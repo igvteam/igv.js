@@ -724,7 +724,7 @@ class ViewPort extends ViewportBase {
                     browser.search(string);
 
                 } else {
-                    browser.zoomWithScaleFactor(0.5, centerBP)
+                    browser.zoomWithScaleFactor(0.5, centerBP, self)
                 }
 
 

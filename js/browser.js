@@ -1317,7 +1317,44 @@ class Browser {
 
     };
 
-    zoomWithScaleFactor(scaleFactor, centerBPOrUndefined) {
+    zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, viewportOrUndefined) {
+
+        let viewports = viewportOrUndefined ? [viewportOrUndefined] : this.trackViews[0].viewports;
+        for (let viewport of viewports) {
+
+            const referenceFrame = viewport.referenceFrame;
+            const chromosome = referenceFrame.getChromosome();
+            const start = referenceFrame.start;
+            const bpPerPixel = referenceFrame.bpPerPixel;
+            const chromosomeLengthBP = chromosome.bpLength - chromosome.bpStart;
+            const bppThreshold = scaleFactor < 1.0 ?
+                this.minimumBases() / viewport.$viewport.width() :
+                chromosomeLengthBP / viewport.$viewport.width();
+            const centerBP = undefined === centerBPOrUndefined ?
+                (referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width() / 2.0)) :
+                centerBPOrUndefined;
+
+            let bpp;
+            if (scaleFactor < 1.0) {
+                bpp = Math.max(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
+            } else {
+                bpp = Math.min(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
+            }
+
+            const viewportWidthBP = bpp * viewport.$viewport.width();
+            referenceFrame.start = centerBP - (viewportWidthBP / 2)
+            referenceFrame.bpPerPixel = bpp;
+            referenceFrame.clamp(viewport.$viewport.width())
+
+            const viewChanged = start !== referenceFrame.start || bpPerPixel !== referenceFrame.bpPerPixel;
+            if (viewChanged) {
+                this.updateViews(viewport.referenceFrame);
+            }
+
+        }
+    }
+
+    _zoomWithScaleFactor(scaleFactor, centerBPOrUndefined) {
 
         // Only zoom when in single locus view mode
         if (this.referenceFrameList.length > 1 || this.loadInProgress()) {
