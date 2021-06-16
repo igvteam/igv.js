@@ -39,15 +39,13 @@ class HtsgetReader {
     }
 
     async readHeader() {
-        let endpointURL = this.config.url + (this.config.endpoint ? this.config.endpoint : "");
-        const url = `${endpointURL}${this.config.id}?class=header`;
+        const url = `${getUrl(this.config)}?class=header&format=${this.format}`;
         const ticket = await igvxhr.loadJson(url, buildOptions(this.config));
         return await this.loadUrls(ticket.htsget.urls);
     }
 
     async readData(chr, start, end) {
-        let endpointURL = this.config.url + (this.config.endpoint ? this.config.endpoint : "");
-        const url = `${endpointURL}${this.config.id}?format=${this.format}&referenceName=${chr}&start=${start}&end=${end}`;
+        const url = `${getUrl(this.config)}?format=${this.format}&referenceName=${chr}&start=${start}&end=${end}`;
         const ticket = await igvxhr.loadJson(url, buildOptions(this.config));
         return this.loadUrls(ticket.htsget.urls);
     }
@@ -75,6 +73,25 @@ class HtsgetReader {
         const arrayBuffers = await Promise.all(promiseArray);
         return concatArrays(arrayBuffers);
     }
+}
+
+/**
+ * Extract the full url from the config.  Striving for backward compatibility.
+ *
+ * @param config
+ */
+function getUrl(config)  {
+    if(config.url && config.endpoint && config.id) {
+        return config.url + config.endpoint + config.id;
+    } else if(config.endpoint && config.id) {
+        return config.endpoint + config.id;
+    } else if(config.url) {
+        return config.url;
+    } else {
+        throw Error("Must specify either 'url', or 'endpoint' and 'id");
+    }
+
+
 }
 
 /**

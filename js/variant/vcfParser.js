@@ -93,7 +93,10 @@ class VcfParser {
                         }
                     } else if (line.startsWith("##contig") && genome) {
                         const idx1 = line.indexOf("<ID=");
-                        const idx2 = line.indexOf(",", idx1);
+                        let idx2 = line.indexOf(",", idx1);
+                        if(idx2 == -1) {
+                            idx2 = line.indexOf(">", idx1);
+                        }
                         const chr = line.substring(idx1+4, idx2);
                         const canonicalChromosome = genome.getChromosomeName(chr);
                         header.chrAliasTable.set(canonicalChromosome, chr);
