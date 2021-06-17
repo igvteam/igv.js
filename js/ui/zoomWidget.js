@@ -24,69 +24,87 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
-import {createIcon} from "../igv-icons.js";
+import { DOMUtils, Icon } from "../../node_modules/igv-utils/src/index.js"
 
-const ZoomWidget = function (browser, $parent) {
+const ZoomWidget = function (browser, parent) {
 
-    let $div;
+    this.browser = browser
 
-    this.$zoomContainer = $('<div class="igv-zoom-widget">');
-    $parent.append(this.$zoomContainer);
+    this.zoomContainer = DOMUtils.div({ class: 'igv-zoom-widget' })
+    parent.appendChild(this.zoomContainer)
 
     // zoom out
-    $div = $('<div>');
-    this.$zoomContainer.append($div);
-
-    $div.append(createIcon("minus-circle"));
-
-    $div.on('click', () => browser.zoomWithScaleFactor(2.0));
+    let el = DOMUtils.div()
+    this.zoomContainer.appendChild(el)
+    el.appendChild(Icon.createIcon('minus-circle'))
+    el.addEventListener('click', () => {
+        browser.zoomWithScaleFactor(2.0)
+    })
 
     // Range slider
-    $div = $('<div>');
-    this.$zoomContainer.append($div);
-
-    this.$slider = $('<input type="range"/>');
-    $div.append(this.$slider);
-
-    this.$slider.on('change', e => browser.zoomWithRangePercentage(e.target.value / 100.0));
+    el = DOMUtils.div()
+    this.zoomContainer.appendChild(el)
+    this.slider = document.createElement('input')
+    this.slider.type = 'range'
+    this.slider.min = 0
+    this.slider.max = 100
+    el.appendChild(this.slider)
+    this.slider.addEventListener('change', e => {
+        const value = e.target.valueAsNumber
+        browser.zoomWithRangePercentage(value / 100.0)
+    })
 
     // zoom in
-    $div = $('<div>');
-    this.$zoomContainer.append($div);
-
-    $div.append(createIcon("plus-circle"));
-
-    $div.on('click', () => browser.zoomWithScaleFactor(0.5));
+    el = DOMUtils.div()
+    this.zoomContainer.appendChild(el)
+    el.appendChild(Icon.createIcon('plus-circle'))
+    el.addEventListener('click', () => {
+        browser.zoomWithScaleFactor(0.5)
+    })
 
     this.currentChr = undefined;
-    browser.on('locuschange', () => browser.updateZoomSlider(this.$slider))
+    browser.on('locuschange', () => {
+        console.log(`Zoom Widget - locus change`)
+        this.update(this.browser.referenceFrameList[ 0 ])
+    })
+
 };
+
+ZoomWidget.prototype.update = function (referenceFrame) {
+
+    const viewportWidth = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
+    const { bpLength } = referenceFrame.getChromosome()
+
+    const percent = (bpLength - referenceFrame.toBP(viewportWidth)) / (bpLength - this.browser.minimumBases())
+
+    this.slider.value = `${Math.round(100 * percent)}`
+
+}
 
 ZoomWidget.prototype.enable = function () {
     // enable
-    this.$slider.get(0).disabled = false;
+    this.slider.disabled = false;
 };
 
 ZoomWidget.prototype.disable = function () {
     // disable
-    this.$slider.get(0).disabled = true;
+    this.slider.disabled = true;
 };
 
 ZoomWidget.prototype.hide = function () {
-    this.$zoomContainer.hide();
+    this.zoomContainer.style.display = 'none'
 };
 
 ZoomWidget.prototype.show = function () {
-    this.$zoomContainer.show()
+    this.zoomContainer.style.display = 'block'
 };
 
 ZoomWidget.prototype.hideSlider = function () {
-    this.$slider.hide();
+    this.slider.style.display = 'none'
 };
 
 ZoomWidget.prototype.showSlider = function () {
-    this.$slider.show();
+    this.slider.style.display = 'block'
 };
 
 export default ZoomWidget;

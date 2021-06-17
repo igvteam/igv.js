@@ -257,7 +257,7 @@ class Browser {
             this.svgSaveControl = new SVGSaveControl($toggle_button_container, this);
         }
 
-        this.zoomWidget = new ZoomWidget(this, $navbarRightContainer);
+        this.zoomWidget = new ZoomWidget(this, $navbarRightContainer.get(0));
 
         if (false === config.showNavigation) {
             this.$navigation.hide();
@@ -666,7 +666,7 @@ class Browser {
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr));
 
-        // this.isMultiLocusMode() ? this.zoomWidget.disable() : this.zoomWidget.enable()
+        this.isMultiLocusMode() ? this.zoomWidget.disable() : this.zoomWidget.enable()
 
         this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
 
@@ -1278,19 +1278,6 @@ class Browser {
 
     minimumBases() {
         return this.config.minimumBases;
-    };
-
-    updateZoomSlider($slider) {
-
-        const referenceFrame = this.referenceFrameList[0];
-        const viewportWidthBP = this.calculateViewportWidth(this.referenceFrameList.length) * referenceFrame.bpPerPixel;
-        const maxBP = referenceFrame.getChromosome().bpLength;
-        const minBP = this.minimumBases();
-        const percent = (maxBP - viewportWidthBP) / (maxBP - minBP)
-        const value = Math.round(100 * percent);
-
-        $slider.val(value);
-
     }
 
     async zoomWithRangePercentage(percentage) {
