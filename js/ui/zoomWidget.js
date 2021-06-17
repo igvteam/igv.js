@@ -24,7 +24,11 @@
  * THE SOFTWARE.
  */
 
-import { DOMUtils, Icon } from "../../node_modules/igv-utils/src/index.js"
+import { DOMUtils, Icon, StringUtils } from '../../node_modules/igv-utils/src/index.js'
+
+const sliderMin = 0
+let sliderMax = 23
+let sliderValueRaw = 0
 
 const ZoomWidget = function (browser, parent) {
 
@@ -46,12 +50,30 @@ const ZoomWidget = function (browser, parent) {
     this.zoomContainer.appendChild(el)
     this.slider = document.createElement('input')
     this.slider.type = 'range'
-    this.slider.min = 0
-    this.slider.max = 100
+
+    this.slider.min = `${ sliderMin }`
+    this.slider.max = `${ sliderMax }`
+
     el.appendChild(this.slider)
+
     this.slider.addEventListener('change', e => {
-        const value = e.target.valueAsNumber
-        browser.zoomWithRangePercentage(value / 100.0)
+
+        const referenceFrame = browser.referenceFrameList[ 0 ]
+        const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
+        const { initialEnd:end, start } = referenceFrame
+
+        const extent = end - start
+
+        // bpLength/(end - start)
+        const scaleFactor = Math.pow(2, e.target.valueAsNumber)
+
+        // (end - start) = bpLength/scaleFactor
+        const zoomedExtent = bpLength/scaleFactor
+
+        console.log(`zoom-widget - slider ${ e.target.value } scaleFactor ${ scaleFactor } extent-zoomed ${ StringUtils.numberFormatter(Math.round(zoomedExtent)) }`)
+
+        browser.zoomWithScaleFactor(zoomedExtent/extent)
+
     })
 
     // zoom in
@@ -62,22 +84,36 @@ const ZoomWidget = function (browser, parent) {
         browser.zoomWithScaleFactor(0.5)
     })
 
-    this.currentChr = undefined;
-    browser.on('locuschange', () => {
-        console.log(`Zoom Widget - locus change`)
-        this.update(this.browser.referenceFrameList[ 0 ])
+    browser.on('locuschange', (referenceFrame) => {
+        this.update(referenceFrame)
     })
 
 };
 
 ZoomWidget.prototype.update = function (referenceFrame) {
 
-    const viewportWidth = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
-    const { bpLength } = referenceFrame.getChromosome()
+    const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
+    const { start, initialEnd: end } = referenceFrame
 
-    const percent = (bpLength - referenceFrame.toBP(viewportWidth)) / (bpLength - this.browser.minimumBases())
+    sliderMax = Math.ceil(Math.log2(bpLength/this.browser.minimumBases()))
 
-    this.slider.value = `${Math.round(100 * percent)}`
+    this.slider.max = `${ sliderMax }`
+
+    const scaleFactor = bpLength/(end-start)
+    sliderValueRaw = Math.log2(scaleFactor)
+    this.slider.value = `${ Math.round(sliderValueRaw) }`
+
+    const extent = end - start
+
+    const derivedScalefactor = Math.pow(2, sliderValueRaw)
+
+    const derivedExtent = bpLength/derivedScalefactor
+
+    // console.log(`frame - start ${ StringUtils.numberFormatter(Math.floor(start)) } end ${ StringUtils.numberFormatter(Math.floor(end)) } extent ${ StringUtils.numberFormatter(Math.floor(extent)) }`)
+
+    console.log(`update - slider ${ this.slider.value } scaleFactor ${ Math.round(scaleFactor) } extent ${ StringUtils.numberFormatter(Math.round(extent)) }`)
+
+    // console.log(`update - sliderMin ${ sliderMin } sliderValue ${ this.slider.value } sliderMax ${ sliderMax } scaleFactor ${ scaleFactor.toFixed(3) } derived-scaleFactor ${ derivedScalefactor.toFixed(3) }`)
 
 }
 
@@ -106,5 +142,9 @@ ZoomWidget.prototype.hideSlider = function () {
 ZoomWidget.prototype.showSlider = function () {
     this.slider.style.display = 'block'
 };
+
+function lerpAlvyRaySmith(a, b, t) {
+    return a - t * (a - b)
+}
 
 export default ZoomWidget;

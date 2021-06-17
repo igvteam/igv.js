@@ -1,7 +1,6 @@
-import { DOMUtils } from "../node_modules/igv-utils/src/index.js";
+import { DOMUtils, Icon } from "../node_modules/igv-utils/src/index.js";
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {randomRGB} from "./util/colorPalletes.js";
-import {createIcon} from "./igv-icons.js";
 import MenuPopup from "./ui/menuPopup.js";
 import MenuUtils from "./ui/menuUtils.js";
 
@@ -25,7 +24,7 @@ class TrackGearControl {
         const gear = DOMUtils.div()
         gearContainer.appendChild(gear)
 
-        $(gear).append(createIcon('cog'))
+        gear.appendChild(Icon.createIcon('cog'))
 
         const trackGearPopup = new MenuPopup($(gear));
         trackGearPopup.$popover.hide();

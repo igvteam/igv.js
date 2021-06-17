@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
+import {DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
 import {validateLocusExtent} from "./util/igvUtils.js";
 import GtexSelection from "./gtex/gtexSelection.js";
 
@@ -116,7 +116,7 @@ class ReferenceFrame {
     }
 
     description(blurb) {
-        console.log(` ${ blurb || '' } referenceFrame chr ${ this.chr } bpp ${ this.bpPerPixel.toFixed(3) } start ${ StringUtils.numberFormatter(this.start) } end ${ StringUtils.numberFormatter(this.initialEnd) } `)
+        console.log(` ${ blurb || '' } referenceFrame - ${ this.chr } bpp ${ this.bpPerPixel.toFixed(3) } start ${ StringUtils.numberFormatter(this.start) } end ${ StringUtils.numberFormatter(this.initialEnd) } `)
     }
 }
 

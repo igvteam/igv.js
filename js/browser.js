@@ -1238,16 +1238,18 @@ class Browser {
 
             const width = this.calculateViewportWidth(this.referenceFrameList.length)
             const locus = referenceFrameList[ 0 ].getPresentationLocusComponents(width)
+            const { chr, start:ss, initialEnd:ee } = referenceFrameList[ 0 ]
 
             this.chromosomeSelectWidget.$select.val(locus.chr)
 
             if ('all' === locus.chr) {
                 this.$searchInput.val(locus.chr)
             } else {
-                const { chr, start, end } = locus
-                const str = `${ chr }:${ start }-${ end }`
-                this.$searchInput.val(str)
-                this.fireEvent('locuschange', [{ chr, start, end, label: str }]);
+                const { start, end } = locus
+                const label = `${ chr }:${ start }-${ end }`
+                this.$searchInput.val(label)
+                // this.fireEvent('locuschange', [{ chr, start, end, label: str }]);
+                this.fireEvent('locuschange', [ this.referenceFrameList[ 0 ] ]);
             }
 
         }
@@ -1280,7 +1282,7 @@ class Browser {
         return this.config.minimumBases;
     }
 
-    async zoomWithRangePercentage(percentage) {
+    async zoomWithInterpolant(interpolant) {
 
         if (this.loadInProgress()) {
             return;
@@ -1295,7 +1297,7 @@ class Browser {
             const { bpLength, bpStart } = referenceFrame.getChromosome();
 
             // update bpp
-            referenceFrame.bpPerPixel = IGVMath.lerp((bpLength - bpStart) / viewportWidth, this.minimumBases() / viewportWidth, percentage);
+            referenceFrame.bpPerPixel = IGVMath.lerp((bpLength - bpStart) / viewportWidth, this.minimumBases() / viewportWidth, interpolant);
 
             // update start
             referenceFrame.start = centerBP - (referenceFrame.bpPerPixel * viewportWidth / 2.0);
@@ -1317,11 +1319,10 @@ class Browser {
             const centerBP = undefined === centerBPOrUndefined ? (referenceFrame.start + referenceFrame.toBP(viewportWidth / 2.0)) : centerBPOrUndefined;
 
             // save initial start and bpp
-            const start = referenceFrame.start;
-            const bpPerPixel = referenceFrame.bpPerPixel;
+            const { start, bpPerPixel } = referenceFrame.start;
 
-            const { bpLength, bpStart } = referenceFrame.getChromosome();
-            const bppThreshold = scaleFactor < 1.0 ? this.minimumBases() / viewportWidth : (bpLength - bpStart) / viewportWidth;
+            const { bpLength } = referenceFrame.getChromosome();
+            const bppThreshold = scaleFactor < 1.0 ? this.minimumBases() / viewportWidth : bpLength / viewportWidth;
 
             // update bpp
             if (scaleFactor < 1.0) {
@@ -1330,8 +1331,12 @@ class Browser {
                 referenceFrame.bpPerPixel = Math.min(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
             }
 
-            // update start
-            referenceFrame.start = centerBP - (referenceFrame.bpPerPixel * viewportWidth / 2.0)
+            // update start and end
+            const widthBP = referenceFrame.bpPerPixel * viewportWidth
+            referenceFrame.start = centerBP - 0.5 * widthBP
+            referenceFrame.clamp(viewportWidth)
+
+            referenceFrame.initialEnd = referenceFrame.start + widthBP
 
             referenceFrame.clamp(viewportWidth)
 
@@ -1439,6 +1444,8 @@ class Browser {
         }
 
         this.centerGuideList = this.createCenterGuideList(this.columnContainer)
+
+        this.updateUIWithReferenceFrameList(this.referenceFrameList);
 
         await this.updateViews(undefined, undefined, true);
 
