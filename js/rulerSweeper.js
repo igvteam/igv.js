@@ -110,11 +110,10 @@ class RulerSweeper {
 
                 this.rulerSweeper.style.display = 'none';
 
-                extent = {};
-                extent.start = this.bp(left);
-                extent.end = this.bp(left + width);
 
                 if (width > threshold) {
+
+                    extent = { start: this.bp(left), end: this.bp(left + width) };
 
                     validateLocusExtent(this.viewport.browser.genome.getChromosome(this.viewport.referenceFrame.chr).bpLength, extent, this.viewport.browser.minimumBases());
 

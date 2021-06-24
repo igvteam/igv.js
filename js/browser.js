@@ -1282,32 +1282,6 @@ class Browser {
         return this.config.minimumBases;
     }
 
-    async zoomWithInterpolant(interpolant) {
-
-        if (this.loadInProgress()) {
-            return;
-        }
-
-        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
-
-        for (let referenceFrame of this.referenceFrameList) {
-
-            const centerBP = referenceFrame.start + referenceFrame.toBP(viewportWidth / 2.0);
-
-            const { bpLength, bpStart } = referenceFrame.getChromosome();
-
-            // update bpp
-            referenceFrame.bpPerPixel = IGVMath.lerp((bpLength - bpStart) / viewportWidth, this.minimumBases() / viewportWidth, interpolant);
-
-            // update start
-            referenceFrame.start = centerBP - (referenceFrame.bpPerPixel * viewportWidth / 2.0);
-
-            referenceFrame.clamp(viewportWidth)
-
-            await this.updateViews(referenceFrame);
-        }
-    }
-
     async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
 
         const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)

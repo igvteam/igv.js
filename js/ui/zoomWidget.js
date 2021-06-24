@@ -111,7 +111,7 @@ ZoomWidget.prototype.update = function (referenceFrame) {
 
     // console.log(`frame - start ${ StringUtils.numberFormatter(Math.floor(start)) } end ${ StringUtils.numberFormatter(Math.floor(end)) } extent ${ StringUtils.numberFormatter(Math.floor(extent)) }`)
 
-    console.log(`update - slider ${ this.slider.value } scaleFactor ${ Math.round(scaleFactor) } extent ${ StringUtils.numberFormatter(Math.round(extent)) }`)
+    console.log(`${ Date.now() } update - slider ${ this.slider.value } scaleFactor ${ Math.round(scaleFactor) } extent ${ StringUtils.numberFormatter(Math.round(extent)) }`)
 
     // console.log(`update - sliderMin ${ sliderMin } sliderValue ${ this.slider.value } sliderMax ${ sliderMax } scaleFactor ${ scaleFactor.toFixed(3) } derived-scaleFactor ${ derivedScalefactor.toFixed(3) }`)
 

@@ -34,9 +34,12 @@ class ReferenceFrame {
     constructor(genome, chr, start, end, bpPerPixel) {
         this.genome = genome;
         this.chr = chr;
+
         this.start = start;
-        this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
-        this.initialStart = start;
+        this.end = start;
+
+         this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
+
         this.bpPerPixel = bpPerPixel;
         this.id = DOMUtils.guid()
     }
@@ -158,7 +161,7 @@ function adjustReferenceFrame(scaleFactor, referenceFrame, viewportWidth, alignm
     const alignmentEE = alignmentStart + alignmentLength
     const alignmentCC = (alignmentStart + alignmentEE) / 2
 
-    referenceFrame.initialStart = referenceFrame.start = alignmentCC - (referenceFrame.bpPerPixel * (viewportWidth / 2))
+    referenceFrame.start = alignmentCC - (referenceFrame.bpPerPixel * (viewportWidth / 2))
     referenceFrame.initialEnd = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
     referenceFrame.locusSearchString = referenceFrame.getPresentionLocus(viewportWidth)
     // console.log(`adjustReferenceFrame - locus ${ referenceFrame.locusSearchString }`)
