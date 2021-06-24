@@ -102,7 +102,7 @@ function clickHandler(e, canvas, browser, referenceFrame) {
     const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
 
     referenceFrame.start = ss;
-    referenceFrame.initialEnd = ee;
+    referenceFrame.end = ee;
     referenceFrame.bpPerPixel = (ee - ss) / width;
 
     browser.updateLocusSearchWidget(browser.referenceFrameList > 1 ? browser.referenceFrameList : [ referenceFrame ])

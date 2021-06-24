@@ -1097,7 +1097,7 @@ class Browser {
         if (status) {
             const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
             for (let referenceFrame of this.referenceFrameList) {
-                referenceFrame.bpPerPixel = (referenceFrame.initialEnd - referenceFrame.start) / viewportWidth
+                referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth
             }
         }
 
@@ -1115,11 +1115,16 @@ class Browser {
 
         for (let referenceFrame of this.referenceFrameList) {
 
-            const {bpLength} = this.genome.getChromosome(referenceFrame.chr)
+            const {bpLength} = referenceFrame.genome.getChromosome(referenceFrame.chr)
 
+            // scenario: browser width less than monitor width. User then drags browser width wider
             if (referenceFrame.toBP(viewportWidth) > bpLength) {
-                referenceFrame.bpPerPixel = bpLength / viewportWidth
+                referenceFrame.bpPerPixel = bpLength/viewportWidth
+            } else {
+                referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
             }
+
+            referenceFrame.description('browser.resize')
 
         }
 
@@ -1238,7 +1243,6 @@ class Browser {
 
             const width = this.calculateViewportWidth(this.referenceFrameList.length)
             const locus = referenceFrameList[ 0 ].getPresentationLocusComponents(width)
-            const { chr, start:ss, initialEnd:ee } = referenceFrameList[ 0 ]
 
             this.chromosomeSelectWidget.$select.val(locus.chr)
 
@@ -1246,15 +1250,14 @@ class Browser {
                 this.$searchInput.val(locus.chr)
             } else {
                 const { start, end } = locus
-                const label = `${ chr }:${ start }-${ end }`
+                const label = `${ locus.chr }:${ start }-${ end }`
                 this.$searchInput.val(label)
-                // this.fireEvent('locuschange', [{ chr, start, end, label: str }]);
                 this.fireEvent('locuschange', [ this.referenceFrameList[ 0 ] ]);
             }
 
         }
 
-    };
+    }
 
     calculateViewportWidth(columnCount) {
 
@@ -1308,11 +1311,11 @@ class Browser {
             // update start and end
             const widthBP = referenceFrame.bpPerPixel * viewportWidth
             referenceFrame.start = centerBP - 0.5 * widthBP
-            referenceFrame.clamp(viewportWidth)
+            referenceFrame.clampStart(viewportWidth)
 
-            referenceFrame.initialEnd = referenceFrame.start + widthBP
+            referenceFrame.end = referenceFrame.start + widthBP
 
-            referenceFrame.clamp(viewportWidth)
+            referenceFrame.clampStart(viewportWidth)
 
             const viewChanged = start !== referenceFrame.start || bpPerPixel !== referenceFrame.bpPerPixel;
             if (viewChanged) {
@@ -1795,18 +1798,29 @@ class Browser {
             this.resize();
         });
 
-        $(this.root).on('mouseup', mouseUpOrLeave);
-        $(this.root).on('mouseleave', mouseUpOrLeave);
+        this.$root.on('mouseup', mouseUpOrLeave);
 
-        $(this.columnContainer).on('mousemove', handleMouseMove);
+        this.$root.on('mouseleave', mouseUpOrLeave);
 
-        $(this.columnContainer).on('touchmove', handleMouseMove);
+        this.columnContainer.addEventListener('mousemove', e => {
+            handleMouseMove(e)
+        })
 
-        $(this.columnContainer).on('mouseleave', mouseUpOrLeave);
+        this.columnContainer.addEventListener('touchmove', e => {
+            handleMouseMove(e)
+        })
 
-        $(this.columnContainer).on('mouseup', mouseUpOrLeave);
+        this.columnContainer.addEventListener('mouseleave', e => {
+            mouseUpOrLeave(e)
+        })
 
-        $(this.columnContainer).on('touchend', mouseUpOrLeave);
+        this.columnContainer.addEventListener('mouseup', e => {
+            mouseUpOrLeave(e)
+        })
+
+        this.columnContainer.addEventListener('touchend', e => {
+            mouseUpOrLeave(e)
+        })
 
         function handleMouseMove(e) {
 

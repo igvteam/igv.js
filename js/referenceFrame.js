@@ -36,9 +36,9 @@ class ReferenceFrame {
         this.chr = chr;
 
         this.start = start;
-        this.end = start;
 
-         this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
+        // TODO WARNING THIS IS NOT UPDATED !!!
+        this.end = end;
 
         this.bpPerPixel = bpPerPixel;
         this.id = DOMUtils.guid()
@@ -72,13 +72,22 @@ class ReferenceFrame {
      * @param viewportWidth
      */
     shiftPixels(pixels, viewportWidth) {
-        const start = this.start;
-        this.start += pixels * this.bpPerPixel;
-        this.clamp(viewportWidth);
-        return start !== this.start;
+
+        const currentStart = this.start;
+
+        const deltaBP = pixels * this.bpPerPixel
+
+        this.start += deltaBP;
+        this.clampStart(viewportWidth);
+
+        this.end += deltaBP;
+        const { bpLength } = this.genome.getChromosome(this.chr);
+        this.end = Math.min(bpLength, this.end)
+
+        return currentStart !== this.start;
     }
 
-    clamp(viewportWidth) {
+    clampStart(viewportWidth) {
         // clamp left
         const min = this.genome.getChromosome(this.chr).bpStart || 0
         this.start = Math.max(min, this.start);
@@ -86,9 +95,8 @@ class ReferenceFrame {
         // clamp right
         if (viewportWidth) {
 
-            var chromosome = this.genome.getChromosome(this.chr);
-            var maxEnd = chromosome.bpLength;
-            var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
+            const { bpLength } = this.genome.getChromosome(this.chr);
+            const maxStart = bpLength - (viewportWidth * this.bpPerPixel);
 
             if (this.start > maxStart) {
                 this.start = maxStart;
@@ -119,7 +127,7 @@ class ReferenceFrame {
     }
 
     description(blurb) {
-        console.log(` ${ blurb || '' } referenceFrame - ${ this.chr } bpp ${ this.bpPerPixel.toFixed(3) } start ${ StringUtils.numberFormatter(this.start) } end ${ StringUtils.numberFormatter(this.initialEnd) } `)
+        console.log(` ${ blurb || '' } referenceFrame - ${ this.chr } bpp ${ this.bpPerPixel.toFixed(3) } start ${ StringUtils.numberFormatter(Math.round(this.start)) } end ${ StringUtils.numberFormatter(Math.round(this.end)) } `)
     }
 }
 
@@ -162,9 +170,8 @@ function adjustReferenceFrame(scaleFactor, referenceFrame, viewportWidth, alignm
     const alignmentCC = (alignmentStart + alignmentEE) / 2
 
     referenceFrame.start = alignmentCC - (referenceFrame.bpPerPixel * (viewportWidth / 2))
-    referenceFrame.initialEnd = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
+    referenceFrame.end = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
     referenceFrame.locusSearchString = referenceFrame.getPresentionLocus(viewportWidth)
-    // console.log(`adjustReferenceFrame - locus ${ referenceFrame.locusSearchString }`)
 }
 
 function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
@@ -178,8 +185,6 @@ function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewport
     const referenceFrame = new ReferenceFrame(genome, chromosomeName, ss, ee, bpp)
 
     referenceFrame.locusSearchString = referenceFrame.getPresentionLocus(viewportWidth)
-
-    // console.log(`createReferenceFrameWithAlignment - locus ${ referenceFrame.locusSearchString }`)
 
     return referenceFrame
 }

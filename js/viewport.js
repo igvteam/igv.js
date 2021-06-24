@@ -223,9 +223,9 @@ class ViewPort extends ViewportBase {
         let pixelWidth
 
         if (isWGV) {
-            bpPerPixel = this.referenceFrame.initialEnd / this.$viewport.width()
+            bpPerPixel = this.referenceFrame.end / this.$viewport.width()
             startBP = 0
-            endBP = this.referenceFrame.initialEnd
+            endBP = this.referenceFrame.end
             pixelWidth = this.$viewport.width()
         } else {
             pixelWidth = Math.ceil((endBP - startBP) / bpPerPixel)

@@ -60,7 +60,7 @@ const ZoomWidget = function (browser, parent) {
 
         const referenceFrame = browser.referenceFrameList[ 0 ]
         const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
-        const { initialEnd:end, start } = referenceFrame
+        const { end, start } = referenceFrame
 
         const extent = end - start
 
@@ -93,7 +93,7 @@ const ZoomWidget = function (browser, parent) {
 ZoomWidget.prototype.update = function (referenceFrame) {
 
     const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
-    const { start, initialEnd: end } = referenceFrame
+    const { start, end } = referenceFrame
 
     sliderMax = Math.ceil(Math.log2(bpLength/this.browser.minimumBases()))
 
@@ -109,9 +109,9 @@ ZoomWidget.prototype.update = function (referenceFrame) {
 
     const derivedExtent = bpLength/derivedScalefactor
 
-    // console.log(`frame - start ${ StringUtils.numberFormatter(Math.floor(start)) } end ${ StringUtils.numberFormatter(Math.floor(end)) } extent ${ StringUtils.numberFormatter(Math.floor(extent)) }`)
-
-    console.log(`${ Date.now() } update - slider ${ this.slider.value } scaleFactor ${ Math.round(scaleFactor) } extent ${ StringUtils.numberFormatter(Math.round(extent)) }`)
+    referenceFrame.description('zoom.update')
+    
+    // console.log(`${ Date.now() } update - slider ${ this.slider.value } scaleFactor ${ Math.round(scaleFactor) } extent ${ StringUtils.numberFormatter(Math.round(extent)) }`)
 
     // console.log(`update - sliderMin ${ sliderMin } sliderValue ${ this.slider.value } sliderMax ${ sliderMax } scaleFactor ${ scaleFactor.toFixed(3) } derived-scaleFactor ${ derivedScalefactor.toFixed(3) }`)
 
