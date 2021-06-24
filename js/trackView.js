@@ -63,11 +63,11 @@ class TrackView {
             this.viewports.push(viewport)
         }
 
-        if (referenceFrameList.length > 1 && 'ruler' === this.track.type) {
-            for (let rulerViewport of this.viewports) {
-                rulerViewport.presentLocusLabel()
-            }
-        }
+        // if (referenceFrameList.length > 1 && 'ruler' === this.track.type) {
+        //     for (let rulerViewport of this.viewports) {
+        //         rulerViewport.presentLocusLabel()
+        //     }
+        // }
 
         this.sampleNameViewport = new SampleNameViewport(this, $(browser.sampleNameColumn), undefined, browser.sampleNameViewportWidth)
 

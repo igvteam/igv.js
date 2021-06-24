@@ -43,14 +43,6 @@ class RulerTrack {
         this.type = 'ruler';
     }
 
-    updateLocusLabel() {
-
-        for (let viewport of this.trackView.viewports) {
-            viewport.updateLocusLabel()
-        }
-
-    };
-
     async getFeatures(chr, start, end) {
         return [];
     };

@@ -120,6 +120,7 @@ class RulerSweeper {
                     this.viewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) /this.viewport.contentDiv.clientWidth;
                     this.viewport.referenceFrame.start = Math.round(extent.start);
                     this.viewport.referenceFrame.end = Math.round(extent.end);
+
                     this.viewport.browser.updateViews(this.viewport.referenceFrame);
                 }
 

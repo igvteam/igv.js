@@ -10,6 +10,7 @@ let currentViewport = undefined
 const toolTipTimeout = 1e4
 
 class RulerViewport extends ViewPort {
+
     constructor(trackView, $viewportColumn, referenceFrame, width) {
         super(trackView, $viewportColumn, referenceFrame, width);
     }
@@ -44,12 +45,20 @@ class RulerViewport extends ViewPort {
         this.$tooltip.hide()
         this.dismissLocusLabel()
 
+        this.browser.on('locuschange', referenceFrameList => {
+
+            if (referenceFrameList.length > 1) {
+                const viewportWidth = this.browser.calculateViewportWidth(referenceFrameList.length)
+                this.presentLocusLabel(viewportWidth)
+            }
+
+        })
+
+
     }
 
-    presentLocusLabel() {
-        const viewportWidth = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
-        const str = this.referenceFrame.getPresentionLocus(viewportWidth)
-        this.$rulerLabel.text(str)
+    presentLocusLabel(viewportWidth) {
+        this.$rulerLabel.text( this.referenceFrame.getPresentionLocus(viewportWidth) )
         this.$rulerLabel.show()
         this.$multiLocusCloseButton.show()
     }
@@ -57,12 +66,6 @@ class RulerViewport extends ViewPort {
     dismissLocusLabel() {
         this.$rulerLabel.hide()
         this.$multiLocusCloseButton.hide()
-    }
-
-    updateLocusLabel() {
-        const viewportWidth = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
-        const str = this.referenceFrame.getPresentionLocus(viewportWidth)
-        this.$rulerLabel.text(str)
     }
 
     attachMouseHandlers(isWholeGenomeView) {

@@ -104,6 +104,37 @@ class ReferenceFrame {
         }
     }
 
+    async zoomWithScaleFactor(browser, scaleFactor, viewportWidth, centerBPOrUndefined) {
+
+        const centerBP = undefined === centerBPOrUndefined ? (this.start + this.toBP(viewportWidth / 2.0)) : centerBPOrUndefined
+
+        // save initial start and bpp
+        const { start, bpPerPixel } = this.start
+
+        const { bpLength } = this.getChromosome()
+        const bppThreshold = scaleFactor < 1.0 ? browser.minimumBases() / viewportWidth : bpLength / viewportWidth
+
+        // update bpp
+        if (scaleFactor < 1.0) {
+            this.bpPerPixel = Math.max(this.bpPerPixel * scaleFactor, bppThreshold)
+        } else {
+            this.bpPerPixel = Math.min(this.bpPerPixel * scaleFactor, bppThreshold)
+        }
+
+        // update start and end
+        const widthBP = this.bpPerPixel * viewportWidth
+        this.start = centerBP - 0.5 * widthBP
+        this.clampStart(viewportWidth)
+
+        this.end = this.start + widthBP
+
+        const viewChanged = start !== this.start || bpPerPixel !== this.bpPerPixel
+        if (viewChanged) {
+            await browser.updateViews(this)
+        }
+
+    }
+
     getChromosome() {
         return this.genome.getChromosome(this.chr)
     }

@@ -105,8 +105,6 @@ function clickHandler(e, canvas, browser, referenceFrame) {
     referenceFrame.end = ee;
     referenceFrame.bpPerPixel = (ee - ss) / width;
 
-    browser.updateLocusSearchWidget(browser.referenceFrameList > 1 ? browser.referenceFrameList : [ referenceFrame ])
-
     browser.updateViews(referenceFrame, browser.trackViews, true)
 
 }

@@ -70,7 +70,7 @@ const ZoomWidget = function (browser, parent) {
         // (end - start) = bpLength/scaleFactor
         const zoomedExtent = bpLength/scaleFactor
 
-        console.log(`zoom-widget - slider ${ e.target.value } scaleFactor ${ scaleFactor } extent-zoomed ${ StringUtils.numberFormatter(Math.round(zoomedExtent)) }`)
+        // console.log(`zoom-widget - slider ${ e.target.value } scaleFactor ${ scaleFactor } extent-zoomed ${ StringUtils.numberFormatter(Math.round(zoomedExtent)) }`)
 
         browser.zoomWithScaleFactor(zoomedExtent/extent)
 
@@ -84,14 +84,22 @@ const ZoomWidget = function (browser, parent) {
         browser.zoomWithScaleFactor(0.5)
     })
 
-    browser.on('locuschange', (referenceFrame) => {
-        this.update(referenceFrame)
+    browser.on('locuschange', (referenceFrameList) => {
+
+        if (this.browser.isMultiLocusMode()) {
+            this.disable()
+        } else {
+            this.enable()
+            this.update(referenceFrameList)
+        }
+
     })
 
 };
 
-ZoomWidget.prototype.update = function (referenceFrame) {
+ZoomWidget.prototype.update = function (referenceFrameList) {
 
+    const referenceFrame = referenceFrameList[ 0 ]
     const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
     const { start, end } = referenceFrame
 
@@ -109,8 +117,8 @@ ZoomWidget.prototype.update = function (referenceFrame) {
 
     const derivedExtent = bpLength/derivedScalefactor
 
-    referenceFrame.description('zoom.update')
-    
+    // referenceFrame.description('zoom.update')
+
     // console.log(`${ Date.now() } update - slider ${ this.slider.value } scaleFactor ${ Math.round(scaleFactor) } extent ${ StringUtils.numberFormatter(Math.round(extent)) }`)
 
     // console.log(`update - sliderMin ${ sliderMin } sliderValue ${ this.slider.value } sliderMax ${ sliderMax } scaleFactor ${ scaleFactor.toFixed(3) } derived-scaleFactor ${ derivedScalefactor.toFixed(3) }`)

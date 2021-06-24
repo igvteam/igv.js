@@ -229,7 +229,7 @@ class Browser {
 
         $searchIconContainer.on('click', () => this.search(this.$searchInput.val()));
 
-        this.windowSizePanel = new WindowSizePanel($locusSizeGroup, this);
+        this.windowSizePanel = new WindowSizePanel($locusSizeGroup.get(0), this);
 
         const $navbarRightContainer = $('<div>', {class: 'igv-navbar-right-container'});
         $navBar.append($navbarRightContainer);
@@ -511,15 +511,7 @@ class Browser {
 
         await this.loadTrackList(trackConfigurations);
 
-        toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
-
-        this.updateLocusSearchWidget(this.referenceFrameList);
-
-        this.windowSizePanel.updatePanel(this.referenceFrameList);
-
-        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr);
-
-        this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
+        this.updateUIWithReferenceFrameList(this.referenceFrameList)
 
     }
 
@@ -662,17 +654,13 @@ class Browser {
 
         this.updateLocusSearchWidget(referenceFrameList)
 
-        this.windowSizePanel.updatePanel(referenceFrameList)
-
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr));
-
-        this.isMultiLocusMode() ? this.zoomWidget.disable() : this.zoomWidget.enable()
 
         this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
 
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
 
-    };
+    }
 
 // track labels
     setTrackLabelName(trackView, name) {
@@ -763,14 +751,14 @@ class Browser {
             }
         }
         for (let tv of this.trackViews) {
-            tv.updateViews(undefined, undefined, true);
+            tv.updateViews(true);
         }
     }
 
     clearROIs() {
         this.roi = [];
         for (let tv of this.trackViews) {
-            tv.updateViews(undefined, undefined, true);
+            tv.updateViews(true);
         }
     }
 
@@ -1124,7 +1112,7 @@ class Browser {
                 referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
             }
 
-            referenceFrame.description('browser.resize')
+            // referenceFrame.description('browser.resize')
 
         }
 
@@ -1146,15 +1134,10 @@ class Browser {
         if (undefined === referenceFrame && this.referenceFrameList && 1 === this.referenceFrameList.length) {
             referenceFrame = this.referenceFrameList[0];
         }
-        if (referenceFrame) {
 
-            if (this.referenceFrameList.length > 1) {
-                this.updateLocusSearchWidget(this.referenceFrameList);
-                this.windowSizePanel.updatePanel(this.referenceFrameList);
-            } else {
-                this.updateLocusSearchWidget([referenceFrame]);
-                this.windowSizePanel.updatePanel([referenceFrame]);
-            }
+        if (referenceFrame) {
+            console.log(`${ Date.now() } - browser.updateViews() -> browser.updateLocusSearchWidget() -> fire locus-change event`)
+            this.updateLocusSearchWidget(this.referenceFrameList.length > 1 ? this.referenceFrameList : [ referenceFrame ])
         }
 
         for (let centerGuide of this.centerGuideList) {
@@ -1218,7 +1201,7 @@ class Browser {
                 await trackView.updateViews(force);
             }
         }
-    };
+    }
 
     loadInProgress() {
         for (let trackView of this.trackViews) {
@@ -1232,13 +1215,6 @@ class Browser {
         if (referenceFrameList.length > 1) {
             this.$searchInput.val('')
             this.chromosomeSelectWidget.$select.val('')
-
-            if (this.rulerTrack) {
-                for (let rulerViewport of this.rulerTrack.trackView.viewports) {
-                    rulerViewport.updateLocusLabel();
-                }
-            }
-
         } else {
 
             const width = this.calculateViewportWidth(this.referenceFrameList.length)
@@ -1252,11 +1228,12 @@ class Browser {
                 const { start, end } = locus
                 const label = `${ locus.chr }:${ start }-${ end }`
                 this.$searchInput.val(label)
-                this.fireEvent('locuschange', [ this.referenceFrameList[ 0 ] ]);
+
             }
 
         }
 
+        this.fireEvent('locuschange', [ this.referenceFrameList ])
     }
 
     calculateViewportWidth(columnCount) {
@@ -1292,36 +1269,7 @@ class Browser {
         let referenceFrames = referenceFrameOrUndefined ? [ referenceFrameOrUndefined ] : this.referenceFrameList;
 
         for (let referenceFrame of referenceFrames) {
-
-            const centerBP = undefined === centerBPOrUndefined ? (referenceFrame.start + referenceFrame.toBP(viewportWidth / 2.0)) : centerBPOrUndefined;
-
-            // save initial start and bpp
-            const { start, bpPerPixel } = referenceFrame.start;
-
-            const { bpLength } = referenceFrame.getChromosome();
-            const bppThreshold = scaleFactor < 1.0 ? this.minimumBases() / viewportWidth : bpLength / viewportWidth;
-
-            // update bpp
-            if (scaleFactor < 1.0) {
-                referenceFrame.bpPerPixel = Math.max(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
-            } else {
-                referenceFrame.bpPerPixel = Math.min(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
-            }
-
-            // update start and end
-            const widthBP = referenceFrame.bpPerPixel * viewportWidth
-            referenceFrame.start = centerBP - 0.5 * widthBP
-            referenceFrame.clampStart(viewportWidth)
-
-            referenceFrame.end = referenceFrame.start + widthBP
-
-            referenceFrame.clampStart(viewportWidth)
-
-            const viewChanged = start !== referenceFrame.start || bpPerPixel !== referenceFrame.bpPerPixel;
-            if (viewChanged) {
-                await this.updateViews(referenceFrame);
-            }
-
+            referenceFrame.zoomWithScaleFactor(this, scaleFactor, viewportWidth, centerBPOrUndefined)
         }
     }
 
@@ -1369,12 +1317,12 @@ class Browser {
 
         await this.resize();
 
-        if (this.rulerTrack) {
-
-            for (let rulerViewport of this.rulerTrack.trackView.viewports) {
-                rulerViewport.presentLocusLabel();
-            }
-        }
+        // if (this.rulerTrack) {
+        //
+        //     for (let rulerViewport of this.rulerTrack.trackView.viewports) {
+        //         rulerViewport.presentLocusLabel();
+        //     }
+        // }
 
     }
 
@@ -1451,7 +1399,6 @@ class Browser {
             // create reference frame list based on search loci
             this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length))
 
-
             // discard viewport DOM elements
             for (let trackView of this.trackViews) {
 
@@ -1483,16 +1430,6 @@ class Browser {
 
         } else {
             Alert.presentAlert( new Error(`Error searching for locus ${ string }`) )
-        }
-    }
-
-    async createReferenceFrameList(lociString) {
-
-        const loci = await search(this, lociString)
-        if (loci && loci.length > 0) {
-            return createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length))
-        } else {
-            throw new Error(`Unrecognized locus ${lociString}`)
         }
     }
 
@@ -1858,13 +1795,6 @@ class Browser {
                 if (self.dragObject) {
                     const viewChanged = referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - x, viewport.$viewport.width());
                     if (viewChanged) {
-
-                        if (self.referenceFrameList.length > 1) {
-                            self.updateLocusSearchWidget(self.referenceFrameList);
-                        } else {
-                            self.updateLocusSearchWidget([referenceFrame]);
-                        }
-
                         self.updateViews();
                     }
                     self.fireEvent('trackdrag');
@@ -1938,10 +1868,10 @@ function logo() {
 
 function toggleTrackLabels(trackViews, isVisible) {
 
-    for (let trackView of trackViews) {
-        for (let viewport of trackView.viewports) {
+    for (let { viewports } of trackViews) {
+        for (let viewport of viewports) {
             if (viewport.$trackLabel) {
-                if (0 === trackView.viewports.indexOf(viewport) && true === isVisible) {
+                if (0 === viewports.indexOf(viewport) && true === isVisible) {
                     viewport.$trackLabel.show();
                 } else {
                     viewport.$trackLabel.hide();

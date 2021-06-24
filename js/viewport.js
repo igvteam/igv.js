@@ -283,9 +283,7 @@ class ViewPort extends ViewportBase {
                 referenceFrame: this.referenceFrame,
                 selection: this.selection,
                 viewport: this,
-                viewportWidth: this.$viewport.width(),
-                //viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - startBP),
-                //viewportContainerWidth: this.browser.getViewportContainerWidth()
+                viewportWidth: this.$viewport.width()
             };
 
         this.draw(drawConfiguration, features, roiFeatures);
@@ -714,11 +712,10 @@ class ViewPort extends ViewportBase {
                     if (1 === browser.referenceFrameList.length) {
                         string = chr;
                     } else {
-                        let loci = browser.referenceFrameList.map(function (g) {
-                            return g.locusSearchString;
-                        });
-                        loci[browser.referenceFrameList.indexOf(self.referenceFrame)] = chr;
-                        string = loci.join(' ');
+                        const loci = browser.referenceFrameList.map(({ locusSearchString }) => locusSearchString)
+                        const index = browser.referenceFrameList.indexOf(self.referenceFrame)
+                        loci[ index ] = chr
+                        string = loci.join(' ')
                     }
 
                     browser.search(string);
