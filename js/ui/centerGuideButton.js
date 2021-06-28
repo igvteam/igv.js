@@ -14,25 +14,23 @@ class CenterGuideButton {
         this.button.addEventListener('click', () => {
             browser.isCenterGuideVisible = !browser.isCenterGuideVisible
             browser.setCenterGuideVisibility(browser.isCenterGuideVisible)
+            this.setButtonState(browser.isCenterGuideVisible)
         })
 
-        if (true === browser.config.showCenterGuideButton) {
-            this.show()
-        } else {
-            this.hide()
-        }
-
+        this.setButtonState(this.browser.isCenterGuideVisible)
     }
 
-    show () {
-
-        this.button.style.display = 'block'
-
-        if (true === this.browser.isCenterGuideVisible) {
+    setButtonState (isCenterGuideVisible) {
+        if (true === isCenterGuideVisible) {
             this.button.classList.add('igv-navbar-button-clicked')
         } else {
             this.button.classList.remove('igv-navbar-button-clicked')
         }
+    }
+
+    show () {
+        this.button.style.display = 'block'
+        this.setButtonState(this.browser.isCenterGuideVisible)
     }
 
     hide () {
