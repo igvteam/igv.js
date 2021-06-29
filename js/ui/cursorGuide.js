@@ -25,11 +25,9 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import {DOMUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {DOMUtils} from "../../node_modules/igv-utils/src/index.js";
 
-const CursorGuide = function ($cursorGuideParent, $controlParent, config, browser) {
-
-    const self = this;
+const CursorGuide = function ($cursorGuideParent, browser) {
 
     this.browser = browser;
 
@@ -38,6 +36,8 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
     this.$verticalGuide = $('<div class="igv-cursor-guide-vertical">');
     $cursorGuideParent.append(this.$verticalGuide);
+
+    this.setVisibility(browser.config.showCursorTrackingGuide)
 
     // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
     $cursorGuideParent.on('mousemove.cursor-guide', e => {
@@ -74,23 +74,34 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
     });
 
-    if (true === config.showCursorTrackingGuideButton) {
+}
 
-        this.$button = $('<div class="igv-navbar-button">');
-        $controlParent.append(this.$button);
-        this.$button.text('cursor guide');
+CursorGuide.prototype.setVisibility = function (showCursorTrackingGuide) {
+    if (true === showCursorTrackingGuide) {
+        this.show()
+    } else {
+        this.hide()
+    }
+}
 
-        this.$button.on('click', function () {
-            if (true === browser.cursorGuideVisible) {
-                self.doHide();
-            } else {
-                self.doShow();
-            }
-        });
+CursorGuide.prototype.show = function () {
+    this.$verticalGuide.show()
+    this.$horizontalGuide.show()
 
+}
+
+CursorGuide.prototype.hide = function () {
+
+    this.$verticalGuide.hide()
+    this.$horizontalGuide.hide()
+
+    if (this.browser.rulerTrack) {
+        for (let viewport of this.browser.rulerTrack.trackView.viewports) {
+            viewport.$tooltip.hide()
+        }
     }
 
-};
+}
 
 function mouseHandler(event, $viewport, $horizontalGuide, $verticalGuide, $cursorGuideParent, browser) {
 
@@ -123,50 +134,5 @@ function mouseHandler(event, $viewport, $horizontalGuide, $verticalGuide, $curso
     const $host = $viewport.closest('.igv-track-container')
     return { bp, start, end, interpolant:xNormalized, host_css_left:left, $host }
 }
-
-CursorGuide.prototype.doHide = function () {
-    if (this.$button) {
-        this.$button.removeClass('igv-navbar-button-clicked');
-    }
-
-    this.browser.hideCursorGuide();
-
-    if (this.browser.rulerTrack) {
-        for (let viewport of this.browser.rulerTrack.trackView.viewports) {
-            viewport.$tooltip.hide()
-        }
-    }
-
-};
-
-CursorGuide.prototype.doShow = function () {
-    this.$button.addClass('igv-navbar-button-clicked');
-    this.browser.showCursorGuide();
-};
-
-CursorGuide.prototype.setState = function (cursorGuideVisible) {
-
-    if (this.$button) {
-
-        if (true === cursorGuideVisible) {
-            this.$button.addClass('igv-navbar-button-clicked');
-        } else {
-            this.$button.removeClass('igv-navbar-button-clicked');
-        }
-
-    }
-};
-
-CursorGuide.prototype.disable = function () {
-    this.doHide();
-    this.$verticalGuide.hide();
-    this.$horizontalGuide.hide();
-};
-
-CursorGuide.prototype.enable = function () {
-    if (this.$button) {
-        this.$button.show();
-    }
-};
 
 export default CursorGuide;

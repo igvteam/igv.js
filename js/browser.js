@@ -54,6 +54,8 @@ import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
 import {createIcon} from "./igv-icons.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import CursorGuide from "./ui/cursorGuide.js";
+import CursorGuideButton from "./ui/cursorGuideButton.js";
+import CenterGuideButton from './ui/centerGuideButton.js';
 import TrackLabelControl from "./ui/trackLabelControl.js";
 import SampleNameControl from "./ui/sampleNameControl.js";
 import ZoomWidget from "./ui/zoomWidget.js";
@@ -63,7 +65,6 @@ import SVGSaveControl from "./ui/svgSaveControl.js";
 import MenuPopup from "./ui/menuPopup.js";
 import { viewportColumnManager } from './viewportColumnManager.js';
 import GenericColorPicker from './ui/genericColorPicker.js';
-import CenterGuideButton from './ui/centerGuideButton.js';
 import ViewportCenterGuide from './ui/viewportCenterGuide.js';
 
 // $igv-column-shim-width: 1px;
@@ -170,12 +171,6 @@ class Browser {
             }
         }
 
-        if (false === config.showCursorTrackingGuide) {
-            this.cursorGuide.doHide();
-        } else {
-            this.cursorGuide.doShow();
-        }
-
     }
 
     createStandardControls(config) {
@@ -243,7 +238,9 @@ class Browser {
         $navbarRightContainer.append($toggle_button_container);
         this.$toggle_button_container = $toggle_button_container;
 
-        this.cursorGuide = new CursorGuide($(this.columnContainer), $toggle_button_container, config, this);
+        this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
+
+        this.cursorGuide = new CursorGuide($(this.columnContainer), this)
 
         this.centerGuideButton = new CenterGuideButton(this, $toggle_button_container.get(0))
 
@@ -667,33 +664,29 @@ class Browser {
 
     }
 
-// track labels
+    // track labels
     setTrackLabelName(trackView, name) {
         trackView.viewports.forEach((viewport) => {
             viewport.setTrackLabel(name);
         });
-    };
+    }
 
     setTrackLabelVisibility(isVisible) {
         toggleTrackLabels(this.trackViews, isVisible)
     }
 
-// cursor guide
-    hideCursorGuide() {
-        this.cursorGuide.$verticalGuide.hide();
-        this.cursorGuide.$horizontalGuide.hide();
-        this.cursorGuideVisible = false;
-    };
-
-    showCursorGuide() {
-        this.cursorGuide.$verticalGuide.show();
-        this.cursorGuide.$horizontalGuide.show();
-        this.cursorGuideVisible = true;
-    };
+    // cursor guide
+    setCursorGuideVisibility(cursorGuideVisible) {
+        if (cursorGuideVisible) {
+            this.cursorGuide.show()
+        } else {
+            this.cursorGuide.hide()
+        }
+    }
 
     setCustomCursorGuideMouseHandler(mouseHandler) {
         this.cursorGuide.customMouseHandler = mouseHandler;
-    };
+    }
 
     // center guide
     setCenterGuideVisibility(isCenterGuideVisible) {
@@ -726,7 +719,7 @@ class Browser {
         } finally {
             await this.resize()
         }
-    };
+    }
 
     async loadROI(config) {
         if (!this.roi) {
