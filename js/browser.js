@@ -205,9 +205,14 @@ class Browser {
         $navbarLeftContainer.append($genomicLocation);
 
         // chromosome select widget
-        if (config.showChromosomeWidget !== false) {
-            this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation);
-            this.chromosomeSelectWidget.$container.show();
+        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0));
+        if (undefined === config.showChromosomeWidget) {
+            config.showChromosomeWidget = true;   // Default to true
+        }
+        if (true === config.showChromosomeWidget) {
+            this.chromosomeSelectWidget.show()
+        } else {
+            this.chromosomeSelectWidget.hide()
         }
 
         const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'});
@@ -1136,7 +1141,7 @@ class Browser {
         }
 
         if (referenceFrame) {
-            console.log(`${ Date.now() } - browser.updateViews() -> browser.updateLocusSearchWidget() -> fire locus-change event`)
+            // console.log(`${ Date.now() } - browser.updateViews() -> browser.updateLocusSearchWidget() -> fire locus-change event`)
             this.updateLocusSearchWidget(this.referenceFrameList.length > 1 ? this.referenceFrameList : [ referenceFrame ])
         }
 
@@ -1214,13 +1219,13 @@ class Browser {
 
         if (referenceFrameList.length > 1) {
             this.$searchInput.val('')
-            this.chromosomeSelectWidget.$select.val('')
+            this.chromosomeSelectWidget.select.value = ''
         } else {
 
             const width = this.calculateViewportWidth(this.referenceFrameList.length)
             const locus = referenceFrameList[ 0 ].getPresentationLocusComponents(width)
 
-            this.chromosomeSelectWidget.$select.val(locus.chr)
+            this.chromosomeSelectWidget.select.value = locus.chr
 
             if ('all' === locus.chr) {
                 this.$searchInput.val(locus.chr)
