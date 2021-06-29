@@ -24,52 +24,38 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
+import { DOMUtils } from '../../node_modules/igv-utils/src/index.js'
 
-const TrackLabelControl = function ($parent, browser) {
+const TrackLabelControl = function (parent, browser) {
 
-    var self = this;
+    this.button = DOMUtils.div({ class: 'igv-navbar-button'})
+    parent.appendChild(this.button)
+    this.button.textContent = 'track labels'
 
-    this.browser = browser;
+    this.button.addEventListener('click', () => {
+        browser.trackLabelsVisible = !browser.trackLabelsVisible
+        this.setState(browser.trackLabelsVisible)
+        browser.setTrackLabelVisibility(browser.trackLabelsVisible)
+    })
 
-    this.$button = $('<div class="igv-navbar-button">');
-    $parent.append(this.$button);
-    this.$button.text('track labels');
-
-    this.$button.on('click', function () {
-        if (true === browser.trackLabelsVisible) {
-            self.doHide();
-        } else {
-            self.doShow();
-        }
-    });
-};
-
-TrackLabelControl.prototype.doHide = function () {
-    this.$button.removeClass('igv-navbar-button-clicked');
-    this.browser.hideTrackLabels();
-};
-
-TrackLabelControl.prototype.doShow = function () {
-    this.$button.addClass('igv-navbar-button-clicked');
-    this.browser.showTrackLabels();
-};
+    this.browser = browser
+}
 
 TrackLabelControl.prototype.setState = function (trackLabelsVisible) {
     if (true === trackLabelsVisible) {
-        this.$button.addClass('igv-navbar-button-clicked');
+        this.button.classList.add('igv-navbar-button-clicked')
     } else {
-        this.$button.removeClass('igv-navbar-button-clicked');
+        this.button.classList.remove('igv-navbar-button-clicked')
     }
-};
+}
 
-TrackLabelControl.prototype.disable = function () {
-    this.doHide();
-    this.$button.hide();
-};
+TrackLabelControl.prototype.show = function () {
+    this.button.style.display = 'block'
+    this.setState(this.browser.trackLabelsVisible)
+}
 
-TrackLabelControl.prototype.enable = function () {
-    this.$button.show();
-};
+TrackLabelControl.prototype.hide = function () {
+    this.button.style.display = 'none'
+}
 
 export default TrackLabelControl;

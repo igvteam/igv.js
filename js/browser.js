@@ -162,9 +162,9 @@ class Browser {
         }
 
         if (false === config.showTrackLabels) {
-            this.hideTrackLabels();
+            this.setTrackLabelVisibility(false);
         } else {
-            this.showTrackLabels();
+            this.setTrackLabelVisibility(true);
             if (this.trackLabelControl) {
                 this.trackLabelControl.setState(this.trackLabelsVisible);
             }
@@ -248,7 +248,7 @@ class Browser {
         this.centerGuideButton = new CenterGuideButton(this, $toggle_button_container.get(0))
 
         if (true === config.showTrackLabelButton) {
-            this.trackLabelControl = new TrackLabelControl($toggle_button_container, this);
+            this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), this);
         }
 
         // if (true === config.showSampleNameButton) {
@@ -674,15 +674,9 @@ class Browser {
         });
     };
 
-    hideTrackLabels() {
-        this.trackLabelsVisible = false;
-        toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
-    };
-
-    showTrackLabels() {
-        this.trackLabelsVisible = true;
-        toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
-    };
+    setTrackLabelVisibility(isVisible) {
+        toggleTrackLabels(this.trackViews, isVisible)
+    }
 
 // cursor guide
     hideCursorGuide() {
