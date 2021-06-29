@@ -252,14 +252,14 @@ class Browser {
         }
 
         // if (true === config.showSampleNameButton) {
-        this.sampleNameControl = new SampleNameControl($toggle_button_container, this)
+        this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
         if (!config.showSampleNameButton) {
             this.sampleNameControl.hide();
         }
         //  }
 
         if (true === config.showSVGButton) {
-            this.svgSaveControl = new SVGSaveControl($toggle_button_container, this);
+            this.svgSaveControl = new SVGSaveControl($toggle_button_container.get(0), this);
         }
 
         this.zoomWidget = new ZoomWidget(this, $navbarRightContainer.get(0));

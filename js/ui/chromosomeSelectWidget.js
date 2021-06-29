@@ -47,7 +47,7 @@ const ChromosomeSelectWidget = function (browser, parent) {
 };
 
 ChromosomeSelectWidget.prototype.show = function () {
-    this.container.style.display = 'block'
+    this.container.style.display = 'flex'
 }
 
 ChromosomeSelectWidget.prototype.hide = function () {

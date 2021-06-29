@@ -24,34 +24,26 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
+import { DOMUtils } from '../../node_modules/igv-utils/src/index.js';
 
 class SampleNameControl {
 
-    constructor($parent, browser) {
+    constructor(parent, browser) {
 
-        this.$button = $('<div class="igv-navbar-button">')
-        $parent.append(this.$button)
+        this.button = DOMUtils.div({ class: 'igv-navbar-button' })
+        parent.appendChild(this.button)
 
-        this.$button.text('Sample Names')
+        this.button.innerText = 'Sample Names'
 
-        if (true === browser.showSampleNames) {
-            this.$button.addClass('igv-navbar-button-clicked')
-        } else {
-            this.$button.removeClass('igv-navbar-button-clicked')
-        }
+        this.setState(browser.showSampleNames)
 
-        this.$button.on('click.sample-name-control', () => {
+        this.button.addEventListener('click', () => {
 
             browser.showSampleNames = !browser.showSampleNames
 
-            if (true === browser.showSampleNames) {
-                this.$button.addClass('igv-navbar-button-clicked')
-            } else {
-                this.$button.removeClass('igv-navbar-button-clicked')
-            }
+            this.setState(browser.showSampleNames)
 
-            for (let {sampleNameViewport} of browser.trackViews) {
+            for (let { sampleNameViewport } of browser.trackViews) {
                 if (false === browser.showSampleNames) {
                     sampleNameViewport.hide()
                 } else {
@@ -66,20 +58,20 @@ class SampleNameControl {
 
     }
 
-    setState(isVisible) {
-        if (true === isVisible) {
-            this.$button.addClass('igv-navbar-button-clicked')
+    setState(showSampleNames) {
+        if (true === showSampleNames) {
+            this.button.classList.add('igv-navbar-button-clicked')
         } else {
-            this.$button.removeClass('igv-navbar-button-clicked')
+            this.button.classList.remove('igv-navbar-button-clicked')
         }
     }
 
     hide() {
-        this.$button.hide();
+        this.button.style.display = 'none'
     }
 
     show() {
-        this.$button.show();
+        this.button.style.display = 'block'
     }
 
 }

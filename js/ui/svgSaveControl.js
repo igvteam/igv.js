@@ -24,19 +24,14 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
+import { DOMUtils } from '../../node_modules/igv-utils/src/index.js'
 
-const SVGSaveControl = function ($parent, browser) {
+const SVGSaveControl = function (parent, browser) {
+    const button = DOMUtils.div({ class: 'igv-navbar-button' })
+    parent.append(button)
 
-    let $button = $('<div class="igv-navbar-button">');
-    $parent.append($button);
-
-    $button.text('Save SVG');
-
-    $button.on('click.svg-save-control', () => {
-        // browser.renderSVG({ $container: $('#igv-svg-container') })
-        browser.saveSVGtoFile({});
-    });
+    button.textContent = 'Save SVG'
+    button.addEventListener('click', () => browser.saveSVGtoFile({}))
 };
 
-export default SVGSaveControl;
+export default SVGSaveControl
