@@ -162,15 +162,6 @@ class Browser {
             $navBar.hide();
         }
 
-        if (false === config.showTrackLabels) {
-            this.setTrackLabelVisibility(false);
-        } else {
-            this.setTrackLabelVisibility(true);
-            if (this.trackLabelControl) {
-                this.trackLabelControl.setState(this.trackLabelsVisible);
-            }
-        }
-
     }
 
     createStandardControls(config) {
@@ -238,22 +229,17 @@ class Browser {
         $navbarRightContainer.append($toggle_button_container);
         this.$toggle_button_container = $toggle_button_container;
 
-        this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
-
         this.cursorGuide = new CursorGuide($(this.columnContainer), this)
+
+        this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
 
         this.centerGuideButton = new CenterGuideButton(this, $toggle_button_container.get(0))
 
-        if (true === config.showTrackLabelButton) {
-            this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), this);
-        }
+        this.setTrackLabelVisibility(config.showTrackLabels)
 
-        // if (true === config.showSampleNameButton) {
+        this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), this)
+
         this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
-        if (!config.showSampleNameButton) {
-            this.sampleNameControl.hide();
-        }
-        //  }
 
         if (true === config.showSVGButton) {
             this.svgSaveControl = new SVGSaveControl($toggle_button_container.get(0), this);

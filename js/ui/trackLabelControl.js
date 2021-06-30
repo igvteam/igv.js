@@ -39,6 +39,19 @@ const TrackLabelControl = function (parent, browser) {
     })
 
     this.browser = browser
+
+    this.setVisibility(browser.config.showTrackLabelButton)
+
+    this.setState(browser.trackLabelsVisible)
+
+}
+
+TrackLabelControl.prototype.setVisibility = function (showTrackLabelButton) {
+    if (true === showTrackLabelButton) {
+        this.show()
+    } else {
+        this.hide()
+    }
 }
 
 TrackLabelControl.prototype.setState = function (trackLabelsVisible) {

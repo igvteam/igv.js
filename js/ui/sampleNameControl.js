@@ -37,6 +37,8 @@ class SampleNameControl {
 
         this.setState(browser.showSampleNames)
 
+        this.setVisibility(browser.showSampleNameButton)
+
         this.button.addEventListener('click', () => {
 
             browser.showSampleNames = !browser.showSampleNames
@@ -56,6 +58,15 @@ class SampleNameControl {
 
         })
 
+    }
+
+    setVisibility(showSampleNameButton) {
+
+        if (true === showSampleNameButton) {
+            this.show()
+        } else {
+            this.hide()
+        }
     }
 
     setState(showSampleNames) {
