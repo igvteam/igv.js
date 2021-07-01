@@ -26,6 +26,7 @@
 import MenuUtils from "./menuUtils.js"
 import {DOMUtils, UIUtils, makeDraggable} from "../../node_modules/igv-utils/src/index.js";
 import GenericColorPicker from './genericColorPicker.js';
+import { createCheckbox } from "../igv-icons.js";
 
 const MenuPopup = function (parent) {
 
@@ -104,8 +105,8 @@ MenuPopup.prototype.presentTrackContextMenu = function(e, menuItems) {
     this.popoverContent.innerHTML = ''
 
     const menuElements = createMenuElements(menuItems, this.popover)
-    for (let { object } of menuElements) {
-        this.popoverContent.appendChild(object)
+    for (let { el } of menuElements) {
+        this.popoverContent.appendChild(el)
     }
 
     present(e, this.popover)
@@ -126,30 +127,30 @@ function createMenuElements(itemList, popover) {
 
     return itemList.map( item => {
 
-        let elem;
+        let el;
 
         if (typeof item === 'string' && '<hr/>' === item) {
-            elem = document.createElement('hr')
+            el = document.createElement('hr')
         } else  if (typeof item === 'string') {
-            elem = DOMUtils.div({ class:'context-menu'})
-            elem.innerHTML = item
+            el = DOMUtils.div({ class:'context-menu'})
+            el.innerHTML = item
         } else if (typeof item === 'Node') {
-            elem = item;
+            el = item;
         } else {
             if (typeof item.init === 'function') {
                 item.init();
             }
 
             if ("checkbox" === item.type) {
-                elem = Icon.createCheckbox("Show all bases", item.value);
+                el = createCheckbox("Show all bases", item.value);
             } else if("color" === item.type) {
 
                 const colorPicker = new GenericColorPicker({ parent: popover.parentElement, width: 364 })
                 colorPicker.configure(undefined, { color: color => item.click(color) })
 
-                elem = DOMUtils.div({ class:'context-menu'})
+                el = DOMUtils.div({ class:'context-menu'})
                 if (typeof item.label === 'string') {
-                    elem.innerHTML = item.label;
+                    el.innerHTML = item.label;
                 }
                 const clickHandler =  e => {
                     colorPicker.show();
@@ -157,23 +158,23 @@ function createMenuElements(itemList, popover) {
                     e.preventDefault();
                     e.stopPropagation()
                 }
-                elem.addEventListener('click', clickHandler);
-                elem.addEventListener('touchend', clickHandler);
-                elem.addEventListener('mouseup', function (e) {
+                el.addEventListener('click', clickHandler);
+                el.addEventListener('touchend', clickHandler);
+                el.addEventListener('mouseup', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                 })
             } else {
-                elem = DOMUtils.div({ class:'context-menu'})
+                el = DOMUtils.div({ class:'context-menu'})
                 if (typeof item.label === 'string') {
-                    elem.innerHTML = item.label;
+                    el.innerHTML = item.label;
                 }
             }
 
             if (item.click && "color" !== item.type) {
-                elem.addEventListener('click', handleClick);
-                elem.addEventListener('touchend', handleClick);
-                elem.addEventListener('mouseup', function (e) {
+                el.addEventListener('click', handleClick);
+                el.addEventListener('touchend', handleClick);
+                el.addEventListener('mouseup', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                 })
@@ -188,7 +189,7 @@ function createMenuElements(itemList, popover) {
             }
         }
 
-        return { object: elem, init: item.init };
+        return { el, init: item.init };
     })
 
 }

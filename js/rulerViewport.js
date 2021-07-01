@@ -2,8 +2,7 @@ import ViewPort from "./viewport.js";
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
-import {DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
-import {createIcon} from "./igv-icons.js";
+import {Icon, DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
 
 let timer
 let currentViewport = undefined
@@ -21,7 +20,7 @@ class RulerViewport extends ViewPort {
 
         this.$multiLocusCloseButton = $('<div>', { class: 'igv-multi-locus-close-button' })
         this.$viewport.append(this.$multiLocusCloseButton);
-        this.$multiLocusCloseButton.append(createIcon("times-circle"));
+        this.$multiLocusCloseButton.get(0).appendChild(Icon.createIcon("times-circle"));
         this.$multiLocusCloseButton.click(() => this.browser.removeMultiLocusPanel(this.referenceFrame));
 
         this.$rulerLabel = $('<div>', { class: 'igv-multi-locus-ruler-label' })

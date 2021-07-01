@@ -128,7 +128,7 @@ class SegTrack extends TrackBase {
         for (let displayMode of displayOptions) {
             menuItems.push(
                 {
-                    object: createCheckbox(lut[displayMode], displayMode === this.displayMode),
+                    object: $(createCheckbox(lut[displayMode], displayMode === this.displayMode)),
                     click: () => {
                         this.displayMode = displayMode;
                         this.config.displayMode = displayMode;

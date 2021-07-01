@@ -60,7 +60,7 @@ const MenuUtils = {
 
         if (trackView.track.logScale !== undefined) {
             menuItems.push({
-                    object: createCheckbox("Log scale", trackView.track.logScale),
+                    object: $(createCheckbox("Log scale", trackView.track.logScale)),
                     click: () => {
                         trackView.track.logScale = !trackView.track.logScale;
                         trackView.repaintViews();
@@ -70,7 +70,7 @@ const MenuUtils = {
         }
 
         menuItems.push({
-                object: createCheckbox("Autoscale", trackView.track.autoscale),
+                object: $(createCheckbox("Autoscale", trackView.track.autoscale)),
                 click: () => {
                     trackView.track.autoscale = !trackView.track.autoscale;
                     trackView.updateViews();

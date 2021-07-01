@@ -25,7 +25,7 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {Alert, InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js'
-import { IGVMath, DOMUtils, FileUtils, GoogleUtils, igvxhr, StringUtils, TrackUtils, URIUtils } from "../node_modules/igv-utils/src/index.js";
+import { Icon, DOMUtils, FileUtils, GoogleUtils, igvxhr, StringUtils, TrackUtils, URIUtils } from "../node_modules/igv-utils/src/index.js";
 import TrackView, { igv_axis_column_width, createAxisColumn, maxViewportContentHeight } from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
@@ -51,7 +51,6 @@ import TrackScrollbarControl, {igv_scrollbar_outer_width} from "./trackScrollbar
 import TrackDragControl, { igv_track_manipulation_handle_width } from "./trackDragControl.js";
 import TrackGearControl, { igv_track_gear_menu_column_width } from "./trackGearControl.js";
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
-import {createIcon} from "./igv-icons.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import CursorGuide from "./ui/cursorGuide.js";
 import CursorGuideButton from "./ui/cursorGuideButton.js";
@@ -212,12 +211,12 @@ class Browser {
 
         this.$searchInput.change(() => this.search( this.$searchInput.val() ) )
 
-        const $searchIconContainer = $('<div>', {class: 'igv-search-icon-container'});
-        $searchContainer.append($searchIconContainer);
+        const searchIconContainer = DOMUtils.div({ class: 'igv-search-icon-container' });
+        $searchContainer.append($(searchIconContainer));
 
-        $searchIconContainer.append(createIcon("search"));
+        searchIconContainer.appendChild(Icon.createIcon("search"));
 
-        $searchIconContainer.on('click', () => this.search(this.$searchInput.val()));
+        searchIconContainer.addEventListener('click', () => this.search(this.$searchInput.val()));
 
         this.windowSizePanel = new WindowSizePanel($locusSizeGroup.get(0), this);
 

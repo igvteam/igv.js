@@ -255,7 +255,7 @@ class BAMTrack extends TrackBase {
 
         menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
         menuItems.push({
-            object: createCheckbox("Show Coverage", this.showCoverage),
+            object: $(createCheckbox("Show Coverage", this.showCoverage)),
             click: () => {
                 this.showCoverage = !this.showCoverage;
                 adjustTrackHeight();
@@ -264,7 +264,7 @@ class BAMTrack extends TrackBase {
             }
         });
         menuItems.push({
-            object: createCheckbox("Show Alignments", this.showAlignments),
+            object: $(createCheckbox("Show Alignments", this.showAlignments)),
             click: () => {
                 this.showAlignments = !this.showAlignments;
                 adjustTrackHeight();
@@ -276,7 +276,7 @@ class BAMTrack extends TrackBase {
         // Show all bases
         menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
         menuItems.push({
-            object: createCheckbox("Show all bases", this.showAllBases),
+            object: $(createCheckbox("Show all bases", this.showAllBases)),
             click: () => {
                 this.showAllBases = !this.showAllBases;
                 this.config.showAllBases = this.showAllBases;
@@ -286,7 +286,7 @@ class BAMTrack extends TrackBase {
 
         // Soft clips
         menuItems.push({
-            object: createCheckbox("Show soft clips", this.showSoftClips),
+            object: $(createCheckbox("Show soft clips", this.showSoftClips)),
             click: () => {
                 this.showSoftClips = !this.showSoftClips;
                 this.config.showSoftClips = this.showSoftClips;
@@ -303,7 +303,7 @@ class BAMTrack extends TrackBase {
         if (this.pairsSupported && this.alignmentTrack.hasPairs) {
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
             menuItems.push({
-                object: createCheckbox("View as pairs", this.viewAsPairs),
+                object: $(createCheckbox("View as pairs", this.viewAsPairs)),
                 click: () => {
                     this.viewAsPairs = !this.viewAsPairs;
                     this.config.viewAsPairs = this.viewAsPairs;
@@ -325,7 +325,7 @@ class BAMTrack extends TrackBase {
         menuItems.push({name: undefined, object: $displayModeLabel, click: undefined, init: undefined});
 
         menuItems.push({
-            object: createCheckbox("expand", this.alignmentTrack.displayMode === "EXPANDED"),
+            object: $(createCheckbox("expand", this.alignmentTrack.displayMode === "EXPANDED")),
             click: () => {
                 this.alignmentTrack.displayMode = "EXPANDED";
                 this.config.displayMode = "EXPANDED";
@@ -335,7 +335,7 @@ class BAMTrack extends TrackBase {
         });
 
         menuItems.push({
-            object: createCheckbox("squish", this.alignmentTrack.displayMode === "SQUISHED"),
+            object: $(createCheckbox("squish", this.alignmentTrack.displayMode === "SQUISHED")),
             click: () => {
                 this.alignmentTrack.displayMode = "SQUISHED";
                 this.config.displayMode = "SQUISHED";
@@ -355,7 +355,7 @@ class BAMTrack extends TrackBase {
      * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
      */
     colorByCB(menuItem, showCheck) {
-        const $e = createCheckbox(menuItem.label, showCheck);
+        const $e = $(createCheckbox(menuItem.label, showCheck));
         const clickHandler = (ev) => {
 
             if (menuItem.key === this.alignmentTrack.colorBy) {

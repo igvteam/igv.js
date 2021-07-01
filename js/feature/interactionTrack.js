@@ -378,7 +378,7 @@ class InteractionTrack extends TrackBase {
             for (let arcType of ["nested", "proportional"]) {
                 items.push(
                     {
-                        object: createCheckbox(lut[arcType], arcType === this.arcType),
+                        object: $(createCheckbox(lut[arcType], arcType === this.arcType)),
                         click: () => {
                             this.arcType = arcType;
                             this.trackView.repaintViews();
@@ -388,7 +388,7 @@ class InteractionTrack extends TrackBase {
         }
 
         items.push({
-            object: createCheckbox("Show Blocks", this.showBlocks),
+            object: $(createCheckbox("Show Blocks", this.showBlocks)),
             click: () => {
                 this.showBlocks = !this.showBlocks;
                 this.trackView.repaintViews();
