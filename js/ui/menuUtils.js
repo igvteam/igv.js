@@ -82,7 +82,7 @@ const MenuUtils = {
         return menuItems;
     },
 
-    trackMenuItemListHelper: function (itemList, $popover) {
+    trackMenuItemListHelper: function (itemList, menuPopup) {
 
         var list = [];
 
@@ -126,7 +126,7 @@ const MenuUtils = {
                     // eslint-disable-next-line no-inner-declarations
                     function handleClick(e) {
                         item.click(e);
-                        $popover.hide();
+                        menuPopup.hide();
                         e.preventDefault();
                         e.stopPropagation()
                     }

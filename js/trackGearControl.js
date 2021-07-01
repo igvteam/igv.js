@@ -1,5 +1,4 @@
 import { DOMUtils, Icon } from "../node_modules/igv-utils/src/index.js";
-import $ from "./vendor/jquery-3.3.1.slim.js";
 import {randomRGB} from "./util/colorPalletes.js";
 import MenuPopup from "./ui/menuPopup.js";
 import MenuUtils from "./ui/menuUtils.js";
@@ -26,13 +25,12 @@ class TrackGearControl {
 
         gear.appendChild(Icon.createIcon('cog'))
 
-        const trackGearPopup = new MenuPopup($(gear));
-        trackGearPopup.$popover.hide();
+        const trackGearPopup = new MenuPopup(gear);
 
         gear.addEventListener('click', e => {
             e.preventDefault();
             e.stopPropagation();
-            trackGearPopup.presentMenuList(-(trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(trackView));
+            trackGearPopup.presentMenuList(MenuUtils.trackMenuItemList(trackView));
         });
 
         trackView.gearContainer = gearContainer;

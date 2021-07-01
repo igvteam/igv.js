@@ -91,8 +91,7 @@ class Browser {
         this.columnContainer = DOMUtils.div({ class: 'igv-column-container' });
         this.$root.get(0).appendChild(this.columnContainer);
 
-        this.menuPopup = new MenuPopup($(this.columnContainer));
-        this.menuPopup.$popover.hide();
+        this.menuPopup = new MenuPopup(this.columnContainer);
 
         this.initialize(config);
 

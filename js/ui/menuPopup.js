@@ -23,56 +23,57 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
 import MenuUtils from "./menuUtils.js"
 import {DOMUtils, UIUtils, makeDraggable} from "../../node_modules/igv-utils/src/index.js";
 import GenericColorPicker from './genericColorPicker.js';
 
-const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper
+const MenuPopup = function (parent) {
 
-const MenuPopup = function ($parent) {
+    this.popover = DOMUtils.div({ class: 'igv-menu-popup' })
+    parent.appendChild(this.popover)
 
-    // popover container
-    this.$popover = $('<div>', {class: 'igv-menu-popup'});
-    $parent.append(this.$popover);
+    const header = DOMUtils.div({ class: 'igv-menu-popup-header' })
+    this.popover.appendChild(header)
 
-    // popover header
-    let $popoverHeader = $('<div>', {class: 'igv-menu-popup-header'});
-    this.$popover.append($popoverHeader);
+    UIUtils.attachDialogCloseHandlerWithParent(header, () => this.hide())
 
-    UIUtils.attachDialogCloseHandlerWithParent($popoverHeader.get(0), () => this.$popover.hide());
+    this.popoverContent = DOMUtils.div()
+    this.popover.appendChild(this.popoverContent)
 
-    this.$popoverContent = $('<div>');
-    this.$popover.append(this.$popoverContent);
+    makeDraggable(this.popover, header)
 
-    makeDraggable(this.$popover.get(0), $popoverHeader.get(0));
-
-    $popoverHeader.on('click.menu-popup-dismiss', function (e) {
-        e.stopPropagation();
-        e.preventDefault();
+    header.addEventListener('click', e => {
+        e.stopPropagation()
+        e.preventDefault()
         // absorb click to prevent it leaking through to parent DOM element
-    });
+    })
 
-};
+    this.hide()
 
-MenuPopup.prototype.presentMenuList = function (dx, dy, list) {
+}
+
+MenuPopup.prototype.hide = function () {
+    this.popover.style.display = 'none'
+}
+
+MenuPopup.prototype.presentMenuList = function (menuList) {
 
     hideAllMenuPopups()
 
-    if (list.length > 0) {
+    if (menuList.length > 0) {
 
-        this.$popoverContent.empty();
+        this.popoverContent.innerHTML = ''
 
-        list = trackMenuItemListHelper(list, this.$popover);
+        menuList = MenuUtils.trackMenuItemListHelper(menuList, this)
 
-        for (let item of list) {
+        for (let item of menuList) {
 
             if (item.init) {
                 item.init();
             }
 
             let $e = item.object;
-            if (0 === list.indexOf(item)) {
+            if (0 === menuList.indexOf(item)) {
                 $e.removeClass('igv-track-menu-border-top');
             }
 
@@ -82,34 +83,40 @@ MenuPopup.prototype.presentMenuList = function (dx, dy, list) {
                 $e.addClass('igv-menu-popup-shim');
             }
 
-            this.$popoverContent.append($e);
+            this.popoverContent.appendChild($e.get(0))
 
         }
 
-        this.$popover.css({left: (dx + 'px'), top: (dy + 'px')});
-        this.$popover.show();
+        // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
+        //       yield a width of zero (0).
+        this.popover.style.display = 'flex'
+
+        const { width } = this.popover.getBoundingClientRect()
+
+        this.popover.style.left = `${ -width }px`
+        this.popover.style.top = `${ 0 }px`
 
     }
 };
 
 MenuPopup.prototype.presentTrackContextMenu = function(e, menuItems) {
 
-    this.$popoverContent.empty()
+    this.popoverContent.innerHTML = ''
 
-    const menuElements = createMenuElements(menuItems, this.$popover.get(0))
-    for (let item of menuElements) {
-        this.$popoverContent.get(0).appendChild(item.object)
+    const menuElements = createMenuElements(menuItems, this.popover)
+    for (let { object } of menuElements) {
+        this.popoverContent.appendChild(object)
     }
 
-    present(e, this.$popover.get(0))
-
-    this.$popover.show()
+    present(e, this.popover)
 
 }
 
 MenuPopup.prototype.dispose = function () {
-    this.$popover.empty();
-    this.$popoverContent.empty();
+
+    this.popoverContent.innerHTML = ''
+    this.popover.innerHTML = ''
+
     Object.keys(this).forEach(function (key) {
         this[key] = undefined;
     })
@@ -181,7 +188,6 @@ function createMenuElements(itemList, popover) {
             }
         }
 
-
         return { object: elem, init: item.init };
     })
 
@@ -189,20 +195,29 @@ function createMenuElements(itemList, popover) {
 
 function present(e, popover) {
 
+    // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
+    //       yield a width of zero (0).
+    popover.style.display = 'flex'
+
     const { x, y } = DOMUtils.translateMouseCoordinates(e, popover.parentNode)
+    const { width } = popover.getBoundingClientRect()
+    const xmax = x + width
 
-    // parent bbox
-    const { width } = popover.parentNode.getBoundingClientRect()
-    const { width: w } = popover.getBoundingClientRect()
+    const { width:parentWidth } = popover.parentNode.getBoundingClientRect()
 
-    const xmax = x + w
-
-    popover.style.left = `${ xmax > width ? (x - (xmax - width)) : x }px`
+    popover.style.left = `${ xmax > parentWidth ? (x - (xmax - parentWidth)) : x }px`
     popover.style.top  = `${ y }px`
 
 }
 
-const hideAllMenuPopups = () => $('.igv-menu-popup').hide()
+const hideAllMenuPopups = () => {
+
+    const menus = document.querySelectorAll('.igv-menu-popup')
+    for (let i = 0; i < menus.length; i++) {
+        menus[ i ].style.display = 'none'
+    }
+
+}
 
 export default MenuPopup;
 
