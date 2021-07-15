@@ -161,17 +161,8 @@ function inferTrackType(config) {
         return config.type;
     }
 
-    let format;
-    if ("file" === config.sourceType || (undefined === config.sourceType && config.url)) {
-        if (undefined === config.format) {
-            const path = FileUtils.isFilePath(config.url) ? config.url.name : config.url;
-            format = TrackUtils.inferFileFormat(path);
-        } else {
-            format = config.format.toLowerCase();
-        }
-    }
-
-    if (format) {
+    if (config.format) {
+        const format = config.format.toLowerCase();
         switch (format) {
             case "bw":
             case "bigwig":

@@ -20,11 +20,32 @@ const genome2 = {
 
 suite("htsget", function () {
 
+    /**
+     * Minimal tests of htsget -- just verifies that something parsable as a BAM record is returned.
+     */
 
     /**
-     * Minimal test of htsget -- just verifies that something parsable as a BAM record is returned.
+     * Full URL
      */
-    test("Alignments - bam", async function () {
+    test("Full URL", async function () {
+
+        this.timeout(40000);
+
+        const trackConfig = {
+            sourceType: 'htsget',
+            format: 'bam',
+            url: 'https://htsget.ga4gh.org/reads/giab.NA12878.NIST7086.1'
+        }
+
+        const reader = new HtsgetBamReader(trackConfig, genome1);
+        const alignmentContainer = await reader.readAlignments('1', 10000, 10100);
+        assert.equal(7, alignmentContainer.alignments.length);
+    })
+
+    /**
+     * Endpoint form
+     */
+    test("Endpoint + ID", async function () {
 
         this.timeout(40000);
 
@@ -44,23 +65,7 @@ suite("htsget", function () {
         assert.equal(7, alignmentContainer2.alignments.length);
     })
 
-    /**
-     * Full URL
-     */
-    test("Full URL (url + endpoint + id", async function () {
 
-        this.timeout(40000);
-
-        const trackConfig = {
-            sourceType: 'htsget',
-            format: 'bam',
-            url: 'https://htsget.ga4gh.org/reads/giab.NA12878.NIST7086.1'
-        }
-
-        const reader = new HtsgetBamReader(trackConfig, genome1);
-        const alignmentContainer = await reader.readAlignments('1', 10000, 10100);
-        assert.equal(7, alignmentContainer.alignments.length);
-    })
 
     /**
      * Test deprecated config form for backward compatibility
