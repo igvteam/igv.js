@@ -45,7 +45,7 @@ class HtsgetReader {
     }
 
     async readData(chr, start, end) {
-        const url = `${getUrl(this.config)}?format=${this.format}&referenceName=${chr}&start=${start}&end=${end}`;
+        const url = `${getUrl(this.config)}?format=${this.format}&referenceName=${chr}&start=${Math.floor(start)}&end=${Math.ceil(end)}`;
         const ticket = await igvxhr.loadJson(url, buildOptions(this.config));
         return this.loadUrls(ticket.htsget.urls);
     }
