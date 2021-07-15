@@ -73,6 +73,20 @@ class HtsgetReader {
         const arrayBuffers = await Promise.all(promiseArray);
         return concatArrays(arrayBuffers);
     }
+
+
+    static async inferFormat(config) {
+        const headerURL = `${config.url}?class=header`;
+        const ticket = await igvxhr.loadJson(headerURL, buildOptions(config))
+        if(ticket.htsget) {
+            const format = ticket.htsget.format;
+            if (!(format === "BAM" || format === "VCF")) {
+                throw  Error(`htsget format ${format} is not supported`);
+            }
+            config.format = format.toLowerCase();
+            config.sourceType = "htsget";
+        }
+    }
 }
 
 /**

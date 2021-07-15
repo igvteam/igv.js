@@ -69,6 +69,7 @@ import SVGSaveControl from "./ui/svgSaveControl.js";
 import ZoomWidget from "./ui/zoomWidget.js";
 import UserFeedback from "./ui/userFeedback.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
+import HtsgetReader from "./htsget/htsgetReader.js";
 
 // igv.scss - $igv-multi-locus-gap-width
 const multiLocusGapDivWidth = 1
@@ -849,8 +850,14 @@ class Browser {
                     filename = await getFilename(url);
                 }
                 config.format = TrackUtils.inferFileFormat(filename);
+
+                if(!config.format) {
+                    // Check for htsget URL.  This is a longshot
+                    await HtsgetReader.inferFormat(config);
+                }
             }
         }
+
 
         let type = config.type;
         if (type) {
