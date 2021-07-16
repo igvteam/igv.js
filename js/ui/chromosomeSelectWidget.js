@@ -29,6 +29,7 @@ import $ from "../vendor/jquery-3.3.1.slim.js";
 const ChromosomeSelectWidget = function (browser, $parent) {
 
     this.showAllChromosomes = browser.config.showAllChromosomes !== false;   // i.e. default to true
+    this.show = browser.config.showChromosomeWidget !== false; // i.e. default to true
 
     this.$container = $('<div>', { class: 'igv-chromosome-select-widget-container' });
     $parent.append(this.$container);
@@ -50,6 +51,9 @@ ChromosomeSelectWidget.prototype.update = function (genome) {
 
 
     this.$select.empty();
+    if (!this.show){
+        return;
+    }
     const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice();  // slice used to copy list
     if(genome.showWholeGenomeView()) {
         list.unshift('all');

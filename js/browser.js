@@ -236,10 +236,10 @@ class Browser {
         $navbarLeftContainer.append($genomicLocation);
 
         // chromosome select widget
-        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation);
         if (undefined === config.showChromosomeWidget) {
             config.showChromosomeWidget = true;   // Default to true
         }
+        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation);
         if (true === config.showChromosomeWidget) {
             this.chromosomeSelectWidget.$container.show();
         } else {
