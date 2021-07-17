@@ -848,7 +848,7 @@ class Browser {
                 }
                 config.format = TrackUtils.inferFileFormat(filename);
 
-                if (!config.format) {
+                if (!config.format && (config.sourceType === undefined || config.sourceType === "htsget")) {
                     // Check for htsget URL.  This is a longshot
                     await HtsgetReader.inferFormat(config);
                 }
