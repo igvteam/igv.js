@@ -236,14 +236,9 @@ class Browser {
         $navbarLeftContainer.append($genomicLocation);
 
         // chromosome select widget
-        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation);
-        if (undefined === config.showChromosomeWidget) {
-            config.showChromosomeWidget = true;   // Default to true
-        }
-        if (true === config.showChromosomeWidget) {
+        if (config.showChromosomeWidget !== false) {
+            this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation);
             this.chromosomeSelectWidget.$container.show();
-        } else {
-            this.chromosomeSelectWidget.$container.hide();
         }
 
         const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'});
@@ -610,7 +605,9 @@ class Browser {
         this.genome = genome;
         this.$current_genome.text(genome.id || '');
         this.$current_genome.attr('title', genome.id || '');
-        this.chromosomeSelectWidget.update(genome);
+        if(this.chromosomeSelectWidget) {
+            this.chromosomeSelectWidget.update(genome);
+        }
         if (genomeChange) {
             this.removeAllTracks();
         }
@@ -851,7 +848,7 @@ class Browser {
                 }
                 config.format = TrackUtils.inferFileFormat(filename);
 
-                if(!config.format) {
+                if (!config.format) {
                     // Check for htsget URL.  This is a longshot
                     await HtsgetReader.inferFormat(config);
                 }
@@ -1213,27 +1210,30 @@ class Browser {
     updateLocusSearchWidget(referenceFrameList) {
 
         if (referenceFrameList.length > 1) {
-            this.$searchInput.val('')
-            this.chromosomeSelectWidget.$select.val('')
-            return
+            this.$searchInput.val('');
+            if(this.chromosomeSelectWidget) {
+                this.chromosomeSelectWidget.$select.val('');
+            }
+            return;
         }
 
         if (this.rulerTrack) {
-            this.rulerTrack.updateLocusLabel()
+            this.rulerTrack.updateLocusLabel();
         }
 
         const referenceFrame = referenceFrameList[0]
         if (referenceFrame.locusSearchString && 'all' === referenceFrame.locusSearchString.toLowerCase()) {
-
             this.$searchInput.val(referenceFrame.locusSearchString);
-            this.chromosomeSelectWidget.$select.val('all');
+            if(this.chromosomeSelectWidget) {
+                this.chromosomeSelectWidget.$select.val('all');
+            }
         } else {
-
-            this.chromosomeSelectWidget.$select.val(referenceFrame.chr);
-
-            let ss
-            let ee
-            let str
+            if(this.chromosomeSelectWidget) {
+                this.chromosomeSelectWidget.$select.val(referenceFrame.chr);
+            }
+            let ss;
+            let ee;
+            let str;
             if (this.$searchInput) {
 
                 let end = referenceFrame.start + referenceFrame.bpPerPixel * this.getViewportWidth();
