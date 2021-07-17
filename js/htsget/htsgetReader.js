@@ -77,7 +77,7 @@ class HtsgetReader {
 
     static async inferFormat(config) {
         try {
-            const headerURL = `${config.url}?class=header`;
+            const headerURL = `${config.url}${config.url.includes("?") ? "&" : "?"}class=header`;
             const ticket = await igvxhr.loadJson(headerURL, buildOptions(config))
             if (ticket.htsget) {
                 const format = ticket.htsget.format;
