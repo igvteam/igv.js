@@ -40,7 +40,7 @@ class HtsgetBamReader extends HtsgetReader {
     async readAlignments(chr, start, end) {
 
         if (!this.header) {
-            const compressedData = await this.readHeader();
+            const compressedData = await this.readHeaderData();
             const ba = BGZip.unbgzf(compressedData.buffer);
             this.header = BamUtils.decodeBamHeader(ba, this.genome);
             this.chrAliasTable = new Map();
