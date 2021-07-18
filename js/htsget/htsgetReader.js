@@ -38,7 +38,7 @@ class HtsgetReader {
         }
     }
 
-    async readHeader() {
+    async readHeaderData() {
         const url = `${getUrl(this.config)}?class=header&format=${this.format}`;
         const ticket = await igvxhr.loadJson(url, buildOptions(this.config));
         return await this.loadUrls(ticket.htsget.urls);
