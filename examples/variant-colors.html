@@ -7,19 +7,17 @@
     <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
     <title>VCF with VT field</title>
 
+    <!-- IGV JS -->
+    <script src="../dist/igv.min.js"></script>
+
 </head>
 
 <body>
-
-<button id="bmBtn">Bookmark</button>
-<button id="sessionButton">Save Session</button>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 
 <script type="module">
-
-    import igv from "../../js";
 
     const options =
         {
@@ -83,33 +81,6 @@
 
         .then(function (browser) {
 
-
-            function download(filename, data) {
-
-                const element = document.createElement('a');
-                element.setAttribute('href', data);
-                element.setAttribute('download', filename);
-                element.style.display = 'none';
-                document.body.appendChild(element);
-                element.click();
-                document.body.removeChild(element);
-            }
-
-            document.getElementById("bmBtn").addEventListener("click", () => {
-                window.history.pushState({}, "IGV", browser.sessionURL());
-            });
-
-            document.getElementById("sessionButton").addEventListener("click", () => {
-                try {
-                    const json = browser.toJSON();
-                    console.log(json);
-                    const jsonString = JSON.stringify(json, null, '\t');
-                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}));
-                    download("session.json", data);
-                } catch (e) {
-                    alert(e);
-                }
-            })
         });
 
 </script>

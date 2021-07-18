@@ -71,7 +71,11 @@ class VariantTrack extends TrackBase {
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
         this.sortDirection = "ASC";
         this.type = config.type || "variant"
-        this.variantColorBy = config.variantColorBy;   // Can be undefined => default
+        this.colorBy = config.colorBy;   // Can be undefined => default
+        if (config.colorBy && config.colorTable) {
+            this.colorTables = new Map();
+            this.colorTables.set(config.colorBy, new ColorTable(config.colorTable));
+        }
         this._color = config.color;
         this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes;
 
@@ -108,7 +112,7 @@ class VariantTrack extends TrackBase {
 
     set color(c) {
         this._color = c;
-        this.variantColorBy = undefined;
+        this.colorBy = undefined;
     }
 
     async getHeader() {
@@ -282,19 +286,19 @@ class VariantTrack extends TrackBase {
 
         let variantColor;
 
-        if (this.variantColorBy) {
-            const value = variant.info[this.variantColorBy];
-            if (value) {
-                return getVariantColorTable(this.variantColorBy).getColor(value);
-            } else {
-                return "gray";
+        if (this.colorBy) {
+            const value = variant.info[this.colorBy];
+            variantColor = this.getVariantColorTable(this.colorBy).getColor(value);
+            if (!variantColor) {
+                variantColor = "gray";
             }
+
+        } else if (this._color) {
+            variantColor = (typeof this._color === "function") ? this._color(variant) : this._color;
         } else if ("NONVARIANT" === variant.type) {
             variantColor = this.nonRefColor;
         } else if ("MIXED" === variant.type) {
             variantColor = this.mixedColor;
-        } else if (this._color) {
-            variantColor = (typeof this._color === "function") ? this._color(variant) : this._color;
         } else {
             variantColor = this.defaultColor;
         }
@@ -496,17 +500,19 @@ class VariantTrack extends TrackBase {
             //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => "String" === this.header.INFO[key].Type);
 
             // For now stick to explicit info fields (well, exactly 1 for starters)
-            const stringInfoKeys = this.header.INFO.SVTYPE ? ['SVTYPE', undefined] : [];
-
-            if (stringInfoKeys.length > 0) {
-                const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-                $e.text('Color by:');
-                menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
-                stringInfoKeys.sort();
-                for (let item of stringInfoKeys) {
-                    const selected = (this.variantColorBy === item);
-                    const label = item ? item : 'None';
-                    menuItems.push(this.colorByCB({key: item, label: label}, selected));
+            if (this.header.INFO) {
+                //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => this.header.INFO[key].Type === "String")
+                const stringInfoKeys = this.header.INFO.SVTYPE ? ['SVTYPE', undefined] : [];
+                if (stringInfoKeys.length > 0) {
+                    const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+                    $e.text('Color by:');
+                    menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
+                    stringInfoKeys.sort();
+                    for (let item of stringInfoKeys) {
+                        const selected = (this.colorBy === item);
+                        const label = item ? item : 'None';
+                        menuItems.push(this.colorByCB({key: item, label: label}, selected));
+                    }
                 }
             }
         }
@@ -559,13 +565,13 @@ class VariantTrack extends TrackBase {
         const $e = createCheckbox(menuItem.label, showCheck);
         const clickHandler = ev => {
 
-            if (menuItem.key === this.variantColorBy) {
-                this.variantColorBy = undefined;
-                delete this.config.variantColorBy;
+            if (menuItem.key === this.colorBy) {
+                this.colorBy = undefined;
+                delete this.config.colorBy;
                 this.trackView.repaintViews();
             } else {
-                this.variantColorBy = menuItem.key;
-                this.config.variantColorBy = menuItem.key;
+                this.colorBy = menuItem.key;
+                this.config.colorBy = menuItem.key;
                 this.trackView.repaintViews();
             }
 
@@ -577,38 +583,44 @@ class VariantTrack extends TrackBase {
     getState() {
 
         const config = super.getState();
-        config.color = this._color;
+        if (this._color && typeof this._color !== "function") {
+            config.color = this._color;
+        }
         return config;
 
     }
-}
 
-let VARIANT_COLOR_TABLES;
+    getVariantColorTable(key) {
 
-function getVariantColorTable(key) {
-
-    if (!VARIANT_COLOR_TABLES) VARIANT_COLOR_TABLES = new Map();
-
-    if (!VARIANT_COLOR_TABLES.has(key)) {
-        let tbl;
-        switch (key) {
-            case "SVTYPE" :
-                tbl = new ColorTable({
-                    'DEL': '#ff2101',
-                    'INS': '#001888',
-                    'DUP': '#028401',
-                    'INV': '#008688',
-                    'CNV': '#8931ff',
-                    'BND': '#891100'
-                })
-                break;
-            default:
-                tbl = new PaletteColorTable("Set1");
+        if (!this.colorTables) {
+            this.colorTables = new Map();
         }
-        VARIANT_COLOR_TABLES.set(key, tbl);
-    }
-    return VARIANT_COLOR_TABLES.get(key);
 
+        if (!this.colorTables.has(key)) {
+            let tbl;
+            switch (key) {
+                case "SVTYPE" :
+                    tbl = SV_COLOR_TABLE;
+                    break;
+                default:
+                    tbl = new PaletteColorTable("Set3");
+            }
+            this.colorTables.set(key, tbl);
+        }
+        return this.colorTables.get(key);
+    }
 }
+
+
+const SV_COLOR_TABLE = new ColorTable({
+    'DEL': '#ff2101',
+    'INS': '#001888',
+    'DUP': '#028401',
+    'INV': '#008688',
+    'CNV': '#8931ff',
+    'BND': '#891100',
+    '*': '#002eff'
+})
+
 
 export default VariantTrack
