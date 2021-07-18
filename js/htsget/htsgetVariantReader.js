@@ -36,6 +36,15 @@ class HtsgetVariantReader extends HtsgetReader {
         this.parser = new VcfParser();
     }
 
+    async readHeader() {
+        if (!this.header) {
+            const data = await this.readHeaderData();
+            const dataWrapper = getDataWrapper(data);
+            this.header = await this.parser.parseHeader(dataWrapper, this.genome);
+            this.chrAliasTable = this.header.chrAliasTable;
+        }
+        return this.header;
+    }
 
     async readFeatures(chr, start, end) {
 
@@ -43,11 +52,8 @@ class HtsgetVariantReader extends HtsgetReader {
             throw  Error(`htsget format ${this.config.format} is not supported`);
         }
 
-        if(!this.header) {
-            const data = await this.readHeader();
-            const dataWrapper = getDataWrapper(data);
-            await this.parser.parseHeader(dataWrapper, this.genome);
-            this.chrAliasTable = this.parser.header.chrAliasTable;
+        if(!this.chrAliasTable) {
+            await this.readHeader();
         }
 
         let queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr;
