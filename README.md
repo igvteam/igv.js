@@ -26,7 +26,7 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
 
 ***[Mutation Annotation Format (MAF)](https://igv.org/web/release/2.9.2/examples/maf-tcga.html)***
 
-***[htsget server (VCF, BAM)](https://igv.org/web/release/2.9.2/examples/htsget.html)***
+***[Variant color options](https://igv.org/web/release/2.9.2/examples/variant-colors.html)***
 
 ***[More](https://igv.org/web/release/2.9.2/examples/)***
 
