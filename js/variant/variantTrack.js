@@ -71,10 +71,13 @@ class VariantTrack extends TrackBase {
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
         this.sortDirection = "ASC";
         this.type = config.type || "variant"
-        this.colorBy = config.colorBy;   // Can be undefined => default
-        if (config.colorBy && config.colorTable) {
-            this.colorTables = new Map();
-            this.colorTables.set(config.colorBy, new ColorTable(config.colorTable));
+        if(config.colorBy) {
+            this.colorBy = config.colorBy;   // Can be undefined => default
+            this._initColorBy = config.colorBy;
+            if (config.colorTable) {
+                this.colorTables = new Map();
+                this.colorTables.set(config.colorBy, new ColorTable(config.colorTable));
+            }
         }
         this._color = config.color;
         this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes;
@@ -502,7 +505,10 @@ class VariantTrack extends TrackBase {
             // For now stick to explicit info fields (well, exactly 1 for starters)
             if (this.header.INFO) {
                 //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => this.header.INFO[key].Type === "String")
-                const stringInfoKeys = this.header.INFO.SVTYPE ? ['SVTYPE', undefined] : [];
+                const stringInfoKeys = this.header.INFO.SVTYPE ? ['SVTYPE'] : [];
+                if(this._initColorBy && this._initColorBy !== 'SVTYPE') {
+                    stringInfoKeys.push(this._initColorBy);
+                }
                 if (stringInfoKeys.length > 0) {
                     const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
                     $e.text('Color by:');
@@ -513,6 +519,7 @@ class VariantTrack extends TrackBase {
                         const label = item ? item : 'None';
                         menuItems.push(this.colorByCB({key: item, label: label}, selected));
                     }
+                    menuItems.push(this.colorByCB({key: undefined, label: 'None'}, this.colorBy === undefined));
                 }
             }
         }
