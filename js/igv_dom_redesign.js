@@ -25048,7 +25048,7 @@
       return s;
     }
 
-    const _version = "2.9.1";
+    const _version = "2.9.2";
 
     function version() {
       return _version;
@@ -25801,8 +25801,8 @@
 
       getColor(key) {
         if (!this.colorTable.hasOwnProperty(key)) {
-          if (this.colorTable.hasOwnProperty("*other*")) {
-            return this.colorTable["*other"];
+          if (this.colorTable.hasOwnProperty("*")) {
+            return this.colorTable["*"];
           }
 
           this.colorTable[key] = this.colorGenerator.get();
@@ -35888,7 +35888,7 @@
         }
       }
 
-      async readHeader() {
+      async readHeaderData() {
         const url = `${getUrl(this.config)}?class=header&format=${this.format}`;
         const ticket = await igvxhr.loadJson(url, buildOptions(this.config));
         return await this.loadUrls(ticket.htsget.urls);
@@ -35923,28 +35923,32 @@
       }
 
       static async inferFormat(config) {
-        const headerURL = `${config.url}?class=header`;
-        const ticket = await igvxhr.loadJson(headerURL, buildOptions(config));
+        try {
+          const url = getUrl(config);
+          const headerURL = `${url}${url.includes("?") ? "&" : "?"}class=header`;
+          const ticket = await igvxhr.loadJson(headerURL, buildOptions(config));
 
-        if (ticket.htsget) {
-          const format = ticket.htsget.format;
+          if (ticket.htsget) {
+            const format = ticket.htsget.format;
 
-          if (!(format === "BAM" || format === "VCF")) {
-            throw Error(`htsget format ${format} is not supported`);
+            if (!(format === "BAM" || format === "VCF")) {
+              throw Error(`htsget format ${format} is not supported`);
+            }
+
+            config.format = format.toLowerCase();
+            config.sourceType = "htsget";
+
+            if (!config.name) {
+              config.name = await getFilename(config.url);
+            }
           }
-
-          config.format = format.toLowerCase();
-          config.sourceType = "htsget";
-
-          if (!config.name) {
-            config.name = await getFilename(config.url);
-          }
+        } catch (e) {// Errors => this is not an htsget source, not an application error.  Ignore
         }
       }
 
     }
     /**
-     * Extract the full url from the config.  Striving for backward compatibility.
+     * Extract the full url from the config.  Striving for backward compatibility, "endpoint" and "id" are deprecated.
      *
      * @param config
      */
@@ -35952,11 +35956,15 @@
 
     function getUrl(config) {
       if (config.url && config.endpoint && config.id) {
-        return config.url + config.endpoint + config.id;
+        return config.url + config.endpoint + config.id; // Deprecated
       } else if (config.endpoint && config.id) {
-        return config.endpoint + config.id;
+        return config.endpoint + config.id; // Deprecated
       } else if (config.url) {
-        return config.url;
+        if (config.url.startsWith("htsget://")) {
+          return config.url.replace("htsget://", "https://"); // htsget -> http not supported
+        } else {
+          return config.url;
+        }
       } else {
         throw Error("Must specify either 'url', or 'endpoint' and 'id");
       }
@@ -36038,16 +36046,24 @@
         this.parser = new VcfParser();
       }
 
+      async readHeader() {
+        if (!this.header) {
+          const data = await this.readHeaderData();
+          const dataWrapper = getDataWrapper(data);
+          this.header = await this.parser.parseHeader(dataWrapper, this.genome);
+          this.chrAliasTable = this.header.chrAliasTable;
+        }
+
+        return this.header;
+      }
+
       async readFeatures(chr, start, end) {
         if (this.config.format && this.config.format.toUpperCase() !== "VCF") {
           throw Error(`htsget format ${this.config.format} is not supported`);
         }
 
-        if (!this.header) {
-          const data = await this.readHeader();
-          const dataWrapper = getDataWrapper(data);
-          await this.parser.parseHeader(dataWrapper, this.genome);
-          this.chrAliasTable = this.parser.header.chrAliasTable;
+        if (!this.chrAliasTable) {
+          await this.readHeader();
         }
 
         let queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr;
@@ -42565,7 +42581,7 @@
 
       async readAlignments(chr, start, end) {
         if (!this.header) {
-          const compressedData = await this.readHeader();
+          const compressedData = await this.readHeaderData();
           const ba = unbgzf(compressedData.buffer);
           this.header = BamUtils.decodeBamHeader(ba, this.genome);
           this.chrAliasTable = new Map();
@@ -61132,7 +61148,17 @@
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
         this.sortDirection = "ASC";
         this.type = config.type || "variant";
-        this.variantColorBy = config.variantColorBy; // Can be undefined => default
+
+        if (config.colorBy) {
+          this.colorBy = config.colorBy; // Can be undefined => default
+
+          this._initColorBy = config.colorBy;
+
+          if (config.colorTable) {
+            this.colorTables = new Map();
+            this.colorTables.set(config.colorBy, new ColorTable(config.colorTable));
+          }
+        }
 
         this._color = config.color;
         this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes; // The number of variant rows are computed dynamically, but start with "1" by default
@@ -61169,7 +61195,7 @@
 
       set color(c) {
         this._color = c;
-        this.variantColorBy = undefined;
+        this.colorBy = undefined;
       }
 
       async getHeader() {
@@ -61364,20 +61390,19 @@
       getVariantColor(variant) {
         let variantColor;
 
-        if (this.variantColorBy) {
-          const value = variant.info[this.variantColorBy];
+        if (this.colorBy) {
+          const value = variant.info[this.colorBy];
+          variantColor = this.getVariantColorTable(this.colorBy).getColor(value);
 
-          if (value) {
-            return getVariantColorTable(this.variantColorBy).getColor(value);
-          } else {
-            return "gray";
+          if (!variantColor) {
+            variantColor = "gray";
           }
+        } else if (this._color) {
+          variantColor = typeof this._color === "function" ? this._color(variant) : this._color;
         } else if ("NONVARIANT" === variant.type) {
           variantColor = this.nonRefColor;
         } else if ("MIXED" === variant.type) {
           variantColor = this.mixedColor;
-        } else if (this._color) {
-          variantColor = typeof this._color === "function" ? this._color(variant) : this._color;
         } else {
           variantColor = this.defaultColor;
         }
@@ -61598,26 +61623,38 @@
           //Code below will present checkboxes for all info fields of type "String".   Wait until this is requested
           //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => "String" === this.header.INFO[key].Type);
           // For now stick to explicit info fields (well, exactly 1 for starters)
-          const stringInfoKeys = this.header.INFO.SVTYPE ? ['SVTYPE', undefined] : [];
+          if (this.header.INFO) {
+            //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => this.header.INFO[key].Type === "String")
+            const stringInfoKeys = this.header.INFO.SVTYPE ? ['SVTYPE'] : [];
 
-          if (stringInfoKeys.length > 0) {
-            const $e = $$1('<div class="igv-track-menu-category igv-track-menu-border-top">');
-            $e.text('Color by:');
-            menuItems.push({
-              name: undefined,
-              object: $e,
-              click: undefined,
-              init: undefined
-            });
-            stringInfoKeys.sort();
+            if (this._initColorBy && this._initColorBy !== 'SVTYPE') {
+              stringInfoKeys.push(this._initColorBy);
+            }
 
-            for (let item of stringInfoKeys) {
-              const selected = this.variantColorBy === item;
-              const label = item ? item : 'None';
+            if (stringInfoKeys.length > 0) {
+              const $e = $$1('<div class="igv-track-menu-category igv-track-menu-border-top">');
+              $e.text('Color by:');
+              menuItems.push({
+                name: undefined,
+                object: $e,
+                click: undefined,
+                init: undefined
+              });
+              stringInfoKeys.sort();
+
+              for (let item of stringInfoKeys) {
+                const selected = this.colorBy === item;
+                const label = item ? item : 'None';
+                menuItems.push(this.colorByCB({
+                  key: item,
+                  label: label
+                }, selected));
+              }
+
               menuItems.push(this.colorByCB({
-                key: item,
-                label: label
-              }, selected));
+                key: undefined,
+                label: 'None'
+              }, this.colorBy === undefined));
             }
           }
         }
@@ -61671,13 +61708,13 @@
         const $e = $$1(createCheckbox$1(menuItem.label, showCheck));
 
         const clickHandler = () => {
-          if (menuItem.key === this.variantColorBy) {
-            this.variantColorBy = undefined;
-            delete this.config.variantColorBy;
+          if (menuItem.key === this.colorBy) {
+            this.colorBy = undefined;
+            delete this.config.colorBy;
             this.trackView.repaintViews();
           } else {
-            this.variantColorBy = menuItem.key;
-            this.config.variantColorBy = menuItem.key;
+            this.colorBy = menuItem.key;
+            this.config.colorBy = menuItem.key;
             this.trackView.repaintViews();
           }
         };
@@ -61692,41 +61729,48 @@
 
       getState() {
         const config = super.getState();
-        config.color = this._color;
+
+        if (this._color && typeof this._color !== "function") {
+          config.color = this._color;
+        }
+
         return config;
       }
 
-    }
-
-    let VARIANT_COLOR_TABLES;
-
-    function getVariantColorTable(key) {
-      if (!VARIANT_COLOR_TABLES) VARIANT_COLOR_TABLES = new Map();
-
-      if (!VARIANT_COLOR_TABLES.has(key)) {
-        let tbl;
-
-        switch (key) {
-          case "SVTYPE":
-            tbl = new ColorTable({
-              'DEL': '#ff2101',
-              'INS': '#001888',
-              'DUP': '#028401',
-              'INV': '#008688',
-              'CNV': '#8931ff',
-              'BND': '#891100'
-            });
-            break;
-
-          default:
-            tbl = new PaletteColorTable("Set1");
+      getVariantColorTable(key) {
+        if (!this.colorTables) {
+          this.colorTables = new Map();
         }
 
-        VARIANT_COLOR_TABLES.set(key, tbl);
+        if (!this.colorTables.has(key)) {
+          let tbl;
+
+          switch (key) {
+            case "SVTYPE":
+              tbl = SV_COLOR_TABLE;
+              break;
+
+            default:
+              tbl = new PaletteColorTable("Set3");
+          }
+
+          this.colorTables.set(key, tbl);
+        }
+
+        return this.colorTables.get(key);
       }
 
-      return VARIANT_COLOR_TABLES.get(key);
     }
+
+    const SV_COLOR_TABLE = new ColorTable({
+      'DEL': '#ff2101',
+      'INS': '#001888',
+      'DUP': '#028401',
+      'INV': '#008688',
+      'CNV': '#8931ff',
+      'BND': '#891100',
+      '*': '#002eff'
+    });
 
     /*
      * The MIT License (MIT)
@@ -66145,7 +66189,7 @@
 
             config.format = inferFileFormat(filename);
 
-            if (!config.format) {
+            if (!config.format && (config.sourceType === undefined || config.sourceType === "htsget")) {
               // Check for htsget URL.  This is a longshot
               await HtsgetReader.inferFormat(config);
             }
