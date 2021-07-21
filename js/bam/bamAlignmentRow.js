@@ -96,6 +96,8 @@ class BamAlignmentRow {
                     return Number.MAX_VALUE;
                 }
             }
+            case "READ_NAME":
+                return hashCode(alignment.readName);
             case "INSERT_SIZE":
                 return -Math.abs(alignment.fragmentLength);
             case "GAP_SIZE":
