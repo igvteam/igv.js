@@ -77,7 +77,8 @@ class HtsgetReader {
 
     static async inferFormat(config) {
         try {
-            const headerURL = `${config.url}${config.url.includes("?") ? "&" : "?"}class=header`;
+            const url = getUrl(config);
+            const headerURL = `${url}${url.includes("?") ? "&" : "?"}class=header`;
             const ticket = await igvxhr.loadJson(headerURL, buildOptions(config))
             if (ticket.htsget) {
                 const format = ticket.htsget.format;
@@ -97,17 +98,21 @@ class HtsgetReader {
 }
 
 /**
- * Extract the full url from the config.  Striving for backward compatibility.
+ * Extract the full url from the config.  Striving for backward compatibility, "endpoint" and "id" are deprecated.
  *
  * @param config
  */
-function getUrl(config)  {
-    if(config.url && config.endpoint && config.id) {
-        return config.url + config.endpoint + config.id;
-    } else if(config.endpoint && config.id) {
-        return config.endpoint + config.id;
-    } else if(config.url) {
-        return config.url;
+function getUrl(config) {
+    if (config.url && config.endpoint && config.id) {
+        return config.url + config.endpoint + config.id;    // Deprecated
+    } else if (config.endpoint && config.id) {
+        return config.endpoint + config.id;                // Deprecated
+    } else if (config.url) {
+        if (config.url.startsWith("htsget://")) {
+            return config.url.replace("htsget://", "https://");    // htsget -> http not supported
+        } else {
+            return config.url;
+        }
     } else {
         throw Error("Must specify either 'url', or 'endpoint' and 'id");
     }
