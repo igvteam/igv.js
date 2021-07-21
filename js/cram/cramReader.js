@@ -149,6 +149,7 @@ class CramReader {
                 const records = await this.indexedCramFile.getRecordsForRange(chrIdx, bpStart, bpEnd);
 
                 for (let record of records) {
+
                     const refID = record.sequenceId;
                     const pos = record.alignmentStart;
                     const alignmentEnd = pos + record.lengthOnRef;
@@ -166,9 +167,9 @@ class CramReader {
 
                     const alignment = decodeCramRecord(record, header.chrNames);
 
-                    //  if (filter.pass(alignment)) {
-                    alignmentContainer.push(alignment);
-                    //  }
+                    if (this.filter.pass(alignment)) {
+                        alignmentContainer.push(alignment);
+                    }
                 }
 
                 alignmentContainer.finish();
