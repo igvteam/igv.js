@@ -39,7 +39,7 @@ class RulerViewport extends ViewPort {
         this.$tooltipContent = $('<div>')
         this.$tooltip.append(this.$tooltipContent)
 
-        this.attachMouseHandlers( GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr) )
+        this.attachMouseHandlers( GenomeUtils.isWholeGenomeView(this.referenceFrame.chr) )
 
         this.$tooltip.hide()
         this.dismissLocusLabel()
@@ -119,7 +119,7 @@ class RulerViewport extends ViewPort {
                 this.$tooltip.show()
             }
 
-            const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr));
+            const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrame.chr));
 
             if (isWholeGenome) {
                 this.$tooltip.hide();

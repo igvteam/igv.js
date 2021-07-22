@@ -219,7 +219,8 @@ class ViewPort extends ViewportBase {
 
         let {features, roiFeatures, bpPerPixel, startBP, endBP} = this.tile
 
-        const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
+        // const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
+        const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
         let pixelWidth
 
         if (isWGV) {

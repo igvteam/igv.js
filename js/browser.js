@@ -1077,32 +1077,33 @@ class Browser {
 
         const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
-
         for (let referenceFrame of this.referenceFrameList) {
+
+            const index = this.referenceFrameList.indexOf(referenceFrame)
 
             const { chr, genome } = referenceFrame
 
             const {bpLength} = genome.getChromosome(referenceFrame.chr)
-            
+
             const viewportWidthBP = referenceFrame.toBP(viewportWidth)
 
             if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
-                console.log(`${ Date.now() } browser.resize - viewport ${ StringUtils.numberFormatter(viewportWidthBP) } > ${ StringUtils.numberFormatter(bpLength) }. Recalc referenceFrame.bpp.`)
+                console.log(`${ Date.now() } Recalc referenceFrame(${ index }) bpp. viewport ${ StringUtils.numberFormatter(viewportWidthBP) } > ${ StringUtils.numberFormatter(bpLength) }.`)
                 referenceFrame.bpPerPixel = bpLength/viewportWidth
             } else {
-                console.log(`${ Date.now() } browser.resize Recalc referenceFrame.end.`)
+                console.log(`${ Date.now() } Recalc referenceFrame(${ index }) end.`)
                 referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
+            }
+
+            for (let { viewports } of this.trackViews) {
+                viewports[ index ].setWidth(viewportWidth)
             }
 
         }
 
-        this.updateUIWithReferenceFrameList(this.referenceFrameList);
-
-        for (let trackView of this.trackViews) {
-            trackView.resize(viewportWidth)
-        }
-
         await this.updateViews(undefined, undefined, true);
+
+        this.updateUIWithReferenceFrameList(this.referenceFrameList);
     }
 
     async updateViews(referenceFrame, trackViews, force) {
