@@ -1087,11 +1087,12 @@ class Browser {
 
             const viewportWidthBP = referenceFrame.toBP(viewportWidth)
 
+            // viewportWidthBP > bpLength occurs when locus is full chromosome and user widens browser
             if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
-                console.log(`${ Date.now() } Recalc referenceFrame(${ index }) bpp. viewport ${ StringUtils.numberFormatter(viewportWidthBP) } > ${ StringUtils.numberFormatter(bpLength) }.`)
+                // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) bpp. viewport ${ StringUtils.numberFormatter(viewportWidthBP) } > ${ StringUtils.numberFormatter(bpLength) }.`)
                 referenceFrame.bpPerPixel = bpLength/viewportWidth
             } else {
-                console.log(`${ Date.now() } Recalc referenceFrame(${ index }) end.`)
+                // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) end.`)
                 referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
             }
 

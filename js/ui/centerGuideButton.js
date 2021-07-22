@@ -9,7 +9,7 @@ class CenterGuideButton {
         this.button = DOMUtils.div({ class: 'igv-navbar-button'})
         parent.appendChild(this.button)
 
-        this.button.textContent = 'center guide'
+        this.button.textContent = 'center line'
 
         this.button.addEventListener('click', () => {
             browser.isCenterGuideVisible = !browser.isCenterGuideVisible
