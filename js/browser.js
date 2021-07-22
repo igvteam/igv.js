@@ -1077,18 +1077,22 @@ class Browser {
 
         const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
+
         for (let referenceFrame of this.referenceFrameList) {
 
-            const {bpLength} = referenceFrame.genome.getChromosome(referenceFrame.chr)
+            const { chr, genome } = referenceFrame
 
-            // scenario: browser width less than monitor width. User then drags browser width wider
-            if (referenceFrame.toBP(viewportWidth) > bpLength) {
+            const {bpLength} = genome.getChromosome(referenceFrame.chr)
+            
+            const viewportWidthBP = referenceFrame.toBP(viewportWidth)
+
+            if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
+                console.log(`${ Date.now() } browser.resize - viewport ${ StringUtils.numberFormatter(viewportWidthBP) } > ${ StringUtils.numberFormatter(bpLength) }. Recalc referenceFrame.bpp.`)
                 referenceFrame.bpPerPixel = bpLength/viewportWidth
             } else {
+                console.log(`${ Date.now() } browser.resize Recalc referenceFrame.end.`)
                 referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
             }
-
-            // referenceFrame.description('browser.resize')
 
         }
 

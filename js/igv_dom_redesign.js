@@ -1445,9 +1445,7 @@
 
             if (match[3]) {
               match[2] = match[4] || match[5] || ""; // Strip excess characters from unquoted arguments
-            } else if (unquoted && rpseudo.test(unquoted) && ( // Get excess from tokenize (recursively)
-            excess = tokenize(unquoted, true)) && ( // advance to the next closing parenthesis
-            excess = unquoted.indexOf(")", unquoted.length - excess) - unquoted.length)) {
+            } else if (unquoted && rpseudo.test(unquoted) && (excess = tokenize(unquoted, true)) && (excess = unquoted.indexOf(")", unquoted.length - excess) - unquoted.length)) {
               // excess is a negative index
               match[0] = match[0].slice(0, excess);
               match[2] = unquoted.slice(0, excess);
@@ -1542,8 +1540,7 @@
                   diff = nodeIndex && cache[2];
                   node = nodeIndex && parent.childNodes[nodeIndex];
 
-                  while (node = ++nodeIndex && node && node[dir] || ( // Fallback to seeking `elem` from the start
-                  diff = nodeIndex = 0) || start.pop()) {
+                  while (node = ++nodeIndex && node && node[dir] || (diff = nodeIndex = 0) || start.pop()) {
                     // When found, cache indexes on `parent` and break
                     if (node.nodeType === 1 && ++diff && node === elem) {
                       uniqueCache[type] = [dirruns, nodeIndex, diff];
@@ -1751,9 +1748,7 @@
           },
           "text": function (elem) {
             var attr;
-            return elem.nodeName.toLowerCase() === "input" && elem.type === "text" && ( // Support: IE<8
-            // New HTML5 attribute values (e.g., "search") appear with elem.type === "text"
-            (attr = elem.getAttribute("type")) == null || attr.toLowerCase() === "text");
+            return elem.nodeName.toLowerCase() === "input" && elem.type === "text" && ((attr = elem.getAttribute("type")) == null || attr.toLowerCase() === "text");
           },
           // Position-in-collection
           "first": createPositionalPseudo(function () {
@@ -2985,9 +2980,7 @@
             return promise.then(null, fn);
           },
           // Keep pipe for back-compat
-          pipe: function ()
-          /* fnDone, fnFail, fnProgress */
-          {
+          pipe: function () {
             var fns = arguments;
             return jQuery.Deferred(function (newDefer) {
               jQuery.each(tuples, function (i, tuple) {
@@ -3036,10 +3029,7 @@
                   // Retrieve `then` only once
 
 
-                  then = returned && ( // Support: Promises/A+ section 2.3.4
-                  // https://promisesaplus.com/#point-64
-                  // Only check objects and functions for thenability
-                  typeof returned === "object" || typeof returned === "function") && returned.then; // Handle a returned thenable
+                  then = returned && (typeof returned === "object" || typeof returned === "function") && returned.then; // Handle a returned thenable
 
                   if (isFunction(then)) {
                     // Special processors (notify) just wait for resolution
@@ -5663,13 +5653,7 @@
           if (computed) {
             // Certain elements can have dimension info if we invisibly show them
             // but it must have a current display style that would benefit
-            return rdisplayswap.test(jQuery.css(elem, "display")) && ( // Support: Safari 8+
-            // Table columns in Safari have non-zero offsetWidth & zero
-            // getBoundingClientRect().width unless display is changed.
-            // Support: IE <=11 only
-            // Running getBoundingClientRect on a disconnected node
-            // in IE throws an error.
-            !elem.getClientRects().length || !elem.getBoundingClientRect().width) ? swap(elem, cssShow, function () {
+            return rdisplayswap.test(jQuery.css(elem, "display")) && (!elem.getClientRects().length || !elem.getBoundingClientRect().width) ? swap(elem, cssShow, function () {
               return getWidthOrHeight(elem, dimension, extra);
             }) : getWidthOrHeight(elem, dimension, extra);
           }
@@ -7668,9 +7652,7 @@
         output[op1++] = output[op2++] = flags & 0xff;
         output[op1++] = output[op2++] = flags >> 8 & 0xff; // compression method
 
-        compressionMethod =
-        /** @type {Zlib.Zip.CompressionMethod} */
-        file.option['compressionMethod'];
+        compressionMethod = file.option['compressionMethod'];
         output[op1++] = output[op2++] = compressionMethod & 0xff;
         output[op1++] = output[op2++] = compressionMethod >> 8 & 0xff; // date
 
@@ -7844,12 +7826,8 @@
 
     Zlib$1.Zip.prototype.encode = function (key, n) {
       /** @type {number} */
-      var tmp = this.getByte(
-      /** @type {(Array.<number>|Uint32Array)} */
-      key);
-      this.updateKeys(
-      /** @type {(Array.<number>|Uint32Array)} */
-      key, n);
+      var tmp = this.getByte(key);
+      this.updateKeys(key, n);
       return tmp ^ n;
     };
     /**
@@ -8277,9 +8255,7 @@
       } // output byte
 
 
-      octet = bitsbuf &
-      /* MASK */
-      (1 << length) - 1;
+      octet = bitsbuf & (1 << length) - 1;
       bitsbuf >>>= length;
       bitsbuflen -= length;
       this.bitsbuf = bitsbuf;
@@ -9246,9 +9222,7 @@
       } // output byte
 
 
-      octet = bitsbuf &
-      /* MASK */
-      (1 << length) - 1;
+      octet = bitsbuf & (1 << length) - 1;
       bitsbuf >>>= length;
       bitsbuflen -= length;
       this.bitsbuf = bitsbuf;
@@ -9742,9 +9716,7 @@
         this.op = this.sp = Zlib$1.RawInflateStream.MaxBackwardLength;
 
         {
-          tmp =
-          /** @type {Uint8Array} */
-          this.output;
+          tmp = this.output;
           this.output = new Uint8Array(this.bufferSize + Zlib$1.RawInflateStream.MaxBackwardLength);
           this.output.set(tmp.subarray(op - Zlib$1.RawInflateStream.MaxBackwardLength, op));
         }
@@ -11617,10 +11589,7 @@
       freqsLitLen[256]++;
       this.freqsLitLen = freqsLitLen;
       this.freqsDist = freqsDist;
-      return (
-        /** @type {!(Uint16Array|Array.<number>)} */
-        lz77buf.subarray(0, pos) 
-      );
+      return lz77buf.subarray(0, pos) ;
     };
     /**
      * マッチした候補の中から最長一致を探す
@@ -12590,12 +12559,8 @@
 
 
     Zlib$1.Unzip.prototype.decode = function (key, n) {
-      n ^= this.getByte(
-      /** @type {(Array.<number>|Uint32Array)} */
-      key);
-      this.updateKeys(
-      /** @type {(Array.<number>|Uint32Array)} */
-      key, n);
+      n ^= this.getByte(key);
+      this.updateKeys(key, n);
       return n;
     }; // common method
 
@@ -14076,9 +14041,9 @@
 
         if (numsLen % 2 === 0 // is even
         ) {
-            // average of two middle numbers
-            median = (numbers[numsLen / 2 - 1] + numbers[numsLen / 2]) / 2;
-          } else {
+          // average of two middle numbers
+          median = (numbers[numsLen / 2 - 1] + numbers[numsLen / 2]) / 2;
+        } else {
           // is odd
           // middle number only
           median = numbers[(numsLen - 1) / 2];
@@ -17056,9 +17021,7 @@
         output[op1++] = output[op2++] = flags & 0xff;
         output[op1++] = output[op2++] = flags >> 8 & 0xff; // compression method
 
-        compressionMethod =
-        /** @type {Zlib.Zip.CompressionMethod} */
-        file.option['compressionMethod'];
+        compressionMethod = file.option['compressionMethod'];
         output[op1++] = output[op2++] = compressionMethod & 0xff;
         output[op1++] = output[op2++] = compressionMethod >> 8 & 0xff; // date
 
@@ -17232,12 +17195,8 @@
 
     Zlib.Zip.prototype.encode = function (key, n) {
       /** @type {number} */
-      var tmp = this.getByte(
-      /** @type {(Array.<number>|Uint32Array)} */
-      key);
-      this.updateKeys(
-      /** @type {(Array.<number>|Uint32Array)} */
-      key, n);
+      var tmp = this.getByte(key);
+      this.updateKeys(key, n);
       return tmp ^ n;
     };
     /**
@@ -17664,9 +17623,7 @@
       } // output byte
 
 
-      octet = bitsbuf &
-      /* MASK */
-      (1 << length) - 1;
+      octet = bitsbuf & (1 << length) - 1;
       bitsbuf >>>= length;
       bitsbuflen -= length;
       this.bitsbuf = bitsbuf;
@@ -18625,9 +18582,7 @@
       } // output byte
 
 
-      octet = bitsbuf &
-      /* MASK */
-      (1 << length) - 1;
+      octet = bitsbuf & (1 << length) - 1;
       bitsbuf >>>= length;
       bitsbuflen -= length;
       this.bitsbuf = bitsbuf;
@@ -19120,9 +19075,7 @@
       if (op > Zlib.RawInflateStream.MaxBackwardLength + this.bufferSize) {
         this.op = this.sp = Zlib.RawInflateStream.MaxBackwardLength;
         {
-          tmp =
-          /** @type {Uint8Array} */
-          this.output;
+          tmp = this.output;
           this.output = new Uint8Array(this.bufferSize + Zlib.RawInflateStream.MaxBackwardLength);
           this.output.set(tmp.subarray(op - Zlib.RawInflateStream.MaxBackwardLength, op));
         }
@@ -20989,10 +20942,7 @@
       freqsLitLen[256]++;
       this.freqsLitLen = freqsLitLen;
       this.freqsDist = freqsDist;
-      return (
-        /** @type {!(Uint16Array|Array.<number>)} */
-        lz77buf.subarray(0, pos)
-      );
+      return lz77buf.subarray(0, pos);
     };
     /**
      * マッチした候補の中から最長一致を探す
@@ -21961,12 +21911,8 @@
 
 
     Zlib.Unzip.prototype.decode = function (key, n) {
-      n ^= this.getByte(
-      /** @type {(Array.<number>|Uint32Array)} */
-      key);
-      this.updateKeys(
-      /** @type {(Array.<number>|Uint32Array)} */
-      key, n);
+      n ^= this.getByte(key);
+      this.updateKeys(key, n);
       return n;
     }; // common method
 
@@ -34623,8 +34569,8 @@
                 if (allFeatures.length === 0) {
                   continue; //adjacent chr to the left
                 } else {
-                    break; //adjacent chr to the right
-                  }
+                  break; //adjacent chr to the right
+                }
               }
 
               if (f.start > end) {
@@ -40402,6 +40348,9 @@
               }
             }
 
+          case "READ_NAME":
+            return hashCode(alignment.readName);
+
           case "INSERT_SIZE":
             return -Math.abs(alignment.fragmentLength);
 
@@ -42843,9 +42792,7 @@
           };
       }
 
-      return function ()
-      /* ...args */
-      {
+      return function () {
         return fn.apply(that, arguments);
       };
     };
@@ -58151,9 +58098,11 @@
               } // Record out-of-range "to the left", skip to next one
 
 
-              const alignment = decodeCramRecord(record, header.chrNames); //  if (filter.pass(alignment)) {
+              const alignment = decodeCramRecord(record, header.chrNames);
 
-              alignmentContainer.push(alignment); //  }
+              if (this.filter.pass(alignment)) {
+                alignmentContainer.push(alignment);
+              }
             }
 
             alignmentContainer.finish();
@@ -59905,9 +59854,9 @@
                 yListPixel = [yRect, yRect, yRect + alignmentHeight / 2.0, yRect + alignmentHeight, yRect + alignmentHeight, yRect];
               } // Last block on - strand ?
               else if (lastBlockReverseStrand) {
-                  xListPixel = [blockEndPixel, blockStartPixel, blockStartPixel - arrowHeadWidthPixel, blockStartPixel, blockEndPixel, blockEndPixel];
-                  yListPixel = [yRect, yRect, yRect + alignmentHeight / 2.0, yRect + alignmentHeight, yRect + alignmentHeight, yRect];
-                }
+                xListPixel = [blockEndPixel, blockStartPixel, blockStartPixel - arrowHeadWidthPixel, blockStartPixel, blockEndPixel, blockEndPixel];
+                yListPixel = [yRect, yRect, yRect + alignmentHeight / 2.0, yRect + alignmentHeight, yRect + alignmentHeight, yRect];
+              }
 
               IGVGraphics.fillPolygon(ctx, xListPixel, yListPixel, {
                 fillStyle: alignmentColor
@@ -59920,17 +59869,17 @@
               }
             } // Internal block
             else {
-                IGVGraphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {
-                  fillStyle: alignmentColor
-                });
+              IGVGraphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {
+                fillStyle: alignmentColor
+              });
 
-                if (strokeOutline) {
-                  ctx.save();
-                  ctx.strokeStyle = blockOutlineColor;
-                  ctx.strokeRect(blockStartPixel, yRect, blockWidthPixel, alignmentHeight);
-                  ctx.restore();
-                }
-              } // Mismatch coloring
+              if (strokeOutline) {
+                ctx.save();
+                ctx.strokeStyle = blockOutlineColor;
+                ctx.strokeRect(blockStartPixel, yRect, blockWidthPixel, alignmentHeight);
+                ctx.restore();
+              }
+            } // Mismatch coloring
 
 
             if (this.parent.showMismatches && (isSoftClip || showAllBases || referenceSequence && alignment.seq && alignment.seq !== "*")) {
@@ -60041,6 +59990,10 @@
         list.push({
           label: '&nbsp; mapping quality',
           click: () => sortByOption("MQ")
+        });
+        list.push({
+          label: '&nbsp; read name',
+          click: () => sortByOption("READ_NAME")
         });
         list.push({
           label: '&nbsp; tag',
@@ -65863,11 +65816,11 @@
         if (pushSequenceTrack
         /*&& false !== this.config.showSequence*/
         ) {
-            trackConfigurations.push({
-              type: "sequence",
-              order: defaultSequenceTrackOrder
-            });
-          } // Maintain track order unless explicitly set
+          trackConfigurations.push({
+            type: "sequence",
+            order: defaultSequenceTrackOrder
+          });
+        } // Maintain track order unless explicitly set
 
 
         let trackOrder = 1;
@@ -66445,15 +66398,21 @@
 
         for (let referenceFrame of this.referenceFrameList) {
           const {
+            chr,
+            genome
+          } = referenceFrame;
+          const {
             bpLength
-          } = referenceFrame.genome.getChromosome(referenceFrame.chr); // scenario: browser width less than monitor width. User then drags browser width wider
+          } = genome.getChromosome(referenceFrame.chr);
+          const viewportWidthBP = referenceFrame.toBP(viewportWidth);
 
-          if (referenceFrame.toBP(viewportWidth) > bpLength) {
+          if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
+            console.log(`${Date.now()} browser.resize - viewport ${numberFormatter$1(viewportWidthBP)} > ${numberFormatter$1(bpLength)}. Recalc referenceFrame.bpp.`);
             referenceFrame.bpPerPixel = bpLength / viewportWidth;
           } else {
+            console.log(`${Date.now()} browser.resize Recalc referenceFrame.end.`);
             referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth);
-          } // referenceFrame.description('browser.resize')
-
+          }
         }
 
         this.updateUIWithReferenceFrameList(this.referenceFrameList);
