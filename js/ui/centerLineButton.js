@@ -1,6 +1,6 @@
 import { DOMUtils } from '../../node_modules/igv-utils/src/index.js';
 
-class CenterGuideButton {
+class CenterLineButton {
 
     constructor(browser, parent) {
 
@@ -12,16 +12,16 @@ class CenterGuideButton {
         this.button.textContent = 'center line'
 
         this.button.addEventListener('click', () => {
-            browser.isCenterGuideVisible = !browser.isCenterGuideVisible
-            browser.setCenterGuideVisibility(browser.isCenterGuideVisible)
-            this.setButtonState(browser.isCenterGuideVisible)
+            browser.isCenterLineVisible = !browser.isCenterLineVisible
+            browser.setCenterLineVisibility(browser.isCenterLineVisible)
+            this.setButtonState(browser.isCenterLineVisible)
         })
 
-        this.setButtonState(this.browser.isCenterGuideVisible)
+        this.setButtonState(this.browser.isCenterLineVisible)
     }
 
-    setButtonState (isCenterGuideVisible) {
-        if (true === isCenterGuideVisible) {
+    setButtonState (isCenterLineVisible) {
+        if (true === isCenterLineVisible) {
             this.button.classList.add('igv-navbar-button-clicked')
         } else {
             this.button.classList.remove('igv-navbar-button-clicked')
@@ -30,7 +30,7 @@ class CenterGuideButton {
 
     show () {
         this.button.style.display = 'block'
-        this.setButtonState(this.browser.isCenterGuideVisible)
+        this.setButtonState(this.browser.isCenterLineVisible)
     }
 
     hide () {
@@ -38,4 +38,4 @@ class CenterGuideButton {
     }
 }
 
-export default CenterGuideButton
+export default CenterLineButton

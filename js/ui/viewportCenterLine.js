@@ -26,7 +26,7 @@
 
 import { DOMUtils } from '../../node_modules/igv-utils/src/index.js';
 
-class ViewportCenterGuide {
+class ViewportCenterLine {
 
     constructor(browser, referenceFrame, column) {
 
@@ -34,10 +34,10 @@ class ViewportCenterGuide {
         this.referenceFrame = referenceFrame
         this.column = column
 
-        this.container = DOMUtils.div({ class: 'igv-center-guide' })
+        this.container = DOMUtils.div({ class: 'igv-center-line' })
         column.appendChild(this.container)
 
-        if (browser.isCenterGuideVisible) {
+        if (browser.isCenterLineVisible) {
             this.show()
         } else {
             this.hide()
@@ -57,13 +57,13 @@ class ViewportCenterGuide {
             if (ppb > 1) {
                 this.container.style.left = `${ left }px`
                 this.container.style.width = `${ Math.floor(this.referenceFrame.toPixels(1)) }px`
-                this.container.classList.remove('igv-center-guide-thin')
-                this.container.classList.add('igv-center-guide-wide')
+                this.container.classList.remove('igv-center-line-thin')
+                this.container.classList.add('igv-center-line-wide')
             } else {
                 this.container.style.left = `${ left }px`
                 this.container.style.width = '1px'
-                this.container.classList.remove('igv-center-guide-wide')
-                this.container.classList.add('igv-center-guide-thin')
+                this.container.classList.remove('igv-center-line-wide')
+                this.container.classList.add('igv-center-line-thin')
             }
 
         }
@@ -83,4 +83,4 @@ class ViewportCenterGuide {
     }
 }
 
-export default ViewportCenterGuide;
+export default ViewportCenterLine;

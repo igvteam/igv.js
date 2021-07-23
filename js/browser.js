@@ -54,7 +54,7 @@ import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import CursorGuide from "./ui/cursorGuide.js";
 import CursorGuideButton from "./ui/cursorGuideButton.js";
-import CenterGuideButton from './ui/centerGuideButton.js';
+import CenterLineButton from './ui/centerLineButton.js';
 import TrackLabelControl from "./ui/trackLabelControl.js";
 import SampleNameControl from "./ui/sampleNameControl.js";
 import ZoomWidget from "./ui/zoomWidget.js";
@@ -64,7 +64,7 @@ import SVGSaveControl from "./ui/svgSaveControl.js";
 import MenuPopup from "./ui/menuPopup.js";
 import { viewportColumnManager } from './viewportColumnManager.js';
 import GenericColorPicker from './ui/genericColorPicker.js';
-import ViewportCenterGuide from './ui/viewportCenterGuide.js';
+import ViewportCenterLine from './ui/viewportCenterLine.js';
 
 // $igv-column-shim-width: 1px;
 // $igv-column-shim-margin: 2px;
@@ -127,7 +127,7 @@ class Browser {
 
         this.trackLabelsVisible = config.showTrackLabels;
 
-        this.isCenterGuideVisible = config.showCenterGuide;
+        this.isCenterLineVisible = config.showCenterLine;
 
         this.cursorGuideVisible = config.showCursorTrackingGuide;
 
@@ -231,7 +231,7 @@ class Browser {
 
         this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
 
-        this.centerGuideButton = new CenterGuideButton(this, $toggle_button_container.get(0))
+        this.centerLineButton = new CenterLineButton(this, $toggle_button_container.get(0))
 
         this.setTrackLabelVisibility(config.showTrackLabels)
 
@@ -431,7 +431,7 @@ class Browser {
 
         viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
 
-        this.centerGuideList = this.createCenterGuideList(this.columnContainer)
+        this.centerLineList = this.createCenterLineList(this.columnContainer)
 
         // Add sample name column
         this.sampleNameColumn = createSampleNameColumn(this.columnContainer)
@@ -501,20 +501,20 @@ class Browser {
 
     }
 
-    createCenterGuideList(columnContainer) {
+    createCenterLineList(columnContainer) {
 
-        const centerGuides = columnContainer.querySelectorAll('.igv-center-guide')
-        for (let i = 0; i < centerGuides.length; i++) {
-            centerGuides[ i ].remove()
+        const centerLines = columnContainer.querySelectorAll('.igv-center-line')
+        for (let i = 0; i < centerLines.length; i++) {
+            centerLines[ i ].remove()
         }
 
-        const centerGuideList = []
+        const centerLineList = []
         const viewportColumns = columnContainer.querySelectorAll('.igv-column')
         for (let i = 0; i < viewportColumns.length; i++) {
-            centerGuideList.push(new ViewportCenterGuide(this, this.referenceFrameList[i], viewportColumns[i]))
+            centerLineList.push(new ViewportCenterLine(this, this.referenceFrameList[i], viewportColumns[i]))
         }
 
-        return centerGuideList
+        return centerLineList
     }
 
     /**
@@ -673,13 +673,13 @@ class Browser {
     }
 
     // center guide
-    setCenterGuideVisibility(isCenterGuideVisible) {
-        for (let centerGuide of this.centerGuideList) {
-            if (true === isCenterGuideVisible) {
-                centerGuide.show()
-                centerGuide.repaint()
+    setCenterLineVisibility(isCenterLineVisible) {
+        for (let centerLine of this.centerLineList) {
+            if (true === isCenterLineVisible) {
+                centerLine.show()
+                centerLine.repaint()
             } else {
-                centerGuide.hide()
+                centerLine.hide()
             }
         }
     }
@@ -1122,7 +1122,7 @@ class Browser {
             this.updateLocusSearchWidget(this.referenceFrameList.length > 1 ? this.referenceFrameList : [ referenceFrame ])
         }
 
-        for (let centerGuide of this.centerGuideList) {
+        for (let centerGuide of this.centerLineList) {
             centerGuide.repaint()
         }
 
@@ -1234,7 +1234,7 @@ class Browser {
         return Math.floor(width/columnCount)
     }
 
-    getCenterGuideXOffset() {
+    getCenterLineXOffset() {
         let { width:columnContainerWidth } = this.columnContainer.getBoundingClientRect()
         columnContainerWidth -= igv_axis_column_width + this.getSampleNameViewportWidth() + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
         return Math.floor(columnContainerWidth/2 + igv_axis_column_width)
@@ -1295,7 +1295,7 @@ class Browser {
 
         }
 
-        this.centerGuideList = this.createCenterGuideList(this.columnContainer)
+        this.centerLineList = this.createCenterLineList(this.columnContainer)
 
         await this.resize();
 
@@ -1350,7 +1350,7 @@ class Browser {
             }
         }
 
-        this.centerGuideList = this.createCenterGuideList(this.columnContainer)
+        this.centerLineList = this.createCenterLineList(this.columnContainer)
 
         this.updateUIWithReferenceFrameList(this.referenceFrameList);
 
@@ -1398,7 +1398,7 @@ class Browser {
 
             viewportColumnManager.insertBefore($(this.sampleNameColumn), this.referenceFrameList.length)
 
-            this.centerGuideList = this.createCenterGuideList(this.columnContainer)
+            this.centerLineList = this.createCenterLineList(this.columnContainer)
 
             for (let trackView of this.trackViews) {
                 trackView.addDOMToColumnContainer(this, this.columnContainer, this.referenceFrameList);

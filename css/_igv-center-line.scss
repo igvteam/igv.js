@@ -1,5 +1,5 @@
 
-.igv-center-guide {
+.igv-center-line {
 
   pointer-events:none;
 
@@ -22,14 +22,14 @@
 
 }
 
-.igv-center-guide-wide {
+.igv-center-line-wide {
   background-color: rgba(0,0,0,0);
   //background-color: rgba(255,0,0,0.5);
   border-left-color: rgba(127, 127, 127, 0.51);
   border-right-color: rgba(127, 127, 127, 0.51);
 }
 
-.igv-center-guide-thin {
+.igv-center-line-thin {
   background-color: rgba(0,0,0,0);
   border-left-color: rgba(127, 127, 127, 0.51);
   border-right-color: rgba(0,0,0,0);

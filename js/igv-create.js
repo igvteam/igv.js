@@ -139,12 +139,12 @@ function setDefaults(config) {
         config.showCursorTrackingGuide = false;
     }
 
-    if (undefined === config.showCenterGuideButton) {
-        config.showCenterGuideButton = true;
+    if (undefined === config.showCenterLineButton) {
+        config.showCenterLineButton = true;
     }
 
-    if (undefined === config.showCenterGuide) {
-        config.showCenterGuide = false;
+    if (undefined === config.showCenterLine) {
+        config.showCenterLine = false;
     }
 
     if (undefined === config.showSampleNames) {
