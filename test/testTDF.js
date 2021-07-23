@@ -11,7 +11,7 @@ suite("testTDF", function () {
 
     test("TDF source get features (zoom)", async function () {
         this.timeout(10000);
-        const url = dataURL + "tdf/gstt1_sample.bam.tdf",
+        const url = require.resolve("./data/tdf/gstt1_sample.bam.tdf"),
             chr = "22",
             start = 24049020,
             end = 24375399,
@@ -25,7 +25,7 @@ suite("testTDF", function () {
 
     test("TDF header", async function () {
         this.timeout(10000);
-        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const url = require.resolve("./data/tdf/gstt1_sample.bam.tdf");
         const tdfReader = new TDFReader({url: url}, genome);
         await tdfReader.readHeader();
         assert.equal(4, tdfReader.version);
@@ -36,7 +36,7 @@ suite("testTDF", function () {
 
     test("TDF dataset", async function () {
         this.timeout(10000);
-        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const url = require.resolve("./data/tdf/gstt1_sample.bam.tdf");
         const tdfReader = new TDFReader({url: url}, genome);
         const dataset = await tdfReader.readDataset("chr22", "mean", 6);
         assert.ok(dataset);
@@ -51,7 +51,7 @@ suite("testTDF", function () {
 
     test("TDF root group", async function () {
         this.timeout(10000);
-        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const url = require.resolve("./data/tdf/gstt1_sample.bam.tdf");
         const tdfReader = new TDFReader({url: url}, genome);
         const group = await tdfReader.readGroup("/");
         assert.equal("321.74997", group["Mean"]);
@@ -62,7 +62,7 @@ suite("testTDF", function () {
 
     test("TDF variable step tile", async function () {
         this.timeout(20000);
-        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const url = require.resolve("./data/tdf/gstt1_sample.bam.tdf");
         const tdfReader = new TDFReader({url: url}, genome);
         const dataset = await tdfReader.readDataset("chr22", "mean", 6);
         var tileNumber = 30;
@@ -78,7 +78,7 @@ suite("testTDF", function () {
 
     test("TDF bed tile", async function () {
         this.timeout(20000);
-        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const url = require.resolve("./data/tdf/gstt1_sample.bam.tdf");
         const tdfReader = new TDFReader({url: url}, genome);
         const dataset = await tdfReader.readDataset("chr22", "raw");
         assert.ok(dataset);
@@ -98,7 +98,7 @@ suite("testTDF", function () {
 
     test("TDF root group", async function () {
         this.timeout(10000);
-        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const url = require.resolve("./data/tdf/gstt1_sample.bam.tdf");
         const tdfReader = new TDFReader({url: url}, genome);
         const group = await tdfReader.readRootGroup();
         assert.ok(group);
@@ -109,7 +109,7 @@ suite("testTDF", function () {
 
     test("TDF source get features (raw)", async function () {
         this.timeout(10000);
-        const url = dataURL + "tdf/gstt1_sample.bam.tdf",
+        const url = require.resolve("./data/tdf/gstt1_sample.bam.tdf"),
             chr = "22",
             start = 24376175,
             end = 24376200,
