@@ -1,9 +1,10 @@
 import { DOMUtils } from "../node_modules/igv-utils/src/index.js";
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import {randomRGB} from "./util/colorPalletes.js";
 
 // css - $igv-track-drag-column-width: 12px;
 const igv_track_manipulation_handle_width = 12
+
+let currentDragHandle = undefined
 
 class TrackDragControl {
     constructor(columnContainer) {
@@ -14,32 +15,57 @@ class TrackDragControl {
     addDragHandle(browser, trackView) {
 
         const dragHandle = DOMUtils.div({ class: 'igv-track-drag-handle' })
-        this.column.appendChild(dragHandle);
+        this.column.appendChild(dragHandle)
 
-        // dragHandle.style.backgroundColor = randomRGB(150, 250)
-        dragHandle.style.height = `${ trackView.track.height }px`
+        trackView.dragHandle = dragHandle
 
-        dragHandle.addEventListener('mousedown', e => {
-            e.preventDefault();
-            e.stopPropagation();
+        trackView.dragHandle.style.height = `${ trackView.track.height }px`
+
+        trackView.dragHandle.addEventListener('mousedown', event => {
+            event.preventDefault();
+
+            currentDragHandle = event.target
+            currentDragHandle.classList.add('igv-track-drag-handle-hover')
+
+            // console.log('dragHandle.mouseDown - currentDragHandle = event.target')
+
             browser.startTrackDrag(trackView);
         })
 
-        dragHandle.addEventListener('mouseup', e => {
-            e.preventDefault();
-            e.stopPropagation();
-            browser.endTrackDrag();
+        $(document).on(`mouseup.${ trackView.namespace }`, event => {
+            event.preventDefault();
+
+            browser.endTrackDrag()
+
+            let str = ''
+            if (currentDragHandle && event.target !== currentDragHandle) {
+                str = ' - remove hover style'
+                currentDragHandle.classList.remove('igv-track-drag-handle-hover')
+            }
+
+            // console.log(`document.mouseup.${ trackView.namespace } - currentDragHandle = undefined${ str }`)
+
+            currentDragHandle = undefined
         })
 
-        dragHandle.addEventListener('mouseenter', e => {
+        trackView.dragHandle.addEventListener('mouseenter', e => {
             e.preventDefault();
-            e.stopPropagation();
-            if (browser.dragTrack) {
-                browser.updateTrackDrag(trackView);
+
+            if (undefined === currentDragHandle) {
+                e.target.classList.add('igv-track-drag-handle-hover')
+            }
+
+            browser.updateTrackDrag(trackView);
+        })
+
+        trackView.dragHandle.addEventListener('mouseout', e => {
+            e.preventDefault();
+
+            if (undefined === currentDragHandle) {
+                e.target.classList.remove('igv-track-drag-handle-hover')
             }
         })
 
-        trackView.dragHandle = dragHandle;
     }
 
     removeDragHandle(trackView) {
@@ -47,6 +73,7 @@ class TrackDragControl {
         if (trackView.dragHandle) {
             $(trackView.dragHandle).off()
             trackView.dragHandle.remove()
+            $(document).off(`mouseup.${ trackView.namespace }`)
         }
 
     }

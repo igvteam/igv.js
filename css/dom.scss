@@ -189,8 +189,9 @@ $igv-zoom-in-notice-height: 16px;
     background-color: #c4c4c4;
   }
 
-  >.igv-track-drag-handle:hover {
+  .igv-track-drag-handle-hover {
     background-color: #787878;
+    //background-color: magenta;
   }
 
   >.igv-track-drag-shim {

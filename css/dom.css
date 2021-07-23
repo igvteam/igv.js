@@ -961,7 +961,7 @@
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
     background-color: #c4c4c4; }
-  .igv-track-drag-column > .igv-track-drag-handle:hover {
+  .igv-track-drag-column .igv-track-drag-handle-hover {
     background-color: #787878; }
   .igv-track-drag-column > .igv-track-drag-shim {
     position: relative;
