@@ -40,7 +40,7 @@ const CRAM_MATE_STRAND_FLAG = 0x1;
 const CRAM_MATE_MAPPED_FLAG = 0x2;
 
 /**
- * Class for reading a cram file
+ * Class for reading a cram file.  Wraps the gMOD Cram package.
  *
  * @param config
  * @constructor
