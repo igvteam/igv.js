@@ -344,6 +344,8 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
 
 .igv-navbar-button {
 
+  display: block;
+
   box-sizing: unset;
 
   padding-left: 6px;

@@ -42,7 +42,6 @@ class ViewportCenterLine {
         } else {
             this.hide()
         }
-
     }
 
     repaint() {
@@ -70,11 +69,13 @@ class ViewportCenterLine {
     }
 
     show () {
+        this.isVisible = true
         this.container.style.display = 'block'
         this.repaint()
     }
 
     hide () {
+        this.isVisible = false
         this.container.style.display = 'none'
     }
 

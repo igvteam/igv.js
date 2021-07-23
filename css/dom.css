@@ -203,6 +203,7 @@
       display: none; }
 
 .igv-navbar-button {
+  display: block;
   box-sizing: unset;
   padding-left: 6px;
   padding-right: 6px;
@@ -357,12 +358,12 @@
   background-color: rgba(0, 0, 0, 0.05); }
 
 .igv-center-line {
+  display: none;
   pointer-events: none;
   position: absolute;
   top: 0;
   bottom: 0;
   z-index: 8;
-  display: none;
   user-select: none;
   -moz-user-select: none;
   -webkit-user-select: none;
@@ -382,6 +383,7 @@
   border-right-color: rgba(0, 0, 0, 0); }
 
 .igv-cursor-guide-horizontal {
+  display: none;
   pointer-events: none;
   user-select: none;
   -moz-user-select: none;
@@ -394,8 +396,7 @@
   z-index: 1;
   border-top-style: dotted;
   border-top-width: thin;
-  border-top-color: rgba(127, 127, 127, 0.76);
-  display: none; }
+  border-top-color: rgba(127, 127, 127, 0.76); }
 
 .igv-cursor-guide-vertical {
   pointer-events: none;

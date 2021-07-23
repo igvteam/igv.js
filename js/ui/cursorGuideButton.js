@@ -30,6 +30,8 @@ class CursorGuideButton {
 
     constructor(browser, parent) {
 
+        this.browser = browser
+
         this.button = DOMUtils.div({ class: 'igv-navbar-button'})
         parent.appendChild(this.button)
 
@@ -43,7 +45,11 @@ class CursorGuideButton {
 
         this.setButtonState(browser.cursorGuideVisible)
 
-        this.browser = browser
+        if (browser.config.showCursorTrackingGuideButton) {
+            this.show()
+        } else {
+            this.hide()
+        }
 
     }
 

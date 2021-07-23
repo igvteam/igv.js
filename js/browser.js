@@ -646,6 +646,8 @@ class Browser {
 
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
 
+        this.setCenterLineAndCenterLineButtonVisibility(!GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
+
     }
 
     // track labels
@@ -672,7 +674,7 @@ class Browser {
         this.cursorGuide.customMouseHandler = mouseHandler;
     }
 
-    // center guide
+    // center line
     setCenterLineVisibility(isCenterLineVisible) {
         for (let centerLine of this.centerLineList) {
             if (true === isCenterLineVisible) {
@@ -682,6 +684,18 @@ class Browser {
                 centerLine.hide()
             }
         }
+    }
+
+    setCenterLineAndCenterLineButtonVisibility(isCenterLineVisible) {
+
+        for (let centerLine of this.centerLineList) {
+            const isShown = isCenterLineVisible && centerLine.isVisible
+            isShown ? centerLine.show() : centerLine.container.style.display = 'none'
+        }
+
+        const isShown = isCenterLineVisible && this.centerLineButton.isVisible
+        isShown ? this.centerLineButton.show() : this.centerLineButton.button.style.display = 'none'
+
     }
 
     async loadTrackList(configList) {

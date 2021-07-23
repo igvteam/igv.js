@@ -17,7 +17,13 @@ class CenterLineButton {
             this.setButtonState(browser.isCenterLineVisible)
         })
 
-        this.setButtonState(this.browser.isCenterLineVisible)
+        this.setButtonState(browser.isCenterLineVisible)
+
+        if (browser.config.showCenterLineButton) {
+            this.show()
+        } else {
+            this.hide()
+        }
     }
 
     setButtonState (isCenterLineVisible) {
@@ -29,11 +35,13 @@ class CenterLineButton {
     }
 
     show () {
+        this.isVisible = true
         this.button.style.display = 'block'
         this.setButtonState(this.browser.isCenterLineVisible)
     }
 
     hide () {
+        this.isVisible = false
         this.button.style.display = 'none'
     }
 }
