@@ -25,6 +25,7 @@
  */
 
 import { DOMUtils, Icon, StringUtils } from '../../node_modules/igv-utils/src/index.js'
+import { appleCrayonPalette } from "../util/colorPalletes.js";
 
 const sliderMin = 0
 let sliderMax = 23
@@ -38,15 +39,15 @@ const ZoomWidget = function (browser, parent) {
     parent.appendChild(this.zoomContainer)
 
     // zoom out
-    let el = DOMUtils.div()
-    this.zoomContainer.appendChild(el)
-    el.appendChild(Icon.createIcon('minus-circle'))
-    el.addEventListener('click', () => {
+    this.zoomOutButton = DOMUtils.div()
+    this.zoomContainer.appendChild(this.zoomOutButton)
+    this.zoomOutButton.appendChild(Icon.createIcon('minus-circle'))
+    this.zoomOutButton.addEventListener('click', () => {
         browser.zoomWithScaleFactor(2.0)
     })
 
     // Range slider
-    el = DOMUtils.div()
+    const el = DOMUtils.div()
     this.zoomContainer.appendChild(el)
     this.slider = document.createElement('input')
     this.slider.type = 'range'
@@ -77,10 +78,10 @@ const ZoomWidget = function (browser, parent) {
     })
 
     // zoom in
-    el = DOMUtils.div()
-    this.zoomContainer.appendChild(el)
-    el.appendChild(Icon.createIcon('plus-circle'))
-    el.addEventListener('click', () => {
+    this.zoomInButton = DOMUtils.div()
+    this.zoomContainer.appendChild(this.zoomInButton)
+    this.zoomInButton.appendChild(Icon.createIcon('plus-circle'))
+    this.zoomInButton.addEventListener('click', () => {
         browser.zoomWithScaleFactor(0.5)
     })
 
@@ -126,12 +127,24 @@ ZoomWidget.prototype.update = function (referenceFrameList) {
 }
 
 ZoomWidget.prototype.enable = function () {
-    // enable
+
+    this.zoomInButton.style.color = appleCrayonPalette[ 'steel' ];
+    this.zoomInButton.style.pointerEvents = 'auto';
+
+    this.zoomOutButton.style.color = appleCrayonPalette[ 'steel' ];
+    this.zoomOutButton.style.pointerEvents = 'auto';
+
     this.slider.disabled = false;
 };
 
 ZoomWidget.prototype.disable = function () {
-    // disable
+
+    this.zoomInButton.style.color = appleCrayonPalette[ 'silver' ];
+    this.zoomInButton.style.pointerEvents = 'none';
+
+    this.zoomOutButton.style.color = appleCrayonPalette[ 'silver' ];
+    this.zoomOutButton.style.pointerEvents = 'none';
+
     this.slider.disabled = true;
 };
 

@@ -238,24 +238,29 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
       justify-content: flex-end;
       align-items: center;
 
+      // container: zoom-out | zoom-slider | zoom-in
       div {
         cursor: pointer;
         margin-left: unset;
         margin-right: unset;
       }
 
+      // zoom-out
       div:first-child {
         height: 24px;
         width: 24px;
         margin-left: unset;
         margin-right: 8px;
+        //background-color: magenta;
       }
 
+      // zoom-in
       div:last-child {
         height: 24px;
         width: 24px;
         margin-left: 8px;
         margin-right: unset;
+        //background-color: lime;
       }
 
       div:nth-child(even) {
@@ -263,6 +268,7 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
         height: fit-content;
       }
 
+      // zoom-slider
       input {
         display: block;
         width: 125px;
