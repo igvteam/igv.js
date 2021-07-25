@@ -31,17 +31,16 @@ import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
 class RulerSweeper {
 
     constructor(viewport) {
-
         this.viewport = viewport;
-
         this.rulerSweeper = DOMUtils.div({ class: 'igv-ruler-sweeper'})
         viewport.contentDiv.appendChild(this.rulerSweeper)
-
-        this.isMouseHandlers = undefined;
+        this.isMouseHandlers = undefined
     }
 
     disableMouseHandlers() {
-        $(this.viewport.contentDiv).off()
+        this.viewport.$content.off()
+        $(document).off(`mousemove.${ this.viewport.trackView.namespace }`)
+        $(document).off(`mouseup.${ this.viewport.trackView.namespace }`)
         this.isMouseHandlers = false;
     };
 
@@ -60,7 +59,7 @@ class RulerSweeper {
 
         let threshold = 1;
 
-        this.viewport.contentDiv.addEventListener('mousedown', e => {
+        this.viewport.$content.on('mousedown', e => {
 
             isMouseDown = true
             isMouseIn = true;
@@ -75,9 +74,9 @@ class RulerSweeper {
             this.rulerSweeper.style.left = `${left}px`;
             this.rulerSweeper.style.width = `${width}px`;
 
-        });
+        })
 
-        this.viewport.contentDiv.addEventListener('mousemove', e => {
+        $(document).on(`mousemove.${ this.viewport.trackView.namespace }`, e => {
 
             let mouseCurrentX;
 
@@ -98,9 +97,9 @@ class RulerSweeper {
 
             }
 
-        });
+        })
 
-        this.viewport.contentDiv.addEventListener('mouseup', () => {
+        $(document).on(`mouseup.${ this.viewport.trackView.namespace }`, e => {
 
             let extent;
 
@@ -126,7 +125,7 @@ class RulerSweeper {
 
             }
 
-        });
+        })
 
         this.isMouseHandlers = true;
     }
