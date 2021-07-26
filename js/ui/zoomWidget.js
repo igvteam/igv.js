@@ -128,22 +128,22 @@ ZoomWidget.prototype.update = function (referenceFrameList) {
 
 ZoomWidget.prototype.enable = function () {
 
-    this.zoomInButton.style.color = appleCrayonPalette[ 'steel' ];
-    this.zoomInButton.style.pointerEvents = 'auto';
-
-    this.zoomOutButton.style.color = appleCrayonPalette[ 'steel' ];
-    this.zoomOutButton.style.pointerEvents = 'auto';
+    // this.zoomInButton.style.color = appleCrayonPalette[ 'steel' ];
+    // this.zoomInButton.style.pointerEvents = 'auto';
+    //
+    // this.zoomOutButton.style.color = appleCrayonPalette[ 'steel' ];
+    // this.zoomOutButton.style.pointerEvents = 'auto';
 
     this.slider.disabled = false;
 };
 
 ZoomWidget.prototype.disable = function () {
 
-    this.zoomInButton.style.color = appleCrayonPalette[ 'silver' ];
-    this.zoomInButton.style.pointerEvents = 'none';
-
-    this.zoomOutButton.style.color = appleCrayonPalette[ 'silver' ];
-    this.zoomOutButton.style.pointerEvents = 'none';
+    // this.zoomInButton.style.color = appleCrayonPalette[ 'silver' ];
+    // this.zoomInButton.style.pointerEvents = 'none';
+    //
+    // this.zoomOutButton.style.color = appleCrayonPalette[ 'silver' ];
+    // this.zoomOutButton.style.pointerEvents = 'none';
 
     this.slider.disabled = true;
 };

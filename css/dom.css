@@ -281,10 +281,10 @@
 
 .igv-multi-locus-close-button {
   position: absolute;
-  top: 2px;
+  top: 0;
   right: 2px;
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   color: #666666;
   z-index: 1000; }
 
