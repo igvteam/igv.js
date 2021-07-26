@@ -21,14 +21,21 @@ class RulerViewport extends ViewPort {
         this.$multiLocusCloseButton = $('<div>', { class: 'igv-multi-locus-close-button' })
         this.$viewport.append(this.$multiLocusCloseButton);
         this.$multiLocusCloseButton.get(0).appendChild(Icon.createIcon("times-circle"));
-        this.$multiLocusCloseButton.click(() => this.browser.removeMultiLocusPanel(this.referenceFrame));
+
+        this.$multiLocusCloseButton.click(() => {
+            this.browser.removeMultiLocusPanel(this.referenceFrame)
+        });
 
         this.$rulerLabel = $('<div>', { class: 'igv-multi-locus-ruler-label' })
         this.$viewport.append(this.$rulerLabel)
 
-        this.$rulerLabel.click(() => {
-            const remove = this.browser.referenceFrameList.filter(r => this.referenceFrame !== r).pop();
-            this.browser.removeMultiLocusPanel(remove)
+        this.$rulerLabel.click(async () => {
+            
+            const removals = this.browser.referenceFrameList.filter(r => this.referenceFrame !== r)
+            for (let referenceFrame of removals) {
+                await this.browser.removeMultiLocusPanel(referenceFrame)
+            }
+
         })
 
         this.$tooltip = $('<div>', { class: 'igv-ruler-tooltip' })
@@ -42,17 +49,6 @@ class RulerViewport extends ViewPort {
         this.attachMouseHandlers( GenomeUtils.isWholeGenomeView(this.referenceFrame.chr) )
 
         this.$tooltip.hide()
-        this.dismissLocusLabel()
-
-        this.browser.on('locuschange', referenceFrameList => {
-
-            if (referenceFrameList.length > 1) {
-                const viewportWidth = this.browser.calculateViewportWidth(referenceFrameList.length)
-                this.presentLocusLabel(viewportWidth)
-            }
-
-        })
-
 
     }
 

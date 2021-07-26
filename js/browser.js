@@ -1197,6 +1197,30 @@ class Browser {
                 await trackView.updateViews(force);
             }
         }
+
+        this.updateRulerViewportLabels()
+    }
+
+    updateRulerViewportLabels() {
+
+        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
+
+        for (let { viewports } of this.trackViews) {
+
+            for (let viewport of viewports) {
+
+                if ('ruler' === viewport.trackView.track.type) {
+                    if (viewports.length > 1) {
+                        viewport.presentLocusLabel(viewportWidth)
+                    } else {
+                        viewport.dismissLocusLabel()
+                    }
+                }
+
+            } // for viewports
+
+        } // for trackViews
+
     }
 
     loadInProgress() {
@@ -1322,7 +1346,7 @@ class Browser {
 
     }
 
-    removeMultiLocusPanel(referenceFrame) {
+    async removeMultiLocusPanel(referenceFrame) {
 
         // find the $column corresponding to this referenceFrame and remove it
         const index = this.referenceFrameList.indexOf(referenceFrame);
@@ -1344,7 +1368,7 @@ class Browser {
 
         const scaleFactor = this.calculateViewportWidth(1 + this.referenceFrameList.length) / this.calculateViewportWidth(this.referenceFrameList.length)
 
-        this.rescaleForMultiLocus(scaleFactor)
+        await this.rescaleForMultiLocus(scaleFactor)
 
     }
 
@@ -1354,7 +1378,6 @@ class Browser {
 
         for (let referenceFrame of this.referenceFrameList) {
             referenceFrame.bpPerPixel *= scaleFactor
-            // console.log(`rescaleForMultiLocus - locus ${ referenceFrame.getPresentionLocus(viewportWidth) }`)
         }
 
         for (let { viewports } of this.trackViews) {
