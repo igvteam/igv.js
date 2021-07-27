@@ -7090,7 +7090,7 @@
       !isNaN(obj - parseFloat(obj));
     };
 
-    const $$1 = jQuery;
+    const $ = jQuery;
 
     function div$1(options) {
       return create$1("div", options);
@@ -16237,12 +16237,12 @@
       numericDataMenuItems: function (trackView) {
         const menuItems = []; // Data range
 
-        const object = $$1('<div>');
+        const object = $('<div>');
         object.text('Set data range');
 
         const click = () => {
           trackView.browser.dataRangeDialog.configure(trackView);
-          trackView.browser.dataRangeDialog.present($$1(trackView.browser.columnContainer));
+          trackView.browser.dataRangeDialog.present($(trackView.browser.columnContainer));
         };
 
         menuItems.push({
@@ -16252,7 +16252,7 @@
 
         if (trackView.track.logScale !== undefined) {
           menuItems.push({
-            object: $$1(createCheckbox$1("Log scale", trackView.track.logScale)),
+            object: $(createCheckbox$1("Log scale", trackView.track.logScale)),
             click: () => {
               trackView.track.logScale = !trackView.track.logScale;
               trackView.repaintViews();
@@ -16261,7 +16261,7 @@
         }
 
         menuItems.push({
-          object: $$1(createCheckbox$1("Autoscale", trackView.track.autoscale)),
+          object: $(createCheckbox$1("Autoscale", trackView.track.autoscale)),
           click: () => {
             trackView.track.autoscale = !trackView.track.autoscale;
             trackView.updateViews();
@@ -16277,18 +16277,18 @@
             var $e; // name and object fields checked for backward compatibility
 
             if (item.name) {
-              $e = $$1('<div>');
+              $e = $('<div>');
               $e.text(item.name);
             } else if (item.object) {
               $e = item.object;
             } else if (typeof item.label === 'string') {
-              $e = $$1('<div>');
+              $e = $('<div>');
               $e.html(item.label);
             } else if (typeof item === 'string') {
               if (item.startsWith("<")) {
-                $e = $$1(item);
+                $e = $(item);
               } else {
-                $e = $$1("<div>" + item + "</div>");
+                $e = $("<div>" + item + "</div>");
               }
             }
 
@@ -16348,7 +16348,7 @@
         trackView.browser.inputDialog.present(config, e);
       };
 
-      const object = $$1('<div>');
+      const object = $('<div>');
       object.text('Set visibility window');
       return {
         object,
@@ -16357,7 +16357,7 @@
     }
 
     function trackRemovalMenuItem(trackView) {
-      const object = $$1('<div>');
+      const object = $('<div>');
       object.text('Remove track');
       return {
         object,
@@ -16370,7 +16370,7 @@
       label,
       option
     }) {
-      const $e = $$1('<div>');
+      const $e = $('<div>');
       $e.text(label);
       return {
         object: $e,
@@ -16382,7 +16382,7 @@
       trackView,
       label
     }) {
-      const $e = $$1('<div>');
+      const $e = $('<div>');
       $e.text(label);
       return {
         object: $e,
@@ -16409,7 +16409,7 @@
         trackView.browser.inputDialog.present(config, e);
       };
 
-      const object = $$1('<div>');
+      const object = $('<div>');
       object.text('Set track name');
       return {
         object,
@@ -16446,7 +16446,7 @@
         trackView.browser.inputDialog.present(config, e);
       };
 
-      const object = $$1('<div>');
+      const object = $('<div>');
       object.text('Set track height');
       return {
         object,
@@ -23242,7 +23242,7 @@
     class DataRangeDialog {
       constructor($parent, alert) {
         // dialog container
-        this.$container = $$1("<div>", {
+        this.$container = $("<div>", {
           class: 'igv-generic-dialog-container'
         });
         $parent.append(this.$container);
@@ -23251,7 +23251,7 @@
           top: 0
         }); // dialog header
 
-        const $header = $$1("<div>", {
+        const $header = $("<div>", {
           class: 'igv-generic-dialog-header'
         });
         this.$container.append($header);
@@ -23265,36 +23265,36 @@
           this.$container.hide();
         }); // minimun
 
-        this.$minimum = $$1("<div>", {
+        this.$minimum = $("<div>", {
           class: 'igv-generic-dialog-label-input'
         });
         this.$container.append(this.$minimum);
-        const $mindiv = $$1('<div>');
+        const $mindiv = $('<div>');
         $mindiv.text('Minimum');
         this.$minimum.append($mindiv);
-        this.$minimum_input = $$1("<input>");
+        this.$minimum_input = $("<input>");
         this.$minimum.append(this.$minimum_input); // maximum
 
-        this.$maximum = $$1("<div>", {
+        this.$maximum = $("<div>", {
           class: 'igv-generic-dialog-label-input'
         });
         this.$container.append(this.$maximum);
-        const $maxdiv = $$1('<div>');
+        const $maxdiv = $('<div>');
         $maxdiv.text('Maximum');
         this.$maximum.append($maxdiv);
-        this.$maximum_input = $$1("<input>");
+        this.$maximum_input = $("<input>");
         this.$maximum.append(this.$maximum_input); // ok | cancel
 
-        const $buttons = $$1("<div>", {
+        const $buttons = $("<div>", {
           class: 'igv-generic-dialog-ok-cancel'
         });
         this.$container.append($buttons); // ok
 
-        this.$ok = $$1("<div>");
+        this.$ok = $("<div>");
         $buttons.append(this.$ok);
         this.$ok.text('OK'); // cancel
 
-        this.$cancel = $$1("<div>");
+        this.$cancel = $("<div>");
         $buttons.append(this.$cancel);
         this.$cancel.text('Cancel');
         this.$cancel.on('click', () => {
@@ -23365,7 +23365,7 @@
 
       present($parent) {
         const offset_top = $parent.offset().top;
-        const scroll_top = $$1('body').scrollTop();
+        const scroll_top = $('body').scrollTop();
         this.$container.offset({
           left: $parent.width() - this.$container.width(),
           top: offset_top + scroll_top
@@ -26403,7 +26403,7 @@
         this.trackView = trackView;
         this.referenceFrame = referenceFrame;
         this.browser = trackView.browser;
-        this.$viewport = $$1('<div class="igv-viewport">');
+        this.$viewport = $('<div class="igv-viewport">');
         $viewportColumn.append(this.$viewport);
 
         if (trackView.track.height) {
@@ -26420,13 +26420,13 @@
           this.alert = new AlertDialog(this.$viewport.get(0));
         }
 
-        this.$content = $$1("<div>", {
+        this.$content = $("<div>", {
           class: 'igv-viewport-content'
         });
         this.$viewport.append(this.$content);
         this.$content.height(this.$viewport.height());
         this.contentDiv = this.$content.get(0);
-        this.$canvas = $$1('<canvas>');
+        this.$canvas = $('<canvas>');
         this.$content.append(this.$canvas);
         this.canvas = this.$canvas.get(0);
         this.ctx = this.canvas.getContext("2d");
@@ -28134,11 +28134,11 @@
 
       initializationHelper() {
         this.addMouseHandlers();
-        this.$spinner = $$1('<div>', {
+        this.$spinner = $('<div>', {
           class: 'igv-loading-spinner-container'
         });
         this.$viewport.append(this.$spinner);
-        this.$spinner.append($$1('<div>'));
+        this.$spinner.append($('<div>'));
         this.stopSpinner();
         const {
           track
@@ -28149,7 +28149,7 @@
         }
 
         if (track.name && "sequence" !== track.config.type) {
-          this.$trackLabel = $$1('<div class="igv-track-label">');
+          this.$trackLabel = $('<div class="igv-track-label">');
           this.$viewport.append(this.$trackLabel);
           this.setTrackLabel(track.name);
 
@@ -28350,7 +28350,7 @@
 
         if (0 === pixelWidth || 0 === pixelHeight) {
           if (this.canvas) {
-            $$1(this.canvas).remove();
+            $(this.canvas).remove();
           }
 
           return;
@@ -28367,7 +28367,7 @@
         }
 
         const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / this.referenceFrame.bpPerPixel);
-        const newCanvas = $$1('<canvas class="igv-canvas">').get(0);
+        const newCanvas = $('<canvas class="igv-canvas">').get(0);
         const ctx = newCanvas.getContext("2d");
         newCanvas.style.width = pixelWidth + "px";
         newCanvas.style.height = pixelHeight + "px";
@@ -28401,7 +28401,7 @@
           this.$canvas.remove();
         }
 
-        this.$canvas = $$1(newCanvas);
+        this.$canvas = $(newCanvas);
         this.$content.append(this.$canvas);
         this.canvas = newCanvas;
         this.ctx = ctx;
@@ -28487,7 +28487,7 @@
         const devicePixelRatio = window.devicePixelRatio;
         const w = this.$viewport.width() * devicePixelRatio;
         const h = this.$viewport.height() * devicePixelRatio;
-        const x = -$$1(this.canvas).position().left * devicePixelRatio;
+        const x = -$(this.canvas).position().left * devicePixelRatio;
         const y = (-this.$content.position().top - canvasTop) * devicePixelRatio;
         const imageData = this.ctx.getImageData(x, y, w, h);
         const exportCanvas = document.createElement('canvas');
@@ -28627,11 +28627,11 @@
       }
 
       createZoomInNotice($parent) {
-        const $container = $$1('<div>', {
+        const $container = $('<div>', {
           class: 'igv-zoom-in-notice-container'
         });
         $parent.append($container);
-        const $e = $$1('<div>');
+        const $e = $('<div>');
         $container.append($e);
         $e.text('Zoom in to see features');
         $container.hide();
@@ -28674,7 +28674,7 @@
 
           if (menuItems.length > 0) {
             menuItems.push({
-              label: $$1('<HR>')
+              label: $('<HR>')
             });
           }
 
@@ -28736,7 +28736,7 @@
           } // Close any currently open popups
 
 
-          $$1('.igv-popover').hide();
+          $('.igv-popover').hide();
 
           if (browser.dragObject || browser.isScrolling) {
             return;
@@ -28951,7 +28951,7 @@
       }
 
       initializationHelper() {
-        this.$ideogramCanvas = $$1('<canvas>', {
+        this.$ideogramCanvas = $('<canvas>', {
           class: 'igv-ideogram-canvas'
         });
         this.$ideogramCanvas.insertBefore(this.$canvas);
@@ -29071,8 +29071,8 @@
 
       disableMouseHandlers() {
         this.viewport.$content.off();
-        $$1(document).off(`mousemove.${this.viewport.trackView.namespace}`);
-        $$1(document).off(`mouseup.${this.viewport.trackView.namespace}`);
+        $(document).off(`mousemove.${this.viewport.trackView.namespace}`);
+        $(document).off(`mouseup.${this.viewport.trackView.namespace}`);
         this.isMouseHandlers = false;
       }
 
@@ -29100,7 +29100,7 @@
           this.rulerSweeper.style.left = `${left}px`;
           this.rulerSweeper.style.width = `${width}px`;
         });
-        $$1(document).on(`mousemove.${this.viewport.trackView.namespace}`, e => {
+        $(document).on(`mousemove.${this.viewport.trackView.namespace}`, e => {
           let mouseCurrentX;
 
           if (isMouseDown && isMouseIn) {
@@ -29118,7 +29118,7 @@
             }
           }
         });
-        $$1(document).on(`mouseup.${this.viewport.trackView.namespace}`, e => {
+        $(document).on(`mouseup.${this.viewport.trackView.namespace}`, e => {
           let extent;
 
           if (true === isMouseDown && true === isMouseIn) {
@@ -29158,7 +29158,7 @@
 
       initializationHelper() {
         this.rulerSweeper = new RulerSweeper(this);
-        this.$multiLocusCloseButton = $$1('<div>', {
+        this.$multiLocusCloseButton = $('<div>', {
           class: 'igv-multi-locus-close-button'
         });
         this.$viewport.append(this.$multiLocusCloseButton);
@@ -29166,7 +29166,7 @@
         this.$multiLocusCloseButton.click(() => {
           this.browser.removeMultiLocusPanel(this.referenceFrame);
         });
-        this.$rulerLabel = $$1('<div>', {
+        this.$rulerLabel = $('<div>', {
           class: 'igv-multi-locus-ruler-label'
         });
         this.$viewport.append(this.$rulerLabel);
@@ -29177,12 +29177,12 @@
             await this.browser.removeMultiLocusPanel(referenceFrame);
           }
         });
-        this.$tooltip = $$1('<div>', {
+        this.$tooltip = $('<div>', {
           class: 'igv-ruler-tooltip'
         });
         this.$tooltip.height(this.$viewport.height());
         this.$viewport.append(this.$tooltip);
-        this.$tooltipContent = $$1('<div>');
+        this.$tooltipContent = $('<div>');
         this.$tooltip.append(this.$tooltipContent);
         this.attachMouseHandlers(GenomeUtils.isWholeGenomeView(this.referenceFrame.chr));
         this.$tooltip.hide();
@@ -29284,11 +29284,11 @@
 
     const createViewport = (trackView, column, referenceFrame, width) => {
       if ('ruler' === trackView.track.type) {
-        return new RulerViewport(trackView, $$1(column), referenceFrame, width);
+        return new RulerViewport(trackView, $(column), referenceFrame, width);
       } else if ('ideogram' === trackView.track.type) {
-        return new IdeogramViewport(trackView, $$1(column), referenceFrame, width);
+        return new IdeogramViewport(trackView, $(column), referenceFrame, width);
       } else {
-        return new ViewPort(trackView, $$1(column), referenceFrame, width);
+        return new ViewPort(trackView, $(column), referenceFrame, width);
       }
     };
 
@@ -29306,7 +29306,7 @@
         this.guid = guid();
         this.trackView = trackView;
         this.browser = trackView.browser;
-        this.$viewport = $$1('<div class="igv-viewport">');
+        this.$viewport = $('<div class="igv-viewport">');
         $column.append(this.$viewport);
 
         if (trackView.track.height) {
@@ -29314,10 +29314,11 @@
         } // this.$viewport.get(0).style.backgroundColor = randomRGB(150, 250);
 
 
-        this.$canvas = $$1('<canvas>');
+        this.$canvas = $('<canvas>');
         this.$viewport.append(this.$canvas);
         this.canvas = this.$canvas.get(0);
         this.ctx = this.canvas.getContext("2d");
+        this.trackScrollDelta = 0;
         this.contentTop = 0;
         this.setWidth(width);
 
@@ -29366,6 +29367,7 @@
       setTop(contentTop) {
         if (typeof this.trackView.track.getSamples === 'function') {
           this.contentTop = contentTop;
+          console.log(`setTop. content-top(${numberFormatter$1(contentTop)})`);
           const samples = this.trackView.track.getSamples();
           this.repaint(samples);
         }
@@ -29407,14 +29409,18 @@
         const viewportHeight = this.$viewport.get(0).getBoundingClientRect().height;
         let y = (samples.yOffset || 0) + this.contentTop; // contentTop will always be a negative number (top relative to viewport)
 
+        console.log(`draw - content-top(${numberFormatter$1(this.contentTop)}) yOffset(${numberFormatter$1(samples.yOffset)})`);
+
         for (let name of samples.names) {
-          if (y > viewportHeight) break;
+          if (y > viewportHeight) {
+            // console.log(`Will NOT paint. y(${ StringUtils.numberFormatter(y) })  > viewportHeight(${ StringUtils.numberFormatter(viewportHeight) })`)
+            break;
+          }
 
           if (y + samples.height > 0) {
-            // const text = name.toUpperCase();
             const text = name;
             const yFont = getYFont(context, text, y, samples.height);
-            context.fillText(text, sampleNameXShim, yFont);
+            context.fillText(text, sampleNameXShim, yFont); // console.log(`Will     paint. y(${ StringUtils.numberFormatter(y) })  <= viewportHeight(${ StringUtils.numberFormatter(viewportHeight) }) `)
           }
 
           y += samples.height;
@@ -29503,30 +29509,30 @@
         trackView.innerScroll = innerScroll;
         trackView.outerScroll = outerScroll;
         'track-scrollbar-' + guid();
-        $$1(innerScroll).on(`mousedown.${trackView.namespace}`, event => {
+        $(innerScroll).on(`mousedown.${trackView.namespace}`, event => {
           event.stopPropagation();
           const {
             y
           } = pageCoordinates$1(event);
-          $$1(innerScroll).data('yDown', y.toString());
-          $$1(columnContainer).on(`mousemove.${trackView.namespace}`, event => {
+          $(innerScroll).data('yDown', y.toString());
+          $(columnContainer).on(`mousemove.${trackView.namespace}`, event => {
             event.stopPropagation();
             const {
               y
             } = pageCoordinates$1(event);
-            TrackScrollbarControl.moveScroller(trackView, y - parseInt($$1(innerScroll).data('yDown')));
-            $$1(innerScroll).data('yDown', y.toString());
+            TrackScrollbarControl.moveScroller(trackView, y - parseInt($(innerScroll).data('yDown')));
+            $(innerScroll).data('yDown', y.toString());
           });
         });
-        $$1(columnContainer).on(`mouseup.${trackView.namespace}`, () => $$1(columnContainer).off(`mousemove.${trackView.namespace}`));
+        $(columnContainer).on(`mouseup.${trackView.namespace}`, () => $(columnContainer).off(`mousemove.${trackView.namespace}`));
       }
 
       removeScrollbar(trackView, columnContainer) {
         if (trackView.outerScroll) {
           if (trackView.innerScroll) {
-            $$1(trackView.innerScroll).off(trackView.namespace);
+            $(trackView.innerScroll).off(trackView.namespace);
             trackView.innerScroll.remove();
-            $$1(columnContainer).off(trackView.namespace);
+            $(columnContainer).off(trackView.namespace);
           }
 
           trackView.outerScroll.remove();
@@ -29542,15 +29548,18 @@
       }
 
       static moveScroller(trackView, delta) {
-        const y = $$1(trackView.innerScroll).position().top + delta;
+        const y = $(trackView.innerScroll).position().top + delta;
         const top = Math.min(Math.max(0, y), trackView.outerScroll.clientHeight - trackView.innerScroll.clientHeight);
-        $$1(trackView.innerScroll).css('top', `${top}px`);
+        $(trackView.innerScroll).css('top', `${top}px`);
         const contentHeight = maxViewportContentHeight(trackView.viewports);
-        const contentTop = -Math.round(top * (contentHeight / trackView.viewports[0].$viewport.height()));
+        const contentTop = -Math.round(top * (contentHeight / trackView.viewports[0].$viewport.height())); // console.log(`moveScroller contentTop(${ StringUtils.numberFormatter(contentTop) })`)
 
-        for (let viewport of [...trackView.viewports, trackView.sampleNameViewport]) {
+        for (let viewport of trackView.viewports) {
           viewport.setTop(contentTop);
         }
+
+        trackView.sampleNameViewport.trackScrollDelta = delta;
+        trackView.sampleNameViewport.setTop(contentTop);
       }
 
     }
@@ -29608,7 +29617,7 @@
         // }
 
 
-        this.sampleNameViewport = new SampleNameViewport(this, $$1(browser.sampleNameColumn), undefined, browser.sampleNameViewportWidth);
+        this.sampleNameViewport = new SampleNameViewport(this, $(browser.sampleNameColumn), undefined, browser.sampleNameViewportWidth);
         this.attachScrollbar(browser);
         this.attachDragHandle(browser);
         this.createTrackGearPopup(browser);
@@ -29623,7 +29632,7 @@
           if (this.track.dataRange) {
             axis.addEventListener('click', () => {
               browser.dataRangeDialog.configure(this);
-              browser.dataRangeDialog.present($$1(browser.columnContainer));
+              browser.dataRangeDialog.present($(browser.columnContainer));
             });
           }
 
@@ -29892,7 +29901,7 @@
           for (let vp of visibleViewports) {
             const referenceFrame = vp.referenceFrame;
             const start = referenceFrame.start;
-            const end = start + referenceFrame.toBP($$1(vp.contentDiv).width());
+            const end = start + referenceFrame.toBP($(vp.contentDiv).width());
 
             if (vp.tile && vp.tile.features) {
               if (typeof vp.tile.features.getMax === 'function') {
@@ -29965,7 +29974,7 @@
           if (vp.tile && vp.tile.features) {
             const referenceFrame = vp.referenceFrame;
             const start = referenceFrame.start;
-            const end = start + referenceFrame.toBP($$1(vp.contentDiv).width());
+            const end = start + referenceFrame.toBP($(vp.contentDiv).width());
 
             if (typeof vp.tile.features.getMax === 'function') {
               const max = vp.tile.features.getMax(start, end);
@@ -30063,7 +30072,7 @@
             const referenceFrame = viewport.referenceFrame;
             const chr = viewport.referenceFrame.chr;
             const start = referenceFrame.start;
-            const end = start + referenceFrame.toBP($$1(viewport.contentDiv).width());
+            const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
             const bpPerPixel = referenceFrame.bpPerPixel;
             return force || !viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel);
           }
@@ -38225,7 +38234,7 @@
           if (this.config.type == 'spliceJunctions') {
             junctionRenderingContext.referenceFrame = options.viewport.referenceFrame;
             junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
-            junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($$1(options.viewport.contentDiv).width()); // For a given viewport, records where features that are < 2px in width have been rendered already.
+            junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(options.viewport.contentDiv).width()); // For a given viewport, records where features that are < 2px in width have been rendered already.
             // This prevents wasteful rendering of multiple such features onto the same pixels.
 
             junctionRenderingContext.featureZoomOutTracker = {};
@@ -38326,7 +38335,7 @@
         if (this.render === renderSnp) {
           ["function", "class"].forEach(function (colorScheme) {
             menuItems.push({
-              object: $$1(createCheckbox$1('Color by ' + colorScheme, colorScheme === self.colorBy)),
+              object: $(createCheckbox$1('Color by ' + colorScheme, colorScheme === self.colorBy)),
               click: function () {
                 self.colorBy = colorScheme;
                 self.trackView.repaintViews();
@@ -38334,12 +38343,12 @@
             });
           });
           menuItems.push({
-            object: $$1('<div class="igv-track-menu-border-top">')
+            object: $('<div class="igv-track-menu-border-top">')
           });
         }
 
         menuItems.push({
-          object: $$1('<div class="igv-track-menu-border-top">')
+          object: $('<div class="igv-track-menu-border-top">')
         });
         ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
           const lut = {
@@ -38348,7 +38357,7 @@
             "EXPANDED": "Expand"
           };
           menuItems.push({
-            object: $$1(createCheckbox$1(lut[displayMode], displayMode === self.displayMode)),
+            object: $(createCheckbox$1(lut[displayMode], displayMode === self.displayMode)),
             click: function () {
               self.displayMode = displayMode;
               self.config.displayMode = displayMode;
@@ -39560,13 +39569,15 @@
         const displayOptions = this.type === 'seg' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"];
 
         for (let displayMode of displayOptions) {
+          const checkBox = createCheckbox$1(lut[displayMode], displayMode === this.displayMode);
           menuItems.push({
-            object: $(createCheckbox$1(lut[displayMode], displayMode === this.displayMode)),
+            object: $(checkBox),
             click: () => {
               this.displayMode = displayMode;
               this.config.displayMode = displayMode;
               this.trackView.checkContentHeight();
               this.trackView.repaintViews();
+              TrackScrollbarControl.moveScroller(this.trackView, this.trackView.sampleNameViewport.trackScrollDelta);
             }
           });
         }
@@ -59189,7 +59200,7 @@
         let menuItems = ["<hr/>"];
         menuItems = menuItems.concat(MenuUtils.numericDataMenuItems(this.trackView)); // Color by items
 
-        const $e = $$1('<div class="igv-track-menu-category igv-track-menu-border-top">');
+        const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
         $e.text('Color by:');
         menuItems.push({
           name: undefined,
@@ -59237,10 +59248,10 @@
         };
 
         menuItems.push({
-          object: $$1('<div class="igv-track-menu-border-top">')
+          object: $('<div class="igv-track-menu-border-top">')
         });
         menuItems.push({
-          object: $$1(createCheckbox$1("Show Coverage", this.showCoverage)),
+          object: $(createCheckbox$1("Show Coverage", this.showCoverage)),
           click: () => {
             this.showCoverage = !this.showCoverage;
             adjustTrackHeight();
@@ -59249,7 +59260,7 @@
           }
         });
         menuItems.push({
-          object: $$1(createCheckbox$1("Show Alignments", this.showAlignments)),
+          object: $(createCheckbox$1("Show Alignments", this.showAlignments)),
           click: () => {
             this.showAlignments = !this.showAlignments;
             adjustTrackHeight();
@@ -59259,10 +59270,10 @@
         }); // Show all bases
 
         menuItems.push({
-          object: $$1('<div class="igv-track-menu-border-top">')
+          object: $('<div class="igv-track-menu-border-top">')
         });
         menuItems.push({
-          object: $$1(createCheckbox$1("Show all bases", this.showAllBases)),
+          object: $(createCheckbox$1("Show all bases", this.showAllBases)),
           click: () => {
             this.showAllBases = !this.showAllBases;
             this.config.showAllBases = this.showAllBases;
@@ -59271,7 +59282,7 @@
         }); // Soft clips
 
         menuItems.push({
-          object: $$1(createCheckbox$1("Show soft clips", this.showSoftClips)),
+          object: $(createCheckbox$1("Show soft clips", this.showSoftClips)),
           click: () => {
             this.showSoftClips = !this.showSoftClips;
             this.config.showSoftClips = this.showSoftClips;
@@ -59288,10 +59299,10 @@
 
         if (this.pairsSupported && this.alignmentTrack.hasPairs) {
           menuItems.push({
-            object: $$1('<div class="igv-track-menu-border-top">')
+            object: $('<div class="igv-track-menu-border-top">')
           });
           menuItems.push({
-            object: $$1(createCheckbox$1("View as pairs", this.viewAsPairs)),
+            object: $(createCheckbox$1("View as pairs", this.viewAsPairs)),
             click: () => {
               this.viewAsPairs = !this.viewAsPairs;
               this.config.viewAsPairs = this.viewAsPairs;
@@ -59308,7 +59319,7 @@
         } // Display mode
 
 
-        const $displayModeLabel = $$1('<div class="igv-track-menu-category igv-track-menu-border-top">');
+        const $displayModeLabel = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
         $displayModeLabel.text('Display mode:');
         menuItems.push({
           name: undefined,
@@ -59317,7 +59328,7 @@
           init: undefined
         });
         menuItems.push({
-          object: $$1(createCheckbox$1("expand", this.alignmentTrack.displayMode === "EXPANDED")),
+          object: $(createCheckbox$1("expand", this.alignmentTrack.displayMode === "EXPANDED")),
           click: () => {
             this.alignmentTrack.displayMode = "EXPANDED";
             this.config.displayMode = "EXPANDED";
@@ -59326,7 +59337,7 @@
           }
         });
         menuItems.push({
-          object: $$1(createCheckbox$1("squish", this.alignmentTrack.displayMode === "SQUISHED")),
+          object: $(createCheckbox$1("squish", this.alignmentTrack.displayMode === "SQUISHED")),
           click: () => {
             this.alignmentTrack.displayMode = "SQUISHED";
             this.config.displayMode = "SQUISHED";
@@ -59345,7 +59356,7 @@
 
 
       colorByCB(menuItem, showCheck) {
-        const $e = $$1(createCheckbox$1(menuItem.label, showCheck));
+        const $e = $(createCheckbox$1(menuItem.label, showCheck));
 
         const clickHandler = ev => {
           if (menuItem.key === this.alignmentTrack.colorBy) {
@@ -59364,7 +59375,7 @@
                   this.alignmentTrack.colorByTag = tag;
                   this.config.colorByTag = tag;
                   this.alignmentTrack.tagColors = new PaletteColorTable("Set1");
-                  $$1('#color-by-tag').text(self.alignmentTrack.colorByTag);
+                  $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                 }
 
                 this.trackView.repaintViews();
@@ -61602,7 +61613,7 @@
             }
 
             if (stringInfoKeys.length > 0) {
-              const $e = $$1('<div class="igv-track-menu-category igv-track-menu-border-top">');
+              const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
               $e.text('Color by:');
               menuItems.push({
                 name: undefined,
@@ -61631,10 +61642,10 @@
 
         if (this.getCallsetsLength() > 0) {
           menuItems.push({
-            object: $$1('<div class="igv-track-menu-border-top">')
+            object: $('<div class="igv-track-menu-border-top">')
           });
           menuItems.push({
-            object: $$1(createCheckbox$1("Show Genotypes", this.showGenotypes)),
+            object: $(createCheckbox$1("Show Genotypes", this.showGenotypes)),
             click: () => {
               this.showGenotypes = !this.showGenotypes; //adjustTrackHeight();
 
@@ -61645,7 +61656,7 @@
         }
 
         menuItems.push({
-          object: $$1('<div class="igv-track-menu-border-top">')
+          object: $('<div class="igv-track-menu-border-top">')
         });
 
         for (let displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
@@ -61655,7 +61666,7 @@
             "EXPANDED": "Expand"
           };
           menuItems.push({
-            object: $$1(createCheckbox$1(lut[displayMode], displayMode === this.displayMode)),
+            object: $(createCheckbox$1(lut[displayMode], displayMode === this.displayMode)),
             click: () => {
               this.displayMode = displayMode;
               this.trackView.checkContentHeight();
@@ -61675,7 +61686,7 @@
 
 
       colorByCB(menuItem, showCheck) {
-        const $e = $$1(createCheckbox$1(menuItem.label, showCheck));
+        const $e = $(createCheckbox$1(menuItem.label, showCheck));
 
         const clickHandler = () => {
           if (menuItem.key === this.colorBy) {
@@ -64206,8 +64217,8 @@
       updateNavbar(responsiveClassSchedule) {
         this.browser['$toggle_button_container'].removeClass();
         this.browser['$toggle_button_container'].addClass(responsiveClassSchedule['$toggle_button_container']);
-        $$1(this.browser.zoomWidget.zoomContainer).removeClass();
-        $$1(this.browser.zoomWidget.zoomContainer).addClass(responsiveClassSchedule['zoomContainer']);
+        $(this.browser.zoomWidget.zoomContainer).removeClass();
+        $(this.browser.zoomWidget.zoomContainer).addClass(responsiveClassSchedule['zoomContainer']);
       }
 
       createResponsiveClassSchedule(navbarWidth, isWholeGenomeView) {
@@ -64268,7 +64279,7 @@
 
           browser.startTrackDrag(trackView);
         });
-        $$1(document).on(`mouseup.${trackView.namespace}`, event => {
+        $(document).on(`mouseup.${trackView.namespace}`, event => {
           event.preventDefault();
           browser.endTrackDrag();
 
@@ -64299,9 +64310,9 @@
 
       removeDragHandle(trackView) {
         if (trackView.dragHandle) {
-          $$1(trackView.dragHandle).off();
+          $(trackView.dragHandle).off();
           trackView.dragHandle.remove();
-          $$1(document).off(`mouseup.${trackView.namespace}`);
+          $(document).off(`mouseup.${trackView.namespace}`);
         }
       }
 
@@ -64810,15 +64821,15 @@
 
     const CursorGuide = function ($cursorGuideParent, browser) {
       this.browser = browser;
-      this.$horizontalGuide = $$1('<div class="igv-cursor-guide-horizontal">');
+      this.$horizontalGuide = $('<div class="igv-cursor-guide-horizontal">');
       $cursorGuideParent.append(this.$horizontalGuide);
-      this.$verticalGuide = $$1('<div class="igv-cursor-guide-vertical">');
+      this.$verticalGuide = $('<div class="igv-cursor-guide-vertical">');
       $cursorGuideParent.append(this.$verticalGuide);
       this.setVisibility(browser.config.showCursorTrackingGuide); // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
 
       $cursorGuideParent.on('mousemove.cursor-guide', e => {
         e.preventDefault();
-        const $target = $$1(document.elementFromPoint(e.clientX, e.clientY));
+        const $target = $(document.elementFromPoint(e.clientX, e.clientY));
         const $parent = $target.parent();
         let $viewport = undefined;
 
@@ -65358,11 +65369,11 @@
         const columnShim = div$1({
           class: 'igv-column-shim'
         });
-        $$1(columnShim).insertAfter($previous);
+        $(columnShim).insertAfter($previous);
         const column = div$1({
           class: 'igv-column'
         });
-        $$1(column).insertAfter($$1(columnShim));
+        $(column).insertAfter($(columnShim));
         return column;
       },
       insertBefore: ($guard, count) => {
@@ -65370,13 +65381,13 @@
           const column = div$1({
             class: 'igv-column'
           });
-          $$1(column).insertBefore($guard);
+          $(column).insertBefore($guard);
 
           if (count > 1 && i > 0) {
             const columnShim = div$1({
               class: 'igv-column-shim'
             });
-            $$1(columnShim).insertBefore($$1(column));
+            $(columnShim).insertBefore($(column));
           }
         }
       }
@@ -65500,10 +65511,10 @@
         this.guid = guid();
         this.namespace = '.browser_' + this.guid;
         this.parent = parentDiv;
-        this.$root = $$1('<div>', {
+        this.$root = $('<div>', {
           class: 'igv-container'
         });
-        $$1(parentDiv).append(this.$root);
+        $(parentDiv).append(this.$root);
         Alert.init(this.$root.get(0));
         this.columnContainer = div$1({
           class: 'igv-column-container'
@@ -65563,7 +65574,7 @@
 
       setControls(config) {
         const $navBar = this.createStandardControls(config);
-        $navBar.insertBefore($$1(this.columnContainer));
+        $navBar.insertBefore($(this.columnContainer));
         this.$navigation = $navBar;
 
         if (false === config.showControls) {
@@ -65573,16 +65584,16 @@
 
       createStandardControls(config) {
         this.navbarManager = new NavbarManager(this);
-        const $navBar = $$1('<div>', {
+        const $navBar = $('<div>', {
           class: 'igv-navbar'
         });
         this.$navigation = $navBar;
-        const $navbarLeftContainer = $$1('<div>', {
+        const $navbarLeftContainer = $('<div>', {
           class: 'igv-navbar-left-container'
         });
         $navBar.append($navbarLeftContainer); // IGV logo
 
-        const $logo = $$1('<div>', {
+        const $logo = $('<div>', {
           class: 'igv-logo'
         });
         $navbarLeftContainer.append($logo);
@@ -65590,12 +65601,12 @@
         logoSvg.css("width", "34px");
         logoSvg.css("height", "32px");
         $logo.append(logoSvg);
-        this.$current_genome = $$1('<div>', {
+        this.$current_genome = $('<div>', {
           class: 'igv-current-genome'
         });
         $navbarLeftContainer.append(this.$current_genome);
         this.$current_genome.text('');
-        const $genomicLocation = $$1('<div>', {
+        const $genomicLocation = $('<div>', {
           class: 'igv-navbar-genomic-location'
         });
         $navbarLeftContainer.append($genomicLocation); // chromosome select widget
@@ -65612,16 +65623,16 @@
           this.chromosomeSelectWidget.hide();
         }
 
-        const $locusSizeGroup = $$1('<div>', {
+        const $locusSizeGroup = $('<div>', {
           class: 'igv-locus-size-group'
         });
         $genomicLocation.append($locusSizeGroup);
-        const $searchContainer = $$1('<div>', {
+        const $searchContainer = $('<div>', {
           class: 'igv-search-container'
         });
         $locusSizeGroup.append($searchContainer); // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
 
-        this.$searchInput = $$1('<input>', {
+        this.$searchInput = $('<input>', {
           class: 'igv-search-input',
           type: 'text',
           placeholder: 'Locus Search'
@@ -65631,18 +65642,18 @@
         const searchIconContainer = div$1({
           class: 'igv-search-icon-container'
         });
-        $searchContainer.append($$1(searchIconContainer));
+        $searchContainer.append($(searchIconContainer));
         searchIconContainer.appendChild(createIcon$1("search"));
         searchIconContainer.addEventListener('click', () => this.search(this.$searchInput.val()));
         this.windowSizePanel = new WindowSizePanel($locusSizeGroup.get(0), this);
-        const $navbarRightContainer = $$1('<div>', {
+        const $navbarRightContainer = $('<div>', {
           class: 'igv-navbar-right-container'
         });
         $navBar.append($navbarRightContainer);
-        const $toggle_button_container = $$1('<div class="igv-navbar-toggle-button-container">');
+        const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">');
         $navbarRightContainer.append($toggle_button_container);
         this.$toggle_button_container = $toggle_button_container;
-        this.cursorGuide = new CursorGuide($$1(this.columnContainer), this);
+        this.cursorGuide = new CursorGuide($(this.columnContainer), this);
         this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0));
         this.centerLineButton = new CenterLineButton(this, $toggle_button_container.get(0));
         this.setTrackLabelVisibility(config.showTrackLabels);
@@ -66758,7 +66769,7 @@
 
 
           viewportColumnManager.discardAllColumns(this.columnContainer);
-          viewportColumnManager.insertBefore($$1(this.sampleNameColumn), this.referenceFrameList.length);
+          viewportColumnManager.insertBefore($(this.sampleNameColumn), this.referenceFrameList.length);
           this.centerLineList = this.createCenterLineList(this.columnContainer);
 
           for (let trackView of this.trackViews) {
@@ -66845,8 +66856,8 @@
       }
 
       dispose() {
-        $$1(window).off(this.namespace);
-        $$1(document).off(this.namespace);
+        $(window).off(this.namespace);
+        $(document).off(this.namespace);
         this.eventHandlers = undefined;
         this.trackViews.forEach(function (tv) {
           tv.dispose();
@@ -67077,7 +67088,7 @@
 
       addMouseHandlers() {
         var self = this;
-        $$1(window).on('resize' + this.namespace, () => {
+        $(window).on('resize' + this.namespace, () => {
           this.resize();
         });
         this.$root.on('mouseup', mouseUpOrLeave);
@@ -67198,7 +67209,7 @@
     }
 
     function logo() {
-      return $$1('<svg width="690px" height="324px" viewBox="0 0 690 324" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' + '<title>IGV</title>' + '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">' + '<g id="IGV" fill="#666666">' + '<polygon id="Path" points="379.54574 8.00169252 455.581247 8.00169252 515.564813 188.87244 532.884012 253.529506 537.108207 253.529506 554.849825 188.87244 614.833392 8.00169252 689.60164 8.00169252 582.729511 320.722144 486.840288 320.722144"></polygon>' + '<path d="M261.482414,323.793286 C207.975678,323.793286 168.339046,310.552102 142.571329,284.069337 C116.803612,257.586572 103.919946,217.158702 103.919946,162.784513 C103.919946,108.410325 117.437235,67.8415913 144.472217,41.0770945 C171.507199,14.3125977 212.903894,0.930550071 268.663545,0.930550071 C283.025879,0.930550071 298.232828,1.84616386 314.284849,3.6774189 C330.33687,5.50867394 344.839793,7.97378798 357.794056,11.072835 L357.794056,68.968378 C339.48912,65.869331 323.578145,63.5450806 310.060654,61.9955571 C296.543163,60.4460336 284.574731,59.6712835 274.154998,59.6712835 C255.850062,59.6712835 240.502308,61.4320792 228.111274,64.9537236 C215.720241,68.4753679 205.793482,74.2507779 198.330701,82.2801269 C190.867919,90.309476 185.587729,100.87425 182.48997,113.974767 C179.392212,127.075284 177.843356,143.345037 177.843356,162.784513 C177.843356,181.942258 179.251407,198.000716 182.067551,210.960367 C184.883695,223.920018 189.671068,234.41436 196.429813,242.443709 C203.188559,250.473058 212.059279,256.178037 223.042241,259.558815 C234.025202,262.939594 247.683295,264.629958 264.01693,264.629958 C268.241146,264.629958 273.098922,264.489094 278.590403,264.207362 C284.081883,263.925631 289.643684,263.50304 295.275972,262.939577 L295.275972,159.826347 L361.595831,159.826347 L361.595831,308.579859 C344.698967,313.087564 327.239137,316.750019 309.215815,319.567334 C291.192494,322.38465 275.281519,323.793286 261.482414,323.793286 L261.482414,323.793286 L261.482414,323.793286 Z" id="Path"></path>;' + '<polygon id="Path" points="0.81355666 5.00169252 73.0472883 5.00169252 73.0472883 317.722144 0.81355666 317.722144"></polygon>' + '</g> </g> </svg>');
+      return $('<svg width="690px" height="324px" viewBox="0 0 690 324" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' + '<title>IGV</title>' + '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">' + '<g id="IGV" fill="#666666">' + '<polygon id="Path" points="379.54574 8.00169252 455.581247 8.00169252 515.564813 188.87244 532.884012 253.529506 537.108207 253.529506 554.849825 188.87244 614.833392 8.00169252 689.60164 8.00169252 582.729511 320.722144 486.840288 320.722144"></polygon>' + '<path d="M261.482414,323.793286 C207.975678,323.793286 168.339046,310.552102 142.571329,284.069337 C116.803612,257.586572 103.919946,217.158702 103.919946,162.784513 C103.919946,108.410325 117.437235,67.8415913 144.472217,41.0770945 C171.507199,14.3125977 212.903894,0.930550071 268.663545,0.930550071 C283.025879,0.930550071 298.232828,1.84616386 314.284849,3.6774189 C330.33687,5.50867394 344.839793,7.97378798 357.794056,11.072835 L357.794056,68.968378 C339.48912,65.869331 323.578145,63.5450806 310.060654,61.9955571 C296.543163,60.4460336 284.574731,59.6712835 274.154998,59.6712835 C255.850062,59.6712835 240.502308,61.4320792 228.111274,64.9537236 C215.720241,68.4753679 205.793482,74.2507779 198.330701,82.2801269 C190.867919,90.309476 185.587729,100.87425 182.48997,113.974767 C179.392212,127.075284 177.843356,143.345037 177.843356,162.784513 C177.843356,181.942258 179.251407,198.000716 182.067551,210.960367 C184.883695,223.920018 189.671068,234.41436 196.429813,242.443709 C203.188559,250.473058 212.059279,256.178037 223.042241,259.558815 C234.025202,262.939594 247.683295,264.629958 264.01693,264.629958 C268.241146,264.629958 273.098922,264.489094 278.590403,264.207362 C284.081883,263.925631 289.643684,263.50304 295.275972,262.939577 L295.275972,159.826347 L361.595831,159.826347 L361.595831,308.579859 C344.698967,313.087564 327.239137,316.750019 309.215815,319.567334 C291.192494,322.38465 275.281519,323.793286 261.482414,323.793286 L261.482414,323.793286 L261.482414,323.793286 Z" id="Path"></path>;' + '<polygon id="Path" points="0.81355666 5.00169252 73.0472883 5.00169252 73.0472883 317.722144 0.81355666 317.722144"></polygon>' + '</g> </g> </svg>');
     }
 
     function toggleTrackLabels(trackViews, isVisible) {
@@ -67458,7 +67469,7 @@
     }
 
     function embedCSS() {
-      var css = '.igv-navbar {\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: space-between;\n  align-items: center;\n  box-sizing: border-box;\n  width: 100%;\n  color: #444;\n  font-size: 12px;\n  font-family: \"Open Sans\", sans-serif;\n  font-weight: 400;\n  line-height: 32px;\n  padding-left: 8px;\n  padding-right: 8px;\n  margin-bottom: 6px;\n  height: 32px;\n  border-style: solid;\n  border-radius: 3px;\n  border-width: thin;\n  border-color: #bfbfbf;\n  background-color: #f3f3f3; }\n  .igv-navbar .igv-navbar-left-container {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-between;\n    align-items: center;\n    height: 32px;\n    line-height: 32px; }\n    .igv-navbar .igv-navbar-left-container .igv-logo {\n      width: 34px;\n      height: 32px;\n      margin-right: 8px; }\n    .igv-navbar .igv-navbar-left-container .igv-current-genome {\n      height: 32px;\n      margin-left: 4px;\n      margin-right: 4px;\n      user-select: none;\n      line-height: 32px;\n      vertical-align: middle;\n      text-align: center; }\n    .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location {\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: space-between;\n      align-items: center;\n      height: 100%; }\n      .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-chromosome-select-widget-container {\n        display: flex;\n        flex-flow: column;\n        flex-wrap: nowrap;\n        justify-content: space-around;\n        align-items: center;\n        height: 100%;\n        width: 125px;\n        margin-right: 4px; }\n        .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-chromosome-select-widget-container select {\n          display: block;\n          cursor: pointer;\n          width: 100px;\n          height: 75%;\n          outline: none;\n          font-size: 12px;\n          font-family: \"Open Sans\", sans-serif;\n          font-weight: 400; }\n      .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group {\n        display: flex;\n        flex-flow: row;\n        flex-wrap: nowrap;\n        justify-content: space-between;\n        align-items: center;\n        margin-left: 8px;\n        height: 22px; }\n        .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container {\n          display: flex;\n          flex-flow: row;\n          flex-wrap: nowrap;\n          justify-content: flex-start;\n          align-items: center;\n          width: 210px;\n          height: 22px;\n          line-height: 22px; }\n          .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container input.igv-search-input {\n            cursor: text;\n            width: 85%;\n            height: 22px;\n            line-height: 22px;\n            font-size: 12px;\n            font-family: \"Open Sans\", sans-serif;\n            font-weight: 400;\n            text-align: left;\n            padding-left: 8px;\n            margin-right: 8px;\n            outline: none;\n            border-style: solid;\n            border-radius: 3px;\n            border-width: thin;\n            border-color: #bfbfbf;\n            background-color: white; }\n          .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container .igv-search-icon-container {\n            cursor: pointer;\n            height: 16px;\n            width: 16px; }\n        .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-windowsize-panel-container {\n          margin-left: 4px;\n          user-select: none; }\n  .igv-navbar .igv-navbar-right-container {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-between;\n    align-items: center;\n    height: 32px;\n    line-height: 32px; }\n    .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container {\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: space-between;\n      align-items: center;\n      height: 100%; }\n      .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container div {\n        margin-left: 0;\n        margin-right: 4px; }\n      .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container div:last-child {\n        margin-left: 0;\n        margin-right: 0; }\n    .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container-750 {\n      display: none; }\n    .igv-navbar .igv-navbar-right-container .igv-zoom-widget {\n      color: #737373;\n      font-size: 18px;\n      height: 32px;\n      line-height: 32px;\n      margin-left: 8px;\n      user-select: none;\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: flex-end;\n      align-items: center; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget div {\n        cursor: pointer;\n        margin-left: unset;\n        margin-right: unset; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:first-child {\n        height: 24px;\n        width: 24px;\n        margin-left: unset;\n        margin-right: 8px; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:last-child {\n        height: 24px;\n        width: 24px;\n        margin-left: 8px;\n        margin-right: unset; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:nth-child(even) {\n        display: block;\n        height: fit-content; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget input {\n        display: block;\n        width: 125px; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget svg {\n        display: block; }\n    .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 {\n      color: #737373;\n      font-size: 18px;\n      height: 32px;\n      line-height: 32px;\n      margin-left: 8px;\n      user-select: none;\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: flex-end;\n      align-items: center; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div {\n        cursor: pointer;\n        margin-left: unset;\n        margin-right: unset; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:first-child {\n        height: 24px;\n        width: 24px;\n        margin-left: unset;\n        margin-right: 8px; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:last-child {\n        height: 24px;\n        width: 24px;\n        margin-left: 8px;\n        margin-right: unset; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:nth-child(even) {\n        width: 0;\n        height: 0;\n        display: none; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 input {\n        width: 0;\n        height: 0;\n        display: none; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 svg {\n        display: block; }\n    .igv-navbar .igv-navbar-right-container .igv-zoom-widget-hidden {\n      display: none; }\n\n.igv-navbar-button {\n  display: block;\n  box-sizing: unset;\n  padding-left: 6px;\n  padding-right: 6px;\n  height: 18px;\n  text-transform: capitalize;\n  user-select: none;\n  line-height: 18px;\n  text-align: center;\n  vertical-align: middle;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 11px;\n  font-weight: 200;\n  color: #737373;\n  background-color: #f3f3f3;\n  border-color: #737373;\n  border-style: solid;\n  border-width: thin;\n  border-radius: 6px; }\n\n.igv-navbar-button-clicked {\n  color: white;\n  background-color: #737373; }\n\n.igv-navbar-button:hover {\n  cursor: pointer; }\n\n.igv-zoom-in-notice-container {\n  z-index: 1024;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  display: flex;\n  flex-direction: row;\n  flex-wrap: nowrap;\n  justify-content: center;\n  align-items: center;\n  background-color: white; }\n  .igv-zoom-in-notice-container > div {\n    padding-left: 4px;\n    padding-right: 4px;\n    padding-top: 2px;\n    padding-bottom: 2px;\n    width: 100%;\n    height: 100%;\n    font-family: \"Open Sans\", sans-serif;\n    font-size: 14px;\n    font-weight: 400;\n    color: #3f3f3f; }\n\n.igv-zoom-in-notice {\n  position: absolute;\n  top: 10px;\n  left: 50%; }\n  .igv-zoom-in-notice div {\n    position: relative;\n    left: -50%;\n    font-family: \"Open Sans\", sans-serif;\n    font-size: medium;\n    font-weight: 400;\n    color: #3f3f3f;\n    background-color: rgba(255, 255, 255, 0.51);\n    z-index: 64; }\n\n.igv-container-spinner {\n  position: absolute;\n  top: 90%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  z-index: 1024;\n  width: 24px;\n  height: 24px;\n  pointer-events: none;\n  color: #737373; }\n\n.igv-multi-locus-close-button {\n  position: absolute;\n  top: 2px;\n  right: 2px;\n  width: 14px;\n  height: 14px;\n  color: #666666;\n  z-index: 1000; }\n  .igv-multi-locus-close-button > svg {\n    vertical-align: top; }\n\n.igv-multi-locus-close-button:hover {\n  cursor: pointer;\n  color: #434343; }\n\n.igv-multi-locus-ruler-label {\n  position: absolute;\n  left: 50%;\n  top: 15%;\n  transform: translate(-50%, -25%);\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 12px;\n  font-weight: 400;\n  text-align: center;\n  width: fit-content;\n  z-index: 64;\n  color: #373737;\n  background-color: white;\n  padding: 1px; }\n\n.igv-multi-locus-ruler-label:hover {\n  cursor: pointer; }\n\n.igv-ruler-sweeper {\n  display: none;\n  pointer-events: none;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 0;\n  height: 100%;\n  z-index: 99999;\n  background-color: rgba(68, 134, 247, 0.25); }\n\n.igv-ruler-tooltip {\n  pointer-events: none;\n  z-index: 128;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 1px;\n  height: 32px;\n  background-color: transparent;\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-ruler-tooltip > div {\n    pointer-events: none;\n    width: 128px;\n    height: auto;\n    padding: 1px;\n    color: #373737;\n    font-size: 10px;\n    font-family: \"Open Sans\", sans-serif;\n    font-weight: 400;\n    background-color: white;\n    border-style: solid;\n    border-width: thin;\n    border-color: #373737; }\n\n.igv-track-label {\n  position: absolute;\n  left: 8px;\n  top: 8px;\n  width: auto;\n  height: auto;\n  max-width: 200px;\n  padding-left: 4px;\n  padding-right: 4px;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: small;\n  font-weight: 400;\n  text-align: center;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  border-color: #444;\n  border-radius: 2px;\n  border-style: solid;\n  border-width: thin;\n  background-color: white;\n  z-index: 128;\n  cursor: pointer; }\n\n.igv-track-label:hover,\n.igv-track-label:focus,\n.igv-track-label:active {\n  background-color: rgba(0, 0, 0, 0.05); }\n\n.igv-center-line {\n  display: none;\n  pointer-events: none;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  z-index: 8;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  border-left-style: dashed;\n  border-left-width: thin;\n  border-right-style: dashed;\n  border-right-width: thin; }\n\n.igv-center-line-wide {\n  background-color: rgba(0, 0, 0, 0);\n  border-left-color: rgba(127, 127, 127, 0.51);\n  border-right-color: rgba(127, 127, 127, 0.51); }\n\n.igv-center-line-thin {\n  background-color: rgba(0, 0, 0, 0);\n  border-left-color: rgba(127, 127, 127, 0.51);\n  border-right-color: rgba(0, 0, 0, 0); }\n\n.igv-cursor-guide-horizontal {\n  display: none;\n  pointer-events: none;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 50%;\n  height: 1px;\n  z-index: 1;\n  border-top-style: dotted;\n  border-top-width: thin;\n  border-top-color: rgba(127, 127, 127, 0.76); }\n\n.igv-cursor-guide-vertical {\n  pointer-events: none;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 50%;\n  width: 1px;\n  z-index: 1;\n  border-left-style: dotted;\n  border-left-width: thin;\n  border-left-color: rgba(127, 127, 127, 0.76);\n  display: none; }\n\n.igv-user-feedback {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 512px;\n  height: 360px;\n  z-index: 2048;\n  background-color: white;\n  border-color: #a2a2a2;\n  border-style: solid;\n  border-width: thin;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: medium;\n  font-weight: 400;\n  color: #444;\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-user-feedback div:first-child {\n    position: relative;\n    height: 24px;\n    width: 100%;\n    background-color: white;\n    border-bottom-color: #a2a2a2;\n    border-bottom-style: solid;\n    border-bottom-width: thin; }\n    .igv-user-feedback div:first-child div {\n      position: absolute;\n      top: 2px;\n      width: 16px;\n      height: 16px;\n      background-color: transparent; }\n    .igv-user-feedback div:first-child div:first-child {\n      left: 8px; }\n    .igv-user-feedback div:first-child div:last-child {\n      cursor: pointer;\n      right: 8px; }\n  .igv-user-feedback div:last-child {\n    width: 100%;\n    height: calc(100% - 24px);\n    border-width: 0; }\n    .igv-user-feedback div:last-child div {\n      width: auto;\n      height: auto;\n      margin: 8px; }\n\n.igv-generic-dialog-container {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 300px;\n  height: 200px;\n  border-color: #7F7F7F;\n  border-radius: 4px;\n  border-style: solid;\n  border-width: thin;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: medium;\n  font-weight: 400;\n  z-index: 2048;\n  background-color: white;\n  display: flex;\n  flex-flow: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-generic-dialog-container .igv-generic-dialog-header {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-end;\n    align-items: center;\n    width: 100%;\n    height: 24px;\n    cursor: move;\n    border-top-left-radius: 4px;\n    border-top-right-radius: 4px;\n    border-bottom-color: #7F7F7F;\n    border-bottom-style: solid;\n    border-bottom-width: thin;\n    background-color: #eee; }\n    .igv-generic-dialog-container .igv-generic-dialog-header div {\n      margin-right: 4px;\n      margin-bottom: 2px;\n      height: 12px;\n      width: 12px;\n      color: #7F7F7F; }\n    .igv-generic-dialog-container .igv-generic-dialog-header div:hover {\n      cursor: pointer;\n      color: #444; }\n  .igv-generic-dialog-container .igv-generic-dialog-one-liner {\n    color: #373737;\n    width: 95%;\n    height: 24px;\n    line-height: 24px;\n    text-align: left;\n    margin-top: 8px;\n    padding-left: 8px;\n    overflow-wrap: break-word;\n    background-color: white; }\n  .igv-generic-dialog-container .igv-generic-dialog-label-input {\n    margin-top: 8px;\n    width: 95%;\n    height: 24px;\n    color: #373737;\n    line-height: 24px;\n    padding-left: 8px;\n    background-color: white;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-start;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input div {\n      width: 30%;\n      height: 100%;\n      font-size: 16px;\n      text-align: right;\n      padding-right: 8px;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input input {\n      display: block;\n      height: 100%;\n      width: 100%;\n      padding-left: 4px;\n      font-family: \"Open Sans\", sans-serif;\n      font-weight: 400;\n      color: #373737;\n      text-align: left;\n      outline: none;\n      border-style: solid;\n      border-width: thin;\n      border-color: #7F7F7F;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input input {\n      width: 50%;\n      font-size: 16px; }\n  .igv-generic-dialog-container .igv-generic-dialog-input {\n    margin-top: 8px;\n    width: calc(100% - 16px);\n    height: 24px;\n    color: #373737;\n    line-height: 24px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-input input {\n      display: block;\n      height: 100%;\n      width: 100%;\n      padding-left: 4px;\n      font-family: \"Open Sans\", sans-serif;\n      font-weight: 400;\n      color: #373737;\n      text-align: left;\n      outline: none;\n      border-style: solid;\n      border-width: thin;\n      border-color: #7F7F7F;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-input input {\n      font-size: 16px; }\n  .igv-generic-dialog-container .igv-generic-dialog-ok-cancel {\n    width: 100%;\n    height: 28px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div {\n      margin-top: 32px;\n      color: white;\n      font-family: \"Open Sans\", sans-serif;\n      font-size: 14px;\n      font-weight: 400;\n      width: 75px;\n      height: 28px;\n      line-height: 28px;\n      text-align: center;\n      border-color: transparent;\n      border-style: solid;\n      border-width: thin;\n      border-radius: 2px; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child {\n      margin-left: 32px;\n      margin-right: 0;\n      background-color: #5ea4e0; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child {\n      margin-left: 0;\n      margin-right: 32px;\n      background-color: #c4c4c4; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child:hover {\n      cursor: pointer;\n      background-color: #3b5c7f; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child:hover {\n      cursor: pointer;\n      background-color: #7f7f7f; }\n  .igv-generic-dialog-container .igv-generic-dialog-ok {\n    width: 100%;\n    height: 36px;\n    margin-top: 32px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok div {\n      width: 98px;\n      height: 36px;\n      line-height: 36px;\n      text-align: center;\n      color: white;\n      font-family: \"Open Sans\", sans-serif;\n      font-size: medium;\n      font-weight: 400;\n      border-color: white;\n      border-style: solid;\n      border-width: thin;\n      border-radius: 4px;\n      background-color: #2B81AF; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok div:hover {\n      cursor: pointer;\n      background-color: #25597f; }\n\n.igv-generic-container {\n  position: absolute;\n  top: 0;\n  left: 0;\n  z-index: 2048;\n  background-color: white;\n  cursor: pointer;\n  display: flex;\n  flex-direction: row;\n  flex-wrap: wrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-generic-container div:first-child {\n    cursor: move;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-end;\n    align-items: center;\n    height: 24px;\n    width: 100%;\n    background-color: #dddddd; }\n    .igv-generic-container div:first-child i {\n      display: block;\n      color: #5f5f5f;\n      cursor: pointer;\n      width: 14px;\n      height: 14px;\n      margin-right: 8px;\n      margin-bottom: 4px; }\n\n.igv-menu-popup {\n  position: absolute;\n  top: 0;\n  left: 0;\n  min-width: 132px;\n  z-index: 4096;\n  cursor: pointer;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: small;\n  font-weight: 400;\n  color: #4b4b4b;\n  background: white;\n  border-radius: 4px;\n  border-color: #7F7F7F;\n  border-style: solid;\n  border-width: thin;\n  display: flex;\n  flex-flow: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-end;\n  text-align: left; }\n  .igv-menu-popup > div:not(:first-child) {\n    width: 100%; }\n    .igv-menu-popup > div:not(:first-child) > div {\n      background: white; }\n    .igv-menu-popup > div:not(:first-child) > div.context-menu {\n      padding-left: 4px;\n      padding-right: 4px; }\n    .igv-menu-popup > div:not(:first-child) > div:last-child {\n      border-bottom-left-radius: 4px;\n      border-bottom-right-radius: 4px;\n      border-bottom-color: transparent;\n      border-bottom-style: solid;\n      border-bottom-width: thin; }\n    .igv-menu-popup > div:not(:first-child) > div:hover {\n      background: #efefef; }\n\n.igv-menu-popup-shim {\n  padding-left: 8px;\n  padding-right: 8px; }\n\n.igv-menu-popup-header {\n  position: relative;\n  width: 100%;\n  height: 24px;\n  cursor: move;\n  border-top-color: transparent;\n  border-top-left-radius: 4px;\n  border-top-right-radius: 4px;\n  border-bottom-color: #7F7F7F;\n  border-bottom-style: solid;\n  border-bottom-width: thin;\n  background-color: #eee;\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-end;\n  align-items: center; }\n  .igv-menu-popup-header div {\n    margin-right: 4px;\n    height: 12px;\n    width: 12px;\n    color: #7F7F7F; }\n  .igv-menu-popup-header div:hover {\n    cursor: pointer;\n    color: #444; }\n\n.igv-menu-popup-check-container {\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center;\n  width: 100%;\n  height: 20px;\n  background-color: transparent; }\n  .igv-menu-popup-check-container div {\n    padding-top: 2px;\n    padding-left: 8px; }\n  .igv-menu-popup-check-container div:first-child {\n    position: relative;\n    width: 12px;\n    height: 12px; }\n    .igv-menu-popup-check-container div:first-child svg {\n      position: absolute;\n      width: 12px;\n      height: 12px; }\n\n.igv-user-feedback {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 512px;\n  height: 360px;\n  z-index: 2048;\n  background-color: white;\n  border-color: #a2a2a2;\n  border-style: solid;\n  border-width: thin;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: medium;\n  font-weight: 400;\n  color: #444;\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-user-feedback div:first-child {\n    position: relative;\n    height: 24px;\n    width: 100%;\n    background-color: white;\n    border-bottom-color: #a2a2a2;\n    border-bottom-style: solid;\n    border-bottom-width: thin; }\n    .igv-user-feedback div:first-child div {\n      position: absolute;\n      top: 2px;\n      width: 16px;\n      height: 16px;\n      background-color: transparent; }\n    .igv-user-feedback div:first-child div:first-child {\n      left: 8px; }\n    .igv-user-feedback div:first-child div:last-child {\n      cursor: pointer;\n      right: 8px; }\n  .igv-user-feedback div:last-child {\n    width: 100%;\n    height: calc(100% - 24px);\n    border-width: 0; }\n    .igv-user-feedback div:last-child div {\n      width: auto;\n      height: auto;\n      margin: 8px; }\n\n.igv-loading-spinner-container {\n  z-index: 1024;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 32px;\n  height: 32px;\n  display: flex;\n  flex-direction: row;\n  flex-wrap: nowrap;\n  justify-content: center;\n  align-items: center; }\n  .igv-loading-spinner-container > div {\n    box-sizing: border-box;\n    width: 100%;\n    height: 100%;\n    border-radius: 50%;\n    border: 4px solid rgba(128, 128, 128, 0.5);\n    border-top-color: white;\n    animation: spin 1s ease-in-out infinite;\n    -webkit-animation: spin 1s ease-in-out infinite; }\n\n@keyframes spin {\n  to {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg); } }\n@-webkit-keyframes spin {\n  to {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg); } }\n.igv-container {\n  position: relative;\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  user-select: none;\n  -webkit-user-select: none;\n  -ms-user-select: none; }\n\n.igv-viewport {\n  position: relative;\n  margin-top: 2px;\n  overflow-x: hidden;\n  overflow-y: hidden; }\n\n.igv-viewport-content {\n  position: relative;\n  width: 100%; }\n  .igv-viewport-content > canvas {\n    position: relative;\n    display: block; }\n\n.igv-column-container {\n  position: relative;\n  display: flex;\n  flex-direction: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: stretch;\n  width: 100%; }\n\n.igv-column-shim {\n  width: 1px;\n  margin-left: 2px;\n  margin-right: 2px;\n  background-color: #545453; }\n\n.igv-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%; }\n\n.igv-axis-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%;\n  width: 50px; }\n  .igv-axis-column > div {\n    margin-top: 2px;\n    width: 100%; }\n\n.igv-sample-name-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%; }\n\n.igv-scrollbar-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%;\n  width: 14px; }\n  .igv-scrollbar-column > div {\n    position: relative;\n    margin-top: 2px;\n    width: 14px; }\n    .igv-scrollbar-column > div > div {\n      cursor: pointer;\n      position: absolute;\n      top: 0;\n      left: 2px;\n      width: 8px;\n      border-width: 1px;\n      border-style: solid;\n      border-color: #c4c4c4;\n      border-top-left-radius: 4px;\n      border-top-right-radius: 4px;\n      border-bottom-left-radius: 4px;\n      border-bottom-right-radius: 4px; }\n    .igv-scrollbar-column > div > div:hover {\n      background-color: #c4c4c4; }\n\n.igv-track-drag-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%;\n  width: 12px;\n  background-color: white; }\n  .igv-track-drag-column > .igv-track-drag-handle {\n    z-index: 512;\n    position: relative;\n    cursor: pointer;\n    margin-top: 2px;\n    width: 100%;\n    border-style: solid;\n    border-width: 0;\n    border-top-right-radius: 6px;\n    border-bottom-right-radius: 6px;\n    background-color: #c4c4c4; }\n  .igv-track-drag-column .igv-track-drag-handle-hover {\n    background-color: #787878; }\n  .igv-track-drag-column > .igv-track-drag-shim {\n    position: relative;\n    margin-top: 2px;\n    width: 100%;\n    border-style: solid;\n    border-width: 0; }\n\n.igv-gear-menu-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%;\n  width: 28px; }\n  .igv-gear-menu-column > div {\n    display: flex;\n    flex-direction: column;\n    flex-wrap: nowrap;\n    justify-content: flex-start;\n    align-items: center;\n    margin-top: 2px;\n    width: 100%;\n    background: white; }\n    .igv-gear-menu-column > div > div {\n      position: relative;\n      margin-top: 4px;\n      width: 16px;\n      height: 16px;\n      color: #7F7F7F; }\n    .igv-gear-menu-column > div > div:hover {\n      cursor: pointer;\n      color: #444; }\n\n/*# sourceMappingURL=dom.css.map */\n';
+      var css = '.igv-navbar {\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: space-between;\n  align-items: center;\n  box-sizing: border-box;\n  width: 100%;\n  color: #444;\n  font-size: 12px;\n  font-family: \"Open Sans\", sans-serif;\n  font-weight: 400;\n  line-height: 32px;\n  padding-left: 8px;\n  padding-right: 8px;\n  margin-bottom: 6px;\n  height: 32px;\n  border-style: solid;\n  border-radius: 3px;\n  border-width: thin;\n  border-color: #bfbfbf;\n  background-color: #f3f3f3; }\n  .igv-navbar .igv-navbar-left-container {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-between;\n    align-items: center;\n    height: 32px;\n    line-height: 32px; }\n    .igv-navbar .igv-navbar-left-container .igv-logo {\n      width: 34px;\n      height: 32px;\n      margin-right: 8px; }\n    .igv-navbar .igv-navbar-left-container .igv-current-genome {\n      height: 32px;\n      margin-left: 4px;\n      margin-right: 4px;\n      user-select: none;\n      line-height: 32px;\n      vertical-align: middle;\n      text-align: center; }\n    .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location {\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: space-between;\n      align-items: center;\n      height: 100%; }\n      .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-chromosome-select-widget-container {\n        display: flex;\n        flex-flow: column;\n        flex-wrap: nowrap;\n        justify-content: space-around;\n        align-items: center;\n        height: 100%;\n        width: 125px;\n        margin-right: 4px; }\n        .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-chromosome-select-widget-container select {\n          display: block;\n          cursor: pointer;\n          width: 100px;\n          height: 75%;\n          outline: none;\n          font-size: 12px;\n          font-family: \"Open Sans\", sans-serif;\n          font-weight: 400; }\n      .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group {\n        display: flex;\n        flex-flow: row;\n        flex-wrap: nowrap;\n        justify-content: space-between;\n        align-items: center;\n        margin-left: 8px;\n        height: 22px; }\n        .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container {\n          display: flex;\n          flex-flow: row;\n          flex-wrap: nowrap;\n          justify-content: flex-start;\n          align-items: center;\n          width: 210px;\n          height: 22px;\n          line-height: 22px; }\n          .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container input.igv-search-input {\n            cursor: text;\n            width: 85%;\n            height: 22px;\n            line-height: 22px;\n            font-size: 12px;\n            font-family: \"Open Sans\", sans-serif;\n            font-weight: 400;\n            text-align: left;\n            padding-left: 8px;\n            margin-right: 8px;\n            outline: none;\n            border-style: solid;\n            border-radius: 3px;\n            border-width: thin;\n            border-color: #bfbfbf;\n            background-color: white; }\n          .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container .igv-search-icon-container {\n            cursor: pointer;\n            height: 16px;\n            width: 16px; }\n        .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-windowsize-panel-container {\n          margin-left: 4px;\n          user-select: none; }\n  .igv-navbar .igv-navbar-right-container {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-between;\n    align-items: center;\n    height: 32px;\n    line-height: 32px; }\n    .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container {\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: space-between;\n      align-items: center;\n      height: 100%; }\n      .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container div {\n        margin-left: 0;\n        margin-right: 4px; }\n      .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container div:last-child {\n        margin-left: 0;\n        margin-right: 0; }\n    .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container-750 {\n      display: none; }\n    .igv-navbar .igv-navbar-right-container .igv-zoom-widget {\n      color: #737373;\n      font-size: 18px;\n      height: 32px;\n      line-height: 32px;\n      margin-left: 8px;\n      user-select: none;\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: flex-end;\n      align-items: center; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget div {\n        cursor: pointer;\n        margin-left: unset;\n        margin-right: unset; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:first-child {\n        height: 24px;\n        width: 24px;\n        margin-left: unset;\n        margin-right: 8px; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:last-child {\n        height: 24px;\n        width: 24px;\n        margin-left: 8px;\n        margin-right: unset; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:nth-child(even) {\n        display: block;\n        height: fit-content; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget input {\n        display: block;\n        width: 125px; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget svg {\n        display: block; }\n    .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 {\n      color: #737373;\n      font-size: 18px;\n      height: 32px;\n      line-height: 32px;\n      margin-left: 8px;\n      user-select: none;\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: flex-end;\n      align-items: center; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div {\n        cursor: pointer;\n        margin-left: unset;\n        margin-right: unset; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:first-child {\n        height: 24px;\n        width: 24px;\n        margin-left: unset;\n        margin-right: 8px; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:last-child {\n        height: 24px;\n        width: 24px;\n        margin-left: 8px;\n        margin-right: unset; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:nth-child(even) {\n        width: 0;\n        height: 0;\n        display: none; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 input {\n        width: 0;\n        height: 0;\n        display: none; }\n      .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 svg {\n        display: block; }\n    .igv-navbar .igv-navbar-right-container .igv-zoom-widget-hidden {\n      display: none; }\n\n.igv-navbar-button {\n  display: block;\n  box-sizing: unset;\n  padding-left: 6px;\n  padding-right: 6px;\n  height: 18px;\n  text-transform: capitalize;\n  user-select: none;\n  line-height: 18px;\n  text-align: center;\n  vertical-align: middle;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 11px;\n  font-weight: 200;\n  color: #737373;\n  background-color: #f3f3f3;\n  border-color: #737373;\n  border-style: solid;\n  border-width: thin;\n  border-radius: 6px; }\n\n.igv-navbar-button-clicked {\n  color: white;\n  background-color: #737373; }\n\n.igv-navbar-button:hover {\n  cursor: pointer; }\n\n.igv-zoom-in-notice-container {\n  z-index: 1024;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  display: flex;\n  flex-direction: row;\n  flex-wrap: nowrap;\n  justify-content: center;\n  align-items: center;\n  background-color: white; }\n  .igv-zoom-in-notice-container > div {\n    padding-left: 4px;\n    padding-right: 4px;\n    padding-top: 2px;\n    padding-bottom: 2px;\n    width: 100%;\n    height: 100%;\n    font-family: \"Open Sans\", sans-serif;\n    font-size: 14px;\n    font-weight: 400;\n    color: #3f3f3f; }\n\n.igv-zoom-in-notice {\n  position: absolute;\n  top: 10px;\n  left: 50%; }\n  .igv-zoom-in-notice div {\n    position: relative;\n    left: -50%;\n    font-family: \"Open Sans\", sans-serif;\n    font-size: medium;\n    font-weight: 400;\n    color: #3f3f3f;\n    background-color: rgba(255, 255, 255, 0.51);\n    z-index: 64; }\n\n.igv-container-spinner {\n  position: absolute;\n  top: 90%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  z-index: 1024;\n  width: 24px;\n  height: 24px;\n  pointer-events: none;\n  color: #737373; }\n\n.igv-multi-locus-close-button {\n  position: absolute;\n  top: 2px;\n  right: 2px;\n  width: 14px;\n  height: 14px;\n  color: #666666;\n  z-index: 1000; }\n  .igv-multi-locus-close-button > svg {\n    vertical-align: top; }\n\n.igv-multi-locus-close-button:hover {\n  cursor: pointer;\n  color: #434343; }\n\n.igv-multi-locus-ruler-label {\n  position: absolute;\n  left: 50%;\n  top: 15%;\n  transform: translate(-50%, -25%);\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 12px;\n  font-weight: 400;\n  text-align: center;\n  z-index: 64;\n  color: #373737;\n  background-color: white;\n  padding: 1px; }\n\n.igv-multi-locus-ruler-label:hover {\n  cursor: pointer; }\n\n.igv-ruler-sweeper {\n  display: none;\n  pointer-events: none;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 0;\n  height: 100%;\n  z-index: 99999;\n  background-color: rgba(68, 134, 247, 0.25); }\n\n.igv-ruler-tooltip {\n  pointer-events: none;\n  z-index: 128;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 1px;\n  height: 32px;\n  background-color: transparent;\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-ruler-tooltip > div {\n    pointer-events: none;\n    width: 128px;\n    height: auto;\n    padding: 1px;\n    color: #373737;\n    font-size: 10px;\n    font-family: \"Open Sans\", sans-serif;\n    font-weight: 400;\n    background-color: white;\n    border-style: solid;\n    border-width: thin;\n    border-color: #373737; }\n\n.igv-track-label {\n  position: absolute;\n  left: 8px;\n  top: 8px;\n  width: auto;\n  height: auto;\n  max-width: 200px;\n  padding-left: 4px;\n  padding-right: 4px;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: small;\n  font-weight: 400;\n  text-align: center;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  border-color: #444;\n  border-radius: 2px;\n  border-style: solid;\n  border-width: thin;\n  background-color: white;\n  z-index: 128;\n  cursor: pointer; }\n\n.igv-track-label:hover,\n.igv-track-label:focus,\n.igv-track-label:active {\n  background-color: rgba(0, 0, 0, 0.05); }\n\n.igv-center-line {\n  display: none;\n  pointer-events: none;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  z-index: 8;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  border-left-style: dashed;\n  border-left-width: thin;\n  border-right-style: dashed;\n  border-right-width: thin; }\n\n.igv-center-line-wide {\n  background-color: rgba(0, 0, 0, 0);\n  border-left-color: rgba(127, 127, 127, 0.51);\n  border-right-color: rgba(127, 127, 127, 0.51); }\n\n.igv-center-line-thin {\n  background-color: rgba(0, 0, 0, 0);\n  border-left-color: rgba(127, 127, 127, 0.51);\n  border-right-color: rgba(0, 0, 0, 0); }\n\n.igv-cursor-guide-horizontal {\n  display: none;\n  pointer-events: none;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  position: absolute;\n  left: 0;\n  right: 0;\n  top: 50%;\n  height: 1px;\n  z-index: 1;\n  border-top-style: dotted;\n  border-top-width: thin;\n  border-top-color: rgba(127, 127, 127, 0.76); }\n\n.igv-cursor-guide-vertical {\n  pointer-events: none;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 50%;\n  width: 1px;\n  z-index: 1;\n  border-left-style: dotted;\n  border-left-width: thin;\n  border-left-color: rgba(127, 127, 127, 0.76);\n  display: none; }\n\n.igv-user-feedback {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 512px;\n  height: 360px;\n  z-index: 2048;\n  background-color: white;\n  border-color: #a2a2a2;\n  border-style: solid;\n  border-width: thin;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: medium;\n  font-weight: 400;\n  color: #444;\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-user-feedback div:first-child {\n    position: relative;\n    height: 24px;\n    width: 100%;\n    background-color: white;\n    border-bottom-color: #a2a2a2;\n    border-bottom-style: solid;\n    border-bottom-width: thin; }\n    .igv-user-feedback div:first-child div {\n      position: absolute;\n      top: 2px;\n      width: 16px;\n      height: 16px;\n      background-color: transparent; }\n    .igv-user-feedback div:first-child div:first-child {\n      left: 8px; }\n    .igv-user-feedback div:first-child div:last-child {\n      cursor: pointer;\n      right: 8px; }\n  .igv-user-feedback div:last-child {\n    width: 100%;\n    height: calc(100% - 24px);\n    border-width: 0; }\n    .igv-user-feedback div:last-child div {\n      width: auto;\n      height: auto;\n      margin: 8px; }\n\n.igv-generic-dialog-container {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 300px;\n  height: 200px;\n  border-color: #7F7F7F;\n  border-radius: 4px;\n  border-style: solid;\n  border-width: thin;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: medium;\n  font-weight: 400;\n  z-index: 2048;\n  background-color: white;\n  display: flex;\n  flex-flow: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-generic-dialog-container .igv-generic-dialog-header {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-end;\n    align-items: center;\n    width: 100%;\n    height: 24px;\n    cursor: move;\n    border-top-left-radius: 4px;\n    border-top-right-radius: 4px;\n    border-bottom-color: #7F7F7F;\n    border-bottom-style: solid;\n    border-bottom-width: thin;\n    background-color: #eee; }\n    .igv-generic-dialog-container .igv-generic-dialog-header div {\n      margin-right: 4px;\n      margin-bottom: 2px;\n      height: 12px;\n      width: 12px;\n      color: #7F7F7F; }\n    .igv-generic-dialog-container .igv-generic-dialog-header div:hover {\n      cursor: pointer;\n      color: #444; }\n  .igv-generic-dialog-container .igv-generic-dialog-one-liner {\n    color: #373737;\n    width: 95%;\n    height: 24px;\n    line-height: 24px;\n    text-align: left;\n    margin-top: 8px;\n    padding-left: 8px;\n    overflow-wrap: break-word;\n    background-color: white; }\n  .igv-generic-dialog-container .igv-generic-dialog-label-input {\n    margin-top: 8px;\n    width: 95%;\n    height: 24px;\n    color: #373737;\n    line-height: 24px;\n    padding-left: 8px;\n    background-color: white;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-start;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input div {\n      width: 30%;\n      height: 100%;\n      font-size: 16px;\n      text-align: right;\n      padding-right: 8px;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input input {\n      display: block;\n      height: 100%;\n      width: 100%;\n      padding-left: 4px;\n      font-family: \"Open Sans\", sans-serif;\n      font-weight: 400;\n      color: #373737;\n      text-align: left;\n      outline: none;\n      border-style: solid;\n      border-width: thin;\n      border-color: #7F7F7F;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input input {\n      width: 50%;\n      font-size: 16px; }\n  .igv-generic-dialog-container .igv-generic-dialog-input {\n    margin-top: 8px;\n    width: calc(100% - 16px);\n    height: 24px;\n    color: #373737;\n    line-height: 24px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-input input {\n      display: block;\n      height: 100%;\n      width: 100%;\n      padding-left: 4px;\n      font-family: \"Open Sans\", sans-serif;\n      font-weight: 400;\n      color: #373737;\n      text-align: left;\n      outline: none;\n      border-style: solid;\n      border-width: thin;\n      border-color: #7F7F7F;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-input input {\n      font-size: 16px; }\n  .igv-generic-dialog-container .igv-generic-dialog-ok-cancel {\n    width: 100%;\n    height: 28px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div {\n      margin-top: 32px;\n      color: white;\n      font-family: \"Open Sans\", sans-serif;\n      font-size: 14px;\n      font-weight: 400;\n      width: 75px;\n      height: 28px;\n      line-height: 28px;\n      text-align: center;\n      border-color: transparent;\n      border-style: solid;\n      border-width: thin;\n      border-radius: 2px; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child {\n      margin-left: 32px;\n      margin-right: 0;\n      background-color: #5ea4e0; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child {\n      margin-left: 0;\n      margin-right: 32px;\n      background-color: #c4c4c4; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child:hover {\n      cursor: pointer;\n      background-color: #3b5c7f; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child:hover {\n      cursor: pointer;\n      background-color: #7f7f7f; }\n  .igv-generic-dialog-container .igv-generic-dialog-ok {\n    width: 100%;\n    height: 36px;\n    margin-top: 32px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok div {\n      width: 98px;\n      height: 36px;\n      line-height: 36px;\n      text-align: center;\n      color: white;\n      font-family: \"Open Sans\", sans-serif;\n      font-size: medium;\n      font-weight: 400;\n      border-color: white;\n      border-style: solid;\n      border-width: thin;\n      border-radius: 4px;\n      background-color: #2B81AF; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok div:hover {\n      cursor: pointer;\n      background-color: #25597f; }\n\n.igv-generic-container {\n  position: absolute;\n  top: 0;\n  left: 0;\n  z-index: 2048;\n  background-color: white;\n  cursor: pointer;\n  display: flex;\n  flex-direction: row;\n  flex-wrap: wrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-generic-container div:first-child {\n    cursor: move;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-end;\n    align-items: center;\n    height: 24px;\n    width: 100%;\n    background-color: #dddddd; }\n    .igv-generic-container div:first-child i {\n      display: block;\n      color: #5f5f5f;\n      cursor: pointer;\n      width: 14px;\n      height: 14px;\n      margin-right: 8px;\n      margin-bottom: 4px; }\n\n.igv-menu-popup {\n  position: absolute;\n  top: 0;\n  left: 0;\n  min-width: 132px;\n  z-index: 4096;\n  cursor: pointer;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: small;\n  font-weight: 400;\n  color: #4b4b4b;\n  background: white;\n  border-radius: 4px;\n  border-color: #7F7F7F;\n  border-style: solid;\n  border-width: thin;\n  display: flex;\n  flex-flow: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-end;\n  text-align: left; }\n  .igv-menu-popup > div:not(:first-child) {\n    width: 100%; }\n    .igv-menu-popup > div:not(:first-child) > div {\n      background: white; }\n    .igv-menu-popup > div:not(:first-child) > div.context-menu {\n      padding-left: 4px;\n      padding-right: 4px; }\n    .igv-menu-popup > div:not(:first-child) > div:last-child {\n      border-bottom-left-radius: 4px;\n      border-bottom-right-radius: 4px;\n      border-bottom-color: transparent;\n      border-bottom-style: solid;\n      border-bottom-width: thin; }\n    .igv-menu-popup > div:not(:first-child) > div:hover {\n      background: #efefef; }\n\n.igv-menu-popup-shim {\n  padding-left: 8px;\n  padding-right: 8px; }\n\n.igv-menu-popup-header {\n  position: relative;\n  width: 100%;\n  height: 24px;\n  cursor: move;\n  border-top-color: transparent;\n  border-top-left-radius: 4px;\n  border-top-right-radius: 4px;\n  border-bottom-color: #7F7F7F;\n  border-bottom-style: solid;\n  border-bottom-width: thin;\n  background-color: #eee;\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-end;\n  align-items: center; }\n  .igv-menu-popup-header div {\n    margin-right: 4px;\n    height: 12px;\n    width: 12px;\n    color: #7F7F7F; }\n  .igv-menu-popup-header div:hover {\n    cursor: pointer;\n    color: #444; }\n\n.igv-menu-popup-check-container {\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center;\n  width: 100%;\n  height: 20px;\n  background-color: transparent; }\n  .igv-menu-popup-check-container div {\n    padding-top: 2px;\n    padding-left: 8px; }\n  .igv-menu-popup-check-container div:first-child {\n    position: relative;\n    width: 12px;\n    height: 12px; }\n    .igv-menu-popup-check-container div:first-child svg {\n      position: absolute;\n      width: 12px;\n      height: 12px; }\n\n.igv-user-feedback {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 512px;\n  height: 360px;\n  z-index: 2048;\n  background-color: white;\n  border-color: #a2a2a2;\n  border-style: solid;\n  border-width: thin;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: medium;\n  font-weight: 400;\n  color: #444;\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-user-feedback div:first-child {\n    position: relative;\n    height: 24px;\n    width: 100%;\n    background-color: white;\n    border-bottom-color: #a2a2a2;\n    border-bottom-style: solid;\n    border-bottom-width: thin; }\n    .igv-user-feedback div:first-child div {\n      position: absolute;\n      top: 2px;\n      width: 16px;\n      height: 16px;\n      background-color: transparent; }\n    .igv-user-feedback div:first-child div:first-child {\n      left: 8px; }\n    .igv-user-feedback div:first-child div:last-child {\n      cursor: pointer;\n      right: 8px; }\n  .igv-user-feedback div:last-child {\n    width: 100%;\n    height: calc(100% - 24px);\n    border-width: 0; }\n    .igv-user-feedback div:last-child div {\n      width: auto;\n      height: auto;\n      margin: 8px; }\n\n.igv-loading-spinner-container {\n  z-index: 1024;\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 32px;\n  height: 32px;\n  display: flex;\n  flex-direction: row;\n  flex-wrap: nowrap;\n  justify-content: center;\n  align-items: center; }\n  .igv-loading-spinner-container > div {\n    box-sizing: border-box;\n    width: 100%;\n    height: 100%;\n    border-radius: 50%;\n    border: 4px solid rgba(128, 128, 128, 0.5);\n    border-top-color: white;\n    animation: spin 1s ease-in-out infinite;\n    -webkit-animation: spin 1s ease-in-out infinite; }\n\n@keyframes spin {\n  to {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg); } }\n@-webkit-keyframes spin {\n  to {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg); } }\n.igv-container {\n  position: relative;\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  user-select: none;\n  -webkit-user-select: none;\n  -ms-user-select: none; }\n\n.igv-viewport {\n  position: relative;\n  margin-top: 2px;\n  overflow-x: hidden;\n  overflow-y: hidden; }\n\n.igv-viewport-content {\n  position: relative;\n  width: 100%; }\n  .igv-viewport-content > canvas {\n    position: relative;\n    display: block; }\n\n.igv-column-container {\n  position: relative;\n  display: flex;\n  flex-direction: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: stretch;\n  width: 100%; }\n\n.igv-column-shim {\n  width: 1px;\n  margin-left: 2px;\n  margin-right: 2px;\n  background-color: #545453; }\n\n.igv-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%; }\n\n.igv-axis-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%;\n  width: 50px; }\n  .igv-axis-column > div {\n    margin-top: 2px;\n    width: 100%; }\n\n.igv-sample-name-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%; }\n\n.igv-scrollbar-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%;\n  width: 14px; }\n  .igv-scrollbar-column > div {\n    position: relative;\n    margin-top: 2px;\n    width: 14px; }\n    .igv-scrollbar-column > div > div {\n      cursor: pointer;\n      position: absolute;\n      top: 0;\n      left: 2px;\n      width: 8px;\n      border-width: 1px;\n      border-style: solid;\n      border-color: #c4c4c4;\n      border-top-left-radius: 4px;\n      border-top-right-radius: 4px;\n      border-bottom-left-radius: 4px;\n      border-bottom-right-radius: 4px; }\n    .igv-scrollbar-column > div > div:hover {\n      background-color: #c4c4c4; }\n\n.igv-track-drag-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%;\n  width: 12px;\n  background-color: white; }\n  .igv-track-drag-column > .igv-track-drag-handle {\n    z-index: 512;\n    position: relative;\n    cursor: pointer;\n    margin-top: 2px;\n    width: 100%;\n    border-style: solid;\n    border-width: 0;\n    border-top-right-radius: 6px;\n    border-bottom-right-radius: 6px;\n    background-color: #c4c4c4; }\n  .igv-track-drag-column .igv-track-drag-handle-hover {\n    background-color: #787878; }\n  .igv-track-drag-column > .igv-track-drag-shim {\n    position: relative;\n    margin-top: 2px;\n    width: 100%;\n    border-style: solid;\n    border-width: 0; }\n\n.igv-gear-menu-column {\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-start;\n  box-sizing: border-box;\n  height: 100%;\n  width: 28px; }\n  .igv-gear-menu-column > div {\n    display: flex;\n    flex-direction: column;\n    flex-wrap: nowrap;\n    justify-content: flex-start;\n    align-items: center;\n    margin-top: 2px;\n    width: 100%;\n    background: white; }\n    .igv-gear-menu-column > div > div {\n      position: relative;\n      margin-top: 4px;\n      width: 16px;\n      height: 16px;\n      color: #7F7F7F; }\n    .igv-gear-menu-column > div > div:hover {\n      cursor: pointer;\n      color: #444; }\n\n/*# sourceMappingURL=dom.css.map */\n';
       var style = document.createElement('style');
       style.setAttribute('type', 'text/css');
       style.innerHTML = css;
