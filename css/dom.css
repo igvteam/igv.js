@@ -287,6 +287,8 @@
   height: 14px;
   color: #666666;
   z-index: 1000; }
+  .igv-multi-locus-close-button > svg {
+    vertical-align: top; }
 
 .igv-multi-locus-close-button:hover {
   cursor: pointer;

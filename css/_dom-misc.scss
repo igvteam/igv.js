@@ -84,6 +84,10 @@
 
   z-index: 1000;
 
+  > svg {
+    vertical-align: top;
+  }
+
 }
 
 .igv-multi-locus-close-button:hover {
