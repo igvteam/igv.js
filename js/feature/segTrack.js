@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+import $ from "../vendor/jquery-3.3.1.slim.js";
 import FeatureSource from './featureSource.js';
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
@@ -31,6 +32,7 @@ import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {isSimpleType} from "../util/igvUtils.js";
 import {ColorTable} from "../util/colorPalletes.js";
+import TrackScrollbarControl from "../trackScrollbarControl.js";
 
 class SegTrack extends TrackBase {
 
@@ -126,14 +128,17 @@ class SegTrack extends TrackBase {
         const displayOptions = this.type === 'seg' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"];
 
         for (let displayMode of displayOptions) {
+
+            const checkBox = createCheckbox(lut[displayMode], displayMode === this.displayMode)
             menuItems.push(
                 {
-                    object: $(createCheckbox(lut[displayMode], displayMode === this.displayMode)),
+                    object: $(checkBox),
                     click: () => {
                         this.displayMode = displayMode;
                         this.config.displayMode = displayMode;
                         this.trackView.checkContentHeight();
                         this.trackView.repaintViews();
+                        TrackScrollbarControl.moveScroller(this.trackView, this.trackView.sampleNameViewport.trackScrollDelta)
                     }
                 });
         }

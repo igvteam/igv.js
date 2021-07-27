@@ -1,5 +1,5 @@
 import $ from './vendor/jquery-3.3.1.slim.js'
-import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
+import {DOMUtils, StringUtils} from '../node_modules/igv-utils/src/index.js'
 import {maxViewportContentHeight} from './trackView.js'
 import {randomRGB} from './util/colorPalletes.js'
 
@@ -85,9 +85,14 @@ class TrackScrollbarControl {
         const contentHeight = maxViewportContentHeight(trackView.viewports)
         const contentTop = -Math.round(top * (contentHeight / trackView.viewports[ 0 ].$viewport.height()))
 
-        for (let viewport of [...trackView.viewports, trackView.sampleNameViewport]) {
+        // console.log(`moveScroller contentTop(${ StringUtils.numberFormatter(contentTop) })`)
+
+        for (let viewport of trackView.viewports) {
             viewport.setTop(contentTop)
         }
+
+        trackView.sampleNameViewport.trackScrollDelta = delta
+        trackView.sampleNameViewport.setTop(contentTop)
 
     }
 

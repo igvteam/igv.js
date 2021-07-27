@@ -1,6 +1,7 @@
 import $ from './vendor/jquery-3.3.1.slim.js'
 import {appleCrayonRGB, randomRGB} from './util/colorPalletes.js'
-import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
+import {DOMUtils, StringUtils} from '../node_modules/igv-utils/src/index.js';
+import {maxViewportContentHeight} from "./trackView.js";
 
 const sampleNameXShim = 4
 
@@ -38,6 +39,8 @@ class SampleNameViewport {
 
         this.canvas = this.$canvas.get(0);
         this.ctx = this.canvas.getContext("2d");
+
+        this.trackScrollDelta = 0
 
         this.contentTop = 0;
 
@@ -92,6 +95,7 @@ class SampleNameViewport {
 
         if (typeof this.trackView.track.getSamples === 'function') {
             this.contentTop = contentTop;
+            console.log(`setTop. content-top(${ StringUtils.numberFormatter(contentTop) })`)
             const samples = this.trackView.track.getSamples();
             this.repaint(samples);
         }
@@ -133,13 +137,19 @@ class SampleNameViewport {
         const viewportHeight = this.$viewport.get(0).getBoundingClientRect().height;
         let y = (samples.yOffset || 0) + this.contentTop;    // contentTop will always be a negative number (top relative to viewport)
 
+        console.log(`draw - content-top(${ StringUtils.numberFormatter(this.contentTop) }) yOffset(${ StringUtils.numberFormatter(samples.yOffset) })`)
+
         for (let name of samples.names) {
-            if (y > viewportHeight) break;
+            if (y > viewportHeight) {
+                // console.log(`Will NOT paint. y(${ StringUtils.numberFormatter(y) })  > viewportHeight(${ StringUtils.numberFormatter(viewportHeight) })`)
+                break;
+            }
             if (y + samples.height > 0) {
-                // const text = name.toUpperCase();
                 const text = name;
                 const yFont = getYFont(context, text, y, samples.height);
                 context.fillText(text, sampleNameXShim, yFont);
+                // console.log(`Will     paint. y(${ StringUtils.numberFormatter(y) })  <= viewportHeight(${ StringUtils.numberFormatter(viewportHeight) }) `)
+
             }
             y += samples.height;
         }

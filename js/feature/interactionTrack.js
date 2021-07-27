@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+import $ from "../vendor/jquery-3.3.1.slim.js";
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
