@@ -82,7 +82,7 @@ class Browser {
 
         this.parent = parentDiv;
 
-        this.$root = $('<div>', {class: 'igv-root'});
+        this.$root = $('<div>', {class: 'igv-container'});
         $(parentDiv).append(this.$root);
 
         Alert.init(this.$root.get(0))
@@ -1132,7 +1132,6 @@ class Browser {
         }
 
         if (referenceFrame) {
-            // console.log(`${ Date.now() } - browser.updateViews() -> browser.updateLocusSearchWidget() -> fire locus-change event`)
             this.updateLocusSearchWidget(this.referenceFrameList.length > 1 ? this.referenceFrameList : [ referenceFrame ])
         }
 
@@ -1197,29 +1196,6 @@ class Browser {
                 await trackView.updateViews(force);
             }
         }
-
-        this.updateRulerViewportLabels()
-    }
-
-    updateRulerViewportLabels() {
-
-        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
-
-        for (let { viewports } of this.trackViews) {
-
-            for (let viewport of viewports) {
-
-                if ('ruler' === viewport.trackView.track.type) {
-                    if (viewports.length > 1) {
-                        viewport.presentLocusLabel(viewportWidth)
-                    } else {
-                        viewport.dismissLocusLabel()
-                    }
-                }
-
-            } // for viewports
-
-        } // for trackViews
 
     }
 

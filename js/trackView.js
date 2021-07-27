@@ -409,6 +409,24 @@ class TrackView {
 
         // Repaint sample names last
         this.repaintSamples();
+
+        this.updateRulerViewportLabels()
+    }
+
+    updateRulerViewportLabels() {
+
+        const viewportWidth = this.browser.calculateViewportWidth(this.viewports.length)
+
+        for (let viewport of this.viewports) {
+            if ('ruler' === this.track.type) {
+                if (this.viewports.length > 1) {
+                    viewport.presentLocusLabel(viewportWidth)
+                } else {
+                    viewport.dismissLocusLabel()
+                }
+            }
+        }
+
     }
 
     /**

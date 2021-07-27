@@ -30,7 +30,7 @@ class RulerViewport extends ViewPort {
         this.$viewport.append(this.$rulerLabel)
 
         this.$rulerLabel.click(async () => {
-            
+
             const removals = this.browser.referenceFrameList.filter(r => this.referenceFrame !== r)
             for (let referenceFrame of removals) {
                 await this.browser.removeMultiLocusPanel(referenceFrame)
@@ -50,6 +50,7 @@ class RulerViewport extends ViewPort {
 
         this.$tooltip.hide()
 
+        this.dismissLocusLabel()
     }
 
     presentLocusLabel(viewportWidth) {

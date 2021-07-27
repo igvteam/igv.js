@@ -54,6 +54,11 @@ $igv-zoom-in-notice-height: 16px;
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: flex-start;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+
 }
 
 .igv-viewport {
