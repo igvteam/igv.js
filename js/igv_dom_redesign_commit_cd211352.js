@@ -16432,7 +16432,9 @@
               trackView.track.minHeight = number;
             }
 
-            trackView.setTrackHeight(number, true); // Explicitly setting track height turns off autoHeight
+            trackView.setTrackHeight(number, true);
+            trackView.checkContentHeight();
+            trackView.repaintViews(); // Explicitly setting track height turns off autoHeight
 
             trackView.track.autoHeight = false;
           }
@@ -29366,8 +29368,8 @@
 
       setTop(contentTop) {
         if (typeof this.trackView.track.getSamples === 'function') {
-          this.contentTop = contentTop;
-          console.log(`setTop. content-top(${numberFormatter$1(contentTop)})`);
+          this.contentTop = contentTop; // console.log(`setTop. content-top(${ StringUtils.numberFormatter(contentTop) })`)
+
           const samples = this.trackView.track.getSamples();
           this.repaint(samples);
         }
@@ -29408,8 +29410,7 @@
         context.fillStyle = appleCrayonRGB('lead');
         const viewportHeight = this.$viewport.get(0).getBoundingClientRect().height;
         let y = (samples.yOffset || 0) + this.contentTop; // contentTop will always be a negative number (top relative to viewport)
-
-        console.log(`draw - content-top(${numberFormatter$1(this.contentTop)}) yOffset(${numberFormatter$1(samples.yOffset)})`);
+        // console.log(`draw - content-top(${ StringUtils.numberFormatter(this.contentTop) }) yOffset(${ StringUtils.numberFormatter(samples.yOffset) })`)
 
         for (let name of samples.names) {
           if (y > viewportHeight) {
@@ -29487,81 +29488,6 @@
       ctx.textAlign = textAlign;
       ctx.textBaseline = textBaseline;
       ctx.fillStyle = fillStyle;
-    }
-
-    const igv_scrollbar_outer_width = 14;
-
-    class TrackScrollbarControl {
-      constructor(columnContainer) {
-        this.column = div$1({
-          class: 'igv-scrollbar-column'
-        });
-        columnContainer.appendChild(this.column);
-      }
-
-      addScrollbar(trackView, columnContainer) {
-        const outerScroll = div$1();
-        this.column.appendChild(outerScroll); // outerScroll.style.backgroundColor = randomRGB(150, 250);
-
-        outerScroll.style.height = `${trackView.track.height}px`;
-        const innerScroll = div$1();
-        outerScroll.appendChild(innerScroll);
-        trackView.innerScroll = innerScroll;
-        trackView.outerScroll = outerScroll;
-        'track-scrollbar-' + guid();
-        $(innerScroll).on(`mousedown.${trackView.namespace}`, event => {
-          event.stopPropagation();
-          const {
-            y
-          } = pageCoordinates$1(event);
-          $(innerScroll).data('yDown', y.toString());
-          $(columnContainer).on(`mousemove.${trackView.namespace}`, event => {
-            event.stopPropagation();
-            const {
-              y
-            } = pageCoordinates$1(event);
-            TrackScrollbarControl.moveScroller(trackView, y - parseInt($(innerScroll).data('yDown')));
-            $(innerScroll).data('yDown', y.toString());
-          });
-        });
-        $(columnContainer).on(`mouseup.${trackView.namespace}`, () => $(columnContainer).off(`mousemove.${trackView.namespace}`));
-      }
-
-      removeScrollbar(trackView, columnContainer) {
-        if (trackView.outerScroll) {
-          if (trackView.innerScroll) {
-            $(trackView.innerScroll).off(trackView.namespace);
-            trackView.innerScroll.remove();
-            $(columnContainer).off(trackView.namespace);
-          }
-
-          trackView.outerScroll.remove();
-        }
-      }
-
-      addScrollbarShim(trackView) {
-        const outerScroll = div$1();
-        this.column.appendChild(outerScroll); // outerScroll.style.backgroundColor = randomRGB(150, 250)
-
-        outerScroll.style.height = `${trackView.track.height}px`;
-        trackView.outerScroll = outerScroll;
-      }
-
-      static moveScroller(trackView, delta) {
-        const y = $(trackView.innerScroll).position().top + delta;
-        const top = Math.min(Math.max(0, y), trackView.outerScroll.clientHeight - trackView.innerScroll.clientHeight);
-        $(trackView.innerScroll).css('top', `${top}px`);
-        const contentHeight = maxViewportContentHeight(trackView.viewports);
-        const contentTop = -Math.round(top * (contentHeight / trackView.viewports[0].$viewport.height())); // console.log(`moveScroller contentTop(${ StringUtils.numberFormatter(contentTop) })`)
-
-        for (let viewport of trackView.viewports) {
-          viewport.setTop(contentTop);
-        }
-
-        trackView.sampleNameViewport.trackScrollDelta = delta;
-        trackView.sampleNameViewport.setTop(contentTop);
-      }
-
     }
 
     /*
@@ -29811,6 +29737,21 @@
         }
       }
 
+      moveScroller(delta) {
+        const y = $(this.innerScroll).position().top + delta;
+        const top = Math.min(Math.max(0, y), this.outerScroll.clientHeight - this.innerScroll.clientHeight);
+        $(this.innerScroll).css('top', `${top}px`);
+        const contentHeight = maxViewportContentHeight(this.viewports);
+        const contentTop = -Math.round(top * (contentHeight / this.viewports[0].$viewport.height()));
+
+        for (let viewport of this.viewports) {
+          viewport.setTop(contentTop);
+        }
+
+        this.sampleNameViewport.trackScrollDelta = delta;
+        this.sampleNameViewport.setTop(contentTop);
+      }
+
       isLoading() {
         for (let viewport of this.viewports) {
           if (viewport.isLoading()) return true;
@@ -29998,33 +29939,6 @@
         this.adjustTrackHeight();
       }
 
-      DEPRICATED_adjustTrackHeight() {
-        const maxHeight = maxViewportContentHeight(this.viewports);
-
-        if (this.track.autoHeight) {
-          this.setTrackHeight(maxHeight, false);
-        } else if (typeof this.track.paintAxis) {
-          this.track.paintAxis(this.axisCanvasContext, this.axisCanvas.width, this.axisCanvas.height);
-        }
-
-        if (false === scrollbarExclusionTypes.has(this.track.type)) {
-          const currentTop = this.viewports[0].getContentTop();
-          const heights = this.viewports.map(viewport => viewport.getContentHeight());
-          const minContentHeight = Math.min(...heights);
-          const newTop = Math.min(0, this.viewports[0].$viewport.height() - minContentHeight);
-
-          if (currentTop < newTop) {
-            for (let {
-              $content
-            } of this.viewports) {
-              $content.css('top', `${newTop}px`);
-            }
-          }
-
-          this.updateScrollbar();
-        }
-      }
-
       adjustTrackHeight() {
         var maxHeight = maxViewportContentHeight(this.viewports);
 
@@ -30120,10 +30034,6 @@
         }
 
         this.disposed = true;
-      }
-
-      scrollBy(delta) {
-        TrackScrollbarControl.moveScroller(this, delta);
       }
 
       createTrackGearPopup(browser) {
@@ -39577,7 +39487,7 @@
               this.config.displayMode = displayMode;
               this.trackView.checkContentHeight();
               this.trackView.repaintViews();
-              TrackScrollbarControl.moveScroller(this.trackView, this.trackView.sampleNameViewport.trackScrollDelta);
+              this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta);
             }
           });
         }
@@ -64254,6 +64164,66 @@
 
     }
 
+    const igv_scrollbar_outer_width = 14;
+
+    class TrackScrollbarControl {
+      constructor(columnContainer) {
+        this.column = div$1({
+          class: 'igv-scrollbar-column'
+        });
+        columnContainer.appendChild(this.column);
+      }
+
+      addScrollbar(trackView, columnContainer) {
+        const outerScroll = div$1();
+        this.column.appendChild(outerScroll); // outerScroll.style.backgroundColor = randomRGB(150, 250);
+
+        outerScroll.style.height = `${trackView.track.height}px`;
+        const innerScroll = div$1();
+        outerScroll.appendChild(innerScroll);
+        trackView.innerScroll = innerScroll;
+        trackView.outerScroll = outerScroll;
+        'track-scrollbar-' + guid();
+        $(innerScroll).on(`mousedown.${trackView.namespace}`, event => {
+          event.stopPropagation();
+          const {
+            y
+          } = pageCoordinates$1(event);
+          $(innerScroll).data('yDown', y.toString());
+          $(columnContainer).on(`mousemove.${trackView.namespace}`, event => {
+            event.stopPropagation();
+            const {
+              y
+            } = pageCoordinates$1(event);
+            trackView.moveScroller(y - parseInt($(innerScroll).data('yDown')));
+            $(innerScroll).data('yDown', y.toString());
+          });
+        });
+        $(columnContainer).on(`mouseup.${trackView.namespace}`, () => $(columnContainer).off(`mousemove.${trackView.namespace}`));
+      }
+
+      removeScrollbar(trackView, columnContainer) {
+        if (trackView.outerScroll) {
+          if (trackView.innerScroll) {
+            $(trackView.innerScroll).off(trackView.namespace);
+            trackView.innerScroll.remove();
+            $(columnContainer).off(trackView.namespace);
+          }
+
+          trackView.outerScroll.remove();
+        }
+      }
+
+      addScrollbarShim(trackView) {
+        const outerScroll = div$1();
+        this.column.appendChild(outerScroll); // outerScroll.style.backgroundColor = randomRGB(150, 250)
+
+        outerScroll.style.height = `${trackView.track.height}px`;
+        trackView.outerScroll = outerScroll;
+      }
+
+    }
+
     const igv_track_manipulation_handle_width = 12;
     let currentDragHandle = undefined;
 
@@ -67159,7 +67129,7 @@
 
             if (self.isScrolling) {
               const delta = self.vpMouseDown.r * (self.vpMouseDown.lastMouseY - y);
-              viewport.trackView.scrollBy(delta);
+              viewport.trackView.moveScroller(delta);
             }
 
             self.vpMouseDown.lastMouseX = x;
