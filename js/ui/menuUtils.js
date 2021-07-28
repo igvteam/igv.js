@@ -264,6 +264,10 @@ function trackHeightMenuItem(trackView) {
                 }
                 trackView.setTrackHeight(number, true);
 
+                trackView.checkContentHeight();
+                trackView.repaintViews();
+
+
                 // Explicitly setting track height turns off autoHeight
                 trackView.track.autoHeight = false;
             }

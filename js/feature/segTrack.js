@@ -32,7 +32,6 @@ import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {isSimpleType} from "../util/igvUtils.js";
 import {ColorTable} from "../util/colorPalletes.js";
-import TrackScrollbarControl from "../trackScrollbarControl.js";
 
 class SegTrack extends TrackBase {
 
@@ -138,7 +137,7 @@ class SegTrack extends TrackBase {
                         this.config.displayMode = displayMode;
                         this.trackView.checkContentHeight();
                         this.trackView.repaintViews();
-                        TrackScrollbarControl.moveScroller(this.trackView, this.trackView.sampleNameViewport.trackScrollDelta)
+                        this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta)
                     }
                 });
         }

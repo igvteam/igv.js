@@ -1,7 +1,5 @@
 import $ from './vendor/jquery-3.3.1.slim.js'
-import {DOMUtils, StringUtils} from '../node_modules/igv-utils/src/index.js'
-import {maxViewportContentHeight} from './trackView.js'
-import {randomRGB} from './util/colorPalletes.js'
+import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -37,7 +35,7 @@ class TrackScrollbarControl {
             $(columnContainer).on(`mousemove.${ trackView.namespace }`, event => {
                 event.stopPropagation()
                 const { y } = DOMUtils.pageCoordinates(event)
-                TrackScrollbarControl.moveScroller(trackView,y - parseInt( $(innerScroll).data('yDown') ))
+                trackView.moveScroller(y - parseInt( $(innerScroll).data('yDown') ))
                 $(innerScroll).data('yDown', y.toString());
 
             })
@@ -74,26 +72,6 @@ class TrackScrollbarControl {
         outerScroll.style.height = `${ trackView.track.height }px`
 
         trackView.outerScroll = outerScroll
-    }
-
-    static moveScroller(trackView, delta) {
-
-        const y = $(trackView.innerScroll).position().top + delta
-        const top = Math.min(Math.max(0, y), trackView.outerScroll.clientHeight - trackView.innerScroll.clientHeight)
-        $(trackView.innerScroll).css('top', `${ top }px`);
-
-        const contentHeight = maxViewportContentHeight(trackView.viewports)
-        const contentTop = -Math.round(top * (contentHeight / trackView.viewports[ 0 ].$viewport.height()))
-
-        // console.log(`moveScroller contentTop(${ StringUtils.numberFormatter(contentTop) })`)
-
-        for (let viewport of trackView.viewports) {
-            viewport.setTop(contentTop)
-        }
-
-        trackView.sampleNameViewport.trackScrollDelta = delta
-        trackView.sampleNameViewport.setTop(contentTop)
-
     }
 
 }

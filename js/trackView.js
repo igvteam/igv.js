@@ -29,8 +29,6 @@ import {createViewport} from "./viewportFactory.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
 import SampleNameViewport from './sampleNameViewport.js';
-import TrackScrollbarControl from "./trackScrollbarControl.js";
-import {randomRGB} from "./util/colorPalletes.js";
 
 const scrollbarExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
@@ -286,6 +284,24 @@ class TrackView {
         }
     }
 
+    moveScroller(delta) {
+
+        const y = $(this.innerScroll).position().top + delta
+        const top = Math.min(Math.max(0, y), this.outerScroll.clientHeight - this.innerScroll.clientHeight)
+        $(this.innerScroll).css('top', `${ top }px`);
+
+        const contentHeight = maxViewportContentHeight(this.viewports)
+        const contentTop = -Math.round(top * (contentHeight / this.viewports[ 0 ].$viewport.height()))
+
+        for (let viewport of this.viewports) {
+            viewport.setTop(contentTop)
+        }
+
+        this.sampleNameViewport.trackScrollDelta = delta
+        this.sampleNameViewport.setTop(contentTop)
+
+    }
+
     isLoading() {
         for (let viewport of this.viewports) {
             if (viewport.isLoading()) return true;
@@ -473,30 +489,6 @@ class TrackView {
         this.adjustTrackHeight()
     }
 
-    DEPRICATED_adjustTrackHeight() {
-
-        const maxHeight = maxViewportContentHeight(this.viewports);
-        if (this.track.autoHeight) {
-            this.setTrackHeight(maxHeight, false);
-        } else if (typeof this.track.paintAxis) {
-            this.track.paintAxis(this.axisCanvasContext, this.axisCanvas.width, this.axisCanvas.height);
-        }
-
-        if (false === scrollbarExclusionTypes.has(this.track.type)) {
-            const currentTop = this.viewports[0].getContentTop();
-            const heights = this.viewports.map((viewport) => viewport.getContentHeight());
-            const minContentHeight = Math.min(...heights);
-            const newTop = Math.min(0, this.viewports[ 0 ].$viewport.height() - minContentHeight);
-            if (currentTop < newTop) {
-                for (let { $content } of this.viewports) {
-                    $content.css('top', `${ newTop }px`)
-                }
-            }
-            this.updateScrollbar();
-        }
-
-    }
-
     adjustTrackHeight() {
 
         var maxHeight = maxViewportContentHeight(this.viewports);
@@ -597,10 +589,6 @@ class TrackView {
         }
 
         this.disposed = true;
-    }
-
-    scrollBy(delta) {
-        TrackScrollbarControl.moveScroller(this, delta)
     }
 
     createTrackGearPopup(browser) {

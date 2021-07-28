@@ -1,9 +1,6 @@
 import $ from './vendor/jquery-3.3.1.slim.js'
-import {appleCrayonRGB, randomRGB} from './util/colorPalletes.js'
-import {DOMUtils, StringUtils} from '../node_modules/igv-utils/src/index.js';
-import {maxViewportContentHeight} from "./trackView.js";
-
-const sampleNameXShim = 4
+import {appleCrayonRGB} from './util/colorPalletes.js'
+import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
 
 const maxFontSize = 10
 
@@ -95,7 +92,7 @@ class SampleNameViewport {
 
         if (typeof this.trackView.track.getSamples === 'function') {
             this.contentTop = contentTop;
-            console.log(`setTop. content-top(${ StringUtils.numberFormatter(contentTop) })`)
+            // console.log(`setTop. content-top(${ StringUtils.numberFormatter(contentTop) })`)
             const samples = this.trackView.track.getSamples();
             this.repaint(samples);
         }
@@ -137,7 +134,7 @@ class SampleNameViewport {
         const viewportHeight = this.$viewport.get(0).getBoundingClientRect().height;
         let y = (samples.yOffset || 0) + this.contentTop;    // contentTop will always be a negative number (top relative to viewport)
 
-        console.log(`draw - content-top(${ StringUtils.numberFormatter(this.contentTop) }) yOffset(${ StringUtils.numberFormatter(samples.yOffset) })`)
+        // console.log(`draw - content-top(${ StringUtils.numberFormatter(this.contentTop) }) yOffset(${ StringUtils.numberFormatter(samples.yOffset) })`)
 
         for (let name of samples.names) {
             if (y > viewportHeight) {

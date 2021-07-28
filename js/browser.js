@@ -1798,7 +1798,7 @@ class Browser {
 
                 if (self.isScrolling) {
                     const delta = self.vpMouseDown.r * (self.vpMouseDown.lastMouseY - y);
-                    viewport.trackView.scrollBy(delta);
+                    viewport.trackView.moveScroller(delta);
                 }
 
 
