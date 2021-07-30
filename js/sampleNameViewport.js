@@ -120,7 +120,9 @@ class SampleNameViewport {
 
     draw({context, samples}) {
 
-        if (!samples || samples.names.length === 0 || samples.height < 1) {
+        console.log(`dpi ${ window.devicePixelRatio } sample-height(${ samples.height })`)
+
+        if (!samples || samples.names.length === 0/* || samples.height < 1*/) {
             return
         }
 
@@ -134,19 +136,14 @@ class SampleNameViewport {
         const viewportHeight = this.$viewport.get(0).getBoundingClientRect().height;
         let y = (samples.yOffset || 0) + this.contentTop;    // contentTop will always be a negative number (top relative to viewport)
 
-        // console.log(`draw - content-top(${ StringUtils.numberFormatter(this.contentTop) }) yOffset(${ StringUtils.numberFormatter(samples.yOffset) })`)
-
         for (let name of samples.names) {
             if (y > viewportHeight) {
-                // console.log(`Will NOT paint. y(${ StringUtils.numberFormatter(y) })  > viewportHeight(${ StringUtils.numberFormatter(viewportHeight) })`)
                 break;
             }
             if (y + samples.height > 0) {
                 const text = name;
                 const yFont = getYFont(context, text, y, samples.height);
                 context.fillText(text, sampleNameXShim, yFont);
-                // console.log(`Will     paint. y(${ StringUtils.numberFormatter(y) })  <= viewportHeight(${ StringUtils.numberFormatter(viewportHeight) }) `)
-
             }
             y += samples.height;
         }
