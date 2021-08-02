@@ -59,7 +59,7 @@
     "rollup-plugin-terser": "^7.0.2",
     "w3c-xmlhttprequest": "^3.0.0",
     "xmldom": "^0.5.0",
-    "igv-ui": "git+https://github.com/igvteam/igv-ui.git#v1.1.7",
+    "igv-ui": "git+https://github.com/igvteam/igv-ui.git#v1.1.8",
     "igv-utils": "git+https://github.com/igvteam/igv-utils.git#v1.2.10"
   }
 }
