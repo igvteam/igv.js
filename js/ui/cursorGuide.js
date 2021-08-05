@@ -42,9 +42,6 @@ const CursorGuide = function ($columnContainer, browser) {
     // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
     $columnContainer.on('mousemove.cursor-guide', event => {
 
-        event.stopPropagation();
-        event.preventDefault();
-
         const { x, y } = DOMUtils.translateMouseCoordinates(event, $columnContainer.get(0));
         // console.log(`cursor guide - x(${ StringUtils.numberFormatter(x) }) y(${ StringUtils.numberFormatter(y) })`)
 
