@@ -77,17 +77,19 @@
             {
                 genome: 'hg19',
 
-                // showCursorTrackingGuideButton: false,
+                showSampleNames: true,
 
-                // showCenterLineButton: false,
+                showCursorTrackingGuide: true,
 
-                showTrackLabelButton: true,
+                showCenterLineButton: false,
+
+                showTrackLabelButton: false,
 
                 // for multi-locus testing
                 // locus: 'chr8:128,750,264-128,750,995',
-                // locus: 'egfr',
+                locus: '19',
                 // locus: 'all',
-                locus: [ 'ace', 'si', 'myc' ],
+                // locus: [ 'ace', 'si', 'myc' ],
                 // locus: [ 'all', 'myc' ],
                 tracks:
                     [
@@ -97,17 +99,17 @@
                         //     "pointSize": 3,
                         //     "name": "Encode bigwig points"
                         // },
-                        // {
-                        //     "name": "SEG Track",
-                        //     "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
-                        //     "indexed": false,
-                        //     "isLog": true,
-                        //     "displayMode": "EXPANDED",
-                        //     "expandedRowHeight": 20,
-                        //     "height": 256,
-                        //     "order": 1,
-                        //     "format": "seg"
-                        // },
+                        {
+                            "name": "SEG Track",
+                            "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                            "indexed": false,
+                            "isLog": true,
+                            "displayMode": "EXPANDED",
+                            "expandedRowHeight": 20,
+                            "height": 256,
+                            "order": 1,
+                            "format": "seg"
+                        },
                         // {
                         //     "sourceType": "gcs",
                         //     "type": "alignment",

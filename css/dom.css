@@ -419,6 +419,8 @@
   top: 50%;
   height: 1px;
   z-index: 1;
+  margin-left: 50px;
+  margin-right: 54px;
   border-top-style: dotted;
   border-top-width: thin;
   border-top-color: rgba(127, 127, 127, 0.76); }

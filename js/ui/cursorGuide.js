@@ -25,28 +25,34 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import {DOMUtils} from "../../node_modules/igv-utils/src/index.js";
+import {DOMUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
-const CursorGuide = function ($cursorGuideParent, browser) {
+const CursorGuide = function ($columnContainer, browser) {
 
     this.browser = browser;
 
     this.$horizontalGuide = $('<div class="igv-cursor-guide-horizontal">');
-    $cursorGuideParent.append(this.$horizontalGuide);
+    $columnContainer.append(this.$horizontalGuide);
 
     this.$verticalGuide = $('<div class="igv-cursor-guide-vertical">');
-    $cursorGuideParent.append(this.$verticalGuide);
+    $columnContainer.append(this.$verticalGuide);
 
     this.setVisibility(browser.config.showCursorTrackingGuide)
 
     // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-    $cursorGuideParent.on('mousemove.cursor-guide', e => {
+    $columnContainer.on('mousemove.cursor-guide', event => {
 
-        e.preventDefault();
+        event.stopPropagation();
+        event.preventDefault();
 
-        const $target = $(document.elementFromPoint(e.clientX, e.clientY));
+        const { x, y } = DOMUtils.translateMouseCoordinates(event, $columnContainer.get(0));
+        // console.log(`cursor guide - x(${ StringUtils.numberFormatter(x) }) y(${ StringUtils.numberFormatter(y) })`)
+
+        const top = `${ y }px`;
+        this.$horizontalGuide.css({ top });
+
+        const $target = $(document.elementFromPoint(event.clientX, event.clientY));
         const $parent = $target.parent();
-
 
         let $viewport = undefined;
 
@@ -56,19 +62,25 @@ const CursorGuide = function ($cursorGuideParent, browser) {
             $viewport = $parent;
         }
 
-        if ($viewport) {
+        if ($viewport && browser.rulerTrack) {
 
-            const result = mouseHandler(e, $viewport, this.$horizontalGuide, this.$verticalGuide, $cursorGuideParent, browser)
+            const left = `${ x }px`;
+            this.$verticalGuide.css({ left });
 
-            if (result) {
+            const $columns = browser.$root.find('.igv-column')
+            const index = $columns.index($viewport.parent())
+            const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
+            rulerViewport.mouseMove(event)
 
-                const { bp, start, end, interpolant } = result;
-
-                if (this.customMouseHandler) {
-                    this.customMouseHandler({ bp, start, end, interpolant });
-                }
-
-            }
+            // if (result) {
+            //
+            //     const { bp, start, end, interpolant } = result;
+            //
+            //     if (this.customMouseHandler) {
+            //         this.customMouseHandler({ bp, start, end, interpolant });
+            //     }
+            //
+            // }
 
         }
 
@@ -101,38 +113,6 @@ CursorGuide.prototype.hide = function () {
         }
     }
 
-}
-
-function mouseHandler(event, $viewport, $horizontalGuide, $verticalGuide, $cursorGuideParent, browser) {
-
-    const { x:xParent, y:yParent } = DOMUtils.translateMouseCoordinates(event, $cursorGuideParent.get(0));
-
-    const top = `${ yParent }px`;
-    $horizontalGuide.css({ top });
-
-    const left = `${ xParent }px`;
-    $verticalGuide.css({ left });
-
-    if (browser.rulerTrack) {
-
-        const $columns = browser.$root.find('.igv-column')
-        const index = $columns.index($viewport.parent())
-        // console.log(`viewport index ${ index }`)
-        const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
-        rulerViewport.mouseMove(event)
-    }
-
-    return undefined
-
-    const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0))
-
-    const { start, bpPerPixel } = referenceFrame
-    const end = 1 + start + (width * bpPerPixel)
-
-    const bp = Math.round(start + x * bpPerPixel)
-
-    const $host = $viewport.closest('.igv-track-container')
-    return { bp, start, end, interpolant:xNormalized, host_css_left:left, $host }
 }
 
 export default CursorGuide;

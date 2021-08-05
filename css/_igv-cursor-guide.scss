@@ -17,6 +17,9 @@
 
   z-index: 1;
 
+  margin-left: $igv-axis-column-width;
+  margin-right: $igv-scrollbar-outer-width + $igv-track-drag-column-width + $igv-track-gear-menu-column-width;
+
   border-top-style: dotted;
   border-top-width: thin;
   border-top-color: rgba(127, 127, 127, 0.76);

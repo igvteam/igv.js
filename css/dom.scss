@@ -1,15 +1,3 @@
-@import "color";
-@import "font";
-@import "navbar";
-@import "dom-misc";
-@import "igv-center-line";
-@import "igv-cursor-guide";
-@import "igv-user-feedback";
-@import "igv-generic-dialog-container";
-@import "igv-generic-container";
-@import "igv-menu-popup";
-@import "igv-user-feedback";
-@import "spinner";
 
 $igv-axis-column-width: 50px;
 
@@ -34,6 +22,19 @@ $igv-column-shim-margin: 2px;
 
 $igv-zoom-in-notice-width: 128px;
 $igv-zoom-in-notice-height: 16px;
+
+@import "color";
+@import "font";
+@import "navbar";
+@import "dom-misc";
+@import "igv-center-line";
+@import "igv-cursor-guide";
+@import "igv-user-feedback";
+@import "igv-generic-dialog-container";
+@import "igv-generic-container";
+@import "igv-menu-popup";
+@import "igv-user-feedback";
+@import "spinner";
 
 @mixin igv-column-base {
   display: flex;
