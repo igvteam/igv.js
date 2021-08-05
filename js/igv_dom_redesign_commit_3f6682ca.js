@@ -64865,8 +64865,6 @@
       this.setVisibility(browser.config.showCursorTrackingGuide); // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
 
       $columnContainer.on('mousemove.cursor-guide', event => {
-        event.stopPropagation();
-        event.preventDefault();
         const {
           x,
           y
