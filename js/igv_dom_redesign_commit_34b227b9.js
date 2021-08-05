@@ -29438,8 +29438,6 @@
         context,
         samples
       }) {
-        console.log(`dpi ${window.devicePixelRatio} sample-height(${samples.height})`);
-
         if (!samples || samples.names.length === 0
         /* || samples.height < 1*/
         ) {
@@ -29511,10 +29509,10 @@
 
     function getSampleNameYShim(context, text, h) {
       const {
-        fontBoundingBoxAscent,
-        fontBoundingBoxDescent
+        actualBoundingBoxAscent,
+        actualBoundingBoxDescent
       } = context.measureText(text);
-      return (h - (fontBoundingBoxAscent + fontBoundingBoxDescent)) / 2;
+      return (h - (actualBoundingBoxAscent + actualBoundingBoxDescent)) / 2;
     }
 
     function configureFont(ctx, {
