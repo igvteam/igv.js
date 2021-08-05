@@ -73,6 +73,45 @@
     let browser
     (async () => {
 
+        const igv_dom_redesign_sample_name_render_bug =
+            {
+                "version": "2.9.4",
+                "showSampleNames": true,
+                "reference": {
+                    "id": "hg19",
+                    "name": "Human (CRCh37/hg19)",
+                    "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+                    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+                    "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+                    "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab"
+                },
+                "locus": "chr19:1-59,128,983",
+                "tracks": [
+                    {
+                        "type": "sequence",
+                        "order": -9007199254740991
+                    },
+                    {
+                        "type": "seg",
+                        "format": "seg",
+                        "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                        "indexed": false,
+                        "isLog": true,
+                        "name": "GBM Copy # (TCGA Broad GDAC)",
+                        "order": 6
+                    },
+                    {
+                        "name": "Refseq Genes",
+                        "format": "refgene",
+                        "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz",
+                        "index": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz.tbi",
+                        "visibilityWindow": -1,
+                        "removable": false,
+                        "order": 1000000
+                    }
+                ]
+            }
+
         const config =
             {
                 genome: 'hg19',
@@ -120,7 +159,7 @@
                     ]
             };
 
-        browser = await igv.createBrowser(document.getElementById('igvDiv'), config)
+        browser = await igv.createBrowser(document.getElementById('igvDiv'), igv_dom_redesign_sample_name_render_bug)
 
         await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
 

@@ -1,6 +1,6 @@
 import $ from './vendor/jquery-3.3.1.slim.js'
 import {appleCrayonRGB} from './util/colorPalletes.js'
-import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
+import {DOMUtils, StringUtils} from '../node_modules/igv-utils/src/index.js';
 
 const maxFontSize = 10
 
@@ -120,8 +120,6 @@ class SampleNameViewport {
 
     draw({context, samples}) {
 
-        console.log(`dpi ${ window.devicePixelRatio } sample-height(${ samples.height })`)
-
         if (!samples || samples.names.length === 0/* || samples.height < 1*/) {
             return
         }
@@ -144,6 +142,7 @@ class SampleNameViewport {
                 const text = name;
                 const yFont = getYFont(context, text, y, samples.height);
                 context.fillText(text, sampleNameXShim, yFont);
+
             }
             y += samples.height;
         }
@@ -234,9 +233,8 @@ function getYFont(context, text, y, height) {
 }
 
 function getSampleNameYShim(context, text, h) {
-
-    const {fontBoundingBoxAscent, fontBoundingBoxDescent} = context.measureText(text)
-    return (h - (fontBoundingBoxAscent + fontBoundingBoxDescent)) / 2
+    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(text)
+    return (h - (actualBoundingBoxAscent + actualBoundingBoxDescent)) / 2
 }
 
 function configureFont(ctx, {textAlign, textBaseline, strokeStyle, fillStyle}, sampleHeight) {
