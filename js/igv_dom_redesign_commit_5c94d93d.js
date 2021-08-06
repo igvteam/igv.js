@@ -25950,6 +25950,7 @@
           let xTick;
           let bp;
           let accumulatedTickDelta = tickDelta;
+          const labelLengthShim = 0.25 * labelLength;
 
           do {
             bp = Math.floor(nTick * tick.majorTick);
@@ -25957,7 +25958,7 @@
             xTick = Math.round(referenceFrame.toPixels(bp - 1 - bpStart + 0.5));
             const xLabel = Math.round(xTick - context.measureText(rulerLabel).width / 2);
 
-            if (xLabel > 0 && labelLength <= accumulatedTickDelta) {
+            if (xLabel > 0 && labelLengthShim + labelLength <= accumulatedTickDelta) {
               IGVGraphics.fillText(context, rulerLabel, xLabel, this.height - tickHeight / 0.75);
               accumulatedTickDelta = 0;
             }
