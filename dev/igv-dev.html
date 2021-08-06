@@ -116,39 +116,31 @@
             {
                 genome: 'hg19',
 
-                showSampleNames: true,
-
-                showCursorTrackingGuide: true,
-
-                showCenterLineButton: false,
-
-                showTrackLabelButton: false,
-
                 // for multi-locus testing
                 // locus: 'chr8:128,750,264-128,750,995',
-                locus: '19',
+                // locus: '19',
                 // locus: 'all',
-                // locus: [ 'ace', 'si', 'myc' ],
+                locus: [ 'ace', 'si', 'myc' ],
                 // locus: [ 'all', 'myc' ],
                 tracks:
                     [
-                        // {
-                        //     "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
-                        //     "graphType": "points",
-                        //     "pointSize": 3,
-                        //     "name": "Encode bigwig points"
-                        // },
                         {
-                            "name": "SEG Track",
-                            "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
-                            "indexed": false,
-                            "isLog": true,
-                            "displayMode": "EXPANDED",
-                            "expandedRowHeight": 20,
-                            "height": 256,
-                            "order": 1,
-                            "format": "seg"
+                            "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+                            "graphType": "points",
+                            "pointSize": 3,
+                            "name": "Encode bigwig points"
                         },
+                        // {
+                        //     "name": "SEG Track",
+                        //     "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                        //     "indexed": false,
+                        //     "isLog": true,
+                        //     "displayMode": "EXPANDED",
+                        //     "expandedRowHeight": 20,
+                        //     "height": 256,
+                        //     "order": 1,
+                        //     "format": "seg"
+                        // },
                         // {
                         //     "sourceType": "gcs",
                         //     "type": "alignment",
@@ -159,7 +151,7 @@
                     ]
             };
 
-        browser = await igv.createBrowser(document.getElementById('igvDiv'), igv_dom_redesign_sample_name_render_bug)
+        browser = await igv.createBrowser(document.getElementById('igvDiv'), config)
 
         await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
 

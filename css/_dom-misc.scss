@@ -100,19 +100,20 @@
 
   left:50%;
   top:15%;
-  transform: translate(-50%, -25%);
+  transform: translate(-50%, 0%);
 
   font-family: $igv-default-font-face;
   font-size: 12px;
   font-weight: 400;
 
   text-align: center;
-  //width: fit-content;
+  width: fit-content;
 
   z-index:64;
 
   color: $igv-dark-grey-color;
   background-color: white;
+  //background-color: $igv-apple_crayon_strawberry;
 
   padding: 1px;
 }
