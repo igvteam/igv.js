@@ -297,17 +297,15 @@
 .igv-multi-locus-ruler-label {
   position: absolute;
   left: 50%;
-  top: 15%;
+  top: 10%;
   transform: translate(-50%, 0%);
   font-family: "Open Sans", sans-serif;
   font-size: 12px;
   font-weight: 400;
   text-align: center;
-  width: fit-content;
   z-index: 64;
   color: #373737;
-  background-color: white;
-  padding: 1px; }
+  background-color: white; }
 
 .igv-multi-locus-ruler-label:hover {
   cursor: pointer; }
