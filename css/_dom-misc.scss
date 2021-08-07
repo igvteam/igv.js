@@ -99,7 +99,7 @@
   position: absolute;
 
   left:50%;
-  top:10%;
+  top:5%;
   transform: translate(-50%, 0%);
 
   font-family: $igv-default-font-face;
@@ -112,7 +112,7 @@
 
   z-index:64;
 
-  color: $igv-dark-grey-color;
+  color: rgb(68, 68, 68);
   background-color: white;
 
 }

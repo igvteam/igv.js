@@ -24,7 +24,7 @@
  */
 
 import {DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
-import {validateLocusExtent} from "./util/igvUtils.js";
+import {validateLocusExtent,prettyBasePairNumber} from "./util/igvUtils.js";
 import GtexSelection from "./gtex/gtexSelection.js";
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
@@ -137,6 +137,13 @@ class ReferenceFrame {
 
     getChromosome() {
         return this.genome.getChromosome(this.chr)
+    }
+
+    getMultiLocusLabel(pixels) {
+        const space = '&nbsp &nbsp &nbsp'
+        const ss = Math.floor(this.start) + 1
+        const ee = Math.round(this.start + this.bpPerPixel * pixels)
+        return `${ this.chr }${ space }${ prettyBasePairNumber(ee-ss) }`
     }
 
     getPresentationLocusComponents(pixels) {

@@ -54,7 +54,7 @@ class RulerViewport extends ViewPort {
     }
 
     presentLocusLabel(viewportWidth) {
-        this.$rulerLabel.text( this.referenceFrame.getPresentionLocus(viewportWidth) )
+        this.$rulerLabel.html( this.referenceFrame.getMultiLocusLabel(viewportWidth) )
         this.$rulerLabel.show()
         this.$multiLocusCloseButton.show()
     }
