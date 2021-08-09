@@ -1,0 +1,252 @@
+
+$igv-axis-column-width: 50px;
+
+$igv-scrollbar-outer-width: 14px;
+$igv-scrollbar-inner-border-width: 1px;
+$igv-scrollbar-inner-left: 2px;
+$igv-scrollbar-inner-width: $igv-scrollbar-outer-width - 2 * ($igv-scrollbar-inner-left + $igv-scrollbar-inner-border-width);
+
+$igv-track-drag-column-width: 12px;
+
+$igv-track-gear-menu-column-width: 28px;
+
+$igv-trackgear-grey-color: #7F7F7F;
+$igv-trackgear-popover-border-radius: 4px;
+$igv-trackgear-font-color: #4b4b4b;
+$igv-trackgear-default-font-face: 'Open Sans', sans-serif;
+
+$igv-column-item-margin-top: 2px;
+
+$igv-column-shim-width: 1px;
+$igv-column-shim-margin: 2px;
+
+$igv-zoom-in-notice-width: 128px;
+$igv-zoom-in-notice-height: 16px;
+
+@import "color";
+@import "font";
+@import "navbar";
+@import "dom-misc";
+@import "igv-center-line";
+@import "igv-cursor-guide";
+@import "igv-user-feedback";
+@import "igv-generic-dialog-container";
+@import "igv-generic-container";
+@import "igv-menu-popup";
+@import "igv-user-feedback";
+@import "spinner";
+
+@mixin igv-column-base {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.igv-container {
+
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  padding-top: 4px;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+
+}
+
+.igv-viewport {
+  position: relative;
+
+  margin-top: $igv-column-item-margin-top;
+
+  overflow-x: hidden;
+  overflow-y: hidden;
+
+}
+
+.igv-viewport-content {
+  position: relative;
+  width: 100%;
+
+  >canvas {
+    position: relative;
+    display: block;
+  }
+}
+
+.igv-column-container {
+
+  position: relative;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  width: 100%;
+
+}
+
+.igv-column-shim {
+  width: $igv-column-shim-width;
+  margin-left: $igv-column-shim-margin;
+  margin-right: $igv-column-shim-margin;
+  background-color: $igv-apple_crayon_iron;
+}
+
+.igv-column {
+  @include igv-column-base;
+}
+
+.igv-axis-column {
+
+  @include igv-column-base;
+
+  width: $igv-axis-column-width;
+
+  >div {
+    margin-top: $igv-column-item-margin-top;
+    width: 100%;
+  }
+}
+
+.igv-sample-name-column {
+  @include igv-column-base;
+}
+
+.igv-scrollbar-column {
+
+  @include igv-column-base;
+
+  width: $igv-scrollbar-outer-width;
+
+  >div {
+
+    position: relative;
+
+    margin-top: $igv-column-item-margin-top;
+    width: $igv-scrollbar-outer-width;
+
+    >div {
+
+      cursor: pointer;
+
+      position:absolute;
+      top: 0;
+      left: $igv-scrollbar-inner-left;
+
+      width: $igv-scrollbar-inner-width;
+
+      border-width: $igv-scrollbar-inner-border-width;
+      border-style: solid;
+
+      //border-color: transparent;
+      border-color: #c4c4c4;
+
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+
+      //background-color: chartreuse;
+      //background-color: transparent;
+    }
+
+    >div:hover {
+      background-color: #c4c4c4;
+    }
+
+  }
+
+}
+
+.igv-track-drag-column {
+
+  @include igv-column-base;
+
+  width: $igv-track-drag-column-width;
+
+  background-color: white;
+
+  // track drag/reorder handle
+  >.igv-track-drag-handle {
+    z-index: 512;
+    position: relative;
+    cursor: pointer;
+
+    margin-top: $igv-column-item-margin-top;
+    width: 100%;
+
+    border-style: solid;
+    border-width: 0;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+
+    background-color: #c4c4c4;
+  }
+
+  .igv-track-drag-handle-hover {
+    background-color: #787878;
+    //background-color: magenta;
+  }
+
+  >.igv-track-drag-shim {
+    position: relative;
+
+    margin-top: $igv-column-item-margin-top;
+    width: 100%;
+
+    border-style: solid;
+    border-width: 0;
+  }
+
+}
+
+.igv-gear-menu-column {
+
+  @include igv-column-base;
+
+  width: $igv-track-gear-menu-column-width;
+
+  // gear gutter
+  >div {
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+
+    margin-top: $igv-column-item-margin-top;
+    width: 100%;
+    background: white;
+
+    // gear container
+    >div {
+      position: relative;
+
+      margin-top: 4px;
+      width: 16px;
+      height: 16px;
+      color: $igv-trackgear-grey-color;
+    }
+
+    >div:hover {
+      cursor: pointer;
+      color: #444;
+    }
+  }
+
+}

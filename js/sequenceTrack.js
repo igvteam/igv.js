@@ -25,6 +25,7 @@
 
 import IGVGraphics from "./igv-canvas.js";
 import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
+import {randomRGBConstantAlpha} from "./util/colorPalletes.js";
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER;
 
@@ -169,11 +170,7 @@ class SequenceTrack {
                     const start = viewport.referenceFrame.start;
                     const end = start + bpWindow;
                     const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
-                    if (viewport.trackView.alert) {
-                        viewport.trackView.alert.present(sequence);
-                    } else {
-                        Alert.presentAlert(sequence);
-                    }
+                    Alert.presentAlert(sequence);
                 }
             },
                 '<hr/>'
@@ -248,6 +245,8 @@ class SequenceTrack {
                     let aPixel = offsetBP / options.bpPerPixel;
                     let bPixel = (offsetBP + 1) / options.bpPerPixel;
                     let color = this.fillColor(letter);
+
+                    // IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, { fillStyle: randomRGBConstantAlpha(150, 255, 0.75) });
 
                     if (options.bpPerPixel > 1 / 10) {
                         IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});

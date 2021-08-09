@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+import $ from "../vendor/jquery-3.3.1.slim.js";
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
@@ -378,7 +379,7 @@ class InteractionTrack extends TrackBase {
             for (let arcType of ["nested", "proportional"]) {
                 items.push(
                     {
-                        object: createCheckbox(lut[arcType], arcType === this.arcType),
+                        object: $(createCheckbox(lut[arcType], arcType === this.arcType)),
                         click: () => {
                             this.arcType = arcType;
                             this.trackView.repaintViews();
@@ -388,7 +389,7 @@ class InteractionTrack extends TrackBase {
         }
 
         items.push({
-            object: createCheckbox("Show Blocks", this.showBlocks),
+            object: $(createCheckbox("Show Blocks", this.showBlocks)),
             click: () => {
                 this.showBlocks = !this.showBlocks;
                 this.trackView.repaintViews();

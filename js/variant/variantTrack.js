@@ -527,7 +527,7 @@ class VariantTrack extends TrackBase {
         if (this.getCallsetsLength() > 0) {
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
             menuItems.push({
-                object: createCheckbox("Show Genotypes", this.showGenotypes),
+                object: $(createCheckbox("Show Genotypes", this.showGenotypes)),
                 click: () => {
                     this.showGenotypes = !this.showGenotypes;
                     //adjustTrackHeight();
@@ -548,7 +548,7 @@ class VariantTrack extends TrackBase {
 
             menuItems.push(
                 {
-                    object: createCheckbox(lut[displayMode], displayMode === this.displayMode),
+                    object: $(createCheckbox(lut[displayMode], displayMode === this.displayMode)),
                     click: () => {
                         this.displayMode = displayMode;
                         this.trackView.checkContentHeight();
@@ -569,8 +569,8 @@ class VariantTrack extends TrackBase {
      */
     colorByCB(menuItem, showCheck) {
 
-        const $e = createCheckbox(menuItem.label, showCheck);
-        const clickHandler = ev => {
+        const $e = $(createCheckbox(menuItem.label, showCheck));
+        const clickHandler = () => {
 
             if (menuItem.key === this.colorBy) {
                 this.colorBy = undefined;
