@@ -459,27 +459,31 @@ function constructWG(genome, config) {
 
     let wgChromosomes;
     if (config.chromosomeOrder) {
-        genome.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
-        wgChromosomes = genome.wgChromosomeNames.map(nm => genome.chromosomes[nm]).filter(chr => chr !== undefined)
+        if(Array.isArray(config.chromosomeOrder)) {
+            genome.wgChromosomeNames = config.chromosomeOrder;
+        } else {
+            genome.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim());
+        }
+        wgChromosomes = genome.wgChromosomeNames.map(nm => genome.chromosomes[nm]).filter(chr => chr !== undefined);
 
     } else {
 
         // Trim small chromosomes.
-        const lengths = Object.keys(genome.chromosomes).map(key => genome.chromosomes[key].bpLength)
-        const median = lengths.reduce((a, b) => Math.max(a, b))
+        const lengths = Object.keys(genome.chromosomes).map(key => genome.chromosomes[key].bpLength);
+        const median = lengths.reduce((a, b) => Math.max(a, b));
         const threshold = median / 50;
-        wgChromosomes = Object.values(genome.chromosomes).filter(chr => chr.bpLength > threshold)
+        wgChromosomes = Object.values(genome.chromosomes).filter(chr => chr.bpLength > threshold);
 
         // Sort chromosomes.  First segregate numeric and alpha names, sort numeric, leave alpha as is
-        const numericChromosomes = wgChromosomes.filter(chr => isDigit(chr.name.replace('chr', '')))
-        const alphaChromosomes = wgChromosomes.filter(chr => !isDigit(chr.name.replace('chr', '')))
-        numericChromosomes.sort((a, b) => Number.parseInt(a.name.replace('chr', '')) - Number.parseInt(b.name.replace('chr', '')))
+        const numericChromosomes = wgChromosomes.filter(chr => isDigit(chr.name.replace('chr', '')));
+        const alphaChromosomes = wgChromosomes.filter(chr => !isDigit(chr.name.replace('chr', '')));
+        numericChromosomes.sort((a, b) => Number.parseInt(a.name.replace('chr', '')) - Number.parseInt(b.name.replace('chr', '')));
 
-        const wgChromosomeNames = numericChromosomes.map(chr => chr.name)
+        const wgChromosomeNames = numericChromosomes.map(chr => chr.name);
         for (let chr of alphaChromosomes) {
-            wgChromosomeNames.push(chr.name)
+            wgChromosomeNames.push(chr.name);
         }
-        genome.wgChromosomeNames = wgChromosomeNames
+        genome.wgChromosomeNames = wgChromosomeNames;
     }
 
 
