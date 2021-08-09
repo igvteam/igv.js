@@ -877,6 +877,7 @@
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: flex-start;
+  padding-top: 4px;
   user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none; }
