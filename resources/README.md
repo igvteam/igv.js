@@ -1,1 +1,0 @@
-The genomes.json file in this directory is for reference, it is not read directly by igv.js.  Editing this file will have no effect on igv.js.
