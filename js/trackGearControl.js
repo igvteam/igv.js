@@ -7,9 +7,8 @@ import MenuUtils from "./ui/menuUtils.js";
 const igv_track_gear_menu_column_width = 28;
 
 class TrackGearControl {
-    constructor(columnContainer) {
-        this.column = DOMUtils.div({ class: 'igv-gear-menu-column' })
-        columnContainer.appendChild(this.column)
+    constructor(trackGearColumn) {
+        this.column = trackGearColumn
     }
 
     addGearMenu(browser, trackView) {

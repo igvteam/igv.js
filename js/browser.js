@@ -36,7 +36,7 @@ import {
     URIUtils
 } from "../node_modules/igv-utils/src/index.js";
 import * as TrackUtils from './util/trackUtils.js';
-import TrackView, {igv_axis_column_width, createAxisColumn, maxViewportContentHeight} from "./trackView.js";
+import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
@@ -56,7 +56,6 @@ import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
 import NavbarManager from "./navbarManager.js";
-import {createSampleNameColumn} from './sampleNameViewport.js';
 import TrackScrollbarControl, {igv_scrollbar_outer_width} from "./trackScrollbarControl.js";
 import TrackDragControl, {igv_track_manipulation_handle_width} from "./trackDragControl.js";
 import TrackGearControl, {igv_track_gear_menu_column_width} from "./trackGearControl.js";
@@ -438,23 +437,23 @@ class Browser {
 
         await this.loadReference(genomeConfig, session.locus);
 
-        this.axisColumn = createAxisColumn(this.columnContainer)
+        this.axisColumn = createColumn(this.columnContainer, 'igv-axis-column')
 
         viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
         // Add sample name column
-        this.sampleNameColumn = createSampleNameColumn(this.columnContainer)
+        this.sampleNameColumn = createColumn(this.columnContainer, 'igv-sample-name-column')
 
         // Add track scrollbar manager
-        this.trackScrollbarControl = new TrackScrollbarControl(this.columnContainer)
+        this.trackScrollbarControl = new TrackScrollbarControl(createColumn(this.columnContainer, 'igv-scrollbar-column'))
 
         // Add track drag/reorder control
-        this.trackDragControl = new TrackDragControl(this.columnContainer)
+        this.trackDragControl = new TrackDragControl(createColumn(this.columnContainer, 'igv-track-drag-column'))
 
         // Add track drag/reorder control
-        this.trackGearControl = new TrackGearControl(this.columnContainer)
+        this.trackGearControl = new TrackGearControl(createColumn(this.columnContainer, 'igv-gear-menu-column'))
 
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame

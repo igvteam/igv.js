@@ -7,9 +7,8 @@ const igv_track_manipulation_handle_width = 12
 let currentDragHandle = undefined
 
 class TrackDragControl {
-    constructor(columnContainer) {
-        this.column = DOMUtils.div({ class: 'igv-track-drag-column' })
-        columnContainer.appendChild(this.column)
+    constructor(trackDragColumn) {
+        this.column = trackDragColumn
     }
 
     addDragHandle(browser, trackView) {

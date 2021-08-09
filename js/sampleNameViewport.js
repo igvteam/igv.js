@@ -222,12 +222,6 @@ class SampleNameViewport {
 
 }
 
-function createSampleNameColumn(columnContainer) {
-    const column = DOMUtils.div({ class: 'igv-sample-name-column' })
-    columnContainer.appendChild(column)
-    return column
-}
-
 function getYFont(context, text, y, height) {
     return y + height - getSampleNameYShim(context, text, height)
 }
@@ -244,7 +238,5 @@ function configureFont(ctx, {textAlign, textBaseline, strokeStyle, fillStyle}, s
     ctx.textBaseline = textBaseline
     ctx.fillStyle = fillStyle
 }
-
-export { createSampleNameColumn }
 
 export default SampleNameViewport

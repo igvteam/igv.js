@@ -24,6 +24,7 @@
  */
 
 import {FileUtils, StringUtils, GoogleAuth, GoogleDrive} from "../../node_modules/igv-utils/src/index.js";
+import {DOMUtils} from "../../node_modules/igv-utils/src/index.js"
 
 const extend = function (parent, child) {
 
@@ -195,9 +196,15 @@ function prettyBasePairNumber  (raw) {
     return floored.toString() + units;
 }
 
+
 function isDataURL(obj) {
     return (StringUtils.isString(obj) && obj.startsWith("data:"))
 }
 
-export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, getFilename, prettyBasePairNumber, isDataURL}
+function createColumn(columnContainer, className) {
+    const column = DOMUtils.div({ class: className })
+    columnContainer.appendChild(column)
+    return column
+}
 
+export {createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, getFilename, prettyBasePairNumber, isDataURL}

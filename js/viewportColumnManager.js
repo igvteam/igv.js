@@ -1,16 +1,16 @@
 import $ from './vendor/jquery-3.3.1.slim.js';
 import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
+import {createColumn} from './util/igvUtils.js';
 
 const viewportColumnManager =
     {
         createColumns: (columnContainer, count) => {
             for (let i = 0; i < count; i++) {
-                const column = DOMUtils.div({ class: 'igv-column' })
                 if (0 === i) {
-                    columnContainer.appendChild(column)
+                    createColumn(columnContainer, 'igv-column')
                 } else {
                     columnContainer.appendChild(DOMUtils.div({ class: 'igv-column-shim' }))
-                    columnContainer.appendChild(column)
+                    createColumn(columnContainer, 'igv-column')
                 }
             }
         },

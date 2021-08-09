@@ -6,9 +6,8 @@ const igv_scrollbar_outer_width = 14
 
 class TrackScrollbarControl {
 
-    constructor(columnContainer) {
-        this.column = DOMUtils.div({ class: 'igv-scrollbar-column' })
-        columnContainer.appendChild(this.column)
+    constructor(trackScrollbarColumn) {
+        this.column = trackScrollbarColumn
     }
 
     addScrollbar(trackView, columnContainer) {
