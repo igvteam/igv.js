@@ -20,70 +20,14 @@
 <script type="module">
 
     import igv from "../../js";
-    $(document).ready(function () {
-        console.log("ready");
-        igv.createBrowser(document.getElementById('igvDiv'), {
-            genome: "hg19",
-            locus: "chr8:128,306,385-129,129,504"
-        }).then(function (b) {
-            window.igvBrowser = b;
-        })
+    $(document).ready(async () => {
+        console.log("ready")
+        window.igvBrowser = await igv.createBrowser(document.getElementById('igvDiv'), { genome: "hg19", locus: "chr8:128,306,385-129,129,504" })
     });
 
-    function displayAlignmentTrackFromUrl(msg) {
-        //checkSignature(self, "displayAlignmentTrackFromUrl")
+    document.getElementById('loadButton').onclick = () => {
 
-        var trackName = msg.payload.name;
-        var trackHeight = msg.payload.trackHeight;
-        var dataURL = msg.payload.dataURL;
-        var visibilityWindow = msg.payload.visibilityWindow;
-
-        console.log("==== bam visibilityWindow: " + visibilityWindow);
-        console.log("==== bam height: " + trackHeight);
-        console.log("dataURL: " + dataURL)
-
-        var indexURL = msg.payload.indexURL;
-        var color = msg.payload.color;
-        var config = {
-            name: trackName,
-            type: "alignment",
-            format: "bam",
-            url: dataURL,
-            indexURL: indexURL,
-            sync: true,
-            order: Number.MAX_VALUE,
-            visibilityWindow: visibilityWindow,
-            height: trackHeight,
-            color: color
-        };
-        console.log(JSON.stringify(config));
-
-        console.log(" about to call 'await loadTrack(config)'");
-        browser.loadTrack(config)
-            .then(function (ignore) {
-                console.log(" 'await loadTrack(config)' returned");
-                listTrackNames();
-                //self.hub.send({cmd: msg.callback, status: "success", callback: "", payload: ""});
-            })
-            .catch(function (error) {
-                console.log("=== load bed track error")
-                console.log(error)
-                // self.hub.send({cmd: msg.callback, status: "failure", callback: "", payload: error});
-            })
-    }
-
-
-    function listTrackNames() {
-        var count = browser.trackViews.length;
-        for (var i = 0; i < count; i++) {
-            var trackName = browser.trackViews[i].track.name;
-            console.log(trackName);
-        }
-    }
-
-    function load() {
         displayAlignmentTrackFromUrl({
-            payload: {
                 trackHeight: 500,
                 dataURL: 'https://s3.amazonaws.com/1000genomes/phase3/data/HG00096/exome_alignment/HG00096.mapped.ILLUMINA.bwa.GBR.exome.20120522.bam',
                 indexURL: 'https://s3.amazonaws.com/1000genomes/phase3/data/HG00096/exome_alignment/HG00096.mapped.ILLUMINA.bwa.GBR.exome.20120522.bam.bai',
@@ -91,11 +35,53 @@
                 visibilityWindow: 1000000,
                 color: 'blue'
             }
-        })
+        )
         return "doTest returns"
     }
 
-    document.getElementById('loadButton').onclick = load;
+    function displayAlignmentTrackFromUrl({ trackHeight, dataURL, indexURL, name,  visibilityWindow, color }) {
+
+        console.log("==== bam visibilityWindow: " + visibilityWindow);
+        console.log("==== bam height: " + trackHeight);
+        console.log("dataURL: " + dataURL);
+
+        const config =
+            {
+                name,
+                type: "alignment",
+                format: "bam",
+                url: dataURL,
+                indexURL,
+                sync: true,
+                order: Number.MAX_VALUE,
+                visibilityWindow,
+                height: trackHeight,
+                color
+            }
+
+        console.log(JSON.stringify(config));
+
+        console.log(" about to call 'await loadTrack(config)'");
+
+        (async () => {
+
+            try {
+                await window.igvBrowser.loadTrack(config)
+            } catch (error) {
+                console.log("=== load bed track error")
+                console.log(error)
+                return
+            }
+
+            console.log(" 'await loadTrack(config)' returned")
+
+            for (let { track } of window.igvBrowser.trackViews) {
+                console.log(track.name)
+            }
+
+        })()
+    }
+
 
 </script>
 

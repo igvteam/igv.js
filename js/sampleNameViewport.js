@@ -1,8 +1,6 @@
 import $ from './vendor/jquery-3.3.1.slim.js'
 import {appleCrayonRGB} from './util/colorPalletes.js'
-import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
-
-const sampleNameXShim = 4
+import {DOMUtils, StringUtils} from '../node_modules/igv-utils/src/index.js';
 
 const maxFontSize = 10
 
@@ -17,26 +15,37 @@ const fontConfigureTemplate =
 
 class SampleNameViewport {
 
-    constructor(trackView, $viewportContainer, referenceFrame, width) {
+    constructor(trackView, $column, unused, width) {
 
         this.guid = DOMUtils.guid();
         this.trackView = trackView;
-        this.referenceFrame = referenceFrame;
 
         this.browser = trackView.browser;
 
         this.$viewport = $('<div class="igv-viewport">');
-        $viewportContainer.append(this.$viewport);
+        $column.append(this.$viewport);
 
-        this.$canvas = $('<canvas class ="igv-canvas">');
+        if (trackView.track.height) {
+            this.$viewport.get(0).style.height = `${ trackView.track.height }px`;
+        }
+
+        // this.$viewport.get(0).style.backgroundColor = randomRGB(150, 250);
+
+        this.$canvas = $('<canvas>');
         this.$viewport.append(this.$canvas);
 
         this.canvas = this.$canvas.get(0);
         this.ctx = this.canvas.getContext("2d");
 
+        this.trackScrollDelta = 0
+
         this.contentTop = 0;
 
         this.setWidth(width);
+
+        if (false === this.browser.showSampleNames) {
+            this.hide()
+        }
 
         this.$viewport.get(0).addEventListener('contextmenu', e => {
 
@@ -47,8 +56,8 @@ class SampleNameViewport {
                 {
                     label: 'Name Panel Width',
                     value: this.browser.sampleNameViewportWidth,
-                    callback: width => {
-                        this.browser.sampleNameViewportWidth = width
+                    callback: newWidth => {
+                        this.browser.sampleNameViewportWidth = parseInt(newWidth)
                         for (let { sampleNameViewport } of this.browser.trackViews) {
                             sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
                         }
@@ -79,17 +88,16 @@ class SampleNameViewport {
 
     }
 
-
     setTop(contentTop) {
 
         if (typeof this.trackView.track.getSamples === 'function') {
             this.contentTop = contentTop;
+            // console.log(`setTop. content-top(${ StringUtils.numberFormatter(contentTop) })`)
             const samples = this.trackView.track.getSamples();
             this.repaint(samples);
         }
 
     }
-
 
     setWidth(width) {
         this.$viewport.width(width);
@@ -105,13 +113,14 @@ class SampleNameViewport {
     }
 
     async repaint(samples) {
+
         this.checkCanvas();
         this.draw({context: this.ctx, samples})
     }
 
     draw({context, samples}) {
 
-        if (!samples || samples.names.length === 0 || samples.height < 1) {
+        if (!samples || samples.names.length === 0/* || samples.height < 1*/) {
             return
         }
 
@@ -126,11 +135,14 @@ class SampleNameViewport {
         let y = (samples.yOffset || 0) + this.contentTop;    // contentTop will always be a negative number (top relative to viewport)
 
         for (let name of samples.names) {
-            if (y > viewportHeight) break;
+            if (y > viewportHeight) {
+                break;
+            }
             if (y + samples.height > 0) {
-                const text = name.toUpperCase();
+                const text = name;
                 const yFont = getYFont(context, text, y, samples.height);
                 context.fillText(text, sampleNameXShim, yFont);
+
             }
             y += samples.height;
         }
@@ -158,6 +170,13 @@ class SampleNameViewport {
     }
 
     addMouseHandler(context, pixelTop, samples) {
+
+
+
+        return
+
+
+
 
         this.canvas.addEventListener('click', e => {
 
@@ -203,14 +222,19 @@ class SampleNameViewport {
 
 }
 
+function createSampleNameColumn(columnContainer) {
+    const column = DOMUtils.div({ class: 'igv-sample-name-column' })
+    columnContainer.appendChild(column)
+    return column
+}
+
 function getYFont(context, text, y, height) {
     return y + height - getSampleNameYShim(context, text, height)
 }
 
 function getSampleNameYShim(context, text, h) {
-
-    const {fontBoundingBoxAscent, fontBoundingBoxDescent} = context.measureText(text)
-    return (h - (fontBoundingBoxAscent + fontBoundingBoxDescent)) / 2
+    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(text)
+    return (h - (actualBoundingBoxAscent + actualBoundingBoxDescent)) / 2
 }
 
 function configureFont(ctx, {textAlign, textBaseline, strokeStyle, fillStyle}, sampleHeight) {
@@ -221,6 +245,6 @@ function configureFont(ctx, {textAlign, textBaseline, strokeStyle, fillStyle}, s
     ctx.fillStyle = fillStyle
 }
 
-export {sampleNameXShim}
+export { createSampleNameColumn }
 
 export default SampleNameViewport

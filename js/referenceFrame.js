@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
-import {validateLocusExtent} from "./util/igvUtils.js";
+import {DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
+import {validateLocusExtent,prettyBasePairNumber} from "./util/igvUtils.js";
 import GtexSelection from "./gtex/gtexSelection.js";
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
@@ -34,13 +34,15 @@ class ReferenceFrame {
     constructor(genome, chr, start, end, bpPerPixel) {
         this.genome = genome;
         this.chr = chr;
+
         this.start = start;
-        this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
-        this.initialStart = start;
+
+        // TODO WARNING THIS IS NOT UPDATED !!!
+        this.end = end;
+
         this.bpPerPixel = bpPerPixel;
         this.id = DOMUtils.guid()
     }
-
 
     calculateEnd(pixels) {
         return this.start + this.bpPerPixel * pixels;
@@ -70,13 +72,22 @@ class ReferenceFrame {
      * @param viewportWidth
      */
     shiftPixels(pixels, viewportWidth) {
-        const start = this.start;
-        this.start += pixels * this.bpPerPixel;
-        this.clamp(viewportWidth);
-        return start !== this.start;
+
+        const currentStart = this.start;
+
+        const deltaBP = pixels * this.bpPerPixel
+
+        this.start += deltaBP;
+        this.clampStart(viewportWidth);
+
+        this.end += deltaBP;
+        const { bpLength } = this.genome.getChromosome(this.chr);
+        this.end = Math.min(bpLength, this.end)
+
+        return currentStart !== this.start;
     }
 
-    clamp(viewportWidth) {
+    clampStart(viewportWidth) {
         // clamp left
         const min = this.genome.getChromosome(this.chr).bpStart || 0
         this.start = Math.max(min, this.start);
@@ -84,9 +95,8 @@ class ReferenceFrame {
         // clamp right
         if (viewportWidth) {
 
-            var chromosome = this.genome.getChromosome(this.chr);
-            var maxEnd = chromosome.bpLength;
-            var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
+            const { bpLength } = this.genome.getChromosome(this.chr);
+            const maxStart = bpLength - (viewportWidth * this.bpPerPixel);
 
             if (this.start > maxStart) {
                 this.start = maxStart;
@@ -94,65 +104,112 @@ class ReferenceFrame {
         }
     }
 
+    async zoomWithScaleFactor(browser, scaleFactor, viewportWidth, centerBPOrUndefined) {
+
+        const centerBP = undefined === centerBPOrUndefined ? (this.start + this.toBP(viewportWidth / 2.0)) : centerBPOrUndefined
+
+        // save initial start and bpp
+        const { start, bpPerPixel } = this.start
+
+        const { bpLength } = this.getChromosome()
+        const bppThreshold = scaleFactor < 1.0 ? browser.minimumBases() / viewportWidth : bpLength / viewportWidth
+
+        // update bpp
+        if (scaleFactor < 1.0) {
+            this.bpPerPixel = Math.max(this.bpPerPixel * scaleFactor, bppThreshold)
+        } else {
+            this.bpPerPixel = Math.min(this.bpPerPixel * scaleFactor, bppThreshold)
+        }
+
+        // update start and end
+        const widthBP = this.bpPerPixel * viewportWidth
+        this.start = centerBP - 0.5 * widthBP
+        this.clampStart(viewportWidth)
+
+        this.end = this.start + widthBP
+
+        const viewChanged = start !== this.start || bpPerPixel !== this.bpPerPixel
+        if (viewChanged) {
+            await browser.updateViews(this)
+        }
+
+    }
+
     getChromosome() {
         return this.genome.getChromosome(this.chr)
     }
 
-    presentLocus(pixels) {
+    getMultiLocusLabel(pixels) {
+        const space = '&nbsp &nbsp &nbsp'
+        const ss = Math.floor(this.start) + 1
+        const ee = Math.round(this.start + this.bpPerPixel * pixels)
+        return `${ this.chr }${ space }${ prettyBasePairNumber(ee-ss) }`
+    }
+
+    getPresentationLocusComponents(pixels) {
 
         if ('all' === this.chr) {
-            return this.chr
+            return { chr: this.chr }
         } else {
-            const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1);
-            const ee = StringUtils.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
-            return `${this.chr}:${ss}-${ee}`
+            const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1)
+            const ee = StringUtils.numberFormatter( Math.round(this.start + this.bpPerPixel * pixels) )
+
+            return { chr: this.chr, start: ss, end: ee }
         }
 
     }
+
+    getPresentionLocus(pixels) {
+        const { chr, start, end } = this.getPresentationLocusComponents(pixels)
+        return 'all' === chr ? chr : `${ chr }:${ start }-${ end }`
+    }
+
+    description(blurb) {
+        console.log(` ${ blurb || '' } referenceFrame - ${ this.chr } bpp ${ this.bpPerPixel.toFixed(3) } start ${ StringUtils.numberFormatter(Math.round(this.start)) } end ${ StringUtils.numberFormatter(Math.round(this.end)) } `)
+    }
 }
 
-function createReferenceFrameList(browser, loci) {
+function createReferenceFrameList(loci, genome, browserFlanking, minimumBases, viewportWidth) {
 
-    const viewportWidth = browser.computeViewportWidth(loci.length, browser.getViewportContainerWidth())
-
-    return loci.map(locusObject => {
+    return loci.map(locus => {
 
         // If a flanking region is defined, and the search object is a symbol ("gene") type, adjust start and end
-        if (browser.flanking && locusObject.gene) {
-            locusObject.start = Math.max(0, locusObject.start - browser.flanking)
-            locusObject.end += browser.flanking
+        if (browserFlanking && locus.gene) {
+            locus.start = Math.max(0, locus.start - browserFlanking)
+            locus.end += browserFlanking
         }
 
-        // Validate the range.  This potentionally modifies start & end of locusObject.
-        const chromosome = browser.genome.getChromosome(locusObject.chr)
-        validateLocusExtent(chromosome.bpLength, locusObject, browser.minimumBases())
+        // Validate the range.  This potentionally modifies start & end of locus.
+        const chromosome = genome.getChromosome(locus.chr)
+        validateLocusExtent(chromosome.bpLength, locus, minimumBases)
 
-        const referenceFrame = new ReferenceFrame(
-            browser.genome,
-            locusObject.chr,
-            locusObject.start,
-            locusObject.end,
-            (locusObject.end - locusObject.start) / viewportWidth)
+        const referenceFrame = new ReferenceFrame(genome,
+            locus.chr,
+            locus.start,
+            locus.end,
+            (locus.end - locus.start) / viewportWidth)
 
-        referenceFrame.locusSearchString = locusObject.locusSearchString
+        referenceFrame.locusSearchString = locus.locusSearchString
 
         // GTEX hack
-        if (locusObject.gene || locusObject.snp) {
-            referenceFrame.selection = new GtexSelection(locusObject.gene, locusObject.snp);
+        if (locus.gene || locus.snp) {
+            referenceFrame.selection = new GtexSelection(locus.gene, locus.snp);
         }
 
         return referenceFrame
     });
 }
 
-function adjustReferenceFrame(referenceFrame, viewportWidth, alignmentStart, alignmentLength) {
+function adjustReferenceFrame(scaleFactor, referenceFrame, viewportWidth, alignmentStart, alignmentLength) {
+
+    referenceFrame.bpPerPixel *= scaleFactor
 
     const alignmentEE = alignmentStart + alignmentLength
     const alignmentCC = (alignmentStart + alignmentEE) / 2
 
     referenceFrame.start = alignmentCC - (referenceFrame.bpPerPixel * (viewportWidth / 2))
-    referenceFrame.initialEnd = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
-    referenceFrame.locusSearchString = referenceFrame.presentLocus(viewportWidth)
+    referenceFrame.end = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
+    referenceFrame.locusSearchString = referenceFrame.getPresentionLocus(viewportWidth)
 }
 
 function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
@@ -165,7 +222,7 @@ function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewport
 
     const referenceFrame = new ReferenceFrame(genome, chromosomeName, ss, ee, bpp)
 
-    referenceFrame.locusSearchString = referenceFrame.presentLocus(viewportWidth)
+    referenceFrame.locusSearchString = referenceFrame.getPresentionLocus(viewportWidth)
 
     return referenceFrame
 }

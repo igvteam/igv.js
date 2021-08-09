@@ -24,42 +24,57 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
+import { DOMUtils } from '../../node_modules/igv-utils/src/index.js';
 
-const ChromosomeSelectWidget = function (browser, $parent) {
+const ChromosomeSelectWidget = function (browser, parent) {
 
-    this.showAllChromosomes = browser.config.showAllChromosomes !== false;   // i.e. default to true
+    this.container = DOMUtils.div({ class: 'igv-chromosome-select-widget-container' })
+    parent.appendChild(this.container)
 
-    this.$container = $('<div>', { class: 'igv-chromosome-select-widget-container' });
-    $parent.append(this.$container);
+    this.select = document.createElement('select')
+    this.select.setAttribute('name', 'chromosome-select-widget')
+    this.container.appendChild(this.select)
 
-    this.$select = $('<select>', {'name': 'chromosome-select-widget'});
-    this.$container.append(this.$select);
-
-    this.$select.on('change', function () {
-        const value = $(this).val();
-        if (value !== '') {
-            browser.search($(this).val());
-            $(this).blur();
+    this.select.addEventListener('change', () => {
+        this.select.blur()
+        if (this.select.value !== '') {
+            browser.search(this.select.value)
         }
     });
 
+    this.showAllChromosomes = browser.config.showAllChromosomes !== false;   // i.e. default to true
+
 };
+
+ChromosomeSelectWidget.prototype.show = function () {
+    this.container.style.display = 'flex'
+}
+
+ChromosomeSelectWidget.prototype.hide = function () {
+    this.container.style.display = 'none'
+}
 
 ChromosomeSelectWidget.prototype.update = function (genome) {
 
+    this.select.innerHeight = ''
 
-    this.$select.empty();
-    const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice();  // slice used to copy list
+    const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice()
+
     if(genome.showWholeGenomeView()) {
         list.unshift('all');
         list.unshift('');
     }
     for (let name of list) {
-        var $o;
-        $o = $('<option>', {'value': name});
-        this.$select.append($o);
-        $o.text(name);
+
+        // var $o;
+        // $o = $('<option>', {'value': name});
+        // this.$select.append($o);
+        // $o.text(name);
+
+        const option = document.createElement('option')
+        option.setAttribute('value', name)
+        option.innerText = name
+        this.select.appendChild(option)
     }
 
 };

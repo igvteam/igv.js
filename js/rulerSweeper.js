@@ -32,81 +32,74 @@ class RulerSweeper {
 
     constructor(viewport) {
         this.viewport = viewport;
-        this.browser = viewport.browser;
-        this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-        $(viewport.contentDiv).append(this.$rulerSweeper);
-        this.namespace = '.sweeper_' + DOMUtils.guid();
-        this.addMouseHandlers();
+        this.rulerSweeper = DOMUtils.div({ class: 'igv-ruler-sweeper'})
+        viewport.contentDiv.appendChild(this.rulerSweeper)
+        this.isMouseHandlers = undefined
     }
 
     disableMouseHandlers() {
-
-        $(document).off(this.namespace);
-        this.viewport.$viewport.off(this.namespace);
+        this.viewport.$content.off()
+        $(document).off(`mousemove.${ this.viewport.trackView.namespace }`)
+        $(document).off(`mouseup.${ this.viewport.trackView.namespace }`)
+        this.isMouseHandlers = false;
     };
 
     addMouseHandlers() {
 
-        const browser = this.browser;
-        const self = this;
+        if (true === this.isMouseHandlers) {
+            return
+        }
 
-        var isMouseDown,
-            isMouseIn,
-            mouseDown,
-            left,
-            threshold,
-            width,
-            dx;
+        let isMouseDown;
+        let isMouseIn;
+        let mouseDownX;
+        let left;
+        let width;
+        let dx;
 
-        this.disableMouseHandlers();
+        let threshold = 1;
 
-        isMouseDown = isMouseIn = mouseDown = undefined;
+        this.viewport.$content.on('mousedown', e => {
 
-        threshold = 1;
-
-        $(this.browser.$root).on('mousedown' + this.namespace, function (e) {
-
+            isMouseDown = true
             isMouseIn = true;
 
-            mouseDown = DOMUtils.translateMouseCoordinates(e, self.viewport.$viewport.get(0)).x;
+            const { x } = DOMUtils.translateMouseCoordinates(e, this.viewport.contentDiv);
+            left = mouseDownX = x;
 
-            if (true === isMouseDown) {
+            width = threshold;
 
-                self.$rulerSweeper.show();
+            this.rulerSweeper.style.display = 'block';
 
-                width = threshold;
-                left = mouseDown;
-                self.$rulerSweeper.css({left: left + 'px'});
-                self.$rulerSweeper.width(width);
+            this.rulerSweeper.style.left = `${left}px`;
+            this.rulerSweeper.style.width = `${width}px`;
 
-            }
+        })
 
-        });
+        $(document).on(`mousemove.${ this.viewport.trackView.namespace }`, e => {
 
-        $(this.browser.$root).on('mousemove' + this.namespace, function (e) {
-            var mouseCurrent;
+            let mouseCurrentX;
 
             if (isMouseDown && isMouseIn) {
 
-                mouseCurrent = DOMUtils.translateMouseCoordinates(e, self.viewport.$viewport.get(0)).x;
-                mouseCurrent = Math.min(mouseCurrent, self.viewport.$viewport.width());
-                mouseCurrent = Math.max(mouseCurrent, 0);
+                const { x } = DOMUtils.translateMouseCoordinates(e, this.viewport.contentDiv);
+                mouseCurrentX = Math.max(Math.min(x, this.viewport.contentDiv.clientWidth), 0);
 
-                dx = mouseCurrent - mouseDown;
+                dx = mouseCurrentX - mouseDownX;
 
                 width = Math.abs(dx);
-                self.$rulerSweeper.width(width);
+                this.rulerSweeper.style.width = `${width}px`;
 
                 if (dx < 0) {
-                    left = mouseDown + dx;
-                    self.$rulerSweeper.css({left: left + 'px'});
+                    left = mouseDownX + dx;
+                    this.rulerSweeper.style.left = `${left}px`;
                 }
 
             }
 
-        });
+        })
 
-        $(this.browser.$root).on('mouseup' + this.namespace, function (e) {
+        $(document).on(`mouseup.${ this.viewport.trackView.namespace }`, e => {
 
             let extent;
 
@@ -114,35 +107,27 @@ class RulerSweeper {
 
                 isMouseDown = isMouseIn = undefined;
 
-                self.$rulerSweeper.hide();
+                this.rulerSweeper.style.display = 'none';
 
-                extent = {};
-                extent.start = self.bp(left);
-                extent.end = self.bp(left + width);
 
                 if (width > threshold) {
 
-                    validateLocusExtent(browser.genome.getChromosome(self.viewport.referenceFrame.chr).bpLength, extent, browser.minimumBases());
+                    extent = { start: this.bp(left), end: this.bp(left + width) };
 
-                    self.viewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
-                    self.viewport.referenceFrame.start = Math.round(extent.start);
-                    self.viewport.referenceFrame.initialEnd = Math.round(extent.end);
-                    browser.updateViews(self.viewport.referenceFrame);
+                    validateLocusExtent(this.viewport.browser.genome.getChromosome(this.viewport.referenceFrame.chr).bpLength, extent, this.viewport.browser.minimumBases());
+
+                    this.viewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) /this.viewport.contentDiv.clientWidth;
+                    this.viewport.referenceFrame.start = Math.round(extent.start);
+                    this.viewport.referenceFrame.end = Math.round(extent.end);
+
+                    this.viewport.browser.updateViews(this.viewport.referenceFrame);
                 }
 
             }
 
-        });
+        })
 
-        this.viewport.$viewport.on('mousedown' + this.namespace, function (e) {
-
-            isMouseDown = true;
-        });
-
-    }
-
-    dispose() {
-        this.disableMouseHandlers();
+        this.isMouseHandlers = true;
     }
 
     bp(pixel) {
