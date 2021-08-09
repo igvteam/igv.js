@@ -2,30 +2,43 @@ import ViewPort from "./viewport.js";
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
-import {DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
-import {createIcon} from "./igv-icons.js";
+import {Icon, DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
 
 let timer
 let currentViewport = undefined
 const toolTipTimeout = 1e4
 
 class RulerViewport extends ViewPort {
-    constructor(trackView, $viewportContainer, referenceFrame, width) {
-        super(trackView, $viewportContainer, referenceFrame, width);
+
+    constructor(trackView, $viewportColumn, referenceFrame, width) {
+        super(trackView, $viewportColumn, referenceFrame, width);
     }
 
     initializationHelper() {
 
         this.rulerSweeper = new RulerSweeper(this)
 
-        appendMultiPanelCloseButton(this.browser, this.$viewport, this.referenceFrame)
+        this.$multiLocusCloseButton = $('<div>', { class: 'igv-multi-locus-close-button' })
+        this.$viewport.append(this.$multiLocusCloseButton);
+        this.$multiLocusCloseButton.get(0).appendChild(Icon.createIcon("times-circle"));
 
-        this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">')
-        this.$content.append(this.$rulerLabel)
+        this.$multiLocusCloseButton.click(() => {
+            this.browser.removeMultiLocusPanel(this.referenceFrame)
+        });
 
-        this.$rulerLabel.click(() => this.browser.selectMultiLocusPanelWithReferenceFrame(this.referenceFrame))
+        this.$rulerLabel = $('<div>', { class: 'igv-multi-locus-ruler-label' })
+        this.$viewport.append(this.$rulerLabel)
 
-        this.$tooltip = $('<div>', { class: 'igv-ruler-tooltip'})
+        this.$rulerLabel.click(async () => {
+
+            const removals = this.browser.referenceFrameList.filter(r => this.referenceFrame !== r)
+            for (let referenceFrame of removals) {
+                await this.browser.removeMultiLocusPanel(referenceFrame)
+            }
+
+        })
+
+        this.$tooltip = $('<div>', { class: 'igv-ruler-tooltip' })
         this.$tooltip.height(this.$viewport.height())
 
         this.$viewport.append(this.$tooltip)
@@ -33,15 +46,22 @@ class RulerViewport extends ViewPort {
         this.$tooltipContent = $('<div>')
         this.$tooltip.append(this.$tooltipContent)
 
-        this.attachMouseHandlers( GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr) )
+        this.attachMouseHandlers( GenomeUtils.isWholeGenomeView(this.referenceFrame.chr) )
 
         this.$tooltip.hide()
 
+        this.dismissLocusLabel()
     }
 
-    updateLocusLabel() {
-        const str = this.referenceFrame.presentLocus(this.$viewport.width())
-        this.$rulerLabel.text(str)
+    presentLocusLabel(viewportWidth) {
+        this.$rulerLabel.html( this.referenceFrame.getMultiLocusLabel(viewportWidth) )
+        this.$rulerLabel.show()
+        this.$multiLocusCloseButton.show()
+    }
+
+    dismissLocusLabel() {
+        this.$rulerLabel.hide()
+        this.$multiLocusCloseButton.hide()
     }
 
     attachMouseHandlers(isWholeGenomeView) {
@@ -96,7 +116,7 @@ class RulerViewport extends ViewPort {
                 this.$tooltip.show()
             }
 
-            const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr));
+            const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrame.chr));
 
             if (isWholeGenome) {
                 this.$tooltip.hide();
@@ -122,18 +142,8 @@ class RulerViewport extends ViewPort {
 
     }
 
-}
-
-function appendMultiPanelCloseButton(browser, $viewport, referenceFrame) {
-
-    $viewport.addClass('igv-viewport-ruler');
-
-    const $close = $('<div class="igv-multi-locus-panel-close-container">');
-    $viewport.append($close);
-
-    $close.append(createIcon("times-circle"));
-
-    $close.click(() => browser.removeMultiLocusPanelWithReferenceFrame(referenceFrame, true));
+    startSpinner() {}
+    stopSpinner() {}
 
 }
 

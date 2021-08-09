@@ -24,69 +24,148 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
-import {createIcon} from "../igv-icons.js";
+import { DOMUtils, Icon, StringUtils } from '../../node_modules/igv-utils/src/index.js'
+import { appleCrayonPalette } from "../util/colorPalletes.js";
 
-const ZoomWidget = function (browser, $parent) {
+const sliderMin = 0
+let sliderMax = 23
+let sliderValueRaw = 0
 
-    let $div;
+const ZoomWidget = function (browser, parent) {
 
-    this.$zoomContainer = $('<div class="igv-zoom-widget">');
-    $parent.append(this.$zoomContainer);
+    this.browser = browser
+
+    this.zoomContainer = DOMUtils.div({ class: 'igv-zoom-widget' })
+    parent.appendChild(this.zoomContainer)
 
     // zoom out
-    $div = $('<div>');
-    this.$zoomContainer.append($div);
-
-    $div.append(createIcon("minus-circle"));
-
-    $div.on('click', function () {
-        browser.zoomOut();
-    });
+    this.zoomOutButton = DOMUtils.div()
+    this.zoomContainer.appendChild(this.zoomOutButton)
+    this.zoomOutButton.appendChild(Icon.createIcon('minus-circle'))
+    this.zoomOutButton.addEventListener('click', () => {
+        browser.zoomWithScaleFactor(2.0)
+    })
 
     // Range slider
-    $div = $('<div>');
-    this.$zoomContainer.append($div);
+    const el = DOMUtils.div()
+    this.zoomContainer.appendChild(el)
+    this.slider = document.createElement('input')
+    this.slider.type = 'range'
 
-    this.$slider = $('<input type="range"/>');
-    $div.append(this.$slider);
+    this.slider.min = `${ sliderMin }`
+    this.slider.max = `${ sliderMax }`
 
-    this.$slider.on('change', function (e) {
-        browser.zoomWithRangePercentage(e.target.value / 100.0);
-    });
+    el.appendChild(this.slider)
+
+    this.slider.addEventListener('change', e => {
+
+        const referenceFrame = browser.referenceFrameList[ 0 ]
+        const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
+        const { end, start } = referenceFrame
+
+        const extent = end - start
+
+        // bpLength/(end - start)
+        const scaleFactor = Math.pow(2, e.target.valueAsNumber)
+
+        // (end - start) = bpLength/scaleFactor
+        const zoomedExtent = bpLength/scaleFactor
+
+        // console.log(`zoom-widget - slider ${ e.target.value } scaleFactor ${ scaleFactor } extent-zoomed ${ StringUtils.numberFormatter(Math.round(zoomedExtent)) }`)
+
+        browser.zoomWithScaleFactor(zoomedExtent/extent)
+
+    })
 
     // zoom in
-    $div = $('<div>');
-    this.$zoomContainer.append($div);
-
-    $div.append(createIcon("plus-circle"));
-
-    $div.on('click', function () {
-        browser.zoomIn();
-    });
-
-    this.currentChr = undefined;
-
-    let self = this;
-    browser.on('locuschange', function () {
-        browser.updateZoomSlider(self.$slider);
+    this.zoomInButton = DOMUtils.div()
+    this.zoomContainer.appendChild(this.zoomInButton)
+    this.zoomInButton.appendChild(Icon.createIcon('plus-circle'))
+    this.zoomInButton.addEventListener('click', () => {
+        browser.zoomWithScaleFactor(0.5)
     })
+
+    browser.on('locuschange', (referenceFrameList) => {
+
+        if (this.browser.isMultiLocusMode()) {
+            this.disable()
+        } else {
+            this.enable()
+            this.update(referenceFrameList)
+        }
+
+    })
+
+};
+
+ZoomWidget.prototype.update = function (referenceFrameList) {
+
+    const referenceFrame = referenceFrameList[ 0 ]
+    const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
+    const { start, end } = referenceFrame
+
+    sliderMax = Math.ceil(Math.log2(bpLength/this.browser.minimumBases()))
+
+    this.slider.max = `${ sliderMax }`
+
+    const scaleFactor = bpLength/(end-start)
+    sliderValueRaw = Math.log2(scaleFactor)
+    this.slider.value = `${ Math.round(sliderValueRaw) }`
+
+    const extent = end - start
+
+    const derivedScalefactor = Math.pow(2, sliderValueRaw)
+
+    const derivedExtent = bpLength/derivedScalefactor
+
+    // referenceFrame.description('zoom.update')
+
+    // console.log(`${ Date.now() } update - slider ${ this.slider.value } scaleFactor ${ Math.round(scaleFactor) } extent ${ StringUtils.numberFormatter(Math.round(extent)) }`)
+
+    // console.log(`update - sliderMin ${ sliderMin } sliderValue ${ this.slider.value } sliderMax ${ sliderMax } scaleFactor ${ scaleFactor.toFixed(3) } derived-scaleFactor ${ derivedScalefactor.toFixed(3) }`)
+
+}
+
+ZoomWidget.prototype.enable = function () {
+
+    // this.zoomInButton.style.color = appleCrayonPalette[ 'steel' ];
+    // this.zoomInButton.style.pointerEvents = 'auto';
+    //
+    // this.zoomOutButton.style.color = appleCrayonPalette[ 'steel' ];
+    // this.zoomOutButton.style.pointerEvents = 'auto';
+
+    this.slider.disabled = false;
+};
+
+ZoomWidget.prototype.disable = function () {
+
+    // this.zoomInButton.style.color = appleCrayonPalette[ 'silver' ];
+    // this.zoomInButton.style.pointerEvents = 'none';
+    //
+    // this.zoomOutButton.style.color = appleCrayonPalette[ 'silver' ];
+    // this.zoomOutButton.style.pointerEvents = 'none';
+
+    this.slider.disabled = true;
 };
 
 ZoomWidget.prototype.hide = function () {
-    this.$zoomContainer.hide();
+    this.zoomContainer.style.display = 'none'
 };
 
 ZoomWidget.prototype.show = function () {
-    this.$zoomContainer.show()
+    this.zoomContainer.style.display = 'block'
 };
 
 ZoomWidget.prototype.hideSlider = function () {
-    this.$slider.hide();
+    this.slider.style.display = 'none'
 };
 
 ZoomWidget.prototype.showSlider = function () {
-    this.$slider.show();
+    this.slider.style.display = 'block'
 };
+
+function lerpAlvyRaySmith(a, b, t) {
+    return a - t * (a - b)
+}
 
 export default ZoomWidget;

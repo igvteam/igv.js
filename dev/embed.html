@@ -12,17 +12,14 @@
 
 <!-- This page contains an undecorated igv.js instance.  Its purpose is to serve as an iFrame src for embedding igv.js  -->
 
-<div id="igvDiv"/>
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
     import igv from "../js/index.js";
 
-    var div = document.getElementById('igvDiv');
-    var config = {
-        queryParametersSupported: true
-    };
-    igv.createBrowser(div, config);
+    // igv.createBrowser(document.getElementById('igvDiv'), { queryParametersSupported: true })
+    igv.createBrowser(document.getElementById('igvDiv'), { })
 
 
 </script>

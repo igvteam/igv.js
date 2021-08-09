@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+import $ from "../vendor/jquery-3.3.1.slim.js";
 import FeatureSource from './featureSource.js';
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
@@ -126,14 +127,17 @@ class SegTrack extends TrackBase {
         const displayOptions = this.type === 'seg' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"];
 
         for (let displayMode of displayOptions) {
+
+            const checkBox = createCheckbox(lut[displayMode], displayMode === this.displayMode)
             menuItems.push(
                 {
-                    object: createCheckbox(lut[displayMode], displayMode === this.displayMode),
+                    object: $(checkBox),
                     click: () => {
                         this.displayMode = displayMode;
                         this.config.displayMode = displayMode;
                         this.trackView.checkContentHeight();
                         this.trackView.repaintViews();
+                        this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta)
                     }
                 });
         }

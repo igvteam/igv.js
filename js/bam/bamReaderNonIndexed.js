@@ -67,7 +67,7 @@ class BamReaderNonIndexed {
             if (this.isDataUri) {
                 const data = decodeDataURI(this.bamPath);
                 const unc = BGZip.unbgzf(data.buffer);
-                this.parseAlignments(this, unc);
+                this.parseAlignments(unc);
                 return this.fetchAlignments(chr, bpStart, bpEnd);
             } else {
                 const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config));
@@ -77,28 +77,26 @@ class BamReaderNonIndexed {
             }
         }
 
-        function parseAlignments(data) {
-            const alignments = [];
-            this.header = BamUtils.decodeBamHeader(data);
-            BamUtils.decodeBamRecords(data, this.header.size, alignments, this.header.chrNames);
-            this.alignmentCache = new FeatureCache(alignments, genome);
-        }
-
-        function fetchAlignments(chr, bpStart, bpEnd) {
-
-            var header, queryChr, qAlignments, alignmentContainer;
-            header = this.header;
-            queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
-            qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd);
-            alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported);
-            for (let a of qAlignments) {
-                alignmentContainer.push(a);
-            }
-            alignmentContainer.finish();
-            return alignmentContainer;
-        }
-
     }
+
+    parseAlignments(data) {
+        const alignments = [];
+        this.header = BamUtils.decodeBamHeader(data);
+        BamUtils.decodeBamRecords(data, this.header.size, alignments, this.header.chrNames);
+        this.alignmentCache = new FeatureCache(alignments, this.genome);
+    }
+
+    fetchAlignments(chr, bpStart, bpEnd) {
+        const queryChr = this.header.chrAliasTable.hasOwnProperty(chr) ? this.header.chrAliasTable[chr] : chr;
+        const features = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd);
+        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported);
+        for (let feature of features) {
+            alignmentContainer.push(feature);
+        }
+        alignmentContainer.finish();
+        return alignmentContainer;
+    }
+
 }
 
 function decodeDataURI(dataURI) {

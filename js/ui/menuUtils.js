@@ -49,17 +49,18 @@ const MenuUtils = {
         const menuItems = [];
 
         // Data range
-        const $e = $('<div>');
-        $e.text('Set data range');
-        const clickHandler = function () {
+        const object = $('<div>');
+        object.text('Set data range');
+
+        const click = () => {
             trackView.browser.dataRangeDialog.configure(trackView);
-            trackView.browser.dataRangeDialog.present($(trackView.trackDiv));
+            trackView.browser.dataRangeDialog.present($(trackView.browser.columnContainer));
         };
-        menuItems.push({object: $e, click: clickHandler});
+        menuItems.push({ object, click });
 
         if (trackView.track.logScale !== undefined) {
             menuItems.push({
-                    object: createCheckbox("Log scale", trackView.track.logScale),
+                    object: $(createCheckbox("Log scale", trackView.track.logScale)),
                     click: () => {
                         trackView.track.logScale = !trackView.track.logScale;
                         trackView.repaintViews();
@@ -69,7 +70,7 @@ const MenuUtils = {
         }
 
         menuItems.push({
-                object: createCheckbox("Autoscale", trackView.track.autoscale),
+                object: $(createCheckbox("Autoscale", trackView.track.autoscale)),
                 click: () => {
                     trackView.track.autoscale = !trackView.track.autoscale;
                     trackView.updateViews();
@@ -81,7 +82,7 @@ const MenuUtils = {
         return menuItems;
     },
 
-    trackMenuItemListHelper: function (itemList, $popover) {
+    trackMenuItemListHelper: function (itemList, menuPopup) {
 
         var list = [];
 
@@ -125,7 +126,7 @@ const MenuUtils = {
                     // eslint-disable-next-line no-inner-declarations
                     function handleClick(e) {
                         item.click(e);
-                        $popover.hide();
+                        menuPopup.hide();
                         e.preventDefault();
                         e.stopPropagation()
                     }
@@ -184,17 +185,10 @@ function visibilityWindowMenuItem(trackView) {
 
 function trackRemovalMenuItem(trackView) {
 
-    var $e,
-        menuClickHandler;
+    const object = $('<div>');
+    object.text('Remove track');
 
-    $e = $('<div>');
-    $e.text('Remove track');
-
-    menuClickHandler = function () {
-        trackView.browser.removeTrack(trackView.track);
-    };
-
-    return {object: $e, click: menuClickHandler};
+    return { object, click: () => trackView.browser.removeTrack(trackView.track) };
 
 }
 
@@ -270,6 +264,10 @@ function trackHeightMenuItem(trackView) {
                 }
                 trackView.setTrackHeight(number, true);
 
+                trackView.checkContentHeight();
+                trackView.repaintViews();
+
+
                 // Explicitly setting track height turns off autoHeight
                 trackView.track.autoHeight = false;
             }
@@ -279,7 +277,7 @@ function trackHeightMenuItem(trackView) {
         const config =
             {
                 label: 'Track Height',
-                value: trackView.trackDiv.clientHeight,
+                value: trackView.track.height,
                 callback
             }
 

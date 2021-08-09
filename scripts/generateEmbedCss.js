@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const cssPath = require.resolve('../css/igv.css')
+const cssPath = require.resolve('../css/dom.css')
 let ping = fs.readFileSync(cssPath, 'utf-8');
 ping = ping.replace(/\r\n/g, '\\n');
 ping = ping.replace(/\n/g, '\\n');

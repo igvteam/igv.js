@@ -43,14 +43,6 @@ class RulerTrack {
         this.type = 'ruler';
     }
 
-    updateLocusLabel() {
-
-        for (let viewport of this.trackView.viewports) {
-            viewport.updateLocusLabel()
-        }
-
-    };
-
     async getFeatures(chr, start, end) {
         return [];
     };
@@ -59,51 +51,87 @@ class RulerTrack {
         return this.height;
     };
 
-    draw(options) {
+    draw({ context, viewport, referenceFrame, pixelWidth, pixelHeight, bpPerPixel, bpStart }) {
 
-        if (GenomeUtils.isWholeGenomeView(options.referenceFrame.chr)) {
-
-            options.viewport.rulerSweeper.disableMouseHandlers();
-
-            this.drawWholeGenome(options);
-
+        if (GenomeUtils.isWholeGenomeView(referenceFrame.chr)) {
+            viewport.rulerSweeper.disableMouseHandlers();
+            this.drawWholeGenome({ context, pixelWidth, pixelHeight, bpPerPixel });
         } else {
 
-            options.viewport.rulerSweeper.addMouseHandlers();
+            viewport.rulerSweeper.addMouseHandlers();
+
+            context.clearRect(0, 0, pixelWidth, pixelHeight)
 
             const tickHeight = 6;
             const shim = 2;
-            const pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
-            const tick = new Tick(pixelWidthBP, options);
 
-            tick.drawTicks(options, tickHeight, shim, this.height);
-            IGVGraphics.strokeLine(options.context, 0, this.height - shim, options.pixelWidth, this.height - shim);
+            const bpLength = Math.floor(referenceFrame.toBP(pixelWidth));
+            const tick = findSpacing(bpLength, context.isSVG);
+
+            let nTick = Math.floor(bpStart / tick.majorTick) - 1;
+
+            const { tickDelta, labelLength } = calculateDeltas(context, referenceFrame, bpStart, nTick, tick)
+
+            const index = this.browser.referenceFrameList.indexOf(referenceFrame)
+            // console.log(`ruler(${ index }) label-length ${ labelLength > tickDelta ? 'clobbers' : 'less than' } tick-delta ${ StringUtils.numberFormatter(tickDelta)} `)
+
+            let xTick
+            let bp
+            let accumulatedTickDelta = tickDelta
+            const labelLengthShim = 0.25 * labelLength
+            do {
+
+                bp = Math.floor(nTick * tick.majorTick)
+                const rulerLabel = `${ StringUtils.numberFormatter(Math.floor(bp / tick.unitMultiplier)) } ${ tick.majorUnit }`
+
+                xTick = Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5))
+                const xLabel = Math.round(xTick - context.measureText(rulerLabel).width / 2)
+
+                if (xLabel > 0 && (labelLengthShim + labelLength) <= accumulatedTickDelta) {
+                    IGVGraphics.fillText(context, rulerLabel, xLabel, this.height - (tickHeight / 0.75))
+                    accumulatedTickDelta = 0
+                }
+
+                if(xTick > 0) {
+                    IGVGraphics.strokeLine(context, xTick, this.height - tickHeight, xTick, this.height - shim)
+                }
+
+                bp = Math.floor((1 + nTick) * tick.majorTick)
+                let pixel = Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5))
+                let delta = (pixel - xTick)/2
+                let xx = xTick + delta
+                if(xx > 0) {
+                    IGVGraphics.strokeLine(context, xx, this.height - tickHeight, xx, this.height - shim)
+                }
+
+                ++nTick
+                accumulatedTickDelta += tickDelta
+
+            } while (xTick < pixelWidth)
+
+            IGVGraphics.strokeLine(context, 0, this.height - shim, pixelWidth, this.height - shim);
 
         }
     }
 
+    drawWholeGenome({ context, pixelWidth, pixelHeight, bpPerPixel }) {
 
-    drawWholeGenome(options) {
+        context.save();
 
-        options.context.save();
-
-        IGVGraphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, {'fillStyle': 'white'});
-
-        let y = 0;
-        let h = options.pixelHeight;
+        IGVGraphics.fillRect(context, 0, 0, pixelWidth, pixelHeight, {'fillStyle': 'white'});
 
         for (let name of this.browser.genome.wgChromosomeNames) {
 
             let xBP = this.browser.genome.getCumulativeOffset(name);
             let wBP = this.browser.genome.getChromosome(name).bpLength;
 
-            let x = Math.round(xBP / options.bpPerPixel);
-            let w = Math.round(wBP / options.bpPerPixel);
+            let x = Math.round(xBP / bpPerPixel);
+            let w = Math.round(wBP / bpPerPixel);
 
-            this.renderChromosomeRect(options.context, x, y, w, h, name);
+            this.renderChromosomeRect(context, x, 0, w, pixelHeight, name);
         }
 
-        options.context.restore();
+        context.restore();
 
     }
 
@@ -112,8 +140,6 @@ class RulerTrack {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         ctx.font = '12px sans-serif';
-
-        // IGVGraphics.fillRect(ctx, x, y, w, h, { 'fillStyle' : toggleColor(this.browser.genome.wgChromosomeNames.indexOf(name)) });
 
         IGVGraphics.strokeLine(ctx, x + w, y, x + w, y + h, {strokeStyle: IGVColor.greyScale(191)});
 
@@ -133,126 +159,70 @@ class RulerTrack {
     }
 }
 
-function toggleColor(value) {
-    return 0 === value % 2 ? 'rgb(250,250,250)' : 'rgb(255,255,255)';
-}
+function findSpacing(bpLength, isSVG) {
 
-
-class Tick {
-    constructor(pixelWidthBP, options) {
-
-        initialize.call(this, pixelWidthBP, options);
-
-        function initialize(pixelWidthBP, options) {
-
-            var numberOfZeroes,
-                majorUnit,
-                unitMultiplier,
-                numberOfMajorTicks,
-                str;
-
-            const isSVGContext = options.context.isSVG || false;
-
-            if (pixelWidthBP < 10) {
-                set.call(this, 1, "bp", 1, isSVGContext);
-            }
-
-            numberOfZeroes = Math.floor(Math.log10(pixelWidthBP));
-
-            if (numberOfZeroes > 9) {
-                majorUnit = "gb";
-                unitMultiplier = 1e9;
-            } else if (numberOfZeroes > 6) {
-                majorUnit = "mb";
-                unitMultiplier = 1e6;
-            } else if (numberOfZeroes > 3) {
-                majorUnit = "kb";
-                unitMultiplier = 1e3;
-            } else {
-                majorUnit = "bp";
-                unitMultiplier = 1;
-            }
-
-            str = numberFormatter(Math.floor(pixelWidthBP / unitMultiplier)) + " " + majorUnit;
-            this.labelWidthBP = Math.round(options.referenceFrame.toBP(options.context.measureText(str).width));
-
-            numberOfMajorTicks = pixelWidthBP / Math.pow(10, numberOfZeroes - 1);
-
-            if (numberOfMajorTicks < 25) {
-                set.call(this, Math.pow(10, numberOfZeroes - 1), majorUnit, unitMultiplier, isSVGContext);
-            } else {
-                set.call(this, Math.pow(10, numberOfZeroes) / 2, majorUnit, unitMultiplier, isSVGContext);
-            }
-
-        }
-
-        function set(majorTick, majorUnit, unitMultiplier, isSVGContext) {
-
-            // reduce label frequency by half for SVG rendering
-            this.majorTick = true === isSVGContext ? 2 * majorTick : majorTick;
-            this.majorUnit = majorUnit;
-
-            this.halfTick = majorTick / 2;
-
-            this.unitMultiplier = unitMultiplier;
-        }
+    if (bpLength < 10) {
+        return new Tick(1, 'bp', 1)
     }
 
-    drawTicks(options, tickHeight, shim, height) {
+    const nZeroes = Math.floor(Math.log10(bpLength))
 
-        var numberOfTicks,
-            bp,
-            pixel,
-            label,
-            labelWidth,
-            labelX,
-            numer,
-            floored;
+    let majorUnit = 'bp'
+    let unitMultiplier = 1
 
+    if (nZeroes > 9) {
+        majorUnit = 'gb'
+        unitMultiplier = 1e9
+    } else if (nZeroes > 6) {
+        majorUnit = 'mb'
+        unitMultiplier = 1e6
+    } else if (nZeroes > 3) {
+        majorUnit = 'kb'
+        unitMultiplier = 1e3
+    }
 
-        numberOfTicks = Math.floor(options.bpStart / this.majorTick) - 1;
-        labelWidth = 0;
-        labelX = 0;
-        pixel = 0;
-        while (pixel < options.pixelWidth) {
+    const denom = Math.pow(10, nZeroes - 1)
+    const nMajorTicks = bpLength / denom
 
-            bp = Math.floor(numberOfTicks * this.majorTick);
-            pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
+    // const threshold = 25
+    const threshold = 3 * 25
 
-            label = numberFormatter(Math.floor(bp / this.unitMultiplier)) + " " + this.majorUnit;
-            labelWidth = options.context.measureText(label).width;
+    const belowThresholdTick = Math.pow(10, nZeroes - 1)
+    const aboveThresholdTick = Math.pow(10, nZeroes)/2
 
-            labelX = Math.round(pixel - labelWidth / 2);
+    // console.log(`zeros ${ nZeroes } tick-threshold ${ threshold } ticks ${ nMajorTicks } belowTick ${ StringUtils.numberFormatter(belowThresholdTick) } aboveTick ${ StringUtils.numberFormatter(aboveThresholdTick) }`)
 
-            IGVGraphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
-            IGVGraphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
+    const majorTick = (nMajorTicks < threshold && isSVG !== true) ? belowThresholdTick : aboveThresholdTick
 
-            ++numberOfTicks;
-        }
+    return new Tick(majorTick, majorUnit, unitMultiplier)
+}
 
-        numberOfTicks = Math.floor(options.bpStart / this.halfTick) - 1;
-        pixel = 0;
-        while (pixel < options.pixelWidth) {
+function calculateDeltas(context, referenceFrame, bpStart, nTick, tick) {
 
-            bp = Math.floor(numberOfTicks * this.halfTick);
-            pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
-            numer = bp / this.unitMultiplier;
-            floored = Math.floor(numer);
+    const tickDelta = getX(referenceFrame, getBP(1 + nTick, tick), bpStart) - getX(referenceFrame, getBP(nTick, tick), bpStart)
 
-            if (numer === floored && (this.majorTick / this.labelWidthBP) > 8) {
-                label = numberFormatter(Math.floor(numer)) + " " + this.majorUnit;
-                labelWidth = options.context.measureText(label).width;
-                labelX = pixel - labelWidth / 2;
-                IGVGraphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
-            }
+    const label = `${ StringUtils.numberFormatter(Math.floor(getBP(nTick, tick) / tick.unitMultiplier)) } ${ tick.majorUnit }`
+    const labelLength = Math.floor(context.measureText(label).width)
 
-            IGVGraphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
+    return { tickDelta, labelLength }
 
-            ++numberOfTicks;
-        }
+    function getBP(nTick, tick) {
+        return Math.floor(nTick * tick.majorTick)
+    }
 
+    function getX(referenceFrame, bp, bpStart) {
+        return Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5))
+    }
+}
 
-    };
+class Tick {
+
+    constructor(majorTick, majorUnit, unitMultiplier) {
+        this.majorTick = majorTick;
+        this.minorTick = majorTick / 10.0;
+        this.majorUnit = majorUnit;
+        this.unitMultiplier = unitMultiplier;
+    }
 
     description(blurb) {
         console.log((blurb || '') + ' tick ' + numberFormatter(this.majorTick) + ' label width ' + numberFormatter(this.labelWidthBP) + ' multiplier ' + this.unitMultiplier);

@@ -241,5 +241,34 @@ async function getFilename(url) {
     }
 }
 
-export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, inferTrackType, getFilename}
+
+function prettyBasePairNumber  (raw) {
+
+    var denom,
+        units,
+        value,
+        floored;
+
+    if (raw > 1e7) {
+        denom = 1e6;
+        units = " mb";
+    } else if (raw > 1e4) {
+
+        denom = 1e3;
+        units = " kb";
+
+        value = raw / denom;
+        floored = Math.floor(value);
+        return StringUtils.numberFormatter(floored) + units;
+    } else {
+        return StringUtils.numberFormatter(raw) + " bp";
+    }
+
+    value = raw / denom;
+    floored = Math.floor(value);
+
+    return floored.toString() + units;
+}
+
+export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, inferTrackType, getFilename, prettyBasePairNumber}
 

@@ -1,28 +1,22 @@
-import $ from "./vendor/jquery-3.3.1.slim.js";
-import {Icon} from "../node_modules/igv-utils/src/index.js"
+import {DOMUtils, Icon} from "../node_modules/igv-utils/src/index.js"
 
 function createCheckbox(name, initialState) {
 
-    const $container = $('<div>', {class: 'igv-menu-popup-check-container'});
+    const container = DOMUtils.div({ class: 'igv-menu-popup-check-container' })
 
-    const $div = $('<div>');
-    $container.append($div);
+    const div = DOMUtils.div()
+    container.appendChild(div)
 
-    const svg = Icon.createIcon('check', (true === initialState ? '#444' : 'transparent'));
-    $div.append($(svg));
+    const svg = Icon.createIcon('check', (true === initialState ? '#444' : 'transparent'))
+    div.appendChild(svg)
 
-    const $label = $('<div>'/*, { class: 'igv-some-label-class' }*/);
-    $label.text(name);
-    $container.append($label);
+    const label = DOMUtils.div()
+    label.innerText = name
+    container.appendChild(label)
 
-    return $container;
+    return container
 }
 
-function createIcon(name, color) {
-    return $(Icon.createIcon(name, color));
-}
-
-
-export {createIcon, createCheckbox};
+export {createCheckbox};
 
 

@@ -1,4 +1,9 @@
 
+$igv-menu-popup-font-face: 'Open Sans', sans-serif;
+$igv-menu-popup-border-radius: 4px;
+$igv-menu-popup-font-color: #4b4b4b;
+$igv-menu-popup-grey: #7F7F7F;
+
 .igv-menu-popup {
   position: absolute;
   top: 0;
@@ -10,15 +15,15 @@
 
   cursor: pointer;
 
-  font-family: $igv-trackgear-default-font-face;
+  font-family: $igv-menu-popup-font-face;
   font-size: small;
   font-weight: 400;
-  color: $igv-trackgear-font-color;
+  color: $igv-menu-popup-font-color;
 
   background: white;
 
-  border-radius: $igv-trackgear-popover-border-radius;
-  border-color: $igv-trackgear-grey-color;
+  border-radius: $igv-menu-popup-border-radius;
+  border-color: $igv-menu-popup-grey;
   border-style: solid;
   border-width: thin;
 
@@ -43,8 +48,8 @@
     }
 
     > div:last-child {
-      border-bottom-left-radius: $igv-trackgear-popover-border-radius;
-      border-bottom-right-radius: $igv-trackgear-popover-border-radius;
+      border-bottom-left-radius: $igv-menu-popup-border-radius;
+      border-bottom-right-radius: $igv-menu-popup-border-radius;
       border-bottom-color: transparent;
       border-bottom-style: solid;
       border-bottom-width: thin;
@@ -71,10 +76,10 @@
   cursor: move;
 
   border-top-color: transparent;
-  border-top-left-radius: $igv-trackgear-popover-border-radius;
-  border-top-right-radius: $igv-trackgear-popover-border-radius;
+  border-top-left-radius: $igv-menu-popup-border-radius;
+  border-top-right-radius: $igv-menu-popup-border-radius;
 
-  border-bottom-color: $igv-trackgear-grey-color;
+  border-bottom-color: $igv-menu-popup-grey;
   border-bottom-style: solid;
   border-bottom-width: thin;
 
@@ -90,7 +95,7 @@
     margin-right: 4px;
     height: 12px;
     width: 12px;
-    color: $igv-trackgear-grey-color;
+    color: $igv-menu-popup-grey;
   }
 
   div:hover {
