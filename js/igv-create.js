@@ -77,18 +77,13 @@ async function createBrowser(parentDiv, config) {
         await browser.loadSessionObject(config)
     }
 
-    // Session dependent browser settings (do not set until session is loaded)
     const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr);
-    if (browser.isMultiLocusMode() || isWGV) {
-        browser.centerGuide.forcedHide();
-    } else {
-        browser.centerGuide.forcedShow();
-    }
     browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
 
     return browser;
 
 }
+
 
 function removeBrowser(browser) {
     browser.dispose();
@@ -144,12 +139,12 @@ function setDefaults(config) {
         config.showCursorTrackingGuide = false;
     }
 
-    if (undefined === config.showCenterGuideButton) {
-        config.showCenterGuideButton = true;
+    if (undefined === config.showCenterLineButton) {
+        config.showCenterLineButton = true;
     }
 
-    if (undefined === config.showCenterGuide) {
-        config.showCenterGuide = false;
+    if (undefined === config.showCenterLine) {
+        config.showCenterLine = false;
     }
 
     if (undefined === config.showSampleNames) {

@@ -23,57 +23,35 @@
  * THE SOFTWARE.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js";
-import {StringUtils} from "../node_modules/igv-utils/src/index.js";
+import { DOMUtils } from '../node_modules/igv-utils/src/index.js'
+import { prettyBasePairNumber } from './util/igvUtils.js'
 
 class WindowSizePanel {
-    constructor($parent, browser) {
-        this.$container = $('<div>', {class: 'igv-windowsize-panel-container'});
-        $parent.append(this.$container);
+    constructor(parent, browser) {
+
+        this.container = DOMUtils.div({ class: 'igv-windowsize-panel-container' });
+        parent.appendChild(this.container)
+
+        browser.on('locuschange', (referenceFrameList) => {
+            this.updatePanel(referenceFrameList)
+        })
+
         this.browser = browser;
+
     }
 
     show() {
-        this.$container.show();
+        this.container.style.display = 'block'
     }
 
     hide() {
-        this.$container.hide();
+        this.container.style.display = 'none'
     }
 
     updatePanel(referenceFrameList) {
-        this.$container.text(1 === referenceFrameList.length ? prettyBasePairNumber(Math.round(this.browser.getViewportWidth() * referenceFrameList[ 0 ].bpPerPixel)) : '');
+        const width = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
+        this.container.innerText = 1 === referenceFrameList.length ? prettyBasePairNumber(Math.round(width * referenceFrameList[ 0 ].bpPerPixel)) : ''
     }
 }
-
-
-function prettyBasePairNumber  (raw) {
-
-    var denom,
-        units,
-        value,
-        floored;
-
-    if (raw > 1e7) {
-        denom = 1e6;
-        units = " mb";
-    } else if (raw > 1e4) {
-
-        denom = 1e3;
-        units = " kb";
-
-        value = raw / denom;
-        floored = Math.floor(value);
-        return StringUtils.numberFormatter(floored) + units;
-    } else {
-        return StringUtils.numberFormatter(raw) + " bp";
-    }
-
-    value = raw / denom;
-    floored = Math.floor(value);
-
-    return floored.toString() + units;
-}
-
 
 export default WindowSizePanel;

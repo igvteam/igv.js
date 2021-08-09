@@ -30,8 +30,8 @@ import ViewPort from "./viewport.js"
 
 class IdeogramViewport extends ViewPort {
 
-    constructor(trackView, $viewportContainer, referenceFrame, width) {
-        super(trackView, $viewportContainer, referenceFrame, width)
+    constructor(trackView, $viewportColumn, referenceFrame, width) {
+        super(trackView, $viewportColumn, referenceFrame, width)
     }
 
     initializationHelper() {
@@ -55,9 +55,9 @@ class IdeogramViewport extends ViewPort {
         this.$viewport.width(width);
     }
 
-    drawSVGWithContext(context, width, height, id, tx, ty, clipYOffset) {
+    drawSVGWithContext(context, width, height, id, x, y, yClipOffset) {
 
-        context.saveWithTranslationAndClipRect(id, tx, ty, width, height, clipYOffset);
+        context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset);
 
         this.trackView.track.draw({ context, referenceFrame: this.referenceFrame, pixelWidth: width, pixelHeight: height })
 
@@ -76,6 +76,9 @@ class IdeogramViewport extends ViewPort {
 
         this.trackView.track.draw({ context: this.ideogram_ctx, referenceFrame, pixelWidth: this.$viewport.width(), pixelHeight: this.$viewport.height() })
     }
+
+    startSpinner() {}
+    stopSpinner() {}
 
 }
 
@@ -99,10 +102,8 @@ function clickHandler(e, canvas, browser, referenceFrame) {
     const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
 
     referenceFrame.start = ss;
-    referenceFrame.initialEnd = ee;
+    referenceFrame.end = ee;
     referenceFrame.bpPerPixel = (ee - ss) / width;
-
-    browser.updateLocusSearchWidget(browser.referenceFrameList > 1 ? browser.referenceFrameList : [ referenceFrame ])
 
     browser.updateViews(referenceFrame, browser.trackViews, true)
 

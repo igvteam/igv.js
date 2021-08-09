@@ -1,4 +1,34 @@
 
+$igv-generic-dialog-container-border-radius: 4px;
+$igv-button-border-radius: 2px;
+$igv-button-height: 28px;
+$igv-button-width: 75px;
+
+@mixin generic-input {
+
+  input {
+    display: block;
+    height: 100%;
+    width: 100%;
+
+    padding-left: 4px;
+
+    font-family: $igv-default-font-face;
+    font-weight: 400;
+    color: $igv-dark-grey-color;
+    text-align: left;
+
+    outline: none;
+
+    border-style: solid;
+    border-width: thin;
+    border-color: $igv-grey-color;
+
+    background-color: white;
+  }
+
+}
+
 // generic dialog
 .igv-generic-dialog-container {
 
@@ -9,7 +39,7 @@
   height:200px;
 
   border-color: $igv-trackgear-grey-color;
-  border-radius: $igv-trackgear-popover-border-radius;
+  border-radius: $igv-generic-dialog-container-border-radius;
   border-style: solid;
   border-width: thin;
 
@@ -40,8 +70,8 @@
     height: 24px;
     cursor: move;
 
-    border-top-left-radius: $igv-trackgear-popover-border-radius;
-    border-top-right-radius: $igv-trackgear-popover-border-radius;
+    border-top-left-radius: $igv-generic-dialog-container-border-radius;
+    border-top-right-radius: $igv-generic-dialog-container-border-radius;
     border-bottom-color: $igv-trackgear-grey-color;
     border-bottom-style: solid;
     border-bottom-width: thin;
@@ -173,7 +203,7 @@
       border-color: transparent;
       border-style: solid;
       border-width: thin;
-      border-radius: $igv-button-border-radius;
+      border-radius: 2px;
 
     }
 
@@ -229,7 +259,7 @@
       border-color: white;
       border-style: solid;
       border-width: thin;
-      border-radius: 4px;
+      border-radius: $igv-generic-dialog-container-border-radius;
       background-color: #2B81AF;
     }
 

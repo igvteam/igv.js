@@ -13,22 +13,36 @@
 
 <body>
 
+<div style="border: solid thin grey; padding: 20px;">
+    <button id="session-button" style="font-size: 16px">Load Session</button>
+</div>
+
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import igv from "../js";
+    import igv from '../js/index.js'
 
-    igv.createBrowser(document.getElementById('igvDiv'), {
-        genome: "hg19",
-        showChromosomeWidget: false,
-        showCenterGuide: true,
-    })
-        .then(function (browser) {
-            browser.loadSession({
-                url: "sessions/sortedBamSession.json"
-            })
+    let browser
+
+    (async () => {
+
+        const config =
+            {
+                genome: "hg19",
+                showChromosomeWidget: false,
+                showCenterLine: true,
+            }
+
+        browser = await igv.createBrowser(document.getElementById('igvDiv'), config)
+
+        document.getElementById('session-button').addEventListener('click', () => {
+            // browser.loadSession({ url: 'sessions/sortedBamSession.json' })
+            browser.loadSession({ url: 'sessions/igv-session-dugla.json' })
         })
+
+    })()
+
 
 </script>
 

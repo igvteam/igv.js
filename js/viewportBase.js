@@ -25,10 +25,14 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
+import {AlertDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
+import {randomRGB} from "./util/colorPalletes.js";
+import RulerTrack from "./rulerTrack.js";
+import SequenceTrack from "./sequenceTrack.js";
 
 class ViewportBase {
 
-    constructor(trackView, $viewportContainer, referenceFrame, width) {
+    constructor(trackView, $viewportColumn, referenceFrame, width) {
 
         this.guid = DOMUtils.guid();
         this.trackView = trackView;
@@ -37,10 +41,22 @@ class ViewportBase {
         this.browser = trackView.browser;
 
         this.$viewport = $('<div class="igv-viewport">');
-        $viewportContainer.append(this.$viewport);
+        $viewportColumn.append(this.$viewport);
 
-        // store the viewport GUID for later use
-        this.$viewport.data('viewportGUID', this.guid);
+        if (trackView.track.height) {
+            this.$viewport.get(0).style.height = `${ trackView.track.height }px`;
+        }
+
+        // this.$viewport.get(0).style.backgroundColor = randomRGB(150, 250);
+
+        if (trackView.track instanceof RulerTrack) {
+            this.$viewport.get(0).dataset.rulerTrack = 'rulerTrack';
+        }
+
+        // Create an alert dialog for the sequence track to copy ref sequence to.
+        if (trackView.track instanceof SequenceTrack) {
+            this.alert = new AlertDialog(this.$viewport.get(0));
+        }
 
         this.$content = $("<div>", {class: 'igv-viewport-content'});
         this.$viewport.append(this.$content);
@@ -48,7 +64,7 @@ class ViewportBase {
         this.$content.height(this.$viewport.height());
         this.contentDiv = this.$content.get(0);
 
-        this.$canvas = $('<canvas class ="igv-canvas">');
+        this.$canvas = $('<canvas>');
         this.$content.append(this.$canvas);
 
         this.canvas = this.$canvas.get(0);
@@ -156,14 +172,6 @@ class ViewportBase {
 
     }
 
-    renderSVGContext(context, offset) {
-        console.log('ViewportBase - renderSVGContext(context, offset)')
-    }
-
-    drawSVGWithContext(context) {
-        console.log('ViewportBase - drawSVGWithContext(context)')
-    }
-
     isVisible() {
         return this.$viewport.width()
     }
@@ -196,13 +204,13 @@ class ViewportBase {
         }
 
         this.$canvas.off();
-        this.$canvas.empty();
+        this.$canvas.remove();
 
         this.$content.off();
-        this.$content.empty();
+        this.$content.remove();
 
         this.$viewport.off();
-        this.$viewport.empty();
+        this.$viewport.remove();
 
         // Null out all properties -- this should not be neccessary, but just in case there is a
         // reference to self somewhere we want to free memory.

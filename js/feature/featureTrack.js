@@ -319,7 +319,7 @@ class FeatureTrack extends TrackBase {
         if (this.render === renderSnp) {
             (["function", "class"]).forEach(function (colorScheme) {
                 menuItems.push({
-                    object: createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
+                    object: $(createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy)),
                     click: function () {
                         self.colorBy = colorScheme;
                         self.trackView.repaintViews();
@@ -343,7 +343,7 @@ class FeatureTrack extends TrackBase {
 
             menuItems.push(
                 {
-                    object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                    object: $(createCheckbox(lut[displayMode], displayMode === self.displayMode)),
                     click: function () {
                         self.displayMode = displayMode;
                         self.config.displayMode = displayMode;
