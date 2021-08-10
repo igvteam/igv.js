@@ -13,7 +13,7 @@ const fontConfigureTemplate =
         fillStyle: 'black'
     }
 
-class SampleNameViewport {
+class SampleNameViewportController {
 
     constructor(trackView, $column, unused, width) {
 
@@ -239,4 +239,4 @@ function configureFont(ctx, {textAlign, textBaseline, strokeStyle, fillStyle}, s
     ctx.fillStyle = fillStyle
 }
 
-export default SampleNameViewport
+export default SampleNameViewportController

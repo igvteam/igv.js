@@ -28,7 +28,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js";
 import {createViewport} from "./viewportFactory.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
-import SampleNameViewport from './sampleNameViewport.js';
+import SampleNameViewportController from './sampleNameViewportController.js';
 
 const scrollbarExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
@@ -43,16 +43,16 @@ class TrackView {
         this.track = track;
         track.trackView = this;
 
-        // add columns to columnContainer. One column per reference frame
         this.addDOMToColumnContainer(browser, columnContainer, browser.referenceFrameList)
-
 
     }
 
     addDOMToColumnContainer(browser, columnContainer, referenceFrameList) {
 
-        this.axis = this.createAxis(browser, browser.axisColumn)
+        // Axis
+        this.axis = this.createAxis(browser, this.track)
 
+        // Track Viewports
         this.viewports = []
         const viewportWidth = browser.calculateViewportWidth(referenceFrameList.length)
         const viewportColumns = columnContainer.querySelectorAll('.igv-column')
@@ -61,39 +61,39 @@ class TrackView {
             this.viewports.push(viewport)
         }
 
-        // if (referenceFrameList.length > 1 && 'ruler' === this.track.type) {
-        //     for (let rulerViewport of this.viewports) {
-        //         rulerViewport.presentLocusLabel()
-        //     }
-        // }
+        // SampleName Viewport
+        this.sampleNameViewport = new SampleNameViewportController(this, $(browser.sampleNameColumn), undefined, browser.sampleNameViewportWidth)
 
-        this.sampleNameViewport = new SampleNameViewport(this, $(browser.sampleNameColumn), undefined, browser.sampleNameViewportWidth)
-
+        // Track Scrollbar
         this.attachScrollbar(browser)
 
-        this.attachDragHandle(browser)
+        let className
 
+        // Track Drag
+        className = 'ideogram' === this.track.type || 'ruler' === this.track.type ? 'igv-track-drag-shim' : 'igv-track-drag-handle'
+        this.dragHandle = DOMUtils.div({ class: className })
+        browser.trackDragColumn.appendChild(this.dragHandle)
+        this.dragHandle.style.height = `${ this.track.height }px`
+
+        this.addTrackDragMouseHandlers(browser)
+
+        // Track Gear
         this.createTrackGearPopup(browser)
 
     }
 
-    createAxis(browser, axisColumn) {
+    createAxis(browser, track) {
 
         const axis = DOMUtils.div()
-        axisColumn.appendChild(axis)
+        browser.axisColumn.appendChild(axis)
 
-        axis.style.height = `${ this.track.height }px`
+        axis.style.height = `${ track.height }px`
         // axis.style.backgroundColor = randomRGB(150, 250)
 
-        if (typeof this.track.paintAxis === 'function') {
+        if (typeof track.paintAxis === 'function') {
 
-            if (this.track.dataRange) {
-
-                axis.addEventListener('click', () => {
-                    browser.dataRangeDialog.configure(this)
-                    browser.dataRangeDialog.present($(browser.columnContainer))
-                })
-
+            if (track.dataRange) {
+                this.addAxisEventListener(axis)
              }
 
             this.resizeAxisCanvas(axis, axis.clientWidth, axis.clientHeight)
@@ -104,9 +104,7 @@ class TrackView {
 
     resizeAxisCanvas(axis, width, height) {
 
-        if (this.axisCanvas) {
-            this.axisCanvas.remove()
-        }
+        if (this.axisCanvas) this.axisCanvas.remove()
 
         axis.style.width = `${ width }px`
         axis.style.height = `${ height }px`
@@ -127,12 +125,19 @@ class TrackView {
 
     removeDOMFromColumnContainer() {
 
+        // Axis
+        if (this.boundAxisClickHander) {
+            this.removeAxisEventListener(this.axis)
+        }
         this.axis.remove()
 
-        for (let { $viewport } of this.viewports) {
-            $viewport.remove()
+        // Track Viewports
+        for (let viewport of this.viewports) {
+            viewport.removeMouseHandlers()
+            viewport.$viewport.remove()
         }
 
+        // SampleName Viewport
         this.sampleNameViewport.$viewport.remove()
 
     }
@@ -514,12 +519,112 @@ class TrackView {
         }
     }
 
-    attachDragHandle(browser) {
+    addAxisEventListener(axis) {
+
+        this.boundAxisClickHander = axisClickHandler.bind(this)
+        axis.addEventListener('click', this.boundAxisClickHander)
+
+        function axisClickHandler(event) {
+            this.browser.dataRangeDialog.configure(this)
+            this.browser.dataRangeDialog.present($(this.browser.columnContainer))
+        }
+
+    }
+
+    addTrackDragMouseHandlers(browser) {
 
         if ('ideogram' === this.track.type || 'ruler' === this.track.type) {
-            browser.trackDragControl.addDragShim(this)
+            // do nothing
         } else {
-            browser.trackDragControl.addDragHandle(browser, this)
+
+            let currentDragHandle = undefined
+
+            // Mouse Down
+            this.boundTrackDragMouseDownHandler = trackDragMouseDownHandler.bind(this)
+            this.dragHandle.addEventListener('mousedown', this.boundTrackDragMouseDownHandler)
+
+            function trackDragMouseDownHandler(event) {
+
+                event.preventDefault();
+
+                currentDragHandle = event.target
+                currentDragHandle.classList.add('igv-track-drag-handle-hover')
+
+                browser.startTrackDrag(this);
+
+            }
+
+            // Mouse Up
+            this.boundDocumentTrackDragMouseUpHandler = documentTrackDragMouseUpHandler.bind(this)
+            document.addEventListener('mouseup', this.boundDocumentTrackDragMouseUpHandler)
+
+            function documentTrackDragMouseUpHandler(event) {
+
+                event.preventDefault();
+
+                browser.endTrackDrag()
+
+                let str = ''
+                if (currentDragHandle && event.target !== currentDragHandle) {
+                    str = ' - remove hover style'
+                    currentDragHandle.classList.remove('igv-track-drag-handle-hover')
+                }
+
+                currentDragHandle = undefined
+            }
+
+            // Mouse Enter
+            this.boundTrackDragMouseEnterHandler = trackDragMouseEnterHandler.bind(this)
+            this.dragHandle.addEventListener('mouseenter', this.boundTrackDragMouseEnterHandler)
+
+            function trackDragMouseEnterHandler(event) {
+                event.preventDefault();
+
+                if (undefined === currentDragHandle) {
+                    event.target.classList.add('igv-track-drag-handle-hover')
+                }
+
+                browser.updateTrackDrag(this);
+
+            }
+
+            // Mouse Out
+            this.dragHandle.addEventListener('mouseout', e => {
+                e.preventDefault();
+
+                if (undefined === currentDragHandle) {
+                    e.target.classList.remove('igv-track-drag-handle-hover')
+                }
+            })
+
+            this.boundTrackDragMouseOutHandler = trackDragMouseOutHandler.bind(this)
+            this.dragHandle.addEventListener('mouseout', this.boundTrackDragMouseOutHandler)
+
+            function trackDragMouseOutHandler(event) {
+                event.preventDefault();
+
+                if (undefined === currentDragHandle) {
+                    event.target.classList.remove('igv-track-drag-handle-hover')
+                }
+            }
+
+        }
+
+    }
+
+    removeAxisEventListener(axis) {
+        axis.removeEventListener('click', this.boundAxisClickHander)
+    }
+
+    removeTrackDragMouseHandlers() {
+
+        if ('ideogram' === this.track.type || 'ruler' === this.track.type) {
+            // do nothing
+        } else {
+            this.dragHandle.removeEventListener('mousedown', this.boundTrackDragMouseDownHandler)
+            document.removeEventListener('mouseup', this.boundDocumentTrackDragMouseUpHandler)
+            this.dragHandle.removeEventListener('mouseup', this.boundTrackDragMouseEnterHandler)
+            this.dragHandle.removeEventListener('mouseout', this.boundTrackDragMouseOutHandler)
         }
 
     }
@@ -550,6 +655,7 @@ class TrackView {
      */
     dispose() {
 
+        this.removeAxisEventListener(this.axis)
         this.axis.remove()
 
         for (let viewport of this.viewports) {
@@ -560,7 +666,8 @@ class TrackView {
 
         this.browser.trackScrollbarControl.removeScrollbar(this, this.browser.columnContainer)
 
-        this.browser.trackDragControl.removeDragHandle(this)
+        this.removeTrackDragMouseHandlers()
+        this.dragHandle.remove()
 
         this.browser.trackGearControl.removeGearContainer(this)
 

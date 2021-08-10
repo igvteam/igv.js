@@ -59,14 +59,14 @@ const CursorGuide = function ($columnContainer, browser) {
             $viewport = $parent;
         }
 
-        if ($viewport && browser.rulerTrack) {
+        if ($viewport && browser.rulerTrackView) {
 
             const left = `${ x }px`;
             this.$verticalGuide.css({ left });
 
             const $columns = browser.$root.find('.igv-column')
             const index = $columns.index($viewport.parent())
-            const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
+            const rulerViewport = browser.rulerTrackView.viewports[ index ]
             rulerViewport.mouseMove(event)
 
             // if (result) {
@@ -104,8 +104,8 @@ CursorGuide.prototype.hide = function () {
     this.$verticalGuide.hide()
     this.$horizontalGuide.hide()
 
-    if (this.browser.rulerTrack) {
-        for (let viewport of this.browser.rulerTrack.trackView.viewports) {
+    if (this.browser.rulerTrackView) {
+        for (let viewport of this.browser.rulerTrackView.viewports) {
             viewport.$tooltip.hide()
         }
     }

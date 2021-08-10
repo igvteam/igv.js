@@ -26,11 +26,9 @@
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
 import {AlertDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
-import {randomRGB} from "./util/colorPalletes.js";
-import RulerTrack from "./rulerTrack.js";
 import SequenceTrack from "./sequenceTrack.js";
 
-class ViewportBase {
+class ViewportController {
 
     constructor(trackView, $viewportColumn, referenceFrame, width) {
 
@@ -45,12 +43,6 @@ class ViewportBase {
 
         if (trackView.track.height) {
             this.$viewport.get(0).style.height = `${ trackView.track.height }px`;
-        }
-
-        // this.$viewport.get(0).style.backgroundColor = randomRGB(150, 250);
-
-        if (trackView.track instanceof RulerTrack) {
-            this.$viewport.get(0).dataset.rulerTrack = 'rulerTrack';
         }
 
         // Create an alert dialog for the sequence track to copy ref sequence to.
@@ -126,11 +118,11 @@ class ViewportBase {
     }
 
     async repaint() {
-        console.log('ViewportBase - repaint()')
+        console.log('ViewportController - repaint()')
     }
 
     draw(drawConfiguration, features, roiFeatures) {
-        console.log('ViewportBase - draw(drawConfiguration, features, roiFeatures)')
+        console.log('ViewportController - draw(drawConfiguration, features, roiFeatures)')
     }
 
     checkContentHeight() {
@@ -191,8 +183,12 @@ class ViewportBase {
     }
 
     containsPosition(chr, position) {
-        console.log('ViewportBase - containsPosition(chr, position)')
+        console.log('ViewportController - containsPosition(chr, position)')
     }
+
+    addMouseHandlers() {}
+
+    removeMouseHandlers() {}
 
     /**
      * Called when the associated track is removed.  Do any needed cleanup here.
@@ -203,14 +199,9 @@ class ViewportBase {
             this.popover.dispose()
         }
 
-        this.$canvas.off();
-        this.$canvas.remove();
+        this.removeMouseHandlers()
 
-        this.$content.off();
-        this.$content.remove();
-
-        this.$viewport.off();
-        this.$viewport.remove();
+        this.$viewport.get(0).remove()
 
         // Null out all properties -- this should not be neccessary, but just in case there is a
         // reference to self somewhere we want to free memory.
@@ -221,4 +212,4 @@ class ViewportBase {
 
 }
 
-export default ViewportBase
+export default ViewportController

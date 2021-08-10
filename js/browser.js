@@ -41,15 +41,12 @@ import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
 import ROI from "./roi.js";
-import GtexSelection from "./gtex/gtexSelection.js";
 import XMLSession from "./session/igvXmlSession.js";
-import RulerTrack from "./rulerTrack.js";
 import GenomeUtils from "./genome/genome.js";
 import loadPlinkFile from "./sampleInformation.js";
 import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js";
 import {buildOptions, doAutoscale, getFilename} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
-import IdeogramTrack from "./ideogramTrack.js";
 import {defaultSequenceTrackOrder} from './sequenceTrack.js';
 import version from "./version.js";
 import FeatureSource from "./feature/featureSource.js"
@@ -57,7 +54,6 @@ import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
 import NavbarManager from "./navbarManager.js";
 import TrackScrollbarControl, {igv_scrollbar_outer_width} from "./trackScrollbarControl.js";
-import TrackDragControl, {igv_track_manipulation_handle_width} from "./trackDragControl.js";
 import TrackGearControl, {igv_track_gear_menu_column_width} from "./trackGearControl.js";
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
 import WindowSizePanel from "./windowSizePanel.js";
@@ -75,6 +71,9 @@ import {viewportColumnManager} from './viewportColumnManager.js';
 import GenericColorPicker from './ui/genericColorPicker.js';
 import ViewportCenterLine from './ui/viewportCenterLine.js';
 
+
+// css - $igv-track-drag-column-width: 12px;
+const igv_track_manipulation_handle_width = 12
 
 // $igv-column-shim-width: 1px;
 // $igv-column-shim-margin: 2px;
@@ -437,36 +436,40 @@ class Browser {
 
         await this.loadReference(genomeConfig, session.locus);
 
+        // axis column
         this.axisColumn = createColumn(this.columnContainer, 'igv-axis-column')
 
-        viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
+        // track viewport columns
+        this.viewportColumns = viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
+
+        // SampleName column
+        this.sampleNameColumn = createColumn(this.columnContainer, 'igv-sample-name-column')
+
+        // Track scrollbar column
+        this.trackScrollbarColumn = createColumn(this.columnContainer, 'igv-scrollbar-column')
+        this.trackScrollbarControl = new TrackScrollbarControl(this.trackScrollbarColumn)
+
+        // Track drag/reorder column
+        this.trackDragColumn = createColumn(this.columnContainer, 'igv-track-drag-column')
+
+        // Track gear column
+        this.trackGearColumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
+        this.trackGearControl = new TrackGearControl(this.trackGearColumn)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
-        // Add sample name column
-        this.sampleNameColumn = createColumn(this.columnContainer, 'igv-sample-name-column')
-
-        // Add track scrollbar manager
-        this.trackScrollbarControl = new TrackScrollbarControl(createColumn(this.columnContainer, 'igv-scrollbar-column'))
-
-        // Add track drag/reorder control
-        this.trackDragControl = new TrackDragControl(createColumn(this.columnContainer, 'igv-track-drag-column'))
-
-        // Add track drag/reorder control
-        this.trackGearControl = new TrackGearControl(createColumn(this.columnContainer, 'igv-gear-menu-column'))
-
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
-        if (undefined === this.ideogram && false !== session.showIdeogram) {
-            this.ideogram = new IdeogramTrack(this)
-            this.trackViews.push(new TrackView(this, this.columnContainer, this.ideogram));
-            this.ideogram.trackView.updateViews();
-        }
+        if (undefined === this.ideogramTrackView && false !== session.showIdeogram) {
+            this.ideogramTrackView = new TrackView(this, this.columnContainer, new IdeogramTrack(this))
+            this.trackViews.push(this.ideogramTrackView)
+            this.ideogramTrackView.updateViews();
+         }
 
-        if (undefined === this.rulerTrack && false !== session.showRuler) {
-            this.rulerTrack = new RulerTrack(this);
-            this.trackViews.push(new TrackView(this, this.columnContainer, this.rulerTrack));
-            this.rulerTrack.trackView.updateViews();
+        if (undefined === this.rulerTrackView && false !== session.showRuler) {
+            this.rulerTrackView = new TrackView(this, this.columnContainer, new RulerTrack(this))
+            this.trackViews.push(this.rulerTrackView)
+            this.rulerTrackView.updateViews()
         }
 
         // Restore gtex selections.
@@ -570,8 +573,8 @@ class Browser {
             // empty trackScrollbarControl column
             this.trackScrollbarControl.removeScrollbar(trackView, this.columnContainer)
 
-            // empty trackDragControl column
-            this.trackDragControl.removeDragHandle(trackView)
+            // empty trackDragColumn
+            trackView.removeTrackDragMouseHandlers()
 
             // empty trackGearControl column
             this.trackGearControl.removeGearContainer(trackView)
@@ -583,26 +586,28 @@ class Browser {
         if (this.axisColumn) this.axisColumn.remove()
 
         // viewport columns
-        viewportColumnManager.discardAllColumns(this.columnContainer)
+        if (this.viewportColumns) this.viewportColumns.remove()
+        // viewportColumnManager.discardAllColumns(this.columnContainer)
 
         // sample name column
         if (this.sampleNameColumn) this.sampleNameColumn.remove()
 
-        // scrollbar column
-        if (this.trackScrollbarControl) this.trackScrollbarControl.column.remove()
+        // track scrollbar column
+        if (this.trackScrollbarColumn) this.trackScrollbarColumn.remove()
+        // if (this.trackScrollbarControl) this.trackScrollbarControl.column.remove()
 
         // drag column
-        if (this.trackDragControl) this.trackDragControl.column.remove()
+        if (this.trackDragColumn) this.trackDragColumn.remove()
 
         // gear column
-        if (this.trackGearControl) this.trackGearControl.column.remove()
+        if (this.trackGearColumn) this.trackGearColumn.remove()
 
         // discard remaining state
-        if (this.ideogram) this.ideogram.dispose()
-        this.ideogram = undefined
+        // if (this.ideogramTrackView) this.ideogramTrackView.dispose()
+        // this.ideogramTrackView = undefined
 
-        if (this.rulerTrack) this.rulerTrack.dispose()
-        this.rulerTrack = undefined
+        // if (this.rulerTrackView) this.rulerTrackView.dispose()
+        // this.rulerTrackView = undefined
 
         this.trackViews = []
 
@@ -981,7 +986,7 @@ class Browser {
             this.sampleNameColumn.appendChild(sampleNameViewport.$viewport.get(0))
 
             this.trackScrollbarControl.column.appendChild(outerScroll)
-            this.trackDragControl.column.appendChild(dragHandle)
+            this.trackDragColumn.appendChild(dragHandle)
             this.trackGearControl.column.appendChild(gearContainer)
         }
 
@@ -1280,14 +1285,6 @@ class Browser {
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
         await this.resize();
-
-        // if (this.rulerTrack) {
-        //
-        //     for (let rulerViewport of this.rulerTrack.trackView.viewports) {
-        //         rulerViewport.presentLocusLabel();
-        //     }
-        // }
-
     }
 
     async removeMultiLocusPanel(referenceFrame) {
@@ -1304,8 +1301,8 @@ class Browser {
 
         this.referenceFrameList.splice(index, 1);
 
-        if (1 === this.referenceFrameList.length && this.rulerTrack) {
-            for (let rulerViewport of this.rulerTrack.trackView.viewports) {
+        if (1 === this.referenceFrameList.length && this.rulerTrackView) {
+            for (let rulerViewport of this.rulerTrackView.viewports) {
                 rulerViewport.dismissLocusLabel()
             }
         }
@@ -1387,7 +1384,8 @@ class Browser {
 
                 this.trackScrollbarControl.removeScrollbar(trackView, this.columnContainer)
 
-                this.trackDragControl.removeDragHandle(trackView)
+                trackView.removeTrackDragMouseHandlers()
+                trackView.dragHandle.remove()
 
                 this.trackGearControl.removeGearContainer(trackView)
             }

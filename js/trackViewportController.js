@@ -2,16 +2,17 @@
  * Created by dat on 9/16/16.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js";
-import {Alert, Popover} from '../node_modules/igv-ui/dist/igv-ui.js';
-import GenomeUtils from "./genome/genome.js";
-import ViewportBase from "./viewportBase.js";
-import {DOMUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
+import ViewportController from "./viewportController.js";
+import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 import C2S from "./canvas2svg.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
-class ViewPort extends ViewportBase {
+let mouseDownCoords
+let lastClickTime = 0;
+let popupTimerID;
+
+class TrackViewportController extends ViewportController {
 
     constructor(trackView, $viewportColumn, referenceFrame, width) {
 
@@ -21,13 +22,12 @@ class ViewPort extends ViewportBase {
 
     initializationHelper() {
 
-        this.addMouseHandlers();
-        this.$spinner = $('<div>', {class: 'igv-loading-spinner-container'});
+        this.$spinner = $('<div>', { class: 'igv-loading-spinner-container' });
         this.$viewport.append(this.$spinner);
         this.$spinner.append($('<div>'));
-        this.stopSpinner();
 
         const {track} = this.trackView
+
         if ('sequence' !== track.type) {
             this.$zoomInNotice = this.createZoomInNotice(this.$content);
         }
@@ -42,44 +42,12 @@ class ViewPort extends ViewportBase {
                 this.$trackLabel.hide();
             }
 
-            this.$trackLabel.click(e => {
-                let str;
-                e.stopPropagation();
-                if (typeof track.description === 'function') {
-                    str = track.description();
-                } else if (track.description) {
-                    str = `<div>${track.description}</div>`
-                } else {
-                    if (track.url) {
-                        if (track.url instanceof File) {
-                            str = `<div><b>Filename: </b>${track.url.name}`;
-                        } else {
-                            str = `<div><b>URL: </b>${track.url}`;
-                        }
-                    } else {
-                        str = track.name;
-                    }
-                }
-
-                if (this.popover) this.popover.dispose()
-                this.popover = new Popover(this.browser.columnContainer, (track.name || 'unnamed'))
-                this.popover.presentContentWithEvent(e, str)
-            });
-            this.$trackLabel.mousedown(function (e) {
-                // Prevent bubbling
-                e.stopPropagation();
-            });
-            this.$trackLabel.mouseup(function (e) {
-                // Prevent  bubbling
-                e.stopPropagation();
-            });
-            this.$trackLabel.mousemove(function (e) {
-                // Prevent  bubbling
-                e.stopPropagation();
-            });
-
-
         }
+
+        this.stopSpinner();
+
+        this.addMouseHandlers();
+
     }
 
     setTrackLabel(label) {
@@ -562,35 +530,68 @@ class ViewPort extends ViewportBase {
 
     addMouseHandlers() {
 
-        const self = this;
-        const browser = this.browser;
+        this.addViewportContextMenuHandler(this.$viewport.get(0))
 
-        let lastMouseX;
-        let mouseDownCoords;
+        this.addViewportMouseDownHandler(this.$viewport.get(0))
 
-        let popupTimerID;
+        this.addViewportTouchStartHandler(this.$viewport.get(0))
 
-        let lastClickTime = 0;
+        this.addViewportMouseUpHandler(this.$viewport.get(0))
 
-        this.$viewport.on("contextmenu", function (e) {
+        this.addViewportTouchEndHandler(this.$viewport.get(0))
+
+        this.addViewportClickHandler(this.$viewport.get(0))
+
+        if (this.trackView.track.name && "sequence" !== this.trackView.track.config.type) {
+            this.addTrackLabelClickHandler(this.$trackLabel.get(0))
+        }
+
+    }
+
+    removeMouseHandlers() {
+
+        this.removeViewportContextMenuHandler(this.$viewport.get(0))
+
+        this.removeViewportMouseDownHandler(this.$viewport.get(0))
+
+        this.removeViewportTouchStartHandler(this.$viewport.get(0))
+
+        this.removeViewportMouseUpHandler(this.$viewport.get(0))
+
+        this.removeViewportTouchEndHandler(this.$viewport.get(0))
+
+        this.removeViewportClickHandler(this.$viewport.get(0))
+
+        if (this.trackView.track.name && "sequence" !== this.trackView.track.config.type) {
+            this.removeTrackLabelClickHandler(this.$trackLabel.get(0))
+        }
+
+    }
+
+    addViewportContextMenuHandler(viewport) {
+
+        this.boundContextMenuHandler = contextMenuHandler.bind(this)
+        viewport.addEventListener('contextmenu', this.boundContextMenuHandler)
+
+        function contextMenuHandler(event) {
 
             // Ignore if we are doing a drag.  This can happen with touch events.
-            if (self.browser.dragObject) {
+            if (this.browser.dragObject) {
                 return false;
             }
-            const clickState = createClickState(e, self);
+
+            const clickState = createClickState(event, this);
 
             if (undefined === clickState) {
                 return false;
             }
 
-
-            e.preventDefault();
+            event.preventDefault();
 
             // Track specific items
             let menuItems = [];
-            if (typeof self.trackView.track.contextMenuItemList === "function") {
-                const trackMenuItems = self.trackView.track.contextMenuItemList(clickState);
+            if (typeof this.trackView.track.contextMenuItemList === "function") {
+                const trackMenuItems = this.trackView.track.contextMenuItemList(clickState);
                 if (trackMenuItems) {
                     menuItems = trackMenuItems;
                 }
@@ -601,240 +602,292 @@ class ViewPort extends ViewportBase {
                 menuItems.push({label: $('<HR>')});
             }
 
-            menuItems.push({label: 'Save Image (PNG)', click: () => self.saveImage()});
-            menuItems.push({label: 'Save Image (SVG)', click: () => self.saveSVG()});
+            menuItems.push({ label: 'Save Image (PNG)', click: () => this.saveImage() });
+            menuItems.push({ label: 'Save Image (SVG)', click: () => this.saveSVG() });
 
-            browser.menuPopup.presentTrackContextMenu(e, menuItems)
-        });
-
-
-        /**
-         * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
-         */
-        this.$viewport.on('mousedown', function (e) {
-            self.enableClick = true;
-            browser.mouseDownOnViewport(e, self);
-            mouseDownCoords = DOMUtils.pageCoordinates(e);
-        });
-
-        this.$viewport.on('touchstart', function (e) {
-            self.enableClick = true;
-            browser.mouseDownOnViewport(e, self);
-            mouseDownCoords = DOMUtils.pageCoordinates(e);
-        });
-
-        /**
-         * Mouse is released.  Ignore if this is a context menu click, or the end of a drag action.   If neither of
-         * those, it is a click.
-         */
-        this.$viewport.on('mouseup', handleMouseUp);
-
-        this.$viewport.on('touchend', handleMouseUp);
-
-        this.$viewport.on('click', function (e) {
-            if (self.enableClick) {
-                handleClick(e);
-            }
-        });
-
-        function handleMouseUp(e) {
-
-            // Any mouse up cancels drag and scrolling
-            if (self.browser.dragObject || self.browser.isScrolling) {
-                self.browser.cancelTrackPan();
-                e.preventDefault();
-                e.stopPropagation();
-                self.enableClick = false;   // Until next mouse down
-                return;
-            } else {
-                self.browser.cancelTrackPan();
-                self.browser.endTrackDrag();
-            }
+            this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
         }
 
-        function handleClick(e) {
+    }
 
-            if (3 === e.which || e.ctrlKey) {
-                return;
-            }
+    removeViewportContextMenuHandler(viewport) {
+        viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
+    }
 
-            // Close any currently open popups
-            $('.igv-popover').hide();
+    addViewportMouseDownHandler(viewport) {
+        this.boundMouseDownHandler = mouseDownHandler.bind(this)
+        viewport.addEventListener('mousedown', this.boundMouseDownHandler)
+    }
 
+    removeViewportMouseDownHandler(viewport) {
+         viewport.removeEventListener('mousedown', this.boundMouseDownHandler)
+    }
 
-            if (browser.dragObject || browser.isScrolling) {
-                return;
-            }
+    addViewportTouchStartHandler(viewport) {
+        this.boundTouchStartHandler = mouseDownHandler.bind(this)
+        viewport.addEventListener('touchstart', this.boundTouchStartHandler)
+    }
 
-            // // Interpret mouseDown + mouseUp < 5 pixels as a click.
-            // if(!mouseDownCoords) {
-            //     return;
-            // }
-            // const coords = pageCoordinates(e);
-            // const dx = coords.x - mouseDownCoords.x;
-            // const dy = coords.y - mouseDownCoords.y;
-            // const dist2 = dx*dx + dy*dy;
-            // if(dist2 > 25) {
-            //     mouseDownCoords = undefined;
-            //     return;
-            // }
+    removeViewportTouchStartHandler(viewport) {
+        viewport.removeEventListener('touchstart', this.boundTouchStartHandler)
+    }
 
-            // Treat as a mouse click, its either a single or double click.
-            // Handle here and stop propogation / default
-            e.preventDefault();
-            e.stopPropagation();
+    addViewportMouseUpHandler(viewport) {
+        this.boundMouseUpHandler = mouseUpHandler.bind(this)
+        viewport.addEventListener('mouseup', this.boundMouseUpHandler)
+    }
 
-            const mouseX = DOMUtils.translateMouseCoordinates(e, self.$viewport.get(0)).x;
-            const mouseXCanvas = DOMUtils.translateMouseCoordinates(e, self.canvas).x;
-            const referenceFrame = self.referenceFrame;
-            const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
+    removeViewportMouseUpHandler(viewport) {
+        viewport.removeEventListener('mouseup', this.boundMouseUpHandler)
+    }
 
-            const time = Date.now();
+    addViewportTouchEndHandler(viewport) {
+        this.boundTouchEndHandler = mouseUpHandler.bind(this)
+        viewport.addEventListener('touchend', this.boundTouchEndHandler)
+    }
 
-            if (time - lastClickTime < browser.constants.doubleClickDelay) {
+    removeViewportTouchEndHandler(viewport) {
+        viewport.removeEventListener('touchend', this.boundTouchEndHandler)
+    }
 
-                // double-click
-                if (popupTimerID) {
-                    window.clearTimeout(popupTimerID);
-                    popupTimerID = undefined;
+    addViewportClickHandler(viewport) {
+
+        this.boundClickHandler = clickHandler.bind(this)
+        viewport.addEventListener('click', this.boundClickHandler)
+
+        function clickHandler(event) {
+
+            if (this.enableClick) {
+                if (3 === event.which || event.ctrlKey) {
+                    return;
                 }
 
-                const centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
+                // Close any currently open popups
+                $('.igv-popover').hide();
 
-                let string;
 
-                if ('all' === self.referenceFrame.chr.toLowerCase()) {
+                if (this.browser.dragObject || this.browser.isScrolling) {
+                    return;
+                }
 
-                    const chr = browser.genome.getChromosomeCoordinate(centerBP).chr;
+                // Treat as a mouse click, its either a single or double click.
+                // Handle here and stop propogation / default
+                event.preventDefault();
+                event.stopPropagation();
 
-                    if (1 === browser.referenceFrameList.length) {
-                        string = chr;
-                    } else {
-                        const loci = browser.referenceFrameList.map(({locusSearchString}) => locusSearchString)
-                        const index = browser.referenceFrameList.indexOf(self.referenceFrame)
-                        loci[index] = chr
-                        string = loci.join(' ')
+                const mouseX = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0)).x;
+                const mouseXCanvas = DOMUtils.translateMouseCoordinates(event, this.canvas).x;
+                const referenceFrame = this.referenceFrame;
+                const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
+
+                const time = Date.now();
+
+                if (time - lastClickTime < this.browser.constants.doubleClickDelay) {
+
+                    // double-click
+                    if (popupTimerID) {
+                        window.clearTimeout(popupTimerID);
+                        popupTimerID = undefined;
                     }
 
-                    browser.search(string);
+                    const centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
+
+                    let string;
+
+                    if ('all' === this.referenceFrame.chr.toLowerCase()) {
+
+                        const chr = this.browser.genome.getChromosomeCoordinate(centerBP).chr;
+
+                        if (1 === this.browser.referenceFrameList.length) {
+                            string = chr;
+                        } else {
+                            const loci = this.browser.referenceFrameList.map(({ locusSearchString }) => locusSearchString)
+                            const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
+                            loci[ index ] = chr
+                            string = loci.join(' ')
+                        }
+
+                        this.browser.search(string);
+
+                    } else {
+                        this.browser.zoomWithScaleFactor(0.5, centerBP, this.referenceFrame)
+                    }
+
 
                 } else {
-                    browser.zoomWithScaleFactor(0.5, centerBP, self.referenceFrame)
+                    // single-click
+
+                    if (event.shiftKey && typeof this.trackView.track.shiftClick === "function") {
+
+                        this.trackView.track.shiftClick(xBP, event);
+
+                    } else if (typeof this.trackView.track.popupData === "function") {
+
+                        popupTimerID = setTimeout(() => {
+
+                                const content = getPopupContent(event, this);
+                                if (content) {
+                                    if (this.popover) this.popover.dispose()
+                                    this.popover = new Popover(this.browser.columnContainer)
+                                    this.popover.presentContentWithEvent(event, content)
+                                }
+                                window.clearTimeout(popupTimerID);
+                                popupTimerID = undefined;
+                            },
+                            this.browser.constants.doubleClickDelay);
+                    }
                 }
 
+                lastClickTime = time;
 
+            }
+
+        }
+
+    }
+
+    removeViewportClickHandler(viewport) {
+        viewport.removeEventListener('click', this.boundClickHandler)
+    }
+
+    addTrackLabelClickHandler(trackLabel) {
+
+        this.boundTrackLabelClickHandler = clickHandler.bind(this)
+        trackLabel.addEventListener('click', this.boundTrackLabelClickHandler)
+
+        function clickHandler(event) {
+
+            event.stopPropagation();
+
+            const { track } = this.trackView
+
+            let str;
+            if (typeof track.description === 'function') {
+                str = track.description();
+            } else if (track.description) {
+                str = `<div>${track.description}</div>`
             } else {
-                // single-click
-
-                if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
-
-                    self.trackView.track.shiftClick(xBP, e);
-
-                } else if (typeof self.trackView.track.popupData === "function") {
-
-                    popupTimerID = setTimeout(function () {
-
-                            const content = getPopupContent(e, self);
-                            if (content) {
-                                if (self.popover) self.popover.dispose()
-                                self.popover = new Popover(self.browser.columnContainer)
-                                self.popover.presentContentWithEvent(e, content)
-                            }
-                            clearTimeout(popupTimerID);
-                            popupTimerID = undefined;
-                        },
-                        browser.constants.doubleClickDelay);
-                }
-            }
-
-            lastClickTime = time;
-        }
-
-        function createClickState(e, viewport) {
-
-            const referenceFrame = viewport.referenceFrame;
-            const viewportCoords = DOMUtils.translateMouseCoordinates(e, viewport.contentDiv);
-            const canvasCoords = DOMUtils.translateMouseCoordinates(e, viewport.canvas);
-            const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
-
-            if (undefined === genomicLocation || null === viewport.tile) {
-                return undefined;
-            }
-
-            return {
-                event: e,
-                viewport: viewport,
-                referenceFrame: referenceFrame,
-                genomicLocation: genomicLocation,
-                x: viewportCoords.x,
-                y: viewportCoords.y,
-                canvasX: canvasCoords.x,
-                canvasY: canvasCoords.y
-            }
-
-        }
-
-        /**
-         * Return markup for popup info window
-         *
-         * @param e
-         * @param viewport
-         * @returns {*}
-         */
-        function getPopupContent(e, viewport) {
-
-            const clickState = createClickState(e, viewport);
-
-            if (undefined === clickState) {
-                return;
-            }
-
-            let track = viewport.trackView.track;
-            const dataList = track.popupData(clickState);
-
-            const popupClickHandlerResult = browser.fireEvent('trackclick', [track, dataList]);
-
-            let content;
-            if (undefined === popupClickHandlerResult || true === popupClickHandlerResult) {
-                // Indicates handler did not handle the result, or the handler wishes default behavior to occur
-                if (dataList && dataList.length > 0) {
-                    content = formatPopoverText(dataList);
-                }
-
-            } else if (typeof popupClickHandlerResult === 'string') {
-                content = popupClickHandlerResult;
-            }
-
-            return content;
-        }
-
-        /**
-         * Format markup for popover text from an array of name value pairs [{name, value}]
-         */
-        function formatPopoverText(nameValues) {
-
-            const rows = nameValues.map(nameValue => {
-
-                if (nameValue.name) {
-                    const str = `<span>${nameValue.name}</span>&nbsp&nbsp&nbsp${nameValue.value}`
-                    const title = StringUtils.isString(nameValue.value) && nameValue.value.startsWith("<") ? "" : nameValue.value;
-                    return `<div title="${title}">${str}</div>`
-                } else if (nameValue.html) {
-                    return nameValue.html
+                if(track.url) {
+                    if (track.url instanceof File) {
+                        str = `<div><b>Filename: </b>${track.url.name}`;
+                    } else {
+                        str = `<div><b>URL: </b>${track.url}`;
+                    }
                 } else {
-                    return nameValue;   // If a string just return as is
+                    str = track.name;
+
                 }
+            }
 
-            })
+            if (this.popover) {
+                this.popover.dispose()
+            }
 
-            return rows.join('')
+            this.popover = new Popover(this.browser.columnContainer, (track.name || 'unnamed'))
+
+            this.popover.presentContentWithEvent(event, str)
         }
 
+    }
 
+    removeTrackLabelClickHandler(trackLabel) {
+        trackLabel.removeEventListener('click', this.boundTrackLabelClickHandler)
     }
 
 }
 
+function mouseDownHandler(event) {
+    this.enableClick = true;
+    this.browser.mouseDownOnViewport(event, this);
+    mouseDownCoords = DOMUtils.pageCoordinates(event);
+}
+
+function mouseUpHandler(event) {
+
+    // Any mouse up cancels drag and scrolling
+    if (this.browser.dragObject || this.browser.isScrolling) {
+        this.browser.cancelTrackPan();
+        event.preventDefault();
+        event.stopPropagation();
+        this.enableClick = false;   // Until next mouse down
+    } else {
+        this.browser.cancelTrackPan();
+        this.browser.endTrackDrag();
+    }
+}
+
+function createClickState(event, viewport) {
+
+    const referenceFrame = viewport.referenceFrame;
+
+    const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.contentDiv);
+    const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewport.canvas);
+
+    const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
+
+    if (undefined === genomicLocation || null === viewport.tile) {
+        return undefined;
+    }
+
+    return {
+        event,
+        viewport,
+        referenceFrame,
+        genomicLocation,
+        x: viewportCoords.x,
+        y: viewportCoords.y,
+        canvasX: canvasCoords.x,
+        canvasY: canvasCoords.y
+    }
+
+}
+
+function getPopupContent(event, viewport) {
+
+    const clickState = createClickState(event, viewport);
+
+    if (undefined === clickState) {
+        return;
+    }
+
+    let track = viewport.trackView.track;
+    const dataList = track.popupData(clickState);
+
+    const popupClickHandlerResult = viewport.browser.fireEvent('trackclick', [track, dataList]);
+
+    let content;
+    if (undefined === popupClickHandlerResult || true === popupClickHandlerResult) {
+        // Indicates handler did not handle the result, or the handler wishes default behavior to occur
+        if (dataList && dataList.length > 0) {
+            content = formatPopoverText(dataList);
+        }
+
+    } else if (typeof popupClickHandlerResult === 'string') {
+        content = popupClickHandlerResult;
+    }
+
+    return content;
+}
+
+function formatPopoverText(nameValues) {
+
+    const rows = nameValues.map(nameValue => {
+
+        if (nameValue.name) {
+            const str = `<span>${nameValue.name}</span>&nbsp&nbsp&nbsp${nameValue.value}`
+            return `<div title="${nameValue.value}">${str}</div>`
+        } else if ('<hr>' === nameValue) { // this can be retired if nameValue.html is allowed.
+            return nameValue
+        } else if (nameValue.html) {
+            return nameValue.html
+        } else {
+            return `<div title="${nameValue}">${nameValue}</div>`
+        }
+
+    })
+
+    return rows.join('')
+}
 
 var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures) {
     this.chr = chr;
@@ -866,4 +919,4 @@ function mergeArrays(a, b) {
 
 }
 
-export default ViewPort
+export default TrackViewportController

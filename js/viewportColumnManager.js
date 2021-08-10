@@ -5,6 +5,7 @@ import {createColumn} from './util/igvUtils.js';
 const viewportColumnManager =
     {
         createColumns: (columnContainer, count) => {
+
             for (let i = 0; i < count; i++) {
                 if (0 === i) {
                     createColumn(columnContainer, 'igv-column')
@@ -13,6 +14,8 @@ const viewportColumnManager =
                     createColumn(columnContainer, 'igv-column')
                 }
             }
+
+            return document.querySelectorAll('.igv-column')
         },
 
         discardAllColumns: columnContainer => {
