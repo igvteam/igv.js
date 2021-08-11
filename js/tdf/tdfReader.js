@@ -25,7 +25,7 @@
  */
 
 import BinaryParser from "../binary.js";
-import {igvxhr, Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, BGZip} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const GZIP_FLAG = 0x1;
@@ -276,8 +276,7 @@ class TDFReader {
             if (size > 0) {
                 let tileData;
                 if (this.compressed) {
-                    const inflate = new Zlib.Inflate(new Uint8Array(data, start, size));
-                    const plain = inflate.decompress();
+                    const plain = BGZip.inflate(data.slice(start, start + size));
                     tileData = plain.buffer;
                 } else {
                     tileData = data.slice(start, start + size);
@@ -316,8 +315,7 @@ class TDFReader {
         }))
 
         if (this.compressed) {
-            const inflate = new Zlib.Inflate(new Uint8Array(data));
-            const plain = inflate.decompress();
+            const plain = BGZip.inflate(data);
             data = plain.buffer;
         }
 

@@ -2,29 +2,9 @@
 // Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
 
 import BinaryParser from "../binary.js";
-import {igvxhr, Zlib} from "../../node_modules/igv-utils/src/index.js";
-import {buildOptions} from "../util/igvUtils.js";
 
 const BAI_MAGIC = 21578050;
 const TABIX_MAGIC = 21578324;
-const MAX_HEADER_SIZE = 100000000;   // IF the header is larger than this we can't read it !
-const MAX_GZIP_BLOCK_SIZE = (1 << 16);
-
-/**
- * @param indexURL
- * @param config
- * @param tabix
- *
- */
-async function loadBamIndex(indexURL, config, tabix, genome) {
-
-    let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, buildOptions(config))
-    if (tabix) {
-        const inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer))
-        arrayBuffer = inflate.decompress().buffer;
-    }
-    return parseBamIndex(arrayBuffer, tabix, genome)
-}
 
 async function parseBamIndex(arrayBuffer, genome) {
     return parseIndex(arrayBuffer, false, genome);
@@ -266,4 +246,4 @@ function reg2bins(beg, end) {
     return list;
 }
 
-export {parseTabixIndex, parseBamIndex, loadBamIndex};
+export {parseTabixIndex, parseBamIndex};
