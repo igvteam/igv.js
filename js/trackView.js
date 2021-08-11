@@ -65,17 +65,10 @@ class TrackView {
         this.sampleNameViewport = new SampleNameViewportController(this, $(browser.sampleNameColumn), undefined, browser.sampleNameViewportWidth)
 
         // Track Scrollbar
-        this.attachScrollbar(browser)
-
-        let className
+        this.createTrackScrollbar(browser)
 
         // Track Drag
-        className = 'ideogram' === this.track.type || 'ruler' === this.track.type ? 'igv-track-drag-shim' : 'igv-track-drag-handle'
-        this.dragHandle = DOMUtils.div({ class: className })
-        browser.trackDragColumn.appendChild(this.dragHandle)
-        this.dragHandle.style.height = `${ this.track.height }px`
-
-        this.addTrackDragMouseHandlers(browser)
+        this.createTrackDragHandle(browser)
 
         // Track Gear
         this.createTrackGearPopup(browser)
@@ -140,6 +133,18 @@ class TrackView {
         // SampleName Viewport
         this.sampleNameViewport.$viewport.remove()
 
+        // empty trackScrollbar column
+        this.removeTrackScrollMouseHandlers()
+        this.outerScroll.remove()
+
+        // empty trackDragColumn
+        this.removeTrackDragMouseHandlers()
+        this.dragHandle.remove()
+
+        // empty trackGearControl column
+        this.browser.trackGearControl.removeGearContainer(this)
+
+
     }
 
     renderSVGContext(context, { deltaX, deltaY }) {
@@ -165,16 +170,6 @@ class TrackView {
         if (true === this.browser.showSampleNames) {
             this.sampleNameViewport.renderSVGContext(context, delta)
         }
-    }
-
-    attachScrollbar(browser) {
-
-        if (false === scrollbarExclusionTypes.has(this.track.type)) {
-            browser.trackScrollbarControl.addScrollbar(this, browser.columnContainer)
-        } else {
-            browser.trackScrollbarControl.addScrollbarShim(this)
-        }
-
     }
 
     dataRange() {
@@ -519,6 +514,65 @@ class TrackView {
         }
     }
 
+    viewportsToReload(force) {
+
+        // List of viewports that need reloading
+        const rpV = this.viewports.filter(function (viewport) {
+            if (!viewport.isVisible()) {
+                return false;
+            }
+            if (!viewport.checkZoomIn()) {
+                return false;
+            } else {
+                const referenceFrame = viewport.referenceFrame;
+                const chr = viewport.referenceFrame.chr;
+                const start = referenceFrame.start;
+                const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
+                const bpPerPixel = referenceFrame.bpPerPixel;
+                return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel));
+            }
+        });
+        return rpV;
+    }
+
+    createTrackScrollbar(browser) {
+
+        const outerScroll = DOMUtils.div()
+        browser.trackScrollbarColumn.appendChild(outerScroll)
+        outerScroll.style.height = `${ this.track.height }px`
+        this.outerScroll = outerScroll
+
+        if (false === scrollbarExclusionTypes.has(this.track.type)) {
+            const innerScroll = DOMUtils.div()
+            outerScroll.appendChild(innerScroll)
+            this.innerScroll = innerScroll
+
+            this.addTrackScrollMouseHandlers(browser)
+        }
+
+    }
+
+    createTrackDragHandle(browser) {
+
+        const className = 'ideogram' === this.track.type || 'ruler' === this.track.type ? 'igv-track-drag-shim' : 'igv-track-drag-handle'
+        this.dragHandle = DOMUtils.div({ class: className })
+        browser.trackDragColumn.appendChild(this.dragHandle)
+        this.dragHandle.style.height = `${ this.track.height }px`
+
+        this.addTrackDragMouseHandlers(browser)
+
+    }
+
+    createTrackGearPopup(browser) {
+
+        if (true === this.track.ignoreTrackMenu) {
+            browser.trackGearControl.addGearShim(this)
+        } else {
+            browser.trackGearControl.addGearMenu(browser, this)
+        }
+
+    }
+
     addAxisEventListener(axis) {
 
         this.boundAxisClickHander = axisClickHandler.bind(this)
@@ -529,6 +583,57 @@ class TrackView {
             this.browser.dataRangeDialog.present($(this.browser.columnContainer))
         }
 
+    }
+
+    removeAxisEventListener(axis) {
+        axis.removeEventListener('click', this.boundAxisClickHander)
+    }
+
+    addTrackScrollMouseHandlers(browser) {
+
+        // Mouse Down
+        this.boundTrackScrollMouseDownHandler = trackScrollMouseDownHandler.bind(this)
+        this.innerScroll.addEventListener('mousedown', this.boundTrackScrollMouseDownHandler)
+
+        function trackScrollMouseDownHandler(event) {
+
+            event.stopPropagation()
+
+            const { y } = DOMUtils.pageCoordinates(event)
+
+            $(this.innerScroll).data('yDown', y.toString());
+
+            this.boundColumnContainerMouseMoveHandler = columnContainerMouseMoveHandler.bind(this)
+            browser.columnContainer.addEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
+
+            function columnContainerMouseMoveHandler(event) {
+
+                event.stopPropagation()
+
+                const { y } = DOMUtils.pageCoordinates(event)
+
+                this.moveScroller(y - parseInt( $(this.innerScroll).data('yDown') ))
+
+                $(this.innerScroll).data('yDown', y.toString());
+
+            }
+        }
+
+        this.boundColumnContainerMouseUpHandler = columnContainerMouseUpHandler.bind(this)
+        browser.columnContainer.addEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
+
+        function columnContainerMouseUpHandler(event) {
+            browser.columnContainer.removeEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
+        }
+
+    }
+
+    removeTrackScrollMouseHandlers() {
+        if (false === scrollbarExclusionTypes.has(this.track.type)) {
+            this.innerScroll.removeEventListener('mousedown', this.boundTrackScrollMouseDownHandler)
+            this.browser.columnContainer.removeEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
+            this.browser.columnContainer.removeEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
+        }
     }
 
     addTrackDragMouseHandlers(browser) {
@@ -612,10 +717,6 @@ class TrackView {
 
     }
 
-    removeAxisEventListener(axis) {
-        axis.removeEventListener('click', this.boundAxisClickHander)
-    }
-
     removeTrackDragMouseHandlers() {
 
         if ('ideogram' === this.track.type || 'ruler' === this.track.type) {
@@ -627,27 +728,6 @@ class TrackView {
             this.dragHandle.removeEventListener('mouseout', this.boundTrackDragMouseOutHandler)
         }
 
-    }
-
-    viewportsToReload(force) {
-
-        // List of viewports that need reloading
-        const rpV = this.viewports.filter(function (viewport) {
-            if (!viewport.isVisible()) {
-                return false;
-            }
-            if (!viewport.checkZoomIn()) {
-                return false;
-            } else {
-                const referenceFrame = viewport.referenceFrame;
-                const chr = viewport.referenceFrame.chr;
-                const start = referenceFrame.start;
-                const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
-                const bpPerPixel = referenceFrame.bpPerPixel;
-                return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel));
-            }
-        });
-        return rpV;
     }
 
     /**
@@ -664,7 +744,8 @@ class TrackView {
 
         this.sampleNameViewport.$viewport.detach()
 
-        this.browser.trackScrollbarControl.removeScrollbar(this, this.browser.columnContainer)
+        this.removeTrackScrollMouseHandlers()
+        this.outerScroll.remove()
 
         this.removeTrackDragMouseHandlers()
         this.dragHandle.remove()
@@ -698,15 +779,6 @@ class TrackView {
         this.disposed = true;
     }
 
-    createTrackGearPopup(browser) {
-
-        if (true === this.track.ignoreTrackMenu) {
-            browser.trackGearControl.addGearShim(this)
-        } else {
-            browser.trackGearControl.addGearMenu(browser, this)
-        }
-
-    }
 }
 
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {

@@ -53,8 +53,7 @@ import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
 import NavbarManager from "./navbarManager.js";
-import TrackScrollbarControl, {igv_scrollbar_outer_width} from "./trackScrollbarControl.js";
-import TrackGearControl, {igv_track_gear_menu_column_width} from "./trackGearControl.js";
+import TrackGearControl, { igv_track_gear_menu_column_width } from "./trackGearControl.js";
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import CursorGuide from "./ui/cursorGuide.js";
@@ -71,6 +70,8 @@ import {viewportColumnManager} from './viewportColumnManager.js';
 import GenericColorPicker from './ui/genericColorPicker.js';
 import ViewportCenterLine from './ui/viewportCenterLine.js';
 
+// css - $igv-scrollbar-outer-width: 14px;
+const igv_scrollbar_outer_width = 14
 
 // css - $igv-track-drag-column-width: 12px;
 const igv_track_manipulation_handle_width = 12
@@ -447,7 +448,6 @@ class Browser {
 
         // Track scrollbar column
         this.trackScrollbarColumn = createColumn(this.columnContainer, 'igv-scrollbar-column')
-        this.trackScrollbarControl = new TrackScrollbarControl(this.trackScrollbarColumn)
 
         // Track drag/reorder column
         this.trackDragColumn = createColumn(this.columnContainer, 'igv-track-drag-column')
@@ -566,18 +566,18 @@ class Browser {
         for (let trackView of this.trackViews) {
 
             // empty axis column
+
             // empty viewport columns
+
             // empty sampleName column
+
+            // empty track scroll column
+
+            // empty track drap column
+
+            // empty track gear column
+
             trackView.removeDOMFromColumnContainer()
-
-            // empty trackScrollbarControl column
-            this.trackScrollbarControl.removeScrollbar(trackView, this.columnContainer)
-
-            // empty trackDragColumn
-            trackView.removeTrackDragMouseHandlers()
-
-            // empty trackGearControl column
-            this.trackGearControl.removeGearContainer(trackView)
         }
 
         // discard columns
@@ -594,7 +594,6 @@ class Browser {
 
         // track scrollbar column
         if (this.trackScrollbarColumn) this.trackScrollbarColumn.remove()
-        // if (this.trackScrollbarControl) this.trackScrollbarControl.column.remove()
 
         // drag column
         if (this.trackDragColumn) this.trackDragColumn.remove()
@@ -985,7 +984,7 @@ class Browser {
 
             this.sampleNameColumn.appendChild(sampleNameViewport.$viewport.get(0))
 
-            this.trackScrollbarControl.column.appendChild(outerScroll)
+            this.trackScrollbarColumn.appendChild(outerScroll)
             this.trackDragColumn.appendChild(dragHandle)
             this.trackGearControl.column.appendChild(gearContainer)
         }
@@ -1380,14 +1379,19 @@ class Browser {
             // discard viewport DOM elements
             for (let trackView of this.trackViews) {
 
+                // empty axis column
+
+                // empty viewport columns
+
+                // empty track scroll column
+
+                // empty track drap column
+
+                // empty track gear column
+
+                // empty sampleName column
+
                 trackView.removeDOMFromColumnContainer()
-
-                this.trackScrollbarControl.removeScrollbar(trackView, this.columnContainer)
-
-                trackView.removeTrackDragMouseHandlers()
-                trackView.dragHandle.remove()
-
-                this.trackGearControl.removeGearContainer(trackView)
             }
 
             // discard viewport columns
