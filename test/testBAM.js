@@ -1,6 +1,7 @@
 import "./utils/mockObjects.js"
 import BamReader from "../js/bam/bamReader.js";
 import {assert} from 'chai';
+import BamReaderNonIndexed from "../js/bam/bamReaderNonIndexed.js";
 
 suite("testBAM", function () {
 
@@ -26,10 +27,10 @@ suite("testBAM", function () {
         const start = 155140000;
         const end = 155160000;
 
-        const bamReader = new BamReader({
+        const bamReader = new BamReaderNonIndexed({
             type: 'bam',
             url: require.resolve('./data/bam/na12889.bam'),
-            indexUed: false
+            indexed: false
         });
 
         const alignmentContainer = await bamReader.readAlignments(chr, start, end)

@@ -1,5 +1,5 @@
 import CramReader from "../../js/cram/cramReader.js";
-import FastaSequence from "../../js/genome/fasta.js";
+import FastaSequence from "../../js/genome/indexedFasta.js";
 import {assert} from 'chai';
 import {setup} from "../util/setup.js";
 

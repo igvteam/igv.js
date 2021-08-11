@@ -1,4 +1,11 @@
 8	Ensembl	chromosome	1	145138636	.	.	.	ID=chromosome:8;Alias=CM000670.2,chr8,NC_000008.11
+8	havana	ncRNA_gene	127686343	127733967	.	-	.	ID=gene:ENSG00000249375;Name=CASC11;biotype=lincRNA;description=cancer susceptibility 11 [Source:HGNC Symbol%3BAcc:HGNC:48939];gene_id=ENSG00000249375;logic_name=havana;version=7
+8	havana	lnc_RNA	127686343	127733967	.	-	.	ID=transcript:ENST00000502463;Parent=gene:ENSG00000249375;Name=CASC11-201;biotype=lincRNA;tag=basic;transcript_id=ENST00000502463;transcript_support_level=2;version=7
+8	havana	lnc_RNA	127700608	127733967	.	-	.	ID=transcript:ENST00000519071;Parent=gene:ENSG00000249375;Name=CASC11-203;biotype=lincRNA;tag=basic;transcript_id=ENST00000519071;transcript_support_level=3;version=5
+8	havana	lnc_RNA	127730194	127733967	.	-	.	ID=transcript:ENST00000518376;Parent=gene:ENSG00000249375;Name=CASC11-202;biotype=lincRNA;transcript_id=ENST00000518376;transcript_support_level=3;version=1
+8	havana	exon	127733825	127733967	.	-	.	Parent=transcript:ENST00000502463;Name=ENSE00002038150;constitutive=1;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002038150;rank=1;version=1
+8	havana	exon	127733825	127733967	.	-	.	Parent=transcript:ENST00000519071;Name=ENSE00002038150;constitutive=1;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002038150;rank=1;version=1
+8	havana	exon	127733825	127733967	.	-	.	Parent=transcript:ENST00000518376;Name=ENSE00002038150;constitutive=1;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002038150;rank=1;version=1
 8	ensembl_havana	gene	127735434	127741434	.	+	.	ID=gene:ENSG00000136997;Name=MYC;biotype=protein_coding;description=MYC proto-oncogene%2C bHLH transcription factor [Source:HGNC Symbol%3BAcc:HGNC:7553];gene_id=ENSG00000136997;logic_name=ensembl_havana_gene;version=17
 8	havana	mRNA	127735434	127740477	.	+	.	ID=transcript:ENST00000259523;Parent=gene:ENSG00000136997;Name=MYC-201;biotype=protein_coding;tag=basic;transcript_id=ENST00000259523;transcript_support_level=1;version=10
 8	havana	exon	127735434	127736623	.	+	.	Parent=transcript:ENST00000259523;Name=ENSE00001848036;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00001848036;rank=1;version=1

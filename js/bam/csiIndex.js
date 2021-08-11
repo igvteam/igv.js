@@ -2,27 +2,9 @@
 // Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
 
 import BinaryParser from "../binary.js";
-import {igvxhr, Zlib} from "../../node_modules/igv-utils/src/index.js";
-import {buildOptions} from "../util/igvUtils.js";
 
 const CSI1_MAGIC = 21582659 // CSI\1
 const CSI2_MAGIC = 38359875 // CSI\2
-
-/**
- * @param indexURL
- * @param config
- * @param tabix
- *
- */
-async function loadCsiIndex(indexURL, config, tabix, genome) {
-
-    let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, buildOptions(config))
-    const inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer))
-    arrayBuffer = inflate.decompress().buffer;
-    const idx = new CSIIndex();
-    idx.parse(arrayBuffer, genome);
-    return idx;
-}
 
 async function parseCsiIndex(arrayBuffer, genome) {
 
@@ -260,4 +242,4 @@ function canMerge(chunk1, chunk2) {
 }
 
 
-export {loadCsiIndex, parseCsiIndex};
+export {parseCsiIndex};
