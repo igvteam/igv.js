@@ -27,8 +27,10 @@
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {createViewport} from "./viewportFactory.js";
 import {doAutoscale} from "./util/igvUtils.js";
-import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
+import {DOMUtils, IGVColor, StringUtils, FeatureUtils, Icon} from '../node_modules/igv-utils/src/index.js';
 import SampleNameViewportController from './sampleNameViewportController.js';
+import MenuPopup from "./ui/menuPopup.js";
+import MenuUtils from "./ui/menuUtils.js";
 
 const scrollbarExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
@@ -87,7 +89,7 @@ class TrackView {
 
             if (track.dataRange) {
                 this.addAxisEventListener(axis)
-             }
+            }
 
             this.resizeAxisCanvas(axis, axis.clientWidth, axis.clientHeight)
         }
@@ -133,17 +135,17 @@ class TrackView {
         // SampleName Viewport
         this.sampleNameViewport.$viewport.remove()
 
-        // empty trackScrollbar column
+        // empty trackScrollbar Column
         this.removeTrackScrollMouseHandlers()
         this.outerScroll.remove()
 
-        // empty trackDragColumn
+        // empty trackDrag Column
         this.removeTrackDragMouseHandlers()
         this.dragHandle.remove()
 
-        // empty trackGearControl column
-        this.browser.trackGearControl.removeGearContainer(this)
-
+        // empty trackGear Column
+        this.removeTrackGearMouseHandlers()
+        this.gearContainer.remove()
 
     }
 
@@ -223,7 +225,7 @@ class TrackView {
             this.browser.genericColorPicker.show()
         }
 
-     }
+    }
 
     setTrackHeight(newHeight, force) {
 
@@ -565,10 +567,21 @@ class TrackView {
 
     createTrackGearPopup(browser) {
 
+        this.gearContainer = DOMUtils.div()
+        browser.trackGearColumn.appendChild(this.gearContainer);
+        this.gearContainer.style.height = `${ this.track.height }px`
+
         if (true === this.track.ignoreTrackMenu) {
-            browser.trackGearControl.addGearShim(this)
+            // do nothing
         } else {
-            browser.trackGearControl.addGearMenu(browser, this)
+
+            this.gear = DOMUtils.div()
+            this.gearContainer.appendChild(this.gear)
+            this.gear.appendChild(Icon.createIcon('cog'))
+
+            this.trackGearPopup = new MenuPopup(this.gear);
+
+            this.addTrackGearMouseHandlers()
         }
 
     }
@@ -730,6 +743,33 @@ class TrackView {
 
     }
 
+    addTrackGearMouseHandlers() {
+        if (true === this.track.ignoreTrackMenu) {
+            // do nothing
+        } else {
+
+            this.boundTrackGearClickHandler = trackGearClickHandler.bind(this)
+            this.gear.addEventListener('click', this.boundTrackGearClickHandler)
+
+            function trackGearClickHandler(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                this.trackGearPopup.presentMenuList(MenuUtils.trackMenuItemList(this));
+            }
+
+        }
+
+    }
+
+    removeTrackGearMouseHandlers() {
+        if (true === this.track.ignoreTrackMenu) {
+            // do nothing
+        } else {
+            this.gear.removeEventListener('click', this.boundTrackGearClickHandler)
+        }
+
+    }
+
     /**
      * Do any cleanup here
      */
@@ -750,7 +790,8 @@ class TrackView {
         this.removeTrackDragMouseHandlers()
         this.dragHandle.remove()
 
-        this.browser.trackGearControl.removeGearContainer(this)
+        this.removeTrackGearMouseHandlers()
+        this.gearContainer.remove()
 
         if (typeof this.track.dispose === "function") {
             this.track.dispose();

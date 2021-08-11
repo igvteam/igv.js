@@ -53,7 +53,6 @@ import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
 import NavbarManager from "./navbarManager.js";
-import TrackGearControl, { igv_track_gear_menu_column_width } from "./trackGearControl.js";
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import CursorGuide from "./ui/cursorGuide.js";
@@ -75,6 +74,9 @@ const igv_scrollbar_outer_width = 14
 
 // css - $igv-track-drag-column-width: 12px;
 const igv_track_manipulation_handle_width = 12
+
+// css - $igv-track-gear-menu-column-width: 28px;
+const igv_track_gear_menu_column_width = 28;
 
 // $igv-column-shim-width: 1px;
 // $igv-column-shim-margin: 2px;
@@ -454,7 +456,6 @@ class Browser {
 
         // Track gear column
         this.trackGearColumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
-        this.trackGearControl = new TrackGearControl(this.trackGearColumn)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
@@ -585,9 +586,8 @@ class Browser {
         // axis column
         if (this.axisColumn) this.axisColumn.remove()
 
-        // viewport columns
-        if (this.viewportColumns) this.viewportColumns.remove()
-        // viewportColumnManager.discardAllColumns(this.columnContainer)
+        // viewport columns (and viewport shims)
+        viewportColumnManager.discardAllColumns(this.columnContainer)
 
         // sample name column
         if (this.sampleNameColumn) this.sampleNameColumn.remove()
@@ -985,8 +985,10 @@ class Browser {
             this.sampleNameColumn.appendChild(sampleNameViewport.$viewport.get(0))
 
             this.trackScrollbarColumn.appendChild(outerScroll)
+
             this.trackDragColumn.appendChild(dragHandle)
-            this.trackGearControl.column.appendChild(gearContainer)
+
+            this.trackGearColumn.appendChild(gearContainer)
         }
 
     }
