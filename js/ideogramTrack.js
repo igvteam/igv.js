@@ -79,8 +79,9 @@ class IdeogramTrack {
         // Total chromosome length can be > chromosome.bpLength for partial fastas.
         let chrLength = chromosome.bpLength;
         const cytobands = referenceFrame.genome.getCytobands(chr);
-        if (cytobands && cytobands.length > 0) {
+        if (cytobands && cytobands.length > 0 && cytobands[cytobands.length - 1].end) {
             chrLength = Math.max(chrLength, cytobands[cytobands.length - 1].end)
+            chromosome.bpLength = chrLength;   // Correct bp length, bit of a hack
         }
 
         if (widthBP < chrLength) {
