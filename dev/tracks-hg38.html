@@ -37,83 +37,83 @@
             genome: "hg38",
             locus: "chr22:23,767,847-23,844,164",
             tracks: [
-                {
-                    name: 'example track',
-                    url: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz',
-                    indexURL: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz.tbi',
-                    //height: 200,
-                    // min: 0,
-                    // max: 5,
-                    // autoscale: false,
-                    // highlightSamples: {
-                    //     "RP-1425_BON_B17_29_1_D1_v1_Exome_GCP": "blue",
-                    //     "RP-1425_BON_B18-97_3_D1_v1_Exome_GCP": "red",
-                    // },
-                    // onlyHandleClicksForHighlightedSamples: false
-                },
-                {
-                    name: 'GWAS Catalog',
-                    type: 'annotation',
-                    format: 'gtexgwas',
-                    url: 'https://storage.googleapis.com/gtex-igv-files/GWAS_catalog_v1.0.2_signif_only_filtered_reordered_renamed.txt',
-                    indexed: false,
-                    color: 'rgb(100,200,200)',
-                    displayMode: 'EXPANDED',
-                },
-                {
-                    type: "eqtl",
-                    sourceType: "gtex-ws",
-                    url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
-                    tissueSiteDetailId: "Muscle_Skeletal",
-                    name: "Muscle Skeletal",
-                    visibilityWindow: 100000
-                },
-                {
-                    name: "Indexed GTF (Gencode)",
-                    url: "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz",
-                    indexURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz.tbi"
-                },
-                {
-                    name: "Indexed GFF (Ensemble Genes)",
-                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
-                    color: "blue",
-                    altColor: "red"
-                },
-                {
-                    "name": "Common SNPs (150)",
-                    "type": "snp",
-                    "format": "snp",
-                    "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz",
-                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz.tbi",
-                    visibilityWindow: 100000
-                },
-                {
-                    "name": "Repeat Masker",
-                    "type": "annotation",
-                    "format": "rmsk",
-                    "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz",
-                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz.tbi",
-                    "visibilityWindow": 100000
-                },
+                // {
+                //     name: 'example track',
+                //     url: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz',
+                //     indexURL: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz.tbi',
+                //     //height: 200,
+                //     // min: 0,
+                //     // max: 5,
+                //     // autoscale: false,
+                //     // highlightSamples: {
+                //     //     "RP-1425_BON_B17_29_1_D1_v1_Exome_GCP": "blue",
+                //     //     "RP-1425_BON_B18-97_3_D1_v1_Exome_GCP": "red",
+                //     // },
+                //     // onlyHandleClicksForHighlightedSamples: false
+                // },
+                // {
+                //     name: 'GWAS Catalog',
+                //     type: 'annotation',
+                //     format: 'gtexgwas',
+                //     url: 'https://storage.googleapis.com/gtex-igv-files/GWAS_catalog_v1.0.2_signif_only_filtered_reordered_renamed.txt',
+                //     indexed: false,
+                //     color: 'rgb(100,200,200)',
+                //     displayMode: 'EXPANDED',
+                // },
+                // {
+                //     type: "eqtl",
+                //     sourceType: "gtex-ws",
+                //     url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
+                //     tissueSiteDetailId: "Muscle_Skeletal",
+                //     name: "Muscle Skeletal",
+                //     visibilityWindow: 100000
+                // },
+                // {
+                //     name: "Indexed GTF (Gencode)",
+                //     url: "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz",
+                //     indexURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz.tbi"
+                // },
+                // {
+                //     name: "Indexed GFF (Ensemble Genes)",
+                //     url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                //     indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                //     color: "blue",
+                //     altColor: "red"
+                // },
+                // {
+                //     "name": "Common SNPs (150)",
+                //     "type": "snp",
+                //     "format": "snp",
+                //     "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz",
+                //     "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz.tbi",
+                //     visibilityWindow: 100000
+                // },
+                // {
+                //     "name": "Repeat Masker",
+                //     "type": "annotation",
+                //     "format": "rmsk",
+                //     "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz",
+                //     "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz.tbi",
+                //     "visibilityWindow": 100000
+                // },
                 {
                     name: "bigbed (Clinvar)",
                     url: "https://s3.amazonaws.com/igv.org.genomes/hg38/clinvarMain.bb"
                 },
-                {
-                    name: "Conservation phyloP 100 way",
-                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/hg38.phyloP100way.bw",
-                    color: "blue",
-                    altColor: "red"
-                },
-                {
-                    name: "Simple_repeat (useScore)",
-                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz",
-                    indexURL:"https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz.tbi",
-                    useScore: true,
-                    min: 0,
-                    max: 100
-                }
+                // {
+                //     name: "Conservation phyloP 100 way",
+                //     url: "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/hg38.phyloP100way.bw",
+                //     color: "blue",
+                //     altColor: "red"
+                // },
+                // {
+                //     name: "Simple_repeat (useScore)",
+                //     url: "https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz",
+                //     indexURL:"https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz.tbi",
+                //     useScore: true,
+                //     min: 0,
+                //     max: 100
+                // }
 
             ]
         };

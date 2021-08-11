@@ -306,7 +306,7 @@ class FeatureFileReader {
             delete this.features;
             return tmp;
         } else {
-            const plain = URIUtils.decodeDataURI(this.dataURI)
+            const plain = BGZip.decodeDataURI(this.dataURI)
             let dataWrapper = getDataWrapper(plain);
             this.header = await this.parser.parseHeader(dataWrapper);
             if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {

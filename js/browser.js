@@ -25,7 +25,7 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {Alert, InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js'
-import { Icon, DOMUtils, FileUtils, GoogleUtils, igvxhr, StringUtils, TrackUtils, URIUtils } from "../node_modules/igv-utils/src/index.js";
+import { BGZip, Icon, DOMUtils, FileUtils, GoogleUtils, igvxhr, StringUtils, TrackUtils, URIUtils } from "../node_modules/igv-utils/src/index.js";
 import TrackView, { igv_axis_column_width, createAxisColumn, maxViewportContentHeight } from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
@@ -65,6 +65,7 @@ import MenuPopup from "./ui/menuPopup.js";
 import { viewportColumnManager } from './viewportColumnManager.js';
 import GenericColorPicker from './ui/genericColorPicker.js';
 import ViewportCenterLine from './ui/viewportCenterLine.js';
+
 
 // $igv-column-shim-width: 1px;
 // $igv-column-shim-margin: 2px;
@@ -1591,7 +1592,7 @@ class Browser {
 
     compressedSession() {
         const json = JSON.stringify(this.toJSON());
-        return StringUtils.compressString(json);
+        return BGZip.compressString(json);
     }
 
     sessionURL() {
@@ -1817,7 +1818,7 @@ class Browser {
         let bytes
         if (url.indexOf('/gzip;base64') > 0) {
             //Proper dataURI
-            bytes = URIUtils.decodeDataURI(url);
+            bytes = BGZip.decodeDataURI(url);
             let json = ''
             for (let b of bytes) {
                 json += String.fromCharCode(b)
@@ -1826,7 +1827,7 @@ class Browser {
         } else {
 
             let enc = url.substring(5);
-            return StringUtils.uncompressString(enc);
+            return BGZip.uncompressString(enc);
         }
     }
 
@@ -1869,62 +1870,6 @@ function toggleTrackLabels(trackViews, isVisible) {
     }
 }
 
-function isLocusString(browser, locus) {
-
-    const a = locus.split(':')
-    const chr = a[0]
-
-    if ('all' === chr && browser.genome.getChromosome(chr)) {
-        return {browser, chr, start: 0, end: browser.genome.getChromosome(chr).bpLength, locus}
-    } else if (undefined === browser.genome.getChromosome(chr)) {
-
-        return undefined
-
-    } else {
-
-        const extent = {}
-        extent.start = 0;
-        extent.end = browser.genome.getChromosome(chr).bpLength;
-
-        if (a.length > 1) {
-
-            const b = a[1].split('-');
-
-            if (b.length > 2) {
-                return undefined;
-            } else {
-
-                let numeric
-                numeric = b[0].replace(/,/g, '')
-                if (isNaN(numeric)) {
-                    return undefined;
-                }
-
-                extent.start = parseInt(numeric, 10) - 1;
-
-                if (1 === b.length) {
-                    extent.start = extent.start - 20;
-                    extent.end = extent.start + 20;
-                }
-
-                if (2 === b.length) {
-                    numeric = b[1].replace(/,/g, '')
-                    if (isNaN(numeric)) {
-                        return undefined;
-                    } else {
-                        extent.end = parseInt(numeric, 10)
-                    }
-                }
-            }
-        }
-
-        validateLocusExtent(browser.genome.getChromosome(chr).bpLength, extent, browser.minimumBases());
-        const queryChr = browser.genome.getChromosomeName(chr);
-        return {browser, chr: queryChr, start: extent.start, end: extent.end, locus}
-
-    }
-}
-
 async function searchWebService(browser, locus, searchConfig) {
 
     let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase());
@@ -1935,6 +1880,6 @@ async function searchWebService(browser, locus, searchConfig) {
     return {result: result, locusSearchString: locus}
 }
 
-export {isLocusString, searchWebService}
+export {searchWebService}
 export default Browser
 

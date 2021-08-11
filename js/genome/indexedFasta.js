@@ -24,10 +24,11 @@
  */
 
 // Indexed fasta files
-import {igvxhr, StringUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import GenomicInterval from "./genomicInterval.js";
 import Chromosome from "./chromosome.js";
 import {buildOptions} from "../util/igvUtils.js";
+import NonIndexedFasta from "./nonIndexedFasta.js";
 
 const splitLines = StringUtils.splitLines;
 
@@ -35,20 +36,10 @@ const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'inde
 
 class FastaSequence {
 
-
     constructor(reference) {
 
-        if (typeof reference.fastaURL === 'string' && reference.fastaURL.startsWith('data:')) {
-            this.file = decodeDataUri(reference.fastaURL);
-            this.indexed = false;  // dataURI is by definition not indexed
-            this.isDataURI = true;
-        } else {
-            this.file = reference.fastaURL;
-            this.indexed = reference.indexed !== false;   // Indexed unless it explicitly is not
-            if (this.indexed) {
-                this.indexFile = reference.indexURL || reference.indexFile || this.file + ".fai";
-            }
-        }
+        this.file = reference.fastaURL;
+        this.indexFile = reference.indexURL || reference.indexFile || this.file + ".fai";
         this.withCredentials = reference.withCredentials;
         this.chromosomeNames = [];
         this.chromosomes = {};
@@ -67,22 +58,10 @@ class FastaSequence {
 
 
     async init() {
-        if (this.indexed) {
-            return this.getIndex()
-        } else {
-            return this.loadAll();
-        }
+        return this.getIndex()
     }
 
     async getSequence(chr, start, end) {
-        if (this.indexed) {
-            return this.getSequenceIndexed(chr, start, end);
-        } else {
-            return this.getSequenceNonIndexed(chr, start, end)
-        }
-    }
-
-    async getSequenceIndexed(chr, start, end) {
 
         if (!(this.interval && this.interval.contains(chr, start, end))) {
 
@@ -105,30 +84,6 @@ class FastaSequence {
         const seq = this.interval.features ? this.interval.features.substr(offset, n) : null;
         return seq;
     }
-
-
-    async getSequenceNonIndexed(chr, start, end) {
-
-        if (this.offsets[chr]) {
-            start -= this.offsets[chr];
-            end -= this.offsets[chr];
-        }
-        let prefix = "";
-        if (start < 0) {
-            for (let i = start; i < Math.min(end, 0); i++) {
-                prefix += "*";
-            }
-        }
-
-        if (end <= 0) {
-            return Promise.resolve(prefix);
-        }
-
-        const seq = this.sequences[chr];
-        const seqEnd = Math.min(end, seq.length)
-        return prefix + seq.substring(start, seqEnd);
-    }
-
 
     async getIndex() {
 
@@ -168,75 +123,6 @@ class FastaSequence {
             }
             return this.index;
         }
-    }
-
-    /**
-     * 
-     * @returns {Promise<void>}
-     */
-    async loadAll() {
-
-        let data;
-        if (this.isDataURI) {
-            data = this.file;     // <= Strange convention, revisit.
-        } else {
-            data = await igvxhr.load(this.file, buildOptions(this.config))
-        }
-
-        const lines = splitLines(data);
-        const len = lines.length;
-        let lineNo = 0;
-        let currentSeq;
-        let currentRangeLocus;
-        let currentOffset = 0;
-        let order = 0;
-        let nextLine;
-        let currentChr;
-        while (lineNo < len) {
-            nextLine = lines[lineNo++].trim();
-            if (nextLine.startsWith("#") || nextLine.length === 0) {
-                // skip
-            } else if (nextLine.startsWith(">")) {
-                // Start the next sequence
-                if (currentSeq) {
-                    this.chromosomeNames.push(currentChr);
-                    this.sequences[currentChr] = currentSeq;
-                    this.chromosomes[currentChr] = new Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus);
-                }
-
-                const parts = nextLine.substr(1).split(/\s+/)
-
-                // Check for samtools style locus string.   This is not perfect, and could fail on weird sequence names
-                const nameParts = parts[0].split(':');
-                currentChr = nameParts[0];
-                currentSeq = "";
-                currentOffset = 0
-                currentRangeLocus = undefined;
-                if (nameParts.length > 1 && nameParts[1].indexOf('-') > 0) {
-                    const locusParts = nameParts[1].split('-')
-                    if (locusParts.length === 2 &&
-                        /^[0-9]+$/.test(locusParts[0]) &&
-                        /^[0-9]+$/.test(locusParts[1])) {
-                    }
-                    const from = Number.parseInt(locusParts[0])
-                    const to = Number.parseInt(locusParts[1])
-                    if (to > from) {
-                        currentOffset = from - 1;
-                        this.offsets[currentChr] = currentOffset;
-                        currentRangeLocus = nameParts[1];
-                    }
-                }
-            } else {
-                currentSeq += nextLine;
-            }
-        }
-        // add last seq
-        if (currentSeq) {
-            this.chromosomeNames.push(currentChr);
-            this.sequences[currentChr] = currentSeq;
-            this.chromosomes[currentChr] = new Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus);
-        }
-
     }
 
     async readSequence(chr, qstart, qend) {
@@ -316,33 +202,6 @@ class FastaSequence {
     }
 }
 
-function decodeDataUri(dataUri) {
+export default FastaSequence
 
-    const split = dataUri.split(',');
-    const info = split[0].split(':')[1];
-    let dataString = split[1];
 
-    if (info.indexOf('base64') >= 0) {
-        dataString = atob(dataString);
-    } else {
-        dataString = decodeURI(dataString);
-    }
-
-    const bytes = new Uint8Array(dataString.length);
-    for (let i = 0; i < dataString.length; i++) {
-        bytes[i] = dataString.charCodeAt(i);
-    }
-
-    const inflate = new Zlib.Gunzip(bytes);
-    const plain = inflate.decompress();
-
-    let s = "";
-    const len = plain.length;
-    for (let i = 0; i < len; i++)
-        s += String.fromCharCode(plain[i]);
-
-    return s;
-}
-
-export default FastaSequence;
-export {decodeDataUri};

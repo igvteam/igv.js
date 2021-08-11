@@ -25,7 +25,7 @@
 
 import BufferedReader from "./bufferedReader.js";
 import BinaryParser from "../binary.js";
-import {igvxhr, Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, BGZip} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 import getDecoder from "./bbDecoders.js";
 import {parseAutoSQL} from "../util/ucscUtils.js"
@@ -112,14 +112,12 @@ class BWReader {
 
             // Parse data and return features
             const allFeatures = [];
-            const buffer = new Uint8Array(arrayBuffer);
             for (let item of leafItems) {
-                const uint8Array = buffer.subarray(item.dataOffset - start, item.dataOffset + item.dataSize);
+                const uint8Array = new Uint8Array(arrayBuffer, item.dataOffset - start, item.dataSize);
                 let plain;
                 const isCompressed = this.header.uncompressBuffSize > 0;
                 if (isCompressed) {
-                    const inflate = new Zlib.Inflate(uint8Array);
-                    plain = inflate.decompress();
+                    plain = BGZip.inflate(uint8Array);
                 } else {
                     plain = uint8Array;
                 }
