@@ -125,6 +125,22 @@ suite("testBigWig", function () {
 
     });
 
+    test("bigbed", async function () {
+
+        this.timeout(10000);
+
+        const url = "https://s3.amazonaws.com/igv.org.genomes/hg38/clinvarMain.bb",
+            chr = "chr22",
+            start = 23786974,
+            end = 23787050;
+
+        const bwReader = new BWReader({url: url});
+        const features = await bwReader.readFeatures(chr, start, chr, end);
+        assert.equal(features.length, 3);
+
+    });
+
+
     test("Zoom data", async function () {
 
         this.timeout(10000);

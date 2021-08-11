@@ -51,7 +51,6 @@ class BamReaderNonIndexed {
     // Return an alignment container
     async readAlignments(chr, bpStart, bpEnd) {
 
-        const genome = this.genome;
         if (this.alignmentCache) {
             const header = this.header;
             const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;

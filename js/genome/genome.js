@@ -23,10 +23,10 @@
  * THE SOFTWARE.
  */
 
+import {loadFasta} from "./fasta.js";
 import Cytoband from "./cytoband.js";
-import FastaSequence from "./fasta.js";
 import {buildOptions} from "../util/igvUtils.js";
-import {igvxhr, StringUtils, URIUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, StringUtils, URIUtils, BGZip} from "../../node_modules/igv-utils/src/index.js";
 import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import version from "../version.js";
 
@@ -41,8 +41,7 @@ const GenomeUtils = {
 
         const cytobandUrl = options.cytobandURL;
         const aliasURL = options.aliasURL;
-        const sequence = new FastaSequence(options);
-        await sequence.init()
+        const sequence = await loadFasta(options);
 
         let cytobands
         if (cytobandUrl) {
@@ -221,12 +220,8 @@ class Genome {
         if (this.showWholeGenomeView() && this.chromosomes.hasOwnProperty("all")) {
             return "all";
         } else {
-            const chromosome = this.chromosomes[this.chromosomeNames[0]];
-            if (chromosome.rangeLocus) {
-                return chromosome.name + ":" + chromosome.rangeLocus;
-            } else {
-                return this.chromosomeNames[0];
-            }
+            return this.chromosomeNames[0];
+
         }
     }
 
@@ -405,7 +400,7 @@ function loadCytobands(cytobandUrl, config) {
         let plain
 
         if (dataUri.startsWith("data:application/gzip;base64")) {
-            plain = URIUtils.decodeDataURI(dataUri)
+            plain = BGZip.decodeDataURI(dataUri)
         } else {
 
             let bytes,
@@ -424,8 +419,7 @@ function loadCytobands(cytobandUrl, config) {
                 bytes[i] = dataString.charCodeAt(i);
             }
 
-            var inflate = new Zlib.Gunzip(bytes);
-            plain = inflate.decompress();
+            plain = new BGZip.ungzip(bytes);
         }
 
         let s = "";
@@ -459,7 +453,7 @@ function constructWG(genome, config) {
 
     let wgChromosomes;
     if (config.chromosomeOrder) {
-        if(Array.isArray(config.chromosomeOrder)) {
+        if (Array.isArray(config.chromosomeOrder)) {
             genome.wgChromosomeNames = config.chromosomeOrder;
         } else {
             genome.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim());
