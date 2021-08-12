@@ -1,6 +1,5 @@
-import $ from './vendor/jquery-3.3.1.slim.js'
-import {appleCrayonRGB} from './util/colorPalletes.js'
 import {DOMUtils, StringUtils} from '../node_modules/igv-utils/src/index.js';
+import {appleCrayonRGB} from './util/colorPalletes.js'
 
 const maxFontSize = 10
 
@@ -15,24 +14,23 @@ const fontConfigureTemplate =
 
 class SampleNameViewportController {
 
-    constructor(trackView, $column, unused, width) {
+    constructor(trackView, column, unused, width) {
 
         this.guid = DOMUtils.guid();
         this.trackView = trackView;
 
         this.browser = trackView.browser;
 
-        this.$viewport = $('<div class="igv-viewport">');
-        $column.append(this.$viewport);
+        this.viewport = DOMUtils.div({ class: 'igv-viewport' })
+
+        column.appendChild(this.viewport)
 
         if (trackView.track.height) {
-            this.$viewport.get(0).style.height = `${ trackView.track.height }px`;
+            this.viewport.style.height = `${ trackView.track.height }px`;
         }
 
-        this.$canvas = $('<canvas>');
-        this.$viewport.append(this.$canvas);
-
-        this.canvas = this.$canvas.get(0);
+        this.canvas = document.createElement('canvas')
+        this.viewport.appendChild(this.canvas)
         this.ctx = this.canvas.getContext("2d");
 
         this.trackScrollDelta = 0
@@ -51,7 +49,7 @@ class SampleNameViewportController {
     checkCanvas() {
 
         const dpi = window.devicePixelRatio;
-        const requiredHeight = this.$viewport.height();
+        const requiredHeight = this.viewport.clientHeight
         const requiredWidth = this.browser.sampleNameViewportWidth;
 
         if (this.canvas.width !== requiredWidth * dpi || this.canvas.height !== requiredHeight * dpi) {
@@ -70,7 +68,6 @@ class SampleNameViewportController {
 
         if (typeof this.trackView.track.getSamples === 'function') {
             this.contentTop = contentTop;
-            // console.log(`setTop. content-top(${ StringUtils.numberFormatter(contentTop) })`)
             const samples = this.trackView.track.getSamples();
             this.repaint(samples);
         }
@@ -78,16 +75,16 @@ class SampleNameViewportController {
     }
 
     setWidth(width) {
-        this.$viewport.width(width);
+        this.viewport.innerWidth = width
         this.checkCanvas();
     }
 
     show() {
-        this.$viewport.show()
+        this.viewport.style.display = 'block'
     }
 
     hide() {
-        this.$viewport.hide()
+        this.viewport.style.display = 'none'
     }
 
     async repaint(samples) {
@@ -109,7 +106,7 @@ class SampleNameViewportController {
 
         context.fillStyle = appleCrayonRGB('lead');
 
-        const viewportHeight = this.$viewport.get(0).getBoundingClientRect().height;
+        const viewportHeight = this.viewport.getBoundingClientRect().height;
         let y = (samples.yOffset || 0) + this.contentTop;    // contentTop will always be a negative number (top relative to viewport)
 
         for (let name of samples.names) {
@@ -134,7 +131,7 @@ class SampleNameViewportController {
 
             const yScrollDelta = 0;   // This is not relevant, scrolling is handled in "draw"
 
-            const {width, height} = this.$viewport.get(0).getBoundingClientRect()
+            const {width, height} = this.viewport.getBoundingClientRect()
 
             const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
             const id = `${ str }_sample_names_guid_${ DOMUtils.guid() }`
@@ -148,11 +145,11 @@ class SampleNameViewportController {
     }
 
     addMouseHandlers() {
-        this.addViewportContextMenuHandler(this.$viewport.get(0))
+        this.addViewportContextMenuHandler(this.viewport)
     }
 
     removeMouseHandlers() {
-        this.removeViewportContextMenuHandler(this.$viewport.get(0))
+        this.removeViewportContextMenuHandler(this.viewport)
     }
 
     addViewportContextMenuHandler(viewport) {
@@ -184,6 +181,11 @@ class SampleNameViewportController {
 
     removeViewportContextMenuHandler(viewport) {
         viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
+    }
+
+    dispose() {
+        this.removeMouseHandlers()
+        this.viewport.remove()
     }
 }
 

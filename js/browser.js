@@ -963,7 +963,7 @@ class Browser {
                 $viewport.detach()
             }
 
-            sampleNameViewport.$viewport.detach()
+            sampleNameViewport.viewport.remove()
 
             outerScroll.remove()
             dragHandle.remove()
@@ -982,7 +982,7 @@ class Browser {
                 viewportColumns[i].appendChild($viewport.get(0))
             }
 
-            this.sampleNameColumn.appendChild(sampleNameViewport.$viewport.get(0))
+            this.sampleNameColumn.appendChild(sampleNameViewport.viewport)
 
             this.trackScrollbarColumn.appendChild(outerScroll)
 

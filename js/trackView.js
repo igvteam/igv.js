@@ -64,7 +64,7 @@ class TrackView {
         }
 
         // SampleName Viewport
-        this.sampleNameViewport = new SampleNameViewportController(this, $(browser.sampleNameColumn), undefined, browser.sampleNameViewportWidth)
+        this.sampleNameViewport = new SampleNameViewportController(this, browser.sampleNameColumn, undefined, browser.sampleNameViewportWidth)
 
         // Track Scrollbar
         this.createTrackScrollbar(browser)
@@ -133,8 +133,7 @@ class TrackView {
         }
 
         // SampleName Viewport
-        this.sampleNameViewport.removeMouseHandlers()
-        this.sampleNameViewport.$viewport.remove()
+        this.sampleNameViewport.dispose()
 
         // empty trackScrollbar Column
         this.removeTrackScrollMouseHandlers()
@@ -248,9 +247,11 @@ class TrackView {
             this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
         }
 
-        for (let { $viewport } of [...this.viewports, this.sampleNameViewport]) {
+        for (let { $viewport } of this.viewports) {
             $viewport.height(newHeight)
         }
+
+        this.sampleNameViewport.viewport.style.height = `${newHeight}px`
 
         // If the track does not manage its own content height set it here
         if (typeof this.track.computePixelHeight !== "function") {
@@ -783,8 +784,7 @@ class TrackView {
             viewport.dispose();
         }
 
-        this.sampleNameViewport.removeMouseHandlers()
-        this.sampleNameViewport.$viewport.remove()
+        this.sampleNameViewport.dispose()
 
         this.removeTrackScrollMouseHandlers()
         this.outerScroll.remove()
