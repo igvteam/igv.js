@@ -133,6 +133,7 @@ class TrackView {
         }
 
         // SampleName Viewport
+        this.sampleNameViewport.removeMouseHandlers()
         this.sampleNameViewport.$viewport.remove()
 
         // empty trackScrollbar Column
@@ -782,7 +783,8 @@ class TrackView {
             viewport.dispose();
         }
 
-        this.sampleNameViewport.$viewport.detach()
+        this.sampleNameViewport.removeMouseHandlers()
+        this.sampleNameViewport.$viewport.remove()
 
         this.removeTrackScrollMouseHandlers()
         this.outerScroll.remove()

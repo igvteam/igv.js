@@ -29,8 +29,6 @@ class SampleNameViewportController {
             this.$viewport.get(0).style.height = `${ trackView.track.height }px`;
         }
 
-        // this.$viewport.get(0).style.backgroundColor = randomRGB(150, 250);
-
         this.$canvas = $('<canvas>');
         this.$viewport.append(this.$canvas);
 
@@ -47,27 +45,7 @@ class SampleNameViewportController {
             this.hide()
         }
 
-        this.$viewport.get(0).addEventListener('contextmenu', e => {
-
-            e.preventDefault()
-            e.stopPropagation()
-
-            const config =
-                {
-                    label: 'Name Panel Width',
-                    value: this.browser.sampleNameViewportWidth,
-                    callback: newWidth => {
-                        this.browser.sampleNameViewportWidth = parseInt(newWidth)
-                        for (let { sampleNameViewport } of this.browser.trackViews) {
-                            sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
-                        }
-                        this.browser.resize()
-                    }
-                }
-
-            this.browser.inputDialog.present(config, e);
-        })
-
+        this.addMouseHandlers()
     }
 
     checkCanvas() {
@@ -169,57 +147,44 @@ class SampleNameViewportController {
         }
     }
 
-    addMouseHandler(context, pixelTop, samples) {
-
-
-
-        return
-
-
-
-
-        this.canvas.addEventListener('click', e => {
-
-            if ('block' === this.hover.style.display) {
-                this.hover.style.display = 'none'
-                this.hover.textContent = ''
-            } else {
-
-                const {currentTarget, clientY} = e
-
-                const {y: target_bbox_min_y} = currentTarget.getBoundingClientRect()
-
-                const y = (clientY - target_bbox_min_y) + pixelTop
-
-                let yMin = 0
-                for (let name of samples.names) {
-
-                    const yMax = getYFont(context, name.toUpperCase(), yMin, samples.height)
-                    if (y < yMin || y > yMax) {
-                        // do nothing
-                    } else {
-
-                        this.hover.style.top = `${yMin + this.contentTop}px`
-                        this.hover.style.right = '0px'
-
-                        this.hover.textContent = name.toUpperCase()
-                        this.hover.style.display = 'block'
-                    }
-
-                    yMin += samples.height
-                }
-
-            }
-
-
-        })
-
-        this.canvas.addEventListener('mouseleave', () => {
-            this.hover.style.display = 'none'
-            this.hover.textContent = ''
-        })
+    addMouseHandlers() {
+        this.addViewportContextMenuHandler(this.$viewport.get(0))
     }
 
+    removeMouseHandlers() {
+        this.removeViewportContextMenuHandler(this.$viewport.get(0))
+    }
+
+    addViewportContextMenuHandler(viewport) {
+        this.boundContextMenuHandler = contextMenuHandler.bind(this)
+        viewport.addEventListener('contextmenu', this.boundContextMenuHandler)
+
+        function contextMenuHandler(event) {
+
+            event.preventDefault()
+            event.stopPropagation()
+
+            const config =
+                {
+                    label: 'Name Panel Width',
+                    value: this.browser.sampleNameViewportWidth,
+                    callback: newWidth => {
+                        this.browser.sampleNameViewportWidth = parseInt(newWidth)
+                        for (let { sampleNameViewport } of this.browser.trackViews) {
+                            sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
+                        }
+                        this.browser.resize()
+                    }
+                }
+
+            this.browser.inputDialog.present(config, event);
+        }
+
+    }
+
+    removeViewportContextMenuHandler(viewport) {
+        viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
+    }
 }
 
 function getYFont(context, text, y, height) {
