@@ -3,6 +3,7 @@ import {Icon, DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/sr
 import TrackViewportController from "./trackViewportController.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
+import {viewportColumnManager} from "./viewportColumnManager.js";
 
 let timer
 let currentViewport = undefined
@@ -22,14 +23,13 @@ class RulerViewportController extends TrackViewportController {
 
         const viewport = this.$viewport.get(0)
 
-        this.multiLocusCloseButton = DOMUtils.div({ class: 'igv-multi-locus-close-button' })
-        viewport.appendChild(this.multiLocusCloseButton)
-        this.multiLocusCloseButton.appendChild(Icon.createIcon("times-circle"))
+        this.multiLocusPanelCloseButton = DOMUtils.div({ class: 'igv-multi-locus-close-button' })
+        viewport.appendChild(this.multiLocusPanelCloseButton)
+
+        this.multiLocusPanelCloseButton.appendChild(Icon.createIcon("times-circle"))
 
         this.rulerLabel = DOMUtils.div({ class: 'igv-multi-locus-ruler-label' })
         viewport.appendChild(this.rulerLabel)
-
-        this.addMouseHandlers()
 
         this.$tooltip = $('<div>', { class: 'igv-ruler-tooltip' })
         this.$tooltip.height(this.$viewport.height())
@@ -42,11 +42,13 @@ class RulerViewportController extends TrackViewportController {
         this.$tooltip.hide()
 
         this.dismissLocusLabel()
+
+        this.addMouseHandlers()
     }
 
     addMouseHandlers() {
 
-        this.addMultiLocusLableClickHandler(this.multiLocusCloseButton)
+        this.addMultiLocusPanelCloseHandler(this.multiLocusPanelCloseButton)
 
         this.addRulerLableClickHandler(this.rulerLabel)
 
@@ -58,15 +60,15 @@ class RulerViewportController extends TrackViewportController {
     }
 
     removeMouseHandlers() {
-        this.removeMultiLocusLableClickHandler(this.multiLocusCloseButton)
+        this.removeMultiLocusPanelCloseHandler(this.multiLocusPanelCloseButton)
         this.removeRulerLableClickHandler(this.rulerLabel)
         this.removeViewportClickHandler(this.$viewport.get(0))
     }
 
-    addMultiLocusLableClickHandler(multiLocusCloseButton) {
+    addMultiLocusPanelCloseHandler(multiLocusPanelCloseButton) {
 
-        this.boundMultiLocusLableClickHandler = clickHandler.bind(this)
-        multiLocusCloseButton.addEventListener('click', this.boundMultiLocusLableClickHandler)
+        this.boundMultiLocusPanelCloseHandler = clickHandler.bind(this)
+        multiLocusPanelCloseButton.addEventListener('click', this.boundMultiLocusPanelCloseHandler)
 
         function clickHandler(event) {
             this.browser.removeMultiLocusPanel(this.referenceFrame)
@@ -74,8 +76,8 @@ class RulerViewportController extends TrackViewportController {
 
     }
 
-    removeMultiLocusLableClickHandler(multiLocusCloseButton) {
-        multiLocusCloseButton.removeEventListener('click', this.boundMultiLocusLableClickHandler)
+    removeMultiLocusPanelCloseHandler(multiLocusPanelCloseButton) {
+        multiLocusPanelCloseButton.removeEventListener('click', this.boundMultiLocusPanelCloseHandler)
     }
 
     addRulerLableClickHandler(rulerLabel) {
@@ -135,12 +137,12 @@ class RulerViewportController extends TrackViewportController {
     presentLocusLabel(viewportWidth) {
         this.rulerLabel.innerHTML = this.referenceFrame.getMultiLocusLabel(viewportWidth)
         this.rulerLabel.style.display = 'block'
-        this.multiLocusCloseButton.style.display = 'block'
+        this.multiLocusPanelCloseButton.style.display = 'block'
     }
 
     dismissLocusLabel() {
         this.rulerLabel.style.display = 'none'
-        this.multiLocusCloseButton.style.display = 'none'
+        this.multiLocusPanelCloseButton.style.display = 'none'
     }
 
     mouseMove(event) {
@@ -187,6 +189,10 @@ class RulerViewportController extends TrackViewportController {
     startSpinner() {}
     stopSpinner() {}
 
+    dispose() {
+        this.rulerSweeper.dispose()
+        super.dispose()
+    }
 }
 
 export default RulerViewportController

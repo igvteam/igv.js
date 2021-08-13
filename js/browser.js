@@ -1709,90 +1709,73 @@ class Browser {
      * Mouse handlers to support drag (pan)
      */
     addMouseHandlers() {
+        this.addWindowResizeHandler()
+        this.addRootMouseUpHandler()
+        this.addRootMouseLeaveHandler()
+        this.addColumnContainerEventHandlers()
+    }
 
-        var self = this;
+    removeMouseHandlers() {
+        this.removeWindowResizeHandler()
+        this.removeRootMouseUpHandler()
+        this.removeRootMouseLeaveHandler()
+        this.removeColumnContainerEventHandlers()
+    }
 
-        $(window).on('resize' + this.namespace, () => {
-            this.resize();
-        });
-
-        this.$root.on('mouseup', mouseUpOrLeave);
-
-        this.$root.on('mouseleave', mouseUpOrLeave);
-
-        this.columnContainer.addEventListener('mousemove', e => {
-            handleMouseMove(e)
-        })
-
-        this.columnContainer.addEventListener('touchmove', e => {
-            handleMouseMove(e)
-        })
-
-        this.columnContainer.addEventListener('mouseleave', e => {
-            mouseUpOrLeave(e)
-        })
-
-        this.columnContainer.addEventListener('mouseup', e => {
-            mouseUpOrLeave(e)
-        })
-
-        this.columnContainer.addEventListener('touchend', e => {
-            mouseUpOrLeave(e)
-        })
-
-        function handleMouseMove(e) {
-
-            e.preventDefault();
-
-            const {x, y} = DOMUtils.pageCoordinates(e);
-
-            if (self.vpMouseDown) {
-
-                const {viewport, referenceFrame} = self.vpMouseDown;
-
-                // Determine direction,  true == horizontal
-                const horizontal = Math.abs((x - self.vpMouseDown.mouseDownX)) > Math.abs((y - self.vpMouseDown.mouseDownY));
-
-                if (!self.dragObject && !self.isScrolling) {
-                    if (horizontal) {
-                        if (self.vpMouseDown.mouseDownX && Math.abs(x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
-                            self.dragObject = {viewport, start: referenceFrame.start};
-                        }
-                    } else {
-                        if (self.vpMouseDown.mouseDownY &&
-                            Math.abs(y - self.vpMouseDown.mouseDownY) > self.constants.scrollThreshold) {
-                            self.isScrolling = true;
-                            const viewportHeight = viewport.$viewport.height();
-                            const contentHeight = maxViewportContentHeight(viewport.trackView.viewports);
-                            self.vpMouseDown.r = viewportHeight / contentHeight;
-                        }
-                    }
-                }
-
-                if (self.dragObject) {
-                    const viewChanged = referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - x, viewport.$viewport.width());
-                    if (viewChanged) {
-                        self.updateViews();
-                    }
-                    self.fireEvent('trackdrag');
-                }
-
-
-                if (self.isScrolling) {
-                    const delta = self.vpMouseDown.r * (self.vpMouseDown.lastMouseY - y);
-                    viewport.trackView.moveScroller(delta);
-                }
-
-
-                self.vpMouseDown.lastMouseX = x;
-                self.vpMouseDown.lastMouseY = y
-            }
+    addWindowResizeHandler() {
+        this.boundWindowResizeHandler = windowResizeHandler.bind(this)
+        window.addEventListener('resize', this.boundWindowResizeHandler)
+        function windowResizeHandler() {
+            this.resize()
         }
+    }
 
-        function mouseUpOrLeave(e) {
-            self.cancelTrackPan();
-            self.endTrackDrag();
-        }
+    removeWindowResizeHandler() {
+        window.removeEventListener('resize', this.boundWindowResizeHandler)
+    }
+
+    addRootMouseUpHandler() {
+        this.boundRootMouseUpHandler = mouseUpOrLeave.bind(this)
+        this.$root.get(0).addEventListener('mouseup', this.boundRootMouseUpHandler)
+    }
+
+    removeRootMouseUpHandler() {
+        this.$root.get(0).removeEventListener('mouseup', this.boundRootMouseUpHandler)
+    }
+
+    addRootMouseLeaveHandler() {
+        this.boundRootMouseLeaveHandler = mouseUpOrLeave.bind(this)
+        this.$root.get(0).addEventListener('mouseleave', this.boundRootMouseLeaveHandler)
+    }
+
+    removeRootMouseLeaveHandler() {
+        this.$root.get(0).removeEventListener('mouseleave', this.boundRootMouseLeaveHandler)
+    }
+
+    addColumnContainerEventHandlers() {
+        this.boundColumnContainerMouseMoveHandler = handleMouseMove.bind(this)
+        this.boundColumnContainerTouchMoveHandler = handleMouseMove.bind(this)
+        this.boundColumnContainerMouseLeaveHandler = mouseUpOrLeave.bind(this)
+        this.boundColumnContainerMouseUpHandler = mouseUpOrLeave.bind(this)
+        this.boundColumnContainerTouchEndHandler = mouseUpOrLeave.bind(this)
+
+        this.columnContainer.addEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
+        this.columnContainer.addEventListener('touchmove', this.boundColumnContainerTouchMoveHandler)
+
+        this.columnContainer.addEventListener('mouseleave', this.boundColumnContainerMouseLeaveHandler)
+
+        this.columnContainer.addEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
+        this.columnContainer.addEventListener('touchend', this.boundColumnContainerTouchEndHandler)
+    }
+
+    removeColumnContainerEventHandlers() {
+        this.columnContainer.removeEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
+        this.columnContainer.removeEventListener('touchmove', this.boundColumnContainerTouchMoveHandler)
+
+        this.columnContainer.removeEventListener('mouseleave', this.boundColumnContainerMouseLeaveHandler)
+
+        this.columnContainer.removeEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
+        this.columnContainer.removeEventListener('touchend', this.boundColumnContainerTouchEndHandler)
     }
 
     async getDriveFileInfo(googleDriveURL) {
@@ -1819,6 +1802,64 @@ class Browser {
         }
     }
 
+}
+
+function handleMouseMove(e) {
+
+    e.preventDefault();
+
+    if (this.loadInProgress()) {
+        return;
+    }
+
+    const { x, y } = DOMUtils.pageCoordinates(e);
+
+    if (this.vpMouseDown) {
+
+        const { viewport, referenceFrame } = this.vpMouseDown;
+
+        // Determine direction,  true == horizontal
+        const horizontal = Math.abs((x - this.vpMouseDown.mouseDownX)) > Math.abs((y - this.vpMouseDown.mouseDownY));
+
+        if (!this.dragObject && !this.isScrolling) {
+            if (horizontal) {
+                if (this.vpMouseDown.mouseDownX && Math.abs(x - this.vpMouseDown.mouseDownX) > this.constants.dragThreshold) {
+                    this.dragObject = { viewport, start: referenceFrame.start };
+                }
+            } else {
+                if (this.vpMouseDown.mouseDownY &&
+                    Math.abs(y - this.vpMouseDown.mouseDownY) > this.constants.scrollThreshold) {
+                    this.isScrolling = true;
+                    const viewportHeight = viewport.$viewport.height();
+                    const contentHeight = maxViewportContentHeight(viewport.trackView.viewports);
+                    this.vpMouseDown.r = viewportHeight / contentHeight;
+                }
+            }
+        }
+
+        if (this.dragObject) {
+            const viewChanged = referenceFrame.shiftPixels(this.vpMouseDown.lastMouseX - x, viewport.$viewport.width());
+            if (viewChanged) {
+                this.updateViews();
+            }
+            this.fireEvent('trackdrag');
+        }
+
+
+        if (this.isScrolling) {
+            const delta = this.vpMouseDown.r * (this.vpMouseDown.lastMouseY - y);
+            viewport.trackView.moveScroller(delta);
+        }
+
+
+        this.vpMouseDown.lastMouseX = x;
+        this.vpMouseDown.lastMouseY = y
+    }
+}
+
+function mouseUpOrLeave(e) {
+    this.cancelTrackPan();
+    this.endTrackDrag();
 }
 
 function getInitialLocus(locus, genome) {

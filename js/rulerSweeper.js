@@ -31,18 +31,32 @@ import GenomeUtils from './genome/genome.js';
 class RulerSweeper {
 
     constructor(viewport) {
-        this.viewport = viewport;
         this.rulerSweeper = DOMUtils.div({ class: 'igv-ruler-sweeper'})
         viewport.contentDiv.appendChild(this.rulerSweeper)
+
+        this.viewport = viewport;
+
         this.isMouseHandlers = undefined
 
-        viewport.trackView.browser.on('locuschange', () => {
+        this.addBrowserObserver()
+    }
+
+    addBrowserObserver() {
+        
+        // Viewport Content
+        this.boundObserverHandler = observerHandler.bind(this)
+        this.viewport.browser.on('locuschange', this.boundObserverHandler)
+
+        function observerHandler() {
             if (GenomeUtils.isWholeGenomeView(this.viewport.referenceFrame.chr)) {
                 this.removeMouseHandlers()
             } else {
                 this.addMouseHandlers()
             }
-        })
+        }    }
+
+    removeBrowserObserver() {
+        this.viewport.browser.off('locuschange', this.boundObserverHandler)
     }
 
     addMouseHandlers() {
@@ -147,6 +161,12 @@ class RulerSweeper {
         document.removeEventListener('mousemove', this.boundDocumentMouseMoveHandler)
         document.removeEventListener('mouseup', this.boundDocumentMouseUpHandler)
         this.isMouseHandlers = false;
+    }
+
+    dispose() {
+        this.removeBrowserObserver()
+        this.removeMouseHandlers()
+        this.rulerSweeper.remove()
     }
 
 }
