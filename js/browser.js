@@ -1380,14 +1380,7 @@ class Browser {
 
     async search(string, init) {
 
-        let loci
-
-        try {
-            loci = await search(this, string);
-        } catch (error) {
-            Alert.presentAlert(error)
-            return
-        }
+        const loci = await search(this, string);
 
         if (loci && loci.length > 0) {
 
@@ -1424,7 +1417,7 @@ class Browser {
             }
 
         } else {
-            Alert.presentAlert( new Error(`Error searching for locus ${ string }`) )
+            Alert.presentAlert( new Error(`Unrecognized locus ${string}`) )
         }
     }
 
