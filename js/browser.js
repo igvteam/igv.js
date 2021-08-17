@@ -25,8 +25,18 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {Alert, InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js'
-import { BGZip, Icon, DOMUtils, FileUtils, GoogleUtils, igvxhr, StringUtils, TrackUtils, URIUtils } from "../node_modules/igv-utils/src/index.js";
-import TrackView, { igv_axis_column_width, createAxisColumn, maxViewportContentHeight } from "./trackView.js";
+import {
+    BGZip,
+    Icon,
+    DOMUtils,
+    FileUtils,
+    GoogleUtils,
+    igvxhr,
+    StringUtils,
+    TrackUtils,
+    URIUtils
+} from "../node_modules/igv-utils/src/index.js";
+import TrackView, {igv_axis_column_width, createAxisColumn, maxViewportContentHeight} from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
@@ -46,10 +56,10 @@ import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
 import NavbarManager from "./navbarManager.js";
-import { createSampleNameColumn } from './sampleNameViewport.js';
+import {createSampleNameColumn} from './sampleNameViewport.js';
 import TrackScrollbarControl, {igv_scrollbar_outer_width} from "./trackScrollbarControl.js";
-import TrackDragControl, { igv_track_manipulation_handle_width } from "./trackDragControl.js";
-import TrackGearControl, { igv_track_gear_menu_column_width } from "./trackGearControl.js";
+import TrackDragControl, {igv_track_manipulation_handle_width} from "./trackDragControl.js";
+import TrackGearControl, {igv_track_gear_menu_column_width} from "./trackGearControl.js";
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import CursorGuide from "./ui/cursorGuide.js";
@@ -62,7 +72,7 @@ import DataRangeDialog from "./ui/dataRangeDialog.js";
 import HtsgetReader from "./htsget/htsgetReader.js";
 import SVGSaveControl from "./ui/svgSaveControl.js";
 import MenuPopup from "./ui/menuPopup.js";
-import { viewportColumnManager } from './viewportColumnManager.js';
+import {viewportColumnManager} from './viewportColumnManager.js';
 import GenericColorPicker from './ui/genericColorPicker.js';
 import ViewportCenterLine from './ui/viewportCenterLine.js';
 
@@ -88,7 +98,7 @@ class Browser {
 
         Alert.init(this.$root.get(0))
 
-        this.columnContainer = DOMUtils.div({ class: 'igv-column-container' });
+        this.columnContainer = DOMUtils.div({class: 'igv-column-container'});
         this.$root.get(0).appendChild(this.columnContainer);
 
         this.menuPopup = new MenuPopup(this.columnContainer);
@@ -210,14 +220,14 @@ class Browser {
         this.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'});
         $searchContainer.append(this.$searchInput);
 
-        this.$searchInput.change(() => this.search( this.$searchInput.val() ) )
+        this.$searchInput.change(() => this.doSearch(this.$searchInput.val()));
 
-        const searchIconContainer = DOMUtils.div({ class: 'igv-search-icon-container' });
+        const searchIconContainer = DOMUtils.div({class: 'igv-search-icon-container'});
         $searchContainer.append($(searchIconContainer));
 
         searchIconContainer.appendChild(Icon.createIcon("search"));
 
-        searchIconContainer.addEventListener('click', () => this.search(this.$searchInput.val()));
+        searchIconContainer.addEventListener('click', () => this.doSearch(this.$searchInput.val()));
 
         this.windowSizePanel = new WindowSizePanel($locusSizeGroup.get(0), this);
 
@@ -251,13 +261,13 @@ class Browser {
         }
 
         this.inputDialog = new InputDialog(this.$root.get(0));
-        this.inputDialog.container.id = `igv-input-dialog-${ DOMUtils.guid() }`
+        this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
 
         this.dataRangeDialog = new DataRangeDialog(this.$root);
-        this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${ DOMUtils.guid() }`
+        this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${DOMUtils.guid()}`
 
-        this.genericColorPicker = new GenericColorPicker({ parent: this.columnContainer, width: 432 })
-        this.genericColorPicker.container.id = `igv-track-color-picker-${ DOMUtils.guid() }`
+        this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432})
+        this.genericColorPicker.container.id = `igv-track-color-picker-${DOMUtils.guid()}`
 
         return $navBar;
 
@@ -296,7 +306,7 @@ class Browser {
      */
     async toSVG() {
 
-        let { x, y, width, height } = this.columnContainer.getBoundingClientRect();
+        let {x, y, width, height} = this.columnContainer.getBoundingClientRect();
 
         const h_render = 8000;
 
@@ -324,7 +334,7 @@ class Browser {
 
         // tracks -> SVG
         for (let trackView of this.trackViews) {
-            trackView.renderSVGContext(context, { deltaX: 0, deltaY: -y })
+            trackView.renderSVGContext(context, {deltaX: 0, deltaY: -y})
         }
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
@@ -450,13 +460,13 @@ class Browser {
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
         if (undefined === this.ideogram && false !== session.showIdeogram) {
             this.ideogram = new IdeogramTrack(this)
-            this.trackViews.push( new TrackView(this, this.columnContainer, this.ideogram));
+            this.trackViews.push(new TrackView(this, this.columnContainer, this.ideogram));
             this.ideogram.trackView.updateViews();
-         }
+        }
 
         if (undefined === this.rulerTrack && false !== session.showRuler) {
             this.rulerTrack = new RulerTrack(this);
-            this.trackViews.push( new TrackView(this, this.columnContainer, this.rulerTrack));
+            this.trackViews.push(new TrackView(this, this.columnContainer, this.rulerTrack));
             this.rulerTrack.trackView.updateViews();
         }
 
@@ -506,7 +516,7 @@ class Browser {
 
         const centerLines = columnContainer.querySelectorAll('.igv-center-line')
         for (let i = 0; i < centerLines.length; i++) {
-            centerLines[ i ].remove()
+            centerLines[i].remove()
         }
 
         const centerLineList = []
@@ -539,17 +549,13 @@ class Browser {
             this.removeAllTracks();
         }
 
-        let locus
-        try {
-            locus = getInitialLocus(initialLocus, genome)
-            await this.search(locus, true)
-        } catch (error) {
-            Alert.presentAlert(new Error(`Error searching for locus ${initialLocus}  [${error}]`), undefined)
-
-            locus = this.genome.getHomeChromosomeName()
+        let locus = getInitialLocus(initialLocus, genome);
+        const locusFound = await this.search(locus, true);
+        if (!locusFound) {
+            console.log("Initial locus not found: " + locus);
+            locus = genome.getHomeChromosomeName()
             await this.search(locus);
         }
-
     }
 
     cleanHouseForSession() {
@@ -965,11 +971,11 @@ class Browser {
         });
 
         // discard current track order
-        for (let { axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer } of this.trackViews) {
+        for (let {axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
             axis.remove()
 
-            for (let { $viewport } of viewports) {
+            for (let {$viewport} of viewports) {
                 $viewport.detach()
             }
 
@@ -983,13 +989,13 @@ class Browser {
         // Reattach the divs to the dom in the correct order
         const viewportColumns = this.columnContainer.querySelectorAll('.igv-column')
 
-        for (let { axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer } of this.trackViews) {
+        for (let {axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
             this.axisColumn.append(axis)
 
             for (let i = 0; i < viewportColumns.length; i++) {
-                const { $viewport } = viewports[ i ]
-                viewportColumns[ i ].appendChild($viewport.get(0))
+                const {$viewport} = viewports[i]
+                viewportColumns[i].appendChild($viewport.get(0))
             }
 
             this.sampleNameColumn.appendChild(sampleNameViewport.$viewport.get(0))
@@ -1036,7 +1042,7 @@ class Browser {
             if (trackView.track.id !== 'ruler' && trackView.track.id !== 'ideogram') {
                 this.fireEvent('trackremoved', [trackView.track]);
                 trackView.dispose();
-             } else {
+            } else {
                 remainingTrackViews.push(trackView);
             }
         }
@@ -1096,7 +1102,7 @@ class Browser {
 
             const index = this.referenceFrameList.indexOf(referenceFrame)
 
-            const { chr, genome } = referenceFrame
+            const {chr, genome} = referenceFrame
 
             const {bpLength} = genome.getChromosome(referenceFrame.chr)
 
@@ -1105,14 +1111,14 @@ class Browser {
             // viewportWidthBP > bpLength occurs when locus is full chromosome and user widens browser
             if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
                 // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) bpp. viewport ${ StringUtils.numberFormatter(viewportWidthBP) } > ${ StringUtils.numberFormatter(bpLength) }.`)
-                referenceFrame.bpPerPixel = bpLength/viewportWidth
+                referenceFrame.bpPerPixel = bpLength / viewportWidth
             } else {
                 // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) end.`)
                 referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
             }
 
-            for (let { viewports } of this.trackViews) {
-                viewports[ index ].setWidth(viewportWidth)
+            for (let {viewports} of this.trackViews) {
+                viewports[index].setWidth(viewportWidth)
             }
 
         }
@@ -1133,7 +1139,7 @@ class Browser {
         }
 
         if (referenceFrame) {
-            this.updateLocusSearchWidget(this.referenceFrameList.length > 1 ? this.referenceFrameList : [ referenceFrame ])
+            this.updateLocusSearchWidget(this.referenceFrameList.length > 1 ? this.referenceFrameList : [referenceFrame])
         }
 
         for (let centerGuide of this.centerLineList) {
@@ -1215,27 +1221,27 @@ class Browser {
         } else {
 
             const width = this.calculateViewportWidth(this.referenceFrameList.length)
-            const locus = referenceFrameList[ 0 ].getPresentationLocusComponents(width)
+            const locus = referenceFrameList[0].getPresentationLocusComponents(width)
 
             this.chromosomeSelectWidget.select.value = locus.chr
 
             if ('all' === locus.chr) {
                 this.$searchInput.val(locus.chr)
             } else {
-                const { start, end } = locus
-                const label = `${ locus.chr }:${ start }-${ end }`
+                const {start, end} = locus
+                const label = `${locus.chr}:${start}-${end}`
                 this.$searchInput.val(label)
 
             }
 
         }
 
-        this.fireEvent('locuschange', [ this.referenceFrameList ])
+        this.fireEvent('locuschange', [this.referenceFrameList])
     }
 
     calculateViewportWidth(columnCount) {
 
-        let { width } = this.columnContainer.getBoundingClientRect()
+        let {width} = this.columnContainer.getBoundingClientRect()
         // console.log(`${ Date.now() }  column-container ${ StringUtils.numberFormatter(width) }  root ${ StringUtils.numberFormatter(this.$root.get(0).clientWidth) } `)
 
         const sampleNameViewportWidth = this.getSampleNameViewportWidth()
@@ -1246,13 +1252,13 @@ class Browser {
 
         // console.log(`${ Date.now() }  column-container ${ width } viewport ${ Math.floor(width/columnCount) } sample-name-viewport ${ sampleNameViewportWidth }`)
 
-        return Math.floor(width/columnCount)
+        return Math.floor(width / columnCount)
     }
 
     getCenterLineXOffset() {
-        let { width:columnContainerWidth } = this.columnContainer.getBoundingClientRect()
+        let {width: columnContainerWidth} = this.columnContainer.getBoundingClientRect()
         columnContainerWidth -= igv_axis_column_width + this.getSampleNameViewportWidth() + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
-        return Math.floor(columnContainerWidth/2 + igv_axis_column_width)
+        return Math.floor(columnContainerWidth / 2 + igv_axis_column_width)
     }
 
     minimumBases() {
@@ -1263,7 +1269,7 @@ class Browser {
 
         const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
-        let referenceFrames = referenceFrameOrUndefined ? [ referenceFrameOrUndefined ] : this.referenceFrameList;
+        let referenceFrames = referenceFrameOrUndefined ? [referenceFrameOrUndefined] : this.referenceFrameList;
 
         for (let referenceFrame of referenceFrames) {
             referenceFrame.zoomWithScaleFactor(this, scaleFactor, viewportWidth, centerBPOrUndefined)
@@ -1287,7 +1293,7 @@ class Browser {
         const indexLeft = this.referenceFrameList.indexOf(referenceFrameLeft)
         const indexRight = 1 + (this.referenceFrameList.indexOf(referenceFrameLeft))
 
-        const { $viewport } = this.trackViews[ 0 ].viewports[ indexLeft ]
+        const {$viewport} = this.trackViews[0].viewports[indexLeft]
         const viewportColumn = viewportColumnManager.insertAfter($viewport.parent())
 
         if (indexRight === this.referenceFrameList.length) {
@@ -1327,11 +1333,11 @@ class Browser {
 
         // find the $column corresponding to this referenceFrame and remove it
         const index = this.referenceFrameList.indexOf(referenceFrame);
-        const { $viewport } = this.trackViews[ 0 ].viewports[ index ];
+        const {$viewport} = this.trackViews[0].viewports[index];
         viewportColumnManager.removeColumnAtIndex(index, $viewport.parent().get(0))
 
-        for (let { viewports } of this.trackViews) {
-            viewports[ index ].dispose();
+        for (let {viewports} of this.trackViews) {
+            viewports[index].dispose();
             viewports.splice(index, 1);
         }
 
@@ -1357,7 +1363,7 @@ class Browser {
             referenceFrame.bpPerPixel *= scaleFactor
         }
 
-        for (let { viewports } of this.trackViews) {
+        for (let {viewports} of this.trackViews) {
 
             for (let viewport of viewports) {
                 viewport.setWidth(viewportWidth);
@@ -1379,6 +1385,29 @@ class Browser {
         await this.search(chr + ":" + start + "-" + end);
     }
 
+    /**
+     * Search for the locus string -- this function is called from various igv.js GUI elements, and is not part of the
+     * API.  Wraps ```search``` and presents an error dialog if false.
+     *
+     * @param string
+     * @param init
+     * @returns {Promise<void>}
+     */
+    async doSearch(string, init) {
+        const success = await this.search(string, init);
+        if(!success) {
+            Alert.presentAlert(new Error(`Unrecognized locus: <b> ${string} </b>`))
+        }
+        return success;
+    }
+
+    /**
+     * Search for the locus string
+     * NOTE: This is part of the API
+     * @param string
+     * @param init  true if called during browser initialization
+     * @returns {Promise<boolean>}  true if found, false if not
+     */
     async search(string, init) {
 
         const loci = await search(this, string);
@@ -1416,9 +1445,9 @@ class Browser {
             if (!init) {
                 await this.updateViews();
             }
-
+            return true;
         } else {
-            Alert.presentAlert( new Error(`Unrecognized locus ${string}`) )
+            return false;
         }
     }
 
@@ -1756,11 +1785,11 @@ class Browser {
                 return;
             }
 
-            const { x, y } = DOMUtils.pageCoordinates(e);
+            const {x, y} = DOMUtils.pageCoordinates(e);
 
             if (self.vpMouseDown) {
 
-                const { viewport, referenceFrame } = self.vpMouseDown;
+                const {viewport, referenceFrame} = self.vpMouseDown;
 
                 // Determine direction,  true == horizontal
                 const horizontal = Math.abs((x - self.vpMouseDown.mouseDownX)) > Math.abs((y - self.vpMouseDown.mouseDownY));
@@ -1768,7 +1797,7 @@ class Browser {
                 if (!self.dragObject && !self.isScrolling) {
                     if (horizontal) {
                         if (self.vpMouseDown.mouseDownX && Math.abs(x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
-                            self.dragObject = { viewport, start: referenceFrame.start };
+                            self.dragObject = {viewport, start: referenceFrame.start};
                         }
                     } else {
                         if (self.vpMouseDown.mouseDownY &&
@@ -1857,7 +1886,7 @@ function logo() {
 
 function toggleTrackLabels(trackViews, isVisible) {
 
-    for (let { viewports } of trackViews) {
+    for (let {viewports} of trackViews) {
         for (let viewport of viewports) {
             if (viewport.$trackLabel) {
                 if (0 === viewports.indexOf(viewport) && true === isVisible) {
