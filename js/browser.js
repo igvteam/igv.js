@@ -220,14 +220,14 @@ class Browser {
         this.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'});
         $searchContainer.append(this.$searchInput);
 
-        this.$searchInput.change(() => this.search(this.$searchInput.val()))
+        this.$searchInput.change(() => this.doSearch(this.$searchInput.val()));
 
         const searchIconContainer = DOMUtils.div({class: 'igv-search-icon-container'});
         $searchContainer.append($(searchIconContainer));
 
         searchIconContainer.appendChild(Icon.createIcon("search"));
 
-        searchIconContainer.addEventListener('click', () => this.search(this.$searchInput.val()));
+        searchIconContainer.addEventListener('click', () => this.doSearch(this.$searchInput.val()));
 
         this.windowSizePanel = new WindowSizePanel($locusSizeGroup.get(0), this);
 
@@ -552,6 +552,7 @@ class Browser {
         let locus = getInitialLocus(initialLocus, genome);
         const locusFound = await this.search(locus, true);
         if (!locusFound) {
+            console.log("Initial locus not found: " + locus);
             locus = genome.getHomeChromosomeName()
             await this.search(locus);
         }
@@ -1385,21 +1386,33 @@ class Browser {
     }
 
     /**
+
+     * Search for the locus string -- this function is called from various igv.js GUI elements, and is not part of the
+     * API.  Wraps ```search``` and presents an error dialog if false.
+     *
+     * @param string
+     * @param init
+     * @returns {Promise<void>}
+     */
+    async doSearch(string, init) {
+        const success = await this.search(string, init);
+        if(!success) {
+            Alert.presentAlert(new Error(`Unrecognized locus: <b> ${string} </b>`))
+        }
+        return success;
+    }
+
+
+    /**
      * Search for the locus string
+     * NOTE: This is part of the API
      * @param string
      * @param init  true if called during browser initialization
      * @returns {Promise<boolean>}  true if found, false if not
      */
     async search(string, init) {
 
-        let loci
-
-        try {
-            loci = await search(this, string);
-        } catch (error) {
-            Alert.presentAlert(error);
-            return false;
-        }
+        const loci = await search(this, string);
 
         if (loci && loci.length > 0) {
 
@@ -1436,7 +1449,6 @@ class Browser {
             }
             return true;
         } else {
-            Alert.presentAlert(new Error(`Error searching for locus ${string}`));
             return false;
         }
     }
