@@ -10,6 +10,9 @@ suite("testRnaStruct", function () {
         genome: {
             getChromosomeName: function (chr) {
                 return chr.replace("chr", "");
+            },
+            getChromosome: function (chrName) {
+                return {bpLength: Number.MAX_SAFE_INTEGER}
             }
         },
         constants: {}

@@ -63,10 +63,10 @@ class BamSource {
         } else if ("cram" === config.format) {
             this.bamReader = new CramReader(config, genome, browser);
         } else {
-            if (this.config.indexed === false) {
-                this.bamReader = new BamReaderNonIndexed(config, genome);
-            } else {
+            if (this.config.indexed !== false) { // && this.config.indexURL) {
                 this.bamReader = new BamReader(config, genome);
+            } else {
+                this.bamReader = new BamReaderNonIndexed(config, genome);
             }
         }
 
