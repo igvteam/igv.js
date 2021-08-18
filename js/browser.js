@@ -1386,6 +1386,7 @@ class Browser {
     }
 
     /**
+
      * Search for the locus string -- this function is called from various igv.js GUI elements, and is not part of the
      * API.  Wraps ```search``` and presents an error dialog if false.
      *
@@ -1400,6 +1401,7 @@ class Browser {
         }
         return success;
     }
+
 
     /**
      * Search for the locus string
