@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <title>Dev - Multiple Browser</title>
+
+</head>
+
+<body>
+
+<h1>Example of multiple IGV browser windows on a page</h1>
+
+<div class="side-by-side-container">
+    <div id="ba" style="width: 50%">
+    </div>
+    <div id="bb" style="width: 50%">
+    </div>
+</div>
+
+<div class="side-by-side-container">
+    <div id="bc" style="width: 50%">
+    </div>
+    <div id="bd" style="width: 50%">
+    </div>
+</div>
+
+<div><p>
+    <button  type="button" id="removeBrowsersButton" >Remove all browsers </button>
+</p></div>
+
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    document.getElementById("removeBrowsersButton").onclick = () => igv.removeAllBrowsers()
+
+    const config_a =
+        {
+            genome: "hg19",
+            locus: 'egfr',
+            tracks:
+                [
+                    {
+                        "url": "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                        "indexed": false,
+                        "isLog": true,
+                        "name": "GBM Copy # (TCGA Broad GDAC)"
+                    }
+                ]
+        };
+
+    const config_b =
+        {
+            genome: "hg19",
+            locus: 'myc',
+            tracks:
+                [
+                    {
+                        "url": "https://www.encodeproject.org/files/ENCFF356YES/@@download/ENCFF356YES.bigWig",
+                        "name": "ctcf bigwig"
+                    }
+                ]
+        };
+
+    (async () => {
+        await igv.createBrowser(document.getElementById("ba"), config_a)
+        await igv.createBrowser(document.getElementById("bb"), config_b)
+        await igv.createBrowser(document.getElementById("bc"), config_a)
+        await igv.createBrowser(document.getElementById("bd"), config_b)
+    })()
+
+
+</script>
+
+</body>
+
+</html>
