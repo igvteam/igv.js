@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>1000 Genomes Cram file</h1>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            "genome": "hg19",
+            "locus": "chr4:67,047,933-67,047,971",
+            "tracks": [
+                {
+                    "type": "alignment",
+                    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam",
+                    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam.bai",
+                    "name": "NA12890",
+                    "format": "bam",
+                    "height": 300,
+                    "coverageTrackHeight": 50,
+                    "alleleFreqThreshold": 0.2,
+                    "color": "rgb(185, 185, 185)",
+                    "order": 4
+                }
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

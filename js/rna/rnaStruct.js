@@ -28,6 +28,7 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {igvxhr, FeatureCache} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
+import TextFeatureSource from "../feature/textFeatureSource.js";
 
 class RnaStructTrack extends TrackBase {
 
@@ -47,28 +48,26 @@ class RnaStructTrack extends TrackBase {
         if ("bp" === config.format) {
             this.featureSource = new RNAFeatureSource(config, browser.genome);
         } else {
-            this.featureSource = new RNAFeatureSource(config, browser.genome);
+            this.featureSource = new TextFeatureSource(config, browser.genome);
         }
     }
 
     async getFeatures(chr, start, end) {
-        return this.featureSource.getFeatures(chr, start, end);
+        return this.featureSource.getFeatures({chr, start, end});
     }
 
     draw(options) {
 
-        const self = this;
+        const ctx = options.context;
 
         const theta = Math.PI / 2;
-
-        const ctx = options.context;
         const pixelWidth = options.pixelWidth;
         const pixelHeight = options.pixelHeight;
         const viewportWidth = options.viewportWidth;
         const bpPerPixel = options.bpPerPixel;
         const bpStart = options.bpStart;
         const xScale = bpPerPixel;
-        const orienation = self.arcOrientation;
+        const orienation = this.arcOrientation;
 
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -79,7 +78,7 @@ class RnaStructTrack extends TrackBase {
             // Sort by score -- draw lowest scored features first
             sortByScore(featureList, 1);
 
-            featureList.forEach(function (feature) {
+            for(let feature of featureList) {
 
                 if (feature.startLeft) {
 
@@ -95,7 +94,7 @@ class RnaStructTrack extends TrackBase {
                     // First arc
                     let x1 = (sl + er) / 2;
                     let r1 = (er - sl) / 2;
-                    let y1 = self.height;
+                    let y1 = this.height;
                     let sa = Math.PI + (Math.PI / 2 - theta);
                     let ea = 2 * Math.PI - (Math.PI / 2 - theta);
 
@@ -136,7 +135,7 @@ class RnaStructTrack extends TrackBase {
                     // First arc
                     let x = (s + e) / 2;
                     let r = (e - s) / 2;
-                    let y = self.height;
+                    let y = this.height;
                     let sa = Math.PI + (Math.PI / 2 - theta);
                     let ea = 2 * Math.PI - (Math.PI / 2 - theta);
 
@@ -153,7 +152,7 @@ class RnaStructTrack extends TrackBase {
 
                 }
 
-            })
+            }
         }
     }
 
@@ -252,7 +251,7 @@ class RNAFeatureSource {
         this.genome = genome;
     }
 
-    async getFeatures(chr, start, end) {
+    async getFeatures({chr, start, end, bpPerPixel, visibilityWindow}) {
 
 
         const genome = this.genome;
