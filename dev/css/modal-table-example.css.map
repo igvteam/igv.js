@@ -1,7 +1,0 @@
-{
-"version": 3,
-"mappings": "AAGA,oCAAqC;EACnC,KAAK,EAHa,OAAO;EAIzB,cAAc,EAAE,IAAI;EACpB,OAAO,EAAE,GAAG",
-"sources": ["modal-table-example.scss"],
-"names": [],
-"file": "modal-table-example.css"
-}

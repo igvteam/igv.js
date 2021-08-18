@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<h1>Try searching for 'kan2 marker'</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const options =
+        {
+            genome: "hg19",
+            flanking: 1000,
+            tracks: [
+                {
+                    name: "Annotations",
+                    type: "annotation",
+                    format: "bed",
+                    delimiter: "\t",
+                    url: "../test/data/bed/names_with_spaces.bed",
+                    indexed: false,
+                    searchable: true,
+                }
+            ]
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (browser) {
+
+        })
+
+
+</script>
+
+</body>
+
+</html>

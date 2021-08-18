@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <title>issue 1300</title>
+
+        </head>
+
+<body>
+
+<h1>VCF variants and CRAM alignments</h1>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg19"
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+    igvDiv.style.width = "800px";
+    igvDiv.style.height = "620px";
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+
+            const tracks = [];
+
+            browser.loadTrack({
+                name: "Phase 3 WGS variants",
+                type: "variant",
+                format: "vcf",
+                url: "../../test/data/vcf/S4.vcf.gz",
+                indexURL: "../../test/data/vcf/S4.vcf.gz.tbi"
+            })
+                .then(newTrack => {
+                    tracks.push(newTrack);
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+
+
+            browser.search("chr12:56088040-56088080");
+        })
+
+</script>
+
+</body>
+
+</html>
