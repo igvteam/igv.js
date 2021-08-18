@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IGV</title>
+
+</head>
+
+<body>
+
+<h1>MUT file example</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+    import igv from "../../js/index.js";
+
+    const options =
+        {
+            showSampleNames: true,
+            sampleNameViewportWidth: 200,
+            genome: 'ASM985889v3',
+            tracks: [
+                {
+                    format: 'mut',
+                    type: 'mut',
+                    url: 'https://s3.amazonaws.com/igv.org.demo/issue1265.mut.txt',
+                    height: 700,
+                    displayMode: "EXPANDED",
+                }
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
