@@ -24,7 +24,7 @@
  */
 
 import {isSimpleType} from "./util/igvUtils.js";
-import {FileUtils, StringUtils, FeatureUtils} from "../node_modules/igv-utils/src/index.js";
+import {FileUtils, StringUtils, FeatureUtils, GoogleUtils} from "../node_modules/igv-utils/src/index.js";
 
 
 /**
@@ -60,10 +60,12 @@ class TrackBase {
 
         if (config.name || config.label) {
             this.name = config.name || config.label;
-        } else {
-            if (FileUtils.isFilePath(config.url)) this.name = config.url.name;
-            else this.name = config.url;
+        } else if (config.url instanceof File) {
+            this.name = config.url.name;
+        } else if (StringUtils.isString(config.url) && config.url.indexOf("://") > 0) {
+            this.name = FileUtils.getFilename(config.url);
         }
+
         this.id = this.config.id === undefined ? this.name : this.config.id;
 
         this.order = config.order;
