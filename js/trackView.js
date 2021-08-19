@@ -49,6 +49,22 @@ class TrackView {
 
     }
 
+    /**
+     * Start a spinner for the track on any of its viewports.  In practice this is called during initialization
+     * when there is only one.
+     */
+    startSpinner() {
+        if(this.viewports && this.viewports.length > 0) {
+            this.viewports[0].startSpinner();
+        }
+    }
+
+    stopSpinner() {
+        if(this.viewports && this.viewports.length > 0) {
+            this.viewports[0].stopSpinner();
+        }
+    }
+
     addDOMToColumnContainer(browser, columnContainer, referenceFrameList) {
 
         this.axis = this.createAxis(browser, browser.axisColumn)
