@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {TrackUtils} from "../../node_modules/igv-utils/src/index.js";
+import * as TrackUtils from '../util/trackUtils.js';
 import {decodeBedpe, decodeBedpeDomain, fixBedPE} from './decode/bedpe.js';
 import {decodeInteract} from "./decode/interact.js";
 import {
