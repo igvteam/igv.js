@@ -33,9 +33,9 @@ import {
     GoogleUtils,
     igvxhr,
     StringUtils,
-    TrackUtils,
     URIUtils
 } from "../node_modules/igv-utils/src/index.js";
+import * as TrackUtils from './util/trackUtils.js';
 import TrackView, {igv_axis_column_width, createAxisColumn, maxViewportContentHeight} from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
@@ -47,7 +47,7 @@ import RulerTrack from "./rulerTrack.js";
 import GenomeUtils from "./genome/genome.js";
 import loadPlinkFile from "./sampleInformation.js";
 import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js";
-import {buildOptions, doAutoscale, getFilename, inferTrackType, validateLocusExtent} from "./util/igvUtils.js";
+import {buildOptions, doAutoscale, getFilename} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import {defaultSequenceTrackOrder} from './sequenceTrack.js';
@@ -861,7 +861,7 @@ class Browser {
         if (type && "bedtype" !== type) {
             type = type.toLowerCase();
         } else {
-            type = inferTrackType(config);
+            type = TrackUtils.inferTrackType(config);
             if ("bedtype" === type) {
                 // Bed files must be read to determine track type
                 const featureSource = FeatureSource(config, this.genome);
@@ -872,9 +872,10 @@ class Browser {
                 } else {
                     type = "annotation";
                 }
-                // Record in config to make type persistent in session
-                config.type = type;
             }
+            // Record in config to make type persistent in session
+            config.type = type;
+
         }
 
         // Set defaults if specified
@@ -1396,7 +1397,7 @@ class Browser {
      */
     async doSearch(string, init) {
         const success = await this.search(string, init);
-        if(!success) {
+        if (!success) {
             Alert.presentAlert(new Error(`Unrecognized locus: <b> ${string} </b>`))
         }
         return success;

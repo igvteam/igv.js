@@ -27,8 +27,9 @@
 import {loadIndex} from "./indexFactory.js";
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
-import {igvxhr, TrackUtils, BGZip} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, BGZip} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
+import * as TrackUtils from '../util/trackUtils.js';
 
 /**
  * Class for reading a bam file
