@@ -25,7 +25,7 @@
  */
 
 import TrackBase from "../trackBase.js";
-import {inferTrackType} from "../util/igvUtils.js";
+import {inferTrackType} from "../util/trackUtils.js";
 
 class MergedTrack extends TrackBase {
     constructor(config, browser) {
