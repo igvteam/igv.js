@@ -789,10 +789,6 @@ class Browser {
                 newTrack.order = this.trackViews.length;
             }
 
-            if (typeof newTrack.postInit === 'function') {
-                await newTrack.postInit();
-            }
-
             if (config.sync) {
                 await this.addTrack(newTrack);
             } else {
@@ -894,7 +890,7 @@ class Browser {
                 track.roi.push(new ROI(r, this.genome));
             }
         }
-        
+
         return track
 
     }
@@ -922,6 +918,15 @@ class Browser {
 
         this.reorderTracks();
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+
+        if (typeof track.postInit === 'function') {
+            try {
+                trackView.startSpinner();
+                await track.postInit();
+            } finally {
+                trackView.stopSpinner();
+            }
+        }
 
         if (!track.autoscaleGroup) {
             // Group autoscale groups will get updated later (as a group)
