@@ -12,67 +12,65 @@ import GCNVTrack from "./gcnv/gcnvTrack.js";
 import RnaStructTrack from "./rna/rnaStruct.js";
 import IdeogramTrack from "./ideogramTrack.js";
 
-const tracks = {
-    'ideogram': (config, browser) => {
-        return new IdeogramTrack(config, browser);
-    },
-    'sequence': (config, browser) => {
-        return new SequenceTrack(config, browser);
-    },
-    'feature': (config, browser) => {
-        return new FeatureTrack(config, browser);
-    },
-    'seg': (config, browser) => {
-        return new SegTrack(config, browser);
-    },
-    'mut': (config, browser) => {
-        return new SegTrack(config, browser);
-    },
-    'maf': (config, browser) => {
-        return new SegTrack(config, browser);
-    },
-    'wig': (config, browser) => {
-        return new WigTrack(config, browser);
-    },
-    'merged': (config, browser) => {
-        return new MergedTrack(config, browser);
-    },
-    'alignment': (config, browser) => {
-        return new BAMTrack(config, browser);
-    },
-    'interaction': (config, browser) => {
-        return new InteractionTrack(config, browser);
-    },
-    'interact': (config, browser) => {
-        return new InteractionTrack(config, browser);
-    },
-    'variant': (config, browser) => {
-        return new VariantTrack(config, browser);
-    },
-    'eqtl': (config, browser) => {
-        return new EqtlTrack(config, browser);
-    },
-    'gwas': (config, browser) => {
-        return new GWASTrack(config, browser);
-    },
-    'arc': (config, browser) => {
-        return new RnaStructTrack(config, browser);
-    },
-    'gcnv': (config, browser) => {
-        return new GCNVTrack(config, browser);
+const trackFunctions =
+    new Map([
+        ['ideogram', (config, browser) => new IdeogramTrack(config, browser)],
+        ['sequence', (config, browser) => new SequenceTrack(config, browser)],
+        ['feature', (config, browser) => new FeatureTrack(config, browser)],
+        ['seg', (config, browser) => new SegTrack(config, browser)],
+        ['mut', (config, browser) => new SegTrack(config, browser)],
+        ['maf', (config, browser) => new SegTrack(config, browser)],
+        ['wig', (config, browser) => new WigTrack(config, browser)],
+        ['merged', (config, browser) => new MergedTrack(config, browser)],
+        ['alignment', (config, browser) => new BAMTrack(config, browser)],
+        ['interaction', (config, browser) => new InteractionTrack(config, browser)],
+        ['interact', (config, browser) => new InteractionTrack(config, browser)],
+        ['variant', (config, browser) => new VariantTrack(config, browser)],
+        ['eqtl', (config, browser) => new EqtlTrack(config, browser)],
+        ['gwas', (config, browser) => new GWASTrack(config, browser)],
+        ['arc', (config, browser) => new RnaStructTrack(config, browser)],
+        ['gcnv', (config, browser) => new GCNVTrack(config, browser)]
+    ]);
+
+
+/**
+ * Add a track constructor  the the factory lookup table.
+ *
+ * @param type
+ * @param track
+ */
+const addTrackCreatorFunction = function (type, track) {
+    trackFunctions.set(type, track);
+}
+
+const getTrack = function (type, config, browser) {
+
+    let trackKey;
+    switch (type) {
+        case "annotation":
+        case "genes":
+        case "fusionjuncspan":
+        case "junctions":
+        case "splicejunctions":
+        case "snp":
+            trackKey = "feature";
+            break;
+        case 'seg':
+        case 'maf':
+        case 'mut':
+            trackKey = 'seg';
+            break;
+        default:
+            trackKey = type;
     }
-}
 
-const addTrack = function (name, track) {
-    this.tracks[name] = track;
-}
-
-const getTrack = function (name) {
-    return this.tracks[name];
+    return trackFunctions.has(trackKey) ?
+        trackFunctions.get(trackKey)(config, browser):
+        undefined;
 }
 
 export default {
-    tracks,
-    addTrack,
+    tracks: trackFunctions,
+    addTrack: addTrackCreatorFunction,
     getTrack
 }

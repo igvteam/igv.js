@@ -848,7 +848,6 @@ class Browser {
                     filename = await getFilename(url);
                 }
                 config.format = TrackUtils.inferFileFormat(filename);
-
                 if (!config.format && (config.sourceType === undefined || config.sourceType === "htsget")) {
                     // Check for htsget URL.  This is a longshot
                     await HtsgetReader.inferFormat(config);
@@ -857,10 +856,9 @@ class Browser {
         }
 
 
-        let type = config.type;
-        if (type && "bedtype" !== type) {
-            type = type.toLowerCase();
-        } else {
+        let type = config.type ? config.type.toLowerCase() : undefined;
+
+        if (!type) {
             type = TrackUtils.inferTrackType(config);
             if ("bedtype" === type) {
                 // Bed files must be read to determine track type
@@ -875,7 +873,6 @@ class Browser {
             }
             // Record in config to make type persistent in session
             config.type = type;
-
         }
 
         // Set defaults if specified
@@ -890,31 +887,14 @@ class Browser {
             }
         }
 
-        let track
-        switch (type) {
-            case "annotation":
-            case "genes":
-            case "fusionjuncspan":
-            case "junctions":
-            case "splicejunctions":
-            case "snp":
-                track = TrackFactory.getTrack("feature")(config, this);
-                break;
-            default:
-                if (TrackFactory.tracks.hasOwnProperty(type)) {
-                    track = TrackFactory.getTrack(type)(config, this);
-                } else {
-                    track = undefined;
-                }
-        }
-
-        if (config.roi && track) {
+        const track = TrackFactory.getTrack(type, config, this);
+        if (track && config.roi) {
             track.roi = [];
             for (let r of config.roi) {
                 track.roi.push(new ROI(r, this.genome));
             }
         }
-
+        
         return track
 
     }
@@ -935,8 +915,7 @@ class Browser {
      */
     async addTrack(track) {
 
-        var trackView;
-        trackView = new TrackView(this, this.columnContainer, track);
+        const trackView = new TrackView(this, this.columnContainer, track);
         this.trackViews.push(trackView);
 
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
