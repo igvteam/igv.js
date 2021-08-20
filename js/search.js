@@ -13,7 +13,20 @@ const DEFAULT_SEARCH_CONFIG = {
     snpField: "snp"
 }
 
-
+/**
+ * Return an object representing the locus of the given string.  Object is of the form
+ * {
+ *   chr,
+ *   start,
+ *   end,
+ *   locusSearchString,
+ *   gene,
+ *   snp
+ * }
+ * @param browser
+ * @param string
+ * @returns {Promise<*>}
+ */
 async function search(browser, string) {
 
     if (undefined === string || '' === string.trim()) {
@@ -33,7 +46,15 @@ async function search(browser, string) {
         let locusObject = parseLocusString(browser, locus)
 
         if (!locusObject) {
-            locusObject = browser.genome.featureDB[locus.toUpperCase()]
+            const feature = browser.genome.featureDB[locus.toUpperCase()];
+            if(feature) {
+                locusObject = {
+                    chr: feature.chr,
+                    start: feature.start,
+                    end: feature.end,
+                    locusSearchString: string
+                }
+            }
         }
 
         if (!locusObject && (browser.config && false !== browser.config.search)) {
