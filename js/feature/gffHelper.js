@@ -220,7 +220,7 @@ class GFFHelper {
                     consumedFeatures.add(f);
                     const g = geneMap[f.parent];
                     if (g) {
-                        gffTranscript.gene = geneMap[f.parent];
+                        gffTranscript.geneObject = geneMap[f.parent];
                         consumedFeatures.add(g);
                     }
                 }
@@ -415,8 +415,8 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
     const pd = []
 
     // If feature has an associated gene list its attributes first
-    if (this.gene && typeof this.gene.popupData === 'function') {
-        const gd = this.gene.popupData(genomicLocation);
+    if (this.geneObject && typeof this.geneObject.popupData === 'function') {
+        const gd = this.geneObject.popupData(genomicLocation);
         for (let e of gd) {
             pd.push(e);
         }
