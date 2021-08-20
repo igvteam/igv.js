@@ -454,7 +454,12 @@ function getColorForFeature(feature) {
     } else if (this.config.colorBy) {
         const colorByValue = feature[this.config.colorBy.field];
         if (colorByValue) {
-            color = this.config.colorBy.pallete[colorByValue];  // This is an undocumented option, and its not clear if its used
+            const palette =
+                this.config.colorBy.pallete ||    // for backward compatibility
+                this.config.colorBy.palette;
+            if (palette) {
+                color = palette[colorByValue];
+            }
         }
     } else if (feature.color) {
         color = feature.color;   // Explicit color for feature
@@ -627,7 +632,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
 
 
     let pixelXOffset = options.pixelXOffset || 0;
-    const t1 = Math.max(featureX, - pixelXOffset);
+    const t1 = Math.max(featureX, -pixelXOffset);
     const t2 = Math.min(featureX1, -pixelXOffset + options.viewportWidth);
     const centerX = (t1 + t2) / 2;
 

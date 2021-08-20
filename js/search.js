@@ -52,6 +52,7 @@ async function search(browser, string) {
                     chr: feature.chr,
                     start: feature.start,
                     end: feature.end,
+                    gene: feature.name,
                     locusSearchString: string
                 }
             }
