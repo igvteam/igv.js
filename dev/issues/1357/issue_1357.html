@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <title>issue 1357</title>
+
+        </head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    //import igv from "https://cdn.jsdelivr.net/npm/igv@2.9.4/dist/igv.esm.js";
+    import igv from "../../../js/index.js";
+
+    const options =
+        {
+            reference: {
+                id: "1357",
+                fastaURL: "https://www.dropbox.com/s/tbox1txf2j0paq8/mygenome.fasta?dl=0",
+                indexed: false,
+                tracks: [
+                    {
+                        name: "GFF",
+                        //format: "gff3",
+                        url: "mygenome.gff3",
+                        //url: "https://www.dropbox.com/s/0yxyew9r1ibefkc/mygenome.gff3?dl=0",
+                        searchable: true
+                    }
+                ]
+            }
+        };
+
+    const igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+
+
+
+        })
+
+</script>
+
+</body>
+
+</html>
