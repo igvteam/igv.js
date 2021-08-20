@@ -343,7 +343,7 @@ class TrackView {
             viewport.repaint();
         }
 
-        if (this.track.paintAxis) {
+        if (typeof this.track.paintAxis === 'function') {
             this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
         }
 
@@ -438,6 +438,11 @@ class TrackView {
         }
 
         this.adjustTrackHeight();
+
+        if (typeof this.track.paintAxis === 'function') {
+            this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
+        }
+
 
         // Repaint sample names last
         this.repaintSamples();
