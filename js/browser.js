@@ -760,7 +760,19 @@ class Browser {
     }
 
     /**
-     * Return a promise to load a track
+     * Return a promise to load a track.
+     *
+     * Each track is associated with the following DOM elements
+     *
+     *      leftHandGutter  - div on the left for track controls and legend
+     *      contentDiv  - a div element wrapping all the track content.  Height can be > viewportDiv height
+     *      viewportDiv - a div element through which the track is viewed.  This might have a vertical scrollbar
+     *      canvas     - canvas element upon which the track is drawn.  Child of contentDiv
+     *
+     * The width of all elements should be equal.  Height of the viewportDiv is controlled by the user, but never
+     * greater than the contentDiv height.   Height of contentDiv and canvas are equal, and governed by the data
+     * loaded.
+     *
      *
      * @param config
      * @param doResize - undefined by default
@@ -789,10 +801,28 @@ class Browser {
                 newTrack.order = this.trackViews.length;
             }
 
-            if (config.sync) {
-                await this.addTrack(newTrack);
-            } else {
-                this.addTrack(newTrack);
+            const trackView = new TrackView(this, this.columnContainer, newTrack);
+            this.trackViews.push(trackView);
+            toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
+            this.reorderTracks();
+            this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+
+            if (typeof newTrack.postInit === 'function') {
+                try {
+                    trackView.startSpinner();
+                    await newTrack.postInit();
+                } finally {
+                    trackView.stopSpinner();
+                }
+            }
+
+            if (!newTrack.autoscaleGroup) {
+                // Group autoscale will get updated later (as a group)
+                if(config.sync) {
+                    await trackView.updateViews();
+                } else {
+                    trackView.updateViews();
+                }
             }
 
             if (typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
@@ -827,6 +857,11 @@ class Browser {
         }
     }
 
+    /**
+     * Create a Track object.
+     * @param config
+     * @returns {Promise<*>}
+     */
     async createTrack(config) {
 
         // Resolve function and promise urls
@@ -895,44 +930,6 @@ class Browser {
 
     }
 
-    /**
-     * Add a new track.  Each track is associated with the following DOM elements
-     *
-     *      leftHandGutter  - div on the left for track controls and legend
-     *      contentDiv  - a div element wrapping all the track content.  Height can be > viewportDiv height
-     *      viewportDiv - a div element through which the track is viewed.  This might have a vertical scrollbar
-     *      canvas     - canvas element upon which the track is drawn.  Child of contentDiv
-     *
-     * The width of all elements should be equal.  Height of the viewportDiv is controlled by the user, but never
-     * greater than the contentDiv height.   Height of contentDiv and canvas are equal, and governed by the data
-     * loaded.
-     *
-     * @param track
-     */
-    async addTrack(track) {
-
-        const trackView = new TrackView(this, this.columnContainer, track);
-        this.trackViews.push(trackView);
-
-        toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
-
-        this.reorderTracks();
-        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
-
-        if (typeof track.postInit === 'function') {
-            try {
-                trackView.startSpinner();
-                await track.postInit();
-            } finally {
-                trackView.stopSpinner();
-            }
-        }
-
-        if (!track.autoscaleGroup) {
-            // Group autoscale groups will get updated later (as a group)
-            return trackView.updateViews();
-        }
-    }
 
     reorderTracks() {
 

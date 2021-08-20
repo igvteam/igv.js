@@ -135,7 +135,7 @@ class VariantTrack extends TrackBase {
     }
 
     getCallsetsLength() {
-        return this.callSets.length;
+        return this.callSets ? this.callSets.length : 0;
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
