@@ -37,7 +37,7 @@ class TrackView {
 
     constructor(browser, columnContainer, track) {
 
-        this.namespace = `trackview-${ DOMUtils.guid() }`
+        this.namespace = `trackview-${DOMUtils.guid()}`
 
         this.browser = browser;
         this.track = track;
@@ -54,20 +54,20 @@ class TrackView {
      * when there is only one.
      */
     startSpinner() {
-        if(this.viewports && this.viewports.length > 0) {
+        if (this.viewports && this.viewports.length > 0) {
             this.viewports[0].startSpinner();
         }
     }
 
     stopSpinner() {
-        if(this.viewports && this.viewports.length > 0) {
+        if (this.viewports && this.viewports.length > 0) {
             this.viewports[0].stopSpinner();
         }
     }
 
     addDOMToColumnContainer(browser, columnContainer, referenceFrameList) {
 
-        this.axis = this.createAxis(browser, browser.axisColumn)
+        this.createAxis(browser, browser.axisColumn)
 
         this.viewports = []
         const viewportWidth = browser.calculateViewportWidth(referenceFrameList.length)
@@ -95,57 +95,47 @@ class TrackView {
 
     createAxis(browser, axisColumn) {
 
-        const axis = DOMUtils.div()
-        axisColumn.appendChild(axis)
+        this.axis = DOMUtils.div();
+        axisColumn.appendChild(this.axis);
 
-        axis.style.height = `${ this.track.height }px`
+        this.axis.style.height = `${this.track.height}px`;
         // axis.style.backgroundColor = randomRGB(150, 250)
 
         if (typeof this.track.paintAxis === 'function') {
-
             if (this.track.dataRange) {
-
-                axis.addEventListener('click', () => {
-                    browser.dataRangeDialog.configure(this)
-                    browser.dataRangeDialog.present($(browser.columnContainer))
+                this.axis.addEventListener('click', () => {
+                    browser.dataRangeDialog.configure(this);
+                    browser.dataRangeDialog.present($(browser.columnContainer));
                 })
+            }
 
-             }
 
-            this.resizeAxisCanvas(axis, axis.clientWidth, axis.clientHeight)
+            const {width, height} = this.axis.getBoundingClientRect();
+            this.axisCanvas = document.createElement('canvas');
+            this.axisCanvas.style.width = `${width}px`;
+            this.axisCanvas.style.height = `${height}px`;
+            this.axis.appendChild(this.axisCanvas);
         }
 
-        return axis
     }
 
-    resizeAxisCanvas(axis, width, height) {
+    resizeAxisCanvas(width, height) {
 
-        if (this.axisCanvas) {
-            this.axisCanvas.remove()
-        }
+        // Size the canvas containing div.  Do we really need this?
+        this.axis.style.width = `${width}px`;
+        this.axis.style.height = `${height}px`;
 
-        axis.style.width = `${ width }px`
-        axis.style.height = `${ height }px`
-
-        this.axisCanvas = document.createElement('canvas')
-        axis.appendChild(this.axisCanvas);
-
-        this.axisCanvasContext = this.axisCanvas.getContext('2d');
-
-        this.axisCanvas.style.height = `${ height }px`
-        this.axisCanvas.style.width = `${ width }px`
-
-        this.axisCanvas.height = window.devicePixelRatio * height
-        this.axisCanvas.width = window.devicePixelRatio * width
-
-        this.axisCanvasContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+        // Size the canvas in CSS (logical) pixels.  The buffer size will be set when painted.
+        // TODO -- if
+        this.axisCanvas.style.width = `${width}px`;
+        this.axisCanvas.style.height = `${height}px`;
     }
 
     removeDOMFromColumnContainer() {
 
         this.axis.remove()
 
-        for (let { $viewport } of this.viewports) {
+        for (let {$viewport} of this.viewports) {
             $viewport.remove()
         }
 
@@ -153,13 +143,13 @@ class TrackView {
 
     }
 
-    renderSVGContext(context, { deltaX, deltaY }) {
+    renderSVGContext(context, {deltaX, deltaY}) {
 
         renderSVGAxis(context, this.track, this.axisCanvas, deltaX, deltaY)
 
-        const { width:axisWidth } = this.axis.getBoundingClientRect()
+        const {width: axisWidth} = this.axis.getBoundingClientRect()
 
-        const { y } = this.viewports[ 0 ].$viewport.get(0).getBoundingClientRect()
+        const {y} = this.viewports[0].$viewport.get(0).getBoundingClientRect()
 
         let delta =
             {
@@ -169,7 +159,7 @@ class TrackView {
 
         for (let viewport of this.viewports) {
             viewport.renderSVGContext(context, delta)
-            const { width } = viewport.$viewport.get(0).getBoundingClientRect()
+            const {width} = viewport.$viewport.get(0).getBoundingClientRect()
             delta.deltaX += width
         }
 
@@ -239,7 +229,7 @@ class TrackView {
             this.browser.genericColorPicker.show()
         }
 
-     }
+    }
 
     setTrackHeight(newHeight, force) {
 
@@ -257,11 +247,11 @@ class TrackView {
         this.track.config.height = newHeight;
 
         if (typeof this.track.paintAxis === 'function') {
-            this.resizeAxisCanvas(this.axis, this.axis.clientWidth, this.track.height);
-            this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
+            this.resizeAxisCanvas(this.axis.clientWidth, this.track.height);
+            this.paintAxis();
         }
 
-        for (let { $viewport } of [...this.viewports, this.sampleNameViewport]) {
+        for (let {$viewport} of [...this.viewports, this.sampleNameViewport]) {
             $viewport.height(newHeight)
         }
 
@@ -279,22 +269,22 @@ class TrackView {
             this.updateScrollbar()
         }
 
-        this.dragHandle.style.height = `${ newHeight }px`
-        this.gearContainer.style.height = `${ newHeight }px`
+        this.dragHandle.style.height = `${newHeight}px`
+        this.gearContainer.style.height = `${newHeight}px`
 
     }
 
     updateScrollbar() {
 
-        const viewportHeight = this.viewports[ 0 ].$viewport.height();
-        this.outerScroll.style.height = `${ viewportHeight }px`;
+        const viewportHeight = this.viewports[0].$viewport.height();
+        this.outerScroll.style.height = `${viewportHeight}px`;
 
         const viewportContentHeight = maxViewportContentHeight(this.viewports);
         const innerScrollHeight = Math.round((viewportHeight / viewportContentHeight) * viewportHeight);
 
         if (viewportContentHeight > viewportHeight) {
             this.innerScroll.style.display = 'block'
-            this.innerScroll.style.height = `${ innerScrollHeight }px`
+            this.innerScroll.style.height = `${innerScrollHeight}px`
         } else {
             this.innerScroll.style.display = 'none'
         }
@@ -304,10 +294,10 @@ class TrackView {
 
         const y = $(this.innerScroll).position().top + delta
         const top = Math.min(Math.max(0, y), this.outerScroll.clientHeight - this.innerScroll.clientHeight)
-        $(this.innerScroll).css('top', `${ top }px`);
+        $(this.innerScroll).css('top', `${top}px`);
 
         const contentHeight = maxViewportContentHeight(this.viewports)
-        const contentTop = -Math.round(top * (contentHeight / this.viewports[ 0 ].$viewport.height()))
+        const contentTop = -Math.round(top * (contentHeight / this.viewports[0].$viewport.height()))
 
         for (let viewport of this.viewports) {
             viewport.setTop(contentTop)
@@ -344,7 +334,7 @@ class TrackView {
         }
 
         if (typeof this.track.paintAxis === 'function') {
-            this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
+            this.paintAxis();
         }
 
         // Repaint sample names last
@@ -354,7 +344,7 @@ class TrackView {
 
     repaintSamples() {
 
-        if(typeof this.track.getSamples === 'function') {
+        if (typeof this.track.getSamples === 'function') {
             const samples = this.track.getSamples()
             this.sampleNameViewport.repaint(samples)
         }
@@ -385,15 +375,15 @@ class TrackView {
         // Very special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
         // section depends on data from all the views.  We only need to adjust this however if any data was loaded
         // (i.e. rpV.length > 0)
-        if(typeof this.track.variantRowCount === 'function') {
+        if (typeof this.track.variantRowCount === 'function') {
             let maxRow = 0;
-            for(let vp of this.viewports) {
+            for (let vp of this.viewports) {
                 if (vp.tile && vp.tile.features) {
                     maxRow = Math.max(maxRow, vp.tile.features.reduce((a, f) => Math.max(a, f.row || 0), 0));
                 }
             }
             const current = this.track.nVariantRows;
-            if(current !== maxRow + 1) {
+            if (current !== maxRow + 1) {
                 this.track.variantRowCount(maxRow + 1);
                 for (let vp of this.viewports) {
                     vp.checkContentHeight();
@@ -437,12 +427,7 @@ class TrackView {
             }
         }
 
-        this.adjustTrackHeight();
-
-        if (typeof this.track.paintAxis === 'function') {
-            this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
-        }
-
+        this.adjustTrackHeight();   // <= this will also repaint y-axis
 
         // Repaint sample names last
         this.repaintSamples();
@@ -516,7 +501,7 @@ class TrackView {
         if (this.track.autoHeight) {
             this.setTrackHeight(maxHeight, false);
         } else if (this.track.paintAxis) {   // Avoid duplication, paintAxis is already called in setTrackHeight
-            this.track.paintAxis(this.axisCanvasContext, this.axisCanvas.width, this.axisCanvas.height);
+            this.paintAxis();
         }
 
         if (false === scrollbarExclusionTypes.has(this.track.type)) {
@@ -525,10 +510,10 @@ class TrackView {
 
             const heights = this.viewports.map(viewport => viewport.getContentHeight());
             const minContentHeight = Math.min(...heights);
-            const newTop = Math.min(0, this.viewports[ 0 ].$viewport.height() - minContentHeight);
+            const newTop = Math.min(0, this.viewports[0].$viewport.height() - minContentHeight);
             if (currentTop < newTop) {
                 for (let viewport of this.viewports) {
-                    viewport.$content.css('top', `${ newTop }px`)
+                    viewport.$content.css('top', `${newTop}px`)
                 }
             }
             this.updateScrollbar();
@@ -605,7 +590,7 @@ class TrackView {
             this[key] = undefined;
         }
 
-        if(this.alert) {
+        if (this.alert) {
             this.alert.container.remove();    // This is quite obviously a hack, need a "dispose" method on AlertDialog
         }
 
@@ -619,7 +604,25 @@ class TrackView {
         } else {
             browser.trackGearControl.addGearMenu(browser, this)
         }
+    }
 
+    paintAxis() {
+
+        if (typeof this.track.paintAxis === 'function') {
+
+            // Set the canvas buffer size, this is the resolution it is drawn at.  This is done here in case the browser
+            // has been drug between screens at different dpi resolutions since the last repaint
+            const {width, height} = this.axisCanvas.getBoundingClientRect();
+            const dpi = window.devicePixelRatio || 1;
+            this.axisCanvas.height = dpi * height
+            this.axisCanvas.width = dpi * width
+
+            // Get a scaled context to draw aon
+            const axisCanvasContext = this.axisCanvas.getContext('2d');
+            axisCanvasContext.scale(dpi, dpi)
+
+            this.track.paintAxis(axisCanvasContext, width, height);
+        }
     }
 }
 
@@ -627,10 +630,10 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
     if (typeof track.paintAxis === 'function') {
 
-        const { y, width, height } = axisCanvas.getBoundingClientRect()
+        const {y, width, height} = axisCanvas.getBoundingClientRect();
 
         const str = (track.name || track.id).replace(/\W/g, '');
-        const id = `${ str }_axis_guid_${ DOMUtils.guid() }`
+        const id = `${str}_axis_guid_${DOMUtils.guid()}`
 
         context.saveWithTranslationAndClipRect(id, deltaX, y + deltaY, width, height, 0);
 
@@ -645,7 +648,7 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 const igv_axis_column_width = 50;
 
 function createAxisColumn(columnContainer) {
-    const column = DOMUtils.div({ class: 'igv-axis-column' })
+    const column = DOMUtils.div({class: 'igv-axis-column'})
     columnContainer.appendChild(column)
     return column
 }
