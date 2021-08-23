@@ -508,7 +508,7 @@ class Browser {
 
         await this.loadTrackList(trackConfigurations);
 
-        this.updateUIWithReferenceFrameList(this.referenceFrameList)
+        this.updateUIWithReferenceFrameList()
 
     }
 
@@ -643,9 +643,11 @@ class Browser {
     }
 
 //
-    updateUIWithReferenceFrameList(referenceFrameList) {
+    updateUIWithReferenceFrameList() {
 
-        this.updateLocusSearchWidget(referenceFrameList)
+        const referenceFrameList = this.referenceFrameList;
+
+        this.updateLocusSearchWidget()
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr));
 
@@ -718,7 +720,7 @@ class Browser {
                 return trackView.track.autoscaleGroup
             })
             if (groupAutoscaleViews.length > 0) {
-                this.updateViews(this.referenceFrameList[0], groupAutoscaleViews);
+                this.updateViews(groupAutoscaleViews);
             }
             return loadedTracks;
         } finally {
@@ -737,7 +739,7 @@ class Browser {
         } else {
             this.roi.push(new ROI(config, this.genome));
         }
-        await this.updateViews(undefined, undefined, true);
+        await this.updateViews(true);
     }
 
     removeROI(roiToRemove) {
@@ -818,7 +820,7 @@ class Browser {
 
             if (!newTrack.autoscaleGroup) {
                 // Group autoscale will get updated later (as a group)
-                if(config.sync) {
+                if (config.sync) {
                     await trackView.updateViews();
                 } else {
                     trackView.updateViews();
@@ -1105,24 +1107,16 @@ class Browser {
 
         }
 
-        await this.updateViews(undefined, undefined, true);
+        await this.updateViews(true);
 
-        this.updateUIWithReferenceFrameList(this.referenceFrameList);
+        this.updateUIWithReferenceFrameList();
     }
 
-    async updateViews(referenceFrame, trackViews, force) {
+    async updateViews(force) {
 
-        if (!trackViews) {
-            trackViews = this.trackViews;
-        }
+        const trackViews = this.trackViews;
 
-        if (undefined === referenceFrame && this.referenceFrameList && 1 === this.referenceFrameList.length) {
-            referenceFrame = this.referenceFrameList[0];
-        }
-
-        if (referenceFrame) {
-            this.updateLocusSearchWidget(this.referenceFrameList.length > 1 ? this.referenceFrameList : [referenceFrame])
-        }
+        this.updateLocusSearchWidget()
 
         for (let centerGuide of this.centerLineList) {
             centerGuide.repaint()
@@ -1195,7 +1189,9 @@ class Browser {
         return false;
     };
 
-    updateLocusSearchWidget(referenceFrameList) {
+    updateLocusSearchWidget() {
+
+        const referenceFrameList = this.referenceFrameList;
 
         if (referenceFrameList.length > 1) {
             this.$searchInput.val('')
@@ -1354,9 +1350,9 @@ class Browser {
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
-        this.updateUIWithReferenceFrameList(this.referenceFrameList);
+        this.updateUIWithReferenceFrameList();
 
-        await this.updateViews(undefined, undefined, true);
+        await this.updateViews(true);
 
     }
 
@@ -1424,7 +1420,7 @@ class Browser {
                 trackView.addDOMToColumnContainer(this, this.columnContainer, this.referenceFrameList);
             }
 
-            this.updateUIWithReferenceFrameList(this.referenceFrameList);
+            this.updateUIWithReferenceFrameList();
 
             if (!init) {
                 await this.updateViews();
