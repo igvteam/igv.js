@@ -24,7 +24,7 @@
  */
 
 import {DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
-import {validateLocusExtent,prettyBasePairNumber} from "./util/igvUtils.js";
+import {validateLocusExtent, prettyBasePairNumber} from "./util/igvUtils.js";
 import GtexSelection from "./gtex/gtexSelection.js";
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
@@ -81,7 +81,7 @@ class ReferenceFrame {
         this.clampStart(viewportWidth);
 
         this.end += deltaBP;
-        const { bpLength } = this.genome.getChromosome(this.chr);
+        const {bpLength} = this.genome.getChromosome(this.chr);
         this.end = Math.min(bpLength, this.end)
 
         return currentStart !== this.start;
@@ -95,7 +95,7 @@ class ReferenceFrame {
         // clamp right
         if (viewportWidth) {
 
-            const { bpLength } = this.genome.getChromosome(this.chr);
+            const {bpLength} = this.genome.getChromosome(this.chr);
             const maxStart = bpLength - (viewportWidth * this.bpPerPixel);
 
             if (this.start > maxStart) {
@@ -109,9 +109,9 @@ class ReferenceFrame {
         const centerBP = undefined === centerBPOrUndefined ? (this.start + this.toBP(viewportWidth / 2.0)) : centerBPOrUndefined
 
         // save initial start and bpp
-        const { start, bpPerPixel } = this.start
+        const {start, bpPerPixel} = this.start
 
-        const { bpLength } = this.getChromosome()
+        const {bpLength} = this.getChromosome()
         const bppThreshold = scaleFactor < 1.0 ? browser.minimumBases() / viewportWidth : bpLength / viewportWidth
 
         // update bpp
@@ -143,29 +143,34 @@ class ReferenceFrame {
         const space = '&nbsp &nbsp &nbsp'
         const ss = Math.floor(this.start) + 1
         const ee = Math.round(this.start + this.bpPerPixel * pixels)
-        return `${ this.chr }${ space }${ prettyBasePairNumber(ee-ss) }`
+        return `${this.chr}${space}${prettyBasePairNumber(ee - ss)}`
     }
 
     getPresentationLocusComponents(pixels) {
 
         if ('all' === this.chr) {
-            return { chr: this.chr }
+            return {chr: this.chr}
         } else {
             const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1)
-            const ee = StringUtils.numberFormatter( Math.round(this.start + this.bpPerPixel * pixels) )
+            const ee = StringUtils.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels))
 
-            return { chr: this.chr, start: ss, end: ee }
+            return {chr: this.chr, start: ss, end: ee}
         }
 
     }
 
-    getPresentionLocus(pixels) {
-        const { chr, start, end } = this.getPresentationLocusComponents(pixels)
-        return 'all' === chr ? chr : `${ chr }:${ start }-${ end }`
+    getLocusString() {
+        if ('all' === this.chr) {
+            return 'all';
+        } else {
+            const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1)
+            const ee = StringUtils.numberFormatter(Math.round(this.end))
+            return `${this.chr}:${ss}-${ee}`
+        }
     }
 
     description(blurb) {
-        console.log(` ${ blurb || '' } referenceFrame - ${ this.chr } bpp ${ this.bpPerPixel.toFixed(3) } start ${ StringUtils.numberFormatter(Math.round(this.start)) } end ${ StringUtils.numberFormatter(Math.round(this.end)) } `)
+        console.log(` ${blurb || ''} referenceFrame - ${this.chr} bpp ${this.bpPerPixel.toFixed(3)} start ${StringUtils.numberFormatter(Math.round(this.start))} end ${StringUtils.numberFormatter(Math.round(this.end))} `)
     }
 }
 
@@ -209,7 +214,7 @@ function adjustReferenceFrame(scaleFactor, referenceFrame, viewportWidth, alignm
 
     referenceFrame.start = alignmentCC - (referenceFrame.bpPerPixel * (viewportWidth / 2))
     referenceFrame.end = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
-    referenceFrame.locusSearchString = referenceFrame.getPresentionLocus(viewportWidth)
+    referenceFrame.locusSearchString = referenceFrame.getLocusString()
 }
 
 function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
@@ -220,11 +225,8 @@ function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewport
     const ss = alignmentCC - (bpp * (viewportWidth / 2));
     const ee = ss + (bpp * viewportWidth);
 
-    const referenceFrame = new ReferenceFrame(genome, chromosomeName, ss, ee, bpp)
+    return new ReferenceFrame(genome, chromosomeName, ss, ee, bpp)
 
-    referenceFrame.locusSearchString = referenceFrame.getPresentionLocus(viewportWidth)
-
-    return referenceFrame
 }
 
 export {createReferenceFrameList, adjustReferenceFrame, createReferenceFrameWithAlignment}

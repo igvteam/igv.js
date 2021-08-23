@@ -642,7 +642,11 @@ class Browser {
         return this.genome;
     }
 
-//
+    /**
+     * Called after a session load, search, pan (horizontal drag), or resize
+     *
+     * @param referenceFrameList
+     */
     updateUIWithReferenceFrameList() {
 
         const referenceFrameList = this.referenceFrameList;
@@ -1193,24 +1197,20 @@ class Browser {
 
         const referenceFrameList = this.referenceFrameList;
 
+        // Update end position of reference frames based on pixel widths.  This is hacky, but its been done here
+        // for a long time, although indirectly.
+        const width = this.calculateViewportWidth(this.referenceFrameList.length);
+        for (let referenceFrame of referenceFrameList) {
+            referenceFrame.end = referenceFrame.start + referenceFrame.bpPerPixel * width;
+        }
+
         if (referenceFrameList.length > 1) {
-            this.$searchInput.val('')
-            this.chromosomeSelectWidget.select.value = ''
+            this.$searchInput.val('');
+            this.chromosomeSelectWidget.select.value = '';
+
         } else {
-
-            const width = this.calculateViewportWidth(this.referenceFrameList.length)
-            const locus = referenceFrameList[0].getPresentationLocusComponents(width)
-
-            this.chromosomeSelectWidget.select.value = locus.chr
-
-            if ('all' === locus.chr) {
-                this.$searchInput.val(locus.chr)
-            } else {
-                const {start, end} = locus
-                const label = `${locus.chr}:${start}-${end}`
-                this.$searchInput.val(label)
-
-            }
+            this.chromosomeSelectWidget.select.value = this.referenceFrameList[0].chr;
+            this.$searchInput.val(this.referenceFrameList[0].getLocusString());
 
         }
 
@@ -1457,22 +1457,15 @@ class Browser {
      * @param fn
      */
     un(eventName, fn) {
-        if (!this.eventHandlers[eventName]) {
-            return;
-        }
-
-        var callbackIndex = this.eventHandlers[eventName].indexOf(fn);
-        if (callbackIndex !== -1) {
-            this.eventHandlers[eventName].splice(callbackIndex, 1);
-        }
+        this.off(eventName, fn);
     };
 
     off(eventName, fn) {
 
         if (!eventName) {
-            this.eventHandlers = {}   // Remove all event handlers
+            this.eventHandlers = {};   // Remove all event handlers
         } else if (!fn) {
-            this.eventHandlers[eventName] = []  // Remove all eventhandlers matching name
+            this.eventHandlers[eventName] = []; // Remove all eventhandlers matching name
         } else {
             // Remove specific event handler
             const callbackIndex = this.eventHandlers[eventName].indexOf(fn);
@@ -1533,8 +1526,7 @@ class Browser {
         let anyTrackView = this.trackViews[0];
         for (let viewport of anyTrackView.viewports) {
             const referenceFrame = viewport.referenceFrame;
-            const pixelWidth = viewport.$viewport[0].clientWidth;
-            const locusString = referenceFrame.getPresentionLocus(pixelWidth);
+            const locusString = referenceFrame.getLocusString();
             locus.push(locusString);
             if (referenceFrame.selection) {
                 const selection = {
@@ -1616,8 +1608,7 @@ class Browser {
         const anyTrackView = this.trackViews[0];
         for (let viewport of anyTrackView.viewports) {
             const referenceFrame = viewport.referenceFrame;
-            const pixelWidth = viewport.$viewport[0].clientWidth;
-            const locusString = referenceFrame.getPresentionLocus(pixelWidth);
+            const locusString = referenceFrame.getLocusString();
             loci.push(locusString);
         }
         return loci;
