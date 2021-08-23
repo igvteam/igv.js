@@ -1204,15 +1204,11 @@ class Browser {
             referenceFrame.end = referenceFrame.start + referenceFrame.bpPerPixel * width;
         }
 
-        if (referenceFrameList.length > 1) {
-            this.$searchInput.val('');
-            this.chromosomeSelectWidget.select.value = '';
+        this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : '';
 
-        } else {
-            this.chromosomeSelectWidget.select.value = this.referenceFrameList[0].chr;
-            this.$searchInput.val(this.referenceFrameList[0].getLocusString());
-
-        }
+        const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ');
+        //const loc = this.referenceFrameList.length === 1 ?   this.referenceFrameList[0].getLocusString() : '';
+        this.$searchInput.val(loc);
 
         this.fireEvent('locuschange', [this.referenceFrameList])
     }
