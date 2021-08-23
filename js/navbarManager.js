@@ -37,11 +37,11 @@ class NavbarManager {
 
     updateNavbar(responsiveClassSchedule) {
 
-        this.browser['$toggle_button_container'].removeClass();
-        this.browser['$toggle_button_container'].addClass(responsiveClassSchedule['$toggle_button_container']);
+        this.browser.$toggle_button_container.removeClass();
+        this.browser.$toggle_button_container.addClass(responsiveClassSchedule.$toggle_button_container);
 
         $(this.browser.zoomWidget.zoomContainer).removeClass();
-        $(this.browser.zoomWidget.zoomContainer).addClass(responsiveClassSchedule['zoomContainer']);
+        $(this.browser.zoomWidget.zoomContainer).addClass(responsiveClassSchedule.zoomContainer);
     }
 
     createResponsiveClassSchedule(navbarWidth, isWholeGenomeView) {
@@ -55,17 +55,17 @@ class NavbarManager {
         }
 
         if (navbarWidth > 990) {
-            candidates['$toggle_button_container'] = 'igv-navbar-toggle-button-container';
-            candidates['zoomContainer'] = 'igv-zoom-widget';
+            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container';
+            candidates.zoomContainer = 'igv-zoom-widget';
         } else if (navbarWidth > 860) {
-            candidates['$toggle_button_container'] = 'igv-navbar-toggle-button-container';
-            candidates['zoomContainer'] = 'igv-zoom-widget-900';
+            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container';
+            candidates.zoomContainer = 'igv-zoom-widget-900';
         } else if (navbarWidth > 540) {
-            candidates['$toggle_button_container'] = 'igv-navbar-toggle-button-container-750';
-            candidates['zoomContainer'] = 'igv-zoom-widget-900';
+            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container-750';
+            candidates.zoomContainer = 'igv-zoom-widget-900';
         } else {
-            candidates['$toggle_button_container'] = 'igv-navbar-toggle-button-container-750';
-            candidates['zoomContainer'] = 'igv-zoom-widget-900';
+            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container-750';
+            candidates.zoomContainer = 'igv-zoom-widget-900';
             this.browser.windowSizePanel.hide();
         }
 
