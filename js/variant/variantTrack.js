@@ -510,6 +510,7 @@ class VariantTrack extends TrackBase {
                     stringInfoKeys.push(this._initColorBy);
                 }
                 if (stringInfoKeys.length > 0) {
+                    menuItems.push('<hr/>')
                     const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
                     $e.text('Color by:');
                     menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
@@ -520,6 +521,7 @@ class VariantTrack extends TrackBase {
                         menuItems.push(this.colorByCB({key: item, label: label}, selected));
                     }
                     menuItems.push(this.colorByCB({key: undefined, label: 'None'}, this.colorBy === undefined));
+                    menuItems.push('<hr/>')
                 }
             }
         }
