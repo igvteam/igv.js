@@ -80,8 +80,8 @@
             console.log("Created IGV browser");
 
             browser.on('locuschange', function (referenceFrameList) {
-                const referenceFrame = referenceFrameList[0];
-                window.location.replace(HASH_PREFIX + referenceFrame.getPresentionLocus());
+                let loc = referenceFrameList.map(rf => rf.getLocusString()).join('%20');
+                window.location.replace(HASH_PREFIX + loc);
             });
         });
 
