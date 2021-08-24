@@ -139,6 +139,7 @@ const GenomeUtils = {
 
 
 class Genome {
+
     constructor(config, sequence, ideograms, aliases) {
 
         this.config = config;
@@ -345,6 +346,10 @@ class Genome {
             this.bpLength = bpLength;
         }
         return this.bpLength;
+    }
+
+    async getSequence(chr, start, end) {
+        return this.sequence.getSequence(chr, start, end);
     }
 }
 

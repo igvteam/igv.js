@@ -72,7 +72,7 @@ class BAMTrack extends TrackBase {
         this.showAllBases = config.showAllBases;
 
         this.showMismatches = config.showMismatches !== false;
-        this.color = config.color ;
+        this.color = config.color;
         this.coverageColor = config.coverageColor;
         this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
         this.maxFragmentLength = config.maxFragmentLength;
@@ -226,6 +226,7 @@ class BAMTrack extends TrackBase {
         menuItems = menuItems.concat(MenuUtils.numericDataMenuItems(this.trackView));
 
         // Color by items
+        menuItems.push('<hr/>')
         const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
         $e.text('Color by:');
         menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
@@ -252,6 +253,8 @@ class BAMTrack extends TrackBase {
                 this.trackView.setTrackHeight(h);
             }
         }
+
+        menuItems.push('<hr/>');
 
         menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
         menuItems.push({
@@ -318,8 +321,8 @@ class BAMTrack extends TrackBase {
         }
 
 
-
         // Display mode
+        menuItems.push('<hr/>');
         const $displayModeLabel = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
         $displayModeLabel.text('Display mode:');
         menuItems.push({name: undefined, object: $displayModeLabel, click: undefined, init: undefined});
@@ -343,7 +346,6 @@ class BAMTrack extends TrackBase {
                 this.trackView.repaintViews();
             }
         });
-
         return menuItems;
     }
 
@@ -1065,7 +1067,7 @@ class AlignmentTrack {
         list.push('<hr/>');
 
         const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
-        if(clickedObject) {
+        if (clickedObject) {
 
             const showSoftClips = this.parent.showSoftClips;
             const clickedAlignment = (typeof clickedObject.alignmentContaining === 'function') ?
@@ -1104,6 +1106,18 @@ class AlignmentTrack {
                     }
                 }
             });
+
+            list.push({
+                label: 'Copy read sequence',
+                click: () => {
+                    const alignment = clickedAlignment;
+                    if (!alignment) return;
+
+                    const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
+                    navigator.clipboard.writeText(seqstring);
+                }
+            });
+
             list.push('<hr/>');
         }
 

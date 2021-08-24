@@ -161,18 +161,31 @@ class SequenceTrack {
     contextMenuItemList(clickState) {
         const viewport = clickState.viewport;
         if (viewport.referenceFrame.bpPerPixel <= 1) {
-            return [{
-                label: 'Copy visible sequence...',
-                click: async () => {
-                    const pixelWidth = viewport.getWidth();
-                    const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel;
-                    const chr = viewport.referenceFrame.chr;
-                    const start = viewport.referenceFrame.start;
-                    const end = start + bpWindow;
-                    const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
-                    Alert.presentAlert(sequence);
-                }
-            },
+            return [
+                {
+                    label: 'View visible sequence...',
+                    click: async () => {
+                        const pixelWidth = viewport.getWidth();
+                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel;
+                        const chr = viewport.referenceFrame.chr;
+                        const start = viewport.referenceFrame.start;
+                        const end = start + bpWindow;
+                        const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
+                        Alert.presentAlert(sequence);
+                    }
+                },
+                {
+                    label: 'Copy visible sequence',
+                    click: async () => {
+                        const pixelWidth = viewport.getWidth();
+                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel;
+                        const chr = viewport.referenceFrame.chr;
+                        const start = viewport.referenceFrame.start;
+                        const end = start + bpWindow;
+                        const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
+                        navigator.clipboard.writeText(sequence);
+                    }
+                },
                 '<hr/>'
             ]
         } else {
