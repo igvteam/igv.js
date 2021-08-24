@@ -56,7 +56,7 @@ const MenuUtils = {
             trackView.browser.dataRangeDialog.configure(trackView);
             trackView.browser.dataRangeDialog.present($(trackView.browser.columnContainer));
         };
-        menuItems.push({ object, click });
+        menuItems.push({object, click});
 
         if (trackView.track.logScale !== undefined) {
             menuItems.push({
@@ -147,8 +147,13 @@ const MenuUtils = {
             "annotation" === track.type ||
             "variant" === track.type ||
             "wig" === track.type);
-    }
+    },
 
+    createMenuItem(label, action) {
+        const object = $('<div>');
+        object.text(label);
+        return {object, click: action};
+    }
 }
 
 
@@ -188,7 +193,7 @@ function trackRemovalMenuItem(trackView) {
     const object = $('<div>');
     object.text('Remove track');
 
-    return { object, click: () => trackView.browser.removeTrack(trackView.track) };
+    return {object, click: () => trackView.browser.removeTrack(trackView.track)};
 
 }
 
