@@ -31,7 +31,7 @@ import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {PaletteColorTable} from "../util/colorPalletes.js";
 import GtexUtils from "../gtex/gtexUtils.js";
-
+import {reverseComplementSequence} from "../util/sequenceUtils.js";
 
 let JUNCTION_MOTIF_PALETTE = new PaletteColorTable("Dark2");
 
@@ -310,7 +310,6 @@ class FeatureTrack extends TrackBase {
 
     }
 
-
     menuItemList() {
 
         const self = this;
@@ -357,6 +356,34 @@ class FeatureTrack extends TrackBase {
 
     };
 
+
+    contextMenuItemList(clickState) {
+
+        const features = this.clickedFeatures(clickState);
+        if (features.length > 1) {
+            features.sort((a, b) => (a.end - a.start) - (b.end - b.start));
+        }
+        const f = features[0];   // The longest feature
+        if ((f.end - f.start) <= 1000000) {
+            return [
+                {
+                    label: 'Copy feature sequence',
+                    click: async () => {
+                        let seq = await this.browser.genome.getSequence(f.chr, f.start, f.end);
+                        if (f.strand === '-') {
+                            seq = reverseComplementSequence(seq);
+                        }
+
+                        navigator.clipboard.writeText(seq);
+                    }
+                },
+                '<hr/>'
+            ];
+        } else {
+            return undefined;
+        }
+
+    }
 
     description() {
 
