@@ -71,13 +71,20 @@ class VariantTrack extends TrackBase {
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
         this.sortDirection = "ASC";
         this.type = config.type || "variant"
-        if(config.colorBy) {
-            this.colorBy = config.colorBy;   // Can be undefined => default
-            this._initColorBy = config.colorBy;
-            if (config.colorTable) {
-                this.colorTables = new Map();
-                this.colorTables.set(config.colorBy, new ColorTable(config.colorTable));
+        if (config.colorBy) {
+            if (isString(config.colorBy)) {
+                this.colorBy = config.colorBy;   // Can be undefined => default
+                this._initColorBy = config.colorBy;
+                if (config.colorTable) {
+                    this.colorTables = new Map();
+                    this.colorTables.set(config.colorBy, new ColorTable(config.colorTable));
+                }
+            } else if (config.colorBy.field) {
+
+            } else {
+                console.warn("Unrecognized colorBy option: " + config.colorBy);
             }
+
         }
         this._color = config.color;
         this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes;
@@ -421,7 +428,7 @@ class VariantTrack extends TrackBase {
 
             var infoKeys = Object.keys(call.info);
             if (infoKeys.length) {
-                popupData.push("<hr>");
+                popupData.push('<hr/>');
             }
             infoKeys.forEach(function (key) {
                 popupData.push({name: key, value: decodeURIComponent(call.info[key])});
@@ -506,7 +513,7 @@ class VariantTrack extends TrackBase {
             if (this.header.INFO) {
                 //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => this.header.INFO[key].Type === "String")
                 const stringInfoKeys = this.header.INFO.SVTYPE ? ['SVTYPE'] : [];
-                if(this._initColorBy && this._initColorBy !== 'SVTYPE') {
+                if (this._initColorBy && this._initColorBy !== 'SVTYPE') {
                     stringInfoKeys.push(this._initColorBy);
                 }
                 if (stringInfoKeys.length > 0) {

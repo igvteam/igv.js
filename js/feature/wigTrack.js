@@ -226,7 +226,7 @@ class WigTrack extends TrackBase {
             for(let selectedFeature of displayFeatures) {
                 if (selectedFeature) {
                     if(popupData.length > 0) {
-                        popupData.push("<hr/>")
+                        popupData.push('<hr/>')
                     }
                     let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
                         StringUtils.numberFormatter(selectedFeature.start + 1)
