@@ -222,12 +222,12 @@ class BAMTrack extends TrackBase {
 
 
         // Start with overage track items
-        let menuItems = ["<hr/>"];
+        let menuItems = ['<hr/>'];
         menuItems = menuItems.concat(MenuUtils.numericDataMenuItems(this.trackView));
 
         // Color by items
-        menuItems.push('<hr/>')
-        const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+        menuItems.push('<hr/>');
+        const $e = $('<div class="igv-track-menu-category">');
         $e.text('Color by:');
         menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
 
@@ -255,8 +255,6 @@ class BAMTrack extends TrackBase {
         }
 
         menuItems.push('<hr/>');
-
-        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
         menuItems.push({
             object: $(createCheckbox("Show Coverage", this.showCoverage)),
             click: () => {
@@ -277,7 +275,7 @@ class BAMTrack extends TrackBase {
         });
 
         // Show all bases
-        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+        menuItems.push('<hr/>');
         menuItems.push({
             object: $(createCheckbox("Show all bases", this.showAllBases)),
             click: () => {
@@ -304,7 +302,7 @@ class BAMTrack extends TrackBase {
 
         // View as pairs
         if (this.pairsSupported && this.alignmentTrack.hasPairs) {
-            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+            menuItems.push('<hr/>');
             menuItems.push({
                 object: $(createCheckbox("View as pairs", this.viewAsPairs)),
                 click: () => {
@@ -323,7 +321,6 @@ class BAMTrack extends TrackBase {
 
         // Display mode
         menuItems.push('<hr/>');
-        const $displayModeLabel = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
         $displayModeLabel.text('Display mode:');
         menuItems.push({name: undefined, object: $displayModeLabel, click: undefined, init: undefined});
 

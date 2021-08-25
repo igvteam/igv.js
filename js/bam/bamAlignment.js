@@ -230,7 +230,7 @@ class BamAlignment {
 
         // Sample
         // Read group
-        nameValues.push("<hr>");
+        nameValues.push('<hr/>');
 
         // Add 1 to genomic location to map from 0-based computer units to user-based units
         nameValues.push({name: 'Alignment Start', value: StringUtils.numberFormatter(1 + this.start), borderTop: true});
@@ -244,7 +244,7 @@ class BamAlignment {
         nameValues.push({name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck())});
 
         if (this.isPaired()) {
-            nameValues.push("<hr>");
+            nameValues.push('<hr/>');
             nameValues.push({name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true});
             nameValues.push({name: 'Mate is Mapped', value: yesNo(this.isMateMapped())});
             if (this.pairOrientation) {
@@ -264,7 +264,7 @@ class BamAlignment {
 
         }
 
-        nameValues.push("<hr>");
+        nameValues.push('<hr/>');
 
         const tagDict = this.tags();
         let isFirst = true;
@@ -282,7 +282,7 @@ class BamAlignment {
             }
         }
 
-        nameValues.push("<hr>");
+        nameValues.push('<hr/>');
         nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)});
         nameValues.push({name: 'Read Base:', value: this.readBaseAt(genomicLocation)});
         nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)});
