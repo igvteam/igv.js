@@ -420,7 +420,7 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
         for (let e of gd) {
             pd.push(e);
         }
-        pd.push("<hr>");
+        pd.push('<hr/>');
     }
     if (this.name) {
         pd.push({name: 'name', value: this.name})
@@ -448,7 +448,7 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
     // If clicked over an exon add its attributes
     for (let exon of this.exons) {
         if (genomicLocation >= exon.start && genomicLocation < exon.end && typeof exon.popupData === 'function') {
-            pd.push("<hr>")
+            pd.push('<hr/>')
             const exonData = exon.popupData(genomicLocation)
             for (let att of exonData) {
                 pd.push(att)
@@ -456,7 +456,7 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
 
             if (exon.children) {
                 for (let c of exon.children) {
-                    pd.push("<hr>")
+                    pd.push('<hr/>')
                     const exonData = c.popupData(genomicLocation)
                     for (let att of exonData) {
                         pd.push(att)

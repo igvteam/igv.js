@@ -328,9 +328,9 @@ class TrackBase {
                             const cravatLink = TrackBase.getCravatLink(feature.chr, feature.start + 1, ref, alt, genomeId)
                             console.log(cravatLink)
                             if (cravatLink) {
-                                data.push("<hr/>");
+                                data.push('<hr/>');
                                 data.push({html: cravatLink});
-                                data.push("<hr/>");
+                                data.push('<hr/>');
                             }
                         }
                     }
@@ -352,7 +352,7 @@ class TrackBase {
         data.push({name: 'Location', value: posString});
 
         if (this.infoURL) {
-            data.push("<hr/>");
+            data.push('<hr/>');
             const href = this.infoURL.replace("$$", feature.name);
             data.push({html: `<a target="_blank" href=${href}>${href}</a>`});
         }

@@ -177,7 +177,7 @@ class Variant {
                     if (alt.length === 1) {
                         let l = TrackBase.getCravatLink(this.chr, this.pos, ref, alt, genomeId)
                         if (l) {
-                            fields.push("<hr/>");
+                            fields.push('<hr/>');
                             fields.push({html: l});
                         }
                     }

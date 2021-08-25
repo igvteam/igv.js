@@ -166,11 +166,11 @@ class SegFeature {
             {name: (this.valueColumnName ? this.valueColumnName : "Value"), value: this.value}
         ];
         if (this.attributeNames && this.attributeNames.length > 0) {
-            pd.push("<hr/>")
+            pd.push('<hr/>')
             for (let i = 0; i < this.attributeNames.length; i++) {
                 pd.push({name: this.attributeNames[i], value: this.attributeValues[i]});
             }
-            pd.push("<hr/>");  // In case there are multiple features selected
+            pd.push('<hr/>');  // In case there are multiple features selected
         }
         return pd;
     }
