@@ -316,22 +316,19 @@ class FeatureTrack extends TrackBase {
         const menuItems = [];
 
         if (this.render === renderSnp) {
-            (["function", "class"]).forEach(function (colorScheme) {
+            menuItems.push('<hr/>');
+            for (let colorScheme of ["function", "class"]) {
                 menuItems.push({
-                    object: $(createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy)),
-                    click: function () {
-                        self.colorBy = colorScheme;
-                        self.trackView.repaintViews();
+                    object: $(createCheckbox('Color by ' + colorScheme, colorScheme === this.colorBy)),
+                    click:  () => {
+                        this.colorBy = colorScheme;
+                        this.trackView.repaintViews();
                     }
                 });
-            });
-
-            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
-
+            }
         }
 
-        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
-
+        menuItems.push('<hr/>');
         ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
             const lut =
                 {
@@ -389,7 +386,7 @@ class FeatureTrack extends TrackBase {
 
         // if('snp' === this.type) {
         if (renderSnp === this.render) {
-            let desc = "<html>" + this.name + "<hr>";
+            let desc = "<html>" + this.name + '<hr/>';
             desc += '<em>Color By Function:</em><br>';
             desc += '<span style="color:red">Red</span>: Coding-Non-Synonymous, Splice Site<br>';
             desc += '<span style="color:green">Green</span>: Coding-Synonymous<br>';

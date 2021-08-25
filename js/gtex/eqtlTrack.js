@@ -225,7 +225,7 @@ class EqtlTrack extends TrackBase {
                 Math.abs(feature.py - clckState.canvasY) < (feature.radius + tolerance)) {
 
                 if (popupData.length > 0) {
-                    popupData.push("<hr>");
+                    popupData.push('<hr/>');
                 }
                 popupData.push(
                     {name: "snp id", value: feature.snp},

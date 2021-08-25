@@ -48,6 +48,8 @@ const MenuUtils = {
 
         const menuItems = [];
 
+        menuItems.push('<hr/>')
+
         // Data range
         const object = $('<div>');
         object.text('Set data range');

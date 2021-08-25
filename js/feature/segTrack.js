@@ -121,7 +121,7 @@ class SegTrack extends TrackBase {
                 "FILL": "Fill",
             };
 
-        menuItems.push("<hr/>");
+        menuItems.push('<hr/>');
         menuItems.push("Sample Height:");
 
         const displayOptions = this.type === 'seg' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"];
@@ -417,7 +417,7 @@ class SegTrack extends TrackBase {
 
         for (let feature of featureList) {
             if (items.length > 0) {
-                items.push("<hr/>")
+                items.push('<hr/>')
             }
 
             if (typeof feature.popupData === 'function') {
