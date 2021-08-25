@@ -48,6 +48,7 @@ class BWReader {
         this.genome = genome;
         this.rpTreeCache = {};
         this.config = config;
+        this.loader = this.path.startsWith("data:") ? new DataBuffer(this.path) : igvxhr;
     }
 
     async readWGFeatures(bpPerPixel, windowFunction) {
@@ -103,7 +104,7 @@ class BWReader {
                 end = Math.max(end, item.dataOffset + item.dataSize);
             }
             const size = end - start;
-            const arrayBuffer = await igvxhr.loadArrayBuffer(this.config.url, buildOptions(this.config, {
+            const arrayBuffer = await this.loader.loadArrayBuffer(this.config.url, buildOptions(this.config, {
                 range: {
                     start: start,
                     size: size
@@ -146,7 +147,7 @@ class BWReader {
         if (this.header) {
             return this.header;
         } else {
-            let data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {
+            let data = await  this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
                 range: {
                     start: 0,
                     size: BBFILE_HEADER_SIZE
@@ -199,7 +200,7 @@ class BWReader {
 
             const startOffset = BBFILE_HEADER_SIZE;
             let range = {start: startOffset, size: (header.fullDataOffset - startOffset + 5)};
-            data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: range}))
+            data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: range}))
 
             const nZooms = header.nZoomLevels;
             binaryParser = new BinaryParser(new DataView(data));
@@ -256,7 +257,7 @@ class BWReader {
         if (rpTree) {
             return rpTree;
         } else {
-            rpTree = new RPTree(offset, this.config, this.littleEndian);
+            rpTree = new RPTree(offset, this.config, this.littleEndian, this.loader);
             await rpTree.load();
             this.rpTreeCache[offset] = rpTree;
             return rpTree;
@@ -303,9 +304,10 @@ class ZoomLevelHeader {
 
 class RPTree {
 
-    constructor(fileOffset, config, littleEndian) {
+    constructor(fileOffset, config, littleEndian, loader) {
 
         this.config = config;
+        this.loader = loader;
         this.fileOffset = fileOffset; // File offset to beginning of tree
         this.path = config.url;
         this.littleEndian = littleEndian;
@@ -313,7 +315,9 @@ class RPTree {
 
     async load() {
         const rootNodeOffset = this.fileOffset + RPTREE_HEADER_SIZE;
-        const bufferedReader = new BufferedReader(this.config, BUFFER_SIZE);
+        const bufferedReader = this.path.startsWith("data:") ?
+            this.loader :
+            new BufferedReader(this.config, BUFFER_SIZE);
         this.rootNode = await this.readNode(rootNodeOffset, bufferedReader)
         return this;
     }
@@ -376,7 +380,9 @@ class RPTree {
 
             let leafItems = [],
                 processing = new Set(),
-                bufferedReader = new BufferedReader(self.config, BUFFER_SIZE);
+                bufferedReader = self.path.startsWith("data:") ?
+                    self.loader :
+                    new BufferedReader(self.config, BUFFER_SIZE);
 
             processing.add(0);  // Zero represents the root node
             findLeafItems(self.rootNode, 0);
@@ -703,6 +709,38 @@ function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, ch
 
 
         }
+    }
+}
+
+class DataBuffer {
+
+    constructor(dataURI) {
+        this.data = BGZip.decodeDataURI(dataURI).buffer;
+    }
+
+    /**
+     * igvxhr interface
+     * @param ignore
+     * @param options
+     * @returns {any}
+     */
+    loadArrayBuffer(ignore, options) {
+        const range = options.range;
+        return range ? this.data.slice(range.start, range.start + range.size) : this.data;
+    }
+
+    /**
+     * BufferedReader interface
+     *
+     * @param requestedRange - byte rangeas {start, size}
+     * @param fulfill - function to receive result
+     * @param asUint8 - optional flag to return result as an UInt8Array
+     */
+    async dataViewForRange(requestedRange, asUint8) {
+        const len = Math.min(this.data.byteLength - requestedRange.start, requestedRange.size);
+        return asUint8 ?
+            new Uint8Array(this.data, requestedRange.start, len) :
+            new DataView(this.data, requestedRange.start, len);
     }
 }
 

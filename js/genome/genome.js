@@ -353,87 +353,52 @@ class Genome {
     }
 }
 
-function loadCytobands(cytobandUrl, config) {
+async function loadCytobands(cytobandUrl, config) {
+
+    let data;
     if (cytobandUrl.startsWith("data:")) {
-        var data = decodeDataUri(cytobandUrl);
-        return Promise.resolve(getCytobands(data));
-    } else {
-        return igvxhr.loadString(cytobandUrl, buildOptions(config))
-            .then(function (data) {
-                return getCytobands(data);
-            });
-    }
-
-    function getCytobands(data) {
-        var bands = [],
-            lastChr,
-            n = 0,
-            c = 1,
-            lines = splitLines(data),
-            len = lines.length,
-            cytobands = {};
-
-        for (var i = 0; i < len; i++) {
-            var tokens = lines[i].split("\t");
-            var chr = tokens[0];
-            if (!lastChr) lastChr = chr;
-
-            if (chr !== lastChr) {
-
-                cytobands[lastChr] = bands;
-                bands = [];
-                lastChr = chr;
-                n = 0;
-                c++;
-            }
-
-            if (tokens.length === 5) {
-                //10	0	3000000	p15.3	gneg
-                var start = parseInt(tokens[1]);
-                var end = parseInt(tokens[2]);
-                var name = tokens[3];
-                var stain = tokens[4];
-                bands[n++] = new Cytoband(start, end, name, stain);
-            }
-        }
-
-        return cytobands;
-    }
-
-    function decodeDataUri(dataUri) {
-
-        let plain
-
-        if (dataUri.startsWith("data:application/gzip;base64")) {
-            plain = BGZip.decodeDataURI(dataUri)
-        } else {
-
-            let bytes,
-                split = dataUri.split(','),
-                info = split[0].split(':')[1],
-                dataString = split[1];
-
-            if (info.indexOf('base64') >= 0) {
-                dataString = atob(dataString);
-            } else {
-                dataString = decodeURI(dataString);
-            }
-
-            bytes = new Uint8Array(dataString.length);
-            for (let i = 0; i < dataString.length; i++) {
-                bytes[i] = dataString.charCodeAt(i);
-            }
-
-            plain = new BGZip.ungzip(bytes);
-        }
-
-        let s = "";
+        const plain = BGZip.decodeDataURI(cytobandUrl);
+        data = "";
         const len = plain.length;
         for (let i = 0; i < len; i++) {
-            s += String.fromCharCode(plain[i]);
+            data += String.fromCharCode(plain[i]);
         }
-        return s;
+    } else {
+        data = await igvxhr.loadString(cytobandUrl, buildOptions(config));
     }
+
+    // var bands = [],
+    //     lastChr,
+    //     n = 0,
+    //     c = 1,
+    //
+    //     len = lines.length,
+    const cytobands = {};
+    let lastChr;
+    let bands = [];
+    const lines = splitLines(data);
+    for (let line of lines) {
+        var tokens = line.split("\t");
+        var chr = tokens[0];
+        if (!lastChr) lastChr = chr;
+
+        if (chr !== lastChr) {
+            cytobands[lastChr] = bands;
+            bands = [];
+            lastChr = chr;
+        }
+
+        if (tokens.length === 5) {
+            //10	0	3000000	p15.3	gneg
+            var start = parseInt(tokens[1]);
+            var end = parseInt(tokens[2]);
+            var name = tokens[3];
+            var stain = tokens[4];
+            bands.push(new Cytoband(start, end, name, stain));
+        }
+    }
+
+    return cytobands;
 }
 
 function loadAliases(aliasURL, config) {
