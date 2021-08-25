@@ -2,11 +2,33 @@ import "./utils/mockObjects.js"
 import BWSource from "../js/bigwig/bwSource.js";
 import {parseAutoSQL} from "../js/util/ucscUtils.js"
 import {assert} from 'chai';
+import {fileToDataURL} from "./utils/URLUtils";
 
 suite("testBigBed", function () {
 
     test("bed9+2 features", async function () {
-        const url = require.resolve("./data/bb/myBigBed2.bb");
+        const url = (require.resolve("./data/bb/myBigBed2.bb"));
+        const chr = "chr7";
+        const start = 0;
+        const end = Number.MAX_SAFE_INTEGER;
+        const bwSource = new BWSource({url: url});
+
+        const trackType = await bwSource.trackType();
+        assert.equal(trackType, "annotation");
+
+        const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1});
+        assert.ok(features);
+        assert.equal(features.length, 3339);   // Verified in iPad app
+
+        //chr7	773975	792642	uc003sjb.2	0	+	776710	791816	0,255,0	HEATR2	Q86Y56-3
+        const f = features[20];
+        assert.equal(f.start, 773975);
+        assert.equal(f.geneSymbol, 'HEATR2');
+        assert.equal(f.spID, 'Q86Y56-3')
+    });
+
+    test("bed9+2 features - dataURL", async function () {
+        const url = await fileToDataURL(require.resolve("./data/bb/myBigBed2.bb"));
         const chr = "chr7";
         const start = 0;
         const end = Number.MAX_SAFE_INTEGER;
@@ -27,7 +49,6 @@ suite("testBigBed", function () {
     });
 
     test("interact features", async function () {
-
         const url = require.resolve("./data/bb/interactExample3.inter.bb");
         const chr = "chr3";
         const start = 63702628;
@@ -47,9 +68,29 @@ suite("testBigBed", function () {
         assert.equal(secondFeature.end1, 63743120);
         assert.equal(secondFeature.start2, 63976338);
         assert.equal(secondFeature.end2, 63978511);
-
     });
 
+    test("interact features - dataURL", async function () {
+        const url = await fileToDataURL(require.resolve("./data/bb/interactExample3.inter.bb"));
+        const chr = "chr3";
+        const start = 63702628;
+        const end = 63880091;
+        const bwSource = new BWSource({url: url});
+
+        const trackType = await bwSource.trackType();
+        assert.equal(trackType, "interact");
+
+        const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1});
+        assert.ok(features);
+        assert.equal(features.length, 18);
+
+        //chr3	63741418	63978511	.	350	6	.	0	chr3	63741418	63743120	.	.	chr3	63976338	63978511	.	.
+        const secondFeature = features[1];
+        assert.equal(secondFeature.start1, 63741418);
+        assert.equal(secondFeature.end1, 63743120);
+        assert.equal(secondFeature.start2, 63976338);
+        assert.equal(secondFeature.end2, 63978511);
+    });
 
     test("Autosql", function () {
         const autosql = `
@@ -88,3 +129,47 @@ table chromatinInteract
         assert.equal(r2s.description, 'Orientation of upper/this region: + or -.  Use . if not applicable');
     })
 })
+
+async function testBed9_2(url) {
+    const chr = "chr7";
+    const start = 0;
+    const end = Number.MAX_SAFE_INTEGER;
+    const bwSource = new BWSource({url: url});
+
+    const trackType = await bwSource.trackType();
+    assert.equal(trackType, "annotation");
+
+    const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1});
+    assert.ok(features);
+    assert.equal(features.length, 3339);   // Verified in iPad app
+
+    //chr7	773975	792642	uc003sjb.2	0	+	776710	791816	0,255,0	HEATR2	Q86Y56-3
+    const f = features[20];
+    assert.equal(f.start, 773975);
+    assert.equal(f.geneSymbol, 'HEATR2');
+    assert.equal(f.spID, 'Q86Y56-3')
+    return true;
+}
+
+async function testInteract(url) {
+
+    const chr = "chr3";
+    const start = 63702628;
+    const end = 63880091;
+    const bwSource = new BWSource({url: url});
+
+    const trackType = await bwSource.trackType();
+    assert.equal(trackType, "interact");
+
+    const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1});
+    assert.ok(features);
+    assert.equal(features.length, 18);
+
+    //chr3	63741418	63978511	.	350	6	.	0	chr3	63741418	63743120	.	.	chr3	63976338	63978511	.	.
+    const secondFeature = features[1];
+    assert.equal(secondFeature.start1, 63741418);
+    assert.equal(secondFeature.end1, 63743120);
+    assert.equal(secondFeature.start2, 63976338);
+    assert.equal(secondFeature.end2, 63978511);
+
+}
