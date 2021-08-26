@@ -11,6 +11,7 @@ import GWASTrack from "./gwas/gwasTrack.js";
 import GCNVTrack from "./gcnv/gcnvTrack.js";
 import RnaStructTrack from "./rna/rnaStruct.js";
 import IdeogramTrack from "./ideogramTrack.js";
+import SpliceJunctionTrack from "./feature/spliceJunctionTrack.js";
 
 const trackFunctions =
     new Map([
@@ -29,7 +30,8 @@ const trackFunctions =
         ['eqtl', (config, browser) => new EqtlTrack(config, browser)],
         ['gwas', (config, browser) => new GWASTrack(config, browser)],
         ['arc', (config, browser) => new RnaStructTrack(config, browser)],
-        ['gcnv', (config, browser) => new GCNVTrack(config, browser)]
+        ['gcnv', (config, browser) => new GCNVTrack(config, browser)],
+        ['splicejunctions' , (config, browser) => new SpliceJunctionTrack(config, browser)]
     ]);
 
 
@@ -51,7 +53,6 @@ const getTrack = function (type, config, browser) {
         case "genes":
         case "fusionjuncspan":
         case "junctions":
-        case "splicejunctions":
         case "snp":
             trackKey = "feature";
             break;
