@@ -245,6 +245,14 @@ class TrackBase {
         for (let key of Object.keys(tracklineConfg)) {
             if (!this.config.hasOwnProperty(key)) {
                 this[key] = tracklineConfg[key];
+                if(key === "height" && this.trackView) {
+                    try {
+                        const h = Number.parseInt(tracklineConfg[key]);
+                        this.trackView.setTrackHeight(h);
+                    } catch (e) {
+                        console.error(e);
+                    }
+                }
             }
         }
     }
