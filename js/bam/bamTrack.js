@@ -222,7 +222,8 @@ class BAMTrack extends TrackBase {
 
 
         // Start with overage track items
-        let menuItems = ['<hr/>'];
+        let menuItems = [];
+
         menuItems = menuItems.concat(MenuUtils.numericDataMenuItems(this.trackView));
 
         // Color by items
@@ -321,8 +322,9 @@ class BAMTrack extends TrackBase {
 
         // Display mode
         menuItems.push('<hr/>');
-        $displayModeLabel.text('Display mode:');
-        menuItems.push({name: undefined, object: $displayModeLabel, click: undefined, init: undefined});
+        const $dml = $('<div class="igv-track-menu-category">');
+        $dml.text('Display mode:');
+        menuItems.push({name: undefined, object: $dml, click: undefined, init: undefined});
 
         menuItems.push({
             object: $(createCheckbox("expand", this.alignmentTrack.displayMode === "EXPANDED")),
