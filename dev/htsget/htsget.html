@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+
+</head>
+
+<body>
+
+<h1>htsget server example</h1>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var div = document.getElementById("myDiv");
+    var options = {
+        genome: "hg19",
+        locus: "chr8:128,734,098-128,763,217",
+        tracks: [
+            {
+             //   type: 'variant',
+             //   name: 'giab.NA12878',
+             //   sourceType: 'htsget',
+             //   format: "VCF",
+                url: 'htsget://htsget.ga4gh.org/variants/giab.NA12878'
+            },
+            {
+              //  type: 'alignment',
+              //  name: 'giab.NA12878.NIST7086.1',
+              //  sourceType: 'htsget',
+              //  format: 'bam',
+                url: 'htsget://htsget.ga4gh.org/reads/giab.NA12878.NIST7086.1'
+            }
+        ]
+    };
+
+    igv.createBrowser(div, options)
+
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

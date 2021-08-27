@@ -52,7 +52,7 @@ class SpliceJunctionTrack extends TrackBase {
 
         super.init(config);
 
-        this.type = config.type || 'spliceJunctions';
+        this.type = config.type || 'junctions';
 
         if (config._featureSource) {
             this.featureSource = config._featureSource;

@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -14,30 +13,28 @@
 
 <body>
 
+<h1>Click track feature</h1>
 
-<h3>GWAS example</h3>
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
-<div id="igvDiv"></div>
 
 <script type="module">
+
     import igv from "../../js/index.js";
-    let options = {
-        genome: "hg38",
-        tracks: [
-            {
-                type: "gwas",
-                format: "gwas",
-                name: "GWAS",
-                url: "../../test/data/gwas/gwas_sample.tsv",
-                indexed: false,
-                columns: {
-                    chromosome: 12,
-                    position: 13,
-                    value: 28
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr22:10000000-10020000",
+            tracks: [
+                {
+                    type: "annotation",
+                    format: "bed",
+                    url: "../../test/data/bed/track_url.bed"
                 }
-            }
-        ]
-    }
+            ]
+        };
+
     igv.createBrowser(document.getElementById('igvDiv'), options)
         .then(function (browser) {
 
@@ -49,4 +46,3 @@
 </body>
 
 </html>
-
