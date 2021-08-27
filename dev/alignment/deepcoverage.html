@@ -13,7 +13,7 @@
 
 <body>
 
-<h1>1000 Genomes CRAM file</h1>
+<h1>Deep coverage bam file</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -31,10 +31,20 @@
                     format: 'bam',
                     url: 'https://s3.amazonaws.com/igv.org.demo/deep_coverage.bam',
                     indexURL: 'https://s3.amazonaws.com/igv.org.demo/deep_coverage.bam.bai',
-                    samplingDepth: '2000',
+                    samplingDepth: Number.MAX_SAFE_INTEGER,
                     alignmentRowHeight: 10,
                     colorBy: "strand",
-                    name: 'TEST'
+                    name: 'Deep coverage'
+                },
+                {
+                    type: 'alignment',
+                    format: 'bam',
+                    url: 'https://s3.amazonaws.com/igv.org.demo/deep_coverage.bam',
+                    indexURL: 'https://s3.amazonaws.com/igv.org.demo/deep_coverage.bam.bai',
+                    samplingDepth: 100,
+                    alignmentRowHeight: 10,
+                    colorBy: "strand",
+                    name: 'Downsampled'
                 }
             ]
         }

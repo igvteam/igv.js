@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>rnaStruct</title>
+
+</head>
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const div = document.getElementById("myDiv");
+    const options = {
+        reference: {
+            fastaURL: "../../test/data/bp/test.fa",
+            indexed: false
+        },
+        tracks: [
+            {
+                name: 'RNA Struct BP',
+                url: '../../test/data/bp/example.bp',
+                indexed: false
+            },
+            {
+                name: 'stemLoop.bed',
+                type: 'arc',
+                format: 'bed',
+                url: '../../test/data/bp/stemLoop.bed',
+                indexed: false,
+                height: 400
+            }
+        ]
+    };
+
+    igv.createBrowser(div, options);
+
+
+</script>
+
+</body>
+
+</html>

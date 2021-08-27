@@ -58,7 +58,6 @@ class ViewPort extends ViewportBase {
                         }
                     } else {
                         str = track.name;
-
                     }
                 }
 
