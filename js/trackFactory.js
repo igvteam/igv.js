@@ -31,7 +31,7 @@ const trackFunctions =
         ['gwas', (config, browser) => new GWASTrack(config, browser)],
         ['arc', (config, browser) => new RnaStructTrack(config, browser)],
         ['gcnv', (config, browser) => new GCNVTrack(config, browser)],
-        ['splicejunctions' , (config, browser) => new SpliceJunctionTrack(config, browser)]
+        ['junction' , (config, browser) => new SpliceJunctionTrack(config, browser)]
     ]);
 
 
@@ -52,7 +52,6 @@ const getTrack = function (type, config, browser) {
         case "annotation":
         case "genes":
         case "fusionjuncspan":
-        case "junctions":
         case "snp":
             trackKey = "feature";
             break;
@@ -60,6 +59,10 @@ const getTrack = function (type, config, browser) {
         case 'maf':
         case 'mut':
             trackKey = 'seg';
+            break;
+        case 'junctions':
+        case 'splicejunctions':
+            trackKey = 'junction'
             break;
         default:
             trackKey = type;

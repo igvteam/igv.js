@@ -15,7 +15,7 @@
 
 <p>
 
-<h1>1000 Genomes Cram file</h1>
+<h1>Test of a CSI index with a gtf file</h1>
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
@@ -26,21 +26,20 @@
     var options =
         {
             genome: "hg19",
-            locus: "chr1",
+            locus: "chr1:1-43,648,031",
             tracks:
                 [
                     {
                         name: "Genes-csi",
                         format: "gtf",
-                        url: `../test/data/tabix/sorted.genes.gtf.gz`,
-                        indexURL: `../test/data/tabix/sorted.genes.gtf.gz.csi`
+                        url: `../../test/data/tabix/sorted.genes.gtf.gz`,
+                        indexURL: `../../test/data/tabix/sorted.genes.gtf.gz.csi`
                     },
                     {
                         name: "Genes no index",
                         format: "gtf",
-                        url: `../test/data/tabix/sorted.genes.gtf.gz`,
-                        indexed: false,
-                        order: 1000000
+                        url: `../../test/data/tabix/sorted.genes.gtf.gz`,
+                        indexed: false
                     }
                 ]
         };

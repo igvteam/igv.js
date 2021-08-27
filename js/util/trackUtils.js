@@ -188,7 +188,7 @@ function inferTrackType(config) {
                 return "alignment";
             case "bedpe":
             case "bedpe-loop":
-                return "interaction";
+                return "interact";
             case "bp":
                 return "arc";
             case "gwas":
@@ -210,7 +210,7 @@ function translateDeprecatedTypes(config) {
         config.featureType = undefined;
     }
     if ("junctions" === config.type) {
-        config.type = "spliceJunctions"
+        config.type = "junction"
     } else if ("bed" === config.type) {
         config.type = "annotation";
         config.format = config.format || "bed";
