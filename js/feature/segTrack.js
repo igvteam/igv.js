@@ -43,6 +43,7 @@ class SegTrack extends TrackBase {
         super.init(config);
 
         this.type = config.type || "seg";
+        if(this.type === 'maf') this.type = 'mut';
         this.isLog = config.isLog;
         this.displayMode = config.displayMode || "EXPANDED"; // EXPANDED | SQUISHED -- TODO perhaps set his based on sample count
         this.height = config.height || 300;

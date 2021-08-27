@@ -87,9 +87,9 @@ class NonIndexedFasta {
         if (typeof this.fastaURL === 'string' && this.fastaURL.startsWith('data:')) {
             let bytes = BGZip.decodeDataURI(this.fastaURL);
             data = "";
-            const len = bytes.length;
-            for (let i = 0; i < len; i++)
-                data += String.fromCharCode(bytes[i]);
+            for (let b of bytes) {
+                data += String.fromCharCode(b);
+            }
         } else {
             data = await igvxhr.load(this.fastaURL, buildOptions(this.config))
         }

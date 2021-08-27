@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>IGV Examples - Load Session</title>
+
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+    <h1>Blank browser to demonstrate loading igv sessions and files from html links. See igv-links.html</h1>
+</div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    var div = document.getElementById("myDiv");
+
+    igv
+        .createBrowser(div, {
+            queryParametersSupported: true
+        })
+        .then(function (browser) {
+            console.log("Browser ready");
+        })
+
+
+</script>
+
+</body>
+
+</html>

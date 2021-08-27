@@ -72,16 +72,12 @@
 
             let sampleCount = study["cnaSampleCount"];
             if (sampleCount > 0) {
-                let name = study["shortName"] + " (" + sampleCount + ")";
+                let name = study["name"] + " (" + sampleCount + ")";
                 let trackDiv = document.createElement('div');
                 trackDiv.textContent = name;
                 trackDiv.addEventListener('click', async function (event) {
 
                     const sampleStudyList = await cBioUtils.fetchSamplesByStudy(study.studyId)
-
-                    let body = JSON.stringify(sampleStudyList);
-
-                    let mutJsion = await cBioUtils.fetchMutationsByStudy(study.studyId);
 
                     const features = await cBioUtils.fetchCopyNumberByStudy(study.studyId)
 
@@ -89,6 +85,7 @@
                         "name": name,
                         "type": "seg",
                         "displayMode": "EXPANDED",
+                        "description": study.description,
                         features: features
 
                     }
