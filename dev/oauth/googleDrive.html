@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <!-- Google Platform JS -->
+    <script src="https://apis.google.com/js/platform.js"></script>
+
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>Google Drive</h1>
+
+<p>
+    BAM and CRAM files hosted on Google Drive.  An API Key, specified in oauthConfig, is required to run this demo.
+</p>
+
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+    import {GoogleAuth} from "../../node_modules/igv-utils/src/index.js";
+    import oauthConfig from "./oauthConfig.js";
+
+    var options =
+        {
+
+            genome: "hg19",
+            locus: "slc25a3",
+            tracks: [
+                {
+                    "type": "alignment",
+                    "name": "Heart SLC25S3 - Google Drive",
+                    "format": "cram",
+                    "url": "https://drive.google.com/open?id=1b7tAs4GjyRz_Ix6Wjr5AxNQY_NXZd1Mo",
+                    "indexURL": "https://drive.google.com/open?id=1FTzrjG9xw4sm0sMDN6wo1B1ljBKVB4D2"
+                },
+                {
+                    "type": "alignment",
+                    "name": "Heart SLC25S3 - Google Drive - Form 2",
+                    "format": "cram",
+                    "url": "https://drive.google.com/a/cloud.ucsd.edu/file/d/1b7tAs4GjyRz_Ix6Wjr5AxNQY_NXZd1Mo/view?usp=sharing",
+                    "indexURL": "https://drive.google.com/a/cloud.ucsd.edu/file/d/1FTzrjG9xw4sm0sMDN6wo1B1ljBKVB4D2/view?usp=sharing"
+                }
+            ]
+
+        }
+    var igvDiv = document.getElementById("igvDiv");
+
+
+    GoogleAuth.init(oauthConfig)
+        .then(function (ignore) {
+            return igv.createBrowser(igvDiv, options)
+        })
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

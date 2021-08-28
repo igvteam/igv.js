@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const div = document.getElementById("myDiv");
+    const options = {
+        genome: "hg19",
+        tracks: [
+
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+                "name": "Encode bigwig"
+            },
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+                "graphType": "points",
+                "pointSize": 3,
+                "name": "Encode bigwig points"
+            },
+            {
+                "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
+                "name": "Big BigWig"
+            },
+
+        ]
+    };
+
+    igv.createBrowser(div, options).then(function (browser) {
+    });
+
+
+</script>
+
+</body>
+
+</html>
+

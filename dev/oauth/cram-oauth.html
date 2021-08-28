@@ -9,39 +9,46 @@
     <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
+    <!-- Google Platform JS -->
+    <script src="https://apis.google.com/js/platform.js"></script>
+
 </head>
 
 <body>
 
-<h1>1000 Genomes CRAM file</h1>
+<h1></h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import igv from "../js/index.js";
+    import {GoogleAuth} from "../../node_modules/igv-utils/src/index.js";
+    import igv from "../../js/index.js";
+    import oauthConfig from "./oauthConfig.js";
 
-    var options =
-        {
-            genome: "hg19",
-            locus: "slc25a3",
-            tracks: [
+    GoogleAuth.init(oauthConfig)
+        .then(function (ignore) {
+            var options =
                 {
-                    type: 'alignment',
-                    format: 'cram',
-                    url: 'gs://fc-0d14d0d0-242d-40c8-bc98-055c6639e05d/heart_slc25a3.cram',
-                    indexURL: 'gs://fc-0d14d0d0-242d-40c8-bc98-055c6639e05d/heart_slc25a3.cram.crai',
-                    name: 'HG00096',
-                    color: 'blue',
-                    oauthToken: 'yourAccessToken'
-                }
+                    genome: "hg19",
+                    locus: "slc25a3",
+                    tracks: [
+                        {
+                            type: 'alignment',
+                            format: 'cram',
+                            url: 'gs://fc-0d14d0d0-242d-40c8-bc98-055c6639e05d/heart_slc25a3.cram',
+                            indexURL: 'gs://fc-0d14d0d0-242d-40c8-bc98-055c6639e05d/heart_slc25a3.cram.crai',
+                            name: 'HG00096',
+                            color: 'blue'
+                        }
 
-            ]
-        };
+                    ]
+                };
 
-    var igvDiv = document.getElementById("igvDiv");
+            var igvDiv = document.getElementById("igvDiv");
 
-    igv.createBrowser(igvDiv, options)
+            igv.createBrowser(igvDiv, options);
+        });
 
 
 </script>

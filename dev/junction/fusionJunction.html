@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Splice Junctions</title>
+</head>
+
+<body>
+
+<h1>Splice junctions</h1>
+
+<div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const tracks = [
+        {
+            "url": "../../test/data/misc/FusionJuncSpan.tabular",
+            "type": "FusionJuncSpan",
+            "name": "Fusion Inspector (chr1, chr2)"
+        }
+    ]
+
+    var options = {
+        genome: 'hg19',
+        tracks: tracks,
+    };
+
+    var igvDiv = document.getElementById("igv-div");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+</script>
+
+</body>
+
+</html>
