@@ -28,6 +28,7 @@ import TrackBase from "../trackBase.js";
 import {inferTrackType} from "../util/trackUtils.js";
 
 class MergedTrack extends TrackBase {
+
     constructor(config, browser) {
         super(config, browser);
     }
@@ -40,10 +41,26 @@ class MergedTrack extends TrackBase {
         super.init(config);
     }
 
+    get height() {
+        return this._height;
+    }
+
+    set height(h) {
+        this._height = h;
+        if(this.tracks) {
+            for (let t of this.tracks) {
+                t.height = h;
+                t.config.height = h;
+            }
+        }
+    }
+
+
     async postInit() {
+
         this.tracks = [];
+        const p = [];
         for (let tconf of this.config.tracks) {
-            if (!tconf.type) inferTrackType(tconf);
             tconf.isMergedTrack = true;
             const t = await this.browser.createTrack(tconf);
             if (t) {
@@ -52,22 +69,15 @@ class MergedTrack extends TrackBase {
             } else {
                 console.warn("Could not create track " + tconf);
             }
+
+            if (typeof t.postInit === 'function') {
+                p.push(t.postInit());
+            }
         }
 
-        Object.defineProperty(this, "height", {
-            get() {
-                return this._height;
-            },
-            set(h) {
-                this._height = h;
-                for (let t of this.tracks) {
-                    t.height = h;
-                    t.config.height = h;
-                }
-            }
-        });
-
         this.height = this.config.height || 100;
+
+        return Promise.all(p)
     }
 
 
@@ -118,11 +128,11 @@ class MergedTrack extends TrackBase {
 
         const featuresArray = features || clickState.viewport.getCachedFeatures();
 
-        if(featuresArray && featuresArray.length === this.tracks.length) {
+        if (featuresArray && featuresArray.length === this.tracks.length) {
             // Array of feature arrays, 1 for each track
             const popupData = [];
-            for(let i=0; i<this.tracks.length; i++) {
-                if(i > 0) popupData.push('<hr/>');
+            for (let i = 0; i < this.tracks.length; i++) {
+                if (i > 0) popupData.push('<hr/>');
                 popupData.push(`<div style=background-color:#f7f8fa;border-bottom-style:dashed;border-bottom-width:1px;margin-bottom:5px;margin-top:5px;font-size:medium><b>${this.tracks[i].name}</b></div>`);
                 const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i]);
                 popupData.push(...trackPopupData);
@@ -130,6 +140,12 @@ class MergedTrack extends TrackBase {
             }
             return popupData;
         }
+    }
+
+
+    supportsWholeGenome() {
+        const b = this.tracks.every(track => track.supportsWholeGenome());
+        return b;
     }
 }
 
