@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>Civic webservice</h1>
+
+<p>
+Variants from the <a href="https://civicdb.org/home" target="_blank">CIViC webservice</a>.
+</p>
+
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr7:55,057,179-55,303,485",
+            tracks: [
+                {
+                    "type": "annotation",
+                    "sourceType": "civic-ws",
+                    "url": "https://civicdb.org/api",
+                    "indexed": false,
+                    "queryable": false,
+                    "name": "CIViC",
+                    height: 800
+                }
+            ]
+
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
