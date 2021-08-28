@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>Annotation tracks</h1>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "myc",
+            tracks:
+                [
+                    {
+                        "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
+                        "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz.tbi",
+                        "name": "Bed - Tabix Index"
+                    },
+                    {
+                        "type": "annotation",
+                        "format": "bed",
+                        "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
+                        "indexed": false,
+                        "supportsWholeGenome": true,
+                        "name": "Bed - No Index"
+                    },
+                    {
+                        "type": "annotation",
+                        "format": "bed",
+                        "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
+                        "indexURL": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx",
+                        "name": "Bed - Tribble Index"
+                    },
+                    {
+                        "type": "annotation",
+                        "format": "bed",
+                        "url": "https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz",
+                        "indexURL": "https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi",
+                        "name": "dbSNP 137 - Tabix index",
+                        "visibilityWindow": 200000
+                    },
+                    {
+                        "type": "annotation",
+                        "format": "gtf",
+                        "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz",
+                        "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi",
+                        "name": "Gencode v24 (gtf) -- genes filtered",
+                        "visibilityWindow": 10000000,
+                        "filterTypes": ["gene", "chromosome"]
+                    }
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

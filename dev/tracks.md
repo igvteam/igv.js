@@ -7,7 +7,6 @@ snp
 * seg
 * mut
 * wig  (wig, bigWig, tdf)
-merged
 * alignment   
 * interact
 * variant
@@ -17,3 +16,5 @@ merged
 * gcnv
 * junction (splicejunctions, junctions)
 fusionjuncspan
+merged
+

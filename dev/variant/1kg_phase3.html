@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>indel</title>
+
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr22:50,173,455-50,173,752",
+            tracks: [
+                {
+                    "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz?versionId=null",
+                    "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi?versionId=null",
+                    "name": "1KG Sites"
+                },
+                {
+                    "type": "variant",
+                    "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
+                    "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi",
+                    "name": "1KG variants (chr22)",
+                    "visibilityWindow": 1000,
+                    "height": 500
+                },
+                {
+                    "type": "variant",
+                    "url": "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz",
+                    "indexURL": "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz.tbi",
+                    "name": "1KG SV variants",
+                    "visibilityWindow": 10000
+                }
+            ]
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (browser) {
+
+        })
+
+
+</script>
+
+</body>
+
+</html>

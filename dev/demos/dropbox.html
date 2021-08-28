@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>Dropbox</h1>
+
+<p>
+BAM and CRAM files hosted on Dropbox.
+</p>
+
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "slc25a3",
+            tracks: [
+                {
+                    "type": "alignment",
+                    "name": "Heart SLC25A3 - Dropbox BAM",
+                    "format": "bam",
+                    "url": "https://www.dropbox.com/s/tb6vueic5t1bvcv/heart_slc25a3.bam?dl=0",
+                    "indexURL": "https://www.dropbox.com/s/x22tg6s3umkp5yy/heart_slc25a3.bam.bai?dl=0"
+                },
+                {
+                    "type": "alignment",
+                    "name": "Heart SLC25A3 - Dropbox CRAM",
+                    "format": "cram",
+                    "url": "https://www.dropbox.com/s/zx7owfskn0jk6ab/heart_slc25a3.cram?dl=0",
+                    "indexURL": "https://www.dropbox.com/s/k3r83ckbo0chtm7/heart_slc25a3.crai?dl=0"
+                }
+            ]
+
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
