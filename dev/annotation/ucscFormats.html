@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>Miscellaneous UCSC formats</h1>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg38",
+            locus: "chr1:170,143,093-170,165,974",
+            tracks:
+                [
+                    {
+                        "name": "UCSC sno/miRNA (wgRna)",
+                        "type": "annotation",
+                        "format": "wgRna",
+                        "displayMode": "EXPANDED",
+                        "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/wgRna.txt.gz",
+                        "indexed": false
+                    },
+                    {
+                        "name": "GWAS (gwasCatalog)",
+                        "type": "annotation",
+                        "format": "gwasCatalog",
+                        "displayMode": "EXPANDED",
+                        "visibilityWindow": -1,
+                        "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/gwasCatalog.txt.gz",
+                        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/gwasCatalog.txt.gz.tbi"
+                    },
+                    {
+                        "name": "Common SNPs (150)",
+                        "type": "snp",
+                        "format": "snp",
+                        "visibilityWindow": 25000,
+                        "height": 30,
+                        "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz",
+                        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz.tbi"
+                    },
+                    {
+                        "name": "Repeat Masker",
+                        "type": "annotation",
+                        "format": "rmsk",
+                        "displayMode": "EXPANDED",
+                        "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz",
+                        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz.tbi",
+                        "visibilityWindow": 1000000
+                    },
+                    {
+                        "name": "CpG Islands",
+                        "type": "annotation",
+                        "format": "cpgIslandExt",
+                        "displayMode": "EXPANDED",
+                        "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/annotations/cpgIslandExt.txt.gz",
+                        "indexed": false
+                    },
+                    {
+                        "url": "https://www.encodeproject.org/files/ENCFF522RNT/@@download/ENCFF522RNT.bigBed",
+                        "name": "ENCODE BigBed",
+                        "height": 50,
+                        "autoHeight": false
+                    },
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
