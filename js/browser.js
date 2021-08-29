@@ -1011,10 +1011,8 @@ class Browser {
     removeTrack(track) {
 
         this.trackViews.splice(this.trackViews.indexOf(track.trackView), 1)
-
         this.fireEvent('trackremoved', [track])
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
-
         track.trackView.dispose()
     }
 
@@ -1185,13 +1183,6 @@ class Browser {
         }
 
     }
-
-    loadInProgress() {
-        for (let trackView of this.trackViews) {
-            if (trackView.isLoading()) return true;
-        }
-        return false;
-    };
 
     updateLocusSearchWidget() {
 
@@ -1747,10 +1738,6 @@ class Browser {
         function handleMouseMove(e) {
 
             e.preventDefault();
-
-            if (self.loadInProgress()) {
-                return;
-            }
 
             const {x, y} = DOMUtils.pageCoordinates(e);
 
