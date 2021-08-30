@@ -1,13 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="https://igv.org/web/https://igv.org/web/img/favicon.ico">
-
     <title>igv.js</title>
 </head>
 
@@ -15,7 +8,7 @@
 
 <p>
 
-<h1>1000 Genomes Cram file</h1>
+<h1>Sharded BAM file</h1>
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
@@ -26,7 +19,7 @@
     var options =
         {
             genome: "hg19",
-            locus: "myc",
+            locus: ["chr1:155,178,958-155,199,954", "chr8:128,750,212-128,752,052"],
             tracks:
                 [
                     {
@@ -39,7 +32,7 @@
                                 "chr8"
                             ],
                             "url": "https://data.broadinstitute.org/igvdata/test/data/bam/hg19_$CHR.bam",
-                            "indexURL": "https://data.broadinstitute.org/igvdata/test/data/bam/hg19_$CHR.bai"
+                            "indexURL": "https://data.broadinstitute.org/igvdata/test/data/bam/hg19_$CHR.bam.bai"
                         }
                     }
                 ]
