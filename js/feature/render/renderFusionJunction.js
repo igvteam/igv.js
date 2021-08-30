@@ -7,26 +7,20 @@
  * @param ctx  the canvas 2d context
  */
 export function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
-    var py;
-    var rowHeight = (this.displayMode === "EXPANDED") ? this.expandedRowHeight : this.squishedRowHeight;
 
-    if (this.display === "COLLAPSED") {
-        py = this.margin;
+    const rowHeight = (this.displayMode === "EXPANDED") ? this.expandedRowHeight : this.squishedRowHeight;
+    let py = this.margin;
+    if (this.displayMode !== "COLLAPSED" && feature.row !== undefined) {
+        py += feature.row * rowHeight;
     }
 
-    if (this.displayMode === "SQUISHED" && feature.row !== undefined) {
-        py = this.margin + rowHeight * feature.row;
-    } else if (this.displayMode === "EXPANDED" && feature.row !== undefined) {
-        py = this.margin + rowHeight * feature.row;
-    }
-
-    var cy = py + 0.5 * rowHeight;
-    var topY = cy - 0.5 * rowHeight;
-    var bottomY = cy + 0.5 * rowHeight;
+    const cy = py + 0.5 * rowHeight;
+    const topY = cy - 0.5 * rowHeight;
+    const bottomY = cy + 0.5 * rowHeight;
 
     // draw the junction arc
-    var junctionLeftPx = Math.round((feature.junction_left - bpStart) / xScale);
-    var junctionRightPx = Math.round((feature.junction_right - bpStart) / xScale);
+    const junctionLeftPx = Math.round((feature.junction_left - bpStart) / xScale);
+    const junctionRightPx = Math.round((feature.junction_right - bpStart) / xScale);
 
     ctx.beginPath();
     ctx.moveTo(junctionLeftPx, cy);
@@ -37,13 +31,12 @@ export function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx)
     ctx.stroke();
 
     // draw the spanning arcs
-    var spanningCoords = feature.spanning_frag_coords;
-    for (var i = 0; i < spanningCoords.length; i++) {
-        var spanningInfo = spanningCoords[i];
+    const spanningCoords = feature.spanning_frag_coords;
+    for (let i = 0; i < spanningCoords.length; i++) {
 
-        var spanLeftPx = Math.round((spanningInfo.left - bpStart) / xScale);
-        var spanRightPx = Math.round((spanningInfo.right - bpStart) / xScale);
-
+        const spanningInfo = spanningCoords[i];
+        const spanLeftPx = Math.round((spanningInfo.left - bpStart) / xScale);
+        const spanRightPx = Math.round((spanningInfo.right - bpStart) / xScale);
 
         ctx.beginPath();
         ctx.moveTo(spanLeftPx, cy);
