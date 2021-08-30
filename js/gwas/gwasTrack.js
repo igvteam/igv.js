@@ -44,11 +44,13 @@ class GWASTrack extends TrackBase {
     }
 
     init(config) {
+
         super.init(config);
 
         this.useChrColors = config.useChrColors === undefined ? true : config.useChrColors;
         this.trait = config.trait;
         this.posteriorProbability = config.posteriorProbability;
+        this.valueProperty = "bed" === config.format ? "score" : "value";
         this.height = config.height || 100;   // The preferred height
 
         // Set initial range if specfied, unless autoscale == true
@@ -119,10 +121,10 @@ class GWASTrack extends TrackBase {
                 let color;
                 let val;
                 if (this.posteriorProbability) {
-                    val = variant.value
+                    val = variant[this.valueProperty];
                     color = colorScale.getColor(val);
                 } else {
-                    const pvalue = variant.value || variant.score;
+                    const pvalue = variant[this.valueProperty]
                     if (!pvalue) continue;
                     val = -Math.log10(pvalue);
                     color = colorScale.getColor(val);
@@ -202,7 +204,7 @@ class GWASTrack extends TrackBase {
             for (let f of features) {
                 const xDelta = Math.abs(clickState.canvasX - f.px);
                 const yDelta = Math.abs(clickState.canvasY - f.py);
-                const value = f.value || f.score
+                const value = f[this.valueProperty]
                 if (xDelta < this.dotSize && yDelta < this.dotSize) {
                     if (count > 0) {
                         data.push("<HR/>")
@@ -241,15 +243,14 @@ class GWASTrack extends TrackBase {
 
         if (featureList.length > 0) {
             // posterior probabilities are treated without modification, but we need to take a negative logarithm of P values
-            const features = this.posteriorProbability ?
-                featureList :
+            const valueProperty = this.valueProperty;
+            const posterior = this.posteriorProbability;
+            const features =
                 featureList.map(function (feature) {
-                    const v = feature.value !== undefined ? feature.value : feature.score;
-                    return {value: -Math.log(v) / Math.LN10};
+                    const v = feature[valueProperty];
+                    return {value: posterior ? v : -Math.log(v) / Math.LN10};
                 });
-            const range = doAutoscale(features);
-            this.dataRange.max = range.max;
-            this.dataRange.min = (range.min !== range.max) ? range.min : 0;
+            this.dataRange = doAutoscale(features);
 
         } else {
             // No features -- pick something reasonable for PPAs and p-values
