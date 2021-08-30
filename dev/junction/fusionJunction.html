@@ -15,18 +15,20 @@
 
     import igv from "../../js/index.js";
 
-    const tracks = [
-        {
-            "url": "../../test/data/misc/FusionJuncSpan.tabular",
-            "type": "FusionJuncSpan",
-            "name": "Fusion Inspector (chr1, chr2)"
-        }
-    ]
-
     var options = {
-        genome: 'hg19',
-        tracks: tracks,
-    };
+        reference: {
+            id: "fusion",
+            name: "fusion",
+            fastaURL: "../../test/data/fusion/finspector.fa",
+            indexed: false,
+            wholeGenomeView: false
+        },
+        tracks: {
+            url: "../../test/data/fusion/finspector.igv.FusionJuncSpan",
+            type: "FusionJuncSpan",
+            name: "Fusion Inspector junctions"
+        }
+    }
 
     var igvDiv = document.getElementById("igv-div");
 
