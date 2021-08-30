@@ -40,16 +40,9 @@ class ShardedBamReader {
         const chrAliasTable = {};
 
         config.sources.sequences.forEach(function (chr) {
-
-            bamReaders[chr] = null;   // Placeholder
-
-            if (genome) {
-                const alias = genome.getChromosomeName(chr);
-                chrAliasTable[alias] = chr;
-            }
+            const queryChr = genome ? genome.getChromosomeName(chr) : chr;
+            bamReaders[queryChr] = getReader(config, genome, chr);
         });
-
-        this.chrAliasTable = chrAliasTable;
 
         this.bamReaders = bamReaders;
 
@@ -58,45 +51,28 @@ class ShardedBamReader {
 
     async readAlignments(chr, start, end) {
 
-        const genome = this.genome;
-        const self = this;
-
-        const queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
-
-        if (!this.bamReaders.hasOwnProperty(queryChr) || "none" === this.bamReaders[queryChr]) {
-            return Promise.resolve(new AlignmentContainer(chr, start, end));
+        if (!this.bamReaders.hasOwnProperty(chr)) {
+            return new AlignmentContainer(chr, start, end);
         } else {
 
-            let reader = self.bamReaders[queryChr];
-            let tmp;
-
-            if (!reader) {
-
-                tmp = {
-                    url: self.config.sources.url.replace("$CHR", queryChr)
-                }
-
-                if (self.config.sources.indexURL) {
-                    tmp.indexURL = self.config.sources.indexURL.replace("$CHR", queryChr);
-                }
-
-                const bamConfig = Object.assign(self.config, tmp);
-                reader = new BamReader(bamConfig);
-                self.bamReaders[queryChr] = reader;
-            }
-
-            return reader.readAlignments(queryChr, start, end)
-
-                .catch(function (error) {
-                    console.error(error);
-                    const str = `Error reading BAM or index file for: ${ tmp ? tmp.url : '' }`
-                    Alert.presentAlert(new Error(str))
-                    self.bamReaders[queryChr] = "none";
-                    return new AlignmentContainer(chr, start, end);   // Empty alignment container
-                })
-
+            let reader = this.bamReaders[chr];
+            const a = await reader.readAlignments(chr, start, end)
+            return a;
         }
     }
+}
+
+function getReader(config, genome, chr) {
+    const tmp = {
+        url: config.sources.url.replace("$CHR", chr)
+    }
+    if (config.sources.indexURL) {
+        tmp.indexURL = config.sources.indexURL.replace("$CHR", chr);
+    }
+    const bamConfig = Object.assign(config, tmp);
+
+    // TODO -- support non-indexed, htsget, etc
+    return new BamReader(bamConfig, genome);
 }
 
 export default ShardedBamReader
