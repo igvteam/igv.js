@@ -2,14 +2,7 @@
 
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
-    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
-
+    <title>IGV</title>
 </head>
 
 <body>
@@ -23,13 +16,23 @@
     import igv from "../../js/index.js";
     let options = {
         genome: "hg38",
+        locus: ["chr1:504,188-606,029", "chr1:39,567,483-39,819,700"],
         tracks: [
             {
                 type: "gwas",
                 format: "bed",
-                name: "GWAS",
+                name: "GWAS pValue",
                 url: "../../test/data/gwas/diamante.pvalue.bed",
                 indexed: false,
+                autoscale: true
+            },
+            {
+                type: "gwas",
+                format: "bed",
+                name: "GWAS posterior",
+                url: "../../test/data/gwas/diamante.posterior.bed",
+                indexed: false,
+                posteriorProbability: true,
                 autoscale: true
             }
         ]
