@@ -52,7 +52,7 @@ class GWASParser {
                     case 'pvalue':
                     case 'p-value':
                     case 'p.value':
-                        this.pvalueCol = i;
+                        this.valueCol = i;
                         break;
                 }
             }
@@ -74,7 +74,7 @@ class GWASParser {
                 const chr = tokens[this.chrCol];
                 const start = parseInt(tokens[this.posCol]) - 1;
                 const end = start + 1;
-                const value = parseFloat(tokens[this.pvalueCol]);
+                const value = parseFloat(tokens[this.valueCol]);
                 allFeatures.push(new GWASFeature({
                     chr: chr,
                     start: start,
