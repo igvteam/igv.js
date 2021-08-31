@@ -156,21 +156,23 @@ class SegFeature {
     }
 
     popupData() {
-
+        const filteredProperties = new Set(['chr', 'start', 'end', 'sample', 'value', 'row', 'color', 'sampleKey',
+            'uniqueSampleKey', 'sampleId', 'chromosome', 'uniquePatientKey']);
         const locationString = (this.chr + ":" +
             StringUtils.numberFormatter(this.start + 1) + "-" +
             StringUtils.numberFormatter(this.end));
         const pd = [
             {name: "Sample", value: this.sample},
             {name: "Location", value: locationString},
-            {name: (this.valueColumnName ? this.valueColumnName : "Value"), value: this.value}
+            {name: this.valueColumnName ? StringUtils.capitalize(this.valueColumnName) : "Value", value: this.value}
         ];
         if (this.attributeNames && this.attributeNames.length > 0) {
             pd.push('<hr/>')
             for (let i = 0; i < this.attributeNames.length; i++) {
-                pd.push({name: this.attributeNames[i], value: this.attributeValues[i]});
+                if(!filteredProperties.has(this.attributeNames[i]) & this.valueColumnName !== this.attributeNames[i]) {
+                    pd.push({name: StringUtils.capitalize(this.attributeNames[i]), value: this.attributeValues[i]});
+                }
             }
-            pd.push('<hr/>');  // In case there are multiple features selected
         }
         return pd;
     }
