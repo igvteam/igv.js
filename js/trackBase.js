@@ -291,12 +291,19 @@ class TrackBase {
         const data = [];
 
         let alleles, alleleFreqs;
-        for (var property in feature) {
+        for (let property in feature) {
 
             if (feature.hasOwnProperty(property) &&
                 !filteredProperties.has(property) &&
                 isSimpleType(feature[property])) {
+
                 let value = feature[property];
+                if("name" === property && (this.infoURL || this.config.infoURL)) {
+                    const url = this.infoURL || this.config.infoURL;
+                    const href = url.replace("$$", feature.name);
+                    value = `<a target="_blank" href=${href}>${value}</a>`;
+                }
+
                 data.push({name: StringUtils.capitalize(property), value: value});
 
                 if (property === "alleles") {
@@ -357,14 +364,8 @@ class TrackBase {
         if (feature.strand) {
             posString += ` (${feature.strand})`
         }
-        data.push({name: 'Location', value: posString});
 
-        if (this.infoURL || this.config.infoURL) {
-            data.push('<hr/>');
-            const url = this.infoURL || this.config.infoURL;
-            const href = url.replace("$$", feature.name);
-            data.push({html: `<a target="_blank" href=${href}>${href}</a>`});
-        }
+        data.push({name: 'Location', value: posString});
 
         return data;
 
