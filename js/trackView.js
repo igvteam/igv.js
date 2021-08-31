@@ -350,6 +350,11 @@ class TrackView {
         }
     }
 
+    // track labels
+    setTrackLabelName(name) {
+        this.viewports.forEach(viewport => viewport.setTrackLabel(name));
+    }
+
     /**
      * Update viewports to reflect current genomic state, possibly loading additional data.
      */

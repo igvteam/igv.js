@@ -663,13 +663,6 @@ class Browser {
 
     }
 
-    // track labels
-    setTrackLabelName(trackView, name) {
-        trackView.viewports.forEach((viewport) => {
-            viewport.setTrackLabel(name);
-        });
-    }
-
     setTrackLabelVisibility(isVisible) {
         toggleTrackLabels(this.trackViews, isVisible)
     }
