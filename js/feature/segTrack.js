@@ -45,7 +45,7 @@ class SegTrack extends TrackBase {
         this.type = config.type || "seg";
         if (this.type === 'maf') this.type = 'mut';
         this.isLog = config.isLog;
-        this.displayMode = config.displayMode || "EXPANDED"; // EXPANDED | SQUISHED -- TODO perhaps set his based on sample count
+        this.displayMode = config.displayMode || "EXPANDED"; // EXPANDED | SQUISHED
         this.height = config.height || 300;
         this.maxHeight = config.maxHeight || 500;
         this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2;
@@ -119,11 +119,11 @@ class SegTrack extends TrackBase {
             {
                 "SQUISHED": "Squish",
                 "EXPANDED": "Expand",
-                "FILL": "Fill",
+                "FILL": "Fill"
             };
 
         menuItems.push('<hr/>');
-        menuItems.push("Sample Height:");
+        menuItems.push("DisplayMode:");
 
         const displayOptions = this.type === 'seg' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"];
 
@@ -198,7 +198,6 @@ class SegTrack extends TrackBase {
                     this.sampleHeight = this.squishedRowHeight;
                     border = 0;
                     break;
-
                 default:   // EXPANDED
                     this.sampleHeight = this.expandedRowHeight;
                     border = 1;
@@ -315,13 +314,13 @@ class SegTrack extends TrackBase {
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
      * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
      *
+     * Note displayMode "FILL" is handled by the viewport
+     *
      * @param features
      * @returns {number}
      */
     computePixelHeight(features) {
-
         if (!features) return 0;
-
         const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
         this.updateSampleKeys(features);
         return this.sampleKeys.length * sampleHeight;
@@ -399,16 +398,12 @@ class SegTrack extends TrackBase {
     clickedFeatures(clickState, features) {
 
         const allFeatures = super.clickedFeatures(clickState, features);
-        return filterByRow(allFeatures, clickState.y);
+        const y = clickState.y;
+        return allFeatures.filter(function (feature) {
+            const rect = feature.pixelRect;
+            return rect && y >= rect.y && y <= (rect.y + rect.h);
+        })
 
-        function filterByRow(features, y) {
-
-            return features.filter(function (feature) {
-                const rect = feature.pixelRect;
-                return rect && y >= rect.y && y <= (rect.y + rect.h);
-            });
-
-        }
     }
 
     popupData(clickState, featureList) {
