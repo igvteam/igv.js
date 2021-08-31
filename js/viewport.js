@@ -6,7 +6,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js";
 import {Alert, Popover} from '../node_modules/igv-ui/dist/igv-ui.js';
 import GenomeUtils from "./genome/genome.js";
 import ViewportBase from "./viewportBase.js";
-import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
+import {DOMUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
 import C2S from "./canvas2svg.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
@@ -22,7 +22,7 @@ class ViewPort extends ViewportBase {
     initializationHelper() {
 
         this.addMouseHandlers();
-        this.$spinner = $('<div>', { class: 'igv-loading-spinner-container' });
+        this.$spinner = $('<div>', {class: 'igv-loading-spinner-container'});
         this.$viewport.append(this.$spinner);
         this.$spinner.append($('<div>'));
         this.stopSpinner();
@@ -50,7 +50,7 @@ class ViewPort extends ViewportBase {
                 } else if (track.description) {
                     str = `<div>${track.description}</div>`
                 } else {
-                    if(track.url) {
+                    if (track.url) {
                         if (track.url instanceof File) {
                             str = `<div><b>Filename: </b>${track.url.name}`;
                         } else {
@@ -430,20 +430,20 @@ class ViewPort extends ViewportBase {
         const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '');
 
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
-        const id = `${ str }_referenceFrame_${ index }_guid_${ DOMUtils.guid() }`
+        const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
 
         this.drawSVGWithContext(context, width, height, id, 0, 0, 0)
 
         const svg = context.getSerializedSvg(true);
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
 
-        FileUtils.download(`${ id }.svg`, data);
+        FileUtils.download(`${id}.svg`, data);
     }
 
     // called by trackView.renderSVGContext() when rendering
     // entire browser as SVG
 
-    renderSVGContext(context, { deltaX, deltaY }) {
+    renderSVGContext(context, {deltaX, deltaY}) {
 
         // Nothing to do if zoomInNotice is active
         if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
@@ -453,16 +453,16 @@ class ViewPort extends ViewportBase {
         const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '');
 
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
-        const id = `${ str }_referenceFrame_${ index }_guid_${ DOMUtils.guid() }`
+        const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
 
-        const { top: yScrollDelta } = this.$content.position();
+        const {top: yScrollDelta} = this.$content.position();
 
         const {width, height} = this.$viewport.get(0).getBoundingClientRect();
 
         this.drawSVGWithContext(context, width, height, id, deltaX, deltaY + yScrollDelta, -yScrollDelta)
 
         if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
-            const { x, y, width, height } = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+            const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
             this.renderTrackLabelSVG(context, deltaX + x, deltaY + y, width, height)
         }
 
@@ -472,7 +472,7 @@ class ViewPort extends ViewportBase {
     renderTrackLabelSVG(context, tx, ty, width, height) {
 
         const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '');
-        const id = `${ str }_track_label_guid_${ DOMUtils.guid() }`
+        const id = `${str}_track_label_guid_${DOMUtils.guid()}`
 
         context.saveWithTranslationAndClipRect(id, tx, ty, width, height, 0);
 
@@ -482,7 +482,7 @@ class ViewPort extends ViewportBase {
         context.font = "12px Arial";
         context.fillStyle = 'rgb(68, 68, 68)';
 
-        const { width: stringWidth } = context.measureText(this.$trackLabel.text());
+        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
         const dx = 0.25 * (width - stringWidth);
         const dy = 0.7 * (height - 12);
         context.fillText(this.$trackLabel.text(), dx, height - dy);
@@ -545,7 +545,7 @@ class ViewPort extends ViewportBase {
 
     createZoomInNotice($parent) {
 
-        const $container = $('<div>', { class: 'igv-zoom-in-notice-container' })
+        const $container = $('<div>', {class: 'igv-zoom-in-notice-container'})
         $parent.append($container);
 
         const $e = $('<div>');
@@ -712,9 +712,9 @@ class ViewPort extends ViewportBase {
                     if (1 === browser.referenceFrameList.length) {
                         string = chr;
                     } else {
-                        const loci = browser.referenceFrameList.map(({ locusSearchString }) => locusSearchString)
+                        const loci = browser.referenceFrameList.map(({locusSearchString}) => locusSearchString)
                         const index = browser.referenceFrameList.indexOf(self.referenceFrame)
-                        loci[ index ] = chr
+                        loci[index] = chr
                         string = loci.join(' ')
                     }
 
@@ -819,19 +819,20 @@ class ViewPort extends ViewportBase {
 
                 if (nameValue.name) {
                     const str = `<span>${nameValue.name}</span>&nbsp&nbsp&nbsp${nameValue.value}`
-                    return `<div title="${nameValue.value}">${str}</div>`
-                } else if ('<hr/>' === nameValue) { // this can be retired if nameValue.html is allowed.
-                    return nameValue
+                    const title = StringUtils.isString(nameValue.value) && nameValue.value.startsWith("<") ? "" : nameValue.value;
+                    return `<div title="${title}">${str}</div>`
                 } else if (nameValue.html) {
                     return nameValue.html
                 } else {
-                    return `<div title="${nameValue}">${nameValue}</div>`
+                    return nameValue;   // If a string just return as is
                 }
 
             })
 
             return rows.join('')
         }
+
+
     }
 
 }
