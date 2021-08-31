@@ -43,7 +43,7 @@ class SegTrack extends TrackBase {
         super.init(config);
 
         this.type = config.type || "seg";
-        if(this.type === 'maf') this.type = 'mut';
+        if (this.type === 'maf') this.type = 'mut';
         this.isLog = config.isLog;
         this.displayMode = config.displayMode || "EXPANDED"; // EXPANDED | SQUISHED -- TODO perhaps set his based on sample count
         this.height = config.height || 300;
@@ -259,7 +259,8 @@ class SegTrack extends TrackBase {
                     if (w < 3) {
                         w = 3;
                         x -= 1;
-                    }               } else {
+                    }
+                } else {
                     // Assume seg track
                     let value = f.value;
                     if (!this.isLog) {
@@ -417,31 +418,21 @@ class SegTrack extends TrackBase {
         const items = [];
 
         for (let feature of featureList) {
+
+            // Double line divider between features
             if (items.length > 0) {
-                items.push('<hr/>')
+                items.push('<hr/>');
+                items.push('<hr/>');
             }
 
-            if (typeof feature.popupData === 'function') {
-                const data = feature.popupData()
-                Array.prototype.push.apply(items, data);
-            } else {
-                const filteredProperties = new Set(['chr', 'start', 'end', 'sample', 'value', 'row', 'color', 'sampleKey',
-                    'uniqueSampleKey', 'sampleId', 'chromosome', 'uniquePatientKey']);
+            // hack for whole genome features, which save the original feature as "_f"
+            const f = feature._f || feature;
 
-                // hack for whole genome features, which save the original feature as "_f"
-                const f = feature._f || feature;
-                items.push({name: 'Sample', value: f.sample})
-                const valueString = this.type === 'seg' ? StringUtils.numberFormatter(f.value) : f.value;
-                items.push({name: 'Value', value: valueString});
-                const locus = `${f.chr}:${StringUtils.numberFormatter(f.start + 1)}-${StringUtils.numberFormatter(f.end)}`;
-                items.push({name: 'Locus', value: locus})
-                items.push('<hr/>')
-                for (let property of Object.keys(f)) {
-                    if (!filteredProperties.has(property) && isSimpleType(f[property])) {
-                        items.push({name: property, value: f[property]});
-                    }
-                }
-            }
+            const data = (typeof f.popupData === 'function') ?
+                f.popupData() :
+                this.extractPopupData(f);
+            Array.prototype.push.apply(items, data);
+
         }
 
         return items;
