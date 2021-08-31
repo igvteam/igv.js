@@ -92,6 +92,17 @@ class TrackBase {
         this.trackView = undefined
     }
 
+    get name() {
+        return this._name;
+    }
+
+    set name(name) {
+        this._name = name;
+        if (this.trackView) {
+            this.trackView.setTrackLabelName(name)
+        }
+    }
+
     /**
      * Update track properties from the config object.
      *
@@ -241,12 +252,12 @@ class TrackBase {
                     break;
                 case "type":
                     const v = properties[key];
-                    if(UCSCTypeMappings.has(v)) {
+                    if (UCSCTypeMappings.has(v)) {
                         tracklineConfg[key] = UCSCTypeMappings.get(v);
                     }
                     break;
                 default:
-                    // No default action, only copy recognized properties
+                // No default action, only copy recognized properties
             }
         }
 
@@ -254,7 +265,7 @@ class TrackBase {
         for (let key of Object.keys(tracklineConfg)) {
             if (!this.config.hasOwnProperty(key)) {
                 this[key] = tracklineConfg[key];
-                if(key === "height" && this.trackView) {
+                if (key === "height" && this.trackView) {
                     try {
                         const h = Number.parseInt(tracklineConfg[key]);
                         this.trackView.setTrackHeight(h);
@@ -348,7 +359,7 @@ class TrackBase {
                     for (let i = b.length - 2; i >= 0; i--) {
                         let alt = b[i].a;
                         if (alt.length === 1) {
-                            if(!genomeId) genomeId = this.getGenomeId();
+                            if (!genomeId) genomeId = this.getGenomeId();
                             const cravatLink = TrackBase.getCravatLink(feature.chr, feature.start + 1, ref, alt, genomeId)
                             console.log(cravatLink)
                             if (cravatLink) {
