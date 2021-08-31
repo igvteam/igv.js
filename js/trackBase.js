@@ -359,9 +359,10 @@ class TrackBase {
         }
         data.push({name: 'Location', value: posString});
 
-        if (this.infoURL) {
+        if (this.infoURL || this.config.infoURL) {
             data.push('<hr/>');
-            const href = this.infoURL.replace("$$", feature.name);
+            const url = this.infoURL || this.config.infoURL;
+            const href = url.replace("$$", feature.name);
             data.push({html: `<a target="_blank" href=${href}>${href}</a>`});
         }
 
