@@ -233,11 +233,20 @@ class TrackBase {
                         tracklineConfg.autoscale = false;
                         tracklineConfg.dataRange = {min, max};
                     }
+                case "name":
+                    tracklineConfg[key] = properties[key];
+                    break;
                 case "url":
                     tracklineConfg["infoURL"] = properties[key];
                     break;
+                case "type":
+                    const v = properties[key];
+                    if(UCSCTypeMappings.has(v)) {
+                        tracklineConfg[key] = UCSCTypeMappings.get(v);
+                    }
+                    break;
                 default:
-                    tracklineConfg[key] = properties[key];
+                    // No default action, only copy recognized properties
             }
         }
 
@@ -387,4 +396,15 @@ class TrackBase {
     }
 }
 
+
+/**
+ * Map UCSC track line "type" setting to file format.  In igv.js "type" refers to the track type, not the input file format
+ * @type {Map<string, string>}
+ */
+const UCSCTypeMappings = new Map([
+    ["wiggle_0", "wig"],
+    ["bed", "bed"],
+    ["bigBed", "bigBed"],
+    ["bigWig", "bigWig"]
+])
 export default TrackBase;
