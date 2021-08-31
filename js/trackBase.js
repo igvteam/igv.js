@@ -233,11 +233,11 @@ class TrackBase {
                         tracklineConfg.autoscale = false;
                         tracklineConfg.dataRange = {min, max};
                     }
-                case "name":
-                    tracklineConfg[key] = properties[key];
-                    break;
                 case "url":
                     tracklineConfg["infoURL"] = properties[key];
+                    break;
+                default:
+                    tracklineConfg[key] = properties[key];
             }
         }
 
