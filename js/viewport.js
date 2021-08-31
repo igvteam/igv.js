@@ -84,8 +84,6 @@ class ViewPort extends ViewportBase {
 
     setTrackLabel(label) {
 
-        this.trackView.track.name = this.trackView.track.config.name = label;
-
         this.$trackLabel.empty();
         this.$trackLabel.html(label);
 

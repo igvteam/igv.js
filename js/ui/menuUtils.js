@@ -231,7 +231,7 @@ function trackRenameMenuItem(trackView) {
         const callback = function () {
             let value = trackView.browser.inputDialog.input.value;
             value = ('' === value || undefined === value) ? 'untitled' : value.trim();
-            trackView.browser.setTrackLabelName(trackView, value);
+            trackView.track.name = value;
         };
 
         const config =
