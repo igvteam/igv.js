@@ -70,7 +70,10 @@ class RulerViewport extends ViewPort {
 
         this.$viewport.off(this.namespace)
 
+        // console.log(`Ruler track ${ true === isWholeGenomeView ? 'is' : 'is not' } whole genome.`)
+
         if (true === isWholeGenomeView) {
+
             const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
 
             const click = `click${ this.namespace }`
@@ -97,6 +100,9 @@ class RulerViewport extends ViewPort {
                 this.browser.search(searchString);
             })
 
+            this.$viewport.get(0).style.cursor = 'pointer'
+        } else {
+            this.$viewport.get(0).style.cursor = 'default'
         }
 
     }
