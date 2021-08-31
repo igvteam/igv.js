@@ -885,7 +885,7 @@
 
 .igv-viewport {
   position: relative;
-  margin-top: 2px;
+  margin-top: 5px;
   overflow-x: hidden;
   overflow-y: hidden; }
 
@@ -930,7 +930,7 @@
   height: 100%;
   width: 50px; }
   .igv-axis-column > div {
-    margin-top: 2px;
+    margin-top: 5px;
     width: 100%; }
 
 .igv-sample-name-column {
@@ -953,7 +953,7 @@
   width: 14px; }
   .igv-scrollbar-column > div {
     position: relative;
-    margin-top: 2px;
+    margin-top: 5px;
     width: 14px; }
     .igv-scrollbar-column > div > div {
       cursor: pointer;
@@ -985,7 +985,7 @@
     z-index: 512;
     position: relative;
     cursor: pointer;
-    margin-top: 2px;
+    margin-top: 5px;
     width: 100%;
     border-style: solid;
     border-width: 0;
@@ -996,7 +996,7 @@
     background-color: #787878; }
   .igv-track-drag-column > .igv-track-drag-shim {
     position: relative;
-    margin-top: 2px;
+    margin-top: 5px;
     width: 100%;
     border-style: solid;
     border-width: 0; }
@@ -1016,7 +1016,7 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: center;
-    margin-top: 2px;
+    margin-top: 5px;
     width: 100%;
     background: white; }
     .igv-gear-menu-column > div > div {
