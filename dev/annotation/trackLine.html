@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>Demonstration of track line, and overriding track line through track configuration.</h1>
+
+<b>Bed file contents:</b>
+
+<pre>
+    track name=clones description="Clones" visibility=2 color=0,128,0 useScore=1 url="http://genome.ucsc.edu/goldenPath/help/clones.html#$$"
+    #chrom chromStart chromEnd name score
+    chr22 10000000 10004000 cloneA 960
+    ....
+</pre>
+
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg38",
+            locus: "chr22:10000000-10020000",
+            tracks:
+                [
+                    {
+                        type: "annotation",
+                        format: "bed",
+                        url: "../../test/data/bed/track_url.bed",
+                        indexed: false
+                    },
+                    {
+                        name: "Override track name, description, and color",
+                        color: "blue",
+                        description:'<a href="http://genome.ucsc.edu/goldenPath/help/clones.html" target="_blank">UCSC Clones example</a>',
+                        type: "annotation",
+                        format: "bed",
+                        url: "../../test/data/bed/track_url.bed",
+                        indexed: false
+                    },
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
