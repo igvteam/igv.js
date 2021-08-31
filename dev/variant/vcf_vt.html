@@ -2,14 +2,11 @@
 <html lang="en">
 
 <head>
-    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
-    <meta charset="utf-8">
-    <link href="https://igv.org/web/https://igv.org/web/img/favicon.ico" rel="shortcut icon">
-    <title>VCF with VT field</title>
-
-</head>
-
+    <title>igv.js</title>
 <body>
+
+<h1>VCF with VT field</h1>
+
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -20,15 +17,13 @@
 
     const options =
         {
-            showNavigation: true,
-            locus: "chr1:155,160,475-155,184,282",
+            locus: "chr1:155,061,988-155,252,452",
             genome: "hg19",
             tracks: [
                 {
                     "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz?versionId=null",
                     "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi?versionId=null",
                     "name": "1KG Sites",
-                    "displayMode": "COLLAPSED"
                 }
             ]
         };
