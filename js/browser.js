@@ -1455,9 +1455,14 @@ class Browser {
             this.eventHandlers[eventName] = []; // Remove all eventhandlers matching name
         } else {
             // Remove specific event handler
-            const callbackIndex = this.eventHandlers[eventName].indexOf(fn);
-            if (callbackIndex !== -1) {
-                this.eventHandlers[eventName].splice(callbackIndex, 1);
+            const handlers = this.eventHandlers[eventName];
+            if(!handlers || handlers.length === 0) {
+                console.warn("No handlers to remove for event: " + eventName);
+            } else {
+                const callbackIndex = handlers.indexOf(fn);
+                if (callbackIndex !== -1) {
+                    this.eventHandlers[eventName].splice(callbackIndex, 1);
+                }
             }
         }
     }
