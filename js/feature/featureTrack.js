@@ -32,6 +32,8 @@ import {reverseComplementSequence} from "../util/sequenceUtils.js";
 import {renderFeature} from "./render/renderFeature.js";
 import {renderSnp} from "./render/renderSnp.js";
 import {renderFusionJuncSpan} from "./render/renderFusionJunction.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
 
 class FeatureTrack extends TrackBase {
 
@@ -247,8 +249,26 @@ class FeatureTrack extends TrackBase {
                 this.extractPopupData(feature._f || feature, this.getGenomeId());
 
             if (featureData) {
+
                 if (data.length > 0) {
                     data.push("<hr/><hr/>");
+                }
+
+                // If we have an infoURL, find the name property and create the link.  We do this at this level
+                // to catch name properties in both custom popupData functions and the generic extractPopupData function
+
+                const infoURL = this.infoURL || this.config.infoURL;
+                if(infoURL) {
+                    for (let fd of featureData) {
+                        if (fd.name &&
+                            fd.name.toLowerCase() === "name" &&
+                            fd.value && StringUtils.isString(fd.value) &&
+                            !fd.value.startsWith("<")) {
+                                const url = this.infoURL || this.config.infoURL;
+                                const href = url.replace("$$", feature.name);
+                                fd.value = `<a target="_blank" href=${href}>${fd.value}</a>`;
+                        }
+                    }
                 }
 
                 Array.prototype.push.apply(data, featureData);
