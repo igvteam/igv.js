@@ -1,9 +1,7 @@
 Track types
 
-ideogram
-sequence
-annotation
-snp
+* annotation
+* snp
 * seg
 * mut
 * wig  (wig, bigWig, tdf)
@@ -15,6 +13,6 @@ snp
 * arc
 * gcnv
 * junction (splicejunctions, junctions)
-fusionjuncspan
-merged
+* fusionjuncspan
+* merged
 

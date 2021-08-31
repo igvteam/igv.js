@@ -1,19 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
-    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
-
+    <title>IGV</title>
 </head>
 
 <body>
 
 <h1>Non-indexed BAM file</h1>
+
+In this example a non-indexed bam file is loaded.  This is only suitable for small bam files as the entire file
+is loaded.
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -30,7 +26,7 @@
                     id: "myBamTrack",
                     type: "alignment",
                     url: "../../test/data/bam/gstt1_sample.bam",
-                    indexed: false,
+                    indexed: false,        // <= required if not using an index
                     name: "gstt1"
                 }
             ]
