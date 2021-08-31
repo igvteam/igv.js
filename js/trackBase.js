@@ -62,7 +62,7 @@ class TrackBase {
             this.name = config.name || config.label;
         } else if (config.url instanceof File) {
             this.name = config.url.name;
-        } else if (StringUtils.isString(config.url) && config.url.indexOf("://") > 0) {
+        } else if (StringUtils.isString(config.url) && !config.url.startsWith("data:")) {
             this.name = FileUtils.getFilename(config.url);
         }
 
