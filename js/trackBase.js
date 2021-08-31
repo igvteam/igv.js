@@ -323,7 +323,6 @@ class TrackBase {
             }
         }
 
-        //const genomeId = this.getGenomeId()
         if (alleles && alleleFreqs) {
 
             if (alleles.endsWith(",")) {
@@ -349,6 +348,7 @@ class TrackBase {
                     for (let i = b.length - 2; i >= 0; i--) {
                         let alt = b[i].a;
                         if (alt.length === 1) {
+                            if(!genomeId) genomeId = this.getGenomeId();
                             const cravatLink = TrackBase.getCravatLink(feature.chr, feature.start + 1, ref, alt, genomeId)
                             console.log(cravatLink)
                             if (cravatLink) {
