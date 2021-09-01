@@ -53,7 +53,7 @@ class GFFHelper {
             new Set(options.filterTypes);
     }
 
-    combineFeatures(features) {
+    combineFeatures(features, genomicInterval) {
         let combinedFeatures;
         if ("gff3" === this.format) {
             const tmp = this.combineFeaturesById(features);
@@ -64,6 +64,7 @@ class GFFHelper {
         combinedFeatures.sort(function (a, b) {
             return a.start - b.start;
         })
+        this.numberExons(combinedFeatures, genomicInterval);
         return combinedFeatures;
     }
 
@@ -302,7 +303,22 @@ class GFFHelper {
             }
         }
     }
+
+    numberExons(features, genomicInterval) {
+
+        for (let f of features) {
+            if (f.exons &&
+                (!genomicInterval ||
+                    (f.end <= genomicInterval.end && f.start > genomicInterval.start))) {
+                for (let i = 0; i < f.exons.length; i++) {
+                    const exon = f.exons[i];
+                    exon.number = f.strand === "-" ? f.exons.length - i : i + 1;
+                }
+            }
+        }
+    }
 }
+
 
 var GFFTranscript = function (feature) {
     Object.assign(this, feature);
