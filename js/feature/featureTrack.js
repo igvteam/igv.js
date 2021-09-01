@@ -273,22 +273,26 @@ class FeatureTrack extends TrackBase {
                     }
                 }
 
-               Array.prototype.push.apply(data, featureData);
+                Array.prototype.push.apply(data, featureData);
 
-                // If we have clicked over an exon number it
+                // If we have clicked over an exon number it.
+                // Disabled for GFF and GTF files if the visibility window is < the feature length since we don't know if we have all exons
+                const isGFF = "gff" === this.config.format || "gff3" === this.config.format || "gtf" === this.config.format;
                 if (f.exons) {
                     for (let i = 0; i < f.exons.length; i++) {
                         const exon = f.exons[i];
-                        if(genomicLocation >= exon.start && genomicLocation <= exon.end) {
-                            data.push('<hr/>');
-                            const exonNumber = f.strand === "-" ? f.exons.length - i : i + 1;
-                            data.push({name: "Exon Number", value: exonNumber});
+                        if (genomicLocation >= exon.start && genomicLocation <= exon.end) {
+                            const exonNumber = isGFF ?
+                                exon.number :
+                                f.strand === "-" ? f.exons.length - i : i + 1;
+                            if (exonNumber) {
+                                data.push('<hr/>');
+                                data.push({name: "Exon Number", value: exonNumber});
+                            }
                             break;
                         }
                     }
                 }
-
-
             }
         }
 
