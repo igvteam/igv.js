@@ -210,7 +210,7 @@ class TextFeatureSource {
         if (features) {
 
             if ("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) {
-                features = (new GFFHelper(this.config)).combineFeatures(features);
+                features = (new GFFHelper(this.config)).combineFeatures(features, genomicInterval);
             }
 
             // Assign overlapping features to rows
