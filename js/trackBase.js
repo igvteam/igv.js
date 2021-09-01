@@ -129,7 +129,7 @@ class TrackBase {
 
         // Update original config values with any changes
         for (let key of Object.keys(state)) {
-            if (key.startsWith("_") || transientProperties.has(key)) continue;   // transient property
+            if (key.startsWith("_")) continue;   // transient property
             const value = this[key];
             if (value && (isSimpleType(value) || typeof value === "boolean")) {
                 state[key] = value;
