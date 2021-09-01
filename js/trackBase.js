@@ -119,17 +119,20 @@ class TrackBase {
      */
     getState() {
 
+        // Transient properties that do not follow the _ convention
+        const transientProperties = new Set(["derivedName"]);
+
         // Create copy of config, minus transient properties (convention is name starts with '_')
         const state = {};
         for (let key of Object.keys(this.config)) {
-            if (!key.startsWith("_")) {
+            if (!(key.startsWith("_") || transientProperties.has(key))) {
                 state[key] = this.config[key];
             }
         }
 
         // Update original config values with any changes
         for (let key of Object.keys(state)) {
-            if (key.startsWith("_")) continue;   // transient property
+            if (key.startsWith("_") || transientProperties.has(key)) continue;   // transient property
             const value = this[key];
             if (value && (isSimpleType(value) || typeof value === "boolean")) {
                 state[key] = value;
@@ -267,9 +270,6 @@ class TrackBase {
 
             if (!this.config.hasOwnProperty(key) || (key === "name" && this.config.derivedName)) {
                 this[key] = tracklineConfg[key];
-                if(key === "name") {
-                    this.config.derivedName = false; // No longer "derived"
-                }
                 if (key === "height" && this.trackView) {
                     try {
                         const h = Number.parseInt(tracklineConfg[key]);
