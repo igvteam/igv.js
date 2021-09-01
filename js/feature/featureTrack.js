@@ -260,20 +260,35 @@ class FeatureTrack extends TrackBase {
                 // If we have an infoURL, find the name property and create the link.  We do this at this level
                 // to catch name properties in both custom popupData functions and the generic extractPopupData function
                 const infoURL = this.infoURL || this.config.infoURL;
-                if(infoURL) {
+                if (infoURL) {
                     for (let fd of featureData) {
                         if (fd.name &&
                             fd.name.toLowerCase() === "name" &&
                             fd.value && StringUtils.isString(fd.value) &&
                             !fd.value.startsWith("<")) {
-                                const url = this.infoURL || this.config.infoURL;
-                                const href = url.replace("$$", feature.name);
-                                fd.value = `<a target="_blank" href=${href}>${fd.value}</a>`;
+                            const url = this.infoURL || this.config.infoURL;
+                            const href = url.replace("$$", feature.name);
+                            fd.value = `<a target="_blank" href=${href}>${fd.value}</a>`;
                         }
                     }
                 }
 
-                Array.prototype.push.apply(data, featureData);
+               Array.prototype.push.apply(data, featureData);
+
+                // If we have clicked over an exon number it
+                if (f.exons) {
+                    for (let i = 0; i < f.exons.length; i++) {
+                        const exon = f.exons[i];
+                        if(genomicLocation >= exon.start && genomicLocation <= exon.end) {
+                            data.push('<hr/>');
+                            const exonNumber = f.strand === "-" ? f.exons.length - i : i + 1;
+                            data.push({name: "Exon Number", value: exonNumber});
+                            break;
+                        }
+                    }
+                }
+
+
             }
         }
 
