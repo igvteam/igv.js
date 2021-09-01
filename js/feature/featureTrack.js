@@ -244,9 +244,12 @@ class FeatureTrack extends TrackBase {
         const data = [];
         for (let feature of features) {
 
-            const featureData = (typeof feature.popupData === "function") ?
-                feature.popupData(genomicLocation) :
-                this.extractPopupData(feature._f || feature);
+            // Whole genome hack, whole-genome psuedo features store the "real" feature in an _f field
+            const f = feature._f || feature;
+
+            const featureData = (typeof f.popupData === "function") ?
+                f.popupData(genomicLocation) :
+                this.extractPopupData(f);
 
             if (featureData) {
 
@@ -256,7 +259,6 @@ class FeatureTrack extends TrackBase {
 
                 // If we have an infoURL, find the name property and create the link.  We do this at this level
                 // to catch name properties in both custom popupData functions and the generic extractPopupData function
-
                 const infoURL = this.infoURL || this.config.infoURL;
                 if(infoURL) {
                     for (let fd of featureData) {
