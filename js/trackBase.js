@@ -261,9 +261,11 @@ class TrackBase {
             }
         }
 
-        // Track configuration objects have precendence over track line properties
+        // Track configuration objects have precedence over track line properties in general.  The "name" property
+        // is an exception if it was derived and not explicitly entered (that is derived from the web app from filename).
         for (let key of Object.keys(tracklineConfg)) {
-            if (!this.config.hasOwnProperty(key)) {
+
+            if (!this.config.hasOwnProperty(key) || (key === "name" && this.config.derivedName)) {
                 this[key] = tracklineConfg[key];
                 if (key === "height" && this.trackView) {
                     try {
