@@ -267,6 +267,9 @@ class TrackBase {
 
             if (!this.config.hasOwnProperty(key) || (key === "name" && this.config.derivedName)) {
                 this[key] = tracklineConfg[key];
+                if(key === "name") {
+                    this.config.derivedName = false; // No longer "derived"
+                }
                 if (key === "height" && this.trackView) {
                     try {
                         const h = Number.parseInt(tracklineConfg[key]);
