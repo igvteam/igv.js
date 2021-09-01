@@ -15,6 +15,9 @@ global.document.implementation = new DOMImplementation();    // For jQUery
 global.window = {
     document: global.document,
     setTimeout: function () {
+    },
+    location: {
+        href: ""
     }
 }
 

@@ -1044,6 +1044,10 @@ class Browser {
         return this.trackViews.filter(f).map(tv => tv.track);
     }
 
+    /**
+     * Set the track height globally for all tracks.  (Note: Its not clear why this is useful).
+     * @param newHeight
+     */
     setTrackHeight(newHeight) {
 
         this.trackHeight = newHeight;
