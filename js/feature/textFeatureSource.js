@@ -78,7 +78,7 @@ class TextFeatureSource {
             this.expandQuery = config.expandQuery ? true : false;
         } else if ("htsget" === config.sourceType) {
             this.reader = new HtsgetVariantReader(config, genome);
-        }else if (config.sourceType === 'ucscservice') {
+        } else if (config.sourceType === 'ucscservice') {
             this.reader = new UCSCServiceReader(config.source);
             this.queryable = true;
         } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
@@ -323,7 +323,7 @@ function fixFeatures(features, genome) {
         const interChrFeatures = [];
         for (let feature of features) {
 
-            if(genome) {
+            if (genome) {
                 feature.chr1 = genome.getChromosomeName(feature.chr1);
                 feature.chr2 = genome.getChromosomeName(feature.chr2);
             }

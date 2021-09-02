@@ -1,15 +1,42 @@
 import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js";
+import FeatureFileReader from "../js/feature/featureFileReader.js";
 import {assert} from 'chai';
 import {genome} from "./utils/Genome.js";
+import GFFHelper from "../js/feature/gffHelper";
 
 suite("testGFF", function () {
 
-    test("GFF query", async function () {
+    test("ENSEMBL GFF", async function () {
 
         const chr = "chr1";
         const start = 1;
         const end = 10000;
+        const featureReader = new FeatureFileReader({
+                url: require.resolve('./data/gff/Ensembl_MYC-205.gff3'),
+                format: 'gff3',
+                filterTypes: []
+            },
+            genome);
+
+        // Fetch "raw" features (constituitive parts)
+        const features = await featureReader.readFeatures(chr, start, end);
+        assert.ok(features);
+        assert.equal(9, features.length);
+
+        // Combine features
+        const helper = new GFFHelper({format: "gff3"});
+        const combinedFeatures = helper.combineFeatures(features);
+        assert.equal(1, combinedFeatures.length);
+        assert.equal(3, combinedFeatures[0].exons.length);
+    })
+
+
+    test("GFF query", async function () {
+
+        const chr = "chr1";
+        const start = 0;
+        const end = Number.MAX_SAFE_INTEGER;
         const featureSource = FeatureSource({
                 url: require.resolve('./data/gff/eden.gff'),
                 format: 'gff3',
