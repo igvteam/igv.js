@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import FileFormats from "./fileFormats.js";
 
 const knownFileExtensions = new Set([
@@ -132,7 +133,7 @@ function inferFileFormat(fn) {
         case "bb":
             return "bigbed";
         default:
-            if(knownFileExtensions.has(ext)) {
+            if (knownFileExtensions.has(ext)) {
                 return ext;
             } else {
                 return undefined;
@@ -144,17 +145,15 @@ function inferFileFormat(fn) {
 
 function inferIndexPath(url, extension) {
 
-    var path, idx;
-
-    if (url instanceof File) {
-        throw new Error("Cannot infer an index path for a local File.  Please select explicitly")
-    }
-
-    if (url.includes("?")) {
-        idx = url.indexOf("?");
-        return url.substring(0, idx) + "." + extension + url.substring(idx);
+    if (StringUtils.isString(url)) {
+        if (url.includes("?")) {
+            const idx = url.indexOf("?");
+            return url.substring(0, idx) + "." + extension + url.substring(idx);
+        } else {
+            return url + "." + extension;
+        }
     } else {
-        return url + "." + extension;
+        return undefined;
     }
 }
 

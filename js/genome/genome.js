@@ -66,7 +66,7 @@ const GenomeUtils = {
             if (config.loadDefaultGenomes !== false) {
                 try {
                     const url = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`;  // prevent caching
-                    const jsonArray = await igvxhr.loadJson(url, {timeout: 3000});
+                    const jsonArray = await igvxhr.loadJson(url, {timeout: 5000});
                     processJson(jsonArray);
                 } catch (e) {
                     console.error(e);
