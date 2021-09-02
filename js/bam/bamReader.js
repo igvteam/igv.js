@@ -29,7 +29,6 @@ import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
 import {igvxhr, BGZip} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
-import * as TrackUtils from '../util/trackUtils.js';
 
 /**
  * Class for reading a bam file
@@ -43,13 +42,7 @@ class BamReader {
         this.config = config;
         this.genome = genome;
         this.bamPath = config.url;
-
-        // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
         this.baiPath = config.indexURL;
-        if (!this.baiPath && config.indexed !== false && !(this.bamPath instanceof File)) {
-            this.baiPath = TrackUtils.inferIndexPath(this.bamPath, "bai");
-            console.error(`Warning: no indexURL specified for ${this.config.url}.  Guessing ${this.baiPath}`)
-        }
         BamUtils.setReaderDefaults(this, config);
     }
 
