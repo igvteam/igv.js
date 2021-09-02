@@ -27,15 +27,12 @@ import FeatureParser from "./featureParser.js";
 import SegParser from "./segParser.js";
 import VcfParser from "../variant/vcfParser.js";
 import {FileUtils, igvxhr, StringUtils, URIUtils, BGZip} from "../../node_modules/igv-utils/src/index.js";
-import {buildOptions} from "../util/igvUtils.js";
+import {buildOptions, isDataURL} from "../util/igvUtils.js";
 import GWASParser from "../gwas/gwasParser.js";
 import AEDParser from "../aed/AEDParser.js";
 import {loadIndex} from "../bam/indexFactory.js";
 import getDataWrapper from "./dataWrapper.js";
 import BGZipLineReader from "../util/BGZipLineReader.js";
-
-
-const isString = StringUtils.isString;
 
 /**
  * Reader for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -56,7 +53,7 @@ class FeatureFileReader {
 
         if (FileUtils.isFilePath(this.config.url)) {
             this.filename = this.config.url.name;
-        } else if (isString(this.config.url) && this.config.url.startsWith('data:')) {
+        } else if (isDataURL(this.config.url)) {
             this.indexed = false;  // by definition
             this.dataURI = config.url;
         } else {

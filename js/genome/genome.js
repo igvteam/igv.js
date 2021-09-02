@@ -25,7 +25,7 @@
 
 import {loadFasta} from "./fasta.js";
 import Cytoband from "./cytoband.js";
-import {buildOptions} from "../util/igvUtils.js";
+import {buildOptions, isDataURL} from "../util/igvUtils.js";
 import {igvxhr, StringUtils, URIUtils, BGZip} from "../../node_modules/igv-utils/src/index.js";
 import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import version from "../version.js";
@@ -356,7 +356,7 @@ class Genome {
 async function loadCytobands(cytobandUrl, config) {
 
     let data;
-    if (cytobandUrl.startsWith("data:")) {
+    if (isDataURL(cytobandUrl)) {
         const plain = BGZip.decodeDataURI(cytobandUrl);
         data = "";
         const len = plain.length;
