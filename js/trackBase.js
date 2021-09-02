@@ -320,12 +320,6 @@ class TrackBase {
                 isSimpleType(feature[property])) {
 
                 let value = feature[property];
-                // if("name" === property && (this.infoURL || this.config.infoURL)) {
-                //     const url = this.infoURL || this.config.infoURL;
-                //     const href = url.replace("$$", feature.name);
-                //     value = `<a target="_blank" href=${href}>${value}</a>`;
-                // }
-
                 data.push({name: StringUtils.capitalize(property), value: value});
 
                 if (property === "alleles") {
