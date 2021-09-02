@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>GFF canonical "eden" transcript</h1>
+
+<div style="padding-top: 10px;padding-bottom: 10px;">
+
+Example taken from <a href="https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md" target="_blank">GFF3 Spec</a>
+
+</div>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            reference: {
+                "id": "hg38",
+                "name": "Human (GRCh38/hg38)",
+                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
+            },
+            locus: "chr1:1-9000",
+            tracks:
+                [
+                    {
+                        "name": "MYC-205",
+                        "url": "../../test/data/gff/eden.gff",
+                        "format": "gff3",
+                        "indexed": false,
+                        "height": 300
+                    }
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

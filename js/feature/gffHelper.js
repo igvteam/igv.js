@@ -54,7 +54,12 @@ class GFFHelper {
     }
 
     combineFeatures(features, genomicInterval) {
+
         let combinedFeatures;
+
+        const filterTypes = this.filterTypes;
+        features = features.filter(f => filterTypes === undefined || !filterTypes.has(f.type));
+
         if ("gff3" === this.format) {
             const tmp = this.combineFeaturesById(features);
             combinedFeatures = this.combineFeaturesGFF(tmp);
@@ -68,50 +73,61 @@ class GFFHelper {
         return combinedFeatures;
     }
 
+    /**
+     * Combine multiple non-transcript model features with the same ID on the same chromosome into a single feature.
+     * Features that are part of the transcript model (e.g. exon, mRNA, etc) are combined later.
+     *
+     * @param features
+     * @returns {[]}
+     */
     combineFeaturesById(features) {
+
+        const chrIdMap = new Map();
         const combinedFeatures = [];
-        const chrIdHash = {};
+
         for (let f of features) {
-            if (f.id === undefined) {
+
+            if (transcriptModelTypes.has(f.type)) {
                 combinedFeatures.push(f);
             } else {
-                let idHash = chrIdHash[f.chr];
-                if (!idHash) {
-                    idHash = {};
-                    chrIdHash[f.chr] = idHash;
+                let idMap = chrIdMap.get(f.chr);
+                if (!idMap) {
+                    idMap = new Map();
+                    chrIdMap.set(f.chr, idMap);
                 }
-                if (idHash.hasOwnProperty(f.id)) {
-                    const sf = idHash[f.id];
-                    if (sf.hasOwnProperty("exons")) {
-                        sf.start = Math.min(sf.start, f.start);
-                        sf.end = Math.max(sf.end, f.end);
-                        sf.exons.push(f);
-                    } else {
-                        const cf = {
-                            id: f.id,
-                            type: f.type,
-                            chr: f.chr,
-                            strand: f.strand,
-                            start: Math.min(f.start, sf.start),
-                            end: Math.max(f.end, sf.end),
-                            exons: [sf, f]
-                        };
-                        if (f.parent && f.parent.trim() !== "") {
-                            cf.parent = f.parent;
-                        }
-                        idHash[f.id] = cf;
-                    }
+
+                let featureArray = idMap.get(f.id);
+                if (featureArray) {
+                    featureArray.push(f);
                 } else {
-                    idHash[f.id] = f;
+                    idMap.set(f.id, [f]);
                 }
             }
         }
-        for (let key of Object.keys(chrIdHash)) {
-            const idHash = chrIdHash[key];
-            for (let id of Object.keys(idHash)) {
-                combinedFeatures.push(idHash[id])
+
+        for (let idMap of chrIdMap.values()) {
+            for (let featureArray of idMap.values()) {
+                if (featureArray.length > 1) {
+                    // Use the first feature as prototypical (for column 9 attributes), and adjust start/end
+                    // Parts are represented as "exons", as that is how they are presented visually
+                    const cf = featureArray[0];
+                    cf.exons = [];
+                    for (let f of featureArray) {
+                        cf.start = Math.min(cf.start, f.start);
+                        cf.end = Math.max(cf.end, f.end);
+                        cf.exons.push({
+                            start: f.start,
+                            end: f.end
+                        });
+                    }
+                    combinedFeatures.push(cf);
+                } else {
+                    combinedFeatures.push(featureArray[0]);
+                }
             }
         }
+
+
         return combinedFeatures;
     }
 
@@ -120,9 +136,6 @@ class GFFHelper {
         const transcripts = Object.create(null)
         const combinedFeatures = []
         const consumedFeatures = new Set();
-        const filterTypes = this.filterTypes;
-
-        features = features.filter(f => filterTypes === undefined || !filterTypes.has(f.type))
 
         // 1. Build dictionary of transcripts
         for (let f of features) {
@@ -221,14 +234,12 @@ class GFFHelper {
                     consumedFeatures.add(f);
                     const g = geneMap[f.parent];
                     if (g) {
-                        gffTranscript.geneObject = geneMap[f.parent];
+                        gffTranscript.geneObject = g;
                         consumedFeatures.add(g);
                     }
                 }
             }
         }
-
-        // Remove assigned genes
 
         // Add exons
         for (let f of features) {
