@@ -195,5 +195,9 @@ function prettyBasePairNumber  (raw) {
     return floored.toString() + units;
 }
 
-export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, getFilename, prettyBasePairNumber}
+function isDataURL(obj) {
+    return (StringUtils.isString(obj) && obj.startsWith("data:"))
+}
+
+export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, getFilename, prettyBasePairNumber, isDataURL}
 

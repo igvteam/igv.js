@@ -27,10 +27,7 @@
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
 import {igvxhr, StringUtils, BGZip, FeatureCache} from "../../node_modules/igv-utils/src/index.js";
-import {buildOptions} from "../util/igvUtils.js";
-
-const isString = StringUtils.isString;
-
+import {buildOptions, isDataURL} from "../util/igvUtils.js";
 
 /**
  * Class for reading a bam file
@@ -44,7 +41,7 @@ class BamReaderNonIndexed {
         this.config = config;
         this.genome = genome;
         this.bamPath = config.url;
-        this.isDataUri = isString(config.url) && config.url.startsWith("data:");
+        this.isDataUri = isDataURL(config.url);
         BamUtils.setReaderDefaults(this, config);
     }
 
