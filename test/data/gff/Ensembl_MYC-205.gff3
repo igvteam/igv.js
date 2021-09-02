@@ -1,0 +1,9 @@
+8	havana	mRNA	127736220	127741372	.	+	.	ID=transcript:ENST00000524013;Parent=gene:ENSG00000136997;Name=MYC-205;biotype=protein_coding;tag=basic;transcript_id=ENST00000524013;transcript_support_level=1;version=1
+8	havana	five_prime_UTR	127736220	127736593	.	+	.	Parent=transcript:ENST00000524013
+8	havana	exon	127736220	127736623	.	+	.	Parent=transcript:ENST00000524013;Name=ENSE00002098079;constitutive=0;ensembl_end_phase=0;ensembl_phase=-1;exon_id=ENSE00002098079;rank=1;version=1
+8	havana	CDS	127736594	127736623	.	+	0	ID=CDS:ENSP00000430235;Parent=transcript:ENST00000524013;protein_id=ENSP00000430235
+8	havana	exon	127738251	127739019	.	+	.	Parent=transcript:ENST00000524013;Name=ENSE00002116242;constitutive=0;ensembl_end_phase=1;ensembl_phase=0;exon_id=ENSE00002116242;rank=2;version=1
+8	havana	CDS	127738251	127739019	.	+	0	ID=CDS:ENSP00000430235;Parent=transcript:ENST00000524013;protein_id=ENSP00000430235
+8	havana	CDS	127740396	127740958	.	+	2	ID=CDS:ENSP00000430235;Parent=transcript:ENST00000524013;protein_id=ENSP00000430235
+8	havana	exon	127740396	127741372	.	+	.	Parent=transcript:ENST00000524013;Name=ENSE00002104585;constitutive=0;ensembl_end_phase=-1;ensembl_phase=1;exon_id=ENSE00002104585;rank=3;version=1
+8	havana	three_prime_UTR	127740959	127741372	.	+	.	Parent=transcript:ENST00000524013
