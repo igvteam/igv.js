@@ -31,9 +31,7 @@ import HtsgetBamReader from "../htsget/htsgetBamReader.js";
 import CramReader from "../cram/cramReader.js";
 import Ga4ghAlignmentReader from "../ga4gh/ga4ghAlignmentReader.js";
 import {packAlignmentRows, unpairAlignments} from "./alignmentUtils.js";
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
-
-const isString = StringUtils.isString;
+import {isDataURL} from "../util/igvUtils.js";
 
 class BamSource {
 
@@ -45,7 +43,7 @@ class BamSource {
         this.genome = genome;
         this.alignmentContainer = undefined;
 
-        if (isString(config.url) && config.url.startsWith("data:")) {
+        if (isDataURL(config.url) ) {
             if ("cram" === config.format) {
                 throw "CRAM data uris are not supported"
             }

@@ -26,7 +26,7 @@
 import BufferedReader from "./bufferedReader.js";
 import BinaryParser from "../binary.js";
 import {igvxhr, BGZip} from "../../node_modules/igv-utils/src/index.js";
-import {buildOptions} from "../util/igvUtils.js";
+import {buildOptions, isDataURL} from "../util/igvUtils.js";
 import getDecoder from "./bbDecoders.js";
 import {parseAutoSQL} from "../util/ucscUtils.js"
 
@@ -48,7 +48,7 @@ class BWReader {
         this.genome = genome;
         this.rpTreeCache = {};
         this.config = config;
-        this.loader = this.path.startsWith("data:") ? new DataBuffer(this.path) : igvxhr;
+        this.loader = isDataURL(this.path) ? new DataBuffer(this.path) : igvxhr;
     }
 
     async readWGFeatures(bpPerPixel, windowFunction) {
@@ -315,7 +315,7 @@ class RPTree {
 
     async load() {
         const rootNodeOffset = this.fileOffset + RPTREE_HEADER_SIZE;
-        const bufferedReader = this.path.startsWith("data:") ?
+        const bufferedReader = isDataURL(this.path) ?
             this.loader :
             new BufferedReader(this.config, BUFFER_SIZE);
         this.rootNode = await this.readNode(rootNodeOffset, bufferedReader)
@@ -380,7 +380,7 @@ class RPTree {
 
             let leafItems = [],
                 processing = new Set(),
-                bufferedReader = self.path.startsWith("data:") ?
+                bufferedReader = isDataURL(self.path) ?
                     self.loader :
                     new BufferedReader(self.config, BUFFER_SIZE);
 
