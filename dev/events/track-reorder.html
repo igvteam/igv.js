@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+    <title>IGV - Custom Track Click</title>
+
+    <!-- Bootstrap 4 - CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <!-- Examples CSS -->
+    <link rel="stylesheet" href="../css/custom-track-click.css">
+
+    <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
+
+    <!-- Bootstrap 4 - JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
+
+    <!-- IGV JS-->
+    <script src="../../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+<main role="main" class="container">
+
+    <div class="igv-custom-track-click-container">
+        <h2>IGV.js <code>trackorderchanged</code> Event Example </h2>
+        <p class="lead">In this example we use the <code>trackorderchange</code> event to update an ordered
+            list of track names.</p>
+
+        <h3>Try it out:</h3>
+
+        <ol>
+            <li>Reorder tracks by dragging its <i>grab bar</i> vertically.</li>
+            <li>Notice the track name list updates with the new order.</li>
+        </ol>
+
+    </div>
+
+    <div class="row">
+        <div id="igv-custom-track-click" class="col-sm-9"></div>
+        <div id="igv-custom-track-click-selected-genes" class="col-sm-3">
+            <h4>Track names</h4>
+            <ul id="trackList">
+
+            </ul>
+        </div>
+    </div>
+
+</main>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        var options = {
+            genome: "hg19",
+            locus: "chr1:155,138,124-155,153,715",
+            tracks:
+                [
+                    {
+                        url: 'https://www.encodeproject.org/files/ENCFF000ASF/@@download/ENCFF000ASF.bigWig',
+                        name: 'Red',
+                        color: 'rgb(200,0,0)',
+                        autoscaleGroup: '1'
+                    },
+                    {
+                        url: 'https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig',
+                        name: 'Blue',
+                        color: 'rgb(0,0,150)',
+                        autoscaleGroup: '1'
+                    },
+                    {
+                        url: 'https://www.encodeproject.org/files/ENCFF000ATA/@@download/ENCFF000ATA.bigWig',
+                        name: 'Green',
+                        color: 'rgb(0,150,0)',
+                        autoscaleGroup: '1'
+                    }
+                ]
+        }
+
+        var igv_custom_track_click = $('#igv-custom-track-click');
+
+        igv.createBrowser(igv_custom_track_click.get(0), options)
+
+            .then(function (browser) {
+
+                // Initialize list, this is not part of the public API
+                updateTrackList(browser.getTrackOrder())
+
+                browser.on('trackorderchanged', updateTrackList);
+
+                function updateTrackList(trackNames) {
+                    let html = "<ul>";
+                    for(let track of trackNames) {
+                        html += `<li>${track}</li>`
+                    }
+                    html += "</ul>";
+                    document.getElementById("trackList").innerHTML = html;
+                }
+            })
+    })
+
+</script>
+
+</body>
+
+</html>

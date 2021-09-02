@@ -259,21 +259,26 @@ class FeatureTrack extends TrackBase {
 
                 // If we have an infoURL, find the name property and create the link.  We do this at this level
                 // to catch name properties in both custom popupData functions and the generic extractPopupData function
+
                 const infoURL = this.infoURL || this.config.infoURL;
-                if (infoURL) {
-                    for (let fd of featureData) {
+                for (let fd of featureData) {
+                    data.push(fd);
+                    if (infoURL) {
                         if (fd.name &&
                             fd.name.toLowerCase() === "name" &&
-                            fd.value && StringUtils.isString(fd.value) &&
+                            fd.value &&
+                            StringUtils.isString(fd.value) &&
                             !fd.value.startsWith("<")) {
+
+
                             const url = this.infoURL || this.config.infoURL;
                             const href = url.replace("$$", feature.name);
-                            fd.value = `<a target="_blank" href=${href}>${fd.value}</a>`;
+                            data.push({name: "Info", value: `<a target="_blank" href=${href}>${fd.value}</a>`});
                         }
                     }
                 }
 
-                Array.prototype.push.apply(data, featureData);
+                //Array.prototype.push.apply(data, featureData);
 
                 // If we have clicked over an exon number it.
                 // Disabled for GFF and GTF files if the visibility window is < the feature length since we don't know if we have all exons
