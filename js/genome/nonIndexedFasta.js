@@ -26,7 +26,7 @@
 // Indexed fasta files
 import {igvxhr, StringUtils, BGZip, URIUtils} from "../../node_modules/igv-utils/src/index.js";
 import Chromosome from "./chromosome.js";
-import {buildOptions} from "../util/igvUtils.js";
+import {buildOptions, isDataURL} from "../util/igvUtils.js";
 
 const splitLines = StringUtils.splitLines;
 
@@ -84,7 +84,7 @@ class NonIndexedFasta {
     async loadAll() {
 
         let data;
-        if (typeof this.fastaURL === 'string' && this.fastaURL.startsWith('data:')) {
+        if (isDataURL(this.fastaURL)) {
             let bytes = BGZip.decodeDataURI(this.fastaURL);
             data = "";
             for (let b of bytes) {
