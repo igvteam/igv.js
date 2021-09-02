@@ -32,6 +32,8 @@ import CramReader from "../cram/cramReader.js";
 import Ga4ghAlignmentReader from "../ga4gh/ga4ghAlignmentReader.js";
 import {packAlignmentRows, unpairAlignments} from "./alignmentUtils.js";
 import {isDataURL} from "../util/igvUtils.js";
+import * as TrackUtils from "../util/trackUtils.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 class BamSource {
 
@@ -43,7 +45,7 @@ class BamSource {
         this.genome = genome;
         this.alignmentContainer = undefined;
 
-        if (isDataURL(config.url) ) {
+        if (isDataURL(config.url)) {
             if ("cram" === config.format) {
                 throw "CRAM data uris are not supported"
             }
@@ -61,6 +63,23 @@ class BamSource {
         } else if ("cram" === config.format) {
             this.bamReader = new CramReader(config, genome, browser);
         } else {
+            if (!this.config.indexURL && config.indexed !== false) {
+                if(StringUtils.isString(this.config.url)) {
+                    const inferIndexPath = TrackUtils.inferIndexPath(this.config.url, "bai");
+                    if (inferIndexPath) {
+                        console.error(`Warning: no indexURL specified for ${this.config.url}.  Guessing ${this.baiPath}`)
+                        this.config.indexURL = inferIndexPath;
+                    } else {
+                        console.error(`Warning: no indexURL specified for ${this.config.url}.`)
+                        this.config.indexed = false;
+                    }
+                }
+                else {
+                    console.error(`Warning: no indexURL specified for ${this.config.name}.`)
+                    this.config.indexed = false;
+                }
+            }
+
             if (this.config.indexed !== false) { // && this.config.indexURL) {
                 this.bamReader = new BamReader(config, genome);
             } else {
