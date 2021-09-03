@@ -45,7 +45,7 @@ import XMLSession from "./session/igvXmlSession.js";
 import GenomeUtils from "./genome/genome.js";
 import loadPlinkFile from "./sampleInformation.js";
 import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js";
-import {buildOptions, doAutoscale, getFilename} from "./util/igvUtils.js";
+import {buildOptions, createColumn, doAutoscale, getFilename} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import {defaultSequenceTrackOrder} from './sequenceTrack.js';
 import version from "./version.js";
@@ -68,6 +68,9 @@ import MenuPopup from "./ui/menuPopup.js";
 import {viewportColumnManager} from './viewportColumnManager.js';
 import GenericColorPicker from './ui/genericColorPicker.js';
 import ViewportCenterLine from './ui/viewportCenterLine.js';
+import IdeogramTrack from "./ideogramTrack.js";
+import RulerTrack from "./rulerTrack.js";
+import GtexSelection from "./gtex/gtexSelection.js";
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -602,11 +605,11 @@ class Browser {
         if (this.trackGearColumn) this.trackGearColumn.remove()
 
         // discard remaining state
-        // if (this.ideogramTrackView) this.ideogramTrackView.dispose()
-        // this.ideogramTrackView = undefined
+        if (this.ideogramTrackView) this.ideogramTrackView.dispose()
+        this.ideogramTrackView = undefined
 
-        // if (this.rulerTrackView) this.rulerTrackView.dispose()
-        // this.rulerTrackView = undefined
+        if (this.rulerTrackView) this.rulerTrackView.dispose()
+        this.rulerTrackView = undefined
 
         this.trackViews = []
 
@@ -1807,10 +1810,6 @@ class Browser {
 function handleMouseMove(e) {
 
     e.preventDefault();
-
-    if (this.loadInProgress()) {
-        return;
-    }
 
     const { x, y } = DOMUtils.pageCoordinates(e);
 

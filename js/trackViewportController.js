@@ -2,9 +2,12 @@
  * Created by dat on 9/16/16.
  */
 
+import $ from "./vendor/jquery-3.3.1.slim.js";
+import {Popover} from '../node_modules/igv-ui/dist/igv-ui.js'
 import ViewportController from "./viewportController.js";
 import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 import C2S from "./canvas2svg.js"
+import GenomeUtils from "./genome/genome.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
