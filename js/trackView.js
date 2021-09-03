@@ -49,6 +49,22 @@ class TrackView {
 
     }
 
+    /**
+     * Start a spinner for the track on any of its viewports.  In practice this is called during initialization
+     * when there is only one.
+     */
+    startSpinner() {
+        if (this.viewports && this.viewports.length > 0) {
+            this.viewports[0].startSpinner();
+        }
+    }
+
+    stopSpinner() {
+        if (this.viewports && this.viewports.length > 0) {
+            this.viewports[0].stopSpinner();
+        }
+    }
+
     addDOMToColumnContainer(browser, columnContainer, referenceFrameList) {
 
         // Axis
@@ -79,43 +95,42 @@ class TrackView {
 
     createAxis(browser, track) {
 
-        const axis = DOMUtils.div()
-        browser.axisColumn.appendChild(axis)
+        const axis = DOMUtils.div();
+        browser.axisColumn.appendChild(axis);
 
-        axis.style.height = `${ track.height }px`
+        axis.style.height = `${track.height}px`;
         // axis.style.backgroundColor = randomRGB(150, 250)
 
         if (typeof track.paintAxis === 'function') {
-
             if (track.dataRange) {
-                this.addAxisEventListener(axis)
+                axis.addEventListener('click', () => {
+                    browser.dataRangeDialog.configure(this);
+                    browser.dataRangeDialog.present($(browser.columnContainer));
+                })
             }
 
-            this.resizeAxisCanvas(axis, axis.clientWidth, axis.clientHeight)
+
+            const {width, height} = axis.getBoundingClientRect();
+            this.axisCanvas = document.createElement('canvas');
+            this.axisCanvas.style.width = `${width}px`;
+            this.axisCanvas.style.height = `${height}px`;
+            axis.appendChild(this.axisCanvas);
         }
 
         return axis
+
     }
 
-    resizeAxisCanvas(axis, width, height) {
+    resizeAxisCanvas(width, height) {
 
-        if (this.axisCanvas) this.axisCanvas.remove()
+        // Size the canvas containing div.  Do we really need this?
+        this.axis.style.width = `${width}px`;
+        this.axis.style.height = `${height}px`;
 
-        axis.style.width = `${ width }px`
-        axis.style.height = `${ height }px`
-
-        this.axisCanvas = document.createElement('canvas')
-        axis.appendChild(this.axisCanvas);
-
-        this.axisCanvasContext = this.axisCanvas.getContext('2d');
-
-        this.axisCanvas.style.height = `${ height }px`
-        this.axisCanvas.style.width = `${ width }px`
-
-        this.axisCanvas.height = window.devicePixelRatio * height
-        this.axisCanvas.width = window.devicePixelRatio * width
-
-        this.axisCanvasContext.scale(window.devicePixelRatio, window.devicePixelRatio)
+        // Size the canvas in CSS (logical) pixels.  The buffer size will be set when painted.
+        // TODO -- if
+        this.axisCanvas.style.width = `${width}px`;
+        this.axisCanvas.style.height = `${height}px`;
     }
 
     removeDOMFromColumnContainer() {
@@ -243,8 +258,8 @@ class TrackView {
         this.track.config.height = newHeight;
 
         if (typeof this.track.paintAxis === 'function') {
-            this.resizeAxisCanvas(this.axis, this.axis.clientWidth, this.track.height);
-            this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
+            this.resizeAxisCanvas(this.axis.clientWidth, this.track.height);
+            this.paintAxis();
         }
 
         for (let { $viewport } of this.viewports) {
@@ -331,8 +346,8 @@ class TrackView {
             viewport.repaint();
         }
 
-        if (this.track.paintAxis) {
-            this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
+        if (typeof this.track.paintAxis === 'function') {
+            this.paintAxis();
         }
 
         // Repaint sample names last
@@ -346,6 +361,11 @@ class TrackView {
             const samples = this.track.getSamples()
             this.sampleNameViewport.repaint(samples)
         }
+    }
+
+    // track labels
+    setTrackLabelName(name) {
+        this.viewports.forEach(viewport => viewport.setTrackLabel(name));
     }
 
     /**
@@ -499,7 +519,7 @@ class TrackView {
         if (this.track.autoHeight) {
             this.setTrackHeight(maxHeight, false);
         } else if (this.track.paintAxis) {   // Avoid duplication, paintAxis is already called in setTrackHeight
-            this.track.paintAxis(this.axisCanvasContext, this.axisCanvas.width, this.axisCanvas.height);
+            this.paintAxis();
         }
 
         if (false === scrollbarExclusionTypes.has(this.track.type)) {
@@ -822,6 +842,25 @@ class TrackView {
         this.disposed = true;
     }
 
+    paintAxis() {
+
+        if (typeof this.track.paintAxis === 'function') {
+
+            // Set the canvas buffer size, this is the resolution it is drawn at.  This is done here in case the browser
+            // has been drug between screens at different dpi resolutions since the last repaint
+            const {width, height} = this.axisCanvas.getBoundingClientRect();
+            const dpi = window.devicePixelRatio || 1;
+            this.axisCanvas.height = dpi * height
+            this.axisCanvas.width = dpi * width
+
+            // Get a scaled context to draw aon
+            const axisCanvasContext = this.axisCanvas.getContext('2d');
+            axisCanvasContext.scale(dpi, dpi)
+
+            this.track.paintAxis(axisCanvasContext, width, height);
+        }
+    }
+
 }
 
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
@@ -841,6 +880,7 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
     }
 
 }
+
 
 // css - $igv-axis-column-width: 50px;
 const igv_axis_column_width = 50;
