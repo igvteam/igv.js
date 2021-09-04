@@ -1,0 +1,13 @@
+8	havana	ncRNA_gene	127686343	127733967	.	-	.	ID=gene:ENSG00000249375;Name=CASC11;biotype=lincRNA;description=cancer susceptibility 11 [Source:HGNC Symbol%3BAcc:HGNC:48939];gene_id=ENSG00000249375;logic_name=havana;version=7
+8	havana	lnc_RNA	127686343	127733967	.	-	.	ID=transcript:ENST00000502463;Parent=gene:ENSG00000249375;Name=CASC11-201;biotype=lincRNA;tag=basic;transcript_id=ENST00000502463;transcript_support_level=2;version=7
+8	havana	exon	127686343	127689423	.	-	.	Parent=transcript:ENST00000502463;Name=ENSE00002047991;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002047991;rank=3;version=2
+8	havana	exon	127691790	127691866	.	-	.	Parent=transcript:ENST00000502463;Name=ENSE00003437271;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00003437271;rank=2;version=1
+8	havana	exon	127733825	127733967	.	-	.	Parent=transcript:ENST00000502463;Name=ENSE00002038150;constitutive=1;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002038150;rank=1;version=1
+8	havana	lnc_RNA	127700608	127733967	.	-	.	ID=transcript:ENST00000519071;Parent=gene:ENSG00000249375;Name=CASC11-203;biotype=lincRNA;tag=basic;transcript_id=ENST00000519071;transcript_support_level=3;version=5
+8	havana	exon	127700608	127700839	.	-	.	Parent=transcript:ENST00000519071;Name=ENSE00002114147;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002114147;rank=4;version=1
+8	havana	exon	127703050	127703243	.	-	.	Parent=transcript:ENST00000519071;Name=ENSE00002123989;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002123989;rank=3;version=1
+8	havana	exon	127715947	127716168	.	-	.	Parent=transcript:ENST00000519071;Name=ENSE00002125530;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002125530;rank=2;version=1
+8	havana	exon	127733825	127733967	.	-	.	Parent=transcript:ENST00000519071;Name=ENSE00002038150;constitutive=1;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002038150;rank=1;version=1
+8	havana	lnc_RNA	127730194	127733967	.	-	.	ID=transcript:ENST00000518376;Parent=gene:ENSG00000249375;Name=CASC11-202;biotype=lincRNA;transcript_id=ENST00000518376;transcript_support_level=3;version=1
+8	havana	exon	127730194	127730922	.	-	.	Parent=transcript:ENST00000518376;Name=ENSE00002099724;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002099724;rank=2;version=1
+8	havana	exon	127733825	127733967	.	-	.	Parent=transcript:ENST00000518376;Name=ENSE00002038150;constitutive=1;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002038150;rank=1;version=1
