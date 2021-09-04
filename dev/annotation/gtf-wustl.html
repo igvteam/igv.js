@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>WUSTL gtf file</h1>
+
+An older Wash U gtf file.
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg38",
+            locus: ["1:135-1012", "1:5036-13307", "1:64,957-73,591"],
+            tracks:
+                [
+                    {
+                        name: "washu gtf",
+                        url: "../../test/data/gff/wustl.gtf",
+                        format: "gtf",
+                        indexed: false,
+                    },
+                    {
+                        name: "washu gtf- parts",
+                        url: "../../test/data/gff/wustl.gtf",
+                        format: "gtf",
+                        assembleGFF: false,
+                        indexed: false,
+                    }
+
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

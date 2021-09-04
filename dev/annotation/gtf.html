@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>gtf files</h1>
+
+gtf files from Gencode, NCBI, and Ensmbl
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg38",
+            locus: ["chr22:30,663,879-30,667,396", "chr8:127686343-127733967", "chr8:127735434-127742951"],
+            tracks:
+                [
+                    {
+                        name: "Ensembl transcript",
+                        url: "../../test/data/gff/Ensembl-transcript.gtf",
+                        format: "gtf",
+                        indexed: false,
+                    },
+                    {
+                        name: "Ensembl transcript parts",
+                        url: "../../test/data/gff/Ensembl-transcript.gtf",
+                        format: "gtf",
+                        assembleGFF: false,
+                        displayMode: "SQUISHED",
+                        height: 100,
+                        indexed: false,
+                    },
+                    {
+                        name: "Ensembl gene",
+                        url: "../../test/data/gff/NCBI_hg38_MYC.gtf",
+                        format: "gtf",
+                        indexed: false,
+                    },
+                    {
+                        name: "gencode lincRNA",
+                        url: "../../test/data/gff/gencode-lincRNA.gtf",
+                        format: "gtf",
+                        indexed: false
+                    },
+
+                    {
+                        name: "gencode lincRNA",
+                        url: "../../test/data/gff/gencode-lincRNA.gtf",
+                        format: "gtf",
+                        indexed: false
+                    }
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

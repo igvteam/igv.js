@@ -1,9 +1,14 @@
-#Reference: http://mblab.wustl.edu/GTF22.html#examples
-#Here is an example of a gene on the negative strand including UTR regions. Larger coordinates are 5' of smaller coordinates. Thus, the start codon is 3 bp with largest coordinates among all those bp that fall within the CDS regions. Note that the stop codon lies between the 3UTR and the CDS
-#Note the split start codon. The second start codon region has a frame of 2, since it is the second base, and has an accompanying CDS feature, since CDS always includes the start codon.
+# Reference: http://mblab.wustl.edu/GTF22.html#examples
+# Here is an example of a gene on the negative strand including UTR regions. Larger coordinates are 5' of smaller
+# coordinates. Thus, the start codon is 3 bp with largest coordinates among all those bp that fall within the CDS
+# regions. Note that the stop codon lies between the 3UTR and the CDS
+#
 1	Twinscan	inter	5141	8522	.	-	.	gene_id ""; transcript_id "";
 1	Twinscan	inter_CNS	8523	9711	.	-	.	gene_id ""; transcript_id "";
 1	Twinscan	inter	9712	13182	.	-	.	gene_id ""; transcript_id "";
+# Note the split start codon. The second start codon region has a frame of 2, since it is the second base, and has
+# an accompanying CDS feature, since CDS always includes the start codon.
+#
 1	Twinscan	3UTR	65149	65487	.	-	.	gene_id "140.000"; transcript_id "140.000.1";
 1	Twinscan	3UTR	66823	66992	.	-	.	gene_id "140.000"; transcript_id "140.000.1";
 1	Twinscan	stop_codon	66993	66995	.	-	0	gene_id "140.000"; transcript_id "140.000.1";
@@ -15,7 +20,9 @@
 1	Twinscan	start_codon	73222	73222	.	-	2	gene_id "140.000"; transcript_id "140.000.1";
 1	Twinscan	CDS	73222	73222	.	-	0	gene_id "140.000"; transcript_id "140.000.1";
 1	Twinscan	5UTR	73223	73504	.	-	.	gene_id "140.000"; transcript_id "140.000.1";
-#Here is an example in which the "exon" feature is used. It is a 5 exon gene with 3 translated exons.
+#
+# Here is an example in which the "exon" feature is used. It is a 5 exon gene with 3 translated exons.
+#
 1	Twinscan	exon	150	200	.	+	.	gene_id "381.000"; transcript_id "381.000.1"; 
 1	Twinscan	exon	300	401	.	+	.	gene_id "381.000"; transcript_id "381.000.1"; 
 1	Twinscan	CDS	380	401	.	+	0	gene_id "381.000"; transcript_id "381.000.1"; 

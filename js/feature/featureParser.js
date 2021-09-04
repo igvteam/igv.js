@@ -37,7 +37,7 @@ import {
     decodeSNP,
     decodeWig
 } from "./decode/ucsc.js";
-import {decodeGFF} from "./decode/gff.js";
+import {decodeGTF, decodeGFF3} from "./decode/gff.js";
 import {decodeFusionJuncSpan} from "./decode/fusionJuncSpan.js";
 import {decodeGtexGWAS} from "./decode/gtexGWAS.js";
 import {decodeCustom} from "./decode/custom.js";
@@ -223,9 +223,12 @@ class FeatureParser {
                 this.delimiter = this.config.delimiter || /\s+/;
                 break;
             case "gff3" :
-            case "gff" :
+            case "gff":
+                this.decode = decodeGFF3;
+                this.delimiter = "\t";
+                break;
             case "gtf" :
-                this.decode = decodeGFF;
+                this.decode = decodeGTF;
                 this.delimiter = "\t";
                 break;
             case "fusionjuncspan":
