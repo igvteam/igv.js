@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta charset="utf-8">
+    <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
+    <title>VCF with VT field</title>
+
+    <!-- IGV JS -->
+    <script src="../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+<h3>Example illustrating optinos for coloring VCF variants</h3>
+<h4>
+    <ol>
+        <li>color function</li>
+        <li>INFO tag with color table</li>
+        <li>INFO tag with default colors</li>
+    </ol>
+</h4>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script type="module">
+
+    const options =
+        {
+            locus: "chr22",
+            genome: "hg38",
+            tracks: [
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color by function, SVTYPE",
+                    visibilityWindow: -1,
+                    color: function (variant) {
+                        const svtype = variant.info["SVTYPE"];
+                        switch (svtype) {
+                            case 'DEL':
+                                return "#ff2101";
+                            case 'INS':
+                                return "#001888";
+                            case 'DUP':
+                                return "#028401";
+                            case 'INV':
+                                return "#008688";
+                            case 'CNV':
+                                return "#8931ff";
+                            case 'BND':
+                                return "#891100";
+                            default:
+                                return "#002eff";
+                        }
+                    }
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color by table, SVTYPE",
+                    visibilityWindow: -1,
+                    colorBy: "SVTYPE",
+                    colorTable: {
+                        "DEL": "#ff2101",
+                        "INS": "#001888",
+                        "DUP": "#028401",
+                        "INV": "#008688",
+                        "CNV": "#8931ff",
+                        "BND": "#891100",
+                        "*": "#002eff"
+                    }
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color by REGIONID",
+                    colorBy: "REGIONID",
+                    visibilityWindow: -1
+                }
+            ]
+        };
+
+    const igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+
+        .then(function (browser) {
+
+        });
+
+</script>
+
+</body>
+
+</html>

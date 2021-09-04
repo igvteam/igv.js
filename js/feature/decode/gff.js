@@ -2,6 +2,30 @@ import {IGVColor, StringUtils} from "../../../node_modules/igv-utils/src/index.j
 
 const gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus", "name"];
 
+
+function decode(tokens, header) {
+
+    const format = header.format
+    if (tokens.length < 9) {
+        return undefined;      // Not a valid gff record
+    }
+
+    const delim = ('gff3' === format) ? '=' : /\s+/;
+    return {
+        type: tokens[2],
+        chr: tokens[0],
+        start: parseInt(tokens[3]) - 1,
+        end: parseInt(tokens[4]),
+        score: "." === tokens[5] ? 0 : parseFloat(tokens[5]),
+        strand: tokens[6],
+        phase: "." === tokens[7] ? 0 : parseInt(tokens[7]),
+        attributeString: tokens[8],
+        delim: delim,
+        popupData: popupData
+    }
+}
+
+
 /**
  * Decode a single gff record (1 line in file).  Aggregations such as gene models are constructed at a higher level.
  *      ctg123 . mRNA            1050  9000  .  +  .  ID=mRNA00001;Parent=gene00001
@@ -9,75 +33,109 @@ const gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus",
  * @param ignore
  * @returns {*}
  */
-function decodeGFF(tokens, header) {
+function decodeGFF3(tokens, header) {
 
-    var tokenCount, chr, start, end, strand, type, score, phase, attributeString, color, name,
-        transcript_id, i,
-        format = header.format
+    const feature = decode(tokens, header);
 
-    tokenCount = tokens.length;
-    if (tokenCount < 9) {
-        return null;      // Not a valid gff record
+    if (!feature) {
+        return;
     }
 
-    chr = tokens[0];
-    type = tokens[2];
-    start = parseInt(tokens[3]) - 1;
-    end = parseInt(tokens[4]);
-    score = "." === tokens[5] ? 0 : parseFloat(tokens[5]);
-    strand = tokens[6];
-    phase = "." === tokens[7] ? 0 : parseInt(tokens[7]);
-    attributeString = tokens[8];
+    const attributes = parseAttributeString(feature.attributeString, feature.delim);
 
-    // Find ID and Parent, or transcript_id
-    var delim = ('gff3' === format) ? '=' : /\s+/;
-    var attributes = parseAttributeString(attributeString, delim);
     for (let [key, value] of Object.entries(attributes)) {
         const keyLower = key.toLowerCase()
         if ("color" === keyLower || "colour" === keyLower) {
-            color = IGVColor.createColorString(value);
-        } else if ('gff3' === format)
+            feature.color = IGVColor.createColorString(value);
+        } else {
             try {
                 attributes[key] = unescape(value);
             } catch (e) {
                 attributes[key] = value;   // Invalid
                 console.error(`Malformed gff3 attibute value: ${value}`);
             }
+        }
     }
 
     // Find name (label) property
     if (header.nameField) {
-        name = attributes[header.nameField];
+        feature.name = attributes[header.nameField];
     } else {
-        for (i = 0; i < gffNameFields.length; i++) {
-            if (attributes.hasOwnProperty(gffNameFields[i])) {
-                header.nameField = gffNameFields[i];
-                name = attributes[header.nameField];
+        for (let nameField of gffNameFields) {
+            if (attributes.hasOwnProperty(nameField)) {
+                feature.name = attributes[nameField];
                 break;
             }
         }
     }
 
-    const id = attributes["ID"] || attributes["transcript_id"]
-    const parent = attributes["Parent"]
+    feature.id = attributes["ID"];
+    feature.parent = attributes["Parent"];
+    return feature;
+}
 
-    return  {
-        id: id,
-        parent: parent,
-        name: name,
-        type: type,
-        chr: chr,
-        start: start,
-        end: end,
-        score: score,
-        strand: strand,
-        color: color,
-        attributeString: attributeString,
-        delim: delim,
-        popupData: popupData
+/**
+ * GTF format example:
+ NC_000008.11    BestRefSeq    gene    127735434    127742951    .    +    .    gene_id "MYC"; transcript_id ""; db_xref "GeneID:4609"; db_xref "HGNC:HGNC:7553"; db_xref "MIM:190080"; description "MYC proto-oncogene, bHLH transcription factor"; gbkey "Gene"; gene "MYC"; gene_biotype "protein_coding"; gene_synonym "bHLHe39"; gene_synonym "c-Myc"; gene_synonym "MRTL"; gene_synonym "MYCC";
+ NC_000008.11    BestRefSeq    transcript    127735434    127742951    .    +    .    gene_id "MYC"; transcript_id "NM_001354870.1"; db_xref "GeneID:4609"; gbkey "mRNA"; gene "MYC"; product "MYC proto-oncogene, bHLH transcription factor, transcript variant 2"; transcript_biotype "mRNA";
+ NC_000008.11    BestRefSeq    exon    127735434    127736623    .    +    .    gene_id "MYC"; transcript_id "NM_001354870.1"; db_xref "GeneID:4609"; gene "MYC"; product "MYC proto-oncogene, bHLH transcription factor, transcript variant 2"; transcript_biotype "mRNA"; exon_number "1";
+ *
+ * @param tokens
+ * @param ignore
+ * @returns {*}
+ */
+function decodeGTF(tokens, header) {
+
+    const feature = decode(tokens, header);
+
+    if (!feature) {
+        return;
     }
 
+    const attributes = parseAttributeString(feature.attributeString, feature.delim);
+
+    for (let [key, value] of Object.entries(attributes)) {
+        const keyLower = key.toLowerCase()
+        if ("color" === keyLower || "colour" === keyLower) {
+            feature.color = IGVColor.createColorString(value);
+        }
+    }
+
+    // GTF files specify neither ID nor parent fields, but they can be inferred from common conventions
+    if (header.idField) {
+        feature.id = attributes[header.idField];
+    } else {
+        if ("gene" === feature.type) {
+            feature.id = attributes["gene_id"];
+        } else if ("transcript" === feature.type) {
+            feature.id = attributes["transcript_id"];
+            feature.parent = attributes["gene_id"];
+        } else {
+            feature.parent = attributes["transcript_id"];
+        }
+    }
+
+    // Find name property
+    if (header.nameField) {
+        feature.name = feature.attributes[header.nameField];
+    } else {
+        const nameField = feature.type + "_name";        // Common convention
+        if (attributes.hasOwnProperty(nameField)) {
+            feature.name = attributes[nameField];
+        } else {
+            for (let nameField of gffNameFields) {
+                if (attributes.hasOwnProperty(nameField)) {
+                    feature.name = attributes[nameField];
+                    break;
+                }
+            }
+        }
+    }
+
+    return feature;
+
 }
+
 
 function parseAttributeString(attributeString, keyValueDelim) {
     // parse 'attributes' string (see column 9 docs in https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md)
@@ -97,7 +155,7 @@ function parseAttributeString(attributeString, keyValueDelim) {
     return attributes
 }
 
-function popupData (genomicLocation) {
+function popupData(genomicLocation) {
     const kvs = this.attributeString.split(';')
     const pd = [];
     if (this.name) {
@@ -124,7 +182,7 @@ function popupData (genomicLocation) {
     return pd;
 }
 
-export {decodeGFF, parseAttributeString, gffNameFields};
+export {decodeGFF3, decodeGTF, parseAttributeString, gffNameFields};
 
 
 
