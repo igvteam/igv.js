@@ -37,7 +37,7 @@ import {
     decodeSNP,
     decodeWig
 } from "./decode/ucsc.js";
-import {decodeGTF, decodeGFF3} from "./decode/gff.js";
+import {decodeGTF, decodeGFF3} from "./gff/gff.js";
 import {decodeFusionJuncSpan} from "./decode/fusionJuncSpan.js";
 import {decodeGtexGWAS} from "./decode/gtexGWAS.js";
 import {decodeCustom} from "./decode/custom.js";

@@ -3,7 +3,8 @@ import FeatureSource from "../js/feature/featureSource.js";
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import {assert} from 'chai';
 import {genome} from "./utils/Genome.js";
-import GFFHelper from "../js/feature/gffHelper";
+import GFFHelper from "../js/feature/gff/gffHelper.js";
+import {parseAttributeString} from "../js/feature/gff/gff.js";
 
 suite("testGFF", function () {
 
@@ -48,11 +49,8 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
         assert.equal(mRNA3.exons[3].cdEnd, 7600);
     })
 
-    test("ENSEMBL GFF", async function () {
+    test("ENSEMBL GFF transcript", async function () {
 
-        const chr = "chr1";
-        const start = 1;
-        const end = 10000;
         const featureReader = new FeatureFileReader({
                 url: require.resolve('./data/gff/Ensembl_MYC-205.gff3'),
                 format: 'gff3',
@@ -61,7 +59,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
             genome);
 
         // Fetch "raw" features (constituitive parts)
-        const features = await featureReader.readFeatures(chr, start, end);
+        const features = await featureReader.readFeatures();
         assert.ok(features);
         assert.equal(9, features.length);
 
@@ -72,11 +70,57 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
         assert.equal(3, combinedFeatures[0].exons.length);
     })
 
+    test("ENSEMBL GFF region", async function () {
+
+        const featureReader = new FeatureFileReader({
+                url: require.resolve('./data/gff/Ensembl_MYC-region.gff3'),
+                format: 'gff3',
+                filterTypes: []
+            },
+            genome);
+
+        // Fetch "raw" features (constituitive parts)
+        const features = await featureReader.readFeatures();
+        assert.ok(features);
+        assert.equal(76, features.length);
+
+        // Combine features
+        const helper = new GFFHelper({format: "gff3"});
+        const combinedFeatures = helper.combineFeatures(features);
+
+        // 9 mRNAs, 11 biological regions
+        assert.equal(20, combinedFeatures.length);
+        assert.equal(9, combinedFeatures.filter(f => f.type === "mRNA").length);
+
+    })
+
+    test("NCBI GTF", async function () {
+
+
+        const featureReader = new FeatureFileReader({
+                url: require.resolve('./data/gff/NCBI_hg38_MYC.gtf'),
+                format: 'gtf',
+                filterTypes: []
+            },
+            genome);
+
+        // Fetch "raw" features (constituitive parts)
+        const features = await featureReader.readFeatures();
+        assert.ok(features);
+        assert.equal(19, features.length);
+
+        // Combine features
+        const helper = new GFFHelper({format: "gtf"});
+        const combinedFeatures = helper.combineFeatures(features);
+        assert.equal(2, combinedFeatures.length);
+
+        const transcript1 = combinedFeatures[0];
+        const attributes = parseAttributeString(transcript1.attributeString, transcript1.delim);
+        assert.equal(attributes['product'], 'MYC proto-oncogene, bHLH transcription factor, transcript variant 2')
+    })
+
     test("gencode lincRNA gtf", async function () {
 
-        const chr = "chr8";
-        const start = 1;
-        const end = Number.MAX_SAFE_INTEGER;
         const featureReader = new FeatureFileReader({
                 url: require.resolve('./data/gff/gencode-lincRNA.gtf'),
                 format: 'gtf',
@@ -85,7 +129,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
             genome);
 
         // Fetch "raw" features (constituitive parts)
-        const features = await featureReader.readFeatures(chr, start, end);
+        const features = await featureReader.readFeatures();
         assert.ok(features);
         assert.equal(10, features.length);
 
@@ -99,9 +143,6 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
     test("Ensembl transcript gtf", async function () {
 
-        const chr = "chr22";
-        const start = 1;
-        const end = Number.MAX_SAFE_INTEGER;
         const featureReader = new FeatureFileReader({
                 url: require.resolve('./data/gff/Ensembl-transcript.gtf'),
                 format: 'gtf',
@@ -110,7 +151,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
             genome);
 
         // Fetch "raw" features (constituitive parts)
-        const features = await featureReader.readFeatures(chr, start, end);
+        const features = await featureReader.readFeatures();
         assert.ok(features);
         assert.equal(7, features.length);
 
@@ -141,9 +182,6 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
     test("washU gtf", async function () {
 
-        const chr = "1";
-        const start = 1;
-        const end = Number.MAX_SAFE_INTEGER;
         const featureReader = new FeatureFileReader({
                 url: require.resolve('./data/gff/wustl.gtf'),
                 format: 'gtf',
@@ -152,7 +190,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
             genome);
 
         // Fetch "raw" features (constituitive parts)
-        const features = await featureReader.readFeatures(chr, start, end);
+        const features = await featureReader.readFeatures();
         assert.ok(features);
         assert.equal(24, features.length);
 

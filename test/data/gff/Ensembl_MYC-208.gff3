@@ -1,3 +1,0 @@
-8	havana	mRNA	127736046	127736612	.	+	.	ID=transcript:ENST00000641036;Parent=gene:ENSG00000136997;Name=MYC-208;biotype=protein_coding;tag=basic;transcript_id=ENST00000641036;version=1
-8	havana	exon	127736046	127736612	.	+	.	Parent=transcript:ENST00000641036;Name=ENSE00003814064;constitutive=0;ensembl_end_phase=0;ensembl_phase=0;exon_id=ENSE00003814064;rank=1;version=1
-8	havana	CDS	127736046	127736612	.	+	0	ID=CDS:ENSP00000493145;Parent=transcript:ENST00000641036;protein_id=ENSP00000493145
