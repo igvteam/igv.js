@@ -22,14 +22,7 @@ the parent is of type "mRNA", children of of type "exon", "five_prime_utr", "thr
 
     var options =
         {
-            reference: {
-                "id": "hg38",
-                "name": "Human (GRCh38/hg38)",
-                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
-                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
-                "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/cytoBandIdeo.txt.gz",
-                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/hg38_alias.tab",
-            },
+            genome: "hg38",
             locus: "myc",
             tracks:
                 [
@@ -40,11 +33,12 @@ the parent is of type "mRNA", children of of type "exon", "five_prime_utr", "thr
                         "indexed": false,
                     },
                     {
-                        "name": "MYC-208",
-                        "url": "../../test/data/gff/Ensembl_MYC-208.gff3",
+                        "name": "MYC-205 parts",
+                        "url": "../../test/data/gff/Ensembl_MYC-205.gff3",
                         "format": "gff3",
                         "indexed": false,
-                    }
+                        "assembleGFF": false
+                    },
                 ]
         };
 

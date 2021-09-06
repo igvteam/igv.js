@@ -1,5 +1,5 @@
 import {IGVColor} from "../../../node_modules/igv-utils/src/index.js";
-import {gffNameFields, parseAttributeString} from "./gff.js";
+import {parseAttributeString} from "../gff/gff.js";
 import DecodeError from "./decodeError.js";
 
 
@@ -29,31 +29,9 @@ function decodeBed(tokens, header) {
     try {
         if (tokens.length > 3) {
 
-            // Note: these are very special rules for the gencode gene files.
-            // tmp = tokens[3].replace(/"/g, '');
-            // idName = tmp.split(';');
-            // for (var i = 0; i < idName.length; i++) {
-            //     var kv = idName[i].split('=');
-            //     if (kv[0] == "gene_id") {
-            //         id = kv[1];
-            //     }
-            //     if (kv[0] == "gene_name") {
-            //         name = kv[1];
-            //     }
-            // }
-            // feature.id = id ? id : tmp;
-            // feature.name = name ? name : tmp;
 
-            //parse gffTags in the name field
             if (tokens[3].indexOf(';') > 0 && tokens[3].indexOf('=') > 0) {
                 const attributes = parseAttributeString(tokens[3], '=');
-                for (let nmField of gffNameFields) {
-                    if (attributes.hasOwnProperty(nmField)) {
-                        feature.name = attributes[nmField];
-                        delete attributes[nmField];
-                        break;
-                    }
-                }
                 feature.attributes = attributes;
             }
             if (!feature.name) {
