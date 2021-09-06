@@ -38,8 +38,14 @@ export function calculateFeatureCoordinates(feature, bpStart, xScale) {
  */
 export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
-    let color = getColorForFeature.call(this, feature)
+    ctx.save();
 
+    // Set ctx color to a known valid color.  If getColorForFeature returns an invalid color string it is ignored, and
+    // this default will be used.
+    ctx.fillStyle = this.defaultColor;
+    ctx.strokeStyle = this.defaultColor;
+
+    const color = getColorForFeature.call(this, feature)
     ctx.fillStyle = color;
     ctx.strokeStyle = color;
 
@@ -150,6 +156,8 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
     if (options.drawLabel && this.displayMode !== "SQUISHED") {
         renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, options.referenceFrame, options);
     }
+
+    ctx.restore();
 }
 
 /**

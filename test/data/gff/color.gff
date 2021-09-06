@@ -1,6 +1,7 @@
 ##gff-version 3
 ##sequence-region chr1	1	1497228
-chr1	.	gene	1000	9000	.	t	.	ID=gene00001;Name=EDEN1;color=#C0C0C0
-chr1	.	gene	11000	19000	.	t	.	ID=gene00001;Name=EDEN2;color=130,0,130
-chr1	.	gene	21000	29000	.	t	.	ID=gene00001;Name=EDEN3;color=rgb(0,150,0)
-chr1	.	gene	31000	39000	.	t	.	ID=gene00001;Name=EDEN4;color=red
+chr1	.	gene	1000	9000	.	t	.	ID=gene00001;Name=gray;color=#C0C0C0
+chr1	.	gene	11000	19000	.	t	.	ID=gene00002;Name=purple;color=130,0,130
+chr1	.	gene	21000	29000	.	t	.	ID=gene00003;Name=green;color=rgb(0,150,0)
+chr1	.	gene	31000	39000	.	t	.	ID=gene00004;Name=red;color=red
+chr1	.	gene	41000	49000	.	t	.	ID=gene00005;Name=non-valid-color;color=3
