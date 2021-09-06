@@ -79,8 +79,10 @@ class SegTrack extends TrackBase {
                     highB: 255
                 });
 
-            // Color table for mutation (mut and maf) tracks
-            this.colorTable = new ColorTable(config.colorTable || MUT_COLORS);
+            // Default color table for mutation (mut and maf) tracks
+            if(this.type === "mut") {
+                this.colorTable = new ColorTable(config.colorTable || MUT_COLORS);
+            }
         }
 
         this.sampleKeys = [];
@@ -245,15 +247,18 @@ class SegTrack extends TrackBase {
                 let w = Math.max(1, x1 - x);
 
                 let color;
-                let h;
                 if (this.color) {
                     if (typeof this.color === "function") {
                         color = this.color(f);
                     } else {
                         color = this.color;
                     }
-                } else if ("mut" === this.type) {
+                } else if(this.colorTable) {
                     color = this.colorTable.getColor(f.value.toLowerCase());
+                }
+
+                let h;
+                if ("mut" === this.type) {
                     h = rowHeight - 2 * border;
                     if (w < 3) {
                         w = 3;
