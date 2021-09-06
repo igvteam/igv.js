@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>NCBI gff and gtf files</h1>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg38",
+            locus: "myc",
+            tracks:
+                [
+                    {
+                        name: "NCBI gff",
+                        url: "../../test/data/gff/NCBI_hg38_MYC.gff",
+                        format: "gff",
+                        indexed: false,
+                    },
+                    {
+                        name: "NCBI gff - parts",
+                        url: "../../test/data/gff/NCBI_hg38_MYC.gff",
+                        format: "gff",
+                        assembleGFF: false,
+                        indexed: false,
+                        height: 250
+                    },
+                    {
+                        name: "NCBI gtf",
+                        url: "../../test/data/gff/NCBI_hg38_MYC.gtf",
+                        format: "gtf",
+                        indexed: false,
+                    },
+                    {
+                        name: "NCBI gtf - parts",
+                        url: "../../test/data/gff/NCBI_hg38_MYC.gtf",
+                        format: "gtf",
+                        assembleGFF: false,
+                        indexed: false,
+                        height: 250
+                    },
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
