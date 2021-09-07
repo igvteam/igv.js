@@ -120,7 +120,7 @@ class SegParser {
     extractExtraColumns(tokens) {
         const extras = []
         for (let i = 0; i < tokens.length; i++) {
-            if (i !== this.chrColumn && i !== this.startColumn && i !== this.endColumn) {
+            if (i !== this.chrColumn && i !== this.startColumn && i !== this.endColumn && i !== this.sampleColumn) {
                 extras.push(tokens[i]);
             }
         }
@@ -167,7 +167,6 @@ class SegFeature {
             {name: this.valueColumnName ? StringUtils.capitalize(this.valueColumnName) : "Value", value: this.value}
         ];
         if (this.attributeNames && this.attributeNames.length > 0) {
-            pd.push('<hr/>')
             for (let i = 0; i < this.attributeNames.length; i++) {
                 if(!filteredProperties.has(this.attributeNames[i]) & this.valueColumnName !== this.attributeNames[i]) {
                     pd.push({name: StringUtils.capitalize(this.attributeNames[i]), value: this.attributeValues[i]});
