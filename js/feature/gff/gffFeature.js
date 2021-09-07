@@ -1,5 +1,6 @@
 import {StringUtils} from "../../../node_modules/igv-utils/src/index.js";
 import {isCoding, isIntron, isUTR} from "./so.js";
+import {parseAttributeString} from "./gff.js";
 
 const filterPopupProperties = new Set(["id", "parent", "name"])
 
@@ -24,25 +25,11 @@ class GFFFeature {
         pd.push({name: 'Type', value: this.type});
         pd.push({name: 'Source', value: this.source});
 
-
         if (this.attributeString) {
-            const kvs = this.attributeString.split(';')
-
-            for (let kv of kvs) {
-                const t = kv.trim().split(this.delim, 2);
-                if (t.length === 2 && t[1] !== undefined) {
-                    const key = t[0].trim();
-                    if (filterPopupProperties.has(key.toLowerCase())) {
-                        continue;
-                    }
-                    let value = decodeURIComponent(t[1].trim());
-                    //Strip off quotes, if any
-                    if (value.startsWith('"') && value.endsWith('"')) {
-                        value = value.substr(1, value.length - 2);
-                    }
-                    if (value.length > 0) {
-                        pd.push({name: key + ":", value: value});
-                    }
+            const atts = parseAttributeString(this.attributeString, this.delim);
+            for (let [key, value] of atts) {
+                if (value !== undefined && value.length > 0 && !filterPopupProperties.has(key.toLowerCase())) {
+                    pd.push({name: key + ":", value: value});
                 }
             }
         }
@@ -51,6 +38,30 @@ class GFFFeature {
             value: `${this.chr}:${StringUtils.numberFormatter(this.start + 1)}-${StringUtils.numberFormatter(this.end)}`
         })
         return pd;
+    }
+
+    getAttributeValue(attributeName) {
+        if (this.hasOwnProperty(attributeName)) {
+            return this[attributeName];
+        } else {
+            // TODO -- fetch from attribute string and cache
+            if (!this._attributeCache) {
+                this._attributeCache = new Map();
+            } else if (this._attributeCache.has(attributeName)) {
+                return this._attributeCache.get(attributeName);
+            } else {
+                const atts = parseAttributeString(this.attributeString, this.delim);
+                let v;
+                for (let [key, value] of atts) {
+                    if (key === attributeName) {
+                        v = value;
+                        break;
+                    }
+                }
+                this._attributeCache.set(attributeName, v);
+                return v
+            }
+        }
     }
 }
 

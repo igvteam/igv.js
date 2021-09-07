@@ -24,15 +24,18 @@ function decodeBed(tokens, header) {
     if (isNaN(start) || isNaN(end)) {
         return new DecodeError(`Unparsable bed record.`);
     }
-    const feature = {chr: chr, start: start, end: end, score: 1000};
+    const feature = new UCSCBedFeature({chr: chr, start: start, end: end, score: 1000});
 
     try {
         if (tokens.length > 3) {
 
-
+            // Potentially parse name field as GFF column 9 style streng.
             if (tokens[3].indexOf(';') > 0 && tokens[3].indexOf('=') > 0) {
-                const attributes = parseAttributeString(tokens[3], '=');
-                feature.attributes = attributes;
+                const attributeKVs = parseAttributeString(tokens[3], '=');
+                feature.attributes = {};
+                for(let kv of attributeKVs) {
+                    feature.attributes[kv[0]] = kv[1];
+                }
             }
             if (!feature.name) {
                 feature.name = tokens[3] === '.' ? '' : tokens[3];
@@ -433,6 +436,20 @@ function decodeSNP(tokens, header) {
 
 }
 
+class UCSCBedFeature {
+
+    constructor(properties) {
+        Object.assign(this, properties);
+    }
+
+    getAttributeValue(attributeName) {
+        if (this.hasOwnProperty(attributeName)) {
+            return this[attributeName];
+        } else if (this.attributes) {
+           return this.attributes[attributeName];
+        }
+    }
+}
 
 export {
     decodeBed, decodeBedGraph, decodeGenePred, decodeGenePredExt, decodePeak, decodeReflat, decodeRepeatMasker,

@@ -71,22 +71,15 @@ class VariantTrack extends TrackBase {
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
         this.sortDirection = "ASC";
         this.type = config.type || "variant"
-        if (config.colorBy) {
-            if (isString(config.colorBy)) {
-                this.colorBy = config.colorBy;   // Can be undefined => default
-                this._initColorBy = config.colorBy;
-                if (config.colorTable) {
-                    this.colorTables = new Map();
-                    this.colorTables.set(config.colorBy, new ColorTable(config.colorTable));
-                }
-            } else if (config.colorBy.field) {
 
-            } else {
-                console.warn("Unrecognized colorBy option: " + config.colorBy);
-            }
-
+        this.colorBy = config.colorBy;   // Can be undefined => default
+        this._initColorBy = config.colorBy;
+        if (config.colorTable) {
+            this.colorTables = new Map();
+            this.colorTables.set(config.colorBy, new ColorTable(config.colorTable));
         }
         this._color = config.color;
+
         this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes;
 
         // The number of variant rows are computed dynamically, but start with "1" by default
@@ -619,7 +612,7 @@ class VariantTrack extends TrackBase {
                     tbl = SV_COLOR_TABLE;
                     break;
                 default:
-                    tbl = new PaletteColorTable("Set3");
+                    tbl = new PaletteColorTable("Set1");
             }
             this.colorTables.set(key, tbl);
         }
