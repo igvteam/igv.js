@@ -144,10 +144,12 @@ suite("testBed", function () {
         const reader = new FeatureFileReader(config);
         const features = await reader.readFeatures("chr15", 0, Number.MAX_VALUE);
         assert.equal(features.length, 2);
-        for (let f of features) {
-            const attrs = f.attributes;
-            assert.ok(attrs);
-        }
+
+        // motif=CT/AC;uniquely_mapped=2;multi_mapped=2;maximum_spliced_alignment_overhang=36;annotated_junction=true
+        // motif=GT/AG;uniquely_mapped=56;multi_mapped=2;maximum_spliced_alignment_overhang=35;annotated_junction=true
+        const f1 = features[0];
+        assert.equal("CT/AC", f1.getAttributeValue("motif"));    // new API
+        assert.equal("CT/AC", f1.attributes["motif"]);           // old style
     })
 
     test("BED query", async function () {
