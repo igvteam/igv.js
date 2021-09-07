@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>igv.js</title>
+    </head>
+
+    <body>
+
+        <p>
+
+        <h1>gff and gtf files</h1>
+
+
+        <div>
+            <button id="sessionButton">Save Session</button>
+        </div>
+
+        <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+        <script type="module">
+
+            import igv from "../../js/index.js";
+
+            var options =
+                {
+                    genome: "hg38",
+                    locus: "chr22:21,913,513-22,216,565",
+                    tracks:
+                        [
+                            {
+                                name: "Color by \"source\"",
+                                format: "gff3",
+                                displayMode: "expanded",
+                                height: 300,
+                                url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                                indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                                visibilityWindow: 1000000,
+                                colorBy: "source",
+                                colorTable: {
+                                    "Ensembl": "blueviolet",
+                                    "ensembl": "blueviolet",
+                                    "ensembl_havana": "purple",
+                                    "havana": "blue",
+                                    "insdc": "7fff00",
+                                    "mirbase": "d2691e",
+                                    "*": "black"
+                                }
+                            },
+                            {
+                                name: "Color by \"source\" - default color table",
+                                format: "gff3",
+                                displayMode: "expanded",
+                                height: 300,
+                                url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                                indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                                visibilityWindow: 1000000,
+                                colorBy: "source",
+                            },
+                            {
+                                name: "Color by \"source\" - pre 2.10 syntax",
+                                format: "gff3",
+                                displayMode: "expanded",
+                                height: 300,
+                                url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                                indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                                visibilityWindow: 1000000,
+                                colorBy: {
+                                    field: "source",
+                                    palette: {      // (sic)
+                                        "Ensembl": "blueviolet",
+                                        "ensembl": "blueviolet",
+                                        "ensembl_havana": "purple",
+                                        "havana": "blue",
+                                        "insdc": "7fff00",
+                                        "mirbase": "d2691e",
+                                        "*": "black"
+                                    }
+                                }
+                            }
+                        ]
+                }
+
+            var igvDiv = document.getElementById("igvDiv");
+
+            igv.createBrowser(igvDiv, options)
+                .then(function (browser) {
+                    document.getElementById("sessionButton").addEventListener("click", () => {
+                        try {
+                            const json = browser.toJSON()
+                            const jsonString = JSON.stringify(json, null, '\t')
+                            console.log(jsonString)
+                            // const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}))
+                            // download(`igv-sample-name-session-${ Date.now() }.json`, data)
+                        } catch (e) {
+                            alert(e)
+                        }
+                    })
+                })
+
+
+        </script>
+
+    </body>
+
+</html>
