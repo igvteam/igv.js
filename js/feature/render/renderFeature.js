@@ -234,8 +234,10 @@ function getColorForFeature(feature) {
     } else if (this.color) {
         color = this.color;   // Explicit setting via menu, or possibly track line if !config.color
     } else if (this.colorBy) {
-        const colorByValue = feature[this.colorBy];
-        color = this.colorTable.getColor(colorByValue);
+        const value = feature.getAttributeValue ?
+            feature.getAttributeValue(this.colorBy) :
+            feature[this.colorBy];
+        color = this.colorTable.getColor(value);
     } else if (feature.color) {
         color = feature.color;   // Explicit color for feature
     } else {
