@@ -9,6 +9,17 @@
 
 <h1>Segmented Copy Number</h1>
 
+<div style="padding-top: 10px;padding-bottom: 10px;">
+
+    Segmented copy number ("seg" format) with
+    <ul>
+        <li>No index</li>
+        <li>Index with no visibiliy window (loads by whole chromosome)</li>
+        <li>Index with visibility window of 100 MB</li>
+    </ul>
+
+</div>
+
 <div>
     <button id="bmBtn">Bookmark</button>
 </div>
@@ -19,32 +30,44 @@
 
     import igv from "../../js/index.js";
 
-    var options =
+    const version = igv.version();
+    console.log("Using IGV version: " + version);
+
+    const igvDiv = document.getElementById("igvDiv");
+    const options =
         {
             genome: "hg19",
+            showSampleNames: true,
             tracks: [
                 {
                     name: "Segmented Copy Number",
                     type: "seg",
                     format: "seg",
-                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                },
+                {
+                    name: "Indexed",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
+                },
+                {
+                    name: "Indexed with visibility window",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
+                    visibilityWindow: "100000000"
                 },
             ]
-        }
+        };
 
-    var igvDiv = document.getElementById("igvDiv");
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
             console.log("Created IGV browser");
-
-            function bookmark() {
-            }
-
-            document.getElementById("bmBtn")
-                .addEventListener("click", () => window.history.pushState({}, "IGV", browser.sessionURL()));
         })
-
 
 </script>
 </body>

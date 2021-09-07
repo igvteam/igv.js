@@ -35,12 +35,13 @@
                     <td>locuschange</td>
                     <td>
                         <p>Fired whenever the viewer locus changes.</p><br/>
-
-                        <strong>Arguments Passed to Handler Fn:</strong>
+                        <strong>Note: as of release 2.10.0 an array of reference frames is passed to the handler to account
+                        for multi-locus views.</strong>
+                        <strong>Arguments Passed to Handler Fn:  </strong>
                         <div class="well">
                             <dl class="dl-horizontal">
-                                <dt>referenceFrame</dt>
-                                <dd>{chr, start, end, label}</dd>
+                                <dt>referenceFrameList</dt>
+                                <dd>[{chr, start, end, label}, {chr, start, end, label}, ...]</dd>
                             </dl>
                         </div>
                     </td>
