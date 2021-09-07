@@ -77,17 +77,6 @@
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            document.getElementById("sessionButton").addEventListener("click", () => {
-                try {
-                    const json = browser.toJSON()
-                    const jsonString = JSON.stringify(json, null, '\t')
-                    console.log(jsonString)
-                    // const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}))
-                    // download(`igv-sample-name-session-${ Date.now() }.json`, data)
-                } catch (e) {
-                    alert(e)
-                }
-            })
         })
 
 
