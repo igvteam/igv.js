@@ -33,6 +33,7 @@ import {renderFeature} from "./render/renderFeature.js";
 import {renderSnp} from "./render/renderSnp.js";
 import {renderFusionJuncSpan} from "./render/renderFusionJunction.js";
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js";
 
 
 class FeatureTrack extends TrackBase {
@@ -88,6 +89,20 @@ class FeatureTrack extends TrackBase {
             this.squishedRowHeight = config.squishedRowHeight || 15;
             this.expandedRowHeight = config.expandedRowHeight || 30;
             this.height = config.height || this.margin + 2 * this.expandedRowHeight;
+
+            // Set colorBy fields considering legacy options for backward compatibility
+            if (config.colorBy) {
+                if (config.colorBy.field) {
+                    config.colorTable = config.colorBy.pallete || config.colorBy.palette;
+                    config.colorBy = config.colorBy.field;
+               }
+                this.colorBy = config.colorBy;   // Can be undefined => default
+                if (config.colorTable) {
+                    this.colorTable = new ColorTable(config.colorTable);
+                } else {
+                    this.colorTable = new PaletteColorTable("Set1");
+                }
+            }
         }
 
         //UCSC useScore option

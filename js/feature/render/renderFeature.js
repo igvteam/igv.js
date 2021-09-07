@@ -233,18 +233,9 @@ function getColorForFeature(feature) {
         color = this.altColor;
     } else if (this.color) {
         color = this.color;   // Explicit setting via menu, or possibly track line if !config.color
-    } else if (this.config.colorBy) {
-
-        const isLegacy = this.config.colorBy.field !== undefined;
-        const colorByValue = isLegacy ? feature[this.config.colorBy.field] : feature[this.colorBy];
-        if (colorByValue) {
-            const palette =
-                isLegacy ? this.config.colorBy.pallete || this.config.colorBy.palette :
-                    this.config.colorTable;
-            if (palette) {
-                color = palette[colorByValue];
-            }
-        }
+    } else if (this.colorBy) {
+        const colorByValue = feature[this.colorBy];
+        color = this.colorTable.getColor(colorByValue);
     } else if (feature.color) {
         color = feature.color;   // Explicit color for feature
     } else {
