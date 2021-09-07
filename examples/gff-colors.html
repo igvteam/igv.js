@@ -1,0 +1,98 @@
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta charset="utf-8">
+    <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
+    <title>igv.js</title>
+
+    <!-- IGV JS -->
+    <script src="../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+<h3>Example illustrating options for coloring GFF and GTF annotation tracks</h3>
+<h4>
+    <ol>
+        <li>color by attribute (column 9)</li>
+        <li>color by source (column 2)</li>
+        <li>color by source with color table </li>
+    </ol>
+</h4>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script>
+
+
+    var options =
+        {
+            genome: "hg38",
+            locus: "chr22:21,913,513-22,216,565",
+            tracks:
+                [
+                    {
+                        name: "Color by attribute \"biotype\"",
+                        format: "gff3",
+                        displayMode: "expanded",
+                        height: 300,
+                        url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                        visibilityWindow: 1000000,
+                        colorBy: "biotype"
+                    },
+                    {
+                        name: "Color by \"source\"",
+                        format: "gff3",
+                        displayMode: "expanded",
+                        height: 300,
+                        url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                        visibilityWindow: 1000000,
+                        colorBy: "source",
+                    },
+                    {
+                        name: "Color by \"source\" with color table",
+                        format: "gff3",
+                        displayMode: "expanded",
+                        height: 300,
+                        url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                        visibilityWindow: 1000000,
+                        colorBy: "source",
+                        colorTable: {
+                            "Ensembl": "blueviolet",
+                            "ensembl": "blueviolet",
+                            "ensembl_havana": "purple",
+                            "havana": "blue",
+                            "insdc": "7fff00",
+                            "mirbase": "d2691e",
+                            "*": "black"
+                        }
+                    }
+                ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            document.getElementById("sessionButton").addEventListener("click", () => {
+                try {
+                    const json = browser.toJSON()
+                    const jsonString = JSON.stringify(json, null, '\t')
+                    console.log(jsonString)
+                    // const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}))
+                    // download(`igv-sample-name-session-${ Date.now() }.json`, data)
+                } catch (e) {
+                    alert(e)
+                }
+            })
+        })
+
+
+</script>
+
+</body>
+
+</html>
