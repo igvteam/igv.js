@@ -236,12 +236,13 @@ class GFFHelper {
             if(f.attributeString) {
                 const delim = ('gff3' === this.format) ? '=' : ' ';
                 const attributes = parseAttributeString(f.attributeString, delim);
+                const attributesMap = new Map(attributes);
                 if (this.nameField ) {
-                    f.name = attributes[this.nameField];
+                    f.name = attributesMap.get(this.nameField);
                 } else {
                     for (let nameField of gffNameFields) {
-                        if (attributes.hasOwnProperty(nameField)) {
-                            f.name = attributes[nameField];
+                        if (attributesMap.has(nameField)) {
+                            f.name = attributesMap.get(nameField);
                             break;
                         }
                     }

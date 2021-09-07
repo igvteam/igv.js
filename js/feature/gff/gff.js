@@ -42,19 +42,15 @@ function decodeGFF3(tokens, header) {
     const attributes = parseAttributeString(feature.attributeString, feature.delim);
 
     // Search for color value as case insenstivie key
-    for (let [key, value] of Object.entries(attributes)) {
+    for (let [key, value] of attributes) {
         const keyLower = key.toLowerCase()
         if ("color" === keyLower || "colour" === keyLower) {
             feature.color = IGVColor.createColorString(value);
+        } else if (key === "ID") {
+            feature.id = value;
+        } else if (key === "Parent") {
+            feature.parent = value;
         }
-    }
-    const id = attributes["ID"];
-    if (id) {
-        feature.id = decodeURIComponent(id);
-    }
-    const parent = attributes["Parent"];
-    if(parent) {
-        feature.parent = decodeURIComponent(parent);
     }
     return feature;
 }
@@ -79,42 +75,54 @@ function decodeGTF(tokens, header) {
 
     const attributes = parseAttributeString(feature.attributeString, feature.delim);
 
-    for (let [key, value] of Object.entries(attributes)) {
+    // GTF files specify neither ID nor parent fields, but they can be inferred from common conventions
+    let idField;
+    let parentField;
+    switch (feature.type) {
+        case "gene":
+            idField = "gene_id";
+            break;
+        case "transcript":
+            idField = "transcript_id";
+            parentField = "gene_id";
+            break;
+        default:
+            parentField = "transcript_id";
+    }
+
+    for (let [key, value] of attributes) {
         const keyLower = key.toLowerCase()
         if ("color" === keyLower || "colour" === keyLower) {
             feature.color = IGVColor.createColorString(value);
+        } else if (key === idField) {
+            feature.id = value;
+        } else if (key === parentField) {
+            feature.parent = value;
         }
     }
-
-    // GTF files specify neither ID nor parent fields, but they can be inferred from common conventions
-    if (header.idField) {
-        feature.id = attributes[header.idField];
-    } else {
-        if ("gene" === feature.type) {
-            feature.id = attributes["gene_id"];
-        } else if ("transcript" === feature.type) {
-            feature.id = attributes["transcript_id"];
-            feature.parent = attributes["gene_id"];
-        } else {
-            feature.parent = attributes["transcript_id"];
-        }
-    }
-
     return feature;
 
 }
 
 
+/**
+ * Parse the attribute string, returning an array of key-value pairs.  An array is used rather than a map as attribute
+ * keys are not required to be unique.
+ *
+ * @param attributeString
+ * @param keyValueDelim
+ * @returns {[]}
+ */
 function parseAttributeString(attributeString, keyValueDelim) {
     // parse 'attributes' string (see column 9 docs in https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md)
-    var attributes = {};
+    var attributes = [];
     for (let kv of attributeString.split(';')) {
         kv = kv.trim();
         const idx = kv.indexOf(keyValueDelim);
         if (idx > 0 && idx < kv.length - 1) {
             const key = kv.substring(0, idx);
-            let value = stripQuotes(kv.substring(idx + 1));
-            attributes[key] = value;
+            let value = stripQuotes(decodeURIComponent(kv.substring(idx + 1).trim()));
+            attributes.push([key, value]);
         }
     }
     return attributes
