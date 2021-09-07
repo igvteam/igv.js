@@ -15,7 +15,17 @@
 <h1>Custom search service example</h1>
 <h4>This example configures a search object as described
     <a href="https://github.com/igvteam/igv.js/wiki/Browser-Creation#search-object-details">here</a>
-    to use the Ensembl web service to provide annotation search capability for Macaca Fasciularis.  To test search for  'OLIG3'</h4>
+    to use the Ensembl web service to provide annotation search capability for Macaca Fasciularis.  To test search for  'OLIG3'
+</h4>
+
+Configuration object:
+<pre>
+ search: {
+   url: 'https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/$FEATURE$?content-type=application/json',
+   chromosomeField: 'seq_region_name',
+   displayName: 'display_name'
+},
+</pre>
 
 <div id="igv-div" style="margin-top: 50px;padding-top:10px; padding-bottom: 10px; border:1px solid lightgray"></div>
 
@@ -42,7 +52,7 @@
                         type: "annotation",
                         format: "gtf",
                         url: 'https://s3.amazonaws.com/igv.org.genomes/Macaca_fascicularis_5.0/Macaca_fascicularis.Macaca_fascicularis_5.0.100.gtf.gz',
-                        indexed: false
+                        indexURL: 'https://s3.amazonaws.com/igv.org.genomes/Macaca_fascicularis_5.0/Macaca_fascicularis.Macaca_fascicularis_5.0.100.gtf.gz.tbi',
                     }
                 ]
             };

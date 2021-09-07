@@ -1,13 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
-    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
+
+    <title>igv.js</title>
 
     <style>
         #trackList {
@@ -55,7 +50,9 @@
 <h3>Select study to load copy number</h3>
 
 <div id="trackList"></div>
-
+<div class='igv-loading-spinner-container' >
+    <div id="spinner" style="display: none"></div>   <!-- This extra div is needed, apparently -->
+</div>
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
@@ -75,9 +72,9 @@
                 let name = study["name"] + " (" + sampleCount + ")";
                 let trackDiv = document.createElement('div');
                 trackDiv.textContent = name;
-                trackDiv.addEventListener('click', async function (event) {
+                trackDiv.addEventListener('click', async  (event) => {
 
-                    const sampleStudyList = await cBioUtils.fetchSamplesByStudy(study.studyId)
+                    document.getElementById("spinner").style.display = "block";
 
                     const features = await cBioUtils.fetchCopyNumberByStudy(study.studyId)
 
@@ -90,6 +87,8 @@
 
                     }
                     browser.loadTrack(trackJson);
+
+                    document.getElementById("spinner").style.display = "none";
 
                 });
 

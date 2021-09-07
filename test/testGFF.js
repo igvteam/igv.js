@@ -116,7 +116,14 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
         const transcript1 = combinedFeatures[0];
         const attributes = parseAttributeString(transcript1.attributeString, transcript1.delim);
-        assert.equal(attributes['product'], 'MYC proto-oncogene, bHLH transcription factor, transcript variant 2')
+        let product;
+        for(let kv of attributes) {
+            if(kv[0] === 'product') {
+                product = kv[1];
+                break;
+            }
+        }
+        assert.equal(product, 'MYC proto-oncogene, bHLH transcription factor, transcript variant 2')
     })
 
     test("gencode lincRNA gtf", async function () {
