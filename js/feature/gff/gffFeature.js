@@ -47,7 +47,8 @@ class GFFFeature {
             // TODO -- fetch from attribute string and cache
             if (!this._attributeCache) {
                 this._attributeCache = new Map();
-            } else if (this._attributeCache.has(attributeName)) {
+            }
+            if (this._attributeCache.has(attributeName)) {
                 return this._attributeCache.get(attributeName);
             } else {
                 const atts = parseAttributeString(this.attributeString, this.delim);
