@@ -119,10 +119,11 @@ class TrackBase {
      */
     getState() {
 
-        // Create copy of config, minus transient properties (convention is name starts with '_')
+        // Create copy of config, minus transient properties (convention is name starts with '_').  Also, all
+        // function properties are transient as they cannot be saved in json
         const state = {};
         for (let key of Object.keys(this.config)) {
-            if (!key.startsWith("_")) {
+            if (!key.startsWith("_") && typeof this.config[key] !== "function")  {
                 state[key] = this.config[key];
             }
         }
