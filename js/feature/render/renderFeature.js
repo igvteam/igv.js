@@ -173,6 +173,8 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
  */
 function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referenceFrame, options) {
 
+    ctx.save();
+
     let name = feature.name;
     if (name === undefined && feature.gene) name = feature.gene.name;
     if (name === undefined) name = feature.id || feature.ID
@@ -213,6 +215,8 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform);
 
     }
+
+    ctx.restore();
 }
 
 function getFeatureLabelY(featureY, transform) {
