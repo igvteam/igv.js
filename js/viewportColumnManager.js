@@ -1,6 +1,6 @@
 import $ from './vendor/jquery-3.3.1.slim.js';
 import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
-import {createColumn} from './util/igvUtils.js';
+import {createColumn, insertElementBefore, insertElementAfter} from './util/igvUtils.js';
 
 const viewportColumnManager =
     {
@@ -17,12 +17,6 @@ const viewportColumnManager =
 
         },
 
-        discardAllColumns: columnContainer => {
-            columnContainer.querySelectorAll('.igv-column-shim').forEach(columnShim => columnShim.remove())
-            columnContainer.querySelectorAll('.igv-column').forEach(column => column.remove())
-
-        },
-
         removeColumnAtIndex: (i, column) => {
             const shim = 0 === i ? column.nextElementSibling : column.previousElementSibling
             column.remove()
@@ -31,12 +25,12 @@ const viewportColumnManager =
 
         insertAfter: $previous => {
 
-            const columnShim = DOMUtils.div({ class: 'igv-column-shim' })
-            $(columnShim).insertAfter($previous)
+            const shim = DOMUtils.div({ class: 'igv-column-shim' })
+            $(shim).insertAfter($previous)
 
             const column = DOMUtils.div({ class: 'igv-column' })
             column.setAttribute('data-name', 'viewport')
-            $(column).insertAfter($(columnShim))
+            $(column).insertAfter($(shim))
 
             return column
         },

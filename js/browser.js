@@ -443,7 +443,7 @@ class Browser {
         await this.loadReference(genomeConfig, session.locus);
 
         // axis column
-        this.axisColumn = createColumn(this.columnContainer, 'igv-axis-column', 'axis')
+        createColumn(this.columnContainer, 'igv-axis-column', 'axis')
 
         // track viewport columns
         viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
@@ -452,28 +452,24 @@ class Browser {
         createColumn(this.columnContainer, 'igv-sample-name-column', 'sampleName')
 
         // Track scrollbar column
-        this.trackScrollbarColumn = createColumn(this.columnContainer, 'igv-scrollbar-column', 'trackScroll')
+        createColumn(this.columnContainer, 'igv-scrollbar-column', 'trackScroll')
 
         // Track drag/reorder column
-        this.trackDragColumn = createColumn(this.columnContainer, 'igv-track-drag-column', 'trackDrag')
+        createColumn(this.columnContainer, 'igv-track-drag-column', 'trackDrag')
 
         // Track gear column
-        this.trackGearColumn = createColumn(this.columnContainer, 'igv-gear-menu-column', 'trackGear')
+        createColumn(this.columnContainer, 'igv-gear-menu-column', 'trackGear')
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
-        if (undefined === this.ideogramTrackView && false !== session.showIdeogram) {
-            this.ideogramTrackView = new TrackView(this, this.columnContainer, new IdeogramTrack(this))
-            this.trackViews.push(this.ideogramTrackView)
-            this.ideogramTrackView.updateViews();
+        if (false !== session.showIdeogram) {
+             this.trackViews.push(new TrackView(this, this.columnContainer, new IdeogramTrack(this)))
          }
 
-        if (undefined === this.rulerTrackView && false !== session.showRuler) {
-            this.rulerTrackView = new TrackView(this, this.columnContainer, new RulerTrack(this))
-            this.trackViews.push(this.rulerTrackView)
-            this.rulerTrackView.updateViews()
+        if (false !== session.showRuler) {
+            this.trackViews.push(new TrackView(this, this.columnContainer, new RulerTrack(this)))
         }
 
         // Restore gtex selections.
@@ -566,47 +562,14 @@ class Browser {
 
     cleanHouseForSession() {
 
-        // empty columns
         for (let trackView of this.trackViews) {
-
-            // empty axis column
-
-            // empty viewport columns
-
-            // empty sampleName column
-
-            // empty track scroll column
-
-            // empty track drap column
-
-            // empty track gear column
-
+            // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column
             trackView.removeDOMFromColumnContainer()
         }
 
-        // discard columns
-
-        // axis column
-        if (this.axisColumn) this.axisColumn.remove()
-
-        // viewport columns (and viewport shims)
-        viewportColumnManager.discardAllColumns(this.columnContainer)
-
-        // track scrollbar column
-        if (this.trackScrollbarColumn) this.trackScrollbarColumn.remove()
-
-        // drag column
-        if (this.trackDragColumn) this.trackDragColumn.remove()
-
-        // gear column
-        if (this.trackGearColumn) this.trackGearColumn.remove()
-
-        // discard remaining state
-        if (this.ideogramTrackView) this.ideogramTrackView.dispose()
-        this.ideogramTrackView = undefined
-
-        if (this.rulerTrackView) this.rulerTrackView.dispose()
-        this.rulerTrackView = undefined
+        // discard all columns
+        const elements = this.columnContainer.querySelectorAll('.igv-axis-column, .igv-column-shim, .igv-column, .igv-sample-name-column, .igv-scrollbar-column, .igv-track-drag-column, .igv-gear-menu-column')
+        elements.forEach(column => column.remove())
 
         this.trackViews = []
 
@@ -975,7 +938,7 @@ class Browser {
 
         for (let {axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
-            this.axisColumn.append(axis)
+            this.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
             for (let i = 0; i < viewportColumns.length; i++) {
                 const {$viewport} = viewports[i]
@@ -984,11 +947,11 @@ class Browser {
 
             this.columnContainer.querySelector('.igv-sample-name-column').appendChild(sampleNameViewport.viewport)
 
-            this.trackScrollbarColumn.appendChild(outerScroll)
+            this.columnContainer.querySelector('.igv-scrollbar-column').appendChild(outerScroll)
 
-            this.trackDragColumn.appendChild(dragHandle)
+            this.columnContainer.querySelector('.igv-track-drag-column').appendChild(dragHandle)
 
-            this.trackGearColumn.appendChild(gearContainer)
+            this.columnContainer.querySelector('.igv-gear-menu-column').appendChild(gearContainer)
         }
 
     }
@@ -1380,29 +1343,19 @@ class Browser {
 
             // discard viewport DOM elements
             for (let trackView of this.trackViews) {
-
-                // empty axis column
-
-                // empty viewport columns
-
-                // empty track scroll column
-
-                // empty track drap column
-
-                // empty track gear column
-
-                // empty sampleName column
-
+                // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column
                 trackView.removeDOMFromColumnContainer()
             }
 
-            // discard viewport columns
-            viewportColumnManager.discardAllColumns(this.columnContainer)
+            // discard ONLY viewport columns
+            this.columnContainer.querySelectorAll('.igv-column-shim, .igv-column').forEach(el => el.remove())
 
+            // Insert viewport columns preceding the sample-name column
             viewportColumnManager.insertBefore($(this.columnContainer.querySelector('.igv-sample-name-column')), this.referenceFrameList.length)
 
             this.centerLineList = this.createCenterLineList(this.columnContainer)
 
+            // Populate the columns
             for (let trackView of this.trackViews) {
                 trackView.addDOMToColumnContainer(this, this.columnContainer, this.referenceFrameList);
             }

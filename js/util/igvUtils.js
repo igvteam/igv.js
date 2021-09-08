@@ -167,7 +167,6 @@ async function getFilename(url) {
     }
 }
 
-
 function prettyBasePairNumber  (raw) {
 
     var denom,
@@ -205,11 +204,15 @@ function createColumn(columnContainer, className, columnName) {
     const column = DOMUtils.div({ class: className })
     column.setAttribute('data-name', columnName)
     columnContainer.appendChild(column)
-    return column
 }
 
-function getColumnWithName(columnContainer, columnName) {
 
+function insertElementBefore(element, referenceNode) {
+    referenceNode.parentNode.insertBefore(element, referenceNode);
 }
 
-export {createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, getFilename, prettyBasePairNumber, isDataURL}
+function insertElementAfter(element, referenceNode) {
+    referenceNode.parentNode.insertBefore(element, referenceNode.nextSibling);
+}
+
+export {createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter}

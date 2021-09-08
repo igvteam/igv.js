@@ -96,7 +96,7 @@ class TrackView {
     createAxis(browser, track) {
 
         const axis = DOMUtils.div();
-        browser.axisColumn.appendChild(axis);
+        browser.columnContainer.querySelector('.igv-axis-column').appendChild(axis);
 
         axis.style.height = `${track.height}px`;
         // axis.style.backgroundColor = randomRGB(150, 250)
@@ -562,7 +562,7 @@ class TrackView {
     createTrackScrollbar(browser) {
 
         const outerScroll = DOMUtils.div()
-        browser.trackScrollbarColumn.appendChild(outerScroll)
+        browser.columnContainer.querySelector('.igv-scrollbar-column').appendChild(outerScroll)
         outerScroll.style.height = `${ this.track.height }px`
         this.outerScroll = outerScroll
 
@@ -580,7 +580,7 @@ class TrackView {
 
         const className = 'ideogram' === this.track.type || 'ruler' === this.track.type ? 'igv-track-drag-shim' : 'igv-track-drag-handle'
         this.dragHandle = DOMUtils.div({ class: className })
-        browser.trackDragColumn.appendChild(this.dragHandle)
+        browser.columnContainer.querySelector('.igv-track-drag-column').appendChild(this.dragHandle)
         this.dragHandle.style.height = `${ this.track.height }px`
 
         this.addTrackDragMouseHandlers(browser)
@@ -590,7 +590,7 @@ class TrackView {
     createTrackGearPopup(browser) {
 
         this.gearContainer = DOMUtils.div()
-        browser.trackGearColumn.appendChild(this.gearContainer);
+        browser.columnContainer.querySelector('.igv-gear-menu-column').appendChild(this.gearContainer);
         this.gearContainer.style.height = `${ this.track.height }px`
 
         if (true === this.track.ignoreTrackMenu) {
