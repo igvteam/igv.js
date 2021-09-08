@@ -230,9 +230,9 @@ function getColorForFeature(feature) {
 
     let color;
     if (this.altColor && "-" === feature.strand) {
-        color = this.altColor;
+        color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor;
     } else if (this.color) {
-        color = this.color;   // Explicit setting via menu, or possibly track line if !config.color
+        color = (typeof this.color === "function") ? this.color(feature) : this.color;  // Explicit setting via menu, or possibly track line if !config.color
     } else if (this.colorBy) {
         const value = feature.getAttributeValue ?
             feature.getAttributeValue(this.colorBy) :
