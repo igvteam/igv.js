@@ -7,10 +7,10 @@ const viewportColumnManager =
 
             for (let i = 0; i < count; i++) {
                 if (0 === i) {
-                    createColumn(columnContainer, 'igv-column', 'viewport')
+                    createColumn(columnContainer, 'igv-column')
                 } else {
                     columnContainer.appendChild(DOMUtils.div({ class: 'igv-column-shim' }))
-                    createColumn(columnContainer, 'igv-column', 'viewport')
+                    createColumn(columnContainer, 'igv-column')
                 }
             }
 
@@ -28,7 +28,6 @@ const viewportColumnManager =
             insertElementAfter(shim, referenceElement)
 
             const column = DOMUtils.div({ class: 'igv-column' })
-            column.setAttribute('data-name', 'viewport')
             insertElementAfter(column, shim)
 
             return column
@@ -39,7 +38,6 @@ const viewportColumnManager =
             for (let i = 0; i < count; i++) {
 
                 const column = DOMUtils.div({ class: 'igv-column' })
-                column.setAttribute('data-name', 'viewport')
                 insertElementBefore(column, referenceElement)
 
                 if (count > 1 && i > 0) {

@@ -64,7 +64,7 @@ const CursorGuide = function ($columnContainer, browser) {
             const left = `${ x }px`;
             this.$verticalGuide.css({ left });
 
-            const $columns = browser.$root.find('.igv-column')
+            const $columns = $(browser.root).find('.igv-column')
             const index = $columns.index($viewport.parent())
             const rulerViewport = browser.rulerTrackView.viewports[ index ]
             rulerViewport.mouseMove(event)

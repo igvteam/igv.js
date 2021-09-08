@@ -200,9 +200,8 @@ function isDataURL(obj) {
     return (StringUtils.isString(obj) && obj.startsWith("data:"))
 }
 
-function createColumn(columnContainer, className, columnName) {
+function createColumn(columnContainer, className) {
     const column = DOMUtils.div({ class: className })
-    column.setAttribute('data-name', columnName)
     columnContainer.appendChild(column)
 }
 

@@ -97,13 +97,13 @@ class Browser {
 
         this.parent = parentDiv;
 
-        this.$root = $('<div>', {class: 'igv-container'});
-        $(parentDiv).append(this.$root);
+        this.root = DOMUtils.div({class: 'igv-container'});
+        parentDiv.appendChild(this.root);
 
-        Alert.init(this.$root.get(0))
+        Alert.init(this.root)
 
         this.columnContainer = DOMUtils.div({class: 'igv-column-container'});
-        this.$root.get(0).appendChild(this.columnContainer);
+        this.root.appendChild(this.columnContainer);
 
         this.menuPopup = new MenuPopup(this.columnContainer);
 
@@ -264,10 +264,10 @@ class Browser {
             this.$navigation.hide();
         }
 
-        this.inputDialog = new InputDialog(this.$root.get(0));
+        this.inputDialog = new InputDialog(this.root);
         this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
 
-        this.dataRangeDialog = new DataRangeDialog(this.$root);
+        this.dataRangeDialog = new DataRangeDialog($(this.root));
         this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${DOMUtils.guid()}`
 
         this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432})
@@ -439,22 +439,22 @@ class Browser {
         }
 
         // axis column
-        createColumn(this.columnContainer, 'igv-axis-column', 'axis')
+        createColumn(this.columnContainer, 'igv-axis-column')
 
         // defer creation of track viewport columns. Will be done in search method
         // viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
 
         // SampleName column
-        createColumn(this.columnContainer, 'igv-sample-name-column', 'sampleName')
+        createColumn(this.columnContainer, 'igv-sample-name-column')
 
         // Track scrollbar column
-        createColumn(this.columnContainer, 'igv-scrollbar-column', 'trackScroll')
+        createColumn(this.columnContainer, 'igv-scrollbar-column')
 
         // Track drag/reorder column
-        createColumn(this.columnContainer, 'igv-track-drag-column', 'trackDrag')
+        createColumn(this.columnContainer, 'igv-track-drag-column')
 
         // Track gear column
-        createColumn(this.columnContainer, 'igv-gear-menu-column', 'trackGear')
+        createColumn(this.columnContainer, 'igv-gear-menu-column')
 
         const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome);
         await this.loadReference(genomeConfig, session.locus);
@@ -1171,15 +1171,12 @@ class Browser {
     calculateViewportWidth(columnCount) {
 
         let {width} = this.columnContainer.getBoundingClientRect()
-        // console.log(`${ Date.now() }  column-container ${ StringUtils.numberFormatter(width) }  root ${ StringUtils.numberFormatter(this.$root.get(0).clientWidth) } `)
 
         const sampleNameViewportWidth = this.getSampleNameViewportWidth()
 
         width -= igv_axis_column_width + sampleNameViewportWidth + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
 
         width -= column_multi_locus_shim_width * (columnCount - 1)
-
-        // console.log(`${ Date.now() }  column-container ${ width } viewport ${ Math.floor(width/columnCount) } sample-name-viewport ${ sampleNameViewportWidth }`)
 
         return Math.floor(width / columnCount)
     }
@@ -1435,13 +1432,11 @@ class Browser {
     }
 
     dispose() {
-
-        $(window).off(this.namespace);
-        $(document).off(this.namespace);
-        this.eventHandlers = undefined;
-        this.trackViews.forEach(function (tv) {
-            tv.dispose();
-        })
+        this.removeMouseHandlers()
+        this.eventHandlers = undefined
+        for (let trackView of this.trackViews) {
+            trackView.dispose()
+        }
     }
 
     toJSON() {
@@ -1688,20 +1683,20 @@ class Browser {
 
     addRootMouseUpHandler() {
         this.boundRootMouseUpHandler = mouseUpOrLeave.bind(this)
-        this.$root.get(0).addEventListener('mouseup', this.boundRootMouseUpHandler)
+        this.root.addEventListener('mouseup', this.boundRootMouseUpHandler)
     }
 
     removeRootMouseUpHandler() {
-        this.$root.get(0).removeEventListener('mouseup', this.boundRootMouseUpHandler)
+        this.root.removeEventListener('mouseup', this.boundRootMouseUpHandler)
     }
 
     addRootMouseLeaveHandler() {
         this.boundRootMouseLeaveHandler = mouseUpOrLeave.bind(this)
-        this.$root.get(0).addEventListener('mouseleave', this.boundRootMouseLeaveHandler)
+        this.root.addEventListener('mouseleave', this.boundRootMouseLeaveHandler)
     }
 
     removeRootMouseLeaveHandler() {
-        this.$root.get(0).removeEventListener('mouseleave', this.boundRootMouseLeaveHandler)
+        this.root.removeEventListener('mouseleave', this.boundRootMouseLeaveHandler)
     }
 
     addColumnContainerEventHandlers() {
