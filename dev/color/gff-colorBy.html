@@ -36,8 +36,46 @@
                                 url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
                                 indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
                                 visibilityWindow: 1000000,
-                                colorBy: "biotype"
+                                colorBy: "biotype",
+                                // Uncomment to explicitly set a colorTable
+                                // colorTable: {
+                                //     "antisense": "blueviolet",
+                                //     "protein_coding": "blue",
+                                //     "retained_intron": "rgb(0, 150, 150)",
+                                //     "processed_transcript": "purple",
+                                //     "processed_pseudogene": "#7fff00",
+                                //     "unprocessed_pseudogene": "#d2691e",
+                                //     "*": "black"
+                                // }
                             },
+                            {
+                                name: "Color by function",
+                                format: "gff3",
+                                displayMode: "expanded",
+                                height: 300,
+                                url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                                indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                                visibilityWindow: 1000000,
+                                color: (feature) => {
+                                    switch (feature.getAttributeValue("biotype")) {
+                                        case "antisense":
+                                            return "blueviolet"
+                                        case "protein_coding":
+                                            return "blue"
+                                        case "retained_intron":
+                                            return "rgb(0, 150, 150)"
+                                        case "processed_transcript":
+                                            return "purple"
+                                        case "processed_pseudogene":
+                                            return "#7fff00"
+                                        case "unprocessed_pseudogene":
+                                            return "#d2691e"
+                                        default:
+                                            return "black"
+                                    }
+                                }
+                            },
+
                             {
                                 name: "Color by \"source\"",
                                 format: "gff3",
@@ -52,8 +90,8 @@
                                     "ensembl": "blueviolet",
                                     "ensembl_havana": "purple",
                                     "havana": "blue",
-                                    "insdc": "7fff00",
-                                    "mirbase": "d2691e",
+                                    "insdc": "#7fff00",
+                                    "mirbase": "#d2691e",
                                     "*": "black"
                                 }
                             },
@@ -82,35 +120,9 @@
                                         "ensembl": "blueviolet",
                                         "ensembl_havana": "purple",
                                         "havana": "blue",
-                                        "insdc": "7fff00",
-                                        "mirbase": "d2691e",
+                                        "insdc": "#7fff00",
+                                        "mirbase": "#d2691e",
                                         "*": "black"
-                                    }
-                                }
-                            },
-                            {
-                                name: "Color by function",
-                                format: "gff3",
-                                displayMode: "expanded",
-                                height: 300,
-                                url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
-                                indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
-                                visibilityWindow: 1000000,
-                                color: (feature) => {
-                                    switch (feature.getAttributeValue("source")) {
-                                        case "Ensembl":
-                                        case "ensembl":
-                                            return "blueviolet";
-                                        case "ensembl_havana":
-                                            return "purple";
-                                        case "havana":
-                                            return "blue";
-                                        case "insdc":
-                                            return "7fff00";
-                                        case "mirbase":
-                                            return "d2691e";
-                                        default:
-                                            return "black"
                                     }
                                 }
                             }
