@@ -3,7 +3,7 @@ import IdeogramViewportController from "./ideogramViewportController.js";
 import TrackViewportController from "./trackViewportController.js";
 import RulerViewportController from "./rulerViewportController.js";
 
-const createViewport = (trackView, column, referenceFrame, width) => {
+const createViewportController = (trackView, column, referenceFrame, width) => {
 
     if ('ruler' === trackView.track.type) {
         return new RulerViewportController(trackView, $(column), referenceFrame, width);
@@ -15,4 +15,4 @@ const createViewport = (trackView, column, referenceFrame, width) => {
 
 }
 
-export { createViewport }
+export { createViewportController }

@@ -37,7 +37,7 @@ import {
 } from "../node_modules/igv-utils/src/index.js";
 import * as TrackUtils from './util/trackUtils.js';
 import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js";
-import {createViewport} from "./viewportFactory.js";
+import {createViewportController} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
 import ROI from "./roi.js";
@@ -443,22 +443,22 @@ class Browser {
         await this.loadReference(genomeConfig, session.locus);
 
         // axis column
-        this.axisColumn = createColumn(this.columnContainer, 'igv-axis-column')
+        this.axisColumn = createColumn(this.columnContainer, 'igv-axis-column', 'axis')
 
         // track viewport columns
-        this.viewportColumns = viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
+        viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
 
         // SampleName column
-        this.sampleNameColumn = createColumn(this.columnContainer, 'igv-sample-name-column')
+        createColumn(this.columnContainer, 'igv-sample-name-column', 'sampleName')
 
         // Track scrollbar column
-        this.trackScrollbarColumn = createColumn(this.columnContainer, 'igv-scrollbar-column')
+        this.trackScrollbarColumn = createColumn(this.columnContainer, 'igv-scrollbar-column', 'trackScroll')
 
         // Track drag/reorder column
-        this.trackDragColumn = createColumn(this.columnContainer, 'igv-track-drag-column')
+        this.trackDragColumn = createColumn(this.columnContainer, 'igv-track-drag-column', 'trackDrag')
 
         // Track gear column
-        this.trackGearColumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
+        this.trackGearColumn = createColumn(this.columnContainer, 'igv-gear-menu-column', 'trackGear')
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
@@ -591,9 +591,6 @@ class Browser {
 
         // viewport columns (and viewport shims)
         viewportColumnManager.discardAllColumns(this.columnContainer)
-
-        // sample name column
-        if (this.sampleNameColumn) this.sampleNameColumn.remove()
 
         // track scrollbar column
         if (this.trackScrollbarColumn) this.trackScrollbarColumn.remove()
@@ -985,7 +982,7 @@ class Browser {
                 viewportColumns[i].appendChild($viewport.get(0))
             }
 
-            this.sampleNameColumn.appendChild(sampleNameViewport.viewport)
+            this.columnContainer.querySelector('.igv-sample-name-column').appendChild(sampleNameViewport.viewport)
 
             this.trackScrollbarColumn.appendChild(outerScroll)
 
@@ -1271,7 +1268,7 @@ class Browser {
             this.referenceFrameList.push(referenceFrameRight)
 
             for (let trackView of this.trackViews) {
-                const viewport = createViewport(trackView, viewportColumn, referenceFrameRight)
+                const viewport = createViewportController(trackView, viewportColumn, referenceFrameRight)
                 trackView.viewports.push(viewport);
             }
 
@@ -1280,7 +1277,7 @@ class Browser {
             this.referenceFrameList.splice(indexRight, 0, referenceFrameRight);
 
             for (let trackView of this.trackViews) {
-                const viewport = createViewport(trackView, viewportColumn, referenceFrameRight)
+                const viewport = createViewportController(trackView, viewportColumn, referenceFrameRight)
                 trackView.viewports.splice(indexRight, 0, viewport)
             }
 
@@ -1402,7 +1399,7 @@ class Browser {
             // discard viewport columns
             viewportColumnManager.discardAllColumns(this.columnContainer)
 
-            viewportColumnManager.insertBefore($(this.sampleNameColumn), this.referenceFrameList.length)
+            viewportColumnManager.insertBefore($(this.columnContainer.querySelector('.igv-sample-name-column')), this.referenceFrameList.length)
 
             this.centerLineList = this.createCenterLineList(this.columnContainer)
 

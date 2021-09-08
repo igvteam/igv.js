@@ -25,7 +25,7 @@
 
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import {createViewport} from "./viewportFactory.js";
+import {createViewportController} from "./viewportFactory.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils, Icon} from '../node_modules/igv-utils/src/index.js';
 import SampleNameViewportController from './sampleNameViewportController.js';
@@ -75,12 +75,12 @@ class TrackView {
         const viewportWidth = browser.calculateViewportWidth(referenceFrameList.length)
         const viewportColumns = columnContainer.querySelectorAll('.igv-column')
         for (let i = 0; i < viewportColumns.length; i++) {
-            const viewport = createViewport(this, viewportColumns[i], referenceFrameList[i], viewportWidth)
+            const viewport = createViewportController(this, viewportColumns[i], referenceFrameList[i], viewportWidth)
             this.viewports.push(viewport)
         }
 
         // SampleName Viewport
-        this.sampleNameViewport = new SampleNameViewportController(this, browser.sampleNameColumn, undefined, browser.sampleNameViewportWidth)
+        this.sampleNameViewport = new SampleNameViewportController(this, browser.columnContainer.querySelector('.igv-sample-name-column'), undefined, browser.sampleNameViewportWidth)
 
         // Track Scrollbar
         this.createTrackScrollbar(browser)

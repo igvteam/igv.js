@@ -3,7 +3,6 @@ import {Icon, DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/sr
 import TrackViewportController from "./trackViewportController.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
-import {viewportColumnManager} from "./viewportColumnManager.js";
 
 let timer
 let currentViewport = undefined
