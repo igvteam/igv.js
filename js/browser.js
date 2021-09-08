@@ -438,15 +438,11 @@ class Browser {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
         }
 
-        const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome);
-
-        await this.loadReference(genomeConfig, session.locus);
-
         // axis column
         createColumn(this.columnContainer, 'igv-axis-column', 'axis')
 
-        // track viewport columns
-        viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
+        // defer creation of track viewport columns. Will be done in search method
+        // viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
 
         // SampleName column
         createColumn(this.columnContainer, 'igv-sample-name-column', 'sampleName')
@@ -459,6 +455,9 @@ class Browser {
 
         // Track gear column
         createColumn(this.columnContainer, 'igv-gear-menu-column', 'trackGear')
+
+        const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome);
+        await this.loadReference(genomeConfig, session.locus);
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
@@ -1224,7 +1223,7 @@ class Browser {
         const indexRight = 1 + (this.referenceFrameList.indexOf(referenceFrameLeft))
 
         const {$viewport} = this.trackViews[0].viewports[indexLeft]
-        const viewportColumn = viewportColumnManager.insertAfter($viewport.parent())
+        const viewportColumn = viewportColumnManager.insertAfter($viewport.get(0).parentElement)
 
         if (indexRight === this.referenceFrameList.length) {
 
@@ -1351,7 +1350,7 @@ class Browser {
             this.columnContainer.querySelectorAll('.igv-column-shim, .igv-column').forEach(el => el.remove())
 
             // Insert viewport columns preceding the sample-name column
-            viewportColumnManager.insertBefore($(this.columnContainer.querySelector('.igv-sample-name-column')), this.referenceFrameList.length)
+            viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-name-column'), this.referenceFrameList.length)
 
             this.centerLineList = this.createCenterLineList(this.columnContainer)
 
