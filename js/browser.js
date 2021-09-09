@@ -440,9 +440,6 @@ class Browser {
         // axis column
         createColumn(this.columnContainer, 'igv-axis-column')
 
-        // defer creation of track viewport columns. Will be done in search method
-        // viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
-
         // SampleName column
         createColumn(this.columnContainer, 'igv-sample-name-column')
 
@@ -720,6 +717,11 @@ class Browser {
         for (let tv of this.trackViews) {
             tv.updateViews(true);
         }
+    }
+
+    getRulerTrackView() {
+        const list = this.trackViews.filter(({ track }) => 'ruler'  === track.id)
+        return list.length > 0 ? list[ 0 ] : undefined
     }
 
     /**
@@ -1260,8 +1262,8 @@ class Browser {
 
         this.referenceFrameList.splice(index, 1);
 
-        if (1 === this.referenceFrameList.length && this.rulerTrackView) {
-            for (let rulerViewport of this.rulerTrackView.viewports) {
+        if (1 === this.referenceFrameList.length && this.getRulerTrackView()) {
+            for (let rulerViewport of this.getRulerTrackView().viewports) {
                 rulerViewport.dismissLocusLabel()
             }
         }
