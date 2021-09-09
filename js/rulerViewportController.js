@@ -70,6 +70,9 @@ class RulerViewportController extends TrackViewportController {
         multiLocusPanelCloseButton.addEventListener('click', this.boundMultiLocusPanelCloseHandler)
 
         function clickHandler(event) {
+            if (currentViewport === this) {
+                currentViewport = undefined
+            }
             this.browser.removeMultiLocusPanel(this.referenceFrame)
         }
 
@@ -145,6 +148,8 @@ class RulerViewportController extends TrackViewportController {
     }
 
     mouseMove(event) {
+
+        // console.log(`${ Date.now() } ruler viewport controller ${ this.browser.referenceFrameList.indexOf(this.referenceFrame)}`)
 
         if (true === this.browser.cursorGuideVisible) {
 
