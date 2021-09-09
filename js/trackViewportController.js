@@ -17,9 +17,9 @@ let popupTimerID;
 
 class TrackViewportController extends ViewportController {
 
-    constructor(trackView, $viewportColumn, referenceFrame, width) {
+    constructor(trackView, viewportColumn, referenceFrame, width) {
 
-        super(trackView, $viewportColumn, referenceFrame, width)
+        super(trackView, viewportColumn, referenceFrame, width)
 
     }
 

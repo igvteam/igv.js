@@ -37,7 +37,6 @@ import {
 } from "../node_modules/igv-utils/src/index.js";
 import * as TrackUtils from './util/trackUtils.js';
 import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js";
-import {createViewportController} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
 import ROI from "./roi.js";
@@ -45,7 +44,7 @@ import XMLSession from "./session/igvXmlSession.js";
 import GenomeUtils from "./genome/genome.js";
 import loadPlinkFile from "./sampleInformation.js";
 import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js";
-import {buildOptions, createColumn, doAutoscale, getFilename} from "./util/igvUtils.js";
+import {buildOptions, createColumn, doAutoscale, getFilename, createViewportController} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import {defaultSequenceTrackOrder} from './sequenceTrack.js';
 import version from "./version.js";

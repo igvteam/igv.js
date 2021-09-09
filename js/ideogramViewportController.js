@@ -30,8 +30,8 @@ import TrackViewportController from "./trackViewportController.js"
 
 class IdeogramViewportController extends TrackViewportController {
 
-    constructor(trackView, $viewportColumn, referenceFrame, width) {
-        super(trackView, $viewportColumn, referenceFrame, width)
+    constructor(trackView, viewportColumn, referenceFrame, width) {
+        super(trackView, viewportColumn, referenceFrame, width)
     }
 
     initializationHelper() {

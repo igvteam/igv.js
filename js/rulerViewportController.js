@@ -10,8 +10,8 @@ const toolTipTimeout = 1e4
 
 class RulerViewportController extends TrackViewportController {
 
-    constructor(trackView, $viewportColumn, referenceFrame, width) {
-        super(trackView, $viewportColumn, referenceFrame, width);
+    constructor(trackView, viewportColumn, referenceFrame, width) {
+        super(trackView, viewportColumn, referenceFrame, width);
     }
 
     initializationHelper() {

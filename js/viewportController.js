@@ -30,7 +30,7 @@ import SequenceTrack from "./sequenceTrack.js";
 
 class ViewportController {
 
-    constructor(trackView, $viewportColumn, referenceFrame, width) {
+    constructor(trackView, viewportColumn, referenceFrame, width) {
 
         this.guid = DOMUtils.guid();
         this.trackView = trackView;
@@ -39,7 +39,7 @@ class ViewportController {
         this.browser = trackView.browser;
 
         this.$viewport = $('<div class="igv-viewport">');
-        $viewportColumn.append(this.$viewport);
+        viewportColumn.appendChild(this.$viewport.get(0));
 
         if (trackView.track.height) {
             this.$viewport.get(0).style.height = `${ trackView.track.height }px`;

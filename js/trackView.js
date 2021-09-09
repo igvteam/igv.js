@@ -25,12 +25,12 @@
 
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import {createViewportController} from "./viewportFactory.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils, Icon} from '../node_modules/igv-utils/src/index.js';
 import SampleNameViewportController from './sampleNameViewportController.js';
 import MenuPopup from "./ui/menuPopup.js";
 import MenuUtils from "./ui/menuUtils.js";
+import {createViewportController} from "./util/igvUtils.js";
 
 const scrollbarExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
