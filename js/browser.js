@@ -241,7 +241,7 @@ class Browser {
         $navbarRightContainer.append($toggle_button_container);
         this.$toggle_button_container = $toggle_button_container;
 
-        this.cursorGuide = new CursorGuide($(this.columnContainer), this)
+        this.cursorGuide = new CursorGuide(this.columnContainer, this)
 
         this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
 

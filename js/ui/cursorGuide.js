@@ -24,48 +24,50 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
-import {DOMUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {DOMUtils} from "../../node_modules/igv-utils/src/index.js";
 
-const CursorGuide = function ($columnContainer, browser) {
+const CursorGuide = function (columnContainer, browser) {
 
-    this.browser = browser;
+    this.browser = browser
 
-    this.$horizontalGuide = $('<div class="igv-cursor-guide-horizontal">');
-    $columnContainer.append(this.$horizontalGuide);
+    this.horizontalGuide = DOMUtils.div({ class: 'igv-cursor-guide-horizontal' })
+    columnContainer.appendChild(this.horizontalGuide)
 
-    this.$verticalGuide = $('<div class="igv-cursor-guide-vertical">');
-    $columnContainer.append(this.$verticalGuide);
+    this.verticalGuide = DOMUtils.div({ class: 'igv-cursor-guide-vertical' })
+    columnContainer.appendChild(this.verticalGuide)
 
     this.setVisibility(browser.config.showCursorTrackingGuide)
 
     // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-    $columnContainer.on('mousemove.cursor-guide', event => {
+    columnContainer.addEventListener('mousemove', event => {
 
-        const { x, y } = DOMUtils.translateMouseCoordinates(event, $columnContainer.get(0));
-        // console.log(`cursor guide - x(${ StringUtils.numberFormatter(x) }) y(${ StringUtils.numberFormatter(y) })`)
+        const { x, y } = DOMUtils.translateMouseCoordinates(event, columnContainer)
+        this.horizontalGuide.style.top = `${ y }px`
 
-        const top = `${ y }px`;
-        this.$horizontalGuide.css({ top });
+        const target = document.elementFromPoint(event.clientX, event.clientY)
+        const parent = target.parentElement
 
-        const $target = $(document.elementFromPoint(event.clientX, event.clientY));
-        const $parent = $target.parent();
+        let viewport = undefined;
 
-        let $viewport = undefined;
-
-        if ($parent.hasClass('igv-viewport-content')) {
-            $viewport = $parent.parent();
-        } else if ($parent.hasClass('igv-viewport') && $target.hasClass('igv-viewport-content')) {
-            $viewport = $parent;
+        if (parent.classList.contains('igv-viewport-content')) {
+            viewport = parent.parentElement
+        } else if (parent.classList.contains('igv-viewport') && target.classList.contains('igv-viewport-content')) {
+            viewport = parent
         }
 
-        if ($viewport && browser.getRulerTrackView()) {
+        if (viewport && browser.getRulerTrackView()) {
 
-            const left = `${ x }px`;
-            this.$verticalGuide.css({ left });
+            this.verticalGuide.style.left = `${ x }px`
 
-            const $columns = $(browser.root).find('.igv-column')
-            const index = $columns.index($viewport.parent())
+            const columns = browser.root.querySelectorAll('.igv-column')
+            let index = undefined
+            const viewportParent = viewport.parentElement
+            for (let i = 0; i < columns.length; i++) {
+                if (undefined === index && viewportParent === columns[i]) {
+                    index = i
+                }
+            }
+            // const index = columns.index(viewport.parent())
             const rulerViewport = browser.getRulerTrackView().viewports[ index ]
             rulerViewport.mouseMove(event)
 
@@ -94,15 +96,15 @@ CursorGuide.prototype.setVisibility = function (showCursorTrackingGuide) {
 }
 
 CursorGuide.prototype.show = function () {
-    this.$verticalGuide.show()
-    this.$horizontalGuide.show()
+    this.verticalGuide.style.display = 'block'
+    this.horizontalGuide.style.display = 'block'
 
 }
 
 CursorGuide.prototype.hide = function () {
 
-    this.$verticalGuide.hide()
-    this.$horizontalGuide.hide()
+    this.verticalGuide.style.display = 'none'
+    this.horizontalGuide.style.display = 'none'
 
     if (this.browser.getRulerTrackView()) {
         for (let viewport of this.browser.getRulerTrackView().viewports) {
