@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>BAM file with CSI index</h1>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr22:24,376,171-24,376,467",
+            tracks: [
+                {
+                    type: "alignment",
+                    url: "https://s3.amazonaws.com/igv.org.demo/gstt1_sample.bam",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/gstt1_sample.bam.csi",
+                    name: "CSI BAM"
+                }
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
