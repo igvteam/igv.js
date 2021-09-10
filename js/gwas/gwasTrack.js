@@ -196,8 +196,8 @@ class GWASTrack extends TrackBase {
     popupData(clickState) {
 
         let data = [];
-        const track = clickState.viewport.trackView.track;
-        const features = clickState.viewport.getCachedFeatures();
+        const track = clickState.viewportController.trackView.track;
+        const features = clickState.viewportController.getCachedFeatures();
 
         if (features) {
             let count = 0;

@@ -210,9 +210,9 @@ class EqtlTrack extends TrackBase {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    popupData(clckState) {
+    popupData(clickState) {
 
-        let features = clckState.viewport.getCachedFeatures();
+        let features = clickState.viewportController.getCachedFeatures();
         if (!features || features.length === 0) return [];
 
         const tolerance = 3;
@@ -221,8 +221,8 @@ class EqtlTrack extends TrackBase {
 
         for (let feature of features) {
             // Hit test --use square vs circle for efficiency (no sqrt)
-            if (Math.abs(feature.px - clckState.canvasX) < (feature.radius + tolerance) &&
-                Math.abs(feature.py - clckState.canvasY) < (feature.radius + tolerance)) {
+            if (Math.abs(feature.px - clickState.canvasX) < (feature.radius + tolerance) &&
+                Math.abs(feature.py - clickState.canvasY) < (feature.radius + tolerance)) {
 
                 if (popupData.length > 0) {
                     popupData.push('<hr/>');

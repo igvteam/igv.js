@@ -167,8 +167,8 @@ class SampleNameViewportController {
                     value: this.browser.sampleNameViewportWidth,
                     callback: newWidth => {
                         this.browser.sampleNameViewportWidth = parseInt(newWidth)
-                        for (let { sampleNameViewport } of this.browser.trackViews) {
-                            sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
+                        for (let { sampleNameViewportController } of this.browser.trackViews) {
+                            sampleNameViewportController.setWidth(this.browser.sampleNameViewportWidth)
                         }
                         this.browser.resize()
                     }

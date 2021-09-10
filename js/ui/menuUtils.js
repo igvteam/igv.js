@@ -303,7 +303,7 @@ function getTrackLabelText(track) {
     var vp,
         txt;
 
-    vp = track.trackView.viewports[0];
+    vp = track.trackView.viewportControllers[0];
     txt = vp.$trackLabel.text();
 
     return txt;

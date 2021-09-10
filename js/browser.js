@@ -918,15 +918,15 @@ class Browser {
         });
 
         // discard current track order
-        for (let {axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
+        for (let {axis, viewportControllers, sampleNameViewportController, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
             axis.remove()
 
-            for (let {$viewport} of viewports) {
+            for (let {$viewport} of viewportControllers) {
                 $viewport.detach()
             }
 
-            sampleNameViewport.viewport.remove()
+            sampleNameViewportController.viewport.remove()
 
             outerScroll.remove()
             dragHandle.remove()
@@ -936,16 +936,16 @@ class Browser {
         // Reattach the divs to the dom in the correct order
         const viewportColumns = this.columnContainer.querySelectorAll('.igv-column')
 
-        for (let {axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
+        for (let {axis, viewportControllers, sampleNameViewportController, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
             this.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
             for (let i = 0; i < viewportColumns.length; i++) {
-                const {$viewport} = viewports[i]
+                const {$viewport} = viewportControllers[i]
                 viewportColumns[i].appendChild($viewport.get(0))
             }
 
-            this.columnContainer.querySelector('.igv-sample-name-column').appendChild(sampleNameViewport.viewport)
+            this.columnContainer.querySelector('.igv-sample-name-column').appendChild(sampleNameViewportController.viewport)
 
             this.columnContainer.querySelector('.igv-scrollbar-column').appendChild(outerScroll)
 
@@ -1068,8 +1068,8 @@ class Browser {
                 referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
             }
 
-            for (let {viewports} of this.trackViews) {
-                viewports[index].setWidth(viewportWidth)
+            for (let {viewportControllers} of this.trackViews) {
+                viewportControllers[index].setWidth(viewportWidth)
             }
 
         }
@@ -1220,7 +1220,7 @@ class Browser {
         const indexLeft = this.referenceFrameList.indexOf(referenceFrameLeft)
         const indexRight = 1 + (this.referenceFrameList.indexOf(referenceFrameLeft))
 
-        const {$viewport} = this.trackViews[0].viewports[indexLeft]
+        const {$viewport} = this.trackViews[0].viewportControllers[indexLeft]
         const viewportColumn = viewportColumnManager.insertAfter($viewport.get(0).parentElement)
 
         if (indexRight === this.referenceFrameList.length) {
@@ -1228,8 +1228,8 @@ class Browser {
             this.referenceFrameList.push(referenceFrameRight)
 
             for (let trackView of this.trackViews) {
-                const viewport = createViewportController(trackView, viewportColumn, referenceFrameRight)
-                trackView.viewports.push(viewport);
+                const viewportController = createViewportController(trackView, viewportColumn, referenceFrameRight)
+                trackView.viewportControllers.push(viewportController);
             }
 
         } else {
@@ -1237,8 +1237,8 @@ class Browser {
             this.referenceFrameList.splice(indexRight, 0, referenceFrameRight);
 
             for (let trackView of this.trackViews) {
-                const viewport = createViewportController(trackView, viewportColumn, referenceFrameRight)
-                trackView.viewports.splice(indexRight, 0, viewport)
+                const viewportController = createViewportController(trackView, viewportColumn, referenceFrameRight)
+                trackView.viewportControllers.splice(indexRight, 0, viewportController)
             }
 
         }
@@ -1252,18 +1252,18 @@ class Browser {
 
         // find the $column corresponding to this referenceFrame and remove it
         const index = this.referenceFrameList.indexOf(referenceFrame);
-        const {$viewport} = this.trackViews[0].viewports[index];
+        const {$viewport} = this.trackViews[0].viewportControllers[index];
         viewportColumnManager.removeColumnAtIndex(index, $viewport.parent().get(0))
 
-        for (let {viewports} of this.trackViews) {
-            viewports[index].dispose();
-            viewports.splice(index, 1);
+        for (let {viewportControllers} of this.trackViews) {
+            viewportControllers[index].dispose();
+            viewportControllers.splice(index, 1);
         }
 
         this.referenceFrameList.splice(index, 1);
 
         if (1 === this.referenceFrameList.length && this.getRulerTrackView()) {
-            for (let rulerViewport of this.getRulerTrackView().viewports) {
+            for (let rulerViewport of this.getRulerTrackView().viewportControllers) {
                 rulerViewport.dismissLocusLabel()
             }
         }
@@ -1282,10 +1282,10 @@ class Browser {
             referenceFrame.bpPerPixel *= scaleFactor
         }
 
-        for (let {viewports} of this.trackViews) {
+        for (let {viewportControllers} of this.trackViews) {
 
-            for (let viewport of viewports) {
-                viewport.setWidth(viewportWidth);
+            for (let viewportController of viewportControllers) {
+                viewportController.setWidth(viewportWidth);
             }
         }
 
@@ -1464,8 +1464,7 @@ class Browser {
         const locus = [];
         const gtexSelections = {};
         let anyTrackView = this.trackViews[0];
-        for (let viewport of anyTrackView.viewports) {
-            const referenceFrame = viewport.referenceFrame;
+        for (let { referenceFrame } of anyTrackView.viewportControllers) {
             const locusString = referenceFrame.getLocusString();
             locus.push(locusString);
             if (referenceFrame.selection) {
@@ -1546,8 +1545,7 @@ class Browser {
     currentLoci() {
         const loci = [];
         const anyTrackView = this.trackViews[0];
-        for (let viewport of anyTrackView.viewports) {
-            const referenceFrame = viewport.referenceFrame;
+        for (let { referenceFrame } of anyTrackView.viewportControllers) {
             const locusString = referenceFrame.getLocusString();
             loci.push(locusString);
         }
@@ -1560,19 +1558,19 @@ class Browser {
      * track) without halting the drag.
      *
      * @param e
-     * @param viewport
+     * @param viewportController
      */
-    mouseDownOnViewport(e, viewport) {
+    mouseDownOnViewport(e, viewportController) {
 
         var coords;
         coords = DOMUtils.pageCoordinates(e);
         this.vpMouseDown = {
-            viewport: viewport,
+            viewportController,
             lastMouseX: coords.x,
             mouseDownX: coords.x,
             lastMouseY: coords.y,
             mouseDownY: coords.y,
-            referenceFrame: viewport.referenceFrame
+            referenceFrame: viewportController.referenceFrame
         };
     };
 
@@ -1584,7 +1582,7 @@ class Browser {
         this.vpMouseDown = undefined;
 
 
-        if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
+        if (dragObject && dragObject.viewportController.referenceFrame.start !== dragObject.start) {
             this.updateViews();
             this.fireEvent('trackdragend');
         }
@@ -1760,7 +1758,7 @@ function handleMouseMove(e) {
 
     if (this.vpMouseDown) {
 
-        const { viewport, referenceFrame } = this.vpMouseDown;
+        const { viewportController, referenceFrame } = this.vpMouseDown;
 
         // Determine direction,  true == horizontal
         const horizontal = Math.abs((x - this.vpMouseDown.mouseDownX)) > Math.abs((y - this.vpMouseDown.mouseDownY));
@@ -1768,21 +1766,21 @@ function handleMouseMove(e) {
         if (!this.dragObject && !this.isScrolling) {
             if (horizontal) {
                 if (this.vpMouseDown.mouseDownX && Math.abs(x - this.vpMouseDown.mouseDownX) > this.constants.dragThreshold) {
-                    this.dragObject = { viewport, start: referenceFrame.start };
+                    this.dragObject = { viewportController, start: referenceFrame.start };
                 }
             } else {
                 if (this.vpMouseDown.mouseDownY &&
                     Math.abs(y - this.vpMouseDown.mouseDownY) > this.constants.scrollThreshold) {
                     this.isScrolling = true;
-                    const viewportHeight = viewport.$viewport.height();
-                    const contentHeight = maxViewportContentHeight(viewport.trackView.viewports);
+                    const viewportHeight = viewportController.$viewport.height();
+                    const contentHeight = maxViewportContentHeight(viewportController.trackView.viewportControllers);
                     this.vpMouseDown.r = viewportHeight / contentHeight;
                 }
             }
         }
 
         if (this.dragObject) {
-            const viewChanged = referenceFrame.shiftPixels(this.vpMouseDown.lastMouseX - x, viewport.$viewport.width());
+            const viewChanged = referenceFrame.shiftPixels(this.vpMouseDown.lastMouseX - x, viewportController.$viewport.width());
             if (viewChanged) {
                 this.updateViews();
             }
@@ -1792,7 +1790,7 @@ function handleMouseMove(e) {
 
         if (this.isScrolling) {
             const delta = this.vpMouseDown.r * (this.vpMouseDown.lastMouseY - y);
-            viewport.trackView.moveScroller(delta);
+            viewportController.trackView.moveScroller(delta);
         }
 
 
@@ -1830,13 +1828,13 @@ function logo() {
 
 function toggleTrackLabels(trackViews, isVisible) {
 
-    for (let {viewports} of trackViews) {
-        for (let viewport of viewports) {
-            if (viewport.$trackLabel) {
-                if (0 === viewports.indexOf(viewport) && true === isVisible) {
-                    viewport.$trackLabel.show();
+    for (let {viewportControllers} of trackViews) {
+        for (let viewportController of viewportControllers) {
+            if (viewportController.$trackLabel) {
+                if (0 === viewportControllers.indexOf(viewportController) && true === isVisible) {
+                    viewportController.$trackLabel.show();
                 } else {
-                    viewport.$trackLabel.hide();
+                    viewportController.$trackLabel.hide();
                 }
             }
         }

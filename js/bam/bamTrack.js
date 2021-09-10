@@ -106,7 +106,7 @@ class BAMTrack extends TrackBase {
     sort(options) {
         options = this.assignSort(options);
 
-        for (let vp of this.trackView.viewports) {
+        for (let vp of this.trackView.viewportControllers) {
             if (vp.containsPosition(options.chr, options.position)) {
                 const alignmentContainer = vp.getCachedFeatures();
                 if (alignmentContainer) {
@@ -423,7 +423,7 @@ class BAMTrack extends TrackBase {
     }
 
     getCachedAlignmentContainers() {
-        return this.trackView.viewports.map(vp => vp.getCachedFeatures())
+        return this.trackView.viewportControllers.map(vp => vp.getCachedFeatures())
     }
 
     get dataRange() {
@@ -566,11 +566,11 @@ class CoverageTrack {
 
     popupData(config) {
 
-        let features = config.viewport.getCachedFeatures();
+        let features = config.viewportController.getCachedFeatures();
         if (!features || features.length === 0) return;
 
         let genomicLocation = Math.floor(config.genomicLocation),
-            referenceFrame = config.viewport.referenceFrame,
+            referenceFrame = config.viewportController.referenceFrame,
             coverageMap = features.coverageMap,
             nameValues = [],
             coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart),
@@ -1006,27 +1006,27 @@ class AlignmentTrack {
     };
 
     popupData(config) {
-        const clickedObject = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
+        const clickedObject = this.getClickedObject(config.viewportController, config.y, config.genomicLocation);
         return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
     contextMenuItemList(clickState) {
 
-        const viewport = clickState.viewport;
+        const viewportController = clickState.viewportController;
         const list = [];
 
         const sortByOption = (option) => {
             const cs = this.parent.sortObject;
             const direction = (cs && cs.position === Math.floor(clickState.genomicLocation)) ? !cs.direction : true;
             const newSortObject = {
-                chr: viewport.referenceFrame.chr,
+                chr: viewportController.referenceFrame.chr,
                 position: Math.floor(clickState.genomicLocation),
                 option: option,
                 direction: direction
             }
             this.parent.sortObject = newSortObject;
-            sortAlignmentRows(newSortObject, viewport.getCachedFeatures());
-            viewport.repaint();
+            sortAlignmentRows(newSortObject, viewportController.getCachedFeatures());
+            viewportController.repaint();
         }
         list.push('<b>Sort by...</b>')
         list.push({label: '&nbsp; base', click: () => sortByOption("BASE")});
@@ -1047,7 +1047,7 @@ class AlignmentTrack {
                         callback: (tag) => {
                             if (tag) {
                                 const newSortObject = {
-                                    chr: viewport.referenceFrame.chr,
+                                    chr: viewportController.referenceFrame.chr,
                                     position: Math.floor(clickState.genomicLocation),
                                     option: "TAG",
                                     tag: tag,
@@ -1055,8 +1055,8 @@ class AlignmentTrack {
                                 }
                                 this.sortByTag = tag;
                                 this.parent.sortObject = newSortObject;
-                                sortAlignmentRows(newSortObject, viewport.getCachedFeatures());
-                                viewport.repaint();
+                                sortAlignmentRows(newSortObject, viewportController.getCachedFeatures());
+                                viewportController.repaint();
                             }
                         }
                     };
@@ -1065,7 +1065,7 @@ class AlignmentTrack {
         });
         list.push('<hr/>');
 
-        const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
+        const clickedObject = this.getClickedObject(viewportController, clickState.y, clickState.genomicLocation);
         if (clickedObject) {
 
             const showSoftClips = this.parent.showSoftClips;
@@ -1078,7 +1078,7 @@ class AlignmentTrack {
                     label: 'View mate in split screen',
                     click: () => {
                         if (clickedAlignment.mate) {
-                            const referenceFrame = clickState.viewport.referenceFrame;
+                            const referenceFrame = clickState.viewportController.referenceFrame;
                             if (this.browser.genome.getChromosome(clickedAlignment.mate.chr)) {
                                 this.highlightedAlignmentReadNamed = clickedAlignment.readName;
                                 this.browser.presentMultiLocusPanel(clickedAlignment, referenceFrame);
@@ -1124,11 +1124,11 @@ class AlignmentTrack {
 
     }
 
-    getClickedObject(viewport, y, genomicLocation) {
+    getClickedObject(viewportController, y, genomicLocation) {
 
         const showSoftClips = this.parent.showSoftClips;
 
-        let features = viewport.getCachedFeatures();
+        let features = viewportController.getCachedFeatures();
         if (!features || features.length === 0) return;
 
         let packedAlignmentRows = features.packedAlignmentRows;

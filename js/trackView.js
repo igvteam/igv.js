@@ -54,14 +54,14 @@ class TrackView {
      * when there is only one.
      */
     startSpinner() {
-        if (this.viewports && this.viewports.length > 0) {
-            this.viewports[0].startSpinner();
+        if (this.viewportControllers && this.viewportControllers.length > 0) {
+            this.viewportControllers[0].startSpinner();
         }
     }
 
     stopSpinner() {
-        if (this.viewports && this.viewports.length > 0) {
-            this.viewports[0].stopSpinner();
+        if (this.viewportControllers && this.viewportControllers.length > 0) {
+            this.viewportControllers[0].stopSpinner();
         }
     }
 
@@ -71,16 +71,16 @@ class TrackView {
         this.axis = this.createAxis(browser, this.track)
 
         // Track Viewports
-        this.viewports = []
+        this.viewportControllers = []
         const viewportWidth = browser.calculateViewportWidth(referenceFrameList.length)
         const viewportColumns = columnContainer.querySelectorAll('.igv-column')
         for (let i = 0; i < viewportColumns.length; i++) {
-            const viewport = createViewportController(this, viewportColumns[i], referenceFrameList[i], viewportWidth)
-            this.viewports.push(viewport)
+            const viewportController = createViewportController(this, viewportColumns[i], referenceFrameList[i], viewportWidth)
+            this.viewportControllers.push(viewportController)
         }
 
-        // SampleName Viewport
-        this.sampleNameViewport = new SampleNameViewportController(this, browser.columnContainer.querySelector('.igv-sample-name-column'), undefined, browser.sampleNameViewportWidth)
+        // SampleName ViewportController
+        this.sampleNameViewportController = new SampleNameViewportController(this, browser.columnContainer.querySelector('.igv-sample-name-column'), undefined, browser.sampleNameViewportWidth)
 
         // Track Scrollbar
         this.createTrackScrollbar(browser)
@@ -142,13 +142,13 @@ class TrackView {
         this.axis.remove()
 
         // Track Viewports
-        for (let viewport of this.viewports) {
-            viewport.removeMouseHandlers()
-            viewport.$viewport.remove()
+        for (let viewportController of this.viewportControllers) {
+            viewportController.removeMouseHandlers()
+            viewportController.$viewport.remove()
         }
 
-        // SampleName Viewport
-        this.sampleNameViewport.dispose()
+        // SampleName ViewportController
+        this.sampleNameViewportController.dispose()
 
         // empty trackScrollbar Column
         this.removeTrackScrollMouseHandlers()
@@ -170,7 +170,7 @@ class TrackView {
 
         const { width:axisWidth } = this.axis.getBoundingClientRect()
 
-        const { y } = this.viewports[ 0 ].$viewport.get(0).getBoundingClientRect()
+        const { y } = this.viewportControllers[ 0 ].$viewport.get(0).getBoundingClientRect()
 
         let delta =
             {
@@ -178,14 +178,14 @@ class TrackView {
                 deltaY: y + deltaY
             }
 
-        for (let viewport of this.viewports) {
-            viewport.renderSVGContext(context, delta)
-            const { width } = viewport.$viewport.get(0).getBoundingClientRect()
+        for (let viewportController of this.viewportControllers) {
+            viewportController.renderSVGContext(context, delta)
+            const { width } = viewportController.$viewport.get(0).getBoundingClientRect()
             delta.deltaX += width
         }
 
         if (true === this.browser.showSampleNames) {
-            this.sampleNameViewport.renderSVGContext(context, delta)
+            this.sampleNameViewportController.renderSVGContext(context, delta)
         }
     }
 
@@ -262,16 +262,16 @@ class TrackView {
             this.paintAxis();
         }
 
-        for (let { $viewport } of this.viewports) {
+        for (let { $viewport } of this.viewportControllers) {
             $viewport.height(newHeight)
         }
 
-        this.sampleNameViewport.viewport.style.height = `${newHeight}px`
+        this.sampleNameViewportController.viewport.style.height = `${newHeight}px`
 
         // If the track does not manage its own content height set it here
         if (typeof this.track.computePixelHeight !== "function") {
 
-            for (let vp of this.viewports) {
+            for (let vp of this.viewportControllers) {
                 vp.setContentHeight(newHeight);
             }
         }
@@ -289,10 +289,10 @@ class TrackView {
 
     updateScrollbar() {
 
-        const viewportHeight = this.viewports[ 0 ].$viewport.height();
+        const viewportHeight = this.viewportControllers[ 0 ].$viewport.height();
         this.outerScroll.style.height = `${ viewportHeight }px`;
 
-        const viewportContentHeight = maxViewportContentHeight(this.viewports);
+        const viewportContentHeight = maxViewportContentHeight(this.viewportControllers);
         const innerScrollHeight = Math.round((viewportHeight / viewportContentHeight) * viewportHeight);
 
         if (viewportContentHeight > viewportHeight) {
@@ -309,28 +309,28 @@ class TrackView {
         const top = Math.min(Math.max(0, y), this.outerScroll.clientHeight - this.innerScroll.clientHeight)
         $(this.innerScroll).css('top', `${ top }px`);
 
-        const contentHeight = maxViewportContentHeight(this.viewports)
-        const contentTop = -Math.round(top * (contentHeight / this.viewports[ 0 ].$viewport.height()))
+        const contentHeight = maxViewportContentHeight(this.viewportControllers)
+        const contentTop = -Math.round(top * (contentHeight / this.viewportControllers[ 0 ].$viewport.height()))
 
-        for (let viewport of this.viewports) {
-            viewport.setTop(contentTop)
+        for (let viewportController of this.viewportControllers) {
+            viewportController.setTop(contentTop)
         }
 
-        this.sampleNameViewport.trackScrollDelta = delta
-        this.sampleNameViewport.setTop(contentTop)
+        this.sampleNameViewportController.trackScrollDelta = delta
+        this.sampleNameViewportController.setTop(contentTop)
 
     }
 
     isLoading() {
-        for (let viewport of this.viewports) {
-            if (viewport.isLoading()) return true;
+        for (let viewportController of this.viewportControllers) {
+            if (viewportController.isLoading()) return true;
         }
     }
 
     resize(viewportWidth) {
 
-        for (let viewport of this.viewports) {
-            viewport.setWidth(viewportWidth);
+        for (let viewportController of this.viewportControllers) {
+            viewportController.setWidth(viewportWidth);
         }
 
         this.updateViews(true);
@@ -342,8 +342,8 @@ class TrackView {
      */
     repaintViews() {
 
-        for (let viewport of this.viewports) {
-            viewport.repaint();
+        for (let viewportController of this.viewportControllers) {
+            viewportController.repaint();
         }
 
         if (typeof this.track.paintAxis === 'function') {
@@ -359,13 +359,13 @@ class TrackView {
 
         if(typeof this.track.getSamples === 'function') {
             const samples = this.track.getSamples()
-            this.sampleNameViewport.repaint(samples)
+            this.sampleNameViewportController.repaint(samples)
         }
     }
 
     // track labels
     setTrackLabelName(name) {
-        this.viewports.forEach(viewport => viewport.setTrackLabel(name));
+        this.viewportControllers.forEach(viewportController => viewportController.setTrackLabel(name));
     }
 
     /**
@@ -375,36 +375,34 @@ class TrackView {
 
         if (!(this.browser && this.browser.referenceFrameList)) return;
 
-        const visibleViewports = this.viewports.filter(vp => vp.isVisible())
+        const visibleViewportControllers = this.viewportControllers.filter(viewportController => viewportController.isVisible())
 
         // Shift viewports left/right to current genomic state (pans canvas)
-        visibleViewports.forEach(function (viewport) {
-            viewport.shift();
-        });
+        visibleViewportControllers.forEach(viewportController => viewportController.shift());
 
         // rpv: viewports whose image (canvas) does not fully cover current genomic range
-        const rpV = this.viewportsToReload(force);
+        const reloadableViewportControllers = this.viewportControllersToReload(force);
 
-        // Trigger viewport to load features needed to cover current genomic range
-        for (let vp of rpV) {
-            await vp.loadFeatures()
+        // Trigger viewportController to load features needed to cover current genomic range
+        for (let viewportController of reloadableViewportControllers) {
+            await viewportController.loadFeatures()
         }
 
         // Very special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
         // section depends on data from all the views.  We only need to adjust this however if any data was loaded
-        // (i.e. rpV.length > 0)
+        // (i.e. reloadableViewportControllers.length > 0)
         if(typeof this.track.variantRowCount === 'function') {
             let maxRow = 0;
-            for(let vp of this.viewports) {
-                if (vp.tile && vp.tile.features) {
-                    maxRow = Math.max(maxRow, vp.tile.features.reduce((a, f) => Math.max(a, f.row || 0), 0));
+            for(let viewportController of this.viewportControllers) {
+                if (viewportController.tile && viewportController.tile.features) {
+                    maxRow = Math.max(maxRow, viewportController.tile.features.reduce((a, f) => Math.max(a, f.row || 0), 0));
                 }
             }
             const current = this.track.nVariantRows;
             if(current !== maxRow + 1) {
                 this.track.variantRowCount(maxRow + 1);
-                for (let vp of this.viewports) {
-                    vp.checkContentHeight();
+                for (let viewportController of this.viewportControllers) {
+                    viewportController.checkContentHeight();
                 }
             }
         }
@@ -414,16 +412,16 @@ class TrackView {
         const isDragging = this.browser.dragObject;
         if (!isDragging && this.track.autoscale) {
             let allFeatures = [];
-            for (let vp of visibleViewports) {
-                const referenceFrame = vp.referenceFrame;
+            for (let visibleViewportController of visibleViewportControllers) {
+                const referenceFrame = visibleViewportController.referenceFrame;
                 const start = referenceFrame.start;
-                const end = start + referenceFrame.toBP($(vp.contentDiv).width());
-                if (vp.tile && vp.tile.features) {
-                    if (typeof vp.tile.features.getMax === 'function') {
-                        const max = vp.tile.features.getMax(start, end);
+                const end = start + referenceFrame.toBP($(visibleViewportController.contentDiv).width());
+                if (visibleViewportController.tile && visibleViewportController.tile.features) {
+                    if (typeof visibleViewportController.tile.features.getMax === 'function') {
+                        const max = visibleViewportController.tile.features.getMax(start, end);
                         allFeatures.push({value: max});
                     } else {
-                        allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
+                        allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(visibleViewportController.tile.features, start, end));
                     }
                 }
             }
@@ -436,11 +434,11 @@ class TrackView {
 
         // Must repaint all viewports if autoscaling
         if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup)) {
-            for (let vp of visibleViewports) {
-                vp.repaint();
+            for (let visibleViewportController of visibleViewportControllers) {
+                visibleViewportController.repaint();
             }
         } else {
-            for (let vp of rpV) {
+            for (let vp of reloadableViewportControllers) {
                 vp.repaint();
             }
         }
@@ -455,14 +453,14 @@ class TrackView {
 
     updateRulerViewportLabels() {
 
-        const viewportWidth = this.browser.calculateViewportWidth(this.viewports.length)
+        const viewportWidth = this.browser.calculateViewportWidth(this.viewportControllers.length)
 
-        for (let viewport of this.viewports) {
+        for (let viewportController of this.viewportControllers) {
             if ('ruler' === this.track.type) {
-                if (this.viewports.length > 1) {
-                    viewport.presentLocusLabel(viewportWidth)
+                if (this.viewportControllers.length > 1) {
+                    viewportController.presentLocusLabel(viewportWidth)
                 } else {
-                    viewport.dismissLocusLabel()
+                    viewportController.dismissLocusLabel()
                 }
             }
         }
@@ -479,7 +477,7 @@ class TrackView {
         }
 
         // List of viewports that need reloading
-        const rpV = this.viewportsToReload(force);
+        const rpV = this.viewportControllersToReload(force);
         const promises = rpV.map(function (vp) {
             return vp.loadFeatures();
         });
@@ -487,7 +485,7 @@ class TrackView {
         await Promise.all(promises)
 
         let allFeatures = [];
-        for (let vp of this.viewports) {
+        for (let vp of this.viewportControllers) {
             if (vp.tile && vp.tile.features) {
                 const referenceFrame = vp.referenceFrame;
                 const start = referenceFrame.start;
@@ -506,8 +504,8 @@ class TrackView {
 
     checkContentHeight() {
 
-        for (let viewport of this.viewports) {
-            viewport.checkContentHeight()
+        for (let viewportController of this.viewportControllers) {
+            viewportController.checkContentHeight()
         }
 
         this.adjustTrackHeight()
@@ -515,7 +513,7 @@ class TrackView {
 
     adjustTrackHeight() {
 
-        var maxHeight = maxViewportContentHeight(this.viewports);
+        var maxHeight = maxViewportContentHeight(this.viewportControllers);
         if (this.track.autoHeight) {
             this.setTrackHeight(maxHeight, false);
         } else if (this.track.paintAxis) {   // Avoid duplication, paintAxis is already called in setTrackHeight
@@ -524,39 +522,39 @@ class TrackView {
 
         if (false === scrollbarExclusionTypes.has(this.track.type)) {
 
-            const currentTop = this.viewports[0].getContentTop();
+            const currentTop = this.viewportControllers[0].getContentTop();
 
-            const heights = this.viewports.map(viewport => viewport.getContentHeight());
+            const heights = this.viewportControllers.map(viewportController => viewportController.getContentHeight());
             const minContentHeight = Math.min(...heights);
-            const newTop = Math.min(0, this.viewports[ 0 ].$viewport.height() - minContentHeight);
+            const newTop = Math.min(0, this.viewportControllers[ 0 ].$viewport.height() - minContentHeight);
             if (currentTop < newTop) {
-                for (let viewport of this.viewports) {
-                    viewport.$content.css('top', `${ newTop }px`)
+                for (let viewportController of this.viewportControllers) {
+                    viewportController.$content.css('top', `${ newTop }px`)
                 }
             }
             this.updateScrollbar();
         }
     }
 
-    viewportsToReload(force) {
+    viewportControllersToReload(force) {
 
         // List of viewports that need reloading
-        const rpV = this.viewports.filter(function (viewport) {
-            if (!viewport.isVisible()) {
+        const viewportControllers = this.viewportControllers.filter(viewportController => {
+            if (!viewportController.isVisible()) {
                 return false;
             }
-            if (!viewport.checkZoomIn()) {
+            if (!viewportController.checkZoomIn()) {
                 return false;
             } else {
-                const referenceFrame = viewport.referenceFrame;
-                const chr = viewport.referenceFrame.chr;
+                const referenceFrame = viewportController.referenceFrame;
+                const chr = viewportController.referenceFrame.chr;
                 const start = referenceFrame.start;
-                const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
+                const end = start + referenceFrame.toBP($(viewportController.contentDiv).width());
                 const bpPerPixel = referenceFrame.bpPerPixel;
-                return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel));
+                return force || (!viewportController.tile || viewportController.tile.invalidate || !viewportController.tile.containsRange(chr, start, end, bpPerPixel));
             }
         });
-        return rpV;
+        return viewportControllers;
     }
 
     createTrackScrollbar(browser) {
@@ -800,11 +798,11 @@ class TrackView {
         this.removeAxisEventListener(this.axis)
         this.axis.remove()
 
-        for (let viewport of this.viewports) {
-            viewport.dispose();
+        for (let viewportController of this.viewportControllers) {
+            viewportController.dispose();
         }
 
-        this.sampleNameViewport.dispose()
+        this.sampleNameViewportController.dispose()
 
         this.removeTrackScrollMouseHandlers()
         this.outerScroll.remove()
@@ -885,8 +883,8 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 // css - $igv-axis-column-width: 50px;
 const igv_axis_column_width = 50;
 
-function maxViewportContentHeight(viewports) {
-    const heights = viewports.map(viewport => viewport.getContentHeight());
+function maxViewportContentHeight(viewportControllers) {
+    const heights = viewportControllers.map(viewportController => viewportController.getContentHeight());
     return Math.max(...heights);
 }
 

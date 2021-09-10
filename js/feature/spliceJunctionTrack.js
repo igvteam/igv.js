@@ -136,11 +136,11 @@ class SpliceJunctionTrack extends TrackBase {
             const rowFeatureCount = [];
             for (let feature of featureList) {
 
-                junctionRenderingContext.referenceFrame = options.viewport.referenceFrame;
+                junctionRenderingContext.referenceFrame = options.viewportController.referenceFrame;
                 junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
-                junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(options.viewport.contentDiv).width());
+                junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(options.viewportController.contentDiv).width());
 
-                // For a given viewport, records where features that are < 2px in width have been rendered already.
+                // For a given viewportController, records where features that are < 2px in width have been rendered already.
                 // This prevents wasteful rendering of multiple such features onto the same pixels.
                 junctionRenderingContext.featureZoomOutTracker = {}
 

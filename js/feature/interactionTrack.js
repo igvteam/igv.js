@@ -473,7 +473,7 @@ class InteractionTrack extends TrackBase {
 
         // We use the cached features rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        const featureList = features || clickState.viewport.getCachedFeatures();
+        const featureList = features || clickState.viewportController.getCachedFeatures();
         const candidates = [];
         if (featureList) {
             const proportional = this.arcType === "proportional";

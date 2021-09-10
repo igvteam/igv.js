@@ -18,9 +18,7 @@ let popupTimerID;
 class TrackViewportController extends ViewportController {
 
     constructor(trackView, viewportColumn, referenceFrame, width) {
-
         super(trackView, viewportColumn, referenceFrame, width)
-
     }
 
     initializationHelper() {
@@ -318,7 +316,7 @@ class TrackViewportController extends ViewportController {
 
         const drawConfiguration =
             {
-                viewport: this,
+                viewportController: this,
                 context: ctx,
                 top: -this.$content.position().top,
                 pixelTop: 0,   // for compatibility with canvas draw
@@ -330,8 +328,6 @@ class TrackViewportController extends ViewportController {
                 referenceFrame: this.referenceFrame,
                 selection: this.selection,
                 viewportWidth: pixelWidth,
-                viewportContainerX: 0,
-                viewportContainerWidth: this.browser.getViewportContainerWidth()
             };
 
         this.draw(drawConfiguration, features, roiFeatures);
@@ -819,22 +815,22 @@ function mouseUpHandler(event) {
     }
 }
 
-function createClickState(event, viewport) {
+function createClickState(event, viewportController) {
 
-    const referenceFrame = viewport.referenceFrame;
+    const referenceFrame = viewportController.referenceFrame;
 
-    const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.contentDiv);
-    const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewport.canvas);
+    const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewportController.contentDiv);
+    const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewportController.canvas);
 
     const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
 
-    if (undefined === genomicLocation || null === viewport.tile) {
+    if (undefined === genomicLocation || null === viewportController.tile) {
         return undefined;
     }
 
     return {
         event,
-        viewport,
+        viewportController,
         referenceFrame,
         genomicLocation,
         x: viewportCoords.x,

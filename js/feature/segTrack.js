@@ -140,7 +140,7 @@ class SegTrack extends TrackBase {
                         this.config.displayMode = displayMode;
                         this.trackView.checkContentHeight();
                         this.trackView.repaintViews();
-                        this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta)
+                        this.trackView.moveScroller(this.trackView.sampleNameViewportController.trackScrollDelta)
                     }
                 });
         }
@@ -397,7 +397,7 @@ class SegTrack extends TrackBase {
         }
 
         this.trackView.repaintViews();
-        // self.trackView.$viewport.scrollTop(0);
+
     }
 
     clickedFeatures(clickState, features) {
@@ -440,7 +440,7 @@ class SegTrack extends TrackBase {
 
     contextMenuItemList(clickState) {
 
-        const referenceFrame = clickState.viewport.referenceFrame;
+        const referenceFrame = clickState.viewportController.referenceFrame;
         const genomicLocation = clickState.genomicLocation;
 
         // Define a region 5 "pixels" wide in genomic coordinates
@@ -450,8 +450,8 @@ class SegTrack extends TrackBase {
         const bpWidth = referenceFrame.toBP(2.5);
 
         const sortHandler = (sort) => {
-            const viewport = clickState.viewport;
-            const features = viewport.getCachedFeatures();
+            const viewportController = clickState.viewportController;
+            const features = viewportController.getCachedFeatures();
             this.sortSamples(sort.chr, sort.start, sort.end, sort.direction, features);
         }
 
@@ -464,7 +464,7 @@ class SegTrack extends TrackBase {
 
                     const sort = {
                         direction: sortDirection,
-                        chr: clickState.viewport.referenceFrame.chr,
+                        chr: clickState.viewportController.referenceFrame.chr,
                         start: genomicLocation - bpWidth,
                         end: genomicLocation + bpWidth
 
