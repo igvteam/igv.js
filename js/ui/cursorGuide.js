@@ -68,7 +68,7 @@ const CursorGuide = function (columnContainer, browser) {
                 }
             }
 
-            const rulerViewport = browser.getRulerTrackView().viewportControllers[ index ]
+            const rulerViewport = browser.getRulerTrackView().viewports[ index ]
             rulerViewport.mouseMove(event)
 
             // if (result) {
@@ -107,8 +107,8 @@ CursorGuide.prototype.hide = function () {
     this.horizontalGuide.style.display = 'none'
 
     if (this.browser.getRulerTrackView()) {
-        for (let viewportController of this.browser.getRulerTrackView().viewportControllers) {
-            viewportController.$tooltip.hide()
+        for (let viewport of this.browser.getRulerTrackView().viewports) {
+            viewport.$tooltip.hide()
         }
     }
 

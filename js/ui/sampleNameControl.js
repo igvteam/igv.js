@@ -45,11 +45,11 @@ class SampleNameControl {
 
             this.setState(browser.showSampleNames)
 
-            for (let { sampleNameViewportController } of browser.trackViews) {
+            for (let { sampleNameViewport } of browser.trackViews) {
                 if (false === browser.showSampleNames) {
-                    sampleNameViewportController.hide()
+                    sampleNameViewport.hide()
                 } else {
-                    sampleNameViewportController.show()
+                    sampleNameViewport.show()
                 }
             }
 

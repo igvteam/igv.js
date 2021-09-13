@@ -212,7 +212,7 @@ class EqtlTrack extends TrackBase {
      */
     popupData(clickState) {
 
-        let features = clickState.viewportController.getCachedFeatures();
+        let features = clickState.viewport.getCachedFeatures();
         if (!features || features.length === 0) return [];
 
         const tolerance = 3;

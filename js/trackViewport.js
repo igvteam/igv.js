@@ -4,7 +4,7 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {Popover} from '../node_modules/igv-ui/dist/igv-ui.js'
-import ViewportController from "./viewportController.js";
+import Viewport from "./viewport.js";
 import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genome.js";
@@ -15,7 +15,7 @@ let mouseDownCoords
 let lastClickTime = 0;
 let popupTimerID;
 
-class TrackViewportController extends ViewportController {
+class TrackViewport extends Viewport {
 
     constructor(trackView, viewportColumn, referenceFrame, width) {
         super(trackView, viewportColumn, referenceFrame, width)
@@ -316,7 +316,7 @@ class TrackViewportController extends ViewportController {
 
         const drawConfiguration =
             {
-                viewportController: this,
+                viewport: this,
                 context: ctx,
                 top: -this.$content.position().top,
                 pixelTop: 0,   // for compatibility with canvas draw
@@ -815,22 +815,22 @@ function mouseUpHandler(event) {
     }
 }
 
-function createClickState(event, viewportController) {
+function createClickState(event, viewport) {
 
-    const referenceFrame = viewportController.referenceFrame;
+    const referenceFrame = viewport.referenceFrame;
 
-    const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewportController.contentDiv);
-    const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewportController.canvas);
+    const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.contentDiv);
+    const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewport.canvas);
 
     const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
 
-    if (undefined === genomicLocation || null === viewportController.tile) {
+    if (undefined === genomicLocation || null === viewport.tile) {
         return undefined;
     }
 
     return {
         event,
-        viewportController,
+        viewport,
         referenceFrame,
         genomicLocation,
         x: viewportCoords.x,
@@ -918,4 +918,4 @@ function mergeArrays(a, b) {
 
 }
 
-export default TrackViewportController
+export default TrackViewport

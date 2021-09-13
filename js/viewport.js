@@ -28,7 +28,7 @@ import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
 import {AlertDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
 import SequenceTrack from "./sequenceTrack.js";
 
-class ViewportController {
+class Viewport {
 
     constructor(trackView, viewportColumn, referenceFrame, width) {
 
@@ -118,11 +118,11 @@ class ViewportController {
     }
 
     async repaint() {
-        console.log('ViewportController - repaint()')
+        console.log('Viewport - repaint()')
     }
 
     draw(drawConfiguration, features, roiFeatures) {
-        console.log('ViewportController - draw(drawConfiguration, features, roiFeatures)')
+        console.log('Viewport - draw(drawConfiguration, features, roiFeatures)')
     }
 
     checkContentHeight() {
@@ -183,7 +183,7 @@ class ViewportController {
     }
 
     containsPosition(chr, position) {
-        console.log('ViewportController - containsPosition(chr, position)')
+        console.log('Viewport - containsPosition(chr, position)')
     }
 
     addMouseHandlers() {}
@@ -212,4 +212,4 @@ class ViewportController {
 
 }
 
-export default ViewportController
+export default Viewport

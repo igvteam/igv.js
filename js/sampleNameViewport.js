@@ -12,7 +12,7 @@ const fontConfigureTemplate =
         fillStyle: 'black'
     }
 
-class SampleNameViewportController {
+class SampleNameViewport {
 
     constructor(trackView, column, unused, width) {
 
@@ -167,8 +167,8 @@ class SampleNameViewportController {
                     value: this.browser.sampleNameViewportWidth,
                     callback: newWidth => {
                         this.browser.sampleNameViewportWidth = parseInt(newWidth)
-                        for (let { sampleNameViewportController } of this.browser.trackViews) {
-                            sampleNameViewportController.setWidth(this.browser.sampleNameViewportWidth)
+                        for (let { sampleNameViewport } of this.browser.trackViews) {
+                            sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
                         }
                         this.browser.resize()
                     }
@@ -206,4 +206,4 @@ function configureFont(ctx, {textAlign, textBaseline, strokeStyle, fillStyle}, s
     ctx.fillStyle = fillStyle
 }
 
-export default SampleNameViewportController
+export default SampleNameViewport

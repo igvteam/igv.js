@@ -1,6 +1,6 @@
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {Icon, DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
-import TrackViewportController from "./trackViewportController.js";
+import TrackViewport from "./trackViewport.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
 
@@ -8,7 +8,7 @@ let timer
 let currentViewport = undefined
 const toolTipTimeout = 1e4
 
-class RulerViewportController extends TrackViewportController {
+class RulerViewport extends TrackViewport {
 
     constructor(trackView, viewportColumn, referenceFrame, width) {
         super(trackView, viewportColumn, referenceFrame, width);
@@ -149,8 +149,6 @@ class RulerViewportController extends TrackViewportController {
 
     mouseMove(event) {
 
-        // console.log(`${ Date.now() } ruler viewport controller ${ this.browser.referenceFrameList.indexOf(this.referenceFrame)}`)
-
         if (true === this.browser.cursorGuideVisible) {
 
             if (undefined === currentViewport) {
@@ -199,4 +197,4 @@ class RulerViewportController extends TrackViewportController {
     }
 }
 
-export default RulerViewportController
+export default RulerViewport

@@ -125,7 +125,7 @@ class MergedTrack extends TrackBase {
 
     popupData(clickState, features) {
 
-        const featuresArray = features || clickState.viewportController.getCachedFeatures();
+        const featuresArray = features || clickState.viewport.getCachedFeatures();
 
         if (featuresArray && featuresArray.length === this.tracks.length) {
             // Array of feature arrays, 1 for each track

@@ -26,9 +26,9 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
 import { DOMUtils } from "../node_modules/igv-utils/src/index.js"
-import TrackViewportController from "./trackViewportController.js"
+import TrackViewport from "./trackViewport.js"
 
-class IdeogramViewportController extends TrackViewportController {
+class IdeogramViewport extends TrackViewport {
 
     constructor(trackView, viewportColumn, referenceFrame, width) {
         super(trackView, viewportColumn, referenceFrame, width)
@@ -128,4 +128,4 @@ class IdeogramViewportController extends TrackViewportController {
 
 }
 
-export default IdeogramViewportController;
+export default IdeogramViewport;

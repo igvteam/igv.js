@@ -140,12 +140,12 @@ class SequenceTrack {
                 click: () => {
                     this.frameTranslate = !this.frameTranslate;
                     if (this.frameTranslate) {
-                        for (let vp of this.trackView.viewportControllers) {
+                        for (let vp of this.trackView.viewports) {
                             vp.setContentHeight(115);
                         }
                         this.trackView.setTrackHeight(115);
                     } else {
-                        for (let vp of this.trackView.viewportControllers) {
+                        for (let vp of this.trackView.viewports) {
                             vp.setContentHeight(25);
                         }
                         this.trackView.setTrackHeight(25);
@@ -159,16 +159,16 @@ class SequenceTrack {
 
 
     contextMenuItemList(clickState) {
-        const viewportController = clickState.viewportController;
-        if (viewportController.referenceFrame.bpPerPixel <= 1) {
+        const viewport = clickState.viewport;
+        if (viewport.referenceFrame.bpPerPixel <= 1) {
             return [
                 {
                     label: 'View visible sequence...',
                     click: async () => {
-                        const pixelWidth = viewportController.getWidth();
-                        const bpWindow = pixelWidth * viewportController.referenceFrame.bpPerPixel;
-                        const chr = viewportController.referenceFrame.chr;
-                        const start = viewportController.referenceFrame.start;
+                        const pixelWidth = viewport.getWidth();
+                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel;
+                        const chr = viewport.referenceFrame.chr;
+                        const start = viewport.referenceFrame.start;
                         const end = start + bpWindow;
                         const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
                         Alert.presentAlert(sequence);
@@ -177,10 +177,10 @@ class SequenceTrack {
                 {
                     label: 'Copy visible sequence',
                     click: async () => {
-                        const pixelWidth = viewportController.getWidth();
-                        const bpWindow = pixelWidth * viewportController.referenceFrame.bpPerPixel;
-                        const chr = viewportController.referenceFrame.chr;
-                        const start = viewportController.referenceFrame.start;
+                        const pixelWidth = viewport.getWidth();
+                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel;
+                        const chr = viewport.referenceFrame.chr;
+                        const start = viewport.referenceFrame.start;
                         const end = start + bpWindow;
                         const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
                         navigator.clipboard.writeText(sequence);
