@@ -208,14 +208,25 @@ class BAMTrack extends TrackBase {
         return this.alignmentTrack.contextMenuItemList(config);
     }
 
-    popupData(config) {
-
-        if (true === this.showCoverage && config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
-            return this.coverageTrack.popupData(config);
+    popupData(clickState) {
+        if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
+            return this.coverageTrack.popupData(clickState);
         } else {
-            return this.alignmentTrack.popupData(config);
+            return this.alignmentTrack.popupData(clickState);
         }
+    }
 
+    /**
+     * Return the features (alignment, coverage, downsampled interval) clicked on.  Needed for "onclick" event.
+     * @param clickState
+     * @param features
+     */
+    clickedFeatures(clickState) {
+        if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
+            return [this.coverageTrack.getClickedObject(clickState)];
+        } else {
+            return [this.alignmentTrack.getClickedObject(clickState)];
+        }
     }
 
     menuItemList() {
@@ -564,19 +575,25 @@ class CoverageTrack {
         }
     }
 
-    popupData(config) {
+    getClickedObject(clickState) {
 
-        let features = config.viewport.getCachedFeatures();
+        let features = clickState.viewport.getCachedFeatures();
         if (!features || features.length === 0) return;
 
-        let genomicLocation = Math.floor(config.genomicLocation),
-            referenceFrame = config.viewport.referenceFrame,
-            coverageMap = features.coverageMap,
-            nameValues = [],
-            coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart),
-            coverage = coverageMap.coverage[coverageMapIndex];
+        const genomicLocation = Math.floor(clickState.genomicLocation);
+        const coverageMap = features.coverageMap;
+        const coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart);
+        return coverageMap.coverage[coverageMapIndex];
+    }
 
+    popupData(clickState) {
+
+        const nameValues = [];
+
+        const coverage = this.getClickedObject(clickState);
         if (coverage) {
+            const genomicLocation = Math.floor(clickState.genomicLocation);
+            const referenceFrame = clickState.viewport.referenceFrame;
 
             nameValues.push(referenceFrame.chr + ":" + StringUtils.numberFormatter(1 + genomicLocation));
 
@@ -1005,9 +1022,9 @@ class AlignmentTrack {
 
     };
 
-    popupData(config) {
-        const clickedObject = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-        return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
+    popupData(clickState) {
+        const clickedObject = this.getClickedObject(clickState);
+        return clickedObject ? clickedObject.popupData(clickState.genomicLocation) : undefined;
     };
 
     contextMenuItemList(clickState) {
@@ -1124,7 +1141,11 @@ class AlignmentTrack {
 
     }
 
-    getClickedObject(viewport, y, genomicLocation) {
+    getClickedObject(clickState) {
+
+        const viewport = clickState.viewport;
+        const y = clickState.y;
+        const genomicLocation = clickState.genomicLocation
 
         const showSoftClips = this.parent.showSoftClips;
 

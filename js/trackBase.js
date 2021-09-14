@@ -89,7 +89,10 @@ class TrackBase {
 
         this.visibilityWindow = config.visibilityWindow
 
-        this.trackView = undefined
+        if(config.onclick) {
+            this.onclick = config.onclick;
+            config.onclick = undefined;   // functions cannot be saved in sessions, clear it here.
+        }
     }
 
     get name() {
@@ -284,6 +287,14 @@ class TrackBase {
         return this.visibilityWindow;
     }
 
+    /**
+     * Return the features clicked over.  Default implementation assumes a single row of features and only considers
+     * the genomic location.   Overriden by most subclasses.
+     *
+     * @param clickState
+     * @param features
+     * @returns {[]|*[]}
+     */
     clickedFeatures(clickState, features) {
 
         // We use the cached features rather than method to avoid async load.  If the

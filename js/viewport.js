@@ -730,6 +730,31 @@ class ViewPort extends ViewportBase {
 
                     self.trackView.track.shiftClick(xBP, e);
 
+                }
+
+                if (typeof self.trackView.track.onclick === "function" &&
+                    typeof self.trackView.track.clickedFeatures === "function") {
+
+                    popupTimerID = setTimeout(() => {
+
+                            const clickState = createClickState(e, self);
+                            const features = self.trackView.track.clickedFeatures(clickState)
+                            const consumed = self.trackView.track.onclick(features);
+
+                            if (!consumed) {
+                                const content = getPopupContent(e, self);
+                                if (content) {
+                                    if (self.popover) self.popover.dispose()
+                                    self.popover = new Popover(self.browser.columnContainer)
+                                    self.popover.presentContentWithEvent(e, content)
+                                }
+                            }
+
+                            clearTimeout(popupTimerID);
+                            popupTimerID = undefined;
+                        },
+                        browser.constants.doubleClickDelay);
+
                 } else if (typeof self.trackView.track.popupData === "function") {
 
                     popupTimerID = setTimeout(function () {
