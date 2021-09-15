@@ -37,6 +37,9 @@
         JBrowseCircularGenomeView,
     } = JBrowseReactCircularGenomeView
 
+    // Keep a copy fo the chords sent to JBrowse until we know how to append to the current set.
+    const chords = [];
+
     const circularState = new createViewState({
         assembly: {
             name: 'forIGV',
@@ -56,7 +59,7 @@
                 type: 'VariantTrack',
                 adapter: {
                     type: 'FromConfigAdapter',
-                    features: [],
+                    features: chords,
                 },
             },
         ],
@@ -72,31 +75,35 @@
     var options =
         {
             genome: "hg19",
+            locus: "chr8:77,706,075-77,707,003",
             tracks: [
                 // {
                 //     id: "skbr3_vcf",
-                //     url: "SKBR3_Illumina_delly.tra.pass.vcf",
+                //     url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.vcf",
                 //     type: "variant",
                 //     format: "vcf",
                 //     name: "Translocations",
                 // },
-                {
-                    id: "skbr3_bedpe",
-                    url: "SKBRE_Illumina_delly.tra.pass.bedpe",
-                    type: "interact",
-                    format: "bedpe",
-                    name: "Translocations",
-                    onclick: function (features) {
-                        console.log(features);
-                        return true;
-                    }
-                },
+                // {
+                //     id: "skbr3_bedpe",
+                //     url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina.delly.tra.pass.bedpe",
+                //     type: "interact",
+                //     format: "bedpe",
+                //     name: "Translocations"
+                // },
                 {
                     url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam",
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam.bai",
                     type: "alignment",
                     format: "bam",
-                    name: "Alignments"
+                    name: "Alignments",
+                    height: 500,
+                    onclick: (features) => {
+                        if(features ) {
+                            sendPairedAlignmentChord(features);
+                        }
+                        return true;
+                    }
                 }
             ]
         };
@@ -107,7 +114,6 @@
         .then(async function (browser) {
             console.log("Created IGV browser");
             window.igvBrowser = browser;
-
 
             const regions = [];
             for (let chrName of browser.genome.wgChromosomeNames) {
@@ -130,29 +136,28 @@
 
 
             // Send all chords
-            const track = browser.findTracks("id", "skbr3_bedpe")[0];
-            const features = await track.getFeatures("all");
-
-            const chords = [];
-            let fID = 1;
-            for (let f of features) {
-                chords.push(
-                    {
-                        uniqueId: fID,
-                        refName: f.chr1,
-                        start: f.start1,
-                        end: f.end1,
-                        mate: {
-                            refName: f.chr2,
-                            start: f.start2,
-                            end: f.end2,
-                        },
-                    })
-                fID++;
-            }
-
-            circularState.config.tracks[0].adapter.features.set(chords)
-            circularState.session.view.showTrack(circularState.config.tracks[0].trackId)
+            // const track = browser.findTracks("id", "skbr3_bedpe")[0];
+            // const features = await track.getFeatures("all");
+            //
+            // const chords = [];
+            // let fID = 1;
+            // for (let f of features) {
+            //     chords.push(
+            //         {
+            //             uniqueId: fID,
+            //             refName: f.chr1,
+            //             start: f.start1,
+            //             end: f.end1,
+            //             mate: {
+            //                 refName: f.chr2,
+            //                 start: f.start2,
+            //                 end: f.end2,
+            //             },
+            //         })
+            //     fID++;
+            // }
+            // circularState.config.tracks[0].adapter.features.set(chords)
+            // circularState.session.view.showTrack(circularState.config.tracks[0].trackId)
 
             function onChordClick(feature, chordTrack, pluginManager) {
                 const f1 = feature.data;
@@ -169,6 +174,34 @@
             )
 
         })
+
+    let fID = 0;
+
+    function sendPairedAlignmentChord(features) {
+
+
+        for (let f of features) {
+            const mate = f.mate;
+            if (mate && mate.chr && mate.position) {
+                chords.push(
+                    {
+                        uniqueId: fID,
+                        refName: f.chr,
+                        start: f.start,
+                        end: f.end,
+                        mate: {
+                            refName: mate.chr,
+                            start: mate.position - 1,
+                            end: mate.position,
+                        },
+                    })
+                fID++;
+            }
+        }
+        circularState.config.tracks[0].adapter.features.set(chords)
+        circularState.session.view.showTrack(circularState.config.tracks[0].trackId)
+    }
+
 
 </script>
 

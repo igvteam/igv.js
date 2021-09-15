@@ -1082,7 +1082,7 @@ class AlignmentTrack {
         });
         list.push('<hr/>');
 
-        const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
+        const clickedObject = this.getClickedObject(clickState);
         if (clickedObject) {
 
             const showSoftClips = this.parent.showSoftClips;
