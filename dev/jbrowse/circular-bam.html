@@ -21,13 +21,17 @@
 </head>
 <body>
 
-<div id="jbrowse_circular_genome_view" style="width: 450px;height: 450px;"></div>
+<div id="jbrowse_circular_genome_view" style="z-index: 2048; position: absolute; top:0; left:0;width: 450px; height: 450px;"></div>
 
 <div id="igvDiv"></div>
 
 <script type="module">
 
+    import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
     import igv from "../../js";
+
+    const el = document.getElementById('jbrowse_circular_genome_view')
+    makeDraggable(el, el)
 
     // Initialize circular view
     const {createElement} = React
