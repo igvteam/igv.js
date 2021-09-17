@@ -142,7 +142,11 @@ class RulerViewport extends ViewPort {
 
             // hide tooltip when movement stops
             clearTimeout(timer)
-            timer = setTimeout(() => this.$tooltip.hide(),toolTipTimeout)
+            timer = setTimeout(() => {
+                if (this.$tooltip) {
+                    this.$tooltip.hide()
+                }
+            }, toolTipTimeout)
 
         }
 
