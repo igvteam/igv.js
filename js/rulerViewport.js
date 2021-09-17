@@ -31,10 +31,12 @@ class RulerViewport extends ViewPort {
 
         this.$rulerLabel.click(async () => {
 
-            const removals = this.browser.referenceFrameList.filter(r => this.referenceFrame !== r)
-            for (let referenceFrame of removals) {
-                await this.browser.removeMultiLocusPanel(referenceFrame)
-            }
+            await this.browser.selectMultiLocusPanel(this.referenceFrame)
+
+            // const removals = this.browser.referenceFrameList.filter(r => this.referenceFrame !== r)
+            // for (let referenceFrame of removals) {
+            //     await this.browser.removeMultiLocusPanel(referenceFrame)
+            // }
 
         })
 
