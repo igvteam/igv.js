@@ -739,7 +739,7 @@ class ViewPort extends ViewportBase {
 
                             const clickState = createClickState(e, self);
                             const features = self.trackView.track.clickedFeatures(clickState)
-                            const consumed = self.trackView.track.onclick(features);
+                            const consumed = self.trackView.track.onclick(features, e);
 
                             if (!consumed) {
                                 const content = getPopupContent(e, self);

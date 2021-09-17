@@ -367,7 +367,7 @@ class InteractionTrack extends TrackBase {
                     this.trackView.presentColorPicker();
                 }
             },
-            '<HR/>'
+            '<hr/>'
         ];
 
         if (this.hasValue) {
@@ -407,6 +407,33 @@ class InteractionTrack extends TrackBase {
             items.push("<HR>");
             items = items.concat(MenuUtils.numericDataMenuItems(this.trackView));
         }
+
+        // Experimental JBrowse feature
+        if (this.browser.circularView) {
+            items.push('<hr/>');
+
+            items.push({
+                label: 'Show chords',
+                click: () => {
+                    this.browser.circularView.addBedPEChords(this.featureSource.getAllFeatures(), this.color);
+                }
+            });
+
+            items.push({
+                label: 'Clear chords',
+                click: () => {
+                    this.browser.circularView.clearChords();
+                }
+            });
+
+            items.push({
+                label: 'Clear chord selections',
+                click: () => {
+                    this.browser.circularView.clearSelection();
+                }
+            });
+        }
+
 
         return items;
     };

@@ -237,3 +237,38 @@ To clear all highlights, do:
 ```js
 circularState.pluginManager.rootModel.session.clearSelection()
 ```
+
+## color the chords. 
+
+I think the easiest way to do that would be a two-step process. First, when you create your feature, give it a 
+"color" attribute (doesn't actually have to be called "color," can name it whatever you like) like this:
+
+```
+{
+  uniqueId: 'feature1',
+  refName: 'chr1',
+  start: 312,
+  end: 313,
+  color: '#03AC13',
+  mate: {
+    refName: 'chr2',
+    start: 13,
+    end: 14,
+  },
+}
+````
+
+Hex, RGB, and CSS named colors should work. Then you have to tell the renderer what attribute to use for the color. 
+It's probably easiest to do this right after you set the onChordClick.
+
+```javascript
+circularState.config.tracks[0].displays[0].renderer.strokeColor.set(
+  "jexl:get(feature, 'color') || 'black'"
+)
+````
+
+This will use the "color" attribute or black if there isn't one. In the same way you can set "strokeColor" you can also set "strokeColorSelected" for the color when it's highlighted and "strokeColorHover" for the color when you hover over the chord. If you just want it to be a single color (e.g. set the highlighted color to always be orange) you can skip the "jexl" part and just do:
+
+```javascript
+circularState.config.tracks[0].displays[0].renderer.strokeColorSelected.set('orange')
+```

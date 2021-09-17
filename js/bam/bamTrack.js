@@ -356,6 +356,7 @@ class BAMTrack extends TrackBase {
                 this.trackView.repaintViews();
             }
         });
+
         return menuItems;
     }
 
@@ -1135,6 +1136,40 @@ class AlignmentTrack {
             });
 
             list.push('<hr/>');
+        }
+
+        // Experimental JBrowse feature
+        if (this.browser.circularView) {
+            list.push({
+                label: 'Show discordant pairs',
+                click: () => {
+                    const refFrame = viewport.referenceFrame;
+                    const inView = viewport.getCachedFeatures().allAlignments().filter(a => {
+                        return a.end >= refFrame.start && a.start <= refFrame.end
+                            && a.mate
+                            && a.mate.chr
+                            && (a.mate.chr !== a.chr || a.fragmentLength > 10000);
+                    })
+                    this.browser.circularView.addPairedAlignmentChords(inView);
+                }
+            });
+
+            list.push({
+                label: 'Clear discordant pairs',
+                click: () => {
+                    this.browser.circularView.clearChords();
+                }
+            });
+
+            list.push({
+                label: 'Clear selections',
+                click: () => {
+                    this.browser.circularView.clearSelection();
+                }
+            });
+
+            list.push('<hr/>');
+
         }
 
         return list;

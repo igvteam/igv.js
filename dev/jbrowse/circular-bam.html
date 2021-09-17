@@ -10,7 +10,8 @@
     <!--    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.development.js"
                 crossorigin="anonymous"></script>-->
     <script
-            src="https://s3.amazonaws.com/jbrowse.org/jb2_releases/react-circular-genome-view/react-circular-genome-view%40v1.3.2/react-circular-genome-view.umd.development.js"
+            src = "https://s3.amazonaws.com/jbrowse.org/jb2_releases/react-circular-genome-view/react-circular-genome-view%40v1.4.5-beta.0/react-circular-genome-view.umd.development.js"
+<!--            src="https://s3.amazonaws.com/jbrowse.org/jb2_releases/react-circular-genome-view/react-circular-genome-view%40v1.3.2/react-circular-genome-view.umd.development.js"-->
             crossorigin=""
     ></script>
     <!--    <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
@@ -28,85 +29,72 @@
 <script type="module">
 
     import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
-    import igv from "../../js";
+    import igv from "../../js/index.js";
+    import CircularView from "../../js/jbrowse/CircularView.js";
 
     const el = document.getElementById('jbrowse_circular_genome_view')
     makeDraggable(el, el)
-
-    // Initialize circular view
-    const {createElement} = React
-    const {render} = ReactDOM
-    const {
-        createViewState,
-        JBrowseCircularGenomeView,
-    } = JBrowseReactCircularGenomeView
-
-    // Keep a copy fo the chords sent to JBrowse until we know how to append to the current set.
-    const chords = [];
-
-    const circularState = new createViewState({
-        assembly: {
-            name: 'forIGV',
-            sequence: {
-                trackId: 'refSeqTrack',
-                type: 'ReferenceSequenceTrack',
-                adapter: {
-                    type: 'FromConfigSequenceAdapter',
-                    features: [],
-                },
-            },
-        },
-        tracks: [
-            {
-                trackId: 'firstTrack',
-                assemblyNames: ['forIGV'],
-                type: 'VariantTrack',
-                adapter: {
-                    type: 'FromConfigAdapter',
-                    features: chords,
-                },
-            },
-        ],
-    })
-
-    render(
-        createElement(JBrowseCircularGenomeView, {viewState: circularState}),
-        document.getElementById('jbrowse_circular_genome_view'),
-    )
-
+    const circularView = new CircularView(el);
 
     // Start igv.js and create regions
     var options =
         {
             genome: "hg19",
-            locus: "chr8:77,706,075-77,707,003",
+            locus: "chr17:64,040,802-64,045,633",
             tracks: [
-                // {
-                //     id: "skbr3_vcf",
-                //     url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.vcf",
-                //     type: "variant",
-                //     format: "vcf",
-                //     name: "Translocations",
-                // },
-                // {
-                //     id: "skbr3_bedpe",
-                //     url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina.delly.tra.pass.bedpe",
-                //     type: "interact",
-                //     format: "bedpe",
-                //     name: "Translocations"
-                // },
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam",
-                    indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam.bai",
+                    name: "sniffles",
+                    url: "SKBR3_Sniffles_variants_tra.bedpe",
+                    height: 40,
+                    color: "rgb(0,0,150)"
+                },
+                {
+                    id: "sniffles vcf",
+                    url: "../../Downloads/skbr3/sniffles_tra.vcf",
+                    type: "variant",
+                    format: "vcf",
+                    name: "delly",
+                    supportsWholeGenome: true,
+                    visibilityWindow: -1,
+                    showGenotypes: false,
+                    height: 40
+                },
+                {
+                    name: "delly",
+                    url: "SKBR3_Illumina_delly.tra.pass.bedpe",
+                    height: 40,
+                    color: "rgb(0,150,0)"
+                },
+                {
+                    id: "delly",
+                    url: "SKBR3_Illumina_delly.tra.pass.vcf",
+                    type: "variant",
+                    format: "vcf",
+                    name: "delly",
+                    supportsWholeGenome: true,
+                    visibilityWindow: -1,
+                    showGenotypes: false,
+                    height: 40
+                },
+
+                {
+                    // url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam",
+                    // indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam.bai",
+                    url: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
+                    indexURL: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
                     type: "alignment",
                     format: "bam",
                     name: "Alignments",
                     height: 500,
-                    onclick: (features) => {
-                        if(features ) {
-                            sendPairedAlignmentChord(features);
+                    onclick: (features, e) => {
+                        if(e.shiftKey) {
+                            if (features) {
+                                sendPairedAlignmentChord(features);
+                            }
+                            return true;
+                        } else {
+                            return false;
                         }
-                        return true;
                     }
                 }
             ]
@@ -119,6 +107,11 @@
             console.log("Created IGV browser");
             window.igvBrowser = browser;
 
+            browser.circularView = circularView;
+            circularView.browser = browser;
+
+            // TODO -- below needs to be done in igv.js when genome is loaded
+            const circularState = circularView.circularState;
             const regions = [];
             for (let chrName of browser.genome.wgChromosomeNames) {
                 const chr = browser.genome.getChromosome(chrName);
@@ -131,7 +124,6 @@
                     }
                 )
             }
-
             circularState.config.assembly.sequence.adapter.features.set(regions)
             circularState.assemblyManager.removeAssembly(
                 circularState.assemblyManager.assemblies[0]
@@ -139,71 +131,11 @@
             circularState.assemblyManager.addAssembly(circularState.config.assembly)
 
 
-            // Send all chords
-            // const track = browser.findTracks("id", "skbr3_bedpe")[0];
-            // const features = await track.getFeatures("all");
-            //
-            // const chords = [];
-            // let fID = 1;
-            // for (let f of features) {
-            //     chords.push(
-            //         {
-            //             uniqueId: fID,
-            //             refName: f.chr1,
-            //             start: f.start1,
-            //             end: f.end1,
-            //             mate: {
-            //                 refName: f.chr2,
-            //                 start: f.start2,
-            //                 end: f.end2,
-            //             },
-            //         })
-            //     fID++;
-            // }
-            // circularState.config.tracks[0].adapter.features.set(chords)
-            // circularState.session.view.showTrack(circularState.config.tracks[0].trackId)
-
-            function onChordClick(feature, chordTrack, pluginManager) {
-                const f1 = feature.data;
-                const f2 = f1.mate;
-                const flanking = 100;
-                const loci = `${f1.refName}:${f1.start - flanking}-${f1.end + flanking} ${f2.refName}:${f2.start - flanking}-${f2.end + flanking}`
-                browser.search(loci);
-                console.log(feature)
-            }
-
-            circularState.pluginManager.jexl.addFunction('onChordClick', onChordClick)
-            circularState.config.tracks[0].displays[0].onChordClick.set(
-                'jexl:onChordClick(feature, track, pluginManager)'
-            )
-
         })
 
-    let fID = 0;
-
+    // individual clicked-on alignments
     function sendPairedAlignmentChord(features) {
-
-
-        for (let f of features) {
-            const mate = f.mate;
-            if (mate && mate.chr && mate.position) {
-                chords.push(
-                    {
-                        uniqueId: fID,
-                        refName: f.chr,
-                        start: f.start,
-                        end: f.end,
-                        mate: {
-                            refName: mate.chr,
-                            start: mate.position - 1,
-                            end: mate.position,
-                        },
-                    })
-                fID++;
-            }
-        }
-        circularState.config.tracks[0].adapter.features.set(chords)
-        circularState.session.view.showTrack(circularState.config.tracks[0].trackId)
+        circularView.selectAlignmentChord(features[0]);
     }
 
 
