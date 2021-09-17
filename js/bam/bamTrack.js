@@ -1388,7 +1388,7 @@ const orientationTypes = {
     }
 }
 
-function getChrColor(chr) {
+export function getChrColor(chr) {
     if (chrColorMap[chr]) {
         return chrColorMap[chr];
     } else if (chrColorMap["chr" + chr]) {
