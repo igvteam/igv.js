@@ -75,7 +75,7 @@ class BAMTrack extends TrackBase {
         this.color = config.color;
         this.coverageColor = config.coverageColor;
         this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
-        this.maxFragmentLength = config.maxFragmentLength;
+        this.maxFragmentLength = config.maxFragmentLength || 1000;
 
         // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
         // are present for a given reference frame the last one will take precedence
@@ -297,6 +297,17 @@ class BAMTrack extends TrackBase {
             }
         });
 
+        // Show mismatches
+        menuItems.push('<hr/>');
+        menuItems.push({
+            object: $(createCheckbox("Show mismatches", this.showMismatches)),
+            click: () => {
+                this.showMismatches = !this.showMismatches;
+                this.config.showMismatches = this.showMismatches;
+                this.trackView.repaintViews();
+            }
+        });
+
         // Soft clips
         menuItems.push({
             object: $(createCheckbox("Show soft clips", this.showSoftClips)),
@@ -510,7 +521,9 @@ class CoverageTrack {
 
         // paint for all coverage buckets
         // If alignment track color is != default, use it
-        let color = this.parent.coverageColor || DEFAULT_COVERAGE_COLOR;
+        // let color = this.parent.coverageColor || DEFAULT_COVERAGE_COLOR;
+        let color = getChrColor(alignmentContainer.chr);
+
         if (this.parent.color !== undefined) {
             color = IGVColor.darkenLighten(this.parent.color, -35);
         }
@@ -958,9 +971,11 @@ class AlignmentTrack {
                 }
 
 
-                // Mismatch coloring
+                // Read base coloring coloring
 
-                if (this.parent.showMismatches && (isSoftClip || showAllBases || (referenceSequence && alignment.seq && alignment.seq !== "*"))) {
+                if (isSoftClip ||
+                    showAllBases ||
+                    this.parent.showMismatches && (referenceSequence && alignment.seq && alignment.seq !== "*")) {
 
                     const seq = alignment.seq ? alignment.seq.toUpperCase() : undefined;
                     const qual = alignment.qual;
@@ -1140,22 +1155,23 @@ class AlignmentTrack {
 
         // Experimental JBrowse feature
         if (this.browser.circularView) {
+            const maxFragmentLenth = this.parent.maxFragmentLength;
             list.push({
-                label: 'Show discordant pairs',
+                label: 'Show discordant chords',
                 click: () => {
                     const refFrame = viewport.referenceFrame;
                     const inView = viewport.getCachedFeatures().allAlignments().filter(a => {
                         return a.end >= refFrame.start && a.start <= refFrame.end
                             && a.mate
                             && a.mate.chr
-                            && (a.mate.chr !== a.chr || a.fragmentLength > 10000);
+                            && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxFragmentLenth);
                     })
                     this.browser.circularView.addPairedAlignmentChords(inView);
                 }
             });
 
             list.push({
-                label: 'Clear discordant pairs',
+                label: 'Clear discordant chords',
                 click: () => {
                     this.browser.circularView.clearChords();
                 }
