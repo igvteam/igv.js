@@ -521,13 +521,14 @@ class CoverageTrack {
 
         // paint for all coverage buckets
         // If alignment track color is != default, use it
-        // let color = this.parent.coverageColor || DEFAULT_COVERAGE_COLOR;
-        let color = getChrColor(alignmentContainer.chr);
-
-        if (this.parent.color !== undefined) {
+        let color;
+        if(this.parent.coverageColor) {
+            color = this.parent.coverageColor
+        } else if (this.parent.color !== undefined) {
             color = IGVColor.darkenLighten(this.parent.color, -35);
+        } else {
+            color = DEFAULT_COVERAGE_COLOR;
         }
-
         IGVGraphics.setProperties(ctx, {
             fillStyle: color,
             strokeStyle: color
@@ -1157,7 +1158,7 @@ class AlignmentTrack {
         if (this.browser.circularView) {
             const maxFragmentLenth = this.parent.maxFragmentLength;
             list.push({
-                label: 'Show discordant chords',
+                label: 'Show discordant pairs',
                 click: () => {
                     const refFrame = viewport.referenceFrame;
                     const inView = viewport.getCachedFeatures().allAlignments().filter(a => {
@@ -1171,7 +1172,7 @@ class AlignmentTrack {
             });
 
             list.push({
-                label: 'Clear discordant chords',
+                label: 'Clear chords',
                 click: () => {
                     this.browser.circularView.clearChords();
                 }
