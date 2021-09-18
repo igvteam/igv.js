@@ -438,6 +438,45 @@ class InteractionTrack extends TrackBase {
         return items;
     };
 
+    contextMenuItemList(clickState) {
+
+        // Experimental JBrowse feature
+        if (this.browser.circularView) {
+            const viewport = clickState.viewport;
+            const list = [];
+
+            list.push({
+                label: 'Show chords',
+                click: () => {
+                    const refFrame = viewport.referenceFrame;
+                    const inView = "all" === refFrame.chr ?
+                        this.featureSource.getAllFeatures() :
+                        this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end);
+                    this.browser.circularView.addBedPEChords(inView, this.color);
+                }
+            });
+
+            list.push({
+                label: 'Clear chords',
+                click: () => {
+                    this.browser.circularView.clearChords();
+                }
+            });
+
+            list.push({
+                label: 'Clear selections',
+                click: () => {
+                    this.browser.circularView.clearSelection();
+                }
+            });
+
+            list.push('<hr/>');
+            return list;
+        }
+
+    }
+
+
     doAutoscale(features) {
 
         // if ("proportional" === this.arcType) {

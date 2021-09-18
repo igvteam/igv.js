@@ -1,52 +1,11 @@
 import Locus from "../locus.js";
-
-function makeAlignmentChord(a) {
-    // Strip chr names -  a hack
-    const chr = a.chr.startsWith("chr") ? a.chr.substring(3) : a.chr;
-    const mateChr = a.mate.chr.startsWith("chr") ? a.mate.chr.substring(3) : a.chr;
-    return {
-        uniqueId: a.readName,
-        refName: chr,
-        start: a.start,
-        end: a.end,
-        mate: {
-            refName: a.mate.chr,
-            start: a.mate.position - 1,
-            end: a.mate.position,
-        },
-        color: `rgba(0, 0, 255, 0.02)`,
-        baseColor: `rgba(0, 0, 255, 0.02)`,
-        highlightColor: 'red',
-        igvtype: 'alignment'
-    };
-}
-
-function makeBedPEChord(f, color) {
-    color = color || `rgba(0, 0, 255, 0.02)`;
-    // Strip chr names -  a hack
-    const chr1 = f.chr1.startsWith("chr") ? f.chr1.substring(3) : f.chr1;
-    const chr2 = f.chr2.startsWith("chr") ? f.chr2.substring(3) : f.chr2;
-
-    return {
-        uniqueId: bedPEID(f),
-        refName: chr1,
-        start: f.start1,
-        end: f.end1,
-        mate: {
-            refName: chr2,
-            start: f.start2,
-            end: f.end2,
-        },
-        color: color,
-        baseColor: color,
-        highlightColor: 'red',
-        igvtype: 'bedpe'
-    };
-}
+import {getChrColor} from "../bam/bamTrack.js";
 
 class CircularView {
 
-    constructor(div) {
+    constructor(div, browser) {
+
+        this.browser = browser;
 
         const {createElement} = React
         const {render} = ReactDOM
@@ -58,6 +17,21 @@ class CircularView {
         // Keep a copy fo the chords sent to JBrowse until we know how to append to the current set.
         this.chords = [];
 
+        const regions = [];
+        const colors = [];
+        for (let chrName of browser.genome.wgChromosomeNames) {
+            const chr = browser.genome.getChromosome(chrName);
+            colors.push(getChrColor(chr.name));
+            regions.push(
+                {
+                    refName: chr.name.substring(3),
+                    uniqueId: chr.name.substring(3),
+                    start: 0,
+                    end: chr.bpLength
+                }
+            )
+        }
+
         this.circularState = new createViewState({
             assembly: {
                 name: 'forIGV',
@@ -66,9 +40,10 @@ class CircularView {
                     type: 'ReferenceSequenceTrack',
                     adapter: {
                         type: 'FromConfigSequenceAdapter',
-                        features: [],
+                        features: regions,
                     },
                 },
+                refNameColors: colors
             },
             tracks: [
                 {
@@ -86,17 +61,19 @@ class CircularView {
         this.circularState.config.tracks[0].displays[0].renderer.strokeColor.set(
             "jexl:get(feature, 'color') || 'black'"
         )
-        this.circularState.config.tracks[0].displays[0].renderer.strokeColorSelected.set(
-            "jexl:get(feature, 'highlightColor') || 'red'"
-        )
+      //  this.circularState.config.tracks[0].displays[0].renderer.strokeColorSelected.set(
+      //      "jexl:get(feature, 'highlightColor') || 'red'"
+      //  )
+        const renderer = this.circularState.config.tracks[0].displays[0].renderer;
+        this.circularState.config.tracks[0].displays[0].renderer.strokeColorSelected.set('orange')
 
         this.setHeight(div.clientWidth)
 
         // Harcode chord click action for now
         this.onChordClick(defaultOnChordClick.bind(this))
 
+        render(createElement(JBrowseCircularGenomeView, {viewState: this.circularState}), div);
 
-        render(createElement(JBrowseCircularGenomeView, {viewState: this.circularState}), div)
     }
 
     setHeight(height) {
@@ -142,14 +119,23 @@ class CircularView {
     }
 
     selectAlignmentChord(alignment) {
+
+        // TODO -- this is broken, or rather doesn't seem to do anything.
+        // const feature = this.getFeature(alignment.readName);
+        // this.circularState.pluginManager.rootModel.session.setSelection(feature);
+        // this.circularState.session.view.showTrack(this.circularState.config.tracks[0].trackId)
+
+
+        // TODO -- hack until selection is fixed
         const chords = [...this.circularState.config.tracks[0].adapter.features.value];
         let found = false;
         const featureId = alignment.readName;
         for (let f of chords) {
             if (featureId === f.uniqueId) {
-                f.color = f.highlightColor;
+                f.color = f.color === f.highlightColor ? f.baseColor : f.highlightColor;   // Toggle selection
                 found = true;
-                break;
+            } else {
+                f.color = f.baseColor;    // Single select, all non-clicked chords off
             }
         }
         if (!found) {
@@ -157,13 +143,9 @@ class CircularView {
             f.color = f.highlightColor;
             chords.push(f);
         }
+
         this.circularState.config.tracks[0].adapter.features.set(chords)
         this.circularState.session.view.showTrack(this.circularState.config.tracks[0].trackId)
-    }
-
-    selectChord(featureId) {
-        //let feature = this.getFeature(featureId);
-        //this.circularState.pluginManager.rootModel.session.setSelection(feature)
     }
 
     clearSelection() {
@@ -176,18 +158,19 @@ class CircularView {
         this.circularState.session.view.showTrack(this.circularState.config.tracks[0].trackId)
     }
 
+    // TODO -- broken
     getFeature(featureId) {
 
-        const display = this.circularState.pluginManager.rootModel.session.view.tracks[0].displays[0]
-        const feature = display.data.features.get(featureId)
-        return feature;
+        // const display = this.circularState.pluginManager.rootModel.session.view.tracks[0].displays[0]
+        // const feature = display.data.features.get(featureId)
+        // return feature;
 
-        // const feature = [...this.circularState.config.tracks[0].adapter.features.value];
-        // for(let f of feature) {
-        //     if(featureId === f.uniqueId) {
-        //         return f;
-        //     }
-        // }
+        const features = [...this.circularState.config.tracks[0].adapter.features.value];
+        for(let f of features) {
+            if(featureId === f.uniqueId) {
+                return f;
+            }
+        }
     }
 
     onChordClick(callback) {
@@ -195,6 +178,33 @@ class CircularView {
         this.circularState.config.tracks[0].displays[0].onChordClick.set(
             'jexl:onChordClick(feature, track, pluginManager)'
         )
+    }
+
+    // TODO -- not been tested
+    updateGenome(genome) {
+
+        // TODO -- below needs to be done in igv.js when genome is loaded
+        const circularState = this.circularState;
+        const regions = [];
+        const colors = [];
+        for (let chrName of browser.genome.wgChromosomeNames) {
+            const chr = browser.genome.getChromosome(chrName);
+            colors.push(getChrColor(chr.name));
+            regions.push(
+                {
+                    refName: chr.name.substring(3),
+                    uniqueId: chr.name.substring(3),
+                    start: 0,
+                    end: chr.bpLength,
+                }
+            )
+        }
+        circularState.config.assembly.sequence.adapter.features.set(regions)
+        circularState.config.assembly.refNameColors.set(color);
+        circularState.assemblyManager.removeAssembly(
+            circularState.assemblyManager.assemblies[0]
+        )
+        circularState.assemblyManager.addAssembly(circularState.config.assembly)
     }
 
 }
@@ -245,6 +255,51 @@ function defaultOnChordClick(feature, chordTrack, pluginManager) {
 function bedPEID(f) {
     return `${f.chr1}:${f.start1}-${f.end1}_${f.chr2}:${f.start2}-${f.end2}`
 }
+
+function makeAlignmentChord(a) {
+    // Strip chr names -  a hack
+    const chr = a.chr.startsWith("chr") ? a.chr.substring(3) : a.chr;
+    const mateChr = a.mate.chr.startsWith("chr") ? a.mate.chr.substring(3) : a.chr;
+    return {
+        uniqueId: a.readName,
+        refName: chr,
+        start: a.start,
+        end: a.end,
+        mate: {
+            refName: a.mate.chr,
+            start: a.mate.position - 1,
+            end: a.mate.position,
+        },
+        color: `rgba(0, 0, 255, 0.02)`,
+        baseColor: `rgba(0, 0, 255, 0.02)`,
+        highlightColor: 'red',
+        igvtype: 'alignment'
+    };
+}
+
+function makeBedPEChord(f, color) {
+    color = color || `rgba(0, 0, 255, 0.02)`;
+    // Strip chr names -  a hack
+    const chr1 = f.chr1.startsWith("chr") ? f.chr1.substring(3) : f.chr1;
+    const chr2 = f.chr2.startsWith("chr") ? f.chr2.substring(3) : f.chr2;
+
+    return {
+        uniqueId: bedPEID(f),
+        refName: chr1,
+        start: f.start1,
+        end: f.end1,
+        mate: {
+            refName: chr2,
+            start: f.start2,
+            end: f.end2,
+        },
+        color: color,
+        baseColor: color,
+        highlightColor: 'red',
+        igvtype: 'bedpe'
+    };
+}
+
 
 
 export default CircularView;

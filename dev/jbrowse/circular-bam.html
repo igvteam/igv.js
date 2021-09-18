@@ -22,9 +22,9 @@
 </head>
 <body>
 
-<div id="jbrowse_circular_genome_view" style="z-index: 2048; position: absolute; top:0; left:0;width: 450px; height: 450px;"></div>
-
 <div id="igvDiv"></div>
+
+<div id="jbrowse_circular_genome_view" style="z-index: 2048; position: absolute; top:0; left:0;width: 450px; height: 450px;"></div>
 
 <script type="module">
 
@@ -32,50 +32,51 @@
     import igv from "../../js/index.js";
     import CircularView from "../../js/jbrowse/CircularView.js";
 
-    const el = document.getElementById('jbrowse_circular_genome_view')
-    makeDraggable(el, el)
-    const circularView = new CircularView(el);
-
     // Start igv.js and create regions
     var options =
         {
             genome: "hg19",
-            locus: "chr17:64,040,802-64,045,633",
+            //locus: "chr17:64,040,802-64,045,633",
             tracks: [
                 {
-                    name: "sniffles",
+                    name: "sniffles translocations",
                     url: "SKBR3_Sniffles_variants_tra.bedpe",
-                    height: 40,
-                    color: "rgb(0,0,150)"
+                    height: 400,
+                    color: "rgb(0,150,150)"
                 },
-                {
-                    id: "sniffles vcf",
-                    url: "../../Downloads/skbr3/sniffles_tra.vcf",
-                    type: "variant",
-                    format: "vcf",
-                    name: "delly",
-                    supportsWholeGenome: true,
-                    visibilityWindow: -1,
-                    showGenotypes: false,
-                    height: 40
-                },
-                {
-                    name: "delly",
-                    url: "SKBR3_Illumina_delly.tra.pass.bedpe",
-                    height: 40,
-                    color: "rgb(0,150,0)"
-                },
-                {
-                    id: "delly",
-                    url: "SKBR3_Illumina_delly.tra.pass.vcf",
-                    type: "variant",
-                    format: "vcf",
-                    name: "delly",
-                    supportsWholeGenome: true,
-                    visibilityWindow: -1,
-                    showGenotypes: false,
-                    height: 40
-                },
+                // {
+                //     name: "sniffles deletions",
+                //     url: "SKBR3_Sniffles_variants_del.bedpe",
+                //     height: 40,
+                //   //  color: "rgb(0,0,150)"
+                // },
+                // {
+                //     url: "../../Downloads/skbr3/sniffles_del.vcf",
+                //     type: "variant",
+                //     format: "vcf",
+                //     name: "sniffles deletions",
+                //     supportsWholeGenome: true,
+                //     visibilityWindow: -1,
+                //     showGenotypes: false,
+                //     height: 40
+                // },
+                // {
+                //     name: "delly translocations",
+                //     url: "SKBR3_Illumina_delly.tra.pass.bedpe",
+                //     height: 40,
+                //     color: "rgb(0,150,0)"
+                // },
+                // {
+                //     id: "delly",
+                //     url: "SKBR3_Illumina_delly.tra.pass.vcf",
+                //     type: "variant",
+                //     format: "vcf",
+                //     name: "delly",
+                //     supportsWholeGenome: true,
+                //     visibilityWindow: -1,
+                //     showGenotypes: false,
+                //     height: 40
+                // },
 
                 {
                     // url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam",
@@ -85,7 +86,10 @@
                     type: "alignment",
                     format: "bam",
                     name: "Alignments",
+                    showMismatches: false,
                     height: 500,
+                    maxFragmentLength: 1000000,  // 1 mb -- only interested in large deletions
+                    colorBy: "fragmentLength",
                     onclick: (features, e) => {
                         if(e.shiftKey) {
                             if (features) {
@@ -102,33 +106,18 @@
 
     var igvDiv = document.getElementById("igvDiv");
 
+    let circularView;
     igv.createBrowser(igvDiv, options)
         .then(async function (browser) {
+
             console.log("Created IGV browser");
             window.igvBrowser = browser;
 
+            const el = document.getElementById('jbrowse_circular_genome_view')
+            makeDraggable(el, el)
+            circularView = new CircularView(el, browser);
             browser.circularView = circularView;
-            circularView.browser = browser;
 
-            // TODO -- below needs to be done in igv.js when genome is loaded
-            const circularState = circularView.circularState;
-            const regions = [];
-            for (let chrName of browser.genome.wgChromosomeNames) {
-                const chr = browser.genome.getChromosome(chrName);
-                regions.push(
-                    {
-                        refName: chr.name.substring(3),
-                        uniqueId: chr.name.substring(3),
-                        start: 0,
-                        end: chr.bpLength,
-                    }
-                )
-            }
-            circularState.config.assembly.sequence.adapter.features.set(regions)
-            circularState.assemblyManager.removeAssembly(
-                circularState.assemblyManager.assemblies[0]
-            )
-            circularState.assemblyManager.addAssembly(circularState.config.assembly)
 
 
         })
