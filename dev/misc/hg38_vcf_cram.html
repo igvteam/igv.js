@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>BAM file with CSI index</h1>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg38",
+            locus: "chr8:127,734,433-127,743,951",
+            "tracks": [
+                {
+                    name: "Variants",
+                    type: "variant",
+                    format: "vcf",
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38_1kg/ALL.chr22.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38_1kg/ALL.chr22.shapeit2_integrated_snvindels_v2a_27022019.GRCh38.phased.vcf.gz.tbi"
+                },
+                {
+                    "url": "https://s3.amazonaws.com/1000genomes/data/HG00096/alignment/HG00096.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram",
+                    "name": "HG00096.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram",
+                    "indexURL": "https://s3.amazonaws.com/1000genomes/data/HG00096/alignment/HG00096.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram.crai",
+                    "format": "cram",
+                    "type": "alignment",
+                    "alleleFreqThreshold": 0.2,
+                    "order": 5
+                }
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
