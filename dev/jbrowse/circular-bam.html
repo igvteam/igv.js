@@ -78,29 +78,29 @@
                 //     height: 40
                 // },
 
-                {
-                    // url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam",
-                    // indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam.bai",
-                    url: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
-                    indexURL: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
-                    type: "alignment",
-                    format: "bam",
-                    name: "Alignments",
-                    showMismatches: false,
-                    height: 500,
-                    maxFragmentLength: 1000000,  // 1 mb -- only interested in large deletions
-                    colorBy: "fragmentLength",
-                    onclick: (features, e) => {
-                        if(e.shiftKey) {
-                            if (features) {
-                                sendPairedAlignmentChord(features);
-                            }
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                }
+                // {
+                //     // url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam",
+                //     // indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam.bai",
+                //     url: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
+                //     indexURL: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
+                //     type: "alignment",
+                //     format: "bam",
+                //     name: "Alignments",
+                //     showMismatches: false,
+                //     height: 500,
+                //     maxFragmentLength: 1000000,  // 1 mb -- only interested in large deletions
+                //     colorBy: "fragmentLength",
+                //     onclick: (features, e) => {
+                //         if(e.shiftKey) {
+                //             if (features) {
+                //                 sendPairedAlignmentChord(features);
+                //             }
+                //             return true;
+                //         } else {
+                //             return false;
+                //         }
+                //     }
+                // }
             ]
         };
 
