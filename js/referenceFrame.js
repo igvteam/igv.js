@@ -140,10 +140,11 @@ class ReferenceFrame {
     }
 
     getMultiLocusLabel(pixels) {
+        const margin = '&nbsp'
         const space = '&nbsp &nbsp &nbsp'
         const ss = Math.floor(this.start) + 1
         const ee = Math.round(this.start + this.bpPerPixel * pixels)
-        return `${this.chr}${space}${prettyBasePairNumber(ee - ss)}`
+        return `${margin}${this.chr}${space}${prettyBasePairNumber(ee - ss)}${margin}`
     }
 
     getPresentationLocusComponents(pixels) {
