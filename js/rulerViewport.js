@@ -3,6 +3,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
 import {Icon, DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
+import { getChrColor } from "./bam/bamTrack.js";
 
 let timer
 let currentViewport = undefined
@@ -56,8 +57,59 @@ class RulerViewport extends ViewPort {
     }
 
     presentLocusLabel(viewportWidth) {
-        this.$rulerLabel.html( this.referenceFrame.getMultiLocusLabel(viewportWidth) )
+
+        const createRulerLabelString = () =>
+        {
+            const html = `<div>${ this.referenceFrame.getMultiLocusLabel(viewportWidth) }</div>`
+            return document.createRange().createContextualFragment(html).firstChild;
+        }
+
+        this.$rulerLabel.get(0).innerHTML = ''
+        this.$rulerLabel.get(0).style.backgroundColor = getChrColor(this.referenceFrame.chr)
+        this.$rulerLabel.get(0).appendChild(createRulerLabelString())
         this.$rulerLabel.show()
+
+        this.$multiLocusCloseButton.show()
+    }
+
+    // Use in conjuction with .igv-multi-locus-ruler-label-square-dot css class (_dom-misc.scss)
+    presentLocusLabel_Square_Dot(viewportWidth) {
+
+        const createRulerLabelSquare = () => {
+            const html = `<div>
+                                <?xml version="1.0" encoding="UTF-8"?>
+                                <svg width="14px" height="14px" viewBox="0 0 93 93" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <g>
+                                        <rect id="Rectangle" fill="${ getChrColor(this.referenceFrame.chr) }" x="0" y="0" width="93" height="93"></rect>
+                                    </g>
+                                </svg>
+                            </div>`
+            return document.createRange().createContextualFragment(html).firstChild;
+        }
+
+        const createRulerLabelDot = () => {
+            const html = `<div>
+                                <?xml version="1.0" encoding="UTF-8"?>
+                                <svg width="14px" height="14px" viewBox="0 0 89 89" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+                                    <g>
+                                        <circle id="Oval" fill="${ getChrColor(this.referenceFrame.chr) }" cx="44.5" cy="44.5" r="44.5"></circle>
+                                    </g>
+                                </svg>
+                            </div>`
+            return document.createRange().createContextualFragment(html).firstChild;
+        }
+
+        const createRulerLabelString = () =>
+        {
+            const html = `<div>${ this.referenceFrame.getMultiLocusLabel(viewportWidth) }</div>`
+            return document.createRange().createContextualFragment(html).firstChild;
+        }
+
+        this.$rulerLabel.get(0).innerHTML = ''
+        this.$rulerLabel.get(0).appendChild(createRulerLabelDot())
+        this.$rulerLabel.get(0).appendChild(createRulerLabelString())
+        this.$rulerLabel.show()
+
         this.$multiLocusCloseButton.show()
     }
 
