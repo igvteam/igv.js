@@ -99,7 +99,6 @@ class TrackView {
         browser.columnContainer.querySelector('.igv-axis-column').appendChild(axis);
 
         axis.style.height = `${track.height}px`;
-        // axis.style.backgroundColor = randomRGB(150, 250)
 
         if (typeof track.paintAxis === 'function') {
             if (track.dataRange) {
@@ -123,14 +122,15 @@ class TrackView {
 
     resizeAxisCanvas(width, height) {
 
-        // Size the canvas containing div.  Do we really need this?
         this.axis.style.width = `${width}px`;
         this.axis.style.height = `${height}px`;
 
-        // Size the canvas in CSS (logical) pixels.  The buffer size will be set when painted.
-        // TODO -- if
-        this.axisCanvas.style.width = `${width}px`;
-        this.axisCanvas.style.height = `${height}px`;
+        if (typeof this.track.paintAxis === 'function') {
+            // Size the canvas in CSS (logical) pixels.  The buffer size will be set when painted.
+            this.axisCanvas.style.width = `${width}px`;
+            this.axisCanvas.style.height = `${height}px`;
+
+        }
     }
 
     removeDOMFromColumnContainer() {
@@ -257,8 +257,9 @@ class TrackView {
         this.track.height = newHeight;
         this.track.config.height = newHeight;
 
+        this.resizeAxisCanvas(this.axis.clientWidth, this.track.height);
+
         if (typeof this.track.paintAxis === 'function') {
-            this.resizeAxisCanvas(this.axis.clientWidth, this.track.height);
             this.paintAxis();
         }
 
