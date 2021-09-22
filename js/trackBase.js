@@ -405,10 +405,8 @@ class TrackBase {
 
             const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr;
             return `<a target="_blank" href="https://run.opencravat.org/result/nocache/variant.html` +
-                `?chrom=${cravatChr}&pos=${position}&ref_base=${ref}&alt_base=${alt}">Cravat ${ref}->${alt}</a>`
-            // return "<a target='_blank' " +
-            //     "href='https://www.cravat.us/CRAVAT/variant.html?variant=" +
-            //     cravatChr + "_" + position + "_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>"
+                `?chrom=${cravatChr}&pos=${position}&ref_base=${ref}&alt_base=${alt}"><b>Cravat ${ref}->${alt}</b></a>`
+
         } else {
             return undefined
         }
