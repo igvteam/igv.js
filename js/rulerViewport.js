@@ -115,7 +115,9 @@ class RulerViewport extends ViewPort {
                 currentViewport = this
                 this.$tooltip.show()
             } else if (currentViewport.guid !== this.guid) {
-                currentViewport.$tooltip.hide()
+                if (currentViewport.$tooltip) {
+                    currentViewport.$tooltip.hide();
+                }
                 this.$tooltip.show()
                 currentViewport = this
             } else {
