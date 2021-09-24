@@ -26,12 +26,12 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
 import { DOMUtils } from "../node_modules/igv-utils/src/index.js"
-import ViewPort from "./viewport.js"
+import TrackViewport from "./trackViewport.js"
 
-class IdeogramViewport extends ViewPort {
+class IdeogramViewport extends TrackViewport {
 
-    constructor(trackView, $viewportColumn, referenceFrame, width) {
-        super(trackView, $viewportColumn, referenceFrame, width)
+    constructor(trackView, viewportColumn, referenceFrame, width) {
+        super(trackView, viewportColumn, referenceFrame, width)
     }
 
     initializationHelper() {
@@ -46,11 +46,57 @@ class IdeogramViewport extends ViewPort {
         this.canvas = undefined
         this.ctx = undefined
 
-        this.$viewport.on('click.ideogram', e => {
-            clickHandler(e, canvas, this.browser, this.referenceFrame)
-        })
+        this.addMouseHandlers()
 
     }
+
+    addMouseHandlers() {
+        this.addViewportClickHandler(this.$viewport.get(0))
+    }
+
+    removeMouseHandlers() {
+        this.removeViewportClickHandler(this.$viewport.get(0))
+
+    }
+
+    addViewportClickHandler(viewport) {
+
+        this.boundClickHandler = clickHandler.bind(this)
+        viewport.addEventListener('click', this.boundClickHandler)
+
+        function clickHandler(event) {
+
+            const { xNormalized, width } = DOMUtils.translateMouseCoordinates(event, this.ideogram_ctx.canvas);
+            const { bpLength } = this.browser.genome.getChromosome(this.referenceFrame.chr);
+            const locusLength = this.referenceFrame.bpPerPixel * width;
+            const chrCoveragePercentage = locusLength / bpLength;
+
+            let xPercentage = xNormalized;
+            if (xPercentage - (chrCoveragePercentage / 2.0) < 0) {
+                xPercentage = chrCoveragePercentage / 2.0;
+            }
+
+            if (xPercentage + (chrCoveragePercentage / 2.0) > 1.0) {
+                xPercentage = 1.0 - chrCoveragePercentage / 2.0;
+            }
+
+            const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
+            const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
+
+            this.referenceFrame.start = ss;
+            this.referenceFrame.end = ee;
+            this.referenceFrame.bpPerPixel = (ee - ss) / width;
+
+            this.browser.updateViews(this.referenceFrame, this.browser.trackViews, true)
+
+        }
+
+    }
+
+    removeViewportClickHandler(viewport) {
+        viewport.removeEventListener('click', this.boundClickHandler)
+    }
+
     setWidth(width) {
         this.$viewport.width(width);
     }
@@ -79,33 +125,6 @@ class IdeogramViewport extends ViewPort {
 
     startSpinner() {}
     stopSpinner() {}
-
-}
-
-function clickHandler(e, canvas, browser, referenceFrame) {
-
-    const { xNormalized, width } = DOMUtils.translateMouseCoordinates(e, canvas);
-    const { bpLength } = browser.genome.getChromosome(referenceFrame.chr);
-    const locusLength = referenceFrame.bpPerPixel * width;
-    const chrCoveragePercentage = locusLength / bpLength;
-
-    let xPercentage = xNormalized;
-    if (xPercentage - (chrCoveragePercentage / 2.0) < 0) {
-        xPercentage = chrCoveragePercentage / 2.0;
-    }
-
-    if (xPercentage + (chrCoveragePercentage / 2.0) > 1.0) {
-        xPercentage = 1.0 - chrCoveragePercentage / 2.0;
-    }
-
-    const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
-    const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
-
-    referenceFrame.start = ss;
-    referenceFrame.end = ee;
-    referenceFrame.bpPerPixel = (ee - ss) / width;
-
-    browser.updateViews(referenceFrame, browser.trackViews, true)
 
 }
 

@@ -87,14 +87,14 @@ async function createBrowser(parentDiv, config) {
 
 function removeBrowser(browser) {
     browser.dispose();
-    browser.$root.remove();
+    browser.root.remove();
     allBrowsers = allBrowsers.filter(item => item !== browser);
 }
 
 function removeAllBrowsers() {
     for (let browser of allBrowsers) {
         browser.dispose();
-        browser.$root.remove();
+        browser.root.remove();
     }
     allBrowsers = [];
 }

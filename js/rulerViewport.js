@@ -1,42 +1,34 @@
-import ViewPort from "./viewport.js";
 import $ from "./vendor/jquery-3.3.1.slim.js";
+import {Icon, DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
+import TrackViewport from "./trackViewport.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
-import {Icon, DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
 
 let timer
 let currentViewport = undefined
 const toolTipTimeout = 1e4
 
-class RulerViewport extends ViewPort {
+class RulerViewport extends TrackViewport {
 
-    constructor(trackView, $viewportColumn, referenceFrame, width) {
-        super(trackView, $viewportColumn, referenceFrame, width);
+    constructor(trackView, viewportColumn, referenceFrame, width) {
+        super(trackView, viewportColumn, referenceFrame, width);
     }
 
     initializationHelper() {
 
+        this.$viewport.get(0).dataset.rulerTrack = 'rulerTrack';
+
         this.rulerSweeper = new RulerSweeper(this)
 
-        this.$multiLocusCloseButton = $('<div>', { class: 'igv-multi-locus-close-button' })
-        this.$viewport.append(this.$multiLocusCloseButton);
-        this.$multiLocusCloseButton.get(0).appendChild(Icon.createIcon("times-circle"));
+        const viewport = this.$viewport.get(0)
 
-        this.$multiLocusCloseButton.click(() => {
-            this.browser.removeMultiLocusPanel(this.referenceFrame)
-        });
+        this.multiLocusPanelCloseButton = DOMUtils.div({ class: 'igv-multi-locus-close-button' })
+        viewport.appendChild(this.multiLocusPanelCloseButton)
 
-        this.$rulerLabel = $('<div>', { class: 'igv-multi-locus-ruler-label' })
-        this.$viewport.append(this.$rulerLabel)
+        this.multiLocusPanelCloseButton.appendChild(Icon.createIcon("times-circle"))
 
-        this.$rulerLabel.click(async () => {
-
-            const removals = this.browser.referenceFrameList.filter(r => this.referenceFrame !== r)
-            for (let referenceFrame of removals) {
-                await this.browser.removeMultiLocusPanel(referenceFrame)
-            }
-
-        })
+        this.rulerLabel = DOMUtils.div({ class: 'igv-multi-locus-ruler-label' })
+        viewport.appendChild(this.rulerLabel)
 
         this.$tooltip = $('<div>', { class: 'igv-ruler-tooltip' })
         this.$tooltip.height(this.$viewport.height())
@@ -46,65 +38,113 @@ class RulerViewport extends ViewPort {
         this.$tooltipContent = $('<div>')
         this.$tooltip.append(this.$tooltipContent)
 
-        this.attachMouseHandlers( GenomeUtils.isWholeGenomeView(this.referenceFrame.chr) )
-
         this.$tooltip.hide()
 
         this.dismissLocusLabel()
+
+        this.addMouseHandlers()
     }
 
-    presentLocusLabel(viewportWidth) {
-        this.$rulerLabel.html( this.referenceFrame.getMultiLocusLabel(viewportWidth) )
-        this.$rulerLabel.show()
-        this.$multiLocusCloseButton.show()
+    addMouseHandlers() {
+
+        this.addMultiLocusPanelCloseHandler(this.multiLocusPanelCloseButton)
+
+        this.addRulerLableClickHandler(this.rulerLabel)
+
+        if (GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)) {
+            this.addViewportClickHandler(this.$viewport.get(0))
+        } else {
+            this.removeViewportClickHandler(this.$viewport.get(0))
+        }
     }
 
-    dismissLocusLabel() {
-        this.$rulerLabel.hide()
-        this.$multiLocusCloseButton.hide()
+    removeMouseHandlers() {
+        this.removeMultiLocusPanelCloseHandler(this.multiLocusPanelCloseButton)
+        this.removeRulerLableClickHandler(this.rulerLabel)
+        this.removeViewportClickHandler(this.$viewport.get(0))
     }
 
-    attachMouseHandlers(isWholeGenomeView) {
+    addMultiLocusPanelCloseHandler(multiLocusPanelCloseButton) {
 
-        this.namespace = `.ruler_track_viewport_${ this.browser.referenceFrameList.indexOf(this.referenceFrame) }`
+        this.boundMultiLocusPanelCloseHandler = clickHandler.bind(this)
+        multiLocusPanelCloseButton.addEventListener('click', this.boundMultiLocusPanelCloseHandler)
 
-        this.$viewport.off(this.namespace)
+        function clickHandler(event) {
+            if (currentViewport === this) {
+                currentViewport = undefined
+            }
+            this.browser.removeMultiLocusPanel(this.referenceFrame)
+        }
 
-        // console.log(`Ruler track ${ true === isWholeGenomeView ? 'is' : 'is not' } whole genome.`)
+    }
 
-        if (true === isWholeGenomeView) {
+    removeMultiLocusPanelCloseHandler(multiLocusPanelCloseButton) {
+        multiLocusPanelCloseButton.removeEventListener('click', this.boundMultiLocusPanelCloseHandler)
+    }
+
+    addRulerLableClickHandler(rulerLabel) {
+
+        this.boundRulerLableClickHandler = clickHandler.bind(this)
+        rulerLabel.addEventListener('click', this.boundRulerLableClickHandler)
+
+        async function clickHandler() {
+
+            const removals = this.browser.referenceFrameList.filter(r => this.referenceFrame !== r)
+            for (let referenceFrame of removals) {
+                await this.browser.removeMultiLocusPanel(referenceFrame)
+            }
+
+        }
+
+    }
+
+    removeRulerLableClickHandler(rulerLabel) {
+        rulerLabel.removeEventListener('click', this.boundRulerLableClickHandler)
+    }
+
+    addViewportClickHandler(viewport) {
+
+        this.boundViewportClickHandler = clickHandler.bind(this)
+        viewport.addEventListener('click', this.boundViewportClickHandler)
+
+        function clickHandler(event) {
 
             const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
 
-            const click = `click${ this.namespace }`
-            this.$viewport.on(click, (e) => {
+            const { x:pixel } = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
 
-                const { x:pixel } = DOMUtils.translateMouseCoordinates(e, this.$viewport.get(0));
-                const bp = Math.round(this.referenceFrame.start + this.referenceFrame.toBP(pixel));
+            const bp = Math.round(this.referenceFrame.start + this.referenceFrame.toBP(pixel))
 
-                let searchString;
+            const { chr } = this.browser.genome.getChromosomeCoordinate(bp)
 
-                const { chr } = this.browser.genome.getChromosomeCoordinate(bp)
+            let searchString
+            if (1 === this.browser.referenceFrameList.length) {
+                searchString = chr
+            } else {
+                let loci = this.browser.referenceFrameList.map(({ locusSearchString }) => locusSearchString);
+                loci[ index ] = chr;
+                searchString = loci.join(' ');
+            }
 
-                if (1 === this.browser.referenceFrameList.length) {
-                    searchString = chr
-                } else {
+            this.browser.search(searchString);
 
-                    let loci = this.browser.referenceFrameList.map(({ locusSearchString }) => locusSearchString);
-
-                    loci[ index ] = chr;
-
-                    searchString = loci.join(' ');
-                }
-
-                this.browser.search(searchString);
-            })
-
-            this.$viewport.get(0).style.cursor = 'pointer'
-        } else {
-            this.$viewport.get(0).style.cursor = 'default'
         }
 
+    }
+
+    removeViewportClickHandler(viewport) {
+        viewport.removeEventListener('click', this.boundViewportClickHandler)
+    }
+
+    presentLocusLabel(viewportWidth) {
+        this.rulerLabel.innerHTML = this.referenceFrame.getMultiLocusLabel(viewportWidth)
+        this.rulerLabel.style.display = 'block'
+        this.multiLocusPanelCloseButton.style.display = 'block'
+    }
+
+    dismissLocusLabel() {
+        this.rulerLabel.style.display = 'none'
+        this.multiLocusPanelCloseButton.style.display = 'none'
     }
 
     mouseMove(event) {
@@ -157,6 +197,10 @@ class RulerViewport extends ViewPort {
     startSpinner() {}
     stopSpinner() {}
 
+    dispose() {
+        this.rulerSweeper.dispose()
+        super.dispose()
+    }
 }
 
 export default RulerViewport
