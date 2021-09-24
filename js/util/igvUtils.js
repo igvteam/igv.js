@@ -24,6 +24,10 @@
  */
 
 import {FileUtils, StringUtils, GoogleAuth, GoogleDrive} from "../../node_modules/igv-utils/src/index.js";
+import {DOMUtils} from "../../node_modules/igv-utils/src/index.js"
+import RulerViewport from "../rulerViewport.js";
+import IdeogramViewport from "../ideogramViewport.js";
+import TrackViewport from "../trackViewport.js";
 
 const extend = function (parent, child) {
 
@@ -166,7 +170,6 @@ async function getFilename(url) {
     }
 }
 
-
 function prettyBasePairNumber  (raw) {
 
     var denom,
@@ -195,9 +198,35 @@ function prettyBasePairNumber  (raw) {
     return floored.toString() + units;
 }
 
+
 function isDataURL(obj) {
     return (StringUtils.isString(obj) && obj.startsWith("data:"))
 }
 
-export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, getFilename, prettyBasePairNumber, isDataURL}
+function createColumn(columnContainer, className) {
+    const column = DOMUtils.div({ class: className })
+    columnContainer.appendChild(column)
+}
 
+
+function insertElementBefore(element, referenceNode) {
+    referenceNode.parentNode.insertBefore(element, referenceNode);
+}
+
+function insertElementAfter(element, referenceNode) {
+    referenceNode.parentNode.insertBefore(element, referenceNode.nextSibling);
+}
+
+function createViewport(trackView, column, referenceFrame, width) {
+
+    if ('ruler' === trackView.track.type) {
+        return new RulerViewport(trackView, column, referenceFrame, width);
+    } else if ('ideogram' === trackView.track.type) {
+        return new IdeogramViewport(trackView, column, referenceFrame, width);
+    } else {
+        return new TrackViewport(trackView, column, referenceFrame, width);
+    }
+
+}
+
+export {createViewport, createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter}
