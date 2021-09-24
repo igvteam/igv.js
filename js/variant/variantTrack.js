@@ -345,7 +345,7 @@ class VariantTrack extends TrackBase {
             }
 
             if (yOffset <= this.variantBandHeight) {
-                const v = variant.popupData(genomicLocation, genomeID);
+                const v = variant.popupData(genomicLocation);
                 Array.prototype.push.apply(popupData, v);
             } else {
                 // Callset

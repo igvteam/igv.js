@@ -24,25 +24,40 @@
  * THE SOFTWARE.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js";
 import {validateLocusExtent} from "./util/igvUtils.js";
 import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
+import GenomeUtils from './genome/genome.js';
 
 class RulerSweeper {
 
-    constructor(viewport) {
-        this.viewport = viewport;
+    constructor(rulerViewport) {
         this.rulerSweeper = DOMUtils.div({ class: 'igv-ruler-sweeper'})
-        viewport.contentDiv.appendChild(this.rulerSweeper)
+        rulerViewport.contentDiv.appendChild(this.rulerSweeper)
+
+        this.rulerViewport = rulerViewport;
+
         this.isMouseHandlers = undefined
+
+        this.addBrowserObserver()
     }
 
-    disableMouseHandlers() {
-        this.viewport.$content.off()
-        $(document).off(`mousemove.${ this.viewport.trackView.namespace }`)
-        $(document).off(`mouseup.${ this.viewport.trackView.namespace }`)
-        this.isMouseHandlers = false;
-    };
+    addBrowserObserver() {
+
+        // Viewport Content
+        this.boundObserverHandler = observerHandler.bind(this)
+        this.rulerViewport.browser.on('locuschange', this.boundObserverHandler)
+
+        function observerHandler() {
+            if (GenomeUtils.isWholeGenomeView(this.rulerViewport.referenceFrame.chr)) {
+                this.removeMouseHandlers()
+            } else {
+                this.addMouseHandlers()
+            }
+        }    }
+
+    removeBrowserObserver() {
+        this.rulerViewport.browser.off('locuschange', this.boundObserverHandler)
+    }
 
     addMouseHandlers() {
 
@@ -59,12 +74,16 @@ class RulerSweeper {
 
         let threshold = 1;
 
-        this.viewport.$content.on('mousedown', e => {
+        // Viewport Content
+        this.boundContentMouseDownHandler = contentMouseDownHandler.bind(this)
+        this.rulerViewport.contentDiv.addEventListener('mousedown', this.boundContentMouseDownHandler)
+
+        function contentMouseDownHandler(event) {
 
             isMouseDown = true
             isMouseIn = true;
 
-            const { x } = DOMUtils.translateMouseCoordinates(e, this.viewport.contentDiv);
+            const { x } = DOMUtils.translateMouseCoordinates(event, this.rulerViewport.contentDiv);
             left = mouseDownX = x;
 
             width = threshold;
@@ -74,16 +93,20 @@ class RulerSweeper {
             this.rulerSweeper.style.left = `${left}px`;
             this.rulerSweeper.style.width = `${width}px`;
 
-        })
+        }
 
-        $(document).on(`mousemove.${ this.viewport.trackView.namespace }`, e => {
+        // Document
+        this.boundDocumentMouseMoveHandler = documentMouseMoveHandler.bind(this)
+        document.addEventListener('mousemove', this.boundDocumentMouseMoveHandler)
+
+        function documentMouseMoveHandler(event) {
 
             let mouseCurrentX;
 
             if (isMouseDown && isMouseIn) {
 
-                const { x } = DOMUtils.translateMouseCoordinates(e, this.viewport.contentDiv);
-                mouseCurrentX = Math.max(Math.min(x, this.viewport.contentDiv.clientWidth), 0);
+                const { x } = DOMUtils.translateMouseCoordinates(event, this.rulerViewport.contentDiv);
+                mouseCurrentX = Math.max(Math.min(x, this.rulerViewport.contentDiv.clientWidth), 0);
 
                 dx = mouseCurrentX - mouseDownX;
 
@@ -97,9 +120,12 @@ class RulerSweeper {
 
             }
 
-        })
+        }
 
-        $(document).on(`mouseup.${ this.viewport.trackView.namespace }`, e => {
+        this.boundDocumentMouseUpHandler = documentMouseUpHandler.bind(this)
+        document.addEventListener('mouseup', this.boundDocumentMouseUpHandler)
+
+        function documentMouseUpHandler(event) {
 
             let extent;
 
@@ -112,28 +138,41 @@ class RulerSweeper {
 
                 if (width > threshold) {
 
-                    extent = { start: this.bp(left), end: this.bp(left + width) };
+                    extent = { start: bp(this.rulerViewport.referenceFrame, left), end: bp(this.rulerViewport.referenceFrame, left + width) };
 
-                    validateLocusExtent(this.viewport.browser.genome.getChromosome(this.viewport.referenceFrame.chr).bpLength, extent, this.viewport.browser.minimumBases());
+                    validateLocusExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, extent, this.rulerViewport.browser.minimumBases());
 
-                    this.viewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) /this.viewport.contentDiv.clientWidth;
-                    this.viewport.referenceFrame.start = Math.round(extent.start);
-                    this.viewport.referenceFrame.end = Math.round(extent.end);
+                    this.rulerViewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) /this.rulerViewport.contentDiv.clientWidth;
+                    this.rulerViewport.referenceFrame.start = Math.round(extent.start);
+                    this.rulerViewport.referenceFrame.end = Math.round(extent.end);
 
-                    this.viewport.browser.updateViews(this.viewport.referenceFrame);
+                    this.rulerViewport.browser.updateViews(this.rulerViewport.referenceFrame);
                 }
 
             }
 
-        })
+        }
 
         this.isMouseHandlers = true;
     }
 
-    bp(pixel) {
-        return this.viewport.referenceFrame.start + (pixel * this.viewport.referenceFrame.bpPerPixel);
+    removeMouseHandlers() {
+        this.rulerViewport.contentDiv.removeEventListener('mousedown', this.boundContentMouseDownHandler)
+        document.removeEventListener('mousemove', this.boundDocumentMouseMoveHandler)
+        document.removeEventListener('mouseup', this.boundDocumentMouseUpHandler)
+        this.isMouseHandlers = false;
     }
+
+    dispose() {
+        this.removeBrowserObserver()
+        this.removeMouseHandlers()
+        this.rulerSweeper.remove()
+    }
+
 }
 
+function bp(referenceFrame, pixel) {
+    return referenceFrame.start + (pixel * referenceFrame.bpPerPixel);
+}
 
 export default RulerSweeper;

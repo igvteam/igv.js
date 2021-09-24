@@ -397,7 +397,7 @@ class SegTrack extends TrackBase {
         }
 
         this.trackView.repaintViews();
-        // self.trackView.$viewport.scrollTop(0);
+
     }
 
     clickedFeatures(clickState, features) {
