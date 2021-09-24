@@ -25,7 +25,6 @@
  */
 
 import TrackBase from "../trackBase.js";
-import {inferTrackType} from "../util/trackUtils.js";
 
 class MergedTrack extends TrackBase {
 
@@ -134,7 +133,7 @@ class MergedTrack extends TrackBase {
             for (let i = 0; i < this.tracks.length; i++) {
                 if (i > 0) popupData.push('<hr/>');
                 popupData.push(`<div style=background-color:#f7f8fa;border-bottom-style:dashed;border-bottom-width:1px;margin-bottom:5px;margin-top:5px;font-size:medium><b>${this.tracks[i].name}</b></div>`);
-                const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i]);
+                const trackPopupData = this.tracks[i].popupData(clickState);
                 popupData.push(...trackPopupData);
 
             }
