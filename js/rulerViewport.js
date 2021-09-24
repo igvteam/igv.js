@@ -115,7 +115,9 @@ class RulerViewport extends ViewPort {
                 currentViewport = this
                 this.$tooltip.show()
             } else if (currentViewport.guid !== this.guid) {
-                currentViewport.$tooltip.hide()
+                if (currentViewport.$tooltip) {
+                    currentViewport.$tooltip.hide();
+                }
                 this.$tooltip.show()
                 currentViewport = this
             } else {
@@ -142,7 +144,11 @@ class RulerViewport extends ViewPort {
 
             // hide tooltip when movement stops
             clearTimeout(timer)
-            timer = setTimeout(() => this.$tooltip.hide(),toolTipTimeout)
+            timer = setTimeout(() => {
+                if (this.$tooltip) {
+                    this.$tooltip.hide()
+                }
+            }, toolTipTimeout)
 
         }
 
