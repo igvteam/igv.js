@@ -70,9 +70,14 @@ const GenomeUtils = {
                     processJson(jsonArray);
                 } catch (e) {
                     console.error(e);
-                    const url = BACKUP_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`;  // prevent caching
-                    const jsonArray = await igvxhr.loadJson(url, {});
-                    processJson(jsonArray);
+                    try {
+                        const url = BACKUP_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`;  // prevent caching
+                        const jsonArray = await igvxhr.loadJson(url, {});
+                        processJson(jsonArray);
+                    } catch (e) {
+                        console.error(e);
+                        console.warn("Errors loading default genome definitions.")
+                    }
                 }
             }
 
