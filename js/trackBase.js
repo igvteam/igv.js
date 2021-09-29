@@ -257,8 +257,11 @@ class TrackBase {
                         tracklineConfg[key] = UCSCTypeMappings.get(v);
                     }
                     break;
+                case "graphtype":
+                    tracklineConfg["graphType"] = properties[key];
+                    break;
                 default:
-                // No default action, only copy recognized properties
+                    tracklineConfg[key] = properties[key];
             }
         }
 
