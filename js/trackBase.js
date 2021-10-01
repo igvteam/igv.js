@@ -89,6 +89,8 @@ class TrackBase {
 
         this.visibilityWindow = config.visibilityWindow
 
+        this.panContinuousUpdate = (config.panContinuousUpdate === undefined) ? true : config.panContinuousUpdate;
+
         this.trackView = undefined
     }
 

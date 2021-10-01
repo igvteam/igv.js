@@ -373,6 +373,7 @@ class TrackView {
      * Update viewports to reflect current genomic state, possibly loading additional data.
      */
     async updateViews(force) {
+        const isDragging = this.browser.dragObject;
 
         if (!(this.browser && this.browser.referenceFrameList)) return;
 
@@ -381,36 +382,39 @@ class TrackView {
         // Shift viewports left/right to current genomic state (pans canvas)
         visibleViewports.forEach(viewport => viewport.shift());
 
-        // rpv: viewports whose image (canvas) does not fully cover current genomic range
         const reloadableViewports = this.viewportsToReload(force);
 
-        // Trigger viewport to load features needed to cover current genomic range
-        for (let viewport of reloadableViewports) {
-            await viewport.loadFeatures()
-        }
+        // Do not update data if currently dragging and continuous update disabled
+        if (!isDragging || this.track.panContinuousUpdate){
+            // rpv: viewports whose image (canvas) does not fully cover current genomic range
 
-        // Very special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
-        // section depends on data from all the views.  We only need to adjust this however if any data was loaded
-        // (i.e. reloadableViewports.length > 0)
-        if(typeof this.track.variantRowCount === 'function') {
-            let maxRow = 0;
-            for(let viewport of this.viewports) {
-                if (viewport.tile && viewport.tile.features) {
-                    maxRow = Math.max(maxRow, viewport.tile.features.reduce((a, f) => Math.max(a, f.row || 0), 0));
-                }
+            // Trigger viewport to load features needed to cover current genomic range
+            for (let viewport of reloadableViewports) {
+                await viewport.loadFeatures()
             }
-            const current = this.track.nVariantRows;
-            if(current !== maxRow + 1) {
-                this.track.variantRowCount(maxRow + 1);
-                for (let viewport of this.viewports) {
-                    viewport.checkContentHeight();
+
+            // Very special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
+            // section depends on data from all the views.  We only need to adjust this however if any data was loaded
+            // (i.e. reloadableViewports.length > 0)
+            if(typeof this.track.variantRowCount === 'function') {
+                let maxRow = 0;
+                for(let viewport of this.viewports) {
+                    if (viewport.tile && viewport.tile.features) {
+                        maxRow = Math.max(maxRow, viewport.tile.features.reduce((a, f) => Math.max(a, f.row || 0), 0));
+                    }
+                }
+                const current = this.track.nVariantRows;
+                if(current !== maxRow + 1) {
+                    this.track.variantRowCount(maxRow + 1);
+                    for (let viewport of this.viewports) {
+                        viewport.checkContentHeight();
+                    }
                 }
             }
         }
 
         if (this.disposed) return;   // Track was removed during load
 
-        const isDragging = this.browser.dragObject;
         if (!isDragging && this.track.autoscale) {
             let allFeatures = [];
             for (let visibleViewport of visibleViewports) {
