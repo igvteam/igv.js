@@ -382,11 +382,11 @@ class TrackView {
         // Shift viewports left/right to current genomic state (pans canvas)
         visibleViewports.forEach(viewport => viewport.shift());
 
+        // rpv: viewports whose image (canvas) does not fully cover current genomic range
         const reloadableViewports = this.viewportsToReload(force);
 
         // Do not update data if currently dragging and continuous update disabled
         if (!isDragging || this.track.panContinuousUpdate){
-            // rpv: viewports whose image (canvas) does not fully cover current genomic range
 
             // Trigger viewport to load features needed to cover current genomic range
             for (let viewport of reloadableViewports) {
@@ -442,7 +442,7 @@ class TrackView {
             for (let visibleViewport of visibleViewports) {
                 visibleViewport.repaint();
             }
-        } else {
+        } else if (!isDragging || this.track.panContinuousUpdate) {
             for (let vp of reloadableViewports) {
                 vp.repaint();
             }
