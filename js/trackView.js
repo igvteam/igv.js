@@ -699,13 +699,11 @@ class TrackView {
 
             function documentTrackDragMouseUpHandler(event) {
 
-                event.preventDefault();
+                // console.log(`${ Date.now() } TrackView - documentTrackDragMouseUpHandler - target ${ event.target.nodeName }`)
 
                 browser.endTrackDrag()
 
-                let str = ''
                 if (currentDragHandle && event.target !== currentDragHandle) {
-                    str = ' - remove hover style'
                     currentDragHandle.classList.remove('igv-track-drag-handle-hover')
                 }
 
