@@ -138,6 +138,12 @@ class AlignmentContainer {
         this.packedAlignmentRows = packAlignmentRows(alignments, this.start, this.end, bool);
     }
 
+    repack(bpPerPixel, showSoftClips) {
+        const alignments = this.allAlignments();
+        this.packedAlignmentRows = packAlignmentRows(alignments, this.start, this.end, showSoftClips, bpPerPixel);
+
+    }
+
     allAlignments() {
         const alignments = [];
         for (let row of this.packedAlignmentRows) {

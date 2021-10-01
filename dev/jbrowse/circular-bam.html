@@ -11,7 +11,6 @@
                 crossorigin="anonymous"></script>-->
     <script
             src = "https://s3.amazonaws.com/jbrowse.org/jb2_releases/react-circular-genome-view/react-circular-genome-view%40v1.4.5-beta.0/react-circular-genome-view.umd.development.js"
-<!--            src="https://s3.amazonaws.com/jbrowse.org/jb2_releases/react-circular-genome-view/react-circular-genome-view%40v1.3.2/react-circular-genome-view.umd.development.js"-->
             crossorigin=""
     ></script>
     <!--    <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
@@ -39,10 +38,30 @@
             //locus: "chr17:64,040,802-64,045,633",
             tracks: [
                 {
-                    name: "sniffles translocations",
+                    id: 'bedpe-track',
+                    name: "SKBR3 translocations",
                     url: "SKBR3_Sniffles_variants_tra.bedpe",
-                    height: 400,
-                    color: "rgb(0,150,150)"
+                    color: "rgb(0,150,150)",
+                    height: 300,
+                    onclick: (features, e) => {
+                        if (e.shiftKey) {
+                            if (features) {
+                                sendBedPEChords(features);
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                },
+                {
+                    name: "Coverage",
+                    type: "wig",
+                    format: "tdf",
+                    max: 300,
+                    color: "rgb(80,80,80)",
+                    url: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.tdf"
+
                 },
                 // {
                 //     name: "sniffles deletions",
@@ -78,29 +97,29 @@
                 //     height: 40
                 // },
 
-                // {
-                //     // url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam",
-                //     // indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam.bai",
-                //     url: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
-                //     indexURL: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
-                //     type: "alignment",
-                //     format: "bam",
-                //     name: "Alignments",
-                //     showMismatches: false,
-                //     height: 500,
-                //     maxFragmentLength: 1000000,  // 1 mb -- only interested in large deletions
-                //     colorBy: "fragmentLength",
-                //     onclick: (features, e) => {
-                //         if(e.shiftKey) {
-                //             if (features) {
-                //                 sendPairedAlignmentChord(features);
-                //             }
-                //             return true;
-                //         } else {
-                //             return false;
-                //         }
-                //     }
-                // }
+                {
+                    // url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam",
+                    // indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam.bai",
+                    url: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
+                    indexURL: "../../Downloads/skbr3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
+                    type: "alignment",
+                    format: "bam",
+                    name: "Alignments",
+                    showMismatches: false,
+                    height: 500,
+                    maxFragmentLength: 1000000,  // 1 mb -- only interested in large deletions
+                    colorBy: "fragmentLength",
+                    onclick: (features, e) => {
+                        if (e.shiftKey) {
+                            if (features) {
+                                sendPairedAlignmentChord(features);
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
             ]
         };
 
@@ -119,6 +138,30 @@
             browser.circularView = circularView;
 
 
+            document.addEventListener('keydown', logKey);
+
+            function logKey(e) {
+                switch (e.key) {
+                    case '1' :
+                        circularView.clearChords();
+                        break;
+                    case '2':
+                        for(let t of browser.findTracks('id', 'bedpe-track')) {
+                            t.height = 30;
+                            t.trackView.setTrackHeight(30, true);
+                            t.trackView.checkContentHeight();
+                            t.trackView.repaintViews();
+
+                           for(let tv of browser.trackViews) {
+                               if (typeof tv.track.paintAxis === 'function') {
+                                   tv.paintAxis();
+                               }
+                           }
+                        }
+                        break;
+                }
+            }
+
 
         })
 
@@ -127,6 +170,9 @@
         circularView.selectAlignmentChord(features[0]);
     }
 
+    function sendBedPEChords(features) {
+        circularView.addBedPEChords(features);
+    }
 
 </script>
 
