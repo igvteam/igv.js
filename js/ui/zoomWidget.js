@@ -59,6 +59,9 @@ const ZoomWidget = function (browser, parent) {
 
     this.slider.addEventListener('change', e => {
 
+        e.preventDefault()
+        e.stopPropagation()
+
         const referenceFrame = browser.referenceFrameList[ 0 ]
         const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
         const { end, start } = referenceFrame
