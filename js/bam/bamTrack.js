@@ -718,10 +718,13 @@ class AlignmentTrack {
         const bpStart = options.bpStart
         const pixelWidth = options.pixelWidth
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        const packedAlignmentRows = alignmentContainer.packedAlignmentRows
         const showSoftClips = this.parent.showSoftClips;
         const showAllBases = this.parent.showAllBases;
         const nucleotideColors = this.browser.nucleotideColors;
+
+        //alignmentContainer.repack(bpPerPixel, showSoftClips);
+        const packedAlignmentRows = alignmentContainer.packedAlignmentRows
+
 
         ctx.save();
 
@@ -897,7 +900,11 @@ class AlignmentTrack {
                 const blockStartPixel = (block.start - bpStart) / bpPerPixel;
                 const blockEndPixel = ((block.start + block.len) - bpStart) / bpPerPixel;
                 const blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel);
-                const arrowHeadWidthPixel = alignmentRowHeight / 2.0;
+
+                //const arrowHeadWidthPixel = alignmentRowHeight / 2.0;
+                const nomPixelWidthOnRef = 100 / bpPerPixel;
+                const arrowHeadWidthPixel = Math.min(alignmentRowHeight / 2.0,  nomPixelWidthOnRef / 6);
+
                 const isSoftClip = 'S' === block.type;
 
                 const strokeOutline =
