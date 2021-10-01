@@ -101,6 +101,8 @@ class RulerSweeper {
 
         function documentMouseMoveHandler(event) {
 
+            // console.log(`${ Date.now() } RulerSweeper - documentMouseMoveHandler - target ${ event.target.nodeName }`)
+
             let mouseCurrentX;
 
             if (isMouseDown && isMouseIn) {
@@ -126,6 +128,8 @@ class RulerSweeper {
         document.addEventListener('mouseup', this.boundDocumentMouseUpHandler)
 
         function documentMouseUpHandler(event) {
+
+            // console.log(`${ Date.now() } RulerSweeper - documentMouseUpHandler - target ${ event.target.nodeName }`)
 
             let extent;
 
