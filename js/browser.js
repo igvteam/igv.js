@@ -307,7 +307,7 @@ class Browser {
      * Render browse display as SVG
      * @returns {string}
      */
-    async toSVG() {
+    toSVG() {
 
         let {x, y, width, height} = this.columnContainer.getBoundingClientRect();
 
@@ -345,10 +345,10 @@ class Browser {
 
         return context.getSerializedSvg(true);
 
-    };
+    }
 
     async renderSVG($container) {
-        const svg = await this.toSVG()
+        const svg = this.toSVG()
         $container.empty()
         $container.append(svg)
 
@@ -357,7 +357,7 @@ class Browser {
 
     async saveSVGtoFile(config) {
 
-        let svg = await this.toSVG()
+        let svg = this.toSVG()
 
         if (config.$container) {
             config.$container.empty()
