@@ -551,7 +551,10 @@ class Browser {
         if (!locusFound) {
             console.log("Initial locus not found: " + locus);
             locus = genome.getHomeChromosomeName()
-            await this.search(locus);
+            const locusFound = await this.search(locus, true);
+            if (!locusFound) {
+                throw new Error("Cannot set initial locus");
+            }
         }
     }
 
