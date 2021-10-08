@@ -10,20 +10,6 @@
 <body>
 
 <h4>This example illustrates embedding copy number segments directly as objects in lieu of supplying a url.</h4>
-Track configuration:
-<pre>
-
-{
-  name: "Copy number",
-  type: "seg",
-  displayMode: "EXPANDED",
-  features: [
-    {"chr": "1", "start": 3218610, "end": 4749076, "value": -0.2239, "sample": "TCGA-OR-A5J2-01"},
-    {"chr": "1", "start": 4750119, "end": 11347492, "value": -0.8391,  "sample": "TCGA-OR-A5J2-01"}
-  ]
-}
-
-</pre>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -59,6 +45,48 @@ Track configuration:
                             }
                         ]
                     },
+                    {
+                        name: "Annotations",
+                        type: "annotation",
+                        displayMode: "EXPANDED",
+                        features: [
+                            {
+                                "chr": "1",
+                                "start": 3218610,
+                                "end": 4749076,
+                                "value": -0.2239,
+                                "color": "blue",
+                                "name": "Blue"
+                            },
+                            {
+                                "chr": "1",
+                                "start": 4750119,
+                                "end": 11347492,
+                                "value": -0.8391,
+                                "color": "green",
+                                "name": "Green"
+                            }
+                        ]
+                    },
+                    {
+                        name: "Wig",
+                        type: "wig",
+                        displayMode: "EXPANDED",
+                        features: [
+                            {
+                                "chr": "1",
+                                "start": 3218610,
+                                "end": 4749076,
+                                "value": -0.2239
+                            },
+                            {
+                                "chr": "1",
+                                "start": 4750119,
+                                "end": 11347492,
+                                "value": -0.8391
+                            }
+                        ]
+                    },
                 ]
         }
 
@@ -70,6 +98,78 @@ Track configuration:
 
 
 </script>
+
+<h4>Tracks configuration:</h4>
+<pre>
+
+           tracks:
+                [
+                    {
+                        name: "Copy number",
+                        type: "seg",
+                        displayMode: "EXPANDED",
+                        features: [
+                            {
+                                "chr": "1",
+                                "start": 3218610,
+                                "end": 4749076,
+                                "value": -0.2239,
+                                "sample": "TCGA-OR-A5J2-01"
+                            },
+                            {
+                                "chr": "1",
+                                "start": 4750119,
+                                "end": 11347492,
+                                "value": -0.8391,
+                                "sample": "TCGA-OR-A5J2-01"
+                            }
+                        ]
+                    },
+                    {
+                        name: "Annotations",
+                        type: "annotation",
+                        displayMode: "EXPANDED",
+                        features: [
+                            {
+                                "chr": "1",
+                                "start": 3218610,
+                                "end": 4749076,
+                                "value": -0.2239,
+                                "color": "blue",
+                                "name": "Blue"
+                            },
+                            {
+                                "chr": "1",
+                                "start": 4750119,
+                                "end": 11347492,
+                                "value": -0.8391,
+                                "color": "green",
+                                "name": "Green"
+                            }
+                        ]
+                    },
+                    {
+                        name: "Wig",
+                        type: "wig",
+                        displayMode: "EXPANDED",
+                        features: [
+                            {
+                                "chr": "1",
+                                "start": 3218610,
+                                "end": 4749076,
+                                "value": -0.2239
+                            },
+                            {
+                                "chr": "1",
+                                "start": 4750119,
+                                "end": 11347492,
+                                "value": -0.8391
+                            }
+                        ]
+                    },
+                ]
+
+</pre>
 
 </body>
 
