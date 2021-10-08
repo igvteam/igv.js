@@ -307,7 +307,7 @@ class Browser {
      * Render browse display as SVG
      * @returns {string}
      */
-    async toSVG() {
+    toSVG() {
 
         let {x, y, width, height} = this.columnContainer.getBoundingClientRect();
 
@@ -345,19 +345,19 @@ class Browser {
 
         return context.getSerializedSvg(true);
 
-    };
+    }
 
-    async renderSVG($container) {
-        const svg = await this.toSVG()
+    renderSVG($container) {
+        const svg = this.toSVG()
         $container.empty()
         $container.append(svg)
 
         return svg
     }
 
-    async saveSVGtoFile(config) {
+    saveSVGtoFile(config) {
 
-        let svg = await this.toSVG()
+        let svg = this.toSVG()
 
         if (config.$container) {
             config.$container.empty()
@@ -460,8 +460,8 @@ class Browser {
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
         if (false !== session.showIdeogram) {
-             this.trackViews.push(new TrackView(this, this.columnContainer, new IdeogramTrack(this)))
-         }
+            this.trackViews.push(new TrackView(this, this.columnContainer, new IdeogramTrack(this)))
+        }
 
         if (false !== session.showRuler) {
             this.trackViews.push(new TrackView(this, this.columnContainer, new RulerTrack(this)))
@@ -723,8 +723,8 @@ class Browser {
     }
 
     getRulerTrackView() {
-        const list = this.trackViews.filter(({ track }) => 'ruler'  === track.id)
-        return list.length > 0 ? list[ 0 ] : undefined
+        const list = this.trackViews.filter(({track}) => 'ruler' === track.id)
+        return list.length > 0 ? list[0] : undefined
     }
 
     /**
@@ -1409,7 +1409,7 @@ class Browser {
         } else {
             // Remove specific event handler
             const handlers = this.eventHandlers[eventName];
-            if(!handlers || handlers.length === 0) {
+            if (!handlers || handlers.length === 0) {
                 console.warn("No handlers to remove for event: " + eventName);
             } else {
                 const callbackIndex = handlers.indexOf(fn);
@@ -1466,7 +1466,7 @@ class Browser {
         const locus = [];
         const gtexSelections = {};
         let anyTrackView = this.trackViews[0];
-        for (let { referenceFrame } of anyTrackView.viewports) {
+        for (let {referenceFrame} of anyTrackView.viewports) {
             const locusString = referenceFrame.getLocusString();
             locus.push(locusString);
             if (referenceFrame.selection) {
@@ -1547,7 +1547,7 @@ class Browser {
     currentLoci() {
         const loci = [];
         const anyTrackView = this.trackViews[0];
-        for (let { referenceFrame } of anyTrackView.viewports) {
+        for (let {referenceFrame} of anyTrackView.viewports) {
             const locusString = referenceFrame.getLocusString();
             loci.push(locusString);
         }
@@ -1673,6 +1673,7 @@ class Browser {
     addWindowResizeHandler() {
         this.boundWindowResizeHandler = windowResizeHandler.bind(this)
         window.addEventListener('resize', this.boundWindowResizeHandler)
+
         function windowResizeHandler() {
             this.resize()
         }
@@ -1756,11 +1757,11 @@ function handleMouseMove(e) {
 
     e.preventDefault();
 
-    const { x, y } = DOMUtils.pageCoordinates(e);
+    const {x, y} = DOMUtils.pageCoordinates(e);
 
     if (this.vpMouseDown) {
 
-        const { viewport, referenceFrame } = this.vpMouseDown;
+        const {viewport, referenceFrame} = this.vpMouseDown;
 
         // Determine direction,  true == horizontal
         const horizontal = Math.abs((x - this.vpMouseDown.mouseDownX)) > Math.abs((y - this.vpMouseDown.mouseDownY));
@@ -1768,7 +1769,7 @@ function handleMouseMove(e) {
         if (!this.dragObject && !this.isScrolling) {
             if (horizontal) {
                 if (this.vpMouseDown.mouseDownX && Math.abs(x - this.vpMouseDown.mouseDownX) > this.constants.dragThreshold) {
-                    this.dragObject = { viewport, start: referenceFrame.start };
+                    this.dragObject = {viewport, start: referenceFrame.start};
                 }
             } else {
                 if (this.vpMouseDown.mouseDownY &&
