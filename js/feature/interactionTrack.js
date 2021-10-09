@@ -275,8 +275,6 @@ class InteractionTrack extends TrackBase {
 
             for (let feature of featureList) {
 
-                ctx.save();
-
                 const value = this.valueColumn ? feature[this.valueColumn] : feature.score;
                 if (value === undefined || Number.isNaN(value)) continue;
 
@@ -324,7 +322,6 @@ class InteractionTrack extends TrackBase {
                         ctx.fillStyle = alphaColor;
                         ctx.fill();
                     }
-                    ctx.restore();
 
                     feature.drawState = {xc, yc: y, radiusX, radiusY};
                 } else {
