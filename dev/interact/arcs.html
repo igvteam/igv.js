@@ -88,7 +88,7 @@
 
             document.getElementById("svgButton").addEventListener("click", () => {
                 let svg = browser.toSVG();
-                const path = 'tracks-hg38.svg';
+                const path = 'arcs.svg';
                 const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
                 download(path, data);
             })
