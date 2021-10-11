@@ -135,9 +135,6 @@ class EqtlTrack extends TrackBase {
         }
         IGVGraphics.strokeLine(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
-
-        ctx.save();
-
         const drawEqtls = (drawSelected) => {
 
             const radius = drawSelected ? 2 * this.dotSize : this.dotSize;
@@ -196,14 +193,10 @@ class EqtlTrack extends TrackBase {
                 }
             }
         }
-
-
+        
         // Draw in two passes, with "selected" eqtls drawn last
         drawEqtls(false);
         drawEqtls(true);
-
-        ctx.restore();
-
 
     }
 
