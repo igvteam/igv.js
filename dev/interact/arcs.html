@@ -22,6 +22,7 @@
 <p>
     <button id="bookmarkButton">Bookmark</button>
     <button id="sessionButton">Session JSON</button>
+    <button id="svgButton">Save SVG</button>
 </p>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
@@ -84,7 +85,25 @@
 
             document.getElementById("bookmarkButton").addEventListener("click",
                 () => window.history.pushState({}, "IGV", browser.sessionURL()))
+
+            document.getElementById("svgButton").addEventListener("click", () => {
+                let svg = browser.toSVG();
+                const path = 'tracks-hg38.svg';
+                const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
+                download(path, data);
+            })
         })
+
+    function download  (filename, data) {
+
+        const element = document.createElement('a');
+        element.setAttribute('href', data);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
 
 
 </script>
