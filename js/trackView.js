@@ -391,6 +391,7 @@ class TrackView {
         const reloadableViewports = this.viewportsToReload(force);
 
         // Trigger viewport to load features needed to cover current genomic range
+        // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
         for (let viewport of reloadableViewports) {
             await viewport.loadFeatures()
         }
