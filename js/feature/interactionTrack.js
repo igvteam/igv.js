@@ -32,6 +32,8 @@ import MenuUtils from "../ui/menuUtils.js";
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
+import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
+
 
 
 class InteractionTrack extends TrackBase {
@@ -260,6 +262,12 @@ class InteractionTrack extends TrackBase {
         const bpPerPixel = options.bpPerPixel;
         const bpStart = options.bpStart;
         const xScale = bpPerPixel;
+
+        // SVG output for proportional arcs are currently not supported because "ellipse" is not implemented
+        if(typeof ctx.ellipse !== 'function') {
+            Alert.presentAlert("SVG output of proportional arcs is currently not supported.")
+            return;
+        }
 
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
