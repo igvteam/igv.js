@@ -517,7 +517,7 @@ ctx.prototype.getSvg = function () {
 ctx.prototype.saveWithTranslationAndClipRect = function (id, tx, ty, width, height, clipYOffset) {
 
     // clip rect
-    const clip_id = `${ id }_clip_rect`;
+    const clip_id = `${id}_clip_rect`;
     let clipPath = this.__createElement('clipPath', {id: clip_id});
 
     this.__defs.appendChild(clipPath);
@@ -889,11 +889,11 @@ ctx.prototype.rect = function (x, y, width, height) {
  */
 ctx.prototype.fillRect = function (x, y, width, height) {
 
-    if(height < 0) {
+    if (height < 0) {
         y += height;
         height = -height;
     }
-    if(width < 0) {
+    if (width < 0) {
         x += width;
         width = -width;
     }
@@ -1179,6 +1179,14 @@ ctx.prototype.arc = function (x, y, radius, startAngle, endAngle, counterClockwi
 
     this.__currentPosition = {x: endX, y: endY};
 };
+
+/**
+ * The ellipse() method creates an elliptical arc centered at (x, y) with the radii radiusX and radiusY. The path
+ * starts at startAngle and ends at endAngle, and travels in the direction given by counterclockwise (defaulting to clockwise).
+ */
+// ctx.prototype.ellipse = function (x, y, radiusX, radiusY, rotation, startAngle, endAngle, counterclockwise) {
+//     // TODO -- implement
+// }
 
 /**
  * Generates a ClipPath from the clip command.
