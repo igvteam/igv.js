@@ -135,10 +135,10 @@ class TrackViewport extends Viewport {
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
-        const pixelWidth = this.$content.width() * 3;
+        const pixelWidth = this.$content.width();// * 3;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
-        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
-        const bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
+        const bpStart = Math.floor(Math.max(0, referenceFrame.start -  bpWidth ));
+        const bpEnd = Math.ceil(Math.min(chrLength, referenceFrame.start + bpWidth +  bpWidth));  // Add one screen width to end
 
         if (this.loading && this.loading.start === bpStart && this.loading.end === bpEnd) {
             return undefined;
@@ -146,7 +146,6 @@ class TrackViewport extends Viewport {
         this.loading = {start: bpStart, end: bpEnd};
         this.startSpinner();
 
-        // console.log('get features');
         try {
             const features = await this.getFeatures(this.trackView.track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel);
             let roiFeatures = [];
