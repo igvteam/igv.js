@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="https://igv.org/web/https://igv.org/web/img/favicon.ico" rel="shortcut icon">
+
+    <title>hg19 test</title>
+
+</head>
+
+<body>
+
+<p>
+
+
+<h1>Test tracks</h1>
+
+<p>
+    <b>Look for console errors and compare with
+        <a target="_blank" href="https://drive.google.com/file/d/1E7SkKtPHgDqnlXYm2DEWOGBsbSAIBnaD/view?usp=sharing">tracks-hg19.png</a>
+    </b>
+</p>
+<p>
+    <button id="bookmarkButton">Bookmark</button>
+    <button id="sessionButton">Session JSON</button>
+    <button id="svgButton">Save SVG</button>
+</p>
+
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const options = {
+        "genome": "hg19",
+        "locus": "myc",
+        "tracks": [
+            {
+                "type": "sequence",
+                "order": -1.7976931348623157e+308
+            },
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF000ATR/@@download/ENCFF000ATR.bigWig",
+                "color": "#018448",
+                "name": "GM12878 H3K4me3  signal ENCSR000AKA",
+                "format": "bigwig",
+                "type": "wig",
+                "height": 50,
+                "autoscaleGroup": "1",
+                "order": 4
+            },
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF000AST/@@download/ENCFF000AST.bigWig",
+                "color": "#891100",
+                "name": "GM12878 H3K27me3  signal ENCSR000AKD",
+                "format": "bigwig",
+                "type": "wig",
+                "height": 50,
+                "autoscaleGroup": "1",
+                "order": 4
+            },
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF000ATA/@@download/ENCFF000ATA.bigWig",
+                "color": "rgb(150,150,150)",
+                "name": "GM12878 H3K36me3  signal ENCSR000AKE",
+                "format": "bigwig",
+                "type": "wig",
+                "height": 50,
+                "autoscaleGroup": "1",
+                "order": 5
+            }
+        ]
+    }
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+
+            console.log("Created IGV browser");
+
+            document.getElementById("sessionButton").addEventListener("click", () => {
+                try {
+                    const json = browser.toJSON();
+                    console.log(json);
+                    const jsonString = JSON.stringify(json, null, '\t');
+                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}));
+                    download("session.json", data);
+                } catch (e) {
+                    alert(e);
+                }
+            })
+
+            document.getElementById("bookmarkButton").addEventListener("click",
+                () => window.history.pushState({}, "IGV", browser.sessionURL()))
+
+            document.getElementById("svgButton").addEventListener("click", () => {
+                let svg = browser.toSVG();
+                const path = 'tracks-hg19.svg';
+                const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
+                download(path, data);
+            })
+
+        })
+
+    function download(filename, data) {
+
+        const element = document.createElement('a');
+        element.setAttribute('href', data);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+
+</script>
+
+</body>
+
+</html>
