@@ -1136,18 +1136,21 @@ class Browser {
                     }
                     dataRange = doAutoscale(allFeatures);
 
+                    const p = [];
                     for (let trackView of groupTrackViews) {
                         trackView.track.dataRange = dataRange;
                         trackView.track.autoscale = false;
-                        await trackView.updateViews(force);
+                        p.push(trackView.updateViews(force));
                     }
+                    await Promise.all(p);
                 }
 
             }
 
-            for (let trackView of otherTracks) {
-                await trackView.updateViews(force);
-            }
+            await Promise.all(otherTracks.map(tv => tv.updateViews(force)));
+            // for (let trackView of otherTracks) {
+            //     await trackView.updateViews(force);
+            // }
         }
 
     }
