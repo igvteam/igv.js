@@ -381,6 +381,12 @@ class TrackView {
         // Shift viewports left/right to current genomic state (pans canvas)
         visibleViewports.forEach(viewport => viewport.shift());
 
+        const isDragging = this.browser.dragObject;
+
+        if (isDragging) {
+            return;
+        }
+
         // rpv: viewports whose image (canvas) does not fully cover current genomic range
         const reloadableViewports = this.viewportsToReload(force);
 
@@ -392,7 +398,7 @@ class TrackView {
         // Very special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
         // section depends on data from all the views.  We only need to adjust this however if any data was loaded
         // (i.e. reloadableViewports.length > 0)
-        if(typeof this.track.variantRowCount === 'function') {
+        if (typeof this.track.variantRowCount === 'function' && reloadableViewports.length > 0) {
             let maxRow = 0;
             for(let viewport of this.viewports) {
                 if (viewport.tile && viewport.tile.features) {
@@ -410,8 +416,7 @@ class TrackView {
 
         if (this.disposed) return;   // Track was removed during load
 
-        const isDragging = this.browser.dragObject;
-        if (!isDragging && this.track.autoscale) {
+        if (this.track.autoscale) {
             let allFeatures = [];
             for (let visibleViewport of visibleViewports) {
                 const referenceFrame = visibleViewport.referenceFrame;
