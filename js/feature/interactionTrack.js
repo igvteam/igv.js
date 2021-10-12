@@ -146,7 +146,7 @@ class InteractionTrack extends TrackBase {
             const y = this.arcOrientation ? options.pixelHeight : 0;
             const direction = this.arcOrientation;
 
-            ctx.font = "8px";
+            ctx.font = "8px sans-serif";
             ctx.textAlign = "center";
 
             for (let feature of featureList) {
