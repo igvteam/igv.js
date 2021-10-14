@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>Searchable GFF</h1>
+<p>
+    Illustrates searching for a feature in a GFF track from a column 9 field.  Search for
+<pre>MYC+proto-oncogene,+bHLH+transcription+factor,+transcript+variant+1</pre>
+</p>
+<p>
+    Track configuration:
+    <pre>
+    {
+      name: "NCBI gff",
+      url: "../../test/data/gff/NCBI_hg38_MYC.gff",
+      format: "gff",
+      indexed: false,
+      searchable: true,
+      searchableFields: ["product"]
+    }
+</pre>
+</p>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg38",
+            tracks:
+                [
+                    {
+                        name: "NCBI gff",
+                        url: "../../test/data/gff/NCBI_hg38_MYC.gff",
+                        format: "gff",
+                        indexed: false,
+                        searchable: true,
+                        searchableFields: ["product"]
+                    }
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
