@@ -141,7 +141,7 @@ class Browser {
 
         this.trackLabelsVisible = config.showTrackLabels;
 
-        this.isCenterLineVisible = config.showCenterLine;
+        this.isCenterLineVisible = config.showCenterGuide;
 
         this.cursorGuideVisible = config.showCursorTrackingGuide;
 
