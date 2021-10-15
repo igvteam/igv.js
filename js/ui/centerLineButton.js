@@ -19,7 +19,7 @@ class CenterLineButton {
 
         this.setButtonState(browser.isCenterLineVisible)
 
-        if (browser.config.showCenterLineButton) {
+        if (browser.config.showCenterGuideButton) {
             this.show()
         } else {
             this.hide()
