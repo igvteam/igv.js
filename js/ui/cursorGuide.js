@@ -55,14 +55,12 @@ class CursorGuide {
             this.horizontalGuide.style.top = `${ y }px`
 
             const target = document.elementFromPoint(event.clientX, event.clientY)
-            const parent = target.parentElement
 
             let viewport = undefined;
-
-            if (parent.classList.contains('igv-viewport-content')) {
-                viewport = parent.parentElement
-            } else if (parent.classList.contains('igv-viewport') && target.classList.contains('igv-viewport-content')) {
-                viewport = parent
+            if (target.parentElement.classList.contains('igv-viewport-content')) {
+                viewport = target.parentElement.parentElement
+            } else if (target.parentElement.classList.contains('igv-viewport') && target.classList.contains('igv-viewport-content')) {
+                viewport = target.parentElement
             }
 
             if (viewport && browser.getRulerTrackView()) {
@@ -79,17 +77,18 @@ class CursorGuide {
                 }
 
                 const rulerViewport = browser.getRulerTrackView().viewports[ index ]
-                rulerViewport.mouseMove(event)
+                const result = rulerViewport.mouseMove(event)
 
-                // if (result) {
-                //
-                //     const { bp, start, end, interpolant } = result;
-                //
-                //     if (this.customMouseHandler) {
-                //         this.customMouseHandler({ bp, start, end, interpolant });
-                //     }
-                //
-                // }
+                if (result) {
+
+                    const { start, bp, end } = result
+                    const interpolant = (bp - start)/(end - start)
+
+                    if (this.customMouseHandler) {
+                        this.customMouseHandler({ start, bp, end, interpolant });
+                    }
+
+                }
 
             }
 
