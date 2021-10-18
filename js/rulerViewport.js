@@ -167,12 +167,12 @@ class RulerViewport extends TrackViewport {
             const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrame.chr));
 
             if (isWholeGenome) {
-                this.$tooltip.hide();
-                return;
+                this.$tooltip.hide()
+                return undefined
             }
 
             const { x } = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
-            const { start, bpPerPixel } = this.referenceFrame
+            const { start, bpPerPixel, end } = this.referenceFrame
             const bp = Math.round(0.5 + start + Math.max(0, x) * bpPerPixel)
 
             this.$tooltipContent.text( StringUtils.numberFormatter(bp) )
@@ -189,6 +189,8 @@ class RulerViewport extends TrackViewport {
                     this.$tooltip.hide()
                 }
             }, toolTipTimeout)
+
+            return { start, bp, end }
 
         }
 
