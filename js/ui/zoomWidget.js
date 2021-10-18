@@ -43,7 +43,8 @@ const ZoomWidget = function (browser, parent) {
     this.zoomContainer.appendChild(this.zoomOutButton)
     this.zoomOutButton.appendChild(Icon.createIcon('minus-circle'))
     this.zoomOutButton.addEventListener('click', () => {
-        browser.zoomWithScaleFactor(2.0)
+        // browser.zoomWithScaleFactor(2.0)
+        browser.zoomOut()
     })
 
     // Range slider
@@ -85,7 +86,8 @@ const ZoomWidget = function (browser, parent) {
     this.zoomContainer.appendChild(this.zoomInButton)
     this.zoomInButton.appendChild(Icon.createIcon('plus-circle'))
     this.zoomInButton.addEventListener('click', () => {
-        browser.zoomWithScaleFactor(0.5)
+        // browser.zoomWithScaleFactor(0.5)
+        browser.zoomIn()
     })
 
     browser.on('locuschange', (referenceFrameList) => {
