@@ -1198,6 +1198,16 @@ class Browser {
         return this.config.minimumBases;
     }
 
+    // Zoom in by a factor of 2, keeping the same center location
+    zoomIn() {
+        this.zoomWithScaleFactor(0.5)
+    };
+
+    // Zoom out by a factor of 2, keeping the same center location if possible
+    zoomOut() {
+        this.zoomWithScaleFactor(2.0)
+    };
+
     async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
 
         const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
