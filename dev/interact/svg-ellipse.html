@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>SVG demo</title>
+
+
+</head>
+
+<body>
+
+<div id="igv-centering-container">
+    <div id='igv-app-container'></div>
+</div>
+
+<div id='igv-draw-svg-button-container'>
+    <button id='igv-draw-svg-button' type="button">
+        <label>Draw SVG</label>
+    </button>
+</div>
+
+<div id="igv-svg-container">
+</div>
+
+</body>
+
+<script type="module">
+
+    import $ from '../../js/vendor/jquery-3.3.1.slim.js'
+    import igv from '../../js'
+
+    (async () => {
+
+        const config =
+            {
+                genome: "hg38",
+                locus: "chr2:65,489,209-65,795,733",
+                tracks:
+                    [
+                        {
+                            url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                            type: "interact",
+                            format: "bedpe",
+                            name: "CTCF PET - proportional",
+                            arcType: "proportional",
+                            color: "rgb(0,200,0)",
+                            logScale: true,
+                            showBlocks: true,
+                            max: 80,
+                            visibilityWindow: 10000000
+                        },
+                        {
+                            url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                            type: "interact",
+                            format: "bedpe",
+                            name: "CTCF PET - nested",
+                            arcType: "nested",
+                            arcOrientation: false,
+                            color: "blue",
+                            showBlocks: true,
+                            alpha: 0.15,
+                            visibilityWindow: 10000000
+                        }
+                    ]
+            };
+
+        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), config)
+
+        $('#igv-draw-svg-button').on('click', () => browser.saveSVGtoFile({ $container: $('#igv-svg-container') }))
+
+
+    })()
+
+</script>
+</html>
