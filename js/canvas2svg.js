@@ -82,7 +82,7 @@ function getDominantBaseline(textBaseline) {
 function normalize(vector) {
     var len = Math.sqrt(vector[0] * vector[0] + vector[1] * vector[1]);
     return [vector[0] / len, vector[1] / len];
-};
+}
 
 
 function intersectRect(rect1, rect2) {
@@ -910,7 +910,7 @@ class ctx {
             x += width;
             width = -width;
         }
-        // See if rect instersects current viewbox
+        // See if rect intersects current viewbox
         var r2 = {
             x: x,
             y: y,
@@ -953,6 +953,32 @@ class ctx {
         this.__applyStyleToCurrentElement("stroke");
     };
 
+    // stroke ellipse
+    strokeEllipse(cx, cy, rx, ry, rotation, startAngle, endAngle, isCCW) {
+        this.__ellipse(cx, cy, rx, ry, rotation, startAngle, endAngle, isCCW, 'stroke')
+    }
+
+    // fill ellipse
+    fillEllipse(cx, cy, rx, ry, rotation, startAngle, endAngle, isCCW) {
+        this.__ellipse(cx, cy, rx, ry, rotation, startAngle, endAngle, isCCW, 'fill')
+    }
+
+    // ellipse helper
+    __ellipse(cx, cy, rx, ry, rotation, startAngle, endAngle, isCCW, style) {
+
+        const config =
+            {
+                cx,
+                cy,
+                rx,
+                ry
+            }
+        const element = this.__createElement('ellipse', config, true)
+        const parent = this.__closestGroupOrSvg()
+        parent.appendChild(element)
+        this.__currentElement = element
+        this.__applyStyleToCurrentElement(style)
+    }
 
     /**
      * Clear entire canvas:
