@@ -264,10 +264,10 @@ class InteractionTrack extends TrackBase {
         const xScale = bpPerPixel;
 
         // SVG output for proportional arcs are currently not supported because "ellipse" is not implemented
-        if(typeof ctx.ellipse !== 'function') {
-            Alert.presentAlert("SVG output of proportional arcs is currently not supported.")
-            return;
-        }
+        // if(typeof ctx.ellipse !== 'function') {
+        //     Alert.presentAlert("SVG output of proportional arcs is currently not supported.")
+        //     return;
+        // }
 
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -310,9 +310,14 @@ class InteractionTrack extends TrackBase {
                     const color = feature.color || this.color;
                     ctx.strokeStyle = color;
                     ctx.lineWidth = feature.thickness || this.thickness || 1;
-                    ctx.beginPath();
-                    ctx.ellipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise);
-                    ctx.stroke();
+
+                    if (true === ctx.isSVG) {
+                        ctx.strokeEllipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise)
+                    } else {
+                        ctx.beginPath()
+                        ctx.ellipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise)
+                        ctx.stroke()
+                    }
 
                     if (this.showBlocks && feature.chr !== 'all') {
                         ctx.fillStyle = color;
@@ -326,9 +331,13 @@ class InteractionTrack extends TrackBase {
                     }
 
                     if (this.alpha) {
-                        const alphaColor = getAlphaColor(color, this.alpha);
-                        ctx.fillStyle = alphaColor;
-                        ctx.fill();
+                        ctx.fillStyle = getAlphaColor(color, this.alpha)
+                        if (true === ctx.isSVG) {
+                            ctx.fillEllipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise)
+                        } else {
+                            ctx.fill()
+                        }
+
                     }
 
                     feature.drawState = {xc, yc: y, radiusX, radiusY};
