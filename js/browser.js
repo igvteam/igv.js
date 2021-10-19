@@ -36,30 +36,22 @@ import {
     URIUtils
 } from "../node_modules/igv-utils/src/index.js";
 import * as TrackUtils from './util/trackUtils.js';
-import TrackView, {igv_axis_column_width, createAxisColumn, maxViewportContentHeight} from "./trackView.js";
-import {createViewport} from "./viewportFactory.js";
+import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
 import ROI from "./roi.js";
-import GtexSelection from "./gtex/gtexSelection.js";
 import XMLSession from "./session/igvXmlSession.js";
-import RulerTrack from "./rulerTrack.js";
 import GenomeUtils from "./genome/genome.js";
 import loadPlinkFile from "./sampleInformation.js";
 import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js";
-import {buildOptions, doAutoscale, getFilename} from "./util/igvUtils.js";
+import {buildOptions, createColumn, doAutoscale, getFilename, createViewport} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
-import IdeogramTrack from "./ideogramTrack.js";
 import {defaultSequenceTrackOrder} from './sequenceTrack.js';
 import version from "./version.js";
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
 import NavbarManager from "./navbarManager.js";
-import {createSampleNameColumn} from './sampleNameViewport.js';
-import TrackScrollbarControl, {igv_scrollbar_outer_width} from "./trackScrollbarControl.js";
-import TrackDragControl, {igv_track_manipulation_handle_width} from "./trackDragControl.js";
-import TrackGearControl, {igv_track_gear_menu_column_width} from "./trackGearControl.js";
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import CursorGuide from "./ui/cursorGuide.js";
@@ -75,7 +67,18 @@ import MenuPopup from "./ui/menuPopup.js";
 import {viewportColumnManager} from './viewportColumnManager.js';
 import GenericColorPicker from './ui/genericColorPicker.js';
 import ViewportCenterLine from './ui/viewportCenterLine.js';
+import IdeogramTrack from "./ideogramTrack.js";
+import RulerTrack from "./rulerTrack.js";
+import GtexSelection from "./gtex/gtexSelection.js";
 
+// css - $igv-scrollbar-outer-width: 14px;
+const igv_scrollbar_outer_width = 14
+
+// css - $igv-track-drag-column-width: 12px;
+const igv_track_manipulation_handle_width = 12
+
+// css - $igv-track-gear-menu-column-width: 28px;
+const igv_track_gear_menu_column_width = 28;
 
 // $igv-column-shim-width: 1px;
 // $igv-column-shim-margin: 2px;
@@ -93,13 +96,13 @@ class Browser {
 
         this.parent = parentDiv;
 
-        this.$root = $('<div>', {class: 'igv-container'});
-        $(parentDiv).append(this.$root);
+        this.root = DOMUtils.div({class: 'igv-container'});
+        parentDiv.appendChild(this.root);
 
-        Alert.init(this.$root.get(0))
+        Alert.init(this.root)
 
         this.columnContainer = DOMUtils.div({class: 'igv-column-container'});
-        this.$root.get(0).appendChild(this.columnContainer);
+        this.root.appendChild(this.columnContainer);
 
         this.menuPopup = new MenuPopup(this.columnContainer);
 
@@ -138,7 +141,7 @@ class Browser {
 
         this.trackLabelsVisible = config.showTrackLabels;
 
-        this.isCenterLineVisible = config.showCenterLine;
+        this.isCenterLineVisible = config.showCenterGuide;
 
         this.cursorGuideVisible = config.showCursorTrackingGuide;
 
@@ -238,7 +241,7 @@ class Browser {
         $navbarRightContainer.append($toggle_button_container);
         this.$toggle_button_container = $toggle_button_container;
 
-        this.cursorGuide = new CursorGuide($(this.columnContainer), this)
+        this.cursorGuide = new CursorGuide(this.columnContainer, this)
 
         this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
 
@@ -260,10 +263,10 @@ class Browser {
             this.$navigation.hide();
         }
 
-        this.inputDialog = new InputDialog(this.$root.get(0));
+        this.inputDialog = new InputDialog(this.root);
         this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
 
-        this.dataRangeDialog = new DataRangeDialog(this.$root);
+        this.dataRangeDialog = new DataRangeDialog($(this.root));
         this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${DOMUtils.guid()}`
 
         this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432})
@@ -304,7 +307,7 @@ class Browser {
      * Render browse display as SVG
      * @returns {string}
      */
-    async toSVG() {
+    toSVG() {
 
         let {x, y, width, height} = this.columnContainer.getBoundingClientRect();
 
@@ -342,19 +345,19 @@ class Browser {
 
         return context.getSerializedSvg(true);
 
-    };
+    }
 
-    async renderSVG($container) {
-        const svg = await this.toSVG()
+    renderSVG($container) {
+        const svg = this.toSVG()
         $container.empty()
         $container.append(svg)
 
         return svg
     }
 
-    async saveSVGtoFile(config) {
+    saveSVGtoFile(config) {
 
-        let svg = await this.toSVG()
+        let svg = this.toSVG()
 
         if (config.$container) {
             config.$container.empty()
@@ -434,40 +437,34 @@ class Browser {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
         }
 
+        // axis column
+        createColumn(this.columnContainer, 'igv-axis-column')
+
+        // SampleName column
+        createColumn(this.columnContainer, 'igv-sample-name-column')
+
+        // Track scrollbar column
+        createColumn(this.columnContainer, 'igv-scrollbar-column')
+
+        // Track drag/reorder column
+        createColumn(this.columnContainer, 'igv-track-drag-column')
+
+        // Track gear column
+        createColumn(this.columnContainer, 'igv-gear-menu-column')
+
         const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome);
-
         await this.loadReference(genomeConfig, session.locus);
-
-        this.axisColumn = createAxisColumn(this.columnContainer)
-
-        viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
-        // Add sample name column
-        this.sampleNameColumn = createSampleNameColumn(this.columnContainer)
-
-        // Add track scrollbar manager
-        this.trackScrollbarControl = new TrackScrollbarControl(this.columnContainer)
-
-        // Add track drag/reorder control
-        this.trackDragControl = new TrackDragControl(this.columnContainer)
-
-        // Add track drag/reorder control
-        this.trackGearControl = new TrackGearControl(this.columnContainer)
-
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
-        if (undefined === this.ideogram && false !== session.showIdeogram) {
-            this.ideogram = new IdeogramTrack(this)
-            this.trackViews.push(new TrackView(this, this.columnContainer, this.ideogram));
-            this.ideogram.trackView.updateViews();
+        if (false !== session.showIdeogram) {
+            this.trackViews.push(new TrackView(this, this.columnContainer, new IdeogramTrack(this)))
         }
 
-        if (undefined === this.rulerTrack && false !== session.showRuler) {
-            this.rulerTrack = new RulerTrack(this);
-            this.trackViews.push(new TrackView(this, this.columnContainer, this.rulerTrack));
-            this.rulerTrack.trackView.updateViews();
+        if (false !== session.showRuler) {
+            this.trackViews.push(new TrackView(this, this.columnContainer, new RulerTrack(this)))
         }
 
         // Restore gtex selections.
@@ -554,56 +551,23 @@ class Browser {
         if (!locusFound) {
             console.log("Initial locus not found: " + locus);
             locus = genome.getHomeChromosomeName()
-            await this.search(locus);
+            const locusFound = await this.search(locus, true);
+            if (!locusFound) {
+                throw new Error("Cannot set initial locus");
+            }
         }
     }
 
     cleanHouseForSession() {
 
-        // empty columns
         for (let trackView of this.trackViews) {
-
-            // empty axis column
-            // empty viewport columns
-            // empty sampleName column
+            // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column
             trackView.removeDOMFromColumnContainer()
-
-            // empty trackScrollbarControl column
-            this.trackScrollbarControl.removeScrollbar(trackView, this.columnContainer)
-
-            // empty trackDragControl column
-            this.trackDragControl.removeDragHandle(trackView)
-
-            // empty trackGearControl column
-            this.trackGearControl.removeGearContainer(trackView)
         }
 
-        // discard columns
-
-        // axis column
-        if (this.axisColumn) this.axisColumn.remove()
-
-        // viewport columns
-        viewportColumnManager.discardAllColumns(this.columnContainer)
-
-        // sample name column
-        if (this.sampleNameColumn) this.sampleNameColumn.remove()
-
-        // scrollbar column
-        if (this.trackScrollbarControl) this.trackScrollbarControl.column.remove()
-
-        // drag column
-        if (this.trackDragControl) this.trackDragControl.column.remove()
-
-        // gear column
-        if (this.trackGearControl) this.trackGearControl.column.remove()
-
-        // discard remaining state
-        if (this.ideogram) this.ideogram.dispose()
-        this.ideogram = undefined
-
-        if (this.rulerTrack) this.rulerTrack.dispose()
-        this.rulerTrack = undefined
+        // discard all columns
+        const elements = this.columnContainer.querySelectorAll('.igv-axis-column, .igv-column-shim, .igv-column, .igv-sample-name-column, .igv-scrollbar-column, .igv-track-drag-column, .igv-gear-menu-column')
+        elements.forEach(column => column.remove())
 
         this.trackViews = []
 
@@ -756,6 +720,11 @@ class Browser {
         for (let tv of this.trackViews) {
             tv.updateViews(true);
         }
+    }
+
+    getRulerTrackView() {
+        const list = this.trackViews.filter(({track}) => 'ruler' === track.id)
+        return list.length > 0 ? list[0] : undefined
     }
 
     /**
@@ -960,7 +929,7 @@ class Browser {
                 $viewport.detach()
             }
 
-            sampleNameViewport.$viewport.detach()
+            sampleNameViewport.viewport.remove()
 
             outerScroll.remove()
             dragHandle.remove()
@@ -972,18 +941,20 @@ class Browser {
 
         for (let {axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
-            this.axisColumn.append(axis)
+            this.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
             for (let i = 0; i < viewportColumns.length; i++) {
                 const {$viewport} = viewports[i]
                 viewportColumns[i].appendChild($viewport.get(0))
             }
 
-            this.sampleNameColumn.appendChild(sampleNameViewport.$viewport.get(0))
+            this.columnContainer.querySelector('.igv-sample-name-column').appendChild(sampleNameViewport.viewport)
 
-            this.trackScrollbarControl.column.appendChild(outerScroll)
-            this.trackDragControl.column.appendChild(dragHandle)
-            this.trackGearControl.column.appendChild(gearContainer)
+            this.columnContainer.querySelector('.igv-scrollbar-column').appendChild(outerScroll)
+
+            this.columnContainer.querySelector('.igv-track-drag-column').appendChild(dragHandle)
+
+            this.columnContainer.querySelector('.igv-gear-menu-column').appendChild(gearContainer)
         }
 
     }
@@ -1165,18 +1136,21 @@ class Browser {
                     }
                     dataRange = doAutoscale(allFeatures);
 
+                    const p = [];
                     for (let trackView of groupTrackViews) {
                         trackView.track.dataRange = dataRange;
                         trackView.track.autoscale = false;
-                        await trackView.updateViews(force);
+                        p.push(trackView.updateViews(force));
                     }
+                    await Promise.all(p);
                 }
 
             }
 
-            for (let trackView of otherTracks) {
-                await trackView.updateViews(force);
-            }
+            await Promise.all(otherTracks.map(tv => tv.updateViews(force)));
+            // for (let trackView of otherTracks) {
+            //     await trackView.updateViews(force);
+            // }
         }
 
     }
@@ -1204,15 +1178,12 @@ class Browser {
     calculateViewportWidth(columnCount) {
 
         let {width} = this.columnContainer.getBoundingClientRect()
-        // console.log(`${ Date.now() }  column-container ${ StringUtils.numberFormatter(width) }  root ${ StringUtils.numberFormatter(this.$root.get(0).clientWidth) } `)
 
         const sampleNameViewportWidth = this.getSampleNameViewportWidth()
 
         width -= igv_axis_column_width + sampleNameViewportWidth + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
 
         width -= column_multi_locus_shim_width * (columnCount - 1)
-
-        // console.log(`${ Date.now() }  column-container ${ width } viewport ${ Math.floor(width/columnCount) } sample-name-viewport ${ sampleNameViewportWidth }`)
 
         return Math.floor(width / columnCount)
     }
@@ -1226,6 +1197,16 @@ class Browser {
     minimumBases() {
         return this.config.minimumBases;
     }
+
+    // Zoom in by a factor of 2, keeping the same center location
+    zoomIn() {
+        this.zoomWithScaleFactor(0.5)
+    };
+
+    // Zoom out by a factor of 2, keeping the same center location if possible
+    zoomOut() {
+        this.zoomWithScaleFactor(2.0)
+    };
 
     async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
 
@@ -1256,7 +1237,7 @@ class Browser {
         const indexRight = 1 + (this.referenceFrameList.indexOf(referenceFrameLeft))
 
         const {$viewport} = this.trackViews[0].viewports[indexLeft]
-        const viewportColumn = viewportColumnManager.insertAfter($viewport.parent())
+        const viewportColumn = viewportColumnManager.insertAfter($viewport.get(0).parentElement)
 
         if (indexRight === this.referenceFrameList.length) {
 
@@ -1281,14 +1262,6 @@ class Browser {
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
         await this.resize();
-
-        // if (this.rulerTrack) {
-        //
-        //     for (let rulerViewport of this.rulerTrack.trackView.viewports) {
-        //         rulerViewport.presentLocusLabel();
-        //     }
-        // }
-
     }
 
     async removeMultiLocusPanel(referenceFrame) {
@@ -1305,8 +1278,8 @@ class Browser {
 
         this.referenceFrameList.splice(index, 1);
 
-        if (1 === this.referenceFrameList.length && this.rulerTrack) {
-            for (let rulerViewport of this.rulerTrack.trackView.viewports) {
+        if (1 === this.referenceFrameList.length && this.getRulerTrackView()) {
+            for (let rulerViewport of this.getRulerTrackView().viewports) {
                 rulerViewport.dismissLocusLabel()
             }
         }
@@ -1420,23 +1393,19 @@ class Browser {
 
             // discard viewport DOM elements
             for (let trackView of this.trackViews) {
-
+                // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column
                 trackView.removeDOMFromColumnContainer()
-
-                this.trackScrollbarControl.removeScrollbar(trackView, this.columnContainer)
-
-                this.trackDragControl.removeDragHandle(trackView)
-
-                this.trackGearControl.removeGearContainer(trackView)
             }
 
-            // discard viewport columns
-            viewportColumnManager.discardAllColumns(this.columnContainer)
+            // discard ONLY viewport columns
+            this.columnContainer.querySelectorAll('.igv-column-shim, .igv-column').forEach(el => el.remove())
 
-            viewportColumnManager.insertBefore($(this.sampleNameColumn), this.referenceFrameList.length)
+            // Insert viewport columns preceding the sample-name column
+            viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-name-column'), this.referenceFrameList.length)
 
             this.centerLineList = this.createCenterLineList(this.columnContainer)
 
+            // Populate the columns
             for (let trackView of this.trackViews) {
                 trackView.addDOMToColumnContainer(this, this.columnContainer, this.referenceFrameList);
             }
@@ -1490,7 +1459,7 @@ class Browser {
         } else {
             // Remove specific event handler
             const handlers = this.eventHandlers[eventName];
-            if(!handlers || handlers.length === 0) {
+            if (!handlers || handlers.length === 0) {
                 console.warn("No handlers to remove for event: " + eventName);
             } else {
                 const callbackIndex = handlers.indexOf(fn);
@@ -1517,13 +1486,10 @@ class Browser {
     }
 
     dispose() {
-
-        $(window).off(this.namespace);
-        $(document).off(this.namespace);
-        this.eventHandlers = undefined;
-        this.trackViews.forEach(function (tv) {
-            tv.dispose();
-        })
+        this.removeMouseHandlers()
+        for (let trackView of this.trackViews) {
+            trackView.dispose()
+        }
     }
 
     toJSON() {
@@ -1550,8 +1516,7 @@ class Browser {
         const locus = [];
         const gtexSelections = {};
         let anyTrackView = this.trackViews[0];
-        for (let viewport of anyTrackView.viewports) {
-            const referenceFrame = viewport.referenceFrame;
+        for (let {referenceFrame} of anyTrackView.viewports) {
             const locusString = referenceFrame.getLocusString();
             locus.push(locusString);
             if (referenceFrame.selection) {
@@ -1632,8 +1597,7 @@ class Browser {
     currentLoci() {
         const loci = [];
         const anyTrackView = this.trackViews[0];
-        for (let viewport of anyTrackView.viewports) {
-            const referenceFrame = viewport.referenceFrame;
+        for (let {referenceFrame} of anyTrackView.viewports) {
             const locusString = referenceFrame.getLocusString();
             loci.push(locusString);
         }
@@ -1653,7 +1617,7 @@ class Browser {
         var coords;
         coords = DOMUtils.pageCoordinates(e);
         this.vpMouseDown = {
-            viewport: viewport,
+            viewport,
             lastMouseX: coords.x,
             mouseDownX: coords.x,
             lastMouseY: coords.y,
@@ -1743,90 +1707,74 @@ class Browser {
      * Mouse handlers to support drag (pan)
      */
     addMouseHandlers() {
+        this.addWindowResizeHandler()
+        this.addRootMouseUpHandler()
+        this.addRootMouseLeaveHandler()
+        this.addColumnContainerEventHandlers()
+    }
 
-        var self = this;
+    removeMouseHandlers() {
+        this.removeWindowResizeHandler()
+        this.removeRootMouseUpHandler()
+        this.removeRootMouseLeaveHandler()
+        this.removeColumnContainerEventHandlers()
+    }
 
-        $(window).on('resize' + this.namespace, () => {
-            this.resize();
-        });
+    addWindowResizeHandler() {
+        this.boundWindowResizeHandler = windowResizeHandler.bind(this)
+        window.addEventListener('resize', this.boundWindowResizeHandler)
 
-        this.$root.on('mouseup', mouseUpOrLeave);
-
-        this.$root.on('mouseleave', mouseUpOrLeave);
-
-        this.columnContainer.addEventListener('mousemove', e => {
-            handleMouseMove(e)
-        })
-
-        this.columnContainer.addEventListener('touchmove', e => {
-            handleMouseMove(e)
-        })
-
-        this.columnContainer.addEventListener('mouseleave', e => {
-            mouseUpOrLeave(e)
-        })
-
-        this.columnContainer.addEventListener('mouseup', e => {
-            mouseUpOrLeave(e)
-        })
-
-        this.columnContainer.addEventListener('touchend', e => {
-            mouseUpOrLeave(e)
-        })
-
-        function handleMouseMove(e) {
-
-            e.preventDefault();
-
-            const {x, y} = DOMUtils.pageCoordinates(e);
-
-            if (self.vpMouseDown) {
-
-                const {viewport, referenceFrame} = self.vpMouseDown;
-
-                // Determine direction,  true == horizontal
-                const horizontal = Math.abs((x - self.vpMouseDown.mouseDownX)) > Math.abs((y - self.vpMouseDown.mouseDownY));
-
-                if (!self.dragObject && !self.isScrolling) {
-                    if (horizontal) {
-                        if (self.vpMouseDown.mouseDownX && Math.abs(x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
-                            self.dragObject = {viewport, start: referenceFrame.start};
-                        }
-                    } else {
-                        if (self.vpMouseDown.mouseDownY &&
-                            Math.abs(y - self.vpMouseDown.mouseDownY) > self.constants.scrollThreshold) {
-                            self.isScrolling = true;
-                            const viewportHeight = viewport.$viewport.height();
-                            const contentHeight = maxViewportContentHeight(viewport.trackView.viewports);
-                            self.vpMouseDown.r = viewportHeight / contentHeight;
-                        }
-                    }
-                }
-
-                if (self.dragObject) {
-                    const viewChanged = referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - x, viewport.$viewport.width());
-                    if (viewChanged) {
-                        self.updateViews();
-                    }
-                    self.fireEvent('trackdrag');
-                }
-
-
-                if (self.isScrolling) {
-                    const delta = self.vpMouseDown.r * (self.vpMouseDown.lastMouseY - y);
-                    viewport.trackView.moveScroller(delta);
-                }
-
-
-                self.vpMouseDown.lastMouseX = x;
-                self.vpMouseDown.lastMouseY = y
-            }
+        function windowResizeHandler() {
+            this.resize()
         }
+    }
 
-        function mouseUpOrLeave(e) {
-            self.cancelTrackPan();
-            self.endTrackDrag();
-        }
+    removeWindowResizeHandler() {
+        window.removeEventListener('resize', this.boundWindowResizeHandler)
+    }
+
+    addRootMouseUpHandler() {
+        this.boundRootMouseUpHandler = mouseUpOrLeave.bind(this)
+        this.root.addEventListener('mouseup', this.boundRootMouseUpHandler)
+    }
+
+    removeRootMouseUpHandler() {
+        this.root.removeEventListener('mouseup', this.boundRootMouseUpHandler)
+    }
+
+    addRootMouseLeaveHandler() {
+        this.boundRootMouseLeaveHandler = mouseUpOrLeave.bind(this)
+        this.root.addEventListener('mouseleave', this.boundRootMouseLeaveHandler)
+    }
+
+    removeRootMouseLeaveHandler() {
+        this.root.removeEventListener('mouseleave', this.boundRootMouseLeaveHandler)
+    }
+
+    addColumnContainerEventHandlers() {
+        this.boundColumnContainerMouseMoveHandler = handleMouseMove.bind(this)
+        this.boundColumnContainerTouchMoveHandler = handleMouseMove.bind(this)
+        this.boundColumnContainerMouseLeaveHandler = mouseUpOrLeave.bind(this)
+        this.boundColumnContainerMouseUpHandler = mouseUpOrLeave.bind(this)
+        this.boundColumnContainerTouchEndHandler = mouseUpOrLeave.bind(this)
+
+        this.columnContainer.addEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
+        this.columnContainer.addEventListener('touchmove', this.boundColumnContainerTouchMoveHandler)
+
+        this.columnContainer.addEventListener('mouseleave', this.boundColumnContainerMouseLeaveHandler)
+
+        this.columnContainer.addEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
+        this.columnContainer.addEventListener('touchend', this.boundColumnContainerTouchEndHandler)
+    }
+
+    removeColumnContainerEventHandlers() {
+        this.columnContainer.removeEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
+        this.columnContainer.removeEventListener('touchmove', this.boundColumnContainerTouchMoveHandler)
+
+        this.columnContainer.removeEventListener('mouseleave', this.boundColumnContainerMouseLeaveHandler)
+
+        this.columnContainer.removeEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
+        this.columnContainer.removeEventListener('touchend', this.boundColumnContainerTouchEndHandler)
     }
 
     async getDriveFileInfo(googleDriveURL) {
@@ -1853,6 +1801,60 @@ class Browser {
         }
     }
 
+}
+
+function handleMouseMove(e) {
+
+    e.preventDefault();
+
+    const {x, y} = DOMUtils.pageCoordinates(e);
+
+    if (this.vpMouseDown) {
+
+        const {viewport, referenceFrame} = this.vpMouseDown;
+
+        // Determine direction,  true == horizontal
+        const horizontal = Math.abs((x - this.vpMouseDown.mouseDownX)) > Math.abs((y - this.vpMouseDown.mouseDownY));
+
+        if (!this.dragObject && !this.isScrolling) {
+            if (horizontal) {
+                if (this.vpMouseDown.mouseDownX && Math.abs(x - this.vpMouseDown.mouseDownX) > this.constants.dragThreshold) {
+                    this.dragObject = {viewport, start: referenceFrame.start};
+                }
+            } else {
+                if (this.vpMouseDown.mouseDownY &&
+                    Math.abs(y - this.vpMouseDown.mouseDownY) > this.constants.scrollThreshold) {
+                    this.isScrolling = true;
+                    const viewportHeight = viewport.$viewport.height();
+                    const contentHeight = maxViewportContentHeight(viewport.trackView.viewports);
+                    this.vpMouseDown.r = viewportHeight / contentHeight;
+                }
+            }
+        }
+
+        if (this.dragObject) {
+            const viewChanged = referenceFrame.shiftPixels(this.vpMouseDown.lastMouseX - x, viewport.$viewport.width());
+            if (viewChanged) {
+                this.updateViews();
+            }
+            this.fireEvent('trackdrag');
+        }
+
+
+        if (this.isScrolling) {
+            const delta = this.vpMouseDown.r * (this.vpMouseDown.lastMouseY - y);
+            viewport.trackView.moveScroller(delta);
+        }
+
+
+        this.vpMouseDown.lastMouseX = x;
+        this.vpMouseDown.lastMouseY = y
+    }
+}
+
+function mouseUpOrLeave(e) {
+    this.cancelTrackPan();
+    this.endTrackDrag();
 }
 
 function getInitialLocus(locus, genome) {

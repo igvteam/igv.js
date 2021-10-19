@@ -87,14 +87,14 @@ async function createBrowser(parentDiv, config) {
 
 function removeBrowser(browser) {
     browser.dispose();
-    browser.$root.remove();
+    browser.root.remove();
     allBrowsers = allBrowsers.filter(item => item !== browser);
 }
 
 function removeAllBrowsers() {
     for (let browser of allBrowsers) {
         browser.dispose();
-        browser.$root.remove();
+        browser.root.remove();
     }
     allBrowsers = [];
 }
@@ -139,12 +139,12 @@ function setDefaults(config) {
         config.showCursorTrackingGuide = false;
     }
 
-    if (undefined === config.showCenterLineButton) {
-        config.showCenterLineButton = true;
+    if (undefined === config.showCenterGuideButton) {
+        config.showCenterGuideButton = true;
     }
 
-    if (undefined === config.showCenterLine) {
-        config.showCenterLine = false;
+    if (undefined === config.showCenterGuide) {
+        config.showCenterGuide = false;
     }
 
     if (undefined === config.showSampleNames) {

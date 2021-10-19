@@ -15,6 +15,10 @@
 
 <h1>Interchromosomal arcs (simulated 10X)</h1>
 
+<p>
+    <button id="svgButton">Save SVG</button>
+</p>
+
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
@@ -26,7 +30,7 @@
             genome: "hg38",
             tracks: [
                 {
-                   url: "../../test/data/bedpe/inter_chr_simulated.bedpe",
+                    url: "../../test/data/bedpe/inter_chr_simulated.bedpe",
                     type: "interact",
                     format: "bedpe",
                     name: "Inter  chr simulated",
@@ -43,7 +47,25 @@
         .then(function (browser) {
             console.log("Created IGV browser");
             window.igvBrowser = browser;
+
+            document.getElementById("svgButton").addEventListener("click", () => {
+                let svg = browser.toSVG();
+                const path = 'bedpe-inter.svg';
+                const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
+                download(path, data);
+            })
         })
+
+    function download  (filename, data) {
+
+        const element = document.createElement('a');
+        element.setAttribute('href', data);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
 
 
 </script>

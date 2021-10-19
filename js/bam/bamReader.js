@@ -88,7 +88,7 @@ class BamReader {
                 const done = BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
 
                 if (done) {
-                    console.log(`Loaded ${counter} chunks out of  ${chunks.length}`);
+                //    console.log(`Loaded ${counter} chunks out of  ${chunks.length}`);
                     break;
                 }
                 counter++;

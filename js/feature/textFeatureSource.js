@@ -232,7 +232,7 @@ class TextFeatureSource {
             this.featureCache = new FeatureCache(features, this.genome, genomicInterval);
 
             // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-            if (this.config.searchable) {
+            if (this.config.searchable || this.config.searchableFields) {
                 this.addFeaturesToDB(features);
             }
         } else {
@@ -247,6 +247,20 @@ class TextFeatureSource {
             }
             if (feature.gene && feature.gene.name) {
                 this.genome.featureDB[feature.gene.name.toUpperCase()] = feature;
+            }
+
+            if(this.config.searchableFields) {
+                for(let f of this.config.searchableFields) {
+                    const value = feature.getAttributeValue(f);
+                    if(value) {
+                        if(value.indexOf(" ") > 0) {
+                            this.genome.featureDB[value.replaceAll(" ", "+").toUpperCase()] = feature;
+                            this.genome.featureDB[value.replaceAll(" ", "%20").toUpperCase()] = feature;
+                        } else {
+                            this.genome.featureDB[value.toUpperCase()] = feature;
+                        }
+                    }
+                }
             }
         }
     }

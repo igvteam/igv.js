@@ -32,6 +32,8 @@ import MenuUtils from "../ui/menuUtils.js";
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
+import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
+
 
 
 class InteractionTrack extends TrackBase {
@@ -144,7 +146,7 @@ class InteractionTrack extends TrackBase {
             const y = this.arcOrientation ? options.pixelHeight : 0;
             const direction = this.arcOrientation;
 
-            ctx.font = "8px";
+            ctx.font = "8px sans-serif";
             ctx.textAlign = "center";
 
             for (let feature of featureList) {
@@ -261,6 +263,12 @@ class InteractionTrack extends TrackBase {
         const bpStart = options.bpStart;
         const xScale = bpPerPixel;
 
+        // SVG output for proportional arcs are currently not supported because "ellipse" is not implemented
+        if(typeof ctx.ellipse !== 'function') {
+            Alert.presentAlert("SVG output of proportional arcs is currently not supported.")
+            return;
+        }
+
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         const featureList = options.features;
@@ -274,8 +282,6 @@ class InteractionTrack extends TrackBase {
             const y = this.arcOrientation ? options.pixelHeight : 0;
 
             for (let feature of featureList) {
-
-                ctx.save();
 
                 const value = this.valueColumn ? feature[this.valueColumn] : feature.score;
                 if (value === undefined || Number.isNaN(value)) continue;
@@ -324,7 +330,6 @@ class InteractionTrack extends TrackBase {
                         ctx.fillStyle = alphaColor;
                         ctx.fill();
                     }
-                    ctx.restore();
 
                     feature.drawState = {xc, yc: y, radiusX, radiusY};
                 } else {
