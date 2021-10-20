@@ -353,7 +353,7 @@ class InteractionTrack extends TrackBase {
                         pixelStart--;
                     }
                     const otherChr = feature.chr === feature.chr1 ? feature.chr2 : feature.chr1;
-                    ctx.font = "8px";
+                    ctx.font = "8px sans-serif";
                     ctx.textAlign = "center";
                     if (this.arcOrientation) {
                         // UP
