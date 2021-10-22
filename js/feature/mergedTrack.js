@@ -132,7 +132,7 @@ class MergedTrack extends TrackBase {
             const popupData = [];
             for (let i = 0; i < this.tracks.length; i++) {
                 if (i > 0) popupData.push('<hr/>');
-                popupData.push(`<div style=background-color:rgb(245,245,245);border-bottom-style:dashed;border-bottom-width:1px;padding-bottom:5px;padding-top:10px;font-weight:bold >${this.tracks[i].name}</div>`);
+                popupData.push(`<div style=background-color:rgb(245,245,245);border-bottom-style:dashed;border-bottom-width:1px;padding-bottom:5px;padding-top:10px;font-weight:bold;font-size:larger >${this.tracks[i].name}</div>`);
                 const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i]);
                 popupData.push(...trackPopupData);
 
