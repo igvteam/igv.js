@@ -148,7 +148,8 @@ const MenuUtils = {
             "alignment" === track.type ||
             "annotation" === track.type ||
             "variant" === track.type ||
-            "wig" === track.type);
+            "wig" === track.type) ||
+            'interact' === track.type
     },
 
     createMenuItem(label, action) {
