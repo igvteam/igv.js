@@ -133,28 +133,21 @@ class SpliceJunctionTrack extends TrackBase {
 
         if (featureList) {
 
-            const rowFeatureCount = [];
+
+            junctionRenderingContext.referenceFrame = options.viewport.referenceFrame;
+            junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
+            junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(options.viewport.contentDiv).width());
+
+            // For a given viewport, records where features that are < 2px in width have been rendered already.
+            // This prevents wasteful rendering of multiple such features onto the same pixels.
+            junctionRenderingContext.featureZoomOutTracker = {}
+
             for (let feature of featureList) {
-
-                junctionRenderingContext.referenceFrame = options.viewport.referenceFrame;
-                junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
-                junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(options.viewport.contentDiv).width());
-
-                // For a given viewport, records where features that are < 2px in width have been rendered already.
-                // This prevents wasteful rendering of multiple such features onto the same pixels.
-                junctionRenderingContext.featureZoomOutTracker = {}
-
-
-                for (let feature of featureList) {
-                    if (feature.end < bpStart) continue;
-                    if (feature.start > bpEnd) break;
-
-                    const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row;
-                    const featureDensity = pixelWidth / rowFeatureCount[row];
-                    options.drawLabel = options.labelAllFeatures || featureDensity > 10;
-                    this.renderJunction(feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
-                }
+                if (feature.end < bpStart) continue;
+                if (feature.start > bpEnd) break;
+                this.renderJunction(feature, bpStart, bpPerPixel, pixelHeight, ctx);
             }
+
         } else {
             console.log("No feature list");
         }
