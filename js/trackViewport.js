@@ -3,7 +3,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import {Popover} from '../node_modules/igv-ui/dist/igv-ui.js'
+import {Popover, Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
 import Viewport from "./viewport.js";
 import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 import C2S from "./canvas2svg.js"
