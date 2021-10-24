@@ -4,75 +4,80 @@ import {getChrColor} from "../bam/bamTrack.js";
 class CircularView {
 
     static isInstalled() {
-        return window.JBrowseReactCircularGenomeView !== undefined;
+        return window["JBrowseReactCircularGenomeView"] !== undefined && window["React"] !== undefined && window["ReactDOM"] !== undefined;
     }
 
     constructor(div, browser) {
 
-        this.browser = browser;
+        if (CircularView.isInstalled()) {
 
-        const {createElement} = React
-        const {render} = ReactDOM
-        const {
-            createViewState,
-            JBrowseCircularGenomeView,
-        } = JBrowseReactCircularGenomeView
+            this.browser = browser;
+
+            const {createElement} = React
+            const {render} = ReactDOM
+            const {
+                createViewState,
+                JBrowseCircularGenomeView,
+            } = JBrowseReactCircularGenomeView
 
 
-        const regions = [];
-        const colors = [];
-        for (let chrName of browser.genome.wgChromosomeNames) {
-            const chr = browser.genome.getChromosome(chrName);
-            colors.push(getChrColor(chr.name));
-            regions.push(
-                {
-                    refName: chr.name.substring(3),
-                    uniqueId: chr.name.substring(3),
-                    start: 0,
-                    end: chr.bpLength
-                }
-            )
+            const regions = [];
+            const colors = [];
+            for (let chrName of browser.genome.wgChromosomeNames) {
+                const chr = browser.genome.getChromosome(chrName);
+                colors.push(getChrColor(chr.name));
+                regions.push(
+                    {
+                        refName: chr.name.substring(3),
+                        uniqueId: chr.name.substring(3),
+                        start: 0,
+                        end: chr.bpLength
+                    }
+                )
+            }
+
+            this.viewState = createViewState({
+                assembly: {
+                    name: 'forIGV',
+                    sequence: {
+                        trackId: 'refSeqTrack',
+                        type: 'ReferenceSequenceTrack',
+                        adapter: {
+                            type: 'FromConfigSequenceAdapter',
+                            features: regions,
+                        },
+                    },
+                    refNameColors: colors
+                },
+                tracks: [
+                    {
+                        trackId: 'firstTrack',
+                        assemblyNames: ['forIGV'],
+                        type: 'VariantTrack',
+                        adapter: {
+                            type: 'FromConfigAdapter',
+                            features: [],
+                        },
+                    },
+                ],
+            })
+
+            this.viewState.config.tracks[0].displays[0].renderer.strokeColor.set("jexl:get(feature, 'color') || 'black'")
+            //  this.viewState.config.tracks[0].displays[0].renderer.strokeColorSelected.set(
+            //      "jexl:get(feature, 'highlightColor') || 'red'"
+            //  )
+            this.viewState.config.tracks[0].displays[0].renderer.strokeColorSelected.set('orange')
+
+            // Harcode chord click action for now
+            this.onChordClick(defaultOnChordClick.bind(this))
+
+            this.setSize(div.clientWidth)
+
+            const element = createElement(JBrowseCircularGenomeView, {viewState: this.viewState})
+            render(element, div);
+        } else {
+            console.error("JBrowse circular view is not installed");
         }
-
-        this.viewState =  createViewState({
-            assembly: {
-                name: 'forIGV',
-                sequence: {
-                    trackId: 'refSeqTrack',
-                    type: 'ReferenceSequenceTrack',
-                    adapter: {
-                        type: 'FromConfigSequenceAdapter',
-                        features: regions,
-                    },
-                },
-                refNameColors: colors
-            },
-            tracks: [
-                {
-                    trackId: 'firstTrack',
-                    assemblyNames: ['forIGV'],
-                    type: 'VariantTrack',
-                    adapter: {
-                        type: 'FromConfigAdapter',
-                        features: [],
-                    },
-                },
-            ],
-        })
-
-        this.viewState.config.tracks[0].displays[0].renderer.strokeColor.set("jexl:get(feature, 'color') || 'black'")
-        //  this.viewState.config.tracks[0].displays[0].renderer.strokeColorSelected.set(
-        //      "jexl:get(feature, 'highlightColor') || 'red'"
-        //  )
-        this.viewState.config.tracks[0].displays[0].renderer.strokeColorSelected.set('orange')
-
-        // Harcode chord click action for now
-        this.onChordClick(defaultOnChordClick.bind(this))
-
-        this.setSize(div.clientWidth)
-
-        const element = createElement(JBrowseCircularGenomeView, {viewState: this.viewState})
-        render(element, div);
     }
 
     setSize(size) {
@@ -81,7 +86,7 @@ class CircularView {
         view.setWidth(size);
         view.setHeight(size /* this is the height of the area inside the border in pixels */);
 
-        if(!this.origSize) {
+        if (!this.origSize) {
             this.origSize = size;
             this.bpPerPx = view.bpPerPx;
         } else {
@@ -127,7 +132,27 @@ class CircularView {
         }
         this.viewState.config.tracks[0].adapter.features.set(chords)
         this.viewState.session.view.showTrack(this.viewState.config.tracks[0].trackId)
+    }
 
+    addVCFChords(features, color) {
+
+        const chords = [...this.viewState.config.tracks[0].adapter.features.value];
+        const currentIDs = new Set(chords.map(c => c.uniqueId));
+        const svFeatures = features.filter(v => {
+            const f = v._f || v;
+            const isLargeEnough = f.info.CHR2 && f.info.END &&
+                (f.info.CHR2 !== f.chr || Math.abs(Number.parseInt(f.info.END) - f.pos) > 1000000);
+            return isLargeEnough;
+        });
+        for (let f of svFeatures) {
+            const chord = makeVCFChord(f, color);
+            if (!currentIDs.has(chord.uniqueId)) {
+                chords.push(chord)
+                currentIDs.add(chord.uniqueId);
+            }
+        }
+        this.viewState.config.tracks[0].adapter.features.set(chords)
+        this.viewState.session.view.showTrack(this.viewState.config.tracks[0].trackId)
     }
 
     selectAlignmentChord(alignment) {
@@ -263,11 +288,6 @@ function defaultOnChordClick(feature, chordTrack, pluginManager) {
     }
 }
 
-
-function bedPEID(f) {
-    return `${f.chr1}:${f.start1}-${f.end1}_${f.chr2}:${f.start2}-${f.end2}`
-}
-
 function makeAlignmentChord(a) {
     // Strip chr names -  a hack
     const chr = a.chr.startsWith("chr") ? a.chr.substring(3) : a.chr;
@@ -290,7 +310,7 @@ function makeAlignmentChord(a) {
 }
 
 function makeBedPEChord(f, color) {
-    color = color || `rgba(0, 0, 255, 0.02)`;
+    color = color || `rgba(0, 0, 255)`;
     // Strip chr names -  a hack
     const chr1 = f.chr1.startsWith("chr") ? f.chr1.substring(3) : f.chr1;
     const chr2 = f.chr2.startsWith("chr") ? f.chr2.substring(3) : f.chr2;
@@ -311,6 +331,45 @@ function makeBedPEChord(f, color) {
         igvtype: 'bedpe'
     };
 }
+
+function makeVCFChord(v, color) {
+
+    color = color || `rgba(0, 0, 255)`;
+
+    const f = v._f || v;
+    const chr1 = f.chr.startsWith("chr") ? f.chr.substring(3) : f.chr;
+    const chr2 = f.info.CHR2.startsWith("chr") ? f.info.CHR2.substring(3) : f.info.CHR2;
+    const pos2 = Number.parseInt(f.info.END);
+    const start2 = pos2 - 100;
+    const end2 = pos2 + 100;
+
+    return {
+        uniqueId: vcfID(v, chr2, start2, end2),
+        refName: chr1,
+        start: f.start,
+        end: f.end,
+        mate: {
+            refName: chr2,
+            start: start2,
+            end: end2
+        },
+        color: color,
+        baseColor: color,
+        highlightColor: 'red',
+        igvtype: 'vcf'
+    }
+}
+
+
+function bedPEID(f) {
+    return `${f.chr1}:${f.start1}-${f.end1}_${f.chr2}:${f.start2}-${f.end2}`
+}
+
+function vcfID(v) {
+    const f = v._f || v;
+    return `${f.chr}:${f.start}-${f.end}_${f.info.CHR2}:${f.info.END}`;
+}
+
 
 
 export default CircularView;

@@ -22,9 +22,26 @@
 </head>
 <body>
 
-<div id="igvDiv"></div>
+<p>
+<h2>Circular genome view with VCF tracks</h2>
 
-<div id="jbrowse_circular_genome_view" style="z-index: 2048; position: absolute; top:0; left:0;width: 450px; height: 450px;"></div>
+<ul>
+    <li>From track gear menu select <b>Show chords</b></li>
+    <li>Click on chord in circular view to see both ends in split screen</li>
+</ul>
+
+</p>
+
+<p>
+    <b>CircView size:&nbsp</b>
+    <input type="text" id="circview-size-input"></input>
+</p>
+
+<div id="igvDiv">
+    <div id="jbrowse_circular_genome_view"
+         style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
+
+</div>
 
 <script type="module">
 
@@ -35,18 +52,8 @@
     // Start igv.js and create regions
     var options =
         {
-            genome: "hg19",
-            //locus: "chr17:64,040,802-64,045,633",
+            genome: "hg38",
             tracks: [
-                {
-                    name: "Coverage",
-                    type: "wig",
-                    format: "tdf",
-                    max: 300,
-                    color: "rgb(80,80,80)",
-                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.tdf"
-
-                },
                 {
                     url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/sniffles_del.vcf",
                     type: "variant",

@@ -531,6 +531,32 @@ class VariantTrack extends TrackBase {
                 });
         }
 
+        // Experimental JBrowse feature
+        if (this.browser.circularView) {
+            menuItems.push('<hr/>');
+
+            menuItems.push({
+                label: 'Show chords',
+                click: () => {
+                    this.browser.circularView.addVCFChords(this.featureSource.getAllFeatures(), this.color);
+                }
+            });
+
+            menuItems.push({
+                label: 'Clear chords',
+                click: () => {
+                    this.browser.circularView.clearChords();
+                }
+            });
+
+            menuItems.push({
+                label: 'Clear chord selections',
+                click: () => {
+                    this.browser.circularView.clearSelection();
+                }
+            });
+        }
+
 
         return menuItems;
     }
