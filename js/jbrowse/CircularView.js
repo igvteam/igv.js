@@ -3,6 +3,10 @@ import {getChrColor} from "../bam/bamTrack.js";
 
 class CircularView {
 
+    static isInstalled() {
+        return window.JBrowseReactCircularGenomeView !== undefined;
+    }
+
     constructor(div, browser) {
 
         this.browser = browser;
@@ -14,8 +18,6 @@ class CircularView {
             JBrowseCircularGenomeView,
         } = JBrowseReactCircularGenomeView
 
-        // Keep a copy fo the chords sent to JBrowse until we know how to append to the current set.
-        this.chords = [];
 
         const regions = [];
         const colors = [];
@@ -32,7 +34,7 @@ class CircularView {
             )
         }
 
-        this.circularState = new createViewState({
+        this.viewState =  createViewState({
             assembly: {
                 name: 'forIGV',
                 sequence: {
@@ -52,42 +54,52 @@ class CircularView {
                     type: 'VariantTrack',
                     adapter: {
                         type: 'FromConfigAdapter',
-                        features: this.chords,
+                        features: [],
                     },
                 },
             ],
         })
 
-        this.circularState.config.tracks[0].displays[0].renderer.strokeColor.set(
-            "jexl:get(feature, 'color') || 'black'"
-        )
-      //  this.circularState.config.tracks[0].displays[0].renderer.strokeColorSelected.set(
-      //      "jexl:get(feature, 'highlightColor') || 'red'"
-      //  )
-        const renderer = this.circularState.config.tracks[0].displays[0].renderer;
-        this.circularState.config.tracks[0].displays[0].renderer.strokeColorSelected.set('orange')
-
-        this.setHeight(div.clientWidth)
+        this.viewState.config.tracks[0].displays[0].renderer.strokeColor.set("jexl:get(feature, 'color') || 'black'")
+        //  this.viewState.config.tracks[0].displays[0].renderer.strokeColorSelected.set(
+        //      "jexl:get(feature, 'highlightColor') || 'red'"
+        //  )
+        this.viewState.config.tracks[0].displays[0].renderer.strokeColorSelected.set('orange')
 
         // Harcode chord click action for now
         this.onChordClick(defaultOnChordClick.bind(this))
 
-        render(createElement(JBrowseCircularGenomeView, {viewState: this.circularState}), div);
+        this.setSize(div.clientWidth)
 
+        const element = createElement(JBrowseCircularGenomeView, {viewState: this.viewState})
+        render(element, div);
     }
 
-    setHeight(height) {
-        this.circularState.session.view.setHeight(height /* this is the height of the area inside the border in pixels */)
+    setSize(size) {
+
+        const view = this.viewState.session.view;
+        view.setWidth(size);
+        view.setHeight(size /* this is the height of the area inside the border in pixels */);
+
+        if(!this.origSize) {
+            this.origSize = size;
+            this.bpPerPx = view.bpPerPx;
+        } else {
+            const r = size / this.origSize;
+            const bpPerPx = r * this.bpPerPx;
+            view.setBpPerPx(bpPerPx);
+        }
+
     }
 
     clearChords() {
-        this.circularState.config.tracks[0].adapter.features.set([])
-        this.circularState.session.view.showTrack(this.circularState.config.tracks[0].trackId)
+        this.viewState.config.tracks[0].adapter.features.set([])
+        this.viewState.session.view.showTrack(this.viewState.config.tracks[0].trackId)
     }
 
     addPairedAlignmentChords(alignments) {
 
-        const chords = [...this.circularState.config.tracks[0].adapter.features.value];
+        const chords = [...this.viewState.config.tracks[0].adapter.features.value];
         const currentIDs = new Set(chords.map(c => c.uniqueId));
 
         for (let a of alignments) {
@@ -98,13 +110,13 @@ class CircularView {
                 currentIDs.add(id);
             }
         }
-        this.circularState.config.tracks[0].adapter.features.set(chords)
-        this.circularState.session.view.showTrack(this.circularState.config.tracks[0].trackId)
+        this.viewState.config.tracks[0].adapter.features.set(chords)
+        this.viewState.session.view.showTrack(this.viewState.config.tracks[0].trackId)
     }
 
     addBedPEChords(features, color) {
 
-        const chords = [...this.circularState.config.tracks[0].adapter.features.value];
+        const chords = [...this.viewState.config.tracks[0].adapter.features.value];
         const currentIDs = new Set(chords.map(c => c.uniqueId));
         for (let f of features) {
             const id = bedPEID(f);
@@ -113,8 +125,8 @@ class CircularView {
                 currentIDs.add(id);
             }
         }
-        this.circularState.config.tracks[0].adapter.features.set(chords)
-        this.circularState.session.view.showTrack(this.circularState.config.tracks[0].trackId)
+        this.viewState.config.tracks[0].adapter.features.set(chords)
+        this.viewState.session.view.showTrack(this.viewState.config.tracks[0].trackId)
 
     }
 
@@ -122,12 +134,12 @@ class CircularView {
 
         // TODO -- this is broken, or rather doesn't seem to do anything.
         // const feature = this.getFeature(alignment.readName);
-        // this.circularState.pluginManager.rootModel.session.setSelection(feature);
-        // this.circularState.session.view.showTrack(this.circularState.config.tracks[0].trackId)
+        // this.viewState.pluginManager.rootModel.session.setSelection(feature);
+        // this.viewState.session.view.showTrack(this.viewState.config.tracks[0].trackId)
 
 
         // TODO -- hack until selection is fixed
-        const chords = [...this.circularState.config.tracks[0].adapter.features.value];
+        const chords = [...this.viewState.config.tracks[0].adapter.features.value];
         let found = false;
         const featureId = alignment.readName;
         for (let f of chords) {
@@ -144,38 +156,38 @@ class CircularView {
             chords.push(f);
         }
 
-        this.circularState.config.tracks[0].adapter.features.set(chords)
-        this.circularState.session.view.showTrack(this.circularState.config.tracks[0].trackId)
+        this.viewState.config.tracks[0].adapter.features.set(chords)
+        this.viewState.session.view.showTrack(this.viewState.config.tracks[0].trackId)
     }
 
     clearSelection() {
-        //this.circularState.pluginManager.rootModel.session.clearSelection()
-        const chords = [...this.circularState.config.tracks[0].adapter.features.value];
+        //this.viewState.pluginManager.rootModel.session.clearSelection()
+        const chords = [...this.viewState.config.tracks[0].adapter.features.value];
         for (let f of chords) {
             f.color = f.baseColor;
         }
-        this.circularState.config.tracks[0].adapter.features.set(chords)
-        this.circularState.session.view.showTrack(this.circularState.config.tracks[0].trackId)
+        this.viewState.config.tracks[0].adapter.features.set(chords)
+        this.viewState.session.view.showTrack(this.viewState.config.tracks[0].trackId)
     }
 
-    // TODO -- broken
     getFeature(featureId) {
 
-        // const display = this.circularState.pluginManager.rootModel.session.view.tracks[0].displays[0]
+        // TODO -- broken
+        // const display = this.viewState.pluginManager.rootModel.session.view.tracks[0].displays[0]
         // const feature = display.data.features.get(featureId)
         // return feature;
 
-        const features = [...this.circularState.config.tracks[0].adapter.features.value];
-        for(let f of features) {
-            if(featureId === f.uniqueId) {
+        const features = [...this.viewState.config.tracks[0].adapter.features.value];
+        for (let f of features) {
+            if (featureId === f.uniqueId) {
                 return f;
             }
         }
     }
 
     onChordClick(callback) {
-        this.circularState.pluginManager.jexl.addFunction('onChordClick', callback)
-        this.circularState.config.tracks[0].displays[0].onChordClick.set(
+        this.viewState.pluginManager.jexl.addFunction('onChordClick', callback)
+        this.viewState.config.tracks[0].displays[0].onChordClick.set(
             'jexl:onChordClick(feature, track, pluginManager)'
         )
     }
@@ -184,7 +196,7 @@ class CircularView {
     updateGenome(genome) {
 
         // TODO -- below needs to be done in igv.js when genome is loaded
-        const circularState = this.circularState;
+        const viewState = this.viewState;
         const regions = [];
         const colors = [];
         for (let chrName of browser.genome.wgChromosomeNames) {
@@ -199,12 +211,12 @@ class CircularView {
                 }
             )
         }
-        circularState.config.assembly.sequence.adapter.features.set(regions)
-        circularState.config.assembly.refNameColors.set(color);
-        circularState.assemblyManager.removeAssembly(
-            circularState.assemblyManager.assemblies[0]
+        viewState.config.assembly.sequence.adapter.features.set(regions)
+        viewState.config.assembly.refNameColors.set(color);
+        viewState.assemblyManager.removeAssembly(
+            viewState.assemblyManager.assemblies[0]
         )
-        circularState.assemblyManager.addAssembly(circularState.config.assembly)
+        viewState.assemblyManager.addAssembly(viewState.config.assembly)
     }
 
 }
@@ -299,7 +311,6 @@ function makeBedPEChord(f, color) {
         igvtype: 'bedpe'
     };
 }
-
 
 
 export default CircularView;
