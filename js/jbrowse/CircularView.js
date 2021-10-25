@@ -81,20 +81,10 @@ class CircularView {
     }
 
     setSize(size) {
-
         const view = this.viewState.session.view;
         view.setWidth(size);
         view.setHeight(size /* this is the height of the area inside the border in pixels */);
-
-        if (!this.origSize) {
-            this.origSize = size;
-            this.bpPerPx = view.bpPerPx;
-        } else {
-            const r = this.origSize / size;
-            const bpPerPx = r * this.bpPerPx;
-            view.setBpPerPx(bpPerPx);
-        }
-
+        view.setBpPerPx(view.minBpPerPx);
     }
 
     clearChords() {
@@ -369,7 +359,6 @@ function vcfID(v) {
     const f = v._f || v;
     return `${f.chr}:${f.start}-${f.end}_${f.info.CHR2}:${f.info.END}`;
 }
-
 
 
 export default CircularView;
