@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Circular Genome View</title>
+    <title>Using JBrowse Circular Genome View</title>
     <!-- The commented scripts below are the minified production versions of the
       other scripts -->
     <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin="anonymous"></script>
@@ -23,7 +23,7 @@
 <body>
 
 <p>
-<h2>Circular genome view with bedpe track</h2>
+<h2>Circular genome view with VCF tracks</h2>
 
 <ul>
     <li>From track gear menu select <b>Show chords</b></li>
@@ -31,7 +31,6 @@
 </ul>
 
 </p>
-
 
 <div id="igvDiv">
     <div id="jbrowse_circular_genome_view"
@@ -48,8 +47,30 @@
     // Start igv.js and create regions
     var options =
         {
-            genome: "hg38",
+            genome: "hg19",
             tracks: [
+                {
+                    id: "delly",
+                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.vcf",
+                    type: "variant",
+                    format: "vcf",
+                    name: "delly translocations",
+                    supportsWholeGenome: true,
+                    visibilityWindow: -1,
+                    showGenotypes: false,
+                    height: 40
+                },
+                {
+                    id: "sniffles",
+                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/sniffles_tra.vcf",
+                    type: "variant",
+                    format: "vcf",
+                    name: "sniffles translocations",
+                    supportsWholeGenome: true,
+                    visibilityWindow: -1,
+                    showGenotypes: false,
+                    height: 40
+                },
                 {
                     id: 'bedpe-track',
                     name: "SKBR3 translocations",
@@ -67,35 +88,42 @@
                         }
                     }
                 },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/reads_lr_skbr3.fa_ngmlr-0.2.3_mapped.bam",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/reads_lr_skbr3.fa_ngmlr-0.2.3_mapped.bam.bai",
+                    type: "alignment",
+                    format: "bam",
+                    name: "Alignments",
+                    height: 500,
+                    maxFragmentLength: 1000000,  // 1 mb -- only interested in large deletions
+                    colorBy: "fragmentLength",
+                    onclick: (features, e) => {
+                        if (e.shiftKey) {
+                            if (features) {
+                                sendPairedAlignmentChord(features);
+                            }
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
+                }
             ]
-        };
+        }
 
     var igvDiv = document.getElementById("igvDiv");
 
     let circularView;
     igv.createBrowser(igvDiv, options)
-
         .then(async function (browser) {
 
             console.log("Created IGV browser");
-
-            CircularView.isInstalled();
-            console.log(`Jbrowse CircView is installed ? ${CircularView.isInstalled()}`)
+            window.igvBrowser = browser;
 
             const el = document.getElementById('jbrowse_circular_genome_view')
             makeDraggable(el, el)
             circularView = new CircularView(el, browser);
             browser.circularView = circularView;
-
-            const sizeInputElement = document.getElementById("circview-size-input");
-            const circContainerElement = document.getElementById("jbrowse_circular_genome_view");
-            sizeInputElement.value = circContainerElement.clientWidth;
-            sizeInputElement.addEventListener("change", e => {
-                const sz = e.target.value;
-                circContainerElement.style.width = sz + "px";
-                circContainerElement.style.height = sz + "px";
-                circularView.setSize(Number.parseInt(sz));
-            })
 
         })
 

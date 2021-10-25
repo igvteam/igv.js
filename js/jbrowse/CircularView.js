@@ -90,7 +90,7 @@ class CircularView {
             this.origSize = size;
             this.bpPerPx = view.bpPerPx;
         } else {
-            const r = size / this.origSize;
+            const r = this.origSize / size;
             const bpPerPx = r * this.bpPerPx;
             view.setBpPerPx(bpPerPx);
         }
