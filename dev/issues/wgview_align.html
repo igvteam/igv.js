@@ -1,7 +1,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>issue 1410</title>
+    <title>igv</title>
 
 </head>
 
@@ -33,6 +33,14 @@
                     url: '../../test/data/bed/chromosomes_odd.bed',
                     indexed: false,
                     name: 'odd chromosomes'
+                },
+                {
+                    type: 'wig',
+                    format: 'bedgraph',
+                    url: '../../test/data/bed/chromosomes.bedgraph',
+                    indexed: false,
+                    name: 'all chromosomes - wig',
+                    colorBy: 'strand'
                 }
             ]
         };
