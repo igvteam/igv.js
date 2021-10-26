@@ -60,7 +60,7 @@ class TrackBase {
 
         if (config.name || config.label) {
             this.name = config.name || config.label;
-        } else if (config.url instanceof File) {
+        } else if (FileUtils.isFile(config.url)) {
             this.name = config.url.name;
         } else if (StringUtils.isString(config.url) && !config.url.startsWith("data:")) {
             this.name = FileUtils.getFilename(config.url);
@@ -123,7 +123,7 @@ class TrackBase {
         // function properties are transient as they cannot be saved in json
         const state = {};
         for (let key of Object.keys(this.config)) {
-            if (!key.startsWith("_") && typeof this.config[key] !== "function")  {
+            if (!key.startsWith("_") && typeof this.config[key] !== "function") {
                 state[key] = this.config[key];
             }
         }
@@ -151,7 +151,7 @@ class TrackBase {
             if (typeof state[key] === 'function') {
                 throw Error(`Property '${key}' of track '${this.name} is a function. Functions cannot be saved in sessions.`);
             }
-            if (state[key] instanceof File) {
+            if (FileUtils.isFile(state[key])) {
                 const str = `Track ${this.name} is a local file. Sessions cannot be saved with local file references.`;
                 throw Error(str);
             }
