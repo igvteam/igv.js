@@ -23,7 +23,7 @@ class TrackViewport extends Viewport {
 
     initializationHelper() {
 
-        this.$spinner = $('<div>', { class: 'igv-loading-spinner-container' });
+        this.$spinner = $('<div>', {class: 'igv-loading-spinner-container'});
         this.$viewport.append(this.$spinner);
         this.$spinner.append($('<div>'));
 
@@ -137,8 +137,8 @@ class TrackViewport extends Viewport {
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
         const pixelWidth = this.$content.width();// * 3;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
-        const bpStart = Math.floor(Math.max(0, referenceFrame.start -  bpWidth ));
-        const bpEnd = Math.ceil(Math.min(chrLength, referenceFrame.start + bpWidth +  bpWidth));  // Add one screen width to end
+        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth));
+        const bpEnd = Math.ceil(Math.min(chrLength, referenceFrame.start + bpWidth + bpWidth));  // Add one screen width to end
 
         if (this.loading && this.loading.start === bpStart && this.loading.end === bpEnd) {
             return undefined;
@@ -600,8 +600,8 @@ class TrackViewport extends Viewport {
                 menuItems.push({label: $('<HR>')});
             }
 
-            menuItems.push({ label: 'Save Image (PNG)', click: () => this.saveImage() });
-            menuItems.push({ label: 'Save Image (SVG)', click: () => this.saveSVG() });
+            menuItems.push({label: 'Save Image (PNG)', click: () => this.saveImage()});
+            menuItems.push({label: 'Save Image (SVG)', click: () => this.saveSVG()});
 
             this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
         }
@@ -618,7 +618,7 @@ class TrackViewport extends Viewport {
     }
 
     removeViewportMouseDownHandler(viewport) {
-         viewport.removeEventListener('mousedown', this.boundMouseDownHandler)
+        viewport.removeEventListener('mousedown', this.boundMouseDownHandler)
     }
 
     addViewportTouchStartHandler(viewport) {
@@ -699,9 +699,9 @@ class TrackViewport extends Viewport {
                         if (1 === this.browser.referenceFrameList.length) {
                             string = chr;
                         } else {
-                            const loci = this.browser.referenceFrameList.map(({ locusSearchString }) => locusSearchString)
+                            const loci = this.browser.referenceFrameList.map(({locusSearchString}) => locusSearchString)
                             const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
-                            loci[ index ] = chr
+                            loci[index] = chr
                             string = loci.join(' ')
                         }
 
@@ -757,7 +757,7 @@ class TrackViewport extends Viewport {
 
             event.stopPropagation();
 
-            const { track } = this.trackView
+            const {track} = this.trackView
 
             let str;
             if (typeof track.description === 'function') {
@@ -765,8 +765,8 @@ class TrackViewport extends Viewport {
             } else if (track.description) {
                 str = `<div>${track.description}</div>`
             } else {
-                if(track.url) {
-                    if (track.url instanceof File) {
+                if (track.url) {
+                    if (FileUtils.isFile(track.url)) {
                         str = `<div><b>Filename: </b>${track.url.name}`;
                     } else {
                         str = `<div><b>URL: </b>${track.url}`;

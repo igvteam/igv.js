@@ -1386,7 +1386,7 @@ class Browser {
 
     async loadSampleInformation(url) {
         var name = url;
-        if (url instanceof File) {
+        if (FileUtils.isFile(url)) {
             name = url.name;
         }
         var ext = name.substr(name.lastIndexOf('.') + 1);
