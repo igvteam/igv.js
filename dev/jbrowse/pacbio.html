@@ -122,7 +122,7 @@
 
             const el = document.getElementById('jbrowse_circular_genome_view')
             makeDraggable(el, el)
-            circularView = new CircularView(el, browser);
+            circularView = new CircularView(el, browser, {width: 450});
             browser.circularView = circularView;
 
         })
