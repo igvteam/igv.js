@@ -63,6 +63,8 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
             py = this.margin;
         }
 
+        const pixelWidth = options.pixelWidth;
+
         const cy = py + h / 2;
         const h2 = h / 2;
         const py2 = cy - h2 / 2;
@@ -74,14 +76,17 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
 
         if (exonCount === 0) {
             // single-exon transcript
-            ctx.fillRect(coord.px, py, coord.pw, h);
+            const xLeft = Math.max(0, coord.px);
+            const xRight = Math.min(pixelWidth, coord.px1);
+            const width = Math.max(coord.pw, xRight - xLeft);
+            ctx.fillRect(xLeft, py, width, h);
 
             // Arrows
             // Do not draw if strand is not +/-
             if (direction !== 0) {
                 ctx.fillStyle = "white";
                 ctx.strokeStyle = "white";
-                for (let x = coord.px + step / 2; x < coord.px1; x += step) {
+                for (let x = xLeft + step / 2; x < xRight; x += step) {
                     // draw arrowheads along central line indicating transcribed orientation
                     IGVGraphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
                     IGVGraphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
@@ -93,7 +98,6 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
             // multi-exon transcript
             IGVGraphics.strokeLine(ctx, coord.px + 1, cy, coord.px1 - 1, cy); // center line for introns
 
-            const pixelWidth = options.pixelWidth;
 
             const xLeft = Math.max(0, coord.px) + step / 2;
             const xRight = Math.min(pixelWidth, coord.px1);
