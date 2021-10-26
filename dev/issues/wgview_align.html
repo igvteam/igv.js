@@ -1,0 +1,51 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>issue 1410</title>
+
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    window.igv = igv;
+
+    var options =
+        {
+            genome: "hg19",
+            tracks: [
+                {
+                    type: 'annotation',
+                    format: 'bed',
+                    url: '../../test/data/bed/chromosomes_even.bed',
+                    indexed: false,
+                    name: 'even chromosomes'
+                },
+                {
+                    type: 'annotation',
+                    format: 'bed',
+                    url: '../../test/data/bed/chromosomes_odd.bed',
+                    indexed: false,
+                    name: 'odd chromosomes'
+                }
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            igv.browser = browser;
+        })
+
+</script>
+
+</body>
+
+</html>
