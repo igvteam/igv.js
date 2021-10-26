@@ -7,7 +7,7 @@ class CircularView {
         return window["JBrowseReactCircularGenomeView"] !== undefined && window["React"] !== undefined && window["ReactDOM"] !== undefined;
     }
 
-    constructor(div, browser) {
+    constructor(container, browser) {
 
         if (CircularView.isInstalled()) {
 
@@ -68,13 +68,22 @@ class CircularView {
             //  )
             this.viewState.config.tracks[0].displays[0].renderer.strokeColorSelected.set('orange')
 
-            // Harcode chord click action for now
+            // Hardcode chord click action for now
             this.onChordClick(defaultOnChordClick.bind(this))
 
-            this.setSize(div.clientWidth)
+            this.setSize(container.clientWidth)
 
-            const element = createElement(JBrowseCircularGenomeView, {viewState: this.viewState})
-            render(element, div);
+            const reactElement = createElement(JBrowseCircularGenomeView, {viewState: this.viewState})
+            this.container = container
+
+            render(reactElement, this.container);
+
+            if (true === browser.circularViewVisible) {
+                this.show()
+            } else {
+                this.hide()
+            }
+
         } else {
             console.error("JBrowse circular view is not installed");
         }
@@ -232,6 +241,14 @@ class CircularView {
             viewState.assemblyManager.assemblies[0]
         )
         viewState.assemblyManager.addAssembly(viewState.config.assembly)
+    }
+
+    show() {
+        this.container.style.display = 'block'
+    }
+
+    hide() {
+        this.container.style.display = 'none'
     }
 
 }

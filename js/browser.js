@@ -70,6 +70,8 @@ import ViewportCenterLine from './ui/viewportCenterLine.js';
 import IdeogramTrack from "./ideogramTrack.js";
 import RulerTrack from "./rulerTrack.js";
 import GtexSelection from "./gtex/gtexSelection.js";
+import CircularViewControl from "./ui/circularViewControl.js";
+import CircularView from "./jbrowse/CircularView.js";
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -138,6 +140,8 @@ class Browser {
         for (let key of Object.keys(this.nucleotideColors)) {
             this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key];
         }
+
+        this.circularViewVisible = config.showCircularView;
 
         this.trackLabelsVisible = config.showTrackLabels;
 
@@ -247,8 +251,12 @@ class Browser {
 
         this.centerLineButton = new CenterLineButton(this, $toggle_button_container.get(0))
 
-        this.setTrackLabelVisibility(config.showTrackLabels)
+        if (CircularView.isInstalled()) {
+            this.setCircularViewVisibility(config.showCircularView)
+            this.circularViewControl = new CircularViewControl($toggle_button_container.get(0), this)
+        }
 
+        this.setTrackLabelVisibility(config.showTrackLabels)
         this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), this)
 
         this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
@@ -627,12 +635,21 @@ class Browser {
 
     }
 
+    setCircularViewVisibility(isVisible) {
+
+        if (CircularView.isInstalled() && this.circularView) {
+            true === isVisible ? this.circularView.show() : this.circularView.hide()
+        }
+
+    }
+
     setTrackLabelVisibility(isVisible) {
         toggleTrackLabels(this.trackViews, isVisible)
     }
 
     // cursor guide
     setCursorGuideVisibility(cursorGuideVisible) {
+
         if (cursorGuideVisible) {
             this.cursorGuide.show()
         } else {
