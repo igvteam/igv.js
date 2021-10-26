@@ -32,13 +32,13 @@
 
 <script type="module">
 
-    import igv from "../../js";
-    import {FileUtils, TrackUtils} from "../../node_modules/igv-utils/src/index.js";
+    import igv from "../../js/index.js";
+    import {FileUtils} from "../../node_modules/igv-utils/src/index.js";
 
     const div = document.getElementById("myDiv");
     const fileWidget = document.getElementById("fileWidget");
 
-    const genome = "hg38";
+    const genome = "hg19";
     igv.createBrowser(div, {genome})
         .then(function (browser) {
 
@@ -74,25 +74,19 @@
                 const trackConfigs = [];
                 for (let df of dataFiles) {
                     const fn = df.name;
-                    const format = TrackUtils.inferFileFormat(fn);
-                    if (!format) {
-                        console.log(`Skipping ${fn} - unknown format.`);
+                    if (indexLUT.has(fn)) {
+                        trackConfigs.push({
+                            url: df,
+                            indexURL: indexLUT.get(fn),
+                            name: df.name
+                        })
                     } else {
-                        if (indexLUT.has(fn)) {
-                            trackConfigs.push({
-                                format: format,
-                                url: df,
-                                indexURL: indexLUT.get(fn),
-                                name: df.name
-                            })
-                        } else {
-                            trackConfigs.push({
-                                format: format,
-                                url: df,
-                                name: df.name
-                            })
-                        }
+                        trackConfigs.push({
+                            url: df,
+                            name: df.name
+                        })
                     }
+
                 }
 
                 if (trackConfigs.length > 0) {
@@ -100,7 +94,7 @@
                 }
             }
 
-            document.getElementById("sessionButton").addEventListener("click", () =>{
+            document.getElementById("sessionButton").addEventListener("click", () => {
                 try {
                     console.log(browser.toJSON());
                 } catch (e) {
