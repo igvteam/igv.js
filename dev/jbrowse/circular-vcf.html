@@ -42,7 +42,7 @@
 
     import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
     import igv from "../../js/index.js";
-    import CircularView from "../../js/jbrowse/circularView.js";
+    import {createCircularView} from "../../js/jbrowse/circularViewUtils.js";
 
     // Start igv.js and create regions
     var options =
@@ -84,9 +84,8 @@
 
             const el = document.getElementById('jbrowse_circular_genome_view')
             makeDraggable(el, el)
-            circularView = new CircularView(el, browser);
-            browser.circularView = circularView;
 
+            circularView = createCircularView(el, browser);
         })
 
     // individual clicked-on alignments

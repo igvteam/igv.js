@@ -31,6 +31,7 @@ import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import {PaletteColorTable, ColorTable} from "../util/colorPalletes.js";
+import {makeVCFChords} from "../jbrowse/circularViewUtils.js";
 
 const isString = StringUtils.isString;
 
@@ -538,7 +539,8 @@ class VariantTrack extends TrackBase {
             menuItems.push({
                 label: 'Show chords',
                 click: () => {
-                    this.browser.circularView.addVCFChords(this.featureSource.getAllFeatures(), this.color);
+                    const chords = makeVCFChords(this.featureSource.getAllFeatures(), this.color);
+                    this.browser.circularView.addChords(chords, true);
                 }
             });
 

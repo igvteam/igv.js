@@ -33,6 +33,7 @@ import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
 import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {makeBedPEChords} from "../jbrowse/circularViewUtils.js";
 
 
 
@@ -420,7 +421,8 @@ class InteractionTrack extends TrackBase {
             items.push({
                 label: 'Show chords',
                 click: () => {
-                    this.browser.circularView.addBedPEChords(this.featureSource.getAllFeatures(), this.color);
+                    const chords = makeBedPEChords(this.featureSource.getAllFeatures(), this.color)
+                    this.browser.circularView.addChords(chords, true);
                 }
             });
 

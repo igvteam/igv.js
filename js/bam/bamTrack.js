@@ -34,6 +34,7 @@ import {createCheckbox} from "../igv-icons.js";
 import MenuUtils from "../ui/menuUtils.js";
 import {PaletteColorTable} from "../util/colorPalletes.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {makePairedAlignmentChords} from "../jbrowse/circularViewUtils.js";
 
 const alignmentStartGap = 5;
 const downsampleRowHeight = 5;
@@ -1174,7 +1175,8 @@ class AlignmentTrack {
                             && a.mate.chr
                             && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxFragmentLenth);
                     })
-                    this.browser.circularView.addPairedAlignmentChords(inView);
+                    const chords = makePairedAlignmentChords(inView);
+                    this.browser.circularView.addChords(chords, true);
                 }
             });
 

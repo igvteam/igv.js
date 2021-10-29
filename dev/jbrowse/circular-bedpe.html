@@ -43,7 +43,7 @@
 
     import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
     import igv from "../../js/index.js";
-    import CircularView from "../../js/jbrowse/circularView.js";
+    import {createCircularView} from "../../js/jbrowse/circularViewUtils.js";
 
     // Start igv.js and create regions
     var options =
@@ -79,24 +79,10 @@
 
             console.log("Created IGV browser");
 
-            CircularView.isInstalled();
-            console.log(`Jbrowse CircView is installed ? ${CircularView.isInstalled()}`)
-
             const el = document.getElementById('jbrowse_circular_genome_view')
             makeDraggable(el, el)
-            circularView = new CircularView(el, browser);
-            browser.circularView = circularView;
 
-            const sizeInputElement = document.getElementById("circview-size-input");
-            const circContainerElement = document.getElementById("jbrowse_circular_genome_view");
-            sizeInputElement.value = circContainerElement.clientWidth;
-            sizeInputElement.addEventListener("change", e => {
-                const sz = e.target.value;
-                circContainerElement.style.width = sz + "px";
-                circContainerElement.style.height = sz + "px";
-                circularView.setSize(Number.parseInt(sz));
-            })
-
+            circularView = createCircularView(el, browser);
         })
 
     // individual clicked-on alignments

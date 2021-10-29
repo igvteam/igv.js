@@ -49,7 +49,7 @@
 
     import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
     import igv from "../../js/index.js";
-    import CircularView from "../../js/jbrowse/circularView.js";
+    import {makePairedAlignmentChords, createCircularView} from "../../js/jbrowse/circularViewUtils.js";
 
     // Start igv.js and create regions
     var options =
@@ -73,8 +73,8 @@
                     colorBy: "fragmentLength",
                     onclick: (features, e) => {
                         if (e.shiftKey) {
-                            if (features) {
-                                sendPairedAlignmentChord(features);
+                            if (features && features.length > 0) {
+                                selectPairedAlignmentChord(features[0]);
                             }
                             return true;
                         } else {
@@ -92,13 +92,10 @@
 
             console.log("Created IGV browser");
 
-            CircularView.isInstalled();
-            console.log(`Jbrowse CircView is installed ? ${CircularView.isInstalled()}`)
-
             const el = document.getElementById('jbrowse_circular_genome_view')
             makeDraggable(el, el)
-            circularView = new CircularView(el, browser);
-            browser.circularView = circularView;
+
+            circularView = createCircularView(el, browser);
 
             const sizeInputElement = document.getElementById("circview-size-input");
             const circContainerElement = document.getElementById("jbrowse_circular_genome_view");
@@ -113,13 +110,15 @@
         })
 
     // individual clicked-on alignments
-    function sendPairedAlignmentChord(features) {
-        circularView.selectAlignmentChord(features[0]);
+    function selectPairedAlignmentChord(feature) {
+        const chord = makePairedAlignmentChords([feature])[0];
+        const found = circularView.selectAlignmentChord(chord.uniqueId);
+        if(!found) {
+            circularView.addChords([chord], true);
+            circularView.selectAlignmentChord(chord.uniqueId)
+        }
     }
 
-    function sendBedPEChords(features) {
-        circularView.addBedPEChords(features);
-    }
 
 </script>
 

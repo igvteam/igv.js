@@ -71,7 +71,7 @@ import IdeogramTrack from "./ideogramTrack.js";
 import RulerTrack from "./rulerTrack.js";
 import GtexSelection from "./gtex/gtexSelection.js";
 import CircularViewControl from "./ui/circularViewControl.js";
-import CircularView from "./jbrowse/CircularView.js";
+import CircularView from "../node_modules/circular-view/js/circularView.js";
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
