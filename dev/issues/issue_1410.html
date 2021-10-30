@@ -1,0 +1,48 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>issue 1410</title>
+
+</head>
+
+<body>
+
+<h1>Issue 1410</h1>
+
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    window.igv = igv;
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr2:61,846,447-61,846,485",
+            tracks: [
+                {
+                    type: 'annotation',
+                    format: 'bed',
+                    url: 'issue_1410.bed',
+                    indexed: false,
+                    name: 'indb test'
+                }
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            igv.browser = browser;
+        })
+
+</script>
+
+</body>
+
+</html>

@@ -1440,7 +1440,7 @@ class Browser {
 
     async loadSampleInformation(url) {
         var name = url;
-        if (url instanceof File) {
+        if (FileUtils.isFile(url)) {
             name = url.name;
         }
         var ext = name.substr(name.lastIndexOf('.') + 1);
@@ -1586,7 +1586,7 @@ class Browser {
 
 
         const locaTrackFiles = trackJson.filter((track) => {
-            track.url && FileUtils.isFilePath(track.url)
+            track.url && FileUtils.isFile(track.url)
         })
 
         if (locaTrackFiles.length > 0) {
