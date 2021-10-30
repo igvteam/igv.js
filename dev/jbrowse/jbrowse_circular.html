@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Using JBrowse Circular Genome View</title>
+    <!-- The commented scripts below are the minified production versions of the
+      other scripts -->
+    <script
+      src="https://unpkg.com/react@16/umd/react.development.js"
+      crossorigin
+    ></script>
+    <!-- <script
+      src="https://unpkg.com/react@16/umd/react.production.min.js"
+      crossorigin
+    ></script> -->
+    <script
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+    <!-- <script
+      src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"
+      crossorigin
+    ></script> -->
+
+    <script
+      src="https://s3.amazonaws.com/jbrowse.org/jb2_releases/react-circular-genome-view/react-circular-genome-view%40v1.3.2/react-circular-genome-view.umd.development.js"
+      crossorigin=""
+    ></script>
+    <!-- <script
+      src="https://s3.amazonaws.com/jbrowse.org/jb2_releases/react-circular-genome-view/react-circular-genome-view%40v1.3.2/react-circular-genome-view.umd.production.min.js"
+      crossorigin=""
+    ></script> -->
+  </head>
+
+  <body>
+    <h2>Using JBrowse Circular Genome View!</h2>
+    <!-- These buttons are used to demo how some outside action can highlight
+      an arc (or "chord," as we call them internally). The id of the feature for
+      that chord is stored in data-featureid. -->
+    <button data-type="highlight_button" data-featureid="feature1">
+      Highlight feature 1
+    </button>
+    <button data-type="highlight_button" data-featureid="feature2">
+      Highlight feature 2
+    </button>
+    <button data-type="highlight_button">
+      Clear highlight
+    </button>
+    <!-- This is the div that the circular view will get rendered into -->
+    <div id="jbrowse_circular_genome_view"></div>
+    <script>
+const {
+  // This will be used to set up the state of the circular view
+  createViewState,
+  // This is what will be passed into the render call
+  JBrowseCircularGenomeView,
+} = JBrowseReactCircularGenomeView
+// Since JBrowse uses React, you'll use React to render the circular view into
+// the div
+const { createElement } = React
+const { render } = ReactDOM
+
+// These are the chords we're going to render into the circular view. Each one
+// needs a unique id. The chord starts at the location defined by "refName",
+// "start", and "end," and ends at the "mate" location, defined by the same
+// attributes. For a single-base-pair feature, "end" should be "start + 1".
+// "end" is needed, although the arc is drawn from the "start" coordinate.
+const features = [
+  // A feature for an arc that starts on chr1 at 312 and ends on chr2 at 13
+  {
+    uniqueId: 'feature1',
+    refName: 'chr1',
+    start: 312,
+    end: 313,
+    mate: {
+      refName: 'chr2',
+      start: 13,
+      end: 14,
+    },
+  },
+  {
+  // A feature for an arc that starts on chr1 at 312 and ends on chr1 at 983
+  uniqueId: 'feature2',
+    refName: 'chr1',
+    start: 589,
+    end: 608,
+    mate: {
+      refName: 'chr1',
+      start: 238,
+      end: 239,
+    },
+  },
+]
+
+const state = new createViewState({
+  // This is the assembly that the view is using
+  assembly: {
+    name: 'testAssembly',
+    sequence: {
+      trackId: 'refSeqTrack',
+      type: 'ReferenceSequenceTrack',
+      // You can also point this at a file instead of specifying each reference
+      // in the assembly manually. Examples below.
+      adapter: {
+        type: 'FromConfigSequenceAdapter',
+        features: [
+          {
+            refName: 'chr1',
+            uniqueId: 'chr1',
+            start: 0,
+            end: 1000,
+          },
+          {
+            refName: 'chr2',
+            uniqueId: 'chr2',
+            start: 0,
+            end: 50,
+          },
+        ],
+      },
+      // adapter: {
+      //   type: 'ChromSizesAdapter',
+      //   chromSizesLocation: {
+      //     uri: 'http://mysite.com/hg19.chrom.sizes',
+      //   },
+      // },
+      // adapter: {
+      //   type: 'IndexedFastaAdapter',
+      //   fastaLocation: {
+      //     uri: 'http://mysite.com/hg19.fa',
+      //   },
+      //   faiLocation: {
+      //     uri: 'http://mysite.com/hg19.fa.fai',
+      //   },
+      // },
+      // adapter: {
+      //   type: 'BgzipFastaAdapter',
+      //   fastaLocation: {
+      //     uri: 'http://mysite.com/hg19.fa.gz',
+      //   },
+      //   faiLocation: {
+      //     uri: 'http://mysite.com/hg19.fa.gz.fai',
+      //   },
+      //   gziLocation: {
+      //     uri: 'http://mysite.com/hg19.fa.gz.gzi',
+      //   },
+      // },
+      // adapter: {
+      //   type: 'TwoBitAdapter',
+      //   twoBitLocation: {
+      //     uri: 'http://mysite.com/hg19.2bit',
+      //   },
+      // },
+    },
+  },
+  tracks: [
+    // The track is where the features are stored
+    {
+      trackId: 'firstTrack',
+      assemblyNames: ['testAssembly'],
+      type: 'VariantTrack',
+      adapter: {
+        type: 'FromConfigAdapter',
+        // Here we use the features defined above
+        features,
+      },
+      displays: [
+        {
+          // If you change the trackId, make sure to change it here, too
+          displayId: 'firstTrack-ChordVariantDisplay',
+          type: 'ChordVariantDisplay',
+          // This is how you register a chord click callback, more info below
+          onChordClick: `jexl:onChordClick(feature, track, pluginManager)`,
+        },
+      ],
+    },
+  ],
+  // The defaultSession controls what the state of the view is when it's loaded
+  // We add the track here so that users don't have to open it manually from
+  // the track selector.
+  defaultSession: {
+    name: 'this session',
+    view: {
+      id: 'circularView',
+      type: 'CircularView',
+      tracks: [
+        {
+          id: 'uPdLKHik1',
+          type: 'VariantTrack',
+          // If you change the trackId, make sure to change it here, too
+          configuration: 'firstTrack',
+          displays: [
+            {
+              id: 'v9QVAR3oaB',
+              type: 'ChordVariantDisplay',
+              // If you change the trackId, make sure to change it here, too
+              configuration: 'firstTrack-ChordVariantDisplay',
+            },
+          ],
+        },
+      ],
+    },
+  },
+})
+
+// This is the callback we're going to register that gets called when a chord
+// is clicked. "feature" is likely the only one of the args you'll need, but
+// just for completeness, know that there are two other args
+function onChordClick(feature, chordTrack, pluginManager) {
+  // feature.id() will return the uniqueId that was used to create the feature
+  alert(`You clicked feature: ${feature.id()}`)
+}
+// This is how we register this function so that a display configuration can
+// refer to it (e.g. in the tracks array above).
+state.pluginManager.jexl.addFunction('onChordClick', onChordClick)
+
+// This next part is setting up the functionality for the feature highlighting
+// buttons. To highlight a feature, we need to pass it the feature object that
+// got created internally from the track configuration. We can get those
+// features using the "display" of the track.
+const display = state.pluginManager.rootModel.session.view.tracks[0].displays[0]
+function highlightFeature(event) {
+  // This is the data-featureid attribute of the button
+  const featureId = event.target.dataset.featureid
+  // If there is no featureid for the button, clear the highlight
+  if (!featureId) {
+    state.pluginManager.rootModel.session.clearSelection()
+    return
+  }
+  // Get the feature out of the display using its id
+  const feature = display.data.features.get(featureId)
+  // Highlight the feature with setSelection
+  state.pluginManager.rootModel.session.setSelection(feature)
+  // You could also use the feature in "onChordClick" above with setSelection
+}
+// This is adding the highlightFeature click event handler to the buttons
+const buttons = document.getElementsByTagName('button')
+for (const button of buttons) {
+  if (button.dataset.type === 'highlight_button') {
+    button.addEventListener('click', highlightFeature)
+  }
+}
+
+// This tells React to render into the div we specified
+render(
+  createElement(JBrowseCircularGenomeView, { viewState: state }),
+  document.getElementById('jbrowse_circular_genome_view'),
+)
+    </script>
+  </body>
+</html>

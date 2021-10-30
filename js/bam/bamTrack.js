@@ -34,6 +34,7 @@ import {createCheckbox} from "../igv-icons.js";
 import MenuUtils from "../ui/menuUtils.js";
 import {PaletteColorTable} from "../util/colorPalletes.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {makePairedAlignmentChords} from "../jbrowse/circularViewUtils.js";
 
 const alignmentStartGap = 5;
 const downsampleRowHeight = 5;
@@ -75,7 +76,7 @@ class BAMTrack extends TrackBase {
         this.color = config.color;
         this.coverageColor = config.coverageColor;
         this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
-        this.maxFragmentLength = config.maxFragmentLength;
+        this.maxFragmentLength = config.maxFragmentLength || 1000;
 
         // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
         // are present for a given reference frame the last one will take precedence
@@ -208,14 +209,25 @@ class BAMTrack extends TrackBase {
         return this.alignmentTrack.contextMenuItemList(config);
     }
 
-    popupData(config) {
-
-        if (true === this.showCoverage && config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
-            return this.coverageTrack.popupData(config);
+    popupData(clickState) {
+        if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
+            return this.coverageTrack.popupData(clickState);
         } else {
-            return this.alignmentTrack.popupData(config);
+            return this.alignmentTrack.popupData(clickState);
         }
+    }
 
+    /**
+     * Return the features (alignment, coverage, downsampled interval) clicked on.  Needed for "onclick" event.
+     * @param clickState
+     * @param features
+     */
+    clickedFeatures(clickState) {
+        if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
+            return [this.coverageTrack.getClickedObject(clickState)];
+        } else {
+            return [this.alignmentTrack.getClickedObject(clickState)];
+        }
     }
 
     menuItemList() {
@@ -286,6 +298,17 @@ class BAMTrack extends TrackBase {
             }
         });
 
+        // Show mismatches
+        menuItems.push('<hr/>');
+        menuItems.push({
+            object: $(createCheckbox("Show mismatches", this.showMismatches)),
+            click: () => {
+                this.showMismatches = !this.showMismatches;
+                this.config.showMismatches = this.showMismatches;
+                this.trackView.repaintViews();
+            }
+        });
+
         // Soft clips
         menuItems.push({
             object: $(createCheckbox("Show soft clips", this.showSoftClips)),
@@ -345,6 +368,7 @@ class BAMTrack extends TrackBase {
                 this.trackView.repaintViews();
             }
         });
+
         return menuItems;
     }
 
@@ -498,11 +522,14 @@ class CoverageTrack {
 
         // paint for all coverage buckets
         // If alignment track color is != default, use it
-        let color = this.parent.coverageColor || DEFAULT_COVERAGE_COLOR;
-        if (this.parent.color !== undefined) {
+        let color;
+        if(this.parent.coverageColor) {
+            color = this.parent.coverageColor
+        } else if (this.parent.color !== undefined) {
             color = IGVColor.darkenLighten(this.parent.color, -35);
+        } else {
+            color = DEFAULT_COVERAGE_COLOR;
         }
-
         IGVGraphics.setProperties(ctx, {
             fillStyle: color,
             strokeStyle: color
@@ -564,19 +591,25 @@ class CoverageTrack {
         }
     }
 
-    popupData(config) {
+    getClickedObject(clickState) {
 
-        let features = config.viewport.getCachedFeatures();
+        let features = clickState.viewport.getCachedFeatures();
         if (!features || features.length === 0) return;
 
-        let genomicLocation = Math.floor(config.genomicLocation),
-            referenceFrame = config.viewport.referenceFrame,
-            coverageMap = features.coverageMap,
-            nameValues = [],
-            coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart),
-            coverage = coverageMap.coverage[coverageMapIndex];
+        const genomicLocation = Math.floor(clickState.genomicLocation);
+        const coverageMap = features.coverageMap;
+        const coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart);
+        return coverageMap.coverage[coverageMapIndex];
+    }
 
+    popupData(clickState) {
+
+        const nameValues = [];
+
+        const coverage = this.getClickedObject(clickState);
         if (coverage) {
+            const genomicLocation = Math.floor(clickState.genomicLocation);
+            const referenceFrame = clickState.viewport.referenceFrame;
 
             nameValues.push(referenceFrame.chr + ":" + StringUtils.numberFormatter(1 + genomicLocation));
 
@@ -686,10 +719,13 @@ class AlignmentTrack {
         const bpStart = options.bpStart
         const pixelWidth = options.pixelWidth
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        const packedAlignmentRows = alignmentContainer.packedAlignmentRows
         const showSoftClips = this.parent.showSoftClips;
         const showAllBases = this.parent.showAllBases;
         const nucleotideColors = this.browser.nucleotideColors;
+
+        //alignmentContainer.repack(bpPerPixel, showSoftClips);
+        const packedAlignmentRows = alignmentContainer.packedAlignmentRows
+
 
         ctx.save();
 
@@ -865,7 +901,11 @@ class AlignmentTrack {
                 const blockStartPixel = (block.start - bpStart) / bpPerPixel;
                 const blockEndPixel = ((block.start + block.len) - bpStart) / bpPerPixel;
                 const blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel);
-                const arrowHeadWidthPixel = alignmentRowHeight / 2.0;
+
+                //const arrowHeadWidthPixel = alignmentRowHeight / 2.0;
+                const nomPixelWidthOnRef = 100 / bpPerPixel;
+                const arrowHeadWidthPixel = Math.min(alignmentRowHeight / 2.0,  nomPixelWidthOnRef / 6);
+
                 const isSoftClip = 'S' === block.type;
 
                 const strokeOutline =
@@ -940,9 +980,11 @@ class AlignmentTrack {
                 }
 
 
-                // Mismatch coloring
+                // Read base coloring coloring
 
-                if (this.parent.showMismatches && (isSoftClip || showAllBases || (referenceSequence && alignment.seq && alignment.seq !== "*"))) {
+                if (isSoftClip ||
+                    showAllBases ||
+                    this.parent.showMismatches && (referenceSequence && alignment.seq && alignment.seq !== "*")) {
 
                     const seq = alignment.seq ? alignment.seq.toUpperCase() : undefined;
                     const qual = alignment.qual;
@@ -1005,9 +1047,9 @@ class AlignmentTrack {
 
     };
 
-    popupData(config) {
-        const clickedObject = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-        return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
+    popupData(clickState) {
+        const clickedObject = this.getClickedObject(clickState);
+        return clickedObject ? clickedObject.popupData(clickState.genomicLocation) : undefined;
     };
 
     contextMenuItemList(clickState) {
@@ -1065,7 +1107,7 @@ class AlignmentTrack {
         });
         list.push('<hr/>');
 
-        const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
+        const clickedObject = this.getClickedObject(clickState);
         if (clickedObject) {
 
             const showSoftClips = this.parent.showSoftClips;
@@ -1120,11 +1162,51 @@ class AlignmentTrack {
             list.push('<hr/>');
         }
 
+        // Experimental JBrowse feature
+        if (this.browser.circularView) {
+            const maxFragmentLenth = this.parent.maxFragmentLength;
+            list.push({
+                label: 'Show discordant pairs',
+                click: () => {
+                    const refFrame = viewport.referenceFrame;
+                    const inView = viewport.getCachedFeatures().allAlignments().filter(a => {
+                        return a.end >= refFrame.start && a.start <= refFrame.end
+                            && a.mate
+                            && a.mate.chr
+                            && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxFragmentLenth);
+                    })
+                    const chords = makePairedAlignmentChords(inView);
+                    this.browser.circularView.addChords(chords, true);
+                }
+            });
+
+            list.push({
+                label: 'Clear chords',
+                click: () => {
+                    this.browser.circularView.clearChords();
+                }
+            });
+
+            list.push({
+                label: 'Clear selections',
+                click: () => {
+                    this.browser.circularView.clearSelection();
+                }
+            });
+
+            list.push('<hr/>');
+
+        }
+
         return list;
 
     }
 
-    getClickedObject(viewport, y, genomicLocation) {
+    getClickedObject(clickState) {
+
+        const viewport = clickState.viewport;
+        const y = clickState.y;
+        const genomicLocation = clickState.genomicLocation
 
         const showSoftClips = this.parent.showSoftClips;
 
@@ -1332,7 +1414,7 @@ const orientationTypes = {
     }
 }
 
-function getChrColor(chr) {
+export function getChrColor(chr) {
     if (chrColorMap[chr]) {
         return chrColorMap[chr];
     } else if (chrColorMap["chr" + chr]) {
