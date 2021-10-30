@@ -176,6 +176,15 @@ class TextFeatureSource {
         }
     }
 
+    // TODO -- experimental, will only work for non-indexed sources
+    getAllFeatures() {
+        if (this.queryable) {   // queryable sources don't support all features
+            return [];
+        } else {
+            return this.getWGFeatures(this.featureCache.getAllFeatures());
+        }
+    }
+
 
     async loadFeatures(start, end, visibilityWindow, queryChr) {
 
