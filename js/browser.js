@@ -1532,7 +1532,7 @@ class Browser {
 
 
         const locaTrackFiles = trackJson.filter((track) => {
-            track.url && FileUtils.isFilePath(track.url)
+            track.url && FileUtils.isFile(track.url)
         })
 
         if (locaTrackFiles.length > 0) {
