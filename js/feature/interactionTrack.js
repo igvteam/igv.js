@@ -33,6 +33,7 @@ import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
 import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {makeBedPEChords} from "../jbrowse/circularViewUtils.js";
 
 
 
@@ -381,7 +382,7 @@ class InteractionTrack extends TrackBase {
                     this.trackView.presentColorPicker();
                 }
             },
-            '<HR/>'
+            '<hr/>'
         ];
 
         if (this.hasValue) {
@@ -422,8 +423,75 @@ class InteractionTrack extends TrackBase {
             items = items.concat(MenuUtils.numericDataMenuItems(this.trackView));
         }
 
+        // Experimental JBrowse feature
+        if (this.browser.circularView) {
+            items.push('<hr/>');
+
+            items.push({
+                label: 'Show chords',
+                click: () => {
+                    const chords = makeBedPEChords(this.featureSource.getAllFeatures(), this.color)
+                    this.browser.circularView.addChords(chords, true);
+                }
+            });
+
+            items.push({
+                label: 'Clear chords',
+                click: () => {
+                    this.browser.circularView.clearChords();
+                }
+            });
+
+            items.push({
+                label: 'Clear chord selections',
+                click: () => {
+                    this.browser.circularView.clearSelection();
+                }
+            });
+        }
+
+
         return items;
     };
+
+    contextMenuItemList(clickState) {
+
+        // Experimental JBrowse feature
+        if (this.browser.circularView) {
+            const viewport = clickState.viewport;
+            const list = [];
+
+            list.push({
+                label: 'Show chords',
+                click: () => {
+                    const refFrame = viewport.referenceFrame;
+                    const inView = "all" === refFrame.chr ?
+                        this.featureSource.getAllFeatures() :
+                        this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end);
+                    this.browser.circularView.addBedPEChords(inView, this.color);
+                }
+            });
+
+            list.push({
+                label: 'Clear chords',
+                click: () => {
+                    this.browser.circularView.clearChords();
+                }
+            });
+
+            list.push({
+                label: 'Clear selections',
+                click: () => {
+                    this.browser.circularView.clearSelection();
+                }
+            });
+
+            list.push('<hr/>');
+            return list;
+        }
+
+    }
+
 
     doAutoscale(features) {
 

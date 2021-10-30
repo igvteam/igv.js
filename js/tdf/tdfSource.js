@@ -37,6 +37,35 @@ class TDFSource {
 
     async getFeatures({chr, start, end, bpPerPixel}) {
 
+        if (chr.toLowerCase() === "all") {
+            const wgFeatures = [];
+            const genome = this.genome;
+            const chrNames = this.genome.wgChromosomeNames;
+            if (chrNames) {
+                for (let c of genome.wgChromosomeNames) {
+                    const len = genome.getChromosome(c).bpLength;
+                    bpPerPixel = len / 1000;
+                    const chrFeatures = await this._getFeatures(c, 0, len, bpPerPixel);
+                    if (chrFeatures) {
+                        for (let f of chrFeatures) {
+                                const wg = Object.assign({}, f);
+                                wg.chr = "all";
+                                wg.start = genome.getGenomeCoordinate(f.chr, f.start);
+                                wg.end = genome.getGenomeCoordinate(f.chr, f.end);
+                                wg._f = f;
+                                wgFeatures.push(wg);
+                        }
+                    }
+                }
+            }
+            return wgFeatures;
+
+        } else {
+            return this._getFeatures(chr, start, end, bpPerPixel);
+        }
+    }
+
+    async _getFeatures(chr, start, end, bpPerPixel) {
         const genomicInterval = new GenomicInterval(chr, start, end);
         const genome = this.genome;
 
@@ -49,10 +78,6 @@ class TDFSource {
                     this.normalizationFactor = 1.0e6 / totalCount;
                 }
             }
-        }
-
-        if (chr.toLowerCase() === "all") {
-            return [];      // Whole genome view not yet supported
         }
 
         genomicInterval.bpPerPixel = bpPerPixel;
@@ -97,7 +122,7 @@ class TDFSource {
     }
 
     supportsWholeGenome() {
-        return false;
+        return true;
     }
 }
 

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>Test of track line in wig file</h1>
+
+<h3>track type=wiggle_0 graphType=points name="truc" description="une description" visibility=full color=50,150,255 yLineMark=100 yLineOnOff=on</h3>
+<p>Notes: <ul><li>yLine not currently supported</li><li>visibility not applicable to wig tracks</li></ul></p>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const div = document.getElementById("myDiv");
+    const options = {
+        reference: {
+            id: "hg19",
+            fastaURL: "../../test/data/fasta/hg19.chrom.sizes",
+            format: "chromsizes"
+        },
+        locus: "chr8:29,206,437-29,208,032",
+        tracks: [
+
+            {
+                "url": "../../test/data/wig/trackLine.wig"
+            }
+
+        ]
+    };
+
+    igv.createBrowser(div, options)
+        .then(function (browser) {
+        });
+
+
+</script>
+
+</body>
+
+</html>
+

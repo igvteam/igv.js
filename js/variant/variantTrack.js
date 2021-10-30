@@ -30,8 +30,8 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {PaletteColorTable, ColorTable} from "../util/colorPalletes.js";
+import {makeVCFChords} from "../jbrowse/circularViewUtils.js";
 import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
-
 
 const isString = StringUtils.isString;
 
@@ -107,7 +107,7 @@ class VariantTrack extends TrackBase {
     }
 
     supportsWholeGenome() {
-        return this.config.indexed === false && this.config.supportsWholeGenome !== false
+        return this.config.indexed === false || this.config.supportsWholeGenome === true
     }
 
     get color() {
@@ -277,7 +277,6 @@ class VariantTrack extends TrackBase {
                         }
                         sampleNumber++;
                     }
-
                 }
             }
 
@@ -309,127 +308,99 @@ class VariantTrack extends TrackBase {
         return variantColor;
     }
 
-    /**
-     * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
-     */
-    popupData(clickState, featureList) {
+    clickedFeatures(clickState, features) {
 
-        featureList = this.clickedFeatures(clickState, featureList);
+        let featureList = super.clickedFeatures(clickState, features);
 
-        const genomicLocation = clickState.genomicLocation
-        const genomeID = this.browser.genome.id
-        const sampleInformation = this.browser.sampleInformation;
         const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
         const callHeight = vGap + ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight);
-
         // Find the variant row (i.e. row assigned during feature packing)
         const yOffset = clickState.y;
-        let row;
-        let sampleRow;
         if (yOffset <= this.variantBandHeight) {
             // Variant
             const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight;
-            row = (Math.floor)((yOffset - TOP_MARGIN) / (variantHeight + vGap));
-            sampleRow = -1;
-        } else {
+            const variantRow = (Math.floor)((yOffset - TOP_MARGIN) / (variantHeight + vGap));
+            featureList = featureList.filter(f => f.row === variantRow);
+        } else if (this.callSets) {
+            const callSets = this.callSets;
             const sampleY = yOffset - this.variantBandHeight;
-            sampleRow = Math.floor(sampleY / this.sampleHeight);
-            row = Math.floor((sampleY - sampleRow * this.sampleHeight) / callHeight);
+            const sampleRow = Math.floor(sampleY / this.sampleHeight);
+            if (sampleRow >= 0 && sampleRow < callSets.length) {
+                const variantRow = Math.floor((sampleY - sampleRow * this.sampleHeight) / callHeight);
+                const variants = featureList.filter(f => f.row === variantRow);
+                const cs = callSets[sampleRow];
+                featureList = variants.map(v => {
+                    const call = v.calls[cs.id];
+                    expandGenotype(call, v);
+                    return call;
+                });
+            }
         }
-        const rowVariants = featureList.filter(f => f.row === row);
 
-        let popupData = []
-        for (let variant of rowVariants) {
+        return featureList;
+    }
+
+
+    /**
+     * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
+     */
+    popupData(clickState, features) {
+
+        const featureList = this.clickedFeatures(clickState, features);
+        const genomicLocation = clickState.genomicLocation
+        const genomeID = this.browser.genome.id
+        const sampleInformation = this.browser.sampleInformation;
+
+        let popupData = [];
+        for (let f of featureList) {
 
             if (popupData.length > 0) {
                 popupData.push({html: '<hr style="border-top-width:2px ;border-color: #c9c3ba" />'})
             }
 
-            if (yOffset <= this.variantBandHeight) {
-                const v = variant.popupData(genomicLocation);
+            if (typeof f.popupData === 'function') {
+                const v = f.popupData(genomicLocation, genomeID);
                 Array.prototype.push.apply(popupData, v);
             } else {
-                // Callset
-                const callSets = this.callSets;
-                if (callSets && variant.calls) {
-                    if (sampleRow >= 0 && sampleRow < callSets.length) {
-                        const cs = callSets[sampleRow];
-                        const call = variant.calls[cs.id];
-                        Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID, sampleInformation));
+                // Assume this is a call (genotype)
+                const call = f;
+
+                if (call.callSetName !== undefined) {
+                    popupData.push({name: 'Name', value: call.callSetName});
+                }
+
+                if (call.genotypeName) {
+                    popupData.push({name: 'Genotype', value: call.genotypeName});
+                }
+
+                if (call.phaseset !== undefined) {
+                    popupData.push({name: 'Phase set', value: call.phaseset});
+                }
+                if (call.genotypeLikelihood !== undefined) {
+                    popupData.push({name: 'genotypeLikelihood', value: call.genotypeLikelihood.toString()});
+                }
+
+                if (sampleInformation) {
+                    var attr = sampleInformation.getAttributes(call.callSetName);
+                    if (attr) {
+                        Object.keys(attr).forEach(function (attrName) {
+                            var displayText = attrName.replace(/([A-Z])/g, " $1");
+                            displayText = displayText.charAt(0).toUpperCase() + displayText.slice(1);
+                            popupData.push({name: displayText, value: attr[attrName]});
+                        });
                     }
                 }
 
+                var infoKeys = Object.keys(call.info);
+                if (infoKeys.length) {
+                    popupData.push('<hr/>');
+                }
+                infoKeys.forEach(function (key) {
+                    popupData.push({name: key, value: decodeURIComponent(call.info[key])});
+                });
             }
         }
-
         return popupData;
-
-        /**
-         * Genotype popup text.
-         * @param call
-         * @param variant
-         * @returns {Array}
-         */
-        function extractGenotypePopupData(call, variant, genomeId, sampleInformation) {
-
-            let popupData = [];
-            if (call.callSetName !== undefined) {
-                popupData.push({name: 'Name', value: call.callSetName});
-            }
-
-            if (call.genotype) {
-                let gt = '';
-
-                if (variant.alternateBases === ".") {
-                    gt = "No Call";
-                } else {
-                    const altArray = variant.alternateBases.split(",")
-                    for (let allele of call.genotype) {
-                        if (gt.length > 0) {
-                            gt += "|";
-                        }
-                        if ('.' === allele) {
-                            gt += '.';
-                        } else if (allele === 0) {
-                            gt += variant.referenceBases;
-                        } else {
-                            let alt = altArray[allele - 1].replace("<", "&lt;");
-                            gt += alt;
-                        }
-                    }
-                }
-                popupData.push({name: 'Genotype', value: gt});
-            }
-
-
-            if (call.phaseset !== undefined) {
-                popupData.push({name: 'Phase set', value: call.phaseset});
-            }
-            if (call.genotypeLikelihood !== undefined) {
-                popupData.push({name: 'genotypeLikelihood', value: call.genotypeLikelihood.toString()});
-            }
-
-            if (sampleInformation) {
-                var attr = sampleInformation.getAttributes(call.callSetName);
-                if (attr) {
-                    Object.keys(attr).forEach(function (attrName) {
-                        var displayText = attrName.replace(/([A-Z])/g, " $1");
-                        displayText = displayText.charAt(0).toUpperCase() + displayText.slice(1);
-                        popupData.push({name: displayText, value: attr[attrName]});
-                    });
-                }
-            }
-
-            var infoKeys = Object.keys(call.info);
-            if (infoKeys.length) {
-                popupData.push('<hr/>');
-            }
-            infoKeys.forEach(function (key) {
-                popupData.push({name: key, value: decodeURIComponent(call.info[key])});
-            });
-
-            return popupData;
-        }
 
     }
 
@@ -560,6 +531,33 @@ class VariantTrack extends TrackBase {
                 });
         }
 
+        // Experimental JBrowse feature
+        if (this.browser.circularView) {
+            menuItems.push('<hr/>');
+
+            menuItems.push({
+                label: 'Show chords',
+                click: () => {
+                    const chords = makeVCFChords(this.featureSource.getAllFeatures(), this.color);
+                    this.browser.circularView.addChords(chords, true);
+                }
+            });
+
+            menuItems.push({
+                label: 'Clear chords',
+                click: () => {
+                    this.browser.circularView.clearChords();
+                }
+            });
+
+            menuItems.push({
+                label: 'Clear chord selections',
+                click: () => {
+                    this.browser.circularView.clearSelection();
+                }
+            });
+        }
+
 
         return menuItems;
     }
@@ -618,6 +616,33 @@ class VariantTrack extends TrackBase {
             this.colorTables.set(key, tbl);
         }
         return this.colorTables.get(key);
+    }
+}
+
+
+function expandGenotype(call, variant) {
+
+    if (call.genotype) {
+        let gt = '';
+        if (variant.alternateBases === ".") {
+            gt = "No Call";
+        } else {
+            const altArray = variant.alternateBases.split(",")
+            for (let allele of call.genotype) {
+                if (gt.length > 0) {
+                    gt += "|";
+                }
+                if ('.' === allele) {
+                    gt += '.';
+                } else if (allele === 0) {
+                    gt += variant.referenceBases;
+                } else {
+                    let alt = altArray[allele - 1].replace("<", "&lt;");
+                    gt += alt;
+                }
+            }
+        }
+        call.genotypeName = gt;
     }
 }
 

@@ -89,7 +89,10 @@ class TrackBase {
 
         this.visibilityWindow = config.visibilityWindow
 
-        this.trackView = undefined
+        if(config.onclick) {
+            this.onclick = config.onclick;
+            config.onclick = undefined;   // functions cannot be saved in sessions, clear it here.
+        }
     }
 
     get name() {
@@ -287,6 +290,14 @@ class TrackBase {
         return this.visibilityWindow;
     }
 
+    /**
+     * Return the features clicked over.  Default implementation assumes a single row of features and only considers
+     * the genomic location.   Overriden by most subclasses.
+     *
+     * @param clickState
+     * @param features
+     * @returns {[]|*[]}
+     */
     clickedFeatures(clickState, features) {
 
         // We use the cached features rather than method to avoid async load.  If the
@@ -397,10 +408,8 @@ class TrackBase {
 
             const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr;
             return `<a target="_blank" href="https://run.opencravat.org/result/nocache/variant.html` +
-                `?chrom=${cravatChr}&pos=${position}&ref_base=${ref}&alt_base=${alt}">Cravat ${ref}->${alt}</a>`
-            // return "<a target='_blank' " +
-            //     "href='https://www.cravat.us/CRAVAT/variant.html?variant=" +
-            //     cravatChr + "_" + position + "_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>"
+                `?chrom=${cravatChr}&pos=${position}&ref_base=${ref}&alt_base=${alt}"><b>Cravat ${ref}->${alt}</b></a>`
+
         } else {
             return undefined
         }

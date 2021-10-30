@@ -429,7 +429,7 @@ class SegTrack extends TrackBase {
             const f = feature._f || feature;
 
             const data = (typeof f.popupData === 'function') ?
-                f.popupData() :
+                f.popupData(this.type, this.browser.genome.id) :
                 this.extractPopupData(f);
             Array.prototype.push.apply(items, data);
 

@@ -123,6 +123,14 @@ function setDefaults(config) {
         config.showIdeogram = true;
     }
 
+    if (undefined === config.showCircularView) {
+        config.showCircularView = false;
+    }
+
+    if (undefined === config.showCircularViewButton) {
+        config.showCircularViewButton = true;
+    }
+
     if (undefined === config.showTrackLabelButton) {
         config.showTrackLabelButton = true;
     }

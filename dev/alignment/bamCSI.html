@@ -24,7 +24,13 @@
                     type: "alignment",
                     url: "https://s3.amazonaws.com/igv.org.demo/gstt1_sample.bam",
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/gstt1_sample.bam.csi",
-                    name: "CSI BAM"
+                    name: "CSI BAM",
+                    onclick: (features) => {
+                        for(let f of features) {
+                            console.log(f);
+                        }
+                        return false;
+                    }
                 }
             ]
         };

@@ -49,6 +49,7 @@
     "btoa": "^1.2.1",
     "chai": "^4.2.0",
     "core-js": "^3.6.4",
+    "circular-view": "github:igvteam/circular-view",
     "eslint": "^6.4.0",
     "esm": "^3.2.25",
     "igv-ui": "git+https://github.com/igvteam/igv-ui.git#v1.2.0",
