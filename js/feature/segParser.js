@@ -24,6 +24,7 @@
  */
 
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import TrackBase from "../trackBase.js";
 
 
 /**
@@ -155,7 +156,8 @@ class SegFeature {
         return undefined;
     }
 
-    popupData() {
+
+    popupData(type, genomeID) {
         const filteredProperties = new Set(['chr', 'start', 'end', 'sample', 'value', 'row', 'color', 'sampleKey',
             'uniqueSampleKey', 'sampleId', 'chromosome', 'uniquePatientKey']);
         const locationString = (this.chr + ":" +
@@ -166,15 +168,46 @@ class SegFeature {
             {name: "Location", value: locationString},
             {name: this.valueColumnName ? StringUtils.capitalize(this.valueColumnName) : "Value", value: this.value}
         ];
+
+        // TODO -- the Cravat stuff should probably be in the track (SegTrack)
+        if("mut" === type && "hg38" === genomeID) {
+            const l = this.extractCravatLink(genomeID);
+            if(l) {
+                pd.push('<hr/>')
+                pd.push({html: l});
+                pd.push('<hr/>')
+            }
+        }
+
         if (this.attributeNames && this.attributeNames.length > 0) {
             for (let i = 0; i < this.attributeNames.length; i++) {
-                if(!filteredProperties.has(this.attributeNames[i]) & this.valueColumnName !== this.attributeNames[i]) {
+                if (!filteredProperties.has(this.attributeNames[i]) & this.valueColumnName !== this.attributeNames[i]) {
                     pd.push({name: StringUtils.capitalize(this.attributeNames[i]), value: this.attributeValues[i]});
                 }
             }
         }
         return pd;
     }
+
+    extractCravatLink(genomeId) {
+
+        let ref, alt;
+        if (this.attributeNames && this.attributeNames.length > 0) {
+            for (let i = 0; i < this.attributeNames.length; i++) {
+                if (!ref && "Reference_Allele" === this.attributeNames[i]) {
+                    ref = this.attributeValues[i]
+                }
+                if (!alt && this.attributeNames[i].startsWith("Tumor_Seq_Allele") && this.attributeValues[i] !== ref) {
+                    alt = this.attributeValues[i];
+                }
+                if (ref && alt) {
+                    return TrackBase.getCravatLink(this.chr, this.start + 1, ref, alt, genomeId)
+                }
+            }
+        }
+
+    }
 }
+
 
 export default SegParser;
