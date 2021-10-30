@@ -51,7 +51,7 @@ class FeatureFileReader {
         this.indexURL = config.indexURL;
         this.indexed = config.indexed;
 
-        if (FileUtils.isFilePath(this.config.url)) {
+        if (FileUtils.isFile(this.config.url)) {
             this.filename = this.config.url.name;
         } else if (isDataURL(this.config.url)) {
             this.indexed = false;  // by definition
