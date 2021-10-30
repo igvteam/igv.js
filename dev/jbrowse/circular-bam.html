@@ -96,6 +96,9 @@
             makeDraggable(el, el)
 
             circularView = createCircularView(el, browser);
+            if(options.showCircularView) {
+                circularView.show();
+            }
 
             const sizeInputElement = document.getElementById("circview-size-input");
             const circContainerElement = document.getElementById("jbrowse_circular_genome_view");

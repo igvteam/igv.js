@@ -124,6 +124,10 @@
             makeDraggable(el, el)
 
             circularView = createCircularView(el, browser);
+            if(options.showCircularView) {
+                circularView.show();
+            }
+
         })
 
     // individual clicked-on alignments

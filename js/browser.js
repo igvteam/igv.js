@@ -71,7 +71,7 @@ import IdeogramTrack from "./ideogramTrack.js";
 import RulerTrack from "./rulerTrack.js";
 import GtexSelection from "./gtex/gtexSelection.js";
 import CircularViewControl from "./ui/circularViewControl.js";
-import CircularView from "../node_modules/circular-view/js/circularView.js";
+import {circViewIsInstalled} from "./jbrowse/circularViewUtils.js";
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -251,7 +251,7 @@ class Browser {
 
         this.centerLineButton = new CenterLineButton(this, $toggle_button_container.get(0))
 
-        if (CircularView.isInstalled()) {
+        if (circViewIsInstalled()) {
             this.setCircularViewVisibility(config.showCircularView)
             this.circularViewControl = new CircularViewControl($toggle_button_container.get(0), this)
         }
@@ -637,7 +637,7 @@ class Browser {
 
     setCircularViewVisibility(isVisible) {
 
-        if (CircularView.isInstalled() && this.circularView) {
+        if (circViewIsInstalled() && this.circularView) {
             true === isVisible ? this.circularView.show() : this.circularView.hide()
         }
 

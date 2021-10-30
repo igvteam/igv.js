@@ -8,6 +8,7 @@ import CircularView from "../../node_modules/circular-view/js/circularView.js";
  */
 const MINIMUM_SV_LENGTH = 1000000;
 
+const circViewIsInstalled = () => CircularView.isInstalled();
 
 const shortChrName = (chrName) => {
     return chrName.startsWith("chr") ? chrName.substring(3) : chrName;
@@ -163,5 +164,5 @@ function createCircularView(el, browser) {
     return circularView;
 }
 
-export {makeBedPEChords, makePairedAlignmentChords, makeVCFChords, createCircularView}
+export {circViewIsInstalled, makeBedPEChords, makePairedAlignmentChords, makeVCFChords, createCircularView}
 

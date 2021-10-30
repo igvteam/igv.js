@@ -31,6 +31,7 @@ import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {PaletteColorTable, ColorTable} from "../util/colorPalletes.js";
 import {makeVCFChords} from "../jbrowse/circularViewUtils.js";
+import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const isString = StringUtils.isString;
 
@@ -276,7 +277,6 @@ class VariantTrack extends TrackBase {
                         }
                         sampleNumber++;
                     }
-
                 }
             }
 
