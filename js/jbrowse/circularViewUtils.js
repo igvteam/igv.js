@@ -116,9 +116,13 @@ const makeCircViewChromosomes = (genome) => {
 
 function createCircularView(el, browser) {
 
-    const circularView = new CircularView(el, {
+   const circularView = new CircularView(el, {
 
-        chromosomes: makeCircViewChromosomes(browser.genome),
+        assembly: {
+            name: browser.genome.id,
+            id: browser.genome.id,
+            chromosomes: makeCircViewChromosomes(browser.genome)
+        },
 
         onChordClick: (feature, chordTrack, pluginManager) => {
 
