@@ -29,8 +29,9 @@ import FeatureSource from '../feature/featureSource.js';
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import {PaletteColorTable, ColorTable} from "../util/colorPalletes.js";
+import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
 
 const isString = StringUtils.isString;
 
