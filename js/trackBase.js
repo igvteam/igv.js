@@ -126,7 +126,7 @@ class TrackBase {
         // function properties are transient as they cannot be saved in json
         const state = {};
         for (let key of Object.keys(this.config)) {
-            if (!key.startsWith("_") && typeof this.config[key] !== "function") {
+            if (!key.startsWith("_") && typeof this.config[key] !== "function" && this.config[key] !== undefined) {
                 state[key] = this.config[key];
             }
         }
