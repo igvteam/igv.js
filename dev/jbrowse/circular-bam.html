@@ -24,7 +24,7 @@
 <body>
 
 <p>
-    <h2>Circular genome view with alignment track</h2>
+<h2>Circular genome view with alignment track</h2>
 
 <ul>
     <li>Right click alignments and select <b>Show discordant pairs</b></li>
@@ -49,15 +49,12 @@
 
     import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
     import igv from "../../js/index.js";
-    import {makePairedAlignmentChords, createCircularView} from "../../js/jbrowse/circularViewUtils.js";
 
     // Start igv.js and create regions
     var options =
         {
             genome: "hg19",
             locus: "chr17:64,040,802-64,045,633",
-            // showCircularViewButton: false,
-            showCircularView: true,
             tracks: [
                 {
                     // url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam",
@@ -70,36 +67,22 @@
                     showMismatches: false,
                     height: 500,
                     maxFragmentLength: 1000000,  // 1 mb -- only interested in large deletions
-                    colorBy: "fragmentLength",
-                    onclick: (features, e) => {
-                        if (e.shiftKey) {
-                            if (features && features.length > 0) {
-                                selectPairedAlignmentChord(features[0]);
-                            }
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
+                    colorBy: "fragmentLength"
                 }
             ]
         };
 
-    let circularView;
     igv.createBrowser(document.getElementById("igvDiv"), options)
 
         .then(async function (browser) {
 
             console.log("Created IGV browser");
 
-            const el = document.getElementById('jbrowse_circular_genome_view')
-            makeDraggable(el, el)
+            const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
+            makeDraggable(circularViewContainer, circularViewContainer)
+            browser.createCircularView(circularViewContainer, true);
 
-            circularView = createCircularView(el, browser);
-            if(options.showCircularView) {
-                circularView.show();
-            }
-
+            // Resize circular view control
             const sizeInputElement = document.getElementById("circview-size-input");
             const circContainerElement = document.getElementById("jbrowse_circular_genome_view");
             sizeInputElement.value = circContainerElement.clientWidth;
@@ -107,20 +90,10 @@
                 const sz = e.target.value;
                 circContainerElement.style.width = sz + "px";
                 circContainerElement.style.height = sz + "px";
-                circularView.setSize(Number.parseInt(sz));
+                browser.circularView.setSize(Number.parseInt(sz));
             })
 
         })
-
-    // individual clicked-on alignments
-    function selectPairedAlignmentChord(feature) {
-        const chord = makePairedAlignmentChords([feature])[0];
-        const found = circularView.selectAlignmentChord(chord.uniqueId);
-        if(!found) {
-            circularView.addChords([chord], true);
-            circularView.selectAlignmentChord(chord.uniqueId)
-        }
-    }
 
 
 </script>

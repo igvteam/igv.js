@@ -98,7 +98,7 @@ const makeVCFChords = (features, color) => {
     })
 }
 
-const makeCircViewChromosomes = (genome) => {
+function makeCircViewChromosomes (genome)  {
     const regions = [];
     const colors = [];
     for (let chrName of genome.wgChromosomeNames) {
@@ -117,15 +117,9 @@ const makeCircViewChromosomes = (genome) => {
 
 function createCircularView(el, browser) {
 
-   const circularView = new CircularView(el, {
+    const circularView = new CircularView(el, {
 
-        assembly: {
-            name: browser.genome.id,
-            id: browser.genome.id,
-            chromosomes: makeCircViewChromosomes(browser.genome)
-        },
-
-        onChordClick: (feature, chordTrack, pluginManager) => {
+         onChordClick: (feature, chordTrack, pluginManager) => {
 
             const f1 = feature.data;
             const f2 = f1.mate;
@@ -159,10 +153,9 @@ function createCircularView(el, browser) {
             browser.search(searchString);
         }
     });
-    browser.circularView = circularView;
-    circularView.hide();
+
     return circularView;
 }
 
-export {circViewIsInstalled, makeBedPEChords, makePairedAlignmentChords, makeVCFChords, createCircularView}
+export {circViewIsInstalled, makeBedPEChords, makePairedAlignmentChords, makeVCFChords, createCircularView, makeCircViewChromosomes}
 
