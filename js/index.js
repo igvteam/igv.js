@@ -9,7 +9,7 @@ import embedCss from "./embedCss.js";
 import version from "./version.js"
 import TrackView from "./trackView.js"
 import {igvxhr, oauth} from "../node_modules/igv-utils/src/index.js"
-
+import CircularView from "circular-view/js/circularView.js";
 
 const setApiKey = igvxhr.setApiKey;
 
@@ -38,6 +38,7 @@ export default {
     version,
     setApiKey,
     doAutoscale,
-    TrackView
+    TrackView,
+    CircularView
 }
 
