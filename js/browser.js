@@ -611,6 +611,14 @@ class Browser {
 
         await this.updateViews();
 
+        if (circViewIsInstalled() && this.circularView) {
+            this.circularView.setAssembly({
+                name: this.genome.id,
+                id: this.genome.id,
+                chromosomes: makeCircViewChromosomes(browser.genome)
+            });
+        }
+
         return this.genome;
     }
 
@@ -1315,7 +1323,7 @@ class Browser {
         this.columnContainer.querySelectorAll('.igv-column').forEach((column, c) => {
             if (c === referenceFrameIndex) {
                 // do nothing
-            }  else {
+            } else {
                 column.remove()
             }
         })
@@ -1325,16 +1333,16 @@ class Browser {
 
         // Discard viewports
         for (let trackView of this.trackViews) {
-            const retain = trackView.viewports[ referenceFrameIndex ]
+            const retain = trackView.viewports[referenceFrameIndex]
             trackView.viewports.filter((viewport, i) => i !== referenceFrameIndex).forEach(viewport => viewport.dispose())
-            trackView.viewports = [ retain ]
+            trackView.viewports = [retain]
         }
 
         const viewportWidth = this.calculateViewportWidth(1)
         referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth
-        this.referenceFrameList = [ referenceFrame ]
+        this.referenceFrameList = [referenceFrame]
 
-        this.trackViews.forEach(({ viewports }) => viewports.forEach(viewport => viewport.setWidth(viewportWidth)))
+        this.trackViews.forEach(({viewports}) => viewports.forEach(viewport => viewport.setWidth(viewportWidth)))
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
