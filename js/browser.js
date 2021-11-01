@@ -71,7 +71,7 @@ import IdeogramTrack from "./ideogramTrack.js";
 import RulerTrack from "./rulerTrack.js";
 import GtexSelection from "./gtex/gtexSelection.js";
 import CircularViewControl from "./ui/circularViewControl.js";
-import {circViewIsInstalled} from "./jbrowse/circularViewUtils.js";
+import {makeCircViewChromosomes, createCircularView} from "./jbrowse/circularViewUtils.js";
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -140,8 +140,6 @@ class Browser {
         for (let key of Object.keys(this.nucleotideColors)) {
             this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key];
         }
-
-        this.circularViewVisible = config.showCircularView;
 
         this.trackLabelsVisible = config.showTrackLabels;
 
@@ -250,11 +248,6 @@ class Browser {
         this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
 
         this.centerLineButton = new CenterLineButton(this, $toggle_button_container.get(0))
-
-        if (circViewIsInstalled()) {
-            this.setCircularViewVisibility(config.showCircularView)
-            this.circularViewControl = new CircularViewControl($toggle_button_container.get(0), this)
-        }
 
         this.setTrackLabelVisibility(config.showTrackLabels)
         this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), this)
@@ -611,14 +604,6 @@ class Browser {
 
         await this.updateViews();
 
-        if (circViewIsInstalled() && this.circularView) {
-            this.circularView.setAssembly({
-                name: this.genome.id,
-                id: this.genome.id,
-                chromosomes: makeCircViewChromosomes(browser.genome)
-            });
-        }
-
         return this.genome;
     }
 
@@ -640,14 +625,6 @@ class Browser {
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
 
         this.setCenterLineAndCenterLineButtonVisibility(!GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
-
-    }
-
-    setCircularViewVisibility(isVisible) {
-
-        if (circViewIsInstalled() && this.circularView) {
-            true === isVisible ? this.circularView.show() : this.circularView.hide()
-        }
 
     }
 
@@ -1832,6 +1809,29 @@ class Browser {
         }
     }
 
+    createCircularView(container, show) {
+
+        this.circularView = createCircularView(container, this);
+        this.circularView.setAssembly({
+            name: this.genome.id,
+            id: this.genome.id,
+            chromosomes: makeCircViewChromosomes(this.genome)
+        });
+        this.circularViewControl = new CircularViewControl(this.$toggle_button_container.get(0), this);
+        this.circularViewControl.setState(show);
+        this.circularViewVisible = show;
+    }
+
+    get circularViewVisible() {
+        return this._circularViewVisible;
+    }
+
+    set circularViewVisible(isVisible) {
+        this._circularViewVisible = isVisible;
+        if (this.circularView) {
+            true === isVisible ? this.circularView.show() : this.circularView.hide()
+        }
+    }
 }
 
 function handleMouseMove(e) {

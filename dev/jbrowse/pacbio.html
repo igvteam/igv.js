@@ -42,7 +42,6 @@
 
     import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
     import igv from "../../js/index.js";
-    import {createCircularView} from "../../js/jbrowse/circularViewUtils.js";
 
     // Start igv.js and create regions
     var options =
@@ -120,24 +119,13 @@
             console.log("Created IGV browser");
             window.igvBrowser = browser;
 
-            const el = document.getElementById('jbrowse_circular_genome_view')
-            makeDraggable(el, el)
+            const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
+            makeDraggable(circularViewContainer, circularViewContainer)
+            browser.createCircularView(circularViewContainer, true);
 
-            circularView = createCircularView(el, browser);
-            if(options.showCircularView) {
-                circularView.show();
-            }
 
         })
 
-    // individual clicked-on alignments
-    function sendPairedAlignmentChord(features) {
-        circularView.selectAlignmentChord(features[0]);
-    }
-
-    function sendBedPEChords(features) {
-        circularView.addBedPEChords(features);
-    }
 
 </script>
 
