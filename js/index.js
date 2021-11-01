@@ -38,7 +38,6 @@ export default {
     version,
     setApiKey,
     doAutoscale,
-    TrackView,
-    CircularView
+    TrackView
 }
 
