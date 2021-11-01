@@ -1323,7 +1323,9 @@ class Browser {
         this.columnContainer.querySelectorAll('.igv-column').forEach((column, c) => {
             if (c === referenceFrameIndex) {
                 // do nothing
+
             } else {
+
                 column.remove()
             }
         })
@@ -1333,16 +1335,20 @@ class Browser {
 
         // Discard viewports
         for (let trackView of this.trackViews) {
+
             const retain = trackView.viewports[referenceFrameIndex]
             trackView.viewports.filter((viewport, i) => i !== referenceFrameIndex).forEach(viewport => viewport.dispose())
             trackView.viewports = [retain]
+
         }
 
         const viewportWidth = this.calculateViewportWidth(1)
         referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth
+
         this.referenceFrameList = [referenceFrame]
 
         this.trackViews.forEach(({viewports}) => viewports.forEach(viewport => viewport.setWidth(viewportWidth)))
+
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
