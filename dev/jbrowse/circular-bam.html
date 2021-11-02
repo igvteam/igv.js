@@ -80,17 +80,25 @@
 
             const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
             makeDraggable(circularViewContainer, circularViewContainer)
-            browser.createCircularView(circularViewContainer, true);
+            browser.createCircularView(circularViewContainer);
 
             // Resize circular view control
             const sizeInputElement = document.getElementById("circview-size-input");
             const circContainerElement = document.getElementById("jbrowse_circular_genome_view");
             sizeInputElement.value = circContainerElement.clientWidth;
             sizeInputElement.addEventListener("change", e => {
+
+                let  trackButton = document.querySelector("button[data-testid='circular_track_select']");
+                if(trackButton) {
+                    trackButton.style.display = 'none';
+                }
+
                 const sz = e.target.value;
                 circContainerElement.style.width = sz + "px";
                 circContainerElement.style.height = sz + "px";
                 browser.circularView.setSize(Number.parseInt(sz));
+
+
             })
 
         })

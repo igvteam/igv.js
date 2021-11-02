@@ -1177,6 +1177,7 @@ class AlignmentTrack {
                     })
                     const chords = makePairedAlignmentChords(inView);
                     this.browser.circularView.addChords(chords, true);
+                    this.browser.circularViewVisible = true;
                 }
             });
 
