@@ -1188,13 +1188,6 @@ class AlignmentTrack {
                 }
             });
 
-            list.push({
-                label: 'Clear selections',
-                click: () => {
-                    this.browser.circularView.clearSelection();
-                }
-            });
-
             list.push('<hr/>');
 
         }
