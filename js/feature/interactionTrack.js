@@ -432,6 +432,7 @@ class InteractionTrack extends TrackBase {
                 click: () => {
                     const chords = makeBedPEChords(this.featureSource.getAllFeatures(), this.color)
                     this.browser.circularView.addChords(chords, true);
+                    this.browser.circularViewVisible = true;
                 }
             });
 

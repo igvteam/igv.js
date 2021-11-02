@@ -540,6 +540,7 @@ class VariantTrack extends TrackBase {
                 click: () => {
                     const chords = makeVCFChords(this.featureSource.getAllFeatures(), this.color);
                     this.browser.circularView.addChords(chords, true);
+                    this.browser.circularViewVisible = true;
                 }
             });
 

@@ -34,7 +34,7 @@ const CircularViewControl = function (parent, browser) {
 
     this.button.addEventListener('click', () => {
         browser.circularViewVisible = !browser.circularViewVisible
-        this.setState(browser.circularViewVisible)
+        //this.setState(browser.circularViewVisible)
     })
 
     this.browser = browser
