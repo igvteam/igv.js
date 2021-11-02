@@ -551,12 +551,6 @@ class VariantTrack extends TrackBase {
                 }
             });
 
-            menuItems.push({
-                label: 'Clear chord selections',
-                click: () => {
-                    this.browser.circularView.clearSelection();
-                }
-            });
         }
 
 
