@@ -1810,7 +1810,6 @@ class Browser {
     }
 
     createCircularView(container, show) {
-
         this.circularView = createCircularView(container, this);
         this.circularView.setAssembly({
             name: this.genome.id,
@@ -1823,13 +1822,13 @@ class Browser {
     }
 
     get circularViewVisible() {
-        return this._circularViewVisible;
+        return this.circularView !== undefined && this.circularView.visible;
     }
 
     set circularViewVisible(isVisible) {
-        this._circularViewVisible = isVisible;
         if (this.circularView) {
-            true === isVisible ? this.circularView.show() : this.circularView.hide()
+            this.circularView.visible = isVisible;
+            this.circularViewControl.setState(isVisible);
         }
     }
 }
