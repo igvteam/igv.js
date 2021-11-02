@@ -557,6 +557,14 @@ class Browser {
                 throw new Error("Cannot set initial locus");
             }
         }
+
+        if(genomeChange && this.circularView) {
+            this.circularView.setAssembly({
+                name: this.genome.id,
+                id: this.genome.id,
+                chromosomes: makeCircViewChromosomes(this.genome)
+            });
+        }
     }
 
     cleanHouseForSession() {
