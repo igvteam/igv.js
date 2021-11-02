@@ -426,7 +426,6 @@ class InteractionTrack extends TrackBase {
         // Experimental JBrowse feature
         if (this.browser.circularView) {
             items.push('<hr/>');
-
             items.push({
                 label: 'Show chords',
                 click: () => {
@@ -435,18 +434,10 @@ class InteractionTrack extends TrackBase {
                     this.browser.circularViewVisible = true;
                 }
             });
-
             items.push({
                 label: 'Clear chords',
                 click: () => {
                     this.browser.circularView.clearChords();
-                }
-            });
-
-            items.push({
-                label: 'Clear chord selections',
-                click: () => {
-                    this.browser.circularView.clearSelection();
                 }
             });
         }
