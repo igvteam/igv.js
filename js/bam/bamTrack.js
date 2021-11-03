@@ -1181,13 +1181,6 @@ class AlignmentTrack {
                 }
             });
 
-            list.push({
-                label: 'Clear chords',
-                click: () => {
-                    this.browser.circularView.clearChords();
-                }
-            });
-
             list.push('<hr/>');
 
         }
