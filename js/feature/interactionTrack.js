@@ -434,14 +434,7 @@ class InteractionTrack extends TrackBase {
                     this.browser.circularViewVisible = true;
                 }
             });
-            items.push({
-                label: 'Clear chords',
-                click: () => {
-                    this.browser.circularView.clearChords();
-                }
-            });
         }
-
 
         return items;
     };
@@ -461,13 +454,6 @@ class InteractionTrack extends TrackBase {
                         this.featureSource.getAllFeatures() :
                         this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end);
                     this.browser.circularView.addBedPEChords(inView, this.color);
-                }
-            });
-
-            list.push({
-                label: 'Clear chords',
-                click: () => {
-                    this.browser.circularView.clearChords();
                 }
             });
 
