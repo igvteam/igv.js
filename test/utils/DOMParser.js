@@ -1,5 +1,5 @@
-const {DOMParser} = require('xmldom')
+const {DOMParser} = require('@xmldom/xmldom')
 
-// Possibly nothing to do, if xmldom is compatible with browser DOMParser
+// Possibly nothing to do, if @xmldom/xmldom is compatible with browser DOMParser
 
 export {DOMParser}
