@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -7,19 +7,41 @@
 <body>
 
 <h1>Example IGV links</h1>
-<ul>
-    <li>
-        <a target="_blank" href="igvjs.html?genome=hg19&locus=myc&file=https%3A%2F%2F1000genomes.s3.amazonaws.com%2Fphase3%2Fdata%2FHG01879%2Fexome_alignment%2FHG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam%2Chttps%3A%2F%2Fs3.amazonaws.com%2Figv.broadinstitute.org%2Fannotations%2Fhg19%2Fgenes%2Fgencode.v18.collapsed.bed">
-            BAM and annotation file at specific locus
-        </a>
-    </li>
-    <li>
-        <a target="_blank" href="igvjs.html?sessionURL=sessions/igvSession.json">
-            JSON session file
-        </a>
-    </li>
 
-</ul>
+<p>
+    <a target="_blank"
+       href="igvjs.html?genome=hg19&locus=myc&file=https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam,https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed">
+        BAM and annotation file at specific locus
+    </a>
+</p>
+
+<p>
+    <a target="_blank" href="igvjs.html?sessionURL=sessions/igvSession.json">
+        JSON session file
+    </a>
+</p>
+
+<p>
+    <a target="_blank" href="igvjs.html?sessionURL=sessions/igvSession.xml">
+        XML (IGV desktop) session file
+    </a>
+</p>
+
+<p>
+    <a target="_blank"
+       href="igvjs.html?file=https://s3.amazonaws.com/igv.org.test/data/gm12878_loops.bedpe.gz&locus=chr1&name=GM12878+loops">
+        BedPE file with name</a>
+</p>
+<p>
+    <a target="_blank"
+       href="igvjs.html?genome=hg19&locus=chr8:128,750,882-128,751,331&file=https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz&index=https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi&name=SNPs">
+        DBSnp with index</a>
+</p>
+<p>
+    <a target="_blank"
+       href="igvjs.html?genome=https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta">
+        Fasta</a>
+</p>
 
 
 </body>
