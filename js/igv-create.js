@@ -200,8 +200,9 @@ function extractQuery(config) {
     i1 = uri.indexOf("?");
     i2 = uri.lastIndexOf("#");
 
-    let files
-    let indexURLs
+    let files;
+    let indexURLs;
+    let names;
     if (i1 >= 0) {
         if (i2 < 0) i2 = uri.length;
         for (i = i1 + 1; i < i2;) {
@@ -221,6 +222,9 @@ function extractQuery(config) {
                 } else if ('index' === key) {
                     // IGV desktop style index parameter
                     indexURLs = value.split(',')
+                } else if ('name' === key) {
+                    // IGV desktop style index parameter
+                    names = value.split(',')
                 } else {
                     config[key] = value;
                 }
@@ -244,6 +248,9 @@ function extractQuery(config) {
             if (indexURLs && indexURLs.length > i) {
                 trackConfig.indexURL = indexURLs[i]
             }
+            if(names && names.length > i) {
+                trackConfig.name = names[i];
+            }
             config.tracks.push(trackConfig)
         }
     }
@@ -252,7 +259,7 @@ function extractQuery(config) {
 }
 
 
-async function createTrack (config, browser) {
+async function createTrack(config, browser) {
     return await Browser.prototype.createTrack.call(browser, config)
 }
 
