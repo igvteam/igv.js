@@ -46,6 +46,7 @@ import HtsgetVariantReader from "../htsget/htsgetVariantReader.js";
 class TextFeatureSource {
 
     constructor(config, genome) {
+
         this.config = config || {};
         this.genome = genome;
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
@@ -199,7 +200,7 @@ class TextFeatureSource {
             // Whole chromosome
             const chromosome = this.genome ? this.genome.getChromosome(queryChr) : undefined;
             intervalStart = 0;
-            intervalEnd = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER;
+            intervalEnd = Math.max(chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER, end);
         } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
             const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
             intervalStart = Math.max(0, (start + end) / 2 - expansionWindow);
