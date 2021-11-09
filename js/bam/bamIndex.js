@@ -5,6 +5,7 @@ import BinaryParser from "../binary.js";
 
 const BAI_MAGIC = 21578050;
 const TABIX_MAGIC = 21578324;
+const MB = 1000000;
 
 async function parseBamIndex(arrayBuffer, genome) {
     return parseIndex(arrayBuffer, false, genome);
@@ -212,13 +213,17 @@ function optimizeChunks(chunks, lowest) {
     return mergedChunks;
 }
 
-function canMerge(chunk1, chunk2) {
-    return (chunk2.minv.block - chunk1.maxv.block) < 65000 &&
-        (chunk2.maxv.block - chunk1.minv.block) < 5000000;
-    // lastChunk.minv.block === lastChunk.maxv.block &&
-    // lastChunk.maxv.block === chunk.minv.block &&
-    // chunk.minv.block === chunk.maxv.block
 
+/**
+ * Merge 2 blocks if the gap between them is < 1kb and the total resulting size < 100mb
+ * @param chunk1
+ * @param chunk2
+ * @returns {boolean|boolean}
+ */
+function canMerge(chunk1, chunk2) {
+    const gap = chunk2.minv.block - chunk1.maxv.block;
+    const total = chunk2.maxv.block - chunk1.minv.block;
+    return gap < 1000 && total < 100*MB;
 }
 
 /**
