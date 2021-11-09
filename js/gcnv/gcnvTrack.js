@@ -35,6 +35,11 @@ class GCNVTrack extends TrackBase {
         } else {
             this.featureSource = FeatureSource(this.config, this.browser.genome);
         }
+
+        // Visibility window hardcoded to -1  (== whole chromosome).  Draw method needs feature beyond current view,
+        // when/if this is resolved visibilityWindow can be used.
+        this.visibilityWindow =  -1;
+        this.featureSource.visibilityWindow = this.visibilityWindow;
     }
 
     async postInit() {
@@ -67,7 +72,7 @@ class GCNVTrack extends TrackBase {
     }
 
     async getFeatures(chr, start, end) {
-        const chrFeatures = await this.featureSource.getFeatures({chr, start: 0, end: Number.MAX_VALUE});
+        const chrFeatures = await this.featureSource.getFeatures({chr, start: 0, end: Number.MAX_SAFE_INTEGER, visibilityWindow: this.visibilityWindow});
         let prevIndex = undefined;
         let nextIndex = undefined;
         for (let i = 1; i < chrFeatures.length - 1; i++) {
@@ -85,7 +90,6 @@ class GCNVTrack extends TrackBase {
     }
 
     draw(options) {
-        let self = this;
 
         const {features, context, bpPerPixel, bpStart, pixelWidth, pixelHeight} = options;
 
@@ -149,7 +153,7 @@ class GCNVTrack extends TrackBase {
                     const previousX = previousEnd >= 0 ? getX(previousEnd) : x1;
 
                     if (isNaN(x1) || isNaN(x2)) continue;
-                    if ((x1 - previousX < X_PIXEL_DIFF_THRESHOLD) && (x2 - x1 < X_PIXEL_DIFF_THRESHOLD)) continue;
+                   // if ((x1 - previousX < X_PIXEL_DIFF_THRESHOLD) && (x2 - x1 < X_PIXEL_DIFF_THRESHOLD)) continue;
 
                     this.clickDetectorCache[x1] = [];
                     this.clickDetectorCache[x2] = [];
