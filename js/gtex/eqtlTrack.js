@@ -116,7 +116,8 @@ class EqtlTrack extends TrackBase {
     async getFeatures(chr, start, end) {
 
         const pValueField = this.pValueField;
-        const features = await this.featureSource.getFeatures({chr, start, end});
+        const visibilityWindow = this.visibilityWindow;
+        const features = await this.featureSource.getFeatures({chr, start, end, visibilityWindow});
         features.forEach(function (f) {
             f.value = f[pValueField];
         })

@@ -75,9 +75,7 @@ class TrackViewport extends Viewport {
             if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
                 return true;
             } else {
-                const visibilityWindow = typeof this.trackView.track.getVisibilityWindow === 'function' ?
-                    this.trackView.track.getVisibilityWindow() :
-                    this.trackView.track.visibilityWindow;
+                const visibilityWindow = this.trackView.track.visibilityWindow;
                 return (
                     visibilityWindow !== undefined && visibilityWindow > 0 &&
                     (referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow));
