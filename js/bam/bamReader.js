@@ -104,11 +104,11 @@ class BamReader {
             const index = await this.getIndex();
             let start;
             let len;
-            if (index.firstAlignmentBlock) {
-                const bsizeOptions = buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
+            if (index.firstBlockPosition) {
+                const bsizeOptions = buildOptions(this.config, {range: {start: index.firstBlockPosition, size: 26}});
                 const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
                 const bsize = BGZip.bgzBlockSize(abuffer)
-                len = index.firstAlignmentBlock + bsize;   // Insure we get the complete compressed block containing the header
+                len = index.firstBlockPosition + bsize;   // Insure we get the complete compressed block containing the header
             } else {
                 len = 64000;
             }

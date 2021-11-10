@@ -21,7 +21,6 @@ async function parseIndex(arrayBuffer, tabix, genome) {
     let blockMin = Number.MAX_SAFE_INTEGER;
     let blockMax = 0
 
-
     const parser = new BinaryParser(new DataView(arrayBuffer));
     const magic = parser.getInt();
     const sequenceIndexMap = {};
@@ -112,8 +111,8 @@ async function parseIndex(arrayBuffer, tabix, genome) {
 class BamIndex {
 
     constructor(indices, blockMin, blockMax, sequenceIndexMap, tabix) {
-        this.firstAlignmentBlock = blockMin;
-        this.lastAlignmentBlock = blockMax;
+        this.firstBlockPosition = blockMin;
+        this.lastBlockPosition = blockMax;
         this.indices = indices;
         this.sequenceIndexMap = sequenceIndexMap;
         this.tabix = tabix;
