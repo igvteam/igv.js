@@ -50,11 +50,11 @@ class TextFeatureSource {
         this.config = config || {};
         this.genome = genome;
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
-        this.visibilityWindow = config.visibilityWindow;
 
         const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "tdf"]);
 
         if (config.features && Array.isArray(config.features)) {
+            // Explicit array of features
             let features = fixFeatures(config.features, genome);
             packFeatures(features);
             if (config.mappings) {
@@ -63,9 +63,9 @@ class TextFeatureSource {
             this.queryable = false;
             this.featureCache = new FeatureCache(features, genome);
         } else if (config.reader) {
+            // Explicit reader implementation
             this.reader = config.reader;
-            this.queryable = config.queryable !== undefined ? config.queryable : true;
-            this.expandQuery = config.expandQuery ? true : false;
+            this.queryable = config.queryable !== false;
         } else if (config.sourceType === "ga4gh") {
             this.reader = new Ga4ghVariantReader(config, genome);
             this.queryable = true;
@@ -75,34 +75,34 @@ class TextFeatureSource {
         } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
             this.reader = new GtexReader(config);
             this.queryable = true;
-            this.expandQuery = config.expandQuery ? true : false;
         } else if ("htsget" === config.sourceType) {
             this.reader = new HtsgetVariantReader(config, genome);
         } else if (config.sourceType === 'ucscservice') {
             this.reader = new UCSCServiceReader(config.source);
             this.queryable = true;
-        } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
+        } else if (config.sourceType === 'custom') {
             this.reader = new CustomServiceReader(config.source);
-            this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
-            this.expandQuery = config.expandQuery ? true : false;
+            this.queryable = false !== config.source.queryable;
         } else if ("civic-ws" === config.sourceType) {
             this.reader = new CivicReader(config);
             this.queryable = false;
-            this.expandQuery = config.expandQuery ? true : false;
         } else {
+            // File of some type (i.e. not a webservice)
             this.reader = new FeatureFileReader(config, genome);
             if (config.queryable !== undefined) {
                 this.queryable = config.queryable
-            } else if (queryableFormats.has(config.format)) {
-                this.queryable = queryableFormats.has(config.format) || this.reader.indexed;
+            } else if (queryableFormats.has(config.format) || this.reader.indexed) {
+                this.queryable = true;
             } else {
                 // Leav undefined -- will defer until we know if reader has an index
             }
         }
     }
 
-    supportsWholeGenome() {
-        return !this.queryable && (this.visibilityWindow === undefined || this.visibilityWindow <= 0);
+    async defaultVisibilityWindow() {
+        if(this.reader && typeof this.reader.defaultVisibilityWindow === 'function') {
+            return this.reader.defaultVisibilityWindow();
+        }
     }
 
     async trackType() {
@@ -160,7 +160,7 @@ class TextFeatureSource {
             this.config.disableCache ||
             !this.featureCache ||
             !this.featureCache.containsRange(new GenomicInterval(queryChr, start, end))) {
-            await this.loadFeatures(start, end, visibilityWindow, queryChr)
+            await this.loadFeatures(queryChr, start, end, visibilityWindow);
         }
 
         if (isWholeGenome) {
@@ -187,7 +187,7 @@ class TextFeatureSource {
     }
 
 
-    async loadFeatures(start, end, visibilityWindow, queryChr) {
+    async loadFeatures(queryChr, start, end, visibilityWindow) {
 
         const reader = this.reader;
         let intervalStart = start;
@@ -196,12 +196,12 @@ class TextFeatureSource {
         // Use visibility window to potentially expand query interval.
         // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
         // indicating whole chromosome should be read at once.
-        if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
+        if ((!visibilityWindow || visibilityWindow <= 0) && this.config.expandQuery !== false) {
             // Whole chromosome
             const chromosome = this.genome ? this.genome.getChromosome(queryChr) : undefined;
             intervalStart = 0;
             intervalEnd = Math.max(chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER, end);
-        } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
+        } else if (visibilityWindow > (end - start) && this.config.expandQuery !== false) {
             const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
             intervalStart = Math.max(0, (start + end) / 2 - expansionWindow);
             intervalEnd = start + expansionWindow;
@@ -250,11 +250,11 @@ class TextFeatureSource {
                 this.genome.featureDB[feature.gene.name.toUpperCase()] = feature;
             }
 
-            if(this.config.searchableFields) {
-                for(let f of this.config.searchableFields) {
+            if (this.config.searchableFields) {
+                for (let f of this.config.searchableFields) {
                     const value = feature.getAttributeValue(f);
-                    if(value) {
-                        if(value.indexOf(" ") > 0) {
+                    if (value) {
+                        if (value.indexOf(" ") > 0) {
                             this.genome.featureDB[value.replaceAll(" ", "+").toUpperCase()] = feature;
                             this.genome.featureDB[value.replaceAll(" ", "%20").toUpperCase()] = feature;
                         } else {
