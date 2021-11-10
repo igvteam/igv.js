@@ -34,7 +34,7 @@ class CSIIndex {
 
         this.indices = []
         this.blockMin = Number.MAX_SAFE_INTEGER;
-        this.blockMax = 0;
+        this.lastBlockPosition = 0;
         this.sequenceIndexMap = {};
 
         this.minShift = parser.getInt();
@@ -95,8 +95,8 @@ class CSIIndex {
                             if (cs.block < this.blockMin) {
                                 this.blockMin = cs.block;    // Block containing first alignment
                             }
-                            if (ce.block > this.blockMax) {
-                                this.blockMax = ce.block;
+                            if (ce.block > this.lastBlockPosition) {
+                                this.lastBlockPosition = ce.block;
                             }
                             binIndex[binNumber].push([cs, ce]);
                         }

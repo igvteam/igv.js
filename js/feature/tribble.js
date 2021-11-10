@@ -28,25 +28,11 @@ import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const SEQUENCE_DICTIONARY_FLAG = 0x8000;  // if we have a sequence dictionary in our header
-/**
- *
- * @param indexFile
- * @param config
- * @returns a Promise for the tribble-style (.idx) index.  The fulfill function takes the index as an argument
- */
-async function loadTribbleIndex(indexFile, config, genome) {
-
-    const arrayBuffer = await igvxhr.loadArrayBuffer(indexFile, buildOptions(config));
-    if (arrayBuffer) {
-       return parseTribbleIndex(arrayBuffer, genome);
-    } else {
-        return undefined;
-    }
-}
 
 async function parseTribbleIndex(arrayBuffer, genome) {
 
-    const index = {};
+    let blockMax = 0;
+    const chrIndexTable = {};
     const parser = new BinaryParser(new DataView(arrayBuffer));
     readHeader(parser);
 
@@ -54,10 +40,10 @@ async function parseTribbleIndex(arrayBuffer, genome) {
     while (nChrs-- > 0) {
         // todo -- support interval tree index, we're assuming its a linear index
         const chrIdx = readLinear(parser);
-        index[chrIdx.chr] = chrIdx;
+        chrIndexTable[chrIdx.chr] = chrIdx;
     }
 
-    return new TribbleIndex(index);
+    return new TribbleIndex({chrIndexTable, blockMax});
 
     /**
      * Read the header file.   Data here is not used in igv.js but we need to read it to advance the pointer.
@@ -88,7 +74,6 @@ async function parseTribbleIndex(arrayBuffer, genome) {
     function readLinear(parser) {
 
         let chr = parser.getString();
-        let blockMax = 0;
 
         // Translate to canonical name
         if (genome) chr = genome.getChromosomeName(chr);
@@ -118,8 +103,9 @@ async function parseTribbleIndex(arrayBuffer, genome) {
 
 class TribbleIndex {
 
-    constructor(chrIndexTable) {
+    constructor({chrIndexTable, blockMax}) {
         this.chrIndex = chrIndexTable;      // Dictionary of chr -> tribble index
+        this.lastBlockPosition = blockMax;
     }
 
     /**
@@ -163,4 +149,4 @@ class TribbleIndex {
     }
 }
 
-export {parseTribbleIndex, loadTribbleIndex};
+export {parseTribbleIndex};

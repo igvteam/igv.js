@@ -122,7 +122,6 @@ class FeatureTrack extends TrackBase {
 
         if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
             this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
-            this.featureSource.visibilityWindow = this.visibilityWindow;   // <- this looks odd
         }
 
         return this;

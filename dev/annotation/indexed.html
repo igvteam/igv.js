@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>dbSnp</title>
+
+</head>
+
+<body>
+
+<h2>Example of each index type: tabix, csi, and tribble (idx).</h2>
+<b>Note visibilityWindows are not set to test default setting based on index values.</b>
+<div id="igvDiv" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js";
+
+    var options =
+        {
+            reference: {
+                fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+                indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai"
+            },
+            locus: "chr22:23,767,847-23,844,164",
+            tracks: [
+                {
+                    "name": "Common SNPs (tabix)",
+                    "type": "snp",
+                    "format": "snp",
+                    "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz",
+                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz.tbi"
+                },
+                {
+                    "name": "Gencode genes (CSI)",
+                    "type": "annotation",
+                    "format": "bed",
+                    "url": " https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.gz",
+                    "indexURL": " https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.gz.csi"
+                },
+                {
+                    "name": "Gencode genes (tribble)",
+                    "type": "annotation",
+                    "format": "bed",
+                    "url": " https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
+                    "indexURL": " https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx"
+                }
+
+
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+</script>
+
+</body>
+
+</html>
