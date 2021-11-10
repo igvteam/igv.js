@@ -249,12 +249,8 @@ class WigTrack extends TrackBase {
         }
     }
 
-    supportsWholeGenome  () {
-        if (typeof this.featureSource.supportsWholeGenome === 'function') {
-            return this.featureSource.supportsWholeGenome();
-        } else {
-            return false;
-        }
+    supportsWholeGenome() {
+        return !this.config.indexURL && this.config.supportsWholeGenome !== false
     }
 
     /**

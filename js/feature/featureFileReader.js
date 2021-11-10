@@ -68,6 +68,17 @@ class FeatureFileReader {
         }
     }
 
+    async defaultVisibilityWindow() {
+        if(this.config.indexURL) {
+            const index = await this.getIndex();
+            if(index && index.lastBlockPosition) {
+                const gl = this.genome.getGenomeLength();
+                const s = 1000000;
+                return Math.round((gl / index.lastBlockPosition) * s);
+            }
+        }
+    }
+
     /**
      * Return a promise to load features for the genomic interval
      * @param chr
@@ -108,13 +119,13 @@ class FeatureFileReader {
                 if (index.tabix) {
                     dataWrapper = new BGZipLineReader(this.config);
                 } else {
-                   // Tribble
-                   const maxSize = Object.values(index.chrIndex)
+                    // Tribble
+                    const maxSize = Object.values(index.chrIndex)
                         .flatMap(chr => chr.blocks)
                         .map(block => block.max)
                         .reduce((previous, current) =>
                             Math.min(previous, current), Number.MAX_SAFE_INTEGER);
-                
+
                     const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
                     const data = await igvxhr.loadString(this.config.url, options)
                     dataWrapper = getDataWrapper(data);
@@ -279,9 +290,9 @@ class FeatureFileReader {
     }
 
     async getIndex() {
-        if (this.index || !this.config.indexURL) {
+        if (this.index) {
             return this.index;
-        } else {
+        } else if (this.config.indexURL) {
             this.index = await this.loadIndex()
             return this.index;
         }
