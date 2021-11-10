@@ -128,7 +128,7 @@ function setDefaults(config) {
     }
 
     if (undefined === config.showCircularViewButton) {
-        config.showCircularViewButton = true;
+        config.showCircularViewButton = false;
     }
 
     if (undefined === config.showTrackLabelButton) {
