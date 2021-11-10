@@ -286,10 +286,6 @@ class TrackBase {
         }
     }
 
-    getVisibilityWindow() {
-        return this.visibilityWindow;
-    }
-
     /**
      * Return the features clicked over.  Default implementation assumes a single row of features and only considers
      * the genomic location.   Overriden by most subclasses.

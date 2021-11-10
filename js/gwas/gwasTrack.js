@@ -92,7 +92,8 @@ class GWASTrack extends TrackBase {
     }
 
     async getFeatures(chr, start, end) {
-        return this.featureSource.getFeatures({chr, start, end});
+        const visibilityWindow = this.visibilityWindow;
+        return this.featureSource.getFeatures({chr, start, end, visibilityWindow});
     }
 
     draw(options) {
