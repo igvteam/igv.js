@@ -17,8 +17,6 @@
 
     import igv from "../../js/index.js";
 
-    window.igv = igv;
-
     var options =
         {
             genome: "hg19",
@@ -38,7 +36,6 @@
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            igv.browser = browser;
         })
 
 </script>
