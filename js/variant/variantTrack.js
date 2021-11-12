@@ -550,6 +550,34 @@ class VariantTrack extends TrackBase {
         return menuItems;
     }
 
+
+    contextMenuItemList(clickState) {
+
+        // Experimental JBrowse feature
+        if (this.browser.circularView) {
+            const viewport = clickState.viewport;
+            const list = [];
+
+            list.push({
+                label: 'Show chords',
+                click: () => {
+                    const refFrame = viewport.referenceFrame;
+                    const inView = "all" === refFrame.chr ?
+                        this.featureSource.getAllFeatures() :
+                        this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end);
+                    const chords = makeVCFChords(inView, this.color);
+                    this.browser.circularView.addChords(chords, true);
+                    this.browser.circularViewVisible = true;
+                }
+            });
+
+            list.push('<hr/>');
+            return list;
+        }
+
+    }
+
+
     /**
      * Create a "color by" checkbox menu item, optionally initially checked
      * @param menuItem
