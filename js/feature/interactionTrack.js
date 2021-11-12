@@ -32,7 +32,6 @@ import MenuUtils from "../ui/menuUtils.js";
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
-import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {makeBedPEChords} from "../jbrowse/circularViewUtils.js";
 
 
@@ -453,14 +452,9 @@ class InteractionTrack extends TrackBase {
                     const inView = "all" === refFrame.chr ?
                         this.featureSource.getAllFeatures() :
                         this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end);
-                    this.browser.circularView.addBedPEChords(inView, this.color);
-                }
-            });
-
-            list.push({
-                label: 'Clear selections',
-                click: () => {
-                    this.browser.circularView.clearSelection();
+                    const chords = makeBedPEChords(inView, this.color)
+                    this.browser.circularView.addChords(chords, true);
+                    this.browser.circularViewVisible = true;
                 }
             });
 
