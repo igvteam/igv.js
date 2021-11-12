@@ -69,11 +69,17 @@ class FeatureFileReader {
     }
 
     async defaultVisibilityWindow() {
-        if(this.config.indexURL) {
+        if (this.config.indexURL) {
             const index = await this.getIndex();
-            if(index && index.lastBlockPosition) {
-                const gl = this.genome.getGenomeLength();
-                const s = 1000000;
+            if (index && index.lastBlockPosition) {
+                let gl = 0;
+                const s = 10000;
+                for (let c of index.chromosomeNames) {
+                    const chromosome = this.genome.getChromosome(c);
+                    if (chromosome) {
+                        gl += chromosome.bpLength;
+                    }
+                }
                 return Math.round((gl / index.lastBlockPosition) * s);
             }
         }

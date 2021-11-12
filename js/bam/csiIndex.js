@@ -34,12 +34,14 @@ class CSIIndex {
 
         this.indices = []
         this.blockMin = Number.MAX_SAFE_INTEGER;
-        this.lastBlockPosition = 0;
+        this.lastBlockPosition = [];
         this.sequenceIndexMap = {};
 
         this.minShift = parser.getInt();
         this.depth = parser.getInt();
         const lAux = parser.getInt();
+        const seqNames = [];
+        let bmax = 0;
 
         if (lAux >= 28) {
             // Tabix header parameters aren't used, but they must be read to advance the pointer
@@ -59,6 +61,7 @@ class CSIIndex {
                     seq_name = genome.getChromosomeName(seq_name);
                 }
                 this.sequenceIndexMap[seq_name] = i;
+                seqNames[i] = seq_name;
                 i++;
             }
         }
@@ -66,7 +69,6 @@ class CSIIndex {
         const MAX_BIN = this.bin_limit() + 1;
         const nref = parser.getInt();
         for (let ref = 0; ref < nref; ref++) {
-
             const binIndex = [];
             const loffset = [];
             const nbin = parser.getInt();
@@ -95,8 +97,8 @@ class CSIIndex {
                             if (cs.block < this.blockMin) {
                                 this.blockMin = cs.block;    // Block containing first alignment
                             }
-                            if (ce.block > this.lastBlockPosition) {
-                                this.lastBlockPosition = ce.block;
+                            if (ce.block > bmax) {
+                                bmax = ce.block;
                             }
                             binIndex[binNumber].push([cs, ce]);
                         }
@@ -111,6 +113,11 @@ class CSIIndex {
                 }
             }
         }
+        this.lastBlockPosition = bmax;
+    }
+
+    get chromosomeNames() {
+        return Object.keys(this.sequenceIndexMap);
     }
 
     /**
