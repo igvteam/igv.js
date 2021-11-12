@@ -95,9 +95,8 @@ class VariantTrack extends TrackBase {
             const fn = FileUtils.isFile(this.config.url) ? this.config.url.name : this.config.url;
             if (isString(fn) && fn.toLowerCase().includes("gnomad")) {
                 this.visibilityWindow = 1000;  // these are known to be very dense
-            } else if (this.callSets) {
-                const length = this.callSets.length;
-                this.visibilityWindow = Math.max(1000, DEFAULT_VISIBILITY_WINDOW - length * (DEFAULT_VISIBILITY_WINDOW / 100));
+            } else if (typeof this.featureSource.defaultVisibilityWindow === 'function') {
+                this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
             } else {
                 this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
             }
