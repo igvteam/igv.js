@@ -8,114 +8,124 @@ const TABIX_MAGIC = 21578324;
 const MB = 1000000;
 
 async function parseBamIndex(arrayBuffer, genome) {
-    return parseIndex(arrayBuffer, false, genome);
+    const index = new BamIndex();
+    await index.parse(arrayBuffer, false, genome);
+    return index;
 }
 
 async function parseTabixIndex(arrayBuffer, genome) {
-    return parseIndex(arrayBuffer, true, genome);
-}
-
-async function parseIndex(arrayBuffer, tabix, genome) {
-
-    const indices = []
-    let blockMin = Number.MAX_SAFE_INTEGER;
-    let blockMax = 0
-
-    const parser = new BinaryParser(new DataView(arrayBuffer));
-    const magic = parser.getInt();
-    const sequenceIndexMap = {};
-    if (magic === BAI_MAGIC || (tabix && magic === TABIX_MAGIC)) {
-
-        const nref = parser.getInt();
-        if (tabix) {
-            // Tabix header parameters aren't used, but they must be read to advance the pointer
-            const format = parser.getInt()
-            const col_seq = parser.getInt()
-            const col_beg = parser.getInt()
-            const col_end = parser.getInt()
-            const meta = parser.getInt()
-            const skip = parser.getInt()
-            const l_nm = parser.getInt()
-
-            for (let i = 0; i < nref; i++) {
-                let seq_name = parser.getString();
-                // Translate to "official" chr name.
-                if (genome) {
-                    seq_name = genome.getChromosomeName(seq_name);
-                }
-                sequenceIndexMap[seq_name] = i;
-            }
-        }
-
-
-        for (let ref = 0; ref < nref; ref++) {
-
-            const binIndex = {};
-            const linearIndex = [];
-            const nbin = parser.getInt();
-            for (let b = 0; b < nbin; b++) {
-
-                const binNumber = parser.getInt();
-
-                if (binNumber === 37450) {
-                    // This is a psuedo bin, not used but we have to consume the bytes
-                    const nchnk = parser.getInt(); // # of chunks for this bin
-                    const cs = parser.getVPointer();   // unmapped beg
-                    const ce = parser.getVPointer();   // unmapped end
-                    const n_maped = parser.getLong()
-                    const nUnmapped = parser.getLong()
-
-                } else {
-
-                    binIndex[binNumber] = [];
-                    const nchnk = parser.getInt(); // # of chunks for this bin
-
-                    for (let i = 0; i < nchnk; i++) {
-                        const cs = parser.getVPointer();    //chunk_beg
-                        const ce = parser.getVPointer();    //chunk_end
-                        if (cs && ce) {
-                            if (cs.block < blockMin) {
-                                blockMin = cs.block;    // Block containing first alignment
-                            }
-                            if (ce.block > blockMax) {
-                                blockMax = ce.block;
-                            }
-                            binIndex[binNumber].push([cs, ce]);
-                        }
-                    }
-                }
-            }
-
-            const nintv = parser.getInt();
-            for (let i = 0; i < nintv; i++) {
-                const cs = parser.getVPointer();
-                linearIndex.push(cs);   // Might be null
-            }
-
-            if (nbin > 0) {
-                indices[ref] = {
-                    binIndex: binIndex,
-                    linearIndex: linearIndex
-                }
-            }
-        }
-
-    } else {
-        throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file");
-    }
-
-    return new BamIndex(indices, blockMin, blockMax, sequenceIndexMap, tabix);
-
+    const index = new BamIndex();
+    await index.parse(arrayBuffer, true, genome);
+    return index;
 }
 
 class BamIndex {
 
-    constructor(indices, blockMin, blockMax, sequenceIndexMap, tabix) {
-        this.firstBlockPosition = blockMin;
-        this.lastBlockPosition = blockMax;
-        this.indices = indices;
-        this.sequenceIndexMap = sequenceIndexMap;
-        this.tabix = tabix;
+    constructor() {
+
+    }
+
+    async parse(arrayBuffer, tabix, genome) {
+
+        const indices = [];
+        let blockMin = Number.MAX_SAFE_INTEGER;
+        let blockMax = 0;
+        const seqNames = [];
+
+        const parser = new BinaryParser(new DataView(arrayBuffer));
+        const magic = parser.getInt();
+        const sequenceIndexMap = {};
+        if (magic === BAI_MAGIC || (tabix && magic === TABIX_MAGIC)) {
+
+            const nref = parser.getInt();
+            if (tabix) {
+                // Tabix header parameters aren't used, but they must be read to advance the pointer
+                const format = parser.getInt()
+                const col_seq = parser.getInt()
+                const col_beg = parser.getInt()
+                const col_end = parser.getInt()
+                const meta = parser.getInt()
+                const skip = parser.getInt()
+                const l_nm = parser.getInt()
+
+                for (let i = 0; i < nref; i++) {
+                    let seq_name = parser.getString();
+                    // Translate to "official" chr name.
+                    if (genome) {
+                        seq_name = genome.getChromosomeName(seq_name);
+                    }
+                    sequenceIndexMap[seq_name] = i;
+                    seqNames[i] = seq_name;
+                }
+            }
+
+            // Loop through sequences
+            for (let ref = 0; ref < nref; ref++) {
+
+                const binIndex = {};
+                const linearIndex = [];
+                const nbin = parser.getInt();
+
+                for (let b = 0; b < nbin; b++) {
+                    const binNumber = parser.getInt();
+                    if (binNumber === 37450) {
+                        // This is a psuedo bin, not used but we have to consume the bytes
+                        const nchnk = parser.getInt(); // # of chunks for this bin
+                        const cs = parser.getVPointer();   // unmapped beg
+                        const ce = parser.getVPointer();   // unmapped end
+                        const n_maped = parser.getLong()
+                        const nUnmapped = parser.getLong()
+
+                    } else {
+
+                        binIndex[binNumber] = [];
+                        const nchnk = parser.getInt(); // # of chunks for this bin
+
+                        for (let i = 0; i < nchnk; i++) {
+                            const cs = parser.getVPointer();    //chunk_beg
+                            const ce = parser.getVPointer();    //chunk_end
+                            if (cs && ce) {
+                                if (cs.block < blockMin) {
+                                    blockMin = cs.block;    // Block containing first alignment
+                                }
+                                if (ce.block > blockMax) {
+                                    blockMax = ce.block;
+                                }
+                                binIndex[binNumber].push([cs, ce]);
+                            }
+                        }
+                    }
+                }
+
+                const nintv = parser.getInt();
+                for (let i = 0; i < nintv; i++) {
+                    const cs = parser.getVPointer();
+                    linearIndex.push(cs);   // Might be null
+                }
+
+                if (nbin > 0) {
+                    indices[ref] = {
+                        binIndex: binIndex,
+                        linearIndex: linearIndex
+                    }
+                }
+            }
+
+            this.firstBlockPosition = blockMin;
+            this.lastBlockPosition = blockMax;
+            this.indices = indices;
+            this.sequenceIndexMap = sequenceIndexMap;
+            this.tabix = tabix;
+
+        } else {
+            throw new Error(indexURL + " is not a " + (tabix ? "tabix" : "bai") + " file");
+        }
+
+
+    }
+
+    get chromosomeNames() {
+        return Object.keys(this.sequenceIndexMap);
     }
 
     /**
