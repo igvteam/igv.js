@@ -428,9 +428,9 @@ class InteractionTrack extends TrackBase {
             items.push({
                 label: 'Show chords',
                 click: () => {
+                    this.browser.circularViewVisible = true;
                     const chords = makeBedPEChords(this.featureSource.getAllFeatures(), this.color)
                     this.browser.circularView.addChords(chords, true);
-                    this.browser.circularViewVisible = true;
                 }
             });
         }
@@ -452,9 +452,9 @@ class InteractionTrack extends TrackBase {
                     const inView = "all" === refFrame.chr ?
                         this.featureSource.getAllFeatures() :
                         this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end);
+                    this.browser.circularViewVisible = true;
                     const chords = makeBedPEChords(inView, this.color)
                     this.browser.circularView.addChords(chords, true);
-                    this.browser.circularViewVisible = true;
                 }
             });
 

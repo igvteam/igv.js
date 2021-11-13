@@ -1175,9 +1175,9 @@ class AlignmentTrack {
                             && a.mate.chr
                             && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxFragmentLenth);
                     })
+                    this.browser.circularViewVisible = true;
                     const chords = makePairedAlignmentChords(inView);
                     this.browser.circularView.addChords(chords, true);
-                    this.browser.circularViewVisible = true;
                 }
             });
 
