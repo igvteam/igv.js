@@ -532,22 +532,6 @@ class VariantTrack extends TrackBase {
                 });
         }
 
-        // Experimental JBrowse feature
-        if (this.browser.circularView) {
-            menuItems.push('<hr/>');
-
-            menuItems.push({
-                label: 'Show chords',
-                click: () => {
-                    this.browser.circularViewVisible = true;
-                    const chords = makeVCFChords(this.featureSource.getAllFeatures(), this.color);
-                    this.browser.circularView.addChords(chords, true);
-                }
-            });
-
-        }
-
-
         return menuItems;
     }
 
@@ -555,7 +539,7 @@ class VariantTrack extends TrackBase {
     contextMenuItemList(clickState) {
 
         // Experimental JBrowse feature
-        if (this.browser.circularView) {
+        if (this.browser.circularView && true === this.browser.circularViewVisible) {
             const viewport = clickState.viewport;
             const list = [];
 
