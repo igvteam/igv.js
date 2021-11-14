@@ -255,12 +255,16 @@ class FeatureFileReader {
 
                 const slicedData = startOffset ? inflated.slice(startOffset) : inflated;
                 const dataWrapper = getDataWrapper(slicedData);
-                const slicedFeatures = await parser.parseFeatures(dataWrapper);
+                let slicedFeatures = await parser.parseFeatures(dataWrapper);
+
+                // Filter psuedo-features (e.g. created mates for VCF SV records)
+                slicedFeatures = slicedFeatures.filter(f => f._f === undefined);
 
                 // Filter features not in requested range.
                 let inInterval = false;
                 for (let i = 0; i < slicedFeatures.length; i++) {
                     const f = slicedFeatures[i];
+
                     const canonicalChromosome = genome ? genome.getChromosomeName(f.chr) : f.chr;
                     if (canonicalChromosome !== chr) {
                         if (allFeatures.length === 0) {

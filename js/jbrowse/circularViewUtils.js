@@ -1,6 +1,7 @@
 import {getChrColor} from "../bam/bamTrack.js";
 import Locus from "../locus.js";
 import CircularView from "../../node_modules/circular-view/js/circularView.js";
+import IGVColor from "../../node_modules/igv-utils/src/igv-color.js";
 
 /**
  * The minimum length for a VCF structural variant.  VCF records < this length are ignored in the circular view
@@ -39,7 +40,7 @@ const makePairedAlignmentChords = (alignments, color) => {
 
 const makeBedPEChords = (features, color) => {
 
-    color = color || 'rgb(0,0,255)';
+    color = IGVColor.addAlpha(color || 'rgb(0,0,255)', 0.5);
 
     return features.map(v => {
 
@@ -65,7 +66,7 @@ const makeBedPEChords = (features, color) => {
 
 const makeVCFChords = (features, color) => {
 
-    color = color || 'rgb(0,0,255)';
+    color = IGVColor.addAlpha(color || 'rgb(0,0,255)', 0.5);
 
     const svFeatures = features.filter(v => {
         const f = v._f || v;
