@@ -1163,26 +1163,8 @@ class AlignmentTrack {
         }
 
         // Experimental JBrowse feature
-        if (this.browser.circularView) {
-            const maxFragmentLenth = this.parent.maxFragmentLength;
-            list.push({
-                label: 'Show discordant pairs',
-                click: () => {
-                    const refFrame = viewport.referenceFrame;
-                    const inView = viewport.getCachedFeatures().allAlignments().filter(a => {
-                        return a.end >= refFrame.start && a.start <= refFrame.end
-                            && a.mate
-                            && a.mate.chr
-                            && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxFragmentLenth);
-                    })
-                    this.browser.circularViewVisible = true;
-                    const chords = makePairedAlignmentChords(inView);
-                    this.browser.circularView.addChords(chords, true);
-                }
-            });
-
-            list.push('<hr/>');
-
+        if (this.browser.circularView && true === this.browser.circularViewVisible) {
+            list.push(getDiscordantPairsMenuItem(this.browser, viewport, this.parent.maxFragmentLength), '<hr/>')
         }
 
         return list;
@@ -1323,6 +1305,32 @@ class AlignmentTrack {
         return color;
 
     }
+}
+
+function getDiscordantPairsMenuItem(browser, viewport, maxFragmentLength) {
+
+    const item =
+        {
+            label: 'Show discordant pairs',
+            click: () => {
+                const { referenceFrame } = viewport;
+                const inView = viewport.getCachedFeatures().allAlignments().filter(a => {
+                    return a.end >= referenceFrame.start
+                        && a.start <= referenceFrame.end
+                        && a.mate
+                        && a.mate.chr
+                        && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxFragmentLength);
+                })
+
+                browser.circularViewVisible = true;
+
+                const chords = makePairedAlignmentChords(inView);
+                browser.circularView.addChords(chords, true);
+            }
+        }
+
+        return item
+
 }
 
 function sortAlignmentRows(options, alignmentContainer) {
