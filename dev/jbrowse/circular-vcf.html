@@ -49,14 +49,15 @@
             genome: "hg19",
             tracks: [
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/sniffles_del.vcf",
+                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/sniffles_tra.vcf",
                     type: "variant",
                     format: "vcf",
-                    name: "sniffles deletions",
+                    name: "sniffles translocations",
                     supportsWholeGenome: true,
                     visibilityWindow: -1,
                     showGenotypes: false,
-                    height: 40
+                    height: 40,
+                    color: 'rgb(0,150,0)'
                 },
                 {
                     id: "delly",
