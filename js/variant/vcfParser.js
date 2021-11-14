@@ -94,10 +94,10 @@ class VcfParser {
                     } else if (line.startsWith("##contig") && genome) {
                         const idx1 = line.indexOf("<ID=");
                         let idx2 = line.indexOf(",", idx1);
-                        if(idx2 == -1) {
+                        if (idx2 == -1) {
                             idx2 = line.indexOf(">", idx1);
                         }
-                        const chr = line.substring(idx1+4, idx2);
+                        const chr = line.substring(idx1 + 4, idx2);
                         const canonicalChromosome = genome.getChromosomeName(chr);
                         header.chrAliasTable.set(canonicalChromosome, chr);
                     } else {
@@ -183,6 +183,10 @@ class VcfParser {
                             });
                         }
                     }
+
+                    if (variant.info && variant.info.CHR2 && variant.info.END) {
+                        allFeatures.push(svComplement(variant));
+                    }
                 }
             }
         }
@@ -203,6 +207,19 @@ function extractCallFields(tokens) {
         }
     }
     return callFields;
+}
+
+function svComplement(v) {
+
+    const chr2 = v.info.CHR2;
+    const pos2 = Number.parseInt(v.info.END);
+    return {
+        chr: chr2,
+        start: pos2 - 1,
+        end: pos2,
+        _f: v
+    }
+
 }
 
 export default VcfParser;

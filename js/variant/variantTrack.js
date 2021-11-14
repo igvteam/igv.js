@@ -351,7 +351,9 @@ class VariantTrack extends TrackBase {
         const sampleInformation = this.browser.sampleInformation;
 
         let popupData = [];
-        for (let f of featureList) {
+        for (let v of featureList) {
+
+            const f = v._f || v;    // Get real variant from psuedo-variant, e.g. whole genome or SV mate
 
             if (popupData.length > 0) {
                 popupData.push({html: '<hr style="border-top-width:2px ;border-color: #c9c3ba" />'})
