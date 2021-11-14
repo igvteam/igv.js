@@ -1819,14 +1819,14 @@ class Browser {
 
     createCircularView(container, show) {
         this.circularView = createCircularView(container, this);
+        this.circularViewControl = new CircularViewControl(this.$toggle_button_container.get(0), this);
+        this.circularViewVisible = show;
         this.circularView.setAssembly({
             name: this.genome.id,
             id: this.genome.id,
             chromosomes: makeCircViewChromosomes(this.genome)
         });
-        this.circularViewControl = new CircularViewControl(this.$toggle_button_container.get(0), this);
-        this.circularViewControl.setState(show);
-        this.circularViewVisible = show;
+
     }
 
     get circularViewVisible() {
