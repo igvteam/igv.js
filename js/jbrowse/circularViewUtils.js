@@ -15,8 +15,8 @@ const shortChrName = (chrName) => {
     return chrName.startsWith("chr") ? chrName.substring(3) : chrName;
 }
 
-const makePairedAlignmentChords = (alignments, color) => {
-    color = color || 'rgba(0, 0, 255, 0.02)'
+const makePairedAlignmentChords = (alignments) => {
+
     const chords = [];
     for (let a of alignments) {
         const mate = a.mate;
@@ -30,17 +30,14 @@ const makePairedAlignmentChords = (alignments, color) => {
                     refName: shortChrName(mate.chr),
                     start: mate.position - 1,
                     end: mate.position,
-                },
-                color: color
+                }
             });
         }
     }
     return chords;
 }
 
-const makeBedPEChords = (features, color) => {
-
-    color = IGVColor.addAlpha(color || 'rgb(0,0,255)', 0.5);
+const makeBedPEChords = (features) => {
 
     return features.map(v => {
 
@@ -56,21 +53,17 @@ const makeBedPEChords = (features, color) => {
                 refName: shortChrName(f.chr2),
                 start: f.start2,
                 end: f.end2,
-            },
-            color: color,
-            igvtype: 'bedpe'
+            }
         }
     })
 }
 
 
-const makeVCFChords = (features, color) => {
-
-    color = IGVColor.addAlpha(color || 'rgb(0,0,255)', 0.5);
+const makeVCFChords = (features) => {
 
     const svFeatures = features.filter(v => {
         const f = v._f || v;
-        const isLargeEnough = f.info.CHR2 && f.info.END &&
+        const isLargeEnough = f.info && f.info.CHR2 && f.info.END &&
             (f.info.CHR2 !== f.chr || Math.abs(Number.parseInt(f.info.END) - f.pos) > MINIMUM_SV_LENGTH);
         return isLargeEnough;
     });
@@ -92,9 +85,7 @@ const makeVCFChords = (features, color) => {
                 refName: shortChrName(f.info.CHR2),
                 start: start2,
                 end: end2
-            },
-            color: color,
-            igvtype: 'vcf'
+            }
         }
     })
 }

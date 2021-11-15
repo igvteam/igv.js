@@ -31,7 +31,7 @@ import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {PaletteColorTable, ColorTable} from "../util/colorPalletes.js";
 import {makeVCFChords} from "../jbrowse/circularViewUtils.js";
-import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js";
 
 const isString = StringUtils.isString;
 
@@ -532,6 +532,20 @@ class VariantTrack extends TrackBase {
                 });
         }
 
+        // Experimental JBrowse feature
+        // if (this.browser.circularView) {
+        //     menuItems.push('<hr/>');
+        //
+        //     menuItems.push({
+        //         label: 'Show chords',
+        //         click: () => {
+        //             this.browser.circularViewVisible = true;
+        //             const chords = makeVCFChords(this.featureSource.getAllFeatures(), this.color);
+        //             this.browser.circularView.addChords(chords, {track: this.name, color: this.color, append: true});
+        //         }
+        //     });
+        // }
+
         return menuItems;
     }
 
@@ -550,9 +564,9 @@ class VariantTrack extends TrackBase {
                     const inView = "all" === refFrame.chr ?
                         this.featureSource.getAllFeatures() :
                         this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end);
-                    this.browser.circularViewVisible = true;
-                    const chords = makeVCFChords(inView, this.color);
-                    this.browser.circularView.addChords(chords, true);
+                    const chords = makeVCFChords(inView);
+                    const color = this._color || this.defaultColor;
+                    this.browser.circularView.addChords(chords, {track: this.name, color: IGVColor.addAlpha(color, 0.5)});
                 }
             });
 

@@ -523,7 +523,7 @@ class CoverageTrack {
         // paint for all coverage buckets
         // If alignment track color is != default, use it
         let color;
-        if(this.parent.coverageColor) {
+        if (this.parent.coverageColor) {
             color = this.parent.coverageColor
         } else if (this.parent.color !== undefined) {
             color = IGVColor.darkenLighten(this.parent.color, -35);
@@ -904,7 +904,7 @@ class AlignmentTrack {
 
                 //const arrowHeadWidthPixel = alignmentRowHeight / 2.0;
                 const nomPixelWidthOnRef = 100 / bpPerPixel;
-                const arrowHeadWidthPixel = Math.min(alignmentRowHeight / 2.0,  nomPixelWidthOnRef / 6);
+                const arrowHeadWidthPixel = Math.min(alignmentRowHeight / 2.0, nomPixelWidthOnRef / 6);
 
                 const isSoftClip = 'S' === block.type;
 
@@ -1164,7 +1164,25 @@ class AlignmentTrack {
 
         // Experimental JBrowse feature
         if (this.browser.circularView && true === this.browser.circularViewVisible) {
-            list.push(getDiscordantPairsMenuItem(this.browser, viewport, this.parent.maxFragmentLength), '<hr/>')
+            list.push({
+                label: 'Show discordant pairs',
+                click: () => {
+                    const maxFragmentLength = this.parent.maxFragmentLength;
+                    const {referenceFrame} = viewport;
+                    const inView = viewport.getCachedFeatures().allAlignments().filter(a => {
+                        return a.end >= referenceFrame.start
+                            && a.start <= referenceFrame.end
+                            && a.mate
+                            && a.mate.chr
+                            && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxFragmentLength);
+                    })
+                    this.browser.circularViewVisible = true;
+                    const chords = makePairedAlignmentChords(inView);
+                    const color = this.parent.color || 'rgb(0,0,255)';
+                    this.browser.circularView.addChords(chords, {track: this.parent.name, color: IGVColor.addAlpha(color, 0.02)});
+                }
+            });
+            list.push('<hr/>')
         }
 
         return list;
@@ -1305,32 +1323,6 @@ class AlignmentTrack {
         return color;
 
     }
-}
-
-function getDiscordantPairsMenuItem(browser, viewport, maxFragmentLength) {
-
-    const item =
-        {
-            label: 'Show discordant pairs',
-            click: () => {
-                const { referenceFrame } = viewport;
-                const inView = viewport.getCachedFeatures().allAlignments().filter(a => {
-                    return a.end >= referenceFrame.start
-                        && a.start <= referenceFrame.end
-                        && a.mate
-                        && a.mate.chr
-                        && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxFragmentLength);
-                })
-
-                browser.circularViewVisible = true;
-
-                const chords = makePairedAlignmentChords(inView);
-                browser.circularView.addChords(chords, true);
-            }
-        }
-
-        return item
-
 }
 
 function sortAlignmentRows(options, alignmentContainer) {
