@@ -80,7 +80,7 @@
 
             const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
             makeDraggable(circularViewContainer, circularViewContainer)
-            browser.createCircularView(circularViewContainer);
+            browser.createCircularView(circularViewContainer, true);
 
             // Resize circular view control
             const sizeInputElement = document.getElementById("circview-size-input");
