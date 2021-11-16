@@ -441,7 +441,7 @@ class InteractionTrack extends TrackBase {
                         this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end);
                     this.browser.circularViewVisible = true;
                     const chords = makeBedPEChords(inView)
-                    this.browser.circularView.addChords(chords, {track: this.name, color: IGVColor.addAlpha(this.color, 0.5)});
+                    this.browser.circularView.addChords(chords, {track: this.name, color: this.color, alpha: 0.5});
                 }
             });
 

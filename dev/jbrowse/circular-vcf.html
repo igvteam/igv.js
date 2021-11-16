@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Using JBrowse Circular Genome View</title>
+    <title>Circular View</title>
     <!-- The commented scripts below are the minified production versions of the
       other scripts -->
     <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin="anonymous"></script>
@@ -18,6 +18,12 @@
         <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
         <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.production.min.js"
                 crossorigin></script>-->
+
+    <style>
+        button[data-testid='circular_track_select'] {
+            display: none;
+        }
+    </style>
 
 </head>
 <body>
