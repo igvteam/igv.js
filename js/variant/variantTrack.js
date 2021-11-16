@@ -566,7 +566,7 @@ class VariantTrack extends TrackBase {
                         this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end);
                     const chords = makeVCFChords(inView);
                     const color = this._color || this.defaultColor;
-                    this.browser.circularView.addChords(chords, {track: this.name, color: IGVColor.addAlpha(color, 0.5)});
+                    this.browser.circularView.addChords(chords, {track: this.name, color: color, alpha: 0.5});
                 }
             });
 
