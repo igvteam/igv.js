@@ -1179,7 +1179,7 @@ class AlignmentTrack {
                     this.browser.circularViewVisible = true;
                     const chords = makePairedAlignmentChords(inView);
                     const color = this.parent.color || 'rgb(0,0,255)';
-                    this.browser.circularView.addChords(chords, {track: this.parent.name, color: IGVColor.addAlpha(color, 0.02)});
+                    this.browser.circularView.addChords(chords, {track: this.parent.name, color: color, alpha: 0.02});
                 }
             });
             list.push('<hr/>')
