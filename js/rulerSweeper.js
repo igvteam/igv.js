@@ -48,12 +48,15 @@ class RulerSweeper {
         this.rulerViewport.browser.on('locuschange', this.boundObserverHandler)
 
         function observerHandler() {
-            if (GenomeUtils.isWholeGenomeView(this.rulerViewport.referenceFrame.chr)) {
-                this.removeMouseHandlers()
-            } else {
-                this.addMouseHandlers()
+            if(this.rulerViewport.referenceFrame) {
+                if (GenomeUtils.isWholeGenomeView(this.rulerViewport.referenceFrame.chr)) {
+                    this.removeMouseHandlers()
+                } else {
+                    this.addMouseHandlers()
+                }
             }
-        }    }
+        }
+    }
 
     removeBrowserObserver() {
         this.rulerViewport.browser.off('locuschange', this.boundObserverHandler)
