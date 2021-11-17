@@ -1,4 +1,4 @@
-import ViewPort from "./viewport.js";
+import TrackViewport from "./trackViewport.js";
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
@@ -9,7 +9,7 @@ let timer
 let currentViewport = undefined
 const toolTipTimeout = 1e4
 
-class RulerViewport extends ViewPort {
+class RulerViewport extends TrackViewport {
 
     constructor(trackView, $viewportColumn, referenceFrame, width) {
         super(trackView, $viewportColumn, referenceFrame, width);
