@@ -40,7 +40,8 @@
 </p>
 
 <p>
-    <b>CircView size:&nbsp</b>
+    <button id="circ-view-visible">Show CircView</button>
+    <label for="circview-size-input"> <b>CircView size:&nbsp</b></label>
     <input type="text" id="circview-size-input"></input>
 </p>
 
@@ -86,19 +87,23 @@
 
             const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
             makeDraggable(circularViewContainer, circularViewContainer)
-            browser.createCircularView(circularViewContainer, true);
+            browser.createCircularView(circularViewContainer, false);
+
+            const visibleButton = document.getElementById("circ-view-visible");
+            visibleButton.addEventListener("click", e => {
+                browser.circularViewVisible = !browser.circularViewVisible;
+                visibleButton.innerText = browser.circularViewVisible ? "Hide" : "Show";
+            })
 
             // Resize circular view control
             const sizeInputElement = document.getElementById("circview-size-input");
             const circContainerElement = document.getElementById("jbrowse_circular_genome_view");
             sizeInputElement.value = circContainerElement.clientWidth;
             sizeInputElement.addEventListener("change", e => {
-
-                let  trackButton = document.querySelector("button[data-testid='circular_track_select']");
-                if(trackButton) {
+                let trackButton = document.querySelector("button[data-testid='circular_track_select']");
+                if (trackButton) {
                     trackButton.style.display = 'none';
                 }
-
                 const sz = e.target.value;
                 circContainerElement.style.width = sz + "px";
                 circContainerElement.style.height = sz + "px";

@@ -90,7 +90,7 @@ const makeVCFChords = (features) => {
     })
 }
 
-function makeCircViewChromosomes (genome)  {
+function makeCircViewChromosomes(genome) {
     const regions = [];
     const colors = [];
     for (let chrName of genome.wgChromosomeNames) {
@@ -111,7 +111,7 @@ function createCircularView(el, browser) {
 
     const circularView = new CircularView(el, {
 
-         onChordClick: (feature, chordTrack, pluginManager) => {
+        onChordClick: (feature, chordTrack, pluginManager) => {
 
             const f1 = feature.data;
             const f2 = f1.mate;
@@ -121,25 +121,29 @@ function createCircularView(el, browser) {
             const l2 = new Locus({chr: browser.genome.getChromosomeName(f2.refName), start: f2.start, end: f2.end});
 
             let loci;
-            if ("alignment" === f1.igvtype) {   // append
-                loci = this.currentLoci().map(str => Locus.fromLocusString(str));
-                for (let l of [l1, l2]) {
-                    if (!loci.some(locus => {
-                        return locus.contains(l)
-                    })) {
-                        // add flanking
-                        l.start = Math.max(0, l.start - flanking);
-                        l.end += flanking;
-                        loci.push(l)
-                    }
-                }
-            } else {
+
+            // If there is overlap with current loci
+
+            loci = browser.currentLoci().map(str => Locus.fromLocusString(str));
+
+            // if(loci.some(locus =>  locus.contains(l1)) || loci.some(locus => locus.contains(l2))) {
+            //     for (let l of [l1, l2]) {
+            //         if (!loci.some(locus => {
+            //             return locus.contains(l)
+            //         })) {
+            //             // add flanking
+            //             l.start = Math.max(0, l.start - flanking);
+            //             l.end += flanking;
+            //             loci.push(l)
+            //         }
+            //     }
+            // } else {
                 l1.start = Math.max(0, l1.start - flanking);
                 l1.end += flanking;
                 l2.start = Math.max(0, l2.start - flanking);
                 l2.end += flanking;
                 loci = [l1, l2];
-            }
+            //}
 
             const searchString = loci.map(l => l.getLocusString()).join(" ");
             browser.search(searchString);
@@ -149,5 +153,12 @@ function createCircularView(el, browser) {
     return circularView;
 }
 
-export {circViewIsInstalled, makeBedPEChords, makePairedAlignmentChords, makeVCFChords, createCircularView, makeCircViewChromosomes}
+export {
+    circViewIsInstalled,
+    makeBedPEChords,
+    makePairedAlignmentChords,
+    makeVCFChords,
+    createCircularView,
+    makeCircViewChromosomes
+}
 
