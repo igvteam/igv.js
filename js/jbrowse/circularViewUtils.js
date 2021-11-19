@@ -1,7 +1,6 @@
 import {getChrColor} from "../bam/bamTrack.js";
 import Locus from "../locus.js";
-import CircularView from "../../node_modules/circular-view/js/circularView.js";
-import IGVColor from "../../node_modules/igv-utils/src/igv-color.js";
+import {CircularView} from "../../node_modules/circular-view/dist/circular-view.js";
 
 /**
  * The minimum length for a VCF structural variant.  VCF records < this length are ignored in the circular view
