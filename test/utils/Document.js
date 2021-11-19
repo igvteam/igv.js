@@ -29,7 +29,8 @@ class Document {
 
     constructor() {
         this.location = {href: ""}
-        this.documentElement = {}
+        this.documentElement = new Element();
+        this.documentElement.firstElementChild = new Element();
         this.styleSheets = []
         this.head = new Element();
         this.body = new Element();
