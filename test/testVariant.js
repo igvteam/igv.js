@@ -139,7 +139,6 @@ suite("testVariant", function () {
     })
 
     test("tribble indexed - large header", async function () {
-
         const config = {
             url: require.resolve("./data/vcf/large_header.vcf"),
             indexURL: require.resolve("./data/vcf/large_header.vcf.idx")
@@ -156,7 +155,25 @@ suite("testVariant", function () {
         const features = await track.getFeatures(chr, start, end);
 
         assert.equal(features.length, 3);
+    })
 
+    test("tabix indexed - large header", async function () {
+        const config = {
+            url: require.resolve("./data/tabix/large_header.vcf.gz"),
+            indexURL: require.resolve("./data/tabix/large_header.vcf.gz.tbi")
+        };
+
+        const browser = {genome};
+
+        const track = await Browser.prototype.createTrack.call(browser, config);
+        assert.equal(track.type, "variant");
+
+        const chr = "chr1";
+        const start = 1;
+        const end = 1298832;
+        const features = await track.getFeatures(chr, start, end);
+
+        assert.equal(features.length, 3);
     })
 
     test("parse svtype = BND ", async function () {
