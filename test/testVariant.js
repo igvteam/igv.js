@@ -159,8 +159,8 @@ suite("testVariant", function () {
 
     test("tabix indexed - large header", async function () {
         const config = {
-            url: require.resolve("./data/tabix/large_header.vcf.gz"),
-            indexURL: require.resolve("./data/tabix/large_header.vcf.gz.tbi")
+            url: require.resolve("./data/vcf/large_header.vcf"),
+            indexURL: require.resolve("./data/vcf/large_header.vcf.idx")
         };
 
         const browser = {genome};
