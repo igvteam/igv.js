@@ -38,7 +38,7 @@ can be downloaded from [https://cdn.jsdelivr.net/npm/igv@2.10.4/dist/](https://c
 To import igv as an ES6 module
 
 ```javascript
-import igv from "https://cdn.jsdelivr.net/npm/igv@2.10.4/dist/igv.es6.min.js"
+import igv from "https://cdn.jsdelivr.net/npm/igv@2.10.4/dist/igv.esm.min.js"
 ``` 
 
 Or as a script include (defines the "igv" global)
