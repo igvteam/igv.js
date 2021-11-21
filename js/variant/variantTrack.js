@@ -532,19 +532,29 @@ class VariantTrack extends TrackBase {
                 });
         }
 
-        // Experimental JBrowse feature
-        // if (this.browser.circularView) {
-        //     menuItems.push('<hr/>');
-        //
-        //     menuItems.push({
-        //         label: 'Show chords',
-        //         click: () => {
-        //             this.browser.circularViewVisible = true;
-        //             const chords = makeVCFChords(this.featureSource.getAllFeatures(), this.color);
-        //             this.browser.circularView.addChords(chords, {track: this.name, color: this.color, append: true});
-        //         }
-        //     });
-        // }
+        // Experimental JBrowse circular view integration
+        if (this.browser.circularView && true === this.browser.circularViewVisible) {
+
+            menuItems.push('<hr>');
+            menuItems.push({
+                label: 'Show SVs in Circular View',
+                click: () => {
+                    const inView = []
+                    for (let viewport of this.trackView.viewports) {
+                        const refFrame = viewport.referenceFrame
+                        for (let f of viewport.getCachedFeatures()) {
+                            if (f.end >= refFrame.start && f.start <= refFrame.end) {
+                                inView.push(f)
+                            }
+                        }
+                    }
+
+                    const chords = makeVCFChords(inView);
+                    const color = IGVColor.addAlpha(this._color || this.defaultColor, 0.5);
+                    this.browser.circularView.addChords(chords, {track: this.name, color: color});
+                }
+            })
+        }
 
         return menuItems;
     }
@@ -552,28 +562,27 @@ class VariantTrack extends TrackBase {
 
     contextMenuItemList(clickState) {
 
-        // Experimental JBrowse feature
+        // Experimental JBrowse circular view integration
         if (this.browser.circularView && true === this.browser.circularViewVisible) {
             const viewport = clickState.viewport;
             const list = [];
 
             list.push({
-                label: 'Show chords',
+                label: 'Show SVs in Circular View',
                 click: () => {
                     const refFrame = viewport.referenceFrame;
                     const inView = "all" === refFrame.chr ?
                         this.featureSource.getAllFeatures() :
                         this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end);
                     const chords = makeVCFChords(inView);
-                    const color = this._color || this.defaultColor;
-                    this.browser.circularView.addChords(chords, {track: this.name, color: color, alpha: 0.5});
+                    const color = IGVColor.addAlpha(this._color || this.defaultColor, 0.5);
+                    this.browser.circularView.addChords(chords, {track: this.name, color: color});
                 }
             });
 
             list.push('<hr/>');
             return list;
         }
-
     }
 
 
