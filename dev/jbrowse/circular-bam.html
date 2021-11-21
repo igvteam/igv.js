@@ -86,7 +86,6 @@
             console.log("Created IGV browser");
 
             const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
-            makeDraggable(circularViewContainer, circularViewContainer)
             browser.createCircularView(circularViewContainer, false);
 
             const visibleButton = document.getElementById("circ-view-visible");
