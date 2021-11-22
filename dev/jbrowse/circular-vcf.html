@@ -86,6 +86,8 @@
 
             const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
             browser.createCircularView(circularViewContainer, true);
+            makeDraggable(circularViewContainer, browser.circularView.toolbar);
+            browser.circularView.setSize(640);
 
         })
 
