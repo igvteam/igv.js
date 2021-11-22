@@ -40,8 +40,7 @@
 
 
 <div id="igvDiv">
-    <div id="jbrowse_circular_genome_view"
-         style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
+    <div id="jbrowse_circular_genome_view" style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
 </div>
 
 <script type="module">
@@ -72,6 +71,7 @@
 
             const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
             browser.createCircularView(circularViewContainer, true);
+            makeDraggable(circularViewContainer, browser.circularView.toolbar);
 
         })
 
