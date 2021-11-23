@@ -286,20 +286,21 @@ class VariantTrack extends TrackBase {
 
     getVariantColor(variant) {
 
+        const v = variant._f || variant;
         let variantColor;
 
         if (this.colorBy) {
-            const value = variant.info[this.colorBy];
+            const value = v.info[this.colorBy];
             variantColor = this.getVariantColorTable(this.colorBy).getColor(value);
             if (!variantColor) {
                 variantColor = "gray";
             }
 
         } else if (this._color) {
-            variantColor = (typeof this._color === "function") ? this._color(variant) : this._color;
-        } else if ("NONVARIANT" === variant.type) {
+            variantColor = (typeof this._color === "function") ? this._color(v) : this._color;
+        } else if ("NONVARIANT" === v.type) {
             variantColor = this.nonRefColor;
-        } else if ("MIXED" === variant.type) {
+        } else if ("MIXED" === v.type) {
             variantColor = this.mixedColor;
         } else {
             variantColor = this.defaultColor;
