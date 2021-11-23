@@ -580,6 +580,10 @@ class Browser {
 
         this.trackViews = []
 
+        if (this.circularView && true === this.circularViewVisible) {
+            this.circularView.clearChords()
+        }
+
     }
 
     updateNavbarDOMWithGenome(genome) {
