@@ -669,7 +669,6 @@ class TrackViewport extends Viewport {
                 // Treat as a mouse click, its either a single or double click.
                 // Handle here and stop propogation / default
                 event.preventDefault();
-                event.stopPropagation();
 
                 const mouseX = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0)).x;
                 const mouseXCanvas = DOMUtils.translateMouseCoordinates(event, this.canvas).x;
