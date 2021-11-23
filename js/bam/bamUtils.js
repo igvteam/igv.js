@@ -473,9 +473,32 @@ const BamUtils = {
             // }
             alignment.pairOrientation = tmp.join('');
         }
+    },
 
+    computeLengthOnReference: function (cigarString) {
+
+        let len = 0
+        let buf = ''
+
+        for(let i=0; i<cigarString.length; i++) {
+            const c = cigarString.charCodeAt(i);
+            if (c > 47 && c < 58) {
+                buf += cigarString.charAt(i);
+            } else {
+                switch (c) {
+                    case 78:  // N
+                    case 68:  // D
+                    case 77:  // M
+                    case 61:  // =
+                    case 88:  // X
+                        len += parseInt(buf.toString());
+                }
+                buf = '';
+            }
+        }
+        return len
     }
-};
+}
 
 
 /**

@@ -47,18 +47,8 @@
     var options =
         {
             genome: "hg19",
+            locus: "chr17:64,040,802-64,045,633",
             tracks: [
-                {
-                    id: "delly",
-                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.vcf",
-                    type: "variant",
-                    format: "vcf",
-                    name: "delly translocations",
-                    supportsWholeGenome: true,
-                    visibilityWindow: -1,
-                    showGenotypes: false,
-                    height: 40
-                },
                 {
                     id: "sniffles",
                     url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/sniffles_tra.vcf",
@@ -71,41 +61,16 @@
                     height: 40
                 },
                 {
-                    id: 'bedpe-track',
-                    name: "SKBR3 translocations",
-                    url: "SKBR3_Sniffles_variants_tra.bedpe",
-                    color: "rgb(0,150,150)",
-                    height: 300,
-                    onclick: (features, e) => {
-                        if (e.shiftKey) {
-                            if (features) {
-                                sendBedPEChords(features);
-                            }
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
-                },
-                {
                     url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/reads_lr_skbr3.fa_ngmlr-0.2.3_mapped.bam",
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/reads_lr_skbr3.fa_ngmlr-0.2.3_mapped.bam.bai",
                     type: "alignment",
                     format: "bam",
                     name: "Alignments",
                     height: 500,
-                    maxFragmentLength: 1000000,  // 1 mb -- only interested in large deletions
-                    colorBy: "fragmentLength",
-                    onclick: (features, e) => {
-                        if (e.shiftKey) {
-                            if (features) {
-                                sendPairedAlignmentChord(features);
-                            }
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
+                    visibilityWindow: 10000,
+                    hideSmallIndels: true,
+                    indelSizeThreshold: 100,
+                    showSoftClips: true
                 }
             ]
         }
@@ -120,7 +85,6 @@
             window.igvBrowser = browser;
 
             const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
-            makeDraggable(circularViewContainer, circularViewContainer)
             browser.createCircularView(circularViewContainer, true);
 
 

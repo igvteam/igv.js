@@ -24,20 +24,21 @@
  */
 
 
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {createSupplementaryAlignments} from "./supplementaryAlignment.js"
 
-const READ_PAIRED_FLAG = 0x1;
-const PROPER_PAIR_FLAG = 0x2;
-const READ_UNMAPPED_FLAG = 0x4;
-const MATE_UNMAPPED_FLAG = 0x8;
-const READ_STRAND_FLAG = 0x10;
-const MATE_STRAND_FLAG = 0x20;
-const FIRST_OF_PAIR_FLAG = 0x40;
-const SECOND_OF_PAIR_FLAG = 0x80;
-const SECONDARY_ALIGNMNET_FLAG = 0x100;
-const READ_FAILS_VENDOR_QUALITY_CHECK_FLAG = 0x200;
-const DUPLICATE_READ_FLAG = 0x400;
-const SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800;
+const READ_PAIRED_FLAG = 0x1
+const PROPER_PAIR_FLAG = 0x2
+const READ_UNMAPPED_FLAG = 0x4
+const MATE_UNMAPPED_FLAG = 0x8
+const READ_STRAND_FLAG = 0x10
+const MATE_STRAND_FLAG = 0x20
+const FIRST_OF_PAIR_FLAG = 0x40
+const SECOND_OF_PAIR_FLAG = 0x80
+const SECONDARY_ALIGNMNET_FLAG = 0x100
+const READ_FAILS_VENDOR_QUALITY_CHECK_FLAG = 0x200
+const DUPLICATE_READ_FLAG = 0x400
+const SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800
 const ELEMENT_SIZE = {
     c: 1,
     C: 1,
@@ -47,6 +48,8 @@ const ELEMENT_SIZE = {
     I: 4,
     f: 4
 }
+
+const MAX_CIGAR = 50
 
 /**
  * readName
@@ -64,130 +67,72 @@ const ELEMENT_SIZE = {
 class BamAlignment {
 
     constructor() {
-        this.hidden = false;
+        this.hidden = false
     }
 
     isMapped() {
-        return (this.flags & READ_UNMAPPED_FLAG) === 0;
+        return (this.flags & READ_UNMAPPED_FLAG) === 0
     }
 
     isPaired() {
-        return (this.flags & READ_PAIRED_FLAG) !== 0;
+        return (this.flags & READ_PAIRED_FLAG) !== 0
     }
 
     isProperPair() {
-        return (this.flags & PROPER_PAIR_FLAG) !== 0;
+        return (this.flags & PROPER_PAIR_FLAG) !== 0
     }
 
     isFirstOfPair() {
-        return (this.flags & FIRST_OF_PAIR_FLAG) !== 0;
+        return (this.flags & FIRST_OF_PAIR_FLAG) !== 0
     }
 
     isSecondOfPair() {
-        return (this.flags & SECOND_OF_PAIR_FLAG) !== 0;
+        return (this.flags & SECOND_OF_PAIR_FLAG) !== 0
     }
 
     isSecondary() {
-        return (this.flags & SECONDARY_ALIGNMNET_FLAG) !== 0;
+        return (this.flags & SECONDARY_ALIGNMNET_FLAG) !== 0
     }
 
     isSupplementary() {
-        return (this.flags & SUPPLEMENTARY_ALIGNMENT_FLAG) !== 0;
+        return (this.flags & SUPPLEMENTARY_ALIGNMENT_FLAG) !== 0
     }
 
     isFailsVendorQualityCheck() {
-        return (this.flags & READ_FAILS_VENDOR_QUALITY_CHECK_FLAG) !== 0;
+        return (this.flags & READ_FAILS_VENDOR_QUALITY_CHECK_FLAG) !== 0
     }
 
     isDuplicate() {
-        return (this.flags & DUPLICATE_READ_FLAG) !== 0;
+        return (this.flags & DUPLICATE_READ_FLAG) !== 0
     }
 
     isMateMapped() {
-        return (this.flags & MATE_UNMAPPED_FLAG) === 0;
+        return (this.flags & MATE_UNMAPPED_FLAG) === 0
     }
 
     isNegativeStrand() {
-        return (this.flags & READ_STRAND_FLAG) !== 0;
+        return (this.flags & READ_STRAND_FLAG) !== 0
     }
 
     isMateNegativeStrand() {
-        return (this.flags & MATE_STRAND_FLAG) !== 0;
+        return (this.flags & MATE_STRAND_FLAG) !== 0
+    }
+
+    hasTag(tag) {
+        const tmpTags = this.tagDict || decodeTags(this.tagBA)
+        return tmpTags.hasOwnProperty(tag)
     }
 
     tags() {
-
         if (!this.tagDict) {
             if (this.tagBA) {
-                this.tagDict = decodeTags(this.tagBA);
-                this.tagBA = undefined;
+                this.tagDict = decodeTags(this.tagBA)
+                this.tagBA = undefined
             } else {
-                this.tagDict = {};  // Mark so we don't try again.  The record has no tags
+                this.tagDict = {}  // Mark so we don't try again.  The record has no tags
             }
         }
-        return this.tagDict;
-
-        function decodeTags(ba) {
-
-            let p = 0;
-            const len = ba.length;
-            const tags = {};
-
-            while (p < len) {
-                const tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
-                p += 2;
-
-                const type = String.fromCharCode(ba[p++]);
-                let value;
-                if (type === 'A') {
-                    value = String.fromCharCode(ba[p]);
-                    p++;
-                } else if (type === 'i' || type === 'I') {
-                    value = readInt(ba, p);
-                    p += 4;
-                } else if (type === 'c' ) {
-                    value = readInt8(ba, p);
-                    p++;
-                } else if (type === 'C') {
-                    value = readUInt8(ba, p);
-                    p++;
-                } else if (type === 's' || type === 'S') {
-                    value = readShort(ba, p);
-                    p += 2;
-                } else if (type === 'f') {
-                    value = readFloat(ba, p);
-                    p += 4;
-                } else if (type === 'Z') {
-                    value = '';
-                    for (; ;) {
-                        var cc = ba[p++];
-                        if (cc === 0) {
-                            break;
-                        } else {
-                            value += String.fromCharCode(cc);
-                        }
-                    }
-                } else if (type === 'B') {
-                    const elementType = String.fromCharCode(ba[p++]);
-                    let elementSize = ELEMENT_SIZE[elementType];
-                    if (elementSize === undefined) {
-                        tags[tag] = `Error: unknown element type '${elementType}'`;
-                        break;
-                    }
-                    const numElements = readInt(ba, p);
-                    p += (4 + numElements * elementSize);
-                    value = '[not shown]';
-                } else {
-                    //'Unknown type ' + type;
-                    value = 'Error unknown type: ' + type;
-                    tags[tag] = value;
-                    break;
-                }
-                tags[tag] = value;
-            }
-            return tags;
-        }
-
+        return this.tagDict
     }
 
     /**
@@ -198,63 +143,70 @@ class BamAlignment {
      * @returns {boolean|boolean}
      */
     containsLocation(genomicLocation, showSoftClips) {
-        const s = showSoftClips ? this.scStart : this.start;
-        const l = showSoftClips ? this.scLengthOnRef : this.lengthOnRef;
-        return (genomicLocation >= s && genomicLocation <= (s + l));
+        const s = showSoftClips ? this.scStart : this.start
+        const l = showSoftClips ? this.scLengthOnRef : this.lengthOnRef
+        return (genomicLocation >= s && genomicLocation <= (s + l))
     }
 
     popupData(genomicLocation) {
 
         // if the user clicks on a base next to an insertion, show just the
         // inserted bases in a popup (like in desktop IGV).
-        const nameValues = [];
+        const nameValues = []
 
         // Consert genomic location to int
-        genomicLocation = Math.floor(genomicLocation);
+        genomicLocation = Math.floor(genomicLocation)
 
         if (this.insertions) {
 
-            const seq = this.seq;
+            const seq = this.seq
 
             for (let insertion of this.insertions) {
-                var ins_start = insertion.start;
+                var ins_start = insertion.start
                 if (genomicLocation === ins_start || genomicLocation === ins_start - 1) {
-                    nameValues.push({name: 'Insertion', value: seq.substr(insertion.seqOffset, insertion.len)});
-                    nameValues.push({name: 'Location', value: ins_start});
-                    return nameValues;
+                    nameValues.push({name: 'Insertion', value: seq.substr(insertion.seqOffset, insertion.len)})
+                    nameValues.push({name: 'Location', value: ins_start})
+                    return nameValues
                 }
             }
         }
 
-        nameValues.push({name: 'Read Name', value: this.readName});
+        nameValues.push({name: 'Read Name', value: this.readName})
 
         // Sample
         // Read group
-        nameValues.push('<hr/>');
+        nameValues.push('<hr/>')
 
         // Add 1 to genomic location to map from 0-based computer units to user-based units
-        nameValues.push({name: 'Alignment Start', value: StringUtils.numberFormatter(1 + this.start), borderTop: true});
-        nameValues.push({name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)'), borderTop: true});
-        nameValues.push({name: 'Cigar', value: this.cigar});
-        nameValues.push({name: 'Mapped', value: yesNo(this.isMapped())});
-        nameValues.push({name: 'Mapping Quality', value: this.mq});
-        nameValues.push({name: 'Secondary', value: yesNo(this.isSecondary())});
-        nameValues.push({name: 'Supplementary', value: yesNo(this.isSupplementary())});
-        nameValues.push({name: 'Duplicate', value: yesNo(this.isDuplicate())});
-        nameValues.push({name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck())});
+        nameValues.push({name: 'Alignment Start', value: StringUtils.numberFormatter(1 + this.start), borderTop: true})
+        nameValues.push({name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)'), borderTop: true})
+
+        // Abbreviate long cigar strings, keeping the beginning and end to show cliping
+        let cigar = this.cigar
+        if (cigar && cigar.length > MAX_CIGAR) {
+            const half = MAX_CIGAR / 2
+            cigar = `${cigar.substring(0, half - 2)} ... ${cigar.substring(cigar.length - half + 2)}`
+        }
+        nameValues.push({name: 'Cigar', value: cigar})
+
+        nameValues.push({name: 'Mapping Quality', value: this.mq})
+        nameValues.push({name: 'Secondary', value: yesNo(this.isSecondary())})
+        nameValues.push({name: 'Supplementary', value: yesNo(this.isSupplementary())})
+        nameValues.push({name: 'Duplicate', value: yesNo(this.isDuplicate())})
+        nameValues.push({name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck())})
 
         if (this.isPaired()) {
-            nameValues.push('<hr/>');
-            nameValues.push({name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true});
-            nameValues.push({name: 'Mate is Mapped', value: yesNo(this.isMateMapped())});
+            nameValues.push('<hr/>')
+            nameValues.push({name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true})
+            nameValues.push({name: 'Mate is Mapped', value: yesNo(this.isMateMapped())})
             if (this.pairOrientation) {
-                nameValues.push({name: 'Pair Orientation', value: this.pairOrientation});
+                nameValues.push({name: 'Pair Orientation', value: this.pairOrientation})
             }
             if (this.isMateMapped()) {
-                nameValues.push({name: 'Mate Chromosome', value: this.mate.chr});
-                nameValues.push({name: 'Mate Start', value: (this.mate.position + 1)});
-                nameValues.push({name: 'Mate Strand', value: (true === this.mate.strand ? '(+)' : '(-)')});
-                nameValues.push({name: 'Insert Size', value: this.fragmentLength});
+                nameValues.push({name: 'Mate Chromosome', value: this.mate.chr})
+                nameValues.push({name: 'Mate Start', value: (this.mate.position + 1)})
+                nameValues.push({name: 'Mate Strand', value: (true === this.mate.strand ? '(+)' : '(-)')})
+                nameValues.push({name: 'Insert Size', value: this.fragmentLength})
                 // Mate Start
                 // Mate Strand
                 // Insert Size
@@ -264,70 +216,77 @@ class BamAlignment {
 
         }
 
-        nameValues.push('<hr/>');
+        const tagDict = this.tags()
 
-        const tagDict = this.tags();
-        let isFirst = true;
-        for (let key in tagDict) {
-
-            if (tagDict.hasOwnProperty(key)) {
-
-                if (isFirst) {
-                    nameValues.push({name: key, value: tagDict[key], borderTop: true});
-                    isFirst = false;
-                } else {
-                    nameValues.push({name: key, value: tagDict[key]});
+        if (tagDict.hasOwnProperty('SA')) {
+            nameValues.push('<hr/>')
+            nameValues.push({name: 'Supplementary Alignments', value: ''})
+            const sa = createSupplementaryAlignments(tagDict['SA'])
+            if (sa) {
+                nameValues.push('<ul>')
+                for (let s of sa) {
+                    nameValues.push(`<li>${s.printString()}</li>`)
                 }
-
+                nameValues.push('</ul>')
             }
         }
 
-        nameValues.push('<hr/>');
-        nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)});
-        nameValues.push({name: 'Read Base:', value: this.readBaseAt(genomicLocation)});
-        nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)});
+        const hiddenTags = new Set(['SA', 'MD'])
+        nameValues.push('<hr/>')
+        for (let key in tagDict) {
+            if (!hiddenTags.has(key)) {
+                nameValues.push({name: key, value: tagDict[key]})
+            }
+        }
 
-        return nameValues;
+        nameValues.push({name: 'Hidden Tags', value: 'SA, MD'})
+
+        nameValues.push('<hr/>')
+        nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)})
+        nameValues.push({name: 'Read Base:', value: this.readBaseAt(genomicLocation)})
+        nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)})
+
+        return nameValues
 
 
         function yesNo(bool) {
-            return bool ? 'Yes' : 'No';
+            return bool ? 'Yes' : 'No'
         }
     }
 
     readBaseAt(genomicLocation) {
 
-        const block = blockAtGenomicLocation(this.blocks, genomicLocation);
+        const block = blockAtGenomicLocation(this.blocks, genomicLocation)
         if (block) {
             if ("*" === this.seq) {
-                return "*";
+                return "*"
             } else {
-                const idx = block.seqIndexAt(genomicLocation);
+                const idx = block.seqIndexAt(genomicLocation)
                 // if (idx >= 0 && idx < this.seq.length) {
-                return this.seq[idx];
+                return this.seq[idx]
                 //  }
             }
         } else {
-            return undefined;
+            return undefined
         }
     }
 
     readBaseQualityAt(genomicLocation) {
 
-        const block = blockAtGenomicLocation(this.blocks, genomicLocation);
+        const block = blockAtGenomicLocation(this.blocks, genomicLocation)
         if (block) {
             if ("*" === this.qual) {
-                return 30;
+                return 30
             } else {
-                const idx = block.seqIndexAt(genomicLocation);
+                const idx = block.seqIndexAt(genomicLocation)
                 if (idx >= 0 && this.qual && idx < this.qual.length) {
-                    return this.qual[idx];
+                    return this.qual[idx]
                 } else {
-                    return 30;
+                    return 30
                 }
             }
         } else {
-            return undefined;
+            return undefined
         }
     }
 
@@ -335,47 +294,109 @@ class BamAlignment {
         if (this.gaps) {
             for (let gap of this.gaps) {
                 if (genomicLocation >= gap.start && genomicLocation < gap.start + gap.len) {
-                    return gap.len;
+                    return gap.len
                 }
             }
         }
-        return 0;
+        return 0
     }
 }
 
 function blockAtGenomicLocation(blocks, genomicLocation) {
 
     for (let i = 0; i < blocks.length; i++) {
-        const block = blocks[i];
+        const block = blocks[i]
         if (genomicLocation >= block.start && genomicLocation < block.start + block.len) {
-            return block;
+            return block
         }
     }
-    return undefined;
+    return undefined
 }
 
+function decodeTags(ba) {
+
+    let p = 0
+    const len = ba.length
+    const tags = {}
+
+    while (p < len) {
+        const tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1])
+        p += 2
+
+        const type = String.fromCharCode(ba[p++])
+        let value
+        if (type === 'A') {
+            value = String.fromCharCode(ba[p])
+            p++
+        } else if (type === 'i' || type === 'I') {
+            value = readInt(ba, p)
+            p += 4
+        } else if (type === 'c') {
+            value = readInt8(ba, p)
+            p++
+        } else if (type === 'C') {
+            value = readUInt8(ba, p)
+            p++
+        } else if (type === 's' || type === 'S') {
+            value = readShort(ba, p)
+            p += 2
+        } else if (type === 'f') {
+            value = readFloat(ba, p)
+            p += 4
+        } else if (type === 'Z') {
+            value = ''
+            for (; ;) {
+                var cc = ba[p++]
+                if (cc === 0) {
+                    break
+                } else {
+                    value += String.fromCharCode(cc)
+                }
+            }
+        } else if (type === 'B') {
+            const elementType = String.fromCharCode(ba[p++])
+            let elementSize = ELEMENT_SIZE[elementType]
+            if (elementSize === undefined) {
+                tags[tag] = `Error: unknown element type '${elementType}'`
+                break
+            }
+            const numElements = readInt(ba, p)
+            p += (4 + numElements * elementSize)
+            value = '[not shown]'
+        } else {
+            //'Unknown type ' + type;
+            value = 'Error unknown type: ' + type
+            tags[tag] = value
+            break
+        }
+        tags[tag] = value
+    }
+    return tags
+}
+
+
 function readInt(ba, offset) {
-    return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);
+    return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset])
 }
 
 function readShort(ba, offset) {
-    return (ba[offset + 1] << 8) | (ba[offset]);
+    return (ba[offset + 1] << 8) | (ba[offset])
 }
 
 function readFloat(ba, offset) {
-    const dataView = new DataView(ba.buffer);
-    return dataView.getFloat32(offset);
+    const dataView = new DataView(ba.buffer)
+    return dataView.getFloat32(offset)
 }
 
 function readInt8(ba, offset) {
-    const dataView = new DataView(ba.buffer);
-    return dataView.getInt8(offset);
+    const dataView = new DataView(ba.buffer)
+    return dataView.getInt8(offset)
 }
 
 function readUInt8(ba, offset) {
-    const dataView = new DataView(ba.buffer);
-    return dataView.getUint8(offset);
+    const dataView = new DataView(ba.buffer)
+    return dataView.getUint8(offset)
 }
 
 
-export default BamAlignment;
+export default BamAlignment

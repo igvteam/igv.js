@@ -1,24 +1,25 @@
-import {getChrColor} from "../bam/bamTrack.js";
-import Locus from "../locus.js";
-import {CircularView} from "../../node_modules/circular-view/dist/circular-view.js";
+import {getChrColor} from "../bam/bamTrack.js"
+import Locus from "../locus.js"
+import {CircularView} from "../../node_modules/circular-view/dist/circular-view.js"
+import {createSupplementaryAlignments} from "../bam/supplementaryAlignment.js"
 
 /**
  * The minimum length for a VCF structural variant.  VCF records < this length are ignored in the circular view
  * @type {number}
  */
-const MINIMUM_SV_LENGTH = 1000000;
+const MINIMUM_SV_LENGTH = 1000000
 
-const circViewIsInstalled = () => CircularView.isInstalled();
+const circViewIsInstalled = () => CircularView.isInstalled()
 
 const shortChrName = (chrName) => {
-    return chrName.startsWith("chr") ? chrName.substring(3) : chrName;
+    return chrName.startsWith("chr") ? chrName.substring(3) : chrName
 }
 
 const makePairedAlignmentChords = (alignments) => {
 
-    const chords = [];
+    const chords = []
     for (let a of alignments) {
-        const mate = a.mate;
+        const mate = a.mate
         if (mate && mate.chr && mate.position) {
             chords.push({
                 uniqueId: a.readName,
@@ -30,10 +31,35 @@ const makePairedAlignmentChords = (alignments) => {
                     start: mate.position - 1,
                     end: mate.position,
                 }
-            });
+            })
         }
     }
-    return chords;
+    return chords
+}
+
+const makeSupplementalAlignmentChords = (alignments) => {
+    const chords = []
+    for (let a of alignments) {
+        const sa = a.tags()['SA']
+        const supAl = createSupplementaryAlignments(sa)
+        let n = 0
+        for (let s of supAl) {
+            if (s.start !== a.start) {
+                chords.push({
+                    uniqueId: `${a.readName}_${n++}`,
+                    refName: shortChrName(a.chr),
+                    start: a.start,
+                    end: a.end,
+                    mate: {
+                        refName: shortChrName(s.chr),
+                        start: s.start,
+                        end: s.start + s.lenOnRef
+                    }
+                })
+            }
+        }
+    }
+    return chords
 }
 
 const makeBedPEChords = (features) => {
@@ -41,7 +67,7 @@ const makeBedPEChords = (features) => {
     return features.map(v => {
 
         // If v is a whole-genome feature, get the true underlying variant.
-        const f = v._f || v;
+        const f = v._f || v
 
         return {
             uniqueId: `${f.chr1}:${f.start1}-${f.end1}_${f.chr2}:${f.start2}-${f.end2}`,
@@ -61,19 +87,19 @@ const makeBedPEChords = (features) => {
 const makeVCFChords = (features) => {
 
     const svFeatures = features.filter(v => {
-        const f = v._f || v;
+        const f = v._f || v
         const isLargeEnough = f.info && f.info.CHR2 && f.info.END &&
-            (f.info.CHR2 !== f.chr || Math.abs(Number.parseInt(f.info.END) - f.pos) > MINIMUM_SV_LENGTH);
-        return isLargeEnough;
-    });
+            (f.info.CHR2 !== f.chr || Math.abs(Number.parseInt(f.info.END) - f.pos) > MINIMUM_SV_LENGTH)
+        return isLargeEnough
+    })
     return svFeatures.map(v => {
 
         // If v is a whole-genome feature, get the true underlying variant.
-        const f = v._f || v;
+        const f = v._f || v
 
-        const pos2 = Number.parseInt(f.info.END);
-        const start2 = pos2 - 100;
-        const end2 = pos2 + 100;
+        const pos2 = Number.parseInt(f.info.END)
+        const start2 = pos2 - 100
+        const end2 = pos2 + 100
 
         return {
             uniqueId: `${f.chr}:${f.start}-${f.end}_${f.info.CHR2}:${f.info.END}`,
@@ -90,11 +116,11 @@ const makeVCFChords = (features) => {
 }
 
 function makeCircViewChromosomes(genome) {
-    const regions = [];
-    const colors = [];
+    const regions = []
+    const colors = []
     for (let chrName of genome.wgChromosomeNames) {
-        const chr = genome.getChromosome(chrName);
-        colors.push(getChrColor(chr.name));
+        const chr = genome.getChromosome(chrName)
+        colors.push(getChrColor(chr.name))
         regions.push(
             {
                 name: chr.name,
@@ -102,7 +128,7 @@ function makeCircViewChromosomes(genome) {
             }
         )
     }
-    return regions;
+    return regions
 }
 
 
@@ -112,18 +138,18 @@ function createCircularView(el, browser) {
 
         onChordClick: (feature, chordTrack, pluginManager) => {
 
-            const f1 = feature.data;
-            const f2 = f1.mate;
-            const flanking = 2000;
+            const f1 = feature.data
+            const f2 = f1.mate
+            const flanking = 2000
 
-            const l1 = new Locus({chr: browser.genome.getChromosomeName(f1.refName), start: f1.start, end: f1.end});
-            const l2 = new Locus({chr: browser.genome.getChromosomeName(f2.refName), start: f2.start, end: f2.end});
+            const l1 = new Locus({chr: browser.genome.getChromosomeName(f1.refName), start: f1.start, end: f1.end})
+            const l2 = new Locus({chr: browser.genome.getChromosomeName(f2.refName), start: f2.start, end: f2.end})
 
-            let loci;
+            let loci
 
             // If there is overlap with current loci
 
-            loci = browser.currentLoci().map(str => Locus.fromLocusString(str));
+            loci = browser.currentLoci().map(str => Locus.fromLocusString(str))
 
             // if(loci.some(locus =>  locus.contains(l1)) || loci.some(locus => locus.contains(l2))) {
             //     for (let l of [l1, l2]) {
@@ -137,25 +163,26 @@ function createCircularView(el, browser) {
             //         }
             //     }
             // } else {
-                l1.start = Math.max(0, l1.start - flanking);
-                l1.end += flanking;
-                l2.start = Math.max(0, l2.start - flanking);
-                l2.end += flanking;
-                loci = [l1, l2];
+            l1.start = Math.max(0, l1.start - flanking)
+            l1.end += flanking
+            l2.start = Math.max(0, l2.start - flanking)
+            l2.end += flanking
+            loci = [l1, l2]
             //}
 
-            const searchString = loci.map(l => l.getLocusString()).join(" ");
-            browser.search(searchString);
+            const searchString = loci.map(l => l.getLocusString()).join(" ")
+            browser.search(searchString)
         }
-    });
+    })
 
-    return circularView;
+    return circularView
 }
 
 export {
     circViewIsInstalled,
     makeBedPEChords,
     makePairedAlignmentChords,
+    makeSupplementalAlignmentChords,
     makeVCFChords,
     createCircularView,
     makeCircViewChromosomes

@@ -55,7 +55,7 @@
 <script type="module">
 
     import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     // Start igv.js and create regions
     var options =
@@ -64,8 +64,16 @@
             locus: "chr17:64,040,802-64,045,633",
             tracks: [
                 {
-                    // url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam",
-                    // indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.bam.bai",
+                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_Illumina_delly.tra.pass.vcf",
+                    type: "variant",
+                    format: "vcf",
+                    name: "delly translocations",
+                    supportsWholeGenome: true,
+                    visibilityWindow: -1,
+                    showGenotypes: false,
+                    height: 40
+                },
+                {
                     url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
                     type: "alignment",
@@ -77,37 +85,38 @@
                     colorBy: "fragmentLength"
                 }
             ]
-        };
+        }
 
     igv.createBrowser(document.getElementById("igvDiv"), options)
 
         .then(async function (browser) {
 
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
+            
+            const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
+            browser.createCircularView(circularViewContainer, false)
+            makeDraggable(circularViewContainer, browser.circularView.toolbar)
 
-            const circularViewContainer = document.getElementById('jbrowse_circular_genome_view');
-            browser.createCircularView(circularViewContainer, false);
-            makeDraggable(circularViewContainer, browser.circularView.toolbar);
 
-            const visibleButton = document.getElementById("circ-view-visible");
+            const visibleButton = document.getElementById("circ-view-visible")
             visibleButton.addEventListener("click", e => {
-                browser.circularViewVisible = !browser.circularViewVisible;
-                visibleButton.innerText = browser.circularViewVisible ? "Hide" : "Show";
+                browser.circularViewVisible = !browser.circularViewVisible
+                visibleButton.innerText = browser.circularViewVisible ? "Hide" : "Show"
             })
 
             // Resize circular view control
-            const sizeInputElement = document.getElementById("circview-size-input");
-            const circContainerElement = document.getElementById("jbrowse_circular_genome_view");
-            sizeInputElement.value = circContainerElement.clientWidth;
+            const sizeInputElement = document.getElementById("circview-size-input")
+            const circContainerElement = document.getElementById("jbrowse_circular_genome_view")
+            sizeInputElement.value = circContainerElement.clientWidth
             sizeInputElement.addEventListener("change", e => {
-                let trackButton = document.querySelector("button[data-testid='circular_track_select']");
+                let trackButton = document.querySelector("button[data-testid='circular_track_select']")
                 if (trackButton) {
-                    trackButton.style.display = 'none';
+                    trackButton.style.display = 'none'
                 }
-                const sz = e.target.value;
-                circContainerElement.style.width = sz + "px";
-                circContainerElement.style.height = sz + "px";
-                browser.circularView.setSize(Number.parseInt(sz));
+                const sz = e.target.value
+                circContainerElement.style.width = sz + "px"
+                circContainerElement.style.height = sz + "px"
+                browser.circularView.setSize(Number.parseInt(sz))
 
 
             })
