@@ -232,7 +232,7 @@ function optimizeChunks(chunks, lowest) {
 function canMerge(chunk1, chunk2) {
     const gap = chunk2.minv.block - chunk1.maxv.block;
     const total = chunk2.maxv.block - chunk1.minv.block;
-    return gap < 1000 && total < 100*MB;
+    return gap < 30000 && total < 10*MB;
 }
 
 /**
