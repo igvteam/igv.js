@@ -803,8 +803,8 @@ function mouseUpHandler(event) {
     // Any mouse up cancels drag and scrolling
     if (this.browser.dragObject || this.browser.isScrolling) {
         this.browser.cancelTrackPan();
-        event.preventDefault();
-        event.stopPropagation();
+        // event.preventDefault();
+        // event.stopPropagation();
         this.enableClick = false;   // Until next mouse down
     } else {
         this.browser.cancelTrackPan();
