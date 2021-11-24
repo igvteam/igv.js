@@ -299,10 +299,10 @@ class GCNVTrack extends TrackBase {
                         delete this.config.samplesClickedToHighlight[closestResult[0]['name']]
                     } else if (this.config.clickToHighlight === 'any') {
                         var colourList = [
-                            'red', 'maroon', 'green', 'teal', 'olivedrab',
-                            'lightblue','darkblue', 'purple', 'orange', 'gold', 
-                        ]
-                        var colour = colourList[Math.floor(Math.random() * colourList.length)];;
+                            'red', 'darkblue', 'green', 'teal', 'olivedrab',
+                            'orange','maroon', 'purple', 'blue', 'gold', 
+                        ];
+                        var colour = colourList[Math.floor(Math.random() * (colourList.length + 1))];
                         this.config.samplesClickedToHighlight[closestResult[0]['name']] = colour;
                     } else {
                         this.config.samplesClickedToHighlight[closestResult[0]['name']] = this.config.clickToHighlight;
