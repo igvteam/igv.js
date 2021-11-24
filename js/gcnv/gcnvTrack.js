@@ -51,6 +51,13 @@ class GCNVTrack extends TrackBase {
             // Set generic properties from track line
             this.setTrackProperties(this.header);   // setTrackProperties defined in TrackBase
 
+            // set option to highlight sample track line on click
+            if (this.header.hasOwnProperty("clickToHighlight")) {
+                let colour = this.header["clickToHighlight"];
+                this.config.clickToHighlight = colour;
+                this.config.samplesClickedToHighlight = {};
+            }
+
             // Special track line properties
             if (this.header.hasOwnProperty("highlight")) {
                 this.config.highlightSamples = {};
@@ -134,6 +141,7 @@ class GCNVTrack extends TrackBase {
             if (this.dataRange.max > this.dataRange.min) {
                 const highlightSamples = this.config.highlightSamples;
                 const onlyHandleClicksForHighlightedSamples = this.config.onlyHandleClicksForHighlightedSamples;
+                const clickToHighlight = this.config.clickToHighlight;
 
                 let previousEnd = -1;
                 let previousValues = {};
@@ -145,7 +153,6 @@ class GCNVTrack extends TrackBase {
                 // by storing lists of rendered line segments, keyed by their right x coordinate in canvas pixel space.
                 // this cache is regenerated on every draw.
                 this.clickDetectorCache = {}
-
 
                 for (let feature of features) {
                     const x1 = getX(feature.start);
@@ -165,8 +172,12 @@ class GCNVTrack extends TrackBase {
                             const previousValue = previousValues[sampleName]
                             const previousY = yScale(previousValue);
                             const highlightColor = highlightSamples && highlightSamples[sampleName];
+
+
                             if (highlightColor) {
                                 highlightConnectorLines.push([previousX, previousY, x1, y, highlightColor])
+                            } else if (clickToHighlight && sampleName in this.config.samplesClickedToHighlight) {
+                                highlightConnectorLines.push([previousX, previousY, x1, y, this.config.samplesClickedToHighlight[sampleName]]);
                             } else {
                                 IGVGraphics.strokeLine(context, previousX, previousY, x1, y, {strokeStyle: '#D9D9D9'});
                             }
@@ -179,6 +190,8 @@ class GCNVTrack extends TrackBase {
                             const highlightColor = highlightSamples && highlightSamples[sampleName];
                             if (highlightColor) {
                                 highlightFeatureLines.push([x1, y, x2, y, highlightColor])
+                            } else if (clickToHighlight && sampleName in this.config.samplesClickedToHighlight) {
+                                highlightFeatureLines.push([x1, y, x2, y, this.config.samplesClickedToHighlight[sampleName]]);
                             } else {
                                 IGVGraphics.strokeLine(context, x1, y, x2, y, {strokeStyle: 'gray'});
                             }
@@ -279,6 +292,23 @@ class GCNVTrack extends TrackBase {
             }
 
             if (closestDistanceSoFar < MIN_DISTANCE_TO_SEGMENT) {
+                // clickToHighlight set, add sample to dict of clicked lines
+                if (this.config.clickToHighlight) {
+                    if (closestResult[0]['name'] in this.config.samplesClickedToHighlight) {
+                        // clicked sample already highlighted => remove if clicked again
+                        delete this.config.samplesClickedToHighlight[closestResult[0]['name']]
+                    } else if (this.config.clickToHighlight === 'any') {
+                        var colourList = [
+                            'red', 'darkblue', 'green', 'teal', 'olivedrab',
+                            'orange','maroon', 'purple', 'blue', 'gold', 
+                        ];
+                        var colour = colourList[Math.floor(Math.random() * (colourList.length + 1))];
+                        this.config.samplesClickedToHighlight[closestResult[0]['name']] = colour;
+                    } else {
+                        this.config.samplesClickedToHighlight[closestResult[0]['name']] = this.config.clickToHighlight;
+                    }
+                    this.trackView.repaintViews();  // prompt redraw to change colour of clicked sample
+                }
                 return closestResult;
             }
         }
