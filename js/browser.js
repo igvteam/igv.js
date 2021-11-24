@@ -580,7 +580,7 @@ class Browser {
 
         this.trackViews = []
 
-        if (this.circularView && true === this.circularViewVisible) {
+        if (this.circularView) {
             this.circularView.clearChords()
         }
 
