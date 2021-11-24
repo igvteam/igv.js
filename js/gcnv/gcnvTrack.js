@@ -292,6 +292,7 @@ class GCNVTrack extends TrackBase {
             }
 
             if (closestDistanceSoFar < MIN_DISTANCE_TO_SEGMENT) {
+                // clickToHighlight set, add sample to dict of clicked lines
                 if (this.config.clickToHighlight) {
                     if (closestResult[0]['name'] in this.config.samplesClickedToHighlight) {
                         // clicked sample already highlighted => remove if clicked again
@@ -306,7 +307,7 @@ class GCNVTrack extends TrackBase {
                     } else {
                         this.config.samplesClickedToHighlight[closestResult[0]['name']] = this.config.clickToHighlight;
                     }
-                    igv.visibilityChange()  // prompt redraw to change colour of clicked sample
+                    this.trackView.repaintViews();  // prompt redraw to change colour of clicked sample
                 }
                 return closestResult;
             }
