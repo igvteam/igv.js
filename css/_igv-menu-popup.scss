@@ -9,7 +9,8 @@ $igv-menu-popup-grey: #7F7F7F;
   top: 0;
   left: 0;
 
-  min-width: 132px;
+  //min-width: 132px;
+  width: max-content;
 
   z-index: 4096;
 
