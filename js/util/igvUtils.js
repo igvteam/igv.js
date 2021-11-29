@@ -226,7 +226,14 @@ function createViewport(trackView, column, referenceFrame, width) {
     } else {
         return new TrackViewport(trackView, column, referenceFrame, width);
     }
-
 }
 
-export {createViewport, createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter}
+/**
+ * Test to see if page is loaded in a secure context, that is by https or is localhost.
+ */
+function isSecureContext(){
+    return window.location.protocol === "https:" || window.location.hostname === "localhost"
+}
+
+export {createViewport, createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber,
+    getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext}
