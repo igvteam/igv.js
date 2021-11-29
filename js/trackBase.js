@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-import {isSimpleType} from "./util/igvUtils.js";
-import {FileUtils, StringUtils, FeatureUtils, GoogleUtils} from "../node_modules/igv-utils/src/index.js";
+import {isSimpleType} from "./util/igvUtils.js"
+import {FileUtils, StringUtils, FeatureUtils, GoogleUtils} from "../node_modules/igv-utils/src/index.js"
 
 
 /**
@@ -37,7 +37,7 @@ import {FileUtils, StringUtils, FeatureUtils, GoogleUtils} from "../node_modules
 class TrackBase {
 
     constructor(config, browser) {
-        this.browser = browser;
+        this.browser = browser
         this.init(config)
     }
 
@@ -49,58 +49,58 @@ class TrackBase {
      */
     init(config) {
         if (config.displayMode) {
-            config.displayMode = config.displayMode.toUpperCase();
+            config.displayMode = config.displayMode.toUpperCase()
         }
 
-        this.config = config;
-        this.url = config.url;
-        this.type = config.type;
-        this.description = config.description;
-        this.supportHiDPI = config.supportHiDPI === undefined ? true : config.supportHiDPI;
+        this.config = config
+        this.url = config.url
+        this.type = config.type
+        this.description = config.description
+        this.supportHiDPI = config.supportHiDPI === undefined ? true : config.supportHiDPI
 
         if (config.name || config.label) {
-            this.name = config.name || config.label;
+            this.name = config.name || config.label
         } else if (FileUtils.isFile(config.url)) {
-            this.name = config.url.name;
+            this.name = config.url.name
         } else if (StringUtils.isString(config.url) && !config.url.startsWith("data:")) {
-            this.name = FileUtils.getFilename(config.url);
+            this.name = FileUtils.getFilename(config.url)
         }
 
-        this.id = this.config.id === undefined ? this.name : this.config.id;
+        this.id = this.config.id === undefined ? this.name : this.config.id
 
-        this.order = config.order;
+        this.order = config.order
 
-        this.color = config.color;
-        this.altColor = config.altColor;
+        this.color = config.color
+        this.altColor = config.altColor
         if ("civic-ws" === config.sourceType) {    // Ugly proxy for specialized track type
-            this.defaultColor = "rgb(155,20,20)";
+            this.defaultColor = "rgb(155,20,20)"
         } else {
-            this.defaultColor = "rgb(0,0,150)";
+            this.defaultColor = "rgb(0,0,150)"
         }
 
-        this.autoscaleGroup = config.autoscaleGroup;
+        this.autoscaleGroup = config.autoscaleGroup
 
-        this.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
+        this.removable = config.removable === undefined ? true : config.removable      // Defaults to true
 
-        this.height = config.height || 100;
-        this.autoHeight = config.autoHeight;
-        this.minHeight = config.minHeight || Math.min(25, this.height);
-        this.maxHeight = config.maxHeight || Math.max(1000, this.height);
+        this.height = config.height || 100
+        this.autoHeight = config.autoHeight
+        this.minHeight = config.minHeight || Math.min(25, this.height)
+        this.maxHeight = config.maxHeight || Math.max(1000, this.height)
 
         this.visibilityWindow = config.visibilityWindow
 
-        if(config.onclick) {
-            this.onclick = config.onclick;
-            config.onclick = undefined;   // functions cannot be saved in sessions, clear it here.
+        if (config.onclick) {
+            this.onclick = config.onclick
+            config.onclick = undefined   // functions cannot be saved in sessions, clear it here.
         }
     }
 
     get name() {
-        return this._name;
+        return this._name
     }
 
     set name(name) {
-        this._name = name;
+        this._name = name
         if (this.trackView) {
             this.trackView.setTrackLabelName(name)
         }
@@ -112,7 +112,7 @@ class TrackBase {
      * @param config
      */
     updateConfig(config) {
-        this.init(config);
+        this.init(config)
     }
 
     /**
@@ -124,50 +124,50 @@ class TrackBase {
 
         // Create copy of config, minus transient properties (convention is name starts with '_').  Also, all
         // function properties are transient as they cannot be saved in json
-        const state = {};
+        const state = {}
         for (let key of Object.keys(this.config)) {
             if (!key.startsWith("_") && typeof this.config[key] !== "function" && this.config[key] !== undefined) {
-                state[key] = this.config[key];
+                state[key] = this.config[key]
             }
         }
 
         // Update original config values with any changes
         for (let key of Object.keys(state)) {
-            if (key.startsWith("_")) continue;   // transient property
-            const value = this[key];
+            if (key.startsWith("_")) continue   // transient property
+            const value = this[key]
             if (value && (isSimpleType(value) || typeof value === "boolean")) {
-                state[key] = value;
+                state[key] = value
             }
         }
 
-        if (this.color) state.color = this.color;
-        if (this.altColor) state.altColor = this.altColor;
+        if (this.color) state.color = this.color
+        if (this.altColor) state.altColor = this.altColor
 
         // Flatten dataRange if present
         if (!this.autoscale && this.dataRange) {
-            state.min = this.dataRange.min;
-            state.max = this.dataRange.max;
+            state.min = this.dataRange.min
+            state.max = this.dataRange.max
         }
 
         // Check for non-json-if-yable properties.  Perhaps we should test what can be saved.
         for (let key of Object.keys(state)) {
             if (typeof state[key] === 'function') {
-                throw Error(`Property '${key}' of track '${this.name} is a function. Functions cannot be saved in sessions.`);
+                throw Error(`Property '${key}' of track '${this.name} is a function. Functions cannot be saved in sessions.`)
             }
             if (FileUtils.isFile(state[key])) {
-                const str = `Track ${this.name} is a local file. Sessions cannot be saved with local file references.`;
-                throw Error(str);
+                const str = `Track ${this.name} is a local file. Sessions cannot be saved with local file references.`
+                throw Error(str)
             }
             if (state[key] instanceof Promise) {
-                throw Error(`Property '${key}' of track '${this.name} is a Promise. Promises cannot be saved in sessions.`);
+                throw Error(`Property '${key}' of track '${this.name} is a Promise. Promises cannot be saved in sessions.`)
             }
         }
 
-        return state;
+        return state
     }
 
     supportsWholeGenome() {
-        return false;
+        return false
     }
 
     /**
@@ -175,7 +175,7 @@ class TrackBase {
      * @returns {boolean}
      */
     hasSamples() {
-        return false;
+        return false
     }
 
     getGenomeId() {
@@ -192,14 +192,14 @@ class TrackBase {
      */
     setTrackProperties(properties) {
 
-        const tracklineConfg = {};
-        let tokens;
+        const tracklineConfg = {}
+        let tokens
         for (let key of Object.keys(properties)) {
             switch (key.toLowerCase()) {
                 case "usescore":
                     tracklineConfg.useScore = (
-                        properties[key] === 1 || properties[key] === "1" || properties[key] === "on" || properties[key] === true);
-                    break;
+                        properties[key] === 1 || properties[key] === "1" || properties[key] === "on" || properties[key] === true)
+                    break
                 case "visibility":
                     //0 - hide, 1 - dense, 2 - full, 3 - pack, and 4 - squish
                     switch (properties[key]) {
@@ -208,63 +208,65 @@ class TrackBase {
                         case "pack":
                         case "full":
                             tracklineConfg.displayMode = "EXPANDED"
-                            break;
+                            break
                         case "4":
                         case "squish":
                             tracklineConfg.displayMode = "SQUISHED"
-                            break;
+                            break
                         case "1":
                         case "dense":
                             tracklineConfg.displayMode = "COLLAPSED"
                     }
-                    break;
+                    break
                 case "color":
                 case "altcolor":
-                    tracklineConfg[key] = properties[key].startsWith("rgb(") ? properties[key] : "rgb(" + properties[key] + ")";
-                    break;
+                    tracklineConfg[key] = properties[key].startsWith("rgb(") ? properties[key] : "rgb(" + properties[key] + ")"
+                    break
                 case "featurevisiblitywindow":
                 case "visibilitywindow":
-                    tracklineConfg.visibilityWindow = Number.parseInt(properties[key]);
-                    break;
+                    tracklineConfg.visibilityWindow = Number.parseInt(properties[key])
+                    break
                 case "maxheightpixels":
-                    tokens = properties[key].split(":");
+                    tokens = properties[key].split(":")
                     if (tokens.length === 3) {
-                        tracklineConfg.minHeight = Number.parseInt(tokens[2]);
-                        tracklineConfg.height = Number.parseInt(tokens[1]);
-                        tracklineConfg.maxHeight = Number.parseInt(tokens[0]);
+                        tracklineConfg.minHeight = Number.parseInt(tokens[2])
+                        tracklineConfg.height = Number.parseInt(tokens[1])
+                        tracklineConfg.maxHeight = Number.parseInt(tokens[0])
                     }
-                    break;
+                    break
                 case "viewlimits":
                     if (!this.config.autoscale) {   // autoscale in the config has precedence
-                        tokens = properties[key].split(":");
-                        let min = 0;
-                        let max;
+                        tokens = properties[key].split(":")
+                        let min = 0
+                        let max
                         if (tokens.length == 1) {
-                            max = Number.parseFloat(tokens[0]);
+                            max = Number.parseFloat(tokens[0])
                         } else if (tokens.length == 2) {
-                            min = Number.parseFloat(tokens[0]);
-                            max = Number.parseFloat(tokens[1]);
+                            min = Number.parseFloat(tokens[0])
+                            max = Number.parseFloat(tokens[1])
                         }
-                        tracklineConfg.autoscale = false;
-                        tracklineConfg.dataRange = {min, max};
+                        tracklineConfg.autoscale = false
+                        tracklineConfg.dataRange = {min, max}
                     }
                 case "name":
-                    tracklineConfg[key] = properties[key];
-                    break;
+                    tracklineConfg[key] = properties[key]
+                    break
                 case "url":
-                    tracklineConfg["infoURL"] = properties[key];
-                    break;
+                    tracklineConfg["infoURL"] = properties[key]
+                    break
                 case "type":
-                    const v = properties[key];
+                    const v = properties[key]
                     if (UCSCTypeMappings.has(v)) {
-                        tracklineConfg[key] = UCSCTypeMappings.get(v);
+                        tracklineConfg[key] = UCSCTypeMappings.get(v)
+                    } else {
+                        tracklineConfg[key] = v
                     }
-                    break;
+                    break
                 case "graphtype":
-                    tracklineConfg["graphType"] = properties[key];
-                    break;
+                    tracklineConfg["graphType"] = properties[key]
+                    break
                 default:
-                    tracklineConfg[key] = properties[key];
+                    tracklineConfg[key] = properties[key]
             }
         }
 
@@ -273,13 +275,17 @@ class TrackBase {
         for (let key of Object.keys(tracklineConfg)) {
 
             if (!this.config.hasOwnProperty(key) || (key === "name" && this.config._derivedName)) {
-                this[key] = tracklineConfg[key];
+                let value = tracklineConfg[key]
+                if ("true" === value) value = true
+                if ("false" === value) value = false
+
+                this[key] = value
                 if (key === "height" && this.trackView) {
                     try {
-                        const h = Number.parseInt(tracklineConfg[key]);
-                        this.trackView.setTrackHeight(h);
+                        const h = Number.parseInt(value)
+                        this.trackView.setTrackHeight(h)
                     } catch (e) {
-                        console.error(e);
+                        console.error(e)
                     }
                 }
             }
@@ -298,19 +304,19 @@ class TrackBase {
 
         // We use the cached features rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (!features) features = clickState.viewport.getCachedFeatures();
+        if (!features) features = clickState.viewport.getCachedFeatures()
 
         if (!features || features.length === 0) {
-            return [];
+            return []
         }
 
-        const genomicLocation = clickState.genomicLocation;
+        const genomicLocation = clickState.genomicLocation
 
         // When zoomed out we need some tolerance around genomicLocation
-        const tolerance = (clickState.referenceFrame.bpPerPixel > 0.2) ? 3 * clickState.referenceFrame.bpPerPixel : 0.2;
-        const ss = genomicLocation - tolerance;
-        const ee = genomicLocation + tolerance;
-        return (FeatureUtils.findOverlapping(features, ss, ee));
+        const tolerance = (clickState.referenceFrame.bpPerPixel > 0.2) ? 3 * clickState.referenceFrame.bpPerPixel : 0.2
+        const ss = genomicLocation - tolerance
+        const ee = genomicLocation + tolerance
+        return (FeatureUtils.findOverlapping(features, ss, ee))
     }
 
     /**
@@ -320,23 +326,23 @@ class TrackBase {
      */
     extractPopupData(feature, genomeId) {
 
-        const filteredProperties = new Set(['row', 'color', 'chr', 'start', 'end', 'cdStart', 'cdEnd', 'strand', 'alpha']);
-        const data = [];
+        const filteredProperties = new Set(['row', 'color', 'chr', 'start', 'end', 'cdStart', 'cdEnd', 'strand', 'alpha'])
+        const data = []
 
-        let alleles, alleleFreqs;
+        let alleles, alleleFreqs
         for (let property in feature) {
 
             if (feature.hasOwnProperty(property) &&
                 !filteredProperties.has(property) &&
                 isSimpleType(feature[property])) {
 
-                let value = feature[property];
-                data.push({name: StringUtils.capitalize(property), value: value});
+                let value = feature[property]
+                data.push({name: StringUtils.capitalize(property), value: value})
 
                 if (property === "alleles") {
-                    alleles = feature[property];
+                    alleles = feature[property]
                 } else if (property === "alleleFreqs") {
-                    alleleFreqs = feature[property];
+                    alleleFreqs = feature[property]
                 }
             }
         }
@@ -344,35 +350,35 @@ class TrackBase {
         if (alleles && alleleFreqs) {
 
             if (alleles.endsWith(",")) {
-                alleles = alleles.substr(0, alleles.length - 1);
+                alleles = alleles.substr(0, alleles.length - 1)
             }
             if (alleleFreqs.endsWith(",")) {
-                alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
+                alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1)
             }
 
-            let a = alleles.split(",");
-            let af = alleleFreqs.split(",");
+            let a = alleles.split(",")
+            let af = alleleFreqs.split(",")
             if (af.length > 1) {
-                let b = [];
+                let b = []
                 for (let i = 0; i < af.length; i++) {
-                    b.push({a: a[i], af: Number.parseFloat(af[i])});
+                    b.push({a: a[i], af: Number.parseFloat(af[i])})
                 }
                 b.sort(function (x, y) {
                     return x.af - y.af
-                });
+                })
 
-                let ref = b[b.length - 1].a;
+                let ref = b[b.length - 1].a
                 if (ref.length === 1) {
                     for (let i = b.length - 2; i >= 0; i--) {
-                        let alt = b[i].a;
+                        let alt = b[i].a
                         if (alt.length === 1) {
-                            if (!genomeId) genomeId = this.getGenomeId();
+                            if (!genomeId) genomeId = this.getGenomeId()
                             const cravatLink = TrackBase.getCravatLink(feature.chr, feature.start + 1, ref, alt, genomeId)
                             console.log(cravatLink)
                             if (cravatLink) {
-                                data.push('<hr/>');
-                                data.push({html: cravatLink});
-                                data.push('<hr/>');
+                                data.push('<hr/>')
+                                data.push({html: cravatLink})
+                                data.push('<hr/>')
                             }
                         }
                     }
@@ -392,9 +398,9 @@ class TrackBase {
             posString += ` (${feature.strand})`
         }
 
-        data.push({name: 'Location', value: posString});
+        data.push({name: 'Location', value: posString})
 
-        return data;
+        return data
 
     }
 
@@ -402,7 +408,7 @@ class TrackBase {
 
         if ("hg38" === genomeID || "GRCh38" === genomeID) {
 
-            const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr;
+            const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr
             return `<a target="_blank" href="https://run.opencravat.org/result/nocache/variant.html` +
                 `?chrom=${cravatChr}&pos=${position}&ref_base=${ref}&alt_base=${alt}"><b>Cravat ${ref}->${alt}</b></a>`
 
@@ -423,4 +429,4 @@ const UCSCTypeMappings = new Map([
     ["bigBed", "bigBed"],
     ["bigWig", "bigWig"]
 ])
-export default TrackBase;
+export default TrackBase
