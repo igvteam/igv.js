@@ -255,7 +255,6 @@ class TrackView {
         }
 
         this.track.height = newHeight;
-        this.track.config.height = newHeight;
 
         this.resizeAxisCanvas(this.axis.clientWidth, this.track.height);
 
