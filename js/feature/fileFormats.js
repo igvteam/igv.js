@@ -100,4 +100,4 @@ const FileFormats = {
     }
 }
 
-export default FileFormats;
+export default FileFormats

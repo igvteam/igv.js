@@ -1,4 +1,3 @@
-
 function decodeFusionJuncSpan(tokens, header) {
 
     /*
@@ -23,16 +22,16 @@ function decodeFusionJuncSpan(tokens, header) {
      */
 
 
-    if (tokens.length < 7) return undefined;
+    if (tokens.length < 7) return undefined
 
-    var chr = tokens[0];
-    var fusion_name = tokens[1];
-    var junction_left = parseInt(tokens[2]);
-    var junction_right = parseInt(tokens[3]);
-    var num_junction_reads = parseInt(tokens[4]);
-    var num_spanning_frags = parseInt(tokens[5]);
+    var chr = tokens[0]
+    var fusion_name = tokens[1]
+    var junction_left = parseInt(tokens[2])
+    var junction_right = parseInt(tokens[3])
+    var num_junction_reads = parseInt(tokens[4])
+    var num_spanning_frags = parseInt(tokens[5])
 
-    var spanning_frag_coords_text = tokens[6];
+    var spanning_frag_coords_text = tokens[6]
 
     var feature = {
         chr: chr,
@@ -45,37 +44,37 @@ function decodeFusionJuncSpan(tokens, header) {
 
         start: -1,
         end: -1
-    }; // set start and end later based on min/max of span coords
+    } // set start and end later based on min/max of span coords
 
-    var min_coord = junction_left;
-    var max_coord = junction_right;
+    var min_coord = junction_left
+    var max_coord = junction_right
 
     if (num_spanning_frags > 0) {
 
-        var coord_pairs = spanning_frag_coords_text.split(',');
+        var coord_pairs = spanning_frag_coords_text.split(',')
 
         for (var i = 0; i < coord_pairs.length; i++) {
-            var split_coords = coord_pairs[i].split('-');
+            var split_coords = coord_pairs[i].split('-')
 
-            var span_left = split_coords[0];
-            var span_right = split_coords[1];
+            var span_left = split_coords[0]
+            var span_right = split_coords[1]
 
             if (span_left < min_coord) {
-                min_coord = span_left;
+                min_coord = span_left
             }
             if (span_right > max_coord) {
-                max_coord = span_right;
+                max_coord = span_right
             }
-            feature.spanning_frag_coords.push({left: span_left, right: span_right});
+            feature.spanning_frag_coords.push({left: span_left, right: span_right})
 
         }
     }
 
-    feature.start = min_coord;
-    feature.end = max_coord;
+    feature.start = min_coord
+    feature.end = max_coord
 
 
-    return feature;
+    return feature
 
 }
 

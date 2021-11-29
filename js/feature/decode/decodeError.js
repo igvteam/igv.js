@@ -4,8 +4,8 @@
 
 class DecodeError {
     constructor(message) {
-        this.message = message;
+        this.message = message
     }
 }
 
-export default DecodeError;
+export default DecodeError

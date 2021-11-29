@@ -23,80 +23,80 @@
  * THE SOFTWARE.
  */
 
-import BWReader from "./bwReader.js";
-import pack from "../feature/featurePacker.js";
+import BWReader from "./bwReader.js"
+import pack from "../feature/featurePacker.js"
 
 class BWSource {
 
     constructor(config, genome) {
-        this.reader = new BWReader(config, genome);
-        this.genome = genome;
-        this.format = config.format || "bigwig";
-        this.wgValues = {};
+        this.reader = new BWReader(config, genome)
+        this.genome = genome
+        this.format = config.format || "bigwig"
+        this.wgValues = {}
     }
 
     async getFeatures({chr, start, end, bpPerPixel, windowFunction}) {
 
         const features = (chr.toLowerCase() === "all") ?
             await this.getWGValues(windowFunction) :
-            await this.reader.readFeatures(chr, start, chr, end, bpPerPixel, windowFunction);
+            await this.reader.readFeatures(chr, start, chr, end, bpPerPixel, windowFunction)
 
-        const isBigWig = this.reader.type === "bigwig";
+        const isBigWig = this.reader.type === "bigwig"
         if (!isBigWig) {
-            pack(features);
+            pack(features)
         }
-        return features;
+        return features
     }
 
     async getHeader() {
-        return this.reader.loadHeader();
+        return this.reader.loadHeader()
     }
 
     getDefaultRange() {
         if (this.reader.totalSummary !== undefined) {
-            return this.reader.totalSummary.defaultRange;
+            return this.reader.totalSummary.defaultRange
         } else {
-            return undefined;
+            return undefined
         }
     }
 
     async defaultVisibilityWindow() {
-        return this.reader.defaultVisibilityWindow;
+        return this.reader.defaultVisibilityWindow
     }
 
     async getWGValues(windowFunction) {
 
-        const nominalScreenWidth = 1000;      // This doesn't need to be precise
-        const genome = this.genome;
+        const nominalScreenWidth = 1000      // This doesn't need to be precise
+        const genome = this.genome
 
         if (this.wgValues[windowFunction]) {
-            return this.wgValues[windowFunction];
+            return this.wgValues[windowFunction]
         } else {
 
-            const bpPerPixel = genome.getGenomeLength() / nominalScreenWidth;
-            const features = await this.reader.readWGFeatures(bpPerPixel, windowFunction);
-            let wgValues = [];
+            const bpPerPixel = genome.getGenomeLength() / nominalScreenWidth
+            const features = await this.reader.readWGFeatures(bpPerPixel, windowFunction)
+            let wgValues = []
             for (let f of features) {
-                const chr = f.chr;
-                const offset = genome.getCumulativeOffset(chr);
-                const wgFeature = Object.assign({}, f);
-                wgFeature.chr = "all";
-                wgFeature.start = offset + f.start;
-                wgFeature.end = offset + f.end;
-                wgValues.push(wgFeature);
+                const chr = f.chr
+                const offset = genome.getCumulativeOffset(chr)
+                const wgFeature = Object.assign({}, f)
+                wgFeature.chr = "all"
+                wgFeature.start = offset + f.start
+                wgFeature.end = offset + f.end
+                wgValues.push(wgFeature)
             }
-            this.wgValues[windowFunction] = wgValues;
-            return wgValues;
+            this.wgValues[windowFunction] = wgValues
+            return wgValues
         }
     }
 
     supportsWholeGenome() {
-        return this.reader.type === "bigwig" || this.defaultVisibilityWindow() <= 0;
+        return this.reader.type === "bigwig" || this.defaultVisibilityWindow() <= 0
     }
 
     async trackType() {
-        return this.reader.getTrackType();
+        return this.reader.getTrackType()
     }
 }
 
-export default BWSource;
+export default BWSource

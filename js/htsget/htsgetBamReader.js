@@ -24,48 +24,48 @@
  * THE SOFTWARE.
  */
 
-import HtsgetReader from "./htsgetReader.js";
-import AlignmentContainer from "../bam/alignmentContainer.js";
-import BamUtils from "../bam/bamUtils.js";
-import {BGZip} from "../../node_modules/igv-utils/src/index.js";
+import HtsgetReader from "./htsgetReader.js"
+import AlignmentContainer from "../bam/alignmentContainer.js"
+import BamUtils from "../bam/bamUtils.js"
+import {BGZip} from "../../node_modules/igv-utils/src/index.js"
 
 class HtsgetBamReader extends HtsgetReader {
 
     constructor(config, genome) {
-        super(config, genome);
-        BamUtils.setReaderDefaults(this, config);
+        super(config, genome)
+        BamUtils.setReaderDefaults(this, config)
     }
 
 
     async readAlignments(chr, start, end) {
 
         if (!this.header) {
-            const compressedData = await this.readHeaderData();
-            const ba = BGZip.unbgzf(compressedData.buffer);
-            this.header = BamUtils.decodeBamHeader(ba, this.genome);
-            this.chrAliasTable = new Map();
-            for(let key of Object.keys(this.header.chrAliasTable)) {
-                this.chrAliasTable.set(key, this.header.chrAliasTable[key]);
+            const compressedData = await this.readHeaderData()
+            const ba = BGZip.unbgzf(compressedData.buffer)
+            this.header = BamUtils.decodeBamHeader(ba, this.genome)
+            this.chrAliasTable = new Map()
+            for (let key of Object.keys(this.header.chrAliasTable)) {
+                this.chrAliasTable.set(key, this.header.chrAliasTable[key])
             }
         }
 
-        let queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr;
+        let queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr
 
-        const compressedData = await this.readData(queryChr, start, end);
+        const compressedData = await this.readData(queryChr, start, end)
 
         // BAM decoding
-        const ba = BGZip.unbgzf(compressedData.buffer);
+        const ba = BGZip.unbgzf(compressedData.buffer)
 
-        const chrIdx = this.header.chrToIndex[chr];
-        const alignmentContainer = new AlignmentContainer(chr, start, end, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold);
-        BamUtils.decodeBamRecords(ba, this.header.size, alignmentContainer, this.header.chrNames, chrIdx, start, end);
-        alignmentContainer.finish();
+        const chrIdx = this.header.chrToIndex[chr]
+        const alignmentContainer = new AlignmentContainer(chr, start, end, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold)
+        BamUtils.decodeBamRecords(ba, this.header.size, alignmentContainer, this.header.chrNames, chrIdx, start, end)
+        alignmentContainer.finish()
 
-        return alignmentContainer;
+        return alignmentContainer
 
     }
 
 }
 
 
-export default HtsgetBamReader;
+export default HtsgetBamReader

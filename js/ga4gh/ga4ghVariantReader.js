@@ -23,168 +23,162 @@
  * THE SOFTWARE.
  */
 
-import   {ga4ghGet, ga4ghSearch} from './ga4ghHelper.js';
-import {createGAVariant} from "../variant/variant.js";
+import {ga4ghGet, ga4ghSearch} from './ga4ghHelper.js'
+import {createGAVariant} from "../variant/variant.js"
 
 const Ga4ghVariantReader = function (config, genome) {
 
-        this.config = config;
-        this.genome = genome;
-        this.url = config.url;
-        this.variantSetId = config.variantSetId;
-        this.callSetIds = config.callSetIds;
-        this.includeCalls = (config.includeCalls === undefined ? true : config.includeCalls);
+    this.config = config
+    this.genome = genome
+    this.url = config.url
+    this.variantSetId = config.variantSetId
+    this.callSetIds = config.callSetIds
+    this.includeCalls = (config.includeCalls === undefined ? true : config.includeCalls)
 
-    }
+}
 
-    // Simulate a VCF file header
-    Ga4ghVariantReader.prototype.readHeader = function () {
+// Simulate a VCF file header
+Ga4ghVariantReader.prototype.readHeader = function () {
 
-        var self = this;
-
-
-        if (self.header) {
-            return Promise.resolve(self.header);
-        }
-
-        else {
-
-            self.header = {};
-
-            if (self.includeCalls === false) {
-                return Promise.resolve(self.header);
-            }
-            else {
-
-                var readURL = self.url + "/callsets/search";
-
-                return ga4ghSearch({
-                    url: readURL,
-                    fields: "nextPageToken,callSets(id,name)",
-                    body: {
-                        "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
-                        "pageSize": "10000"
-                    },
-                    decode: function (json) {
-                        // If specific callSetIds are specified filter to those
-                        if (self.callSetIds) {
-                            var callSets = [],
-                                csIdSet = new Set();
-
-                            self.callSetIds.forEach(function (csid) {
-                                csIdSet.add(csid);
-                            })
-
-                            json.callSets.forEach(function (cs) {
-                                if (csIdSet.has(cs.id)) {
-                                    callSets.push(cs);
-                                }
-                            });
-                            return callSets;
-                        }
-                        else {
-                            return json.callSets;
-                        }
-                    }
-                })
-                    .then(function (callSets) {
-                        self.header.callSets = callSets;
-                        return self.header;
-                    })
-            }
-        }
-    }
+    var self = this
 
 
-    Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
+    if (self.header) {
+        return Promise.resolve(self.header)
+    } else {
 
-        const self = this;
-        const genome = this.genome;
+        self.header = {}
 
-        return self.readHeader()
+        if (self.includeCalls === false) {
+            return Promise.resolve(self.header)
+        } else {
 
-            .then(function (header) {
-                return getChrAliasTable()
-            })
+            var readURL = self.url + "/callsets/search"
 
-            .then(function (chrAliasTable) {
+            return ga4ghSearch({
+                url: readURL,
+                fields: "nextPageToken,callSets(id,name)",
+                body: {
+                    "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
+                    "pageSize": "10000"
+                },
+                decode: function (json) {
+                    // If specific callSetIds are specified filter to those
+                    if (self.callSetIds) {
+                        var callSets = [],
+                            csIdSet = new Set()
 
-                var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
-                    readURL = self.url + "/variants/search";
+                        self.callSetIds.forEach(function (csid) {
+                            csIdSet.add(csid)
+                        })
 
-                return ga4ghSearch({
-                    url: readURL,
-                    fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality,filter,info)"),
-                    body: {
-                        "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
-                        "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
-                        "referenceName": queryChr,
-                        "start": bpStart.toString(),
-                        "end": bpEnd.toString(),
-                        "pageSize": "10000"
-                    },
-                    decode: function (json) {
-
-                        var v;
-
-                        var variants = [];
-
-                        json.variants.forEach(function (json) {
-
-                            v = createGAVariant(json);
-
-                            if (!v.isRefBlock()) {
-                                variants.push(v);
+                        json.callSets.forEach(function (cs) {
+                            if (csIdSet.has(cs.id)) {
+                                callSets.push(cs)
                             }
-                        });
-
-                        return variants;
+                        })
+                        return callSets
+                    } else {
+                        return json.callSets
                     }
-                })
+                }
             })
-
-
-        function getChrAliasTable() {
-
-            return new Promise(function (fulfill, reject) {
-
-                if (self.chrAliasTable) {
-                    fulfill(self.chrAliasTable);
-                }
-
-                else {
-                    self.readMetadata().then(function (json) {
-
-                        self.metadata = json.metadata;
-                        self.chrAliasTable = {};
-
-                        if (json.referenceBounds && genome) {
-
-                            json.referenceBounds.forEach(function (rb) {
-                                var refName = rb.referenceName,
-                                    alias = genome.getChromosomeName(refName);
-                                self.chrAliasTable[alias] = refName;
-
-                            });
-                        }
-                        fulfill(self.chrAliasTable);
-
-                    })
-                }
-
-            });
+                .then(function (callSets) {
+                    self.header.callSets = callSets
+                    return self.header
+                })
         }
+    }
+}
 
+
+Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
+
+    const self = this
+    const genome = this.genome
+
+    return self.readHeader()
+
+        .then(function (header) {
+            return getChrAliasTable()
+        })
+
+        .then(function (chrAliasTable) {
+
+            var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
+                readURL = self.url + "/variants/search"
+
+            return ga4ghSearch({
+                url: readURL,
+                fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality,filter,info)"),
+                body: {
+                    "variantSetIds": (Array.isArray(self.variantSetId) ? self.variantSetId : [self.variantSetId]),
+                    "callSetIds": (self.callSetIds ? self.callSetIds : undefined),
+                    "referenceName": queryChr,
+                    "start": bpStart.toString(),
+                    "end": bpEnd.toString(),
+                    "pageSize": "10000"
+                },
+                decode: function (json) {
+
+                    var v
+
+                    var variants = []
+
+                    json.variants.forEach(function (json) {
+
+                        v = createGAVariant(json)
+
+                        if (!v.isRefBlock()) {
+                            variants.push(v)
+                        }
+                    })
+
+                    return variants
+                }
+            })
+        })
+
+
+    function getChrAliasTable() {
+
+        return new Promise(function (fulfill, reject) {
+
+            if (self.chrAliasTable) {
+                fulfill(self.chrAliasTable)
+            } else {
+                self.readMetadata().then(function (json) {
+
+                    self.metadata = json.metadata
+                    self.chrAliasTable = {}
+
+                    if (json.referenceBounds && genome) {
+
+                        json.referenceBounds.forEach(function (rb) {
+                            var refName = rb.referenceName,
+                                alias = genome.getChromosomeName(refName)
+                            self.chrAliasTable[alias] = refName
+
+                        })
+                    }
+                    fulfill(self.chrAliasTable)
+
+                })
+            }
+
+        })
     }
 
+}
 
-    Ga4ghVariantReader.prototype.readMetadata = function () {
 
-        return ga4ghGet({
-            url: this.url,
-            entity: "variantsets",
-            entityId: this.variantSetId
-        });
-    }
+Ga4ghVariantReader.prototype.readMetadata = function () {
 
-export default Ga4ghVariantReader;
+    return ga4ghGet({
+        url: this.url,
+        entity: "variantsets",
+        entityId: this.variantSetId
+    })
+}
+
+export default Ga4ghVariantReader

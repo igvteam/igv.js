@@ -24,105 +24,105 @@
  */
 
 // Indexed fasta files
-import {igvxhr, StringUtils, BGZip, URIUtils} from "../../node_modules/igv-utils/src/index.js";
-import Chromosome from "./chromosome.js";
-import {buildOptions, isDataURL} from "../util/igvUtils.js";
+import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import Chromosome from "./chromosome.js"
+import {buildOptions, isDataURL} from "../util/igvUtils.js"
 
-const splitLines = StringUtils.splitLines;
+const splitLines = StringUtils.splitLines
 
-const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'indexed']);
+const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'indexed'])
 
 class NonIndexedFasta {
 
 
     constructor(reference) {
 
-        this.fastaURL = reference.fastaURL;
-        this.withCredentials = reference.withCredentials;
-        this.chromosomeNames = [];
-        this.chromosomes = {};
-        this.sequences = new Map();
-        this.offsets = {};
+        this.fastaURL = reference.fastaURL
+        this.withCredentials = reference.withCredentials
+        this.chromosomeNames = []
+        this.chromosomes = {}
+        this.sequences = new Map()
+        this.offsets = {}
 
         // Build a track-like config object from the referenceObject
-        const config = {};
+        const config = {}
         for (let key in reference) {
             if (reference.hasOwnProperty(key) && !reservedProperties.has(key)) {
-                config[key] = reference[key];
+                config[key] = reference[key]
             }
         }
-        this.config = config;
+        this.config = config
     }
 
 
     async init() {
-            return this.loadAll();
+        return this.loadAll()
     }
 
     async getSequence(chr, start, end) {
 
         if (this.offsets[chr]) {
-            start -= this.offsets[chr];
-            end -= this.offsets[chr];
+            start -= this.offsets[chr]
+            end -= this.offsets[chr]
         }
-        let prefix = "";
+        let prefix = ""
         if (start < 0) {
             for (let i = start; i < Math.min(end, 0); i++) {
-                prefix += "*";
+                prefix += "*"
             }
         }
 
         if (end <= 0) {
-            return Promise.resolve(prefix);
+            return Promise.resolve(prefix)
         }
 
-        const seq = this.sequences.get(chr);
+        const seq = this.sequences.get(chr)
         const seqEnd = Math.min(end, seq.length)
-        return prefix + seq.substring(start, seqEnd);
+        return prefix + seq.substring(start, seqEnd)
     }
 
     async loadAll() {
 
-        let data;
+        let data
         if (isDataURL(this.fastaURL)) {
-            let bytes = BGZip.decodeDataURI(this.fastaURL);
-            data = "";
+            let bytes = BGZip.decodeDataURI(this.fastaURL)
+            data = ""
             for (let b of bytes) {
-                data += String.fromCharCode(b);
+                data += String.fromCharCode(b)
             }
         } else {
             data = await igvxhr.load(this.fastaURL, buildOptions(this.config))
         }
 
-        const lines = splitLines(data);
-        const len = lines.length;
-        let lineNo = 0;
-        let currentSeq;
-        let currentRangeLocus;
-        let currentOffset = 0;
-        let order = 0;
-        let nextLine;
-        let currentChr;
+        const lines = splitLines(data)
+        const len = lines.length
+        let lineNo = 0
+        let currentSeq
+        let currentRangeLocus
+        let currentOffset = 0
+        let order = 0
+        let nextLine
+        let currentChr
         while (lineNo < len) {
-            nextLine = lines[lineNo++].trim();
+            nextLine = lines[lineNo++].trim()
             if (nextLine.startsWith("#") || nextLine.length === 0) {
                 // skip
             } else if (nextLine.startsWith(">")) {
                 // Start the next sequence
                 if (currentSeq) {
-                    this.chromosomeNames.push(currentChr);
-                    this.sequences.set(currentChr, currentSeq);
-                    this.chromosomes[currentChr] = new Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus);
+                    this.chromosomeNames.push(currentChr)
+                    this.sequences.set(currentChr, currentSeq)
+                    this.chromosomes[currentChr] = new Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus)
                 }
 
                 const parts = nextLine.substr(1).split(/\s+/)
 
                 // Check for samtools style locus string.   This is not perfect, and could fail on weird sequence names
-                const nameParts = parts[0].split(':');
-                currentChr = nameParts[0];
-                currentSeq = "";
+                const nameParts = parts[0].split(':')
+                currentChr = nameParts[0]
+                currentSeq = ""
                 currentOffset = 0
-                currentRangeLocus = undefined;
+                currentRangeLocus = undefined
                 if (nameParts.length > 1 && nameParts[1].indexOf('-') > 0) {
                     const locusParts = nameParts[1].split('-')
                     if (locusParts.length === 2 &&
@@ -132,20 +132,20 @@ class NonIndexedFasta {
                     const from = Number.parseInt(locusParts[0])
                     const to = Number.parseInt(locusParts[1])
                     if (to > from) {
-                        currentOffset = from - 1;
-                        this.offsets[currentChr] = currentOffset;
-                        currentRangeLocus = nameParts[1];
+                        currentOffset = from - 1
+                        this.offsets[currentChr] = currentOffset
+                        currentRangeLocus = nameParts[1]
                     }
                 }
             } else {
-                currentSeq += nextLine;
+                currentSeq += nextLine
             }
         }
         // add last seq
         if (currentSeq) {
-            this.chromosomeNames.push(currentChr);
-            this.sequences.set(currentChr, currentSeq);
-            this.chromosomes[currentChr] = new Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus);
+            this.chromosomeNames.push(currentChr)
+            this.sequences.set(currentChr, currentSeq)
+            this.chromosomes[currentChr] = new Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus)
         }
 
     }
@@ -153,4 +153,4 @@ class NonIndexedFasta {
 }
 
 
-export default NonIndexedFasta;
+export default NonIndexedFasta

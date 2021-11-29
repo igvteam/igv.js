@@ -1,4 +1,4 @@
-import {IGVColor} from "../../../node_modules/igv-utils/src/index.js";
+import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
 
 /**
  * Decode UCSC "interact" files.  See https://genome.ucsc.edu/goldenpath/help/interact.html
@@ -29,8 +29,8 @@ import {IGVColor} from "../../../node_modules/igv-utils/src/index.js";
 function decodeInteract(tokens, header) {
 
     if (tokens.length < 6) {
-        console.log("Skipping line: " + tokens.join(' '));
-        return undefined;
+        console.log("Skipping line: " + tokens.join(' '))
+        return undefined
     }
 
     var feature = {
@@ -53,7 +53,7 @@ function decodeInteract(tokens, header) {
 
     }
 
-    return feature;
+    return feature
 }
 
 /**
@@ -64,7 +64,7 @@ function decodeInteract(tokens, header) {
  */
 function decodeBedpeDomain(tokens, ignore) {
 
-    if (tokens.length < 8) return undefined;
+    if (tokens.length < 8) return undefined
 
     return {
         chr: tokens[0],
@@ -72,10 +72,8 @@ function decodeBedpeDomain(tokens, ignore) {
         end: Number.parseInt(tokens[2]),
         color: IGVColor.createColorString(tokens[6]),
         score: Number.parseFloat(tokens[7])
-    };
+    }
 }
-
-
 
 
 export {decodeInteract}

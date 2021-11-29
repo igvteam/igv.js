@@ -24,12 +24,12 @@
  * THE SOFTWARE.
  */
 
-import TrackBase from "../trackBase.js";
+import TrackBase from "../trackBase.js"
 
 class MergedTrack extends TrackBase {
 
     constructor(config, browser) {
-        super(config, browser);
+        super(config, browser)
     }
 
     init(config) {
@@ -37,19 +37,19 @@ class MergedTrack extends TrackBase {
             throw Error("Error: no tracks defined for merged track" + config)
         }
 
-        super.init(config);
+        super.init(config)
     }
 
     get height() {
-        return this._height;
+        return this._height
     }
 
     set height(h) {
-        this._height = h;
+        this._height = h
         if (this.tracks) {
             for (let t of this.tracks) {
-                t.height = h;
-                t.config.height = h;
+                t.height = h
+                t.config.height = h
             }
         }
     }
@@ -57,24 +57,24 @@ class MergedTrack extends TrackBase {
 
     async postInit() {
 
-        this.tracks = [];
-        const p = [];
+        this.tracks = []
+        const p = []
         for (let tconf of this.config.tracks) {
-            tconf.isMergedTrack = true;
-            const t = await this.browser.createTrack(tconf);
+            tconf.isMergedTrack = true
+            const t = await this.browser.createTrack(tconf)
             if (t) {
-                t.autoscale = false;     // Scaling done from merged track
-                this.tracks.push(t);
+                t.autoscale = false     // Scaling done from merged track
+                this.tracks.push(t)
             } else {
-                console.warn("Could not create track " + tconf);
+                console.warn("Could not create track " + tconf)
             }
 
             if (typeof t.postInit === 'function') {
-                p.push(t.postInit());
+                p.push(t.postInit())
             }
         }
 
-        this.height = this.config.height || 100;
+        this.height = this.config.height || 100
 
         return Promise.all(p)
     }
@@ -82,69 +82,69 @@ class MergedTrack extends TrackBase {
 
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
 
-        const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel));
-        return Promise.all(promises);
+        const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
+        return Promise.all(promises)
     }
 
     draw(options) {
 
-        var i, len, mergedFeatures, trackOptions, dataRange;
+        var i, len, mergedFeatures, trackOptions, dataRange
 
-        mergedFeatures = options.features;    // Array of feature arrays, 1 for each track
+        mergedFeatures = options.features    // Array of feature arrays, 1 for each track
 
-        dataRange = autoscale(options.referenceFrame.chr, mergedFeatures);
+        dataRange = autoscale(options.referenceFrame.chr, mergedFeatures)
 
         //IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         for (i = 0, len = this.tracks.length; i < len; i++) {
 
-            trackOptions = Object.assign({}, options);
-            trackOptions.features = mergedFeatures[i];
-            this.tracks[i].dataRange = dataRange;
-            this.tracks[i].draw(trackOptions);
+            trackOptions = Object.assign({}, options)
+            trackOptions.features = mergedFeatures[i]
+            this.tracks[i].dataRange = dataRange
+            this.tracks[i].draw(trackOptions)
         }
 
     }
 
     paintAxis(ctx, pixelWidth, pixelHeight) {
 
-        var i, len, autoscale, track;
+        var i, len, autoscale, track
 
-        autoscale = true;   // Hardcoded for now
+        autoscale = true   // Hardcoded for now
 
         for (i = 0, len = this.tracks.length; i < len; i++) {
 
-            track = this.tracks[i];
+            track = this.tracks[i]
 
             if (typeof track.paintAxis === 'function') {
-                track.paintAxis(ctx, pixelWidth, pixelHeight);
-                if (autoscale) break;
+                track.paintAxis(ctx, pixelWidth, pixelHeight)
+                if (autoscale) break
             }
         }
     }
 
     popupData(clickState, features) {
 
-        const featuresArray = features || clickState.viewport.getCachedFeatures();
+        const featuresArray = features || clickState.viewport.getCachedFeatures()
 
         if (featuresArray && featuresArray.length === this.tracks.length) {
             // Array of feature arrays, 1 for each track
-            const popupData = [];
+            const popupData = []
             for (let i = 0; i < this.tracks.length; i++) {
-                if (i > 0) popupData.push('<hr/>');
-                popupData.push(`<div style=background-color:rgb(245,245,245);border-bottom-style:dashed;border-bottom-width:1px;padding-bottom:5px;padding-top:10px;font-weight:bold;font-size:larger >${this.tracks[i].name}</div>`);
-                const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i]);
-                popupData.push(...trackPopupData);
+                if (i > 0) popupData.push('<hr/>')
+                popupData.push(`<div style=background-color:rgb(245,245,245);border-bottom-style:dashed;border-bottom-width:1px;padding-bottom:5px;padding-top:10px;font-weight:bold;font-size:larger >${this.tracks[i].name}</div>`)
+                const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i])
+                popupData.push(...trackPopupData)
 
             }
-            return popupData;
+            return popupData
         }
     }
 
 
     supportsWholeGenome() {
-        const b = this.tracks.every(track => track.supportsWholeGenome());
-        return b;
+        const b = this.tracks.every(track => track.supportsWholeGenome())
+        return b
     }
 }
 
@@ -153,7 +153,7 @@ function autoscale(chr, featureArrays) {
 
     var min = 0,
         max = -Number.MAX_VALUE,
-        allValues;
+        allValues
 
     // if (chr === 'all') {
     //     allValues = [];
@@ -173,13 +173,13 @@ function autoscale(chr, featureArrays) {
     featureArrays.forEach(function (features, i) {
         features.forEach(function (f) {
             if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
-                min = Math.min(min, f.value);
-                max = Math.max(max, f.value);
+                min = Math.min(min, f.value)
+                max = Math.max(max, f.value)
             }
-        });
-    });
+        })
+    })
     //  }
-    return {min: min, max: max};
+    return {min: min, max: max}
 }
 
-export default MergedTrack;
+export default MergedTrack

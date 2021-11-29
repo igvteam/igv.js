@@ -23,8 +23,7 @@
  * THE SOFTWARE.
  */
 
-import getDataWrapper from "../feature/dataWrapper.js";
-import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 /**
  *  Define parsers for bed-like files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
@@ -35,92 +34,92 @@ import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
  *
  */
 
-var aedRegexpNoNamespace = new RegExp("([^:]*)\\(([^)]*)\\)"); // name(type) for AED parsing (namespace undefined)
-var aedRegexpNamespace = new RegExp("([^:]*):([^(]*)\\(([^)]*)\\)"); // namespace:name(type) for AED parsing
+var aedRegexpNoNamespace = new RegExp("([^:]*)\\(([^)]*)\\)") // name(type) for AED parsing (namespace undefined)
+var aedRegexpNamespace = new RegExp("([^:]*):([^(]*)\\(([^)]*)\\)") // namespace:name(type) for AED parsing
 
 
 class AEDParser {
 
     constructor(config) {
-        const decode = config ? config.decode : undefined;
-        this.nameField = config ? config.nameField : undefined;
-        this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
+        const decode = config ? config.decode : undefined
+        this.nameField = config ? config.nameField : undefined
+        this.skipRows = 0   // The number of fixed header rows to skip.  Override for specific types as needed
         if (decode) {
-            this.decode = decode;
+            this.decode = decode
         } else {
-            this.decode = decodeAed;
+            this.decode = decodeAed
         }
-        this.delimiter = "\t";
+        this.delimiter = "\t"
     }
 
     async parseHeader(dataWrapper) {
-        let line;
-        let header;
+        let line
+        let header
         while (line = await dataWrapper.nextLine()) {
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 if (line.startsWith("track") || line.startsWith("#track")) {
-                    let h = parseTrackLine(line);
+                    let h = parseTrackLine(line)
                     if (header) {
-                        Object.assign(header, h);
+                        Object.assign(header, h)
                     } else {
-                        header = h;
+                        header = h
                     }
                 } else if (line.startsWith("#columns")) {
-                    let h = parseColumnsDirective(line);
+                    let h = parseColumnsDirective(line)
                     if (header) {
-                        Object.assign(header, h);
+                        Object.assign(header, h)
                     } else {
-                        header = h;
+                        header = h
                     }
                 } else if (line.startsWith("##gff-version 3")) {
-                    this.format = "gff3";
-                    if (!header) header = {};
-                    header["format"] = "gff3";
+                    this.format = "gff3"
+                    if (!header) header = {}
+                    header["format"] = "gff3"
                 }
             } else {
-                break;
+                break
             }
         }
-        this.header = header;    // Directives might be needed for parsing lines
-        return header;
+        this.header = header    // Directives might be needed for parsing lines
+        return header
     }
 
     async parseFeatures(dataWrapper) {
 
-        const allFeatures = [];
-        let cnt = 0;
-        const decode = this.decode;
-        const delimiter = this.delimiter || "\t";
-        let i = 0;
-        let line;
-        let wig;
+        const allFeatures = []
+        let cnt = 0
+        const decode = this.decode
+        const delimiter = this.delimiter || "\t"
+        let i = 0
+        let line
+        let wig
 
-        while ((line =  dataWrapper.nextLine()) !== undefined) {
-            i++;
+        while ((line = dataWrapper.nextLine()) !== undefined) {
+            i++
             if (i <= this.skipRows || line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
-                continue;
+                continue
             }
 
-            let tokens = readTokensAed();
+            let tokens = readTokensAed()
             if (tokens.length < 1) {
-                continue;
+                continue
             }
 
             if (!this.aed) {
                 // Store information about the aed header in the parser itself
                 // This is done only once - on the first row
-                this.aed = parseAedHeaderRow(tokens);
-                continue;
+                this.aed = parseAedHeaderRow(tokens)
+                continue
             }
 
-            const feature = decode.call(this, tokens, wig);
+            const feature = decode.call(this, tokens, wig)
             if (feature) {
-                allFeatures.push(feature);
-                cnt++;
+                allFeatures.push(feature)
+                cnt++
             }
         }
 
-        return allFeatures;
+        return allFeatures
 
         // Double quoted strings can contain newlines in AED
         // "" is an escape for a ".
@@ -130,49 +129,49 @@ class AEDParser {
                 token = "",
                 quotedString = false,
                 n,
-                c;
+                c
 
             while (line || line === '') {
                 for (n = 0; n < line.length; n++) {
-                    c = line.charAt(n);
+                    c = line.charAt(n)
                     if (c === delimiter) {
                         if (!quotedString) {
-                            tokens.push(token);
-                            token = "";
+                            tokens.push(token)
+                            token = ""
                         } else {
-                            token += c;
+                            token += c
                         }
                     } else if (c === "\"") {
                         // Look ahead to the next character
                         if (n + 1 < line.length && line.charAt(n + 1) === "\"") {
                             if (quotedString) {
                                 // Turn "" into a single " in the output string
-                                token += "\"";
+                                token += "\""
                             } else {
                                 // "" on its own means empty string, ignore
                             }
                             // Skip the next double quote
-                            n++;
+                            n++
                         } else {
                             // We know the next character is NOT a double quote, flip our state
-                            quotedString = !quotedString;
+                            quotedString = !quotedString
                         }
                     } else {
-                        token += c;
+                        token += c
                     }
                 }
                 // We are at the end of the line
                 if (quotedString) {
-                    token += '\n'; // Add newline to the token
-                    line = nextLine(); // Keep going
+                    token += '\n' // Add newline to the token
+                    line = nextLine() // Keep going
                 } else {
                     // We can end the loop
-                    break;
+                    break
                 }
             }
             // Push the last token
-            tokens.push(token);
-            return tokens;
+            tokens.push(token)
+            return tokens
         }
     }
 }
@@ -184,7 +183,7 @@ function parseAedToken(value) {
     // accessionNumber - name of the field
     // aed:String - type of the field
     // The namespace part may be missing
-    var match = aedRegexpNamespace.exec(value);
+    var match = aedRegexpNamespace.exec(value)
     if (match) {
         return {
             namespace: match[1],
@@ -193,7 +192,7 @@ function parseAedToken(value) {
         }
     }
 
-    match = aedRegexpNoNamespace.exec(value);
+    match = aedRegexpNoNamespace.exec(value)
     if (match) {
         return {
             namespace: '?',
@@ -201,7 +200,7 @@ function parseAedToken(value) {
             type: match[2]
         }
     } else {
-        throw new Error("Error parsing the header row of AED file - column not in ns:name(ns:type) format");
+        throw new Error("Error parsing the header row of AED file - column not in ns:name(ns:type) format")
     }
 }
 
@@ -211,7 +210,7 @@ function parseAedHeaderRow(tokens) {
     var aed,
         k,
         token,
-        aedToken;
+        aedToken
 
     // Initialize aed section to be filled in
     aed = {
@@ -237,110 +236,110 @@ function parseAedHeaderRow(tokens) {
             //    }
             // }
         }
-    };
+    }
     for (k = 0; k < tokens.length; k++) {
-        token = tokens[k];
-        aedToken = parseAedToken(token);
-        aed.columns.push(aedToken);
+        token = tokens[k]
+        aedToken = parseAedToken(token)
+        aed.columns.push(aedToken)
     }
 
-    return aed;
+    return aed
 }
 
 function parseTrackLine(line) {
 
-    const properties = {};
-    const tokens = line.split(/(?:")([^"]+)(?:")|([^\s"]+)(?=\s+|$)/g);
+    const properties = {}
+    const tokens = line.split(/(?:")([^"]+)(?:")|([^\s"]+)(?=\s+|$)/g)
 
 
     // Clean up tokens array
-    let curr;
-    const tmp = [];
+    let curr
+    const tmp = []
     for (let tk of tokens) {
-        if (!tk || tk.trim().length === 0) continue;
+        if (!tk || tk.trim().length === 0) continue
         if (tk.endsWith("=") > 0) {
-            curr = tk;
+            curr = tk
         } else if (curr) {
-            tmp.push(curr + tk);
-            curr = undefined;
+            tmp.push(curr + tk)
+            curr = undefined
         } else {
-            tmp.push(tk);
+            tmp.push(tk)
         }
     }
     for (let str of tmp) {
-        if (!str) return;
-        var kv = str.split('=', 2);
+        if (!str) return
+        var kv = str.split('=', 2)
         if (kv.length === 2) {
-            const key = kv[0].trim();
-            const value = kv[1].trim();
-            properties[key] = value;
+            const key = kv[0].trim()
+            const value = kv[1].trim()
+            properties[key] = value
         }
 
     }
 
-    return properties;
+    return properties
 }
 
 function parseColumnsDirective(line) {
 
-    let properties = {};
-    let t1 = line.split(/\s+/);
+    let properties = {}
+    let t1 = line.split(/\s+/)
 
     if (t1.length === 2) {
 
-        let t2 = t1[1].split(";");
+        let t2 = t1[1].split(";")
 
         t2.forEach(function (keyValue) {
 
-            let t = keyValue.split("=");
+            let t = keyValue.split("=")
 
             if (t[0] === "color") {
-                properties.colorColumn = Number.parseInt(t[1]) - 1;
+                properties.colorColumn = Number.parseInt(t[1]) - 1
             } else if (t[0] === "thickness") {
-                properties.thicknessColumn = Number.parseInt(t[1]) - 1;
+                properties.thicknessColumn = Number.parseInt(t[1]) - 1
             }
         })
     }
 
-    return properties;
+    return properties
 }
 
 function decodeBedGraph(tokens, ignore) {
 
-    var chr, start, end, value;
+    var chr, start, end, value
 
-    if (tokens.length < 3) return null;
+    if (tokens.length < 3) return null
 
-    chr = tokens[0];
-    start = parseInt(tokens[1]);
-    end = parseInt(tokens[2]);
-    value = parseFloat(tokens[3]);
-    const feature = {chr: chr, start: start, end: end, value: value};
+    chr = tokens[0]
+    start = parseInt(tokens[1])
+    end = parseInt(tokens[2])
+    value = parseFloat(tokens[3])
+    const feature = {chr: chr, start: start, end: end, value: value}
 
     // Optional extra columns
     if (this.header) {
-        let colorColumn = this.header.colorColumn;
+        let colorColumn = this.header.colorColumn
         if (colorColumn && colorColumn < tokens.length) {
             feature.color = IGVColor.createColorString(tokens[colorColumn])
         }
     }
 
-    return feature;
+    return feature
 }
 
 function parseAttributeString(attributeString, keyValueDelim) {
     // parse 'attributes' string (see column 9 docs in https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md)
-    var attributes = {};
+    var attributes = {}
     for (let kv of attributeString.split(';')) {
         const t = kv.trim().split(keyValueDelim, 2)
         if (t.length === 2) {
-            const key = t[0].trim();
-            let value = t[1].trim();
+            const key = t[0].trim()
+            let value = t[1].trim()
             //Strip off quotes, if any
             if (value.startsWith('"') && value.endsWith('"')) {
-                value = value.substr(1, value.length - 2);
+                value = value.substr(1, value.length - 2)
             }
-            attributes[key] = value;
+            attributes[key] = value
         }
     }
     return attributes
@@ -355,62 +354,62 @@ function parseAttributeString(attributeString, keyValueDelim) {
  * Other values are parsed one by one
  */
 function AedFeature(aed, allColumns) {
-    var token, aedColumn, aedColumns = aed.columns;
+    var token, aedColumn, aedColumns = aed.columns
 
     // Link to AED file (for metadata)
-    this.aed = aed;
+    this.aed = aed
 
     // Unparsed columns from AED file
-    this.allColumns = allColumns;
+    this.allColumns = allColumns
 
     // Prepare space for the parsed values
-    this.chr = null;
-    this.start = null;
-    this.end = null;
-    this.score = 1000;
-    this.strand = '.';
-    this.cdStart = null;
-    this.cdEnd = null;
-    this.name = null;
-    this.color = null;
+    this.chr = null
+    this.start = null
+    this.end = null
+    this.score = 1000
+    this.strand = '.'
+    this.cdStart = null
+    this.cdEnd = null
+    this.name = null
+    this.color = null
 
     for (let i = 0; i < allColumns.length; i++) {
-        token = allColumns[i];
+        token = allColumns[i]
         if (!token) {
             // Skip empty fields
-            continue;
+            continue
         }
-        aedColumn = aedColumns[i];
+        aedColumn = aedColumns[i]
         if (aedColumn.type === 'aed:Integer') {
-            token = parseInt(token);
+            token = parseInt(token)
         }
-        var arr=[];
-        if(aedColumn.namespace.length > 0) {
+        var arr = []
+        if (aedColumn.namespace.length > 0) {
             for (let j = 0; j < aedColumn.namespace.length; j++) {
                 arr.push(aedColumn.namespace.charCodeAt(j))
             }
         }
         if (aedColumn.namespace.trim() === 'bio') {
             if (aedColumn.name === 'sequence') {
-                this.chr = token;
+                this.chr = token
             } else if (aedColumn.name === 'start') {
-                this.start = token;
+                this.start = token
             } else if (aedColumn.name === 'end') {
-                this.end = token;
+                this.end = token
             } else if (aedColumn.name === 'cdsMin') {
-                this.cdStart = token;
+                this.cdStart = token
             } else if (aedColumn.name === 'cdsMax') {
-                this.cdEnd = token;
+                this.cdEnd = token
             } else if (aedColumn.name === 'strand') {
-                this.strand = token;
+                this.strand = token
             }
         } else if (aedColumn.namespace === 'aed') {
             if (aedColumn.name === 'name') {
-                this.name = token;
+                this.name = token
             }
         } else if (aedColumn.namespace === 'style') {
             if (aedColumn.name === 'color') {
-                this.color = IGVColor.createColorString(token);
+                this.color = IGVColor.createColorString(token)
             }
         }
     }
@@ -418,20 +417,20 @@ function AedFeature(aed, allColumns) {
 
 AedFeature.prototype.popupData = function () {
     var data = [],
-        aed = this.aed;
+        aed = this.aed
     // Just dump everything we have for now
     for (var i = 0; i < this.allColumns.length; i++) {
-        var featureValue = this.allColumns[i];
-        var name = aed.columns[i].name;
+        var featureValue = this.allColumns[i]
+        var name = aed.columns[i].name
         // Skip columns that are not interesting - you know the sequence, and you can see color
         if (name !== 'sequence' && name !== 'color') {
             if (featureValue) {
-                data.push({name: name, value: featureValue});
+                data.push({name: name, value: featureValue})
             }
         }
     }
-    return data;
-};
+    return data
+}
 
 /**
  * Decode the AED file format
@@ -445,53 +444,53 @@ function decodeAed(tokens, ignore) {
         aedColumns = this.aed.columns,
         aedColumn,
         aedKey,
-        i;
+        i
 
     // Each aed row must match the exact number of columns or we skip it
     if (tokens.length !== aedColumns.length) {
-        console.log('Corrupted AED file row: ' + tokens.join(','));
-        return undefined;
+        console.log('Corrupted AED file row: ' + tokens.join(','))
+        return undefined
     }
 
     for (i = 0; i < tokens.length; i++) {
-        aedColumn = aedColumns[i];
-        token = tokens[i];
+        aedColumn = aedColumns[i]
+        token = tokens[i]
         if (token !== '') {
-            nonEmptyTokens++;
+            nonEmptyTokens++
         }
         if (aedColumn.name === 'name' && aedColumn.namespace === 'aed') {
-            name = token;
+            name = token
         } else if (aedColumn.name === 'value' && aedColumn.namespace === 'aed') {
-            value = token;
+            value = token
         }
     }
 
     if (nonEmptyTokens === 2 && name && value) {
         // Special row that defines metadata for the entire file
-        aedKey = parseAedToken(name);
+        aedKey = parseAedToken(name)
         // Store in the metadata section
         if (!this.aed.metadata[aedKey.namespace]) {
-            this.aed.metadata[aedKey.namespace] = {};
+            this.aed.metadata[aedKey.namespace] = {}
         }
         if (!this.aed.metadata[aedKey.namespace][aedKey.name]) {
             this.aed.metadata[aedKey.namespace][aedKey.name] = {
                 type: aedKey.type,
                 value: value
-            };
+            }
         }
         // Ignore this value
-        return undefined;
+        return undefined
     }
 
-    var feature = new AedFeature(this.aed, tokens);
+    var feature = new AedFeature(this.aed, tokens)
 
     if (!feature.chr || (!feature.start && feature.start !== 0) || !feature.end) {
-        console.log('Cannot parse feature: ' + tokens.join(','));
-        return undefined;
+        console.log('Cannot parse feature: ' + tokens.join(','))
+        return undefined
     }
 
-    return feature;
+    return feature
 }
 
 
-export default AEDParser;
+export default AEDParser

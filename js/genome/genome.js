@@ -23,88 +23,88 @@
  * THE SOFTWARE.
  */
 
-import {loadFasta} from "./fasta.js";
-import Cytoband from "./cytoband.js";
-import {buildOptions, isDataURL} from "../util/igvUtils.js";
-import {igvxhr, StringUtils, URIUtils, BGZip} from "../../node_modules/igv-utils/src/index.js";
+import {loadFasta} from "./fasta.js"
+import Cytoband from "./cytoband.js"
+import {buildOptions, isDataURL} from "../util/igvUtils.js"
+import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
-import version from "../version.js";
+import version from "../version.js"
 
-const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json";
-const BACKUP_GENOMES_URL = "https://s3.amazonaws.com/igv.org.genomes/genomes.json";
+const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json"
+const BACKUP_GENOMES_URL = "https://s3.amazonaws.com/igv.org.genomes/genomes.json"
 
-const splitLines = StringUtils.splitLines;
+const splitLines = StringUtils.splitLines
 
 const GenomeUtils = {
 
     loadGenome: async function (options) {
 
-        const cytobandUrl = options.cytobandURL;
-        const aliasURL = options.aliasURL;
-        const sequence = await loadFasta(options);
+        const cytobandUrl = options.cytobandURL
+        const aliasURL = options.aliasURL
+        const sequence = await loadFasta(options)
 
         let cytobands
         if (cytobandUrl) {
-            cytobands = await loadCytobands(cytobandUrl, sequence.config);
+            cytobands = await loadCytobands(cytobandUrl, sequence.config)
         }
 
         let aliases
         if (aliasURL) {
-            aliases = await loadAliases(aliasURL, sequence.config);
+            aliases = await loadAliases(aliasURL, sequence.config)
         }
 
-        return new Genome(options, sequence, cytobands, aliases);
+        return new Genome(options, sequence, cytobands, aliases)
     },
 
     initializeGenomes: async function (config) {
 
         if (!GenomeUtils.KNOWN_GENOMES) {
 
-            const table = {};
+            const table = {}
 
             // Get default genomes
             if (config.loadDefaultGenomes !== false) {
                 try {
-                    const url = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`;  // prevent caching
-                    const jsonArray = await igvxhr.loadJson(url, {timeout: 5000});
-                    processJson(jsonArray);
+                    const url = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`  // prevent caching
+                    const jsonArray = await igvxhr.loadJson(url, {timeout: 5000})
+                    processJson(jsonArray)
                 } catch (e) {
-                    console.error(e);
+                    console.error(e)
                     try {
-                        const url = BACKUP_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`;  // prevent caching
-                        const jsonArray = await igvxhr.loadJson(url, {});
-                        processJson(jsonArray);
+                        const url = BACKUP_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`  // prevent caching
+                        const jsonArray = await igvxhr.loadJson(url, {})
+                        processJson(jsonArray)
                     } catch (e) {
-                        console.error(e);
+                        console.error(e)
                         console.warn("Errors loading default genome definitions.")
                     }
                 }
             }
 
             // Add user-defined genomes
-            const genomeList = config.genomeList || config.genomes;
+            const genomeList = config.genomeList || config.genomes
             if (genomeList) {
                 if (typeof genomeList === 'string') {
                     const jsonArray = await igvxhr.loadJson(genomeList, {})
-                    processJson(jsonArray);
+                    processJson(jsonArray)
                 } else {
-                    processJson(genomeList);
+                    processJson(genomeList)
                 }
             }
 
-            GenomeUtils.KNOWN_GENOMES = table;
+            GenomeUtils.KNOWN_GENOMES = table
 
             function processJson(jsonArray) {
                 jsonArray.forEach(function (json) {
-                    table[json.id] = json;
-                });
-                return table;
+                    table[json.id] = json
+                })
+                return table
             }
         }
     },
 
     isWholeGenomeView: function (chr) {
-        return 'all' === chr.toLowerCase();
+        return 'all' === chr.toLowerCase()
     },
 
     // Expand a genome id to a reference object, if needed
@@ -113,53 +113,53 @@ const GenomeUtils = {
         // idOrConfig might be json
         if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
             try {
-                idOrConfig = JSON.parse(idOrConfig);
+                idOrConfig = JSON.parse(idOrConfig)
             } catch (e) {
                 // Apparently its not json,  could be an ID starting with "{".  Unusual but legal.
             }
         }
 
-        let genomeID;
+        let genomeID
         if (StringUtils.isString(idOrConfig)) {
-            genomeID = idOrConfig;
+            genomeID = idOrConfig
         } else if (idOrConfig.genome) {
-            genomeID = idOrConfig.genome;
+            genomeID = idOrConfig.genome
         } else if (idOrConfig.id !== undefined && idOrConfig.fastaURL === undefined) {
             // Backward compatibility
-            genomeID = idOrConfig.id;
+            genomeID = idOrConfig.id
         }
 
         if (genomeID) {
-            const knownGenomes = GenomeUtils.KNOWN_GENOMES;
-            const reference = knownGenomes[genomeID];
+            const knownGenomes = GenomeUtils.KNOWN_GENOMES
+            const reference = knownGenomes[genomeID]
             if (!reference) {
-                Alert.presentAlert(new Error(`Unknown genome id: ${genomeID}`), undefined);
+                Alert.presentAlert(new Error(`Unknown genome id: ${genomeID}`), undefined)
             }
-            return reference;
+            return reference
         } else {
-            return idOrConfig;
+            return idOrConfig
         }
     }
-};
+}
 
 
 class Genome {
 
     constructor(config, sequence, ideograms, aliases) {
 
-        this.config = config;
-        this.id = config.id;
-        this.sequence = sequence;
-        this.chromosomeNames = sequence.chromosomeNames;
-        this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
-        this.ideograms = ideograms;
-        this.featureDB = {};   // Hash of name -> feature, used for search function.
+        this.config = config
+        this.id = config.id
+        this.sequence = sequence
+        this.chromosomeNames = sequence.chromosomeNames
+        this.chromosomes = sequence.chromosomes  // An object (functions as a dictionary)
+        this.ideograms = ideograms
+        this.featureDB = {}   // Hash of name -> feature, used for search function.
 
-        this.wholeGenomeView = config.wholeGenomeView === undefined || config.wholeGenomeView;
+        this.wholeGenomeView = config.wholeGenomeView === undefined || config.wholeGenomeView
         if (this.wholeGenomeView && Object.keys(sequence.chromosomes).length > 1) {
-            constructWG(this, config);
+            constructWG(this, config)
         } else {
-            this.wgChromosomeNames = sequence.chromosomeNames;
+            this.wgChromosomeNames = sequence.chromosomeNames
         }
 
         /**
@@ -168,54 +168,54 @@ class Genome {
          * @param str
          */
         var chrAliasTable = {},
-            self = this;
+            self = this
 
 
         // The standard mappings
-        chrAliasTable["all"] = "all";
+        chrAliasTable["all"] = "all"
         this.chromosomeNames.forEach(function (name) {
-            var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name;
-            chrAliasTable[alias.toLowerCase()] = name;
-            if (name === "chrM") chrAliasTable["mt"] = "chrM";
-            if (name === "MT") chrAliasTable["chrm"] = "MT";
-            chrAliasTable[name.toLowerCase()] = name;
-        });
+            var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name
+            chrAliasTable[alias.toLowerCase()] = name
+            if (name === "chrM") chrAliasTable["mt"] = "chrM"
+            if (name === "MT") chrAliasTable["chrm"] = "MT"
+            chrAliasTable[name.toLowerCase()] = name
+        })
 
         // Custom mappings
         if (aliases) {
             aliases.forEach(function (array) {
                 // Find the official chr name
-                var defName, i;
+                var defName, i
 
                 for (i = 0; i < array.length; i++) {
                     if (self.chromosomes[array[i]]) {
-                        defName = array[i];
-                        break;
+                        defName = array[i]
+                        break
                     }
                 }
 
                 if (defName) {
                     array.forEach(function (alias) {
                         if (alias !== defName) {
-                            chrAliasTable[alias.toLowerCase()] = defName;
-                            chrAliasTable[alias] = defName;      // Should not be needed
+                            chrAliasTable[alias.toLowerCase()] = defName
+                            chrAliasTable[alias] = defName      // Should not be needed
                         }
-                    });
+                    })
                 }
 
-            });
+            })
         }
 
-        this.chrAliasTable = chrAliasTable;
+        this.chrAliasTable = chrAliasTable
 
     }
 
     showWholeGenomeView() {
-        return this.config.wholeGenomeView !== false;
+        return this.config.wholeGenomeView !== false
     }
 
     toJSON() {
-        return Object.assign({}, this.config, {tracks: undefined});
+        return Object.assign({}, this.config, {tracks: undefined})
     }
 
     getInitialLocus() {
@@ -224,44 +224,44 @@ class Genome {
 
     getHomeChromosomeName() {
         if (this.showWholeGenomeView() && this.chromosomes.hasOwnProperty("all")) {
-            return "all";
+            return "all"
         } else {
-            return this.chromosomeNames[0];
+            return this.chromosomeNames[0]
 
         }
     }
 
     getChromosomeName(str) {
-        var chr = this.chrAliasTable[str.toLowerCase()];
-        return chr ? chr : str;
+        var chr = this.chrAliasTable[str.toLowerCase()]
+        return chr ? chr : str
     }
 
     getChromosome(chr) {
-        chr = this.getChromosomeName(chr);
-        return this.chromosomes[chr];
+        chr = this.getChromosomeName(chr)
+        return this.chromosomes[chr]
     }
 
     getCytobands(chr) {
-        return this.ideograms ? this.ideograms[chr] : null;
+        return this.ideograms ? this.ideograms[chr] : null
     }
 
     getLongestChromosome() {
 
         var longestChr,
-            chromosomes = this.chromosomes;
+            chromosomes = this.chromosomes
         for (let key in chromosomes) {
             if (chromosomes.hasOwnProperty(key)) {
-                var chr = chromosomes[key];
+                var chr = chromosomes[key]
                 if (longestChr === undefined || chr.bpLength > longestChr.bpLength) {
-                    longestChr = chr;
+                    longestChr = chr
                 }
             }
-            return longestChr;
+            return longestChr
         }
     }
 
     getChromosomes() {
-        return this.chromosomes;
+        return this.chromosomes
     }
 
     /**
@@ -270,10 +270,10 @@ class Genome {
      */
     getGenomeCoordinate(chr, bp) {
 
-        var offset = this.getCumulativeOffset(chr);
-        if (offset === undefined) return undefined;
+        var offset = this.getCumulativeOffset(chr)
+        if (offset === undefined) return undefined
 
-        return offset + bp;
+        return offset + bp
     }
 
     /**
@@ -282,24 +282,24 @@ class Genome {
     getChromosomeCoordinate(genomeCoordinate) {
 
         if (this.cumulativeOffsets === undefined) {
-            this.cumulativeOffsets = computeCumulativeOffsets.call(this);
+            this.cumulativeOffsets = computeCumulativeOffsets.call(this)
         }
 
-        let lastChr = undefined;
-        let lastCoord = 0;
+        let lastChr = undefined
+        let lastCoord = 0
         for (let name of this.wgChromosomeNames) {
 
-            const cumulativeOffset = this.cumulativeOffsets[name];
+            const cumulativeOffset = this.cumulativeOffsets[name]
             if (cumulativeOffset > genomeCoordinate) {
-                const position = genomeCoordinate - lastCoord;
-                return {chr: lastChr, position: position};
+                const position = genomeCoordinate - lastCoord
+                return {chr: lastChr, position: position}
             }
-            lastChr = name;
-            lastCoord = cumulativeOffset;
+            lastChr = name
+            lastCoord = cumulativeOffset
         }
 
         // If we get here off the end
-        return {chr: this.chromosomeNames[this.chromosomeNames.length - 1], position: 0};
+        return {chr: this.chromosomeNames[this.chromosomeNames.length - 1], position: 0}
 
     };
 
@@ -311,27 +311,27 @@ class Genome {
     getCumulativeOffset(chr) {
 
         if (this.cumulativeOffsets === undefined) {
-            this.cumulativeOffsets = computeCumulativeOffsets.call(this);
+            this.cumulativeOffsets = computeCumulativeOffsets.call(this)
         }
 
-        const queryChr = this.getChromosomeName(chr);
-        return this.cumulativeOffsets[queryChr];
+        const queryChr = this.getChromosomeName(chr)
+        return this.cumulativeOffsets[queryChr]
 
         function computeCumulativeOffsets() {
 
-            let self = this;
-            let acc = {};
-            let offset = 0;
+            let self = this
+            let acc = {}
+            let offset = 0
             for (let name of self.wgChromosomeNames) {
 
-                acc[name] = Math.floor(offset);
+                acc[name] = Math.floor(offset)
 
-                const chromosome = self.getChromosome(name);
+                const chromosome = self.getChromosome(name)
 
-                offset += chromosome.bpLength;
+                offset += chromosome.bpLength
             }
 
-            return acc;
+            return acc
         }
     }
 
@@ -340,36 +340,36 @@ class Genome {
      */
     getGenomeLength() {
 
-        let self = this;
+        let self = this
 
         if (!this.bpLength) {
-            let bpLength = 0;
+            let bpLength = 0
             self.wgChromosomeNames.forEach(function (cname) {
-                let c = self.chromosomes[cname];
-                bpLength += c.bpLength;
-            });
-            this.bpLength = bpLength;
+                let c = self.chromosomes[cname]
+                bpLength += c.bpLength
+            })
+            this.bpLength = bpLength
         }
-        return this.bpLength;
+        return this.bpLength
     }
 
     async getSequence(chr, start, end) {
-        return this.sequence.getSequence(chr, start, end);
+        return this.sequence.getSequence(chr, start, end)
     }
 }
 
 async function loadCytobands(cytobandUrl, config) {
 
-    let data;
+    let data
     if (isDataURL(cytobandUrl)) {
-        const plain = BGZip.decodeDataURI(cytobandUrl);
-        data = "";
-        const len = plain.length;
+        const plain = BGZip.decodeDataURI(cytobandUrl)
+        data = ""
+        const len = plain.length
         for (let i = 0; i < len; i++) {
-            data += String.fromCharCode(plain[i]);
+            data += String.fromCharCode(plain[i])
         }
     } else {
-        data = await igvxhr.loadString(cytobandUrl, buildOptions(config));
+        data = await igvxhr.loadString(cytobandUrl, buildOptions(config))
     }
 
     // var bands = [],
@@ -378,32 +378,32 @@ async function loadCytobands(cytobandUrl, config) {
     //     c = 1,
     //
     //     len = lines.length,
-    const cytobands = {};
-    let lastChr;
-    let bands = [];
-    const lines = splitLines(data);
+    const cytobands = {}
+    let lastChr
+    let bands = []
+    const lines = splitLines(data)
     for (let line of lines) {
-        var tokens = line.split("\t");
-        var chr = tokens[0];
-        if (!lastChr) lastChr = chr;
+        var tokens = line.split("\t")
+        var chr = tokens[0]
+        if (!lastChr) lastChr = chr
 
         if (chr !== lastChr) {
-            cytobands[lastChr] = bands;
-            bands = [];
-            lastChr = chr;
+            cytobands[lastChr] = bands
+            bands = []
+            lastChr = chr
         }
 
         if (tokens.length === 5) {
             //10	0	3000000	p15.3	gneg
-            var start = parseInt(tokens[1]);
-            var end = parseInt(tokens[2]);
-            var name = tokens[3];
-            var stain = tokens[4];
-            bands.push(new Cytoband(start, end, name, stain));
+            var start = parseInt(tokens[1])
+            var end = parseInt(tokens[2])
+            var name = tokens[3]
+            var stain = tokens[4]
+            bands.push(new Cytoband(start, end, name, stain))
         }
     }
 
-    return cytobands;
+    return cytobands
 }
 
 function loadAliases(aliasURL, config) {
@@ -413,46 +413,46 @@ function loadAliases(aliasURL, config) {
         .then(function (data) {
 
             var lines = splitLines(data),
-                aliases = [];
+                aliases = []
 
             lines.forEach(function (line) {
-                if (!line.startsWith("#") && line.length > 0) aliases.push(line.split("\t"));
-            });
+                if (!line.startsWith("#") && line.length > 0) aliases.push(line.split("\t"))
+            })
 
-            return aliases;
-        });
+            return aliases
+        })
 
 }
 
 function constructWG(genome, config) {
 
-    let wgChromosomes;
+    let wgChromosomes
     if (config.chromosomeOrder) {
         if (Array.isArray(config.chromosomeOrder)) {
-            genome.wgChromosomeNames = config.chromosomeOrder;
+            genome.wgChromosomeNames = config.chromosomeOrder
         } else {
-            genome.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim());
+            genome.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
         }
-        wgChromosomes = genome.wgChromosomeNames.map(nm => genome.chromosomes[nm]).filter(chr => chr !== undefined);
+        wgChromosomes = genome.wgChromosomeNames.map(nm => genome.chromosomes[nm]).filter(chr => chr !== undefined)
 
     } else {
 
         // Trim small chromosomes.
-        const lengths = Object.keys(genome.chromosomes).map(key => genome.chromosomes[key].bpLength);
-        const median = lengths.reduce((a, b) => Math.max(a, b));
-        const threshold = median / 50;
-        wgChromosomes = Object.values(genome.chromosomes).filter(chr => chr.bpLength > threshold);
+        const lengths = Object.keys(genome.chromosomes).map(key => genome.chromosomes[key].bpLength)
+        const median = lengths.reduce((a, b) => Math.max(a, b))
+        const threshold = median / 50
+        wgChromosomes = Object.values(genome.chromosomes).filter(chr => chr.bpLength > threshold)
 
         // Sort chromosomes.  First segregate numeric and alpha names, sort numeric, leave alpha as is
-        const numericChromosomes = wgChromosomes.filter(chr => isDigit(chr.name.replace('chr', '')));
-        const alphaChromosomes = wgChromosomes.filter(chr => !isDigit(chr.name.replace('chr', '')));
-        numericChromosomes.sort((a, b) => Number.parseInt(a.name.replace('chr', '')) - Number.parseInt(b.name.replace('chr', '')));
+        const numericChromosomes = wgChromosomes.filter(chr => isDigit(chr.name.replace('chr', '')))
+        const alphaChromosomes = wgChromosomes.filter(chr => !isDigit(chr.name.replace('chr', '')))
+        numericChromosomes.sort((a, b) => Number.parseInt(a.name.replace('chr', '')) - Number.parseInt(b.name.replace('chr', '')))
 
-        const wgChromosomeNames = numericChromosomes.map(chr => chr.name);
+        const wgChromosomeNames = numericChromosomes.map(chr => chr.name)
         for (let chr of alphaChromosomes) {
-            wgChromosomeNames.push(chr.name);
+            wgChromosomeNames.push(chr.name)
         }
-        genome.wgChromosomeNames = wgChromosomeNames;
+        genome.wgChromosomeNames = wgChromosomeNames
     }
 
 
@@ -461,7 +461,7 @@ function constructWG(genome, config) {
     genome.chromosomes["all"] = {
         name: "all",
         bpLength: l
-    };
+    }
 
     function isDigit(val) {
         return /^\d+$/.test(val)
@@ -469,4 +469,4 @@ function constructWG(genome, config) {
 
 }
 
-export default GenomeUtils;
+export default GenomeUtils

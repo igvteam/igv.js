@@ -1,9 +1,9 @@
-import TrackViewport from "./trackViewport.js";
-import $ from "./vendor/jquery-3.3.1.slim.js";
-import RulerSweeper from "./rulerSweeper.js";
-import GenomeUtils from "./genome/genome.js";
-import {Icon, DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
-import { getChrColor } from "./bam/bamTrack.js";
+import TrackViewport from "./trackViewport.js"
+import $ from "./vendor/jquery-3.3.1.slim.js"
+import RulerSweeper from "./rulerSweeper.js"
+import GenomeUtils from "./genome/genome.js"
+import {DOMUtils, Icon, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {getChrColor} from "./bam/bamTrack.js"
 
 let timer
 let currentViewport = undefined
@@ -12,22 +12,22 @@ const toolTipTimeout = 1e4
 class RulerViewport extends TrackViewport {
 
     constructor(trackView, $viewportColumn, referenceFrame, width) {
-        super(trackView, $viewportColumn, referenceFrame, width);
+        super(trackView, $viewportColumn, referenceFrame, width)
     }
 
     initializationHelper() {
 
         this.rulerSweeper = new RulerSweeper(this)
 
-        this.$multiLocusCloseButton = $('<div>', { class: 'igv-multi-locus-close-button' })
-        this.$viewport.append(this.$multiLocusCloseButton);
-        this.$multiLocusCloseButton.get(0).appendChild(Icon.createIcon("times-circle"));
+        this.$multiLocusCloseButton = $('<div>', {class: 'igv-multi-locus-close-button'})
+        this.$viewport.append(this.$multiLocusCloseButton)
+        this.$multiLocusCloseButton.get(0).appendChild(Icon.createIcon("times-circle"))
 
         this.$multiLocusCloseButton.click(() => {
             this.browser.removeMultiLocusPanel(this.referenceFrame)
-        });
+        })
 
-        this.$rulerLabel = $('<div>', { class: 'igv-multi-locus-ruler-label' })
+        this.$rulerLabel = $('<div>', {class: 'igv-multi-locus-ruler-label'})
         this.$viewport.append(this.$rulerLabel)
 
         this.$rulerLabel.click(async () => {
@@ -41,7 +41,7 @@ class RulerViewport extends TrackViewport {
 
         })
 
-        this.$tooltip = $('<div>', { class: 'igv-ruler-tooltip' })
+        this.$tooltip = $('<div>', {class: 'igv-ruler-tooltip'})
         this.$tooltip.height(this.$viewport.height())
 
         this.$viewport.append(this.$tooltip)
@@ -49,7 +49,7 @@ class RulerViewport extends TrackViewport {
         this.$tooltipContent = $('<div>')
         this.$tooltip.append(this.$tooltipContent)
 
-        this.attachMouseHandlers( GenomeUtils.isWholeGenomeView(this.referenceFrame.chr) )
+        this.attachMouseHandlers(GenomeUtils.isWholeGenomeView(this.referenceFrame.chr))
 
         this.$tooltip.hide()
 
@@ -58,10 +58,9 @@ class RulerViewport extends TrackViewport {
 
     presentLocusLabel(viewportWidth) {
 
-        const createRulerLabelString = () =>
-        {
-            const html = `<div>${ this.referenceFrame.getMultiLocusLabel(viewportWidth) }</div>`
-            return document.createRange().createContextualFragment(html).firstChild;
+        const createRulerLabelString = () => {
+            const html = `<div>${this.referenceFrame.getMultiLocusLabel(viewportWidth)}</div>`
+            return document.createRange().createContextualFragment(html).firstChild
         }
 
         this.$rulerLabel.get(0).innerHTML = ''
@@ -80,11 +79,11 @@ class RulerViewport extends TrackViewport {
                                 <?xml version="1.0" encoding="UTF-8"?>
                                 <svg width="14px" height="14px" viewBox="0 0 93 93" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                                     <g>
-                                        <rect id="Rectangle" fill="${ getChrColor(this.referenceFrame.chr) }" x="0" y="0" width="93" height="93"></rect>
+                                        <rect id="Rectangle" fill="${getChrColor(this.referenceFrame.chr)}" x="0" y="0" width="93" height="93"></rect>
                                     </g>
                                 </svg>
                             </div>`
-            return document.createRange().createContextualFragment(html).firstChild;
+            return document.createRange().createContextualFragment(html).firstChild
         }
 
         const createRulerLabelDot = () => {
@@ -92,17 +91,16 @@ class RulerViewport extends TrackViewport {
                                 <?xml version="1.0" encoding="UTF-8"?>
                                 <svg width="14px" height="14px" viewBox="0 0 89 89" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
                                     <g>
-                                        <circle id="Oval" fill="${ getChrColor(this.referenceFrame.chr) }" cx="44.5" cy="44.5" r="44.5"></circle>
+                                        <circle id="Oval" fill="${getChrColor(this.referenceFrame.chr)}" cx="44.5" cy="44.5" r="44.5"></circle>
                                     </g>
                                 </svg>
                             </div>`
-            return document.createRange().createContextualFragment(html).firstChild;
+            return document.createRange().createContextualFragment(html).firstChild
         }
 
-        const createRulerLabelString = () =>
-        {
-            const html = `<div>${ this.referenceFrame.getMultiLocusLabel(viewportWidth) }</div>`
-            return document.createRange().createContextualFragment(html).firstChild;
+        const createRulerLabelString = () => {
+            const html = `<div>${this.referenceFrame.getMultiLocusLabel(viewportWidth)}</div>`
+            return document.createRange().createContextualFragment(html).firstChild
         }
 
         this.$rulerLabel.get(0).innerHTML = ''
@@ -120,7 +118,7 @@ class RulerViewport extends TrackViewport {
 
     attachMouseHandlers(isWholeGenomeView) {
 
-        this.namespace = `.ruler_track_viewport_${ this.browser.referenceFrameList.indexOf(this.referenceFrame) }`
+        this.namespace = `.ruler_track_viewport_${this.browser.referenceFrameList.indexOf(this.referenceFrame)}`
 
         this.$viewport.off(this.namespace)
 
@@ -130,28 +128,28 @@ class RulerViewport extends TrackViewport {
 
             const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
 
-            const click = `click${ this.namespace }`
+            const click = `click${this.namespace}`
             this.$viewport.on(click, (e) => {
 
-                const { x:pixel } = DOMUtils.translateMouseCoordinates(e, this.$viewport.get(0));
-                const bp = Math.round(this.referenceFrame.start + this.referenceFrame.toBP(pixel));
+                const {x: pixel} = DOMUtils.translateMouseCoordinates(e, this.$viewport.get(0))
+                const bp = Math.round(this.referenceFrame.start + this.referenceFrame.toBP(pixel))
 
-                let searchString;
+                let searchString
 
-                const { chr } = this.browser.genome.getChromosomeCoordinate(bp)
+                const {chr} = this.browser.genome.getChromosomeCoordinate(bp)
 
                 if (1 === this.browser.referenceFrameList.length) {
                     searchString = chr
                 } else {
 
-                    let loci = this.browser.referenceFrameList.map(({ locusSearchString }) => locusSearchString);
+                    let loci = this.browser.referenceFrameList.map(({locusSearchString}) => locusSearchString)
 
-                    loci[ index ] = chr;
+                    loci[index] = chr
 
-                    searchString = loci.join(' ');
+                    searchString = loci.join(' ')
                 }
 
-                this.browser.search(searchString);
+                this.browser.search(searchString)
             })
 
             this.$viewport.get(0).style.cursor = 'pointer'
@@ -160,7 +158,7 @@ class RulerViewport extends TrackViewport {
         }
 
     }
-    
+
     mouseMove(event) {
 
         if (true === this.browser.cursorGuideVisible) {
@@ -176,34 +174,37 @@ class RulerViewport extends TrackViewport {
                 this.$tooltip.show()
             }
 
-            const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrame.chr));
+            const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrame.chr))
 
             if (isWholeGenome) {
-                this.$tooltip.hide();
-                return;
+                this.$tooltip.hide()
+                return
             }
 
-            const { x } = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
-            const { start, bpPerPixel } = this.referenceFrame
+            const {x} = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
+            const {start, bpPerPixel} = this.referenceFrame
             const bp = Math.round(0.5 + start + Math.max(0, x) * bpPerPixel)
 
-            this.$tooltipContent.text( StringUtils.numberFormatter(bp) )
+            this.$tooltipContent.text(StringUtils.numberFormatter(bp))
 
-            const { width:ww } = this.$tooltipContent.get(0).getBoundingClientRect()
-            const { width:w } = this.$viewport.get(0).getBoundingClientRect()
+            const {width: ww} = this.$tooltipContent.get(0).getBoundingClientRect()
+            const {width: w} = this.$viewport.get(0).getBoundingClientRect()
 
-            this.$tooltip.css({ left: `${ IGVMath.clamp(x, 0, w - ww) }px` })
+            this.$tooltip.css({left: `${IGVMath.clamp(x, 0, w - ww)}px`})
 
             // hide tooltip when movement stops
             clearTimeout(timer)
-            timer = setTimeout(() => this.$tooltip.hide(),toolTipTimeout)
+            timer = setTimeout(() => this.$tooltip.hide(), toolTipTimeout)
 
         }
 
     }
 
-    startSpinner() {}
-    stopSpinner() {}
+    startSpinner() {
+    }
+
+    stopSpinner() {
+    }
 
 }
 

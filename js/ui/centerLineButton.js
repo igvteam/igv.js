@@ -1,4 +1,4 @@
-import { DOMUtils } from '../../node_modules/igv-utils/src/index.js';
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 
 class CenterLineButton {
 
@@ -6,7 +6,7 @@ class CenterLineButton {
 
         this.browser = browser
 
-        this.button = DOMUtils.div({ class: 'igv-navbar-button'})
+        this.button = DOMUtils.div({class: 'igv-navbar-button'})
         parent.appendChild(this.button)
 
         this.button.textContent = 'center line'
@@ -26,7 +26,7 @@ class CenterLineButton {
         }
     }
 
-    setButtonState (isCenterLineVisible) {
+    setButtonState(isCenterLineVisible) {
         if (true === isCenterLineVisible) {
             this.button.classList.add('igv-navbar-button-clicked')
         } else {
@@ -34,13 +34,13 @@ class CenterLineButton {
         }
     }
 
-    show () {
+    show() {
         this.isVisible = true
         this.button.style.display = 'block'
         this.setButtonState(this.browser.isCenterLineVisible)
     }
 
-    hide () {
+    hide() {
         this.isVisible = false
         this.button.style.display = 'none'
     }

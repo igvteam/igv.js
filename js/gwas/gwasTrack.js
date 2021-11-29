@@ -27,11 +27,10 @@ import FeatureSource from '../feature/featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {BinnedColorScale, ConstantColorScale} from "../util/colorScale.js"
-import {doAutoscale, extend} from "../util/igvUtils.js"
+import {doAutoscale} from "../util/igvUtils.js"
 import MenuUtils from "../ui/menuUtils.js"
 import gwasColors from "./gwasColors.js"
 import {randomColor} from "../util/colorPalletes.js"
-import deepCopy from "../util/deepCopy.js"
 
 const DEFAULT_POPOVER_WINDOW = 100000000
 

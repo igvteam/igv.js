@@ -30,14 +30,14 @@ import TDFSource from "../tdf/tdfSource.js"
 
 function FeatureSource(config, genome) {
 
-    const format = config.format ? config.format.toLowerCase() : undefined;
+    const format = config.format ? config.format.toLowerCase() : undefined
     if ('bigwig' === format || 'bigbed' === format || 'bb' === format) {
-        return new BWSource(config, genome);
+        return new BWSource(config, genome)
     } else if ("tdf" === format) {
-        return new TDFSource(config, genome);
+        return new TDFSource(config, genome)
     } else {
-        return new TextFeatureSource(config, genome);
+        return new TextFeatureSource(config, genome)
     }
 }
 
-export default FeatureSource;
+export default FeatureSource

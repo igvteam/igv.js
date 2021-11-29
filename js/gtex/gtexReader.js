@@ -23,16 +23,16 @@
  * THE SOFTWARE.
  */
 
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
 const GtexReader = function (config) {
 
-    this.config = config;
-    this.url = config.url;
-    this.tissueId = config.tissueSiteDetailId;
-    this.indexed = true;
+    this.config = config
+    this.url = config.url
+    this.tissueId = config.tissueSiteDetailId
+    this.indexed = true
     this.datasetId = config.datasetId || "gtex_v8"
-};
+}
 
 GtexReader.prototype.readFeatures = async function (chr, bpStart, bpEnd) {
 
@@ -43,7 +43,7 @@ GtexReader.prototype.readFeatures = async function (chr, bpStart, bpEnd) {
         queryEnd = Math.ceil(bpEnd),
         datasetId = this.datasetId,
         queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
-            "&tissueSiteDetailId=" + this.tissueId + "&datasetId=" + datasetId;
+            "&tissueSiteDetailId=" + this.tissueId + "&datasetId=" + datasetId
 
     const json = await igvxhr.loadJson(queryURL, {
         withCredentials: self.config.withCredentials
@@ -56,20 +56,20 @@ GtexReader.prototype.readFeatures = async function (chr, bpStart, bpEnd) {
         //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
         json.singleTissueEqtl.forEach(function (eqtl) {
-            eqtl.chr = eqtl.chromosome;
-            eqtl.position = eqtl.pos;
-            eqtl.start = eqtl.pos - 1;
-            eqtl.end = eqtl.start + 1;
-            eqtl.snp = eqtl.snpId;
-            eqtl.geneName = eqtl.geneSymbol;
-            eqtl.geneId = eqtl.gencodeId;
+            eqtl.chr = eqtl.chromosome
+            eqtl.position = eqtl.pos
+            eqtl.start = eqtl.pos - 1
+            eqtl.end = eqtl.start + 1
+            eqtl.snp = eqtl.snpId
+            eqtl.geneName = eqtl.geneSymbol
+            eqtl.geneId = eqtl.gencodeId
 
-        });
+        })
 
-        return json.singleTissueEqtl;
+        return json.singleTissueEqtl
     } else {
-        return undefined;
+        return undefined
     }
 }
 
-export default GtexReader;
+export default GtexReader

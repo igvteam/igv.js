@@ -23,16 +23,16 @@
  * THE SOFTWARE.
  */
 
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
-import {buildOptions} from "../util/igvUtils.js";
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {buildOptions} from "../util/igvUtils.js"
 
 class BufferedReader {
 
     constructor(config, contentLength, bufferSize) {
-        this.path = config.url;
-        this.bufferSize = bufferSize ? bufferSize : 512000;
-        this.range = {start: -1, size: -1};
-        this.config = config;
+        this.path = config.url
+        this.bufferSize = bufferSize ? bufferSize : 512000
+        this.range = {start: -1, size: -1}
+        this.config = config
     }
 
     /**
@@ -44,27 +44,27 @@ class BufferedReader {
     async dataViewForRange(requestedRange, asUint8) {
 
         const hasData = (this.data && (this.range.start <= requestedRange.start) &&
-            ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size)));
+            ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size)))
 
         if (!hasData) {
-            let bufferSize;
+            let bufferSize
             // If requested range size is specified, potentially expand buffer size
             if (requestedRange.size) {
-                bufferSize = Math.max(this.bufferSize, requestedRange.size);
+                bufferSize = Math.max(this.bufferSize, requestedRange.size)
             } else {
-                bufferSize = this.bufferSize;
+                bufferSize = this.bufferSize
             }
-            const loadRange = {start: requestedRange.start, size: bufferSize};
-            const arrayBuffer = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: loadRange}));
-            this.data = arrayBuffer;
-            this.range = loadRange;
+            const loadRange = {start: requestedRange.start, size: bufferSize}
+            const arrayBuffer = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: loadRange}))
+            this.data = arrayBuffer
+            this.range = loadRange
         }
 
-        const len = this.data.byteLength;
+        const len = this.data.byteLength
         const bufferStart = requestedRange.start - this.range.start
         return asUint8 ?
             new Uint8Array(this.data, bufferStart, len - bufferStart) :
-            new DataView(this.data, bufferStart, len - bufferStart);
+            new DataView(this.data, bufferStart, len - bufferStart)
     }
 }
 

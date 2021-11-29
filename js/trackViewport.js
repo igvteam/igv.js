@@ -2,18 +2,18 @@
  * Created by dat on 9/16/16.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js";
-import {Popover, Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
-import Viewport from "./viewport.js";
-import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
+import $ from "./vendor/jquery-3.3.1.slim.js"
+import {Alert, Popover} from '../node_modules/igv-ui/dist/igv-ui.js'
+import Viewport from "./viewport.js"
+import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js"
 import C2S from "./canvas2svg.js"
-import GenomeUtils from "./genome/genome.js";
+import GenomeUtils from "./genome/genome.js"
 
-const NOT_LOADED_MESSAGE = 'Error loading track data';
+const NOT_LOADED_MESSAGE = 'Error loading track data'
 
 let mouseDownCoords
-let lastClickTime = 0;
-let popupTimerID;
+let lastClickTime = 0
+let popupTimerID
 
 class TrackViewport extends Viewport {
 
@@ -23,41 +23,41 @@ class TrackViewport extends Viewport {
 
     initializationHelper() {
 
-        this.$spinner = $('<div>', {class: 'igv-loading-spinner-container'});
-        this.$viewport.append(this.$spinner);
-        this.$spinner.append($('<div>'));
+        this.$spinner = $('<div>', {class: 'igv-loading-spinner-container'})
+        this.$viewport.append(this.$spinner)
+        this.$spinner.append($('<div>'))
 
         const {track} = this.trackView
 
         if ('sequence' !== track.type) {
-            this.$zoomInNotice = this.createZoomInNotice(this.$content);
+            this.$zoomInNotice = this.createZoomInNotice(this.$content)
         }
 
         if (track.name && "sequence" !== track.config.type) {
 
-            this.$trackLabel = $('<div class="igv-track-label">');
-            this.$viewport.append(this.$trackLabel);
-            this.setTrackLabel(track.name);
+            this.$trackLabel = $('<div class="igv-track-label">')
+            this.$viewport.append(this.$trackLabel)
+            this.setTrackLabel(track.name)
 
             if (false === this.browser.trackLabelsVisible) {
-                this.$trackLabel.hide();
+                this.$trackLabel.hide()
             }
 
         }
 
-        this.stopSpinner();
+        this.stopSpinner()
 
-        this.addMouseHandlers();
+        this.addMouseHandlers()
 
     }
 
     setTrackLabel(label) {
 
-        this.$trackLabel.empty();
-        this.$trackLabel.html(label);
+        this.$trackLabel.empty()
+        this.$trackLabel.html(label)
 
-        const txt = this.$trackLabel.text();
-        this.$trackLabel.attr('title', txt);
+        const txt = this.$trackLabel.text()
+        this.$trackLabel.attr('title', txt)
     }
 
     startSpinner() {
@@ -71,113 +71,113 @@ class TrackViewport extends Viewport {
     checkZoomIn() {
 
         const showZoomInNotice = () => {
-            const referenceFrame = this.referenceFrame;
+            const referenceFrame = this.referenceFrame
             if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
-                return true;
+                return true
             } else {
-                const visibilityWindow = this.trackView.track.visibilityWindow;
+                const visibilityWindow = this.trackView.track.visibilityWindow
                 return (
                     visibilityWindow !== undefined && visibilityWindow > 0 &&
-                    (referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow));
+                    (referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow))
             }
         }
 
         if (!(this.viewIsReady())) {
-            return false;
+            return false
         }
 
         if (this.$zoomInNotice) {
             if (showZoomInNotice()) {
                 // Out of visibility window
                 if (this.canvas) {
-                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                    this.tile = undefined;
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+                    this.tile = undefined
                 }
-                this.$zoomInNotice.show();
+                this.$zoomInNotice.show()
 
                 if (this.trackView.track.autoHeight) {
-                    const minHeight = this.trackView.minHeight || 0;
-                    this.setContentHeight(minHeight);
+                    const minHeight = this.trackView.minHeight || 0
+                    this.setContentHeight(minHeight)
                 }
 
-                return false;
+                return false
             } else {
-                this.$zoomInNotice.hide();
-                return true;
+                this.$zoomInNotice.hide()
+                return true
             }
         }
 
-        return true;
+        return true
 
 
     }
 
     shift() {
-        const self = this;
-        const referenceFrame = self.referenceFrame;
+        const self = this
+        const referenceFrame = self.referenceFrame
 
         if (self.canvas &&
             self.tile &&
             self.tile.chr === self.referenceFrame.chr &&
             self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
 
-            const pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
-            self.canvas.style.left = pixelOffset + "px";
+            const pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel)
+            self.canvas.style.left = pixelOffset + "px"
         }
     }
 
     async loadFeatures() {
 
-        const referenceFrame = this.referenceFrame;
-        const chr = referenceFrame.chr;
+        const referenceFrame = this.referenceFrame
+        const chr = referenceFrame.chr
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
-        const chrLength = this.browser.genome.getChromosome(chr).bpLength;
-        const pixelWidth = this.$content.width();// * 3;
-        const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
-        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth));
-        const bpEnd = Math.ceil(Math.min(chrLength, referenceFrame.start + bpWidth + bpWidth));  // Add one screen width to end
+        const chrLength = this.browser.genome.getChromosome(chr).bpLength
+        const pixelWidth = this.$content.width()// * 3;
+        const bpWidth = pixelWidth * referenceFrame.bpPerPixel
+        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth))
+        const bpEnd = Math.ceil(Math.min(chrLength, referenceFrame.start + bpWidth + bpWidth))  // Add one screen width to end
 
         if (this.loading && this.loading.start === bpStart && this.loading.end === bpEnd) {
-            return undefined;
+            return undefined
         }
-        this.loading = {start: bpStart, end: bpEnd};
-        this.startSpinner();
+        this.loading = {start: bpStart, end: bpEnd}
+        this.startSpinner()
 
         try {
-            const features = await this.getFeatures(this.trackView.track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel);
-            let roiFeatures = [];
+            const features = await this.getFeatures(this.trackView.track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            let roiFeatures = []
             const roi = mergeArrays(this.browser.roi, this.trackView.track.roi)
             if (roi) {
                 for (let r of roi) {
                     const f = await
-                        r.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel);
+                        r.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
                     roiFeatures.push({track: r, features: f})
                 }
             }
 
-            this.tile = new Tile(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures);
-            this.loading = false;
-            this.hideMessage();
-            this.stopSpinner();
-            return this.tile;
+            this.tile = new Tile(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures)
+            this.loading = false
+            this.hideMessage()
+            this.stopSpinner()
+            return this.tile
         } catch (error) {
             // Track might have been removed during load
             if (this.trackView && this.trackView.disposed !== true) {
-                this.showMessage(NOT_LOADED_MESSAGE);
-                Alert.presentAlert(error);
+                this.showMessage(NOT_LOADED_MESSAGE)
+                Alert.presentAlert(error)
                 console.error(error)
             }
         } finally {
-            this.loading = false;
-            this.stopSpinner();
+            this.loading = false
+            this.stopSpinner()
         }
     }
 
     async repaint() {
 
         if (undefined === this.tile) {
-            return;
+            return
         }
 
         let {features, roiFeatures, bpPerPixel, startBP, endBP} = this.tile
@@ -198,39 +198,39 @@ class TrackViewport extends Viewport {
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
         const viewportHeight = this.$viewport.height()
         const contentHeight = this.getContentHeight()
-        const minHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight;  // Need to fill viewport for ROIs.
-        let pixelHeight = Math.min(minHeight, 3 * viewportHeight);
+        const minHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight  // Need to fill viewport for ROIs.
+        let pixelHeight = Math.min(minHeight, 3 * viewportHeight)
         if (0 === pixelWidth || 0 === pixelHeight) {
             if (this.canvas) {
-                $(this.canvas).remove();
+                $(this.canvas).remove()
             }
-            return;
+            return
         }
         const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
 
         // Always use high DPI if in compressed display mode, otherwise use preference setting;
-        let devicePixelRatio;
+        let devicePixelRatio
         if ("FILL" === this.trackView.track.displayMode) {
-            devicePixelRatio = window.devicePixelRatio;
+            devicePixelRatio = window.devicePixelRatio
         } else {
-            devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
+            devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio
         }
 
-        const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / this.referenceFrame.bpPerPixel);
+        const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / this.referenceFrame.bpPerPixel)
 
-        const newCanvas = $('<canvas class="igv-canvas">').get(0);
-        const ctx = newCanvas.getContext("2d");
+        const newCanvas = $('<canvas class="igv-canvas">').get(0)
+        const ctx = newCanvas.getContext("2d")
 
-        newCanvas.style.width = pixelWidth + "px";
-        newCanvas.style.height = pixelHeight + "px";
+        newCanvas.style.width = pixelWidth + "px"
+        newCanvas.style.height = pixelHeight + "px"
 
-        newCanvas.width = devicePixelRatio * pixelWidth;
-        newCanvas.height = devicePixelRatio * pixelHeight;
+        newCanvas.width = devicePixelRatio * pixelWidth
+        newCanvas.height = devicePixelRatio * pixelHeight
 
-        ctx.scale(devicePixelRatio, devicePixelRatio);
+        ctx.scale(devicePixelRatio, devicePixelRatio)
 
-        newCanvas.style.left = pixelXOffset + "px";
-        newCanvas.style.top = canvasTop + "px";
+        newCanvas.style.left = pixelXOffset + "px"
+        newCanvas.style.top = canvasTop + "px"
 
         ctx.translate(0, -canvasTop)
 
@@ -248,9 +248,9 @@ class TrackViewport extends Viewport {
                 selection: this.selection,
                 viewport: this,
                 viewportWidth: this.$viewport.width()
-            };
+            }
 
-        this.draw(drawConfiguration, features, roiFeatures);
+        this.draw(drawConfiguration, features, roiFeatures)
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
 
@@ -268,13 +268,13 @@ class TrackViewport extends Viewport {
         // console.log(`${ Date.now() } viewport draw(). track ${ this.trackView.track.type }. content-css-top ${ this.$content.css('top') }. canvas-top ${ drawConfiguration.pixelTop }.`)
 
         if (features) {
-            drawConfiguration.features = features;
-            this.trackView.track.draw(drawConfiguration);
+            drawConfiguration.features = features
+            this.trackView.track.draw(drawConfiguration)
         }
         if (roiFeatures) {
             for (let r of roiFeatures) {
-                drawConfiguration.features = r.features;
-                r.track.draw(drawConfiguration);
+                drawConfiguration.features = r.features
+                r.track.draw(drawConfiguration)
             }
         }
     }
@@ -284,17 +284,17 @@ class TrackViewport extends Viewport {
 
         // Nothing to do if zoomInNotice is active
         if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
-            return;
+            return
         }
 
-        const referenceFrame = this.referenceFrame;
-        const bpPerPixel = tile.bpPerPixel;
-        const features = tile.features;
-        const roiFeatures = tile.roiFeatures;
-        const pixelWidth = this.$viewport.width();
-        const pixelHeight = this.$viewport.height();
-        const bpStart = referenceFrame.start;
-        const bpEnd = referenceFrame.start + pixelWidth * referenceFrame.bpPerPixel;
+        const referenceFrame = this.referenceFrame
+        const bpPerPixel = tile.bpPerPixel
+        const features = tile.features
+        const roiFeatures = tile.roiFeatures
+        const pixelWidth = this.$viewport.width()
+        const pixelHeight = this.$viewport.height()
+        const bpStart = referenceFrame.start
+        const bpEnd = referenceFrame.start + pixelWidth * referenceFrame.bpPerPixel
 
         const ctx = new C2S(
             {
@@ -309,7 +309,7 @@ class TrackViewport extends Viewport {
                         height: pixelHeight
                     }
 
-            });
+            })
 
         const drawConfiguration =
             {
@@ -325,53 +325,53 @@ class TrackViewport extends Viewport {
                 referenceFrame: this.referenceFrame,
                 selection: this.selection,
                 viewportWidth: pixelWidth,
-            };
+            }
 
-        this.draw(drawConfiguration, features, roiFeatures);
+        this.draw(drawConfiguration, features, roiFeatures)
 
-        return ctx.getSerializedSvg(true);
+        return ctx.getSerializedSvg(true)
 
     }
 
     containsPosition(chr, position) {
         if (this.referenceFrame.chr === chr && position >= this.referenceFrame.start) {
-            return position <= this.referenceFrame.calculateEnd(this.getWidth());
+            return position <= this.referenceFrame.calculateEnd(this.getWidth())
         } else {
-            return false;
+            return false
         }
     }
 
     isLoading() {
-        return this.loading;
+        return this.loading
     }
 
     saveImage() {
 
-        if (!this.ctx) return;
+        if (!this.ctx) return
 
-        const canvasTop = this.canvasVerticalRange ? this.canvasVerticalRange.top : 0;
-        const devicePixelRatio = window.devicePixelRatio;
-        const w = this.$viewport.width() * devicePixelRatio;
-        const h = this.$viewport.height() * devicePixelRatio;
-        const x = -$(this.canvas).position().left * devicePixelRatio;
-        const y = (-this.$content.position().top - canvasTop) * devicePixelRatio;
+        const canvasTop = this.canvasVerticalRange ? this.canvasVerticalRange.top : 0
+        const devicePixelRatio = window.devicePixelRatio
+        const w = this.$viewport.width() * devicePixelRatio
+        const h = this.$viewport.height() * devicePixelRatio
+        const x = -$(this.canvas).position().left * devicePixelRatio
+        const y = (-this.$content.position().top - canvasTop) * devicePixelRatio
 
-        const imageData = this.ctx.getImageData(x, y, w, h);
-        const exportCanvas = document.createElement('canvas');
-        const exportCtx = exportCanvas.getContext('2d');
-        exportCanvas.width = imageData.width;
-        exportCanvas.height = imageData.height;
-        exportCtx.putImageData(imageData, 0, 0);
+        const imageData = this.ctx.getImageData(x, y, w, h)
+        const exportCanvas = document.createElement('canvas')
+        const exportCtx = exportCanvas.getContext('2d')
+        exportCanvas.width = imageData.width
+        exportCanvas.height = imageData.height
+        exportCtx.putImageData(imageData, 0, 0)
 
         // filename = this.trackView.track.name + ".png";
-        const filename = (this.$trackLabel.text() ? this.$trackLabel.text() : "image") + ".png";
-        const data = exportCanvas.toDataURL("image/png");
-        FileUtils.download(filename, data);
+        const filename = (this.$trackLabel.text() ? this.$trackLabel.text() : "image") + ".png"
+        const data = exportCanvas.toDataURL("image/png")
+        FileUtils.download(filename, data)
     }
 
     saveSVG() {
 
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect();
+        const {width, height} = this.$viewport.get(0).getBoundingClientRect()
 
         const config =
             {
@@ -387,19 +387,19 @@ class TrackViewport extends Viewport {
 
             }
 
-        const context = new C2S(config);
+        const context = new C2S(config)
 
-        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '');
+        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
 
-        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
+        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
         const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
 
         this.drawSVGWithContext(context, width, height, id, 0, 0, 0)
 
-        const svg = context.getSerializedSvg(true);
-        const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
+        const svg = context.getSerializedSvg(true)
+        const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
 
-        FileUtils.download(`${id}.svg`, data);
+        FileUtils.download(`${id}.svg`, data)
     }
 
     // called by trackView.renderSVGContext() when rendering
@@ -409,22 +409,22 @@ class TrackViewport extends Viewport {
 
         // Nothing to do if zoomInNotice is active
         if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
-            return;
+            return
         }
 
-        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '');
+        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
 
-        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
+        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
         const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
 
-        const {top: yScrollDelta} = this.$content.position();
+        const {top: yScrollDelta} = this.$content.position()
 
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect();
+        const {width, height} = this.$viewport.get(0).getBoundingClientRect()
 
         this.drawSVGWithContext(context, width, height, id, deltaX, deltaY + yScrollDelta, -yScrollDelta)
 
         if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
-            const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+            const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0))
             this.renderTrackLabelSVG(context, deltaX + x, deltaY + y, width, height)
         }
 
@@ -433,35 +433,35 @@ class TrackViewport extends Viewport {
     // render track label element called from renderSVGContext()
     renderTrackLabelSVG(context, tx, ty, width, height) {
 
-        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '');
+        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
         const id = `${str}_track_label_guid_${DOMUtils.guid()}`
 
-        context.saveWithTranslationAndClipRect(id, tx, ty, width, height, 0);
+        context.saveWithTranslationAndClipRect(id, tx, ty, width, height, 0)
 
-        context.fillStyle = "white";
-        context.fillRect(0, 0, width, height);
+        context.fillStyle = "white"
+        context.fillRect(0, 0, width, height)
 
-        context.font = "12px Arial";
-        context.fillStyle = 'rgb(68, 68, 68)';
+        context.font = "12px Arial"
+        context.fillStyle = 'rgb(68, 68, 68)'
 
-        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
-        const dx = 0.25 * (width - stringWidth);
-        const dy = 0.7 * (height - 12);
-        context.fillText(this.$trackLabel.text(), dx, height - dy);
+        const {width: stringWidth} = context.measureText(this.$trackLabel.text())
+        const dx = 0.25 * (width - stringWidth)
+        const dy = 0.7 * (height - 12)
+        context.fillText(this.$trackLabel.text(), dx, height - dy)
 
-        context.strokeStyle = 'rgb(68, 68, 68)';
-        context.strokeRect(0, 0, width, height);
+        context.strokeStyle = 'rgb(68, 68, 68)'
+        context.strokeRect(0, 0, width, height)
 
-        context.restore();
+        context.restore()
 
     }
 
     // called by renderSVGContext()
     drawSVGWithContext(context, width, height, id, x, y, yClipOffset) {
 
-        context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset);
+        context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
 
-        let {start, bpPerPixel} = this.referenceFrame;
+        let {start, bpPerPixel} = this.referenceFrame
 
         const config =
             {
@@ -477,51 +477,51 @@ class TrackViewport extends Viewport {
                 bpPerPixel,
                 viewportWidth: width,
                 selection: this.selection
-            };
+            }
 
-        const features = this.tile ? this.tile.features : [];
-        const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
-        this.draw(config, features, roiFeatures);
+        const features = this.tile ? this.tile.features : []
+        const roiFeatures = this.tile ? this.tile.roiFeatures : undefined
+        this.draw(config, features, roiFeatures)
 
-        context.restore();
+        context.restore()
 
     }
 
     getCachedFeatures() {
-        return this.tile ? this.tile.features : [];
+        return this.tile ? this.tile.features : []
     }
 
     async getFeatures(track, chr, start, end, bpPerPixel) {
 
         if (this.tile && this.tile.containsRange(chr, start, end, bpPerPixel)) {
-            return this.tile.features;
+            return this.tile.features
         } else if (typeof track.getFeatures === "function") {
-            const features = await track.getFeatures(chr, start, end, bpPerPixel, this);
-            this.cachedFeatures = features;
-            this.checkContentHeight();
-            return features;
+            const features = await track.getFeatures(chr, start, end, bpPerPixel, this)
+            this.cachedFeatures = features
+            this.checkContentHeight()
+            return features
         } else {
-            return undefined;
+            return undefined
         }
     }
 
     createZoomInNotice($parent) {
 
         const $container = $('<div>', {class: 'igv-zoom-in-notice-container'})
-        $parent.append($container);
+        $parent.append($container)
 
-        const $e = $('<div>');
-        $container.append($e);
+        const $e = $('<div>')
+        $container.append($e)
 
-        $e.text('Zoom in to see features');
+        $e.text('Zoom in to see features')
 
-        $container.hide();
+        $container.hide()
 
-        return $container;
+        return $container
     }
 
     viewIsReady() {
-        return this.browser && this.browser.referenceFrameList && this.referenceFrame;
+        return this.browser && this.browser.referenceFrameList && this.referenceFrame
     }
 
     addMouseHandlers() {
@@ -573,33 +573,33 @@ class TrackViewport extends Viewport {
 
             // Ignore if we are doing a drag.  This can happen with touch events.
             if (this.browser.dragObject) {
-                return false;
+                return false
             }
 
-            const clickState = createClickState(event, this);
+            const clickState = createClickState(event, this)
 
             if (undefined === clickState) {
-                return false;
+                return false
             }
 
-            event.preventDefault();
+            event.preventDefault()
 
             // Track specific items
-            let menuItems = [];
+            let menuItems = []
             if (typeof this.trackView.track.contextMenuItemList === "function") {
-                const trackMenuItems = this.trackView.track.contextMenuItemList(clickState);
+                const trackMenuItems = this.trackView.track.contextMenuItemList(clickState)
                 if (trackMenuItems) {
-                    menuItems = trackMenuItems;
+                    menuItems = trackMenuItems
                 }
             }
 
             // Add items common to all tracks
             if (menuItems.length > 0) {
-                menuItems.push({label: $('<HR>')});
+                menuItems.push({label: $('<HR>')})
             }
 
-            menuItems.push({label: 'Save Image (PNG)', click: () => this.saveImage()});
-            menuItems.push({label: 'Save Image (SVG)', click: () => this.saveSVG()});
+            menuItems.push({label: 'Save Image (PNG)', click: () => this.saveImage()})
+            menuItems.push({label: 'Save Image (SVG)', click: () => this.saveSVG()})
 
             this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
         }
@@ -655,46 +655,46 @@ class TrackViewport extends Viewport {
 
             if (this.enableClick) {
                 if (3 === event.which || event.ctrlKey) {
-                    return;
+                    return
                 }
 
                 // Close any currently open popups
-                $('.igv-popover').hide();
+                $('.igv-popover').hide()
 
 
                 if (this.browser.dragObject || this.browser.isScrolling) {
-                    return;
+                    return
                 }
 
                 // Treat as a mouse click, its either a single or double click.
                 // Handle here and stop propogation / default
-                event.preventDefault();
+                event.preventDefault()
 
-                const mouseX = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0)).x;
-                const mouseXCanvas = DOMUtils.translateMouseCoordinates(event, this.canvas).x;
-                const referenceFrame = this.referenceFrame;
-                const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
+                const mouseX = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0)).x
+                const mouseXCanvas = DOMUtils.translateMouseCoordinates(event, this.canvas).x
+                const referenceFrame = this.referenceFrame
+                const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas))
 
-                const time = Date.now();
+                const time = Date.now()
 
                 if (time - lastClickTime < this.browser.constants.doubleClickDelay) {
 
                     // double-click
                     if (popupTimerID) {
-                        window.clearTimeout(popupTimerID);
-                        popupTimerID = undefined;
+                        window.clearTimeout(popupTimerID)
+                        popupTimerID = undefined
                     }
 
-                    const centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
+                    const centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX))
 
-                    let string;
+                    let string
 
                     if ('all' === this.referenceFrame.chr.toLowerCase()) {
 
-                        const chr = this.browser.genome.getChromosomeCoordinate(centerBP).chr;
+                        const chr = this.browser.genome.getChromosomeCoordinate(centerBP).chr
 
                         if (1 === this.browser.referenceFrameList.length) {
-                            string = chr;
+                            string = chr
                         } else {
                             const loci = this.browser.referenceFrameList.map(({locusSearchString}) => locusSearchString)
                             const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
@@ -702,7 +702,7 @@ class TrackViewport extends Viewport {
                             string = loci.join(' ')
                         }
 
-                        this.browser.search(string);
+                        this.browser.search(string)
 
                     } else {
                         this.browser.zoomWithScaleFactor(0.5, centerBP, this.referenceFrame)
@@ -714,26 +714,26 @@ class TrackViewport extends Viewport {
 
                     if (event.shiftKey && typeof this.trackView.track.shiftClick === "function") {
 
-                        this.trackView.track.shiftClick(xBP, event);
+                        this.trackView.track.shiftClick(xBP, event)
 
                     } else if (typeof this.trackView.track.popupData === "function") {
 
                         popupTimerID = setTimeout(() => {
 
-                                const content = getPopupContent(event, this);
+                                const content = getPopupContent(event, this)
                                 if (content) {
                                     if (this.popover) this.popover.dispose()
                                     this.popover = new Popover(this.browser.columnContainer)
                                     this.popover.presentContentWithEvent(event, content)
                                 }
-                                window.clearTimeout(popupTimerID);
-                                popupTimerID = undefined;
+                                window.clearTimeout(popupTimerID)
+                                popupTimerID = undefined
                             },
-                            this.browser.constants.doubleClickDelay);
+                            this.browser.constants.doubleClickDelay)
                     }
                 }
 
-                lastClickTime = time;
+                lastClickTime = time
 
             }
 
@@ -752,24 +752,24 @@ class TrackViewport extends Viewport {
 
         function clickHandler(event) {
 
-            event.stopPropagation();
+            event.stopPropagation()
 
             const {track} = this.trackView
 
-            let str;
+            let str
             if (typeof track.description === 'function') {
-                str = track.description();
+                str = track.description()
             } else if (track.description) {
                 str = `<div>${track.description}</div>`
             } else {
                 if (track.url) {
                     if (FileUtils.isFile(track.url)) {
-                        str = `<div><b>Filename: </b>${track.url.name}`;
+                        str = `<div><b>Filename: </b>${track.url.name}`
                     } else {
-                        str = `<div><b>URL: </b>${track.url}`;
+                        str = `<div><b>URL: </b>${track.url}`
                     }
                 } else {
-                    str = track.name;
+                    str = track.name
 
                 }
             }
@@ -792,36 +792,36 @@ class TrackViewport extends Viewport {
 }
 
 function mouseDownHandler(event) {
-    this.enableClick = true;
-    this.browser.mouseDownOnViewport(event, this);
-    mouseDownCoords = DOMUtils.pageCoordinates(event);
+    this.enableClick = true
+    this.browser.mouseDownOnViewport(event, this)
+    mouseDownCoords = DOMUtils.pageCoordinates(event)
 }
 
 function mouseUpHandler(event) {
 
     // Any mouse up cancels drag and scrolling
     if (this.browser.dragObject || this.browser.isScrolling) {
-        this.browser.cancelTrackPan();
+        this.browser.cancelTrackPan()
         // event.preventDefault();
         // event.stopPropagation();
-        this.enableClick = false;   // Until next mouse down
+        this.enableClick = false   // Until next mouse down
     } else {
-        this.browser.cancelTrackPan();
-        this.browser.endTrackDrag();
+        this.browser.cancelTrackPan()
+        this.browser.endTrackDrag()
     }
 }
 
 function createClickState(event, viewport) {
 
-    const referenceFrame = viewport.referenceFrame;
+    const referenceFrame = viewport.referenceFrame
 
-    const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.contentDiv);
-    const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewport.canvas);
+    const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.contentDiv)
+    const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewport.canvas)
 
-    const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
+    const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x))
 
     if (undefined === genomicLocation || null === viewport.tile) {
-        return undefined;
+        return undefined
     }
 
     return {
@@ -839,29 +839,29 @@ function createClickState(event, viewport) {
 
 function getPopupContent(event, viewport) {
 
-    const clickState = createClickState(event, viewport);
+    const clickState = createClickState(event, viewport)
 
     if (undefined === clickState) {
-        return;
+        return
     }
 
-    let track = viewport.trackView.track;
-    const dataList = track.popupData(clickState);
+    let track = viewport.trackView.track
+    const dataList = track.popupData(clickState)
 
-    const popupClickHandlerResult = viewport.browser.fireEvent('trackclick', [track, dataList]);
+    const popupClickHandlerResult = viewport.browser.fireEvent('trackclick', [track, dataList])
 
-    let content;
+    let content
     if (undefined === popupClickHandlerResult || true === popupClickHandlerResult) {
         // Indicates handler did not handle the result, or the handler wishes default behavior to occur
         if (dataList && dataList.length > 0) {
-            content = formatPopoverText(dataList);
+            content = formatPopoverText(dataList)
         }
 
     } else if (typeof popupClickHandlerResult === 'string') {
-        content = popupClickHandlerResult;
+        content = popupClickHandlerResult
     }
 
-    return content;
+    return content
 }
 
 function formatPopoverText(nameValues) {
@@ -885,21 +885,21 @@ function formatPopoverText(nameValues) {
 }
 
 var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures) {
-    this.chr = chr;
-    this.startBP = tileStart;
-    this.endBP = tileEnd;
-    this.bpPerPixel = bpPerPixel;
-    this.features = features;
-    this.roiFeatures = roiFeatures;
-};
+    this.chr = chr
+    this.startBP = tileStart
+    this.endBP = tileEnd
+    this.bpPerPixel = bpPerPixel
+    this.features = features
+    this.roiFeatures = roiFeatures
+}
 
 Tile.prototype.containsRange = function (chr, start, end, bpPerPixel) {
-    return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr;
-};
+    return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr
+}
 
 Tile.prototype.overlapsRange = function (chr, start, end) {
-    return this.chr === chr && end >= this.startBP && start <= this.endBP;
-};
+    return this.chr === chr && end >= this.startBP && start <= this.endBP
+}
 
 
 /**
