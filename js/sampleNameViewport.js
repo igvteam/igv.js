@@ -1,4 +1,4 @@
-import {DOMUtils, StringUtils} from '../node_modules/igv-utils/src/index.js';
+import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
 import {appleCrayonRGB} from './util/colorPalletes.js'
 
 const maxFontSize = 10
@@ -16,28 +16,28 @@ class SampleNameViewport {
 
     constructor(trackView, column, unused, width) {
 
-        this.guid = DOMUtils.guid();
-        this.trackView = trackView;
+        this.guid = DOMUtils.guid()
+        this.trackView = trackView
 
-        this.browser = trackView.browser;
+        this.browser = trackView.browser
 
-        this.viewport = DOMUtils.div({ class: 'igv-viewport' })
+        this.viewport = DOMUtils.div({class: 'igv-viewport'})
 
         column.appendChild(this.viewport)
 
         if (trackView.track.height) {
-            this.viewport.style.height = `${ trackView.track.height }px`;
+            this.viewport.style.height = `${trackView.track.height}px`
         }
 
         this.canvas = document.createElement('canvas')
         this.viewport.appendChild(this.canvas)
-        this.ctx = this.canvas.getContext("2d");
+        this.ctx = this.canvas.getContext("2d")
 
         this.trackScrollDelta = 0
 
-        this.contentTop = 0;
+        this.contentTop = 0
 
-        this.setWidth(width);
+        this.setWidth(width)
 
         if (false === this.browser.showSampleNames) {
             this.hide()
@@ -48,18 +48,18 @@ class SampleNameViewport {
 
     checkCanvas() {
 
-        const dpi = window.devicePixelRatio;
+        const dpi = window.devicePixelRatio
         const requiredHeight = this.viewport.clientHeight
-        const requiredWidth = this.browser.sampleNameViewportWidth;
+        const requiredWidth = this.browser.sampleNameViewportWidth
 
         if (this.canvas.width !== requiredWidth * dpi || this.canvas.height !== requiredHeight * dpi) {
-            const canvas = this.canvas;
-            canvas.width = requiredWidth * dpi;
-            canvas.height = requiredHeight * dpi;
+            const canvas = this.canvas
+            canvas.width = requiredWidth * dpi
+            canvas.height = requiredHeight * dpi
             canvas.style.width = `${requiredWidth}px`
             canvas.style.height = `${requiredHeight}px`
-            this.ctx = this.canvas.getContext("2d");
-            this.ctx.scale(dpi, dpi);
+            this.ctx = this.canvas.getContext("2d")
+            this.ctx.scale(dpi, dpi)
         }
 
     }
@@ -67,16 +67,16 @@ class SampleNameViewport {
     setTop(contentTop) {
 
         if (typeof this.trackView.track.getSamples === 'function') {
-            this.contentTop = contentTop;
-            const samples = this.trackView.track.getSamples();
-            this.repaint(samples);
+            this.contentTop = contentTop
+            const samples = this.trackView.track.getSamples()
+            this.repaint(samples)
         }
 
     }
 
     setWidth(width) {
         this.viewport.innerWidth = width
-        this.checkCanvas();
+        this.checkCanvas()
     }
 
     show() {
@@ -89,7 +89,7 @@ class SampleNameViewport {
 
     async repaint(samples) {
 
-        this.checkCanvas();
+        this.checkCanvas()
         this.draw({context: this.ctx, samples})
     }
 
@@ -99,27 +99,27 @@ class SampleNameViewport {
             return
         }
 
-        configureFont(context, fontConfigureTemplate, samples.height);
-        const sampleNameXShim = 4;
+        configureFont(context, fontConfigureTemplate, samples.height)
+        const sampleNameXShim = 4
 
-        context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height)
 
-        context.fillStyle = appleCrayonRGB('lead');
+        context.fillStyle = appleCrayonRGB('lead')
 
-        const viewportHeight = this.viewport.getBoundingClientRect().height;
-        let y = (samples.yOffset || 0) + this.contentTop;    // contentTop will always be a negative number (top relative to viewport)
+        const viewportHeight = this.viewport.getBoundingClientRect().height
+        let y = (samples.yOffset || 0) + this.contentTop    // contentTop will always be a negative number (top relative to viewport)
 
         for (let name of samples.names) {
             if (y > viewportHeight) {
-                break;
+                break
             }
             if (y + samples.height > 0) {
-                const text = name;
-                const yFont = getYFont(context, text, y, samples.height);
-                context.fillText(text, sampleNameXShim, yFont);
+                const text = name
+                const yFont = getYFont(context, text, y, samples.height)
+                context.fillText(text, sampleNameXShim, yFont)
 
             }
-            y += samples.height;
+            y += samples.height
         }
     }
 
@@ -127,20 +127,20 @@ class SampleNameViewport {
 
         if (typeof this.trackView.track.getSamples === 'function') {
 
-            const samples = this.trackView.track.getSamples();
+            const samples = this.trackView.track.getSamples()
 
-            const yScrollDelta = 0;   // This is not relevant, scrolling is handled in "draw"
+            const yScrollDelta = 0   // This is not relevant, scrolling is handled in "draw"
 
             const {width, height} = this.viewport.getBoundingClientRect()
 
             const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
-            const id = `${ str }_sample_names_guid_${ DOMUtils.guid() }`
+            const id = `${str}_sample_names_guid_${DOMUtils.guid()}`
 
             context.saveWithTranslationAndClipRect(id, deltaX, deltaY + yScrollDelta, width, height, -yScrollDelta)
 
-            this.draw({context, samples});
+            this.draw({context, samples})
 
-            context.restore();
+            context.restore()
         }
     }
 
@@ -167,14 +167,14 @@ class SampleNameViewport {
                     value: this.browser.sampleNameViewportWidth,
                     callback: newWidth => {
                         this.browser.sampleNameViewportWidth = parseInt(newWidth)
-                        for (let { sampleNameViewport } of this.browser.trackViews) {
+                        for (let {sampleNameViewport} of this.browser.trackViews) {
                             sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
                         }
                         this.browser.resize()
                     }
                 }
 
-            this.browser.inputDialog.present(config, event);
+            this.browser.inputDialog.present(config, event)
         }
 
     }
@@ -194,7 +194,7 @@ function getYFont(context, text, y, height) {
 }
 
 function getSampleNameYShim(context, text, h) {
-    const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(text)
+    const {actualBoundingBoxAscent, actualBoundingBoxDescent} = context.measureText(text)
     return (h - (actualBoundingBoxAscent + actualBoundingBoxDescent)) / 2
 }
 

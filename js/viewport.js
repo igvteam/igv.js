@@ -23,46 +23,46 @@
  * THE SOFTWARE.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js";
-import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
-import {AlertDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
-import SequenceTrack from "./sequenceTrack.js";
+import $ from "./vendor/jquery-3.3.1.slim.js"
+import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
+import {AlertDialog} from '../node_modules/igv-ui/dist/igv-ui.js'
+import SequenceTrack from "./sequenceTrack.js"
 
 class Viewport {
 
     constructor(trackView, viewportColumn, referenceFrame, width) {
 
-        this.guid = DOMUtils.guid();
-        this.trackView = trackView;
-        this.referenceFrame = referenceFrame;
+        this.guid = DOMUtils.guid()
+        this.trackView = trackView
+        this.referenceFrame = referenceFrame
 
-        this.browser = trackView.browser;
+        this.browser = trackView.browser
 
-        this.$viewport = $('<div class="igv-viewport">');
-        viewportColumn.appendChild(this.$viewport.get(0));
+        this.$viewport = $('<div class="igv-viewport">')
+        viewportColumn.appendChild(this.$viewport.get(0))
 
         if (trackView.track.height) {
-            this.$viewport.get(0).style.height = `${ trackView.track.height }px`;
+            this.$viewport.get(0).style.height = `${trackView.track.height}px`
         }
 
         // Create an alert dialog for the sequence track to copy ref sequence to.
         if (trackView.track instanceof SequenceTrack) {
-            this.alert = new AlertDialog(this.$viewport.get(0));
+            this.alert = new AlertDialog(this.$viewport.get(0))
         }
 
-        this.$content = $("<div>", {class: 'igv-viewport-content'});
-        this.$viewport.append(this.$content);
+        this.$content = $("<div>", {class: 'igv-viewport-content'})
+        this.$viewport.append(this.$content)
 
-        this.$content.height(this.$viewport.height());
-        this.contentDiv = this.$content.get(0);
+        this.$content.height(this.$viewport.height())
+        this.contentDiv = this.$content.get(0)
 
-        this.$canvas = $('<canvas>');
-        this.$content.append(this.$canvas);
+        this.$canvas = $('<canvas>')
+        this.$content.append(this.$canvas)
 
-        this.canvas = this.$canvas.get(0);
-        this.ctx = this.canvas.getContext("2d");
+        this.canvas = this.$canvas.get(0)
+        this.ctx = this.canvas.getContext("2d")
 
-        this.setWidth(width);
+        this.setWidth(width)
 
         this.initializationHelper()
 
@@ -74,11 +74,11 @@ class Viewport {
 
     showMessage(message) {
         if (!this.messageDiv) {
-            this.messageDiv = document.createElement('div');
-            this.messageDiv.className = 'igv-viewport-message';
+            this.messageDiv = document.createElement('div')
+            this.messageDiv.className = 'igv-viewport-message'
             this.contentDiv.append(this.messageDiv)
         }
-        this.messageDiv.textContent = message;
+        this.messageDiv.textContent = message
         this.messageDiv.style.display = 'inline-block'
     }
 
@@ -87,17 +87,21 @@ class Viewport {
             this.messageDiv.style.display = 'none'
     }
 
-    setTrackLabel(label) {}
+    setTrackLabel(label) {
+    }
 
-    startSpinner() {}
+    startSpinner() {
+    }
 
-    stopSpinner(){}
+    stopSpinner() {
+    }
 
     checkZoomIn() {
         return true
     }
 
-    shift() {}
+    shift() {
+    }
 
     setTop(contentTop) {
 
@@ -105,7 +109,7 @@ class Viewport {
         const viewTop = -contentTop
         const viewBottom = viewTop + viewportHeight
 
-        this.$content.css('top', `${ contentTop }px`)
+        this.$content.css('top', `${contentTop}px`)
 
         if (undefined === this.canvasVerticalRange || this.canvasVerticalRange.bottom < viewBottom || this.canvasVerticalRange.top > viewTop) {
             this.repaint()
@@ -113,7 +117,7 @@ class Viewport {
 
     }
 
-    async loadFeatures () {
+    async loadFeatures() {
         return undefined
     }
 
@@ -127,17 +131,17 @@ class Viewport {
 
     checkContentHeight() {
 
-        let track = this.trackView.track;
+        let track = this.trackView.track
 
         if ("FILL" === track.displayMode) {
             this.setContentHeight(this.$viewport.height())
         } else if (typeof track.computePixelHeight === 'function') {
-            let features = this.cachedFeatures;
+            let features = this.cachedFeatures
             if (features && features.length > 0) {
-                let requiredContentHeight = track.computePixelHeight(features);
-                let currentContentHeight = this.$content.height();
+                let requiredContentHeight = track.computePixelHeight(features)
+                let currentContentHeight = this.$content.height()
                 if (requiredContentHeight !== currentContentHeight) {
-                    this.setContentHeight(requiredContentHeight);
+                    this.setContentHeight(requiredContentHeight)
                 }
             }
         }
@@ -149,11 +153,11 @@ class Viewport {
 
     setContentHeight(contentHeight) {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
-        contentHeight = Math.min(contentHeight, 32000);
+        contentHeight = Math.min(contentHeight, 32000)
 
-        this.$content.height(contentHeight);
+        this.$content.height(contentHeight)
 
-        if (this.tile) this.tile.invalidate = true;
+        if (this.tile) this.tile.invalidate = true
     }
 
     isLoading() {
@@ -169,26 +173,28 @@ class Viewport {
     }
 
     setWidth(width) {
-        this.$viewport.width(width);
-        this.canvas.style.width = (`${ width }px`);
-        this.canvas.setAttribute('width', width);
+        this.$viewport.width(width)
+        this.canvas.style.width = (`${width}px`)
+        this.canvas.setAttribute('width', width)
     }
 
     getWidth() {
-        return this.$viewport.width();
+        return this.$viewport.width()
     }
 
     getContentTop() {
-        return this.contentDiv.offsetTop;
+        return this.contentDiv.offsetTop
     }
 
     containsPosition(chr, position) {
         console.log('Viewport - containsPosition(chr, position)')
     }
 
-    addMouseHandlers() {}
+    addMouseHandlers() {
+    }
 
-    removeMouseHandlers() {}
+    removeMouseHandlers() {
+    }
 
     /**
      * Called when the associated track is removed.  Do any needed cleanup here.
@@ -206,7 +212,7 @@ class Viewport {
         // Null out all properties -- this should not be neccessary, but just in case there is a
         // reference to self somewhere we want to free memory.
         for (let key of Object.keys(this)) {
-            this[ key ] = undefined
+            this[key] = undefined
         }
     }
 

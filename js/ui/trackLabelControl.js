@@ -24,11 +24,11 @@
  * THE SOFTWARE.
  */
 
-import { DOMUtils } from '../../node_modules/igv-utils/src/index.js'
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 
 const TrackLabelControl = function (parent, browser) {
 
-    this.button = DOMUtils.div({ class: 'igv-navbar-button'})
+    this.button = DOMUtils.div({class: 'igv-navbar-button'})
     parent.appendChild(this.button)
     this.button.textContent = 'track labels'
 
@@ -71,4 +71,4 @@ TrackLabelControl.prototype.hide = function () {
     this.button.style.display = 'none'
 }
 
-export default TrackLabelControl;
+export default TrackLabelControl

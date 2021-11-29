@@ -27,9 +27,9 @@
 function getDataWrapper(data) {
 
     if (typeof (data) == 'string' || data instanceof String) {
-        return new StringDataWrapper(data);
+        return new StringDataWrapper(data)
     } else {
-        return new ByteArrayDataWrapper(data);
+        return new ByteArrayDataWrapper(data)
     }
 }
 
@@ -38,27 +38,27 @@ function getDataWrapper(data) {
 class StringDataWrapper {
 
     constructor(string) {
-        this.data = string;
-        this.ptr = 0;
+        this.data = string
+        this.ptr = 0
     }
 
     nextLine() {
         var start = this.ptr,
             idx = this.data.indexOf('\n', start),
-            data = this.data;
+            data = this.data
 
         if (idx > 0) {
-            this.ptr = idx + 1;   // Advance pointer for next line
+            this.ptr = idx + 1   // Advance pointer for next line
             if (idx > start && data.charAt(idx - 1) === '\r') {
                 // Trim CR manually in CR/LF sequence
-                return data.substring(start, idx - 1);
+                return data.substring(start, idx - 1)
             }
-            return data.substring(start, idx);
+            return data.substring(start, idx)
         } else {
-            var length = data.length;
-            this.ptr = length;
+            var length = data.length
+            this.ptr = length
             // Return undefined only at the very end of the data
-            return (start >= length) ? undefined : data.substring(start);
+            return (start >= length) ? undefined : data.substring(start)
         }
     }
 }
@@ -66,29 +66,29 @@ class StringDataWrapper {
 class ByteArrayDataWrapper {
 
     constructor(array) {
-        this.data = array;
-        this.length = this.data.length;
-        this.ptr = 0;
+        this.data = array
+        this.length = this.data.length
+        this.ptr = 0
     }
 
     nextLine() {
 
-        var c, result;
-        result = "";
+        var c, result
+        result = ""
 
-        if (this.ptr >= this.length) return undefined;
+        if (this.ptr >= this.length) return undefined
 
         for (var i = this.ptr; i < this.length; i++) {
-            c = String.fromCharCode(this.data[i]);
-            if (c === '\r') continue;
-            if (c === '\n') break;
-            result = result + c;
+            c = String.fromCharCode(this.data[i])
+            if (c === '\r') continue
+            if (c === '\n') break
+            result = result + c
         }
 
-        this.ptr = i + 1;
-        return result;
+        this.ptr = i + 1
+        return result
     }
 
 }
 
-export default getDataWrapper;
+export default getDataWrapper

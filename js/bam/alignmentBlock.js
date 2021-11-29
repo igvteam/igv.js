@@ -32,7 +32,7 @@
 class AlignmentBlock {
     constructor(b) {
         if (b) {
-            Object.assign(this, b);
+            Object.assign(this, b)
         }
     }
 
@@ -41,4 +41,4 @@ class AlignmentBlock {
     }
 }
 
-export default AlignmentBlock;
+export default AlignmentBlock

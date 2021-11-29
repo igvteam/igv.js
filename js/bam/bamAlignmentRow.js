@@ -23,127 +23,127 @@
  * THE SOFTWARE.
  */
 
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
-const isString = StringUtils.isString;
-const hashCode = StringUtils.hashCode;
+const isString = StringUtils.isString
+const hashCode = StringUtils.hashCode
 
 class BamAlignmentRow {
 
     constructor() {
 
-        this.alignments = [];
-        this.score = undefined;
+        this.alignments = []
+        this.score = undefined
     }
 
     findAlignment(genomicLocation) {
 
         const alignmentContains = (a, genomicLocation) => {
-            return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef;
+            return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef
         }
 
         // find single alignment that overlaps sort location
-        let centerAlignment;
+        let centerAlignment
         for (let i = 0; i < this.alignments.length; i++) {
-            const a = this.alignments[i];
+            const a = this.alignments[i]
             if (genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef) {
                 if (a.paired) {
                     if (a.firstAlignment && alignmentContains(a.firstAlignment, genomicLocation)) {
-                        centerAlignment = a.firstAlignment;
+                        centerAlignment = a.firstAlignment
                     } else if (a.secondAlignment && alignmentContains(a.secondAlignment, genomicLocation)) {
-                        centerAlignment = a.secondAlignment;
+                        centerAlignment = a.secondAlignment
                     }
                 } else {
-                    centerAlignment = a;
+                    centerAlignment = a
                 }
-                break;
+                break
             }
         }
 
-        return centerAlignment;
+        return centerAlignment
 
     }
 
     updateScore(options, alignmentContainer) {
-        this.score = this.calculateScore(options, alignmentContainer);
+        this.score = this.calculateScore(options, alignmentContainer)
     }
 
     calculateScore({position, option, direction, tag}, alignmentContainer) {
 
-        if (!option) option = "BASE";
+        if (!option) option = "BASE"
 
-        const alignment = this.findAlignment(position);
+        const alignment = this.findAlignment(position)
         if (undefined === alignment) {
-            return Number.MAX_VALUE * (direction ? 1 : -1);
+            return Number.MAX_VALUE * (direction ? 1 : -1)
         }
 
-        let mate;
+        let mate
         switch (option) {
             case "NUCLEOTIDE":
             case "BASE": {
-                return calculateBaseScore(alignment, alignmentContainer, position);
+                return calculateBaseScore(alignment, alignmentContainer, position)
             }
             case "STRAND":
-                return alignment.strand ? 1 : -1;
+                return alignment.strand ? 1 : -1
             case "START":
-                return alignment.start;
+                return alignment.start
             case "TAG": {
 
-                const tagValue = alignment.tags()[tag];
+                const tagValue = alignment.tags()[tag]
                 if (tagValue !== undefined) {
-                    return isString(tagValue) ? hashCode(tagValue) : tagValue;
+                    return isString(tagValue) ? hashCode(tagValue) : tagValue
                 } else {
-                    return Number.MAX_VALUE;
+                    return Number.MAX_VALUE
                 }
             }
             case "READ_NAME":
-                return hashCode(alignment.readName);
+                return hashCode(alignment.readName)
             case "INSERT_SIZE":
-                return -Math.abs(alignment.fragmentLength);
+                return -Math.abs(alignment.fragmentLength)
             case "GAP_SIZE":
-                return -alignment.gapSizeAt(position);
+                return -alignment.gapSizeAt(position)
             case "MATE_CHR":
-                mate = alignment.mate;
+                mate = alignment.mate
                 if (!mate) {
-                    return Number.MAX_VALUE;
+                    return Number.MAX_VALUE
                 } else {
                     if (mate.chr === alignment.chr) {
-                        return Number.MAX_VALUE - 1;
+                        return Number.MAX_VALUE - 1
                     } else {
-                        return hashCode(mate.chr);
+                        return hashCode(mate.chr)
                     }
                 }
             case "MQ":
-                return alignment.mq === undefined ? Number.MAX_VALUE : -alignment.mq;
+                return alignment.mq === undefined ? Number.MAX_VALUE : -alignment.mq
             default:
-                return Number.MAX_VALUE;
+                return Number.MAX_VALUE
         }
 
 
         function calculateBaseScore(alignment, alignmentContainer, genomicLocation) {
 
-            let reference;
-            const idx = Math.floor(genomicLocation) - alignmentContainer.start;
+            let reference
+            const idx = Math.floor(genomicLocation) - alignmentContainer.start
             if (idx < alignmentContainer.sequence.length) {
-                reference = alignmentContainer.sequence.charAt(idx);
+                reference = alignmentContainer.sequence.charAt(idx)
             }
             if (!reference) {
-                return 0;
+                return 0
             }
-            const base = alignment.readBaseAt(genomicLocation);
-            const quality = alignment.readBaseQualityAt(genomicLocation);
+            const base = alignment.readBaseAt(genomicLocation)
+            const quality = alignment.readBaseQualityAt(genomicLocation)
 
-            const coverageMap = alignmentContainer.coverageMap;
-            const coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart);
-            const coverage = coverageMap.coverage[coverageMapIndex];
+            const coverageMap = alignmentContainer.coverageMap
+            const coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart)
+            const coverage = coverageMap.coverage[coverageMapIndex]
 
             // Insertions.  These are additive with base scores as they occur between bases, so you can have a
             // base mismatch AND an insertion
-            let baseScore = 0;
+            let baseScore = 0
             if (alignment.insertions) {
-                for(let ins of alignment.insertions) {
-                    if(ins.start === genomicLocation) {
-                        baseScore = -coverage.ins;
+                for (let ins of alignment.insertions) {
+                    if (ins.start === genomicLocation) {
+                        baseScore = -coverage.ins
                     }
                 }
             }
@@ -151,28 +151,28 @@ class BamAlignmentRow {
 
             if (!base) {
                 // Either deletion or skipped (splice junction)
-                const delCount = coverage.del;
+                const delCount = coverage.del
                 if (delCount > 0) {
-                    baseScore -= delCount;
+                    baseScore -= delCount
                 } else if (baseScore === 0) {    // Don't modify insertion score, if any
-                    baseScore = 1;
+                    baseScore = 1
                 }
             } else {
-                reference = reference.toUpperCase();
+                reference = reference.toUpperCase()
                 if ('N' === base && baseScore === 0) {
-                    baseScore = 2;
+                    baseScore = 2
                 } else if ((reference === base || '=' === base) && baseScore === 0) {
-                    baseScore = 4 - quality / 1000;
+                    baseScore = 4 - quality / 1000
                 } else if ("X" === base || reference !== base) {
-                    const count = coverage["pos" + base] + coverage["neg" + base];
-                    baseScore -= (count + (quality / 1000));
+                    const count = coverage["pos" + base] + coverage["neg" + base]
+                    baseScore -= (count + (quality / 1000))
                 }
             }
 
 
-            return baseScore;
+            return baseScore
         }
     }
 }
 
-export default BamAlignmentRow;
+export default BamAlignmentRow

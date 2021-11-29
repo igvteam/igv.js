@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from "../../node_modules/igv-utils/src/index.js";
+import {DOMUtils} from "../../node_modules/igv-utils/src/index.js"
 
 class CursorGuide {
 
@@ -32,10 +32,10 @@ class CursorGuide {
         this.browser = browser
         this.columnContainer = columnContainer
 
-        this.horizontalGuide = DOMUtils.div({ class: 'igv-cursor-guide-horizontal' })
+        this.horizontalGuide = DOMUtils.div({class: 'igv-cursor-guide-horizontal'})
         columnContainer.appendChild(this.horizontalGuide)
 
-        this.verticalGuide = DOMUtils.div({ class: 'igv-cursor-guide-vertical' })
+        this.verticalGuide = DOMUtils.div({class: 'igv-cursor-guide-vertical'})
         columnContainer.appendChild(this.verticalGuide)
 
         this.addMouseHandler(browser)
@@ -51,12 +51,12 @@ class CursorGuide {
 
         function mouseMoveHandler(event) {
 
-            const { x, y } = DOMUtils.translateMouseCoordinates(event, this.columnContainer)
-            this.horizontalGuide.style.top = `${ y }px`
+            const {x, y} = DOMUtils.translateMouseCoordinates(event, this.columnContainer)
+            this.horizontalGuide.style.top = `${y}px`
 
             const target = document.elementFromPoint(event.clientX, event.clientY)
 
-            let viewport = undefined;
+            let viewport = undefined
             if (target.parentElement.classList.contains('igv-viewport-content')) {
                 viewport = target.parentElement.parentElement
             } else if (target.parentElement.classList.contains('igv-viewport') && target.classList.contains('igv-viewport-content')) {
@@ -65,7 +65,7 @@ class CursorGuide {
 
             if (viewport && browser.getRulerTrackView()) {
 
-                this.verticalGuide.style.left = `${ x }px`
+                this.verticalGuide.style.left = `${x}px`
 
                 const columns = browser.root.querySelectorAll('.igv-column')
                 let index = undefined
@@ -76,16 +76,16 @@ class CursorGuide {
                     }
                 }
 
-                const rulerViewport = browser.getRulerTrackView().viewports[ index ]
+                const rulerViewport = browser.getRulerTrackView().viewports[index]
                 const result = rulerViewport.mouseMove(event)
 
                 if (result) {
 
-                    const { start, bp, end } = result
-                    const interpolant = (bp - start)/(end - start)
+                    const {start, bp, end} = result
+                    const interpolant = (bp - start) / (end - start)
 
                     if (this.customMouseHandler) {
-                        this.customMouseHandler({ start, bp, end, interpolant });
+                        this.customMouseHandler({start, bp, end, interpolant})
                     }
 
                 }
@@ -99,7 +99,7 @@ class CursorGuide {
         this.columnContainer.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
 
-    setVisibility (showCursorTrackingGuide) {
+    setVisibility(showCursorTrackingGuide) {
         if (true === showCursorTrackingGuide) {
             this.show()
         } else {
@@ -129,4 +129,4 @@ class CursorGuide {
 }
 
 
-export default CursorGuide;
+export default CursorGuide

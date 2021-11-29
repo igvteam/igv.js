@@ -29,92 +29,92 @@ class PairedAlignment {
 
     constructor(firstAlignment) {
 
-        this.paired = true;
-        this.firstAlignment = firstAlignment;
-        this.chr = firstAlignment.chr;
-        this.readName = firstAlignment.readName;
+        this.paired = true
+        this.firstAlignment = firstAlignment
+        this.chr = firstAlignment.chr
+        this.readName = firstAlignment.readName
 
         if (firstAlignment.start < firstAlignment.mate.position) {
-            this.start = firstAlignment.start;
-            this.scStart = firstAlignment.scStart;
-            this.connectingStart = firstAlignment.start + firstAlignment.lengthOnRef;
-            this.connectingEnd = firstAlignment.mate.position;
+            this.start = firstAlignment.start
+            this.scStart = firstAlignment.scStart
+            this.connectingStart = firstAlignment.start + firstAlignment.lengthOnRef
+            this.connectingEnd = firstAlignment.mate.position
         } else {
-            this.start = firstAlignment.mate.position;
-            this.scStart = this.start;
-            this.connectingStart = firstAlignment.mate.position;
-            this.connectingEnd = firstAlignment.start;
+            this.start = firstAlignment.mate.position
+            this.scStart = this.start
+            this.connectingStart = firstAlignment.mate.position
+            this.connectingEnd = firstAlignment.start
         }
 
-        this.end = Math.max(firstAlignment.mate.position, firstAlignment.start + firstAlignment.lengthOnRef);  // Approximate
-        this.lengthOnRef = this.end - this.start;
+        this.end = Math.max(firstAlignment.mate.position, firstAlignment.start + firstAlignment.lengthOnRef)  // Approximate
+        this.lengthOnRef = this.end - this.start
 
-        let scEnd = Math.max(this.end, firstAlignment.scStart + firstAlignment.scLengthOnRef);
-        this.scLengthOnRef = scEnd - this.scStart;
+        let scEnd = Math.max(this.end, firstAlignment.scStart + firstAlignment.scLengthOnRef)
+        this.scLengthOnRef = scEnd - this.scStart
 
     }
 
     setSecondAlignment(secondAlignment) {
 
         // TODO -- check the chrs are equal,  error otherwise
-        this.secondAlignment = secondAlignment;
-        const firstAlignment = this.firstAlignment;
+        this.secondAlignment = secondAlignment
+        const firstAlignment = this.firstAlignment
 
         if (secondAlignment.start > firstAlignment.start) {
-            this.connectingEnd = secondAlignment.start;
+            this.connectingEnd = secondAlignment.start
         } else {
-            this.connectingStart = secondAlignment.start + secondAlignment.lengthOnRef;
+            this.connectingStart = secondAlignment.start + secondAlignment.lengthOnRef
         }
 
-        this.start = Math.min(firstAlignment.start, secondAlignment.start);
+        this.start = Math.min(firstAlignment.start, secondAlignment.start)
         this.end = Math.max(firstAlignment.start + firstAlignment.lengthOnRef, secondAlignment.start + secondAlignment.lengthOnRef)
-        this.lengthOnRef = this.end - this.start;
+        this.lengthOnRef = this.end - this.start
 
-        this.scStart = Math.min(firstAlignment.scStart, secondAlignment.scStart);
-        const scEnd = Math.max(firstAlignment.scStart + firstAlignment.scLengthOnRef, secondAlignment.scStart + secondAlignment.scLengthOnRef);
-        this.scLengthOnRef = scEnd - this.scStart;
+        this.scStart = Math.min(firstAlignment.scStart, secondAlignment.scStart)
+        const scEnd = Math.max(firstAlignment.scStart + firstAlignment.scLengthOnRef, secondAlignment.scStart + secondAlignment.scLengthOnRef)
+        this.scLengthOnRef = scEnd - this.scStart
 
     }
 
     containsLocation(genomicLocation, showSoftClips) {
-        const s = showSoftClips ? this.scStart : this.start;
-        const l = showSoftClips ? this.scLengthOnRef : this.lengthOnRef;
-        return (genomicLocation >= s && genomicLocation <= (s + l));
+        const s = showSoftClips ? this.scStart : this.start
+        const l = showSoftClips ? this.scLengthOnRef : this.lengthOnRef
+        return (genomicLocation >= s && genomicLocation <= (s + l))
     }
 
     alignmentContaining(genomicLocation, showSoftClips) {
-        if(this.firstAlignment.containsLocation(genomicLocation, showSoftClips)){
-            return this.firstAlignment;
-        } else if(this.secondAlignment && this.secondAlignment.containsLocation(genomicLocation, showSoftClips)) {
-            return this.secondAlignment;
+        if (this.firstAlignment.containsLocation(genomicLocation, showSoftClips)) {
+            return this.firstAlignment
+        } else if (this.secondAlignment && this.secondAlignment.containsLocation(genomicLocation, showSoftClips)) {
+            return this.secondAlignment
         } else {
-            return undefined;
+            return undefined
         }
     }
 
     popupData(genomicLocation) {
 
-        let nameValues = this.firstAlignment.popupData(genomicLocation);
+        let nameValues = this.firstAlignment.popupData(genomicLocation)
 
         if (this.secondAlignment) {
-            nameValues.push("-------------------------------");
-            nameValues = nameValues.concat(this.secondAlignment.popupData(genomicLocation));
+            nameValues.push("-------------------------------")
+            nameValues = nameValues.concat(this.secondAlignment.popupData(genomicLocation))
         }
-        return nameValues;
+        return nameValues
     }
 
     isPaired() {
-        return true; // By definition
+        return true // By definition
     }
 
     firstOfPairStrand() {
 
         if (this.firstAlignment.isFirstOfPair()) {
-            return this.firstAlignment.strand;
+            return this.firstAlignment.strand
         } else if (this.secondAlignment && this.secondAlignment.isFirstOfPair()) {
-            return this.secondAlignment.strand;
+            return this.secondAlignment.strand
         } else {
-            return this.firstAlignment.mate.strand;    // Assumption is mate is first-of-pair
+            return this.firstAlignment.mate.strand    // Assumption is mate is first-of-pair
         }
     }
 }

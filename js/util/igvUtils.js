@@ -23,18 +23,17 @@
  * THE SOFTWARE.
  */
 
-import {FileUtils, StringUtils, GoogleAuth, GoogleDrive} from "../../node_modules/igv-utils/src/index.js";
-import {DOMUtils} from "../../node_modules/igv-utils/src/index.js"
-import RulerViewport from "../rulerViewport.js";
-import IdeogramViewport from "../ideogramViewport.js";
-import TrackViewport from "../trackViewport.js";
+import {DOMUtils, FileUtils, GoogleAuth, GoogleDrive, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import RulerViewport from "../rulerViewport.js"
+import IdeogramViewport from "../ideogramViewport.js"
+import TrackViewport from "../trackViewport.js"
 
 const extend = function (parent, child) {
 
-    child.prototype = Object.create(parent.prototype);
-    child.prototype.constructor = child;
-    child.prototype._super = Object.getPrototypeOf(child.prototype);
-    return child;
+    child.prototype = Object.create(parent.prototype)
+    child.prototype.constructor = child
+    child.prototype._super = Object.getPrototypeOf(child.prototype)
+    return child
 }
 
 /**
@@ -45,8 +44,8 @@ const extend = function (parent, child) {
  */
 
 function isSimpleType(value) {
-    const simpleTypes = new Set(["boolean", "number", "string", "symbol"]);
-    const valueType = typeof value;
+    const simpleTypes = new Set(["boolean", "number", "string", "symbol"])
+    const valueType = typeof value
     return (value !== undefined && (simpleTypes.has(valueType) || value.substring || value.toFixed))
 }
 
@@ -57,9 +56,9 @@ function buildOptions(config, options) {
         headers: config.headers,
         withCredentials: config.withCredentials,
         filename: config.filename
-    };
+    }
 
-    return Object.assign(defaultOptions, options);
+    return Object.assign(defaultOptions, options)
 }
 
 /**
@@ -77,68 +76,68 @@ function buildOptions(config, options) {
 // }
 
 const doAutoscale = function (features) {
-    var min, max;
+    var min, max
 
     if (features.length > 0) {
-        min = Number.MAX_VALUE;
-        max = -Number.MAX_VALUE;
+        min = Number.MAX_VALUE
+        max = -Number.MAX_VALUE
 
         features.forEach(function (f) {
             if (!Number.isNaN(f.value)) {
-                min = Math.min(min, f.value);
-                max = Math.max(max, f.value);
+                min = Math.min(min, f.value)
+                max = Math.max(max, f.value)
             }
-        });
+        })
 
         // Insure we have a zero baseline
-        if (max > 0) min = Math.min(0, min);
-        if (max < 0) max = 0;
+        if (max > 0) min = Math.min(0, min)
+        if (max < 0) max = 0
     } else {
         // No features -- default
-        min = 0;
-        max = 100;
+        min = 0
+        max = 100
     }
 
-    return {min: min, max: max};
+    return {min: min, max: max}
 }
 
 const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
 
-    let ss = extent.start;
-    let ee = extent.end;
+    let ss = extent.start
+    let ee = extent.end
 
     if (undefined === ee) {
 
-        ss -= minimumBP / 2;
-        ee = ss + minimumBP;
+        ss -= minimumBP / 2
+        ee = ss + minimumBP
 
         if (ee > chromosomeLengthBP) {
-            ee = chromosomeLengthBP;
-            ss = ee - minimumBP;
+            ee = chromosomeLengthBP
+            ss = ee - minimumBP
         } else if (ss < 0) {
-            ss = 0;
-            ee = minimumBP;
+            ss = 0
+            ee = minimumBP
         }
 
     } else if (ee - ss < minimumBP) {
 
-        const center = (ee + ss) / 2;
+        const center = (ee + ss) / 2
 
         if (center - minimumBP / 2 < 0) {
-            ss = 0;
-            ee = ss + minimumBP;
+            ss = 0
+            ee = ss + minimumBP
         } else if (center + minimumBP / 2 > chromosomeLengthBP) {
-            ee = chromosomeLengthBP;
-            ss = ee - minimumBP;
+            ee = chromosomeLengthBP
+            ss = ee - minimumBP
         } else {
-            ss = center - minimumBP / 2;
-            ee = ss + minimumBP;
+            ss = center - minimumBP / 2
+            ee = ss + minimumBP
         }
     }
 
-    extent.start = Math.ceil(ss);
-    extent.end = Math.floor(ee);
-};
+    extent.start = Math.ceil(ss)
+    extent.end = Math.floor(ee)
+}
 
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
@@ -149,53 +148,53 @@ const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
 
 const isNumber = function (num) {
     if (typeof num === 'number') {
-        return num - num === 0;
+        return num - num === 0
     }
     if (typeof num === 'string' && num.trim() !== '') {
-        return Number.isFinite ? Number.isFinite(+num) : isFinite(+num);
+        return Number.isFinite ? Number.isFinite(+num) : isFinite(+num)
     }
-    return false;
-};
+    return false
+}
 
 async function getFilename(url) {
     if (StringUtils.isString(url) && url.startsWith("https://drive.google.com")) {
         // This will fail if Google API key is not defined
-        if(GoogleAuth.getApiKey() === undefined) {
-            throw Error("Google drive is referenced, but API key is not defined.  An API key is required for Google Drive access");
+        if (GoogleAuth.getApiKey() === undefined) {
+            throw Error("Google drive is referenced, but API key is not defined.  An API key is required for Google Drive access")
         }
         const json = await GoogleDrive.getDriveFileInfo(url)
-        return json.originalFileName || json.name;
+        return json.originalFileName || json.name
     } else {
-        return FileUtils.getFilename(url);
+        return FileUtils.getFilename(url)
     }
 }
 
-function prettyBasePairNumber  (raw) {
+function prettyBasePairNumber(raw) {
 
     var denom,
         units,
         value,
-        floored;
+        floored
 
     if (raw > 1e7) {
-        denom = 1e6;
-        units = " mb";
+        denom = 1e6
+        units = " mb"
     } else if (raw > 1e4) {
 
-        denom = 1e3;
-        units = " kb";
+        denom = 1e3
+        units = " kb"
 
-        value = raw / denom;
-        floored = Math.floor(value);
-        return StringUtils.numberFormatter(floored) + units;
+        value = raw / denom
+        floored = Math.floor(value)
+        return StringUtils.numberFormatter(floored) + units
     } else {
-        return StringUtils.numberFormatter(raw) + " bp";
+        return StringUtils.numberFormatter(raw) + " bp"
     }
 
-    value = raw / denom;
-    floored = Math.floor(value);
+    value = raw / denom
+    floored = Math.floor(value)
 
-    return floored.toString() + units;
+    return floored.toString() + units
 }
 
 
@@ -204,36 +203,38 @@ function isDataURL(obj) {
 }
 
 function createColumn(columnContainer, className) {
-    const column = DOMUtils.div({ class: className })
+    const column = DOMUtils.div({class: className})
     columnContainer.appendChild(column)
 }
 
 
 function insertElementBefore(element, referenceNode) {
-    referenceNode.parentNode.insertBefore(element, referenceNode);
+    referenceNode.parentNode.insertBefore(element, referenceNode)
 }
 
 function insertElementAfter(element, referenceNode) {
-    referenceNode.parentNode.insertBefore(element, referenceNode.nextSibling);
+    referenceNode.parentNode.insertBefore(element, referenceNode.nextSibling)
 }
 
 function createViewport(trackView, column, referenceFrame, width) {
 
     if ('ruler' === trackView.track.type) {
-        return new RulerViewport(trackView, column, referenceFrame, width);
+        return new RulerViewport(trackView, column, referenceFrame, width)
     } else if ('ideogram' === trackView.track.type) {
-        return new IdeogramViewport(trackView, column, referenceFrame, width);
+        return new IdeogramViewport(trackView, column, referenceFrame, width)
     } else {
-        return new TrackViewport(trackView, column, referenceFrame, width);
+        return new TrackViewport(trackView, column, referenceFrame, width)
     }
 }
 
 /**
  * Test to see if page is loaded in a secure context, that is by https or is localhost.
  */
-function isSecureContext(){
+function isSecureContext() {
     return window.location.protocol === "https:" || window.location.hostname === "localhost"
 }
 
-export {createViewport, createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber,
-    getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext}
+export {
+    createViewport, createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber,
+    getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext
+}

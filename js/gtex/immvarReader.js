@@ -23,25 +23,25 @@
  * THE SOFTWARE.
  */
 
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
 // Experimental class for fetching features from an mpg webservice.
 // http://immvar.broadinstitute.org:3000/load_data?chromosome=&start=&end=&categories=
 
 const ImmVarReader = function (config) {
 
-    this.config = config;
-    this.url = config.url;
-    this.cellConditionId = config.cellConditionId;
-    this.valueThreshold = config.valueThreshold ? config.valueThreshold : 5E-2;
+    this.config = config
+    this.url = config.url
+    this.cellConditionId = config.cellConditionId
+    this.valueThreshold = config.valueThreshold ? config.valueThreshold : 5E-2
 
-};
+}
 
 ImmVarReader.prototype.readFeatures = function (queryChr, queryStart, queryEnd) {
 
     var self = this,
         queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
-            "&cell_condition_id=" + this.cellConditionId;
+            "&cell_condition_id=" + this.cellConditionId
 
     return new Promise(function (fulfill, reject) {
         igvxhr.loadJson(queryURL, {
@@ -56,21 +56,21 @@ ImmVarReader.prototype.readFeatures = function (queryChr, queryStart, queryEnd) 
                 //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
                 json.eqtls.forEach(function (eqtl) {
-                    eqtl.chr = eqtl.chromosome;
-                    eqtl.start = eqtl.position;
-                    eqtl.end = eqtl.position + 1;
-                });
+                    eqtl.chr = eqtl.chromosome
+                    eqtl.start = eqtl.position
+                    eqtl.end = eqtl.position + 1
+                })
 
-                fulfill(json.eqtls);
+                fulfill(json.eqtls)
             } else {
-                fulfill(null);
+                fulfill(null)
             }
 
         }).catch(function (error) {
-            reject(error);
-        });
+            reject(error)
+        })
 
-    });
+    })
 }
 
-export default ImmVarReader;
+export default ImmVarReader

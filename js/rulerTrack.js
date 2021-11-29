@@ -23,77 +23,77 @@
  * THE SOFTWARE.
  */
 
-import IGVGraphics from "./igv-canvas.js";
-import {IGVColor, StringUtils} from "../node_modules/igv-utils/src/index.js";
-import GenomeUtils from "./genome/genome.js";
+import IGVGraphics from "./igv-canvas.js"
+import {IGVColor, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import GenomeUtils from "./genome/genome.js"
 
-const numberFormatter = StringUtils.numberFormatter;
+const numberFormatter = StringUtils.numberFormatter
 
 class RulerTrack {
     constructor(browser) {
 
-        this.browser = browser;
-        this.height = 40;
-        this.name = "";
-        this.id = "ruler";
-        this.disableButtons = true;
-        this.ignoreTrackMenu = true;
-        this.order = Number.MIN_SAFE_INTEGER * 1e-2;
-        this.removable = false;
-        this.type = 'ruler';
+        this.browser = browser
+        this.height = 40
+        this.name = ""
+        this.id = "ruler"
+        this.disableButtons = true
+        this.ignoreTrackMenu = true
+        this.order = Number.MIN_SAFE_INTEGER * 1e-2
+        this.removable = false
+        this.type = 'ruler'
     }
 
     async getFeatures(chr, start, end) {
-        return [];
+        return []
     };
 
     computePixelHeight(ignore) {
-        return this.height;
+        return this.height
     };
 
-    draw({ context, referenceFrame, pixelWidth, pixelHeight, bpPerPixel, bpStart }) {
+    draw({context, referenceFrame, pixelWidth, pixelHeight, bpPerPixel, bpStart}) {
 
         if (GenomeUtils.isWholeGenomeView(referenceFrame.chr)) {
-            this.drawWholeGenome({ context, pixelWidth, pixelHeight, bpPerPixel });
+            this.drawWholeGenome({context, pixelWidth, pixelHeight, bpPerPixel})
         } else {
-            this.doDraw({ context, referenceFrame, pixelWidth, pixelHeight, bpStart })
+            this.doDraw({context, referenceFrame, pixelWidth, pixelHeight, bpStart})
         }
     }
 
-    drawWholeGenome({ context, pixelWidth, pixelHeight, bpPerPixel }) {
+    drawWholeGenome({context, pixelWidth, pixelHeight, bpPerPixel}) {
 
-        context.save();
+        context.save()
 
-        IGVGraphics.fillRect(context, 0, 0, pixelWidth, pixelHeight, {'fillStyle': 'white'});
+        IGVGraphics.fillRect(context, 0, 0, pixelWidth, pixelHeight, {'fillStyle': 'white'})
 
         for (let name of this.browser.genome.wgChromosomeNames) {
 
-            let xBP = this.browser.genome.getCumulativeOffset(name);
-            let wBP = this.browser.genome.getChromosome(name).bpLength;
+            let xBP = this.browser.genome.getCumulativeOffset(name)
+            let wBP = this.browser.genome.getChromosome(name).bpLength
 
-            let x = Math.round(xBP / bpPerPixel);
-            let w = Math.round(wBP / bpPerPixel);
+            let x = Math.round(xBP / bpPerPixel)
+            let w = Math.round(wBP / bpPerPixel)
 
-            this.renderChromosomeRect(context, x, 0, w, pixelHeight, name);
+            this.renderChromosomeRect(context, x, 0, w, pixelHeight, name)
         }
 
-        context.restore();
+        context.restore()
 
     }
 
-    doDraw({ context, referenceFrame, pixelWidth, pixelHeight, bpStart }) {
+    doDraw({context, referenceFrame, pixelWidth, pixelHeight, bpStart}) {
 
         context.clearRect(0, 0, pixelWidth, pixelHeight)
 
-        const tickHeight = 6;
-        const shim = 2;
+        const tickHeight = 6
+        const shim = 2
 
-        const bpLength = Math.floor(referenceFrame.toBP(pixelWidth));
-        const tick = findSpacing(bpLength, context.isSVG);
+        const bpLength = Math.floor(referenceFrame.toBP(pixelWidth))
+        const tick = findSpacing(bpLength, context.isSVG)
 
-        let nTick = Math.floor(bpStart / tick.majorTick) - 1;
+        let nTick = Math.floor(bpStart / tick.majorTick) - 1
 
-        const { tickDelta, labelLength } = calculateDeltas(context, referenceFrame, bpStart, nTick, tick)
+        const {tickDelta, labelLength} = calculateDeltas(context, referenceFrame, bpStart, nTick, tick)
 
         const index = this.browser.referenceFrameList.indexOf(referenceFrame)
         // console.log(`ruler(${ index }) label-length ${ labelLength > tickDelta ? 'clobbers' : 'less than' } tick-delta ${ StringUtils.numberFormatter(tickDelta)} `)
@@ -105,7 +105,7 @@ class RulerTrack {
         do {
 
             bp = Math.floor(nTick * tick.majorTick)
-            const rulerLabel = `${ StringUtils.numberFormatter(Math.floor(bp / tick.unitMultiplier)) } ${ tick.majorUnit }`
+            const rulerLabel = `${StringUtils.numberFormatter(Math.floor(bp / tick.unitMultiplier))} ${tick.majorUnit}`
 
             xTick = Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5))
             const xLabel = Math.round(xTick - context.measureText(rulerLabel).width / 2)
@@ -115,15 +115,15 @@ class RulerTrack {
                 accumulatedTickDelta = 0
             }
 
-            if(xTick > 0) {
+            if (xTick > 0) {
                 IGVGraphics.strokeLine(context, xTick, this.height - tickHeight, xTick, this.height - shim)
             }
 
             bp = Math.floor((1 + nTick) * tick.majorTick)
             let pixel = Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5))
-            let delta = (pixel - xTick)/2
+            let delta = (pixel - xTick) / 2
             let xx = xTick + delta
-            if(xx > 0) {
+            if (xx > 0) {
                 IGVGraphics.strokeLine(context, xx, this.height - tickHeight, xx, this.height - shim)
             }
 
@@ -132,27 +132,27 @@ class RulerTrack {
 
         } while (xTick < pixelWidth)
 
-        IGVGraphics.strokeLine(context, 0, this.height - shim, pixelWidth, this.height - shim);
+        IGVGraphics.strokeLine(context, 0, this.height - shim, pixelWidth, this.height - shim)
 
     }
 
     renderChromosomeRect(ctx, x, y, w, h, name) {
 
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = '12px sans-serif';
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.font = '12px sans-serif'
 
-        IGVGraphics.strokeLine(ctx, x + w, y, x + w, y + h, {strokeStyle: IGVColor.greyScale(191)});
+        IGVGraphics.strokeLine(ctx, x + w, y, x + w, y + h, {strokeStyle: IGVColor.greyScale(191)})
 
-        const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
+        const shortName = (name.startsWith("chr")) ? name.substring(3) : name
 
         if (w > ctx.measureText(shortName).width) {
-            IGVGraphics.fillText(ctx, shortName, (x + (w / 2)), (y + (h / 2)), {fillStyle: IGVColor.greyScale(68)});
+            IGVGraphics.fillText(ctx, shortName, (x + (w / 2)), (y + (h / 2)), {fillStyle: IGVColor.greyScale(68)})
         }
     }
 
     supportsWholeGenome() {
-        return true;
+        return true
     };
 
     dispose() {
@@ -189,7 +189,7 @@ function findSpacing(bpLength, isSVG) {
     const threshold = 3 * 25
 
     const belowThresholdTick = Math.pow(10, nZeroes - 1)
-    const aboveThresholdTick = Math.pow(10, nZeroes)/2
+    const aboveThresholdTick = Math.pow(10, nZeroes) / 2
 
     // console.log(`zeros ${ nZeroes } tick-threshold ${ threshold } ticks ${ nMajorTicks } belowTick ${ StringUtils.numberFormatter(belowThresholdTick) } aboveTick ${ StringUtils.numberFormatter(aboveThresholdTick) }`)
 
@@ -202,10 +202,10 @@ function calculateDeltas(context, referenceFrame, bpStart, nTick, tick) {
 
     const tickDelta = getX(referenceFrame, getBP(1 + nTick, tick), bpStart) - getX(referenceFrame, getBP(nTick, tick), bpStart)
 
-    const label = `${ StringUtils.numberFormatter(Math.floor(getBP(nTick, tick) / tick.unitMultiplier)) } ${ tick.majorUnit }`
+    const label = `${StringUtils.numberFormatter(Math.floor(getBP(nTick, tick) / tick.unitMultiplier))} ${tick.majorUnit}`
     const labelLength = Math.floor(context.measureText(label).width)
 
-    return { tickDelta, labelLength }
+    return {tickDelta, labelLength}
 
     function getBP(nTick, tick) {
         return Math.floor(nTick * tick.majorTick)
@@ -219,15 +219,15 @@ function calculateDeltas(context, referenceFrame, bpStart, nTick, tick) {
 class Tick {
 
     constructor(majorTick, majorUnit, unitMultiplier) {
-        this.majorTick = majorTick;
-        this.minorTick = majorTick / 10.0;
-        this.majorUnit = majorUnit;
-        this.unitMultiplier = unitMultiplier;
+        this.majorTick = majorTick
+        this.minorTick = majorTick / 10.0
+        this.majorUnit = majorUnit
+        this.unitMultiplier = unitMultiplier
     }
 
     description(blurb) {
-        console.log((blurb || '') + ' tick ' + numberFormatter(this.majorTick) + ' label width ' + numberFormatter(this.labelWidthBP) + ' multiplier ' + this.unitMultiplier);
+        console.log((blurb || '') + ' tick ' + numberFormatter(this.majorTick) + ' label width ' + numberFormatter(this.labelWidthBP) + ' multiplier ' + this.unitMultiplier)
     }
 }
 
-export default RulerTrack;
+export default RulerTrack

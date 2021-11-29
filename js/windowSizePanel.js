@@ -23,20 +23,20 @@
  * THE SOFTWARE.
  */
 
-import { DOMUtils } from '../node_modules/igv-utils/src/index.js'
-import { prettyBasePairNumber } from './util/igvUtils.js'
+import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
+import {prettyBasePairNumber} from './util/igvUtils.js'
 
 class WindowSizePanel {
     constructor(parent, browser) {
 
-        this.container = DOMUtils.div({ class: 'igv-windowsize-panel-container' });
+        this.container = DOMUtils.div({class: 'igv-windowsize-panel-container'})
         parent.appendChild(this.container)
 
         browser.on('locuschange', (referenceFrameList) => {
             this.updatePanel(referenceFrameList)
         })
 
-        this.browser = browser;
+        this.browser = browser
 
     }
 
@@ -50,8 +50,8 @@ class WindowSizePanel {
 
     updatePanel(referenceFrameList) {
         const width = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
-        this.container.innerText = 1 === referenceFrameList.length ? prettyBasePairNumber(Math.round(width * referenceFrameList[ 0 ].bpPerPixel)) : ''
+        this.container.innerText = 1 === referenceFrameList.length ? prettyBasePairNumber(Math.round(width * referenceFrameList[0].bpPerPixel)) : ''
     }
 }
 
-export default WindowSizePanel;
+export default WindowSizePanel

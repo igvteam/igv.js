@@ -24,13 +24,13 @@
  * THE SOFTWARE.
  */
 
-import { DOMUtils } from '../../node_modules/igv-utils/src/index.js';
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 
 class SampleNameControl {
 
     constructor(parent, browser) {
 
-        this.button = DOMUtils.div({ class: 'igv-navbar-button' })
+        this.button = DOMUtils.div({class: 'igv-navbar-button'})
         parent.appendChild(this.button)
 
         this.button.innerText = 'Sample Names'
@@ -45,7 +45,7 @@ class SampleNameControl {
 
             this.setState(browser.showSampleNames)
 
-            for (let { sampleNameViewport } of browser.trackViews) {
+            for (let {sampleNameViewport} of browser.trackViews) {
                 if (false === browser.showSampleNames) {
                     sampleNameViewport.hide()
                 } else {

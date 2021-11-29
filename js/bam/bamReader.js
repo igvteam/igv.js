@@ -24,11 +24,11 @@
  * THE SOFTWARE.
  */
 
-import {loadIndex} from "./indexFactory.js";
-import AlignmentContainer from "./alignmentContainer.js";
-import BamUtils from "./bamUtils.js";
-import {igvxhr, BGZip} from "../../node_modules/igv-utils/src/index.js";
-import {buildOptions} from "../util/igvUtils.js";
+import {loadIndex} from "./indexFactory.js"
+import AlignmentContainer from "./alignmentContainer.js"
+import BamUtils from "./bamUtils.js"
+import {BGZip, igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {buildOptions} from "../util/igvUtils.js"
 
 /**
  * Class for reading a bam file
@@ -39,24 +39,24 @@ import {buildOptions} from "../util/igvUtils.js";
 class BamReader {
 
     constructor(config, genome) {
-        this.config = config;
-        this.genome = genome;
-        this.bamPath = config.url;
-        this.baiPath = config.indexURL;
-        BamUtils.setReaderDefaults(this, config);
+        this.config = config
+        this.genome = genome
+        this.bamPath = config.url
+        this.baiPath = config.indexURL
+        BamUtils.setReaderDefaults(this, config)
     }
 
     async readAlignments(chr, bpStart, bpEnd) {
 
         const chrToIndex = await this.getChrIndex()
-        const queryChr = this.chrAliasTable.hasOwnProperty(chr) ? this.chrAliasTable[chr] : chr;
-        const chrId = chrToIndex[queryChr];
+        const queryChr = this.chrAliasTable.hasOwnProperty(chr) ? this.chrAliasTable[chr] : chr
+        const chrId = chrToIndex[queryChr]
         const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd,
             this.config.samplingWindowSize, this.config.samplingDepth,
-            this.config.pairsSupported, this.config.alleleFreqThreshold);
+            this.config.pairsSupported, this.config.alleleFreqThreshold)
 
         if (chrId === undefined) {
-            return alignmentContainer;
+            return alignmentContainer
 
         } else {
 
@@ -64,82 +64,82 @@ class BamReader {
             const chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd)
 
             if (!chunks || chunks.length === 0) {
-                return alignmentContainer;
+                return alignmentContainer
             }
 
-            let counter = 1;
+            let counter = 1
             for (let c of chunks) {
 
                 let lastBlockSize
                 if (c.maxv.offset === 0) {
-                    lastBlockSize = 0;    // Don't need to read the last block.
+                    lastBlockSize = 0    // Don't need to read the last block.
                 } else {
-                    const bsizeOptions = buildOptions(this.config, {range: {start: c.maxv.block, size: 26}});
+                    const bsizeOptions = buildOptions(this.config, {range: {start: c.maxv.block, size: 26}})
                     const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
                     lastBlockSize = BGZip.bgzBlockSize(abuffer)
                 }
                 const fetchMin = c.minv.block
                 const fetchMax = c.maxv.block + lastBlockSize
-                const range = {start: fetchMin, size: fetchMax - fetchMin + 1};
+                const range = {start: fetchMin, size: fetchMax - fetchMin + 1}
 
-                const compressed = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config, {range: range}));
+                const compressed = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config, {range: range}))
 
-                var ba = BGZip.unbgzf(compressed); //new Uint8Array(BGZip.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                const done = BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
+                var ba = BGZip.unbgzf(compressed) //new Uint8Array(BGZip.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                const done = BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter)
 
                 if (done) {
-                //    console.log(`Loaded ${counter} chunks out of  ${chunks.length}`);
-                    break;
+                    //    console.log(`Loaded ${counter} chunks out of  ${chunks.length}`);
+                    break
                 }
-                counter++;
+                counter++
             }
-            alignmentContainer.finish();
-            return alignmentContainer;
+            alignmentContainer.finish()
+            return alignmentContainer
         }
     }
 
     async getHeader() {
         if (!this.header) {
-            const genome = this.genome;
-            const index = await this.getIndex();
-            let start;
-            let len;
+            const genome = this.genome
+            const index = await this.getIndex()
+            let start
+            let len
             if (index.firstBlockPosition) {
-                const bsizeOptions = buildOptions(this.config, {range: {start: index.firstBlockPosition, size: 26}});
+                const bsizeOptions = buildOptions(this.config, {range: {start: index.firstBlockPosition, size: 26}})
                 const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
                 const bsize = BGZip.bgzBlockSize(abuffer)
-                len = index.firstBlockPosition + bsize;   // Insure we get the complete compressed block containing the header
+                len = index.firstBlockPosition + bsize   // Insure we get the complete compressed block containing the header
             } else {
-                len = 64000;
+                len = 64000
             }
 
-            const options = buildOptions(this.config, {range: {start: 0, size: len}});
-            this.header = await BamUtils.readHeader(this.bamPath, options, genome);
+            const options = buildOptions(this.config, {range: {start: 0, size: len}})
+            this.header = await BamUtils.readHeader(this.bamPath, options, genome)
         }
         return this.header
     }
 
     async getIndex() {
-        const genome = this.genome;
+        const genome = this.genome
         if (!this.index) {
-            this.index = await loadIndex(this.baiPath, this.config, genome);
+            this.index = await loadIndex(this.baiPath, this.config, genome)
         }
-        return this.index;
+        return this.index
     }
 
     async getChrIndex() {
         if (this.chrToIndex) {
-            return this.chrToIndex;
+            return this.chrToIndex
         } else {
             const header = await this.getHeader()
-            this.chrToIndex = header.chrToIndex;
-            this.indexToChr = header.chrNames;
-            this.chrAliasTable = header.chrAliasTable;
-            return this.chrToIndex;
+            this.chrToIndex = header.chrToIndex
+            this.indexToChr = header.chrNames
+            this.chrAliasTable = header.chrAliasTable
+            return this.chrToIndex
 
         }
     }
 }
 
-export default BamReader;
+export default BamReader
 

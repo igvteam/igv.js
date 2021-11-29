@@ -24,16 +24,16 @@
  */
 
 import MenuUtils from "./menuUtils.js"
-import {DOMUtils, UIUtils, makeDraggable} from "../../node_modules/igv-utils/src/index.js";
-import GenericColorPicker from './genericColorPicker.js';
-import { createCheckbox } from "../igv-icons.js";
+import {DOMUtils, makeDraggable, UIUtils} from "../../node_modules/igv-utils/src/index.js"
+import GenericColorPicker from './genericColorPicker.js'
+import {createCheckbox} from "../igv-icons.js"
 
 const MenuPopup = function (parent) {
 
-    this.popover = DOMUtils.div({ class: 'igv-menu-popup' })
+    this.popover = DOMUtils.div({class: 'igv-menu-popup'})
     parent.appendChild(this.popover)
 
-    const header = DOMUtils.div({ class: 'igv-menu-popup-header' })
+    const header = DOMUtils.div({class: 'igv-menu-popup-header'})
     this.popover.appendChild(header)
 
     UIUtils.attachDialogCloseHandlerWithParent(header, () => this.hide())
@@ -70,18 +70,18 @@ MenuPopup.prototype.presentMenuList = function (menuList) {
         for (let item of menuList) {
 
             if (item.init) {
-                item.init();
+                item.init()
             }
 
-            let $e = item.object;
+            let $e = item.object
             if (0 === menuList.indexOf(item)) {
-                $e.removeClass('igv-track-menu-border-top');
+                $e.removeClass('igv-track-menu-border-top')
             }
 
             if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-menu-popup-check-container')) {
                 // do nothing
             } else if ($e.is('div')) {
-                $e.addClass('igv-menu-popup-shim');
+                $e.addClass('igv-menu-popup-shim')
             }
 
             this.popoverContent.appendChild($e.get(0))
@@ -92,20 +92,20 @@ MenuPopup.prototype.presentMenuList = function (menuList) {
         //       yield a width of zero (0).
         this.popover.style.display = 'flex'
 
-        const { width } = this.popover.getBoundingClientRect()
+        const {width} = this.popover.getBoundingClientRect()
 
-        this.popover.style.left = `${ -width }px`
-        this.popover.style.top = `${ 0 }px`
+        this.popover.style.left = `${-width}px`
+        this.popover.style.top = `${0}px`
 
     }
-};
+}
 
-MenuPopup.prototype.presentTrackContextMenu = function(e, menuItems) {
+MenuPopup.prototype.presentTrackContextMenu = function (e, menuItems) {
 
     this.popoverContent.innerHTML = ''
 
     const menuElements = createMenuElements(menuItems, this.popover)
-    for (let { el } of menuElements) {
+    for (let {el} of menuElements) {
         this.popoverContent.appendChild(el)
     }
 
@@ -119,77 +119,77 @@ MenuPopup.prototype.dispose = function () {
     this.popover.innerHTML = ''
 
     Object.keys(this).forEach(function (key) {
-        this[key] = undefined;
+        this[key] = undefined
     })
-};
+}
 
 function createMenuElements(itemList, popover) {
 
-    return itemList.map( item => {
+    return itemList.map(item => {
 
-        let el;
+        let el
 
         if (typeof item === 'string' && '<hr/>' === item) {
             el = document.createElement('hr')
-        } else  if (typeof item === 'string') {
-            el = DOMUtils.div({ class:'context-menu'})
+        } else if (typeof item === 'string') {
+            el = DOMUtils.div({class: 'context-menu'})
             el.innerHTML = item
         } else if (typeof item === 'Node') {
-            el = item;
+            el = item
         } else {
             if (typeof item.init === 'function') {
-                item.init();
+                item.init()
             }
 
             if ("checkbox" === item.type) {
-                el = createCheckbox("Show all bases", item.value);
-            } else if("color" === item.type) {
+                el = createCheckbox("Show all bases", item.value)
+            } else if ("color" === item.type) {
 
-                const colorPicker = new GenericColorPicker({ parent: popover.parentElement, width: 364 })
-                colorPicker.configure(undefined, { color: color => item.click(color) })
+                const colorPicker = new GenericColorPicker({parent: popover.parentElement, width: 364})
+                colorPicker.configure(undefined, {color: color => item.click(color)})
 
-                el = DOMUtils.div({ class:'context-menu'})
+                el = DOMUtils.div({class: 'context-menu'})
                 if (typeof item.label === 'string') {
-                    el.innerHTML = item.label;
+                    el.innerHTML = item.label
                 }
-                const clickHandler =  e => {
-                    colorPicker.show();
-                    DOMUtils.hide(popover);
-                    e.preventDefault();
+                const clickHandler = e => {
+                    colorPicker.show()
+                    DOMUtils.hide(popover)
+                    e.preventDefault()
                     e.stopPropagation()
                 }
-                el.addEventListener('click', clickHandler);
-                el.addEventListener('touchend', clickHandler);
+                el.addEventListener('click', clickHandler)
+                el.addEventListener('touchend', clickHandler)
                 el.addEventListener('mouseup', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault()
+                    e.stopPropagation()
                 })
             } else {
-                el = DOMUtils.div({ class:'context-menu'})
+                el = DOMUtils.div({class: 'context-menu'})
                 if (typeof item.label === 'string') {
-                    el.innerHTML = item.label;
+                    el.innerHTML = item.label
                 }
             }
 
             if (item.click && "color" !== item.type) {
-                el.addEventListener('click', handleClick);
-                el.addEventListener('touchend', handleClick);
+                el.addEventListener('click', handleClick)
+                el.addEventListener('touchend', handleClick)
                 el.addEventListener('mouseup', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
+                    e.preventDefault()
+                    e.stopPropagation()
                 })
 
                 // eslint-disable-next-line no-inner-declarations
                 function handleClick(e) {
-                    item.click();
-                    DOMUtils.hide(popover);
-                    e.preventDefault();
+                    item.click()
+                    DOMUtils.hide(popover)
+                    e.preventDefault()
                     e.stopPropagation()
                 }
             }
         }
 
-        return { el, init: item.init };
+        return {el, init: item.init}
     })
 
 }
@@ -200,14 +200,14 @@ function present(e, popover) {
     //       yield a width of zero (0).
     popover.style.display = 'flex'
 
-    const { x, y } = DOMUtils.translateMouseCoordinates(e, popover.parentNode)
-    const { width } = popover.getBoundingClientRect()
+    const {x, y} = DOMUtils.translateMouseCoordinates(e, popover.parentNode)
+    const {width} = popover.getBoundingClientRect()
     const xmax = x + width
 
-    const { width:parentWidth } = popover.parentNode.getBoundingClientRect()
+    const {width: parentWidth} = popover.parentNode.getBoundingClientRect()
 
-    popover.style.left = `${ xmax > parentWidth ? (x - (xmax - parentWidth)) : x }px`
-    popover.style.top  = `${ y }px`
+    popover.style.left = `${xmax > parentWidth ? (x - (xmax - parentWidth)) : x}px`
+    popover.style.top = `${y}px`
 
 }
 
@@ -215,10 +215,10 @@ const hideAllMenuPopups = () => {
 
     const menus = document.querySelectorAll('.igv-menu-popup')
     for (let i = 0; i < menus.length; i++) {
-        menus[ i ].style.display = 'none'
+        menus[i].style.display = 'none'
     }
 
 }
 
-export default MenuPopup;
+export default MenuPopup
 

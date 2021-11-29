@@ -25,44 +25,44 @@
  */
 
 
-import HtsgetReader from "./htsgetReader.js";
-import getDataWrapper from "../feature/dataWrapper.js";
-import VcfParser from "../variant/vcfParser.js";
+import HtsgetReader from "./htsgetReader.js"
+import getDataWrapper from "../feature/dataWrapper.js"
+import VcfParser from "../variant/vcfParser.js"
 
 class HtsgetVariantReader extends HtsgetReader {
 
     constructor(config, genome) {
-        super(config, genome);
-        this.parser = new VcfParser();
+        super(config, genome)
+        this.parser = new VcfParser()
     }
 
     async readHeader() {
         if (!this.header) {
-            const data = await this.readHeaderData();
-            const dataWrapper = getDataWrapper(data);
-            this.header = await this.parser.parseHeader(dataWrapper, this.genome);
-            this.chrAliasTable = this.header.chrAliasTable;
+            const data = await this.readHeaderData()
+            const dataWrapper = getDataWrapper(data)
+            this.header = await this.parser.parseHeader(dataWrapper, this.genome)
+            this.chrAliasTable = this.header.chrAliasTable
         }
-        return this.header;
+        return this.header
     }
 
     async readFeatures(chr, start, end) {
 
         if (this.config.format && this.config.format.toUpperCase() !== "VCF") {
-            throw  Error(`htsget format ${this.config.format} is not supported`);
+            throw  Error(`htsget format ${this.config.format} is not supported`)
         }
 
-        if(!this.chrAliasTable) {
-            await this.readHeader();
+        if (!this.chrAliasTable) {
+            await this.readHeader()
         }
 
-        let queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr;
+        let queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr
 
-        const data = await this.readData(queryChr, start, end);
+        const data = await this.readData(queryChr, start, end)
 
-        const dataWrapper = getDataWrapper(data);
+        const dataWrapper = getDataWrapper(data)
 
-        return this.parser.parseFeatures(dataWrapper);
+        return this.parser.parseFeatures(dataWrapper)
 
         //  return dataWrapper;
 
@@ -90,4 +90,4 @@ Example for https://htsget.ga4gh.org/variants/1000genomes.phase1.chr22?format=VC
 */
 
 
-export default HtsgetVariantReader;
+export default HtsgetVariantReader

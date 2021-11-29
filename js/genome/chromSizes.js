@@ -24,58 +24,58 @@
  */
 
 // Indexed fasta files
-import {igvxhr, StringUtils, BGZip, URIUtils} from "../../node_modules/igv-utils/src/index.js";
-import Chromosome from "./chromosome.js";
-import {buildOptions, isDataURL} from "../util/igvUtils.js";
+import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import Chromosome from "./chromosome.js"
+import {isDataURL} from "../util/igvUtils.js"
 
-const splitLines = StringUtils.splitLines;
+const splitLines = StringUtils.splitLines
 
-const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'indexed']);
+const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'indexed'])
 
 class ChromSizes {
 
 
     constructor(url) {
-        this.url = url;
-        this.chromosomeNames = [];
-        this.chromosomes = {};
+        this.url = url
+        this.chromosomeNames = []
+        this.chromosomes = {}
     }
 
 
     async init() {
-        return this.loadAll();
+        return this.loadAll()
     }
 
     async getSequence(chr, start, end) {
 
-        return undefined; // TODO -- return array of "N"s?
+        return undefined // TODO -- return array of "N"s?
     }
 
     async loadAll() {
 
-        let data;
+        let data
         if (isDataURL(this.url)) {
-            let bytes = BGZip.decodeDataURI(this.fastaURL);
-            data = "";
+            let bytes = BGZip.decodeDataURI(this.fastaURL)
+            data = ""
             for (let b of bytes) {
-                data += String.fromCharCode(b);
+                data += String.fromCharCode(b)
             }
         } else {
-            data = await igvxhr.load(this.url, {});
+            data = await igvxhr.load(this.url, {})
         }
 
 
-        this.chromosomeNames = [];
-        this.chromosomes = {};
+        this.chromosomeNames = []
+        this.chromosomes = {}
 
-        const lines = splitLines(data);
-        let order = 0;
-        for(let nextLine of lines) {
-            const tokens = nextLine.split('\t');
-            this.chromosomeNames.push(tokens[0]);
-            const chrLength = Number.parseInt(tokens[1]);
-            const chromosome = new Chromosome(tokens[0], order++, 0, chrLength);
-            this.chromosomes[tokens[0]] = chromosome;
+        const lines = splitLines(data)
+        let order = 0
+        for (let nextLine of lines) {
+            const tokens = nextLine.split('\t')
+            this.chromosomeNames.push(tokens[0])
+            const chrLength = Number.parseInt(tokens[1])
+            const chromosome = new Chromosome(tokens[0], order++, 0, chrLength)
+            this.chromosomes[tokens[0]] = chromosome
 
         }
     }

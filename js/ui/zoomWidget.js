@@ -24,8 +24,7 @@
  * THE SOFTWARE.
  */
 
-import { DOMUtils, Icon, StringUtils } from '../../node_modules/igv-utils/src/index.js'
-import { appleCrayonPalette } from "../util/colorPalletes.js";
+import {DOMUtils, Icon} from '../../node_modules/igv-utils/src/index.js'
 
 const sliderMin = 0
 let sliderMax = 23
@@ -35,7 +34,7 @@ const ZoomWidget = function (browser, parent) {
 
     this.browser = browser
 
-    this.zoomContainer = DOMUtils.div({ class: 'igv-zoom-widget' })
+    this.zoomContainer = DOMUtils.div({class: 'igv-zoom-widget'})
     parent.appendChild(this.zoomContainer)
 
     // zoom out
@@ -53,8 +52,8 @@ const ZoomWidget = function (browser, parent) {
     this.slider = document.createElement('input')
     this.slider.type = 'range'
 
-    this.slider.min = `${ sliderMin }`
-    this.slider.max = `${ sliderMax }`
+    this.slider.min = `${sliderMin}`
+    this.slider.max = `${sliderMax}`
 
     el.appendChild(this.slider)
 
@@ -63,9 +62,9 @@ const ZoomWidget = function (browser, parent) {
         e.preventDefault()
         e.stopPropagation()
 
-        const referenceFrame = browser.referenceFrameList[ 0 ]
-        const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
-        const { end, start } = referenceFrame
+        const referenceFrame = browser.referenceFrameList[0]
+        const {bpLength} = referenceFrame.genome.getChromosome(referenceFrame.chr)
+        const {end, start} = referenceFrame
 
         const extent = end - start
 
@@ -73,11 +72,11 @@ const ZoomWidget = function (browser, parent) {
         const scaleFactor = Math.pow(2, e.target.valueAsNumber)
 
         // (end - start) = bpLength/scaleFactor
-        const zoomedExtent = bpLength/scaleFactor
+        const zoomedExtent = bpLength / scaleFactor
 
         // console.log(`zoom-widget - slider ${ e.target.value } scaleFactor ${ scaleFactor } extent-zoomed ${ StringUtils.numberFormatter(Math.round(zoomedExtent)) }`)
 
-        browser.zoomWithScaleFactor(zoomedExtent/extent)
+        browser.zoomWithScaleFactor(zoomedExtent / extent)
 
     })
 
@@ -101,27 +100,27 @@ const ZoomWidget = function (browser, parent) {
 
     })
 
-};
+}
 
 ZoomWidget.prototype.update = function (referenceFrameList) {
 
-    const referenceFrame = referenceFrameList[ 0 ]
-    const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
-    const { start, end } = referenceFrame
+    const referenceFrame = referenceFrameList[0]
+    const {bpLength} = referenceFrame.genome.getChromosome(referenceFrame.chr)
+    const {start, end} = referenceFrame
 
-    sliderMax = Math.ceil(Math.log2(bpLength/this.browser.minimumBases()))
+    sliderMax = Math.ceil(Math.log2(bpLength / this.browser.minimumBases()))
 
-    this.slider.max = `${ sliderMax }`
+    this.slider.max = `${sliderMax}`
 
-    const scaleFactor = bpLength/(end-start)
+    const scaleFactor = bpLength / (end - start)
     sliderValueRaw = Math.log2(scaleFactor)
-    this.slider.value = `${ Math.round(sliderValueRaw) }`
+    this.slider.value = `${Math.round(sliderValueRaw)}`
 
     const extent = end - start
 
     const derivedScalefactor = Math.pow(2, sliderValueRaw)
 
-    const derivedExtent = bpLength/derivedScalefactor
+    const derivedExtent = bpLength / derivedScalefactor
 
     // referenceFrame.description('zoom.update')
 
@@ -139,8 +138,8 @@ ZoomWidget.prototype.enable = function () {
     // this.zoomOutButton.style.color = appleCrayonPalette[ 'steel' ];
     // this.zoomOutButton.style.pointerEvents = 'auto';
 
-    this.slider.disabled = false;
-};
+    this.slider.disabled = false
+}
 
 ZoomWidget.prototype.disable = function () {
 
@@ -150,27 +149,27 @@ ZoomWidget.prototype.disable = function () {
     // this.zoomOutButton.style.color = appleCrayonPalette[ 'silver' ];
     // this.zoomOutButton.style.pointerEvents = 'none';
 
-    this.slider.disabled = true;
-};
+    this.slider.disabled = true
+}
 
 ZoomWidget.prototype.hide = function () {
     this.zoomContainer.style.display = 'none'
-};
+}
 
 ZoomWidget.prototype.show = function () {
     this.zoomContainer.style.display = 'block'
-};
+}
 
 ZoomWidget.prototype.hideSlider = function () {
     this.slider.style.display = 'none'
-};
+}
 
 ZoomWidget.prototype.showSlider = function () {
     this.slider.style.display = 'block'
-};
+}
 
 function lerpAlvyRaySmith(a, b, t) {
     return a - t * (a - b)
 }
 
-export default ZoomWidget;
+export default ZoomWidget

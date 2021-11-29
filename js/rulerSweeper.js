@@ -24,17 +24,17 @@
  * THE SOFTWARE.
  */
 
-import {validateLocusExtent} from "./util/igvUtils.js";
+import {validateLocusExtent} from "./util/igvUtils.js"
 import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
-import GenomeUtils from './genome/genome.js';
+import GenomeUtils from './genome/genome.js'
 
 class RulerSweeper {
 
     constructor(rulerViewport) {
-        this.rulerSweeper = DOMUtils.div({ class: 'igv-ruler-sweeper'})
+        this.rulerSweeper = DOMUtils.div({class: 'igv-ruler-sweeper'})
         rulerViewport.contentDiv.appendChild(this.rulerSweeper)
 
-        this.rulerViewport = rulerViewport;
+        this.rulerViewport = rulerViewport
 
         this.isMouseHandlers = undefined
 
@@ -48,7 +48,7 @@ class RulerSweeper {
         this.rulerViewport.browser.on('locuschange', this.boundObserverHandler)
 
         function observerHandler() {
-            if(this.rulerViewport.referenceFrame) {
+            if (this.rulerViewport.referenceFrame) {
                 if (GenomeUtils.isWholeGenomeView(this.rulerViewport.referenceFrame.chr)) {
                     this.removeMouseHandlers()
                 } else {
@@ -68,14 +68,14 @@ class RulerSweeper {
             return
         }
 
-        let isMouseDown;
-        let isMouseIn;
-        let mouseDownX;
-        let left;
-        let width;
-        let dx;
+        let isMouseDown
+        let isMouseIn
+        let mouseDownX
+        let left
+        let width
+        let dx
 
-        let threshold = 1;
+        let threshold = 1
 
         // Viewport Content
         this.boundContentMouseDownHandler = contentMouseDownHandler.bind(this)
@@ -84,17 +84,17 @@ class RulerSweeper {
         function contentMouseDownHandler(event) {
 
             isMouseDown = true
-            isMouseIn = true;
+            isMouseIn = true
 
-            const { x } = DOMUtils.translateMouseCoordinates(event, this.rulerViewport.contentDiv);
-            left = mouseDownX = x;
+            const {x} = DOMUtils.translateMouseCoordinates(event, this.rulerViewport.contentDiv)
+            left = mouseDownX = x
 
-            width = threshold;
+            width = threshold
 
-            this.rulerSweeper.style.display = 'block';
+            this.rulerSweeper.style.display = 'block'
 
-            this.rulerSweeper.style.left = `${left}px`;
-            this.rulerSweeper.style.width = `${width}px`;
+            this.rulerSweeper.style.left = `${left}px`
+            this.rulerSweeper.style.width = `${width}px`
 
         }
 
@@ -106,21 +106,21 @@ class RulerSweeper {
 
             // console.log(`${ Date.now() } RulerSweeper - documentMouseMoveHandler - target ${ event.target.nodeName }`)
 
-            let mouseCurrentX;
+            let mouseCurrentX
 
             if (isMouseDown && isMouseIn) {
 
-                const { x } = DOMUtils.translateMouseCoordinates(event, this.rulerViewport.contentDiv);
-                mouseCurrentX = Math.max(Math.min(x, this.rulerViewport.contentDiv.clientWidth), 0);
+                const {x} = DOMUtils.translateMouseCoordinates(event, this.rulerViewport.contentDiv)
+                mouseCurrentX = Math.max(Math.min(x, this.rulerViewport.contentDiv.clientWidth), 0)
 
-                dx = mouseCurrentX - mouseDownX;
+                dx = mouseCurrentX - mouseDownX
 
-                width = Math.abs(dx);
-                this.rulerSweeper.style.width = `${width}px`;
+                width = Math.abs(dx)
+                this.rulerSweeper.style.width = `${width}px`
 
                 if (dx < 0) {
-                    left = mouseDownX + dx;
-                    this.rulerSweeper.style.left = `${left}px`;
+                    left = mouseDownX + dx
+                    this.rulerSweeper.style.left = `${left}px`
                 }
 
             }
@@ -134,40 +134,43 @@ class RulerSweeper {
 
             // console.log(`${ Date.now() } RulerSweeper - documentMouseUpHandler - target ${ event.target.nodeName }`)
 
-            let extent;
+            let extent
 
             if (true === isMouseDown && true === isMouseIn) {
 
-                isMouseDown = isMouseIn = undefined;
+                isMouseDown = isMouseIn = undefined
 
-                this.rulerSweeper.style.display = 'none';
+                this.rulerSweeper.style.display = 'none'
 
 
                 if (width > threshold) {
 
-                    extent = { start: bp(this.rulerViewport.referenceFrame, left), end: bp(this.rulerViewport.referenceFrame, left + width) };
+                    extent = {
+                        start: bp(this.rulerViewport.referenceFrame, left),
+                        end: bp(this.rulerViewport.referenceFrame, left + width)
+                    }
 
-                    validateLocusExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, extent, this.rulerViewport.browser.minimumBases());
+                    validateLocusExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, extent, this.rulerViewport.browser.minimumBases())
 
-                    this.rulerViewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) /this.rulerViewport.contentDiv.clientWidth;
-                    this.rulerViewport.referenceFrame.start = Math.round(extent.start);
-                    this.rulerViewport.referenceFrame.end = Math.round(extent.end);
+                    this.rulerViewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / this.rulerViewport.contentDiv.clientWidth
+                    this.rulerViewport.referenceFrame.start = Math.round(extent.start)
+                    this.rulerViewport.referenceFrame.end = Math.round(extent.end)
 
-                    this.rulerViewport.browser.updateViews(this.rulerViewport.referenceFrame);
+                    this.rulerViewport.browser.updateViews(this.rulerViewport.referenceFrame)
                 }
 
             }
 
         }
 
-        this.isMouseHandlers = true;
+        this.isMouseHandlers = true
     }
 
     removeMouseHandlers() {
         this.rulerViewport.contentDiv.removeEventListener('mousedown', this.boundContentMouseDownHandler)
         document.removeEventListener('mousemove', this.boundDocumentMouseMoveHandler)
         document.removeEventListener('mouseup', this.boundDocumentMouseUpHandler)
-        this.isMouseHandlers = false;
+        this.isMouseHandlers = false
     }
 
     dispose() {
@@ -179,7 +182,7 @@ class RulerSweeper {
 }
 
 function bp(referenceFrame, pixel) {
-    return referenceFrame.start + (pixel * referenceFrame.bpPerPixel);
+    return referenceFrame.start + (pixel * referenceFrame.bpPerPixel)
 }
 
-export default RulerSweeper;
+export default RulerSweeper

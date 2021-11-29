@@ -24,11 +24,11 @@
  * THE SOFTWARE.
  */
 
-import { DOMUtils } from '../../node_modules/igv-utils/src/index.js'
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 
 const CircularViewControl = function (parent, browser) {
 
-    this.button = DOMUtils.div({ class: 'igv-navbar-button'})
+    this.button = DOMUtils.div({class: 'igv-navbar-button'})
     parent.appendChild(this.button)
     this.button.textContent = 'circular view'
 
@@ -70,4 +70,4 @@ CircularViewControl.prototype.hide = function () {
     this.button.style.display = 'none'
 }
 
-export default CircularViewControl;
+export default CircularViewControl

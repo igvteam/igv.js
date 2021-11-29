@@ -1,17 +1,17 @@
-import FeatureTrack from "./feature/featureTrack.js";
-import SequenceTrack from "./sequenceTrack.js";
-import WigTrack from "./feature/wigTrack.js";
-import SegTrack from "./feature/segTrack.js";
-import MergedTrack from "./feature/mergedTrack.js";
-import BAMTrack from "./bam/bamTrack.js";
-import InteractionTrack from "./feature/interactionTrack.js";
-import VariantTrack from "./variant/variantTrack.js";
-import EqtlTrack from "./gtex/eqtlTrack.js";
-import GWASTrack from "./gwas/gwasTrack.js";
-import GCNVTrack from "./gcnv/gcnvTrack.js";
-import RnaStructTrack from "./rna/rnaStruct.js";
-import IdeogramTrack from "./ideogramTrack.js";
-import SpliceJunctionTrack from "./feature/spliceJunctionTrack.js";
+import FeatureTrack from "./feature/featureTrack.js"
+import SequenceTrack from "./sequenceTrack.js"
+import WigTrack from "./feature/wigTrack.js"
+import SegTrack from "./feature/segTrack.js"
+import MergedTrack from "./feature/mergedTrack.js"
+import BAMTrack from "./bam/bamTrack.js"
+import InteractionTrack from "./feature/interactionTrack.js"
+import VariantTrack from "./variant/variantTrack.js"
+import EqtlTrack from "./gtex/eqtlTrack.js"
+import GWASTrack from "./gwas/gwasTrack.js"
+import GCNVTrack from "./gcnv/gcnvTrack.js"
+import RnaStructTrack from "./rna/rnaStruct.js"
+import IdeogramTrack from "./ideogramTrack.js"
+import SpliceJunctionTrack from "./feature/spliceJunctionTrack.js"
 
 const trackFunctions =
     new Map([
@@ -31,8 +31,8 @@ const trackFunctions =
         ['gwas', (config, browser) => new GWASTrack(config, browser)],
         ['arc', (config, browser) => new RnaStructTrack(config, browser)],
         ['gcnv', (config, browser) => new GCNVTrack(config, browser)],
-        ['junction' , (config, browser) => new SpliceJunctionTrack(config, browser)]
-    ]);
+        ['junction', (config, browser) => new SpliceJunctionTrack(config, browser)]
+    ])
 
 
 /**
@@ -42,35 +42,35 @@ const trackFunctions =
  * @param track
  */
 const addTrackCreatorFunction = function (type, track) {
-    trackFunctions.set(type, track);
+    trackFunctions.set(type, track)
 }
 
 const getTrack = function (type, config, browser) {
 
-    let trackKey;
+    let trackKey
     switch (type) {
         case "annotation":
         case "genes":
         case "fusionjuncspan":
         case "snp":
-            trackKey = "feature";
-            break;
+            trackKey = "feature"
+            break
         case 'seg':
         case 'maf':
         case 'mut':
-            trackKey = 'seg';
-            break;
+            trackKey = 'seg'
+            break
         case 'junctions':
         case 'splicejunctions':
             trackKey = 'junction'
-            break;
+            break
         default:
-            trackKey = type;
+            trackKey = type
     }
 
     return trackFunctions.has(trackKey) ?
-        trackFunctions.get(trackKey)(config, browser):
-        undefined;
+        trackFunctions.get(trackKey)(config, browser) :
+        undefined
 }
 
 export default {
