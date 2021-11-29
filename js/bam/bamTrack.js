@@ -360,7 +360,7 @@ class BAMTrack extends TrackBase {
             menuItems.push('<hr/>')
             if (this.alignmentTrack.hasPairs) {
                 menuItems.push({
-                    label: 'Show discordant pairs in circular view',
+                    label: 'Add discordant pairs to circular view',
                     click: () => {
                         const maxFragmentLength = this.maxFragmentLength
                         const inView = []
@@ -385,7 +385,7 @@ class BAMTrack extends TrackBase {
             }
             if (this.alignmentTrack.hasSupplemental) {
                 menuItems.push({
-                    label: 'Show split reads in circular view',
+                    label: 'Add split reads to circular view',
                     click: () => {
                         const inView = []
                         for (let viewport of this.trackView.viewports) {
@@ -1236,7 +1236,7 @@ class AlignmentTrack {
             && (this.hasPairs || this.hasSupplemental)) {
             if (this.hasPairs) {
                 list.push({
-                    label: 'Show discordant pairs in circular view',
+                    label: 'Add discordant pairs to circular view',
                     click: () => {
                         const maxFragmentLength = this.parent.maxFragmentLength
                         const {referenceFrame} = viewport
@@ -1256,7 +1256,7 @@ class AlignmentTrack {
             }
             if (this.hasSupplemental) {
                 list.push({
-                    label: 'Show split reads in circular view',
+                    label: 'Add split reads to circular view',
                     click: () => {
                         const inView = []
                         for (let a of viewport.getCachedFeatures().allAlignments()) {
