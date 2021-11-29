@@ -2,7 +2,7 @@
  * Colors used for coding omosomes
  */
 
-const Colors  = {
+const Colors = {
     "X": "rgb(204, 153, 0)",
     "Y": "rgb(153, 204, 0)",
     "Un": "darkGray)",
@@ -64,10 +64,10 @@ const Colors  = {
 }
 
 //  aliasing
-for(let key of Object.keys(Colors)) {
-    const altName = "chr" + key;
-    Colors[altName] = Colors[key];
+for (let key of Object.keys(Colors)) {
+    const altName = "chr" + key
+    Colors[altName] = Colors[key]
 }
 
 
-export default Colors;
+export default Colors

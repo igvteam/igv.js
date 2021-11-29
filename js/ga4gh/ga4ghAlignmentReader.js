@@ -23,11 +23,11 @@
  * THE SOFTWARE.
  */
 
-import AlignmentContainer from "../bam/alignmentContainer.js";
-import BamAlignment from "../bam/bamAlignment.js";
-import AlignmentBlock from "../bam/alignmentBlock.js";
-import {ga4ghGet, ga4ghSearch} from './ga4ghHelper.js';
-import BamFilter from "../bam/bamFilter.js";
+import AlignmentContainer from "../bam/alignmentContainer.js"
+import BamAlignment from "../bam/bamAlignment.js"
+import AlignmentBlock from "../bam/alignmentBlock.js"
+import {ga4ghGet, ga4ghSearch} from './ga4ghHelper.js'
+import BamFilter from "../bam/bamFilter.js"
 
 var CigarOperationTable = {
     "ALIGNMENT_MATCH": "M",
@@ -43,34 +43,34 @@ var CigarOperationTable = {
 
 const Ga4ghAlignmentReader = function (config, genome) {
 
-    this.config = config;
-    this.genome = genome;
-    this.url = config.url;
-    this.filter = new BamFilter(config.filter);
-    this.readGroupSetIds = config.readGroupSetIds;
-    this.authKey = config.authKey;   // Might be undefined or nill
+    this.config = config
+    this.genome = genome
+    this.url = config.url
+    this.filter = new BamFilter(config.filter)
+    this.readGroupSetIds = config.readGroupSetIds
+    this.authKey = config.authKey   // Might be undefined or nill
 
-    this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
-    this.samplingDepth = config.samplingDepth === undefined ? 1000 : config.samplingDepth;
+    this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize
+    this.samplingDepth = config.samplingDepth === undefined ? 1000 : config.samplingDepth
     if (config.viewAsPairs) {
-        this.pairsSupported = true;
+        this.pairsSupported = true
     } else {
-        this.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported;
+        this.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported
     }
 }
 
 
 Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
-    const genome = this.genome;
-    const self = this;
+    const genome = this.genome
+    const self = this
 
     return getChrAliasTable()
 
         .then(function (chrAliasTable) {
 
             var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
-                readURL = self.url + "/reads/search";
+                readURL = self.url + "/reads/search"
 
             return ga4ghSearch({
                 url: readURL,
@@ -84,14 +84,14 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                 decode: decodeGa4ghReads,
                 results: new AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported, self.alleleFreqThreshold)
             })
-        });
+        })
 
 
     function getChrAliasTable() {
 
         if (self.chrAliasTable) {
 
-            return Promise.resolve(self.chrAliasTable);
+            return Promise.resolve(self.chrAliasTable)
 
         } else {
 
@@ -99,16 +99,16 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
                 .then(function (json) {
 
-                    self.chrAliasTable = {};
+                    self.chrAliasTable = {}
 
                     if (genome && json.readGroups && json.readGroups.length > 0) {
 
-                        var referenceSetId = json.readGroups[0].referenceSetId;
+                        var referenceSetId = json.readGroups[0].referenceSetId
 
                         if (referenceSetId) {
 
                             // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
-                            var readURL = self.url + "/references/search";
+                            var readURL = self.url + "/references/search"
 
                             return ga4ghSearch({
                                 url: readURL,
@@ -116,7 +116,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                                     "referenceSetId": referenceSetId
                                 },
                                 decode: function (j) {
-                                    return j.references;
+                                    return j.references
                                 }
                             })
                                 .then(function (references) {
@@ -124,24 +124,24 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
                                     references.forEach(function (ref) {
                                         var refName = ref.name,
-                                            alias = genome.getChromosomeName(refName);
-                                        self.chrAliasTable[alias] = refName;
-                                    });
+                                            alias = genome.getChromosomeName(refName)
+                                        self.chrAliasTable[alias] = refName
+                                    })
 
 
-                                    return self.chrAliasTable;
+                                    return self.chrAliasTable
 
                                 })
                         } else {
 
                             // Try hardcoded constants -- workaround for non-compliant data at Google
-                            populateChrAliasTable(self.chrAliasTable, self.config.datasetId);
+                            populateChrAliasTable(self.chrAliasTable, self.config.datasetId)
 
-                            return self.chrAliasTable;
+                            return self.chrAliasTable
                         }
                     } else {
                         // No browser object, can't build map.  This can occur when run from unit tests
-                        return self.chrAliasTable;
+                        return self.chrAliasTable
                     }
                 })
         }
@@ -162,88 +162,88 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
             cigarDecoded,
             alignments = [],
             mate,
-            blocks;
+            blocks
 
         for (i = 0; i < len; i++) {
 
-            let record = jsonRecords[i];
+            let record = jsonRecords[i]
 
-            alignment = new BamAlignment();
+            alignment = new BamAlignment()
 
-            alignment.readName = record.fragmentName;
-            alignment.properPlacement = record.properPlacement;
-            alignment.duplicateFragment = record.duplicateFragment;
-            alignment.numberReads = record.numberReads;
-            alignment.fragmentLength = record.fragmentLength;
-            alignment.readNumber = record.readNumber;
-            alignment.failedVendorQualityChecks = record.failedVendorQualityChecks;
-            alignment.secondaryAlignment = record.secondaryAlignment;
-            alignment.supplementaryAlignment = record.supplementaryAlignment;
-            alignment.seq = record.alignedSequence;
-            alignment.qual = record.alignedQuality;
-            alignment.matePos = record.nextMatePosition;
-            alignment.tagDict = record.info;
-            alignment.flags = encodeFlags(record);
+            alignment.readName = record.fragmentName
+            alignment.properPlacement = record.properPlacement
+            alignment.duplicateFragment = record.duplicateFragment
+            alignment.numberReads = record.numberReads
+            alignment.fragmentLength = record.fragmentLength
+            alignment.readNumber = record.readNumber
+            alignment.failedVendorQualityChecks = record.failedVendorQualityChecks
+            alignment.secondaryAlignment = record.secondaryAlignment
+            alignment.supplementaryAlignment = record.supplementaryAlignment
+            alignment.seq = record.alignedSequence
+            alignment.qual = record.alignedQuality
+            alignment.matePos = record.nextMatePosition
+            alignment.tagDict = record.info
+            alignment.flags = encodeFlags(record)
 
 
-            jsonAlignment = record.alignment;
+            jsonAlignment = record.alignment
             if (jsonAlignment) {
-                alignment.mapped = true;
+                alignment.mapped = true
 
-                alignment.chr = record.alignment.position.referenceName;
-                if (genome) alignment.chr = genome.getChromosomeName(alignment.chr);
+                alignment.chr = record.alignment.position.referenceName
+                if (genome) alignment.chr = genome.getChromosomeName(alignment.chr)
 
-                alignment.start = parseInt(record.alignment.position.position);
-                alignment.strand = !(record.alignment.position.reverseStrand);
-                alignment.mq = record.alignment.mappingQuality;
-                alignment.cigar = encodeCigar(record.alignment.cigar);
-                cigarDecoded = translateCigar(record.alignment.cigar);
+                alignment.start = parseInt(record.alignment.position.position)
+                alignment.strand = !(record.alignment.position.reverseStrand)
+                alignment.mq = record.alignment.mappingQuality
+                alignment.cigar = encodeCigar(record.alignment.cigar)
+                cigarDecoded = translateCigar(record.alignment.cigar)
 
-                alignment.lengthOnRef = cigarDecoded.lengthOnRef;
+                alignment.lengthOnRef = cigarDecoded.lengthOnRef
 
-                blocks = makeBlocks(alignment, cigarDecoded.array);
-                alignment.blocks = blocks.blocks;
-                alignment.insertions = blocks.insertions;
+                blocks = makeBlocks(alignment, cigarDecoded.array)
+                alignment.blocks = blocks.blocks
+                alignment.insertions = blocks.insertions
 
             } else {
-                alignment.mapped = false;
+                alignment.mapped = false
             }
 
-            mate = record.nextMatePosition;
+            mate = record.nextMatePosition
             if (mate) {
                 alignment.mate = {
                     chr: mate.referenceFrame,
                     position: parseInt(mate.position),
                     strand: !mate.reverseStrand
-                };
+                }
             }
 
             if (self.filter.pass(alignment)) {
-                alignments.push(alignment);
+                alignments.push(alignment)
             }
 
 
         }
 
-        return alignments;
+        return alignments
 
 
         // Encode a cigar string -- used for popup text
         function encodeCigar(cigarArray) {
 
-            var cigarString = "";
+            var cigarString = ""
             cigarArray.forEach(function (cigarUnit) {
                 var op = CigarOperationTable[cigarUnit.operation],
-                    len = cigarUnit.operationLength;
-                cigarString = cigarString + (len + op);
-            });
+                    len = cigarUnit.operationLength
+                cigarString = cigarString + (len + op)
+            })
 
-            return cigarString;
+            return cigarString
         }
 
         // TODO -- implement me
         function encodeFlags(json) {
-            return 0;
+            return 0
         }
 
         function translateCigar(cigar) {
@@ -251,23 +251,23 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
             var cigarUnit, opLen, opLtr,
                 lengthOnRef = 0,
                 cigarArray = [],
-                i;
+                i
 
             for (i = 0; i < cigar.length; i++) {
 
-                cigarUnit = cigar[i];
+                cigarUnit = cigar[i]
 
-                opLtr = CigarOperationTable[cigarUnit.operation];
-                opLen = parseInt(cigarUnit.operationLength);    // Google represents long as a String
+                opLtr = CigarOperationTable[cigarUnit.operation]
+                opLen = parseInt(cigarUnit.operationLength)    // Google represents long as a String
 
                 if (opLtr === 'M' || opLtr === 'EQ' || opLtr === 'X' || opLtr === 'D' || opLtr === 'N' || opLtr === '=')
-                    lengthOnRef += opLen;
+                    lengthOnRef += opLen
 
-                cigarArray.push({len: opLen, ltr: opLtr});
+                cigarArray.push({len: opLen, ltr: opLtr})
 
             }
 
-            return {lengthOnRef: lengthOnRef, array: cigarArray};
+            return {lengthOnRef: lengthOnRef, array: cigarArray}
         }
 
 
@@ -292,42 +292,42 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                 seqOffset = 0,
                 pos = record.start,
                 len = cigarArray.length,
-                gapType;
+                gapType
 
             for (var i = 0; i < len; i++) {
 
-                var c = cigarArray[i];
+                var c = cigarArray[i]
 
                 switch (c.ltr) {
                     case 'H' :
-                        break; // ignore hard clips
+                        break // ignore hard clips
                     case 'P' :
-                        break; // ignore pads
+                        break // ignore pads
                     case 'S' :
-                        seqOffset += c.len;
-                        gapType = 'S';
-                        break; // soft clip read bases
+                        seqOffset += c.len
+                        gapType = 'S'
+                        break // soft clip read bases
                     case 'N' :
                     case 'D' :
                         if (gaps === undefined) {
-                            gaps = [];
+                            gaps = []
                         }
                         gaps.push({
                             start: pos,
                             len: c.len,
                             type: c.ltr
-                        });
-                        pos += c.len;
-                        break;
+                        })
+                        pos += c.len
+                        break
                     case 'I' :
-                        if (insertions === undefined) insertions = [];
+                        if (insertions === undefined) insertions = []
                         insertions.push(new AlignmentBlock({
                             start: pos,
                             len: c.len,
                             seqOffset: seqOffset
-                        }));
-                        seqOffset += c.len;
-                        break;
+                        }))
+                        seqOffset += c.len
+                        break
                     case 'M' :
                     case 'EQ' :
                     case '=' :
@@ -338,18 +338,18 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                                 len: c.len,
                                 seqOffset: seqOffset,
                                 gapType: gapType
-                            }));
-                        seqOffset += c.len;
-                        pos += c.len;
+                            }))
+                        seqOffset += c.len
+                        pos += c.len
 
-                        break;
+                        break
 
                     default :
-                        console.log("Error processing cigar element: " + c.len + c.ltr);
+                        console.log("Error processing cigar element: " + c.len + c.ltr)
                 }
             }
 
-            return {blocks: blocks, insertions: insertions, gaps: gaps};
+            return {blocks: blocks, insertions: insertions, gaps: gaps}
         }
     }
 }
@@ -361,7 +361,7 @@ Ga4ghAlignmentReader.prototype.readMetadata = function () {
         url: this.url,
         entity: "readgroupsets",
         entityId: this.readGroupSetIds
-    });
+    })
 }
 
 /**
@@ -371,15 +371,15 @@ Ga4ghAlignmentReader.prototype.readMetadata = function () {
  * @param datasetId
  */
 function populateChrAliasTable(chrAliasTable, datasetId) {
-    var i;
+    var i
     if ("461916304629" === datasetId || "337315832689" === datasetId) {
         for (i = 1; i < 23; i++) {
-            chrAliasTable["chr" + i] = i;
+            chrAliasTable["chr" + i] = i
         }
-        chrAliasTable["chrX"] = "X";
-        chrAliasTable["chrY"] = "Y";
-        chrAliasTable["chrM"] = "MT";
+        chrAliasTable["chrX"] = "X"
+        chrAliasTable["chrY"] = "Y"
+        chrAliasTable["chrM"] = "MT"
     }
 }
 
-export default Ga4ghAlignmentReader;
+export default Ga4ghAlignmentReader

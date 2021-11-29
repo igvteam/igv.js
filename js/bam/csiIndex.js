@@ -1,47 +1,47 @@
 // Represents a BAM index.
 // Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
 
-import BinaryParser from "../binary.js";
+import BinaryParser from "../binary.js"
 
 const CSI1_MAGIC = 21582659 // CSI\1
 const CSI2_MAGIC = 38359875 // CSI\2
 
 async function parseCsiIndex(arrayBuffer, genome) {
 
-    const idx = new CSIIndex();
-    idx.parse(arrayBuffer, genome);
-    return idx;
+    const idx = new CSIIndex()
+    idx.parse(arrayBuffer, genome)
+    return idx
 }
 
 class CSIIndex {
 
     constructor(tabix) {
-        this.tabix = true;   // Means whatever is indexed is BGZipped
+        this.tabix = true   // Means whatever is indexed is BGZipped
     }
 
     parse(arrayBuffer, genome) {
-        const parser = new BinaryParser(new DataView(arrayBuffer));
+        const parser = new BinaryParser(new DataView(arrayBuffer))
 
-        const magic = parser.getInt();
+        const magic = parser.getInt()
 
         if (magic !== CSI1_MAGIC) {
             if (magic === CSI2_MAGIC) {
-                throw Error("CSI version 2 is not supported.  Please enter an issue at https://github.com/igvteam/igv.js");
+                throw Error("CSI version 2 is not supported.  Please enter an issue at https://github.com/igvteam/igv.js")
             } else {
-                throw Error("Not a CSI index");
+                throw Error("Not a CSI index")
             }
         }
 
         this.indices = []
-        this.blockMin = Number.MAX_SAFE_INTEGER;
-        this.lastBlockPosition = [];
-        this.sequenceIndexMap = {};
+        this.blockMin = Number.MAX_SAFE_INTEGER
+        this.lastBlockPosition = []
+        this.sequenceIndexMap = {}
 
-        this.minShift = parser.getInt();
-        this.depth = parser.getInt();
-        const lAux = parser.getInt();
-        const seqNames = [];
-        let bmax = 0;
+        this.minShift = parser.getInt()
+        this.depth = parser.getInt()
+        const lAux = parser.getInt()
+        const seqNames = []
+        let bmax = 0
 
         if (lAux >= 28) {
             // Tabix header parameters aren't used, but they must be read to advance the pointer
@@ -52,55 +52,55 @@ class CSIIndex {
             const meta = parser.getInt()
             const skip = parser.getInt()
             const l_nm = parser.getInt()
-            const nameEndPos = parser.position + l_nm;
-            let i = 0;
+            const nameEndPos = parser.position + l_nm
+            let i = 0
             while (parser.position < nameEndPos) {
-                let seq_name = parser.getString();
+                let seq_name = parser.getString()
                 // Translate to "official" chr name.
                 if (genome) {
-                    seq_name = genome.getChromosomeName(seq_name);
+                    seq_name = genome.getChromosomeName(seq_name)
                 }
-                this.sequenceIndexMap[seq_name] = i;
-                seqNames[i] = seq_name;
-                i++;
+                this.sequenceIndexMap[seq_name] = i
+                seqNames[i] = seq_name
+                i++
             }
         }
 
-        const MAX_BIN = this.bin_limit() + 1;
-        const nref = parser.getInt();
+        const MAX_BIN = this.bin_limit() + 1
+        const nref = parser.getInt()
         for (let ref = 0; ref < nref; ref++) {
-            const binIndex = [];
-            const loffset = [];
-            const nbin = parser.getInt();
+            const binIndex = []
+            const loffset = []
+            const nbin = parser.getInt()
             for (let b = 0; b < nbin; b++) {
 
-                const binNumber = parser.getInt();
-                loffset[binNumber] = parser.getVPointer();
+                const binNumber = parser.getInt()
+                loffset[binNumber] = parser.getVPointer()
 
                 if (binNumber > MAX_BIN) {
                     // This is a psuedo bin, not used but we have to consume the bytes
-                    const nchnk = parser.getInt(); // # of chunks for this bin
-                    const cs = parser.getVPointer();   // unmapped beg
-                    const ce = parser.getVPointer();   // unmapped end
+                    const nchnk = parser.getInt() // # of chunks for this bin
+                    const cs = parser.getVPointer()   // unmapped beg
+                    const ce = parser.getVPointer()   // unmapped end
                     const n_maped = parser.getLong()
                     const nUnmapped = parser.getLong()
 
                 } else {
 
-                    binIndex[binNumber] = [];
-                    const nchnk = parser.getInt(); // # of chunks for this bin
+                    binIndex[binNumber] = []
+                    const nchnk = parser.getInt() // # of chunks for this bin
 
                     for (let i = 0; i < nchnk; i++) {
-                        const cs = parser.getVPointer();    //chunk_beg
-                        const ce = parser.getVPointer();    //chunk_end
+                        const cs = parser.getVPointer()    //chunk_beg
+                        const ce = parser.getVPointer()    //chunk_end
                         if (cs && ce) {
                             if (cs.block < this.blockMin) {
-                                this.blockMin = cs.block;    // Block containing first alignment
+                                this.blockMin = cs.block    // Block containing first alignment
                             }
                             if (ce.block > bmax) {
-                                bmax = ce.block;
+                                bmax = ce.block
                             }
-                            binIndex[binNumber].push([cs, ce]);
+                            binIndex[binNumber].push([cs, ce])
                         }
                     }
                 }
@@ -113,11 +113,11 @@ class CSIIndex {
                 }
             }
         }
-        this.lastBlockPosition = bmax;
+        this.lastBlockPosition = bmax
     }
 
     get chromosomeNames() {
-        return Object.keys(this.sequenceIndexMap);
+        return Object.keys(this.sequenceIndexMap)
     }
 
     /**
@@ -130,32 +130,32 @@ class CSIIndex {
      */
     blocksForRange(refId, min, max) {
 
-        const ba = this.indices[refId];
+        const ba = this.indices[refId]
         if (!ba) {
-            return [];
+            return []
         } else {
-            const overlappingBins = this.reg2bins(min, max);        // List of bin #s that overlap min, max
-            if (overlappingBins.length == 0) return [];
+            const overlappingBins = this.reg2bins(min, max)        // List of bin #s that overlap min, max
+            if (overlappingBins.length == 0) return []
 
-            const chunks = [];
+            const chunks = []
             // Find chunks in overlapping bins.  Leaf bins (< 4681) are not pruned
             for (let binRange of overlappingBins) {
                 for (let bin = binRange[0]; bin <= binRange[1]; bin++) {
                     if (ba.binIndex[bin]) {
-                        const binChunks = ba.binIndex[bin];
+                        const binChunks = ba.binIndex[bin]
                         const nchnk = binChunks.length
                         for (let c = 0; c < nchnk; ++c) {
                             const cs = binChunks[c][0]
                             const ce = binChunks[c][1]
-                            chunks.push({minv: cs, maxv: ce, bin: bin});
+                            chunks.push({minv: cs, maxv: ce, bin: bin})
                         }
                     }
                 }
             }
 
-            const lowestOffset = ba.loffset[overlappingBins[0]];
+            const lowestOffset = ba.loffset[overlappingBins[0]]
 
-            return optimizeChunks(chunks, lowestOffset);
+            return optimizeChunks(chunks, lowestOffset)
         }
 
     }
@@ -194,7 +194,7 @@ class CSIIndex {
     // }
 
     bin_limit() {
-        return ((1 << (this.depth + 1) * 3) - 1) / 7;
+        return ((1 << (this.depth + 1) * 3) - 1) / 7
     }
 
 }
@@ -204,44 +204,44 @@ function optimizeChunks(chunks, lowest) {
     const mergedChunks = []
     let lastChunk = null
 
-    if (chunks.length === 0) return chunks;
+    if (chunks.length === 0) return chunks
 
     chunks.sort(function (c0, c1) {
         const dif = c0.minv.block - c1.minv.block
         if (dif !== 0) {
-            return dif;
+            return dif
         } else {
-            return c0.minv.offset - c1.minv.offset;
+            return c0.minv.offset - c1.minv.offset
         }
-    });
+    })
 
     chunks.forEach(function (chunk) {
 
         if (!lowest || chunk.maxv.isGreaterThan(lowest)) {
             if (lastChunk === null) {
-                mergedChunks.push(chunk);
-                lastChunk = chunk;
+                mergedChunks.push(chunk)
+                lastChunk = chunk
             } else {
                 if (canMerge(lastChunk, chunk)) {
                     if (chunk.maxv.isGreaterThan(lastChunk.maxv)) {
-                        lastChunk.maxv = chunk.maxv;
+                        lastChunk.maxv = chunk.maxv
                     }
                 } else {
-                    mergedChunks.push(chunk);
-                    lastChunk = chunk;
+                    mergedChunks.push(chunk)
+                    lastChunk = chunk
                 }
             }
         } else {
             //console.log(`skipping chunk ${chunk.minv.block} - ${chunk.maxv.block}`)
         }
-    });
+    })
 
-    return mergedChunks;
+    return mergedChunks
 }
 
 function canMerge(chunk1, chunk2) {
     return (chunk2.minv.block - chunk1.maxv.block) < 65000 &&
-        (chunk2.maxv.block - chunk1.minv.block) < 5000000;
+        (chunk2.maxv.block - chunk1.minv.block) < 5000000
     // lastChunk.minv.block === lastChunk.maxv.block &&
     // lastChunk.maxv.block === chunk.minv.block &&
     // chunk.minv.block === chunk.maxv.block
@@ -249,4 +249,4 @@ function canMerge(chunk1, chunk2) {
 }
 
 
-export {parseCsiIndex};
+export {parseCsiIndex}

@@ -23,19 +23,19 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
-import FeatureSource from './featureSource.js';
-import TrackBase from "../trackBase.js";
-import IGVGraphics from "../igv-canvas.js";
-import {PaletteColorTable} from "../util/colorPalletes.js";
+import $ from "../vendor/jquery-3.3.1.slim.js"
+import FeatureSource from './featureSource.js'
+import TrackBase from "../trackBase.js"
+import IGVGraphics from "../igv-canvas.js"
+import {PaletteColorTable} from "../util/colorPalletes.js"
 
-let JUNCTION_MOTIF_PALETTE = new PaletteColorTable("Dark2");
+let JUNCTION_MOTIF_PALETTE = new PaletteColorTable("Dark2")
 
 // Lock in color-to-motif mapping so it's independent of data loading order. This list may not include all possible
 // motif values as this varies depending on the RNA-seq pipeline. The current list is based on STAR v2.4 docs.
-const someMotifValues = ['GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'];
+const someMotifValues = ['GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical']
 someMotifValues.forEach(motif => {
-    JUNCTION_MOTIF_PALETTE.getColor(motif);
+    JUNCTION_MOTIF_PALETTE.getColor(motif)
 })
 
 // rendering context with values that only need to be computed once per render, rather than for each splice junction
@@ -44,41 +44,41 @@ const junctionRenderingContext = {}
 class SpliceJunctionTrack extends TrackBase {
 
     constructor(config, browser) {
-        super(config, browser);
+        super(config, browser)
     }
 
 
     init(config) {
 
-        super.init(config);
+        super.init(config)
 
-        this.type = config.type || 'junctions';
+        this.type = config.type || 'junctions'
 
         if (config._featureSource) {
-            this.featureSource = config._featureSource;
-            delete config._featureSource;
+            this.featureSource = config._featureSource
+            delete config._featureSource
         } else {
             this.featureSource = config.featureSource ?
                 config.featureSource :
-                FeatureSource(config, this.browser.genome);
+                FeatureSource(config, this.browser.genome)
         }
 
-        this.margin = config.margin === undefined ? 10 : config.margin;
+        this.margin = config.margin === undefined ? 10 : config.margin
 
         if (!this.height) {
-            this.height = 100;
+            this.height = 100
         }
 
         //set defaults
         if (config.colorByNumReadsThreshold === undefined) {
-            config.colorByNumReadsThreshold = 5;
+            config.colorByNumReadsThreshold = 5
         }
     }
 
     async postInit() {
 
         if (typeof this.featureSource.getHeader === "function") {
-            this.header = await this.featureSource.getHeader();
+            this.header = await this.featureSource.getHeader()
         }
 
         // Set properties from track line
@@ -87,20 +87,20 @@ class SpliceJunctionTrack extends TrackBase {
         }
 
         if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
-            this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
+            this.visibilityWindow = await this.featureSource.defaultVisibilityWindow()
         }
 
-        return this;
+        return this
 
     }
 
     supportsWholeGenome() {
-        return false;
+        return false
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
-        const visibilityWindow = this.visibilityWindow;
-        return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow});
+        const visibilityWindow = this.visibilityWindow
+        return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
     };
 
 
@@ -112,43 +112,43 @@ class SpliceJunctionTrack extends TrackBase {
      * @returns {*}
      */
     computePixelHeight(features) {
-        return this.height;
+        return this.height
     };
 
     draw(options) {
 
-        const featureList = options.features;
-        const ctx = options.context;
-        const bpPerPixel = options.bpPerPixel;
-        const bpStart = options.bpStart;
-        const pixelWidth = options.pixelWidth;
-        const pixelHeight = options.pixelHeight;
-        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+        const featureList = options.features
+        const ctx = options.context
+        const bpPerPixel = options.bpPerPixel
+        const bpStart = options.bpStart
+        const pixelWidth = options.pixelWidth
+        const pixelHeight = options.pixelHeight
+        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
 
 
         if (!this.config.isMergedTrack) {
-            IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+            IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
         }
 
         if (featureList) {
 
 
-            junctionRenderingContext.referenceFrame = options.viewport.referenceFrame;
-            junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
-            junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(options.viewport.contentDiv).width());
+            junctionRenderingContext.referenceFrame = options.viewport.referenceFrame
+            junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start
+            junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(options.viewport.contentDiv).width())
 
             // For a given viewport, records where features that are < 2px in width have been rendered already.
             // This prevents wasteful rendering of multiple such features onto the same pixels.
             junctionRenderingContext.featureZoomOutTracker = {}
 
             for (let feature of featureList) {
-                if (feature.end < bpStart) continue;
-                if (feature.start > bpEnd) break;
-                this.renderJunction(feature, bpStart, bpPerPixel, pixelHeight, ctx);
+                if (feature.end < bpStart) continue
+                if (feature.start > bpEnd) break
+                this.renderJunction(feature, bpStart, bpPerPixel, pixelHeight, ctx)
             }
 
         } else {
-            console.log("No feature list");
+            console.log("No feature list")
         }
 
     };
@@ -165,9 +165,9 @@ class SpliceJunctionTrack extends TrackBase {
         // cache whether this junction is rendered or filtered out. Use later to exclude non-rendered junctions from click detection.
         feature.isVisible = false
 
-        const junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
-        const junctionRightPx = Math.round((feature.end - bpStart) / xScale);
-        const junctionMiddlePx = (junctionLeftPx + junctionRightPx) / 2;
+        const junctionLeftPx = Math.round((feature.start - bpStart) / xScale)
+        const junctionRightPx = Math.round((feature.end - bpStart) / xScale)
+        const junctionMiddlePx = (junctionLeftPx + junctionRightPx) / 2
         if (junctionRightPx - junctionLeftPx <= 3) {
             if (junctionMiddlePx in junctionRenderingContext.featureZoomOutTracker) {
                 return
@@ -203,16 +203,16 @@ class SpliceJunctionTrack extends TrackBase {
             }
         }
 
-        let uniquelyMappedReadCount;
-        let multiMappedReadCount;
-        let totalReadCount;
+        let uniquelyMappedReadCount
+        let multiMappedReadCount
+        let totalReadCount
         if (feature.attributes.uniquely_mapped) {
-            uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
+            uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped)
             if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
                 return
             }
-            multiMappedReadCount = parseInt(feature.attributes.multi_mapped);
-            totalReadCount = uniquelyMappedReadCount + multiMappedReadCount;
+            multiMappedReadCount = parseInt(feature.attributes.multi_mapped)
+            totalReadCount = uniquelyMappedReadCount + multiMappedReadCount
             if (totalReadCount < this.config.minTotalReads) {
                 return
             }
@@ -244,58 +244,58 @@ class SpliceJunctionTrack extends TrackBase {
             }
         }
 
-        const py = this.margin;
-        const rowHeight = this.height;
+        const py = this.margin
+        const rowHeight = this.height
 
-        const cy = py + 0.5 * rowHeight;
-        let topY = py;
-        const bottomY = py + rowHeight;
-        const bezierBottomY = bottomY - 10;
+        const cy = py + 0.5 * rowHeight
+        let topY = py
+        const bottomY = py + rowHeight
+        const bezierBottomY = bottomY - 10
 
         // draw the junction arc
-        const bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx) / 2;
-        const bezierControlRightPx = (junctionMiddlePx + junctionRightPx) / 2;
+        const bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx) / 2
+        const bezierControlRightPx = (junctionMiddlePx + junctionRightPx) / 2
 
-        let lineWidth = 1;
+        let lineWidth = 1
         if (feature.attributes.line_width) {
             lineWidth = parseFloat(feature.attributes.line_width)
         } else {
             if (this.config.thicknessBasedOn === undefined || this.config.thicknessBasedOn === 'numUniqueReads') {
-                lineWidth = uniquelyMappedReadCount;
+                lineWidth = uniquelyMappedReadCount
             } else if (this.config.thicknessBasedOn === 'numReads') {
-                lineWidth = totalReadCount;
+                lineWidth = totalReadCount
             } else if (this.config.thicknessBasedOn === 'numSamplesWithThisJunction') {
                 if (numSamplesWithThisJunction !== undefined) {
-                    lineWidth = numSamplesWithThisJunction;
+                    lineWidth = numSamplesWithThisJunction
                 }
             }
-            lineWidth = 1 + Math.log(lineWidth + 1) / Math.log(12);
+            lineWidth = 1 + Math.log(lineWidth + 1) / Math.log(12)
         }
 
-        let bounceHeight;
+        let bounceHeight
         if (this.config.bounceHeightBasedOn === undefined || this.config.bounceHeightBasedOn === 'random') {
             // randomly but deterministically stagger topY coordinates to reduce overlap
-            bounceHeight = (feature.start + feature.end) % 7;
+            bounceHeight = (feature.start + feature.end) % 7
         } else if (this.config.bounceHeightBasedOn === 'distance') {
-            bounceHeight = 6 * (feature.end - feature.start) / (junctionRenderingContext.referenceFrameEnd - junctionRenderingContext.referenceFrameStart);
+            bounceHeight = 6 * (feature.end - feature.start) / (junctionRenderingContext.referenceFrameEnd - junctionRenderingContext.referenceFrameStart)
         } else if (this.config.bounceHeightBasedOn === 'thickness') {
-            bounceHeight = 2 * lineWidth;
+            bounceHeight = 2 * lineWidth
         }
-        topY += rowHeight * Math.max(7 - bounceHeight, 0) / 10;
+        topY += rowHeight * Math.max(7 - bounceHeight, 0) / 10
 
-        let color;
+        let color
         if (feature.attributes.color) {
-            color = feature.attributes.color;  // Explicit setting
+            color = feature.attributes.color  // Explicit setting
         } else if (this.config.colorBy === undefined || this.config.colorBy === 'numUniqueReads') {
-            color = uniquelyMappedReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA';  // color gradient?
+            color = uniquelyMappedReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA'  // color gradient?
         } else if (this.config.colorBy === 'numReads') {
-            color = totalReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA';
+            color = totalReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA'
         } else if (this.config.colorBy === 'isAnnotatedJunction') {
-            color = feature.attributes.annotated_junction === "true" ? '#b0b0ec' : 'orange';
+            color = feature.attributes.annotated_junction === "true" ? '#b0b0ec' : 'orange'
         } else if (this.config.colorBy === 'strand') {
-            color = feature.strand === "+" ? '#b0b0ec' : '#ecb0b0';
+            color = feature.strand === "+" ? '#b0b0ec' : '#ecb0b0'
         } else if (this.config.colorBy === 'motif') {
-            color = JUNCTION_MOTIF_PALETTE.getColor(feature.attributes.motif);
+            color = JUNCTION_MOTIF_PALETTE.getColor(feature.attributes.motif)
         } else {
             color = '#AAAAAA'
         }
@@ -350,28 +350,28 @@ class SpliceJunctionTrack extends TrackBase {
         // feature.name:   unique + multi-mapped spanning read counts
         //example feature:  { chr: "chr17", start: 39662344, end: 39662803, name: "59", row: 0, score: 38, strand: "+"}
         feature.isVisible = true
-        ctx.beginPath();
-        ctx.moveTo(junctionLeftPx, bezierBottomY);
-        ctx.bezierCurveTo(bezierControlLeftPx, topY, bezierControlRightPx, topY, junctionRightPx, bezierBottomY);
+        ctx.beginPath()
+        ctx.moveTo(junctionLeftPx, bezierBottomY)
+        ctx.bezierCurveTo(bezierControlLeftPx, topY, bezierControlRightPx, topY, junctionRightPx, bezierBottomY)
 
-        ctx.lineWidth = lineWidth;
-        ctx.strokeStyle = color;
-        ctx.stroke();
+        ctx.lineWidth = lineWidth
+        ctx.strokeStyle = color
+        ctx.stroke()
 
         const drawArrowhead = (ctx, x, y, size) => {
             //TODO draw better arrow heads: https://stackoverflow.com/questions/21052972/curved-thick-arrows-on-canvas
-            ctx.beginPath();
-            ctx.moveTo(x, y);
-            ctx.lineTo(x - size / 2, y - size);
-            ctx.lineTo(x + size / 2, y - size);
-            ctx.lineTo(x, y);
-            ctx.closePath();
-            ctx.fill();
+            ctx.beginPath()
+            ctx.moveTo(x, y)
+            ctx.lineTo(x - size / 2, y - size)
+            ctx.lineTo(x + size / 2, y - size)
+            ctx.lineTo(x, y)
+            ctx.closePath()
+            ctx.fill()
         }
 
         if (feature.attributes.left_shape || feature.attributes.right_shape) {
-            ctx.fillStyle = color;
-            const arrowSize = ctx.lineWidth > 2 ? 10 : 7;
+            ctx.fillStyle = color
+            const arrowSize = ctx.lineWidth > 2 ? 10 : 7
             if (feature.attributes.left_shape) {
                 drawArrowhead(ctx, junctionLeftPx, bezierBottomY, arrowSize)
             }
@@ -380,15 +380,15 @@ class SpliceJunctionTrack extends TrackBase {
             }
         }
 
-        ctx.fillText(label, junctionMiddlePx - ctx.measureText(label).width / 2, (7 * topY + cy) / 8);
+        ctx.fillText(label, junctionMiddlePx - ctx.measureText(label).width / 2, (7 * topY + cy) / 8)
     }
 
     clickedFeatures(clickState, features) {
 
-        const allFeatures = super.clickedFeatures(clickState, features);
+        const allFeatures = super.clickedFeatures(clickState, features)
 
         return allFeatures.filter(function (feature) {
-            return (feature.isVisible && feature.attributes);
+            return (feature.isVisible && feature.attributes)
         })
     }
 
@@ -397,31 +397,31 @@ class SpliceJunctionTrack extends TrackBase {
      */
     popupData(clickState, features) {
 
-        features = this.clickedFeatures(clickState, features);
-        const genomicLocation = clickState.genomicLocation;
+        features = this.clickedFeatures(clickState, features)
+        const genomicLocation = clickState.genomicLocation
 
-        const data = [];
+        const data = []
         for (let feature of features) {
 
             const featureData = (typeof feature.popupData === "function") ?
                 feature.popupData(genomicLocation) :
-                this.extractPopupData(feature._f || feature, this.getGenomeId());
+                this.extractPopupData(feature._f || feature, this.getGenomeId())
 
             if (featureData) {
                 if (data.length > 0) {
-                    data.push("<hr/><hr/>");
+                    data.push("<hr/><hr/>")
                 }
 
-                Array.prototype.push.apply(data, featureData);
+                Array.prototype.push.apply(data, featureData)
             }
         }
 
-        return data;
+        return data
     }
 
 
     description() {
-        return this.name;
+        return this.name
 
     }
 
@@ -429,8 +429,8 @@ class SpliceJunctionTrack extends TrackBase {
      * Called when the track is removed.  Do any needed cleanup here
      */
     dispose() {
-        this.trackView = undefined;
+        this.trackView = undefined
     }
 }
 
-export default SpliceJunctionTrack;
+export default SpliceJunctionTrack

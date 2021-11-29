@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
-import FileFormats from "./fileFormats.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import FileFormats from "./fileFormats.js"
 
 const knownFileExtensions = new Set([
 
@@ -60,7 +60,7 @@ const knownFileExtensions = new Set([
     "gwas",
     "maf",
     "mut"
-]);
+])
 
 /**
  * Return a custom format object with the given name.
@@ -70,33 +70,33 @@ const knownFileExtensions = new Set([
 function getFormat(name) {
 
     if (FileFormats && FileFormats[name]) {
-        return expandFormat(FileFormats[name]);
+        return expandFormat(FileFormats[name])
     } else {
-        return undefined;
+        return undefined
     }
 
     function expandFormat(format) {
 
-        const fields = format.fields;
-        const keys = ['chr', 'start', 'end'];
+        const fields = format.fields
+        const keys = ['chr', 'start', 'end']
 
         for (let i = 0; i < fields.length; i++) {
             for (let key of keys) {
                 if (key === fields[i]) {
-                    format[key] = i;
+                    format[key] = i
                 }
             }
         }
 
-        return format;
+        return format
     }
 }
 
 function inferFileFormat(fn) {
 
-    var idx, ext;
+    var idx, ext
 
-    fn = fn.toLowerCase();
+    fn = fn.toLowerCase()
 
     // Special case -- UCSC refgene files
     if (fn.endsWith("refgene.txt.gz") ||
@@ -104,39 +104,39 @@ function inferFileFormat(fn) {
         fn.endsWith("refgene.txt") ||
         fn.endsWith("refgene.sorted.txt.gz") ||
         fn.endsWith("refgene.sorted.txt.bgz")) {
-        return "refgene";
+        return "refgene"
     }
 
 
     //Strip parameters -- handle local files later
-    idx = fn.indexOf("?");
+    idx = fn.indexOf("?")
     if (idx > 0) {
-        fn = fn.substr(0, idx);
+        fn = fn.substr(0, idx)
     }
 
     //Strip aux extensions .gz, .tab, and .txt
     if (fn.endsWith(".gz")) {
-        fn = fn.substr(0, fn.length - 3);
+        fn = fn.substr(0, fn.length - 3)
     }
 
     if (fn.endsWith(".txt") || fn.endsWith(".tab") || fn.endsWith(".bgz")) {
-        fn = fn.substr(0, fn.length - 4);
+        fn = fn.substr(0, fn.length - 4)
     }
 
 
-    idx = fn.lastIndexOf(".");
-    ext = idx < 0 ? fn : fn.substr(idx + 1);
+    idx = fn.lastIndexOf(".")
+    ext = idx < 0 ? fn : fn.substr(idx + 1)
 
     switch (ext) {
         case "bw":
-            return "bigwig";
+            return "bigwig"
         case "bb":
-            return "bigbed";
+            return "bigbed"
         default:
             if (knownFileExtensions.has(ext)) {
-                return ext;
+                return ext
             } else {
-                return undefined;
+                return undefined
             }
 
     }
@@ -147,57 +147,57 @@ function inferIndexPath(url, extension) {
 
     if (StringUtils.isString(url)) {
         if (url.includes("?")) {
-            const idx = url.indexOf("?");
-            return url.substring(0, idx) + "." + extension + url.substring(idx);
+            const idx = url.indexOf("?")
+            return url.substring(0, idx) + "." + extension + url.substring(idx)
         } else {
-            return url + "." + extension;
+            return url + "." + extension
         }
     } else {
-        return undefined;
+        return undefined
     }
 }
 
 
 function inferTrackType(config) {
 
-    translateDeprecatedTypes(config);
+    translateDeprecatedTypes(config)
 
     if (config.type) {
-        return config.type;
+        return config.type
     }
 
     if (config.format) {
-        const format = config.format.toLowerCase();
+        const format = config.format.toLowerCase()
         switch (format) {
             case "bw":
             case "bigwig":
             case "wig":
             case "bedgraph":
             case "tdf":
-                return "wig";
+                return "wig"
             case "vcf":
-                return "variant";
+                return "variant"
             case "seg":
-                return "seg";
+                return "seg"
             case "mut":
             case "maf":
-                return "mut";
+                return "mut"
             case "bam":
             case "cram":
-                return "alignment";
+                return "alignment"
             case "bedpe":
             case "bedpe-loop":
-                return "interact";
+                return "interact"
             case "bp":
-                return "arc";
+                return "arc"
             case "gwas":
-                return "gwas";
+                return "gwas"
             case "bed":
             case "bigbed":
             case "bb":
-                return "bedtype";
+                return "bedtype"
             default:
-                return "annotation";
+                return "annotation"
         }
     }
 }
@@ -205,33 +205,33 @@ function inferTrackType(config) {
 function translateDeprecatedTypes(config) {
 
     if (config.featureType) {  // Translate deprecated "feature" type
-        config.type = config.type || config.featureType;
-        config.featureType = undefined;
+        config.type = config.type || config.featureType
+        config.featureType = undefined
     }
     if ("junctions" === config.type) {
         config.type = "junction"
     } else if ("bed" === config.type) {
-        config.type = "annotation";
-        config.format = config.format || "bed";
+        config.type = "annotation"
+        config.format = config.format || "bed"
     } else if ("annotations" === config.type) {
         config.type = "annotation"
     } else if ("alignments" === config.type) {
         config.type = "alignment"
     } else if ("bam" === config.type) {
-        config.type = "alignment";
+        config.type = "alignment"
         config.format = "bam"
     } else if ("vcf" === config.type) {
-        config.type = "variant";
+        config.type = "variant"
         config.format = "vcf"
     } else if ("t2d" === config.type) {
-        config.type = "gwas";
+        config.type = "gwas"
     } else if ("FusionJuncSpan" === config.type && !config.format) {
-        config.format = "fusionjuncspan";
+        config.format = "fusionjuncspan"
     } else if ("aed" === config.type) {
-        config.type = "annotation";
-        config.format = config.format || "aed";
+        config.type = "annotation"
+        config.format = config.format || "aed"
     }
 }
 
 
-export {knownFileExtensions, getFormat, inferFileFormat, inferTrackType, inferIndexPath};
+export {knownFileExtensions, getFormat, inferFileFormat, inferTrackType, inferIndexPath}

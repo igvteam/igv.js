@@ -23,55 +23,55 @@
  * THE SOFTWARE.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js";
+import $ from "./vendor/jquery-3.3.1.slim.js"
 import {Alert, InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {
     BGZip,
-    Icon,
     DOMUtils,
     FileUtils,
     GoogleUtils,
+    Icon,
     igvxhr,
     StringUtils,
     URIUtils
-} from "../node_modules/igv-utils/src/index.js";
-import * as TrackUtils from './util/trackUtils.js';
-import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js";
-import C2S from "./canvas2svg.js";
-import TrackFactory from "./trackFactory.js";
-import ROI from "./roi.js";
-import XMLSession from "./session/igvXmlSession.js";
-import GenomeUtils from "./genome/genome.js";
-import loadPlinkFile from "./sampleInformation.js";
-import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js";
-import {buildOptions, createColumn, doAutoscale, getFilename, createViewport} from "./util/igvUtils.js";
-import GtexUtils from "./gtex/gtexUtils.js";
-import {defaultSequenceTrackOrder} from './sequenceTrack.js';
-import version from "./version.js";
+} from "../node_modules/igv-utils/src/index.js"
+import * as TrackUtils from './util/trackUtils.js'
+import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js"
+import C2S from "./canvas2svg.js"
+import TrackFactory from "./trackFactory.js"
+import ROI from "./roi.js"
+import XMLSession from "./session/igvXmlSession.js"
+import GenomeUtils from "./genome/genome.js"
+import loadPlinkFile from "./sampleInformation.js"
+import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js"
+import {buildOptions, createColumn, createViewport, doAutoscale, getFilename} from "./util/igvUtils.js"
+import GtexUtils from "./gtex/gtexUtils.js"
+import {defaultSequenceTrackOrder} from './sequenceTrack.js'
+import version from "./version.js"
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
-import NavbarManager from "./navbarManager.js";
-import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
-import WindowSizePanel from "./windowSizePanel.js";
-import CursorGuide from "./ui/cursorGuide.js";
-import CursorGuideButton from "./ui/cursorGuideButton.js";
-import CenterLineButton from './ui/centerLineButton.js';
-import TrackLabelControl from "./ui/trackLabelControl.js";
-import SampleNameControl from "./ui/sampleNameControl.js";
-import ZoomWidget from "./ui/zoomWidget.js";
-import DataRangeDialog from "./ui/dataRangeDialog.js";
-import HtsgetReader from "./htsget/htsgetReader.js";
-import SVGSaveControl from "./ui/svgSaveControl.js";
-import MenuPopup from "./ui/menuPopup.js";
-import {viewportColumnManager} from './viewportColumnManager.js';
-import GenericColorPicker from './ui/genericColorPicker.js';
-import ViewportCenterLine from './ui/viewportCenterLine.js';
-import IdeogramTrack from "./ideogramTrack.js";
-import RulerTrack from "./rulerTrack.js";
-import GtexSelection from "./gtex/gtexSelection.js";
-import CircularViewControl from "./ui/circularViewControl.js";
-import {makeCircViewChromosomes, createCircularView} from "./jbrowse/circularViewUtils.js";
+import NavbarManager from "./navbarManager.js"
+import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js"
+import WindowSizePanel from "./windowSizePanel.js"
+import CursorGuide from "./ui/cursorGuide.js"
+import CursorGuideButton from "./ui/cursorGuideButton.js"
+import CenterLineButton from './ui/centerLineButton.js'
+import TrackLabelControl from "./ui/trackLabelControl.js"
+import SampleNameControl from "./ui/sampleNameControl.js"
+import ZoomWidget from "./ui/zoomWidget.js"
+import DataRangeDialog from "./ui/dataRangeDialog.js"
+import HtsgetReader from "./htsget/htsgetReader.js"
+import SVGSaveControl from "./ui/svgSaveControl.js"
+import MenuPopup from "./ui/menuPopup.js"
+import {viewportColumnManager} from './viewportColumnManager.js'
+import GenericColorPicker from './ui/genericColorPicker.js'
+import ViewportCenterLine from './ui/viewportCenterLine.js'
+import IdeogramTrack from "./ideogramTrack.js"
+import RulerTrack from "./rulerTrack.js"
+import GtexSelection from "./gtex/gtexSelection.js"
+import CircularViewControl from "./ui/circularViewControl.js"
+import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -80,7 +80,7 @@ const igv_scrollbar_outer_width = 14
 const igv_track_manipulation_handle_width = 12
 
 // css - $igv-track-gear-menu-column-width: 28px;
-const igv_track_gear_menu_column_width = 28;
+const igv_track_gear_menu_column_width = 28
 
 // $igv-column-shim-width: 1px;
 // $igv-column-shim-margin: 2px;
@@ -92,25 +92,25 @@ class Browser {
 
     constructor(config, parentDiv) {
 
-        this.config = config;
-        this.guid = DOMUtils.guid();
-        this.namespace = '.browser_' + this.guid;
+        this.config = config
+        this.guid = DOMUtils.guid()
+        this.namespace = '.browser_' + this.guid
 
-        this.parent = parentDiv;
+        this.parent = parentDiv
 
-        this.root = DOMUtils.div({class: 'igv-container'});
-        parentDiv.appendChild(this.root);
+        this.root = DOMUtils.div({class: 'igv-container'})
+        parentDiv.appendChild(this.root)
 
         Alert.init(this.root)
 
-        this.columnContainer = DOMUtils.div({class: 'igv-column-container'});
-        this.root.appendChild(this.columnContainer);
+        this.columnContainer = DOMUtils.div({class: 'igv-column-container'})
+        this.root.appendChild(this.columnContainer)
 
-        this.menuPopup = new MenuPopup(this.columnContainer);
+        this.menuPopup = new MenuPopup(this.columnContainer)
 
-        this.initialize(config);
+        this.initialize(config)
 
-        this.trackViews = [];
+        this.trackViews = []
 
         this.constants = {
             dragThreshold: 3,
@@ -120,11 +120,11 @@ class Browser {
         }
 
         // Map of event name -> [ handlerFn, ... ]
-        this.eventHandlers = {};
+        this.eventHandlers = {}
 
-        this.addMouseHandlers();
+        this.addMouseHandlers()
 
-        this.setControls(config);
+        this.setControls(config)
     }
 
     initialize(config) {
@@ -132,24 +132,24 @@ class Browser {
         if (config.gtex) {
             GtexUtils.gtexLoaded = true
         }
-        this.flanking = config.flanking;
-        this.crossDomainProxy = config.crossDomainProxy;
-        this.formats = config.formats;
-        this.trackDefaults = config.trackDefaults;
-        this.nucleotideColors = config.nucleotideColors || defaultNucleotideColors;
+        this.flanking = config.flanking
+        this.crossDomainProxy = config.crossDomainProxy
+        this.formats = config.formats
+        this.trackDefaults = config.trackDefaults
+        this.nucleotideColors = config.nucleotideColors || defaultNucleotideColors
         for (let key of Object.keys(this.nucleotideColors)) {
-            this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key];
+            this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key]
         }
 
-        this.trackLabelsVisible = config.showTrackLabels;
+        this.trackLabelsVisible = config.showTrackLabels
 
-        this.isCenterLineVisible = config.showCenterGuide;
+        this.isCenterLineVisible = config.showCenterGuide
 
-        this.cursorGuideVisible = config.showCursorTrackingGuide;
+        this.cursorGuideVisible = config.showCursorTrackingGuide
 
-        this.showSampleNames = config.showSampleNames;
-        this.showSampleNameButton = config.showSampleNameButton;
-        this.sampleNameViewportWidth = config.sampleNameViewportWidth || defaultSampleNameViewportWidth;
+        this.showSampleNames = config.showSampleNames
+        this.showSampleNameButton = config.showSampleNameButton
+        this.sampleNameViewportWidth = config.sampleNameViewportWidth || defaultSampleNameViewportWidth
 
         if (config.search) {
             this.searchConfig = {
@@ -168,46 +168,46 @@ class Browser {
 
     setControls(config) {
 
-        const $navBar = this.createStandardControls(config);
-        $navBar.insertBefore($(this.columnContainer));
-        this.$navigation = $navBar;
+        const $navBar = this.createStandardControls(config)
+        $navBar.insertBefore($(this.columnContainer))
+        this.$navigation = $navBar
 
         if (false === config.showControls) {
-            $navBar.hide();
+            $navBar.hide()
         }
 
     }
 
     createStandardControls(config) {
 
-        this.navbarManager = new NavbarManager(this);
+        this.navbarManager = new NavbarManager(this)
 
-        const $navBar = $('<div>', {class: 'igv-navbar'});
-        this.$navigation = $navBar;
+        const $navBar = $('<div>', {class: 'igv-navbar'})
+        this.$navigation = $navBar
 
-        const $navbarLeftContainer = $('<div>', {class: 'igv-navbar-left-container'});
-        $navBar.append($navbarLeftContainer);
+        const $navbarLeftContainer = $('<div>', {class: 'igv-navbar-left-container'})
+        $navBar.append($navbarLeftContainer)
 
         // IGV logo
-        const $logo = $('<div>', {class: 'igv-logo'});
-        $navbarLeftContainer.append($logo);
+        const $logo = $('<div>', {class: 'igv-logo'})
+        $navbarLeftContainer.append($logo)
 
-        const logoSvg = logo();
-        logoSvg.css("width", "34px");
-        logoSvg.css("height", "32px");
-        $logo.append(logoSvg);
+        const logoSvg = logo()
+        logoSvg.css("width", "34px")
+        logoSvg.css("height", "32px")
+        $logo.append(logoSvg)
 
-        this.$current_genome = $('<div>', {class: 'igv-current-genome'});
-        $navbarLeftContainer.append(this.$current_genome);
-        this.$current_genome.text('');
+        this.$current_genome = $('<div>', {class: 'igv-current-genome'})
+        $navbarLeftContainer.append(this.$current_genome)
+        this.$current_genome.text('')
 
-        const $genomicLocation = $('<div>', {class: 'igv-navbar-genomic-location'});
-        $navbarLeftContainer.append($genomicLocation);
+        const $genomicLocation = $('<div>', {class: 'igv-navbar-genomic-location'})
+        $navbarLeftContainer.append($genomicLocation)
 
         // chromosome select widget
-        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0));
+        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0))
         if (undefined === config.showChromosomeWidget) {
-            config.showChromosomeWidget = true;   // Default to true
+            config.showChromosomeWidget = true   // Default to true
         }
         if (true === config.showChromosomeWidget) {
             this.chromosomeSelectWidget.show()
@@ -215,33 +215,33 @@ class Browser {
             this.chromosomeSelectWidget.hide()
         }
 
-        const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'});
-        $genomicLocation.append($locusSizeGroup);
+        const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'})
+        $genomicLocation.append($locusSizeGroup)
 
-        const $searchContainer = $('<div>', {class: 'igv-search-container'});
-        $locusSizeGroup.append($searchContainer);
+        const $searchContainer = $('<div>', {class: 'igv-search-container'})
+        $locusSizeGroup.append($searchContainer)
 
         // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
-        this.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'});
-        $searchContainer.append(this.$searchInput);
+        this.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'})
+        $searchContainer.append(this.$searchInput)
 
-        this.$searchInput.change(() => this.doSearch(this.$searchInput.val()));
+        this.$searchInput.change(() => this.doSearch(this.$searchInput.val()))
 
-        const searchIconContainer = DOMUtils.div({class: 'igv-search-icon-container'});
-        $searchContainer.append($(searchIconContainer));
+        const searchIconContainer = DOMUtils.div({class: 'igv-search-icon-container'})
+        $searchContainer.append($(searchIconContainer))
 
-        searchIconContainer.appendChild(Icon.createIcon("search"));
+        searchIconContainer.appendChild(Icon.createIcon("search"))
 
-        searchIconContainer.addEventListener('click', () => this.doSearch(this.$searchInput.val()));
+        searchIconContainer.addEventListener('click', () => this.doSearch(this.$searchInput.val()))
 
-        this.windowSizePanel = new WindowSizePanel($locusSizeGroup.get(0), this);
+        this.windowSizePanel = new WindowSizePanel($locusSizeGroup.get(0), this)
 
-        const $navbarRightContainer = $('<div>', {class: 'igv-navbar-right-container'});
-        $navBar.append($navbarRightContainer);
+        const $navbarRightContainer = $('<div>', {class: 'igv-navbar-right-container'})
+        $navBar.append($navbarRightContainer)
 
-        const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">');
-        $navbarRightContainer.append($toggle_button_container);
-        this.$toggle_button_container = $toggle_button_container;
+        const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">')
+        $navbarRightContainer.append($toggle_button_container)
+        this.$toggle_button_container = $toggle_button_container
 
         this.cursorGuide = new CursorGuide(this.columnContainer, this)
 
@@ -255,25 +255,25 @@ class Browser {
         this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
 
         if (true === config.showSVGButton) {
-            this.svgSaveControl = new SVGSaveControl($toggle_button_container.get(0), this);
+            this.svgSaveControl = new SVGSaveControl($toggle_button_container.get(0), this)
         }
 
-        this.zoomWidget = new ZoomWidget(this, $navbarRightContainer.get(0));
+        this.zoomWidget = new ZoomWidget(this, $navbarRightContainer.get(0))
 
         if (false === config.showNavigation) {
-            this.$navigation.hide();
+            this.$navigation.hide()
         }
 
-        this.inputDialog = new InputDialog(this.root);
+        this.inputDialog = new InputDialog(this.root)
         this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
 
-        this.dataRangeDialog = new DataRangeDialog($(this.root));
+        this.dataRangeDialog = new DataRangeDialog($(this.root))
         this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${DOMUtils.guid()}`
 
         this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432})
         this.genericColorPicker.container.id = `igv-track-color-picker-${DOMUtils.guid()}`
 
-        return $navBar;
+        return $navBar
 
     }
 
@@ -282,26 +282,26 @@ class Browser {
     }
 
     isMultiLocusMode() {
-        return this.referenceFrameList && this.referenceFrameList.length > 1;
+        return this.referenceFrameList && this.referenceFrameList.length > 1
     };
 
     addTrackToFactory(name, track) {
-        TrackFactory.addTrack(name, track);
+        TrackFactory.addTrack(name, track)
     }
 
     isMultiLocusWholeGenomeView() {
 
         if (undefined === this.referenceFrameList || 1 === this.referenceFrameList.length) {
-            return false;
+            return false
         }
 
         for (let referenceFrame of this.referenceFrameList) {
             if ('all' === referenceFrame.chr.toLowerCase()) {
-                return true;
+                return true
             }
         }
 
-        return false;
+        return false
     };
 
     /**
@@ -310,9 +310,9 @@ class Browser {
      */
     toSVG() {
 
-        let {x, y, width, height} = this.columnContainer.getBoundingClientRect();
+        let {x, y, width, height} = this.columnContainer.getBoundingClientRect()
 
-        const h_render = 8000;
+        const h_render = 8000
 
         let context = new C2S(
             {
@@ -332,9 +332,9 @@ class Browser {
                         height: h_render
                     }
 
-            });
+            })
 
-        const dx = x;
+        const dx = x
 
         // tracks -> SVG
         for (let trackView of this.trackViews) {
@@ -342,9 +342,9 @@ class Browser {
         }
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
-        context.setHeight(height);
+        context.setHeight(height)
 
-        return context.getSerializedSvg(true);
+        return context.getSerializedSvg(true)
 
     }
 
@@ -380,14 +380,14 @@ class Browser {
      */
     async loadSession(options) {
 
-        this.roi = [];
-        let session;
+        this.roi = []
+        let session
         if (options.url || options.file) {
             session = await loadSessionFile(options)
         } else {
-            session = options;
+            session = options
         }
-        return this.loadSessionObject(session);
+        return this.loadSessionObject(session)
 
 
         async function loadSessionFile(options) {
@@ -395,8 +395,8 @@ class Browser {
             const urlOrFile = options.url || options.file
 
             if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
-                const json = Browser.uncompressSession(options.url);
-                return JSON.parse(json);
+                const json = Browser.uncompressSession(options.url)
+                return JSON.parse(json)
 
             } else {
                 let filename = options.filename
@@ -406,14 +406,14 @@ class Browser {
 
                 if (filename.endsWith(".xml")) {
 
-                    const knownGenomes = GenomeUtils.KNOWN_GENOMES;
+                    const knownGenomes = GenomeUtils.KNOWN_GENOMES
                     const string = await igvxhr.loadString(urlOrFile)
-                    return new XMLSession(string, knownGenomes);
+                    return new XMLSession(string, knownGenomes)
 
                 } else if (filename.endsWith(".json")) {
-                    return igvxhr.loadJson(urlOrFile);
+                    return igvxhr.loadJson(urlOrFile)
                 } else {
-                    return undefined;
+                    return undefined
                 }
             }
 
@@ -431,8 +431,8 @@ class Browser {
         // prepare to load a new session, discarding DOM and state
         this.cleanHouseForSession()
 
-        this.showSampleNames = session.showSampleNames || false;
-        this.sampleNameControl.setState(this.showSampleNames === true);
+        this.showSampleNames = session.showSampleNames || false
+        this.sampleNameControl.setState(this.showSampleNames === true)
 
         if (session.sampleNameViewportWidth) {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
@@ -453,8 +453,8 @@ class Browser {
         // Track gear column
         createColumn(this.columnContainer, 'igv-gear-menu-column')
 
-        const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome);
-        await this.loadReference(genomeConfig, session.locus);
+        const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome)
+        await this.loadReference(genomeConfig, session.locus)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
@@ -472,39 +472,39 @@ class Browser {
         if (session.gtexSelections) {
             for (let referenceFrame of this.referenceFrameList) {
                 for (let s of Object.keys(session.gtexSelections)) {
-                    const gene = session.gtexSelections[s].gene;
-                    const snp = session.gtexSelections[s].snp;
-                    referenceFrame.selection = new GtexSelection(gene, snp);
+                    const gene = session.gtexSelections[s].gene
+                    const snp = session.gtexSelections[s].snp
+                    referenceFrame.selection = new GtexSelection(gene, snp)
                 }
             }
         }
 
         if (session.roi) {
-            this.roi = [];
+            this.roi = []
             for (let r of session.roi) {
-                this.roi.push(new ROI(r, this.genome));
+                this.roi.push(new ROI(r, this.genome))
             }
         }
 
         // Tracks.  Start with genome tracks, if any, then append session tracks
-        const genomeTracks = genomeConfig.tracks || [];
-        const trackConfigurations = session.tracks ? genomeTracks.concat(session.tracks) : genomeTracks;
+        const genomeTracks = genomeConfig.tracks || []
+        const trackConfigurations = session.tracks ? genomeTracks.concat(session.tracks) : genomeTracks
 
         // Insure that we always have a sequence track
-        const pushSequenceTrack = trackConfigurations.filter(track => track.type === 'sequence').length === 0;
+        const pushSequenceTrack = trackConfigurations.filter(track => track.type === 'sequence').length === 0
         if (pushSequenceTrack /*&& false !== this.config.showSequence*/) {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
         // Maintain track order unless explicitly set
-        let trackOrder = 1;
+        let trackOrder = 1
         for (let t of trackConfigurations) {
             if (undefined === t.order) {
-                t.order = trackOrder++;
+                t.order = trackOrder++
             }
         }
 
-        await this.loadTrackList(trackConfigurations);
+        await this.loadTrackList(trackConfigurations)
 
         this.updateUIWithReferenceFrameList()
 
@@ -544,26 +544,26 @@ class Browser {
         this.updateNavbarDOMWithGenome(genome)
 
         if (genomeChange) {
-            this.removeAllTracks();
+            this.removeAllTracks()
         }
 
-        let locus = getInitialLocus(initialLocus, genome);
-        const locusFound = await this.search(locus, true);
+        let locus = getInitialLocus(initialLocus, genome)
+        const locusFound = await this.search(locus, true)
         if (!locusFound) {
-            console.log("Initial locus not found: " + locus);
+            console.log("Initial locus not found: " + locus)
             locus = genome.getHomeChromosomeName()
-            const locusFound = await this.search(locus, true);
+            const locusFound = await this.search(locus, true)
             if (!locusFound) {
-                throw new Error("Cannot set initial locus");
+                throw new Error("Cannot set initial locus")
             }
         }
 
-        if(genomeChange && this.circularView) {
+        if (genomeChange && this.circularView) {
             this.circularView.setAssembly({
                 name: this.genome.id,
                 id: this.genome.id,
                 chromosomes: makeCircViewChromosomes(this.genome)
-            });
+            })
         }
     }
 
@@ -587,9 +587,9 @@ class Browser {
     }
 
     updateNavbarDOMWithGenome(genome) {
-        this.$current_genome.text(genome.id || '');
-        this.$current_genome.attr('title', genome.id || '');
-        this.chromosomeSelectWidget.update(genome);
+        this.$current_genome.text(genome.id || '')
+        this.$current_genome.attr('title', genome.id || '')
+        this.chromosomeSelectWidget.update(genome)
     }
 
     /**
@@ -601,22 +601,22 @@ class Browser {
      */
     async loadGenome(idOrConfig) {
 
-        const genomeConfig = await GenomeUtils.expandReference(idOrConfig);
-        await this.loadReference(genomeConfig, undefined);
+        const genomeConfig = await GenomeUtils.expandReference(idOrConfig)
+        await this.loadReference(genomeConfig, undefined)
 
-        const tracks = genomeConfig.tracks || [];
+        const tracks = genomeConfig.tracks || []
 
         // Insure that we always have a sequence track
-        const pushSequenceTrack = tracks.filter(track => track.type === 'sequence').length === 0;
+        const pushSequenceTrack = tracks.filter(track => track.type === 'sequence').length === 0
         if (pushSequenceTrack) {
             tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
-        await this.loadTrackList(tracks);
+        await this.loadTrackList(tracks)
 
-        await this.updateViews();
+        await this.updateViews()
 
-        return this.genome;
+        return this.genome
     }
 
     /**
@@ -626,15 +626,15 @@ class Browser {
      */
     updateUIWithReferenceFrameList() {
 
-        const referenceFrameList = this.referenceFrameList;
+        const referenceFrameList = this.referenceFrameList
 
         this.updateLocusSearchWidget()
 
-        const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr));
+        const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
 
-        this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
+        this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV)
 
-        toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
+        toggleTrackLabels(this.trackViews, this.trackLabelsVisible)
 
         this.setCenterLineAndCenterLineButtonVisibility(!GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
 
@@ -655,7 +655,7 @@ class Browser {
     }
 
     setCustomCursorGuideMouseHandler(mouseHandler) {
-        this.cursorGuide.customMouseHandler = mouseHandler;
+        this.cursorGuide.customMouseHandler = mouseHandler
     }
 
     // center line
@@ -685,9 +685,9 @@ class Browser {
     async loadTrackList(configList) {
 
         try {
-            const promises = [];
+            const promises = []
             for (let config of configList) {
-                promises.push(this.loadTrack(config, false));
+                promises.push(this.loadTrack(config, false))
             }
 
             const loadedTracks = await Promise.all(promises)
@@ -695,9 +695,9 @@ class Browser {
                 return trackView.track.autoscaleGroup
             })
             if (groupAutoscaleViews.length > 0) {
-                this.updateViews(groupAutoscaleViews);
+                this.updateViews(groupAutoscaleViews)
             }
-            return loadedTracks;
+            return loadedTracks
         } finally {
             await this.resize()
         }
@@ -705,34 +705,34 @@ class Browser {
 
     async loadROI(config) {
         if (!this.roi) {
-            this.roi = [];
+            this.roi = []
         }
         if (Array.isArray(config)) {
             for (let c of config) {
-                this.roi.push(new ROI(c, this.genome));
+                this.roi.push(new ROI(c, this.genome))
             }
         } else {
-            this.roi.push(new ROI(config, this.genome));
+            this.roi.push(new ROI(config, this.genome))
         }
-        await this.updateViews(true);
+        await this.updateViews(true)
     }
 
     removeROI(roiToRemove) {
         for (let i = 0; i < this.roi.length; i++) {
             if (this.roi[i].name === roiToRemove.name) {
-                this.roi.splice(i, 1);
-                break;
+                this.roi.splice(i, 1)
+                break
             }
         }
         for (let tv of this.trackViews) {
-            tv.updateViews(true);
+            tv.updateViews(true)
         }
     }
 
     clearROIs() {
-        this.roi = [];
+        this.roi = []
         for (let tv of this.trackViews) {
-            tv.updateViews(true);
+            tv.updateViews(true)
         }
     }
 
@@ -766,54 +766,54 @@ class Browser {
 
         // config might be json
         if (StringUtils.isString(config)) {
-            config = JSON.parse(config);
+            config = JSON.parse(config)
         }
 
         try {
 
-            const newTrack = await this.createTrack(config);
+            const newTrack = await this.createTrack(config)
 
             if (undefined === newTrack) {
-                Alert.presentAlert(new Error(`Unknown file type: ${config.url || config}`), undefined);
-                return newTrack;
+                Alert.presentAlert(new Error(`Unknown file type: ${config.url || config}`), undefined)
+                return newTrack
             }
 
             // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
             if (undefined === newTrack.order) {
-                newTrack.order = this.trackViews.length;
+                newTrack.order = this.trackViews.length
             }
 
-            const trackView = new TrackView(this, this.columnContainer, newTrack);
-            this.trackViews.push(trackView);
-            toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
-            this.reorderTracks();
+            const trackView = new TrackView(this, this.columnContainer, newTrack)
+            this.trackViews.push(trackView)
+            toggleTrackLabels(this.trackViews, this.trackLabelsVisible)
+            this.reorderTracks()
             this.fireEvent('trackorderchanged', [this.getTrackOrder()])
 
             if (typeof newTrack.postInit === 'function') {
                 try {
-                    trackView.startSpinner();
-                    await newTrack.postInit();
+                    trackView.startSpinner()
+                    await newTrack.postInit()
                 } finally {
-                    trackView.stopSpinner();
+                    trackView.stopSpinner()
                 }
             }
 
             if (!newTrack.autoscaleGroup) {
                 // Group autoscale will get updated later (as a group)
                 if (config.sync) {
-                    await trackView.updateViews();
+                    await trackView.updateViews()
                 } else {
-                    trackView.updateViews();
+                    trackView.updateViews()
                 }
             }
 
             if (typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
                 if (this.config.showSampleNameButton !== false) {
-                    this.sampleNameControl.show();   // If not explicitly set
+                    this.sampleNameControl.show()   // If not explicitly set
                 }
             }
 
-            return newTrack;
+            return newTrack
 
         } catch (error) {
             const httpMessages =
@@ -821,14 +821,14 @@ class Browser {
                     "401": "Access unauthorized",
                     "403": "Access forbidden",
                     "404": "Not found"
-                };
-            console.error(error);
-            let msg = error.message || error.error || error.toString();
+                }
+            console.error(error)
+            let msg = error.message || error.error || error.toString()
             if (httpMessages.hasOwnProperty(msg)) {
-                msg = httpMessages[msg];
+                msg = httpMessages[msg]
             }
-            msg += (": " + config.url);
-            Alert.presentAlert(new Error(msg), undefined);
+            msg += (": " + config.url)
+            Alert.presentAlert(new Error(msg), undefined)
         } finally {
             // TODO: If loadTrack() is called individually - not via loadTrackList() - call this.resize()
             if (false === doResize) {
@@ -847,64 +847,64 @@ class Browser {
     async createTrack(config) {
 
         // Resolve function and promise urls
-        let url = await URIUtils.resolveURL(config.url);
+        let url = await URIUtils.resolveURL(config.url)
         if (StringUtils.isString(url)) {
-            url = url.trim();
+            url = url.trim()
         }
 
         if (url) {
             if (config.format) {
-                config.format = config.format.toLowerCase();
+                config.format = config.format.toLowerCase()
             } else {
-                let filename = config.filename;
+                let filename = config.filename
                 if (!filename) {
-                    filename = await getFilename(url);
+                    filename = await getFilename(url)
                 }
-                config.format = TrackUtils.inferFileFormat(filename);
+                config.format = TrackUtils.inferFileFormat(filename)
                 if (!config.format && (config.sourceType === undefined || config.sourceType === "htsget")) {
                     // Check for htsget URL.  This is a longshot
-                    await HtsgetReader.inferFormat(config);
+                    await HtsgetReader.inferFormat(config)
                 }
             }
         }
 
 
-        let type = config.type ? config.type.toLowerCase() : undefined;
+        let type = config.type ? config.type.toLowerCase() : undefined
 
         if (!type) {
-            type = TrackUtils.inferTrackType(config);
+            type = TrackUtils.inferTrackType(config)
             if ("bedtype" === type) {
                 // Bed files must be read to determine track type
-                const featureSource = FeatureSource(config, this.genome);
-                config._featureSource = featureSource;    // This is a temp variable, bit of a hack
-                const trackType = await featureSource.trackType();
+                const featureSource = FeatureSource(config, this.genome)
+                config._featureSource = featureSource    // This is a temp variable, bit of a hack
+                const trackType = await featureSource.trackType()
                 if (trackType) {
-                    type = trackType;
+                    type = trackType
                 } else {
-                    type = "annotation";
+                    type = "annotation"
                 }
             }
             // Record in config to make type persistent in session
-            config.type = type;
+            config.type = type
         }
 
         // Set defaults if specified
         if (this.trackDefaults && type) {
-            const settings = this.trackDefaults[type];
+            const settings = this.trackDefaults[type]
             if (settings) {
                 for (let property in settings) {
                     if (settings.hasOwnProperty(property) && config[property] === undefined) {
-                        config[property] = settings[property];
+                        config[property] = settings[property]
                     }
                 }
             }
         }
 
-        const track = TrackFactory.getTrack(type, config, this);
+        const track = TrackFactory.getTrack(type, config, this)
         if (track && config.roi) {
-            track.roi = [];
+            track.roi = []
             for (let r of config.roi) {
-                track.roi.push(new ROI(r, this.genome));
+                track.roi.push(new ROI(r, this.genome))
             }
         }
 
@@ -923,16 +923,16 @@ class Browser {
                         3
             }
 
-            const aOrder1 = firstSortOrder(a);
-            const bOrder1 = firstSortOrder(b);
+            const aOrder1 = firstSortOrder(a)
+            const bOrder1 = firstSortOrder(b)
             if (aOrder1 === bOrder1) {
-                const aOrder2 = a.track.order || 0;
-                const bOrder2 = b.track.order || 0;
-                return aOrder2 - bOrder2;
+                const aOrder2 = a.track.order || 0
+                const bOrder2 = b.track.order || 0
+                return aOrder2 - bOrder2
             } else {
-                return aOrder1 - bOrder1;
+                return aOrder1 - bOrder1
             }
-        });
+        })
 
         // discard current track order
         for (let {axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
@@ -978,10 +978,10 @@ class Browser {
     }
 
     removeTrackByName(name) {
-        const copy = this.trackViews.slice();
+        const copy = this.trackViews.slice()
         for (let trackView of copy) {
             if (name === trackView.track.name) {
-                this.removeTrack(trackView.track);
+                this.removeTrack(trackView.track)
             }
         }
     }
@@ -999,19 +999,19 @@ class Browser {
      */
     removeAllTracks() {
 
-        const remainingTrackViews = [];
+        const remainingTrackViews = []
 
         for (let trackView of this.trackViews) {
 
             if (trackView.track.id !== 'ruler' && trackView.track.id !== 'ideogram') {
-                this.fireEvent('trackremoved', [trackView.track]);
-                trackView.dispose();
+                this.fireEvent('trackremoved', [trackView.track])
+                trackView.dispose()
             } else {
-                remainingTrackViews.push(trackView);
+                remainingTrackViews.push(trackView)
             }
         }
 
-        this.trackViews = remainingTrackViews;
+        this.trackViews = remainingTrackViews
     }
 
     /**
@@ -1026,7 +1026,7 @@ class Browser {
             trackView => property(trackView.track) :
             trackView => value === trackView.track[property]
 
-        return this.trackViews.filter(f).map(tv => tv.track);
+        return this.trackViews.filter(f).map(tv => tv.track)
     }
 
     /**
@@ -1035,11 +1035,11 @@ class Browser {
      */
     setTrackHeight(newHeight) {
 
-        this.trackHeight = newHeight;
+        this.trackHeight = newHeight
 
         this.trackViews.forEach(function (trackView) {
-            trackView.setTrackHeight(newHeight);
-        });
+            trackView.setTrackHeight(newHeight)
+        })
 
     }
 
@@ -1055,11 +1055,11 @@ class Browser {
         }
 
         if (this.referenceFrameList) {
-            const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr);
-            this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
+            const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr)
+            this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV)
         }
 
-        await this.resize();
+        await this.resize()
     }
 
     async resize() {
@@ -1091,14 +1091,14 @@ class Browser {
 
         }
 
-        await this.updateViews(true);
+        await this.updateViews(true)
 
-        this.updateUIWithReferenceFrameList();
+        this.updateUIWithReferenceFrameList()
     }
 
     async updateViews(force) {
 
-        const trackViews = this.trackViews;
+        const trackViews = this.trackViews
 
         this.updateLocusSearchWidget()
 
@@ -1109,23 +1109,23 @@ class Browser {
         // Don't autoscale while dragging.
         if (this.dragObject) {
             for (let trackView of trackViews) {
-                await trackView.updateViews(force);
+                await trackView.updateViews(force)
             }
         } else {
             // Group autoscale
-            const groupAutoscaleTracks = {};
-            const otherTracks = [];
+            const groupAutoscaleTracks = {}
+            const otherTracks = []
             for (let trackView of trackViews) {
-                const group = trackView.track.autoscaleGroup;
+                const group = trackView.track.autoscaleGroup
                 if (group) {
-                    var l = groupAutoscaleTracks[group];
+                    var l = groupAutoscaleTracks[group]
                     if (!l) {
-                        l = [];
-                        groupAutoscaleTracks[group] = l;
+                        l = []
+                        groupAutoscaleTracks[group] = l
                     }
-                    l.push(trackView);
+                    l.push(trackView)
                 } else {
-                    otherTracks.push(trackView);
+                    otherTracks.push(trackView)
                 }
             }
 
@@ -1134,34 +1134,34 @@ class Browser {
                 const keys = Object.keys(groupAutoscaleTracks)
                 for (let group of keys) {
 
-                    const groupTrackViews = groupAutoscaleTracks[group];
-                    const promises = [];
+                    const groupTrackViews = groupAutoscaleTracks[group]
+                    const promises = []
 
                     for (let trackView of groupTrackViews) {
-                        promises.push(trackView.getInViewFeatures());
+                        promises.push(trackView.getInViewFeatures())
                     }
 
                     const featureArray = await Promise.all(promises)
 
-                    var allFeatures = [], dataRange;
+                    var allFeatures = [], dataRange
 
                     for (let features of featureArray) {
-                        allFeatures = allFeatures.concat(features);
+                        allFeatures = allFeatures.concat(features)
                     }
-                    dataRange = doAutoscale(allFeatures);
+                    dataRange = doAutoscale(allFeatures)
 
-                    const p = [];
+                    const p = []
                     for (let trackView of groupTrackViews) {
-                        trackView.track.dataRange = dataRange;
-                        trackView.track.autoscale = false;
-                        p.push(trackView.updateViews(force));
+                        trackView.track.dataRange = dataRange
+                        trackView.track.autoscale = false
+                        p.push(trackView.updateViews(force))
                     }
-                    await Promise.all(p);
+                    await Promise.all(p)
                 }
 
             }
 
-            await Promise.all(otherTracks.map(tv => tv.updateViews(force)));
+            await Promise.all(otherTracks.map(tv => tv.updateViews(force)))
             // for (let trackView of otherTracks) {
             //     await trackView.updateViews(force);
             // }
@@ -1171,20 +1171,20 @@ class Browser {
 
     updateLocusSearchWidget() {
 
-        const referenceFrameList = this.referenceFrameList;
+        const referenceFrameList = this.referenceFrameList
 
         // Update end position of reference frames based on pixel widths.  This is hacky, but its been done here
         // for a long time, although indirectly.
-        const width = this.calculateViewportWidth(this.referenceFrameList.length);
+        const width = this.calculateViewportWidth(this.referenceFrameList.length)
         for (let referenceFrame of referenceFrameList) {
-            referenceFrame.end = referenceFrame.start + referenceFrame.bpPerPixel * width;
+            referenceFrame.end = referenceFrame.start + referenceFrame.bpPerPixel * width
         }
 
-        this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : '';
+        this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
 
-        const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ');
+        const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
         //const loc = this.referenceFrameList.length === 1 ?   this.referenceFrameList[0].getLocusString() : '';
-        this.$searchInput.val(loc);
+        this.$searchInput.val(loc)
 
         this.fireEvent('locuschange', [this.referenceFrameList])
     }
@@ -1209,7 +1209,7 @@ class Browser {
     }
 
     minimumBases() {
-        return this.config.minimumBases;
+        return this.config.minimumBases
     }
 
     // Zoom in by a factor of 2, keeping the same center location
@@ -1226,7 +1226,7 @@ class Browser {
 
         const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
-        let referenceFrames = referenceFrameOrUndefined ? [referenceFrameOrUndefined] : this.referenceFrameList;
+        let referenceFrames = referenceFrameOrUndefined ? [referenceFrameOrUndefined] : this.referenceFrameList
 
         for (let referenceFrame of referenceFrames) {
             referenceFrame.zoomWithScaleFactor(this, scaleFactor, viewportWidth, centerBPOrUndefined)
@@ -1236,15 +1236,15 @@ class Browser {
     async presentMultiLocusPanel(alignment, referenceFrameLeft) {
 
         // account for reduced viewport width as a result of adding right mate pair panel
-        const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length);
+        const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length)
 
         const scaleFactor = this.calculateViewportWidth(this.referenceFrameList.length) / this.calculateViewportWidth(1 + this.referenceFrameList.length)
         adjustReferenceFrame(scaleFactor, referenceFrameLeft, viewportWidth, alignment.start, alignment.lengthOnRef)
 
         // create right mate pair reference frame
-        const mateChrName = this.genome.getChromosomeName(alignment.mate.chr);
+        const mateChrName = this.genome.getChromosomeName(alignment.mate.chr)
 
-        const referenceFrameRight = createReferenceFrameWithAlignment(this.genome, mateChrName, referenceFrameLeft.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
+        const referenceFrameRight = createReferenceFrameWithAlignment(this.genome, mateChrName, referenceFrameLeft.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef)
 
         // add right mate panel beside left mate panel
         const indexLeft = this.referenceFrameList.indexOf(referenceFrameLeft)
@@ -1259,12 +1259,12 @@ class Browser {
 
             for (let trackView of this.trackViews) {
                 const viewport = createViewport(trackView, viewportColumn, referenceFrameRight)
-                trackView.viewports.push(viewport);
+                trackView.viewports.push(viewport)
             }
 
         } else {
 
-            this.referenceFrameList.splice(indexRight, 0, referenceFrameRight);
+            this.referenceFrameList.splice(indexRight, 0, referenceFrameRight)
 
             for (let trackView of this.trackViews) {
                 const viewport = createViewport(trackView, viewportColumn, referenceFrameRight)
@@ -1275,22 +1275,22 @@ class Browser {
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
-        await this.resize();
+        await this.resize()
     }
 
     async removeMultiLocusPanel(referenceFrame) {
 
         // find the $column corresponding to this referenceFrame and remove it
-        const index = this.referenceFrameList.indexOf(referenceFrame);
-        const {$viewport} = this.trackViews[0].viewports[index];
+        const index = this.referenceFrameList.indexOf(referenceFrame)
+        const {$viewport} = this.trackViews[0].viewports[index]
         viewportColumnManager.removeColumnAtIndex(index, $viewport.parent().get(0))
 
         for (let {viewports} of this.trackViews) {
-            viewports[index].dispose();
-            viewports.splice(index, 1);
+            viewports[index].dispose()
+            viewports.splice(index, 1)
         }
 
-        this.referenceFrameList.splice(index, 1);
+        this.referenceFrameList.splice(index, 1)
 
         if (1 === this.referenceFrameList.length && this.getRulerTrackView()) {
             for (let rulerViewport of this.getRulerTrackView().viewports) {
@@ -1341,9 +1341,9 @@ class Browser {
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
-        this.updateUIWithReferenceFrameList();
+        this.updateUIWithReferenceFrameList()
 
-        await this.updateViews(true);
+        await this.updateViews(true)
 
     }
 
@@ -1355,7 +1355,7 @@ class Browser {
         this.columnContainer.querySelectorAll('.igv-column').forEach((column, c) => {
             if (c === referenceFrameIndex) {
                 // do nothing
-            }  else {
+            } else {
                 column.remove()
             }
         })
@@ -1365,22 +1365,22 @@ class Browser {
 
         // Discard viewports
         for (let trackView of this.trackViews) {
-            const retain = trackView.viewports[ referenceFrameIndex ]
+            const retain = trackView.viewports[referenceFrameIndex]
             trackView.viewports.filter((viewport, i) => i !== referenceFrameIndex).forEach(viewport => viewport.dispose())
-            trackView.viewports = [ retain ]
+            trackView.viewports = [retain]
         }
 
         const viewportWidth = this.calculateViewportWidth(1)
         referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth
-        this.referenceFrameList = [ referenceFrame ]
+        this.referenceFrameList = [referenceFrame]
 
-        this.trackViews.forEach(({ viewports }) => viewports.forEach(viewport => viewport.setWidth(viewportWidth)))
+        this.trackViews.forEach(({viewports}) => viewports.forEach(viewport => viewport.setWidth(viewportWidth)))
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
-        this.updateUIWithReferenceFrameList();
+        this.updateUIWithReferenceFrameList()
 
-        await this.updateViews(true);
+        await this.updateViews(true)
 
     }
 
@@ -1395,15 +1395,15 @@ class Browser {
         for (let {viewports} of this.trackViews) {
 
             for (let viewport of viewports) {
-                viewport.setWidth(viewportWidth);
+                viewport.setWidth(viewportWidth)
             }
         }
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
-        this.updateUIWithReferenceFrameList();
+        this.updateUIWithReferenceFrameList()
 
-        await this.updateViews(true);
+        await this.updateViews(true)
 
     }
 
@@ -1411,7 +1411,7 @@ class Browser {
      * @deprecated  This is a deprecated method with no known usages.  To be removed in a future release.
      */
     async goto(chr, start, end) {
-        await this.search(chr + ":" + start + "-" + end);
+        await this.search(chr + ":" + start + "-" + end)
     }
 
     /**
@@ -1424,11 +1424,11 @@ class Browser {
      * @returns {Promise<void>}
      */
     async doSearch(string, init) {
-        const success = await this.search(string, init);
+        const success = await this.search(string, init)
         if (!success) {
             Alert.presentAlert(new Error(`Unrecognized locus: <b> ${string} </b>`))
         }
-        return success;
+        return success
     }
 
 
@@ -1441,7 +1441,7 @@ class Browser {
      */
     async search(string, init) {
 
-        const loci = await search(this, string);
+        const loci = await search(this, string)
 
         if (loci && loci.length > 0) {
 
@@ -1464,28 +1464,28 @@ class Browser {
 
             // Populate the columns
             for (let trackView of this.trackViews) {
-                trackView.addDOMToColumnContainer(this, this.columnContainer, this.referenceFrameList);
+                trackView.addDOMToColumnContainer(this, this.columnContainer, this.referenceFrameList)
             }
 
-            this.updateUIWithReferenceFrameList();
+            this.updateUIWithReferenceFrameList()
 
             if (!init) {
-                await this.updateViews();
+                await this.updateViews()
             }
-            return true;
+            return true
         } else {
-            return false;
+            return false
         }
     }
 
     async loadSampleInformation(url) {
-        var name = url;
+        var name = url
         if (FileUtils.isFile(url)) {
-            name = url.name;
+            name = url.name
         }
-        var ext = name.substr(name.lastIndexOf('.') + 1);
+        var ext = name.substr(name.lastIndexOf('.') + 1)
         if (ext === 'fam') {
-            this.sampleInformation = await loadPlinkFile(url);
+            this.sampleInformation = await loadPlinkFile(url)
         }
     };
 
@@ -1493,9 +1493,9 @@ class Browser {
 
     on(eventName, fn) {
         if (!this.eventHandlers[eventName]) {
-            this.eventHandlers[eventName] = [];
+            this.eventHandlers[eventName] = []
         }
-        this.eventHandlers[eventName].push(fn);
+        this.eventHandlers[eventName].push(fn)
     };
 
     /**
@@ -1504,24 +1504,24 @@ class Browser {
      * @param fn
      */
     un(eventName, fn) {
-        this.off(eventName, fn);
+        this.off(eventName, fn)
     };
 
     off(eventName, fn) {
 
         if (!eventName) {
-            this.eventHandlers = {};   // Remove all event handlers
+            this.eventHandlers = {}   // Remove all event handlers
         } else if (!fn) {
-            this.eventHandlers[eventName] = []; // Remove all eventhandlers matching name
+            this.eventHandlers[eventName] = [] // Remove all eventhandlers matching name
         } else {
             // Remove specific event handler
-            const handlers = this.eventHandlers[eventName];
+            const handlers = this.eventHandlers[eventName]
             if (!handlers || handlers.length === 0) {
-                console.warn("No handlers to remove for event: " + eventName);
+                console.warn("No handlers to remove for event: " + eventName)
             } else {
-                const callbackIndex = handlers.indexOf(fn);
+                const callbackIndex = handlers.indexOf(fn)
                 if (callbackIndex !== -1) {
-                    this.eventHandlers[eventName].splice(callbackIndex, 1);
+                    this.eventHandlers[eventName].splice(callbackIndex, 1)
                 }
             }
         }
@@ -1529,17 +1529,17 @@ class Browser {
 
     fireEvent(eventName, args, thisObj) {
 
-        const handlers = this.eventHandlers[eventName];
+        const handlers = this.eventHandlers[eventName]
         if (undefined === handlers || handlers.length === 0) {
-            return undefined;
+            return undefined
         }
 
-        const scope = thisObj || window;
+        const scope = thisObj || window
         const results = handlers.map(function (event) {
-            return event.apply(scope, args);
-        });
+            return event.apply(scope, args)
+        })
 
-        return results[0];
+        return results[0]
     }
 
     dispose() {
@@ -1556,72 +1556,72 @@ class Browser {
         }
 
         if (this.showSampleNames !== undefined) {
-            json['showSampleNames'] = this.showSampleNames;
+            json['showSampleNames'] = this.showSampleNames
         }
         if (this.sampleNameViewportWidth !== defaultSampleNameViewportWidth) {
-            json['sampleNameViewportWidth'] = this.sampleNameViewportWidth;
+            json['sampleNameViewportWidth'] = this.sampleNameViewportWidth
         }
 
-        json["reference"] = this.genome.toJSON();
+        json["reference"] = this.genome.toJSON()
         if (FileUtils.isFilePath(json.reference.fastaURL)) {
-            throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`);
+            throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`)
         } else if (FileUtils.isFilePath(json.reference.indexURL)) {
-            throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`);
+            throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`)
         }
 
         // Build locus array (multi-locus view).  Use the first track to extract the loci, any track could be used.
-        const locus = [];
-        const gtexSelections = {};
-        let anyTrackView = this.trackViews[0];
+        const locus = []
+        const gtexSelections = {}
+        let anyTrackView = this.trackViews[0]
         for (let {referenceFrame} of anyTrackView.viewports) {
-            const locusString = referenceFrame.getLocusString();
-            locus.push(locusString);
+            const locusString = referenceFrame.getLocusString()
+            locus.push(locusString)
             if (referenceFrame.selection) {
                 const selection = {
                     gene: referenceFrame.selection.gene,
                     snp: referenceFrame.selection.snp
-                };
-                gtexSelections[locusString] = selection;
+                }
+                gtexSelections[locusString] = selection
             }
         }
-        json["locus"] = locus.length === 1 ? locus[0] : locus;
+        json["locus"] = locus.length === 1 ? locus[0] : locus
 
-        const gtexKeys = Object.getOwnPropertyNames(gtexSelections);
+        const gtexKeys = Object.getOwnPropertyNames(gtexSelections)
         if (gtexKeys.length > 0) {
-            json["gtexSelections"] = gtexSelections;
+            json["gtexSelections"] = gtexSelections
         }
 
-        const trackJson = [];
-        const errors = [];
+        const trackJson = []
+        const errors = []
         for (let {track} of this.trackViews) {
             try {
-                let config;
+                let config
                 if (typeof track.getState === "function") {
-                    config = track.getState();
+                    config = track.getState()
                 } else {
-                    config = track.config;
+                    config = track.config
                 }
 
                 if (config) {
                     // null backpointer to browser
                     if (config.browser) {
-                        delete config.browser;
+                        delete config.browser
                     }
-                    config.order = track.order; //order++;
-                    trackJson.push(config);
+                    config.order = track.order //order++;
+                    trackJson.push(config)
                 }
             } catch (e) {
-                errors.push(e);
+                errors.push(e)
             }
         }
 
         if (errors.length > 0) {
-            let n = 1;
-            let message = 'Errors encountered saving session:';
+            let n = 1
+            let message = 'Errors encountered saving session:'
             for (let e of errors) {
-                message += ` (${n++}) ${e.toString()}.`;
+                message += ` (${n++}) ${e.toString()}.`
             }
-            throw Error(message);
+            throw Error(message)
         }
 
 
@@ -1630,35 +1630,35 @@ class Browser {
         })
 
         if (locaTrackFiles.length > 0) {
-            throw new Error(`Error. Sessions cannot include local file references.`);
+            throw new Error(`Error. Sessions cannot include local file references.`)
         }
 
-        json["tracks"] = trackJson;
+        json["tracks"] = trackJson
 
-        return json;        // This is an object, not a json string
+        return json        // This is an object, not a json string
 
     }
 
     compressedSession() {
-        const json = JSON.stringify(this.toJSON());
-        return BGZip.compressString(json);
+        const json = JSON.stringify(this.toJSON())
+        return BGZip.compressString(json)
     }
 
     sessionURL() {
-        const path = window.location.href.slice();
-        const idx = path.indexOf("?");
-        const surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + this.compressedSession();
-        return surl;
+        const path = window.location.href.slice()
+        const idx = path.indexOf("?")
+        const surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + this.compressedSession()
+        return surl
     }
 
     currentLoci() {
-        const loci = [];
-        const anyTrackView = this.trackViews[0];
+        const loci = []
+        const anyTrackView = this.trackViews[0]
         for (let {referenceFrame} of anyTrackView.viewports) {
-            const locusString = referenceFrame.getLocusString();
-            loci.push(locusString);
+            const locusString = referenceFrame.getLocusString()
+            loci.push(locusString)
         }
-        return loci;
+        return loci
     }
 
     /**
@@ -1671,8 +1671,8 @@ class Browser {
      */
     mouseDownOnViewport(e, viewport) {
 
-        var coords;
-        coords = DOMUtils.pageCoordinates(e);
+        var coords
+        coords = DOMUtils.pageCoordinates(e)
         this.vpMouseDown = {
             viewport,
             lastMouseX: coords.x,
@@ -1680,27 +1680,27 @@ class Browser {
             lastMouseY: coords.y,
             mouseDownY: coords.y,
             referenceFrame: viewport.referenceFrame
-        };
+        }
     };
 
     cancelTrackPan() {
 
-        const dragObject = this.dragObject;
-        this.dragObject = undefined;
-        this.isScrolling = false;
-        this.vpMouseDown = undefined;
+        const dragObject = this.dragObject
+        this.dragObject = undefined
+        this.isScrolling = false
+        this.vpMouseDown = undefined
 
 
         if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
-            this.updateViews();
-            this.fireEvent('trackdragend');
+            this.updateViews()
+            this.fireEvent('trackdragend')
         }
 
     }
 
     startTrackDrag(trackView) {
 
-        this.dragTrack = trackView;
+        this.dragTrack = trackView
 
     }
 
@@ -1708,55 +1708,55 @@ class Browser {
 
         if (dragDestination && this.dragTrack) {
 
-            const dragged = this.dragTrack;
-            const indexDestination = this.trackViews.indexOf(dragDestination);
-            const indexDragged = this.trackViews.indexOf(dragged);
-            const trackViews = this.trackViews;
+            const dragged = this.dragTrack
+            const indexDestination = this.trackViews.indexOf(dragDestination)
+            const indexDragged = this.trackViews.indexOf(dragged)
+            const trackViews = this.trackViews
 
-            trackViews[indexDestination] = dragged;
-            trackViews[indexDragged] = dragDestination;
+            trackViews[indexDestination] = dragged
+            trackViews[indexDragged] = dragDestination
 
-            const newOrder = this.trackViews[indexDestination].track.order;
-            this.trackViews[indexDragged].track.order = newOrder;
+            const newOrder = this.trackViews[indexDestination].track.order
+            this.trackViews[indexDragged].track.order = newOrder
 
-            const nTracks = trackViews.length;
-            let lastOrder = newOrder;
+            const nTracks = trackViews.length
+            let lastOrder = newOrder
 
             if (indexDestination < indexDragged) {
                 // Displace tracks below
 
                 for (let i = indexDestination + 1; i < nTracks; i++) {
-                    const track = trackViews[i].track;
+                    const track = trackViews[i].track
                     if (track.order <= lastOrder) {
-                        track.order = Math.min(Number.MAX_SAFE_INTEGER, lastOrder + 1);
-                        lastOrder = track.order;
+                        track.order = Math.min(Number.MAX_SAFE_INTEGER, lastOrder + 1)
+                        lastOrder = track.order
                     } else {
-                        break;
+                        break
                     }
                 }
             } else {
                 // Displace tracks above.  First track (index 0) is "ruler"
                 for (let i = indexDestination - 1; i > 0; i--) {
-                    const track = trackViews[i].track;
+                    const track = trackViews[i].track
                     if (track.order >= lastOrder) {
-                        track.order = Math.max(-Number.MAX_SAFE_INTEGER, lastOrder - 1);
-                        lastOrder = track.order;
+                        track.order = Math.max(-Number.MAX_SAFE_INTEGER, lastOrder - 1)
+                        lastOrder = track.order
                     } else {
-                        break;
+                        break
                     }
                 }
             }
-            this.reorderTracks();
+            this.reorderTracks()
         }
     }
 
     endTrackDrag() {
         if (this.dragTrack) {
             // this.dragTrack.$trackDragScrim.hide();
-            this.dragTrack = undefined;
+            this.dragTrack = undefined
             this.fireEvent('trackorderchanged', [this.getTrackOrder()])
         } else {
-            this.dragTrack = undefined;
+            this.dragTrack = undefined
         }
     }
 
@@ -1835,9 +1835,9 @@ class Browser {
     }
 
     async getDriveFileInfo(googleDriveURL) {
-        const id = GoogleUtils.getGoogleDriveFileID(googleDriveURL);
-        const endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true";
-        return igvxhr.loadJson(endPoint, buildOptions({}));
+        const id = GoogleUtils.getGoogleDriveFileID(googleDriveURL)
+        const endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true"
+        return igvxhr.loadJson(endPoint, buildOptions({}))
     }
 
     static uncompressSession(url) {
@@ -1845,95 +1845,95 @@ class Browser {
         let bytes
         if (url.indexOf('/gzip;base64') > 0) {
             //Proper dataURI
-            bytes = BGZip.decodeDataURI(url);
+            bytes = BGZip.decodeDataURI(url)
             let json = ''
             for (let b of bytes) {
                 json += String.fromCharCode(b)
             }
-            return json;
+            return json
         } else {
 
-            let enc = url.substring(5);
-            return BGZip.uncompressString(enc);
+            let enc = url.substring(5)
+            return BGZip.uncompressString(enc)
         }
     }
 
     createCircularView(container, show) {
-        this.circularView = createCircularView(container, this);
-        this.circularViewControl = new CircularViewControl(this.$toggle_button_container.get(0), this);
+        this.circularView = createCircularView(container, this)
+        this.circularViewControl = new CircularViewControl(this.$toggle_button_container.get(0), this)
         this.circularView.setAssembly({
             name: this.genome.id,
             id: this.genome.id,
             chromosomes: makeCircViewChromosomes(this.genome)
-        });
-        this.circularViewVisible = show === true;
+        })
+        this.circularViewVisible = show === true
 
     }
 
     get circularViewVisible() {
-        return this.circularView !== undefined && this.circularView.visible;
+        return this.circularView !== undefined && this.circularView.visible
     }
 
     set circularViewVisible(isVisible) {
         if (this.circularView) {
-            this.circularView.visible = isVisible;
-            this.circularViewControl.setState(isVisible);
+            this.circularView.visible = isVisible
+            this.circularViewControl.setState(isVisible)
         }
     }
 }
 
 function handleMouseMove(e) {
 
-    e.preventDefault();
+    e.preventDefault()
 
-    const {x, y} = DOMUtils.pageCoordinates(e);
+    const {x, y} = DOMUtils.pageCoordinates(e)
 
     if (this.vpMouseDown) {
 
-        const {viewport, referenceFrame} = this.vpMouseDown;
+        const {viewport, referenceFrame} = this.vpMouseDown
 
         // Determine direction,  true == horizontal
-        const horizontal = Math.abs((x - this.vpMouseDown.mouseDownX)) > Math.abs((y - this.vpMouseDown.mouseDownY));
+        const horizontal = Math.abs((x - this.vpMouseDown.mouseDownX)) > Math.abs((y - this.vpMouseDown.mouseDownY))
 
         if (!this.dragObject && !this.isScrolling) {
             if (horizontal) {
                 if (this.vpMouseDown.mouseDownX && Math.abs(x - this.vpMouseDown.mouseDownX) > this.constants.dragThreshold) {
-                    this.dragObject = {viewport, start: referenceFrame.start};
+                    this.dragObject = {viewport, start: referenceFrame.start}
                 }
             } else {
                 if (this.vpMouseDown.mouseDownY &&
                     Math.abs(y - this.vpMouseDown.mouseDownY) > this.constants.scrollThreshold) {
-                    this.isScrolling = true;
-                    const viewportHeight = viewport.$viewport.height();
-                    const contentHeight = maxViewportContentHeight(viewport.trackView.viewports);
-                    this.vpMouseDown.r = viewportHeight / contentHeight;
+                    this.isScrolling = true
+                    const viewportHeight = viewport.$viewport.height()
+                    const contentHeight = maxViewportContentHeight(viewport.trackView.viewports)
+                    this.vpMouseDown.r = viewportHeight / contentHeight
                 }
             }
         }
 
         if (this.dragObject) {
-            const viewChanged = referenceFrame.shiftPixels(this.vpMouseDown.lastMouseX - x, viewport.$viewport.width());
+            const viewChanged = referenceFrame.shiftPixels(this.vpMouseDown.lastMouseX - x, viewport.$viewport.width())
             if (viewChanged) {
-                this.updateViews();
+                this.updateViews()
             }
-            this.fireEvent('trackdrag');
+            this.fireEvent('trackdrag')
         }
 
 
         if (this.isScrolling) {
-            const delta = this.vpMouseDown.r * (this.vpMouseDown.lastMouseY - y);
-            viewport.trackView.moveScroller(delta);
+            const delta = this.vpMouseDown.r * (this.vpMouseDown.lastMouseY - y)
+            viewport.trackView.moveScroller(delta)
         }
 
 
-        this.vpMouseDown.lastMouseX = x;
+        this.vpMouseDown.lastMouseX = x
         this.vpMouseDown.lastMouseY = y
     }
 }
 
 function mouseUpOrLeave(e) {
-    this.cancelTrackPan();
-    this.endTrackDrag();
+    this.cancelTrackPan()
+    this.endTrackDrag()
 }
 
 
@@ -1956,7 +1956,7 @@ function logo() {
         '<path d="M261.482414,323.793286 C207.975678,323.793286 168.339046,310.552102 142.571329,284.069337 C116.803612,257.586572 103.919946,217.158702 103.919946,162.784513 C103.919946,108.410325 117.437235,67.8415913 144.472217,41.0770945 C171.507199,14.3125977 212.903894,0.930550071 268.663545,0.930550071 C283.025879,0.930550071 298.232828,1.84616386 314.284849,3.6774189 C330.33687,5.50867394 344.839793,7.97378798 357.794056,11.072835 L357.794056,68.968378 C339.48912,65.869331 323.578145,63.5450806 310.060654,61.9955571 C296.543163,60.4460336 284.574731,59.6712835 274.154998,59.6712835 C255.850062,59.6712835 240.502308,61.4320792 228.111274,64.9537236 C215.720241,68.4753679 205.793482,74.2507779 198.330701,82.2801269 C190.867919,90.309476 185.587729,100.87425 182.48997,113.974767 C179.392212,127.075284 177.843356,143.345037 177.843356,162.784513 C177.843356,181.942258 179.251407,198.000716 182.067551,210.960367 C184.883695,223.920018 189.671068,234.41436 196.429813,242.443709 C203.188559,250.473058 212.059279,256.178037 223.042241,259.558815 C234.025202,262.939594 247.683295,264.629958 264.01693,264.629958 C268.241146,264.629958 273.098922,264.489094 278.590403,264.207362 C284.081883,263.925631 289.643684,263.50304 295.275972,262.939577 L295.275972,159.826347 L361.595831,159.826347 L361.595831,308.579859 C344.698967,313.087564 327.239137,316.750019 309.215815,319.567334 C291.192494,322.38465 275.281519,323.793286 261.482414,323.793286 L261.482414,323.793286 L261.482414,323.793286 Z" id="Path"></path>;' +
         '<polygon id="Path" points="0.81355666 5.00169252 73.0472883 5.00169252 73.0472883 317.722144 0.81355666 317.722144"></polygon>' +
         '</g> </g> </svg>'
-    );
+    )
 }
 
 function toggleTrackLabels(trackViews, isVisible) {
@@ -1965,9 +1965,9 @@ function toggleTrackLabels(trackViews, isVisible) {
         for (let viewport of viewports) {
             if (viewport.$trackLabel) {
                 if (0 === viewports.indexOf(viewport) && true === isVisible) {
-                    viewport.$trackLabel.show();
+                    viewport.$trackLabel.show()
                 } else {
-                    viewport.$trackLabel.hide();
+                    viewport.$trackLabel.hide()
                 }
             }
         }
@@ -1976,9 +1976,9 @@ function toggleTrackLabels(trackViews, isVisible) {
 
 async function searchWebService(browser, locus, searchConfig) {
 
-    let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase());
+    let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase())
     if (path.indexOf("$GENOME$") > -1) {
-        path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"));
+        path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"))
     }
     const result = await igvxhr.loadString(path)
     return {result: result, locusSearchString: locus}

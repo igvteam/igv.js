@@ -1,4 +1,3 @@
-
 /**
  * Decode a custom columnar format.  Required columns are 'chr' and 'start'
  *
@@ -8,17 +7,17 @@
  */
 function decodeCustom(tokens, header) {
 
-    const format = header.customFormat;
+    const format = header.customFormat
 
-    if (tokens.length < format.fields.length) return undefined;
+    if (tokens.length < format.fields.length) return undefined
 
-    const coords = format.coords || 0;
+    const coords = format.coords || 0
 
-    const chr = tokens[format.chr];
-    const start = parseInt(tokens[format.start]) - coords;
-    const end = format.end !== undefined ? parseInt(tokens[format.end]) : start + 1;
+    const chr = tokens[format.chr]
+    const start = parseInt(tokens[format.start]) - coords
+    const end = format.end !== undefined ? parseInt(tokens[format.end]) : start + 1
 
-    const feature = {chr: chr, start: start, end: end};
+    const feature = {chr: chr, start: start, end: end}
 
     if (format.fields) {
         format.fields.forEach(function (field, index) {
@@ -27,12 +26,12 @@ function decodeCustom(tokens, header) {
                 index !== format.start &&
                 index !== format.end) {
 
-                feature[field] = tokens[index];
+                feature[field] = tokens[index]
             }
-        });
+        })
     }
 
-    return feature;
+    return feature
 
 }
 

@@ -1,14 +1,14 @@
-import {IGVColor} from "../../../node_modules/igv-utils/src/index.js";
-import {GFFFeature} from "./gffFeature.js";
+import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
+import {GFFFeature} from "./gffFeature.js"
 
 function decode(tokens, header) {
 
     const format = header.format
     if (tokens.length < 9) {
-        return undefined;      // Not a valid gff record
+        return undefined      // Not a valid gff record
     }
 
-    const delim = ('gff3' === format) ? '=' : ' ';
+    const delim = ('gff3' === format) ? '=' : ' '
     return new GFFFeature({
         source: tokens[1],
         type: tokens[2],
@@ -33,26 +33,26 @@ function decode(tokens, header) {
  */
 function decodeGFF3(tokens, header) {
 
-    const feature = decode(tokens, header);
+    const feature = decode(tokens, header)
 
     if (!feature) {
-        return;
+        return
     }
 
-    const attributes = parseAttributeString(feature.attributeString, feature.delim);
+    const attributes = parseAttributeString(feature.attributeString, feature.delim)
 
     // Search for color value as case insenstivie key
     for (let [key, value] of attributes) {
         const keyLower = key.toLowerCase()
         if ("color" === keyLower || "colour" === keyLower) {
-            feature.color = IGVColor.createColorString(value);
+            feature.color = IGVColor.createColorString(value)
         } else if (key === "ID") {
-            feature.id = value;
+            feature.id = value
         } else if (key === "Parent") {
-            feature.parent = value;
+            feature.parent = value
         }
     }
-    return feature;
+    return feature
 }
 
 /**
@@ -67,40 +67,40 @@ function decodeGFF3(tokens, header) {
  */
 function decodeGTF(tokens, header) {
 
-    const feature = decode(tokens, header);
+    const feature = decode(tokens, header)
 
     if (!feature) {
-        return;
+        return
     }
 
-    const attributes = parseAttributeString(feature.attributeString, feature.delim);
+    const attributes = parseAttributeString(feature.attributeString, feature.delim)
 
     // GTF files specify neither ID nor parent fields, but they can be inferred from common conventions
-    let idField;
-    let parentField;
+    let idField
+    let parentField
     switch (feature.type) {
         case "gene":
-            idField = "gene_id";
-            break;
+            idField = "gene_id"
+            break
         case "transcript":
-            idField = "transcript_id";
-            parentField = "gene_id";
-            break;
+            idField = "transcript_id"
+            parentField = "gene_id"
+            break
         default:
-            parentField = "transcript_id";
+            parentField = "transcript_id"
     }
 
     for (let [key, value] of attributes) {
         const keyLower = key.toLowerCase()
         if ("color" === keyLower || "colour" === keyLower) {
-            feature.color = IGVColor.createColorString(value);
+            feature.color = IGVColor.createColorString(value)
         } else if (key === idField) {
-            feature.id = value;
+            feature.id = value
         } else if (key === parentField) {
-            feature.parent = value;
+            feature.parent = value
         }
     }
-    return feature;
+    return feature
 
 }
 
@@ -115,14 +115,14 @@ function decodeGTF(tokens, header) {
  */
 function parseAttributeString(attributeString, keyValueDelim) {
     // parse 'attributes' string (see column 9 docs in https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md)
-    var attributes = [];
+    var attributes = []
     for (let kv of attributeString.split(';')) {
-        kv = kv.trim();
-        const idx = kv.indexOf(keyValueDelim);
+        kv = kv.trim()
+        const idx = kv.indexOf(keyValueDelim)
         if (idx > 0 && idx < kv.length - 1) {
-            const key = kv.substring(0, idx);
-            let value = stripQuotes(decodeURIComponent(kv.substring(idx + 1).trim()));
-            attributes.push([key, value]);
+            const key = kv.substring(0, idx)
+            let value = stripQuotes(decodeURIComponent(kv.substring(idx + 1).trim()))
+            attributes.push([key, value])
         }
     }
     return attributes
@@ -130,13 +130,13 @@ function parseAttributeString(attributeString, keyValueDelim) {
 
 function stripQuotes(value) {
     if (value.startsWith('"') && value.endsWith('"')) {
-        value = value.substr(1, value.length - 2);
+        value = value.substr(1, value.length - 2)
     }
-    return value;
+    return value
 }
 
 
-export {decodeGFF3, decodeGTF, parseAttributeString};
+export {decodeGFF3, decodeGTF, parseAttributeString}
 
 
 

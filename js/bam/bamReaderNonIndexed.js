@@ -24,10 +24,10 @@
  * THE SOFTWARE.
  */
 
-import AlignmentContainer from "./alignmentContainer.js";
-import BamUtils from "./bamUtils.js";
-import {igvxhr, StringUtils, BGZip, FeatureCache} from "../../node_modules/igv-utils/src/index.js";
-import {buildOptions, isDataURL} from "../util/igvUtils.js";
+import AlignmentContainer from "./alignmentContainer.js"
+import BamUtils from "./bamUtils.js"
+import {BGZip, FeatureCache, igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {buildOptions, isDataURL} from "../util/igvUtils.js"
 
 /**
  * Class for reading a bam file
@@ -38,81 +38,81 @@ import {buildOptions, isDataURL} from "../util/igvUtils.js";
 class BamReaderNonIndexed {
 
     constructor(config, genome) {
-        this.config = config;
-        this.genome = genome;
-        this.bamPath = config.url;
-        this.isDataUri = isDataURL(config.url);
-        BamUtils.setReaderDefaults(this, config);
+        this.config = config
+        this.genome = genome
+        this.bamPath = config.url
+        this.isDataUri = isDataURL(config.url)
+        BamUtils.setReaderDefaults(this, config)
     }
 
     // Return an alignment container
     async readAlignments(chr, bpStart, bpEnd) {
 
         if (this.alignmentCache) {
-            const header = this.header;
-            const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
-            const qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd);
-            const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold);
+            const header = this.header
+            const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr
+            const qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd)
+            const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold)
             for (let a of qAlignments) {
-                alignmentContainer.push(a);
+                alignmentContainer.push(a)
             }
-            alignmentContainer.finish();
-            return alignmentContainer;
+            alignmentContainer.finish()
+            return alignmentContainer
 
         } else {
             if (this.isDataUri) {
-                const data = decodeDataURI(this.bamPath);
-                const unc = BGZip.unbgzf(data.buffer);
-                this.parseAlignments(unc);
-                return this.fetchAlignments(chr, bpStart, bpEnd);
+                const data = decodeDataURI(this.bamPath)
+                const unc = BGZip.unbgzf(data.buffer)
+                this.parseAlignments(unc)
+                return this.fetchAlignments(chr, bpStart, bpEnd)
             } else {
-                const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config));
-                const unc = BGZip.unbgzf(arrayBuffer);
-                this.parseAlignments(unc);
-                return this.fetchAlignments(chr, bpStart, bpEnd);
+                const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config))
+                const unc = BGZip.unbgzf(arrayBuffer)
+                this.parseAlignments(unc)
+                return this.fetchAlignments(chr, bpStart, bpEnd)
             }
         }
 
     }
 
     parseAlignments(data) {
-        const alignments = [];
-        this.header = BamUtils.decodeBamHeader(data);
-        BamUtils.decodeBamRecords(data, this.header.size, alignments, this.header.chrNames);
-        this.alignmentCache = new FeatureCache(alignments, this.genome);
+        const alignments = []
+        this.header = BamUtils.decodeBamHeader(data)
+        BamUtils.decodeBamRecords(data, this.header.size, alignments, this.header.chrNames)
+        this.alignmentCache = new FeatureCache(alignments, this.genome)
     }
 
     fetchAlignments(chr, bpStart, bpEnd) {
-        const queryChr = this.header.chrAliasTable.hasOwnProperty(chr) ? this.header.chrAliasTable[chr] : chr;
-        const features = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd);
-        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported);
+        const queryChr = this.header.chrAliasTable.hasOwnProperty(chr) ? this.header.chrAliasTable[chr] : chr
+        const features = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd)
+        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported)
         for (let feature of features) {
-            alignmentContainer.push(feature);
+            alignmentContainer.push(feature)
         }
-        alignmentContainer.finish();
-        return alignmentContainer;
+        alignmentContainer.finish()
+        return alignmentContainer
     }
 
 }
 
 function decodeDataURI(dataURI) {
 
-    const split = dataURI.split(',');
-    const info = split[0].split(':')[1];
-    let dataString = split[1];
+    const split = dataURI.split(',')
+    const info = split[0].split(':')[1]
+    let dataString = split[1]
 
     if (info.indexOf('base64') >= 0) {
-        dataString = atob(dataString);
+        dataString = atob(dataString)
     } else {
-        dataString = decodeURI(dataString);
+        dataString = decodeURI(dataString)
     }
 
-    const bytes = new Uint8Array(dataString.length);
+    const bytes = new Uint8Array(dataString.length)
     for (var i = 0; i < dataString.length; i++) {
-        bytes[i] = dataString.charCodeAt(i);
+        bytes[i] = dataString.charCodeAt(i)
     }
-    return bytes;
+    return bytes
 }
 
 
-export default BamReaderNonIndexed;
+export default BamReaderNonIndexed

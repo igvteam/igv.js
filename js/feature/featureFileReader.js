@@ -23,16 +23,16 @@
  * THE SOFTWARE.
  */
 
-import FeatureParser from "./featureParser.js";
-import SegParser from "./segParser.js";
-import VcfParser from "../variant/vcfParser.js";
-import {FileUtils, igvxhr, StringUtils, URIUtils, BGZip} from "../../node_modules/igv-utils/src/index.js";
-import {buildOptions, isDataURL} from "../util/igvUtils.js";
-import GWASParser from "../gwas/gwasParser.js";
-import AEDParser from "../aed/AEDParser.js";
-import {loadIndex} from "../bam/indexFactory.js";
-import getDataWrapper from "./dataWrapper.js";
-import BGZipLineReader from "../util/BGZipLineReader.js";
+import FeatureParser from "./featureParser.js"
+import SegParser from "./segParser.js"
+import VcfParser from "../variant/vcfParser.js"
+import {BGZip, FileUtils, igvxhr, URIUtils} from "../../node_modules/igv-utils/src/index.js"
+import {buildOptions, isDataURL} from "../util/igvUtils.js"
+import GWASParser from "../gwas/gwasParser.js"
+import AEDParser from "../aed/AEDParser.js"
+import {loadIndex} from "../bam/indexFactory.js"
+import getDataWrapper from "./dataWrapper.js"
+import BGZipLineReader from "../util/BGZipLineReader.js"
 
 /**
  * Reader for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -44,43 +44,43 @@ class FeatureFileReader {
 
     constructor(config, genome) {
 
-        var uriParts;
+        var uriParts
 
-        this.config = config || {};
-        this.genome = genome;
-        this.indexURL = config.indexURL;
-        this.indexed = config.indexed;
+        this.config = config || {}
+        this.genome = genome
+        this.indexURL = config.indexURL
+        this.indexed = config.indexed
 
         if (FileUtils.isFile(this.config.url)) {
-            this.filename = this.config.url.name;
+            this.filename = this.config.url.name
         } else if (isDataURL(this.config.url)) {
-            this.indexed = false;  // by definition
-            this.dataURI = config.url;
+            this.indexed = false  // by definition
+            this.dataURI = config.url
         } else {
-            uriParts = URIUtils.parseUri(this.config.url);
-            this.filename = config.filename || uriParts.file;
+            uriParts = URIUtils.parseUri(this.config.url)
+            this.filename = config.filename || uriParts.file
         }
 
-        this.parser = this.getParser(this.config);
+        this.parser = this.getParser(this.config)
 
         if (this.config.format === "vcf" && !this.config.indexURL) {
-            console.warn("Warning: index file not specified.  The entire vcf file will be loaded.");
+            console.warn("Warning: index file not specified.  The entire vcf file will be loaded.")
         }
     }
 
     async defaultVisibilityWindow() {
         if (this.config.indexURL) {
-            const index = await this.getIndex();
+            const index = await this.getIndex()
             if (index && index.lastBlockPosition) {
-                let gl = 0;
-                const s = 10000;
+                let gl = 0
+                const s = 10000
                 for (let c of index.chromosomeNames) {
-                    const chromosome = this.genome.getChromosome(c);
+                    const chromosome = this.genome.getChromosome(c)
                     if (chromosome) {
-                        gl += chromosome.bpLength;
+                        gl += chromosome.bpLength
                     }
                 }
-                return Math.round((gl / index.lastBlockPosition) * s);
+                return Math.round((gl / index.lastBlockPosition) * s)
             }
         }
     }
@@ -93,15 +93,15 @@ class FeatureFileReader {
      */
     async readFeatures(chr, start, end) {
 
-        const index = await this.getIndex();
+        const index = await this.getIndex()
         if (index) {
-            this.indexed = true;
-            return this.loadFeaturesWithIndex(chr, start, end);
+            this.indexed = true
+            return this.loadFeaturesWithIndex(chr, start, end)
         } else if (this.dataURI) {
-            this.indexed = false;
-            return this.loadFeaturesFromDataURI();
+            this.indexed = false
+            return this.loadFeaturesFromDataURI()
         } else {
-            this.indexed = false;
+            this.indexed = false
             return this.loadFeaturesNoIndex()
         }
 
@@ -110,48 +110,48 @@ class FeatureFileReader {
     async readHeader() {
 
         if (this.dataURI) {
-            await this.loadFeaturesFromDataURI(this.dataURI);
-            return this.header;
+            await this.loadFeaturesFromDataURI(this.dataURI)
+            return this.header
         } else {
 
             if (this.config.indexURL) {
-                const index = await this.getIndex();
+                const index = await this.getIndex()
                 if (!index) {
                     // Note - it should be impossible to get here
-                    throw new Error("Unable to load index: " + this.config.indexURL);
+                    throw new Error("Unable to load index: " + this.config.indexURL)
                 }
 
-                let dataWrapper;
+                let dataWrapper
                 if (index.tabix) {
-                    dataWrapper = new BGZipLineReader(this.config);
+                    dataWrapper = new BGZipLineReader(this.config)
                 } else {
                     // Tribble
                     const maxSize = Object.values(index.chrIndex)
                         .flatMap(chr => chr.blocks)
                         .map(block => block.max)
                         .reduce((previous, current) =>
-                            Math.min(previous, current), Number.MAX_SAFE_INTEGER);
+                            Math.min(previous, current), Number.MAX_SAFE_INTEGER)
 
-                    const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
+                    const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}})
                     const data = await igvxhr.loadString(this.config.url, options)
-                    dataWrapper = getDataWrapper(data);
+                    dataWrapper = getDataWrapper(data)
                 }
 
 
-                this.header = await this.parser.parseHeader(dataWrapper);  // Cache header, might be needed to parse features
-                return this.header;
+                this.header = await this.parser.parseHeader(dataWrapper)  // Cache header, might be needed to parse features
+                return this.header
 
             } else {
                 // If this is a non-indexed file we will load all features in advance
-                const options = buildOptions(this.config);
-                const data = await igvxhr.loadString(this.config.url, options);
-                let dataWrapper = getDataWrapper(data);
-                this.header = await this.parser.parseHeader(dataWrapper);
+                const options = buildOptions(this.config)
+                const data = await igvxhr.loadString(this.config.url, options)
+                let dataWrapper = getDataWrapper(data)
+                this.header = await this.parser.parseHeader(dataWrapper)
 
                 // Reset data wrapper and parse features
-                dataWrapper = getDataWrapper(data);
-                this.features = await this.parser.parseFeatures(dataWrapper);   // cache features
-                return this.header;
+                dataWrapper = getDataWrapper(data)
+                this.features = await this.parser.parseFeatures(dataWrapper)   // cache features
+                return this.header
             }
         }
     }
@@ -161,19 +161,19 @@ class FeatureFileReader {
 
         switch (config.format) {
             case "vcf":
-                return new VcfParser(config);
+                return new VcfParser(config)
             case "seg" :
-                return new SegParser("seg");
+                return new SegParser("seg")
             case "mut":
-                return new SegParser("mut");
+                return new SegParser("mut")
             case "maf":
-                return new SegParser("maf");
+                return new SegParser("maf")
             case "gwas" :
-                return new GWASParser(config);
+                return new GWASParser(config)
             case "aed" :
-                return new AEDParser(config);
+                return new AEDParser(config)
             default:
-                return new FeatureParser(config);
+                return new FeatureParser(config)
         }
     }
 
@@ -181,19 +181,19 @@ class FeatureFileReader {
 
         if (this.features) {
             // An optimization hack for non-indexed files, features are temporarily cached when header is read.
-            const tmp = this.features;
-            delete this.features;
-            return tmp;
+            const tmp = this.features
+            delete this.features
+            return tmp
         } else {
-            const options = buildOptions(this.config);    // Add oauth token, if any
+            const options = buildOptions(this.config)    // Add oauth token, if any
             const data = await igvxhr.loadString(this.config.url, options)
             if (!this.header) {
-                const dataWrapper = getDataWrapper(data);
-                this.header = await this.parser.parseHeader(dataWrapper);
+                const dataWrapper = getDataWrapper(data)
+                this.header = await this.parser.parseHeader(dataWrapper)
             }
-            const dataWrapper = getDataWrapper(data);
-            const features = await this.parser.parseFeatures(dataWrapper);   // <= PARSING DONE HERE
-            return features;
+            const dataWrapper = getDataWrapper(data)
+            const features = await this.parser.parseFeatures(dataWrapper)   // <= PARSING DONE HERE
+            return features
         }
     }
 
@@ -205,15 +205,15 @@ class FeatureFileReader {
         const tabix = this.index.tabix
         const refId = tabix ? this.index.sequenceIndexMap[chr] : chr
         if (refId === undefined) {
-            return [];
+            return []
         }
 
-        const genome = this.genome;
-        const blocks = this.index.blocksForRange(refId, start, end);
+        const genome = this.genome
+        const blocks = this.index.blocksForRange(refId, start, end)
         if (!blocks || blocks.length === 0) {
-            return [];
+            return []
         } else {
-            const allFeatures = [];
+            const allFeatures = []
             for (let block of blocks) {
 
                 const startPos = block.minv.block
@@ -229,13 +229,13 @@ class FeatureFileReader {
                                 start: block.maxv.block,
                                 size: 26
                             }
-                        });
+                        })
                         const abuffer = await igvxhr.loadArrayBuffer(config.url, bsizeOptions)
                         lastBlockSize = BGZip.bgzBlockSize(abuffer)
                     }
-                    endPos = block.maxv.block + lastBlockSize;
+                    endPos = block.maxv.block + lastBlockSize
                 } else {
-                    endPos = block.maxv.block;
+                    endPos = block.maxv.block
                 }
 
                 const options = buildOptions(config, {
@@ -243,68 +243,68 @@ class FeatureFileReader {
                         start: startPos,
                         size: endPos - startPos + 1
                     }
-                });
+                })
 
-                let inflated;
+                let inflated
                 if (tabix) {
-                    const data = await igvxhr.loadArrayBuffer(config.url, options);
-                    inflated = BGZip.unbgzf(data);
+                    const data = await igvxhr.loadArrayBuffer(config.url, options)
+                    inflated = BGZip.unbgzf(data)
                 } else {
-                    inflated = await igvxhr.loadString(config.url, options);
+                    inflated = await igvxhr.loadString(config.url, options)
                 }
 
-                const slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                const dataWrapper = getDataWrapper(slicedData);
-                let slicedFeatures = await parser.parseFeatures(dataWrapper);
+                const slicedData = startOffset ? inflated.slice(startOffset) : inflated
+                const dataWrapper = getDataWrapper(slicedData)
+                let slicedFeatures = await parser.parseFeatures(dataWrapper)
 
                 // Filter psuedo-features (e.g. created mates for VCF SV records)
-                slicedFeatures = slicedFeatures.filter(f => f._f === undefined);
+                slicedFeatures = slicedFeatures.filter(f => f._f === undefined)
 
                 // Filter features not in requested range.
-                let inInterval = false;
+                let inInterval = false
                 for (let i = 0; i < slicedFeatures.length; i++) {
-                    const f = slicedFeatures[i];
+                    const f = slicedFeatures[i]
 
-                    const canonicalChromosome = genome ? genome.getChromosomeName(f.chr) : f.chr;
+                    const canonicalChromosome = genome ? genome.getChromosomeName(f.chr) : f.chr
                     if (canonicalChromosome !== chr) {
                         if (allFeatures.length === 0) {
-                            continue;  //adjacent chr to the left
+                            continue  //adjacent chr to the left
                         } else {
-                            break; //adjacent chr to the right
+                            break //adjacent chr to the right
                         }
                     }
                     if (f.start > end) {
-                        allFeatures.push(f);  // First feature beyond interval
-                        break;
+                        allFeatures.push(f)  // First feature beyond interval
+                        break
                     }
                     if (f.end >= start && f.start <= end) {
                         if (!inInterval) {
-                            inInterval = true;
+                            inInterval = true
                             if (i > 0) {
-                                allFeatures.push(slicedFeatures[i - 1]);
+                                allFeatures.push(slicedFeatures[i - 1])
                             } else {
                                 // TODO -- get block before this one for first feature;
                             }
                         }
-                        allFeatures.push(f);
+                        allFeatures.push(f)
                     }
                 }
 
             }
             allFeatures.sort(function (a, b) {
-                return a.start - b.start;
-            });
+                return a.start - b.start
+            })
 
-            return allFeatures;
+            return allFeatures
         }
     }
 
     async getIndex() {
         if (this.index) {
-            return this.index;
+            return this.index
         } else if (this.config.indexURL) {
             this.index = await this.loadIndex()
-            return this.index;
+            return this.index
         }
     }
 
@@ -312,32 +312,32 @@ class FeatureFileReader {
      * Return a Promise for the async loaded index
      */
     async loadIndex() {
-        const indexURL = this.config.indexURL;
-        return loadIndex(indexURL, this.config, this.genome);
+        const indexURL = this.config.indexURL
+        return loadIndex(indexURL, this.config, this.genome)
     }
 
     async loadFeaturesFromDataURI() {
 
         if (this.features) {
             // An optimization hack for non-indexed files, features are temporarily cached when header is read.
-            const tmp = this.features;
-            delete this.features;
-            return tmp;
+            const tmp = this.features
+            delete this.features
+            return tmp
         } else {
             const plain = BGZip.decodeDataURI(this.dataURI)
-            let dataWrapper = getDataWrapper(plain);
-            this.header = await this.parser.parseHeader(dataWrapper);
+            let dataWrapper = getDataWrapper(plain)
+            this.header = await this.parser.parseHeader(dataWrapper)
             if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
-                this.format = 'gff3';
+                this.format = 'gff3'
             }
 
-            dataWrapper = getDataWrapper(plain);
-            this.features = await this.parser.parseFeatures(dataWrapper);
-            return this.features;
+            dataWrapper = getDataWrapper(plain)
+            this.features = await this.parser.parseFeatures(dataWrapper)
+            return this.features
         }
     }
 
 }
 
-export default FeatureFileReader;
+export default FeatureFileReader
 

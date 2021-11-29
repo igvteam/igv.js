@@ -34,20 +34,20 @@ async function search(browser, string) {
     }
 
     if (string && string.trim().toLowerCase() === "all" || string === "*") {
-        string = "all";
+        string = "all"
     }
 
     const loci = string.split(' ')
 
-    let searchConfig = browser.searchConfig || DEFAULT_SEARCH_CONFIG;
-    let list = [];
+    let searchConfig = browser.searchConfig || DEFAULT_SEARCH_CONFIG
+    let list = []
 
     const searchLocus = async (locus) => {
         let locusObject = parseLocusString(browser, locus)
 
         if (!locusObject) {
-            const feature = browser.genome.featureDB[locus.toUpperCase()];
-            if(feature) {
+            const feature = browser.genome.featureDB[locus.toUpperCase()]
+            if (feature) {
                 locusObject = {
                     chr: feature.chr,
                     start: feature.start,
@@ -62,8 +62,8 @@ async function search(browser, string) {
             try {
                 locusObject = await searchWebService(browser, locus, searchConfig)
             } catch (error) {
-                console.error(error);
-                throw Error("Search service currently unavailable.");
+                console.error(error)
+                throw Error("Search service currently unavailable.")
             }
         }
         return locusObject
@@ -72,22 +72,22 @@ async function search(browser, string) {
     for (let locus of loci) {
         const locusObject = await searchLocus(locus)
         if (locusObject) {
-            locusObject.locusSearchString = locus;
-            list.push(locusObject);
+            locusObject.locusSearchString = locus
+            list.push(locusObject)
         }
     }
 
     // If nothing is found, consider possibility that loci name itself has spaces
     if (list.length === 0) {
-        const locusObject = await searchLocus(string);
+        const locusObject = await searchLocus(string)
         if (locusObject) {
-            locusObject.locusSearchString = string;
-            list.push(locusObject);
+            locusObject.locusSearchString = string
+            list.push(locusObject)
         }
     }
 
 
-    return 0 === list.length ? undefined : list;
+    return 0 === list.length ? undefined : list
 }
 
 function parseLocusString(browser, locus) {
@@ -102,7 +102,7 @@ function parseLocusString(browser, locus) {
         return undefined
 
     } else {
-        const queryChr = browser.genome.getChromosomeName(chr);
+        const queryChr = browser.genome.getChromosomeName(chr)
         const extent = {
             chr: queryChr,
             start: 0,
@@ -111,30 +111,30 @@ function parseLocusString(browser, locus) {
 
         if (a.length > 1) {
 
-            const b = a[1].split('-');
+            const b = a[1].split('-')
             if (b.length > 2) {
-                return undefined;
+                return undefined
 
             } else {
 
                 let numeric
                 numeric = b[0].replace(/,/g, '')
                 if (isNaN(numeric)) {
-                    return undefined;
+                    return undefined
                 }
 
-                extent.start = parseInt(numeric, 10) - 1;
-                extent.end = extent.start + 1;
+                extent.start = parseInt(numeric, 10) - 1
+                extent.end = extent.start + 1
 
                 if (1 === b.length) {
-                    extent.start -= 20;
-                    extent.end += 20;
+                    extent.start -= 20
+                    extent.end += 20
                 }
 
                 if (2 === b.length) {
                     numeric = b[1].replace(/,/g, '')
                     if (isNaN(numeric)) {
-                        return undefined;
+                        return undefined
                     } else {
                         extent.end = parseInt(numeric, 10)
                     }
@@ -142,24 +142,24 @@ function parseLocusString(browser, locus) {
             }
         }
 
-        return extent;
+        return extent
     }
 }
 
 async function searchWebService(browser, locus, searchConfig) {
 
-    let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase());
+    let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase())
     if (path.indexOf("$GENOME$") > -1) {
-        path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"));
+        path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"))
     }
-    const options = searchConfig.timeout ? {timeout: searchConfig.timeout} : undefined;
-    const result = await igvxhr.loadString(path, options);
+    const options = searchConfig.timeout ? {timeout: searchConfig.timeout} : undefined
+    const result = await igvxhr.loadString(path, options)
 
-    const locusObject = processSearchResult(browser, result, searchConfig);
+    const locusObject = processSearchResult(browser, result, searchConfig)
     if (locusObject) {
-        locusObject.locusSearchString = locus;
+        locusObject.locusSearchString = locus
     }
-    return locusObject;
+    return locusObject
 }
 
 function processSearchResult(browser, result, searchConfig) {
@@ -181,13 +181,13 @@ function processSearchResult(browser, result, searchConfig) {
 
     } else {
 
-        const chromosomeField = searchConfig.chromosomeField || "chromosome";
-        const startField = searchConfig.startField || "start";
-        const endField = searchConfig.endField || "end";
-        const coords = searchConfig.coords || 1;
+        const chromosomeField = searchConfig.chromosomeField || "chromosome"
+        const startField = searchConfig.startField || "start"
+        const endField = searchConfig.endField || "end"
+        const coords = searchConfig.coords || 1
 
 
-        let result;
+        let result
         if (Array.isArray(results)) {
             // Ignoring all but first result for now
             // TODO -- present all and let user select if results.length > 1
@@ -202,12 +202,12 @@ function processSearchResult(browser, result, searchConfig) {
             console.error("Search service results must include chromosome and start fields: " + result)
         }
 
-        const chrResult = result[chromosomeField];
-        const chromosome = browser.genome.getChromosome(chrResult);
+        const chrResult = result[chromosomeField]
+        const chromosome = browser.genome.getChromosome(chrResult)
         if (!chromosome) {
-            return undefined;
+            return undefined
         }
-        const chr = chromosome.name;
+        const chr = chromosome.name
 
         let start = result[startField] - coords
         let end = result[endField]
@@ -215,18 +215,18 @@ function processSearchResult(browser, result, searchConfig) {
             end = start + 1
         }
 
-        const locusObject = {chr, start, end};
+        const locusObject = {chr, start, end}
 
         // Some GTEX hacks
-        const type = result.type ? result.type : "gene";
+        const type = result.type ? result.type : "gene"
         if (searchConfig.geneField && type === "gene") {
-            locusObject.gene = result[searchConfig.geneField];
+            locusObject.gene = result[searchConfig.geneField]
         }
         if (searchConfig.snpField && type === "snp") {
-            locusObject.snp = result[searchConfig.snpField];
+            locusObject.snp = result[searchConfig.snpField]
         }
 
-        return locusObject;
+        return locusObject
     }
 }
 
@@ -240,15 +240,15 @@ function parseSearchResults(browser, data) {
 
     const linesTrimmed = []
     const results = []
-    const lines = StringUtils.splitLines(data);
+    const lines = StringUtils.splitLines(data)
 
     lines.forEach(function (item) {
         if ("" === item) {
             // do nothing
         } else {
-            linesTrimmed.push(item);
+            linesTrimmed.push(item)
         }
-    });
+    })
 
     linesTrimmed.forEach(function (line) {
 
@@ -256,13 +256,13 @@ function parseSearchResults(browser, data) {
             source,
             locusTokens,
             rangeTokens,
-            obj;
+            obj
 
         if (tokens.length >= 3) {
 
-            locusTokens = tokens[1].split(":");
-            rangeTokens = locusTokens[1].split("-");
-            source = tokens[2].trim();
+            locusTokens = tokens[1].split(":")
+            rangeTokens = locusTokens[1].split("-")
+            source = tokens[2].trim()
 
             obj =
                 {
@@ -271,15 +271,15 @@ function parseSearchResults(browser, data) {
                     start: parseInt(rangeTokens[0].replace(/,/g, '')),
                     end: parseInt(rangeTokens[1].replace(/,/g, '')),
                     type: ("gtex" === source ? "snp" : "gene")
-                };
+                }
 
-            results.push(obj);
+            results.push(obj)
 
         }
 
-    });
+    })
 
-    return results;
+    return results
 
 }
 

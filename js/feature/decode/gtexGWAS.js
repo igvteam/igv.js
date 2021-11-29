@@ -1,11 +1,10 @@
-
 function decodeGtexGWAS(tokens, header) {
     //chrom	chromStart	chromEnd	Strongest SNP-risk allele	Disease/Phenotype	P-value	Odds ratio or beta	PUBMEDID
     //1	1247493	1247494	rs12103-A	Inflammatory bowel disease	8.00E-13	1.1	23128233
 
-    const tokenCount = tokens.length;
+    const tokenCount = tokens.length
     if (tokenCount < 7) {
-        return null;
+        return null
     }
     const feature = {
         chr: tokens[0],

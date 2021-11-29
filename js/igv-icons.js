@@ -2,7 +2,7 @@ import {DOMUtils, Icon} from "../node_modules/igv-utils/src/index.js"
 
 function createCheckbox(name, initialState) {
 
-    const container = DOMUtils.div({ class: 'igv-menu-popup-check-container' })
+    const container = DOMUtils.div({class: 'igv-menu-popup-check-container'})
 
     const div = DOMUtils.div()
     container.appendChild(div)
@@ -17,6 +17,6 @@ function createCheckbox(name, initialState) {
     return container
 }
 
-export {createCheckbox};
+export {createCheckbox}
 
 
