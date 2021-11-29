@@ -321,8 +321,7 @@ class FeatureTrack extends TrackBase {
     }
 
     menuItemList() {
-
-        const self = this
+        
         const menuItems = []
 
         if (this.render === renderSnp) {
@@ -338,8 +337,8 @@ class FeatureTrack extends TrackBase {
             }
         }
 
-        menuItems.push('<hr/>');
-        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
+        menuItems.push('<hr/>')
+        for (let displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
             const lut =
                 {
                     "COLLAPSED": "Collapse",
@@ -349,15 +348,15 @@ class FeatureTrack extends TrackBase {
 
             menuItems.push(
                 {
-                    object: $(createCheckbox(lut[displayMode], displayMode === self.displayMode)),
-                    click: function () {
-                        self.displayMode = displayMode
-                        self.config.displayMode = displayMode
-                        self.trackView.checkContentHeight()
-                        self.trackView.repaintViews()
+                    object: $(createCheckbox(lut[displayMode], displayMode === this.displayMode)),
+                    click:  () => {
+                        this.displayMode = displayMode
+                        this.config.displayMode = displayMode
+                        this.trackView.checkContentHeight()
+                        this.trackView.repaintViews()
                     }
                 })
-        })
+        }
 
         return menuItems
 
