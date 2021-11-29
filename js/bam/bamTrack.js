@@ -35,7 +35,7 @@ import MenuUtils from "../ui/menuUtils.js"
 import {PaletteColorTable} from "../util/colorPalletes.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {makePairedAlignmentChords, makeSupplementalAlignmentChords} from "../jbrowse/circularViewUtils.js"
-import {createSupplementaryAlignments} from "./supplementaryAlignment.js"
+import {isSecureContext} from "../util/igvUtils.js"
 
 const alignmentStartGap = 5
 const downsampleRowHeight = 5
@@ -1217,16 +1217,17 @@ class AlignmentTrack {
                 }
             })
 
-            list.push({
-                label: 'Copy read sequence',
-                click: () => {
-                    const alignment = clickedAlignment
-                    if (!alignment) return
-
-                    const seqstring = alignment.seq //.map(b => String.fromCharCode(b)).join("");
-                    navigator.clipboard.writeText(seqstring)
-                }
-            })
+            if (isSecureContext()) {
+                list.push({
+                    label: 'Copy read sequence',
+                    click: () => {
+                        const alignment = clickedAlignment
+                        if (!alignment) return
+                        const seqstring = alignment.seq //.map(b => String.fromCharCode(b)).join("");
+                        navigator.clipboard.writeText(seqstring)
+                    }
+                })
+            }
 
             list.push('<hr/>')
         }
