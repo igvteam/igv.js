@@ -1,5 +1,5 @@
-import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
-import {createColumn, insertElementAfter, insertElementBefore} from './util/igvUtils.js';
+import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
+import {createColumn, insertElementAfter, insertElementBefore} from './util/igvUtils.js'
 
 const viewportColumnManager =
     {
@@ -9,7 +9,7 @@ const viewportColumnManager =
                 if (0 === i) {
                     createColumn(columnContainer, 'igv-column')
                 } else {
-                    columnContainer.appendChild(DOMUtils.div({ class: 'igv-column-shim' }))
+                    columnContainer.appendChild(DOMUtils.div({class: 'igv-column-shim'}))
                     createColumn(columnContainer, 'igv-column')
                 }
             }
@@ -24,10 +24,10 @@ const viewportColumnManager =
 
         insertAfter: referenceElement => {
 
-            const shim = DOMUtils.div({ class: 'igv-column-shim' })
+            const shim = DOMUtils.div({class: 'igv-column-shim'})
             insertElementAfter(shim, referenceElement)
 
-            const column = DOMUtils.div({ class: 'igv-column' })
+            const column = DOMUtils.div({class: 'igv-column'})
             insertElementAfter(column, shim)
 
             return column
@@ -37,17 +37,17 @@ const viewportColumnManager =
 
             for (let i = 0; i < count; i++) {
 
-                const column = DOMUtils.div({ class: 'igv-column' })
+                const column = DOMUtils.div({class: 'igv-column'})
                 insertElementBefore(column, referenceElement)
 
                 if (count > 1 && i > 0) {
-                    const columnShim = DOMUtils.div({ class: 'igv-column-shim' })
+                    const columnShim = DOMUtils.div({class: 'igv-column-shim'})
                     insertElementBefore(columnShim, column)
                 }
 
             }
 
         },
-    };
+    }
 
-export { viewportColumnManager }
+export {viewportColumnManager}

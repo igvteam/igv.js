@@ -24,7 +24,7 @@
  */
 
 import {isSimpleType} from "./util/igvUtils.js"
-import {FileUtils, StringUtils, FeatureUtils, GoogleUtils} from "../node_modules/igv-utils/src/index.js"
+import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 
 
 /**

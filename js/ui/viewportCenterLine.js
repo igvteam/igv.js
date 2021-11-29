@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-import { DOMUtils } from '../../node_modules/igv-utils/src/index.js';
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 
 class ViewportCenterLine {
 
@@ -34,7 +34,7 @@ class ViewportCenterLine {
         this.referenceFrame = referenceFrame
         this.column = column
 
-        this.container = DOMUtils.div({ class: 'igv-center-line' })
+        this.container = DOMUtils.div({class: 'igv-center-line'})
         column.appendChild(this.container)
 
         if (browser.isCenterLineVisible) {
@@ -46,7 +46,7 @@ class ViewportCenterLine {
 
     repaint() {
 
-        const { x } = this.column.getBoundingClientRect()
+        const {x} = this.column.getBoundingClientRect()
         const left = Math.floor(x + 0.5 * this.browser.calculateViewportWidth(this.browser.referenceFrameList.length))
 
         if (this.referenceFrame) {
@@ -54,12 +54,12 @@ class ViewportCenterLine {
             const ppb = 1.0 / this.referenceFrame.bpPerPixel
 
             if (ppb > 1) {
-                this.container.style.left = `${ left }px`
-                this.container.style.width = `${ Math.floor(this.referenceFrame.toPixels(1)) }px`
+                this.container.style.left = `${left}px`
+                this.container.style.width = `${Math.floor(this.referenceFrame.toPixels(1))}px`
                 this.container.classList.remove('igv-center-line-thin')
                 this.container.classList.add('igv-center-line-wide')
             } else {
-                this.container.style.left = `${ left }px`
+                this.container.style.left = `${left}px`
                 this.container.style.width = '1px'
                 this.container.classList.remove('igv-center-line-wide')
                 this.container.classList.add('igv-center-line-thin')
@@ -68,20 +68,20 @@ class ViewportCenterLine {
         }
     }
 
-    show () {
+    show() {
         this.isVisible = true
         this.container.style.display = 'block'
         this.repaint()
     }
 
-    hide () {
+    hide() {
         this.isVisible = false
         this.container.style.display = 'none'
     }
 
     resize() {
-        this.repaint();
+        this.repaint()
     }
 }
 
-export default ViewportCenterLine;
+export default ViewportCenterLine

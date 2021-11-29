@@ -25,7 +25,7 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
-import { DOMUtils } from "../node_modules/igv-utils/src/index.js"
+import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
 import TrackViewport from "./trackViewport.js"
 
 class IdeogramViewport extends TrackViewport {
@@ -36,7 +36,7 @@ class IdeogramViewport extends TrackViewport {
 
     initializationHelper() {
 
-        this.$ideogramCanvas = $('<canvas>', { class: 'igv-ideogram-canvas' })
+        this.$ideogramCanvas = $('<canvas>', {class: 'igv-ideogram-canvas'})
         this.$ideogramCanvas.insertBefore(this.$canvas)
 
         const canvas = this.$ideogramCanvas.get(0)
@@ -66,26 +66,26 @@ class IdeogramViewport extends TrackViewport {
 
         function clickHandler(event) {
 
-            const { xNormalized, width } = DOMUtils.translateMouseCoordinates(event, this.ideogram_ctx.canvas);
-            const { bpLength } = this.browser.genome.getChromosome(this.referenceFrame.chr);
-            const locusLength = this.referenceFrame.bpPerPixel * width;
-            const chrCoveragePercentage = locusLength / bpLength;
+            const {xNormalized, width} = DOMUtils.translateMouseCoordinates(event, this.ideogram_ctx.canvas)
+            const {bpLength} = this.browser.genome.getChromosome(this.referenceFrame.chr)
+            const locusLength = this.referenceFrame.bpPerPixel * width
+            const chrCoveragePercentage = locusLength / bpLength
 
-            let xPercentage = xNormalized;
+            let xPercentage = xNormalized
             if (xPercentage - (chrCoveragePercentage / 2.0) < 0) {
-                xPercentage = chrCoveragePercentage / 2.0;
+                xPercentage = chrCoveragePercentage / 2.0
             }
 
             if (xPercentage + (chrCoveragePercentage / 2.0) > 1.0) {
-                xPercentage = 1.0 - chrCoveragePercentage / 2.0;
+                xPercentage = 1.0 - chrCoveragePercentage / 2.0
             }
 
-            const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
-            const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
+            const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength)
+            const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength)
 
-            this.referenceFrame.start = ss;
-            this.referenceFrame.end = ee;
-            this.referenceFrame.bpPerPixel = (ee - ss) / width;
+            this.referenceFrame.start = ss
+            this.referenceFrame.end = ee
+            this.referenceFrame.bpPerPixel = (ee - ss) / width
 
             this.browser.updateViews(this.referenceFrame, this.browser.trackViews, true)
 
@@ -98,34 +98,47 @@ class IdeogramViewport extends TrackViewport {
     }
 
     setWidth(width) {
-        this.$viewport.width(width);
+        this.$viewport.width(width)
     }
 
     drawSVGWithContext(context, width, height, id, x, y, yClipOffset) {
 
-        context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset);
+        context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
 
-        this.trackView.track.draw({ context, referenceFrame: this.referenceFrame, pixelWidth: width, pixelHeight: height })
+        this.trackView.track.draw({
+            context,
+            referenceFrame: this.referenceFrame,
+            pixelWidth: width,
+            pixelHeight: height
+        })
 
         context.restore()
     }
 
     async repaint() {
-        this.draw({ referenceFrame: this.referenceFrame })
+        this.draw({referenceFrame: this.referenceFrame})
     }
 
-    draw({ referenceFrame }) {
+    draw({referenceFrame}) {
 
         this.$canvas.hide()
 
         IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, this.$viewport.width(), this.$viewport.height())
 
-        this.trackView.track.draw({ context: this.ideogram_ctx, referenceFrame, pixelWidth: this.$viewport.width(), pixelHeight: this.$viewport.height() })
+        this.trackView.track.draw({
+            context: this.ideogram_ctx,
+            referenceFrame,
+            pixelWidth: this.$viewport.width(),
+            pixelHeight: this.$viewport.height()
+        })
     }
 
-    startSpinner() {}
-    stopSpinner() {}
+    startSpinner() {
+    }
+
+    stopSpinner() {
+    }
 
 }
 
-export default IdeogramViewport;
+export default IdeogramViewport

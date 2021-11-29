@@ -24,11 +24,11 @@
  * THE SOFTWARE.
  */
 
-import { DOMUtils } from '../../node_modules/igv-utils/src/index.js';
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 
 const ChromosomeSelectWidget = function (browser, parent) {
 
-    this.container = DOMUtils.div({ class: 'igv-chromosome-select-widget-container' })
+    this.container = DOMUtils.div({class: 'igv-chromosome-select-widget-container'})
     parent.appendChild(this.container)
 
     this.select = document.createElement('select')
@@ -40,11 +40,11 @@ const ChromosomeSelectWidget = function (browser, parent) {
         if (this.select.value !== '') {
             browser.search(this.select.value)
         }
-    });
+    })
 
-    this.showAllChromosomes = browser.config.showAllChromosomes !== false;   // i.e. default to true
+    this.showAllChromosomes = browser.config.showAllChromosomes !== false   // i.e. default to true
 
-};
+}
 
 ChromosomeSelectWidget.prototype.show = function () {
     this.container.style.display = 'flex'
@@ -59,9 +59,9 @@ ChromosomeSelectWidget.prototype.update = function (genome) {
     const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice()
     // console.log(`${ this.showAllChromosomes ? 'Do' : 'Do not'} show all chromosomes. List ${ list }`)
 
-    if(genome.showWholeGenomeView()) {
-        list.unshift('all');
-        list.unshift('');
+    if (genome.showWholeGenomeView()) {
+        list.unshift('all')
+        list.unshift('')
     }
 
     this.select.innerHTML = ''
@@ -73,7 +73,7 @@ ChromosomeSelectWidget.prototype.update = function (genome) {
         this.select.appendChild(option)
     }
 
-};
+}
 
-export default ChromosomeSelectWidget;
+export default ChromosomeSelectWidget
 

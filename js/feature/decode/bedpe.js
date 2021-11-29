@@ -1,4 +1,4 @@
-import {IGVColor} from "../../../node_modules/igv-utils/src/index.js";
+import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
 import {isNumber} from "../../util/igvUtils.js"
 
 /**
@@ -21,8 +21,8 @@ import {isNumber} from "../../util/igvUtils.js"
 function decodeBedpe(tokens, header) {
 
     if (tokens.length < 6) {
-        console.log("Skipping line: " + tokens.join(' '));
-        return undefined;
+        console.log("Skipping line: " + tokens.join(' '))
+        return undefined
     }
 
     var feature = {
@@ -36,50 +36,50 @@ function decodeBedpe(tokens, header) {
 
     if (isNaN(feature.start1) || isNaN(feature.end1) || isNaN(feature.start2) || isNaN(feature.end2)) {
         //throw Error(`Error parsing line: ${tokens.join('\t')}`);
-        return undefined;
+        return undefined
     }
 
     if (tokens.length > 6 && tokens[6] !== ".") {
-        feature.name = tokens[6];
+        feature.name = tokens[6]
     }
 
     if (tokens.length > 7 && tokens[7] !== ".") {
-        feature.score = parseFloat(tokens[7]);
+        feature.score = parseFloat(tokens[7])
     }
 
     if (tokens.length > 8 && tokens[8] !== ".") {
-        feature.strand1 = tokens[8];
+        feature.strand1 = tokens[8]
     }
 
     if (tokens.length > 9 && tokens[9] !== ".") {
-        feature.strand2 = tokens[9];
+        feature.strand2 = tokens[9]
     }
 
     // Optional extra columns
     if (header) {
-        const colorColumn = header.colorColumn;
+        const colorColumn = header.colorColumn
         if (colorColumn && colorColumn < tokens.length) {
             feature.color = IGVColor.createColorString(tokens[colorColumn])
         }
-        const thicknessColumn = header.thicknessColumn;
+        const thicknessColumn = header.thicknessColumn
         if (thicknessColumn && thicknessColumn < tokens.length) {
-            feature.thickness = tokens[thicknessColumn];
+            feature.thickness = tokens[thicknessColumn]
         }
 
         if (tokens.length > 10 && header.columnNames && header.columnNames.length === tokens.length) {
-            feature.extras = tokens.slice(10);
+            feature.extras = tokens.slice(10)
         }
     }
 
 
     // Set total extent of feature
     if (feature.chr1 === feature.chr2) {
-        feature.chr = feature.chr1;
-        feature.start = Math.min(feature.start1, feature.start2);
-        feature.end = Math.max(feature.end1, feature.end2);
+        feature.chr = feature.chr1
+        feature.start = Math.min(feature.start1, feature.start2)
+        feature.end = Math.max(feature.end1, feature.end2)
 
     }
-    return feature;
+    return feature
 }
 
 /**
@@ -88,35 +88,35 @@ function decodeBedpe(tokens, header) {
  */
 function fixBedPE(features) {
 
-    if (features.length == 0) return;
+    if (features.length == 0) return
 
     // Assume all features have same properties
-    const firstFeature = features[0];
+    const firstFeature = features[0]
     if (firstFeature.score === undefined && firstFeature.name !== undefined) {
         // Name field (col 7) is sometimes used for score.
         for (let f of features) {
-            if (!(isNumber(f.name) || f.name === '.')) return;
+            if (!(isNumber(f.name) || f.name === '.')) return
         }
         for (let f of features) {
-            f.score = parseFloat(f.name);
-            delete f.name;
+            f.score = parseFloat(f.name)
+            delete f.name
         }
     }
 
     // Make copies of inter-chr features, one for each chromosome
-    const interChrFeatures = features.filter(f => f.chr1 !== f.chr2);
+    const interChrFeatures = features.filter(f => f.chr1 !== f.chr2)
     for (let f1 of interChrFeatures) {
-        const f2 = Object.assign({}, f1);
-        f2.dup = true;
-        features.push(f2);
+        const f2 = Object.assign({}, f1)
+        f2.dup = true
+        features.push(f2)
 
-        f1.chr = f1.chr1;
-        f1.start = f1.start1;
-        f1.end = f1.end1;
+        f1.chr = f1.chr1
+        f1.start = f1.start1
+        f1.end = f1.end1
 
-        f2.chr = f2.chr2;
-        f2.start = f2.start2;
-        f2.end = f2.end2;
+        f2.chr = f2.chr2
+        f2.start = f2.start2
+        f2.end = f2.end2
     }
 }
 
@@ -129,7 +129,7 @@ function fixBedPE(features) {
  */
 function decodeBedpeDomain(tokens, header) {
 
-    if (tokens.length < 8) return undefined;
+    if (tokens.length < 8) return undefined
 
     return {
         chr: tokens[0],
@@ -137,7 +137,7 @@ function decodeBedpeDomain(tokens, header) {
         end: Number.parseInt(tokens[2]),
         color: IGVColor.createColorString(tokens[6]),
         value: Number.parseFloat(tokens[7])
-    };
+    }
 }
 
 

@@ -24,158 +24,158 @@
  * THE SOFTWARE.
  */
 
-import TDFReader from "./tdfReader.js";
-import GenomicInterval from "../genome/genomicInterval.js";
+import TDFReader from "./tdfReader.js"
+import GenomicInterval from "../genome/genomicInterval.js"
 
 class TDFSource {
 
     constructor(config, genome) {
-        this.genome = genome;
-        this.windowFunction = config.windowFunction || "mean";
-        this.reader = new TDFReader(config, genome);
+        this.genome = genome
+        this.windowFunction = config.windowFunction || "mean"
+        this.reader = new TDFReader(config, genome)
     }
 
     async getFeatures({chr, start, end, bpPerPixel}) {
 
         if (chr.toLowerCase() === "all") {
-            const wgFeatures = [];
-            const genome = this.genome;
-            const chrNames = this.genome.wgChromosomeNames;
+            const wgFeatures = []
+            const genome = this.genome
+            const chrNames = this.genome.wgChromosomeNames
             if (chrNames) {
                 for (let c of genome.wgChromosomeNames) {
-                    const len = genome.getChromosome(c).bpLength;
-                    bpPerPixel = len / 1000;
-                    const chrFeatures = await this._getFeatures(c, 0, len, bpPerPixel);
+                    const len = genome.getChromosome(c).bpLength
+                    bpPerPixel = len / 1000
+                    const chrFeatures = await this._getFeatures(c, 0, len, bpPerPixel)
                     if (chrFeatures) {
                         for (let f of chrFeatures) {
-                                const wg = Object.assign({}, f);
-                                wg.chr = "all";
-                                wg.start = genome.getGenomeCoordinate(f.chr, f.start);
-                                wg.end = genome.getGenomeCoordinate(f.chr, f.end);
-                                wg._f = f;
-                                wgFeatures.push(wg);
+                            const wg = Object.assign({}, f)
+                            wg.chr = "all"
+                            wg.start = genome.getGenomeCoordinate(f.chr, f.start)
+                            wg.end = genome.getGenomeCoordinate(f.chr, f.end)
+                            wg._f = f
+                            wgFeatures.push(wg)
                         }
                     }
                 }
             }
-            return wgFeatures;
+            return wgFeatures
 
         } else {
-            return this._getFeatures(chr, start, end, bpPerPixel);
+            return this._getFeatures(chr, start, end, bpPerPixel)
         }
     }
 
     async _getFeatures(chr, start, end, bpPerPixel) {
-        const genomicInterval = new GenomicInterval(chr, start, end);
-        const genome = this.genome;
+        const genomicInterval = new GenomicInterval(chr, start, end)
+        const genome = this.genome
 
 
         if (!this.rootGroup) {
-            this.rootGroup = await this.reader.readRootGroup();
+            this.rootGroup = await this.reader.readRootGroup()
             if (!this.normalizationFactor) {
-                const totalCount = this.rootGroup.totalCount;
+                const totalCount = this.rootGroup.totalCount
                 if (totalCount) {
-                    this.normalizationFactor = 1.0e6 / totalCount;
+                    this.normalizationFactor = 1.0e6 / totalCount
                 }
             }
         }
 
-        genomicInterval.bpPerPixel = bpPerPixel;
-        const zoom = zoomLevelForScale(chr, bpPerPixel, genome);
-        let queryChr = this.reader.chrAliasTable[chr];
-        let maxZoom = this.reader.maxZoom;
-        if (queryChr === undefined) queryChr = chr;
-        if (maxZoom === undefined) maxZoom = -1;
+        genomicInterval.bpPerPixel = bpPerPixel
+        const zoom = zoomLevelForScale(chr, bpPerPixel, genome)
+        let queryChr = this.reader.chrAliasTable[chr]
+        let maxZoom = this.reader.maxZoom
+        if (queryChr === undefined) queryChr = chr
+        if (maxZoom === undefined) maxZoom = -1
 
-        const wf = zoom > maxZoom ? "raw" : this.windowFunction;
-        const dataset = await this.reader.readDataset(queryChr, wf, zoom);
+        const wf = zoom > maxZoom ? "raw" : this.windowFunction
+        const dataset = await this.reader.readDataset(queryChr, wf, zoom)
         if (dataset == null) {
-            return [];
+            return []
         }
 
-        const tileWidth = dataset.tileWidth;
-        const startTile = Math.floor(start / tileWidth);
-        const endTile = Math.floor(end / tileWidth);
-        const NTRACKS = 1;   // TODO read this
-        const tiles = await this.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS);
-        const features = [];
+        const tileWidth = dataset.tileWidth
+        const startTile = Math.floor(start / tileWidth)
+        const endTile = Math.floor(end / tileWidth)
+        const NTRACKS = 1   // TODO read this
+        const tiles = await this.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS)
+        const features = []
         for (let tile of tiles) {
             switch (tile.type) {
                 case "bed":
-                    decodeBedTile(tile, chr, start, end, bpPerPixel, features);
-                    break;
+                    decodeBedTile(tile, chr, start, end, bpPerPixel, features)
+                    break
                 case "variableStep":
-                    decodeVaryTile(tile, chr, start, end, bpPerPixel, features);
-                    break;
+                    decodeVaryTile(tile, chr, start, end, bpPerPixel, features)
+                    break
                 case "fixedStep":
-                    decodeFixedTile(tile, chr, start, end, bpPerPixel, features);
-                    break;
+                    decodeFixedTile(tile, chr, start, end, bpPerPixel, features)
+                    break
                 default:
-                    throw ("Unknown tile type: " + tile.type);
+                    throw ("Unknown tile type: " + tile.type)
             }
         }
         features.sort(function (a, b) {
-            return a.start - b.start;
+            return a.start - b.start
         })
 
-        return features;
+        return features
     }
 
     supportsWholeGenome() {
-        return true;
+        return true
     }
 }
 
 function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
 
-    const nPositions = tile.nPositions;
-    const starts = tile.start;
-    const ends = tile.end;
-    const data = tile.data[0];   // Single track for now
+    const nPositions = tile.nPositions
+    const starts = tile.start
+    const ends = tile.end
+    const data = tile.data[0]   // Single track for now
     for (let i = 0; i < nPositions; i++) {
-        const s = starts[i];
-        const e = ends[i];
-        if (e < bpStart) continue;
-        if (s > bpEnd) break;
+        const s = starts[i]
+        const e = ends[i]
+        if (e < bpStart) continue
+        if (s > bpEnd) break
         features.push({
             chr: chr,
             start: s,
             end: e,
             value: data[i]
-        });
+        })
     }
 }
 
 function decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
 
-    const nPositions = tile.nPositions;
-    const starts = tile.start;
-    const span = tile.span;
-    const data = tile.data[0];   // Single track for now
+    const nPositions = tile.nPositions
+    const starts = tile.start
+    const span = tile.span
+    const data = tile.data[0]   // Single track for now
     for (let i = 0; i < nPositions; i++) {
-        const s = starts[i];
-        const e = s + span;
-        if (e < bpStart) continue;
-        if (s > bpEnd) break;
+        const s = starts[i]
+        const e = s + span
+        if (e < bpStart) continue
+        if (s > bpEnd) break
         features.push({
             chr: chr,
             start: s,
             end: e,
             value: data[i]
-        });
+        })
     }
 }
 
 function decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
 
-    const nPositions = tile.nPositions;
-    let s = tile.start;
-    const span = tile.span;
-    const data = tile.data[0];   // Single track for now
+    const nPositions = tile.nPositions
+    let s = tile.start
+    const span = tile.span
+    const data = tile.data[0]   // Single track for now
 
     for (let i = 0; i < nPositions; i++) {
-        const e = s + span;
-        if (s > bpEnd) break;
+        const e = s + span
+        if (s > bpEnd) break
         if (e >= bpStart) {
             if (!Number.isNaN(data[i])) {
                 features.push({
@@ -183,15 +183,15 @@ function decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
                     start: s,
                     end: e,
                     value: data[i]
-                });
+                })
             }
         }
-        s = e;
+        s = e
     }
 }
 
 
-var log2 = Math.log(2);
+var log2 = Math.log(2)
 
 function zoomLevelForScale(chr, bpPerPixel, genome) {
 
@@ -199,9 +199,9 @@ function zoomLevelForScale(chr, bpPerPixel, genome) {
     // display in a 700 pixel window.  The fully zoomed out view of a chromosome is zoom level "0".
     // Zoom level 1 is magnified 2X,  and so forth
 
-    var chrSize = genome.getChromosome(chr).bpLength;
+    var chrSize = genome.getChromosome(chr).bpLength
 
-    return Math.ceil(Math.log(Math.max(0, (chrSize / (bpPerPixel * 700)))) / log2);
+    return Math.ceil(Math.log(Math.max(0, (chrSize / (bpPerPixel * 700)))) / log2)
 }
 
-export default TDFSource;
+export default TDFSource

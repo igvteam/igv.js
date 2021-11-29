@@ -24,21 +24,21 @@
  * THE SOFTWARE.
  */
 import FeatureSource from './feature/featureSource.js'
-import IGVGraphics from "./igv-canvas.js";
+import IGVGraphics from "./igv-canvas.js"
 
-var defaultHighlightColor = "rgba(68, 134, 247, 0.25)";
+var defaultHighlightColor = "rgba(68, 134, 247, 0.25)"
 
 class ROI {
 
     constructor(config, genome) {
-        this.config = config;
-        this.name = config.name;
-        this.roiSource = FeatureSource(config, genome);
-        this.color = config.color || defaultHighlightColor;
+        this.config = config
+        this.name = config.name
+        this.roiSource = FeatureSource(config, genome)
+        this.color = config.color || defaultHighlightColor
     }
 
     async getFeatures(chr, start, end) {
-        return this.roiSource.getFeatures({chr, start, end});
+        return this.roiSource.getFeatures({chr, start, end})
     }
 
     draw(drawConfiguration) {
@@ -46,27 +46,27 @@ class ROI {
         var endBP,
             region,
             coord,
-            regions;
+            regions
 
-        regions = drawConfiguration.features;
+        regions = drawConfiguration.features
         if (!regions) {
-            return;
+            return
         }
 
-        endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1);
+        endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1)
         for (var i = 0, len = regions.length; i < len; i++) {
 
-            region = regions[i];
+            region = regions[i]
             if (region.end < drawConfiguration.bpStart) {
-                continue;
+                continue
             }
 
             if (region.start > endBP) {
-                break;
+                break
             }
 
-            coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel);
-            IGVGraphics.fillRect(drawConfiguration.context, coord.x, drawConfiguration.pixelTop, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color});
+            coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel)
+            IGVGraphics.fillRect(drawConfiguration.context, coord.x, drawConfiguration.pixelTop, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color})
         }
     }
 }
@@ -75,18 +75,18 @@ function coordinates(region, startBP, bpp) {
 
     var ss,
         ee,
-        width;
+        width
 
-    ss = Math.round((region.start - startBP) / bpp);
-    ee = Math.round((region.end - startBP) / bpp);
-    width = ee - ss;
+    ss = Math.round((region.start - startBP) / bpp)
+    ee = Math.round((region.end - startBP) / bpp)
+    width = ee - ss
 
     if (width < 3) {
-        width = 3;
-        ss -= 1;
+        width = 3
+        ss -= 1
     }
 
-    return {x: ss, width: width};
+    return {x: ss, width: width}
 }
 
 export default ROI

@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-import { DOMUtils } from '../../node_modules/igv-utils/src/index.js';
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 
 class CursorGuideButton {
 
@@ -32,7 +32,7 @@ class CursorGuideButton {
 
         this.browser = browser
 
-        this.button = DOMUtils.div({ class: 'igv-navbar-button'})
+        this.button = DOMUtils.div({class: 'igv-navbar-button'})
         parent.appendChild(this.button)
 
         this.button.textContent = 'cursor guide'
@@ -53,7 +53,7 @@ class CursorGuideButton {
 
     }
 
-    setButtonState (cursorGuideVisible) {
+    setButtonState(cursorGuideVisible) {
         if (true === cursorGuideVisible) {
             this.button.classList.add('igv-navbar-button-clicked')
         } else {
@@ -61,12 +61,12 @@ class CursorGuideButton {
         }
     }
 
-    show () {
+    show() {
         this.button.style.display = 'block'
         this.setButtonState(this.browser.cursorGuideVisible)
     }
 
-    hide () {
+    hide() {
         this.button.style.display = 'none'
     }
 }

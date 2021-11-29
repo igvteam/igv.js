@@ -23,9 +23,8 @@
  * THE SOFTWARE.
  */
 
-import IGVGraphics from "./igv-canvas.js";
-import {IGVColor, StringUtils} from "../node_modules/igv-utils/src/index.js";
-import {greyScale, appleCrayonPalette, randomGrey, randomRGB} from "./util/colorPalletes.js"
+import IGVGraphics from "./igv-canvas.js"
+import {IGVColor} from "../node_modules/igv-utils/src/index.js"
 
 class IdeogramTrack {
     constructor(browser) {
@@ -37,31 +36,31 @@ class IdeogramTrack {
 
         this.height = 16
 
-        this.order = Number.MIN_SAFE_INTEGER;
+        this.order = Number.MIN_SAFE_INTEGER
 
-        this.disableButtons = true;
-        this.ignoreTrackMenu = true;
+        this.disableButtons = true
+        this.ignoreTrackMenu = true
 
     }
 
     async getFeatures(chr, start, end) {
-        return [];
+        return []
     }
 
     computePixelHeight(ignore) {
-        return this.height;
+        return this.height
     }
 
     draw({context, referenceFrame, pixelWidth, pixelHeight}) {
 
-        const chr = referenceFrame.chr;
-        const chromosome = referenceFrame.genome.getChromosome(chr);
+        const chr = referenceFrame.chr
+        const chromosome = referenceFrame.genome.getChromosome(chr)
 
         if (undefined === chromosome || pixelWidth <= 0 || pixelHeight <= 0 || 'all' === chr.toLowerCase()) {
-            return;
+            return
         }
 
-        const stainColors = [];
+        const stainColors = []
 
         drawIdeogram({
             ctx: context,
@@ -71,17 +70,17 @@ class IdeogramTrack {
             width: pixelWidth,
             height: pixelHeight,
             stainColors
-        });
+        })
 
-        const widthBP = Math.round(referenceFrame.bpPerPixel * pixelWidth);
-        const xBP = referenceFrame.start;
+        const widthBP = Math.round(referenceFrame.bpPerPixel * pixelWidth)
+        const xBP = referenceFrame.start
 
         // Total chromosome length can be > chromosome.bpLength for partial fastas.
-        let chrLength = chromosome.bpLength;
-        const cytobands = referenceFrame.genome.getCytobands(chr);
+        let chrLength = chromosome.bpLength
+        const cytobands = referenceFrame.genome.getCytobands(chr)
         if (cytobands && cytobands.length > 0 && cytobands[cytobands.length - 1].end) {
             chrLength = Math.max(chrLength, cytobands[cytobands.length - 1].end)
-            chromosome.bpLength = chrLength;   // Correct bp length, bit of a hack
+            chromosome.bpLength = chrLength   // Correct bp length, bit of a hack
         }
 
         if (widthBP < chrLength) {
@@ -123,78 +122,78 @@ class IdeogramTrack {
 
 function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors}) {
 
-    const shim = 1;
-    const shim2 = 0.5 * shim;
-    const ideogramTop = 0;
+    const shim = 1
+    const shim2 = 0.5 * shim
+    const ideogramTop = 0
 
     if (undefined === genome) {
-        return;
+        return
     }
 
-    IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: IGVColor.greyScale(255)});
+    IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: IGVColor.greyScale(255)})
 
-    const cytobands = genome.getCytobands(chr);
+    const cytobands = genome.getCytobands(chr)
     if (cytobands) {
 
-        const center = (ideogramTop + height / 2);
+        const center = (ideogramTop + height / 2)
 
-        const xC = [];
-        const yC = [];
+        const xC = []
+        const yC = []
 
         if (0 === cytobands.length) {
-            return;
+            return
         }
 
         // Get chrLength from the cytobands -- chromsome.bpLength might not work for igv-reports fasta files, which
         // contain only a portion of the chromosome sequence
         // *DOESNT WORK* const chrLength = referenceFrame.genome.getChromosome(chr).bpLength;
 
-        const chrLength = cytobands[cytobands.length - 1].end;
-        const scale = width / chrLength;
+        const chrLength = cytobands[cytobands.length - 1].end
+        const scale = width / chrLength
 
         // round rect clipping path
-        ctx.beginPath();
-        IGVGraphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2 * shim2, (height - 2 * shim2) / 2, 0, 1);
-        ctx.clip();
+        ctx.beginPath()
+        IGVGraphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2 * shim2, (height - 2 * shim2) / 2, 0, 1)
+        ctx.clip()
 
         for (let i = 0; i < cytobands.length; i++) {
 
-            const cytoband = cytobands[i];
-            const start = scale * cytoband.start;
-            const end = scale * cytoband.end;
+            const cytoband = cytobands[i]
+            const start = scale * cytoband.start
+            const end = scale * cytoband.end
 
             if (cytoband.type === 'c') {
 
                 if (cytoband.name.charAt(0) === 'p') {
-                    xC[0] = start;
-                    yC[0] = height + ideogramTop;
-                    xC[1] = start;
-                    yC[1] = ideogramTop;
-                    xC[2] = end;
-                    yC[2] = center;
+                    xC[0] = start
+                    yC[0] = height + ideogramTop
+                    xC[1] = start
+                    yC[1] = ideogramTop
+                    xC[2] = end
+                    yC[2] = center
                 } else {
-                    xC[0] = end;
-                    yC[0] = height + ideogramTop;
-                    xC[1] = end;
-                    yC[1] = ideogramTop;
-                    xC[2] = start;
-                    yC[2] = center;
+                    xC[0] = end
+                    yC[0] = height + ideogramTop
+                    xC[1] = end
+                    yC[1] = ideogramTop
+                    xC[2] = start
+                    yC[2] = center
                 }
 
-                ctx.fillStyle = "rgb(150, 0, 0)";
-                ctx.strokeStyle = "rgb(150, 0, 0)";
-                IGVGraphics.polygon(ctx, xC, yC, 1, 0);
+                ctx.fillStyle = "rgb(150, 0, 0)"
+                ctx.strokeStyle = "rgb(150, 0, 0)"
+                IGVGraphics.polygon(ctx, xC, yC, 1, 0)
             } else {
 
-                ctx.fillStyle = getCytobandColor(stainColors, cytoband);
-                IGVGraphics.fillRect(ctx, start, shim + ideogramTop, (end - start), height - 2 * shim);
+                ctx.fillStyle = getCytobandColor(stainColors, cytoband)
+                IGVGraphics.fillRect(ctx, start, shim + ideogramTop, (end - start), height - 2 * shim)
             }
         }
     }
 
     // round rect border
-    ctx.strokeStyle = IGVColor.greyScale(41);
-    IGVGraphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2 * shim2, (height - 2 * shim2) / 2, 0, 1);
+    ctx.strokeStyle = IGVColor.greyScale(41)
+    IGVGraphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2 * shim2, (height - 2 * shim2) / 2, 0, 1)
 }
 
 function getCytobandColor(colors, data) {
@@ -202,18 +201,18 @@ function getCytobandColor(colors, data) {
     if (data.type === 'c') { // centermere: "acen"
         return "rgb(150, 10, 10)"
     } else {
-        var stain = data.stain; // + 4;
+        var stain = data.stain // + 4;
 
-        var shade = 230;
+        var shade = 230
         if (data.type === 'p') {
-            shade = Math.floor(230 - stain / 100.0 * 230);
+            shade = Math.floor(230 - stain / 100.0 * 230)
         }
-        var c = colors[shade];
+        var c = colors[shade]
         if (!c) {
-            c = "rgb(" + shade + "," + shade + "," + shade + ")";
-            colors[shade] = c;
+            c = "rgb(" + shade + "," + shade + "," + shade + ")"
+            colors[shade] = c
         }
-        return c;
+        return c
 
     }
 }

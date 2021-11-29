@@ -23,17 +23,15 @@
  * THE SOFTWARE.
  */
 
-import BinaryParser from "../binary.js";
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
-import {buildOptions} from "../util/igvUtils.js";
+import BinaryParser from "../binary.js"
 
-const SEQUENCE_DICTIONARY_FLAG = 0x8000;  // if we have a sequence dictionary in our header
+const SEQUENCE_DICTIONARY_FLAG = 0x8000  // if we have a sequence dictionary in our header
 
 async function parseTribbleIndex(arrayBuffer, genome) {
 
-    const index = new TribbleIndex();
-    index.parse(arrayBuffer, genome);
-    return index;
+    const index = new TribbleIndex()
+    index.parse(arrayBuffer, genome)
+    return index
 }
 
 class TribbleIndex {
@@ -44,42 +42,42 @@ class TribbleIndex {
 
     async parse(arrayBuffer, genome) {
 
-        let blockMax = 0;
-        this.chrIndex = {};
-        this.lastBlockPosition = [];
-        const parser = new BinaryParser(new DataView(arrayBuffer));
-        readHeader(parser);
+        let blockMax = 0
+        this.chrIndex = {}
+        this.lastBlockPosition = []
+        const parser = new BinaryParser(new DataView(arrayBuffer))
+        readHeader(parser)
 
-        let nChrs = parser.getInt();
+        let nChrs = parser.getInt()
         while (nChrs-- > 0) {
 
             // todo -- support interval tree index, we're assuming its a linear index
 
-            let chr = parser.getString();
-            if (genome) chr = genome.getChromosomeName(chr); // Translate to canonical name
+            let chr = parser.getString()
+            if (genome) chr = genome.getChromosomeName(chr) // Translate to canonical name
 
-            const binWidth = parser.getInt();
-            const nBins = parser.getInt();
-            const longestFeature = parser.getInt();
-            const OLD_V3_INDEX = parser.getInt() > 0;
-            const nFeatures = parser.getInt();
+            const binWidth = parser.getInt()
+            const nBins = parser.getInt()
+            const longestFeature = parser.getInt()
+            const OLD_V3_INDEX = parser.getInt() > 0
+            const nFeatures = parser.getInt()
 
             // note the code below accounts for > 60% of the total time to read an index
-            let pos = parser.getLong();
-            const blocks = [];
+            let pos = parser.getLong()
+            const blocks = []
             for (let binNumber = 0; binNumber < nBins; binNumber++) {
-                const nextPos = parser.getLong();
-                const size = nextPos - pos;
-                blocks.push({min: pos, max: nextPos}); //        {position: pos, size: size});
-                pos = nextPos;
+                const nextPos = parser.getLong()
+                const size = nextPos - pos
+                blocks.push({min: pos, max: nextPos}) //        {position: pos, size: size});
+                pos = nextPos
                 if (nextPos > blockMax) {
-                    blockMax = nextPos;
+                    blockMax = nextPos
                 }
             }
-            this.chrIndex[chr] = {chr: chr, blocks: blocks, longestFeature: longestFeature, binWidth: binWidth};
-         }
+            this.chrIndex[chr] = {chr: chr, blocks: blocks, longestFeature: longestFeature, binWidth: binWidth}
+        }
 
-        this.lastBlockPosition = blockMax;
+        this.lastBlockPosition = blockMax
 
 
         /**
@@ -88,31 +86,30 @@ class TribbleIndex {
          */
         function readHeader(parser) {
 
-            const magicNumber = parser.getInt();     //   view._getInt32(offset += 32, true);
-            const type = parser.getInt();
-            const version = parser.getInt();
-            const indexedFile = parser.getString();
-            const indexedFileSize = parser.getLong();
-            const indexedFileTS = parser.getLong();
-            const indexedFileMD5 = parser.getString();
-            const flags = parser.getInt();
+            const magicNumber = parser.getInt()     //   view._getInt32(offset += 32, true);
+            const type = parser.getInt()
+            const version = parser.getInt()
+            const indexedFile = parser.getString()
+            const indexedFileSize = parser.getLong()
+            const indexedFileTS = parser.getLong()
+            const indexedFileMD5 = parser.getString()
+            const flags = parser.getInt()
             if (version < 3 && (flags & SEQUENCE_DICTIONARY_FLAG) === SEQUENCE_DICTIONARY_FLAG) {
                 // readSequenceDictionary(dis);
             }
             if (version >= 3) {
-                let nProperties = parser.getInt();
+                let nProperties = parser.getInt()
                 while (nProperties-- > 0) {
-                    const key = parser.getString();
-                    const value = parser.getString();
+                    const key = parser.getString()
+                    const value = parser.getString()
                 }
             }
         }
     }
 
     get chromosomeNames() {
-        return Object.keys(this.chrIndex);
+        return Object.keys(this.chrIndex)
     }
-
 
 
     /**
@@ -124,36 +121,36 @@ class TribbleIndex {
      */
     blocksForRange(queryChr, min, max) { //function (refId, min, max) {
 
-        const self = this;
-        const chrIdx = this.chrIndex[queryChr];
+        const self = this
+        const chrIdx = this.chrIndex[queryChr]
 
         if (chrIdx) {
-            const blocks = chrIdx.blocks;
-            const longestFeature = chrIdx.longestFeature;
-            const binWidth = chrIdx.binWidth;
-            const adjustedPosition = Math.max(min - longestFeature, 0);
-            const startBinNumber = Math.floor(adjustedPosition / binWidth);
+            const blocks = chrIdx.blocks
+            const longestFeature = chrIdx.longestFeature
+            const binWidth = chrIdx.binWidth
+            const adjustedPosition = Math.max(min - longestFeature, 0)
+            const startBinNumber = Math.floor(adjustedPosition / binWidth)
 
             if (startBinNumber >= blocks.length) // are we off the end of the bin list, so return nothing
-                return [];
+                return []
             else {
-                const endBinNumber = Math.min(Math.floor((max - 1) / binWidth), blocks.length - 1);
+                const endBinNumber = Math.min(Math.floor((max - 1) / binWidth), blocks.length - 1)
 
                 // By definition blocks are adjacent in the file for the liner index.  Combine them into one merged block
-                const startPos = blocks[startBinNumber].min;
-                const endPos = blocks[endBinNumber].max;
-                const size = endPos - startPos;
+                const startPos = blocks[startBinNumber].min
+                const endPos = blocks[endBinNumber].max
+                const size = endPos - startPos
                 if (size === 0) {
-                    return [];
+                    return []
                 } else {
-                    const mergedBlock = {minv: {block: startPos, offset: 0}, maxv: {block: endPos, offset: 0}};
-                    return [mergedBlock];
+                    const mergedBlock = {minv: {block: startPos, offset: 0}, maxv: {block: endPos, offset: 0}}
+                    return [mergedBlock]
                 }
             }
         } else {
-            return undefined;
+            return undefined
         }
     }
 }
 
-export {parseTribbleIndex};
+export {parseTribbleIndex}

@@ -23,14 +23,14 @@
  * THE SOFTWARE.
  */
 
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
-const apiKey = igvxhr.apiKey;
+const apiKey = igvxhr.apiKey
 
 function ga4ghGet(options) {
-    var url = options.url + "/" + options.entity + "/" + options.entityId;
-    options.headers = ga4ghHeaders();
-    return igvxhr.loadJson(url, options);      // Returns a promise
+    var url = options.url + "/" + options.entity + "/" + options.entityId
+    options.headers = ga4ghHeaders()
+    return igvxhr.loadJson(url, options)      // Returns a promise
 }
 
 function ga4ghSearch(options) {
@@ -41,31 +41,31 @@ function ga4ghSearch(options) {
             body = options.body,
             decode = options.decode,
             paramSeparator = "?",
-            fields = options.fields;  // Partial response
+            fields = options.fields  // Partial response
 
 
         if (apiKey) {
-            url = url + paramSeparator + "key=" + apiKey;
-            paramSeparator = "&";
+            url = url + paramSeparator + "key=" + apiKey
+            paramSeparator = "&"
         }
 
         if (fields) {
-            url = url + paramSeparator + "fields=" + fields;
+            url = url + paramSeparator + "fields=" + fields
         }
 
 
         // Start the recursive load cycle.  Data is fetched in chunks, if more data is available a "nextPageToken" is returned.
-        return loadChunk();
+        return loadChunk()
 
         function loadChunk(pageToken) {
 
             if (pageToken) {
-                body.pageToken = pageToken;
+                body.pageToken = pageToken
             } else {
-                if (body.pageToken !== undefined) delete body.pageToken;    // Remove previous page token, if any
+                if (body.pageToken !== undefined) delete body.pageToken    // Remove previous page token, if any
             }
 
-            var sendData = JSON.stringify(body);
+            var sendData = JSON.stringify(body)
 
             igvxhr.loadJson(url, {
                 sendData: sendData,
@@ -74,41 +74,41 @@ function ga4ghSearch(options) {
                 //    oauthToken: ga4ghToken()
             })
                 .then(function (json) {
-                    var nextPageToken, tmp;
+                    var nextPageToken, tmp
 
                     if (json) {
 
-                        tmp = decode ? decode(json) : json;
+                        tmp = decode ? decode(json) : json
 
                         if (tmp) {
 
                             tmp.forEach(function (a) {
-                                var keep = true;           // TODO -- conditionally keep (downsample)
+                                var keep = true           // TODO -- conditionally keep (downsample)
                                 if (keep) {
-                                    results.push(a);
+                                    results.push(a)
                                 }
-                            });
+                            })
                         }
 
 
-                        nextPageToken = json["nextPageToken"];
+                        nextPageToken = json["nextPageToken"]
 
                         if (nextPageToken) {
-                            loadChunk(nextPageToken);
+                            loadChunk(nextPageToken)
                         } else {
-                            fulfill(results);
+                            fulfill(results)
                         }
                     } else {
-                        fulfill(results);
+                        fulfill(results)
                     }
 
                 })
                 .catch(function (error) {
-                    reject(error);
-                });
+                    reject(error)
+                })
         }
 
-    });
+    })
 
 
 }
@@ -123,13 +123,13 @@ function ga4ghSearchReadGroupSets(options) {
             "pageSize": "10000"
         },
         decode: function (json) {
-            return json.readGroupSets;
+            return json.readGroupSets
         }
     }).then(function (results) {
-        options.success(results);
+        options.success(results)
     }).catch(function (error) {
-        console.log(error);
-    });
+        console.log(error)
+    })
 }
 
 function ga4ghSearchVariantSets(options) {
@@ -141,13 +141,13 @@ function ga4ghSearchVariantSets(options) {
             "pageSize": "10000"
         },
         decode: function (json) {
-            return json.variantSets;
+            return json.variantSets
         }
     }).then(function (results) {
-        options.success(results);
+        options.success(results)
     }).catch(function (error) {
-        console.log(error);
-    });
+        console.log(error)
+    })
 }
 
 function ga4ghSearchCallSets(options) {
@@ -161,19 +161,19 @@ function ga4ghSearchCallSets(options) {
             datasetId: options.datasetId,
             success: function (results) {
 
-                var variantSetIds = [];
+                var variantSetIds = []
                 results.forEach(function (vs) {
-                    variantSetIds.push(vs.id);
-                });
+                    variantSetIds.push(vs.id)
+                })
 
                 // Substitute variantSetIds for datasetId
-                options.datasetId = undefined;
-                options.variantSetIds = variantSetIds;
-                ga4ghSearchCallSets(options);
+                options.datasetId = undefined
+                options.variantSetIds = variantSetIds
+                ga4ghSearchCallSets(options)
 
 
             }
-        });
+        })
 
     } else {
 
@@ -186,16 +186,16 @@ function ga4ghSearchCallSets(options) {
             decode: function (json) {
 
                 if (json.callSets) json.callSets.forEach(function (cs) {
-                    cs.variantSetIds = options.variantSetIds;
-                });
+                    cs.variantSetIds = options.variantSetIds
+                })
 
-                return json.callSets;
+                return json.callSets
             }
         }).then(function (results) {
-            options.success(results);
+            options.success(results)
         }).catch(function (error) {
-            console.log(error);
-        });
+            console.log(error)
+        })
     }
 }
 
@@ -212,40 +212,40 @@ function ga4ghSearchReadAndCallSets(options) {
 
                     // Merge call sets and read group sets
 
-                    var csHash = {};
+                    var csHash = {}
                     callSets.forEach(function (cs) {
-                        csHash[cs.name] = cs;
-                    });
+                        csHash[cs.name] = cs
+                    })
 
-                    var mergedResults = [];
+                    var mergedResults = []
                     readGroupSets.forEach(function (rg) {
                         var m = {readGroupSetId: rg.id, name: rg.name, datasetId: options.datasetId},
-                            cs = csHash[rg.name];
+                            cs = csHash[rg.name]
                         if (cs) {
-                            m.callSetId = cs.id;
-                            m.variantSetIds = cs.variantSetIds;
+                            m.callSetId = cs.id
+                            m.variantSetIds = cs.variantSetIds
                         }
-                        mergedResults.push(m);
-                    });
+                        mergedResults.push(m)
+                    })
 
-                    options.success(mergedResults);
+                    options.success(mergedResults)
 
                 }
-            });
+            })
         }
-    });
+    })
 
 }
 
 function ga4ghHeaders() {
     return {
         "Cache-Control": "no-cache"
-    };
+    }
 }
 
-export  {
+export {
     ga4ghGet, ga4ghSearch, ga4ghSearchReadGroupSets, ga4ghSearchVariantSets,
     ga4ghSearchCallSets, ga4ghSearchReadAndCallSets
-};
+}
 
 

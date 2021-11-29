@@ -23,18 +23,18 @@
  * THE SOFTWARE.
  */
 
-import {FeatureCache} from "../../node_modules/igv-utils/src/index.js";
-import FeatureFileReader from "./featureFileReader.js";
-import CustomServiceReader from "./customServiceReader.js";
-import UCSCServiceReader from "./ucscServiceReader.js";
-import GFFHelper from "./gff/gffHelper.js";
-import GtexReader from "../gtex/gtexReader.js";
-import ImmVarReader from "../gtex/immvarReader.js";
-import Ga4ghVariantReader from "../ga4gh/ga4ghVariantReader.js";
-import CivicReader from "../civic/civicReader.js";
-import GenomicInterval from "../genome/genomicInterval.js";
-import pack from "../feature/featurePacker.js";
-import HtsgetVariantReader from "../htsget/htsgetVariantReader.js";
+import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
+import FeatureFileReader from "./featureFileReader.js"
+import CustomServiceReader from "./customServiceReader.js"
+import UCSCServiceReader from "./ucscServiceReader.js"
+import GFFHelper from "./gff/gffHelper.js"
+import GtexReader from "../gtex/gtexReader.js"
+import ImmVarReader from "../gtex/immvarReader.js"
+import Ga4ghVariantReader from "../ga4gh/ga4ghVariantReader.js"
+import CivicReader from "../civic/civicReader.js"
+import GenomicInterval from "../genome/genomicInterval.js"
+import pack from "../feature/featurePacker.js"
+import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 
 
 /**
@@ -47,52 +47,52 @@ class TextFeatureSource {
 
     constructor(config, genome) {
 
-        this.config = config || {};
-        this.genome = genome;
-        this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
+        this.config = config || {}
+        this.genome = genome
+        this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType)
 
-        const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "tdf"]);
+        const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "tdf"])
 
         if (config.features && Array.isArray(config.features)) {
             // Explicit array of features
-            let features = fixFeatures(config.features, genome);
-            packFeatures(features);
+            let features = fixFeatures(config.features, genome)
+            packFeatures(features)
             if (config.mappings) {
                 mapProperties(features, config.mappings)
             }
-            this.queryable = false;
-            this.featureCache = new FeatureCache(features, genome);
+            this.queryable = false
+            this.featureCache = new FeatureCache(features, genome)
         } else if (config.reader) {
             // Explicit reader implementation
-            this.reader = config.reader;
-            this.queryable = config.queryable !== false;
+            this.reader = config.reader
+            this.queryable = config.queryable !== false
         } else if (config.sourceType === "ga4gh") {
-            this.reader = new Ga4ghVariantReader(config, genome);
-            this.queryable = true;
+            this.reader = new Ga4ghVariantReader(config, genome)
+            this.queryable = true
         } else if (config.sourceType === "immvar") {
-            this.reader = new ImmVarReader(config);
-            this.queryable = true;
+            this.reader = new ImmVarReader(config)
+            this.queryable = true
         } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
-            this.reader = new GtexReader(config);
-            this.queryable = true;
+            this.reader = new GtexReader(config)
+            this.queryable = true
         } else if ("htsget" === config.sourceType) {
-            this.reader = new HtsgetVariantReader(config, genome);
+            this.reader = new HtsgetVariantReader(config, genome)
         } else if (config.sourceType === 'ucscservice') {
-            this.reader = new UCSCServiceReader(config.source);
-            this.queryable = true;
+            this.reader = new UCSCServiceReader(config.source)
+            this.queryable = true
         } else if (config.sourceType === 'custom') {
-            this.reader = new CustomServiceReader(config.source);
-            this.queryable = false !== config.source.queryable;
+            this.reader = new CustomServiceReader(config.source)
+            this.queryable = false !== config.source.queryable
         } else if ("civic-ws" === config.sourceType) {
-            this.reader = new CivicReader(config);
-            this.queryable = false;
+            this.reader = new CivicReader(config)
+            this.queryable = false
         } else {
             // File of some type (i.e. not a webservice)
-            this.reader = new FeatureFileReader(config, genome);
+            this.reader = new FeatureFileReader(config, genome)
             if (config.queryable !== undefined) {
                 this.queryable = config.queryable
             } else if (queryableFormats.has(config.format) || this.reader.indexed) {
-                this.queryable = true;
+                this.queryable = true
             } else {
                 // Leav undefined -- will defer until we know if reader has an index
             }
@@ -100,17 +100,17 @@ class TextFeatureSource {
     }
 
     async defaultVisibilityWindow() {
-        if(this.reader && typeof this.reader.defaultVisibilityWindow === 'function') {
-            return this.reader.defaultVisibilityWindow();
+        if (this.reader && typeof this.reader.defaultVisibilityWindow === 'function') {
+            return this.reader.defaultVisibilityWindow()
         }
     }
 
     async trackType() {
-        const header = await this.getHeader();
+        const header = await this.getHeader()
         if (header) {
-            return header.type;
+            return header.type
         } else {
-            return undefined;    // Convention for unknown or unspecified
+            return undefined    // Convention for unknown or unspecified
         }
     }
 
@@ -120,15 +120,15 @@ class TextFeatureSource {
             if (this.reader && typeof this.reader.readHeader === "function") {
                 const header = await this.reader.readHeader()
                 if (header) {
-                    this.header = header;
+                    this.header = header
                     if (header.format) {
-                        this.config.format = header.format;
+                        this.config.format = header.format
                     }
                 } else {
-                    this.header = {};
+                    this.header = {}
                 }
             } else {
-                this.header = {};
+                this.header = {}
             }
         }
         return this.header
@@ -148,9 +148,9 @@ class TextFeatureSource {
      */
     async getFeatures({chr, start, end, bpPerPixel, visibilityWindow}) {
 
-        const genome = this.genome;
-        const queryChr = genome ? genome.getChromosomeName(chr) : chr;
-        const isWholeGenome = ("all" === queryChr.toLowerCase());
+        const genome = this.genome
+        const queryChr = genome ? genome.getChromosomeName(chr) : chr
+        const isWholeGenome = ("all" === queryChr.toLowerCase())
 
         // Various conditions that can create a feature load
         // * view is "whole genome" but no features are loaded
@@ -160,105 +160,105 @@ class TextFeatureSource {
             this.config.disableCache ||
             !this.featureCache ||
             !this.featureCache.containsRange(new GenomicInterval(queryChr, start, end))) {
-            await this.loadFeatures(queryChr, start, end, visibilityWindow);
+            await this.loadFeatures(queryChr, start, end, visibilityWindow)
         }
 
         if (isWholeGenome) {
             if (!this.wgFeatures) {
                 if (this.queryable) {   // queryable sources don't support whole genome view
-                    this.wgFeatures = [];
+                    this.wgFeatures = []
                 } else {
-                    this.wgFeatures = this.getWGFeatures(this.featureCache.getAllFeatures());
+                    this.wgFeatures = this.getWGFeatures(this.featureCache.getAllFeatures())
                 }
             }
-            return this.wgFeatures;
+            return this.wgFeatures
         } else {
-            return this.featureCache.queryFeatures(queryChr, start, end);
+            return this.featureCache.queryFeatures(queryChr, start, end)
         }
     }
 
     // TODO -- experimental, will only work for non-indexed sources
     getAllFeatures() {
         if (this.queryable) {   // queryable sources don't support all features
-            return [];
+            return []
         } else {
-            return this.getWGFeatures(this.featureCache.getAllFeatures());
+            return this.getWGFeatures(this.featureCache.getAllFeatures())
         }
     }
 
 
     async loadFeatures(queryChr, start, end, visibilityWindow) {
 
-        const reader = this.reader;
-        let intervalStart = start;
-        let intervalEnd = end;
+        const reader = this.reader
+        let intervalStart = start
+        let intervalEnd = end
 
         // Use visibility window to potentially expand query interval.
         // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
         // indicating whole chromosome should be read at once.
         if ((!visibilityWindow || visibilityWindow <= 0) && this.config.expandQuery !== false) {
             // Whole chromosome
-            const chromosome = this.genome ? this.genome.getChromosome(queryChr) : undefined;
-            intervalStart = 0;
-            intervalEnd = Math.max(chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER, end);
+            const chromosome = this.genome ? this.genome.getChromosome(queryChr) : undefined
+            intervalStart = 0
+            intervalEnd = Math.max(chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER, end)
         } else if (visibilityWindow > (end - start) && this.config.expandQuery !== false) {
             const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
-            intervalStart = Math.max(0, (start + end) / 2 - expansionWindow);
-            intervalEnd = start + expansionWindow;
+            intervalStart = Math.max(0, (start + end) / 2 - expansionWindow)
+            intervalEnd = start + expansionWindow
         }
 
         let features = await reader.readFeatures(queryChr, intervalStart, intervalEnd)
         if (this.queryable === undefined) {
-            this.queryable = reader.indexed;
+            this.queryable = reader.indexed
         }
 
         const genomicInterval = this.queryable ?
             new GenomicInterval(queryChr, intervalStart, intervalEnd) :
-            undefined;
+            undefined
 
         if (features) {
 
             if (this.config.assembleGFF !== false &&
                 ("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format)) {
-                features = (new GFFHelper(this.config)).combineFeatures(features, genomicInterval);
+                features = (new GFFHelper(this.config)).combineFeatures(features, genomicInterval)
             }
 
             // Assign overlapping features to rows
             if (this.config.format !== "wig" && this.config.type !== "junctions") {
-                const maxRows = this.config.maxRows || Number.MAX_SAFE_INTEGER;
-                packFeatures(features, maxRows);
+                const maxRows = this.config.maxRows || Number.MAX_SAFE_INTEGER
+                packFeatures(features, maxRows)
             }
 
             // Note - replacing previous cache with new one.  genomicInterval is optional (might be undefined => includes all features)
-            this.featureCache = new FeatureCache(features, this.genome, genomicInterval);
+            this.featureCache = new FeatureCache(features, this.genome, genomicInterval)
 
             // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
             if (this.config.searchable || this.config.searchableFields) {
-                this.addFeaturesToDB(features);
+                this.addFeaturesToDB(features)
             }
         } else {
-            this.featureCache = new FeatureCache([], genomicInterval);     // Empty cache
+            this.featureCache = new FeatureCache([], genomicInterval)     // Empty cache
         }
     }
 
     addFeaturesToDB(featureList) {
         for (let feature of featureList) {
             if (feature.name) {
-                this.genome.featureDB[feature.name.toUpperCase()] = feature;
+                this.genome.featureDB[feature.name.toUpperCase()] = feature
             }
             if (feature.gene && feature.gene.name) {
-                this.genome.featureDB[feature.gene.name.toUpperCase()] = feature;
+                this.genome.featureDB[feature.gene.name.toUpperCase()] = feature
             }
 
             if (this.config.searchableFields) {
                 for (let f of this.config.searchableFields) {
-                    const value = feature.getAttributeValue(f);
+                    const value = feature.getAttributeValue(f)
                     if (value) {
                         if (value.indexOf(" ") > 0) {
-                            this.genome.featureDB[value.replaceAll(" ", "+").toUpperCase()] = feature;
-                            this.genome.featureDB[value.replaceAll(" ", "%20").toUpperCase()] = feature;
+                            this.genome.featureDB[value.replaceAll(" ", "+").toUpperCase()] = feature
+                            this.genome.featureDB[value.replaceAll(" ", "%20").toUpperCase()] = feature
                         } else {
-                            this.genome.featureDB[value.toUpperCase()] = feature;
+                            this.genome.featureDB[value.toUpperCase()] = feature
                         }
                     }
                 }
@@ -269,67 +269,67 @@ class TextFeatureSource {
     // TODO -- filter by pixel size
     getWGFeatures(allFeatures) {
 
-        const genome = this.genome;
-        const wgChromosomeNames = new Set(genome.wgChromosomeNames);
-        const wgFeatures = [];
+        const genome = this.genome
+        const wgChromosomeNames = new Set(genome.wgChromosomeNames)
+        const wgFeatures = []
 
         for (let c of genome.wgChromosomeNames) {
 
-            const features = allFeatures[c];
+            const features = allFeatures[c]
 
             if (features) {
                 for (let f of features) {
-                    let queryChr = genome.getChromosomeName(f.chr);
+                    let queryChr = genome.getChromosomeName(f.chr)
                     if (wgChromosomeNames.has(queryChr)) {
 
-                        const wg = Object.assign({}, f);
+                        const wg = Object.assign({}, f)
 
-                        wg.chr = "all";
-                        wg.start = genome.getGenomeCoordinate(f.chr, f.start);
-                        wg.end = genome.getGenomeCoordinate(f.chr, f.end);
-                        wg._f = f;
+                        wg.chr = "all"
+                        wg.start = genome.getGenomeCoordinate(f.chr, f.start)
+                        wg.end = genome.getGenomeCoordinate(f.chr, f.end)
+                        wg._f = f
 
                         // Don't draw exons in whole genome view
                         if (wg["exons"]) delete wg["exons"]
 
-                        wgFeatures.push(wg);
+                        wgFeatures.push(wg)
                     }
                 }
             }
         }
 
         wgFeatures.sort(function (a, b) {
-            return a.start - b.start;
-        });
+            return a.start - b.start
+        })
 
-        return wgFeatures;
+        return wgFeatures
 
     }
 }
 
 function packFeatures(features, maxRows) {
 
-    maxRows = maxRows || 1000;
+    maxRows = maxRows || 1000
     if (features == null || features.length === 0) {
-        return;
+        return
     }
     // Segregate by chromosome
-    const chrFeatureMap = {};
-    const chrs = [];
+    const chrFeatureMap = {}
+    const chrs = []
     for (let feature of features) {
-        const chr = feature.chr;
-        let flist = chrFeatureMap[chr];
+        const chr = feature.chr
+        let flist = chrFeatureMap[chr]
         if (!flist) {
-            flist = [];
-            chrFeatureMap[chr] = flist;
-            chrs.push(chr);
+            flist = []
+            chrFeatureMap[chr] = flist
+            chrs.push(chr)
         }
-        flist.push(feature);
+        flist.push(feature)
     }
 
     // Loop through chrosomosomes and pack features;
     for (let chr of chrs) {
-        pack(chrFeatureMap[chr], maxRows);
+        pack(chrFeatureMap[chr], maxRows)
     }
 }
 
@@ -340,59 +340,59 @@ function packFeatures(features, maxRows) {
  */
 function fixFeatures(features, genome) {
 
-    if (!features || features.length === 0) return [];
+    if (!features || features.length === 0) return []
 
-    const isBedPE = features[0].chr === undefined && features[0].chr1 !== undefined;
+    const isBedPE = features[0].chr === undefined && features[0].chr1 !== undefined
     if (isBedPE) {
-        const interChrFeatures = [];
+        const interChrFeatures = []
         for (let feature of features) {
 
             if (genome) {
-                feature.chr1 = genome.getChromosomeName(feature.chr1);
-                feature.chr2 = genome.getChromosomeName(feature.chr2);
+                feature.chr1 = genome.getChromosomeName(feature.chr1)
+                feature.chr2 = genome.getChromosomeName(feature.chr2)
             }
 
             // Set total extent of feature
             if (feature.chr1 === feature.chr2) {
-                feature.chr = feature.chr1;
-                feature.start = Math.min(feature.start1, feature.start2);
-                feature.end = Math.max(feature.end1, feature.end2);
+                feature.chr = feature.chr1
+                feature.start = Math.min(feature.start1, feature.start2)
+                feature.end = Math.max(feature.end1, feature.end2)
             } else {
-                interChrFeatures.push(feature);
+                interChrFeatures.push(feature)
             }
         }
 
         // Make copies of inter-chr features, one for each chromosome
         for (let f1 of interChrFeatures) {
-            const f2 = Object.assign({dup: true}, f1);
-            features.push(f2);
+            const f2 = Object.assign({dup: true}, f1)
+            features.push(f2)
 
-            f1.chr = f1.chr1;
-            f1.start = f1.start1;
-            f1.end = f1.end1;
+            f1.chr = f1.chr1
+            f1.start = f1.start1
+            f1.end = f1.end1
 
-            f2.chr = f2.chr2;
-            f2.start = f2.start2;
-            f2.end = f2.end2;
+            f2.chr = f2.chr2
+            f2.start = f2.start2
+            f2.end = f2.end2
         }
     } else if (genome) {
         for (let feature of features) {
-            feature.chr = genome.getChromosomeName(feature.chr);
+            feature.chr = genome.getChromosomeName(feature.chr)
         }
     }
 
 
-    return features;
+    return features
 }
 
 
 function mapProperties(features, mappings) {
-    let mappingKeys = Object.keys(mappings);
+    let mappingKeys = Object.keys(mappings)
     features.forEach(function (f) {
         mappingKeys.forEach(function (key) {
-            f[key] = f[mappings[key]];
-        });
-    });
+            f[key] = f[mappings[key]]
+        })
+    })
 }
 
 

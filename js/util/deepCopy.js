@@ -2,7 +2,7 @@
  * Fast deep copy function, copied from https://github.com/davidmarkclements/rfdc
  * Function is copied rather than imported because project does not support es6 import, only 'require'
  */
-import {FileUtils} from "../../node_modules/igv-utils/src/index.js";
+import {FileUtils} from "../../node_modules/igv-utils/src/index.js"
 
 
 function cloneArray(a, fn) {
@@ -44,4 +44,4 @@ function deepCopy(o) {
 }
 
 
-export default deepCopy;
+export default deepCopy

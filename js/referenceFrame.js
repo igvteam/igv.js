@@ -23,47 +23,47 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
-import {validateLocusExtent, prettyBasePairNumber} from "./util/igvUtils.js";
-import GtexSelection from "./gtex/gtexSelection.js";
+import {DOMUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {prettyBasePairNumber, validateLocusExtent} from "./util/igvUtils.js"
+import GtexSelection from "./gtex/gtexSelection.js"
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
 
 class ReferenceFrame {
 
     constructor(genome, chr, start, end, bpPerPixel) {
-        this.genome = genome;
-        this.chr = chr;
+        this.genome = genome
+        this.chr = chr
 
-        this.start = start;
+        this.start = start
 
         // TODO WARNING THIS IS NOT UPDATED !!!
-        this.end = end;
+        this.end = end
 
-        this.bpPerPixel = bpPerPixel;
+        this.bpPerPixel = bpPerPixel
         this.id = DOMUtils.guid()
     }
 
     calculateEnd(pixels) {
-        return this.start + this.bpPerPixel * pixels;
+        return this.start + this.bpPerPixel * pixels
     }
 
     calculateBPP(end, pixels) {
-        return (end - this.start) / pixels;
+        return (end - this.start) / pixels
     }
 
     set(json) {
-        this.chr = json.chr;
-        this.start = json.start;
-        this.bpPerPixel = json.bpPerPixel;
+        this.chr = json.chr
+        this.start = json.start
+        this.bpPerPixel = json.bpPerPixel
     }
 
     toPixels(bp) {
-        return bp / this.bpPerPixel;
+        return bp / this.bpPerPixel
     }
 
     toBP(pixels) {
-        return this.bpPerPixel * pixels;
+        return this.bpPerPixel * pixels
     }
 
     /**
@@ -73,33 +73,33 @@ class ReferenceFrame {
      */
     shiftPixels(pixels, viewportWidth) {
 
-        const currentStart = this.start;
+        const currentStart = this.start
 
         const deltaBP = pixels * this.bpPerPixel
 
-        this.start += deltaBP;
-        this.clampStart(viewportWidth);
+        this.start += deltaBP
+        this.clampStart(viewportWidth)
 
-        this.end += deltaBP;
-        const {bpLength} = this.genome.getChromosome(this.chr);
+        this.end += deltaBP
+        const {bpLength} = this.genome.getChromosome(this.chr)
         this.end = Math.min(bpLength, this.end)
 
-        return currentStart !== this.start;
+        return currentStart !== this.start
     }
 
     clampStart(viewportWidth) {
         // clamp left
         const min = this.genome.getChromosome(this.chr).bpStart || 0
-        this.start = Math.max(min, this.start);
+        this.start = Math.max(min, this.start)
 
         // clamp right
         if (viewportWidth) {
 
-            const {bpLength} = this.genome.getChromosome(this.chr);
-            const maxStart = bpLength - (viewportWidth * this.bpPerPixel);
+            const {bpLength} = this.genome.getChromosome(this.chr)
+            const maxStart = bpLength - (viewportWidth * this.bpPerPixel)
 
             if (this.start > maxStart) {
-                this.start = maxStart;
+                this.start = maxStart
             }
         }
     }
@@ -162,7 +162,7 @@ class ReferenceFrame {
 
     getLocusString() {
         if ('all' === this.chr) {
-            return 'all';
+            return 'all'
         } else {
             const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1)
             const ee = StringUtils.numberFormatter(Math.round(this.end))
@@ -199,11 +199,11 @@ function createReferenceFrameList(loci, genome, browserFlanking, minimumBases, v
 
         // GTEX hack
         if (locus.gene || locus.snp) {
-            referenceFrame.selection = new GtexSelection(locus.gene, locus.snp);
+            referenceFrame.selection = new GtexSelection(locus.gene, locus.snp)
         }
 
         return referenceFrame
-    });
+    })
 }
 
 function adjustReferenceFrame(scaleFactor, referenceFrame, viewportWidth, alignmentStart, alignmentLength) {
@@ -220,15 +220,15 @@ function adjustReferenceFrame(scaleFactor, referenceFrame, viewportWidth, alignm
 
 function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
 
-    const alignmentEE = alignmentStart + alignmentLength;
-    const alignmentCC = (alignmentStart + alignmentEE) / 2;
+    const alignmentEE = alignmentStart + alignmentLength
+    const alignmentCC = (alignmentStart + alignmentEE) / 2
 
-    const ss = alignmentCC - (bpp * (viewportWidth / 2));
-    const ee = ss + (bpp * viewportWidth);
+    const ss = alignmentCC - (bpp * (viewportWidth / 2))
+    const ee = ss + (bpp * viewportWidth)
 
     return new ReferenceFrame(genome, chromosomeName, ss, ee, bpp)
 
 }
 
 export {createReferenceFrameList, adjustReferenceFrame, createReferenceFrameWithAlignment}
-export default ReferenceFrame;
+export default ReferenceFrame

@@ -24,59 +24,59 @@
  * THE SOFTWARE.
  */
 
-import getDataWrapper from "../feature/dataWrapper.js";
+import getDataWrapper from "../feature/dataWrapper.js"
 
-const wsRegex = /(\s+)/;
+const wsRegex = /(\s+)/
 
 const GenbankParser = function (config) {
 
-    this.config = config;
-    this.nameFields = new Set(["gene"]);
+    this.config = config
+    this.nameFields = new Set(["gene"])
 
 }
 
 
 GenbankParser.prototype.parseFeatures = function (data) {
 
-    var line, locusName, accession, sequence, aliases, chr;
+    var line, locusName, accession, sequence, aliases, chr
 
-    if (!data) return null;
+    if (!data) return null
 
-    const dataWrapper = getDataWrapper(data);
+    const dataWrapper = getDataWrapper(data)
 
     // Read locus
-    line = dataWrapper.nextLine();
-    readLocus(line);
+    line = dataWrapper.nextLine()
+    readLocus(line)
 
 
     do {
-        line = dataWrapper.nextLine();
+        line = dataWrapper.nextLine()
         if (line.startsWith("ACCESSION")) {
-            readAccession(line);
+            readAccession(line)
         } else if (line.startsWith("ALIASES")) {
-            readAliases(line);
+            readAliases(line)
         }
     }
-    while (line && !line.startsWith("FEATURES"));
+    while (line && !line.startsWith("FEATURES"))
 
-    readFeatures(dataWrapper);
-    readOriginSequence(dataWrapper);
+    readFeatures(dataWrapper)
+    readOriginSequence(dataWrapper)
 
     function readLocus(line) {
-        const tokens = line.split(wsRegex);
+        const tokens = line.split(wsRegex)
         if (!tokens[0].toUpperCase() === "LOCUS") {
             // throw exception
         }
-        locusName = tokens[1].trim();
+        locusName = tokens[1].trim()
     }
 
     function readAccession(line) {
 
-        let tokens = line.split(wsRegex);
+        let tokens = line.split(wsRegex)
         if (tokens.length < 2) {
-            console.log("Genbank file missing ACCESSION number.");
+            console.log("Genbank file missing ACCESSION number.")
         } else {
-            accession = tokens[1].trim();
+            accession = tokens[1].trim()
         }
     }
 
@@ -87,11 +87,11 @@ GenbankParser.prototype.parseFeatures = function (data) {
      * @throws IOException
      */
     function readAliases(line) {
-        let tokens = line.split(wsRegex);
+        let tokens = line.split(wsRegex)
         if (tokens.length < 2) {
             //log.info("Genbank file missing ACCESSION number.");
         } else {
-            aliases = tokens[1].split(",");
+            aliases = tokens[1].split(",")
         }
     }
 
@@ -108,16 +108,16 @@ GenbankParser.prototype.parseFeatures = function (data) {
      */
     function readOriginSequence(dataWrapper) {
 
-        let line;
+        let line
 
-        sequence = [];
+        sequence = []
         while (((line = dataWrapper.nextLine()) !== undefined) && !line.startsWith("//")) {
-            line = line.trim();
-            let tokens = line.split(wsRegex);
+            line = line.trim()
+            let tokens = line.split(wsRegex)
             for (let i = 1; i < tokens.length; i++) {
-                let str = tokens[i];
+                let str = tokens[i]
                 for (let j = 0; j < str.length; j++) {
-                    sequence.push(str.charCodeAt(j));
+                    sequence.push(str.charCodeAt(j))
                 }
             }
         }
@@ -151,68 +151,68 @@ GenbankParser.prototype.parseFeatures = function (data) {
     function readFeatures(dataWrapper) {
 
 
-        chr = accession || locusName;
+        chr = accession || locusName
 
         //Process features until "ORIGIN"
-        let features = [];
+        let features = []
 
         let currentLocQualifier, nextLine,
-            errorCount = 0;
+            errorCount = 0
 
         do {
-            nextLine = dataWrapper.nextLine();
+            nextLine = dataWrapper.nextLine()
 
             // TODO -- first line is source (required), has total length => use to size sequence
             // TODO -- keys start at column 6,   locations and qualifiers at column 22.
 
-            if(nextLine === "") {
-                continue;  // Not sure this is legal in a gbk file
+            if (nextLine === "") {
+                continue  // Not sure this is legal in a gbk file
             }
 
             if (!nextLine || nextLine.startsWith("ORIGIN")) {
-                break;
+                break
             }
 
             if (nextLine.length() < 6) {
                 if (errorCount < 10) {
-                    console("Unexpected line in genbank file (skipping): " + nextLine);
+                    console("Unexpected line in genbank file (skipping): " + nextLine)
                 }
-                errorCount++;
-                continue;
+                errorCount++
+                continue
             }
 
             if (nextLine.charAt(5) !== ' ') {
-                let featureType = nextLine.substring(5, 21).trim();
+                let featureType = nextLine.substring(5, 21).trim()
                 let f = {
                     chr: chr,
                     type: featureType,
                     attributes: {}
-                };
+                }
 
-                currentLocQualifier = nextLine.substring(21);
+                currentLocQualifier = nextLine.substring(21)
 
                 if (!featureType.toLowerCase().equals("source")) {
-                    features.add(f);
+                    features.add(f)
                 }
 
             } else {
-                let tmp = nextLine.substring(21).trim();
+                let tmp = nextLine.substring(21).trim()
 
                 if (tmp.length() > 0)
                     if (tmp.charAt(0) === '/') {
 
                         if (currentLocQualifier.charAt(0) === '/') {
 
-                            let tokens = currentLocQualifier.split("=", 2);
+                            let tokens = currentLocQualifier.split("=", 2)
 
                             if (tokens.length > 1) {
 
-                                let keyName = tokens[0].length() > 1 ? tokens[0].substring(1) : "";
-                                let value = StringUtils.stripQuotes(tokens[1]);
+                                let keyName = tokens[0].length() > 1 ? tokens[0].substring(1) : ""
+                                let value = StringUtils.stripQuotes(tokens[1])
 
-                                f.attributes[keyName] = value;
+                                f.attributes[keyName] = value
                                 if (nameFields.has(keyName)) {
-                                    f.setName(value);
+                                    f.setName(value)
                                 }
                             } else {
                                 // TODO -- don't know how to interpret, log?
@@ -221,47 +221,47 @@ GenbankParser.prototype.parseFeatures = function (data) {
 
                             // location string TODO -- many forms of this to support
                             // Crude test for strand
-                            let strand = currentLocQualifier.contains("complement") ? "-" : "+";
-                            f.strand = strand;
+                            let strand = currentLocQualifier.contains("complement") ? "-" : "+"
+                            f.strand = strand
 
 
                             // join and complement functions irrelevant
-                            let joinString = currentLocQualifier.replace("join", "");
-                            joinString = joinString.replace("order", "");
-                            joinString = joinString.replace("complement", "");
-                            joinString = joinString.replace("(", "");
-                            joinString = joinString.replace(")", "");
+                            let joinString = currentLocQualifier.replace("join", "")
+                            joinString = joinString.replace("order", "")
+                            joinString = joinString.replace("complement", "")
+                            joinString = joinString.replace("(", "")
+                            joinString = joinString.replace(")", "")
 
                             if (joinString.contains("..")) {
 
-                                joinString = joinString.replace("<", "");
-                                joinString = joinString.replace(">", "");
+                                joinString = joinString.replace("<", "")
+                                joinString = joinString.replace(">", "")
 
-                                let exons = createExons(joinString, strand);
+                                let exons = createExons(joinString, strand)
 
-                                let firstExon = exons[0];
-                                f.start = firstExon.start;
+                                let firstExon = exons[0]
+                                f.start = firstExon.start
 
-                                let lastExon = exons.get[exons.length - 1];
-                                f.setEnd = lastExon.end;
+                                let lastExon = exons.get[exons.length - 1]
+                                f.setEnd = lastExon.end
 
                                 if (exons.length > 1) {
-                                    f.exons = exons;
+                                    f.exons = exons
                                 }
                             } else {
                                 // TODO Single locus for now,  other forms possible
-                                f.start = Number.parseInt(joinString) - 1;
-                                f.end = start + 1;
+                                f.start = Number.parseInt(joinString) - 1
+                                f.end = start + 1
                             }
 
                         }
-                        currentLocQualifier = tmp;
+                        currentLocQualifier = tmp
                     } else {
-                        currentLocQualifier = currentLocQualifier || tmp;
+                        currentLocQualifier = currentLocQualifier || tmp
                     }
             }
         }
-        while (true);
+        while (true)
     }
 
 }
@@ -274,24 +274,24 @@ GenbankParser.prototype.parseFeatures = function (data) {
  */
 function createExons(joinString, strand) {
 
-    let lociArray = joinString.split(",");
+    let lociArray = joinString.split(",")
 
-    let exons = [];
+    let exons = []
 
-    let isNegative = joinString.contains("complement");
+    let isNegative = joinString.contains("complement")
 
     lociArray.forEach(function (loci) {
 
-        let tmp = loci.split("..");
+        let tmp = loci.split("..")
 
-        let exonStart = 0;    // - (isNegative ? 0 : 1);
+        let exonStart = 0    // - (isNegative ? 0 : 1);
 
         try {
-            exonStart = Number.parseInt(tmp[0]) - 1;
+            exonStart = Number.parseInt(tmp[0]) - 1
 
-            let exonEnd = exonStart + 1;
+            let exonEnd = exonStart + 1
             if (tmp.length > 1) {
-                exonEnd = Number.parseInt(tmp[1]);
+                exonEnd = Number.parseInt(tmp[1])
             }
 
             exons.add({
@@ -299,18 +299,18 @@ function createExons(joinString, strand) {
                 start: exonStart,
                 end: exonEnd,
                 strand: strand
-            });
+            })
 
         } catch (e) {
-            console.error(e);
+            console.error(e)
         }
-    });
+    })
 
     exons.sort(function (a, b) {
-        return a.start - b.start;
-    });
+        return a.start - b.start
+    })
 
-    return exons;
+    return exons
 }
 
-export default GenbankParser;
+export default GenbankParser
