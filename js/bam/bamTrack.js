@@ -446,34 +446,35 @@ class BAMTrack extends TrackBase {
         const $e = $(createCheckbox(menuItem.label, showCheck))
         const clickHandler = (ev) => {
 
-            if (menuItem.key === this.alignmentTrack.colorBy) {
-                this.alignmentTrack.colorBy = 'none'
-                this.config.colorBy = 'none'
-                this.trackView.repaintViews()
-
-            } else if ('tag' === menuItem.key) {
+            if (menuItem.key !== 'tag') {
+                if (menuItem.key === this.alignmentTrack.colorBy) {
+                    this.alignmentTrack.colorBy = 'none'
+                    this.config.colorBy = 'none'
+                    this.trackView.repaintViews()
+                } else {
+                    this.alignmentTrack.colorBy = menuItem.key
+                    this.config.colorBy = menuItem.key
+                    this.trackView.repaintViews()
+                }
+            } else {
                 this.browser.inputDialog.present({
                     label: 'Tag Name',
                     value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
                     callback: (tag) => {
-                        this.alignmentTrack.colorBy = 'tag'
-                        this.config.colorBy = 'tag'
-
-                        if (tag !== this.alignmentTrack.colorByTag) {
+                        if (tag) {
+                            this.alignmentTrack.colorBy = 'tag'
                             this.alignmentTrack.colorByTag = tag
-                            this.config.colorByTag = tag
-                            this.alignmentTrack.tagColors = new PaletteColorTable("Set1")
-                            $('#color-by-tag').text(self.alignmentTrack.colorByTag)
+                            if (!this.alignmentTrack.tagColors) {
+                                this.alignmentTrack.tagColors = new PaletteColorTable("Set1")
+                            }
+                        } else {
+                            this.alignmentTrack.colorBy = 'none'
+                            this.alignmentTrack.colorByTag = ''
                         }
-
                         this.trackView.repaintViews()
                     }
                 }, ev)
 
-            } else {
-                this.alignmentTrack.colorBy = menuItem.key
-                this.config.colorBy = menuItem.key
-                this.trackView.repaintViews()
             }
 
         }
