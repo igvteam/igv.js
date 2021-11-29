@@ -538,7 +538,7 @@ class VariantTrack extends TrackBase {
 
             menuItems.push('<hr>');
             menuItems.push({
-                label: 'Show SVs in Circular View',
+                label: 'Add SVs to circular view',
                 click: () => {
                     const inView = []
                     for (let viewport of this.trackView.viewports) {
@@ -569,7 +569,7 @@ class VariantTrack extends TrackBase {
             const list = [];
 
             list.push({
-                label: 'Show SVs in Circular View',
+                label: 'Add SVs to Circular View',
                 click: () => {
                     const refFrame = viewport.referenceFrame;
                     const inView = "all" === refFrame.chr ?
