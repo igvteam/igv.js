@@ -423,7 +423,7 @@ class InteractionTrack extends TrackBase {
 
         if (this.browser.circularView && true === this.browser.circularViewVisible) {
             items.push({
-                label: 'Show interactions in Circular View',
+                label: 'Add interactions to circular view',
                 click: () => {
 
                     const inView = []
@@ -454,7 +454,7 @@ class InteractionTrack extends TrackBase {
             const list = []
 
             list.push({
-                label: 'Show interactions in Circular View',
+                label: 'Add interactions to circular view',
                 click: () => {
                     const refFrame = viewport.referenceFrame
                     const inView = "all" === refFrame.chr ?
