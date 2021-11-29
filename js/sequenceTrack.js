@@ -23,11 +23,11 @@
  * THE SOFTWARE.
  */
 
-import IGVGraphics from "./igv-canvas.js";
+import IGVGraphics from "./igv-canvas.js"
 import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
-import {randomRGBConstantAlpha} from "./util/colorPalletes.js";
+import {isSecureContext} from "./util/igvUtils.js"
 
-const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER;
+const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
 
 const translationDict = {
     'TTT': 'F',
@@ -96,12 +96,12 @@ const translationDict = {
     'GGG': 'G'
 }
 
-const complement = {};
+const complement = {}
 const t1 = ['A', 'G', 'C', 'T', 'Y', 'R', 'W', 'S', 'K', 'M', 'D', 'V', 'H', 'B', 'N', 'X']
 const t2 = ['T', 'C', 'G', 'A', 'R', 'Y', 'W', 'S', 'M', 'K', 'H', 'B', 'D', 'V', 'N', 'X']
 for (let i = 0; i < t1.length; i++) {
-    complement[t1[i]] = t2[i];
-    complement[t1[i].toLowerCase()] = t2[i].toLowerCase();
+    complement[t1[i]] = t2[i]
+    complement[t1[i].toLowerCase()] = t2[i].toLowerCase()
 }
 
 class SequenceTrack {
@@ -109,19 +109,19 @@ class SequenceTrack {
     constructor(config, browser) {
 
         this.type = "sequence"
-        this.browser = browser;
-        this.removable = false;
-        this.config = config;
-        this.name = "Sequence";
-        this.id = "sequence";
-        this.sequenceType = config.sequenceType || "dna";             //   dna | rna | prot
-        this.height = 25;
-        this.disableButtons = false;
-        this.order = config.order || defaultSequenceTrackOrder;
-        this.ignoreTrackMenu = false;
+        this.browser = browser
+        this.removable = false
+        this.config = config
+        this.name = "Sequence"
+        this.id = "sequence"
+        this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot
+        this.height = 25
+        this.disableButtons = false
+        this.order = config.order || defaultSequenceTrackOrder
+        this.ignoreTrackMenu = false
 
-        this.reversed = false;
-        this.frameTranslate = false;
+        this.reversed = false
+        this.frameTranslate = false
 
     }
 
@@ -131,24 +131,24 @@ class SequenceTrack {
             {
                 name: this.reversed ? "Forward" : "Reverse",
                 click: () => {
-                    this.reversed = !this.reversed;
-                    this.trackView.repaintViews();
+                    this.reversed = !this.reversed
+                    this.trackView.repaintViews()
                 }
             },
             {
                 name: this.frameTranslate ? "Close Translation" : "Three-frame Translate",
                 click: () => {
-                    this.frameTranslate = !this.frameTranslate;
+                    this.frameTranslate = !this.frameTranslate
                     if (this.frameTranslate) {
                         for (let vp of this.trackView.viewports) {
-                            vp.setContentHeight(115);
+                            vp.setContentHeight(115)
                         }
-                        this.trackView.setTrackHeight(115);
+                        this.trackView.setTrackHeight(115)
                     } else {
                         for (let vp of this.trackView.viewports) {
-                            vp.setContentHeight(25);
+                            vp.setContentHeight(25)
                         }
-                        this.trackView.setTrackHeight(25);
+                        this.trackView.setTrackHeight(25)
                     }
                     this.trackView.repaintViews()
 
@@ -159,72 +159,76 @@ class SequenceTrack {
 
 
     contextMenuItemList(clickState) {
-        const viewport = clickState.viewport;
+        const viewport = clickState.viewport
         if (viewport.referenceFrame.bpPerPixel <= 1) {
-            return [
+            const items = [
                 {
                     label: 'View visible sequence...',
                     click: async () => {
-                        const pixelWidth = viewport.getWidth();
-                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel;
-                        const chr = viewport.referenceFrame.chr;
-                        const start = viewport.referenceFrame.start;
-                        const end = start + bpWindow;
-                        const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
-                        Alert.presentAlert(sequence);
+                        const pixelWidth = viewport.getWidth()
+                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel
+                        const chr = viewport.referenceFrame.chr
+                        const start = viewport.referenceFrame.start
+                        const end = start + bpWindow
+                        const sequence = await this.browser.genome.sequence.getSequence(chr, start, end)
+                        Alert.presentAlert(sequence)
                     }
-                },
-                {
+                }
+            ]
+            if (isSecureContext()) {
+                items.push({
                     label: 'Copy visible sequence',
                     click: async () => {
-                        const pixelWidth = viewport.getWidth();
-                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel;
-                        const chr = viewport.referenceFrame.chr;
-                        const start = viewport.referenceFrame.start;
-                        const end = start + bpWindow;
-                        const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
-                        navigator.clipboard.writeText(sequence);
+                        const pixelWidth = viewport.getWidth()
+                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel
+                        const chr = viewport.referenceFrame.chr
+                        const start = viewport.referenceFrame.start
+                        const end = start + bpWindow
+                        const sequence = await this.browser.genome.sequence.getSequence(chr, start, end)
+                        navigator.clipboard.writeText(sequence)
                     }
-                },
-                '<hr/>'
-            ]
+                })
+            }
+            items.push('<hr/>')
+
+            return items
         } else {
-            return undefined;
+            return undefined
         }
     }
 
 
     translateSequence(seq) {
 
-        const threeFrame = [[], [], []];
+        const threeFrame = [[], [], []]
 
         for (let fNum of [0, 1, 2]) {
-            let idx = fNum;
+            let idx = fNum
 
             while ((seq.length - idx) >= 3) {
-                let st = seq.slice(idx, idx + 3);
+                let st = seq.slice(idx, idx + 3)
                 if (this.reversed) {
-                    st = st.split('').reverse().join('');
+                    st = st.split('').reverse().join('')
                 }
 
-                const aa = translationDict[st.toUpperCase()] || "";
+                const aa = translationDict[st.toUpperCase()] || ""
                 threeFrame[fNum].push({
                     codons: st,
                     aminoA: aa
-                });
-                idx += 3;
+                })
+                idx += 3
             }
         }
 
-        return threeFrame;
+        return threeFrame
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
 
         if (bpPerPixel && bpPerPixel > 1) {
-            return null;
+            return null
         } else {
-            const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
+            const sequence = await this.browser.genome.sequence.getSequence(chr, start, end)
             return {
                 bpStart: start,
                 sequence: sequence
@@ -234,91 +238,91 @@ class SequenceTrack {
 
     draw(options) {
 
-        const ctx = options.context;
+        const ctx = options.context
 
         if (options.features) {
 
-            const sequence = options.features.sequence;
-            const sequenceBpStart = options.features.bpStart;
-            const bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel);
+            const sequence = options.features.sequence
+            const sequenceBpStart = options.features.bpStart
+            const bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel)
 
-            let height = 15;
+            let height = 15
             for (let bp = sequenceBpStart; bp <= bpEnd; bp++) {
 
-                let seqOffsetBp = Math.floor(bp - sequenceBpStart);
+                let seqOffsetBp = Math.floor(bp - sequenceBpStart)
 
                 if (seqOffsetBp < sequence.length) {
-                    let letter = sequence[seqOffsetBp];
+                    let letter = sequence[seqOffsetBp]
 
                     if (this.reversed) {
-                        letter = complement[letter] || "";
+                        letter = complement[letter] || ""
                     }
 
-                    let offsetBP = bp - options.bpStart;
-                    let aPixel = offsetBP / options.bpPerPixel;
-                    let bPixel = (offsetBP + 1) / options.bpPerPixel;
-                    let color = this.fillColor(letter);
+                    let offsetBP = bp - options.bpStart
+                    let aPixel = offsetBP / options.bpPerPixel
+                    let bPixel = (offsetBP + 1) / options.bpPerPixel
+                    let color = this.fillColor(letter)
 
                     // IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, { fillStyle: randomRGBConstantAlpha(150, 255, 0.75) });
 
                     if (options.bpPerPixel > 1 / 10) {
-                        IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
+                        IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color})
                     } else {
-                        let xPixel = 0.5 * (aPixel + bPixel - ctx.measureText(letter).width);
-                        IGVGraphics.strokeText(ctx, letter, xPixel, height, {strokeStyle: color});
+                        let xPixel = 0.5 * (aPixel + bPixel - ctx.measureText(letter).width)
+                        IGVGraphics.strokeText(ctx, letter, xPixel, height, {strokeStyle: color})
                     }
                 }
             }
 
             if (this.frameTranslate) {
 
-                let transSeq;
+                let transSeq
                 if (this.reversed) {
                     transSeq = sequence.split('').map(function (cv) {
-                        return complement[cv];
-                    });
-                    transSeq = transSeq.join('');
+                        return complement[cv]
+                    })
+                    transSeq = transSeq.join('')
                 } else {
-                    transSeq = sequence;
+                    transSeq = sequence
                 }
 
-                let y = height;
-                let translatedSequence = this.translateSequence(transSeq);
+                let y = height
+                let translatedSequence = this.translateSequence(transSeq)
                 for (let arr of translatedSequence) {
 
-                    let i = translatedSequence.indexOf(arr);
-                    let fNum = i;
-                    let h = 25;
+                    let i = translatedSequence.indexOf(arr)
+                    let fNum = i
+                    let h = 25
 
-                    y = (i === 0) ? y + 10 : y + 30; //Little less room at first.
+                    y = (i === 0) ? y + 10 : y + 30 //Little less room at first.
 
                     for (let cv of arr) {
 
-                        let aaS;
-                        let idx = arr.indexOf(cv);
-                        let xSeed = (idx + fNum) + (2 * idx);
-                        let color = 0 === idx % 2 ? 'rgb(160,160,160)' : 'rgb(224,224,224)';
+                        let aaS
+                        let idx = arr.indexOf(cv)
+                        let xSeed = (idx + fNum) + (2 * idx)
+                        let color = 0 === idx % 2 ? 'rgb(160,160,160)' : 'rgb(224,224,224)'
 
-                        let p0 = Math.floor(xSeed / options.bpPerPixel);
-                        let p1 = Math.floor((xSeed + 3) / options.bpPerPixel);
-                        let pc = Math.round((p0 + p1) / 2);
+                        let p0 = Math.floor(xSeed / options.bpPerPixel)
+                        let p1 = Math.floor((xSeed + 3) / options.bpPerPixel)
+                        let pc = Math.round((p0 + p1) / 2)
 
                         if (cv.aminoA.indexOf('STOP') > -1) {
-                            color = 'rgb(255, 0, 0)';
-                            aaS = 'STOP'; //Color blind accessible
+                            color = 'rgb(255, 0, 0)'
+                            aaS = 'STOP' //Color blind accessible
                         } else {
-                            aaS = cv.aminoA;
+                            aaS = cv.aminoA
                         }
 
                         if (cv.aminoA === 'M') {
-                            color = 'rgb(0, 153, 0)';
-                            aaS = 'START'; //Color blind accessible
+                            color = 'rgb(0, 153, 0)'
+                            aaS = 'START' //Color blind accessible
                         }
 
-                        IGVGraphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color});
+                        IGVGraphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color})
 
                         if (options.bpPerPixel <= 1 / 10) {
-                            IGVGraphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15);
+                            IGVGraphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15)
                         }
                     }
                 }
@@ -327,21 +331,21 @@ class SequenceTrack {
     }
 
     supportsWholeGenome() {
-        return false;
+        return false
     }
 
     computePixelHeight(ignore) {
-        return this.height;
+        return this.height
     }
 
     fillColor(index) {
 
         if (this.color) {
-            return this.color;
+            return this.color
         } else if ("dna" === this.sequenceType) {
-            return this.browser.nucleotideColors[index] || 'gray';
+            return this.browser.nucleotideColors[index] || 'gray'
         } else {
-            return 'rgb(0, 0, 150)';
+            return 'rgb(0, 0, 150)'
         }
 
     }
@@ -349,6 +353,6 @@ class SequenceTrack {
 
 export {defaultSequenceTrackOrder}
 
-export default SequenceTrack;
+export default SequenceTrack
 
 
