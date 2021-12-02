@@ -232,7 +232,7 @@ class Genome {
     }
 
     getChromosomeName(str) {
-        var chr = this.chrAliasTable[str.toLowerCase()]
+        const chr = str ? this.chrAliasTable[str.toLowerCase()] : str
         return chr ? chr : str
     }
 
