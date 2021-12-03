@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>All demo</title>
+</head>
+
+<body>
+
+<div id="igv-centering-container">
+    <div id='igv-app-container'></div>
+</div>
+
+</body>
+
+<script type="module">
+
+    import igv from '../../js/index.js'
+
+    (async () => {
+
+        const config = {
+            locus: 'all',
+            genome: "hg18",
+            tracks: []
+        };
+
+        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), config)
+
+    })()
+
+</script>
+</html>
