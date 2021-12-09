@@ -17,25 +17,22 @@
 
 <h1>Centerline over position chr8:128,749,950</h1>
 
-<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+<div id="container" style="width:1024px; margin: 128px; padding: 32px; border:1px solid rgb(128,128,128); background-color: rgba(173,255,47,0.25)"></div>
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from '../../js/index.js'
 
-    var options =
+    const config =
         {
-            genome: "hg19",
-            locus: "chr8:128,749,950",
-            showCenterLine: true
-        };
+            genome: 'hg19',
+            locus: 'chr8:128,749,950',
+            showCenterGuide: true,
+            showCursorTrackingGuide: true,
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
-
-    igv.createBrowser(igvDiv, options)
-        .then(function (browser) {
-            console.log("Created IGV browser");
-        })
+    igv.createBrowser(document.getElementById("container"), config)
+        .then(() => console.log("Created IGV browser"))
 
 
 </script>

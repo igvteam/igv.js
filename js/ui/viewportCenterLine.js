@@ -46,8 +46,7 @@ class ViewportCenterLine {
 
     repaint() {
 
-        const {x} = this.column.getBoundingClientRect()
-        const left = Math.floor(x + 0.5 * this.browser.calculateViewportWidth(this.browser.referenceFrameList.length))
+        const left = Math.floor(this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)/2)
 
         if (this.referenceFrame) {
 
