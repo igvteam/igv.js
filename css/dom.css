@@ -416,6 +416,7 @@
   position: absolute;
   top: 0;
   bottom: 0;
+  transform: translateX(-50%);
   z-index: 8;
   user-select: none;
   -moz-user-select: none;
@@ -940,6 +941,7 @@
   background-color: #545453; }
 
 .igv-column {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
