@@ -106,6 +106,7 @@ $igv-zoom-in-notice-height: 16px;
 }
 
 .igv-column {
+  position: relative;
   @include igv-column-base;
 }
 
