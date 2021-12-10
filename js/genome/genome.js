@@ -299,7 +299,7 @@ class Genome {
         }
 
         // If we get here off the end
-        return {chr: this.chromosomeNames[this.chromosomeNames.length - 1], position: 0}
+        return {chr: this.wgChromosomeNames[this.wgChromosomeNames.length - 1], position: 0}
 
     };
 
