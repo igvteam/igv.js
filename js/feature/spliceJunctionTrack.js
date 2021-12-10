@@ -234,7 +234,7 @@ class SpliceJunctionTrack extends TrackBase {
                 return
             }
             if (feature.attributes.num_samples_total) {
-                feature.attributes.percent_samples_with_this_junction = 100 * numSamplesWithThisJunction / Number(feature.attributes.num_samples_total)
+                feature.attributes.percent_samples_with_this_junction = 100 * numSamplesWithThisJunction / parseFloat(feature.attributes.num_samples_total)
                 if (this.config.minPercentSamplesWithThisJunction) {
                     if (feature.attributes.percent_samples_with_this_junction < this.config.minPercentSamplesWithThisJunction ||
                         feature.attributes.percent_samples_with_this_junction > this.config.maxPercentSamplesWithThisJunction) {
@@ -258,7 +258,7 @@ class SpliceJunctionTrack extends TrackBase {
 
         let lineWidth = 1
         if (feature.attributes.line_width) {
-            lineWidth = Number(feature.attributes.line_width)
+            lineWidth = parseFloat(feature.attributes.line_width)
         } else {
             if (this.config.thicknessBasedOn === undefined || this.config.thicknessBasedOn === 'numUniqueReads') {
                 lineWidth = uniquelyMappedReadCount
