@@ -98,7 +98,7 @@ class SegParser {
         let line
         while ((line = await dataWrapper.nextLine()) !== undefined) {
             const tokens = line.split("\t")
-            const value = ('seg' === this.type) ? parseFloat(tokens[this.dataColumn]) : tokens[this.dataColumn]
+            const value = ('seg' === this.type) ? Number(tokens[this.dataColumn]) : tokens[this.dataColumn]
             if (tokens.length > this.dataColumn) {
                 const feature = new SegFeature({
                     sample: tokens[this.sampleColumn],

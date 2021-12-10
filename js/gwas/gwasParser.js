@@ -72,7 +72,7 @@ class GWASParser {
                 const chr = tokens[this.chrCol]
                 const start = parseInt(tokens[this.posCol]) - 1
                 const end = start + 1
-                const value = parseFloat(tokens[this.valueCol])
+                const value = Number(tokens[this.valueCol])
                 allFeatures.push(new GWASFeature({
                     chr: chr,
                     start: start,
