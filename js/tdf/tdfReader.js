@@ -186,7 +186,7 @@ class TDFReader {
 
             const totalCountString = group["totalCount"]
             if (totalCountString) {
-                group.totalCount = Number.parseFloat(totalCountString)
+                group.totalCount = Number(totalCountString)
             }
 
             // Chromosome names
