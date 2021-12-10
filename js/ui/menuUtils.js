@@ -259,7 +259,7 @@ function trackHeightMenuItem(trackView) {
 
         const callback = () => {
 
-            const number = Number(trackView.browser.inputDialog.input.value, 10)
+            const number = parseFloat(trackView.browser.inputDialog.input.value, 10)
 
             if (undefined !== number) {
 

@@ -6029,7 +6029,7 @@ var rboxStyle = new RegExp(cssExpand.join("|"), "i");
     }
 
     function roundPixelMeasures(measure) {
-        return Math.round(Number(measure));
+        return Math.round(parseFloat(measure));
     }
 
     var pixelPositionVal, boxSizingReliableVal, scrollboxSizeVal, pixelBoxStylesVal,
@@ -6296,7 +6296,7 @@ function getWidthOrHeight(elem, dimension, extra) {
     // Support: Android <=4.1 - 4.3 only
     // Also use offsetWidth/offsetHeight for misreported inline dimensions (gh-3602)
     if (val === "auto" ||
-        !Number(val) && jQuery.css(elem, "display", false, styles) === "inline") {
+        !parseFloat(val) && jQuery.css(elem, "display", false, styles) === "inline") {
 
         val = elem["offset" + dimension[0].toUpperCase() + dimension.slice(1)];
 
@@ -6305,7 +6305,7 @@ function getWidthOrHeight(elem, dimension, extra) {
     }
 
     // Normalize "" and auto
-    val = Number(val) || 0;
+    val = parseFloat(val) || 0;
 
     // Adjust for the element's box model
     return (val +
@@ -6468,7 +6468,7 @@ jQuery.extend({
 
         // Make numeric if forced or a qualifier was provided and val looks numeric
         if (extra === "" || extra) {
-            num = Number(val);
+            num = parseFloat(val);
             return extra === true || isFinite(num) ? num || 0 : val;
         }
 
@@ -6516,7 +6516,7 @@ jQuery.each(["height", "width"], function (i, dimension) {
             if (isBorderBox && support.scrollboxSize() === styles.position) {
                 subtract -= Math.ceil(
                     elem["offset" + dimension[0].toUpperCase() + dimension.slice(1)] -
-                    Number(styles[dimension]) -
+                    parseFloat(styles[dimension]) -
                     boxModelAdjustment(elem, dimension, "border", false, styles) -
                     0.5
                 );
@@ -6538,7 +6538,7 @@ jQuery.each(["height", "width"], function (i, dimension) {
 jQuery.cssHooks.marginLeft = addGetHookIf(support.reliableMarginLeft,
     function (elem, computed) {
         if (computed) {
-            return (Number(curCSS(elem, "marginLeft")) ||
+            return (parseFloat(curCSS(elem, "marginLeft")) ||
                 elem.getBoundingClientRect().left -
                 swap(elem, {marginLeft: 0}, function () {
                     return elem.getBoundingClientRect().left;
@@ -7784,8 +7784,8 @@ jQuery.offset = {
             curLeft = curPosition.left;
 
         } else {
-            curTop = Number(curCSSTop) || 0;
-            curLeft = Number(curCSSLeft) || 0;
+            curTop = parseFloat(curCSSTop) || 0;
+            curLeft = parseFloat(curCSSLeft) || 0;
         }
 
         if (isFunction(options)) {
@@ -8007,7 +8007,7 @@ jQuery.each({Height: "height", Width: "width"}, function (name, type) {
 
                     return value === undefined ?
 
-                        // Get width or height on the element, requesting but not forcing Number
+                        // Get width or height on the element, requesting but not forcing parseFloat
                         jQuery.css(elem, type, extra) :
 
                         // Set width or height on the element
@@ -8115,10 +8115,10 @@ jQuery.isNumeric = function (obj) {
     var type = jQuery.type(obj);
     return (type === "number" || type === "string") &&
 
-        // Number NaNs numeric-cast false positives ("")
+        // parseFloat NaNs numeric-cast false positives ("")
         // ...but misinterprets leading-number strings, particularly hex literals ("0x...")
         // subtraction forces infinities to NaN
-        !isNaN(obj - Number(obj));
+        !isNaN(obj - parseFloat(obj));
 };
 
 const $ = jQuery;

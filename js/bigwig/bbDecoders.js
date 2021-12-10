@@ -34,7 +34,7 @@ function getDecoder(definedFieldCount, fieldCount, autoSql) {
                 feature.name = tokens[0]
             }
             if (standardFieldCount > 1) {
-                feature.score = Number(tokens[1])
+                feature.score = parseFloat(tokens[1])
             }
             if (standardFieldCount > 2) {
                 feature.strand = tokens[2]
@@ -89,8 +89,8 @@ function getDecoder(definedFieldCount, fieldCount, autoSql) {
         feature.end2 = Number.parseInt(tokens[12])
 
         feature.name = tokens[0]
-        feature.score = Number(tokens[1])
-        feature.value = Number(tokens[2])
+        feature.score = Number.parseFloat(tokens[1])
+        feature.value = Number.parseFloat(tokens[2])
         feature.color = tokens[4] === '.' ? undefined : tokens[4] === "0" ? "rgb(0,0,0)" : tokens[4]
 
         return feature

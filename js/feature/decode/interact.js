@@ -47,8 +47,8 @@ function decodeInteract(tokens, header) {
         end2: Number.parseInt(tokens[15]),
 
         name: tokens[3],
-        score: Number(tokens[4]),
-        value: Number(tokens[5]),
+        score: Number.parseFloat(tokens[4]),
+        value: Number.parseFloat(tokens[5]),
         color: tokens[7] === '.' ? undefined : tokens[7] === "0" ? "rgb(0,0,0)" : tokens[7],
 
     }
@@ -71,7 +71,7 @@ function decodeBedpeDomain(tokens, ignore) {
         start: Number.parseInt(tokens[1]),
         end: Number.parseInt(tokens[2]),
         color: IGVColor.createColorString(tokens[6]),
-        score: Number(tokens[7])
+        score: Number.parseFloat(tokens[7])
     }
 }
 
