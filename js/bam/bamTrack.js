@@ -250,6 +250,7 @@ class BAMTrack extends TrackBase {
             colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'})
             colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'})
             colorByMenuItems.push({key: 'fragmentLength', label: 'insert size (TLEN)'})
+            colorByMenuItems.push({key: 'unexpectedPair', label: 'pair orientation & insert size (TLEN)'})
         }
         const tagLabel = 'tag' + (this.alignmentTrack.colorByTag ? ' (' + this.alignmentTrack.colorByTag + ')' : '')
         colorByMenuItems.push({key: 'tag', label: tagLabel})
@@ -1365,19 +1366,19 @@ class AlignmentTrack {
                 }
                 break
 
+            case "unexpectedPair":
             case "pairOrientation":
 
-                if (alignment.mate && alignment.isMateMapped() && alignment.mate.chr !== alignment.chr) {
-                    color = getChrColor(alignment.mate.chr)
-                } else if (this.pairOrientation && alignment.pairOrientation) {
+                if (this.pairOrientation && alignment.pairOrientation) {
                     var oTypes = orientationTypes[this.pairOrientation]
                     if (oTypes) {
                         var pairColor = this.pairColors[oTypes[alignment.pairOrientation]]
                         if (pairColor) color = pairColor
                     }
                 }
-
-                break
+                if ("pairOrientation" === option) {
+                    break
+                }
 
             case "fragmentLength":
 
@@ -1388,7 +1389,6 @@ class AlignmentTrack {
                 } else if (this.parent.maxFragmentLength && Math.abs(alignment.fragmentLength) > this.parent.maxFragmentLength) {
                     color = this.largeFragmentLengthColor
                 }
-
                 break
 
             case "tag":
