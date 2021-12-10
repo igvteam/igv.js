@@ -206,6 +206,11 @@ class RulerViewport extends TrackViewport {
     stopSpinner() {
     }
 
+    dispose() {
+        this.rulerSweeper.dispose()
+        super.dispose()
+    }
+
 }
 
 export default RulerViewport
