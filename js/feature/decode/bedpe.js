@@ -44,7 +44,7 @@ function decodeBedpe(tokens, header) {
     }
 
     if (tokens.length > 7 && tokens[7] !== ".") {
-        feature.score = Number(tokens[7])
+        feature.score = parseFloat(tokens[7])
     }
 
     if (tokens.length > 8 && tokens[8] !== ".") {
@@ -98,7 +98,7 @@ function fixBedPE(features) {
             if (!(isNumber(f.name) || f.name === '.')) return
         }
         for (let f of features) {
-            f.score = Number(f.name)
+            f.score = parseFloat(f.name)
             delete f.name
         }
     }
@@ -136,7 +136,7 @@ function decodeBedpeDomain(tokens, header) {
         start: Number.parseInt(tokens[1]),
         end: Number.parseInt(tokens[2]),
         color: IGVColor.createColorString(tokens[6]),
-        value: Number(tokens[7])
+        value: Number.parseFloat(tokens[7])
     }
 }
 

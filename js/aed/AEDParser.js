@@ -313,7 +313,7 @@ function decodeBedGraph(tokens, ignore) {
     chr = tokens[0]
     start = parseInt(tokens[1])
     end = parseInt(tokens[2])
-    value = Number(tokens[3])
+    value = parseFloat(tokens[3])
     const feature = {chr: chr, start: start, end: end, value: value}
 
     // Optional extra columns

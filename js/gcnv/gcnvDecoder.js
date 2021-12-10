@@ -16,7 +16,7 @@ function decodeGcnv(tokens, header) {
     const chr = tokens[0]
     const start = parseInt(tokens[1])
     const end = parseInt(tokens[2])
-    const values = tokens.slice(3).map(Number)
+    const values = tokens.slice(3).map(parseFloat)
 
     if (values.length == sampleCount) {
         return {
