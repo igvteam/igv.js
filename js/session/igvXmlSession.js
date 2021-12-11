@@ -188,8 +188,8 @@ function extractTrackAttributes(track, config) {
     const dataRangeCltn = track.getElementsByTagName("DataRange")
     if (dataRangeCltn.length > 0) {
         const dataRange = dataRangeCltn.item(0)
-        config.min = Number.parseFloat(dataRange.getAttribute("minimum"))
-        config.max = Number.parseFloat(dataRange.getAttribute("maximum"))
+        config.min = Number(dataRange.getAttribute("minimum"))
+        config.max = Number(dataRange.getAttribute("maximum"))
         config.logScale = dataRange.getAttribute("type") === "LOG"
     }
 }
