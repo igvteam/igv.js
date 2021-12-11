@@ -240,10 +240,10 @@ class TrackBase {
                         let min = 0
                         let max
                         if (tokens.length == 1) {
-                            max = Number.parseFloat(tokens[0])
+                            max = Number(tokens[0])
                         } else if (tokens.length == 2) {
-                            min = Number.parseFloat(tokens[0])
-                            max = Number.parseFloat(tokens[1])
+                            min = Number(tokens[0])
+                            max = Number(tokens[1])
                         }
                         tracklineConfg.autoscale = false
                         tracklineConfg.dataRange = {min, max}
@@ -361,7 +361,7 @@ class TrackBase {
             if (af.length > 1) {
                 let b = []
                 for (let i = 0; i < af.length; i++) {
-                    b.push({a: a[i], af: Number.parseFloat(af[i])})
+                    b.push({a: a[i], af: Number(af[i])})
                 }
                 b.sort(function (x, y) {
                     return x.af - y.af

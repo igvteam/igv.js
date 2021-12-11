@@ -43,7 +43,7 @@ function decodeBed(tokens, header) {
         }
 
         if (tokens.length > 4) {
-            feature.score = tokens[4] === '.' ? 0 : parseFloat(tokens[4])
+            feature.score = tokens[4] === '.' ? 0 : Number(tokens[4])
             if (isNaN(feature.score)) {
                 return feature
             }
@@ -326,11 +326,11 @@ function decodePeak(tokens, header) {
     start = parseInt(tokens[1])
     end = parseInt(tokens[2])
     name = tokens[3]
-    score = parseFloat(tokens[4])
+    score = Number(tokens[4])
     strand = tokens[5].trim()
-    signal = parseFloat(tokens[6])
-    pValue = parseFloat(tokens[7])
-    qValue = parseFloat(tokens[8])
+    signal = Number(tokens[6])
+    pValue = Number(tokens[7])
+    qValue = Number(tokens[8])
 
     if (score === 0) score = signal
 
@@ -349,7 +349,7 @@ function decodeBedGraph(tokens, header) {
     chr = tokens[0]
     start = parseInt(tokens[1])
     end = parseInt(tokens[2])
-    value = parseFloat(tokens[3])
+    value = Number(tokens[3])
     const feature = {chr: chr, start: start, end: end, value: value}
 
     // Optional extra columns
@@ -370,7 +370,7 @@ function decodeWig(tokens, header) {
     if (wig && wig.format === "fixedStep") {
         const ss = (wig.index * wig.step) + wig.start
         const ee = ss + wig.span
-        const value = parseFloat(tokens[0])
+        const value = Number(tokens[0])
         ++(wig.index)
         return isNaN(value) ? null : {chr: wig.chrom, start: ss, end: ee, value: value}
     } else if (wig && wig.format === "variableStep") {
@@ -378,7 +378,7 @@ function decodeWig(tokens, header) {
         if (tokens.length < 2) return null
         const ss = parseInt(tokens[0], 10) - 1
         const ee = ss + wig.span
-        const value = parseFloat(tokens[1])
+        const value = Number(tokens[1])
         return isNaN(value) ? null : {chr: wig.chrom, start: ss, end: ee, value: value}
 
     } else {
