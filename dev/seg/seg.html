@@ -37,7 +37,8 @@
     const options =
         {
             genome: "hg19",
-            showSampleNames: true,
+            locus: [ 'myc', 'ace' ],
+            showSampleNames: false,
             tracks: [
                 {
                     name: "Segmented Copy Number",
@@ -45,21 +46,21 @@
                     format: "seg",
                     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
                 },
-                {
-                    name: "Indexed",
-                    type: "seg",
-                    format: "seg",
-                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
-                },
-                {
-                    name: "Indexed with visibility window",
-                    type: "seg",
-                    format: "seg",
-                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
-                    visibilityWindow: "100000000"
-                },
+                // {
+                //     name: "Indexed",
+                //     type: "seg",
+                //     format: "seg",
+                //     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                //     indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
+                // },
+                // {
+                //     name: "Indexed with visibility window",
+                //     type: "seg",
+                //     format: "seg",
+                //     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                //     indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
+                //     visibilityWindow: "100000000"
+                // },
             ]
         };
 

@@ -283,10 +283,13 @@
 .igv-multi-locus-close-button {
   position: absolute;
   top: 2px;
-  right: 2px;
+  right: 0;
+  padding-left: 2px;
+  padding-right: 2px;
   width: 14px;
   height: 14px;
   color: #666666;
+  background-color: white;
   z-index: 1000; }
   .igv-multi-locus-close-button > svg {
     vertical-align: top; }
