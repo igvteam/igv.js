@@ -225,6 +225,12 @@ function extractQuery(config) {
                 } else if ('name' === key) {
                     // IGV desktop style index parameter
                     names = value.split(',')
+                } else if ('genome' === key && ((value.startsWith("https://") || value.startsWith("http://")) && !value.endsWith(".json"))) {
+                    // IGV desktop compatibility -- assuming url to fasta
+                    config['reference'] = {
+                        fastaURL: value,
+                        indexURL: value + ".fai"
+                    }
                 } else {
                     config[key] = value
                 }
