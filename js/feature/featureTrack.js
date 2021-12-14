@@ -117,8 +117,8 @@ class FeatureTrack extends TrackBase {
         }
 
         // Set properties from track line
-        if (this.header && this.header.trackLineProperties) {
-            this.setTrackProperties(this.header.trackLineProperties)
+        if (this.header) {
+            this.setTrackProperties(this.header)
         }
 
         if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
