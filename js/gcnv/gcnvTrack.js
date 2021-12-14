@@ -49,8 +49,9 @@ class GCNVTrack extends TrackBase {
             this.sampleNames = this.header.columnNames.slice(3)
 
             // Set generic properties from track line
-            this.setTrackProperties(this.header)   // setTrackProperties defined in TrackBase
-
+            if (this.header && this.header.trackLineProperties) {
+                this.setTrackProperties(this.header.trackLineProperties)
+            }
             // set option to highlight sample track line on click
             if (this.header.hasOwnProperty("clickToHighlight")) {
                 let colour = this.header["clickToHighlight"]

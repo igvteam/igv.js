@@ -79,21 +79,21 @@ class GWASTrack extends TrackBase {
         }
 
         // Set properties from track line
-        if (this.header) {
-            this.setTrackProperties(this.header)
+        if (this.header && this.header.trackLineProperties) {
+            this.setTrackProperties(this.header.trackLineProperties)
         }
 
         // Set initial range if specfied, unless autoscale == true
         if (!this.autoscale) {
             if (this.posteriorProbability) {
                 this.dataRange = {
-                    min: this.config.min === undefined ? 0 : config.min,
-                    max: this.config.max === undefined ? 1 : config.max
+                    min: this.config.min === undefined ? 0 : this.config.min,
+                    max: this.config.max === undefined ? 1 : this.config.max
                 }
             } else {
                 this.dataRange = {
-                    min: this.config.min === undefined ? 0 : config.min,
-                    max: this.config.max === undefined ? 25 : config.max
+                    min: this.config.min === undefined ? 0 : this.config.min,
+                    max: this.config.max === undefined ? 25 : this.config.max
                 }
             }
         }

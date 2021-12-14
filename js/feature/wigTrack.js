@@ -73,7 +73,9 @@ class WigTrack extends TrackBase {
 
     async postInit() {
         const header = await this.getHeader()
-        if (header) this.setTrackProperties(header)
+        if (header && header.trackLineProperties) {
+            this.setTrackProperties(header.trackLineProperties)
+        }
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
