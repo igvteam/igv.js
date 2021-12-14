@@ -79,8 +79,8 @@ class GWASTrack extends TrackBase {
         }
 
         // Set properties from track line
-        if (this.header && this.header.trackLineProperties) {
-            this.setTrackProperties(this.header.trackLineProperties)
+        if (this.header) {
+            this.setTrackProperties(this.header)   // setTrackProperties defined in TrackBase
         }
 
         // Set initial range if specfied, unless autoscale == true

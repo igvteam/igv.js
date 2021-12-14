@@ -107,8 +107,8 @@ class SegTrack extends TrackBase {
             this.header = await this.featureSource.getHeader()
         }
         // Set properties from track line
-        if (this.header && this.header.trackLineProperties) {
-            this.setTrackProperties(this.header.trackLineProperties)
+        if (this.header) {
+            this.setTrackProperties(this.header)
         }
     }
 

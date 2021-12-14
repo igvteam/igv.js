@@ -94,7 +94,8 @@ class FeatureParser {
         let line
         while ((line = await dataWrapper.nextLine()) !== undefined) {
             if (line.startsWith("track") || line.startsWith("#track")) {
-                header.trackLineProperties = parseTrackLine(line)
+                let h = parseTrackLine(line)
+                Object.assign(header, h)
             } else if (line.startsWith("browser")) {
                 // UCSC line, currently ignored
             } else if (line.startsWith("#columns")) {
