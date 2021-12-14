@@ -151,24 +151,24 @@ function createCircularView(el, browser) {
 
             loci = browser.currentLoci().map(str => Locus.fromLocusString(str))
 
-            // if(loci.some(locus =>  locus.contains(l1)) || loci.some(locus => locus.contains(l2))) {
-            //     for (let l of [l1, l2]) {
-            //         if (!loci.some(locus => {
-            //             return locus.contains(l)
-            //         })) {
-            //             // add flanking
-            //             l.start = Math.max(0, l.start - flanking);
-            //             l.end += flanking;
-            //             loci.push(l)
-            //         }
-            //     }
-            // } else {
-            l1.start = Math.max(0, l1.start - flanking)
-            l1.end += flanking
-            l2.start = Math.max(0, l2.start - flanking)
-            l2.end += flanking
-            loci = [l1, l2]
-            //}
+            if (loci.some(locus => locus.contains(l1)) || loci.some(locus => locus.contains(l2))) {
+                for (let l of [l1, l2]) {
+                    if (!loci.some(locus => {
+                        return locus.contains(l)
+                    })) {
+                        // add flanking
+                        l.start = Math.max(0, l.start - flanking)
+                        l.end += flanking
+                        loci.push(l)
+                    }
+                }
+            } else {
+                l1.start = Math.max(0, l1.start - flanking)
+                l1.end += flanking
+                l2.start = Math.max(0, l2.start - flanking)
+                l2.end += flanking
+                loci = [l1, l2]
+            }
 
             const searchString = loci.map(l => l.getLocusString()).join(" ")
             browser.search(searchString)
