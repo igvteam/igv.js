@@ -101,7 +101,7 @@ class SpliceJunctionTrack extends TrackBase {
     async getFeatures(chr, start, end, bpPerPixel) {
         const visibilityWindow = this.visibilityWindow
         return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
-    };
+    }
 
 
     /**
@@ -113,7 +113,7 @@ class SpliceJunctionTrack extends TrackBase {
      */
     computePixelHeight(features) {
         return this.height
-    };
+    }
 
     draw(options) {
 
@@ -151,7 +151,7 @@ class SpliceJunctionTrack extends TrackBase {
             console.log("No feature list")
         }
 
-    };
+    }
 
     /**
      *

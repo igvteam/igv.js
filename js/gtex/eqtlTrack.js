@@ -111,7 +111,7 @@ class EqtlTrack extends TrackBase {
 
         IGVGraphics.fillText(ctx, "-log10(pvalue)", pixelWidth / 4, pixelHeight / 2, font, {rotate: {angle: -90}})
 
-    };
+    }
 
     async getFeatures(chr, start, end) {
 

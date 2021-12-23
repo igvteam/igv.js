@@ -34,7 +34,7 @@ class HtsgetReader {
         this.genome = genome
         this.format = config.format ? config.format.toUpperCase() : "BAM"    // Backward compatibility
         if (!(this.format === "BAM" || this.format === "VCF")) {
-            throw  Error(`htsget format ${config.format} is not supported`)
+            throw Error(`htsget format ${config.format} is not supported`)
         }
     }
 
@@ -83,7 +83,7 @@ class HtsgetReader {
             if (ticket.htsget) {
                 const format = ticket.htsget.format
                 if (!(format === "BAM" || format === "VCF")) {
-                    throw  Error(`htsget format ${format} is not supported`)
+                    throw Error(`htsget format ${format} is not supported`)
                 }
                 config.format = format.toLowerCase()
                 config.sourceType = "htsget"

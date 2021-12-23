@@ -283,7 +283,7 @@ class Browser {
 
     isMultiLocusMode() {
         return this.referenceFrameList && this.referenceFrameList.length > 1
-    };
+    }
 
     addTrackToFactory(name, track) {
         TrackFactory.addTrack(name, track)
@@ -302,7 +302,7 @@ class Browser {
         }
 
         return false
-    };
+    }
 
     /**
      * Render browse display as SVG
@@ -1215,12 +1215,12 @@ class Browser {
     // Zoom in by a factor of 2, keeping the same center location
     zoomIn() {
         this.zoomWithScaleFactor(0.5)
-    };
+    }
 
     // Zoom out by a factor of 2, keeping the same center location if possible
     zoomOut() {
         this.zoomWithScaleFactor(2.0)
-    };
+    }
 
     async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
 
@@ -1487,7 +1487,7 @@ class Browser {
         if (ext === 'fam') {
             this.sampleInformation = await loadPlinkFile(url)
         }
-    };
+    }
 
 // EVENTS
 
@@ -1496,7 +1496,7 @@ class Browser {
             this.eventHandlers[eventName] = []
         }
         this.eventHandlers[eventName].push(fn)
-    };
+    }
 
     /**
      * @deprecated use off()
@@ -1505,7 +1505,7 @@ class Browser {
      */
     un(eventName, fn) {
         this.off(eventName, fn)
-    };
+    }
 
     off(eventName, fn) {
 
@@ -1681,7 +1681,7 @@ class Browser {
             mouseDownY: coords.y,
             referenceFrame: viewport.referenceFrame
         }
-    };
+    }
 
     cancelTrackPan() {
 

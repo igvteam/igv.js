@@ -45,11 +45,11 @@ class RulerTrack {
 
     async getFeatures(chr, start, end) {
         return []
-    };
+    }
 
     computePixelHeight(ignore) {
         return this.height
-    };
+    }
 
     draw({context, referenceFrame, pixelWidth, pixelHeight, bpPerPixel, bpStart}) {
 
@@ -153,7 +153,7 @@ class RulerTrack {
 
     supportsWholeGenome() {
         return true
-    };
+    }
 
     dispose() {
         // do stuff

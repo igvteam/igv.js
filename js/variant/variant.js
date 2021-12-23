@@ -198,7 +198,7 @@ class Variant {
 
         return fields
 
-    };
+    }
 
     isRefBlock() {
         return "NONVARIANT" === this.type

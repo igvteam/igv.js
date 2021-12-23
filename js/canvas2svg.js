@@ -331,7 +331,7 @@ class ctx {
         const str = this.config.viewbox.x + ' ' + this.config.viewbox.y + ' ' + width + ' ' + this.config.viewbox.height
         this.__root.setAttribute("viewBox", str)
 
-    };
+    }
 
     setHeight(height) {
 
@@ -341,7 +341,7 @@ class ctx {
         const str = this.config.viewbox.x + ' ' + this.config.viewbox.y + ' ' + this.config.viewbox.width + ' ' + height
         this.__root.setAttribute("viewBox", str)
 
-    };
+    }
 
     /**
      * Creates the specified svg element
@@ -366,7 +366,7 @@ class ctx {
         }
 
         return element
-    };
+    }
 
     /**
      * Applies default canvas styles to the context
@@ -379,7 +379,7 @@ class ctx {
             key = keys[i]
             this[key] = STYLES[key].canvas
         }
-    };
+    }
 
     /**
      * Applies styles on restore
@@ -392,7 +392,7 @@ class ctx {
             key = keys[i]
             this[key] = styleState[key]
         }
-    };
+    }
 
     /**
      * Gets the current style state
@@ -406,7 +406,7 @@ class ctx {
             styleState[key] = this[key]
         }
         return styleState
-    };
+    }
 
     /**
      * Apples the current styles to the current SVG element. On "ctx.fill" or "ctx.stroke"
@@ -476,7 +476,7 @@ class ctx {
                 }
             }
         }
-    };
+    }
 
     /**
      * Will return the closest group or svg node. May return the current element.
@@ -489,7 +489,7 @@ class ctx {
         } else {
             return this.__closestGroupOrSvg(node.parentNode)
         }
-    };
+    }
 
     /**
      * Returns the serialized value of the svg so far
@@ -521,7 +521,7 @@ class ctx {
         }
 
         return serialized
-    };
+    }
 
 
     /**
@@ -530,7 +530,7 @@ class ctx {
      */
     getSvg() {
         return this.__root
-    };
+    }
 
     /**
      * Will generate a group tag.
@@ -563,7 +563,7 @@ class ctx {
 
         this.__currentElement = group
         this.__stack.push(this.__getStyleState())
-    };
+    }
 
     save() {
         var group = this.__createElement("g")
@@ -572,7 +572,7 @@ class ctx {
         parent.appendChild(group)
         this.__currentElement = group
         this.__stack.push(this.__getStyleState())
-    };
+    }
 
     /**
      * Sets current element to parent, or just root if already root
@@ -586,7 +586,7 @@ class ctx {
         }
         var state = this.__stack.pop()
         this.__applyStyleState(state)
-    };
+    }
 
     /**
      * Helper method to add transform
@@ -615,7 +615,7 @@ class ctx {
         }
         transform += t
         this.__currentElement.setAttribute("transform", transform)
-    };
+    }
 
     addTrackGroupWithTranslationAndClipRect(id, tx, ty, width, height, clipYOffset) {
 
@@ -641,7 +641,7 @@ class ctx {
         group.setAttribute('clip-path', format('url(#{id})', {id: clip_id}))
 
         this.__currentElement = group
-    };
+    }
 
     /**
      *  scales the current element
@@ -651,7 +651,7 @@ class ctx {
             y = x
         }
         this.__addTransform(format("scale({x},{y})", {x: x, y: y}))
-    };
+    }
 
     /**
      * rotates the current element
@@ -659,21 +659,21 @@ class ctx {
     rotate(angle) {
         var degrees = (angle * 180 / Math.PI)
         this.__addTransform(format("rotate({angle},{cx},{cy})", {angle: degrees, cx: 0, cy: 0}))
-    };
+    }
 
     /**
      * translates the current element
      */
     translate(x, y) {
         this.__addTransform(format("translate({x},{y})", {x: x, y: y}))
-    };
+    }
 
     /**
      * applies a transform to the current element
      */
     transform(a, b, c, d, e, f) {
         this.__addTransform(format("matrix({a},{b},{c},{d},{e},{f})", {a: a, b: b, c: c, d: d, e: e, f: f}))
-    };
+    }
 
     /**
      * Create a new Path Element
@@ -690,7 +690,7 @@ class ctx {
         parent = this.__closestGroupOrSvg()
         parent.appendChild(path)
         this.__currentElement = path
-    };
+    }
 
     /**
      * Helper function to apply currentDefaultPath to current path element
@@ -703,7 +703,7 @@ class ctx {
         } else {
             console.error("Attempted to apply path command to node", currentElement.nodeName)
         }
-    };
+    }
 
     /**
      * Helper function to add path command
@@ -712,7 +712,7 @@ class ctx {
     __addPathCommand(command) {
         this.__currentDefaultPath += " "
         this.__currentDefaultPath += command
-    };
+    }
 
     /**
      * Adds the move command to the current path element,
@@ -726,7 +726,7 @@ class ctx {
         // creates a new subpath with the given point
         this.__currentPosition = {x: x, y: y}
         this.__addPathCommand(format("M {x} {y}", {x: x, y: y}))
-    };
+    }
 
     /**
      * Closes the current path
@@ -735,7 +735,7 @@ class ctx {
         if (this.__currentDefaultPath) {
             this.__addPathCommand("Z")
         }
-    };
+    }
 
     /**
      * Adds a line to command
@@ -747,7 +747,7 @@ class ctx {
         } else {
             this.__addPathCommand(format("M {x} {y}", {x: x, y: y}))
         }
-    };
+    }
 
     /**
      * Add a bezier command
@@ -756,7 +756,7 @@ class ctx {
         this.__currentPosition = {x: x, y: y}
         this.__addPathCommand(format("C {cp1x} {cp1y} {cp2x} {cp2y} {x} {y}",
             {cp1x: cp1x, cp1y: cp1y, cp2x: cp2x, cp2y: cp2y, x: x, y: y}))
-    };
+    }
 
     /**
      * Adds a quadratic curve to command
@@ -764,7 +764,7 @@ class ctx {
     quadraticCurveTo(cpx, cpy, x, y) {
         this.__currentPosition = {x: x, y: y}
         this.__addPathCommand(format("Q {cpx} {cpy} {x} {y}", {cpx: cpx, cpy: cpy, x: x, y: y}))
-    };
+    }
 
     /**
      * Adds the arcTo to the current path
@@ -857,7 +857,7 @@ class ctx {
         // Connect the start tangent point to the end tangent point by arc
         // and adding the end tangent point to the subpath.
         this.arc(x, y, radius, startAngle, endAngle)
-    };
+    }
 
     /**
      * Sets the stroke property on the current element
@@ -868,7 +868,7 @@ class ctx {
         }
         this.__applyCurrentDefaultPath()
         this.__applyStyleToCurrentElement("stroke")
-    };
+    }
 
     /**
      * Sets fill properties on the current element
@@ -879,7 +879,7 @@ class ctx {
         }
         this.__applyCurrentDefaultPath()
         this.__applyStyleToCurrentElement("fill")
-    };
+    }
 
     /**
      *  Adds a rectangle to the path.
@@ -894,7 +894,7 @@ class ctx {
         this.lineTo(x, y + height)
         this.lineTo(x, y)
         this.closePath()
-    };
+    }
 
 
     /**
@@ -930,7 +930,7 @@ class ctx {
         parent.appendChild(rect)
         this.__currentElement = rect
         this.__applyStyleToCurrentElement("fill")
-    };
+    }
 
     /**
      * Draws a rectangle with no fill
@@ -951,7 +951,7 @@ class ctx {
         parent.appendChild(rect)
         this.__currentElement = rect
         this.__applyStyleToCurrentElement("stroke")
-    };
+    }
 
     // stroke ellipse
     strokeEllipse(cx, cy, rx, ry, rotation, startAngle, endAngle, isCCW) {
@@ -1001,7 +1001,7 @@ class ctx {
         if (transform) {
             this.__addTransform(transform)
         }
-    };
+    }
 
     /**
      * "Clears" a canvas by just drawing a white rectangle in the current group.
@@ -1021,7 +1021,7 @@ class ctx {
             fill: "#FFFFFF"
         }, true)
         parent.appendChild(rect)
-    };
+    }
 
     /**
      * Adds a linear gradient to a defs tag.
@@ -1038,7 +1038,7 @@ class ctx {
         }, false)
         this.__defs.appendChild(grad)
         return new CanvasGradient(grad, this)
-    };
+    }
 
     /**
      * Adds a radial gradient to a defs tag.
@@ -1057,7 +1057,7 @@ class ctx {
         this.__defs.appendChild(grad)
         return new CanvasGradient(grad, this)
 
-    };
+    }
 
     /**
      * Parses the font string and returns svg mapping
@@ -1086,7 +1086,7 @@ class ctx {
         }
 
         return data
-    };
+    }
 
     /**
      * Helper to link text fragments
@@ -1103,7 +1103,7 @@ class ctx {
             return a
         }
         return element
-    };
+    }
 
     /**
      * Fills or strokes text
@@ -1132,7 +1132,7 @@ class ctx {
         this.__currentElement = textElement
         this.__applyStyleToCurrentElement(action)
         parent.appendChild(this.__wrapTextLink(font, textElement))
-    };
+    }
 
     /**
      * Creates a text element
@@ -1142,7 +1142,7 @@ class ctx {
      */
     fillText(text, x, y) {
         this.__applyText(text, x, y, "fill")
-    };
+    }
 
     /**
      * Strokes text
@@ -1152,7 +1152,7 @@ class ctx {
      */
     strokeText(text, x, y) {
         this.__applyText(text, x, y, "stroke")
-    };
+    }
 
     /**
      * No need to implement this for svg.
@@ -1162,7 +1162,7 @@ class ctx {
     measureText(text) {
         this.__ctx.font = this.font
         return this.__ctx.measureText(text)
-    };
+    }
 
     /**
      *  Arc command!
@@ -1210,7 +1210,7 @@ class ctx {
             }))
 
         this.__currentPosition = {x: endX, y: endY}
-    };
+    }
 
     /**
      * The ellipse() method creates an elliptical arc centered at (x, y) with the radii radiusX and radiusY. The path
@@ -1245,7 +1245,7 @@ class ctx {
 
         this.__currentElement = newGroup
 
-    };
+    }
 
     /**
      * Draws a canvas, image or mock context to this canvas.
@@ -1335,7 +1335,7 @@ class ctx {
                 image.nodeName === "CANVAS" ? image.toDataURL() : image.getAttribute("src"))
             parent.appendChild(svgImage)
         }
-    };
+    }
 
     /**
      * Generates a pattern tag
@@ -1362,7 +1362,7 @@ class ctx {
             this.__defs.appendChild(pattern)
         }
         return new CanvasPattern(pattern, this)
-    };
+    }
 
     setLineDash(dashArray) {
         if (dashArray && dashArray.length > 0) {
@@ -1370,28 +1370,28 @@ class ctx {
         } else {
             this.lineDash = null
         }
-    };
+    }
 
     /**
      * Not yet implemented
      */
     drawFocusRing() {
-    };
+    }
 
     createImageData() {
-    };
+    }
 
     getImageData() {
-    };
+    }
 
     putImageData() {
-    };
+    }
 
     globalCompositeOperation() {
-    };
+    }
 
     setTransform() {
-    };
+    }
 }
 
 export default ctx

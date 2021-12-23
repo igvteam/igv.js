@@ -1115,12 +1115,12 @@ class AlignmentTrack {
             }
         }
 
-    };
+    }
 
     popupData(clickState) {
         const clickedObject = this.getClickedObject(clickState)
         return clickedObject ? clickedObject.popupData(clickState.genomicLocation) : undefined
-    };
+    }
 
     contextMenuItemList(clickState) {
 
@@ -1314,7 +1314,7 @@ class AlignmentTrack {
 
         return undefined
 
-    };
+    }
 
     /**
      * Return the color for connectors in paired alignment view.   If explicitly set return that, otherwise return
