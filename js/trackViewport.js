@@ -8,6 +8,7 @@ import Viewport from "./viewport.js"
 import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genome.js"
+import {isSimpleType} from "./util/igvUtils.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
@@ -762,16 +763,29 @@ class TrackViewport extends Viewport {
             } else if (track.description) {
                 str = `<div>${track.description}</div>`
             } else {
+                str = '<div>'
                 if (track.url) {
                     if (FileUtils.isFile(track.url)) {
-                        str = `<div><b>Filename: </b>${track.url.name}`
+                        str += `<b>Filename: </b>${track.url.name}`
                     } else {
-                        str = `<div><b>URL: </b>${track.url}`
+                        str += `<b>URL: </b>${track.url}`
                     }
                 } else {
                     str = track.name
 
                 }
+                if (track.config) {
+                    for (let key of Object.keys(track.config)) {
+                        if (key.startsWith("_")) continue   // transient property
+                        let first = key.substr(0, 1)
+                        if (first === first.toLowerCase() && first !== first.toUpperCase()) continue
+                        const value = track.config[key]
+                        if (value && isSimpleType(value)) {
+                            str += `<br><b>${key}: </b>${value}`
+                        }
+                    }
+                }
+                str += '</div>'
             }
 
             if (this.popover) {
