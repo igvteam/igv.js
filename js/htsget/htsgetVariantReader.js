@@ -49,7 +49,7 @@ class HtsgetVariantReader extends HtsgetReader {
     async readFeatures(chr, start, end) {
 
         if (this.config.format && this.config.format.toUpperCase() !== "VCF") {
-            throw Error(`htsget format ${this.config.format} is not supported`)
+            throw  Error(`htsget format ${this.config.format} is not supported`)
         }
 
         if (!this.chrAliasTable) {

@@ -227,7 +227,7 @@ class RnaStructTrack extends TrackBase {
             }
         ]
 
-    }
+    };
 
 
 }

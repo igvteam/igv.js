@@ -136,7 +136,7 @@ class FeatureTrack extends TrackBase {
     async getFeatures(chr, start, end, bpPerPixel) {
         const visibilityWindow = this.visibilityWindow
         return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
-    }
+    };
 
 
     /**
@@ -164,7 +164,7 @@ class FeatureTrack extends TrackBase {
             return height
 
         }
-    }
+    };
 
     draw(options) {
 
@@ -224,7 +224,7 @@ class FeatureTrack extends TrackBase {
             console.log("No feature list")
         }
 
-    }
+    };
 
     clickedFeatures(clickState, features) {
 
@@ -360,7 +360,7 @@ class FeatureTrack extends TrackBase {
 
         return menuItems
 
-    }
+    };
 
 
     contextMenuItemList(clickState) {
@@ -414,7 +414,7 @@ class FeatureTrack extends TrackBase {
             return this.name
         }
 
-    }
+    };
 
     /**
      * Called when the track is removed.  Do any needed cleanup here

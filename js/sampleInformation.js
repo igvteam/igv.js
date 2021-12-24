@@ -62,14 +62,14 @@ class SampleInformation {
      */
     getAttributes(sample) {
         return this.attributes[sample]
-    }
+    };
 
     getAttributeNames() {
 
         if (this.hasAttributes()) {
             return Object.keys(this.attributes[Object.keys(this.attributes)[0]])
         } else return []
-    }
+    };
 
     hasAttributes() {
         return Object.keys(this.attributes).length > 0
