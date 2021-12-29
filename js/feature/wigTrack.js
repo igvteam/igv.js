@@ -31,6 +31,7 @@ import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import MenuUtils from "../ui/menuUtils.js"
+import {createCheckbox} from "../igv-icons.js"
 
 const DEFAULT_COLOR = "rgb(150,150,150)"
 
@@ -50,8 +51,12 @@ class WigTrack extends TrackBase {
 
         const format = config.format ? config.format.toLowerCase() : config.format
         if ("bigwig" === format) {
+            this.flipAxis = config.flipAxis ? config.flipAxis : false
+            this.logScale = config.logScale ? config.logScale : false
             this.featureSource = new BWSource(config, this.browser.genome)
         } else if ("tdf" === format) {
+            this.flipAxis = config.flipAxis ? config.flipAxis : false
+            this.logScale = config.logScale ? config.logScale : false
             this.featureSource = new TDFSource(config, this.browser.genome)
         } else {
             this.featureSource = FeatureSource(config, this.browser.genome)
@@ -100,7 +105,21 @@ class WigTrack extends TrackBase {
     }
 
     menuItemList() {
-        return MenuUtils.numericDataMenuItems(this.trackView)
+        let items = []
+        if (this.flipAxis !== undefined) {
+            items.push({
+                object: $(createCheckbox("Flip y-axis", this.flipAxis!==false)),
+                click: () => {
+                    this.flipAxis = !this.flipAxis
+                    this.trackView.repaintViews()
+                }
+            })
+            items.push("<HR>")
+        }
+
+        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+
+        return items
     }
 
     async getHeader() {
@@ -109,6 +128,27 @@ class WigTrack extends TrackBase {
             this.header = await this.featureSource.getHeader()
         }
         return this.header
+    }
+
+    // TODO: refactor to igvUtils.js
+    getScaleFactor(min, max, height, logScale) {
+        const scale = logScale ? height / (Math.log10(max + 1) - (min <= 0 ? 0 : Math.log10(min + 1))) : height / (max - min)
+        return scale
+    }
+
+    computeYPixelValue(yValue, yScaleFactor) {
+        return (this.flipAxis ? (yValue - this.dataRange.min) : (this.dataRange.max - yValue)) * yScaleFactor
+    }
+
+    computeYPixelValueInLogScale(yValue, yScaleFactor) {
+        let maxValue = this.dataRange.max
+        let minValue = this.dataRange.min
+        if (maxValue <= 0) return 0 // TODO:
+        if (minValue <= -1) minValue = 0
+        minValue = (minValue <= 0) ? 0 : Math.log10(minValue + 1)
+        maxValue = Math.log10(maxValue + 1)
+        yValue = Math.log10(yValue + 1)
+        return ((this.flipAxis ? (yValue - minValue) : (maxValue - yValue)) * yScaleFactor)
     }
 
     draw(options) {
@@ -130,9 +170,10 @@ class WigTrack extends TrackBase {
             baselineColor = IGVColor.addAlpha(posColor, 0.1)
         }
 
-        const yScale = (yValue) => {
-            return ((this.dataRange.max - yValue) / (this.dataRange.max - this.dataRange.min)) * pixelHeight
-        }
+        const scaleFactor = this.getScaleFactor(this.dataRange.min, this.dataRange.max, options.pixelHeight, this.logScale)
+        const yScale = (yValue) => this.logScale
+            ? this.computeYPixelValueInLogScale(yValue, scaleFactor)
+            : this.computeYPixelValue(yValue, scaleFactor)
 
         if (features && features.length > 0) {
 
@@ -142,7 +183,7 @@ class WigTrack extends TrackBase {
             // nothing to paint.
             if (this.dataRange.max > this.dataRange.min) {
 
-                const y0 = this.dataRange.min == 0 ? pixelHeight : yScale(0)
+                const y0 = yScale(0)
                 for (let f of features) {
 
                     if (f.end < bpStart) continue
@@ -166,9 +207,6 @@ class WigTrack extends TrackBase {
 
                     } else {
                         let height = y - y0
-                        if ((Math.abs(height)) < 1) {
-                            height = height < 0 ? -1 : 1
-                        }
                         const pixelEnd = x + width
                         if (pixelEnd > lastPixelEnd || (f.value >= 0 && f.value > lastValue) || (f.value < 0 && f.value < lastNegValue)) {
                             IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
@@ -264,6 +302,21 @@ class WigTrack extends TrackBase {
      */
     dispose() {
         this.trackView = undefined
+    }
+
+    /**
+     * Return the current state of the track.  Used to create sessions and bookmarks.
+     *
+     * @returns {*|{}}
+     */
+    getState() {
+
+        const config = super.getState()
+
+        if (this.flipAxis !== undefined) config.flipAxis = this.flipAxis
+        if (this.logScale !== undefined) config.logScale = this.logScale
+
+        return config
     }
 }
 
