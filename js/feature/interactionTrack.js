@@ -57,7 +57,6 @@ class InteractionTrack extends TrackBase {
         this.color = config.color || "rgb(180,25,137)"
         this.alpha = config.alpha || 0.02  // was: 0.15
         this.painter = {flipAxis: !this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
-        this.arcCaches = new Map() // FIXME: to stop drawing 'visually identical' arcs; more efficient algo exists
 
         if (config.valueColumn) {
             this.valueColumn = config.valueColumn
@@ -399,7 +398,8 @@ class InteractionTrack extends TrackBase {
 
         if (featureList && featureList.length > 0) {
 
-            this.arcCaches.clear()
+            const arcCaches = new Map() // FIXME: to stop drawing 'visually identical' arcs; more efficient algo exists
+
             // we use the min as a filter but not moving the axis
             const effectiveMin = 0
             const yScale = this.getScaleFactor(effectiveMin, this.dataRange.max, options.pixelHeight - 1, this.logScale)
@@ -441,14 +441,16 @@ class InteractionTrack extends TrackBase {
                     feature.drawState = {xc, yc: y, radiusX, radiusY}
 
                     const arcKey = ((pixelStart << 16) | pixelEnd)
-                    let arc = this.arcCaches.get(arcKey)
+                    let arc = arcCaches.get(arcKey)
                     if (arc !== undefined) {
-                        if (arc.has(radiusY)) continue
+                        if (arc.has(radiusY)) {
+                            continue
+                        }
                         arc.add(radiusY)
                     } else {
                         let arcHeights = new Set()
                         arcHeights.add(radiusY)
-                        this.arcCaches.set(arcKey, arcHeights)
+                        arcCaches.set(arcKey, arcHeights)
                     }
 
                     const counterClockwise = this.arcOrientation ? true : false
