@@ -411,7 +411,7 @@ class FeatureTrack extends TrackBase {
             desc += "</html>"
             return desc
         } else {
-            return this.name
+            return super.description();
         }
 
     };
