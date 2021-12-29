@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <!-- IGV CSS -->
+
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<h1>ChIA-Pet example</h1>
+
+<h2>Data from the <a target="_blank" href="https://www.jax.org/research-and-faculty/faculty/chia-lin-wei">Wei lab</a>.
+See <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM3553630" target="_blank">GEO GSM3553630</a>.</h2>
+
+<p>
+    <button id="bookmarkButton">Bookmark</button>
+    <button id="sessionButton">Session JSON</button>
+    <button id="svgButton">Save SVG</button>
+</p>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const options =
+        {
+            "version": "2.10.5",
+            "showSampleNames": false,
+            "reference": {
+                "id": "hg19",
+                "name": "Human (GRCh37/hg19)",
+                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+            },
+            "locus": [
+                "chr7:55,202,455-55,336,909",
+                "chr8:128,718,692-128,773,416",
+                "chr12:58,126,892-58,168,226"
+            ],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "url": "https://raw.githubusercontent.com/cheehongsg/ChIA-PET-Interactions-Visualization/main/PMID33836152/GSM3553630_HF-3177_chiapet.cis.chiasig.sigf.itx.bedpe.gz",
+                    "name": "GSM3553630 HF-3177 CP Cis",
+                    "derivedName": true,
+                    "format": "bedpe",
+                    "type": "interact",
+                    "color": "#ff2987",
+                    "arcType": "chiapetoutbound",
+                    "arcOrientation": false,
+                    "showBlocks": false,
+                    "blockHeight": 3,
+                    "thickness": 1,
+                    "alpha": 0.02,
+                    "order": 6
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz",
+                    "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz.tbi",
+                    "visibilityWindow": -1,
+                    "removable": false,
+                    "order": 1000000,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation"
+                }
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+
+        .then(function (browser) {
+
+            console.log("Created IGV browser")
+
+            document.getElementById("sessionButton").addEventListener("click", () => {
+                try {
+                    const json = browser.toJSON()
+                    console.log(json)
+                    const jsonString = JSON.stringify(json, null, '\t')
+                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}))
+                    download("session.json", data)
+                } catch (e) {
+                    alert(e)
+                }
+            })
+
+            document.getElementById("bookmarkButton").addEventListener("click",
+                () => window.history.pushState({}, "IGV", browser.sessionURL()))
+
+            document.getElementById("svgButton").addEventListener("click", () => {
+                let svg = browser.toSVG()
+                const path = 'arcs.svg'
+                const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
+                download(path, data)
+            })
+        })
+
+    function download(filename, data) {
+
+        const element = document.createElement('a')
+        element.setAttribute('href', data)
+        element.setAttribute('download', filename)
+        element.style.display = 'none'
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+    }
+
+
+</script>
+
+</body>
+
+</html>
