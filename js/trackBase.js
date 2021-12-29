@@ -55,7 +55,7 @@ class TrackBase {
         this.config = config
         this.url = config.url
         this.type = config.type
-        this.description = config.description
+
         this.supportHiDPI = config.supportHiDPI === undefined ? true : config.supportHiDPI
 
         if (config.name || config.label) {
@@ -92,6 +92,15 @@ class TrackBase {
         if (config.onclick) {
             this.onclick = config.onclick
             config.onclick = undefined   // functions cannot be saved in sessions, clear it here.
+        }
+
+        if (config.description) {
+            // Override description -- displayed when clicking on track label.  Convert to function if neccessary
+            if (typeof config.description === 'function') {
+                this.description = config.description
+            } else {
+                this.description = () => config.description
+            }
         }
     }
 
@@ -402,6 +411,41 @@ class TrackBase {
 
         return data
 
+    }
+
+    /**
+     * Default track description -- displayed on click of track label.  This can be overriden in the track
+     * configuration, or in subclasses.
+     */
+    description() {
+
+        const wrapKeyValue = (k, v) => `<div class="igv-track-label-popup-shim"><b>${k}: </b>${v}</div>`
+
+        let str = '<div class="igv-track-label-popup">'
+        if (this.url) {
+            if (FileUtils.isFile(this.url)) {
+                str += wrapKeyValue('Filename', this.url.name)
+            } else {
+                str += wrapKeyValue('URL', this.url)
+            }
+        } else {
+            str = this.name
+        }
+        if (this.config) {
+            // Add any config properties that are capitalized
+            for (let key of Object.keys(this.config)) {
+                if (key.startsWith("_")) continue   // transient property
+                let first = key.substr(0, 1)
+                if (first !== first.toLowerCase()) {
+                    const value = this.config[key]
+                    if (value && isSimpleType(value)) {
+                        str += wrapKeyValue(key, value)
+                    }
+                }
+            }
+        }
+        str += '</div>'
+        return str
     }
 
     static getCravatLink(chr, position, ref, alt, genomeID) {
