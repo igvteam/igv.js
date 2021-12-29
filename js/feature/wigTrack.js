@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+import $ from "../vendor/jquery-3.3.1.slim.js"
 import FeatureSource from './featureSource.js'
 import TDFSource from "../tdf/tdfSource.js"
 import TrackBase from "../trackBase.js"
@@ -108,13 +109,12 @@ class WigTrack extends TrackBase {
         let items = []
         if (this.flipAxis !== undefined) {
             items.push({
-                object: $(createCheckbox("Flip y-axis", this.flipAxis!==false)),
+                label:"Flip y-axis",
                 click: () => {
                     this.flipAxis = !this.flipAxis
                     this.trackView.repaintViews()
                 }
             })
-            items.push("<HR>")
         }
 
         items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
