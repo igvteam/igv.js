@@ -58,7 +58,6 @@ class GWASTrack extends TrackBase {
         this.divider = config.divider || "rgb(225,225,225)"
         this.dotSize = config.dotSize || 3
         this.popoverWindow = (config.popoverWindow === undefined ? DEFAULT_POPOVER_WINDOW : config.popoverWindow)
-        this.description = config.description  // might be null
 
         this.colorScales = config.color ?
             new ConstantColorScale(config.color) :

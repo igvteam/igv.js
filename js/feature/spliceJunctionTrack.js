@@ -419,12 +419,6 @@ class SpliceJunctionTrack extends TrackBase {
         return data
     }
 
-
-    description() {
-        return this.name
-
-    }
-
     /**
      * Called when the track is removed.  Do any needed cleanup here
      */
