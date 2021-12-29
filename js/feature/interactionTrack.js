@@ -27,6 +27,7 @@
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
+import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import MenuUtils from "../ui/menuUtils.js"
 import {createCheckbox} from "../igv-icons.js"
@@ -48,13 +49,15 @@ class InteractionTrack extends TrackBase {
         this.sinTheta = Math.sin(this.theta)
         this.cosTheta = Math.cos(this.theta)
         this.height = config.height || 250
-        this.arcType = config.arcType || "nested"   // nested | proportional
+        this.arcType = config.arcType || "nested"   // nested | proportional | chiapet | chiapetoutbound
         this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation) // true for up, false for down
         this.showBlocks = config.showBlocks === undefined ? true : config.showBlocks
         this.blockHeight = config.blockHeight || 3
         this.thickness = config.thickness || 1
         this.color = config.color || "rgb(180,25,137)"
-        this.alpha = config.alpha || 0.15
+        this.alpha = config.alpha || 0.02  // was: 0.15
+        this.painter = {flipAxis: !this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
+        this.arcCaches = new Map() // FIXME: to stop drawing 'visually identical' arcs; more efficient algo exists
 
         if (config.valueColumn) {
             this.valueColumn = config.valueColumn
@@ -74,6 +77,8 @@ class InteractionTrack extends TrackBase {
         } else {
             this.autoscale = true
         }
+
+        this.showOutbound = false // false: 2A(nchors) in viewport; true: ≥1A(nchors)
 
         // Create the FeatureSource and override the default whole genome method
         this.featureSource = FeatureSource(config, this.browser.genome)
@@ -119,6 +124,8 @@ class InteractionTrack extends TrackBase {
 
         if (this.arcType === "proportional") {
             this.drawProportional(options)
+        } else if (this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
+            this.drawProportionalChIAPET(options)
         } else {
             this.drawNested(options)
         }
@@ -370,6 +377,163 @@ class InteractionTrack extends TrackBase {
         }
     }
 
+    // TODO: refactor to igvUtils.js
+    getScaleFactor(min, max, height, logScale) {
+        const scale = logScale ? height / (Math.log10(max + 1) - (min <= 0 ? 0 : Math.log10(min + 1))) : height / (max - min)
+        return scale
+    }
+
+    drawProportionalChIAPET(options) {
+
+        const ctx = options.context
+        const pixelWidth = options.pixelWidth
+        const pixelHeight = options.pixelHeight
+        const bpPerPixel = options.bpPerPixel
+        const bpStart = options.bpStart
+        const xScale = bpPerPixel
+        const refStart = options.referenceFrame.start
+        const refEnd = options.referenceFrame.end
+
+        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+
+        const featureList = options.features
+
+        if (featureList && featureList.length > 0) {
+
+            this.arcCaches.clear()
+            // we use the min as a filter but not moving the axis
+            const effectiveMin = 0
+            const yScale = this.getScaleFactor(effectiveMin, this.dataRange.max, options.pixelHeight - 1, this.logScale)
+            const y = this.arcOrientation ? options.pixelHeight : 0
+
+            for (let feature of featureList) {
+
+                const value = this.valueColumn ? feature[this.valueColumn] : feature.score
+                if (value === undefined || Number.isNaN(value)) continue
+
+                const radiusY = Math.round((this.logScale ? Math.log10(value + 1) : value) * yScale)
+
+                if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
+
+                    const {m1, m2} = getMidpoints(feature, this.browser.genome)
+
+                    let pixelStart = Math.round((m1 - bpStart) / xScale)
+                    let pixelEnd = Math.round((m2 - bpStart) / xScale)
+                    let w = (pixelEnd - pixelStart)
+                    if (w < 3) {
+                        w = 3
+                        pixelStart--
+                    }
+
+                    // original fly over issue!
+                    // if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue;
+                    const within = (m1 >= refStart && m2 <= refEnd)
+                    let outBound = false
+                    let inBound = false
+                    if (!within && this.showOutbound) {
+                        outBound = (refStart <= m1 && m1 <= refEnd)
+                        if (!outBound) inBound = (refStart <= m2 && m2 <= refEnd)
+                    }
+                    if (!(within || outBound || inBound)) continue
+                    if (value < this.dataRange.min) continue // TODO: is a range?!
+
+                    const radiusX = w / 2
+                    const xc = pixelStart + w / 2
+                    feature.drawState = {xc, yc: y, radiusX, radiusY}
+
+                    const arcKey = ((pixelStart << 16) | pixelEnd)
+                    let arc = this.arcCaches.get(arcKey)
+                    if (arc !== undefined) {
+                        if (arc.has(radiusY)) continue
+                        arc.add(radiusY)
+                    } else {
+                        let arcHeights = new Set()
+                        arcHeights.add(radiusY)
+                        this.arcCaches.set(arcKey, arcHeights)
+                    }
+
+                    const counterClockwise = this.arcOrientation ? true : false
+                    const color = feature.color || this.color
+                    ctx.strokeStyle = color
+                    ctx.lineWidth = feature.thickness || this.thickness || 1
+
+                    if (true === ctx.isSVG) {
+                        ctx.strokeEllipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise)
+                    } else {
+                        ctx.beginPath()
+                        ctx.ellipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise)
+                        ctx.stroke()
+                    }
+
+                    if (this.alpha) {
+                        ctx.fillStyle = getAlphaColor(color, this.alpha)
+                        if (true === ctx.isSVG) {
+                            ctx.fillEllipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise)
+                        } else {
+                            ctx.fill()
+                        }
+
+                    }
+
+                    if (this.showBlocks && feature.chr !== 'all') {
+                        ctx.fillStyle = color
+                        const s1 = (feature.start1 - bpStart) / xScale
+                        const e1 = (feature.end1 - bpStart) / xScale
+                        const s2 = (feature.start2 - bpStart) / xScale
+                        const e2 = (feature.end2 - bpStart) / xScale
+                        const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight
+                        ctx.fillRect(s1, y, e1 - s1, hb)
+                        ctx.fillRect(s2, y, e2 - s2, hb)
+                    }
+
+                } else {
+                    let pixelStart = Math.round((feature.start - bpStart) / xScale)
+                    let pixelEnd = Math.round((feature.end - bpStart) / xScale)
+                    if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue
+
+                    const h = Math.min(radiusY, this.height - 13)   // Leave room for text
+                    let w = (pixelEnd - pixelStart)
+                    if (w < 3) {
+                        w = 3
+                        pixelStart--
+                    }
+                    const otherChr = feature.chr === feature.chr1 ? feature.chr2 : feature.chr1
+                    ctx.font = "8px sans-serif"
+                    ctx.textAlign = "center"
+                    if (this.arcOrientation) {
+                        // UP
+                        const y = this.height - h
+                        ctx.fillRect(pixelStart, y, w, h)
+                        ctx.fillText(otherChr, pixelStart + w / 2, y - 5)
+                        feature.drawState = {x: pixelStart, y, w, h}
+                    } else {
+                        ctx.fillRect(pixelStart, 0, w, h)
+                        ctx.fillText(otherChr, pixelStart + w / 2, h + 13)
+                        feature.drawState = {x: pixelStart, y: 0, w, h}
+                    }
+                }
+            }
+        }
+    }
+
+    clearAxis(ctx, pixelWidth, pixelHeight) {
+        IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+    }
+
+    paintAxis(ctx, pixelWidth, pixelHeight) {
+        if (this.arcType === "proportional") {
+            this.painter.flipAxis = !this.arcOrientation
+            this.painter.dataRange = this.dataRange
+            this.painter.paintAxis(ctx, pixelWidth, pixelHeight)
+        } else if (this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
+            this.painter.flipAxis = !this.arcOrientation
+            this.painter.dataRange = this.dataRange
+            this.painter.paintAxis(ctx, pixelWidth, pixelHeight)
+        } else {
+            this.clearAxis(ctx, pixelWidth, pixelHeight)
+        }
+    }
+
     menuItemList() {
 
         let items = [
@@ -387,14 +551,17 @@ class InteractionTrack extends TrackBase {
             const lut =
                 {
                     "nested": "Nested Arcs",
-                    "proportional": "Proportional Arcs"
+                    "proportional": "Proportional Arcs",
+                    "chiapet": "ChIA-PET 2A",
+                    "chiapetoutbound": "ChIA-PET ≥1A"
                 }
-            for (let arcType of ["nested", "proportional"]) {
+            for (let arcType of ["nested", "proportional", "chiapet", "chiapetoutbound"]) {
                 items.push(
                     {
                         object: $(createCheckbox(lut[arcType], arcType === this.arcType)),
                         click: () => {
                             this.arcType = arcType
+                            this.showOutbound = (this.arcType === "chiapetoutbound")
                             this.trackView.repaintViews()
                         }
                     })
@@ -416,8 +583,9 @@ class InteractionTrack extends TrackBase {
             }
         })
 
-        if (this.arcType === "proportional") {
+        if (this.arcType === "proportional" || this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
             items.push("<HR>")
+            // MenuUtils.numericDataMenuItems(this.trackView).forEach(item => items.push(item))
             items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
         }
 
@@ -539,7 +707,7 @@ class InteractionTrack extends TrackBase {
         const featureList = features || clickState.viewport.getCachedFeatures()
         const candidates = []
         if (featureList) {
-            const proportional = this.arcType === "proportional"
+            const proportional = (this.arcType === "proportional" || this.arcType === "chiapet" || this.arcType === "chiapetoutbound")
 
             for (let feature of featureList) {
                 if (!feature.drawState) continue
@@ -579,6 +747,26 @@ class InteractionTrack extends TrackBase {
             candidates.sort((a, b) => a.score - b.score)
         }
         return candidates.map((c) => c.feature)
+    }
+
+    /**
+     * Return the current state of the track.  Used to create sessions and bookmarks.
+     *
+     * @returns {*|{}}
+     */
+    getState() {
+
+        const config = super.getState()
+
+        // if (this.height !== undefined) config.height = this.height;
+        if (this.arcType !== undefined) config.arcType = this.arcType
+        if (this.arcOrientation !== undefined) config.arcOrientation = this.arcOrientation
+        if (this.showBlocks !== undefined) config.showBlocks = this.showBlocks
+        if (this.blockHeight !== undefined) config.blockHeight = this.blockHeight
+        if (this.thickness !== undefined) config.thickness = this.thickness
+        if (this.alpha !== undefined) config.alpha = this.alpha
+
+        return config
     }
 }
 
