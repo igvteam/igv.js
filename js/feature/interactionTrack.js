@@ -550,11 +550,12 @@ class InteractionTrack extends TrackBase {
         if (this.hasValue) {
             const lut =
                 {
-                    "nested": "Nested Arcs",
-                    "proportional": "Proportional Arcs",
-                    "chiapet": "ChIA-PET 2A",
-                    "chiapetoutbound": "ChIA-PET ≥1A"
+                    "nested": "Nested",
+                    "proportional": "Proportional - All",
+                    "chiapet": "Proportional - Both Ends in View",
+                    "chiapetoutbound": "Proportional - One End in View"
                 }
+                items.push("<b>Arc Type</b>")
             for (let arcType of ["nested", "proportional", "chiapet", "chiapetoutbound"]) {
                 items.push(
                     {
@@ -567,14 +568,8 @@ class InteractionTrack extends TrackBase {
                     })
             }
         }
+        items.push("<hr/>")
 
-        items.push({
-            object: $(createCheckbox("Show Blocks", this.showBlocks)),
-            click: () => {
-                this.showBlocks = !this.showBlocks
-                this.trackView.repaintViews()
-            }
-        })
         items.push({
             name: "Toggle arc direction",
             click: () => {
@@ -582,9 +577,16 @@ class InteractionTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
         })
+        items.push({
+            name: this.showBlocks ? "Hide Blocks" : "Show Blocks",
+            click: () => {
+                this.showBlocks = !this.showBlocks
+                this.trackView.repaintViews()
+            }
+        })
+
 
         if (this.arcType === "proportional" || this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
-            items.push("<HR>")
             // MenuUtils.numericDataMenuItems(this.trackView).forEach(item => items.push(item))
             items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
         }
