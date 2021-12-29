@@ -20,6 +20,8 @@ function paintAxis(ctx, pixelWidth, pixelHeight) {
         return
     }
 
+    let flipAxis = (undefined === this.flipAxis) ? false : this.flipAxis
+
     IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
     reference = 0.95 * pixelWidth
@@ -34,7 +36,7 @@ function paintAxis(ctx, pixelWidth, pixelHeight) {
 
     // tick
     IGVGraphics.strokeLine(ctx, x1, y1, x2, y2, font)
-    IGVGraphics.fillText(ctx, prettyPrint(this.dataRange.max), x1 + 4, y1 + 12, font)
+    IGVGraphics.fillText(ctx, prettyPrint(flipAxis ? this.dataRange.min : this.dataRange.max), x1 + 4, y1 + 12, font)
 
     //shim = 0.25 * 0.125;
     y1 = y2 = (1.0 - shim) * pixelHeight
@@ -43,7 +45,7 @@ function paintAxis(ctx, pixelWidth, pixelHeight) {
 
     // tick
     IGVGraphics.strokeLine(ctx, x1, y1, x2, y2, font)
-    IGVGraphics.fillText(ctx, prettyPrint(this.dataRange.min), x1 + 4, y1 - 4, font)
+    IGVGraphics.fillText(ctx, prettyPrint(flipAxis ? this.dataRange.max : this.dataRange.min), x1 + 4, y1 - 4, font)
 
     IGVGraphics.strokeLine(ctx, a.x, a.y, b.x, b.y, font)
 
