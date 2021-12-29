@@ -78,8 +78,6 @@ class InteractionTrack extends TrackBase {
             this.autoscale = true
         }
 
-        this.showOutbound = false // false: 2A(nchors) in viewport; true: ≥1A(nchors)
-
         // Create the FeatureSource and override the default whole genome method
         this.featureSource = FeatureSource(config, this.browser.genome)
         this.featureSource.getWGFeatures = getWGFeatures
@@ -393,6 +391,7 @@ class InteractionTrack extends TrackBase {
         const xScale = bpPerPixel
         const refStart = options.referenceFrame.start
         const refEnd = options.referenceFrame.end
+        const showOutbound = (this.arcType === "chiapetoutbound")
 
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
@@ -430,7 +429,7 @@ class InteractionTrack extends TrackBase {
                     const within = (m1 >= refStart && m2 <= refEnd)
                     let outBound = false
                     let inBound = false
-                    if (!within && this.showOutbound) {
+                    if (!within && showOutbound) {
                         outBound = (refStart <= m1 && m1 <= refEnd)
                         if (!outBound) inBound = (refStart <= m2 && m2 <= refEnd)
                     }
@@ -562,7 +561,6 @@ class InteractionTrack extends TrackBase {
                         object: $(createCheckbox(lut[arcType], arcType === this.arcType)),
                         click: () => {
                             this.arcType = arcType
-                            this.showOutbound = (this.arcType === "chiapetoutbound")
                             this.trackView.repaintViews()
                         }
                     })
