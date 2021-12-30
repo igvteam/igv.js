@@ -36,7 +36,7 @@ import GenomicInterval from "../genome/genomicInterval.js"
 import pack from "../feature/featurePacker.js"
 import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 
-const DEFAULT_MAX_WG_COUNT = 1000
+const DEFAULT_MAX_WG_COUNT = 10000
 
 /**
  * feature source for "bed like" files (tab or whitespace delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -285,6 +285,8 @@ class TextFeatureSource {
         const genome = this.genome
         const wgChromosomeNames = new Set(genome.wgChromosomeNames)
         const wgFeatures = []
+        let count = 0
+        const max = this.maxWGCount
         for (let c of genome.wgChromosomeNames) {
 
             const features = allFeatures[c]
@@ -303,8 +305,8 @@ class TextFeatureSource {
                                 wgFeatures[idx] = makeWGFeature(f)
                             }
                         }
-
                     }
+                    count++
                 }
             }
         }
