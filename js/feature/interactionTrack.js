@@ -35,7 +35,6 @@ import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
 import {makeBedPEChords} from "../jbrowse/circularViewUtils.js"
 
-
 class InteractionTrack extends TrackBase {
 
     constructor(config, browser) {
@@ -556,7 +555,7 @@ class InteractionTrack extends TrackBase {
                     "chiapet": "Proportional - Both Ends in View",
                     "chiapetoutbound": "Proportional - One End in View"
                 }
-                items.push("<b>Arc Type</b>")
+            items.push("<b>Arc Type</b>")
             for (let arcType of ["nested", "proportional", "chiapet", "chiapetoutbound"]) {
                 items.push(
                     {
@@ -833,24 +832,41 @@ function getAlphaColor(color, alpha) {
 
 
 /**
- * Called in the context of FeatureSource
+ * Called in the context of FeatureSource  (i.e. this == the feature source (a TextFeatureSource) for the track
+ *
  * @param allFeatures
  * @returns {[]}
  */
 function getWGFeatures(allFeatures) {
 
+    const makeWGFeature = (f) => {
+        const wg = Object.assign({}, f)
+        wg.chr = "all"
+        wg.start = genome.getGenomeCoordinate(f.chr1, f.start1)
+        wg.end = genome.getGenomeCoordinate(f.chr2, f.end2)
+        return wg
+    }
+
     const genome = this.genome
     const wgFeatures = []
+    let count = 0
+    const max = this.maxWGCount;
     for (let c of genome.wgChromosomeNames) {
-        const chrFeatures = allFeatures[c]
+        let chrFeatures = allFeatures[c]
         if (chrFeatures) {
             for (let f of chrFeatures) {
                 if (!f.dup) {
-                    const wg = Object.assign({}, f)
-                    wg.chr = "all"
-                    wg.start = genome.getGenomeCoordinate(f.chr1, f.start1)
-                    wg.end = genome.getGenomeCoordinate(f.chr2, f.end2)
-                    wgFeatures.push(wg)
+                    if (wgFeatures.length < max) {
+                        wgFeatures.push(makeWGFeature(f))
+                    } else {
+                        //Reservoir sampling
+                        const samplingProb = max / (count + 1)
+                        if (Math.random() < samplingProb) {
+                            const idx = Math.floor(Math.random() * (max - 1))
+                            wgFeatures[idx] = makeWGFeature(f)
+                        }
+                    }
+                    count++
                 }
             }
         }
