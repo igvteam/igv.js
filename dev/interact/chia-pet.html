@@ -1,21 +1,34 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
-    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
+    <meta charset="UTF-8">
+    <title>Circular View</title>
+    <!-- The commented scripts below are the minified production versions of the
+      other scripts -->
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin="anonymous"></script>
+    <!--    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.development.js"
+                crossorigin="anonymous"></script>-->
+    <script
+            src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.production.min.js"
+            crossorigin="anonymous"
+    ></script>
 
-    <!-- IGV CSS -->
+    <!--    <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+        <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.production.min.js"
+                crossorigin></script>-->
 
-    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+    <style>
+        button[data-testid='circular_track_select'] {
+            display: none;
+        }
+    </style>
 
 </head>
-
 <body>
+
+<p>
 
 <h1>ChIA-Pet example</h1>
 
@@ -28,8 +41,12 @@ See <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM3553630" targ
     <button id="svgButton">Save SVG</button>
 </p>
 
-<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
+<div id="igvDiv">
+    <div id="jbrowse_circular_genome_view"
+         style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
+
+</div>
 <script type="module">
 
     import igv from "../../js/index.js"
@@ -110,6 +127,13 @@ See <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM3553630" targ
         .then(function (browser) {
 
             console.log("Created IGV browser")
+
+
+            const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
+            browser.createCircularView(circularViewContainer, true);
+            makeDraggable(circularViewContainer, browser.circularView.toolbar);
+            browser.circularView.setSize(640);
+
 
             document.getElementById("sessionButton").addEventListener("click", () => {
                 try {
