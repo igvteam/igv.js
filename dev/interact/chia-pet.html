@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Circular View</title>
+    <!-- The commented scripts below are the minified production versions of the
+      other scripts -->
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin="anonymous"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin="anonymous"></script>
+    <!--    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.development.js"
+                crossorigin="anonymous"></script>-->
+    <script
+            src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.production.min.js"
+            crossorigin="anonymous"
+    ></script>
+
+    <!--    <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+        <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+        <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.production.min.js"
+                crossorigin></script>-->
+
+    <style>
+        button[data-testid='circular_track_select'] {
+            display: none;
+        }
+    </style>
+
+</head>
+<body>
+
+<p>
+
+<h1>ChIA-Pet example</h1>
+
+<h2>Data from the <a target="_blank" href="https://www.jax.org/research-and-faculty/faculty/chia-lin-wei">Wei lab</a>.
+See <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSM3553630" target="_blank">GEO GSM3553630</a>.</h2>
+
+<p>
+    <button id="bookmarkButton">Bookmark</button>
+    <button id="sessionButton">Session JSON</button>
+    <button id="svgButton">Save SVG</button>
+</p>
+
+
+<div id="igvDiv">
+    <div id="jbrowse_circular_genome_view"
+         style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
+
+</div>
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const options =
+        {
+            "version": "2.10.5",
+            "showSampleNames": false,
+            "reference": {
+                "id": "hg19",
+                "name": "Human (GRCh37/hg19)",
+                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+            },
+            "locus": [
+                "chr7:55,202,455-55,336,909",
+                "chr8:128,718,692-128,773,416",
+                "chr12:58,126,892-58,168,226"
+            ],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "url": "https://raw.githubusercontent.com/cheehongsg/ChIA-PET-Interactions-Visualization/main/PMID33836152/GSM3553630_HF-3177_chiapet.trans.chiasig.itx.ge2.bedpe.gz",
+                    "name": "GSM3553630 HF-3177 CP Trans",
+                    "derivedName": true,
+                    "format": "bedpe",
+                    "type": "interact",
+                    "color": "rgb(180,25,137)",
+                    "arcType": "chiapet",
+                    "arcOrientation": true,
+                    "showBlocks": false,
+                    "blockHeight": 3,
+                    "thickness": 1,
+                    "alpha": 0.02,
+                    "order": 5,
+                    "min": 0,
+                    "max": 459
+                },
+                {
+                    "url": "https://raw.githubusercontent.com/cheehongsg/ChIA-PET-Interactions-Visualization/main/PMID33836152/GSM3553630_HF-3177_chiapet.cis.chiasig.sigf.itx.bedpe.gz",
+                    "name": "GSM3553630 HF-3177 CP Cis",
+                    "derivedName": true,
+                    "format": "bedpe",
+                    "type": "interact",
+                    "color": "#ff2987",
+                    "arcType": "chiapetoutbound",
+                    "arcOrientation": false,
+                    "showBlocks": false,
+                    "blockHeight": 3,
+                    "thickness": 1,
+                    "alpha": 0.02,
+                    "order": 6
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz",
+                    "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz.tbi",
+                    "visibilityWindow": -1,
+                    "removable": false,
+                    "order": 1000000,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation"
+                }
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+
+        .then(function (browser) {
+
+            console.log("Created IGV browser")
+
+
+            const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
+            browser.createCircularView(circularViewContainer, true);
+            makeDraggable(circularViewContainer, browser.circularView.toolbar);
+            browser.circularView.setSize(640);
+
+
+            document.getElementById("sessionButton").addEventListener("click", () => {
+                try {
+                    const json = browser.toJSON()
+                    console.log(json)
+                    const jsonString = JSON.stringify(json, null, '\t')
+                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}))
+                    download("session.json", data)
+                } catch (e) {
+                    alert(e)
+                }
+            })
+
+            document.getElementById("bookmarkButton").addEventListener("click",
+                () => window.history.pushState({}, "IGV", browser.sessionURL()))
+
+            document.getElementById("svgButton").addEventListener("click", () => {
+                let svg = browser.toSVG()
+                const path = 'arcs.svg'
+                const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
+                download(path, data)
+            })
+        })
+
+    function download(filename, data) {
+
+        const element = document.createElement('a')
+        element.setAttribute('href', data)
+        element.setAttribute('download', filename)
+        element.style.display = 'none'
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
+    }
+
+
+</script>
+
+</body>
+
+</html>

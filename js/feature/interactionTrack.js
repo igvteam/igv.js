@@ -35,7 +35,6 @@ import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
 import {makeBedPEChords} from "../jbrowse/circularViewUtils.js"
 
-
 class InteractionTrack extends TrackBase {
 
     constructor(config, browser) {
@@ -57,7 +56,6 @@ class InteractionTrack extends TrackBase {
         this.color = config.color || "rgb(180,25,137)"
         this.alpha = config.alpha || 0.02  // was: 0.15
         this.painter = {flipAxis: !this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
-        this.arcCaches = new Map() // FIXME: to stop drawing 'visually identical' arcs; more efficient algo exists
 
         if (config.valueColumn) {
             this.valueColumn = config.valueColumn
@@ -393,6 +391,7 @@ class InteractionTrack extends TrackBase {
         const xScale = bpPerPixel
         const refStart = options.referenceFrame.start
         const refEnd = options.referenceFrame.end
+        const showOutbound = (this.arcType === "chiapetoutbound")
 
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
@@ -400,7 +399,8 @@ class InteractionTrack extends TrackBase {
 
         if (featureList && featureList.length > 0) {
 
-            this.arcCaches.clear()
+            const arcCaches = new Map() // FIXME: to stop drawing 'visually identical' arcs; more efficient algo exists
+
             // we use the min as a filter but not moving the axis
             const effectiveMin = 0
             const yScale = this.getScaleFactor(effectiveMin, this.dataRange.max, options.pixelHeight - 1, this.logScale)
@@ -430,7 +430,7 @@ class InteractionTrack extends TrackBase {
                     const within = (m1 >= refStart && m2 <= refEnd)
                     let outBound = false
                     let inBound = false
-                    if (!within && this.showOutbound) {
+                    if (!within && showOutbound) {
                         outBound = (refStart <= m1 && m1 <= refEnd)
                         if (!outBound) inBound = (refStart <= m2 && m2 <= refEnd)
                     }
@@ -442,14 +442,16 @@ class InteractionTrack extends TrackBase {
                     feature.drawState = {xc, yc: y, radiusX, radiusY}
 
                     const arcKey = ((pixelStart << 16) | pixelEnd)
-                    let arc = this.arcCaches.get(arcKey)
+                    let arc = arcCaches.get(arcKey)
                     if (arc !== undefined) {
-                        if (arc.has(radiusY)) continue
+                        if (arc.has(radiusY)) {
+                            continue
+                        }
                         arc.add(radiusY)
                     } else {
                         let arcHeights = new Set()
                         arcHeights.add(radiusY)
-                        this.arcCaches.set(arcKey, arcHeights)
+                        arcCaches.set(arcKey, arcHeights)
                     }
 
                     const counterClockwise = this.arcOrientation ? true : false
@@ -550,11 +552,12 @@ class InteractionTrack extends TrackBase {
         if (this.hasValue) {
             const lut =
                 {
-                    "nested": "Nested Arcs",
-                    "proportional": "Proportional Arcs",
-                    "chiapet": "ChIA-PET 2A",
-                    "chiapetoutbound": "ChIA-PET ≥1A"
+                    "nested": "Nested",
+                    "proportional": "Proportional - All",
+                    "chiapet": "Proportional - Both Ends in View",
+                    "chiapetoutbound": "Proportional - One End in View"
                 }
+            items.push("<b>Arc Type</b>")
             for (let arcType of ["nested", "proportional", "chiapet", "chiapetoutbound"]) {
                 items.push(
                     {
@@ -567,14 +570,8 @@ class InteractionTrack extends TrackBase {
                     })
             }
         }
+        items.push("<hr/>")
 
-        items.push({
-            object: $(createCheckbox("Show Blocks", this.showBlocks)),
-            click: () => {
-                this.showBlocks = !this.showBlocks
-                this.trackView.repaintViews()
-            }
-        })
         items.push({
             name: "Toggle arc direction",
             click: () => {
@@ -582,9 +579,16 @@ class InteractionTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
         })
+        items.push({
+            name: this.showBlocks ? "Hide Blocks" : "Show Blocks",
+            click: () => {
+                this.showBlocks = !this.showBlocks
+                this.trackView.repaintViews()
+            }
+        })
+
 
         if (this.arcType === "proportional" || this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
-            items.push("<HR>")
             // MenuUtils.numericDataMenuItems(this.trackView).forEach(item => items.push(item))
             items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
         }
@@ -831,24 +835,41 @@ function getAlphaColor(color, alpha) {
 
 
 /**
- * Called in the context of FeatureSource
+ * Called in the context of FeatureSource  (i.e. this == the feature source (a TextFeatureSource) for the track
+ *
  * @param allFeatures
  * @returns {[]}
  */
 function getWGFeatures(allFeatures) {
 
+    const makeWGFeature = (f) => {
+        const wg = Object.assign({}, f)
+        wg.chr = "all"
+        wg.start = genome.getGenomeCoordinate(f.chr1, f.start1)
+        wg.end = genome.getGenomeCoordinate(f.chr2, f.end2)
+        return wg
+    }
+
     const genome = this.genome
     const wgFeatures = []
+    let count = 0
+    const max = this.maxWGCount;
     for (let c of genome.wgChromosomeNames) {
-        const chrFeatures = allFeatures[c]
+        let chrFeatures = allFeatures[c]
         if (chrFeatures) {
             for (let f of chrFeatures) {
                 if (!f.dup) {
-                    const wg = Object.assign({}, f)
-                    wg.chr = "all"
-                    wg.start = genome.getGenomeCoordinate(f.chr1, f.start1)
-                    wg.end = genome.getGenomeCoordinate(f.chr2, f.end2)
-                    wgFeatures.push(wg)
+                    if (wgFeatures.length < max) {
+                        wgFeatures.push(makeWGFeature(f))
+                    } else {
+                        //Reservoir sampling
+                        const samplingProb = max / (count + 1)
+                        if (Math.random() < samplingProb) {
+                            const idx = Math.floor(Math.random() * (max - 1))
+                            wgFeatures[idx] = makeWGFeature(f)
+                        }
+                    }
+                    count++
                 }
             }
         }

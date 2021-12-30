@@ -22,7 +22,11 @@
 
             {
                 "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
-                "name": "Encode bigwig"
+                "name": "Encode bigwig",
+                "metadata" : {
+                    "Foo": "bar",
+                    "Bar": 999.999
+                }
             },
             {
                 "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
@@ -40,6 +44,7 @@
 
     igv.createBrowser(div, options)
         .then(function (browser) {
+            console.log(JSON.stringify(browser.toJSON()))
         });
 
 
