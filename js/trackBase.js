@@ -432,14 +432,21 @@ class TrackBase {
             str = this.name
         }
         if (this.config) {
-            // Add any config properties that are capitalized
-            for (let key of Object.keys(this.config)) {
-                if (key.startsWith("_")) continue   // transient property
-                let first = key.substr(0, 1)
-                if (first !== first.toLowerCase()) {
-                    const value = this.config[key]
-                    if (value && isSimpleType(value)) {
-                        str += wrapKeyValue(key, value)
+            if (this.config.metadata) {
+                for (let key of Object.keys(this.config.metadata)) {
+                    const value = this.config.metadata[key]
+                    str += wrapKeyValue(key, value)
+                }
+            } else {
+                // No explicit metadata -- add any config properties that are capitalized
+                for (let key of Object.keys(this.config)) {
+                    if (key.startsWith("_")) continue   // transient property
+                    let first = key.substr(0, 1)
+                    if (first !== first.toLowerCase()) {
+                        const value = this.config[key]
+                        if (value && isSimpleType(value)) {
+                            str += wrapKeyValue(key, value)
+                        }
                     }
                 }
             }
