@@ -144,7 +144,7 @@ class TrackBase {
         for (let key of Object.keys(state)) {
             if (key.startsWith("_")) continue   // transient property
             const value = this[key]
-            if (value && (isSimpleType(value) || typeof value === "boolean")) {
+            if (value && (isSimpleType(value) || typeof value === "boolean" || key === "metadata")) {
                 state[key] = value
             }
         }
@@ -157,6 +157,7 @@ class TrackBase {
             state.min = this.dataRange.min
             state.max = this.dataRange.max
         }
+
 
         // Check for non-json-if-yable properties.  Perhaps we should test what can be saved.
         for (let key of Object.keys(state)) {
