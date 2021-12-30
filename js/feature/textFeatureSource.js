@@ -36,6 +36,7 @@ import GenomicInterval from "../genome/genomicInterval.js"
 import pack from "../feature/featurePacker.js"
 import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 
+const DEFAULT_MAX_WG_COUNT = 1000
 
 /**
  * feature source for "bed like" files (tab or whitespace delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -50,6 +51,7 @@ class TextFeatureSource {
         this.config = config || {}
         this.genome = genome
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType)
+        this.maxWGCount = config.maxWGCount || DEFAULT_MAX_WG_COUNT
 
         const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "tdf"])
 
@@ -269,10 +271,20 @@ class TextFeatureSource {
     // TODO -- filter by pixel size
     getWGFeatures(allFeatures) {
 
+        const makeWGFeature = (f) => {
+            const wg = Object.assign({}, f)
+            wg.chr = "all"
+            wg.start = genome.getGenomeCoordinate(f.chr, f.start)
+            wg.end = genome.getGenomeCoordinate(f.chr, f.end)
+            wg._f = f
+            // Don't draw exons in whole genome view
+            if (wg["exons"]) delete wg["exons"]
+            return wg
+        }
+
         const genome = this.genome
         const wgChromosomeNames = new Set(genome.wgChromosomeNames)
         const wgFeatures = []
-
         for (let c of genome.wgChromosomeNames) {
 
             const features = allFeatures[c]
@@ -281,18 +293,17 @@ class TextFeatureSource {
                 for (let f of features) {
                     let queryChr = genome.getChromosomeName(f.chr)
                     if (wgChromosomeNames.has(queryChr)) {
+                        if (wgFeatures.length < max) {
+                            wgFeatures.push(makeWGFeature(f))
+                        } else {
+                            //Reservoir sampling
+                            const samplingProb = max / (count + 1)
+                            if (Math.random() < samplingProb) {
+                                const idx = Math.floor(Math.random() * (max - 1))
+                                wgFeatures[idx] = makeWGFeature(f)
+                            }
+                        }
 
-                        const wg = Object.assign({}, f)
-
-                        wg.chr = "all"
-                        wg.start = genome.getGenomeCoordinate(f.chr, f.start)
-                        wg.end = genome.getGenomeCoordinate(f.chr, f.end)
-                        wg._f = f
-
-                        // Don't draw exons in whole genome view
-                        if (wg["exons"]) delete wg["exons"]
-
-                        wgFeatures.push(wg)
                     }
                 }
             }
