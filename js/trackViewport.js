@@ -8,7 +8,6 @@ import Viewport from "./viewport.js"
 import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genome.js"
-import {isSimpleType} from "./util/igvUtils.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
