@@ -41,7 +41,7 @@ suite("testSeg", function () {
 
         const genome = await GenomeUtils.loadGenome(reference)
         const url = dataURL + "seg/segmented_data_080520.seg.gz";
-        const featureSource = FeatureSource({format: 'seg', url: url, indexed: false}, genome);
+        const featureSource = FeatureSource({format: 'seg', url: url, indexed: false, maxWGCount: Number.MAX_SAFE_INTEGER}, genome);
         const chr = "all";
         const features = await featureSource.getFeatures({chr})
 
