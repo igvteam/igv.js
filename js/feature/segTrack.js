@@ -97,7 +97,11 @@ class SegTrack extends TrackBase {
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
-        this.featureSource = FeatureSource(this.config, this.browser.genome)
+
+        // Disable whole genome downsampling unless explicitly.
+        const configCopy = Object.assign({}, this.config);
+        configCopy.maxWGCount = configCopy.maxWGCount || Number.MAX_SAFE_INTEGER;
+        this.featureSource = FeatureSource(configCopy, this.browser.genome)
 
         this.initialSort = config.sort
     }
