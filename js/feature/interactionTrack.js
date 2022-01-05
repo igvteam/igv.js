@@ -914,7 +914,7 @@ function getWGFeatures(allFeatures) {
 
     for (let i = 0; i < nBins; i++) {
         let count = 0
-        binnedFeatures[i] = [];
+        binnedFeatures[i] = []
         for (let c of genome.wgChromosomeNames) {
             let chrFeatures = allFeatures[c]
             if (chrFeatures) {
@@ -938,15 +938,14 @@ function getWGFeatures(allFeatures) {
         minScore -= step
     }
 
-    for(let bf of binnedFeatures) {
-        for(let f of bf) wgFeatures.push(f)
+    for (let bf of binnedFeatures) {
+        for (let f of bf) wgFeatures.push(f)
     }
 
 
     // Keep the feature with max score
-    if (wgFeatures.length === maxCount && maxScoreFeature) {
-        wgFeatures[0] = makeWGFeature(maxScoreFeature)
-    }
+    wgFeatures[0] = makeWGFeature(maxScoreFeature)
+
 
     console.log(wgFeatures.length)
 
