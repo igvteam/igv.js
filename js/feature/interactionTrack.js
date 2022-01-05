@@ -34,6 +34,7 @@ import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
 import {makeBedPEChords} from "../jbrowse/circularViewUtils.js"
+import {getChrColor} from "../bam/bamTrack.js"
 
 class InteractionTrack extends TrackBase {
 
@@ -500,6 +501,8 @@ class InteractionTrack extends TrackBase {
                     const otherChr = feature.chr === feature.chr1 ? feature.chr2 : feature.chr1
                     ctx.font = "8px sans-serif"
                     ctx.textAlign = "center"
+                    // get a sense of trans "spread"
+                    ctx.fillStyle = getAlphaColor(getChrColor(otherChr), 0.5)
                     if (this.arcOrientation) {
                         // UP
                         const y = this.height - h
@@ -626,13 +629,50 @@ class InteractionTrack extends TrackBase {
                 label: 'Add interactions to circular view',
                 click: () => {
                     const refFrame = viewport.referenceFrame
-                    const inView = "all" === refFrame.chr ?
+                    // first pass: to get all the relevant features
+                    const inViewFirstPass = "all" === refFrame.chr ?
                         this.featureSource.getAllFeatures() :
                         this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
+                    // second pass: observe data range to pass its effect to circular view
+                    let inView = []
+                    if (this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
+                        inView = inViewFirstPass.filter(feature => {
+                            if (this.dataRange.min <= feature.score && feature.score <= this.dataRange.max) {
+                                if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
+                                    const {m1,m2} = getMidpoints(feature, this.browser.genome);
+                                    const within = m1 >= refFrame.start && m2 <= refFrame.end;
+                                    let outBound = false;
+                                    let inBound = false;
+            
+                                    if (!within && this.showOutbound) {
+                                        outBound = refFrame.start <= m1 && m1 <= refFrame.end;
+                                        if (!outBound) {
+                                            inBound = refFrame.start <= m2 && m2 <= refFrame.end;
+                                        }
+                                    }
+                
+                                    if (!(within || outBound || inBound)) {
+                                        return false;
+                                    }
+                                    return true;
+                                } else {
+                                    return true;
+                                }
+                              }
+                              return false
+                            }
+                        )
+                    } else {
+                        inView = inViewFirstPass.filter(feature => this.dataRange.min <= feature.score && feature.score <= this.dataRange.max)
+                    }
                     this.browser.circularViewVisible = true
                     const chords = makeBedPEChords(inView)
-                    const color = IGVColor.addAlpha(this.color, 0.5)
-                    this.browser.circularView.addChords(chords, {track: this.name, color: color})
+                    // for filtered set, distinguishing the chromosomes is more critical than tracks
+                    // FIXME: but this become mutual exclusion, i.e. impossible for comparative loci across different tracks
+                    const color = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.5)
+                    // name the track to include filtering information
+                    const inViewName = "all" === refFrame.chr ? this.name : `${this.name} (${refFrame.chr}:${refFrame.start}-${refFrame.end} ; range:${this.dataRange.min}-${this.dataRange.max})`
+                    this.browser.circularView.addChords(chords, {track: inViewName, color: color})
                 }
             })
 
