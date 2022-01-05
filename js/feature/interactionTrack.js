@@ -906,10 +906,10 @@ function getWGFeatures(allFeatures) {
         }
     }
 
-    const nBins = 5   // TODO make a function of total # of features & maxCount
+    const nBins = maxScoreFeature ? 5 : 1   // TODO make a function of total # of features & maxCount
     const featuresPerBin = Math.floor(maxCount / nBins)
-    const step = Math.log(maxScoreFeature.score) / nBins
-    let minScore = Math.log(maxScoreFeature.score) - step
+    const step = maxScoreFeature ? Math.log(maxScoreFeature.score) / nBins : 0
+    let minScore = maxScoreFeature ? Math.log(maxScoreFeature.score) - step : 0
     let binnedFeatures = []
 
     for (let i = 0; i < nBins; i++) {
@@ -919,7 +919,7 @@ function getWGFeatures(allFeatures) {
             let chrFeatures = allFeatures[c]
             if (chrFeatures) {
                 for (let f of chrFeatures) {
-                    if (!f.dup && Math.log(f.score) > minScore && Math.log(f.score) <= minScore + step) {
+                    if (!f.dup && (f.score === undefined || Math.log(f.score) > minScore && Math.log(f.score) <= minScore + step)) {
                         if (binnedFeatures[i].length < featuresPerBin) {
                             binnedFeatures[i].push(makeWGFeature(f))
                         } else {
@@ -944,7 +944,9 @@ function getWGFeatures(allFeatures) {
 
 
     // Keep the feature with max score
-    wgFeatures[0] = makeWGFeature(maxScoreFeature)
+    if(maxScoreFeature) {
+        wgFeatures[0] = makeWGFeature(maxScoreFeature)
+    }
 
 
     console.log(wgFeatures.length)
