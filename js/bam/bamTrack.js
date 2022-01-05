@@ -1500,7 +1500,7 @@ export function getChrColor(chr) {
         chrColorMap[chr] = color
         return color
     } else {
-        const color = IGVColor.randomRGB()
+        const color = IGVColor.randomRGB(0,255)
         chrColorMap[chr] = color
         return color
     }
@@ -1508,7 +1508,7 @@ export function getChrColor(chr) {
 
 const chrColorMap = {
     "chrX": "rgb(204, 153, 0)",
-    "chrY": "rgb(153, 204, 0",
+    "chrY": "rgb(153, 204, 0)",
     "chrUn": "rgb(50, 50, 50)",
     "chr1": "rgb(80, 80, 255)",
     "chrI": "rgb(139, 155, 187)",
