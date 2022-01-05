@@ -888,16 +888,16 @@ function getWGFeatures(allFeatures) {
     }
 
     const genome = this.genome
-    const wgFeatures = []
-    const maxCount = this.maxWGCount
 
     // First pass -- find the max score feature
     let maxScoreFeature
+    let totalFeatureCount = 0
     for (let c of genome.wgChromosomeNames) {
         let chrFeatures = allFeatures[c]
         if (chrFeatures) {
             for (let f of chrFeatures) {
                 if (!f.dup) {
+                    totalFeatureCount++
                     if (f.score && (!maxScoreFeature || f.score > maxScoreFeature.score)) {
                         maxScoreFeature = f
                     }
@@ -906,54 +906,59 @@ function getWGFeatures(allFeatures) {
         }
     }
 
-    const nBins = maxScoreFeature ? 5 : 1   // TODO make a function of total # of features & maxCount
+    const maxCount = this.maxWGCount
+    const nBins = maxScoreFeature && totalFeatureCount > maxCount ? 5 : 1   // TODO make a function of total # of features & maxCount?
     const featuresPerBin = Math.floor(maxCount / nBins)
-    const step = maxScoreFeature ? Math.log(maxScoreFeature.score) / nBins : 0
-    let minScore = maxScoreFeature ? Math.log(maxScoreFeature.score) - step : 0
-    let binnedFeatures = []
+    const binSize = maxScoreFeature ? Math.log(maxScoreFeature.score) / nBins : Number.MAX_SAFE_INTEGER
 
+    let binnedFeatures = []
+    let counts = []
     for (let i = 0; i < nBins; i++) {
-        let count = 0
-        binnedFeatures[i] = []
-        for (let c of genome.wgChromosomeNames) {
-            let chrFeatures = allFeatures[c]
-            if (chrFeatures) {
-                for (let f of chrFeatures) {
-                    if (!f.dup && (f.score === undefined || Math.log(f.score) > minScore && Math.log(f.score) <= minScore + step)) {
-                        if (binnedFeatures[i].length < featuresPerBin) {
-                            binnedFeatures[i].push(makeWGFeature(f))
-                        } else {
-                            //Reservoir sampling
-                            const samplingProb = featuresPerBin / (count + 1)
-                            if (Math.random() < samplingProb) {
-                                const idx = Math.floor(Math.random() * (featuresPerBin - 1))
-                                binnedFeatures[i][idx] = makeWGFeature(f)
-                            }
+        counts.push([0])
+        binnedFeatures.push([])
+    }
+
+    for (let c of genome.wgChromosomeNames) {
+        let chrFeatures = allFeatures[c]
+        if (chrFeatures) {
+            for (let f of chrFeatures) {
+                if (!f.dup) {
+                    const bin = f.score ? Math.min(nBins - 1, Math.floor(Math.log(f.score) / binSize)) : 0
+                    if (binnedFeatures[bin].length < featuresPerBin) {
+                        binnedFeatures[bin].push(makeWGFeature(f))
+                    } else {
+                        //Reservoir sampling
+                        const samplingProb = featuresPerBin / (counts[bin] + 1)
+                        if (Math.random() < samplingProb) {
+                            const idx = Math.floor(Math.random() * (featuresPerBin - 1))
+                            binnedFeatures[bin][idx] = makeWGFeature(f)
                         }
-                        count++
                     }
+                    counts[bin]++
                 }
             }
         }
-        minScore -= step
     }
 
-    for (let bf of binnedFeatures) {
-        for (let f of bf) wgFeatures.push(f)
+    let wgFeatures
+    if (nBins === 1) {
+        wgFeatures = binnedFeatures[0]
+    } else {
+        wgFeatures = []
+        for (let bf of binnedFeatures) {
+            for (let f of bf) wgFeatures.push(f)
+        }
+        // Keep the feature with max score
+        if (maxScoreFeature) {
+            wgFeatures.push(makeWGFeature(maxScoreFeature))
+        }
+        wgFeatures.sort(function (a, b) {
+            return a.start - b.start
+        })
+        console.log(wgFeatures.length)
     }
 
 
-    // Keep the feature with max score
-    if(maxScoreFeature) {
-        wgFeatures[0] = makeWGFeature(maxScoreFeature)
-    }
-
-
-    console.log(wgFeatures.length)
-
-    wgFeatures.sort(function (a, b) {
-        return a.start - b.start
-    })
     return wgFeatures
 }
 
