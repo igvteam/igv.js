@@ -57,35 +57,40 @@ class CursorGuide {
             const target = document.elementFromPoint(event.clientX, event.clientY)
 
             let viewport = undefined
-            if (target.parentElement.classList.contains('igv-viewport-content')) {
-                viewport = target.parentElement.parentElement
-            } else if (target.parentElement.classList.contains('igv-viewport') && target.classList.contains('igv-viewport-content')) {
-                viewport = target.parentElement
-            }
 
-            if (viewport && browser.getRulerTrackView()) {
+            if (target.parentElement) {
 
-                this.verticalGuide.style.left = `${x}px`
-
-                const columns = browser.root.querySelectorAll('.igv-column')
-                let index = undefined
-                const viewportParent = viewport.parentElement
-                for (let i = 0; i < columns.length; i++) {
-                    if (undefined === index && viewportParent === columns[i]) {
-                        index = i
-                    }
+                if (target.parentElement.classList.contains('igv-viewport-content')) {
+                    viewport = target.parentElement.parentElement
+                } else if (target.parentElement.classList.contains('igv-viewport') && target.classList.contains('igv-viewport-content')) {
+                    viewport = target.parentElement
                 }
 
-                const rulerViewport = browser.getRulerTrackView().viewports[index]
-                const result = rulerViewport.mouseMove(event)
+                if (viewport && browser.getRulerTrackView()) {
 
-                if (result) {
+                    this.verticalGuide.style.left = `${x}px`
 
-                    const {start, bp, end} = result
-                    const interpolant = (bp - start) / (end - start)
+                    const columns = browser.root.querySelectorAll('.igv-column')
+                    let index = undefined
+                    const viewportParent = viewport.parentElement
+                    for (let i = 0; i < columns.length; i++) {
+                        if (undefined === index && viewportParent === columns[i]) {
+                            index = i
+                        }
+                    }
 
-                    if (this.customMouseHandler) {
-                        this.customMouseHandler({start, bp, end, interpolant})
+                    const rulerViewport = browser.getRulerTrackView().viewports[index]
+                    const result = rulerViewport.mouseMove(event)
+
+                    if (result) {
+
+                        const {start, bp, end} = result
+                        const interpolant = (bp - start) / (end - start)
+
+                        if (this.customMouseHandler) {
+                            this.customMouseHandler({start, bp, end, interpolant})
+                        }
+
                     }
 
                 }
