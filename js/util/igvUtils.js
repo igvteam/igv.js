@@ -24,9 +24,6 @@
  */
 
 import {DOMUtils, FileUtils, GoogleAuth, GoogleDrive, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import RulerViewport from "../rulerViewport.js"
-import IdeogramViewport from "../ideogramViewport.js"
-import TrackViewport from "../trackViewport.js"
 
 const extend = function (parent, child) {
 
@@ -216,17 +213,6 @@ function insertElementAfter(element, referenceNode) {
     referenceNode.parentNode.insertBefore(element, referenceNode.nextSibling)
 }
 
-function createViewport(trackView, column, referenceFrame, width) {
-
-    if ('ruler' === trackView.track.type) {
-        return new RulerViewport(trackView, column, referenceFrame, width)
-    } else if ('ideogram' === trackView.track.type) {
-        return new IdeogramViewport(trackView, column, referenceFrame, width)
-    } else {
-        return new TrackViewport(trackView, column, referenceFrame, width)
-    }
-}
-
 /**
  * Test to see if page is loaded in a secure context, that is by https or is localhost.
  */
@@ -235,6 +221,6 @@ function isSecureContext() {
 }
 
 export {
-    createViewport, createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber,
+    createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber,
     getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext
 }
