@@ -907,9 +907,9 @@ function getWGFeatures(allFeatures) {
     }
 
     const maxCount = this.maxWGCount
-    const nBins = maxScoreFeature && totalFeatureCount > maxCount ? 5 : 1   // TODO make a function of total # of features & maxCount?
+    const nBins = maxScoreFeature && maxScoreFeature.score > 0 && totalFeatureCount > maxCount ? 5 : 1   // TODO make a function of total # of features & maxCount?
     const featuresPerBin = Math.floor(maxCount / nBins)
-    const binSize = maxScoreFeature ? Math.log(maxScoreFeature.score) / nBins : Number.MAX_SAFE_INTEGER
+    const binSize = maxScoreFeature && maxScoreFeature.score > 0 ? Math.log(maxScoreFeature.score) / nBins : Number.MAX_SAFE_INTEGER
 
     let binnedFeatures = []
     let counts = []
