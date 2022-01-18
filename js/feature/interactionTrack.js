@@ -637,29 +637,29 @@ class InteractionTrack extends TrackBase {
                     let inView = []
                     if (this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
                         inView = inViewFirstPass.filter(feature => {
-                            if (this.dataRange.min <= feature.score && feature.score <= this.dataRange.max) {
-                                if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
-                                    const {m1,m2} = getMidpoints(feature, this.browser.genome);
-                                    const within = m1 >= refFrame.start && m2 <= refFrame.end;
-                                    let outBound = false;
-                                    let inBound = false;
-            
-                                    if (!within && this.showOutbound) {
-                                        outBound = refFrame.start <= m1 && m1 <= refFrame.end;
-                                        if (!outBound) {
-                                            inBound = refFrame.start <= m2 && m2 <= refFrame.end;
+                                if (this.dataRange.min <= feature.score && feature.score <= this.dataRange.max) {
+                                    if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
+                                        const {m1, m2} = getMidpoints(feature, this.browser.genome)
+                                        const within = m1 >= refFrame.start && m2 <= refFrame.end
+                                        let outBound = false
+                                        let inBound = false
+
+                                        if (!within && this.showOutbound) {
+                                            outBound = refFrame.start <= m1 && m1 <= refFrame.end
+                                            if (!outBound) {
+                                                inBound = refFrame.start <= m2 && m2 <= refFrame.end
+                                            }
                                         }
+
+                                        if (!(within || outBound || inBound)) {
+                                            return false
+                                        }
+                                        return true
+                                    } else {
+                                        return true
                                     }
-                
-                                    if (!(within || outBound || inBound)) {
-                                        return false;
-                                    }
-                                    return true;
-                                } else {
-                                    return true;
                                 }
-                              }
-                              return false
+                                return false
                             }
                         )
                     } else {
@@ -888,29 +888,76 @@ function getWGFeatures(allFeatures) {
     }
 
     const genome = this.genome
-    const wgFeatures = []
-    let count = 0
-    const max = this.maxWGCount;
+
+    // First pass -- find the max score feature
+    let maxScoreFeature
+    let totalFeatureCount = 0
     for (let c of genome.wgChromosomeNames) {
         let chrFeatures = allFeatures[c]
         if (chrFeatures) {
             for (let f of chrFeatures) {
                 if (!f.dup) {
-                    if (wgFeatures.length < max) {
-                        wgFeatures.push(makeWGFeature(f))
-                    } else {
-                        //Reservoir sampling
-                        const samplingProb = max / (count + 1)
-                        if (Math.random() < samplingProb) {
-                            const idx = Math.floor(Math.random() * (max - 1))
-                            wgFeatures[idx] = makeWGFeature(f)
-                        }
+                    totalFeatureCount++
+                    if (f.score && (!maxScoreFeature || f.score > maxScoreFeature.score)) {
+                        maxScoreFeature = f
                     }
-                    count++
                 }
             }
         }
     }
+
+    const maxCount = this.maxWGCount
+    const nBins = maxScoreFeature && maxScoreFeature.score > 0 && totalFeatureCount > maxCount ? 5 : 1   // TODO make a function of total # of features & maxCount?
+    const featuresPerBin = Math.floor(maxCount / nBins)
+    const binSize = maxScoreFeature && maxScoreFeature.score > 0 ? Math.log(maxScoreFeature.score) / nBins : Number.MAX_SAFE_INTEGER
+
+    let binnedFeatures = []
+    let counts = []
+    for (let i = 0; i < nBins; i++) {
+        counts.push([0])
+        binnedFeatures.push([])
+    }
+
+    for (let c of genome.wgChromosomeNames) {
+        let chrFeatures = allFeatures[c]
+        if (chrFeatures) {
+            for (let f of chrFeatures) {
+                if (!f.dup) {
+                    const bin = f.score ? Math.min(nBins - 1, Math.floor(Math.log(f.score) / binSize)) : 0
+                    if (binnedFeatures[bin].length < featuresPerBin) {
+                        binnedFeatures[bin].push(makeWGFeature(f))
+                    } else {
+                        //Reservoir sampling
+                        const samplingProb = featuresPerBin / (counts[bin] + 1)
+                        if (Math.random() < samplingProb) {
+                            const idx = Math.floor(Math.random() * (featuresPerBin - 1))
+                            binnedFeatures[bin][idx] = makeWGFeature(f)
+                        }
+                    }
+                    counts[bin]++
+                }
+            }
+        }
+    }
+
+    let wgFeatures
+    if (nBins === 1) {
+        wgFeatures = binnedFeatures[0]
+    } else {
+        wgFeatures = []
+        for (let bf of binnedFeatures) {
+            for (let f of bf) wgFeatures.push(f)
+        }
+        // Keep the feature with max score
+        if (maxScoreFeature) {
+            wgFeatures.push(makeWGFeature(maxScoreFeature))
+        }
+        wgFeatures.sort(function (a, b) {
+            return a.start - b.start
+        })
+        console.log(wgFeatures.length)
+    }
+
 
     return wgFeatures
 }
