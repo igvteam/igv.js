@@ -147,6 +147,7 @@ class VcfParser {
                 if (tokens.length === nExpectedColumns) {
                     const variant = createVCFVariant(tokens)
                     variant.header = this.header       // Keep a pointer to the header to interpret fields for popup text
+                    //variant.line = line              // Uncomment for debugging
                     allFeatures.push(variant)
 
                     if (tokens.length > 9) {
