@@ -1178,59 +1178,61 @@ class AlignmentTrack {
         list.push('<hr/>')
 
         const clickedObject = this.getClickedObject(clickState)
+
         if (clickedObject) {
 
             const showSoftClips = this.parent.showSoftClips
             const clickedAlignment = (typeof clickedObject.alignmentContaining === 'function') ?
                 clickedObject.alignmentContaining(clickState.genomicLocation, showSoftClips) :
                 clickedObject
-
-            if (clickedAlignment.isPaired() && clickedAlignment.isMateMapped()) {
-                list.push({
-                    label: 'View mate in split screen',
-                    click: () => {
-                        if (clickedAlignment.mate) {
-                            const referenceFrame = clickState.viewport.referenceFrame
-                            if (this.browser.genome.getChromosome(clickedAlignment.mate.chr)) {
-                                this.highlightedAlignmentReadNamed = clickedAlignment.readName
-                                this.browser.presentMultiLocusPanel(clickedAlignment, referenceFrame)
-                            } else {
-                                Alert.presentAlert(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`)
+            if (clickedAlignment) {
+                if (clickedAlignment.isPaired() && clickedAlignment.isMateMapped()) {
+                    list.push({
+                        label: 'View mate in split screen',
+                        click: () => {
+                            if (clickedAlignment.mate) {
+                                const referenceFrame = clickState.viewport.referenceFrame
+                                if (this.browser.genome.getChromosome(clickedAlignment.mate.chr)) {
+                                    this.highlightedAlignmentReadNamed = clickedAlignment.readName
+                                    this.browser.presentMultiLocusPanel(clickedAlignment, referenceFrame)
+                                } else {
+                                    Alert.presentAlert(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`)
+                                }
                             }
-                        }
-                    },
-                    init: undefined
-                })
-            }
-
-            list.push({
-                label: 'View read sequence',
-                click: () => {
-                    const alignment = clickedAlignment
-                    if (!alignment) return
-
-                    const seqstring = alignment.seq //.map(b => String.fromCharCode(b)).join("");
-                    if (!seqstring || "*" === seqstring) {
-                        Alert.presentAlert("Read sequence: *")
-                    } else {
-                        Alert.presentAlert(seqstring)
-                    }
+                        },
+                        init: undefined
+                    })
                 }
-            })
 
-            if (isSecureContext()) {
                 list.push({
-                    label: 'Copy read sequence',
+                    label: 'View read sequence',
                     click: () => {
                         const alignment = clickedAlignment
                         if (!alignment) return
+
                         const seqstring = alignment.seq //.map(b => String.fromCharCode(b)).join("");
-                        navigator.clipboard.writeText(seqstring)
+                        if (!seqstring || "*" === seqstring) {
+                            Alert.presentAlert("Read sequence: *")
+                        } else {
+                            Alert.presentAlert(seqstring)
+                        }
                     }
                 })
-            }
 
-            list.push('<hr/>')
+                if (isSecureContext()) {
+                    list.push({
+                        label: 'Copy read sequence',
+                        click: () => {
+                            const alignment = clickedAlignment
+                            if (!alignment) return
+                            const seqstring = alignment.seq //.map(b => String.fromCharCode(b)).join("");
+                            navigator.clipboard.writeText(seqstring)
+                        }
+                    })
+                }
+
+                list.push('<hr/>')
+            }
         }
 
         // Experimental JBrowse feature
@@ -1500,7 +1502,7 @@ export function getChrColor(chr) {
         chrColorMap[chr] = color
         return color
     } else {
-        const color = IGVColor.randomRGB(0,255)
+        const color = IGVColor.randomRGB(0, 255)
         chrColorMap[chr] = color
         return color
     }
