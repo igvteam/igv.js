@@ -218,18 +218,6 @@ class VCFVariant extends Variant {
         this.info = getInfoObject(tokens[7])
         this.init()
     }
-
-    init() {
-        return super().init()
-    }
-
-    popupData(genomicLocation, genomeId) {
-        return super().popupData(genomicLocation, genomeId)
-    }
-
-    isRefBlock() {
-        return super().isRefBlock()
-    }
 }
 
 function getInfoObject(infoStr) {
