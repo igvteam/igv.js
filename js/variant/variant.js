@@ -30,22 +30,21 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 const knownAltBases = new Set(["A", "C", "T", "G"].map(c => c.charCodeAt(0)))
 
 function createVCFVariant(tokens) {
-    return new Variant(tokens)
+    return new VCFVariant(tokens)
 }
 
 
 class Variant {
 
-    constructor(tokens) {
-        this.chr = tokens[0] // TODO -- use genome aliases
-        this.pos = parseInt(tokens[1])
-        this.names = tokens[2]    // id in VCF
-        this.referenceBases = tokens[3]
-        this.alternateBases = tokens[4]
-        this.quality = tokens[5]
-        this.filter = tokens[6]
-        this.info = getInfoObject(tokens[7])
-        this.init()
+    constructor() {
+        this.chr = null
+        this.pos = null
+        this.names = null
+        this.referenceBases = null
+        this.alternateBases = null
+        this.quality = null
+        this.filter = null
+        this.info = {}
     }
 
     init() {
@@ -204,6 +203,33 @@ class Variant {
         return "NONVARIANT" === this.type
     }
 
+}
+
+class VCFVariant extends Variant {
+    constructor(tokens) {
+        super()
+        this.chr = tokens[0] // TODO -- use genome aliases
+        this.pos = parseInt(tokens[1])
+        this.names = tokens[2]    // id in VCF
+        this.referenceBases = tokens[3]
+        this.alternateBases = tokens[4]
+        this.quality = tokens[5]
+        this.filter = tokens[6]
+        this.info = getInfoObject(tokens[7])
+        this.init()
+    }
+
+    init() {
+        return super().init()
+    }
+
+    popupData(genomicLocation, genomeId) {
+        return super().popupData(genomicLocation, genomeId)
+    }
+
+    isRefBlock() {
+        return super().isRefBlock()
+    }
 }
 
 function getInfoObject(infoStr) {
