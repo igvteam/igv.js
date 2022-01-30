@@ -65,7 +65,9 @@ class TrackViewport extends Viewport {
     }
 
     stopSpinner() {
-        this.$spinner.hide()
+        if (this.$spinner) {
+            this.$spinner.hide()
+        }
     }
 
     checkZoomIn() {
