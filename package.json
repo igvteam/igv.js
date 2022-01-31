@@ -10,6 +10,7 @@
   ],
   "scripts": {
     "prepack": "npm run build",
+    "prepare": "npm run build",
     "build": "node scripts/updateVersion.js && node scripts/generateEmbedCss.js && npx rollup --config",
     "test": "mocha -u tdd -r esm"
   },
