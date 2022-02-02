@@ -116,6 +116,9 @@ class TrackView {
             axis.appendChild(this.axisCanvas)
         }
 
+        const trackSelectionContainer = DOMUtils.div()
+        axis.appendChild(trackSelectionContainer)
+
         return axis
 
     }
@@ -394,7 +397,7 @@ class TrackView {
         for (let viewport of reloadableViewports) {
             await viewport.loadFeatures()
         }
-        
+
         if (this.disposed) return   // Track was removed during load
 
         // Very special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)

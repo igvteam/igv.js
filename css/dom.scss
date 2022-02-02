@@ -117,8 +117,21 @@ $igv-zoom-in-notice-height: 16px;
   width: $igv-axis-column-width;
 
   >div {
+    position: relative;
+
     margin-top: $igv-column-item-margin-top;
     width: 100%;
+
+    >div {
+      z-index: 512;
+      position: absolute;
+      top:0;
+      left: 0;
+      width: 16px;
+      height: 16px;
+      background-color: #ff2987;
+    }
+
   }
 }
 
