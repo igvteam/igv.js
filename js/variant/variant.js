@@ -26,27 +26,95 @@
 import TrackBase from "../trackBase.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
-
-const knownAltBases = new Set(["A", "C", "T", "G"].map(c => c.charCodeAt(0)))
-
+/**
+ * Create a variant from an array of tokens representing a line in a "VCF" file
+ * @param tokens
+ */
 function createVCFVariant(tokens) {
-    return new Variant(tokens)
+    const variant = new Variant(tokens)
+    variant.chr = tokens[0] // TODO -- use genome aliases
+    variant.pos = parseInt(tokens[1])
+    variant.names = tokens[2]    // id in VCF
+    variant.referenceBases = tokens[3]
+    variant.alternateBases = tokens[4]
+    variant.quality = tokens[5]
+    variant.filter = tokens[6]
+    variant.info = {}
+    const infoStr = tokens[7]
+    if (infoStr) {
+        for (let elem of infoStr.split(';')) {
+            var element = elem.split('=')
+            variant.info[element[0]] = element[1]
+        }
+    }
+    variant.init()
+    return variant;
+}
+
+
+/**
+ * @deprecated - the GA4GH API has been deprecated.  This code no longer maintained.
+ * @param json
+ * @returns {Variant}
+ */
+function createGAVariant(json) {
+
+    var variant = new Variant()
+
+    variant.chr = json.referenceName
+    variant.start = parseInt(json.start)  // Might get overriden below
+    variant.end = parseInt(json.end)      // Might get overriden below
+    variant.pos = variant.start + 1       // GA4GH is 0 based.
+    variant.names = arrayToString(json.names, "; ")
+    variant.referenceBases = json.referenceBases
+    variant.alternateBases = arrayToString(json.alternateBases)
+    variant.quality = json.quality
+    variant.filter = arrayToString(json.filter)
+
+
+    // Flatten GA4GH attributes array
+    variant.info = {}
+    if (json.info) {
+        Object.keys(json.info).forEach(function (key) {
+            var value,
+                valueArray = json.info[key]
+
+            if (Array.isArray(valueArray)) {
+                value = valueArray.join(",")
+            } else {
+                value = valueArray
+            }
+            variant.info[key] = value
+        })
+    }
+
+
+    // Need to build a hash of calls for fast lookup
+    // Note from the GA4GH spec on call ID:
+    //
+    // The ID of the call set this variant call belongs to. If this field is not present,
+    // the ordering of the call sets from a SearchCallSetsRequest over this GAVariantSet
+    // is guaranteed to match the ordering of the calls on this GAVariant.
+    // The number of results will also be the same.
+    variant.calls = {}
+    var order = 0, id
+    if (json.calls) {
+        json.calls.forEach(function (call) {
+            id = call.callSetId
+            variant.calls[id] = call
+            order++
+
+        })
+    }
+
+    init(variant)
+
+    return variant
+
 }
 
 
 class Variant {
-
-    constructor(tokens) {
-        this.chr = tokens[0] // TODO -- use genome aliases
-        this.pos = parseInt(tokens[1])
-        this.names = tokens[2]    // id in VCF
-        this.referenceBases = tokens[3]
-        this.alternateBases = tokens[4]
-        this.quality = tokens[5]
-        this.filter = tokens[6]
-        this.info = getInfoObject(tokens[7])
-        this.init()
-    }
 
     init() {
 
@@ -206,17 +274,7 @@ class Variant {
 
 }
 
-function getInfoObject(infoStr) {
-    var info = {}
-    if (infoStr) {
-        infoStr.split(';').forEach(function (elem) {
-            var element = elem.split('=')
-            info[element[0]] = element[1]
-        })
-    }
-    return info
-}
-
+const knownAltBases = new Set(["A", "C", "T", "G"].map(c => c.charCodeAt(0)))
 
 function isKnownAlt(alt) {
     for (let i = 0; i < alt.length; i++) {
@@ -266,67 +324,6 @@ function arrayToString(value, delim) {
     return value.join(delim)
 }
 
-
-/**
- * @deprecated - the GA4GH API has been deprecated.  This code no longer maintained.
- * @param json
- * @returns {Variant}
- */
-function createGAVariant(json) {
-
-    var variant = new Variant()
-
-    variant.chr = json.referenceName
-    variant.start = parseInt(json.start)  // Might get overriden below
-    variant.end = parseInt(json.end)      // Might get overriden below
-    variant.pos = variant.start + 1       // GA4GH is 0 based.
-    variant.names = arrayToString(json.names, "; ")
-    variant.referenceBases = json.referenceBases
-    variant.alternateBases = arrayToString(json.alternateBases)
-    variant.quality = json.quality
-    variant.filter = arrayToString(json.filter)
-
-
-    // Flatten GA4GH attributes array
-    variant.info = {}
-    if (json.info) {
-        Object.keys(json.info).forEach(function (key) {
-            var value,
-                valueArray = json.info[key]
-
-            if (Array.isArray(valueArray)) {
-                value = valueArray.join(",")
-            } else {
-                value = valueArray
-            }
-            variant.info[key] = value
-        })
-    }
-
-
-    // Need to build a hash of calls for fast lookup
-    // Note from the GA4GH spec on call ID:
-    //
-    // The ID of the call set this variant call belongs to. If this field is not present,
-    // the ordering of the call sets from a SearchCallSetsRequest over this GAVariantSet
-    // is guaranteed to match the ordering of the calls on this GAVariant.
-    // The number of results will also be the same.
-    variant.calls = {}
-    var order = 0, id
-    if (json.calls) {
-        json.calls.forEach(function (call) {
-            id = call.callSetId
-            variant.calls[id] = call
-            order++
-
-        })
-    }
-
-    init(variant)
-
-    return variant
-
-}
 
 export {createVCFVariant, createGAVariant}
 
