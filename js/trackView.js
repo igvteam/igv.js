@@ -30,7 +30,7 @@ import {createViewport} from "./util/viewportUtils.js"
 import {DOMUtils, FeatureUtils, Icon, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js'
 import SampleNameViewport from './sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import MenuUtils from "./ui/menuUtils.js"
+import MenuUtils, { canShowColorPicker } from "./ui/menuUtils.js"
 
 const scrollbarExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
@@ -221,36 +221,38 @@ class TrackView {
 
     presentColorPicker(key) {
 
-        if (false === colorPickerExclusionTypes.has(this.track.type)) {
+        if (false === colorPickerExclusionTypes.has(this.track.type) && true === canShowColorPicker(this.track)) {
 
             const trackColors = []
 
             const color = this.track.color || this.track.defaultColor
+            const colorString = StringUtils.isString(color) ? color : undefined
 
-            if (StringUtils.isString(color)) {
-                trackColors.push(color)
-            }
+            let altColorString = this.track.altColor && StringUtils.isString(this.track.altColor) ? this.track.altColor : undefined
 
-            if (this.track.altColor && StringUtils.isString(this.track.altColor)) {
-                trackColors.push(this.track.altColor)
-            }
+            // const defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c))
+            const defaultColors = trackColors
 
-            const defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c))
+            const initialColors =
+                {
+                    color: colorString,
+                    altColor: altColorString
+                }
 
             const colorHandlers =
                 {
-                    color: color => {
-                        this.track.color = color
+                    color: rgbString => {
+                        this.track.color = rgbString
                         this.repaintViews()
                     },
-                    altColor: color => {
-                        this.track.altColor = color
+                    altColor: rgbString => {
+                        this.track.altColor = rgbString
                         this.repaintViews()
                     }
 
                 }
 
-            this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
+            this.browser.genericColorPicker.configure(initialColors, colorHandlers)
             this.browser.genericColorPicker.setActiveColorHandler(key)
             this.browser.genericColorPicker.show()
         }

@@ -5,6 +5,9 @@ import {createCheckbox} from "../igv-icons.js"
  * Configure item list for track "gear" menu.
  * @param trackView
  */
+
+const colorPickerTrackTypeSet = new Set([ 'bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact' ])
+
 const MenuUtils = {
 
     trackMenuItemList: function (trackView) {
@@ -20,7 +23,7 @@ const MenuUtils = {
             menuItems.push(trackHeightMenuItem(trackView))
         }
 
-        if (this.showColorPicker(trackView.track)) {
+        if (canShowColorPicker(trackView.track)) {
             menuItems.push('<hr/>')
             menuItems.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}))
             menuItems.push(unsetColorMenuItem({trackView, label: "Unset track color"}))
@@ -139,17 +142,6 @@ const MenuUtils = {
         }
 
         return list
-    },
-
-    showColorPicker(track) {
-        return (
-            undefined === track.type ||
-            "bedtype" === track.type ||
-            "alignment" === track.type ||
-            "annotation" === track.type ||
-            "variant" === track.type ||
-            "wig" === track.type) ||
-            'interact' === track.type
     },
 
     createMenuItem(label, action) {
@@ -309,5 +301,11 @@ function getTrackLabelText(track) {
 
     return txt
 }
+
+function canShowColorPicker(track) {
+    return undefined === track.type || colorPickerTrackTypeSet.has(track.type)
+}
+
+export { canShowColorPicker }
 
 export default MenuUtils
