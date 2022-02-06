@@ -1,11 +1,12 @@
 import Picker from '../../node_modules/vanilla-picker/dist/vanilla-picker.mjs'
 import {GenericContainer} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {getColorNameRGBString, isValidColorName} from '../util/colorPalletes.js'
 
 class GenericColorPicker extends GenericContainer {
 
-    constructor({parent, width}) {
+    constructor(parent) {
 
-        super({ parent, width, border: '1px solid gray'})
+        super({ parent, width: 250, border: '1px solid gray'})
 
         this.activeColor = undefined
         this.activeColorHandler = undefined
@@ -17,6 +18,7 @@ class GenericColorPicker extends GenericContainer {
                 editor:'false',
                 editorFormat: 'rgb',
                 alpha: false,
+                onDone: () => this.hide(this.container)
             }
 
         this.picker = new Picker(config)
@@ -33,7 +35,12 @@ class GenericColorPicker extends GenericContainer {
 
     setActiveColorHandler(key) {
 
-        this.activeColor = this.initialColors[ key ]
+        if (isValidColorName(this.initialColors[ key ])) {
+            this.activeColor = getColorNameRGBString(this.initialColors[ key ])
+        } else {
+            this.activeColor = this.initialColors[ key ]
+        }
+
         this.activeColorHandler = this.colorHandlers[ key ]
 
         this.picker.onChange = ({ rgbString }) => this.activeColorHandler(rgbString)

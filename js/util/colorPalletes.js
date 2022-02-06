@@ -117,6 +117,41 @@ function appleCrayonRGBA(name, alpha) {
     return `rgba(${r},${g},${b},${alpha})`
 }
 
+const webColorRGBPalette =
+    {
+        white: 'rgb(255, 255, 255)',
+        silver: 'rgb(192, 192, 192)',
+        grey: 'rgb(128, 128, 128)',
+        black: 'rgb(0, 0, 0)',
+        red: 'rgb(255, 0, 0)',
+        maroon: 'rgb(128, 0, 0)',
+        yellow: 'rgb(255, 255, 0)',
+        olive: 'rgb(128, 128, 0)',
+        lime: 'rgb(0, 255, 0)',
+        green: 'rgb(0, 128, 0)',
+        aqua: 'rgb(0, 255, 255)',
+        teal: 'rgb(0, 128, 128)',
+        blue: 'rgb(0, 0, 255)',
+        navy: 'rgb(0, 0, 128)',
+        fuchsia: 'rgb(255, 0, 255)',
+        purple: 'rgb(128, 0, 128)',
+    }
+
+function isValidColorName(name) {
+    const a = new Set(Object.keys(webColorRGBPalette))
+    const b = new Set(Object.keys(appleCrayonPalette))
+    return a.has(name) || b.has(name)
+}
+
+function getColorNameRGBString(name) {
+
+    if (isValidColorName(name)) {
+         return webColorRGBPalette[ name ] || appleCrayonRGB(name)
+    } else {
+        return undefined
+    }
+}
+
 const colorPalettes = {
 
     Set1:
@@ -388,6 +423,8 @@ export {
     appleCrayonRGB,
     appleCrayonRGBA,
     appleCrayonPalette,
+    isValidColorName,
+    getColorNameRGBString,
     ColorTable,
     PaletteColorTable,
     randomColor,
