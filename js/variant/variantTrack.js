@@ -81,6 +81,7 @@ class VariantTrack extends TrackBase {
         }
         this._color = config.color
         this._strokecolor = config.strokecolor
+        this._context_hook = config.context_hook
 
         this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes
 
@@ -236,6 +237,10 @@ class VariantTrack extends TrackBase {
                   context.strokeRect(x, y, w, h)
                 }
 
+                context.save()
+                this.callContextHook(variant, context, x, y, w, h)
+                context.restore()
+
                 variant.pixelRect = {x, y, w, h}
 
                 // Loop though the calls for this variant.  There will potentially be a call for each sample.
@@ -328,6 +333,17 @@ class VariantTrack extends TrackBase {
             variantStrokeColor = undefined
         }
         return variantStrokeColor
+    }
+
+    callContextHook(variant, context, x, y, w, h) {
+        const v = variant._f || variant
+
+        if (this._context_hook) {
+          if (typeof this._context_hook === "function") {
+            this._context_hook(v, context, x, y, w, h)
+          }
+        }
+
     }
 
     clickedFeatures(clickState, features) {
