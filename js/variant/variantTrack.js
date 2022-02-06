@@ -80,6 +80,7 @@ class VariantTrack extends TrackBase {
             this.colorTables.set(config.colorBy, new ColorTable(config.colorTable))
         }
         this._color = config.color
+        this._strokecolor = config.strokecolor
 
         this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes
 
@@ -227,6 +228,14 @@ class VariantTrack extends TrackBase {
                 }
                 context.fillStyle = this.getVariantColor(variant)
                 context.fillRect(x, y, w, h)
+
+                //only paint stroke if a color is defined
+                let strokecolor = this.getVariantStrokecolor(variant)
+                if (strokecolor){
+                  context.strokeStyle = strokecolor
+                  context.strokeRect(x, y, w, h)
+                }
+
                 variant.pixelRect = {x, y, w, h}
 
                 // Loop though the calls for this variant.  There will potentially be a call for each sample.
@@ -306,6 +315,19 @@ class VariantTrack extends TrackBase {
             variantColor = this.defaultColor
         }
         return variantColor
+    }
+
+    getVariantStrokecolor(variant) {
+
+        const v = variant._f || variant
+        let variantStrokeColor
+
+        if (this._strokecolor) {
+            variantStrokeColor = (typeof this._strokecolor === "function") ? this._strokecolor(v) : this._strokecolor
+        } else {
+            variantStrokeColor = undefined
+        }
+        return variantStrokeColor
     }
 
     clickedFeatures(clickState, features) {
