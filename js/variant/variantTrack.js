@@ -237,9 +237,8 @@ class VariantTrack extends TrackBase {
                   context.strokeRect(x, y, w, h)
                 }
 
-                context.save()
+                // call hook if _context_hook fn is defined
                 this.callContextHook(variant, context, x, y, w, h)
-                context.restore()
 
                 variant.pixelRect = {x, y, w, h}
 
@@ -336,14 +335,15 @@ class VariantTrack extends TrackBase {
     }
 
     callContextHook(variant, context, x, y, w, h) {
-        const v = variant._f || variant
-
         if (this._context_hook) {
           if (typeof this._context_hook === "function") {
+            const v = variant._f || variant
+
+            context.save()
             this._context_hook(v, context, x, y, w, h)
+            context.restore()
           }
         }
-
     }
 
     clickedFeatures(clickState, features) {
