@@ -31,7 +31,7 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
  * @param tokens
  */
 function createVCFVariant(tokens) {
-    const variant = new Variant(tokens)
+    const variant = new Variant()
     variant.chr = tokens[0] // TODO -- use genome aliases
     variant.pos = parseInt(tokens[1])
     variant.names = tokens[2]    // id in VCF
