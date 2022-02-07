@@ -1,6 +1,7 @@
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
-import {getMultiSelectedTrackViews} from '../trackView.js'
+import {getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from '../trackView.js'
+import MergedTrack from "../feature/mergedTrack.js"
 
 /**
  * Configure item list for track "gear" menu.
@@ -47,6 +48,15 @@ const MenuUtils = {
         if (trackView.track.removable !== false) {
             menuItems.push('<hr/>')
             menuItems.push(trackRemovalMenuItem(trackView))
+        }
+
+        if (false === multiTrackSelectExclusionTypes.has(trackView.track.type)) {
+
+            const selected = getMultiSelectedTrackViews(trackView.browser)
+            if (selected && new Set(selected).has(trackView)) {
+                menuItems.push('<hr/>')
+                menuItems.push(trackMergeMenuItem(trackView))
+            }
         }
 
         return menuItems
@@ -156,6 +166,27 @@ const MenuUtils = {
     }
 }
 
+function trackMergeMenuItem(trackView) {
+
+    const object = $('<div>')
+    object.text('Merge tracks')
+
+    const click = () => {
+
+        const config =
+            {
+                height: 128,
+                name: 'Merge You Very Much',
+                type: 'merged',
+                tracks: getMultiSelectedTrackViews(trackView.browser).map(({ track }) => track.config )
+            };
+
+        trackView.browser.loadTrack(config)
+    }
+
+    return { object, click }
+
+}
 
 function visibilityWindowMenuItem(trackView) {
 

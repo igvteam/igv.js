@@ -171,23 +171,27 @@
             tracks:
                 [
                     {
-                        url: 'https://s3.amazonaws.com/igv.org.test/data/wgEncodeBroadHistoneGm12878H3k4me3StdSig.wig.tdf',
-                        name: 'tdf file',
-                        color: 'blue'
+                        type: "wig",
+                        format: "bigwig",
+                        url: 'https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig',
+                        color: "red",
                     },
                     {
-                        name: "Phase 3 WGS variants",
-                        url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
-                        indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi",
+                        type: "wig",
+                        format: "bigwig",
+                        url: "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                        color: "green",
                     },
                     {
-                        name: "ENCODE bigwig",
-                        url: 'https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig'
-                    },
+                        type: "wig",
+                        format: "bigwig",
+                        url : "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                        color: "blue",
+                    }
                 ]
         };
 
-    igv.createBrowser(document.getElementById("igvDiv"), options)
+    igv.createBrowser(document.getElementById("igvDiv"), multiSelectOption)
         .then(function (browser) {
             console.log("Created IGV browser");
         })
