@@ -126,7 +126,7 @@ class TrackView {
             trackSelectionContainer.appendChild(input)
 
             input.addEventListener('change', event => {
-                setDragHandleSelectionState(this.dragHandle, event.target.checked)
+                setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
             })
 
         }
@@ -226,13 +226,13 @@ class TrackView {
             const color = this.track.color || this.track.defaultColor
             const colorString = StringUtils.isString(color) ? color : undefined
 
-            const initialColors =
+            let initialColors =
                 {
                     color: colorString,
                     altColor: this.track.altColor && StringUtils.isString(this.track.altColor) ? this.track.altColor : undefined
                 }
 
-            const colorHandlers =
+            let colorHandlers =
                 {
                     color: rgbString => {
                         this.track.color = rgbString
@@ -248,7 +248,30 @@ class TrackView {
                 }
             }
 
-            this.browser.genericColorPicker.configure(initialColors, colorHandlers)
+
+            const selected = getMultiSelectedTrackViews(this.browser)
+            if (selected && new Set(selected).has(this)) {
+
+                initialColors =
+                    {
+                        color: colorString
+                    }
+
+                colorHandlers =
+                    {
+                        color: rgbString => {
+                            for (let trackView of selected) {
+                                trackView.track.color = rgbString
+                                trackView.repaintViews()
+                            }
+                        }
+                    }
+
+                this.browser.genericColorPicker.configure(initialColors, colorHandlers)
+            } else {
+                this.browser.genericColorPicker.configure(initialColors, colorHandlers)
+            }
+
             this.browser.genericColorPicker.setActiveColorHandler(key)
             this.browser.genericColorPicker.show()
         }
@@ -896,10 +919,10 @@ class TrackView {
 
 }
 
-function setDragHandleSelectionState(dragHandle, isSelected) {
+function setDragHandleSelectionState(trackView, dragHandle, isSelected) {
 
     if (isSelected) {
-        dragHandle.dataset.selected = 'yes'
+        dragHandle.dataset.selected = trackView.namespace
         dragHandle.classList.remove('igv-track-drag-handle-color')
         dragHandle.classList.remove('igv-track-drag-handle-hover-color')
         dragHandle.classList.add('igv-track-drag-handle-selected-color')
@@ -938,5 +961,24 @@ function maxViewportContentHeight(viewports) {
     return Math.max(...heights)
 }
 
-export {igv_axis_column_width, maxViewportContentHeight}
+function getMultiSelectedTrackViews(browser) {
+
+    let candidates = browser.trackViews
+        .filter(({ track }) => {
+            return false === multiTrackSelectExclusionTypes.has(track.type)
+        })
+        .filter(({ namespace, dragHandle }) => {
+            return namespace === dragHandle.dataset.selected
+        })
+
+    // for (let { namespace } of candidates) {
+    //     console.log(`Multi-Select'ed TrackView ${ namespace }`)
+    // }
+
+    candidates = 0 === candidates.length ? undefined : candidates
+
+    return candidates
+}
+
+export {igv_axis_column_width, maxViewportContentHeight, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews}
 export default TrackView
