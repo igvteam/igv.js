@@ -29,15 +29,51 @@
 
 
 <script>
-    function drawTriangle(context, x, y, w, h){
-      context.clearRect(x, y, w, h);
 
-      context.beginPath();
-      context.moveTo(x, y);
-      context.lineTo(x+w/2, y+h);
-      context.lineTo(x+w, y);
-      context.closePath();
-      context.fill();
+    function drawTrianglerect(context, x, y, w, h){
+      let n=Math.floor(w/h)
+      let p = (w % h)/2
+
+      context.clearRect(x, y, w, h)
+      context.fillRect(x,y,w,h/2)
+
+      for (var i = 0; i < n; i++) {
+         drawTriangle(context, p+x+(i)*h, y, h, h)
+      }
+
+    }
+
+    function drawTriangle(context, x, y, w, h){
+      // context.clearRect(x, y, w, h)
+
+      context.beginPath()
+      context.moveTo(x, y)
+      context.lineTo(x+w/2, y+h)
+      context.lineTo(x+w, y)
+      context.closePath()
+      context.fill()
+    }
+
+    function drawCirclerect(context, x, y, w, h){
+      let n=Math.floor(w/h)
+      let p = (w % h)/2
+
+      context.clearRect(x, y, w, h)
+      context.fillRect(x,y,w,h/2)
+
+      for (var i = 0; i < n; i++) {
+         drawCircle(context, p+x+(i)*h, y, h, h)
+      }
+
+    }
+
+
+    function drawCircle(context, x, y, w, h){
+      // context.clearRect(x, y, w, h)
+
+      context.beginPath()
+      context.arc(x+w/2, y+h/2, h/2, 0, 2 * Math.PI);
+      context.fill()
     }
 
     function drawRoundrect(context, x, y, w, h){
@@ -56,7 +92,6 @@
       context.closePath()
       // context.stroke()
       context.fill()
-
     }
 
     const options =
@@ -138,9 +173,9 @@
                       const mc = parseFloat(variant.info["AF"]);
 
                       if (mc < 0.05){
-                        drawRoundrect(context, x, y, w, h)
+                        drawCirclerect(context, x, y, w, h)
                       }else if (mc < 0.5 ) {
-                        drawTriangle(context, x, y, w, h)
+                        drawTrianglerect(context, x, y, w, h)
                       }else if (mc > 0.2) {
                         context.strokeStyle = 'green'
                         context.lineWidth = 1
