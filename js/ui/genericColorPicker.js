@@ -26,10 +26,8 @@ class GenericColorPicker extends GenericContainer {
     }
 
     configure(initialColors, colorHandlers) {
-
         this.initialColors = initialColors
         this.colorHandlers = colorHandlers
-
         this.setActiveColorHandler('color')
     }
 

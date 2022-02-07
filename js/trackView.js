@@ -223,20 +223,13 @@ class TrackView {
 
         if (false === colorPickerExclusionTypes.has(this.track.type) && true === canShowColorPicker(this.track)) {
 
-            const trackColors = []
-
             const color = this.track.color || this.track.defaultColor
             const colorString = StringUtils.isString(color) ? color : undefined
-
-            let altColorString = this.track.altColor && StringUtils.isString(this.track.altColor) ? this.track.altColor : undefined
-
-            // const defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c))
-            const defaultColors = trackColors
 
             const initialColors =
                 {
                     color: colorString,
-                    altColor: altColorString
+                    altColor: this.track.altColor && StringUtils.isString(this.track.altColor) ? this.track.altColor : undefined
                 }
 
             const colorHandlers =
@@ -245,12 +238,15 @@ class TrackView {
                         this.track.color = rgbString
                         this.repaintViews()
                     },
-                    altColor: rgbString => {
-                        this.track.altColor = rgbString
-                        this.repaintViews()
-                    }
 
                 }
+
+            if (initialColors.altColor) {
+                colorHandlers.altColor = rgbString => {
+                    this.track.altColor = rgbString
+                    this.repaintViews()
+                }
+            }
 
             this.browser.genericColorPicker.configure(initialColors, colorHandlers)
             this.browser.genericColorPicker.setActiveColorHandler(key)

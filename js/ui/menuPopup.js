@@ -146,7 +146,7 @@ function createMenuElements(itemList, popover) {
             } else if ("color" === item.type) {
 
                 const colorPicker = new GenericColorPicker(popover.parentElement)
-                colorPicker.configure(undefined, {color: color => item.click(color)})
+                colorPicker.configure({ color:'grey' }, { color:color => item.click(color) })
 
                 el = DOMUtils.div({class: 'context-menu'})
                 if (typeof item.label === 'string') {

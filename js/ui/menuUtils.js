@@ -23,11 +23,15 @@ const MenuUtils = {
             menuItems.push(trackHeightMenuItem(trackView))
         }
 
-        if (canShowColorPicker(trackView.track)) {
+        if (canShowColorPicker(trackView.track)) {``
             menuItems.push('<hr/>')
             menuItems.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}))
             menuItems.push(unsetColorMenuItem({trackView, label: "Unset track color"}))
-            menuItems.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
+
+            if (trackView.track.altColor) {
+                menuItems.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
+            }
+
         }
 
         if (trackView.track.menuItemList) {
@@ -194,22 +198,22 @@ function trackRemovalMenuItem(trackView) {
 
 function colorPickerMenuItem({trackView, label, option}) {
 
-    const $e = $('<div>')
-    $e.text(label)
+    const object = $('<div>')
+    object.text(label)
 
     return {
-        object: $e,
+        object,
         click: () => trackView.presentColorPicker(option)
     }
 }
 
 function unsetColorMenuItem({trackView, label}) {
 
-    const $e = $('<div>')
-    $e.text(label)
+    const object = $('<div>')
+    object.text(label)
 
     return {
-        object: $e,
+        object,
         click: () => {
             trackView.track.color = undefined
             trackView.repaintViews()
