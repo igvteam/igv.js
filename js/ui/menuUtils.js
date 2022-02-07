@@ -178,7 +178,11 @@ function trackMergeMenuItem(trackView) {
                 height: 128,
                 name: 'Merge You Very Much',
                 type: 'merged',
-                tracks: getMultiSelectedTrackViews(trackView.browser).map(({ track }) => track.config )
+                tracks: getMultiSelectedTrackViews(trackView.browser).map(({ track }) => {
+                    const c = { ...track.config }
+                    c.color = track.color
+                    return c
+                } )
             };
 
         trackView.browser.loadTrack(config)
@@ -224,7 +228,21 @@ function trackRemovalMenuItem(trackView) {
     const object = $('<div>')
     object.text('Remove track')
 
-    return {object, click: () => trackView.browser.removeTrack(trackView.track)}
+    const click = () => {
+
+        const selected = getMultiSelectedTrackViews(trackView.browser)
+        if (selected && new Set(selected).has(trackView)) {
+
+            for (let { browser, track } of selected) {
+                browser.removeTrack(track)
+            }
+        } else {
+            trackView.browser.removeTrack(trackView.track)
+        }
+
+    }
+
+    return {object, click }
 
 }
 
