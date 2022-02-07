@@ -1,5 +1,6 @@
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
+import {getMultiSelectedTrackViews} from '../trackView.js'
 
 /**
  * Configure item list for track "gear" menu.
@@ -259,24 +260,32 @@ function trackHeightMenuItem(trackView) {
 
             if (undefined !== number) {
 
-                // If explicitly setting the height adust min or max, if neccessary.
-                if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
-                    trackView.track.minHeight = number
-                }
-                if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
-                    trackView.track.minHeight = number
-                }
-                trackView.setTrackHeight(number, true)
+                const selected = getMultiSelectedTrackViews(trackView.browser)
 
-                trackView.checkContentHeight()
-                trackView.repaintViews()
+                const list = selected && new Set(selected).has(trackView) ? selected : [ trackView ]
 
+                for (let tv of list) {
 
-                // Explicitly setting track height turns off autoHeight
-                trackView.track.autoHeight = false
-            }
+                    // If explicitly setting the height adjust min or max, if necessary
+                    if (tv.track.minHeight !== undefined && tv.track.minHeight > number) {
+                        tv.track.minHeight = number
+                    }
+                    if (tv.track.maxHeight !== undefined && tv.track.maxHeight < number) {
+                        tv.track.minHeight = number
+                    }
+                    tv.setTrackHeight(number, true)
 
-        }
+                    tv.checkContentHeight()
+                    tv.repaintViews()
+
+                    // Explicitly setting track height turns off autoHeight
+                    tv.track.autoHeight = false
+
+                } // for (list)
+
+            } //if ()
+
+        } // callback
 
         const config =
             {
@@ -287,7 +296,7 @@ function trackHeightMenuItem(trackView) {
 
         trackView.browser.inputDialog.present(config, e)
 
-    }
+    } // click
 
     const object = $('<div>')
     object.text('Set track height')

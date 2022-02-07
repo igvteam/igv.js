@@ -43,8 +43,9 @@ class GenericColorPicker extends GenericContainer {
         this.activeColorHandler = this.colorHandlers[ key ]
 
         this.picker.onChange = ({ rgbString }) => this.activeColorHandler(rgbString)
-        const parts = this.activeColor.split(')')
-        const rgbaString = `${ parts[ 0 ]},1.0)`
+        const [ rgbPart, paren ] = this.activeColor.split(')')
+        const [ discard, r_g_b ] = rgbPart.split('(')
+        const rgbaString = `rgba(${ r_g_b },1.0)`
         this.picker.setColor(rgbaString, true)
     }
 
