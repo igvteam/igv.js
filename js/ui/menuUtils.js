@@ -50,13 +50,15 @@ const MenuUtils = {
             menuItems.push(trackRemovalMenuItem(trackView))
         }
 
-        if (false === multiTrackSelectExclusionTypes.has(trackView.track.type)) {
+        if ('wig' === trackView.track.type) {
 
             const selected = getMultiSelectedTrackViews(trackView.browser)
+
             if (selected && new Set(selected).has(trackView)) {
                 menuItems.push('<hr/>')
                 menuItems.push(trackMergeMenuItem(trackView))
             }
+
         }
 
         return menuItems
@@ -173,17 +175,28 @@ function trackMergeMenuItem(trackView) {
 
     const click = () => {
 
+        const selected = getMultiSelectedTrackViews(trackView.browser)
+
+        let tracks = []
+        if (selected) {
+
+            tracks = selected
+                .filter(({ track }) => {
+                    return 'wig' === track.type
+                })
+                .map(({ track }) => {
+                    return track.config
+                })
+
+        }
+
         const config =
             {
                 height: 128,
                 name: 'Merge You Very Much',
                 type: 'merged',
-                tracks: getMultiSelectedTrackViews(trackView.browser).map(({ track }) => {
-                    const c = { ...track.config }
-                    c.color = track.color
-                    return c
-                } )
-            };
+                tracks
+            }
 
         trackView.browser.loadTrack(config)
     }
