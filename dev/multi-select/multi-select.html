@@ -22,7 +22,7 @@
 
     import igv from "../../js/index.js";
 
-    const options =
+    const KitchenSinkConfig =
         {
             genome: "hg19",
             locus: "chr1:155,138,124-155,153,715",
@@ -46,19 +46,19 @@
                         url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
                         name: 'Group Autoscale 1 of 3',
                         color: 'rgb(200,0,0)',
-                        autoscaleGroup: '1'
+                        // autoscaleGroup: '1'
                     },
                     {
                         url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSig.bigWig',
                         name: 'Group Autoscale 2 of 3',
                         color: 'rgb(0,0,150)',
-                        autoscaleGroup: '1'
+                        // autoscaleGroup: '1'
                     },
                     {
                         url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig',
                         name: 'Group Autoscale 3 of 3',
                         color: 'rgb(0,150,0)',
-                        autoscaleGroup: '1'
+                        // autoscaleGroup: '1'
                     },
                     {
                         name: "Merged",
@@ -150,7 +150,7 @@
 
         };
 
-    const tdfOption =
+    const TDFConfig =
         {
             genome: "hg19",
             locus: "chr1:155,138,124-155,153,715",
@@ -164,7 +164,7 @@
                 ]
         };
 
-    const bigWigOption =
+    const BigWigConfig =
         {
             genome: "hg19",
             locus: "chr1:155,138,124-155,153,715",
@@ -233,7 +233,7 @@
         ]
     }
 
-    igv.createBrowser(document.getElementById("igvDiv"), bigWigOption)
+    igv.createBrowser(document.getElementById("igvDiv"), KitchenSinkConfig)
         .then(function (browser) {
             console.log("Created IGV browser");
         })

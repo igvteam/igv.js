@@ -242,7 +242,7 @@ function trackMergeMenuItem(trackView) {
         const config =
             {
                 height: 128,
-                name: 'Merge You Very Much',
+                name: `merged-tracks-${ DOMUtils.guid() }`,
                 type: 'merged',
                 tracks: trackObjects.map(trackObject => trackObject.config)
             }
