@@ -164,7 +164,7 @@
                 ]
         };
 
-    const multiSelectOption =
+    const bigWigOption =
         {
             genome: "hg19",
             locus: "chr1:155,138,124-155,153,715",
@@ -233,7 +233,7 @@
         ]
     }
 
-    igv.createBrowser(document.getElementById("igvDiv"), groupAutoScaleOption)
+    igv.createBrowser(document.getElementById("igvDiv"), bigWigOption)
         .then(function (browser) {
             console.log("Created IGV browser");
         })
