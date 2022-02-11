@@ -191,7 +191,49 @@
                 ]
         };
 
-    igv.createBrowser(document.getElementById("igvDiv"), multiSelectOption)
+
+    const groupAutoScaleOption = {
+        "genome": "hg19",
+        "locus": "myc",
+        "tracks": [
+            {
+                "type": "sequence",
+                "order": -1.7976931348623157e+308
+            },
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF000ATR/@@download/ENCFF000ATR.bigWig",
+                "color": "#018448",
+                "name": "GM12878 H3K4me3  signal ENCSR000AKA",
+                "format": "bigwig",
+                "type": "wig",
+                "height": 50,
+                "autoscaleGroup": "1",
+                "order": 4
+            },
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF000AST/@@download/ENCFF000AST.bigWig",
+                "color": "#891100",
+                "name": "GM12878 H3K27me3  signal ENCSR000AKD",
+                "format": "bigwig",
+                "type": "wig",
+                "height": 50,
+                "autoscaleGroup": "1",
+                "order": 4
+            },
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF000ATA/@@download/ENCFF000ATA.bigWig",
+                "color": "rgb(150,150,150)",
+                "name": "GM12878 H3K36me3  signal ENCSR000AKE",
+                "format": "bigwig",
+                "type": "wig",
+                "height": 50,
+                "autoscaleGroup": "1",
+                "order": 5
+            }
+        ]
+    }
+
+    igv.createBrowser(document.getElementById("igvDiv"), groupAutoScaleOption)
         .then(function (browser) {
             console.log("Created IGV browser");
         })

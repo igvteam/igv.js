@@ -1,7 +1,7 @@
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
-import {getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from '../trackView.js'
-import MergedTrack from "../feature/mergedTrack.js"
+import {getMultiSelectedTrackViews} from '../trackView.js'
 
 /**
  * Configure item list for track "gear" menu.
@@ -57,6 +57,17 @@ const MenuUtils = {
             if (selected && new Set(selected).has(trackView)) {
                 menuItems.push('<hr/>')
                 menuItems.push(trackMergeMenuItem(trackView))
+            }
+
+        }
+
+        if ('wig' === trackView.track.type) {
+
+            const selected = getMultiSelectedTrackViews(trackView.browser)
+
+            if (selected && new Set(selected).has(trackView)) {
+                menuItems.push('<hr/>')
+                menuItems.push(groupAutoScaleMenuItem(trackView))
             }
 
         }
@@ -166,6 +177,44 @@ const MenuUtils = {
         object.text(label)
         return {object, click: action}
     }
+}
+
+function groupAutoScaleMenuItem(trackView) {
+
+    const object = $('<div>')
+    object.text('AutoScale Group')
+
+    const click = () => {
+
+        const selectedTrackViews = getMultiSelectedTrackViews(trackView.browser)
+
+        if (selectedTrackViews) {
+
+            const scalableTrackViews = selectedTrackViews.filter(({ track }) => { return 'wig' === track.type })
+
+            if (scalableTrackViews.length > 0) {
+
+                const autoScaleGroupID = `auto-scale-group-${DOMUtils.guid()}`
+
+                for (trackView of scalableTrackViews) {
+
+                    if (undefined === trackView.track.autoscaleGroup) {
+                        trackView.track.autoscaleGroup = autoScaleGroupID
+                    }
+
+                } // for (scalableTrackViews)
+
+                trackView.browser.updateViews(true)
+
+            } // if (scalableTrackViews.length > 0)
+
+
+        } // if (selectedTrackViews)
+
+    }
+
+    return { object, click }
+
 }
 
 function trackMergeMenuItem(trackView) {
