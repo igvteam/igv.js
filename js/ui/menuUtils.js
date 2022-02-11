@@ -224,18 +224,18 @@ function trackMergeMenuItem(trackView) {
 
     const click = () => {
 
-        const selected = getMultiSelectedTrackViews(trackView.browser)
+        const trackViews = getMultiSelectedTrackViews(trackView.browser)
 
-        let tracks = []
-        if (selected) {
+        let trackObjects = []
+        if (trackViews) {
 
-            tracks = selected
-                .filter(({ track }) => {
-                    return 'wig' === track.type
-                })
-                .map(({ track }) => {
-                    return track.config
-                })
+            trackObjects = trackViews
+                .filter(({ track }) => { return 'wig' === track.type })
+                .map(({ track }) => { return track })
+
+            for (let trackObject of trackObjects) {
+                trackObject.config.color = trackObject.color
+            }
 
         }
 
@@ -244,7 +244,7 @@ function trackMergeMenuItem(trackView) {
                 height: 128,
                 name: 'Merge You Very Much',
                 type: 'merged',
-                tracks
+                tracks: trackObjects.map(trackObject => trackObject.config)
             }
 
         trackView.browser.loadTrack(config)
