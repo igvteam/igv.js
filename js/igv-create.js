@@ -235,6 +235,8 @@ function extractQuery(config) {
                     config[key] = value
                 }
                 i = j + 1
+            } else {
+                i++;
             }
         }
     }
