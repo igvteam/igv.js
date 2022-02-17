@@ -47,7 +47,7 @@ async function createBrowser(parentDiv, config) {
 
     setDefaults(config)
 
-    if (config.queryParametersSupported !== false) {
+    if (config.queryParametersSupported) {
         extractQuery(config)
     }
     if (config.apiKey) {
