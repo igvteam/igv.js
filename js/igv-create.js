@@ -272,8 +272,3 @@ async function createTrack(config, browser) {
 }
 
 export {createTrack, createBrowser, removeBrowser, removeAllBrowsers, visibilityChange}
-
-
-
-
-
