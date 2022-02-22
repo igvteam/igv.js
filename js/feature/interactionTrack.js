@@ -36,6 +36,20 @@ import FeatureSource from "./featureSource.js"
 import {makeBedPEChords} from "../jbrowse/circularViewUtils.js"
 import {getChrColor} from "../bam/bamTrack.js"
 
+function getArcType(config) {
+    if (!config.arcType) {
+        return "nested"
+    }
+    switch (config.arcType) {
+        case "chiapet":
+            return "inView"
+        case "chiapetoutbound":
+            return "partialInView"
+        default:
+            return config.arcType
+    }
+}
+
 class InteractionTrack extends TrackBase {
 
     constructor(config, browser) {
@@ -49,7 +63,7 @@ class InteractionTrack extends TrackBase {
         this.sinTheta = Math.sin(this.theta)
         this.cosTheta = Math.cos(this.theta)
         this.height = config.height || 250
-        this.arcType = config.arcType || "nested"   // nested | proportional | chiapet | chiapetoutbound
+        this.arcType = getArcType(config)   // nested | proportional | inView | partialInView
         this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation) // true for up, false for down
         this.showBlocks = config.showBlocks === undefined ? true : config.showBlocks
         this.blockHeight = config.blockHeight || 3
@@ -121,8 +135,8 @@ class InteractionTrack extends TrackBase {
 
         if (this.arcType === "proportional") {
             this.drawProportional(options)
-        } else if (this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
-            this.drawProportionalChIAPET(options)
+        } else if (this.arcType === "inView" || this.arcType === "partialInView") {
+            this.drawProportional(options)
         } else {
             this.drawNested(options)
         }
@@ -223,7 +237,10 @@ class InteractionTrack extends TrackBase {
                     }
                     const otherChr = feature.chr === feature.chr1 ? feature.chr2 : feature.chr1
                     ctx.strokeStyle = color
-                    ctx.fillStyle = color
+                    // get a sense of trans "spread"
+                    ctx.fillStyle = getAlphaColor(getChrColor(otherChr), 0.5)
+                   // ctx.fillStyle = color
+                    
                     if (direction) {
                         // UP
                         ctx.fillRect(pixelStart, this.height / 2, w, this.height / 2)
@@ -257,130 +274,13 @@ class InteractionTrack extends TrackBase {
         }
     }
 
-    drawProportional(options) {
-
-        const ctx = options.context
-        const pixelWidth = options.pixelWidth
-        const pixelHeight = options.pixelHeight
-        const bpPerPixel = options.bpPerPixel
-        const bpStart = options.bpStart
-        const xScale = bpPerPixel
-
-        // SVG output for proportional arcs are currently not supported because "ellipse" is not implemented
-        // if(typeof ctx.ellipse !== 'function') {
-        //     Alert.presentAlert("SVG output of proportional arcs is currently not supported.")
-        //     return;
-        // }
-
-        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
-
-        const featureList = options.features
-
-        if (featureList && featureList.length > 0) {
-
-            const yScale = this.logScale ?
-                options.pixelHeight / Math.log10(this.dataRange.max + 1) :
-                options.pixelHeight / (this.dataRange.max - this.dataRange.min)
-
-            const y = this.arcOrientation ? options.pixelHeight : 0
-
-            for (let feature of featureList) {
-
-                const value = this.valueColumn ? feature[this.valueColumn] : feature.score
-                if (value === undefined || Number.isNaN(value)) continue
-
-                const radiusY = this.logScale ?
-                    Math.log10(value + 1) * yScale :
-                    value * yScale
-
-                if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
-
-                    const {m1, m2} = getMidpoints(feature, this.browser.genome)
-
-                    let pixelStart = (m1 - bpStart) / xScale
-                    let pixelEnd = (m2 - bpStart) / xScale
-                    let w = (pixelEnd - pixelStart)
-                    if (w < 3) {
-                        w = 3
-                        pixelStart--
-                    }
-
-                    if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue
-
-                    const radiusX = w / 2
-                    const xc = pixelStart + w / 2
-                    const counterClockwise = this.arcOrientation ? true : false
-                    const color = feature.color || this.color
-                    ctx.strokeStyle = color
-                    ctx.lineWidth = feature.thickness || this.thickness || 1
-
-                    if (true === ctx.isSVG) {
-                        ctx.strokeEllipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise)
-                    } else {
-                        ctx.beginPath()
-                        ctx.ellipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise)
-                        ctx.stroke()
-                    }
-
-                    if (this.showBlocks && feature.chr !== 'all') {
-                        ctx.fillStyle = color
-                        const s1 = (feature.start1 - bpStart) / xScale
-                        const e1 = (feature.end1 - bpStart) / xScale
-                        const s2 = (feature.start2 - bpStart) / xScale
-                        const e2 = (feature.end2 - bpStart) / xScale
-                        const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight
-                        ctx.fillRect(s1, y, e1 - s1, hb)
-                        ctx.fillRect(s2, y, e2 - s2, hb)
-                    }
-
-                    if (this.alpha) {
-                        ctx.fillStyle = getAlphaColor(color, this.alpha)
-                        if (true === ctx.isSVG) {
-                            ctx.fillEllipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise)
-                        } else {
-                            ctx.fill()
-                        }
-
-                    }
-
-                    feature.drawState = {xc, yc: y, radiusX, radiusY}
-                } else {
-                    let pixelStart = Math.round((feature.start - bpStart) / xScale)
-                    let pixelEnd = Math.round((feature.end - bpStart) / xScale)
-                    if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue
-
-                    const h = Math.min(radiusY, this.height - 13)   // Leave room for text
-                    let w = (pixelEnd - pixelStart)
-                    if (w < 3) {
-                        w = 3
-                        pixelStart--
-                    }
-                    const otherChr = feature.chr === feature.chr1 ? feature.chr2 : feature.chr1
-                    ctx.font = "8px sans-serif"
-                    ctx.textAlign = "center"
-                    if (this.arcOrientation) {
-                        // UP
-                        const y = this.height - h
-                        ctx.fillRect(pixelStart, y, w, h)
-                        ctx.fillText(otherChr, pixelStart + w / 2, y - 5)
-                        feature.drawState = {x: pixelStart, y, w, h}
-                    } else {
-                        ctx.fillRect(pixelStart, 0, w, h)
-                        ctx.fillText(otherChr, pixelStart + w / 2, h + 13)
-                        feature.drawState = {x: pixelStart, y: 0, w, h}
-                    }
-                }
-            }
-        }
-    }
-
     // TODO: refactor to igvUtils.js
     getScaleFactor(min, max, height, logScale) {
         const scale = logScale ? height / (Math.log10(max + 1) - (min <= 0 ? 0 : Math.log10(min + 1))) : height / (max - min)
         return scale
     }
 
-    drawProportionalChIAPET(options) {
+    drawProportional(options) {
 
         const ctx = options.context
         const pixelWidth = options.pixelWidth
@@ -390,7 +290,7 @@ class InteractionTrack extends TrackBase {
         const xScale = bpPerPixel
         const refStart = options.referenceFrame.start
         const refEnd = options.referenceFrame.end
-        const showOutbound = (this.arcType === "chiapetoutbound")
+
 
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
@@ -426,15 +326,19 @@ class InteractionTrack extends TrackBase {
 
                     // original fly over issue!
                     // if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue;
-                    const within = (m1 >= refStart && m2 <= refEnd)
-                    let outBound = false
-                    let inBound = false
-                    if (!within && showOutbound) {
-                        outBound = (refStart <= m1 && m1 <= refEnd)
-                        if (!outBound) inBound = (refStart <= m2 && m2 <= refEnd)
+                    if("proportional" !== this.arcType) {
+                        const showOutbound = (this.arcType === "partialInView")
+                        const within = (m1 >= refStart && m2 <= refEnd)
+                        let outBound = false
+                        let inBound = false
+                        if (!within && showOutbound) {
+                            outBound = (refStart <= m1 && m1 <= refEnd)
+                            if (!outBound) inBound = (refStart <= m2 && m2 <= refEnd)
+                        }
+                        if (!(within || outBound || inBound)) continue
+                        if (value < this.dataRange.min) continue // TODO: is a range?!
                     }
-                    if (!(within || outBound || inBound)) continue
-                    if (value < this.dataRange.min) continue // TODO: is a range?!
+
 
                     const radiusX = w / 2
                     const xc = pixelStart + w / 2
@@ -528,7 +432,7 @@ class InteractionTrack extends TrackBase {
             this.painter.flipAxis = !this.arcOrientation
             this.painter.dataRange = this.dataRange
             this.painter.paintAxis(ctx, pixelWidth, pixelHeight)
-        } else if (this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
+        } else if (this.arcType === "inView" || this.arcType === "partialInView") {
             this.painter.flipAxis = !this.arcOrientation
             this.painter.dataRange = this.dataRange
             this.painter.paintAxis(ctx, pixelWidth, pixelHeight)
@@ -555,11 +459,11 @@ class InteractionTrack extends TrackBase {
                 {
                     "nested": "Nested",
                     "proportional": "Proportional - All",
-                    "chiapet": "Proportional - Both Ends in View",
-                    "chiapetoutbound": "Proportional - One End in View"
+                    "inView": "Proportional - Both Ends in View",
+                    "partialInView": "Proportional - One End in View"
                 }
             items.push("<b>Arc Type</b>")
-            for (let arcType of ["nested", "proportional", "chiapet", "chiapetoutbound"]) {
+            for (let arcType of ["nested", "proportional", "inView", "partialInView"]) {
                 items.push(
                     {
                         object: $(createCheckbox(lut[arcType], arcType === this.arcType)),
@@ -588,7 +492,7 @@ class InteractionTrack extends TrackBase {
         })
 
 
-        if (this.arcType === "proportional" || this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
+        if (this.arcType === "proportional" || this.arcType === "inView" || this.arcType === "partialInView") {
             // MenuUtils.numericDataMenuItems(this.trackView).forEach(item => items.push(item))
             items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
         }
@@ -635,7 +539,7 @@ class InteractionTrack extends TrackBase {
                         this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
                     // second pass: observe data range to pass its effect to circular view
                     let inView = []
-                    if (this.arcType === "chiapet" || this.arcType === "chiapetoutbound") {
+                    if (this.arcType === "inView" || this.arcType === "partialInView") {
                         inView = inViewFirstPass.filter(feature => {
                                 if (this.dataRange.min <= feature.score && feature.score <= this.dataRange.max) {
                                     if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
@@ -670,9 +574,13 @@ class InteractionTrack extends TrackBase {
                     // for filtered set, distinguishing the chromosomes is more critical than tracks
                     // FIXME: but this become mutual exclusion, i.e. impossible for comparative loci across different tracks
                     const color = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.5)
-                    // name the track to include filtering information
-                    const inViewName = "all" === refFrame.chr ? this.name : `${this.name} (${refFrame.chr}:${refFrame.start}-${refFrame.end} ; range:${this.dataRange.min}-${this.dataRange.max})`
-                    this.browser.circularView.addChords(chords, {track: inViewName, color: color})
+
+                    // name the chord set to include filtering information
+                    const encodedName = this.name.replaceAll(' ', '%20')
+                    const chordSetName = "all" === refFrame.chr ?
+                        encodedName :
+                        `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end} ; range:${this.dataRange.min}-${this.dataRange.max})`
+                    this.browser.circularView.addChords(chords, {track: chordSetName, color: color})
                 }
             })
 
@@ -748,7 +656,7 @@ class InteractionTrack extends TrackBase {
         const featureList = features || clickState.viewport.getCachedFeatures()
         const candidates = []
         if (featureList) {
-            const proportional = (this.arcType === "proportional" || this.arcType === "chiapet" || this.arcType === "chiapetoutbound")
+            const proportional = (this.arcType === "proportional" || this.arcType === "inView" || this.arcType === "partialInView")
 
             for (let feature of featureList) {
                 if (!feature.drawState) continue
