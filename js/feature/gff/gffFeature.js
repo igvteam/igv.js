@@ -24,6 +24,9 @@ class GFFFeature {
 
         pd.push({name: 'Type', value: this.type})
         pd.push({name: 'Source', value: this.source})
+        if (this.score !== undefined) {
+            pd.push({name: 'Score', value: this.score})
+        }
 
         if (this.attributeString) {
             const atts = parseAttributeString(this.attributeString, this.delim)
