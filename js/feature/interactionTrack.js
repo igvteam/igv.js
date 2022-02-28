@@ -168,6 +168,9 @@ class InteractionTrack extends TrackBase {
 
             for (let feature of featureList) {
 
+                // Reset transient property drawState.  An undefined value => feature has not been drawn.
+                feature.drawState = undefined
+
                 let color = feature.color || this.color
                 if (color && this.config.useScore) {
                     color = getAlphaColor(color, scoreShade(feature.score))
@@ -239,8 +242,8 @@ class InteractionTrack extends TrackBase {
                     ctx.strokeStyle = color
                     // get a sense of trans "spread"
                     ctx.fillStyle = getAlphaColor(getChrColor(otherChr), 0.5)
-                   // ctx.fillStyle = color
-                    
+                    // ctx.fillStyle = color
+
                     if (direction) {
                         // UP
                         ctx.fillRect(pixelStart, this.height / 2, w, this.height / 2)
@@ -274,7 +277,6 @@ class InteractionTrack extends TrackBase {
         }
     }
 
-    // TODO: refactor to igvUtils.js
     getScaleFactor(min, max, height, logScale) {
         const scale = logScale ? height / (Math.log10(max + 1) - (min <= 0 ? 0 : Math.log10(min + 1))) : height / (max - min)
         return scale
@@ -307,6 +309,9 @@ class InteractionTrack extends TrackBase {
 
             for (let feature of featureList) {
 
+                // Reset transient property drawState.  An undefined value => feature has not been drawn.
+                feature.drawState = undefined
+
                 const value = this.valueColumn ? feature[this.valueColumn] : feature.score
                 if (value === undefined || Number.isNaN(value)) continue
 
@@ -324,9 +329,9 @@ class InteractionTrack extends TrackBase {
                         pixelStart--
                     }
 
-                    // original fly over issue!
-                    // if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue;
-                    if("proportional" !== this.arcType) {
+                    // Various filters
+                    if (value < this.dataRange.min || value > this.dataRange.max) continue
+                    if ("proportional" !== this.arcType) {
                         const showOutbound = (this.arcType === "partialInView")
                         const within = (m1 >= refStart && m2 <= refEnd)
                         let outBound = false
@@ -336,7 +341,6 @@ class InteractionTrack extends TrackBase {
                             if (!outBound) inBound = (refStart <= m2 && m2 <= refEnd)
                         }
                         if (!(within || outBound || inBound)) continue
-                        if (value < this.dataRange.min) continue // TODO: is a range?!
                     }
 
 
@@ -344,18 +348,18 @@ class InteractionTrack extends TrackBase {
                     const xc = pixelStart + w / 2
                     feature.drawState = {xc, yc: y, radiusX, radiusY}
 
-                    const arcKey = ((pixelStart << 16) | pixelEnd)
-                    let arc = arcCaches.get(arcKey)
-                    if (arc !== undefined) {
-                        if (arc.has(radiusY)) {
-                            continue
-                        }
-                        arc.add(radiusY)
-                    } else {
-                        let arcHeights = new Set()
-                        arcHeights.add(radiusY)
-                        arcCaches.set(arcKey, arcHeights)
-                    }
+                    // const arcKey = ((pixelStart << 16) | pixelEnd)
+                    // let arc = arcCaches.get(arcKey)
+                    // if (arc !== undefined) {
+                    //     if (arc.has(radiusY)) {
+                    //         continue
+                    //     }
+                    //     arc.add(radiusY)
+                    // } else {
+                    //     let arcHeights = new Set()
+                    //     arcHeights.add(radiusY)
+                    //     arcCaches.set(arcKey, arcHeights)
+                    // }
 
                     const counterClockwise = this.arcOrientation ? true : false
                     const color = feature.color || this.color
@@ -377,7 +381,6 @@ class InteractionTrack extends TrackBase {
                         } else {
                             ctx.fill()
                         }
-
                     }
 
                     if (this.showBlocks && feature.chr !== 'all') {
@@ -392,9 +395,10 @@ class InteractionTrack extends TrackBase {
                     }
 
                 } else {
+                    // Inter chromosome
                     let pixelStart = Math.round((feature.start - bpStart) / xScale)
                     let pixelEnd = Math.round((feature.end - bpStart) / xScale)
-                    if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue
+                    if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min || value > this.dataRange.max) continue
 
                     const h = Math.min(radiusY, this.height - 13)   // Leave room for text
                     let w = (pixelEnd - pixelStart)
@@ -428,13 +432,15 @@ class InteractionTrack extends TrackBase {
     }
 
     paintAxis(ctx, pixelWidth, pixelHeight) {
+        // dataRane is interpreted differently for interactino tracks -- all arcs are drawn from "zero", irrespective of dataRange.min
+        const axisRange = {min: 0, max: this.dataRange.max}
         if (this.arcType === "proportional") {
             this.painter.flipAxis = !this.arcOrientation
-            this.painter.dataRange = this.dataRange
+            this.painter.dataRange = axisRange
             this.painter.paintAxis(ctx, pixelWidth, pixelHeight)
         } else if (this.arcType === "inView" || this.arcType === "partialInView") {
             this.painter.flipAxis = !this.arcOrientation
-            this.painter.dataRange = this.dataRange
+            this.painter.dataRange = axisRange
             this.painter.paintAxis(ctx, pixelWidth, pixelHeight)
         } else {
             this.clearAxis(ctx, pixelWidth, pixelHeight)
@@ -498,23 +504,13 @@ class InteractionTrack extends TrackBase {
         }
 
         if (this.browser.circularView && true === this.browser.circularViewVisible) {
+            items.push('<hr/>')
             items.push({
                 label: 'Add interactions to circular view',
                 click: () => {
-
-                    const inView = []
                     for (let viewport of this.trackView.viewports) {
-                        const refFrame = viewport.referenceFrame
-                        for (let f of viewport.getCachedFeatures()) {
-                            if (f.end >= refFrame.start && f.start <= refFrame.end) {
-                                inView.push(f)
-                            }
-                        }
+                        this.addChordsForViewport(viewport.referenceFrame)
                     }
-
-                    const chords = makeBedPEChords(inView)
-                    const color = IGVColor.addAlpha(this.color, 0.5)
-                    this.browser.circularView.addChords(chords, {track: this.name, color: color})
                 }
             })
         }
@@ -534,62 +530,42 @@ class InteractionTrack extends TrackBase {
                 click: () => {
                     const refFrame = viewport.referenceFrame
                     // first pass: to get all the relevant features
-                    const inViewFirstPass = "all" === refFrame.chr ?
-                        this.featureSource.getAllFeatures() :
-                        this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
-                    // second pass: observe data range to pass its effect to circular view
-                    let inView = []
-                    if (this.arcType === "inView" || this.arcType === "partialInView") {
-                        inView = inViewFirstPass.filter(feature => {
-                                if (this.dataRange.min <= feature.score && feature.score <= this.dataRange.max) {
-                                    if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
-                                        const {m1, m2} = getMidpoints(feature, this.browser.genome)
-                                        const within = m1 >= refFrame.start && m2 <= refFrame.end
-                                        let outBound = false
-                                        let inBound = false
-
-                                        if (!within && this.showOutbound) {
-                                            outBound = refFrame.start <= m1 && m1 <= refFrame.end
-                                            if (!outBound) {
-                                                inBound = refFrame.start <= m2 && m2 <= refFrame.end
-                                            }
-                                        }
-
-                                        if (!(within || outBound || inBound)) {
-                                            return false
-                                        }
-                                        return true
-                                    } else {
-                                        return true
-                                    }
-                                }
-                                return false
-                            }
-                        )
-                    } else {
-                        inView = inViewFirstPass.filter(feature => this.dataRange.min <= feature.score && feature.score <= this.dataRange.max)
-                    }
-                    this.browser.circularViewVisible = true
-                    const chords = makeBedPEChords(inView)
-                    // for filtered set, distinguishing the chromosomes is more critical than tracks
-                    // FIXME: but this become mutual exclusion, i.e. impossible for comparative loci across different tracks
-                    const color = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.5)
-
-                    // name the chord set to include filtering information
-                    const encodedName = this.name.replaceAll(' ', '%20')
-                    const chordSetName = "all" === refFrame.chr ?
-                        encodedName :
-                        `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end} ; range:${this.dataRange.min}-${this.dataRange.max})`
-                    this.browser.circularView.addChords(chords, {track: chordSetName, color: color})
+                    this.addChordsForViewport(refFrame)
                 }
             })
 
             list.push('<hr/>')
             return list
         }
-
     }
 
+    /**
+     * Add chords to the circular view for the given viewport, represented by its reference frame
+     * @param refFrame
+     */
+    addChordsForViewport(refFrame) {
+        const cachedFeatures = "all" === refFrame.chr ?
+            this.featureSource.getAllFeatures() :
+            this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
+
+        // inView features are simply features that have been drawn, i.e. have a drawState
+        const inView = cachedFeatures.filter(f => f.drawState)
+        if(inView.length === 0) erturn;
+
+        this.browser.circularViewVisible = true
+        const chords = makeBedPEChords(inView)
+
+        // for filtered set, distinguishing the chromosomes is more critical than tracks
+        const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.5)
+        const trackColor = IGVColor.addAlpha(this.color, 0.5)
+
+        // name the chord set to include filtering information
+        const encodedName = this.name.replaceAll(' ', '%20')
+        const chordSetName = "all" === refFrame.chr ?
+            encodedName :
+            `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end} ; range:${this.dataRange.min}-${this.dataRange.max})`
+        this.browser.circularView.addChords(chords, {track: chordSetName, color: chordSetColor, trackColor: trackColor})
+    }
 
     doAutoscale(features) {
 
@@ -659,7 +635,9 @@ class InteractionTrack extends TrackBase {
             const proportional = (this.arcType === "proportional" || this.arcType === "inView" || this.arcType === "partialInView")
 
             for (let feature of featureList) {
+
                 if (!feature.drawState) continue
+
                 if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
                     if (proportional) {
                         //(x-xc)^2/radiusX^2 + (y-yc)^2/radiusY^2 <= 1
