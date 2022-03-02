@@ -40,7 +40,7 @@ class CursorGuide {
 
         this.addMouseHandler(browser)
 
-        this.setVisibility(browser.config.showCursorTrackingGuide)
+        this.setVisibility(browser.config.showCursorGuide)
 
     }
 
@@ -104,8 +104,8 @@ class CursorGuide {
         this.columnContainer.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
 
-    setVisibility(showCursorTrackingGuide) {
-        if (true === showCursorTrackingGuide) {
+    setVisibility(showCursorGuide) {
+        if (true === showCursorGuide) {
             this.show()
         } else {
             this.hide()
