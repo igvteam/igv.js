@@ -146,7 +146,7 @@ class Browser {
 
         this.isCenterLineVisible = config.showCenterGuide
 
-        this.cursorGuideVisible = config.showCursorTrackingGuide
+        this.cursorGuideVisible = config.showCursorGuide
 
         this.showSampleNames = config.showSampleNames
         this.showSampleNameButton = config.showSampleNameButton
