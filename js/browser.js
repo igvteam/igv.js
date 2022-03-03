@@ -73,6 +73,7 @@ import RulerTrack from "./rulerTrack.js"
 import GtexSelection from "./gtex/gtexSelection.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
+import CustomButton from "./ui/customButton.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -257,6 +258,12 @@ class Browser {
 
         if (true === config.showSVGButton) {
             this.svgSaveControl = new SVGSaveControl($toggle_button_container.get(0), this)
+        }
+
+        if(config.customButtons) {
+            for(let b of config.customButtons) {
+                new CustomButton($toggle_button_container.get(0), this, b)
+            }
         }
 
         this.zoomWidget = new ZoomWidget(this, $navbarRightContainer.get(0))
