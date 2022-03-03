@@ -26,49 +26,51 @@
 
 import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 
-const TrackLabelControl = function (parent, browser) {
+class TrackLabelControl {
 
-    this.button = DOMUtils.div({class: 'igv-navbar-button'})
-    parent.appendChild(this.button)
-    this.button.textContent = 'track labels'
+    constructor(parent, browser) {
 
-    this.button.addEventListener('click', () => {
-        browser.trackLabelsVisible = !browser.trackLabelsVisible
+        this.button = DOMUtils.div({class: 'igv-navbar-button'})
+        parent.appendChild(this.button)
+        this.button.textContent = 'track labels'
+
+        this.button.addEventListener('click', () => {
+            browser.trackLabelsVisible = !browser.trackLabelsVisible
+            this.setState(browser.trackLabelsVisible)
+            browser.setTrackLabelVisibility(browser.trackLabelsVisible)
+        })
+
+        this.browser = browser
+
+        this.setVisibility(browser.config.showTrackLabelButton)
+
         this.setState(browser.trackLabelsVisible)
-        browser.setTrackLabelVisibility(browser.trackLabelsVisible)
-    })
-
-    this.browser = browser
-
-    this.setVisibility(browser.config.showTrackLabelButton)
-
-    this.setState(browser.trackLabelsVisible)
-
-}
-
-TrackLabelControl.prototype.setVisibility = function (showTrackLabelButton) {
-    if (true === showTrackLabelButton) {
-        this.show()
-    } else {
-        this.hide()
     }
-}
 
-TrackLabelControl.prototype.setState = function (trackLabelsVisible) {
-    if (true === trackLabelsVisible) {
-        this.button.classList.add('igv-navbar-button-clicked')
-    } else {
-        this.button.classList.remove('igv-navbar-button-clicked')
+    setVisibility(showTrackLabelButton) {
+        if (true === showTrackLabelButton) {
+            this.show()
+        } else {
+            this.hide()
+        }
     }
-}
 
-TrackLabelControl.prototype.show = function () {
-    this.button.style.display = 'block'
-    this.setState(this.browser.trackLabelsVisible)
-}
+    setState(trackLabelsVisible) {
+        if (true === trackLabelsVisible) {
+            this.button.classList.add('igv-navbar-button-clicked')
+        } else {
+            this.button.classList.remove('igv-navbar-button-clicked')
+        }
+    }
 
-TrackLabelControl.prototype.hide = function () {
-    this.button.style.display = 'none'
+    show() {
+        this.button.style.display = 'block'
+        this.setState(this.browser.trackLabelsVisible)
+    }
+
+    hide() {
+        this.button.style.display = 'none'
+    }
 }
 
 export default TrackLabelControl
