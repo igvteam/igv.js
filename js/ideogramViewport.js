@@ -27,6 +27,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
 import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
 import TrackViewport from "./trackViewport.js"
+import {viewportColumnManager} from './viewportColumnManager.js'
 
 class IdeogramViewport extends TrackViewport {
 
@@ -51,24 +52,46 @@ class IdeogramViewport extends TrackViewport {
     }
 
     addMouseHandlers() {
+        this.addBrowserObserver()
         this.addViewportClickHandler(this.$viewport.get(0))
     }
 
     removeMouseHandlers() {
+        this.removeBrowserObserver()
         this.removeViewportClickHandler(this.$viewport.get(0))
 
     }
 
-    addViewportClickHandler(viewport) {
+    addBrowserObserver() {
 
-        this.boundClickHandler = clickHandler.bind(this)
-        viewport.addEventListener('click', this.boundClickHandler)
+        function observerHandler(referenceFrameList) {
+            const column = this.$viewport.get(0).parentElement
+            if (null !== column) {
+                const index = viewportColumnManager.indexOfColumn(this.browser.columnContainer, column)
+                // console.log(`ideogram-viewport - locus-change-handler index(${ index }) ${ referenceFrameList[ index ].getLocusString() } ${ Date.now() } `)
+                this.update(this.ideogram_ctx, this.$viewport.width(), this.$viewport.height(), referenceFrameList[ index ])
+            }
+        }
+
+        this.boundObserverHandler = observerHandler.bind(this)
+        this.browser.on('locuschange', this.boundObserverHandler)
+    }
+
+    removeBrowserObserver() {
+        this.browser.off('locuschange', this.boundObserverHandler)
+    }
+
+    addViewportClickHandler(viewport) {
 
         function clickHandler(event) {
 
+            const column = viewport.parentElement
+            const index = viewportColumnManager.indexOfColumn(this.browser.columnContainer, column)
+            const referenceFrame = this.browser.referenceFrameList[ index ]
+
             const {xNormalized, width} = DOMUtils.translateMouseCoordinates(event, this.ideogram_ctx.canvas)
-            const {bpLength} = this.browser.genome.getChromosome(this.referenceFrame.chr)
-            const locusLength = this.referenceFrame.bpPerPixel * width
+            const {bpLength} = this.browser.genome.getChromosome(referenceFrame.chr)
+            const locusLength = referenceFrame.bpPerPixel * width
             const chrCoveragePercentage = locusLength / bpLength
 
             let xPercentage = xNormalized
@@ -83,13 +106,16 @@ class IdeogramViewport extends TrackViewport {
             const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength)
             const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength)
 
-            this.referenceFrame.start = ss
-            this.referenceFrame.end = ee
-            this.referenceFrame.bpPerPixel = (ee - ss) / width
+            referenceFrame.start = ss
+            referenceFrame.end = ee
+            referenceFrame.bpPerPixel = (ee - ss) / width
 
-            this.browser.updateViews(this.referenceFrame, this.browser.trackViews, true)
+            this.browser.updateViews(referenceFrame, this.browser.trackViews, true)
 
         }
+
+        this.boundClickHandler = clickHandler.bind(this)
+        viewport.addEventListener('click', this.boundClickHandler)
 
     }
 
@@ -115,22 +141,10 @@ class IdeogramViewport extends TrackViewport {
         context.restore()
     }
 
-    async repaint() {
-        this.draw({referenceFrame: this.referenceFrame})
-    }
-
-    draw({referenceFrame}) {
-
+    update(context, pixelWidth, pixelHeight, referenceFrame) {
         this.$canvas.hide()
-
-        IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, this.$viewport.width(), this.$viewport.height())
-
-        this.trackView.track.draw({
-            context: this.ideogram_ctx,
-            referenceFrame,
-            pixelWidth: this.$viewport.width(),
-            pixelHeight: this.$viewport.height()
-        })
+        IGVGraphics.configureHighDPICanvas(context, pixelWidth, pixelHeight)
+        this.trackView.track.draw({ context, referenceFrame, pixelWidth, pixelHeight })
     }
 
     startSpinner() {
