@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Custom Button</title>
+</head>
+
+<body>
+
+<h2>Custom Navbar Button</h2>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+
+        const browser = await igv.createBrowser(document.getElementById("igvDiv"),  {
+            genome: "hg19",
+            customButtons: [
+                {
+                    label: "Hello",
+                    callback: () => {alert("Hello World")}
+                }
+            ]
+        })
+
+
+
+</script>
+</body>
+</html>
