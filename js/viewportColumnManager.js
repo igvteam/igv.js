@@ -48,6 +48,20 @@ const viewportColumnManager =
             }
 
         },
+
+        indexOfColumn: (columnContainer, column) => {
+
+            const allColumns = columnContainer.querySelectorAll('.igv-column')
+
+            for (let i = 0; i < allColumns.length; i++) {
+                const c = allColumns[ i ]
+                if (c === column) {
+                    return i
+                }
+            }
+
+            return undefined
+        },
     }
 
 export {viewportColumnManager}
