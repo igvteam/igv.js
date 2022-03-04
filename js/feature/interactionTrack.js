@@ -550,7 +550,7 @@ class InteractionTrack extends TrackBase {
 
         // inView features are simply features that have been drawn, i.e. have a drawState
         const inView = cachedFeatures.filter(f => f.drawState)
-        if(inView.length === 0) erturn;
+        if(inView.length === 0) return;
 
         this.browser.circularViewVisible = true
         const chords = makeBedPEChords(inView)
