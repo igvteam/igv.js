@@ -1537,6 +1537,7 @@ class Browser {
         // Build locus array (multi-locus view).  Use the first track to extract the loci, any track could be used.
         const locus = []
         const gtexSelections = {}
+        let hasGtexSelections = false;
         let anyTrackView = this.trackViews[0]
         for (let {referenceFrame} of anyTrackView.viewports) {
             const locusString = referenceFrame.getLocusString()
@@ -1547,12 +1548,11 @@ class Browser {
                     snp: referenceFrame.selection.snp
                 }
                 gtexSelections[locusString] = selection
+                hasGtexSelections = true;
             }
         }
         json["locus"] = locus.length === 1 ? locus[0] : locus
-
-        const gtexKeys = Object.getOwnPropertyNames(gtexSelections)
-        if (gtexKeys.length > 0) {
+        if (hasGtexSelections) {
             json["gtexSelections"] = gtexSelections
         }
 
@@ -1576,27 +1576,21 @@ class Browser {
                     trackJson.push(config)
                 }
             } catch (e) {
-                errors.push(e)
+                console.error(`Track: ${track.name}: ${e}`)
+                errors.push(`Track: ${track.name}: ${e}`)
             }
         }
 
         if (errors.length > 0) {
             let n = 1
-            let message = 'Errors encountered saving session:'
+            let message = 'Errors encountered saving session: </br>'
             for (let e of errors) {
-                message += ` (${n++}) ${e.toString()}.`
+                message += ` (${n++}) ${e.toString()} <br/>`
             }
             throw Error(message)
         }
 
 
-        const locaTrackFiles = trackJson.filter((track) => {
-            track.url && FileUtils.isFile(track.url)
-        })
-
-        if (locaTrackFiles.length > 0) {
-            throw new Error(`Error. Sessions cannot include local file references.`)
-        }
 
         json["tracks"] = trackJson
 
