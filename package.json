@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": "2.10.5",
+  "version": "2.11.0",
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
@@ -55,7 +55,7 @@
     "eslint": "^6.4.0",
     "esm": "^3.2.25",
     "igv-ui": "github:igvteam/igv-ui#v1.2.3",
-    "igv-utils": "github:igvteam/igv-utils.git",
+    "igv-utils": "github:igvteam/igv-utils.git#v1.3.9",
     "mocha": "^8.1.3",
     "regenerator-runtime": "^0.13.3",
     "rollup": "^2.66.0",
