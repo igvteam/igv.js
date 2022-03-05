@@ -82,7 +82,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                     "pageSize": "10000"
                 },
                 decode: decodeGa4ghReads,
-                results: new AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported, self.alleleFreqThreshold)
+                results: new AlignmentContainer(chr, bpStart, bpEnd, self.config)
             })
         })
 
@@ -174,7 +174,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
             alignment.properPlacement = record.properPlacement
             alignment.duplicateFragment = record.duplicateFragment
             alignment.numberReads = record.numberReads
-            alignment.fragmentLength = record.fragmentLength
+            alignment.tlen = record.tlen
             alignment.readNumber = record.readNumber
             alignment.failedVendorQualityChecks = record.failedVendorQualityChecks
             alignment.secondaryAlignment = record.secondaryAlignment

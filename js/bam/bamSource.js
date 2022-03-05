@@ -123,7 +123,6 @@ class BamSource {
             }
             const hasAlignments = alignments.length > 0
             alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips)
-            alignmentContainer.alignments = undefined  // Don't need to hold onto these anymore
 
             this.alignmentContainer = alignmentContainer
 
