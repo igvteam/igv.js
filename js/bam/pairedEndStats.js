@@ -17,7 +17,7 @@ class PairedEndStats {
 
         for (let alignment of alignments) {
             if (alignment.isProperPair()) {
-                var tlen = Math.abs(alignment.tlen)
+                var tlen = Math.abs(alignment.fragmentLength)
                 this.sumF += tlen
                 this.sumF2 += tlen * tlen
                 this.isizes.push(tlen)
