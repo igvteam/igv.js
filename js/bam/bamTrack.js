@@ -36,6 +36,7 @@ import {PaletteColorTable} from "../util/colorPalletes.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {makePairedAlignmentChords, makeSupplementalAlignmentChords} from "../jbrowse/circularViewUtils.js"
 import {isSecureContext} from "../util/igvUtils.js"
+import PairedEndStats from "./pairedEndStats.js"
 
 const alignmentStartGap = 5
 const downsampleRowHeight = 5
@@ -76,8 +77,6 @@ class BAMTrack extends TrackBase {
         this.showMismatches = false !== config.showMismatches
         this.color = config.color
         this.coverageColor = config.coverageColor
-        this.minFragmentLength = config.minFragmentLength   // Optional, might be undefined
-        this.maxFragmentLength = config.maxFragmentLength || 1000
 
         // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
         // are present for a given reference frame the last one will take precedence
@@ -103,6 +102,18 @@ class BAMTrack extends TrackBase {
 
     get height() {
         return this._height
+    }
+
+    get minTemplateLength() {
+        const configMinTLEN = this.config.minTLEN !== undefined ? this.config.minTLEN : this.config.minFragmentLength
+        return (configMinTLEN !== undefined) ? configMinTLEN :
+            this._pairedEndStats ? this._pairedEndStats.minTLEN : 0
+    }
+
+    get maxTemplateLength() {
+        const configMaxTLEN = this.config.maxTLEN !== undefined ? this.config.maxTLEN : this.config.maxFragmentLength
+        return (configMaxTLEN !== undefined) ? configMaxTLEN :
+            this._pairedEndStats ? this._pairedEndStats.maxTLEN : 1000
     }
 
     sort(options) {
@@ -145,14 +156,13 @@ class BAMTrack extends TrackBase {
 
         const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
 
-        if (alignmentContainer.alignments && alignmentContainer.alignments.length > 99) {
-            if (undefined === this.minFragmentLength) {
-                this.minFragmentLength = alignmentContainer.pairedEndStats.lowerFragmentLength
-            }
-            if (undefined === this.maxFragmentLength) {
-                this.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength
+        if (alignmentContainer.paired && !this._pairedEndStats && !this.config.maxFragmentLength) {
+            const pairedEndStats = new PairedEndStats(alignmentContainer.alignments, this.config)
+            if (pairedEndStats.totalCount > 99) {
+                this._pairedEndStats = pairedEndStats
             }
         }
+        alignmentContainer.alignments = undefined  // Don't need to hold onto these anymore
 
         const sort = this.sortObject
         if (sort) {
@@ -249,7 +259,7 @@ class BAMTrack extends TrackBase {
         if (this.alignmentTrack.hasPairs) {
             colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'})
             colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'})
-            colorByMenuItems.push({key: 'fragmentLength', label: 'insert size (TLEN)'})
+            colorByMenuItems.push({key: 'tlen', label: 'insert size (TLEN)'})
             colorByMenuItems.push({key: 'unexpectedPair', label: 'pair orientation & insert size (TLEN)'})
         }
         const tagLabel = 'tag' + (this.alignmentTrack.colorByTag ? ' (' + this.alignmentTrack.colorByTag + ')' : '')
@@ -363,7 +373,7 @@ class BAMTrack extends TrackBase {
                 menuItems.push({
                     label: 'Add discordant pairs to circular view',
                     click: () => {
-                        const maxFragmentLength = this.maxFragmentLength
+                        const maxTemplateLength = this.maxTemplateLength
                         const inView = []
                         for (let viewport of this.trackView.viewports) {
                             for (let a of viewport.getCachedFeatures().allAlignments()) {
@@ -372,7 +382,7 @@ class BAMTrack extends TrackBase {
                                     && a.start <= referenceFrame.end
                                     && a.mate
                                     && a.mate.chr
-                                    && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxFragmentLength)) {
+                                    && (a.mate.chr !== a.chr || Math.max(a.tlen) > maxTemplateLength)) {
                                     inView.push(a)
                                 }
                             }
@@ -734,8 +744,8 @@ class AlignmentTrack {
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)"
         this.pairConnectorColor = config.pairConnectorColor
 
-        this.smallFragmentLengthColor = config.smallFragmentLengthColor || "rgb(0, 0, 150)"
-        this.largeFragmentLengthColor = config.largeFragmentLengthColor || "rgb(200, 0, 0)"
+        this.smallTLENColor = config.smallTLENColor || config.smallFragmentLengthColor || "rgb(0, 0, 150)"
+        this.largeTLENColor = config.largeTLENColor ||  config.largeFragmentLengthColor || "rgb(200, 0, 0)"
 
         this.pairOrientation = config.pairOrienation || 'fr'
         this.pairColors = {}
@@ -743,7 +753,7 @@ class AlignmentTrack {
         this.pairColors["RR"] = config.rrColor || "rgb(20, 50, 200)"
         this.pairColors["LL"] = config.llColor || "rgb(0, 150, 150)"
 
-        this.colorBy = config.colorBy || "pairOrientation"
+        this.colorBy = config.colorBy || "unexpectedPair"
         this.colorByTag = config.colorByTag ? config.colorByTag.toUpperCase() : undefined
         this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag
 
@@ -1249,7 +1259,7 @@ class AlignmentTrack {
                                 && a.start <= referenceFrame.end
                                 && a.mate
                                 && a.mate.chr
-                                && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxFragmentLength)
+                                && (a.mate.chr !== a.chr || Math.max(a.tlen) > maxFragmentLength)
                         })
                         this.browser.circularViewVisible = true
                         const chords = makePairedAlignmentChords(inView)
@@ -1382,14 +1392,17 @@ class AlignmentTrack {
                     break
                 }
 
+            case "tlen":
             case "fragmentLength":
 
-                if (alignment.mate && alignment.isMateMapped() && alignment.mate.chr !== alignment.chr) {
-                    color = getChrColor(alignment.mate.chr)
-                } else if (this.parent.minFragmentLength && Math.abs(alignment.fragmentLength) < this.parent.minFragmentLength) {
-                    color = this.smallFragmentLengthColor
-                } else if (this.parent.maxFragmentLength && Math.abs(alignment.fragmentLength) > this.parent.maxFragmentLength) {
-                    color = this.largeFragmentLengthColor
+                if (alignment.mate && alignment.isMateMapped()) {
+                    if (alignment.mate.chr !== alignment.chr) {
+                        color = getChrColor(alignment.mate.chr)
+                    } else if (this.parent.minTemplateLength && Math.abs(alignment.tlen) < this.parent.minTemplateLength) {
+                        color = this.smallTLENColor
+                    } else if (this.parent.maxTemplateLength && Math.abs(alignment.tlen) > this.parent.maxTemplateLength) {
+                        color = this.largeTLENColor
+                    }
                 }
                 break
 
@@ -1430,11 +1443,6 @@ function sortAlignmentRows(options, alignmentContainer) {
         const i = rowA.score > rowB.score ? 1 : (rowA.score < rowB.score ? -1 : 0)
         return true === direction ? i : -i
     })
-
-    // For debugging
-    // for(let r of alignmentContainer.packedAlignmentRows) {
-    //     console.log(r.score);
-    // }
 
 }
 

@@ -51,9 +51,7 @@ class BamReader {
         const chrToIndex = await this.getChrIndex()
         const queryChr = this.chrAliasTable.hasOwnProperty(chr) ? this.chrAliasTable[chr] : chr
         const chrId = chrToIndex[queryChr]
-        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd,
-            this.config.samplingWindowSize, this.config.samplingDepth,
-            this.config.pairsSupported, this.config.alleleFreqThreshold)
+        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
 
         if (chrId === undefined) {
             return alignmentContainer

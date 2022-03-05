@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SKBR3 Alignments</title>
+
+</head>
+<body>
+
+
+<div id="igvDiv"></div>
+
+
+<script type="module">
+
+    import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
+    import igv from "../../js/index.js"
+
+    // Start igv.js and create regions
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr17:64,046,674-64,051,506",
+            tracks: [
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
+                    type: "alignment",
+                    format: "bam",
+                    name: "Default",
+                    showMismatches: false,
+                    height: 500,
+                    colorBy: "tlen"
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
+                    type: "alignment",
+                    format: "bam",
+                    name: "Percentiles 5 - 95",
+                    showMismatches: false,
+                    height: 500,
+                    colorBy: "tlen",
+                    minTLENPercentile: 5.0,
+                    maxTLENPercentile: 95.0
+
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
+                    type: "alignment",
+                    format: "bam",
+                    name: "TLEN 50 - 500",
+                    showMismatches: false,
+                    height: 500,
+                    colorBy: "tlen",
+                    minTLEN: 50,
+                    maxTLEN: 500
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById("igvDiv"), options)
+        .then(async function (browser) {
+            console.log("Created IGV browser")
+
+        })
+
+
+</script>
+
+</body>
+</html>
