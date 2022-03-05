@@ -52,7 +52,7 @@ class BamReaderNonIndexed {
             const header = this.header
             const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr
             const qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd)
-            const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold)
+            const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
             for (let a of qAlignments) {
                 alignmentContainer.push(a)
             }
@@ -85,7 +85,7 @@ class BamReaderNonIndexed {
     fetchAlignments(chr, bpStart, bpEnd) {
         const queryChr = this.header.chrAliasTable.hasOwnProperty(chr) ? this.header.chrAliasTable[chr] : chr
         const features = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd)
-        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported)
+        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
         for (let feature of features) {
             alignmentContainer.push(feature)
         }

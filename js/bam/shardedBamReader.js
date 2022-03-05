@@ -51,7 +51,7 @@ class ShardedBamReader {
     async readAlignments(chr, start, end) {
 
         if (!this.bamReaders.hasOwnProperty(chr)) {
-            return new AlignmentContainer(chr, start, end)
+            return new AlignmentContainer(chr, start, end, this.config)
         } else {
 
             let reader = this.bamReaders[chr]

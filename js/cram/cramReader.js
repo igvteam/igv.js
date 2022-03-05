@@ -137,8 +137,7 @@ class CramReader {
         const header = await this.getHeader()
         const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr
         const chrIdx = header.chrToIndex[queryChr]
-        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd,
-            this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold)
+        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
 
         if (chrIdx === undefined) {
             return alignmentContainer
@@ -193,7 +192,7 @@ class CramReader {
             alignment.lengthOnRef = record.lengthOnRef
             alignment.flags = record.flags
             alignment.strand = !(record.flags & READ_STRAND_FLAG)
-            alignment.fragmentLength = record.templateLength || record.templateSize
+            alignment.tlen = record.templateLength || record.templateSize
             alignment.mq = record.mappingQuality
             alignment.end = record.alignmentStart + record.lengthOnRef
             alignment.readGroupId = record.readGroupId
@@ -220,8 +219,8 @@ class CramReader {
 
             makeBlocks(record, alignment)
 
-            if (alignment.mate && alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
-                alignment.fragmentLength = -alignment.fragmentLength
+            if (alignment.mate && alignment.start > alignment.mate.position && alignment.tlen > 0) {
+                alignment.tlen = -alignment.tlen
             }
 
             BamUtils.setPairOrientation(alignment)

@@ -206,7 +206,7 @@ class BamAlignment {
                 nameValues.push({name: 'Mate Chromosome', value: this.mate.chr})
                 nameValues.push({name: 'Mate Start', value: (this.mate.position + 1)})
                 nameValues.push({name: 'Mate Strand', value: (true === this.mate.strand ? '(+)' : '(-)')})
-                nameValues.push({name: 'Insert Size', value: this.fragmentLength})
+                nameValues.push({name: 'Insert Size', value: this.tlen})
                 // Mate Start
                 // Mate Strand
                 // Insert Size
