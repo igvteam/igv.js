@@ -277,7 +277,7 @@ const BamUtils = {
             alignment.readName = readName
             alignment.cigar = cigar
             alignment.lengthOnRef = lengthOnRef
-            alignment.fragmentLength = tlen
+            alignment.tlen = tlen
             alignment.mq = mq
 
             BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray)
@@ -351,7 +351,7 @@ const BamUtils = {
             alignment.strand = !(alignment.flags & READ_STRAND_FLAG)
             alignment.mq = Number.parseInt(tokens[4])
             alignment.cigar = tokens[5]
-            alignment.fragmentLength = Number.parseInt(tokens[8])
+            alignment.tlen = Number.parseInt(tokens[8])
             alignment.seq = tokens[9]
 
             if (alignment.chr === '*' || !alignment.isMapped()) continue  // Unmapped
@@ -447,7 +447,7 @@ const BamUtils = {
             }
 
             var tmp = []
-            var isize = alignment.fragmentLength
+            var isize = alignment.tlen
             var estReadLen = alignment.end - alignment.start
             if (isize === 0) {
                 //isize not recorded.  Need to estimate.  This calculation was validated against an Illumina

@@ -107,6 +107,18 @@ class PairedAlignment {
         return true // By definition
     }
 
+    isMateMapped() {
+        return true // By definition
+    }
+
+    isProperPair() {
+        return this.firstAlignment.isProperPair()
+    }
+
+    get tlen() {
+        return Math.abs(this.firstAlignment.tlen)
+    }
+
     firstOfPairStrand() {
 
         if (this.firstAlignment.isFirstOfPair()) {

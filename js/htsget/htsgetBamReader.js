@@ -57,7 +57,7 @@ class HtsgetBamReader extends HtsgetReader {
         const ba = BGZip.unbgzf(compressedData.buffer)
 
         const chrIdx = this.header.chrToIndex[chr]
-        const alignmentContainer = new AlignmentContainer(chr, start, end, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold)
+        const alignmentContainer = new AlignmentContainer(chr, start, end, this.config)
         BamUtils.decodeBamRecords(ba, this.header.size, alignmentContainer, this.header.chrNames, chrIdx, start, end)
         alignmentContainer.finish()
 
