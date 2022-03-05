@@ -142,8 +142,10 @@ function createCircularView(el, browser) {
             const f2 = f1.mate
             const flanking = 2000
 
-            const l1 = new Locus({chr: browser.genome.getChromosomeName(f1.refName), start: f1.start, end: f1.end})
-            const l2 = new Locus({chr: browser.genome.getChromosomeName(f2.refName), start: f2.start, end: f2.end})
+            const center1 = Math.floor((f1.start + f1.end) / 2)
+            const center2 = Math.floor((f2.start + f2.end) / 2)
+            const l1 = new Locus({chr: browser.genome.getChromosomeName(f1.refName), start: center1, end: center1+1})
+            const l2 = new Locus({chr: browser.genome.getChromosomeName(f2.refName), start: center2, end: center2+1})
 
             let loci
 

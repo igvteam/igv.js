@@ -99,7 +99,7 @@ class BamAlignmentRow {
             case "READ_NAME":
                 return hashCode(alignment.readName)
             case "INSERT_SIZE":
-                return -Math.abs(alignment.tlen)
+                return -Math.abs(alignment.fragmentLength)
             case "GAP_SIZE":
                 return -alignment.gapSizeAt(position)
             case "MATE_CHR":
