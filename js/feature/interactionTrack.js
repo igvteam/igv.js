@@ -559,7 +559,7 @@ class InteractionTrack extends TrackBase {
         const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.5)
         const trackColor = IGVColor.addAlpha(this.color, 0.5)
 
-        // name the chord set to include filtering information
+        // name the chord set to include locus and filtering information
         const encodedName = this.name.replaceAll(' ', '%20')
         const chordSetName = "all" === refFrame.chr ?
             encodedName :

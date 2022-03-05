@@ -192,7 +192,7 @@ class CramReader {
             alignment.lengthOnRef = record.lengthOnRef
             alignment.flags = record.flags
             alignment.strand = !(record.flags & READ_STRAND_FLAG)
-            alignment.tlen = record.templateLength || record.templateSize
+            alignment.fragmentLength = record.templateLength || record.templateSize
             alignment.mq = record.mappingQuality
             alignment.end = record.alignmentStart + record.lengthOnRef
             alignment.readGroupId = record.readGroupId
@@ -219,8 +219,8 @@ class CramReader {
 
             makeBlocks(record, alignment)
 
-            if (alignment.mate && alignment.start > alignment.mate.position && alignment.tlen > 0) {
-                alignment.tlen = -alignment.tlen
+            if (alignment.mate && alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
+                alignment.fragmentLength = -alignment.fragmentLength
             }
 
             BamUtils.setPairOrientation(alignment)

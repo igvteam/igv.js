@@ -365,7 +365,7 @@ class BAMTrack extends TrackBase {
             })
         }
 
-        // Experimental JBrowse feature
+        // Add chords to JBrowse circular view, if present
         if (this.browser.circularView && true === this.browser.circularViewVisible &&
             (this.alignmentTrack.hasPairs || this.alignmentTrack.hasSupplemental)) {
             menuItems.push('<hr/>')
@@ -373,24 +373,9 @@ class BAMTrack extends TrackBase {
                 menuItems.push({
                     label: 'Add discordant pairs to circular view',
                     click: () => {
-                        const maxTemplateLength = this.maxTemplateLength
-                        const inView = []
                         for (let viewport of this.trackView.viewports) {
-                            for (let a of viewport.getCachedFeatures().allAlignments()) {
-                                const referenceFrame = viewport.referenceFrame
-                                if (a.end >= referenceFrame.start
-                                    && a.start <= referenceFrame.end
-                                    && a.mate
-                                    && a.mate.chr
-                                    && (a.mate.chr !== a.chr || Math.max(a.tlen) > maxTemplateLength)) {
-                                    inView.push(a)
-                                }
-                            }
+                            this.addPairedChordsForViewport(viewport)
                         }
-                        this.browser.circularViewVisible = true
-                        const chords = makePairedAlignmentChords(inView)
-                        const color = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.02)
-                        this.browser.circularView.addChords(chords, {track: this.name, color: color})
                     }
                 })
             }
@@ -398,19 +383,9 @@ class BAMTrack extends TrackBase {
                 menuItems.push({
                     label: 'Add split reads to circular view',
                     click: () => {
-                        const inView = []
                         for (let viewport of this.trackView.viewports) {
-                            for (let a of viewport.getCachedFeatures().allAlignments()) {
-                                const referenceFrame = viewport.referenceFrame
-                                const sa = a.hasTag('SA')
-                                if (a.end >= referenceFrame.start && a.start <= referenceFrame.end && sa) {
-                                    inView.push(a)
-                                }
-                            }
+                            this.addSplitChordsForViewport(viewport)
                         }
-                        const chords = makeSupplementalAlignmentChords(inView)
-                        const color = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.1)
-                        this.browser.circularView.addChords(chords, {track: this.name, color: color})
                     }
                 })
             }
@@ -547,6 +522,58 @@ class BAMTrack extends TrackBase {
 
     set autoscale(autoscale) {
         this.coverageTrack.autoscale = autoscale
+    }
+
+    /**
+     * Add chords to the circular view for the given viewport, represented by its reference frame
+     * @param refFrame
+     */
+    addPairedChordsForViewport(viewport) {
+
+        const maxTemplateLength = this.maxTemplateLength
+        const inView = []
+        const refFrame = viewport.referenceFrame
+        for (let a of viewport.getCachedFeatures().allAlignments()) {
+            if (a.end >= refFrame.start
+                && a.start <= refFrame.end
+                && a.mate
+                && a.mate.chr
+                && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxTemplateLength)) {
+                inView.push(a)
+            }
+        }
+        const chords = makePairedAlignmentChords(inView)
+        const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.02)
+        const trackColor = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.02)
+
+        // name the chord set to include track name and locus
+        const encodedName = this.name.replaceAll(' ', '%20')
+        const chordSetName = "all" === refFrame.chr ? encodedName :
+            `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end}`
+        this.browser.circularView.addChords(chords, {name: chordSetName, color: chordSetColor, trackColor: trackColor})
+    }
+
+    addSplitChordsForViewport(viewport) {
+
+        const inView = []
+        const refFrame = viewport.referenceFrame
+        for (let a of viewport.getCachedFeatures().allAlignments()) {
+
+            const sa = a.hasTag('SA')
+            if (a.end >= refFrame.start && a.start <= refFrame.end && sa) {
+                inView.push(a)
+            }
+        }
+
+        const chords = makeSupplementalAlignmentChords(inView)
+        const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.02)
+        const trackColor = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.02)
+
+        // name the chord set to include track name and locus
+        const encodedName = this.name.replaceAll(' ', '%20')
+        const chordSetName = "all" === refFrame.chr ? encodedName :
+            `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end}`
+        this.browser.circularView.addChords(chords, {name: chordSetName, color: chordSetColor, trackColor: trackColor})
     }
 }
 
@@ -745,7 +772,7 @@ class AlignmentTrack {
         this.pairConnectorColor = config.pairConnectorColor
 
         this.smallTLENColor = config.smallTLENColor || config.smallFragmentLengthColor || "rgb(0, 0, 150)"
-        this.largeTLENColor = config.largeTLENColor ||  config.largeFragmentLengthColor || "rgb(200, 0, 0)"
+        this.largeTLENColor = config.largeTLENColor || config.largeFragmentLengthColor || "rgb(200, 0, 0)"
 
         this.pairOrientation = config.pairOrienation || 'fr'
         this.pairColors = {}
@@ -1252,19 +1279,7 @@ class AlignmentTrack {
                 list.push({
                     label: 'Add discordant pairs to circular view',
                     click: () => {
-                        const maxFragmentLength = this.parent.maxFragmentLength
-                        const {referenceFrame} = viewport
-                        const inView = viewport.getCachedFeatures().allAlignments().filter(a => {
-                            return a.end >= referenceFrame.start
-                                && a.start <= referenceFrame.end
-                                && a.mate
-                                && a.mate.chr
-                                && (a.mate.chr !== a.chr || Math.max(a.tlen) > maxFragmentLength)
-                        })
-                        this.browser.circularViewVisible = true
-                        const chords = makePairedAlignmentChords(inView)
-                        const color = IGVColor.addAlpha(this.parent.color || 'rgb(0,0,255)', 0.02)
-                        this.browser.circularView.addChords(chords, {track: this.parent.name, color: color})
+                        this.parent.addPairedChordsForViewport(viewport)
                     }
                 })
             }
@@ -1272,17 +1287,7 @@ class AlignmentTrack {
                 list.push({
                     label: 'Add split reads to circular view',
                     click: () => {
-                        const inView = []
-                        for (let a of viewport.getCachedFeatures().allAlignments()) {
-                            const referenceFrame = viewport.referenceFrame
-                            const sa = a.hasTag('SA')
-                            if (a.end >= referenceFrame.start && a.start <= referenceFrame.end && sa) {
-                                inView.push(a)
-                            }
-                        }
-                        const chords = makeSupplementalAlignmentChords(inView)
-                        const color = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.1)
-                        this.browser.circularView.addChords(chords, {track: this.name, color: color})
+                        this.parent.addSplitChordsForViewport(viewport)
                     }
                 })
             }
@@ -1398,9 +1403,9 @@ class AlignmentTrack {
                 if (alignment.mate && alignment.isMateMapped()) {
                     if (alignment.mate.chr !== alignment.chr) {
                         color = getChrColor(alignment.mate.chr)
-                    } else if (this.parent.minTemplateLength && Math.abs(alignment.tlen) < this.parent.minTemplateLength) {
+                    } else if (this.parent.minTemplateLength && Math.abs(alignment.fragmentLength) < this.parent.minTemplateLength) {
                         color = this.smallTLENColor
-                    } else if (this.parent.maxTemplateLength && Math.abs(alignment.tlen) > this.parent.maxTemplateLength) {
+                    } else if (this.parent.maxTemplateLength && Math.abs(alignment.fragmentLength) > this.parent.maxTemplateLength) {
                         color = this.largeTLENColor
                     }
                 }
