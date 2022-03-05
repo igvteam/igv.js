@@ -116,7 +116,7 @@ class PairedAlignment {
     }
 
     get tlen() {
-        return Math.abs(this.firstAlignment.tlen)
+        return Math.abs(this.firstAlignment.fragmentLength)
     }
 
     firstOfPairStrand() {
