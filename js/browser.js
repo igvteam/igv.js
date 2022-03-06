@@ -1610,14 +1610,9 @@ class Browser {
         return surl
     }
 
-    currentLoci() {
-        const loci = []
+    currentReferenceFrames() {
         const anyTrackView = this.trackViews[0]
-        for (let {referenceFrame} of anyTrackView.viewports) {
-            const locusString = referenceFrame.getLocusString()
-            loci.push(locusString)
-        }
-        return loci
+        return anyTrackView.viewports.map(vp => vp.referenceFrame)
     }
 
     /**
