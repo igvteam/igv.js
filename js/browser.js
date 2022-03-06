@@ -1368,7 +1368,7 @@ class Browser {
 
         this.updateUIWithReferenceFrameList()
 
-        await this.updateViews(true)
+        await this.updateViews()
 
     }
 
