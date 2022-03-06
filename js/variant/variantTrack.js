@@ -30,7 +30,7 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
-import {makeVCFChords} from "../jbrowse/circularViewUtils.js"
+import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 const isString = StringUtils.isString
@@ -297,7 +297,7 @@ class VariantTrack extends TrackBase {
             }
 
         } else if (this._color) {
-            variantColor = (typeof this._color === "function") ? this._color(v) : this._color
+            variantColor = this.color
         } else if ("NONVARIANT" === v.type) {
             variantColor = this.nonRefColor
         } else if ("MIXED" === v.type) {
@@ -306,6 +306,10 @@ class VariantTrack extends TrackBase {
             variantColor = this.defaultColor
         }
         return variantColor
+    }
+
+    get color() {
+        return this._color ? ((typeof this._color === "function") ? this._color(v) : this._color) : this.defaultColor
     }
 
     clickedFeatures(clickState, features) {
@@ -542,17 +546,8 @@ class VariantTrack extends TrackBase {
                 click: () => {
                     const inView = []
                     for (let viewport of this.trackView.viewports) {
-                        const refFrame = viewport.referenceFrame
-                        for (let f of viewport.getCachedFeatures()) {
-                            if (f.end >= refFrame.start && f.start <= refFrame.end) {
-                                inView.push(f)
-                            }
-                        }
+                       this.sendChordsForViewport(viewport)
                     }
-
-                    const chords = makeVCFChords(inView)
-                    const color = IGVColor.addAlpha(this._color || this.defaultColor, 0.5)
-                    this.browser.circularView.addChords(chords, {track: this.name, color: color})
                 }
             })
         }
@@ -571,13 +566,7 @@ class VariantTrack extends TrackBase {
             list.push({
                 label: 'Add SVs to Circular View',
                 click: () => {
-                    const refFrame = viewport.referenceFrame
-                    const inView = "all" === refFrame.chr ?
-                        this.featureSource.getAllFeatures() :
-                        this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
-                    const chords = makeVCFChords(inView)
-                    const color = IGVColor.addAlpha(this._color || this.defaultColor, 0.5)
-                    this.browser.circularView.addChords(chords, {track: this.name, color: color})
+                    this.sendChordsForViewport(viewport)
                 }
             })
 
@@ -586,6 +575,15 @@ class VariantTrack extends TrackBase {
         }
     }
 
+
+    sendChordsForViewport(viewport) {
+        const refFrame = viewport.referenceFrame
+        const inView = "all" === refFrame.chr ?
+            this.featureSource.getAllFeatures() :
+            this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
+        const chords = makeVCFChords(inView)
+        sendChords(chords, this, refFrame, 0.5)
+    }
 
     /**
      * Create a "color by" checkbox menu item, optionally initially checked
