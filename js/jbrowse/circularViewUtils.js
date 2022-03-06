@@ -2,6 +2,7 @@ import {getChrColor} from "../bam/bamTrack.js"
 import Locus from "../locus.js"
 import {CircularView} from "../../node_modules/circular-view/dist/circular-view.js"
 import {createSupplementaryAlignments} from "../bam/supplementaryAlignment.js"
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 /**
  * The minimum length for a VCF structural variant.  VCF records < this length are ignored in the circular view
@@ -131,6 +132,19 @@ function makeCircViewChromosomes(genome) {
     return regions
 }
 
+function sendChords(chords, track, refFrame, alpha) {
+
+    const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? track.color : getChrColor(refFrame.chr), alpha)
+    const trackColor = IGVColor.addAlpha(track.color || 'rgb(0,0,255)', alpha)
+
+    // name the chord set to include locus and filtering information
+    const encodedName = track.name.replaceAll(' ', '%20')
+    const chordSetName = "all" === refFrame.chr ? encodedName :
+        `${encodedName}  ${refFrame.chr}:${refFrame.start}-${refFrame.end}`
+    track.browser.circularView.addChords(chords, {track: chordSetName, color: chordSetColor, trackColor: trackColor})
+
+}
+
 
 function createCircularView(el, browser) {
 
@@ -144,33 +158,34 @@ function createCircularView(el, browser) {
 
             const center1 = Math.floor((f1.start + f1.end) / 2)
             const center2 = Math.floor((f2.start + f2.end) / 2)
-            const l1 = new Locus({chr: browser.genome.getChromosomeName(f1.refName), start: center1, end: center1+1})
-            const l2 = new Locus({chr: browser.genome.getChromosomeName(f2.refName), start: center2, end: center2+1})
+            let l1 = new Locus({
+                chr: browser.genome.getChromosomeName(f1.refName),
+                start: Math.max(0, center1 - flanking),
+                end: center1 + flanking
+            })
+            let l2 = new Locus({
+                chr: browser.genome.getChromosomeName(f2.refName),
+                start: Math.max(0, center2 - flanking),
+                end: center2 + flanking
+            })
 
             let loci
 
             // If there is overlap with current loci
+            loci = browser.currentReferenceFrames().map(rf => Locus.fromLocusString(rf.getLocusString()))
 
-            loci = browser.currentLoci().map(str => Locus.fromLocusString(str))
-
-            if (loci.some(locus => locus.contains(l1)) || loci.some(locus => locus.contains(l2))) {
-                for (let l of [l1, l2]) {
-                    if (!loci.some(locus => {
-                        return locus.contains(l)
-                    })) {
-                        // add flanking
-                        l.start = Math.max(0, l.start - flanking)
-                        l.end += flanking
-                        loci.push(l)
-                    }
+            for(let l of loci) {
+                if(l1 && l.overlaps(l1)) {
+                    l.extend(l1)
+                    l1 = undefined
                 }
-            } else {
-                l1.start = Math.max(0, l1.start - flanking)
-                l1.end += flanking
-                l2.start = Math.max(0, l2.start - flanking)
-                l2.end += flanking
-                loci = [l1, l2]
+                if(l2 && l.overlaps(l2)) {
+                    l.extend(l2)
+                    l2 = undefined
+                }
             }
+            if(l1) loci.push(l1)
+            if(l2) loci.push(l2)
 
             const searchString = loci.map(l => l.getLocusString()).join(" ")
             browser.search(searchString)
@@ -187,6 +202,7 @@ export {
     makeSupplementalAlignmentChords,
     makeVCFChords,
     createCircularView,
-    makeCircViewChromosomes
+    makeCircViewChromosomes,
+    sendChords
 }
 

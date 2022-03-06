@@ -33,7 +33,7 @@ import MenuUtils from "../ui/menuUtils.js"
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
-import {makeBedPEChords} from "../jbrowse/circularViewUtils.js"
+import {makeBedPEChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {getChrColor} from "../bam/bamTrack.js"
 
 function getArcType(config) {
@@ -554,17 +554,19 @@ class InteractionTrack extends TrackBase {
 
         this.browser.circularViewVisible = true
         const chords = makeBedPEChords(inView)
-
-        // for filtered set, distinguishing the chromosomes is more critical than tracks
-        const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.5)
-        const trackColor = IGVColor.addAlpha(this.color, 0.5)
-
-        // name the chord set to include locus and filtering information
-        const encodedName = this.name.replaceAll(' ', '%20')
-        const chordSetName = "all" === refFrame.chr ?
-            encodedName :
-            `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end} ; range:${this.dataRange.min}-${this.dataRange.max})`
-        this.browser.circularView.addChords(chords, {track: chordSetName, color: chordSetColor, trackColor: trackColor})
+        sendChords(chords, this, refFrame, 0.5)
+        //
+        //
+        // // for filtered set, distinguishing the chromosomes is more critical than tracks
+        // const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.5)
+        // const trackColor = IGVColor.addAlpha(this.color, 0.5)
+        //
+        // // name the chord set to include locus and filtering information
+        // const encodedName = this.name.replaceAll(' ', '%20')
+        // const chordSetName = "all" === refFrame.chr ?
+        //     encodedName :
+        //     `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end} ; range:${this.dataRange.min}-${this.dataRange.max})`
+        // this.browser.circularView.addChords(chords, {track: chordSetName, color: chordSetColor, trackColor: trackColor})
     }
 
     doAutoscale(features) {

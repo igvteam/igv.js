@@ -34,7 +34,7 @@ import {createCheckbox} from "../igv-icons.js"
 import MenuUtils from "../ui/menuUtils.js"
 import {PaletteColorTable} from "../util/colorPalletes.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import {makePairedAlignmentChords, makeSupplementalAlignmentChords} from "../jbrowse/circularViewUtils.js"
+import {makePairedAlignmentChords, makeSupplementalAlignmentChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import PairedEndStats from "./pairedEndStats.js"
 
@@ -543,14 +543,16 @@ class BAMTrack extends TrackBase {
             }
         }
         const chords = makePairedAlignmentChords(inView)
-        const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.02)
-        const trackColor = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.02)
+        sendChords(chords, this, refFrame, 0.02)
 
-        // name the chord set to include track name and locus
-        const encodedName = this.name.replaceAll(' ', '%20')
-        const chordSetName = "all" === refFrame.chr ? encodedName :
-            `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end}`
-        this.browser.circularView.addChords(chords, {name: chordSetName, color: chordSetColor, trackColor: trackColor})
+        // const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.02)
+        // const trackColor = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.02)
+        //
+        // // name the chord set to include track name and locus
+        // const encodedName = this.name.replaceAll(' ', '%20')
+        // const chordSetName = "all" === refFrame.chr ? encodedName :
+        //     `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end}`
+        // this.browser.circularView.addChords(chords, {name: chordSetName, color: chordSetColor, trackColor: trackColor})
     }
 
     addSplitChordsForViewport(viewport) {
@@ -566,14 +568,16 @@ class BAMTrack extends TrackBase {
         }
 
         const chords = makeSupplementalAlignmentChords(inView)
-        const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.02)
-        const trackColor = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.02)
+        sendChords(chords, this, refFrame, 0.02)
 
-        // name the chord set to include track name and locus
-        const encodedName = this.name.replaceAll(' ', '%20')
-        const chordSetName = "all" === refFrame.chr ? encodedName :
-            `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end}`
-        this.browser.circularView.addChords(chords, {name: chordSetName, color: chordSetColor, trackColor: trackColor})
+        // const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.02)
+        // const trackColor = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.02)
+        //
+        // // name the chord set to include track name and locus
+        // const encodedName = this.name.replaceAll(' ', '%20')
+        // const chordSetName = "all" === refFrame.chr ? encodedName :
+        //     `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end}`
+        // this.browser.circularView.addChords(chords, {name: chordSetName, color: chordSetColor, trackColor: trackColor})
     }
 }
 
