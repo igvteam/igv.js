@@ -370,6 +370,9 @@ class TrackView {
 
     /**
      * Update viewports to reflect current genomic state, possibly loading additional data.
+     *
+     * @param force - if true, force a repaint even if no new data is loaded
+     * @returns {Promise<void>}
      */
     async updateViews(force) {
 
@@ -387,24 +390,24 @@ class TrackView {
         }
 
         // rpv: viewports whose image (canvas) does not fully cover current genomic range
-        const reloadableViewports = this.viewportsToReload(force)
+        const reloadableViewports = this.viewportsToReload()
 
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
         for (let viewport of reloadableViewports) {
             await viewport.loadFeatures()
         }
-        
+
         if (this.disposed) return   // Track was removed during load
 
-        // Very special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
+        // Special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
         // section depends on data from all the views.  We only need to adjust this however if any data was loaded
         // (i.e. reloadableViewports.length > 0)
         if (this.track && typeof this.track.variantRowCount === 'function' && reloadableViewports.length > 0) {
             let maxRow = 0
             for (let viewport of this.viewports) {
-                if (viewport.tile && viewport.tile.features) {
-                    maxRow = Math.max(maxRow, viewport.tile.features.reduce((a, f) => Math.max(a, f.row || 0), 0))
+                if (viewport.featureCache && viewport.featureCache.features) {
+                    maxRow = Math.max(maxRow, viewport.featureCache.features.reduce((a, f) => Math.max(a, f.row || 0), 0))
                 }
             }
             const current = this.track.nVariantRows
@@ -416,19 +419,18 @@ class TrackView {
             }
         }
 
-
         if (this.track.autoscale) {
             let allFeatures = []
             for (let visibleViewport of visibleViewports) {
                 const referenceFrame = visibleViewport.referenceFrame
                 const start = referenceFrame.start
                 const end = start + referenceFrame.toBP($(visibleViewport.contentDiv).width())
-                if (visibleViewport.tile && visibleViewport.tile.features) {
-                    if (typeof visibleViewport.tile.features.getMax === 'function') {
-                        const max = visibleViewport.tile.features.getMax(start, end)
+                if (visibleViewport.featureCache && visibleViewport.featureCache.features) {
+                    if (typeof visibleViewport.featureCache.features.getMax === 'function') {
+                        const max = visibleViewport.featureCache.features.getMax(start, end)
                         allFeatures.push({value: max})
                     } else {
-                        allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(visibleViewport.tile.features, start, end))
+                        allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(visibleViewport.featureCache.features, start, end))
                     }
                 }
             }
@@ -440,13 +442,18 @@ class TrackView {
         }
 
         // Must repaint all viewports if autoscaling
-        if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup)) {
+
+        if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup) || this.track.type === 'ruler' || force) {
             for (let visibleViewport of visibleViewports) {
                 visibleViewport.repaint()
             }
         } else {
-            for (let vp of reloadableViewports) {
-                vp.repaint()
+            const reloadedViewports = new Set(reloadableViewports)
+            for (let vp of visibleViewports) {
+                const invalid = vp.canvas && vp.canvas._data && vp.canvas._data.invalidate
+                if(!vp.featureCache || invalid || this.track.type === 'ruler' || reloadedViewports.has(vp)) {
+                    vp.repaint()
+                }
             }
         }
 
@@ -493,16 +500,16 @@ class TrackView {
 
         let allFeatures = []
         for (let vp of this.viewports) {
-            if (vp.tile && vp.tile.features) {
+            if (vp.featureCache && vp.featureCache.features) {
                 const referenceFrame = vp.referenceFrame
                 const start = referenceFrame.start
                 const end = start + referenceFrame.toBP($(vp.contentDiv).width())
 
-                if (typeof vp.tile.features.getMax === 'function') {
-                    const max = vp.tile.features.getMax(start, end)
+                if (typeof vp.featureCache.features.getMax === 'function') {
+                    const max = vp.featureCache.features.getMax(start, end)
                     allFeatures.push({value: max})
                 } else {
-                    allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end))
+                    allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.featureCache.features, start, end))
                 }
             }
         }
@@ -558,7 +565,7 @@ class TrackView {
                 const start = referenceFrame.start
                 const end = start + referenceFrame.toBP($(viewport.contentDiv).width())
                 const bpPerPixel = referenceFrame.bpPerPixel
-                return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel))
+                return (!viewport.featureCache || !viewport.featureCache.containsRange(chr, start, end, bpPerPixel))
             }
         })
         return viewports

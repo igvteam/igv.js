@@ -121,7 +121,7 @@ class BAMTrack extends TrackBase {
 
         for (let vp of this.trackView.viewports) {
             if (vp.containsPosition(options.chr, options.position)) {
-                const alignmentContainer = vp.getCachedFeatures()
+                const alignmentContainer = vp.cachedFeatures
                 if (alignmentContainer) {
                     sortAlignmentRows(options, alignmentContainer)
                     vp.repaint()
@@ -497,7 +497,7 @@ class BAMTrack extends TrackBase {
     }
 
     getCachedAlignmentContainers() {
-        return this.trackView.viewports.map(vp => vp.getCachedFeatures())
+        return this.trackView.viewports.map(vp => vp.cachedFeatures)
     }
 
     get dataRange() {
@@ -533,7 +533,7 @@ class BAMTrack extends TrackBase {
         const maxTemplateLength = this.maxTemplateLength
         const inView = []
         const refFrame = viewport.referenceFrame
-        for (let a of viewport.getCachedFeatures().allAlignments()) {
+        for (let a of viewport.cachedFeatures.allAlignments()) {
             if (a.end >= refFrame.start
                 && a.start <= refFrame.end
                 && a.mate
@@ -559,7 +559,7 @@ class BAMTrack extends TrackBase {
 
         const inView = []
         const refFrame = viewport.referenceFrame
-        for (let a of viewport.getCachedFeatures().allAlignments()) {
+        for (let a of viewport.cachedFeatures.allAlignments()) {
 
             const sa = a.hasTag('SA')
             if (a.end >= refFrame.start && a.start <= refFrame.end && sa) {
@@ -699,7 +699,7 @@ class CoverageTrack {
 
     getClickedObject(clickState) {
 
-        let features = clickState.viewport.getCachedFeatures()
+        let features = clickState.viewport.cachedFeatures
         if (!features || features.length === 0) return
 
         const genomicLocation = Math.floor(clickState.genomicLocation)
@@ -1178,7 +1178,7 @@ class AlignmentTrack {
                 direction: direction
             }
             this.parent.sortObject = newSortObject
-            sortAlignmentRows(newSortObject, viewport.getCachedFeatures())
+            sortAlignmentRows(newSortObject, viewport.cachedFeatures)
             viewport.repaint()
         }
         list.push('<b>Sort by...</b>')
@@ -1208,7 +1208,7 @@ class AlignmentTrack {
                                 }
                                 this.sortByTag = tag
                                 this.parent.sortObject = newSortObject
-                                sortAlignmentRows(newSortObject, viewport.getCachedFeatures())
+                                sortAlignmentRows(newSortObject, viewport.cachedFeatures)
                                 viewport.repaint()
                             }
                         }
@@ -1310,7 +1310,7 @@ class AlignmentTrack {
 
         const showSoftClips = this.parent.showSoftClips
 
-        let features = viewport.getCachedFeatures()
+        let features = viewport.cachedFeatures
         if (!features || features.length === 0) return
 
         let packedAlignmentRows = features.packedAlignmentRows
