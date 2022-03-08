@@ -155,7 +155,7 @@ class Viewport {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
         contentHeight = Math.min(contentHeight, 32000)
         this.$content.height(contentHeight)
-        if (this.canvas._data) this.canvas_data.invalidate = true
+        if (this.canvas._data) this.canvas._data.invalidate = true
     }
 
     isLoading() {
