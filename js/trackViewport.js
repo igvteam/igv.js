@@ -159,7 +159,8 @@ class TrackViewport extends Viewport {
                 }
             }
 
-            this.featureCache = new FeatureCache(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures)
+            const mr = this.track && this.track.multiresolution
+            this.featureCache = new FeatureCache(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures, mr)
             this.loading = false
             this.hideMessage()
             this.stopSpinner()
@@ -832,18 +833,22 @@ function formatPopoverText(nameValues) {
 
 class FeatureCache {
 
-    constructor(chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures) {
+    constructor(chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures, multiresolution) {
         this.chr = chr
         this.startBP = tileStart
         this.endBP = tileEnd
         this.bpPerPixel = bpPerPixel
         this.features = features
         this.roiFeatures = roiFeatures
+        this.multiresolution = multiresolution
     }
 
     containsRange(chr, start, end, bpPerPixel) {
-        //return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr
-        return start >= this.startBP && end <= this.endBP && chr === this.chr
+
+        // For multi-resolution tracks allow for a 2X change in bpPerPixel
+        const r = this.multiresolution ? this.bpPerPixel / bpPerPixel : 1
+
+        return start >= this.startBP && end <= this.endBP && chr === this.chr && r > 0.5 && r < 2
     }
 
     overlapsRange(chr, start, end) {

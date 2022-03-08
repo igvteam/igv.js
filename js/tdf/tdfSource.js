@@ -33,6 +33,7 @@ class TDFSource {
         this.genome = genome
         this.windowFunction = config.windowFunction || "mean"
         this.reader = new TDFReader(config, genome)
+        this.multiresolution = true
     }
 
     async getFeatures({chr, start, end, bpPerPixel}) {
