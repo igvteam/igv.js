@@ -97,10 +97,6 @@ class BWSource {
     async trackType() {
         return this.reader.getTrackType()
     }
-
-    get multiresolution() {
-        return this.trackType() === "wig"
-    }
 }
 
 export default BWSource

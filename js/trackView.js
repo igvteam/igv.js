@@ -38,15 +38,11 @@ const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 class TrackView {
 
     constructor(browser, columnContainer, track) {
-
         this.namespace = `trackview-${DOMUtils.guid()}`
-
         this.browser = browser
         this.track = track
         track.trackView = this
-
         this.addDOMToColumnContainer(browser, columnContainer, browser.referenceFrameList)
-
     }
 
     /**
@@ -209,19 +205,14 @@ class TrackView {
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
 
             const trackColors = []
-
             const color = this.track.color || this.track.defaultColor
-
             if (StringUtils.isString(color)) {
                 trackColors.push(color)
             }
-
             if (this.track.altColor && StringUtils.isString(this.track.altColor)) {
                 trackColors.push(this.track.altColor)
             }
-
             const defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c))
-
             const colorHandlers =
                 {
                     color: color => {
@@ -234,7 +225,6 @@ class TrackView {
                     }
 
                 }
-
             this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
             this.browser.genericColorPicker.setActiveColorHandler(key)
             this.browser.genericColorPicker.show()
@@ -248,7 +238,6 @@ class TrackView {
             if (this.track.minHeight) {
                 newHeight = Math.max(this.track.minHeight, newHeight)
             }
-
             if (this.track.maxHeight) {
                 newHeight = Math.min(this.track.maxHeight, newHeight)
             }
@@ -444,14 +433,14 @@ class TrackView {
         // Must repaint all viewports if autoscaling
 
         if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup) || this.track.type === 'ruler' || force) {
-            for (let visibleViewport of visibleViewports) {
-                visibleViewport.repaint()
+            for (let vp of visibleViewports) {
+                vp.repaint()
             }
         } else {
             const reloadedViewports = new Set(reloadableViewports)
             for (let vp of visibleViewports) {
                 const invalid = vp.canvas && vp.canvas._data && vp.canvas._data.invalidate
-                if(!vp.featureCache || invalid || this.track.type === 'ruler' || reloadedViewports.has(vp)) {
+                if (invalid || this.track.type === 'ruler' || reloadedViewports.has(vp)) {
                     vp.repaint()
                 }
             }

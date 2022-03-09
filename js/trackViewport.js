@@ -148,9 +148,10 @@ class TrackViewport extends Viewport {
         this.startSpinner()
 
         try {
-            const features = await this.getFeatures(this.trackView.track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            const track = this.trackView.track
+            const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
             let roiFeatures = []
-            const roi = mergeArrays(this.browser.roi, this.trackView.track.roi)
+            const roi = mergeArrays(this.browser.roi, track.roi)
             if (roi) {
                 for (let r of roi) {
                     const f = await
@@ -159,7 +160,7 @@ class TrackViewport extends Viewport {
                 }
             }
 
-            const mr = this.track && this.track.multiresolution
+            const mr = track && track.type === "wig"   // wig tracks are potentially multiresolution (e.g. bigwig)
             this.featureCache = new FeatureCache(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures, mr)
             this.loading = false
             this.hideMessage()
@@ -196,15 +197,14 @@ class TrackViewport extends Viewport {
         const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
 
         let pixelWidth
-        let bpPerPixel
+        let bpPerPixel = this.referenceFrame.bpPerPixel;
         if (isWGV) {
             bpPerPixel = this.referenceFrame.end / this.$viewport.width()
             startBP = 0
             endBP = this.referenceFrame.end
             pixelWidth = this.$viewport.width()
         } else {
-            bpPerPixel = this.referenceFrame.bpPerPixel
-            pixelWidth = Math.ceil((endBP - startBP) / bpPerPixel)
+            pixelWidth = 3 * this.$viewport.width()
         }
 
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
