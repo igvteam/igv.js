@@ -514,7 +514,7 @@ class Browser {
         await this.loadTrackList(trackConfigurations)
 
         // The ruler track is not explicitly loaded, but needs updated nonetheless.
-        for(let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler')) {
+        for (let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler')) {
             rtv.updateViews()
         }
 
@@ -1226,6 +1226,37 @@ class Browser {
                 trackView.viewports.splice(indexRight, 0, viewport)
             }
         }
+
+        this.centerLineList = this.createCenterLineList(this.columnContainer)
+
+        await resize.call(this)
+    }
+
+    async addMultiLocusPanel(chr, start, end) {
+
+        // account for reduced viewport width as a result of adding right mate pair panel
+        const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length)
+        const scaleFactor = this.calculateViewportWidth(this.referenceFrameList.length) / this.calculateViewportWidth(1 + this.referenceFrameList.length)
+        adjustReferenceFrame(scaleFactor, referenceFrameLeft, viewportWidth, alignment.start, alignment.lengthOnRef)
+
+        // create right mate pair reference frame
+        const mateChrName = this.genome.getChromosomeName(alignment.mate.chr)
+
+        const newReferenceFrame = createReferenceFrameWithAlignment(this.genome, mateChrName, referenceFrameLeft.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef)
+
+        // add right mate panel beside left mate panel
+        const indexLeft = this.referenceFrameList.length - 1
+
+        const {$viewport} = this.trackViews[0].viewports[indexLeft]
+        const viewportColumn = viewportColumnManager.insertAfter($viewport.get(0).parentElement)
+
+        this.referenceFrameList.push(newReferenceFrame)
+
+        for (let trackView of this.trackViews) {
+            const viewport = createViewport(trackView, viewportColumn, newReferenceFrame)
+            trackView.viewports.push(viewport)
+        }
+
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
