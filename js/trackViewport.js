@@ -73,15 +73,25 @@ class TrackViewport extends Viewport {
     checkZoomIn() {
 
         const showZoomInNotice = () => {
-            const referenceFrame = this.referenceFrame
             if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
                 return true
             } else {
                 const visibilityWindow = this.trackView.track.visibilityWindow
                 return (
                     visibilityWindow !== undefined && visibilityWindow > 0 &&
-                    (referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow))
+                    (this.referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow))
             }
+        }
+
+        if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > 1) {
+            if (this.canvas) {
+              //  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+              //  this.canvas._data = undefined
+                $(this.canvas).remove()
+                this.canvas = undefined
+                this.featureCache = undefined
+            }
+            return false
         }
 
         if (!(this.viewIsReady())) {
@@ -180,7 +190,7 @@ class TrackViewport extends Viewport {
     }
 
     /**
-     * Repaint the canvas
+     * Repaint the canvas for the current genomic state.
      *
      * @returns {Promise<void>}
      */
@@ -190,18 +200,17 @@ class TrackViewport extends Viewport {
             return
         }
 
-        let {features, roiFeatures, startBP, endBP} = this.featureCache
+        let {features, roiFeatures} = this.featureCache
         //this.tile.bpPerPixel = this.referenceFrame.bpPerPixel
 
         // const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
         const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
 
         let pixelWidth
-        let bpPerPixel = this.referenceFrame.bpPerPixel;
+        const startBP = this.referenceFrame.start
+        const endBP = this.referenceFrame.end
+        let bpPerPixel = this.referenceFrame.bpPerPixel
         if (isWGV) {
-            bpPerPixel = this.referenceFrame.end / this.$viewport.width()
-            startBP = 0
-            endBP = this.referenceFrame.end
             pixelWidth = this.$viewport.width()
         } else {
             pixelWidth = 3 * this.$viewport.width()
@@ -275,6 +284,7 @@ class TrackViewport extends Viewport {
         this.canvas = newCanvas
         this.ctx = ctx
         this.$content.append($(newCanvas))
+
     }
 
     /**

@@ -430,9 +430,8 @@ class TrackView {
             }
         }
 
-        // Must repaint all viewports if autoscaling
-
-        if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup) || this.track.type === 'ruler' || force) {
+        // Must repaint all viewports if autoscaling.  Always repaint ruler.
+        if (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler') {
             for (let vp of visibleViewports) {
                 vp.repaint()
             }
@@ -440,7 +439,7 @@ class TrackView {
             const reloadedViewports = new Set(reloadableViewports)
             for (let vp of visibleViewports) {
                 const invalid = vp.canvas && vp.canvas._data && vp.canvas._data.invalidate
-                if (invalid || this.track.type === 'ruler' || reloadedViewports.has(vp)) {
+                if (invalid || reloadedViewports.has(vp)) {
                     vp.repaint()
                 }
             }
@@ -542,7 +541,9 @@ class TrackView {
     viewportsToReload(force) {
 
         // List of viewports that need reloading
+        // Special case for sequence track -- this could be handled better
         const viewports = this.viewports.filter(viewport => {
+
             if (!viewport.isVisible()) {
                 return false
             }
