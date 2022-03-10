@@ -32,7 +32,7 @@ class RulerViewport extends TrackViewport {
 
         this.$rulerLabel.click(async () => {
 
-            await this.browser.selectMultiLocusPanel(this.referenceFrame)
+            await this.browser.gotoMultilocusPanel(this.referenceFrame)
 
             // const removals = this.browser.referenceFrameList.filter(r => this.referenceFrame !== r)
             // for (let referenceFrame of removals) {

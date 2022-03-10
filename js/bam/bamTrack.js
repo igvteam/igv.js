@@ -1235,7 +1235,11 @@ class AlignmentTrack {
                                 const referenceFrame = clickState.viewport.referenceFrame
                                 if (this.browser.genome.getChromosome(clickedAlignment.mate.chr)) {
                                     this.highlightedAlignmentReadNamed = clickedAlignment.readName
-                                    this.browser.presentMultiLocusPanel(clickedAlignment, referenceFrame)
+                                    //this.browser.presentMultiLocusPanel(clickedAlignment, referenceFrame)
+                                    const bpWidth = referenceFrame.end - referenceFrame.start
+                                    const frameStart = clickedAlignment.mate.position - bpWidth / 2
+                                    const frameEnd = clickedAlignment.mate.position + bpWidth / 2
+                                    this.browser.addMultiLocusPanel(clickedAlignment.mate.chr, frameStart, frameEnd, referenceFrame)
                                 } else {
                                     Alert.presentAlert(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`)
                                 }

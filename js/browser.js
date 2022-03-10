@@ -74,6 +74,7 @@ import GtexSelection from "./gtex/gtexSelection.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import CustomButton from "./ui/customButton.js"
+import ReferenceFrame from "./referenceFrame.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -1232,35 +1233,49 @@ class Browser {
         await resize.call(this)
     }
 
-    async addMultiLocusPanel(chr, start, end) {
+    /**
+     * Add a new multi-locus panel for the specified region
+     * @param chr
+     * @param start
+     * @param end
+     * @param referenceFrameLeft - optional, if supplied new panel should be placed to the immediate right
+     */
+     async addMultiLocusPanel(chr, start, end, referenceFrameLeft) {
 
         // account for reduced viewport width as a result of adding right mate pair panel
         const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length)
         const scaleFactor = this.calculateViewportWidth(this.referenceFrameList.length) / this.calculateViewportWidth(1 + this.referenceFrameList.length)
-        adjustReferenceFrame(scaleFactor, referenceFrameLeft, viewportWidth, alignment.start, alignment.lengthOnRef)
+        for (let refFrame of this.referenceFrameList) {
+            refFrame.bpPerPixel *= scaleFactor
+        }
 
-        // create right mate pair reference frame
-        const mateChrName = this.genome.getChromosomeName(alignment.mate.chr)
+        const bpp = (end - start) / viewportWidth
+        const newReferenceFrame = new ReferenceFrame(this.genome, chr, start, end, bpp)
+        const indexLeft = referenceFrameLeft ? this.referenceFrameList.indexOf(referenceFrameLeft) : this.referenceFrameList.length - 1
+        const indexRight = 1 + indexLeft
 
-        const newReferenceFrame = createReferenceFrameWithAlignment(this.genome, mateChrName, referenceFrameLeft.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef)
-
-        // add right mate panel beside left mate panel
-        const indexLeft = this.referenceFrameList.length - 1
-
+        // TODO -- this is really ugly
         const {$viewport} = this.trackViews[0].viewports[indexLeft]
         const viewportColumn = viewportColumnManager.insertAfter($viewport.get(0).parentElement)
 
-        this.referenceFrameList.push(newReferenceFrame)
-
-        for (let trackView of this.trackViews) {
-            const viewport = createViewport(trackView, viewportColumn, newReferenceFrame)
-            trackView.viewports.push(viewport)
+        if (indexRight === this.referenceFrameList.length) {
+            this.referenceFrameList.push(newReferenceFrame)
+            for (let trackView of this.trackViews) {
+                const viewport = createViewport(trackView, viewportColumn, newReferenceFrame)
+                trackView.viewports.push(viewport)
+            }
+        } else {
+            this.referenceFrameList.splice(indexRight, 0, newReferenceFrame)
+            for (let trackView of this.trackViews) {
+                const viewport = createViewport(trackView, viewportColumn, newReferenceFrame)
+                trackView.viewports.splice(indexRight, 0, viewport)
+            }
         }
 
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
-        await resize.call(this)
+        resize.call(this)
     }
 
     async removeMultiLocusPanel(referenceFrame) {
@@ -1289,7 +1304,13 @@ class Browser {
 
     }
 
-    async selectMultiLocusPanel(referenceFrame) {
+    /**
+     * Goto the locus represented by the selected referenceFrame, discarding all other panels
+     *
+     * @param referenceFrame
+     * @returns {Promise<void>}
+     */
+    async gotoMultilocusPanel(referenceFrame) {
 
         const referenceFrameIndex = this.referenceFrameList.indexOf(referenceFrame)
 
