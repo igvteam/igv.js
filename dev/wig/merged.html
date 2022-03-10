@@ -40,7 +40,6 @@
                 },
                 {
                     name: "Merged - autoscaled",
-                    height: 50,
                     type: "merged",
                     autoscale: true,
                     tracks: [
@@ -60,7 +59,6 @@
                 },
                 {
                     name: "Merged - fixed scale",
-                    height: 50,
                     type: "merged",
                     min: 0,
                     max: 50,
@@ -78,10 +76,31 @@
                             "color": "green"
                         }
                     ]
+                },
+                {
+                    name: "Merged - individually scaled",
+                    type: "merged",
+                    min: 0,
+                    max: 50,
+                    autoscale: false,
+                    tracks: [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red",
+                            "max": 100
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green",
+                            "max": 25
+                        }
+                    ]
                 }
-
             ]
-
         }
 
     var igvDiv = document.getElementById("igvDiv")
