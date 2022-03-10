@@ -26,6 +26,7 @@
 
 import TrackBase from "../trackBase.js"
 import paintAxis from "../util/paintAxis.js"
+import MenuUtils from "../ui/menuUtils.js"
 
 /**
  * Represents 2 or more wig tracks overlaid on a common viewport.
@@ -35,6 +36,7 @@ class MergedTrack extends TrackBase {
     constructor(config, browser) {
         super(config, browser)
         this.type = "merged"
+        this.featureType = 'numeric'
         this.paintAxis = paintAxis
     }
 
@@ -44,36 +46,6 @@ class MergedTrack extends TrackBase {
         }
 
         super.init(config)
-    }
-
-    /**
-     * A merged track is autoscaled if all its constituitive members are group autoscaled with same group
-     */
-    // get autoscale() {
-    //     const id = this.tracks[0].autoscaleGroup
-    //     return id ? this.tracks.every(t => id === t.autoscaleGroup) : false
-    // }
-    //
-    // set autoscale(b) {
-    //     const id = Math.random().toString()
-    //     for (let t of this.tracks) {
-    //         t.autoscaleGroup = b ? id : undefined
-    //     }
-    // }
-
-
-    get height() {
-        return this._height
-    }
-
-    set height(h) {
-        this._height = h
-        if (this.tracks) {
-            for (let t of this.tracks) {
-                t.height = h
-                t.config.height = h
-            }
-        }
     }
 
     async postInit() {
@@ -95,6 +67,8 @@ class MergedTrack extends TrackBase {
             }
         }
 
+        this.flipAxis = this.config.flipAxis ? this.config.flipAxis : false
+        this.logScale = this.config.logScale ? this.config.logScale : false
         this.autoscale = this.config.autoscale || this.config.max === undefined
         if (!this.autoscale) {
             this.dataRange = {
@@ -102,7 +76,7 @@ class MergedTrack extends TrackBase {
                 max: this.config.max
             }
         }
-        for(let t of this.tracks) {
+        for (let t of this.tracks) {
             t.autoscale = false
             t.dataRange = this.dataRange
         }
@@ -112,6 +86,36 @@ class MergedTrack extends TrackBase {
         return Promise.all(p)
     }
 
+    get height() {
+        return this._height
+    }
+
+    set height(h) {
+        this._height = h
+        if (this.tracks) {
+            for (let t of this.tracks) {
+                t.height = h
+                t.config.height = h
+            }
+        }
+    }
+
+    menuItemList() {
+        let items = []
+        if (this.flipAxis !== undefined) {
+            items.push({
+                label: "Flip y-axis",
+                click: () => {
+                    this.flipAxis = !this.flipAxis
+                    this.trackView.repaintViews()
+                }
+            })
+        }
+
+        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+
+        return items
+    }
 
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
 
@@ -123,7 +127,7 @@ class MergedTrack extends TrackBase {
 
         const mergedFeatures = options.features    // Array of feature arrays, 1 for each track
 
-        if(this.autoscale) {
+        if (this.autoscale) {
             this.dataRange = autoscale(options.referenceFrame.chr, mergedFeatures)
         }
 
@@ -131,24 +135,12 @@ class MergedTrack extends TrackBase {
             const trackOptions = Object.assign({}, options)
             trackOptions.features = mergedFeatures[i]
             this.tracks[i].dataRange = this.dataRange
+            this.tracks[i].flipAxis = this.flipAxis
+            this.tracks[i].logScale = this.logScale
+            this.tracks[i].graphType = this.graphType
             this.tracks[i].draw(trackOptions)
         }
     }
-
-    // paintAxis(ctx, pixelWidth, pixelHeight) {
-    //
-    //     //var i, len, autoscale, track
-    //
-    //     for (i = 0, len = this.tracks.length; i < len; i++) {
-    //
-    //         track = this.tracks[i]
-    //
-    //         if (typeof track.paintAxis === 'function') {
-    //             track.paintAxis(ctx, pixelWidth, pixelHeight)
-    //             if (autoscale) break
-    //         }
-    //     }
-    // }
 
     popupData(clickState, features) {
 
@@ -170,42 +162,22 @@ class MergedTrack extends TrackBase {
 
 
     supportsWholeGenome() {
-        const b = this.tracks.every(track => track.supportsWholeGenome())
-        return b
+        return this.tracks.every(track => track.supportsWholeGenome())
     }
 }
 
 function autoscale(chr, featureArrays) {
 
-
-    var min = 0,
-        max = -Number.MAX_VALUE,
-        allValues
-
-    // if (chr === 'all') {
-    //     allValues = [];
-    //     featureArrays.forEach(function (features) {
-    //         features.forEach(function (f) {
-    //             if (!Number.isNaN(f.value)) {
-    //                 allValues.push(f.value);
-    //             }
-    //         });
-    //     });
-    //
-    //     min = Math.min(0, IGVMath.percentile(allValues, .1));
-    //     max = IGVMath.percentile(allValues, 99.9);
-    //
-    // }
-    // else {
-    featureArrays.forEach(function (features, i) {
-        features.forEach(function (f) {
+    let min = 0
+    let max = -Number.MAX_VALUE
+    for(let features of featureArrays) {
+        for(let f of features) {
             if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
                 min = Math.min(min, f.value)
                 max = Math.max(max, f.value)
             }
-        })
-    })
-    //  }
+        }
+    }
     return {min: min, max: max}
 }
 
