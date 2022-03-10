@@ -31,7 +31,7 @@ import TDFSource from "../tdf/tdfSource.js"
 function FeatureSource(config, genome) {
 
     const format = config.format ? config.format.toLowerCase() : undefined
-    if ('bigwig' === format || 'bigbed' === format || 'bb' === format) {
+    if ('bigwig' === format || 'bigbed' === format || 'bb' === format || "biginteract" === format) {
         return new BWSource(config, genome)
     } else if ("tdf" === format) {
         return new TDFSource(config, genome)

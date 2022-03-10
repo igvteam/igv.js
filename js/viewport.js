@@ -129,14 +129,13 @@ class Viewport {
         console.log('Viewport - draw(drawConfiguration, features, roiFeatures)')
     }
 
-    checkContentHeight() {
+    checkContentHeight(features) {
 
         let track = this.trackView.track
-
+        features = features || this.cachedFeatures
         if ("FILL" === track.displayMode) {
             this.setContentHeight(this.$viewport.height())
         } else if (typeof track.computePixelHeight === 'function') {
-            let features = this.cachedFeatures
             if (features && features.length > 0) {
                 let requiredContentHeight = track.computePixelHeight(features)
                 let currentContentHeight = this.$content.height()
@@ -152,12 +151,11 @@ class Viewport {
     }
 
     setContentHeight(contentHeight) {
+
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
         contentHeight = Math.min(contentHeight, 32000)
-
         this.$content.height(contentHeight)
-
-        if (this.tile) this.tile.invalidate = true
+        if (this.canvas._data) this.canvas._data.invalidate = true
     }
 
     isLoading() {
@@ -174,8 +172,10 @@ class Viewport {
 
     setWidth(width) {
         this.$viewport.width(width)
-        this.canvas.style.width = (`${width}px`)
-        this.canvas.setAttribute('width', width)
+        if(this.canvas) {
+            this.canvas.style.width = (`${width}px`)
+            this.canvas.setAttribute('width', width)
+        }
     }
 
     getWidth() {
