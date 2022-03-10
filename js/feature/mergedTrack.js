@@ -25,11 +25,17 @@
  */
 
 import TrackBase from "../trackBase.js"
+import paintAxis from "../util/paintAxis.js"
 
+/**
+ * Represents 2 or more wig tracks overlaid on a common viewport.
+ */
 class MergedTrack extends TrackBase {
 
     constructor(config, browser) {
         super(config, browser)
+        this.type = "merged"
+        this.paintAxis = paintAxis
     }
 
     init(config) {
@@ -39,6 +45,22 @@ class MergedTrack extends TrackBase {
 
         super.init(config)
     }
+
+    /**
+     * A merged track is autoscaled if all its constituitive members are group autoscaled with same group
+     */
+    // get autoscale() {
+    //     const id = this.tracks[0].autoscaleGroup
+    //     return id ? this.tracks.every(t => id === t.autoscaleGroup) : false
+    // }
+    //
+    // set autoscale(b) {
+    //     const id = Math.random().toString()
+    //     for (let t of this.tracks) {
+    //         t.autoscaleGroup = b ? id : undefined
+    //     }
+    // }
+
 
     get height() {
         return this._height
@@ -53,7 +75,6 @@ class MergedTrack extends TrackBase {
             }
         }
     }
-
 
     async postInit() {
 
@@ -74,7 +95,19 @@ class MergedTrack extends TrackBase {
             }
         }
 
-        this.height = this.config.height || 100
+        this.autoscale = this.config.autoscale || this.config.max === undefined
+        if (!this.autoscale) {
+            this.dataRange = {
+                min: this.config.min || 0,
+                max: this.config.max
+            }
+        }
+        for(let t of this.tracks) {
+            t.autoscale = false
+            t.dataRange = this.dataRange
+        }
+
+        this.height = this.config.height || 50
 
         return Promise.all(p)
     }
@@ -88,40 +121,34 @@ class MergedTrack extends TrackBase {
 
     draw(options) {
 
-        var i, len, mergedFeatures, trackOptions, dataRange
+        const mergedFeatures = options.features    // Array of feature arrays, 1 for each track
 
-        mergedFeatures = options.features    // Array of feature arrays, 1 for each track
+        if(this.autoscale) {
+            this.dataRange = autoscale(options.referenceFrame.chr, mergedFeatures)
+        }
 
-        dataRange = autoscale(options.referenceFrame.chr, mergedFeatures)
-
-        //IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
-        for (i = 0, len = this.tracks.length; i < len; i++) {
-
-            trackOptions = Object.assign({}, options)
+        for (let i = 0, len = this.tracks.length; i < len; i++) {
+            const trackOptions = Object.assign({}, options)
             trackOptions.features = mergedFeatures[i]
-            this.tracks[i].dataRange = dataRange
+            this.tracks[i].dataRange = this.dataRange
             this.tracks[i].draw(trackOptions)
         }
-
     }
 
-    paintAxis(ctx, pixelWidth, pixelHeight) {
-
-        var i, len, autoscale, track
-
-        autoscale = true   // Hardcoded for now
-
-        for (i = 0, len = this.tracks.length; i < len; i++) {
-
-            track = this.tracks[i]
-
-            if (typeof track.paintAxis === 'function') {
-                track.paintAxis(ctx, pixelWidth, pixelHeight)
-                if (autoscale) break
-            }
-        }
-    }
+    // paintAxis(ctx, pixelWidth, pixelHeight) {
+    //
+    //     //var i, len, autoscale, track
+    //
+    //     for (i = 0, len = this.tracks.length; i < len; i++) {
+    //
+    //         track = this.tracks[i]
+    //
+    //         if (typeof track.paintAxis === 'function') {
+    //             track.paintAxis(ctx, pixelWidth, pixelHeight)
+    //             if (autoscale) break
+    //         }
+    //     }
+    // }
 
     popupData(clickState, features) {
 
