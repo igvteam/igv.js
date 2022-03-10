@@ -170,7 +170,7 @@ class TrackViewport extends Viewport {
                 }
             }
 
-            const mr = track && track.type === "wig"   // wig tracks are potentially multiresolution (e.g. bigwig)
+            const mr = track && ("wig" === track.type || "merged" === track.type)   // wig tracks are potentially multiresolution (e.g. bigwig)
             this.featureCache = new FeatureCache(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures, mr)
             this.loading = false
             this.hideMessage()
