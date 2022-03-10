@@ -454,7 +454,7 @@ class SegTrack extends TrackBase {
 
         const sortHandler = (sort) => {
             const viewport = clickState.viewport
-            const features = viewport.getCachedFeatures()
+            const features = viewport.cachedFeatures
             this.sortSamples(sort.chr, sort.start, sort.end, sort.direction, features)
         }
 

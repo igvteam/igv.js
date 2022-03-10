@@ -73,15 +73,25 @@ class TrackViewport extends Viewport {
     checkZoomIn() {
 
         const showZoomInNotice = () => {
-            const referenceFrame = this.referenceFrame
             if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
                 return true
             } else {
                 const visibilityWindow = this.trackView.track.visibilityWindow
                 return (
                     visibilityWindow !== undefined && visibilityWindow > 0 &&
-                    (referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow))
+                    (this.referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow))
             }
+        }
+
+        if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > 1) {
+            if (this.canvas) {
+              //  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+              //  this.canvas._data = undefined
+                $(this.canvas).remove()
+                this.canvas = undefined
+                this.featureCache = undefined
+            }
+            return false
         }
 
         if (!(this.viewIsReady())) {
@@ -93,7 +103,8 @@ class TrackViewport extends Viewport {
                 // Out of visibility window
                 if (this.canvas) {
                     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-                    this.tile = undefined
+                    this.canvas._data = undefined
+                    this.featureCache = undefined
                 }
                 this.$zoomInNotice.show()
 
@@ -114,17 +125,17 @@ class TrackViewport extends Viewport {
 
     }
 
+    /**
+     * Adjust the canvas to the current genomic state.
+     */
     shift() {
-        const self = this
-        const referenceFrame = self.referenceFrame
-
-        if (self.canvas &&
-            self.tile &&
-            self.tile.chr === self.referenceFrame.chr &&
-            self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
-
-            const pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel)
-            self.canvas.style.left = pixelOffset + "px"
+        const referenceFrame = this.referenceFrame
+        if (this.canvas &&
+            this.canvas._data &&
+            this.canvas._data.chr === this.referenceFrame.chr &&
+            this.canvas._data.bpPerPixel === referenceFrame.bpPerPixel) {
+            const pixelOffset = Math.round((this.canvas._data.startBP - referenceFrame.start) / referenceFrame.bpPerPixel)
+            this.canvas.style.left = pixelOffset + "px"
         }
     }
 
@@ -147,9 +158,10 @@ class TrackViewport extends Viewport {
         this.startSpinner()
 
         try {
-            const features = await this.getFeatures(this.trackView.track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+            const track = this.trackView.track
+            const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
             let roiFeatures = []
-            const roi = mergeArrays(this.browser.roi, this.trackView.track.roi)
+            const roi = mergeArrays(this.browser.roi, track.roi)
             if (roi) {
                 for (let r of roi) {
                     const f = await
@@ -158,11 +170,12 @@ class TrackViewport extends Viewport {
                 }
             }
 
-            this.tile = new Tile(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures)
+            const mr = track && track.type === "wig"   // wig tracks are potentially multiresolution (e.g. bigwig)
+            this.featureCache = new FeatureCache(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures, mr)
             this.loading = false
             this.hideMessage()
             this.stopSpinner()
-            return this.tile
+            return this.featureCache
         } catch (error) {
             // Track might have been removed during load
             if (this.trackView && this.trackView.disposed !== true) {
@@ -176,25 +189,31 @@ class TrackViewport extends Viewport {
         }
     }
 
+    /**
+     * Repaint the canvas for the current genomic state.
+     *
+     * @returns {Promise<void>}
+     */
     async repaint() {
 
-        if (undefined === this.tile) {
+        if (undefined === this.featureCache) {
             return
         }
 
-        let {features, roiFeatures, bpPerPixel, startBP, endBP} = this.tile
+        let {features, roiFeatures} = this.featureCache
+        //this.tile.bpPerPixel = this.referenceFrame.bpPerPixel
 
         // const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
         const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
-        let pixelWidth
 
+        let pixelWidth
+        const startBP = this.referenceFrame.start
+        const endBP = this.referenceFrame.end
+        let bpPerPixel = this.referenceFrame.bpPerPixel
         if (isWGV) {
-            bpPerPixel = this.referenceFrame.end / this.$viewport.width()
-            startBP = 0
-            endBP = this.referenceFrame.end
             pixelWidth = this.$viewport.width()
         } else {
-            pixelWidth = Math.ceil((endBP - startBP) / bpPerPixel)
+            pixelWidth = 3 * this.$viewport.width()
         }
 
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
@@ -254,17 +273,27 @@ class TrackViewport extends Viewport {
 
         this.draw(drawConfiguration, features, roiFeatures)
 
-        this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
-
-        if (this.$canvas) {
-            this.$canvas.remove()
+        // Attach metadata to canvas
+        newCanvas._data = {
+            chr: this.referenceFrame.chr, startBP, endBP, bpPerPixel, top: canvasTop, bottom: canvasTop + pixelHeight
         }
-        this.$canvas = $(newCanvas)
-        this.$content.append(this.$canvas)
+
+        if (this.canvas) {
+            $(this.canvas).remove()
+        }
         this.canvas = newCanvas
         this.ctx = ctx
+        this.$content.append($(newCanvas))
+
     }
 
+    /**
+     * Draw the associated track.
+     *
+     * @param drawConfiguration
+     * @param features
+     * @param roiFeatures
+     */
     draw(drawConfiguration, features, roiFeatures) {
 
         // console.log(`${ Date.now() } viewport draw(). track ${ this.trackView.track.type }. content-css-top ${ this.$content.css('top') }. canvas-top ${ drawConfiguration.pixelTop }.`)
@@ -281,60 +310,6 @@ class TrackViewport extends Viewport {
         }
     }
 
-    // TODO: Nolonger used. Will discard
-    async toSVG(tile) {
-
-        // Nothing to do if zoomInNotice is active
-        if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
-            return
-        }
-
-        const referenceFrame = this.referenceFrame
-        const bpPerPixel = tile.bpPerPixel
-        const features = tile.features
-        const roiFeatures = tile.roiFeatures
-        const pixelWidth = this.$viewport.width()
-        const pixelHeight = this.$viewport.height()
-        const bpStart = referenceFrame.start
-        const bpEnd = referenceFrame.start + pixelWidth * referenceFrame.bpPerPixel
-
-        const ctx = new C2S(
-            {
-                // svg
-                width: pixelWidth,
-                height: pixelHeight,
-                viewbox:
-                    {
-                        x: 0,
-                        y: -this.$content.position().top,
-                        width: pixelWidth,
-                        height: pixelHeight
-                    }
-
-            })
-
-        const drawConfiguration =
-            {
-                viewport: this,
-                context: ctx,
-                top: -this.$content.position().top,
-                pixelTop: 0,   // for compatibility with canvas draw
-                pixelWidth,
-                pixelHeight,
-                bpStart,
-                bpEnd,
-                bpPerPixel,
-                referenceFrame: this.referenceFrame,
-                selection: this.selection,
-                viewportWidth: pixelWidth,
-            }
-
-        this.draw(drawConfiguration, features, roiFeatures)
-
-        return ctx.getSerializedSvg(true)
-
-    }
-
     containsPosition(chr, position) {
         if (this.referenceFrame.chr === chr && position >= this.referenceFrame.start) {
             return position <= this.referenceFrame.calculateEnd(this.getWidth())
@@ -347,11 +322,12 @@ class TrackViewport extends Viewport {
         return this.loading
     }
 
-    saveImage() {
+    savePNG() {
 
         if (!this.ctx) return
 
-        const canvasTop = this.canvasVerticalRange ? this.canvasVerticalRange.top : 0
+        const canvasMetadata = this.canvas._data
+        const canvasTop = canvasMetadata ? canvasMetadata.top : 0
         const devicePixelRatio = window.devicePixelRatio
         const w = this.$viewport.width() * devicePixelRatio
         const h = this.$viewport.height() * devicePixelRatio
@@ -481,26 +457,25 @@ class TrackViewport extends Viewport {
                 selection: this.selection
             }
 
-        const features = this.tile ? this.tile.features : []
-        const roiFeatures = this.tile ? this.tile.roiFeatures : undefined
+        const features = this.featureCache ? this.featureCache.features : []
+        const roiFeatures = this.featureCache ? this.featureCache.roiFeatures : undefined
         this.draw(config, features, roiFeatures)
 
         context.restore()
 
     }
 
-    getCachedFeatures() {
-        return this.tile ? this.tile.features : []
+    get cachedFeatures() {
+        return this.featureCache ? this.featureCache.features : []
     }
 
     async getFeatures(track, chr, start, end, bpPerPixel) {
 
-        if (this.tile && this.tile.containsRange(chr, start, end, bpPerPixel)) {
-            return this.tile.features
+        if (this.featureCache && this.featureCache.containsRange(chr, start, end, bpPerPixel)) {
+            return this.featureCache.features
         } else if (typeof track.getFeatures === "function") {
             const features = await track.getFeatures(chr, start, end, bpPerPixel, this)
-            this.cachedFeatures = features
-            this.checkContentHeight()
+            this.checkContentHeight(features)
             return features
         } else {
             return undefined
@@ -738,9 +713,7 @@ class TrackViewport extends Viewport {
                 lastClickTime = time
 
             }
-
         }
-
     }
 
     removeViewportClickHandler(viewport) {
@@ -804,15 +777,9 @@ function mouseUpHandler(event) {
 function createClickState(event, viewport) {
 
     const referenceFrame = viewport.referenceFrame
-
     const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.contentDiv)
     const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewport.canvas)
-
     const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x))
-
-    if (undefined === genomicLocation || null === viewport.tile) {
-        return undefined
-    }
 
     return {
         event,
@@ -874,21 +841,29 @@ function formatPopoverText(nameValues) {
     return rows.join('')
 }
 
-var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures) {
-    this.chr = chr
-    this.startBP = tileStart
-    this.endBP = tileEnd
-    this.bpPerPixel = bpPerPixel
-    this.features = features
-    this.roiFeatures = roiFeatures
-}
+class FeatureCache {
 
-Tile.prototype.containsRange = function (chr, start, end, bpPerPixel) {
-    return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr
-}
+    constructor(chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures, multiresolution) {
+        this.chr = chr
+        this.startBP = tileStart
+        this.endBP = tileEnd
+        this.bpPerPixel = bpPerPixel
+        this.features = features
+        this.roiFeatures = roiFeatures
+        this.multiresolution = multiresolution
+    }
 
-Tile.prototype.overlapsRange = function (chr, start, end) {
-    return this.chr === chr && end >= this.startBP && start <= this.endBP
+    containsRange(chr, start, end, bpPerPixel) {
+
+        // For multi-resolution tracks allow for a 2X change in bpPerPixel
+        const r = this.multiresolution ? this.bpPerPixel / bpPerPixel : 1
+
+        return start >= this.startBP && end <= this.endBP && chr === this.chr && r > 0.5 && r < 2
+    }
+
+    overlapsRange(chr, start, end) {
+        return this.chr === chr && end >= this.startBP && start <= this.endBP
+    }
 }
 
 
