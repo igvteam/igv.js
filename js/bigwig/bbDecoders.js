@@ -22,9 +22,9 @@
 //     )
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
-function getDecoder(definedFieldCount, fieldCount, autoSql) {
+function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
 
-    if (autoSql && 'chromatinInteract' === autoSql.table) {
+    if (autoSql && 'chromatinInteract' === autoSql.table || "biginteract" === format) {
         return decodeInteract
     } else {
         const standardFieldCount = definedFieldCount - 3

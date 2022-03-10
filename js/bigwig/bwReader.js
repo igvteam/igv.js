@@ -45,6 +45,7 @@ class BWReader {
 
     constructor(config, genome) {
         this.path = config.url
+        this.format = config.format || "bigwig"
         this.genome = genome
         this.rpTreeCache = {}
         this.config = config
@@ -648,7 +649,7 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
 function getBedDataDecoder() {
 
     const minSize = 3 * 4 + 1   // Minimum # of bytes required for a bed record
-    const decoder = getDecoder(this.header.definedFieldCount, this.header.fieldCount, this.autoSql)
+    const decoder = getDecoder(this.header.definedFieldCount, this.header.fieldCount, this.autoSql, this.format)
     return function (data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict) {
         const binaryParser = new BinaryParser(data)
         while (binaryParser.remLength() >= minSize) {

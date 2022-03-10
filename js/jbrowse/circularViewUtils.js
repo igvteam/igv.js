@@ -154,41 +154,28 @@ function createCircularView(el, browser) {
 
             const f1 = feature.data
             const f2 = f1.mate
-            const flanking = 2000
+            addFrameForFeature(f1)
+            addFrameForFeature(f2)
 
-            const center1 = Math.floor((f1.start + f1.end) / 2)
-            const center2 = Math.floor((f2.start + f2.end) / 2)
-            let l1 = new Locus({
-                chr: browser.genome.getChromosomeName(f1.refName),
-                start: Math.max(0, center1 - flanking),
-                end: center1 + flanking
-            })
-            let l2 = new Locus({
-                chr: browser.genome.getChromosomeName(f2.refName),
-                start: Math.max(0, center2 - flanking),
-                end: center2 + flanking
-            })
+            function addFrameForFeature(feature) {
 
-            let loci
+                feature.chr = browser.genome.getChromosomeName(feature.refName)
 
-            // If there is overlap with current loci
-            loci = browser.currentReferenceFrames().map(rf => Locus.fromLocusString(rf.getLocusString()))
-
-            for(let l of loci) {
-                if(l1 && l.overlaps(l1)) {
-                    l.extend(l1)
-                    l1 = undefined
-                }
-                if(l2 && l.overlaps(l2)) {
-                    l.extend(l2)
-                    l2 = undefined
+                for (let referenceFrame of browser.currentReferenceFrames()) {
+                    const l = Locus.fromLocusString(referenceFrame.getLocusString())
+                    if (l.contains(feature)) {
+                        break
+                    } else if (l.overlaps(feature)) {
+                        referenceFrame.extend(feature)
+                        break
+                    } else {
+                        const flanking = 2000
+                        const center = (feature.start + feature.end) / 2
+                        browser.addMultiLocusPanel(feature.chr, center - flanking, center + flanking)
+                        break
+                    }
                 }
             }
-            if(l1) loci.push(l1)
-            if(l2) loci.push(l2)
-
-            const searchString = loci.map(l => l.getLocusString()).join(" ")
-            browser.search(searchString)
         }
     })
 

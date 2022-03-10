@@ -43,7 +43,6 @@ class BamSource {
 
         this.config = config
         this.genome = genome
-        this.alignmentContainer = undefined
 
         if (isDataURL(config.url)) {
             if ("cram" === config.format) {
@@ -91,20 +90,11 @@ class BamSource {
     }
 
     setViewAsPairs(bool) {
-        var self = this
-
-        if (this.viewAsPairs !== bool) {
-            this.viewAsPairs = bool
-            // if (this.alignmentContainer) {
-            //     this.alignmentContainer.setViewAsPairs(bool);
-            // }
-        }
+        this.viewAsPairs = bool
     }
 
     setShowSoftClips(bool) {
-        if (this.showSoftClips !== bool) {
-            this.showSoftClips = bool
-        }
+        this.showSoftClips = bool
     }
 
     async getAlignments(chr, bpStart, bpEnd) {
@@ -112,32 +102,28 @@ class BamSource {
         const genome = this.genome
         const showSoftClips = this.showSoftClips
 
-        if (this.alignmentContainer && this.alignmentContainer.contains(chr, bpStart, bpEnd)) {
-            return this.alignmentContainer
-
-        } else {
-            const alignmentContainer = await this.bamReader.readAlignments(chr, bpStart, bpEnd)
-            let alignments = alignmentContainer.alignments
-            if (!this.viewAsPairs) {
-                alignments = unpairAlignments([{alignments: alignments}])
-            }
-            const hasAlignments = alignments.length > 0
-            alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips)
-
-            this.alignmentContainer = alignmentContainer
-
-            if (hasAlignments) {
-                const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
-                if (sequence) {
-                    alignmentContainer.coverageMap.refSeq = sequence    // TODO -- fix this
-                    alignmentContainer.sequence = sequence           // TODO -- fix this
-                    return alignmentContainer
-                } else {
-                    console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
-                }
-            }
-            return alignmentContainer
+        const alignmentContainer = await this.bamReader.readAlignments(chr, bpStart, bpEnd)
+        let alignments = alignmentContainer.alignments
+        if (!this.viewAsPairs) {
+            alignments = unpairAlignments([{alignments: alignments}])
         }
+        const hasAlignments = alignments.length > 0
+        alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips)
+
+        this.alignmentContainer = alignmentContainer
+
+        if (hasAlignments) {
+            const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
+            if (sequence) {
+                alignmentContainer.coverageMap.refSeq = sequence    // TODO -- fix this
+                alignmentContainer.sequence = sequence           // TODO -- fix this
+                return alignmentContainer
+            } else {
+                console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
+            }
+        }
+        return alignmentContainer
+
     }
 }
 
