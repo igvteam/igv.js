@@ -44,6 +44,15 @@ class ReferenceFrame {
         this.id = DOMUtils.guid()
     }
 
+    extend(locus) {
+        const newStart = Math.min(locus.start, this.start)
+        const newEnd = Math.max(locus.end, this.end)
+        const ratio = (newEnd - newStart) / (this.end - this.start)
+        this.start = newStart
+        this.end = newEnd
+        this.bpPerPixel *= ratio
+    }
+
     calculateEnd(pixels) {
         return this.start + this.bpPerPixel * pixels
     }

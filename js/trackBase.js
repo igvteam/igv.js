@@ -315,7 +315,7 @@ class TrackBase {
 
         // We use the cached features rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (!features) features = clickState.viewport.getCachedFeatures()
+        if (!features) features = clickState.viewport.cachedFeatures
 
         if (!features || features.length === 0) {
             return []
