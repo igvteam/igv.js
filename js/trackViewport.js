@@ -204,8 +204,8 @@ class TrackViewport extends Viewport {
         const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
 
         let pixelWidth
-        const startBP = this.referenceFrame.start
-        const endBP = this.referenceFrame.end
+        const startBP = this.featureCache.startBP
+        const endBP = this.featureCache.endBP
         let bpPerPixel = this.referenceFrame.bpPerPixel
         if (isWGV) {
             pixelWidth = this.$viewport.width()
