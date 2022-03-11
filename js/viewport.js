@@ -172,10 +172,6 @@ class Viewport {
 
     setWidth(width) {
         this.$viewport.width(width)
-        if(this.canvas) {
-            this.canvas.style.width = (`${width}px`)
-            this.canvas.setAttribute('width', width)
-        }
     }
 
     getWidth() {
