@@ -723,6 +723,8 @@ class Browser {
         } else {
             this.roi.push(new ROI(config, this.genome))
         }
+        // Force reload all views (force = true) to insure ROI features are loaded.  Wasteful but this function is
+        // rarely called.
         await this.updateViews(true)
     }
 
@@ -734,14 +736,14 @@ class Browser {
             }
         }
         for (let tv of this.trackViews) {
-            tv.updateViews(true)
+            tv.repaintViews()
         }
     }
 
     clearROIs() {
         this.roi = []
         for (let tv of this.trackViews) {
-            tv.updateViews(true)
+            tv.repaintViews()
         }
     }
 
@@ -1123,6 +1125,12 @@ class Browser {
             // }
         }
 
+    }
+
+    repaintViews() {
+        for (let trackView of this.trackViews) {
+            trackView.repaintViews()
+        }
     }
 
     updateLocusSearchWidget() {
