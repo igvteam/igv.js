@@ -85,11 +85,11 @@ class TrackViewport extends Viewport {
 
         if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > 1) {
             if (this.canvas) {
-              //  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-              //  this.canvas._data = undefined
-                $(this.canvas).remove()
-                this.canvas = undefined
-                this.featureCache = undefined
+                //  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
+                //  this.canvas._data = undefined
+                //$(this.canvas).remove()
+               // this.canvas = undefined
+               // this.featureCache = undefined
             }
             return false
         }
@@ -121,8 +121,6 @@ class TrackViewport extends Viewport {
         }
 
         return true
-
-
     }
 
     /**
@@ -164,8 +162,7 @@ class TrackViewport extends Viewport {
             const roi = mergeArrays(this.browser.roi, track.roi)
             if (roi) {
                 for (let r of roi) {
-                    const f = await
-                        r.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+                    const f = await r.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
                     roiFeatures.push({track: r, features: f})
                 }
             }
@@ -194,7 +191,7 @@ class TrackViewport extends Viewport {
      *
      * @returns {Promise<void>}
      */
-    async repaint() {
+    repaint() {
 
         if (undefined === this.featureCache) {
             return
