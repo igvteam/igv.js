@@ -332,7 +332,9 @@ class TrackView {
     repaintViews() {
 
         for (let viewport of this.viewports) {
-            viewport.repaint()
+            if(viewport.isVisible()) {
+                viewport.repaint()
+            }
         }
 
         if (typeof this.track.paintAxis === 'function') {
@@ -379,7 +381,7 @@ class TrackView {
         }
 
         // rpv: viewports whose image (canvas) does not fully cover current genomic range
-        const reloadableViewports = this.viewportsToReload()
+        const reloadableViewports = force ? visibleViewports : this.viewportsToReload()
 
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
@@ -431,7 +433,7 @@ class TrackView {
         }
 
         // Must repaint all viewports if autoscaling.  Always repaint ruler.
-        if (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler') {
+        if (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler' || force) {
             for (let vp of visibleViewports) {
                 vp.repaint()
             }
@@ -472,14 +474,14 @@ class TrackView {
     /**
      * Return a promise to get all in-view features.  Used for group autoscaling.
      */
-    async getInViewFeatures(force) {
+    async getInViewFeatures() {
 
         if (!(this.browser && this.browser.referenceFrameList)) {
             return []
         }
 
         // List of viewports that need reloading
-        const rpV = this.viewportsToReload(force)
+        const rpV = this.viewportsToReload()
         const promises = rpV.map(function (vp) {
             return vp.loadFeatures()
         })
@@ -541,9 +543,7 @@ class TrackView {
     viewportsToReload(force) {
 
         // List of viewports that need reloading
-        // Special case for sequence track -- this could be handled better
         const viewports = this.viewports.filter(viewport => {
-
             if (!viewport.isVisible()) {
                 return false
             }

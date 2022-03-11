@@ -139,7 +139,7 @@ class ReferenceFrame {
 
         const viewChanged = start !== this.start || bpPerPixel !== this.bpPerPixel
         if (viewChanged) {
-            await browser.updateViews(this)
+            await browser.updateViews(true)
         }
 
     }
