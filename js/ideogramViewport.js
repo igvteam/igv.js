@@ -110,7 +110,7 @@ class IdeogramViewport extends TrackViewport {
             referenceFrame.end = ee
             referenceFrame.bpPerPixel = (ee - ss) / width
 
-            this.browser.updateViews(referenceFrame, this.browser.trackViews, true)
+            this.browser.updateViews(true)
 
         }
 
