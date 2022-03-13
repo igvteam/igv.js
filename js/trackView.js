@@ -316,15 +316,6 @@ class TrackView {
         }
     }
 
-    resize(viewportWidth) {
-
-        for (let viewport of this.viewports) {
-            viewport.setWidth(viewportWidth)
-        }
-
-        this.updateViews(true)
-    }
-
     /**
      * Repaint all viewports without loading any new data.   Use this for events that change visual aspect of data,
      * e.g. color, sort order, etc, but do not change the genomic state.
@@ -332,7 +323,7 @@ class TrackView {
     repaintViews() {
 
         for (let viewport of this.viewports) {
-            if(viewport.isVisible()) {
+            if (viewport.isVisible()) {
                 viewport.repaint()
             }
         }
@@ -343,7 +334,6 @@ class TrackView {
 
         // Repaint sample names last
         this.repaintSamples()
-
     }
 
     repaintSamples() {
@@ -360,12 +350,26 @@ class TrackView {
     }
 
     /**
+     * Called in response to a window resize event, change in # of multilocus panels, or other event that changes
+     * the width of the track view.
+     *
+     * @param viewportWidth  The width of each viewport in this track view.
+     */
+    resize(viewportWidth) {
+        for (let viewport of this.viewports) {
+            viewport.setWidth(viewportWidth)
+        }
+    }
+
+    /**
      * Update viewports to reflect current genomic state, possibly loading additional data.
      *
      * @param force - if true, force a repaint even if no new data is loaded
      * @returns {Promise<void>}
      */
     async updateViews(force) {
+
+        force = false
 
         if (!(this.browser && this.browser.referenceFrameList)) return
 
@@ -440,8 +444,7 @@ class TrackView {
         } else {
             const reloadedViewports = new Set(reloadableViewports)
             for (let vp of visibleViewports) {
-                const invalid = vp.canvas && vp.canvas._data && vp.canvas._data.invalidate
-                if (invalid || reloadedViewports.has(vp)) {
+                if (vp.needsRepaint() || reloadedViewports.has(vp)) {
                     vp.repaint()
                 }
             }
@@ -550,12 +553,7 @@ class TrackView {
             if (!viewport.checkZoomIn()) {
                 return false
             } else {
-                const referenceFrame = viewport.referenceFrame
-                const chr = viewport.referenceFrame.chr
-                const start = referenceFrame.start
-                const end = start + referenceFrame.toBP($(viewport.contentDiv).width())
-                const bpPerPixel = referenceFrame.bpPerPixel
-                return (!viewport.featureCache || !viewport.featureCache.containsRange(chr, start, end, bpPerPixel))
+                return viewport.needsReload()
             }
         })
         return viewports
