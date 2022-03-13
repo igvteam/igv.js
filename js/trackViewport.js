@@ -51,6 +51,11 @@ class TrackViewport extends Viewport {
 
     }
 
+    setContentHeight(contentHeight) {
+        super.setContentHeight(contentHeight)
+        if (this.featureCache) this.featureCache.redraw = true
+    }
+
     setTrackLabel(label) {
 
         this.$trackLabel.empty()
@@ -84,13 +89,6 @@ class TrackViewport extends Viewport {
         }
 
         if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > 1) {
-            if (this.canvas) {
-                //  this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-                //  this.canvas._data = undefined
-                //$(this.canvas).remove()
-               // this.canvas = undefined
-               // this.featureCache = undefined
-            }
             return false
         }
 
@@ -102,8 +100,8 @@ class TrackViewport extends Viewport {
             if (showZoomInNotice()) {
                 // Out of visibility window
                 if (this.canvas) {
-                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-                    this.canvas._data = undefined
+                    const ctx = this.canvas.getContext('2d');
+                    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
                     this.featureCache = undefined
                 }
                 this.$zoomInNotice.show()
@@ -123,17 +121,26 @@ class TrackViewport extends Viewport {
         return true
     }
 
+    async setWidth(width) {
+        super.setWidth(width)
+        if(this.needsReload()) {
+            await this.update();
+        } else if(this.needsRepaint()) {
+            await this.repaint()
+        }
+    }
+
     /**
      * Adjust the canvas to the current genomic state.
      */
     shift() {
         const referenceFrame = this.referenceFrame
         if (this.canvas &&
-            this.canvas._data &&
-            this.canvas._data.chr === this.referenceFrame.chr &&
-            this.canvas._data.bpPerPixel === referenceFrame.bpPerPixel) {
-            const pixelOffset = Math.round((this.canvas._data.startBP - referenceFrame.start) / referenceFrame.bpPerPixel)
-            this.canvas.style.left = pixelOffset + "px"
+            this.featureCache &&
+            this.featureCache.chr === this.referenceFrame.chr &&
+            this.featureCache.bpPerPixel === referenceFrame.bpPerPixel) {
+                const pixelOffset = Math.round((this.featureCache.startBP - referenceFrame.start) / referenceFrame.bpPerPixel)
+                this.canvas.style.left = pixelOffset + "px"
         }
     }
 
@@ -187,9 +194,8 @@ class TrackViewport extends Viewport {
     }
 
     /**
-     * Repaint the canvas for the current genomic state.
+     * Repaint the canvas for the currently loaded features
      *
-     * @returns {Promise<void>}
      */
     repaint() {
 
@@ -203,21 +209,19 @@ class TrackViewport extends Viewport {
         // const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
         const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
 
-        let pixelWidth
         const startBP = this.featureCache.startBP
         const endBP = this.featureCache.endBP
-        let bpPerPixel = this.referenceFrame.bpPerPixel
-        if (isWGV) {
-            pixelWidth = this.$viewport.width()
-        } else {
-            pixelWidth = 3 * this.$viewport.width()
-        }
+        const bpPerPixel = this.referenceFrame.bpPerPixel
+        const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / bpPerPixel)
 
+        // Canvas dimensions. There is no left-right panning for WGV so canvas width is viewport width.
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
+
+        const pixelWidth = isWGV ? this.$viewport.width() : 3 * this.$viewport.width()
         const viewportHeight = this.$viewport.height()
         const contentHeight = this.getContentHeight()
         const minHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight  // Need to fill viewport for ROIs.
-        let pixelHeight = Math.min(minHeight, 3 * viewportHeight)
+        const pixelHeight = Math.min(minHeight, 3 * viewportHeight)
         if (0 === pixelWidth || 0 === pixelHeight) {
             if (this.canvas) {
                 $(this.canvas).remove()
@@ -226,30 +230,20 @@ class TrackViewport extends Viewport {
         }
         const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
 
-        // Always use high DPI if in compressed display mode, otherwise use preference setting;
-        let devicePixelRatio
-        if ("FILL" === this.trackView.track.displayMode) {
-            devicePixelRatio = window.devicePixelRatio
-        } else {
-            devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio
-        }
-
-        const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / this.referenceFrame.bpPerPixel)
-
         const newCanvas = $('<canvas class="igv-canvas">').get(0)
-        const ctx = newCanvas.getContext("2d")
-
         newCanvas.style.width = pixelWidth + "px"
         newCanvas.style.height = pixelHeight + "px"
-
-        newCanvas.width = devicePixelRatio * pixelWidth
-        newCanvas.height = devicePixelRatio * pixelHeight
-
-        ctx.scale(devicePixelRatio, devicePixelRatio)
-
         newCanvas.style.left = pixelXOffset + "px"
         newCanvas.style.top = canvasTop + "px"
 
+        // Always use high DPI if in "FILL" display mode, otherwise use track setting;
+        const devicePixelRatio = ("FILL" === this.trackView.track.displayMode || this.trackView.track.supportHiDPI !== false) ?
+            window.devicePixelRatio :  1
+        newCanvas.width = devicePixelRatio * pixelWidth
+        newCanvas.height = devicePixelRatio * pixelHeight
+
+        const ctx = newCanvas.getContext("2d")
+        ctx.scale(devicePixelRatio, devicePixelRatio)
         ctx.translate(0, -canvasTop)
 
         const drawConfiguration =
@@ -270,16 +264,13 @@ class TrackViewport extends Viewport {
 
         this.draw(drawConfiguration, features, roiFeatures)
 
-        // Attach metadata to canvas
-        newCanvas._data = {
-            chr: this.referenceFrame.chr, startBP, endBP, bpPerPixel, top: canvasTop, bottom: canvasTop + pixelHeight
-        }
+        this.featureCache.canvasTop = canvasTop
+        this.featureCache.height = pixelHeight
 
         if (this.canvas) {
             $(this.canvas).remove()
         }
         this.canvas = newCanvas
-        this.ctx = ctx
         this.$content.append($(newCanvas))
 
     }
@@ -321,17 +312,18 @@ class TrackViewport extends Viewport {
 
     savePNG() {
 
-        if (!this.ctx) return
+        if (!this.canvas) return
 
-        const canvasMetadata = this.canvas._data
-        const canvasTop = canvasMetadata ? canvasMetadata.top : 0
+        const canvasMetadata = this.featureCache
+        const canvasTop = canvasMetadata ? canvasMetadata.canvasTop : 0
         const devicePixelRatio = window.devicePixelRatio
         const w = this.$viewport.width() * devicePixelRatio
         const h = this.$viewport.height() * devicePixelRatio
         const x = -$(this.canvas).position().left * devicePixelRatio
         const y = (-this.$content.position().top - canvasTop) * devicePixelRatio
 
-        const imageData = this.ctx.getImageData(x, y, w, h)
+        const ctx = this.canvas.getContext("2d")
+        const imageData = ctx.getImageData(x, y, w, h)
         const exportCanvas = document.createElement('canvas')
         const exportCtx = exportCanvas.getContext('2d')
         exportCanvas.width = imageData.width
@@ -477,6 +469,23 @@ class TrackViewport extends Viewport {
         } else {
             return undefined
         }
+    }
+
+    needsRepaint() {
+        if(!this.featureCache) return false  // cannot repaint
+        return !this.canvas
+            this.referenceFrame.start < this.featureCache.startBP || this.referenceFrame.end > this.featureCache.endBP ||
+            this.referenceFrame.chr !== this.featureCache.chr
+    }
+
+    needsReload() {
+        if(!this.featureCache) return true;
+        const referenceFrame = this.referenceFrame
+        const chr = this.referenceFrame.chr
+        const start = referenceFrame.start
+        const end = start + referenceFrame.toBP($(this.contentDiv).width())
+        const bpPerPixel = referenceFrame.bpPerPixel
+        return (!this.featureCache.containsRange(chr, start, end, bpPerPixel))
     }
 
     createZoomInNotice($parent) {

@@ -43,7 +43,7 @@ import ROI from "./roi.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
-import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js"
+import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
 import {buildOptions, createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import GtexUtils from "./gtex/gtexUtils.js"
@@ -74,7 +74,6 @@ import GtexSelection from "./gtex/gtexSelection.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import CustomButton from "./ui/customButton.js"
-import ReferenceFrame from "./referenceFrame.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -1051,7 +1050,8 @@ class Browser {
             this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV)
         }
 
-        await resize.call(this)
+        resize.call(this)
+        await this.updateViews()
     }
 
     async updateViews(force) {
@@ -1197,50 +1197,6 @@ class Browser {
         }
     }
 
-    async presentMultiLocusPanel(alignment, referenceFrameLeft) {
-
-        // account for reduced viewport width as a result of adding right mate pair panel
-        const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length)
-
-        const scaleFactor = this.calculateViewportWidth(this.referenceFrameList.length) / this.calculateViewportWidth(1 + this.referenceFrameList.length)
-        adjustReferenceFrame(scaleFactor, referenceFrameLeft, viewportWidth, alignment.start, alignment.lengthOnRef)
-
-        // create right mate pair reference frame
-        const mateChrName = this.genome.getChromosomeName(alignment.mate.chr)
-
-        const referenceFrameRight = createReferenceFrameWithAlignment(this.genome, mateChrName, referenceFrameLeft.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef)
-
-        // add right mate panel beside left mate panel
-        const indexLeft = this.referenceFrameList.indexOf(referenceFrameLeft)
-        const indexRight = 1 + (this.referenceFrameList.indexOf(referenceFrameLeft))
-
-        const {$viewport} = this.trackViews[0].viewports[indexLeft]
-        const viewportColumn = viewportColumnManager.insertAfter($viewport.get(0).parentElement)
-
-        if (indexRight === this.referenceFrameList.length) {
-
-            this.referenceFrameList.push(referenceFrameRight)
-
-            for (let trackView of this.trackViews) {
-                const viewport = createViewport(trackView, viewportColumn, referenceFrameRight)
-                trackView.viewports.push(viewport)
-            }
-
-        } else {
-
-            this.referenceFrameList.splice(indexRight, 0, referenceFrameRight)
-
-            for (let trackView of this.trackViews) {
-                const viewport = createViewport(trackView, viewportColumn, referenceFrameRight)
-                trackView.viewports.splice(indexRight, 0, viewport)
-            }
-        }
-
-        this.centerLineList = this.createCenterLineList(this.columnContainer)
-
-        await resize.call(this)
-    }
-
     /**
      * Add a new multi-locus panel for the specified region
      * @param chr
@@ -1248,7 +1204,7 @@ class Browser {
      * @param end
      * @param referenceFrameLeft - optional, if supplied new panel should be placed to the immediate right
      */
-     async addMultiLocusPanel(chr, start, end, referenceFrameLeft) {
+    async addMultiLocusPanel(chr, start, end, referenceFrameLeft) {
 
         // account for reduced viewport width as a result of adding right mate pair panel
         const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length)
@@ -1284,6 +1240,7 @@ class Browser {
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
         resize.call(this)
+        await this.updateViews(true)
     }
 
     async removeMultiLocusPanel(referenceFrame) {
@@ -1845,7 +1802,7 @@ class Browser {
  *
  * @returns {Promise<void>}
  */
-async function resize() {
+function resize() {
 
     const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
@@ -1876,7 +1833,9 @@ async function resize() {
 
     this.updateUIWithReferenceFrameList()
 
-    await this.updateViews(true)
+     TODO -- update view only if needed.  Reducing size never needed.  Increasing size maybe
+
+    // await this.updateViews(true)
 }
 
 
