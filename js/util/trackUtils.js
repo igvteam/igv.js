@@ -188,6 +188,7 @@ function inferTrackType(config) {
                 return "alignment"
             case "bedpe":
             case "bedpe-loop":
+            case "biginteract":
                 return "interact"
             case "bp":
                 return "arc"
@@ -196,7 +197,6 @@ function inferTrackType(config) {
             case "bed":
             case "bigbed":
             case "bb":
-            case "biginteract":
                 return "bedtype"
             default:
                 return "annotation"
