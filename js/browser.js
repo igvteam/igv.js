@@ -1833,9 +1833,9 @@ function resize() {
 
     this.updateUIWithReferenceFrameList()
 
-     TODO -- update view only if needed.  Reducing size never needed.  Increasing size maybe
+     //TODO -- update view only if needed.  Reducing size never needed.  Increasing size maybe
 
-    // await this.updateViews(true)
+     await this.updateViews(true)
 }
 
 
