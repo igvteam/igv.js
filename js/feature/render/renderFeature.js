@@ -78,7 +78,7 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
             // single-exon transcript
             const xLeft = Math.max(0, coord.px)
             const xRight = Math.min(pixelWidth, coord.px1)
-            const width = Math.max(coord.pw, xRight - xLeft)
+            const width = xRight - xLeft
             ctx.fillRect(xLeft, py, width, h)
 
             // Arrows
