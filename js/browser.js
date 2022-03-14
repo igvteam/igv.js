@@ -1802,7 +1802,7 @@ class Browser {
  *
  * @returns {Promise<void>}
  */
-function resize() {
+async function resize() {
 
     const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 

@@ -22,8 +22,12 @@
     <!-- Juicebox JS -->
     <script src="https://cdn.jsdelivr.net/npm/juicebox.js@2.2.0/dist/juicebox.min.js"></script>
 
-    <!-- IGV JS -->
-    <script src="https://cdn.jsdelivr.net/npm/igv@2.11.0/dist/igv.min.js"></script>
+    <!-- IGV JS
+    <script src="https://cdn.jsdelivr.net/npm/igv@2.11.2/dist/igv.min.js"></script>-->
+
+
+    <script src="../../dist/igv.min.js"></script>
+
 
 
 </head>
@@ -71,12 +75,16 @@
             locus: "chr1:19,150,000-19,250,000",
             tracks: [
                 {
+                    url: "https://www.encodeproject.org/files/ENCFF056AAI/@@download/ENCFF056AAI.bigInteract",
+                    format: "biginteract",
+                    //type: "interact"
+                },
+                {
                     url: "https://www.encodeproject.org/files/ENCFF004DTQ/@@download/ENCFF004DTQ.bigWig",
                     name: "HepG2 miRNA (plus strand)",
                     color: "rgb(200,0,0)",
                     format: "bigwig",
-                    type: "wig",
-                    flipAxis: true
+                    type: "wig"
                 },
                 {
                     url: "https://www.encodeproject.org/files/ENCFF646XYR/@@download/ENCFF646XYR.bigWig",
@@ -97,7 +105,8 @@
                     name: "HepG2 total RNA-seq (minus strand)",
                     color: "rgb(0,200,0)",
                     format: "bigwig",
-                    type: "wig"
+                    type: "wig",
+                    flipAxis: true
                 },
                 {
                     url: "https://www.encodeproject.org/files/ENCFF285FQS/@@download/ENCFF285FQS.bigWig",
