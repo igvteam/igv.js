@@ -468,7 +468,9 @@ class Browser {
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
         if (false !== session.showIdeogram) {
-            this.trackViews.push(new TrackView(this, this.columnContainer, new IdeogramTrack(this)))
+            const ideogramTrack = new IdeogramTrack(this)
+            ideogramTrack.id = 'ideogram'
+            this.trackViews.push(new TrackView(this, this.columnContainer, ideogramTrack))
         }
 
         if (false !== session.showRuler) {
@@ -513,8 +515,8 @@ class Browser {
 
         await this.loadTrackList(trackConfigurations)
 
-        // The ruler track is not explicitly loaded, but needs updated nonetheless.
-        for (let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler')) {
+        // The ruler and ideogram tracks are not explicitly loaded, but needs updated nonetheless.
+        for (let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler' || tv.track.type === 'ideogram')) {
             rtv.updateViews()
         }
 
@@ -1054,7 +1056,7 @@ class Browser {
         await this.updateViews()
     }
 
-    async updateViews(force) {
+    async updateViews() {
 
         const trackViews = this.trackViews
 
@@ -1067,7 +1069,7 @@ class Browser {
         // Don't autoscale while dragging.
         if (this.dragObject) {
             for (let trackView of trackViews) {
-                await trackView.updateViews(force)
+                await trackView.updateViews()
             }
         } else {
             // Group autoscale
@@ -1112,14 +1114,14 @@ class Browser {
                     for (let trackView of groupTrackViews) {
                         trackView.track.dataRange = dataRange
                         trackView.track.autoscale = false
-                        p.push(trackView.updateViews(force))
+                        p.push(trackView.updateViews())
                     }
                     await Promise.all(p)
                 }
 
             }
 
-            await Promise.all(otherTracks.map(tv => tv.updateViews(force)))
+            await Promise.all(otherTracks.map(tv => tv.updateViews()))
             // for (let trackView of otherTracks) {
             //     await trackView.updateViews(force);
             // }
@@ -1614,12 +1616,22 @@ class Browser {
 
     }
 
+    /**
+     * Track drag here refers to vertical dragging to reorder tracks, not horizontal panning.
+     *
+     * @param trackView
+     */
     startTrackDrag(trackView) {
 
         this.dragTrack = trackView
 
     }
 
+    /**
+     * Track drag here refers to vertical dragging to reorder tracks, not horizontal panning.
+     *
+     * @param dragDestination
+     */
     updateTrackDrag(dragDestination) {
 
         if (dragDestination && this.dragTrack) {

@@ -27,28 +27,22 @@ class TrackViewport extends Viewport {
         this.$viewport.append(this.$spinner)
         this.$spinner.append($('<div>'))
 
-        const {track} = this.trackView
-
+        const track = this.trackView.track
         if ('sequence' !== track.type) {
             this.$zoomInNotice = this.createZoomInNotice(this.$content)
         }
 
-        if (track.name && "sequence" !== track.config.type) {
-
+        if (track.name && "sequence" !== track.type) {
             this.$trackLabel = $('<div class="igv-track-label">')
             this.$viewport.append(this.$trackLabel)
             this.setTrackLabel(track.name)
-
             if (false === this.browser.trackLabelsVisible) {
                 this.$trackLabel.hide()
             }
-
         }
 
         this.stopSpinner()
-
         this.addMouseHandlers()
-
     }
 
     setContentHeight(contentHeight) {
@@ -75,9 +69,13 @@ class TrackViewport extends Viewport {
         }
     }
 
+    /**
+     * Test to determine if we are zoomed in far enough to see features. Applicable to tracks with visibility windows.
+     * @returns {boolean}
+     */
     checkZoomIn() {
 
-        const showZoomInNotice = () => {
+        const zoomedOutOfWindow = () => {
             if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
                 return true
             } else {
@@ -89,6 +87,9 @@ class TrackViewport extends Viewport {
         }
 
         if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > 1) {
+            $(this.canvas).remove()
+            this.canvas = undefined
+            //this.featureCache = undefined
             return false
         }
 
@@ -96,38 +97,30 @@ class TrackViewport extends Viewport {
             return false
         }
 
-        if (this.$zoomInNotice) {
-            if (showZoomInNotice()) {
-                // Out of visibility window
-                if (this.canvas) {
-                    const ctx = this.canvas.getContext('2d');
-                    ctx.clearRect(0, 0, this.canvas.width, this.canvas.height)
-                    this.featureCache = undefined
-                }
-                this.$zoomInNotice.show()
 
-                if (this.trackView.track.autoHeight) {
-                    const minHeight = this.trackView.minHeight || 0
-                    this.setContentHeight(minHeight)
-                }
+        if (zoomedOutOfWindow()) {
 
-                return false
-            } else {
-                this.$zoomInNotice.hide()
-                return true
+            // Out of visibility window
+            if (this.canvas) {
+                $(this.canvas).remove()
+                this.canvas = undefined
+                //this.featureCache = undefined
             }
+            if (this.trackView.track.autoHeight) {
+                const minHeight = this.trackView.minHeight || 0
+                this.setContentHeight(minHeight)
+            }
+            if (this.$zoomInNotice) {
+                this.$zoomInNotice.show()
+            }
+            return false
+        } else {
+            if (this.$zoomInNotice) {
+                this.$zoomInNotice.hide()
+            }
+            return true
         }
 
-        return true
-    }
-
-    async setWidth(width) {
-        super.setWidth(width)
-        if(this.needsReload()) {
-            await this.update();
-        } else if(this.needsRepaint()) {
-            await this.repaint()
-        }
     }
 
     /**
@@ -136,11 +129,11 @@ class TrackViewport extends Viewport {
     shift() {
         const referenceFrame = this.referenceFrame
         if (this.canvas &&
-            this.featureCache &&
-            this.featureCache.chr === this.referenceFrame.chr &&
-            this.featureCache.bpPerPixel === referenceFrame.bpPerPixel) {
-                const pixelOffset = Math.round((this.featureCache.startBP - referenceFrame.start) / referenceFrame.bpPerPixel)
-                this.canvas.style.left = pixelOffset + "px"
+            this.canvas._data &&
+            this.canvas._data.chr === this.referenceFrame.chr &&
+            this.canvas._data.bpPerPixel === referenceFrame.bpPerPixel) {
+            const pixelOffset = Math.round((this.canvas._data.startBP - referenceFrame.start) / referenceFrame.bpPerPixel)
+            this.canvas.style.left = pixelOffset + "px"
         }
     }
 
@@ -194,7 +187,7 @@ class TrackViewport extends Viewport {
     }
 
     /**
-     * Repaint the canvas for the currently loaded features
+     * Repaint the canvas using the cached features
      *
      */
     repaint() {
@@ -209,14 +202,8 @@ class TrackViewport extends Viewport {
         // const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
         const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
 
-        const startBP = this.featureCache.startBP
-        const endBP = this.featureCache.endBP
-        const bpPerPixel = this.referenceFrame.bpPerPixel
-        const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / bpPerPixel)
-
         // Canvas dimensions. There is no left-right panning for WGV so canvas width is viewport width.
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
-
         const pixelWidth = isWGV ? this.$viewport.width() : 3 * this.$viewport.width()
         const viewportHeight = this.$viewport.height()
         const contentHeight = this.getContentHeight()
@@ -230,6 +217,11 @@ class TrackViewport extends Viewport {
         }
         const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
 
+        const bpPerPixel = this.referenceFrame.bpPerPixel
+        const startBP = this.referenceFrame.start - (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        const endBP = this.referenceFrame.end + (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / bpPerPixel)
+
         const newCanvas = $('<canvas class="igv-canvas">').get(0)
         newCanvas.style.width = pixelWidth + "px"
         newCanvas.style.height = pixelHeight + "px"
@@ -238,7 +230,7 @@ class TrackViewport extends Viewport {
 
         // Always use high DPI if in "FILL" display mode, otherwise use track setting;
         const devicePixelRatio = ("FILL" === this.trackView.track.displayMode || this.trackView.track.supportHiDPI !== false) ?
-            window.devicePixelRatio :  1
+            window.devicePixelRatio : 1
         newCanvas.width = devicePixelRatio * pixelWidth
         newCanvas.height = devicePixelRatio * pixelHeight
 
@@ -269,6 +261,9 @@ class TrackViewport extends Viewport {
 
         if (this.canvas) {
             $(this.canvas).remove()
+        }
+        newCanvas._data = {
+            chr: this.featureCache.chr, bpPerPixel, startBP, endBP, pixelHeight, pixelTop: canvasTop
         }
         this.canvas = newCanvas
         this.$content.append($(newCanvas))
@@ -472,14 +467,19 @@ class TrackViewport extends Viewport {
     }
 
     needsRepaint() {
-        if(!this.featureCache) return false  // cannot repaint
-        return !this.canvas
-            this.referenceFrame.start < this.featureCache.startBP || this.referenceFrame.end > this.featureCache.endBP ||
-            this.referenceFrame.chr !== this.featureCache.chr
+
+        if (!this.canvas) return true
+
+        const data = this.canvas._data
+        return !data ||
+            this.referenceFrame.start < data.startBP ||
+            this.referenceFrame.end > data.endBP ||
+            this.referenceFrame.chr !== data.chr ||
+            this.referenceFrame.bpPerPixel != data.bpPerPixel
     }
 
     needsReload() {
-        if(!this.featureCache) return true;
+        if (!this.featureCache) return true
         const referenceFrame = this.referenceFrame
         const chr = this.referenceFrame.chr
         const start = referenceFrame.start
@@ -509,15 +509,33 @@ class TrackViewport extends Viewport {
 
     addMouseHandlers() {
 
-        this.addViewportContextMenuHandler(this.$viewport.get(0))
+        const viewport = this.$viewport.get(0)
 
-        this.addViewportMouseDownHandler(this.$viewport.get(0))
+        this.addViewportContextMenuHandler(viewport)
 
-        this.addViewportTouchStartHandler(this.$viewport.get(0))
+        const md = (event) => {
+            this.enableClick = true
+            this.browser.mouseDownOnViewport(event, this)
+            mouseDownCoords = DOMUtils.pageCoordinates(event)
+        }
+        viewport.addEventListener('mousedown', md)
+        viewport.addEventListener('touchstart', md)
 
-        this.addViewportMouseUpHandler(this.$viewport.get(0))
+        const mu = (event) => {
+            // Any mouse up cancels drag and scrolling
+            if (this.browser.dragObject || this.browser.isScrolling) {
+                this.browser.cancelTrackPan()
+                // event.preventDefault();
+                // event.stopPropagation();
+                this.enableClick = false   // Until next mouse down
+            } else {
+                this.browser.cancelTrackPan()
+                this.browser.endTrackDrag()
+            }
+        }
 
-        this.addViewportTouchEndHandler(this.$viewport.get(0))
+        viewport.addEventListener('mouseup', mu)
+        viewport.addEventListener('touchend', mu)
 
         this.addViewportClickHandler(this.$viewport.get(0))
 
@@ -527,32 +545,9 @@ class TrackViewport extends Viewport {
 
     }
 
-    removeMouseHandlers() {
-
-        this.removeViewportContextMenuHandler(this.$viewport.get(0))
-
-        this.removeViewportMouseDownHandler(this.$viewport.get(0))
-
-        this.removeViewportTouchStartHandler(this.$viewport.get(0))
-
-        this.removeViewportMouseUpHandler(this.$viewport.get(0))
-
-        this.removeViewportTouchEndHandler(this.$viewport.get(0))
-
-        this.removeViewportClickHandler(this.$viewport.get(0))
-
-        if (this.trackView.track.name && "sequence" !== this.trackView.track.config.type) {
-            this.removeTrackLabelClickHandler(this.$trackLabel.get(0))
-        }
-
-    }
-
     addViewportContextMenuHandler(viewport) {
 
-        this.boundContextMenuHandler = contextMenuHandler.bind(this)
-        viewport.addEventListener('contextmenu', this.boundContextMenuHandler)
-
-        function contextMenuHandler(event) {
+        viewport.addEventListener('contextmenu', (event) => {
 
             // Ignore if we are doing a drag.  This can happen with touch events.
             if (this.browser.dragObject) {
@@ -585,56 +580,14 @@ class TrackViewport extends Viewport {
             menuItems.push({label: 'Save Image (SVG)', click: () => this.saveSVG()})
 
             this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
-        }
+        })
 
     }
 
-    removeViewportContextMenuHandler(viewport) {
-        viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
-    }
-
-    addViewportMouseDownHandler(viewport) {
-        this.boundMouseDownHandler = mouseDownHandler.bind(this)
-        viewport.addEventListener('mousedown', this.boundMouseDownHandler)
-    }
-
-    removeViewportMouseDownHandler(viewport) {
-        viewport.removeEventListener('mousedown', this.boundMouseDownHandler)
-    }
-
-    addViewportTouchStartHandler(viewport) {
-        this.boundTouchStartHandler = mouseDownHandler.bind(this)
-        viewport.addEventListener('touchstart', this.boundTouchStartHandler)
-    }
-
-    removeViewportTouchStartHandler(viewport) {
-        viewport.removeEventListener('touchstart', this.boundTouchStartHandler)
-    }
-
-    addViewportMouseUpHandler(viewport) {
-        this.boundMouseUpHandler = mouseUpHandler.bind(this)
-        viewport.addEventListener('mouseup', this.boundMouseUpHandler)
-    }
-
-    removeViewportMouseUpHandler(viewport) {
-        viewport.removeEventListener('mouseup', this.boundMouseUpHandler)
-    }
-
-    addViewportTouchEndHandler(viewport) {
-        this.boundTouchEndHandler = mouseUpHandler.bind(this)
-        viewport.addEventListener('touchend', this.boundTouchEndHandler)
-    }
-
-    removeViewportTouchEndHandler(viewport) {
-        viewport.removeEventListener('touchend', this.boundTouchEndHandler)
-    }
 
     addViewportClickHandler(viewport) {
 
-        this.boundClickHandler = clickHandler.bind(this)
-        viewport.addEventListener('click', this.boundClickHandler)
-
-        function clickHandler(event) {
+        viewport.addEventListener('click', (event) => {
 
             if (this.enableClick) {
                 if (3 === event.which || event.ctrlKey) {
@@ -719,19 +672,12 @@ class TrackViewport extends Viewport {
                 lastClickTime = time
 
             }
-        }
-    }
-
-    removeViewportClickHandler(viewport) {
-        viewport.removeEventListener('click', this.boundClickHandler)
+        })
     }
 
     addTrackLabelClickHandler(trackLabel) {
 
-        this.boundTrackLabelClickHandler = clickHandler.bind(this)
-        trackLabel.addEventListener('click', this.boundTrackLabelClickHandler)
-
-        function clickHandler(event) {
+        trackLabel.addEventListener('click', (event) => {
 
             event.stopPropagation()
 
@@ -751,11 +697,7 @@ class TrackViewport extends Viewport {
                 this.popover = new Popover(this.browser.columnContainer, (track.name || ''))
                 this.popover.presentContentWithEvent(event, str)
             }
-        }
-    }
-
-    removeTrackLabelClickHandler(trackLabel) {
-        trackLabel.removeEventListener('click', this.boundTrackLabelClickHandler)
+        })
     }
 
 }
