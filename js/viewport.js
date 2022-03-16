@@ -56,11 +56,11 @@ class Viewport {
         this.$content.height(this.$viewport.height())
         this.contentDiv = this.$content.get(0)
 
-        this.$canvas = $('<canvas>')
-        this.$content.append(this.$canvas)
-
-        this.canvas = this.$canvas.get(0)
-        this.ctx = this.canvas.getContext("2d")
+        // this.$canvas = $('<canvas>')
+        // this.$content.append(this.$canvas)
+        //
+        // this.canvas = this.$canvas.get(0)
+        // this.ctx = this.canvas.getContext("2d")
 
         this.$viewport.width(width)
 
@@ -199,8 +199,6 @@ class Viewport {
         if (this.popover) {
             this.popover.dispose()
         }
-
-        this.removeMouseHandlers()
 
         this.$viewport.get(0).remove()
 
