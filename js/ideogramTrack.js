@@ -26,21 +26,18 @@
 import IGVGraphics from "./igv-canvas.js"
 import {IGVColor} from "../node_modules/igv-utils/src/index.js"
 
+/**
+ * Class represents an ideogram of a chromsome cytobands.  It is used for the header of a track panel.
+ *
+ */
 class IdeogramTrack {
     constructor(browser) {
-
         this.browser = browser
-
         this.type = 'ideogram'
-        this.id = this.type
-
         this.height = 16
-
         this.order = Number.MIN_SAFE_INTEGER
-
         this.disableButtons = true
         this.ignoreTrackMenu = true
-
     }
 
     async getFeatures(chr, start, end) {

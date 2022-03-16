@@ -152,11 +152,13 @@ class RulerSweeper {
 
                     validateLocusExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, extent, this.rulerViewport.browser.minimumBases())
 
-                    this.rulerViewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / this.rulerViewport.contentDiv.clientWidth
-                    this.rulerViewport.referenceFrame.start = Math.round(extent.start)
-                    this.rulerViewport.referenceFrame.end = Math.round(extent.end)
+                    const newStart = Math.round(extent.start)
+                    const newEnd = Math.round(extent.end)
+                    this.rulerViewport.referenceFrame.bpPerPixel = (newEnd - newStart) / this.rulerViewport.contentDiv.clientWidth
+                    this.rulerViewport.referenceFrame.start = newStart
+                    this.rulerViewport.referenceFrame.end = newEnd
 
-                    this.rulerViewport.browser.updateViews(this.rulerViewport.referenceFrame)
+                    this.rulerViewport.browser.updateViews()
                 }
 
             }
