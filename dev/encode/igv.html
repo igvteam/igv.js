@@ -1,13 +1,13 @@
 <head>
 
     <link rel="stylesheet" href="https://unpkg.com/@reservoirgenomics/resglass@1.20.5/dist/hglib.css">
-        <script crossorigin src="https://unpkg.com/higlass-plugins@0.2.1/dist/higlass-plugins.min.js">
+    <script crossorigin src="https://unpkg.com/higlass-plugins@0.2.1/dist/higlass-plugins.min.js">
 
-        </script>
-        <script crossorigin src="https://unpkg.com/@reservoirgenomics/resglass@1.20.5/dist/hglib.js">
+    </script>
+    <script crossorigin src="https://unpkg.com/@reservoirgenomics/resglass@1.20.5/dist/hglib.js">
 
-        </script>
-  
+    </script>
+
     <meta charset="UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
     <title>Juicebox</title>
@@ -20,52 +20,53 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/juicebox.js@2.2.0/dist/css/juicebox.css">
 
     <!-- Juicebox JS -->
-    <script src="https://cdn.jsdelivr.net/npm/juicebox.js@2.2.0/dist/juicebox.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/juicebox.js@2.2.1/dist/juicebox.min.js"></script>
 
-    <!-- IGV JS
-    <script src="https://cdn.jsdelivr.net/npm/igv@2.11.2/dist/igv.min.js"></script>-->
-
-
-    <script src="../../dist/igv.min.js"></script>
+    <!-- IGV JS -->
+    <script src="https://cdn.jsdelivr.net/npm/igv@2.11.2/dist/igv.min.js"></script>
 
 
 
 </head>
 <body>
 
-    <div id="igv-container" style="width: auto; margin-left: 10px; border: 1px solid black;">
-    </div>
+<div id="igv-container" style="width: auto; margin-left: 10px; border: 1px solid black;">
+</div>
 
-    <div id="juicebox-container" style="margin-top: 20px;  margin-left: 10px;display:flex">
-    </div>
-  
-    
+<div id="juicebox-container" style="margin-top: 20px;  margin-left: 10px;display:flex">
+</div>
+
 
 <script>
-    const juiceboxConfig1 =
-        {
-            genome: "hg38",
-            url: "https://www.encodeproject.org/files/ENCFF020DPP/@@download/ENCFF020DPP.hic",
-            name: "HepG2 HiC",
-            locus: "chr1:19,150,000-19,250,000",
-            //normalization: "SCALE",
-            //resolution: 1000
-        }
-    const juiceboxConfig2 =
-        {
-            genome: "hg38",
-            url: "https://www.encodeproject.org/files/ENCFF020DPP/@@download/ENCFF020DPP.hic",
-            name: "HepG2 HiC",
-            locus: "chr1:19,150,000-19,250,000",
-            //normalization: "SCALE",
-            //resolution: 1000
-        }
-    juicebox.init(document.getElementById("juicebox-container"), juiceboxConfig1)
-        .then(function (hicBrowser) {
-    })
-    juicebox.createBrowser(document.getElementById("juicebox-container"), juiceboxConfig2)
-</script>
+    const juiceboxConfig = {
+        browsers: [
+            {
+                genome: "hg38",
+                url: "https://www.encodeproject.org/files/ENCFF020DPP/@@download/ENCFF020DPP.hic",
+                name: "HepG2 HiC",
+                locus: "chr1:19,150,000-19,250,000",
+                normalization: "SCALE",
+                //resolution: 1000
+                width: 850
+            },
+            {
+                genome: "hg38",
+                url: "https://www.encodeproject.org/files/ENCFF020DPP/@@download/ENCFF020DPP.hic",
+                name: "HepG2 HiC",
+                locus: "chr1:19,150,000-19,250,000",
+                normalization: "SCALE",
+                width: 850
+                //resolution: 1000
+            }
+        ]
+    }
 
+    juicebox.init(document.getElementById("juicebox-container"), juiceboxConfig)
+        .then(function (hicBrowser) {
+            hicBrowser.set
+        })
+
+</script>
 
 
 <script>
@@ -77,7 +78,6 @@
                 {
                     url: "https://www.encodeproject.org/files/ENCFF056AAI/@@download/ENCFF056AAI.bigInteract",
                     format: "biginteract",
-                    //type: "interact"
                 },
                 {
                     url: "https://www.encodeproject.org/files/ENCFF004DTQ/@@download/ENCFF004DTQ.bigWig",
