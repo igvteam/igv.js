@@ -278,20 +278,17 @@ class FeatureTrack extends TrackBase {
                 const infoURL = this.infoURL || this.config.infoURL
                 for (let fd of featureData) {
                     data.push(fd)
-                    if (infoURL) {
-                        if (fd.name &&
-                            fd.name.toLowerCase() === "name" &&
-                            fd.value &&
-                            StringUtils.isString(fd.value) &&
-                            !fd.value.startsWith("<")) {
-
-
-                            const url = this.infoURL || this.config.infoURL
-                            const href = url.replace("$$", feature.name)
-                            data.push({name: "Info", value: `<a target="_blank" href=${href}>${fd.value}</a>`})
-                        }
+                    if (infoURL &&
+                        fd.name &&
+                        fd.name.toLowerCase() === "name" &&
+                        fd.value &&
+                        StringUtils.isString(fd.value) &&
+                        !fd.value.startsWith("<")) {
+                        const href = infoURL.replace("$$", feature.name)
+                        fd.value = `<a target=_blank href=${href}>${fd.value}</a>`
                     }
                 }
+
 
                 //Array.prototype.push.apply(data, featureData);
 
@@ -321,7 +318,7 @@ class FeatureTrack extends TrackBase {
     }
 
     menuItemList() {
-        
+
         const menuItems = []
 
         if (this.render === renderSnp) {
@@ -349,7 +346,7 @@ class FeatureTrack extends TrackBase {
             menuItems.push(
                 {
                     object: $(createCheckbox(lut[displayMode], displayMode === this.displayMode)),
-                    click:  () => {
+                    click: () => {
                         this.displayMode = displayMode
                         this.config.displayMode = displayMode
                         this.trackView.checkContentHeight()
@@ -411,7 +408,7 @@ class FeatureTrack extends TrackBase {
             desc += "</html>"
             return desc
         } else {
-            return super.description();
+            return super.description()
         }
 
     };
