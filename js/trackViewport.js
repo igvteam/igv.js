@@ -32,7 +32,7 @@ class TrackViewport extends Viewport {
             this.$zoomInNotice = this.createZoomInNotice(this.$content)
         }
 
-        if (track.name && "sequence" !== track.type) {
+        if (track.name && "sequence" !== track.id) {
             this.$trackLabel = $('<div class="igv-track-label">')
             this.$viewport.append(this.$trackLabel)
             this.setTrackLabel(track.name)
@@ -71,7 +71,10 @@ class TrackViewport extends Viewport {
 
     /**
      * Test to determine if we are zoomed in far enough to see features. Applicable to tracks with visibility windows.
-     * @returns {boolean}
+     *
+     * As a side effect the viewports canvas is removed if zoomed out.
+     *
+     * @returns {boolean} true if we are zoomed in past visibility window, false otherwise
      */
     checkZoomIn() {
 
