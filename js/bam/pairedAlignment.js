@@ -115,7 +115,7 @@ class PairedAlignment {
         return this.firstAlignment.isProperPair()
     }
 
-    get tlen() {
+    get fragmentLength() {
         return Math.abs(this.firstAlignment.fragmentLength)
     }
 
