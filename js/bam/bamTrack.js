@@ -1252,10 +1252,7 @@ class AlignmentTrack {
                 list.push({
                     label: 'View read sequence',
                     click: () => {
-                        const alignment = clickedAlignment
-                        if (!alignment) return
-
-                        const seqstring = alignment.seq //.map(b => String.fromCharCode(b)).join("");
+                        const seqstring = clickedAlignment.seq //.map(b => String.fromCharCode(b)).join("");
                         if (!seqstring || "*" === seqstring) {
                             Alert.presentAlert("Read sequence: *")
                         } else {
@@ -1267,11 +1264,16 @@ class AlignmentTrack {
                 if (isSecureContext()) {
                     list.push({
                         label: 'Copy read sequence',
-                        click: () => {
-                            const alignment = clickedAlignment
-                            if (!alignment) return
-                            const seqstring = alignment.seq //.map(b => String.fromCharCode(b)).join("");
-                            navigator.clipboard.writeText(seqstring)
+                        click: async () => {
+                            const seq = clickedAlignment.seq //.map(b => String.fromCharCode(b)).join("");
+                            try {
+                                //console.log(`seq: ${seq}`)
+                                await navigator.clipboard.writeText(seq)
+                            } catch (e) {
+                                console.error(e)
+                                Alert.presentAlert(`error copying sequence to clipboard ${e}`)
+                            }
+
                         }
                     })
                 }
