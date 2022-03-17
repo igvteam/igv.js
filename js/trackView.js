@@ -38,7 +38,6 @@ const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 class TrackView {
 
     constructor(browser, columnContainer, track) {
-        this.namespace = `trackview-${DOMUtils.guid()}`
         this.browser = browser
         this.track = track
         track.trackView = this
@@ -66,7 +65,7 @@ class TrackView {
         // Axis
         this.axis = this.createAxis(browser, this.track)
 
-        // Track Viewports
+        // Create a viewport for each reference frame
         this.viewports = []
         const viewportWidth = browser.calculateViewportWidth(referenceFrameList.length)
         const viewportColumns = columnContainer.querySelectorAll('.igv-column')
@@ -468,7 +467,7 @@ class TrackView {
     }
 
     /**
-     * Return a promise to get all in-view features.  Used for group autoscaling.
+     * Return a promise to get all in-view features across all viewports.  Used for group autoscaling.
      */
     async getInViewFeatures() {
 
@@ -478,6 +477,9 @@ class TrackView {
 
         let allFeatures = []
         for (let vp of this.viewports) {
+            if (vp.needsReload()) {
+                await vp.loadFeatures()
+            }
             if (vp.featureCache && vp.featureCache.features) {
                 const referenceFrame = vp.referenceFrame
                 const start = referenceFrame.start
@@ -526,21 +528,6 @@ class TrackView {
             }
             this.updateScrollbar()
         }
-    }
-
-    viewportsToReload(viewports) {
-
-        // List of viewports that need reloading
-        return viewports.filter(viewport => {
-            if (!viewport.isVisible()) {
-                return false
-            }
-            if (!viewport.checkZoomIn()) {
-                return false
-            } else {
-                return viewport.needsReload()
-            }
-        })
     }
 
     createTrackScrollbar(browser) {
