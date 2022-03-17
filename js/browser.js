@@ -1574,11 +1574,6 @@ class Browser {
         return surl
     }
 
-    currentReferenceFrames() {
-        const anyTrackView = this.trackViews[0]
-        return anyTrackView.viewports.map(vp => vp.referenceFrame)
-    }
-
     /**
      * Record a mouse click on a specific viewport.   This might be the start of a drag operation.   Dragging
      * (panning) is handled here so that the mouse can move out of a specific viewport (e.g. stray into another
