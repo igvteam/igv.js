@@ -235,7 +235,7 @@ const BamUtils = {
             const lseq = readInt(ba, offset + 20)
             const mateChrIdx = readInt(ba, offset + 24)
             const matePos = readInt(ba, offset + 28)
-            const tlen = readInt(ba, offset + 32)
+            const fragmentLength = readInt(ba, offset + 32)
 
             let readName = []
             for (let j = 0; j < nl - 1; ++j) {
@@ -277,7 +277,7 @@ const BamUtils = {
             alignment.readName = readName
             alignment.cigar = cigar
             alignment.lengthOnRef = lengthOnRef
-            alignment.fragmentLength = tlen
+            alignment.fragmentLength = fragmentLength
             alignment.mq = mq
 
             BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray)
