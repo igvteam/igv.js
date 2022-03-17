@@ -160,20 +160,23 @@ function createCircularView(el, browser) {
             function addFrameForFeature(feature) {
 
                 feature.chr = browser.genome.getChromosomeName(feature.refName)
-
-                for (let referenceFrame of browser.currentReferenceFrames()) {
+                let frameFound = false
+                for (let referenceFrame of browser.referenceFrameList) {
                     const l = Locus.fromLocusString(referenceFrame.getLocusString())
                     if (l.contains(feature)) {
+                        frameFound = true
                         break
                     } else if (l.overlaps(feature)) {
                         referenceFrame.extend(feature)
-                        break
-                    } else {
-                        const flanking = 2000
-                        const center = (feature.start + feature.end) / 2
-                        browser.addMultiLocusPanel(feature.chr, center - flanking, center + flanking)
+                        frameFound = true
                         break
                     }
+                }
+                if (!frameFound) {
+                    const flanking = 2000
+                    const center = (feature.start + feature.end) / 2
+                    browser.addMultiLocusPanel(feature.chr, center - flanking, center + flanking)
+
                 }
             }
         }
