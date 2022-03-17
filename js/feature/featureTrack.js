@@ -24,6 +24,7 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js"
+import {Alert,} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import FeatureSource from './featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
@@ -362,14 +363,28 @@ class FeatureTrack extends TrackBase {
 
     contextMenuItemList(clickState) {
 
-        if (isSecureContext()) {
-            const features = this.clickedFeatures(clickState)
-            if (features.length > 1) {
-                features.sort((a, b) => (a.end - a.start) - (b.end - b.start))
-            }
-            const f = features[0]   // The longest feature
-            if ((f.end - f.start) <= 1000000) {
-                return [
+        const features = this.clickedFeatures(clickState)
+        if (features.length > 1) {
+            features.sort((a, b) => (b.end - b.start) - (a.end - a.start))
+        }
+        const f = features[0]   // The shortest clicked feature
+
+        if ((f.end - f.start) <= 1000000) {
+
+            const list = [{
+                label: 'View feature sequence',
+                click: async () => {
+                    let seq = await this.browser.genome.getSequence(f.chr, f.start, f.end)
+                    if (f.strand === '-') {
+                        seq = reverseComplementSequence(seq)
+                    }
+                    Alert.presentAlert(seq)
+
+                }
+            }]
+
+            if (isSecureContext() && navigator.clipboard !== undefined) {
+                list.push(
                     {
                         label: 'Copy feature sequence',
                         click: async () => {
@@ -377,17 +392,23 @@ class FeatureTrack extends TrackBase {
                             if (f.strand === '-') {
                                 seq = reverseComplementSequence(seq)
                             }
-                            navigator.clipboard.writeText(seq)
+                            try {
+                                await navigator.clipboard.writeText(seq)
+                            } catch (e) {
+                                console.error(e)
+                                Alert.presentAlert(`error copying sequence to clipboard ${e}`)
+                            }
                         }
-                    },
-                    '<hr/>'
-                ]
+                    }
+                )
             }
+            list.push('<hr/>')
+            return list
+        } else {
+
+            return undefined
+
         }
-
-        // Either not a secure context (i.e. http: protocol), or feature is too long
-        return undefined
-
     }
 
     description() {

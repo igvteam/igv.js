@@ -26,6 +26,7 @@
 import IGVGraphics from "./igv-canvas.js"
 import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {isSecureContext} from "./util/igvUtils.js"
+import {reverseComplementSequence} from "./util/sequenceUtils.js"
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
 
@@ -126,7 +127,6 @@ class SequenceTrack {
     }
 
     menuItemList() {
-
         return [
             {
                 name: this.reversed ? "Forward" : "Reverse",
@@ -161,17 +161,20 @@ class SequenceTrack {
     contextMenuItemList(clickState) {
         const viewport = clickState.viewport
         if (viewport.referenceFrame.bpPerPixel <= 1) {
+            const pixelWidth = viewport.getWidth()
+            const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel
+            const chr = viewport.referenceFrame.chr
+            const start = Math.floor(viewport.referenceFrame.start)
+            const end = Math.ceil(start + bpWindow)
             const items = [
                 {
-                    label: 'View visible sequence...',
+                    label: this.reversed ? 'View visible sequence (reversed)...' : 'View visible sequence...',
                     click: async () => {
-                        const pixelWidth = viewport.getWidth()
-                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel
-                        const chr = viewport.referenceFrame.chr
-                        const start = viewport.referenceFrame.start
-                        const end = start + bpWindow
-                        const sequence = await this.browser.genome.sequence.getSequence(chr, start, end)
-                        Alert.presentAlert(sequence)
+                        let seq = await this.browser.genome.sequence.getSequence(chr, start, end)
+                        if (this.reversed) {
+                            seq = reverseComplementSequence(seq)
+                        }
+                        Alert.presentAlert(seq)
                     }
                 }
             ]
@@ -179,14 +182,18 @@ class SequenceTrack {
                 items.push({
                     label: 'Copy visible sequence',
                     click: async () => {
-                        const pixelWidth = viewport.getWidth()
-                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel
-                        const chr = viewport.referenceFrame.chr
-                        const start = viewport.referenceFrame.start
-                        const end = start + bpWindow
-                        const sequence = await this.browser.genome.sequence.getSequence(chr, start, end)
-                        navigator.clipboard.writeText(sequence)
+                        let seq = await this.browser.genome.sequence.getSequence(chr, start, end)
+                        if (this.reversed) {
+                            seq = reverseComplementSequence(seq)
+                        }
+                        try {
+                            await navigator.clipboard.writeText(seq)
+                        } catch (e) {
+                            console.error(e)
+                            Alert.presentAlert(`error copying sequence to clipboard ${e}`)
+                        }
                     }
+
                 })
             }
             items.push('<hr/>')
