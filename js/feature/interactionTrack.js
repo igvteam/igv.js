@@ -115,7 +115,7 @@ class InteractionTrack extends TrackBase {
         return this
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return true
     }
 

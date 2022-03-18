@@ -482,7 +482,7 @@ class SegTrack extends TrackBase {
 
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
     }
 
