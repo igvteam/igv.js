@@ -121,7 +121,7 @@ class TDFSource {
         return features
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return true
     }
 }

@@ -161,7 +161,7 @@ class MergedTrack extends TrackBase {
     }
 
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return this.tracks.every(track => track.supportsWholeGenome())
     }
 }

@@ -337,7 +337,7 @@ class SequenceTrack {
         }
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return false
     }
 

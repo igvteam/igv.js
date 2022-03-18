@@ -151,7 +151,7 @@ class RulerTrack {
         }
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return true
     };
 

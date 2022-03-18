@@ -94,7 +94,7 @@ class SpliceJunctionTrack extends TrackBase {
 
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return false
     }
 

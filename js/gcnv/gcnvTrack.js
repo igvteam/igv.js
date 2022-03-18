@@ -337,7 +337,7 @@ class GCNVTrack extends TrackBase {
         return items
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return false
     }
 }
