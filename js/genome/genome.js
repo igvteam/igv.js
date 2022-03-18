@@ -354,6 +354,7 @@ class Genome {
     }
 
     async getSequence(chr, start, end) {
+        chr = this.getChromosomeName(chr)
         return this.sequence.getSequence(chr, start, end)
     }
 }
