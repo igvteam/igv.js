@@ -366,7 +366,7 @@ class BAMTrack extends TrackBase {
         }
 
         // Add chords to JBrowse circular view, if present
-        if (this.browser.circularView && true === this.browser.circularViewVisible &&
+        if (this.browser.circularView &&
             (this.alignmentTrack.hasPairs || this.alignmentTrack.hasSupplemental)) {
             menuItems.push('<hr/>')
             if (this.alignmentTrack.hasPairs) {
@@ -891,7 +891,7 @@ class AlignmentTrack {
                 for (let alignment of alignmentRow.alignments) {
 
                     this.hasPairs = this.hasPairs || alignment.isPaired()
-                    if (this.browser.circularView && true === this.browser.circularViewVisible) {
+                    if (this.browser.circularView) {
                         // This is an expensive check, only do it if needed
                         this.hasSupplemental = this.hasSupplemental || alignment.hasTag('SA')
                     }
@@ -1283,8 +1283,7 @@ class AlignmentTrack {
         }
 
         // Experimental JBrowse feature
-        if (this.browser.circularView && true === this.browser.circularViewVisible
-            && (this.hasPairs || this.hasSupplemental)) {
+        if (this.browser.circularView && (this.hasPairs || this.hasSupplemental)) {
             if (this.hasPairs) {
                 list.push({
                     label: 'Add discordant pairs to circular view',
