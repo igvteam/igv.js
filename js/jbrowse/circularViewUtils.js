@@ -143,6 +143,9 @@ function sendChords(chords, track, refFrame, alpha) {
         `${encodedName}  ${refFrame.chr}:${refFrame.start}-${refFrame.end}`
     track.browser.circularView.addChords(chords, {track: chordSetName, color: chordSetColor, trackColor: trackColor})
 
+    // show circular view if hidden
+    if(!track.browser.circularViewVisible) track.browser.circularViewVisible = true
+
 }
 
 

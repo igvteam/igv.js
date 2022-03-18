@@ -1786,7 +1786,7 @@ class Browser {
             id: this.genome.id,
             chromosomes: makeCircViewChromosomes(this.genome)
         })
-        this.circularViewVisible = show === true
+        this.circularViewVisible = show
 
     }
 

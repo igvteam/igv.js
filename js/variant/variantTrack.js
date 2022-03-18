@@ -538,7 +538,7 @@ class VariantTrack extends TrackBase {
         }
 
         // Experimental JBrowse circular view integration
-        if (this.browser.circularView && true === this.browser.circularViewVisible) {
+        if (this.browser.circularView) {
 
             menuItems.push('<hr>')
             menuItems.push({
@@ -559,7 +559,7 @@ class VariantTrack extends TrackBase {
     contextMenuItemList(clickState) {
 
         // Experimental JBrowse circular view integration
-        if (this.browser.circularView && true === this.browser.circularViewVisible) {
+        if (this.browser.circularView) {
             const viewport = clickState.viewport
             const list = []
 

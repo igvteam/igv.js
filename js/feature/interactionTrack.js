@@ -503,7 +503,7 @@ class InteractionTrack extends TrackBase {
             items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
         }
 
-        if (this.browser.circularView && true === this.browser.circularViewVisible) {
+        if (this.browser.circularView) {
             items.push('<hr/>')
             items.push({
                 label: 'Add interactions to circular view',
@@ -521,7 +521,7 @@ class InteractionTrack extends TrackBase {
     contextMenuItemList(clickState) {
 
         // Experimental JBrowse feature
-        if (this.browser.circularView && true === this.browser.circularViewVisible) {
+        if (this.browser.circularView ) {
             const viewport = clickState.viewport
             const list = []
 
@@ -552,7 +552,6 @@ class InteractionTrack extends TrackBase {
         const inView = cachedFeatures.filter(f => f.drawState)
         if(inView.length === 0) return;
 
-        this.browser.circularViewVisible = true
         const chords = makeBedPEChords(inView)
         sendChords(chords, this, refFrame, 0.5)
         //
