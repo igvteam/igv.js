@@ -102,7 +102,7 @@ class GWASTrack extends TrackBase {
     }
 
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return true
     }
 

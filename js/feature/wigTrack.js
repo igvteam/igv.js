@@ -289,7 +289,7 @@ class WigTrack extends TrackBase {
         }
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return !this.config.indexURL && this.config.supportsWholeGenome !== false
     }
 
