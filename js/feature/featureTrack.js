@@ -370,7 +370,6 @@ class FeatureTrack extends TrackBase {
         const f = features[0]   // The shortest clicked feature
 
         if ((f.end - f.start) <= 1000000) {
-
             const list = [{
                 label: 'View feature sequence',
                 click: async () => {
@@ -378,6 +377,7 @@ class FeatureTrack extends TrackBase {
                     if (f.strand === '-') {
                         seq = reverseComplementSequence(seq)
                     }
+                    if (!seq) seq = "Unknown sequence"
                     Alert.presentAlert(seq)
 
                 }
