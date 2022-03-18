@@ -177,7 +177,7 @@ class TrackBase {
         return state
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return false
     }
 
