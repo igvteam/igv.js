@@ -44,7 +44,7 @@ import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
-import {buildOptions, createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
+import {buildOptions, createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import GtexUtils from "./gtex/gtexUtils.js"
 import {defaultSequenceTrackOrder} from './sequenceTrack.js'
@@ -74,6 +74,7 @@ import GtexSelection from "./gtex/gtexSelection.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import CustomButton from "./ui/customButton.js"
+import ROIManager from './ROIManager.js'
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -467,10 +468,13 @@ class Browser {
 
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
+        let ideogramHeight = 0
         if (false !== session.showIdeogram) {
-            const ideogramTrack = new IdeogramTrack(this)
-            ideogramTrack.id = 'ideogram'
-            this.trackViews.push(new TrackView(this, this.columnContainer, ideogramTrack))
+            const trackView = new TrackView(this, this.columnContainer, new IdeogramTrack(this))
+            this.trackViews.push(trackView)
+            const { $viewport } = trackView.viewports[ 0 ]
+            ideogramHeight = getElementAbsoluteHeight($viewport.get(0))
+
         }
 
         if (false !== session.showRuler) {
@@ -488,11 +492,11 @@ class Browser {
             }
         }
 
+        // ROIManager only deals with global ROIs. All interactively created ROIs are global.
         if (session.roi) {
-            this.roi = []
-            for (let r of session.roi) {
-                this.roi.push(new ROI(r, this.genome))
-            }
+            this.roiManager = new ROIManager(this, ideogramHeight, this.columnContainer.querySelector('.igv-column'), session.roi.map(roi => new ROI(roi, this.genome)))
+        } else {
+            this.roiManager = new ROIManager(this, ideogramHeight, this.columnContainer.querySelector('.igv-column'), undefined)
         }
 
         // Tracks.  Start with genome tracks, if any, then append session tracks

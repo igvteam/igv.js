@@ -23,17 +23,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 import FeatureSource from './feature/featureSource.js'
 import IGVGraphics from "./igv-canvas.js"
 
-var defaultHighlightColor = "rgba(68, 134, 247, 0.25)"
+const defaultHighlightColor = "rgba(68, 134, 247, 0.25)"
 
 class ROI {
 
     constructor(config, genome) {
         this.config = config
         this.name = config.name
-        this.roiSource = FeatureSource(config, genome)
+        this.roiSource = config.roiSource || FeatureSource(config, genome)
         this.color = config.color || defaultHighlightColor
     }
 
@@ -43,50 +44,42 @@ class ROI {
 
     draw(drawConfiguration) {
 
-        var endBP,
-            region,
-            coord,
-            regions
-
-        regions = drawConfiguration.features
+        const regions = drawConfiguration.features
         if (!regions) {
             return
         }
 
-        endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1)
-        for (var i = 0, len = regions.length; i < len; i++) {
+        const endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1)
+        for (let { start:regionStartBP, end:regionEndBP } of regions) {
 
-            region = regions[i]
-            if (region.end < drawConfiguration.bpStart) {
+            if (regionEndBP < drawConfiguration.bpStart) {
                 continue
             }
 
-            if (region.start > endBP) {
+            if (regionStartBP > endBP) {
                 break
             }
 
-            coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel)
-            IGVGraphics.fillRect(drawConfiguration.context, coord.x, drawConfiguration.pixelTop, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color})
+            const { x, width } = screenCoordinates(regionStartBP, regionEndBP, drawConfiguration.bpStart, drawConfiguration.bpPerPixel)
+            IGVGraphics.fillRect(drawConfiguration.context, x, drawConfiguration.pixelTop, width, drawConfiguration.pixelHeight, {fillStyle: this.color})
         }
     }
 }
 
-function coordinates(region, startBP, bpp) {
+function screenCoordinates(regionStartBP, regionEndBP, startBP, bpp) {
 
-    var ss,
-        ee,
-        width
+    let xStart = Math.round((regionStartBP - startBP) / bpp)
+    const xEnd = Math.round((regionEndBP - startBP) / bpp)
 
-    ss = Math.round((region.start - startBP) / bpp)
-    ee = Math.round((region.end - startBP) / bpp)
-    width = ee - ss
+    let width = xEnd - xStart
 
     if (width < 3) {
         width = 3
-        ss -= 1
+        xStart -= 1
     }
 
-    return {x: ss, width: width}
+    return { x:xStart, width }
 }
 
+export { screenCoordinates }
 export default ROI
