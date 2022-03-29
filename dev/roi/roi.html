@@ -13,7 +13,7 @@
 
 <body>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+<div id="container" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
 </div>
 
@@ -21,7 +21,6 @@
 
     import igv from "../../js/index.js";
 
-    const div = document.getElementById("myDiv");
     const options = {
         locus: '1:67,655,272-67,684,468',
         genome: "hg19",
@@ -32,7 +31,7 @@
                 name: 'ROI set 1',
                 url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
                 indexed: false,
-                color: "rgba(68, 134, 247, 0.25)"
+                color: "rgba(255,1,199,0.94)"
             }
         ],
         tracks: [
@@ -44,13 +43,13 @@
                     name: 'ROI set 2',
                     url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_2.bed',
                     indexed: false,
-                    color: "rgba(0, 150, 50, 0.25)"
+                    color: "rgba(100,149,237,0.75)"
                 }]
             }
         ]
     };
 
-    igv.createBrowser(div, options);
+    igv.createBrowser(document.getElementById('container'), options);
 
 </script>
 

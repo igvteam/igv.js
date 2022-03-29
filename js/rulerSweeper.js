@@ -142,7 +142,6 @@ class RulerSweeper {
 
                 this.rulerSweeper.style.display = 'none'
 
-
                 if (width > threshold) {
 
                     extent = {
@@ -152,13 +151,20 @@ class RulerSweeper {
 
                     validateLocusExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, extent, this.rulerViewport.browser.minimumBases())
 
-                    const newStart = Math.round(extent.start)
-                    const newEnd = Math.round(extent.end)
-                    this.rulerViewport.referenceFrame.bpPerPixel = (newEnd - newStart) / this.rulerViewport.contentDiv.clientWidth
-                    this.rulerViewport.referenceFrame.start = newStart
-                    this.rulerViewport.referenceFrame.end = newEnd
+                    const shiftKeyPressed = event.shiftKey
 
-                    this.rulerViewport.browser.updateViews()
+                    if (true === shiftKeyPressed) {
+                        this.rulerViewport.browser.roiManager.addROI(Object.assign({}, extent))
+                    } else {
+
+                        this.rulerViewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / this.rulerViewport.contentDiv.clientWidth
+                        this.rulerViewport.referenceFrame.start = Math.round(extent.start)
+                        this.rulerViewport.referenceFrame.end = Math.round(extent.end)
+
+                        this.rulerViewport.browser.updateViews(this.rulerViewport.referenceFrame)
+
+                    }
+
                 }
 
             }
