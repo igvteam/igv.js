@@ -26,8 +26,12 @@
 
 import FeatureSource from './feature/featureSource.js'
 import IGVGraphics from "./igv-canvas.js"
+import {appleCrayonRGBA} from './util/colorPalletes.js'
 
-const defaultHighlightColor = "rgba(68, 134, 247, 0.25)"
+// const ROI_DEFAULT_COLOR = 'rgba(68, 134, 247, 0.25)'
+const ROI_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 0.25)
+const TRACK_ROI_TYPE = 2
+const GLOBAL_ROI_TYPE = 4
 
 class ROI {
 
@@ -35,7 +39,7 @@ class ROI {
         this.config = config
         this.name = config.name
         this.roiSource = config.roiSource || FeatureSource(config, genome)
-        this.color = config.color || defaultHighlightColor
+        this.color = config.color || ROI_DEFAULT_COLOR
     }
 
     async getFeatures(chr, start, end) {
@@ -81,5 +85,5 @@ function screenCoordinates(regionStartBP, regionEndBP, startBP, bpp) {
     return { x:xStart, width }
 }
 
-export { screenCoordinates }
+export { screenCoordinates, TRACK_ROI_TYPE, GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR }
 export default ROI
