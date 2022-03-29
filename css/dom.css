@@ -953,6 +953,7 @@
 
 .igv-column {
   position: relative;
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -960,8 +961,29 @@
   align-items: flex-start;
   box-sizing: border-box;
   height: 100%; }
+  .igv-column > .igv-roi {
+    cursor: pointer;
+    z-index: 64;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    overflow: visible; }
+    .igv-column > .igv-roi > div {
+      color: dimgrey;
+      position: relative;
+      left: -8px;
+      width: 16px;
+      height: 16px; }
+  .igv-column > .igv-roi:hover {
+    border-left-width: thin;
+    border-left-style: solid;
+    border-left-color: dimgrey;
+    border-right-width: thin;
+    border-right-style: solid;
+    border-right-color: dimgrey; }
 
 .igv-axis-column {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -975,6 +997,7 @@
     width: 100%; }
 
 .igv-sample-name-column {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -984,6 +1007,7 @@
   height: 100%; }
 
 .igv-scrollbar-column {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -1013,6 +1037,7 @@
       background-color: #c4c4c4; }
 
 .igv-track-drag-column {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -1043,6 +1068,7 @@
     border-width: 0; }
 
 .igv-gear-menu-column {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
