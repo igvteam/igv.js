@@ -1,7 +1,7 @@
 import Picker from '../node_modules/vanilla-picker/dist/vanilla-picker.mjs'
 import {DOMUtils, StringUtils, Icon} from '../node_modules/igv-utils/src/index.js'
-import {appleCrayonRGBA} from './util/colorPalletes.js'
-import ROI, { screenCoordinates } from './roi.js'
+
+import ROI, {GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, screenCoordinates} from './roi.js'
 
 
 class ROIManager {
@@ -26,12 +26,17 @@ class ROIManager {
         const config =
             {
                 name: 'unnamed',
-                roiSource: { getFeatures :(chr, start, end) => [ region ] },
-                color: appleCrayonRGBA('sea_foam', 0.75)
+                roiSource:
+                    {
+                        getFeatures :(chr, start, end) => [ region ]
+                    },
+                color: ROI_DEFAULT_COLOR
             }
 
-        // this.interactiveROI.push(region)
-        this.roi.push(new ROI(config, this.browser.genome))
+        const r = new ROI(config, this.browser.genome)
+        r.type = GLOBAL_ROI_TYPE
+
+        this.roi.push(r)
 
         paint(this.browser, this.top, this.column, this.roi)
     }
@@ -60,6 +65,8 @@ async function paint(browser, top, column, roiList) {
                     break
                 }
 
+                regionStartBP = Math.max(regionStartBP, startBP)
+                regionEndBP = Math.min(regionEndBP, endBP)
                 column.appendChild(createGlobalROIElement(top, roi, regionStartBP, regionEndBP, startBP, bpp))
             }
         }
@@ -80,6 +87,12 @@ function createGlobalROIElement(top, roi, regionStartBP, regionEndBP, startBP, b
 
     const { x:regionX, width:regionWidth } = screenCoordinates(regionStartBP, regionEndBP, startBP, bpp)
 
+    // button
+    const button = DOMUtils.div()
+    button.style.transform = `translateX(${ Math.floor(regionWidth/2)}px)`
+    button.appendChild(Icon.createIcon('cog'))
+    button.style.display = 'none'
+
     // ROI surface
     const element = DOMUtils.div({class: 'igv-roi'})
     element.style.top = `${top}px`
@@ -87,10 +100,11 @@ function createGlobalROIElement(top, roi, regionStartBP, regionEndBP, startBP, b
     element.style.width = `${regionWidth}px`
     element.style.backgroundColor = roi.color
 
-    // settings presentation button
-    const button = DOMUtils.div()
-    button.style.transform = `translateX(${ Math.floor(regionWidth/2)}px)`
-    button.appendChild(Icon.createIcon('cog'))
+    element.addEventListener('click', () => {
+        button.style.display = 'none' === button.style.display ? 'block' : 'none'
+    })
+
+    element.appendChild(button)
 
     // Color/Alpha Picker
     const pickerConfig =
@@ -105,8 +119,6 @@ function createGlobalROIElement(top, roi, regionStartBP, regionEndBP, startBP, b
         }
 
     new Picker(pickerConfig)
-
-    element.appendChild(button)
 
     return element
 }

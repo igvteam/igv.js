@@ -39,7 +39,7 @@ import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js"
 import C2S from "./canvas2svg.js"
 import TrackFactory from "./trackFactory.js"
-import ROI from "./roi.js"
+import ROI, {GLOBAL_ROI_TYPE, TRACK_ROI_TYPE} from "./roi.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
@@ -494,7 +494,11 @@ class Browser {
 
         // ROIManager only deals with global ROIs. All interactively created ROIs are global.
         if (session.roi) {
-            this.roiManager = new ROIManager(this, ideogramHeight, this.columnContainer.querySelector('.igv-column'), session.roi.map(roi => new ROI(roi, this.genome)))
+            this.roiManager = new ROIManager(this, ideogramHeight, this.columnContainer.querySelector('.igv-column'), session.roi.map(roi => {
+                const r = new ROI(roi, this.genome)
+                r.type = GLOBAL_ROI_TYPE
+                return r
+            }))
         } else {
             this.roiManager = new ROIManager(this, ideogramHeight, this.columnContainer.querySelector('.igv-column'), undefined)
         }
@@ -898,12 +902,14 @@ class Browser {
         }
 
         const track = TrackFactory.getTrack(type, config, this)
-        if (track && config.roi) {
-            track.roi = []
-            for (let r of config.roi) {
-                track.roi.push(new ROI(r, this.genome))
-            }
-        }
+
+        if (track && config.roi && config.roi.length > 0) {
+            track.roi = config.roi.map(r => {
+                const item = new ROI(r, this.genome)
+                item.type = TRACK_ROI_TYPE
+                return item
+            })
+         }
 
         return track
 
