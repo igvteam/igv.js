@@ -37,6 +37,7 @@ $igv-zoom-in-notice-height: 16px;
 @import "spinner";
 
 @mixin igv-column-base {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -108,6 +109,36 @@ $igv-zoom-in-notice-height: 16px;
 .igv-column {
   position: relative;
   @include igv-column-base;
+
+  >.igv-roi {
+    cursor: pointer;
+    z-index: 64;
+
+    position: absolute;
+    top:0;
+    bottom: 0;
+
+    overflow: visible;
+
+    >div {
+      color: dimgrey;
+      position: relative;
+      left: -8px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  >.igv-roi:hover {
+    border-left-width: thin;
+    border-left-style: solid;
+    border-left-color: dimgrey;
+
+    border-right-width: thin;
+    border-right-style: solid;
+    border-right-color: dimgrey;
+  }
+
 }
 
 .igv-axis-column {
