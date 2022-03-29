@@ -220,7 +220,21 @@ function isSecureContext() {
     return window.location.protocol === "https:" || window.location.hostname === "localhost"
 }
 
+// reference: https://pretagteam.com/question/find-element-height-including-margin
+function getElementAbsoluteHeight(element) {
+
+    // Get the DOM Node if you pass in a string
+    element = (typeof element === 'string') ? document.querySelector(element) : element
+
+    const styles = window.getComputedStyle(element)
+    const margin = parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom'])
+    const height = element.offsetHeight
+
+    return Math.ceil(margin + height);
+}
+
 export {
     createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber,
-    getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext
+    getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext,
+    getElementAbsoluteHeight
 }
