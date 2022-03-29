@@ -974,13 +974,6 @@
       left: -8px;
       width: 16px;
       height: 16px; }
-  .igv-column > .igv-roi:hover {
-    border-left-width: thin;
-    border-left-style: solid;
-    border-left-color: dimgrey;
-    border-right-width: thin;
-    border-right-style: solid;
-    border-right-color: dimgrey; }
 
 .igv-axis-column {
   position: relative;
