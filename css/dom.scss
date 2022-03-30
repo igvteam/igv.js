@@ -23,6 +23,8 @@ $igv-column-shim-margin: 2px;
 $igv-zoom-in-notice-width: 128px;
 $igv-zoom-in-notice-height: 16px;
 
+$igv-roi-border-color: rgba(105, 105, 105, 0.5);
+
 @import "color";
 @import "font";
 @import "navbar";
@@ -123,19 +125,19 @@ $igv-zoom-in-notice-height: 16px;
 
     overflow: visible;
 
-    margin-top: 36px;
+    margin-top: 44px;
 
-    border-top-width: thin;
-    border-top-style: solid;
-    border-top-color: dimgrey;
+    //border-top-width: thin;
+    //border-top-style: solid;
+    //border-top-color: dimgrey;
 
     border-left-width: thin;
     border-left-style: solid;
-    border-left-color: dimgrey;
+    border-left-color: $igv-roi-border-color;
 
     border-right-width: thin;
     border-right-style: solid;
-    border-right-color: dimgrey;
+    border-right-color: $igv-roi-border-color;
 
     display: flex;
     flex-direction: row;
