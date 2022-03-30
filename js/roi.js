@@ -32,7 +32,7 @@ import {appleCrayonRGBA} from './util/colorPalletes.js'
 
 const ROI_DEFAULT_ALPHA = 1/16
 const ROI_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', ROI_DEFAULT_ALPHA)
-const ROI_HEADER_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 4 * ROI_DEFAULT_ALPHA)
+const ROI_HEADER_DEFAULT_COLOR = appleCrayonRGBA('tin', 0.25)
 
 const TRACK_ROI_TYPE = 2
 const GLOBAL_ROI_TYPE = 4

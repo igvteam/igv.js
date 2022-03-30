@@ -119,9 +119,15 @@ $igv-zoom-in-notice-height: 16px;
     top:0;
     bottom: 0;
 
+    pointer-events: none;
+
     overflow: visible;
 
-    background-color: transparent;
+    margin-top: 36px;
+
+    border-top-width: thin;
+    border-top-style: solid;
+    border-top-color: dimgrey;
 
     border-left-width: thin;
     border-left-style: solid;
@@ -140,7 +146,7 @@ $igv-zoom-in-notice-height: 16px;
     // ROI header
     >div {
       width: 100%;
-      height: 16px;
+      height: 8px;
       background-color: dimgrey;
     }
   }
