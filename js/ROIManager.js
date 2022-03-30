@@ -90,7 +90,7 @@ function createGlobalROI(top, roi, regionStartBP, regionEndBP, startBP, bpp) {
     container.style.left = `${regionX}px`
     container.style.width = `${regionWidth}px`
     // container.style.backgroundColor = roi.color
-    container.style.backgroundColor = ROI_DEFAULT_COLOR
+    container.style.backgroundColor = roi.color
 
     // header
     const header = DOMUtils.div()
