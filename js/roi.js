@@ -30,20 +30,23 @@ import {appleCrayonRGBA} from './util/colorPalletes.js'
 
 // const ROI_DEFAULT_COLOR = 'rgba(68, 134, 247, 0.25)'
 const ROI_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 0.25)
+const ROI_HEADER_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 0.50)
+
 const TRACK_ROI_TYPE = 2
 const GLOBAL_ROI_TYPE = 4
 
 class ROI {
 
-    constructor(config, genome) {
+    constructor(config, genome, type) {
         this.config = config
         this.name = config.name
-        this.roiSource = config.roiSource || FeatureSource(config, genome)
+        this.featureSource = config.featureSource || FeatureSource(config, genome)
         this.color = config.color || ROI_DEFAULT_COLOR
+        this.type = type
     }
 
     async getFeatures(chr, start, end) {
-        return this.roiSource.getFeatures({chr, start, end})
+        return this.featureSource.getFeatures({chr, start, end})
     }
 
     draw(drawConfiguration) {
@@ -70,6 +73,8 @@ class ROI {
     }
 }
 
+const SCREEN_COORDS_WIDTH_THRESHOLD = 3
+
 function screenCoordinates(regionStartBP, regionEndBP, startBP, bpp) {
 
     let xStart = Math.round((regionStartBP - startBP) / bpp)
@@ -77,13 +82,13 @@ function screenCoordinates(regionStartBP, regionEndBP, startBP, bpp) {
 
     let width = xEnd - xStart
 
-    if (width < 3) {
-        width = 3
+    if (width < SCREEN_COORDS_WIDTH_THRESHOLD) {
+        width = SCREEN_COORDS_WIDTH_THRESHOLD
         xStart -= 1
     }
 
     return { x:xStart, width }
 }
 
-export { screenCoordinates, TRACK_ROI_TYPE, GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR }
+export { screenCoordinates, TRACK_ROI_TYPE, GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR }
 export default ROI
