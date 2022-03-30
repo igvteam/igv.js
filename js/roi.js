@@ -29,8 +29,10 @@ import IGVGraphics from "./igv-canvas.js"
 import {appleCrayonRGBA} from './util/colorPalletes.js'
 
 // const ROI_DEFAULT_COLOR = 'rgba(68, 134, 247, 0.25)'
-const ROI_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 0.25)
-const ROI_HEADER_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 0.50)
+
+const ROI_DEFAULT_ALPHA = 1/16
+const ROI_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', ROI_DEFAULT_ALPHA)
+const ROI_HEADER_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 4 * ROI_DEFAULT_ALPHA)
 
 const TRACK_ROI_TYPE = 2
 const GLOBAL_ROI_TYPE = 4
