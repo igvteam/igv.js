@@ -470,11 +470,15 @@ class Browser {
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
         let ideogramHeight = 0
         if (false !== session.showIdeogram) {
-            const trackView = new TrackView(this, this.columnContainer, new IdeogramTrack(this))
-            this.trackViews.push(trackView)
+
+            const track = new IdeogramTrack(this)
+            track.id = 'ideogram'
+
+            const trackView = new TrackView(this, this.columnContainer, track)
             const { $viewport } = trackView.viewports[ 0 ]
             ideogramHeight = getElementAbsoluteHeight($viewport.get(0))
 
+            this.trackViews.push(trackView)
         }
 
         if (false !== session.showRuler) {
