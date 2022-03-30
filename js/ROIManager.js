@@ -90,26 +90,27 @@ function createGlobalROI(top, roi, regionStartBP, regionEndBP, startBP, bpp) {
     container.style.left = `${regionX}px`
     container.style.width = `${regionWidth}px`
     // container.style.backgroundColor = roi.color
+    container.style.backgroundColor = ROI_DEFAULT_COLOR
 
     // header
     const header = DOMUtils.div()
-    header.style.backgroundColor = roi.color
+    header.style.backgroundColor = ROI_HEADER_DEFAULT_COLOR
     container.appendChild(header)
 
     // Color/Alpha Picker
-    const pickerConfig =
-        {
-            parent: header,
-            popup: 'right',
-            editorFormat: 'rgb',
-            editor:false,
-            color: header.style.backgroundColor,
-            onChange: ({rgbaString}) => {
-                roi.color = header.style.backgroundColor = rgbaString
-            }
-        }
-
-    new Picker(pickerConfig)
+    // const pickerConfig =
+    //     {
+    //         parent: header,
+    //         popup: 'right',
+    //         editorFormat: 'rgb',
+    //         editor:false,
+    //         color: header.style.backgroundColor,
+    //         onChange: ({rgbaString}) => {
+    //             roi.color = header.style.backgroundColor = rgbaString
+    //         }
+    //     }
+    //
+    // new Picker(pickerConfig)
 
     return container
 }
