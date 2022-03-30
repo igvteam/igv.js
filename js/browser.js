@@ -498,9 +498,9 @@ class Browser {
 
         // ROIManager only deals with global ROIs. All interactively created ROIs are global.
         if (session.roi) {
-            this.roiManager = new ROIManager(this, ideogramHeight, this.columnContainer.querySelector('.igv-column'), session.roi.map(roi => new ROI(roi, this.genome, GLOBAL_ROI_TYPE)))
+            this.roiManager = new ROIManager(this, ideogramHeight, session.roi.map(roi => new ROI(roi, this.genome, GLOBAL_ROI_TYPE)))
         } else {
-            this.roiManager = new ROIManager(this, ideogramHeight, this.columnContainer.querySelector('.igv-column'), undefined)
+            this.roiManager = new ROIManager(this, ideogramHeight, undefined)
         }
 
         // Tracks.  Start with genome tracks, if any, then append session tracks
