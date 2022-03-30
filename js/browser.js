@@ -494,11 +494,7 @@ class Browser {
 
         // ROIManager only deals with global ROIs. All interactively created ROIs are global.
         if (session.roi) {
-            this.roiManager = new ROIManager(this, ideogramHeight, this.columnContainer.querySelector('.igv-column'), session.roi.map(roi => {
-                const r = new ROI(roi, this.genome)
-                r.type = GLOBAL_ROI_TYPE
-                return r
-            }))
+            this.roiManager = new ROIManager(this, ideogramHeight, this.columnContainer.querySelector('.igv-column'), session.roi.map(roi => new ROI(roi, this.genome, GLOBAL_ROI_TYPE)))
         } else {
             this.roiManager = new ROIManager(this, ideogramHeight, this.columnContainer.querySelector('.igv-column'), undefined)
         }
@@ -727,10 +723,10 @@ class Browser {
         }
         if (Array.isArray(config)) {
             for (let c of config) {
-                this.roi.push(new ROI(c, this.genome))
+                this.roi.push(new ROI(c, this.genome, TRACK_ROI_TYPE))
             }
         } else {
-            this.roi.push(new ROI(config, this.genome))
+            this.roi.push(new ROI(config, this.genome, TRACK_ROI_TYPE))
         }
         // Force reload all views (force = true) to insure ROI features are loaded.  Wasteful but this function is
         // rarely called.
@@ -904,11 +900,7 @@ class Browser {
         const track = TrackFactory.getTrack(type, config, this)
 
         if (track && config.roi && config.roi.length > 0) {
-            track.roi = config.roi.map(r => {
-                const item = new ROI(r, this.genome)
-                item.type = TRACK_ROI_TYPE
-                return item
-            })
+            track.roi = config.roi.map(r => new ROI(r, this.genome, TRACK_ROI_TYPE))
          }
 
         return track
