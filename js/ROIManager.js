@@ -5,20 +5,18 @@ import ROI, {GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, scree
 
 
 class ROIManager {
-    constructor(browser, top, column, roi) {
+    constructor(browser, top, roi) {
 
         this.browser = browser
         this.top = top
-        this.column = column
-
         this.roi = roi || []
         this.monitorBrowserEvents()
     }
 
     monitorBrowserEvents() {
-        this.browser.on('locuschange',       () => paint(this.browser, this.top, this.column, this.roi))
-        this.browser.on('trackremoved',      () => paint(this.browser, this.top, this.column, this.roi))
-        this.browser.on('trackorderchanged', () => paint(this.browser, this.top, this.column, this.roi))
+        this.browser.on('locuschange',       () => paint(this.browser, this.top, this.roi))
+        this.browser.on('trackremoved',      () => paint(this.browser, this.top, this.roi))
+        this.browser.on('trackorderchanged', () => paint(this.browser, this.top, this.roi))
     }
 
     addROI(region) {
@@ -35,40 +33,47 @@ class ROIManager {
 
         this.roi.push(new ROI(config, this.browser.genome, GLOBAL_ROI_TYPE))
 
-        paint(this.browser, this.top, this.column, this.roi)
+        paint(this.browser, this.top, this.roi)
     }
 
 }
 
-async function paint(browser, top, column, roiList) {
+async function paint(browser, top, roiList) {
 
-    clear(column)
+    const columns = browser.root.querySelectorAll('.igv-column')
 
-    const { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ 0 ]
+    for (let i = 0; i < columns.length; i++) {
 
-    for (let roi of roiList) {
+        clear(columns[ i ])
 
-        const regions = await roi.getFeatures(chr, startBP, endBP)
+        const { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
 
-        if (regions && regions.length > 0) {
+        for (let roi of roiList) {
 
-            for (let { start:regionStartBP, end:regionEndBP } of regions) {
+            const regions = await roi.getFeatures(chr, startBP, endBP)
 
-                if (regionEndBP < startBP) {
-                    continue
+            if (regions && regions.length > 0) {
+
+                for (let { start:regionStartBP, end:regionEndBP } of regions) {
+
+                    if (regionEndBP < startBP) {
+                        continue
+                    }
+
+                    if (regionStartBP > endBP) {
+                        break
+                    }
+
+                    regionStartBP = Math.max(regionStartBP, startBP)
+                    regionEndBP = Math.min(regionEndBP, endBP)
+                    columns[ i ].appendChild(createGlobalROI(top, roi, regionStartBP, regionEndBP, startBP, bpp))
                 }
-
-                if (regionStartBP > endBP) {
-                    break
-                }
-
-                regionStartBP = Math.max(regionStartBP, startBP)
-                regionEndBP = Math.min(regionEndBP, endBP)
-                column.appendChild(createGlobalROI(top, roi, regionStartBP, regionEndBP, startBP, bpp))
             }
+
         }
 
     }
+
 
 }
 

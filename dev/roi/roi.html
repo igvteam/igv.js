@@ -22,10 +22,19 @@
     import igv from "../../js/index.js";
 
     const options = {
-        locus: '1:67,655,272-67,684,468',
+
+        // ROI testing locus
+        // locus: '1:67,655,272-67,684,468',
+
+        // locus: [ 'ace', 'myc' ],
+
+        locus: [ '1:67,655,272-67,684,468', '1:67,655,272-67,684,468' ],
+
         genome: "hg19",
 
-        // Define 2 "region of interest" sets, the first is global, the second specific to the track
+        // Define two "region of interest" sets
+
+        // first a global set
         roi: [
             {
                 name: 'ROI set 1',
@@ -34,6 +43,8 @@
                 color: "rgba(255,1,199,0.25)"
             }
         ],
+
+        // second a track specific set
         tracks: [
             {
                 name: 'Some features',
