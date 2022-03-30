@@ -967,13 +967,23 @@
     position: absolute;
     top: 0;
     bottom: 0;
-    overflow: visible; }
+    overflow: visible;
+    background-color: transparent;
+    border-left-width: thin;
+    border-left-style: solid;
+    border-left-color: dimgrey;
+    border-right-width: thin;
+    border-right-style: solid;
+    border-right-color: dimgrey;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start; }
     .igv-column > .igv-roi > div {
-      color: dimgrey;
-      position: relative;
-      left: -8px;
-      width: 16px;
-      height: 16px; }
+      width: 100%;
+      height: 16px;
+      background-color: dimgrey; }
 
 .igv-axis-column {
   position: relative;
