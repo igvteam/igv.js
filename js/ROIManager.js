@@ -1,7 +1,7 @@
 import Picker from '../node_modules/vanilla-picker/dist/vanilla-picker.mjs'
 import {DOMUtils, StringUtils, Icon} from '../node_modules/igv-utils/src/index.js'
 
-import ROI, {GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, screenCoordinates} from './roi.js'
+import ROI, {GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, screenCoordinates} from './roi.js'
 
 
 class ROIManager {
@@ -26,17 +26,14 @@ class ROIManager {
         const config =
             {
                 name: 'unnamed',
-                roiSource:
+                featureSource:
                     {
                         getFeatures :(chr, start, end) => [ region ]
                     },
                 color: ROI_DEFAULT_COLOR
             }
 
-        const r = new ROI(config, this.browser.genome)
-        r.type = GLOBAL_ROI_TYPE
-
-        this.roi.push(r)
+        this.roi.push(new ROI(config, this.browser.genome, GLOBAL_ROI_TYPE))
 
         paint(this.browser, this.top, this.column, this.roi)
     }
@@ -67,7 +64,7 @@ async function paint(browser, top, column, roiList) {
 
                 regionStartBP = Math.max(regionStartBP, startBP)
                 regionEndBP = Math.min(regionEndBP, endBP)
-                column.appendChild(createGlobalROIElement(top, roi, regionStartBP, regionEndBP, startBP, bpp))
+                column.appendChild(createGlobalROI(top, roi, regionStartBP, regionEndBP, startBP, bpp))
             }
         }
 
@@ -83,44 +80,38 @@ function clear(column) {
     }
 }
 
-function createGlobalROIElement(top, roi, regionStartBP, regionEndBP, startBP, bpp) {
+function createGlobalROI(top, roi, regionStartBP, regionEndBP, startBP, bpp) {
 
     const { x:regionX, width:regionWidth } = screenCoordinates(regionStartBP, regionEndBP, startBP, bpp)
 
-    // button
-    const button = DOMUtils.div()
-    button.style.transform = `translateX(${ Math.floor(regionWidth/2)}px)`
-    button.appendChild(Icon.createIcon('cog'))
-    button.style.display = 'none'
+    // ROI container
+    const container = DOMUtils.div({class: 'igv-roi'})
+    container.style.top = `${top}px`
+    container.style.left = `${regionX}px`
+    container.style.width = `${regionWidth}px`
+    // container.style.backgroundColor = roi.color
 
-    // ROI surface
-    const element = DOMUtils.div({class: 'igv-roi'})
-    element.style.top = `${top}px`
-    element.style.left = `${regionX}px`
-    element.style.width = `${regionWidth}px`
-    element.style.backgroundColor = roi.color
-
-    element.addEventListener('click', () => {
-        button.style.display = 'none' === button.style.display ? 'block' : 'none'
-    })
-
-    element.appendChild(button)
+    // header
+    const header = DOMUtils.div()
+    header.style.backgroundColor = roi.color
+    container.appendChild(header)
 
     // Color/Alpha Picker
     const pickerConfig =
         {
-            parent: button,
+            parent: header,
             popup: 'right',
             editorFormat: 'rgb',
-            color: element.style.backgroundColor,
+            editor:false,
+            color: header.style.backgroundColor,
             onChange: ({rgbaString}) => {
-                roi.color = element.style.backgroundColor = rgbaString
+                roi.color = header.style.backgroundColor = rgbaString
             }
         }
 
     new Picker(pickerConfig)
 
-    return element
+    return container
 }
 
 export default ROIManager
