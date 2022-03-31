@@ -132,17 +132,32 @@ class RulerSweeper {
 
         function documentMouseUpHandler(event) {
 
-            // console.log(`${ Date.now() } RulerSweeper - documentMouseUpHandler - target ${ event.target.nodeName }`)
-
             let extent
 
             if (true === isMouseDown && true === isMouseIn) {
 
                 isMouseDown = isMouseIn = undefined
 
+                // const column = this.rulerViewport.$viewport.get(0).parentElement
+                // const viewportColumns = this.rulerViewport.browser.columnContainer.querySelectorAll('.igv-column')
+                // let ic = undefined
+                // for (let i = 0; i < viewportColumns.length; i++) {
+                //     if (column === viewportColumns[i]) {
+                //         ic = i
+                //         break
+                //     }
+                // }
+
+                // const ir = this.rulerViewport.browser.referenceFrameList.indexOf(this.rulerViewport.referenceFrame)
+
+                // console.log(`viewport ${ ic } referenceFrame ${ ir }`)
+
+                console.log(`ruler sweeper bpp ${ this.rulerViewport.referenceFrame.bpPerPixel }`)
                 this.rulerSweeper.style.display = 'none'
 
                 if (width > threshold) {
+
+                    const element = event.targetElement
 
                     extent = {
                         start: bp(this.rulerViewport.referenceFrame, left),
