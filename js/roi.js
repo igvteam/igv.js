@@ -31,8 +31,8 @@ import {appleCrayonRGBA} from './util/colorPalletes.js'
 // const ROI_DEFAULT_COLOR = 'rgba(68, 134, 247, 0.25)'
 
 const ROI_DEFAULT_ALPHA = 1/16
-const ROI_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', ROI_DEFAULT_ALPHA)
-const ROI_HEADER_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 4 * ROI_DEFAULT_ALPHA)
+const ROI_DEFAULT_COLOR = appleCrayonRGBA('steel', ROI_DEFAULT_ALPHA)
+const ROI_HEADER_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 8 * ROI_DEFAULT_ALPHA)
 
 const TRACK_ROI_TYPE = 2
 const GLOBAL_ROI_TYPE = 4
@@ -43,7 +43,7 @@ class ROI {
         this.config = config
         this.name = config.name
         this.featureSource = config.featureSource || FeatureSource(config, genome)
-        this.color = config.color || ROI_DEFAULT_COLOR
+        this.color = config.color || ROI_HEADER_DEFAULT_COLOR
         this.type = type
     }
 
