@@ -24,11 +24,9 @@
  * THE SOFTWARE.
  */
 
-import FeatureSource from './feature/featureSource.js'
-import IGVGraphics from "./igv-canvas.js"
-import {appleCrayonRGBA} from './util/colorPalletes.js'
-
-// const ROI_DEFAULT_COLOR = 'rgba(68, 134, 247, 0.25)'
+import FeatureSource from '../feature/featureSource.js'
+import IGVGraphics from "../igv-canvas.js"
+import {appleCrayonRGBA} from '../util/colorPalletes.js'
 
 const ROI_DEFAULT_ALPHA = 1/16
 const ROI_DEFAULT_COLOR = appleCrayonRGBA('steel', ROI_DEFAULT_ALPHA)
