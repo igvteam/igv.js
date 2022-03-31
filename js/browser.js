@@ -75,6 +75,7 @@ import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import CustomButton from "./ui/customButton.js"
 import ROIManager from './roi/ROIManager.js'
+import ROITable from "./roi/ROITable.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -497,10 +498,11 @@ class Browser {
         }
 
         // ROIManager only deals with global ROIs. All interactively created ROIs are global.
+        const roiTable = new ROITable(this.columnContainer)
         if (session.roi) {
-            this.roiManager = new ROIManager(this, ideogramHeight, session.roi.map(roi => new ROI(roi, this.genome, GLOBAL_ROI_TYPE)))
+            this.roiManager = new ROIManager(this, roiTable, ideogramHeight, session.roi.map(roi => new ROI(roi, this.genome, GLOBAL_ROI_TYPE)))
         } else {
-            this.roiManager = new ROIManager(this, ideogramHeight, undefined)
+            this.roiManager = new ROIManager(this, roiTable, ideogramHeight, undefined)
         }
 
         // Tracks.  Start with genome tracks, if any, then append session tracks
