@@ -4,9 +4,10 @@ import {DOMUtils} from "../../node_modules/igv-utils/src/index.js"
 import ROI, {GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, screenCoordinates} from './roi.js'
 
 class ROIManager {
-    constructor(browser, top, roi) {
+    constructor(browser, roiTable, top, roi) {
 
         this.browser = browser
+        this.roiTable = roiTable
         this.top = top
         this.roi = roi || []
         this.monitorBrowserEvents()
