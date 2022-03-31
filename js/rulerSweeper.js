@@ -25,8 +25,9 @@
  */
 
 import {validateLocusExtent} from "./util/igvUtils.js"
-import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
+import {DOMUtils,StringUtils} from "../node_modules/igv-utils/src/index.js"
 import GenomeUtils from './genome/genome.js'
+import {screenCoordinates} from "./roi.js"
 
 class RulerSweeper {
 
@@ -43,19 +44,16 @@ class RulerSweeper {
 
     addBrowserObserver() {
 
+        const observerHandler = () => {
+            if (this.rulerViewport.referenceFrame) {
+                GenomeUtils.isWholeGenomeView(this.rulerViewport.referenceFrame.chr) ? this.removeMouseHandlers() : this.addMouseHandlers()
+            }
+        }
+
         // Viewport Content
         this.boundObserverHandler = observerHandler.bind(this)
         this.rulerViewport.browser.on('locuschange', this.boundObserverHandler)
 
-        function observerHandler() {
-            if (this.rulerViewport.referenceFrame) {
-                if (GenomeUtils.isWholeGenomeView(this.rulerViewport.referenceFrame.chr)) {
-                    this.removeMouseHandlers()
-                } else {
-                    this.addMouseHandlers()
-                }
-            }
-        }
     }
 
     removeBrowserObserver() {
@@ -68,14 +66,14 @@ class RulerSweeper {
             return
         }
 
+        const threshold = 1
+
         let isMouseDown
         let isMouseIn
         let mouseDownX
         let left
         let width
         let dx
-
-        let threshold = 1
 
         // Viewport Content
         this.boundContentMouseDownHandler = contentMouseDownHandler.bind(this)
@@ -103,8 +101,6 @@ class RulerSweeper {
         document.addEventListener('mousemove', this.boundDocumentMouseMoveHandler)
 
         function documentMouseMoveHandler(event) {
-
-            // console.log(`${ Date.now() } RulerSweeper - documentMouseMoveHandler - target ${ event.target.nodeName }`)
 
             let mouseCurrentX
 
@@ -138,39 +134,30 @@ class RulerSweeper {
 
                 isMouseDown = isMouseIn = undefined
 
-                // const column = this.rulerViewport.$viewport.get(0).parentElement
-                // const viewportColumns = this.rulerViewport.browser.columnContainer.querySelectorAll('.igv-column')
-                // let ic = undefined
-                // for (let i = 0; i < viewportColumns.length; i++) {
-                //     if (column === viewportColumns[i]) {
-                //         ic = i
-                //         break
-                //     }
-                // }
-
-                // const ir = this.rulerViewport.browser.referenceFrameList.indexOf(this.rulerViewport.referenceFrame)
-
-                // console.log(`viewport ${ ic } referenceFrame ${ ir }`)
-
-                console.log(`ruler sweeper bpp ${ this.rulerViewport.referenceFrame.bpPerPixel }`)
                 this.rulerSweeper.style.display = 'none'
 
                 if (width > threshold) {
 
-                    const element = event.targetElement
+                    extent =
+                        {
+                            start: bp(this.rulerViewport.referenceFrame, left),
+                            end: bp(this.rulerViewport.referenceFrame, left + width)
+                        }
 
-                    extent = {
-                        start: bp(this.rulerViewport.referenceFrame, left),
-                        end: bp(this.rulerViewport.referenceFrame, left + width)
-                    }
-
-                    validateLocusExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, extent, this.rulerViewport.browser.minimumBases())
 
                     const shiftKeyPressed = event.shiftKey
 
                     if (true === shiftKeyPressed) {
+
+                        // console.log(`   RulerSweeper bpp(${this.rulerViewport.referenceFrame.bpPerPixel}) origin(${ StringUtils.numberFormatter(this.rulerViewport.referenceFrame.start) }) start(${ StringUtils.numberFormatter(extent.start) }) end(${ StringUtils.numberFormatter(extent.end) })`)
+
+                        // const { x:regionX, width:regionWidth } = screenCoordinates(extent.start, extent.end, this.rulerViewport.referenceFrame.start, this.rulerViewport.referenceFrame.bpPerPixel)
+                        // console.log(`RulerSweeper region start(${ StringUtils.numberFormatter(regionX) }) width(${ StringUtils.numberFormatter(regionWidth) })`)
+
                         this.rulerViewport.browser.roiManager.addROI(Object.assign({}, extent))
                     } else {
+
+                        validateLocusExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, extent, this.rulerViewport.browser.minimumBases())
 
                         this.rulerViewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / this.rulerViewport.contentDiv.clientWidth
                         this.rulerViewport.referenceFrame.start = Math.round(extent.start)
