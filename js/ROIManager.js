@@ -28,7 +28,7 @@ class ROIManager {
                     {
                         getFeatures :(chr, start, end) => [ region ]
                     },
-                color: ROI_DEFAULT_COLOR
+                color: ROI_HEADER_DEFAULT_COLOR
             }
 
         this.roi.push(new ROI(config, this.browser.genome, GLOBAL_ROI_TYPE))
@@ -47,6 +47,9 @@ async function paint(browser, top, roiList) {
         clear(columns[ i ])
 
         const { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
+
+        console.log(`ROI Manager paint bpp ${ browser.referenceFrameList[ i ].bpPerPixel }`)
+
 
         for (let roi of roiList) {
 
@@ -95,27 +98,27 @@ function createGlobalROI(top, roi, regionStartBP, regionEndBP, startBP, bpp) {
     container.style.left = `${regionX}px`
     container.style.width = `${regionWidth}px`
     // container.style.backgroundColor = roi.color
-    container.style.backgroundColor = roi.color
+    container.style.backgroundColor = ROI_DEFAULT_COLOR
 
     // header
     const header = DOMUtils.div()
-    header.style.backgroundColor = ROI_HEADER_DEFAULT_COLOR
+    header.style.backgroundColor = roi.color
     container.appendChild(header)
 
-    // Color/Alpha Picker
-    // const pickerConfig =
-    //     {
-    //         parent: header,
-    //         popup: 'right',
-    //         editorFormat: 'rgb',
-    //         editor:false,
-    //         color: header.style.backgroundColor,
-    //         onChange: ({rgbaString}) => {
-    //             roi.color = header.style.backgroundColor = rgbaString
-    //         }
-    //     }
-    //
-    // new Picker(pickerConfig)
+    // Color and Alpha Picker
+    const pickerConfig =
+        {
+            parent: header,
+            popup: 'right',
+            editorFormat: 'rgb',
+            editor:false,
+            color: header.style.backgroundColor,
+            onChange: ({rgbaString}) => {
+                header.style.backgroundColor = roi.color = rgbaString
+            }
+        }
+
+    new Picker(pickerConfig)
 
     return container
 }
