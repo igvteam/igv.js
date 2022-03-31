@@ -1,8 +1,7 @@
 import Picker from '../node_modules/vanilla-picker/dist/vanilla-picker.mjs'
-import {DOMUtils, StringUtils, Icon} from '../node_modules/igv-utils/src/index.js'
+import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
 
 import ROI, {GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, screenCoordinates} from './roi.js'
-
 
 class ROIManager {
     constructor(browser, top, roi) {
@@ -23,7 +22,7 @@ class ROIManager {
 
         const config =
             {
-                name: 'unnamed',
+                name: `region-${DOMUtils.guid()}`,
                 featureSource:
                     {
                         getFeatures :(chr, start, end) => [ region ]
@@ -44,7 +43,7 @@ async function paint(browser, top, roiList) {
 
     for (let i = 0; i < columns.length; i++) {
 
-        clear(columns[ i ])
+        clearGlobalROIDOMElement(columns[i])
 
         const { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
 
@@ -66,7 +65,7 @@ async function paint(browser, top, roiList) {
 
                     regionStartBP = Math.max(regionStartBP, startBP)
                     regionEndBP = Math.min(regionEndBP, endBP)
-                    columns[ i ].appendChild(createGlobalROI(top, roi, regionStartBP, regionEndBP, startBP, bpp))
+                    columns[ i ].appendChild(createGlobalROIDOMElement(top, roi, regionStartBP, regionEndBP, startBP, bpp))
                 }
             }
 
@@ -76,14 +75,14 @@ async function paint(browser, top, roiList) {
 
 }
 
-function clear(column) {
+function clearGlobalROIDOMElement(column) {
     const regionElements = column.querySelectorAll('.igv-roi')
     for (let i = 0; i < regionElements.length; i++) {
         regionElements[ i ].remove()
     }
 }
 
-function createGlobalROI(top, roi, regionStartBP, regionEndBP, startBP, bpp) {
+function createGlobalROIDOMElement(top, roi, regionStartBP, regionEndBP, startBP, bpp) {
 
     const { x:regionX, width:regionWidth } = screenCoordinates(regionStartBP, regionEndBP, startBP, bpp)
 
