@@ -40,16 +40,13 @@ class ROIManager {
 
 async function paint(browser, top, roiList) {
 
-    const columns = browser.root.querySelectorAll('.igv-column')
+    const columns = browser.columnContainer.querySelectorAll('.igv-column')
 
     for (let i = 0; i < columns.length; i++) {
 
         clear(columns[ i ])
 
         const { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
-
-        console.log(`ROI Manager paint bpp ${ browser.referenceFrameList[ i ].bpPerPixel }`)
-
 
         for (let roi of roiList) {
 
@@ -77,11 +74,9 @@ async function paint(browser, top, roiList) {
 
     }
 
-
 }
 
 function clear(column) {
-
     const regionElements = column.querySelectorAll('.igv-roi')
     for (let i = 0; i < regionElements.length; i++) {
         regionElements[ i ].remove()
