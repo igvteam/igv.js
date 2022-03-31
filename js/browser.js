@@ -39,7 +39,7 @@ import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js"
 import C2S from "./canvas2svg.js"
 import TrackFactory from "./trackFactory.js"
-import ROI, {GLOBAL_ROI_TYPE, TRACK_ROI_TYPE} from "./roi.js"
+import ROI, {GLOBAL_ROI_TYPE, TRACK_ROI_TYPE} from "./roi/roi.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
@@ -74,7 +74,7 @@ import GtexSelection from "./gtex/gtexSelection.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import CustomButton from "./ui/customButton.js"
-import ROIManager from './ROIManager.js'
+import ROIManager from './roi/ROIManager.js'
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
