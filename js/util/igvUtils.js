@@ -98,10 +98,10 @@ const doAutoscale = function (features) {
     return {min: min, max: max}
 }
 
-const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
+const validateGenomicExtent = function (chromosomeLengthBP, genomicExtent, minimumBP) {
 
-    let ss = extent.start
-    let ee = extent.end
+    let ss = genomicExtent.start
+    let ee = genomicExtent.end
 
     if (undefined === ee) {
 
@@ -132,8 +132,8 @@ const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
         }
     }
 
-    extent.start = Math.ceil(ss)
-    extent.end = Math.floor(ee)
+    genomicExtent.start = Math.ceil(ss)
+    genomicExtent.end = Math.floor(ee)
 }
 
 /*!
@@ -234,7 +234,7 @@ function getElementAbsoluteHeight(element) {
 }
 
 export {
-    createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber,
+    createColumn, extend, isSimpleType, buildOptions, validateGenomicExtent, doAutoscale, isNumber,
     getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext,
     getElementAbsoluteHeight
 }
