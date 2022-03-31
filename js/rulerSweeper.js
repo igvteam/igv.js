@@ -24,10 +24,9 @@
  * THE SOFTWARE.
  */
 
-import {validateLocusExtent} from "./util/igvUtils.js"
-import {DOMUtils,StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
+import {validateGenomicExtent} from "./util/igvUtils.js"
 import GenomeUtils from './genome/genome.js'
-import {screenCoordinates} from "./roi.js"
 
 class RulerSweeper {
 
@@ -128,7 +127,7 @@ class RulerSweeper {
 
         function documentMouseUpHandler(event) {
 
-            let extent
+            let genomicExtent
 
             if (true === isMouseDown && true === isMouseIn) {
 
@@ -138,31 +137,21 @@ class RulerSweeper {
 
                 if (width > threshold) {
 
-                    extent =
+                    genomicExtent =
                         {
-                            start: bp(this.rulerViewport.referenceFrame, left),
-                            end: bp(this.rulerViewport.referenceFrame, left + width)
+                            start: this.rulerViewport.referenceFrame.calculateEnd(left),
+                            end: this.rulerViewport.referenceFrame.calculateEnd(left+width),
                         }
 
 
                     const shiftKeyPressed = event.shiftKey
 
                     if (true === shiftKeyPressed) {
-
-                        // console.log(`   RulerSweeper bpp(${this.rulerViewport.referenceFrame.bpPerPixel}) origin(${ StringUtils.numberFormatter(this.rulerViewport.referenceFrame.start) }) start(${ StringUtils.numberFormatter(extent.start) }) end(${ StringUtils.numberFormatter(extent.end) })`)
-
-                        // const { x:regionX, width:regionWidth } = screenCoordinates(extent.start, extent.end, this.rulerViewport.referenceFrame.start, this.rulerViewport.referenceFrame.bpPerPixel)
-                        // console.log(`RulerSweeper region start(${ StringUtils.numberFormatter(regionX) }) width(${ StringUtils.numberFormatter(regionWidth) })`)
-
-                        this.rulerViewport.browser.roiManager.addROI(Object.assign({}, extent))
+                        this.rulerViewport.browser.roiManager.addROI(Object.assign({}, genomicExtent))
                     } else {
 
-                        validateLocusExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, extent, this.rulerViewport.browser.minimumBases())
-
-                        this.rulerViewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / this.rulerViewport.contentDiv.clientWidth
-                        this.rulerViewport.referenceFrame.start = Math.round(extent.start)
-                        this.rulerViewport.referenceFrame.end = Math.round(extent.end)
-
+                        validateGenomicExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, genomicExtent, this.rulerViewport.browser.minimumBases())
+                        updateReferenceFrame(this.rulerViewport.referenceFrame, genomicExtent, this.rulerViewport.contentDiv.clientWidth)
                         this.rulerViewport.browser.updateViews(this.rulerViewport.referenceFrame)
 
                     }
@@ -191,8 +180,10 @@ class RulerSweeper {
 
 }
 
-function bp(referenceFrame, pixel) {
-    return referenceFrame.start + (pixel * referenceFrame.bpPerPixel)
+function updateReferenceFrame(referenceFrame, genomicExtent, pixelWidth) {
+    referenceFrame.start = Math.round(genomicExtent.start)
+    referenceFrame.end = Math.round(genomicExtent.end)
+    referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / pixelWidth
 }
 
 export default RulerSweeper
