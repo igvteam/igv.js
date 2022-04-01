@@ -30,7 +30,7 @@ import GenomeUtils from './genome/genome.js'
 
 class RulerSweeper {
 
-    constructor(rulerViewport) {
+    constructor(rulerViewport, column = undefined, browser = undefined, referenceFrame = undefined) {
         this.rulerSweeper = DOMUtils.div({class: 'igv-ruler-sweeper'})
         rulerViewport.contentDiv.appendChild(this.rulerSweeper)
 

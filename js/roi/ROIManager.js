@@ -1,7 +1,7 @@
 import Picker from '../../node_modules/vanilla-picker/dist/vanilla-picker.mjs'
 import {DOMUtils} from "../../node_modules/igv-utils/src/index.js"
-
 import ROI, {GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, screenCoordinates} from './ROI.js'
+import ROIMenu from "./ROIMenu.js"
 
 class ROIManager {
     constructor(browser, roiTable, top, roi) {
@@ -24,6 +24,7 @@ class ROIManager {
         const config =
             {
                 name: `region-${DOMUtils.guid()}`,
+                menu: new ROIMenu(this.browser.columnContainer),
                 featureSource:
                     {
                         getFeatures :(chr, start, end) => [ region ]

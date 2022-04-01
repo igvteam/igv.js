@@ -498,12 +498,14 @@ class Browser {
             }
         }
 
-        // ROIManager only deals with global ROIs. All interactively created ROIs are global.
-        const roiMenu = new ROIMenu(this.columnContainer)
+        const roiTable = new ROITable(this.columnContainer)
         if (session.roi) {
-            this.roiManager = new ROIManager(this, roiMenu, ideogramHeight, session.roi.map(roi => new ROI(roi, this.genome, GLOBAL_ROI_TYPE)))
+            this.roiManager = new ROIManager(this, roiTable, ideogramHeight, session.roi.map(roi => {
+                roi.menu = new ROIMenu(this.columnContainer)
+                return new ROI(roi, this.genome, GLOBAL_ROI_TYPE)
+            }))
         } else {
-            this.roiManager = new ROIManager(this, roiMenu, ideogramHeight, undefined)
+            this.roiManager = new ROIManager(this, roiTable, ideogramHeight, undefined)
         }
 
         // Tracks.  Start with genome tracks, if any, then append session tracks
