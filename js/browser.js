@@ -39,7 +39,7 @@ import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js"
 import C2S from "./canvas2svg.js"
 import TrackFactory from "./trackFactory.js"
-import ROI, {GLOBAL_ROI_TYPE, TRACK_ROI_TYPE} from "./roi/roi.js"
+import ROI, {GLOBAL_ROI_TYPE, TRACK_ROI_TYPE} from "./roi/ROI.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
@@ -75,7 +75,8 @@ import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import CustomButton from "./ui/customButton.js"
 import ROIManager from './roi/ROIManager.js'
-import ROITable from "./roi/ROITable.js"
+import ROITable from './roi/ROITable.js'
+import ROIMenu from './roi/ROIMenu.js'
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -498,11 +499,11 @@ class Browser {
         }
 
         // ROIManager only deals with global ROIs. All interactively created ROIs are global.
-        const roiTable = new ROITable(this.columnContainer)
+        const roiMenu = new ROIMenu(this.columnContainer)
         if (session.roi) {
-            this.roiManager = new ROIManager(this, roiTable, ideogramHeight, session.roi.map(roi => new ROI(roi, this.genome, GLOBAL_ROI_TYPE)))
+            this.roiManager = new ROIManager(this, roiMenu, ideogramHeight, session.roi.map(roi => new ROI(roi, this.genome, GLOBAL_ROI_TYPE)))
         } else {
-            this.roiManager = new ROIManager(this, roiTable, ideogramHeight, undefined)
+            this.roiManager = new ROIManager(this, roiMenu, ideogramHeight, undefined)
         }
 
         // Tracks.  Start with genome tracks, if any, then append session tracks
