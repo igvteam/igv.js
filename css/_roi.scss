@@ -9,8 +9,6 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
 .igv-roi-menu {
   position: absolute;
   z-index: 1024;
-  top: 50%;
-  left: 50%;
 
   width:(4 * $dimension);
   //height:(10 * $dimension);
@@ -38,8 +36,6 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
 .igv-roi-table {
   position: absolute;
   z-index: 1024;
-  top: 50%;
-  left: 50%;
 
   width:(16 * $dimension);
   height:(10 * $dimension);
@@ -65,6 +61,8 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
 
 // reusable header
 .igv-roi-header {
+
+  position: relative;
 
   display: flex;
   flex-flow: row;

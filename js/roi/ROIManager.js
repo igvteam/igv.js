@@ -32,6 +32,7 @@ class ROIManager {
                 color: ROI_HEADER_DEFAULT_COLOR
             }
 
+
         this.roi.push(new ROI(config, this.browser.genome, GLOBAL_ROI_TYPE))
 
         paint(this.browser, this.top, this.roi)
@@ -67,7 +68,7 @@ async function paint(browser, top, roiList) {
 
                     regionStartBP = Math.max(regionStartBP, startBP)
                     regionEndBP = Math.min(regionEndBP, endBP)
-                    columns[ i ].appendChild(createGlobalROIDOMElement(top, roi, regionStartBP, regionEndBP, startBP, bpp))
+                    columns[ i ].appendChild(createGlobalROIDOMElement(browser.columnContainer, top, roi, regionStartBP, regionEndBP, startBP, bpp))
                 }
             }
 
@@ -84,7 +85,7 @@ function clearGlobalROIDOMElement(column) {
     }
 }
 
-function createGlobalROIDOMElement(top, roi, regionStartBP, regionEndBP, startBP, bpp) {
+function createGlobalROIDOMElement(columnContainer, top, roi, regionStartBP, regionEndBP, startBP, bpp) {
 
     const { x:regionX, width:regionWidth } = screenCoordinates(regionStartBP, regionEndBP, startBP, bpp)
 
@@ -102,19 +103,26 @@ function createGlobalROIDOMElement(top, roi, regionStartBP, regionEndBP, startBP
     container.appendChild(header)
 
     // Color and Alpha Picker
-    const pickerConfig =
-        {
-            parent: header,
-            popup: 'right',
-            editorFormat: 'rgb',
-            editor:false,
-            color: header.style.backgroundColor,
-            onChange: ({rgbaString}) => {
-                header.style.backgroundColor = roi.color = rgbaString
-            }
-        }
+    // const pickerConfig =
+    //     {
+    //         parent: header,
+    //         popup: 'right',
+    //         editorFormat: 'rgb',
+    //         editor:false,
+    //         color: header.style.backgroundColor,
+    //         onChange: ({rgbaString}) => {
+    //             header.style.backgroundColor = roi.color = rgbaString
+    //         }
+    //     }
+    //
+    // new Picker(pickerConfig)
 
-    new Picker(pickerConfig)
+    header.addEventListener('click', event => {
+
+        const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
+        console.log(`event.target.parentElement x ${ x } y ${ y }`)
+        roi.menu.present(x, y)
+    })
 
     return container
 }
