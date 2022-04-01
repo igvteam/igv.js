@@ -42,6 +42,7 @@ class ROI {
         this.name = config.name
         this.featureSource = config.featureSource || FeatureSource(config, genome)
         this.color = config.color || ROI_HEADER_DEFAULT_COLOR
+        this.menu = config.menu
         this.type = type
     }
 
