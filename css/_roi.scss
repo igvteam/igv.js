@@ -1,12 +1,12 @@
 $dimension: 24px;
-$igv-roi-menu-width: 16 * $dimension;
+$igv-roi-table-width: 16 * $dimension;
 
-$igv-roi-menu-border-radius: 4px;
+$igv-roi-table-border-radius: 4px;
 
-$igv-roi-menu-font-face: 'Open Sans', sans-serif;
+$igv-roi-table-font-face: 'Open Sans', sans-serif;
 
-// container
-.igv-roi-menu {
+// table container
+.igv-roi-table {
   position: absolute;
   z-index: 1024;
   top: 50%;
@@ -16,11 +16,11 @@ $igv-roi-menu-font-face: 'Open Sans', sans-serif;
   height:(10 * $dimension);
 
   border-color: grey;
-  border-radius: $igv-roi-menu-border-radius;
+  border-radius: $igv-roi-table-border-radius;
   border-style: solid;
   border-width: thin;
 
-  font-family: $igv-roi-menu-font-face;
+  font-family: $igv-roi-table-font-face;
   font-size: 12px;
   font-weight: 400;
 
@@ -47,8 +47,8 @@ $igv-roi-menu-font-face: 'Open Sans', sans-serif;
 
     background-color: #eee;
 
-    border-top-left-radius: $igv-roi-menu-border-radius;
-    border-top-right-radius: $igv-roi-menu-border-radius;
+    border-top-left-radius: $igv-roi-table-border-radius;
+    border-top-right-radius: $igv-roi-table-border-radius;
     border-top-color: transparent;
     border-top-style: solid;
     border-top-width: 0;
@@ -80,8 +80,103 @@ $igv-roi-menu-font-face: 'Open Sans', sans-serif;
 
     background-color: white;
 
-    border-bottom-left-radius: $igv-roi-menu-border-radius;
-    border-bottom-right-radius: $igv-roi-menu-border-radius;
+    border-bottom-left-radius: $igv-roi-table-border-radius;
+    border-bottom-right-radius: $igv-roi-table-border-radius;
+    border-bottom-color: transparent;
+    border-bottom-style: solid;
+    border-bottom-width: 0;
+
+    >div {
+      display: flex;
+      flex-flow: column;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: flex-start;
+
+      width: 100%;
+      height: $dimension
+    }
+  }
+
+}
+
+// table container
+.igv-roi-menu {
+  position: absolute;
+  z-index: 1024;
+  top: 50%;
+  left: 50%;
+
+  width:(6 * $dimension);
+  //height:(10 * $dimension);
+
+  border-color: grey;
+  border-radius: $igv-roi-table-border-radius;
+  border-style: solid;
+  border-width: thin;
+
+  font-family: $igv-roi-table-font-face;
+  font-size: 12px;
+  font-weight: 400;
+
+  background-color: white;
+
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  // header
+  > div:first-child {
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+
+    width: 100%;
+    height: $dimension;
+    cursor: move;
+
+    background-color: #eee;
+
+    border-top-left-radius: $igv-roi-table-border-radius;
+    border-top-right-radius: $igv-roi-table-border-radius;
+    border-top-color: transparent;
+    border-top-style: solid;
+    border-top-width: 0;
+
+    border-bottom-color: grey;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
+    div {
+      margin-right: 4px;
+      margin-bottom: 2px;
+      height: 12px;
+      width: 12px;
+      color: gray;
+    }
+
+    div:hover {
+      cursor: pointer;
+      color: #444;
+    }
+
+
+  }
+
+  // body container
+  > div:last-child {
+    width: 100%;
+    //height: (9 * $dimension);
+
+    background-color: white;
+
+    border-bottom-left-radius: $igv-roi-table-border-radius;
+    border-bottom-right-radius: $igv-roi-table-border-radius;
     border-bottom-color: transparent;
     border-bottom-style: solid;
     border-bottom-width: 0;
