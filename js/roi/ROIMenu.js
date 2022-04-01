@@ -35,11 +35,18 @@ class ROIMenu {
                 'carnation'
             ]
 
-        colors.forEach(colorName => {
+        const words =
+            [
+                'delete',
+                'set color',
+                'roi table',
+            ]
+
+        words.forEach(word => {
             const row = DOMUtils.div({ class: 'igv-roi-body-row' })
             bodyContainer.appendChild(row)
-            row.style.backgroundColor = appleCrayonRGB(colorName)
-            row.innerText = colorName
+            // row.style.backgroundColor = appleCrayonRGB(colorName)
+            row.innerText = word
         })
 
         makeDraggable(this.container, header)

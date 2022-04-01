@@ -117,17 +117,37 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
   flex-flow: column;
   flex-wrap: nowrap;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: stretch;
+
+  >div:last-child {
+
+    border-bottom-left-radius: $igv-roi-table-border-radius;
+    border-bottom-right-radius: $igv-roi-table-border-radius;
+    border-bottom-color: transparent;
+    border-bottom-style: solid;
+    border-bottom-width: 0;
+
+  }
 
 }
 
 // reusable row
 .igv-roi-body-row {
-  color: white;
-  width: 100%;
+
   height: $dimension;
+
+  padding-left: 8px;
+
+  color: grey;
   text-align: start;
   vertical-align: middle;
+
   line-height: $dimension;
 
+  background-color: rgba(255, 105, 180, 0.25);
+}
+
+.igv-roi-body-row:hover {
+  cursor: pointer;
+  background-color: #f4f4f4;
 }
