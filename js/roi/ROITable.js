@@ -2,14 +2,15 @@ import { DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/
 import {appleCrayonRGB, appleCrayonRGBA} from '../util/colorPalletes.js'
 
 class ROITable {
+
     constructor(parent) {
 
         // container
-        this.container = DOMUtils.div({class: 'igv-roi-table'})
+        this.container = DOMUtils.div({ class: 'igv-roi-table' })
         parent.appendChild(this.container)
 
         // header
-        const header = DOMUtils.div()
+        const header = DOMUtils.div({ class: 'igv-roi-header' })
         this.container.appendChild(header)
 
         // dismiss button
@@ -24,7 +25,7 @@ class ROITable {
         })
 
         // body container
-        const bodyContainer = DOMUtils.div()
+        const bodyContainer = DOMUtils.div({ class: 'igv-roi-body' })
         this.container.appendChild(bodyContainer)
 
         const colors =
@@ -34,14 +35,17 @@ class ROITable {
                 'honeydew',
                 'carnation'
             ]
-        
+
         colors.forEach(colorName => {
-            const row = DOMUtils.div()
+            const row = DOMUtils.div({ class: 'igv-roi-body-row' })
             bodyContainer.appendChild(row)
             row.style.backgroundColor = appleCrayonRGB(colorName)
+            row.innerText = colorName
         })
 
         makeDraggable(this.container, header)
+
+        this.container.style.display = 'none'
 
     }
 }
