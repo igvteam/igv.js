@@ -30,11 +30,15 @@ import GenomeUtils from './genome/genome.js'
 
 class RulerSweeper {
 
-    constructor(rulerViewport, column = undefined, browser = undefined, referenceFrame = undefined) {
-        this.rulerSweeper = DOMUtils.div({class: 'igv-ruler-sweeper'})
-        rulerViewport.contentDiv.appendChild(this.rulerSweeper)
+    constructor(rulerViewport, column, browser, referenceFrame) {
 
         this.rulerViewport = rulerViewport
+
+        this.rulerSweeper = DOMUtils.div({class: 'igv-ruler-sweeper'})
+        column.appendChild(this.rulerSweeper)
+
+        this.browser = browser
+        this.referenceFrame = referenceFrame
 
         this.isMouseHandlers = undefined
 
@@ -44,19 +48,19 @@ class RulerSweeper {
     addBrowserObserver() {
 
         const observerHandler = () => {
-            if (this.rulerViewport.referenceFrame) {
-                GenomeUtils.isWholeGenomeView(this.rulerViewport.referenceFrame.chr) ? this.removeMouseHandlers() : this.addMouseHandlers()
+            if (this.referenceFrame) {
+                GenomeUtils.isWholeGenomeView(this.referenceFrame.chr) ? this.removeMouseHandlers() : this.addMouseHandlers()
             }
         }
 
         // Viewport Content
         this.boundObserverHandler = observerHandler.bind(this)
-        this.rulerViewport.browser.on('locuschange', this.boundObserverHandler)
+        this.browser.on('locuschange', this.boundObserverHandler)
 
     }
 
     removeBrowserObserver() {
-        this.rulerViewport.browser.off('locuschange', this.boundObserverHandler)
+        this.browser.off('locuschange', this.boundObserverHandler)
     }
 
     addMouseHandlers() {
@@ -139,20 +143,20 @@ class RulerSweeper {
 
                     genomicExtent =
                         {
-                            start: this.rulerViewport.referenceFrame.calculateEnd(left),
-                            end: this.rulerViewport.referenceFrame.calculateEnd(left+width),
+                            start: this.referenceFrame.calculateEnd(left),
+                            end: this.referenceFrame.calculateEnd(left+width),
                         }
 
 
                     const shiftKeyPressed = event.shiftKey
 
                     if (true === shiftKeyPressed) {
-                        this.rulerViewport.browser.roiManager.addROI(Object.assign({}, genomicExtent))
+                        this.browser.roiManager.addROI(Object.assign({}, genomicExtent))
                     } else {
 
-                        validateGenomicExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, genomicExtent, this.rulerViewport.browser.minimumBases())
-                        updateReferenceFrame(this.rulerViewport.referenceFrame, genomicExtent, this.rulerViewport.contentDiv.clientWidth)
-                        this.rulerViewport.browser.updateViews(this.rulerViewport.referenceFrame)
+                        validateGenomicExtent(this.browser.genome.getChromosome(this.referenceFrame.chr).bpLength, genomicExtent, this.browser.minimumBases())
+                        updateReferenceFrame(this.referenceFrame, genomicExtent, this.rulerViewport.contentDiv.clientWidth)
+                        this.browser.updateViews(this.referenceFrame)
 
                     }
 

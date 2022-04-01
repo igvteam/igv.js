@@ -17,8 +17,6 @@ class RulerViewport extends TrackViewport {
 
     initializationHelper() {
 
-        this.rulerSweeper = new RulerSweeper(this)
-
         this.$multiLocusCloseButton = $('<div>', {class: 'igv-multi-locus-close-button'})
         this.$viewport.append(this.$multiLocusCloseButton)
         this.$multiLocusCloseButton.get(0).appendChild(Icon.createIcon("times-circle"))
@@ -48,6 +46,10 @@ class RulerViewport extends TrackViewport {
 
         this.$tooltipContent = $('<div>')
         this.$tooltip.append(this.$tooltipContent)
+
+        // viewportColumn.appendChild(this.$viewport.get(0))
+        this.rulerSweeper = new RulerSweeper(this, this.$viewport.get(0).parentElement, this.browser, this.referenceFrame)
+
 
         this.attachMouseHandlers(GenomeUtils.isWholeGenomeView(this.referenceFrame.chr))
 
