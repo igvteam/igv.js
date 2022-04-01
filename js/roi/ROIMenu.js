@@ -47,6 +47,14 @@ class ROIMenu {
         this.container.style.display = 'none'
 
     }
+
+    present(x, y) {
+        this.container.style.left = `${ x }px`
+        this.container.style.top  = `${ y }px`
+        this.container.style.display = 'block'
+    }
+
+
 }
 
 export default ROIMenu

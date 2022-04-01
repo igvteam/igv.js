@@ -914,8 +914,6 @@
 .igv-roi-menu {
   position: absolute;
   z-index: 1024;
-  top: 50%;
-  left: 50%;
   width: 96px;
   border-color: grey;
   border-radius: 4px;
@@ -934,8 +932,6 @@
 .igv-roi-table {
   position: absolute;
   z-index: 1024;
-  top: 50%;
-  left: 50%;
   width: 384px;
   height: 240px;
   border-color: grey;
@@ -953,6 +949,7 @@
   align-items: flex-start; }
 
 .igv-roi-header {
+  position: relative;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
