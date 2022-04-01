@@ -39,6 +39,7 @@ class ROIMenu {
             const row = DOMUtils.div()
             bodyContainer.appendChild(row)
             row.style.backgroundColor = appleCrayonRGB(colorName)
+            row.innerText = colorName
         })
 
         makeDraggable(this.container, header)

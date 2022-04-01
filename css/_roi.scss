@@ -76,7 +76,7 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
   // body container
   > div:last-child {
     width: 100%;
-    height: (9 * $dimension);
+    //height: (9 * $dimension);
 
     background-color: white;
 
@@ -86,15 +86,19 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     border-bottom-style: solid;
     border-bottom-width: 0;
 
-    >div {
-      display: flex;
-      flex-flow: column;
-      flex-wrap: nowrap;
-      justify-content: flex-start;
-      align-items: flex-start;
+    display: flex;
+    flex-flow: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
 
+    >div {
+      color: white;
       width: 100%;
-      height: $dimension
+      height: $dimension;
+      text-align: start;
+      vertical-align: middle;
+      line-height: $dimension;
     }
   }
 
@@ -107,7 +111,7 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
   top: 50%;
   left: 50%;
 
-  width:(6 * $dimension);
+  width:(4 * $dimension);
   //height:(10 * $dimension);
 
   border-color: grey;
@@ -181,15 +185,19 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     border-bottom-style: solid;
     border-bottom-width: 0;
 
-    >div {
-      display: flex;
-      flex-flow: column;
-      flex-wrap: nowrap;
-      justify-content: flex-start;
-      align-items: flex-start;
+    display: flex;
+    flex-flow: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
 
+    >div {
+      color: white;
       width: 100%;
-      height: $dimension
+      height: $dimension;
+      text-align: start;
+      vertical-align: middle;
+      line-height: $dimension;
     }
   }
 
