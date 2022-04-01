@@ -5,11 +5,11 @@ class ROIMenu {
     constructor(parent) {
 
         // container
-        this.container = DOMUtils.div({class: 'igv-roi-menu'})
+        this.container = DOMUtils.div({ class: 'igv-roi-menu' })
         parent.appendChild(this.container)
 
         // header
-        const header = DOMUtils.div()
+        const header = DOMUtils.div({ class: 'igv-roi-header' })
         this.container.appendChild(header)
 
         // dismiss button
@@ -24,7 +24,7 @@ class ROIMenu {
         })
 
         // body container
-        const bodyContainer = DOMUtils.div()
+        const bodyContainer = DOMUtils.div({ class: 'igv-roi-body' })
         this.container.appendChild(bodyContainer)
 
         const colors =
@@ -36,13 +36,15 @@ class ROIMenu {
             ]
 
         colors.forEach(colorName => {
-            const row = DOMUtils.div()
+            const row = DOMUtils.div({ class: 'igv-roi-body-row' })
             bodyContainer.appendChild(row)
             row.style.backgroundColor = appleCrayonRGB(colorName)
             row.innerText = colorName
         })
 
         makeDraggable(this.container, header)
+
+        this.container.style.display = 'none'
 
     }
 }

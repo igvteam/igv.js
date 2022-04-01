@@ -911,6 +911,26 @@
   to {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
+.igv-roi-menu {
+  position: absolute;
+  z-index: 1024;
+  top: 50%;
+  left: 50%;
+  width: 96px;
+  border-color: grey;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: thin;
+  font-family: "Open Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  background-color: white;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start; }
+
 .igv-roi-table {
   position: absolute;
   z-index: 1024;
@@ -931,120 +951,56 @@
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: flex-start; }
-  .igv-roi-table > div:first-child {
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-    width: 100%;
-    height: 24px;
-    cursor: move;
-    background-color: #eee;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-top-color: transparent;
-    border-top-style: solid;
-    border-top-width: 0;
-    border-bottom-color: grey;
-    border-bottom-style: solid;
-    border-bottom-width: thin; }
-    .igv-roi-table > div:first-child div {
-      margin-right: 4px;
-      margin-bottom: 2px;
-      height: 12px;
-      width: 12px;
-      color: gray; }
-    .igv-roi-table > div:first-child div:hover {
-      cursor: pointer;
-      color: #444; }
-  .igv-roi-table > div:last-child {
-    width: 100%;
-    background-color: white;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-color: transparent;
-    border-bottom-style: solid;
-    border-bottom-width: 0;
-    display: flex;
-    flex-flow: column;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: flex-start; }
-    .igv-roi-table > div:last-child > div {
-      color: white;
-      width: 100%;
-      height: 24px;
-      text-align: start;
-      vertical-align: middle;
-      line-height: 24px; }
 
-.igv-roi-menu {
-  position: absolute;
-  z-index: 1024;
-  top: 50%;
-  left: 50%;
-  width: 96px;
-  border-color: grey;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-  font-family: "Open Sans", sans-serif;
-  font-size: 12px;
-  font-weight: 400;
+.igv-roi-header {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height: 24px;
+  cursor: move;
+  background-color: #eee;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-top-color: transparent;
+  border-top-style: solid;
+  border-top-width: 0;
+  border-bottom-color: grey;
+  border-bottom-style: solid;
+  border-bottom-width: thin; }
+  .igv-roi-header div {
+    margin-right: 4px;
+    margin-bottom: 2px;
+    height: 12px;
+    width: 12px;
+    color: gray; }
+  .igv-roi-header div:hover {
+    cursor: pointer;
+    color: #444; }
+
+.igv-roi-body {
+  width: 100%;
   background-color: white;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  border-bottom-color: transparent;
+  border-bottom-style: solid;
+  border-bottom-width: 0;
   display: flex;
   flex-flow: column;
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: flex-start; }
-  .igv-roi-menu > div:first-child {
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-    width: 100%;
-    height: 24px;
-    cursor: move;
-    background-color: #eee;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-top-color: transparent;
-    border-top-style: solid;
-    border-top-width: 0;
-    border-bottom-color: grey;
-    border-bottom-style: solid;
-    border-bottom-width: thin; }
-    .igv-roi-menu > div:first-child div {
-      margin-right: 4px;
-      margin-bottom: 2px;
-      height: 12px;
-      width: 12px;
-      color: gray; }
-    .igv-roi-menu > div:first-child div:hover {
-      cursor: pointer;
-      color: #444; }
-  .igv-roi-menu > div:last-child {
-    width: 100%;
-    background-color: white;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border-bottom-color: transparent;
-    border-bottom-style: solid;
-    border-bottom-width: 0;
-    display: flex;
-    flex-flow: column;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: flex-start; }
-    .igv-roi-menu > div:last-child > div {
-      color: white;
-      width: 100%;
-      height: 24px;
-      text-align: start;
-      vertical-align: middle;
-      line-height: 24px; }
+
+.igv-roi-body-row {
+  color: white;
+  width: 100%;
+  height: 24px;
+  text-align: start;
+  vertical-align: middle;
+  line-height: 24px; }
 
 .igv-container {
   position: relative;
