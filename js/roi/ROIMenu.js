@@ -1,11 +1,11 @@
 import { DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
 import {appleCrayonRGB, appleCrayonRGBA} from '../util/colorPalletes.js'
 
-class ROITable {
+class ROIMenu {
     constructor(parent) {
 
         // container
-        this.container = DOMUtils.div({class: 'igv-roi-table'})
+        this.container = DOMUtils.div({class: 'igv-roi-menu'})
         parent.appendChild(this.container)
 
         // header
@@ -34,7 +34,7 @@ class ROITable {
                 'honeydew',
                 'carnation'
             ]
-        
+
         colors.forEach(colorName => {
             const row = DOMUtils.div()
             bodyContainer.appendChild(row)
@@ -46,4 +46,4 @@ class ROITable {
     }
 }
 
-export default ROITable
+export default ROIMenu
