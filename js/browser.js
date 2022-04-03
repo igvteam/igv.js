@@ -391,7 +391,7 @@ class Browser {
      */
     async loadSession(options) {
 
-        this.roi = []
+        this.roiList = []
         let session
         if (options.url || options.file) {
             session = await loadSessionFile(options)
@@ -500,9 +500,9 @@ class Browser {
 
         const roiTable = new ROITable(this.columnContainer)
         if (session.roi) {
-            this.roiManager = new ROIManager(this, roiTable, ideogramHeight, session.roi.map(roi => {
-                roi.menu = new ROIMenu(this.columnContainer)
-                return new ROI(roi, this.genome, GLOBAL_ROI_TYPE)
+            this.roiManager = new ROIManager(this, roiTable, ideogramHeight, session.roi.map(r => {
+                r.menu = new ROIMenu(this.columnContainer)
+                return new ROI(r, this.genome, GLOBAL_ROI_TYPE)
             }))
         } else {
             this.roiManager = new ROIManager(this, roiTable, ideogramHeight, undefined)
@@ -727,15 +727,15 @@ class Browser {
     }
 
     async loadROI(config) {
-        if (!this.roi) {
-            this.roi = []
+        if (!this.roiList) {
+            this.roiList = []
         }
         if (Array.isArray(config)) {
             for (let c of config) {
-                this.roi.push(new ROI(c, this.genome, TRACK_ROI_TYPE))
+                this.roiList.push(new ROI(c, this.genome, TRACK_ROI_TYPE))
             }
         } else {
-            this.roi.push(new ROI(config, this.genome, TRACK_ROI_TYPE))
+            this.roiList.push(new ROI(config, this.genome, TRACK_ROI_TYPE))
         }
         // Force reload all views (force = true) to insure ROI features are loaded.  Wasteful but this function is
         // rarely called.
@@ -743,9 +743,9 @@ class Browser {
     }
 
     removeROI(roiToRemove) {
-        for (let i = 0; i < this.roi.length; i++) {
-            if (this.roi[i].name === roiToRemove.name) {
-                this.roi.splice(i, 1)
+        for (let i = 0; i < this.roiList.length; i++) {
+            if (this.roiList[i].name === roiToRemove.name) {
+                this.roiList.splice(i, 1)
                 break
             }
         }
@@ -755,7 +755,7 @@ class Browser {
     }
 
     clearROIs() {
-        this.roi = []
+        this.roiList = []
         for (let tv of this.trackViews) {
             tv.repaintViews()
         }
@@ -770,7 +770,6 @@ class Browser {
      * Return a promise to load a track.
      *
      * @param config
-     * @param doResize - undefined by default
      * @returns {*}
      */
 
@@ -909,7 +908,7 @@ class Browser {
         const track = TrackFactory.getTrack(type, config, this)
 
         if (track && config.roi && config.roi.length > 0) {
-            track.roi = config.roi.map(r => new ROI(r, this.genome, TRACK_ROI_TYPE))
+            track.roiList = config.roi.map(r => new ROI(r, this.genome, TRACK_ROI_TYPE))
          }
 
         return track
