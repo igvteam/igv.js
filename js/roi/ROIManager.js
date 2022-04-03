@@ -4,19 +4,19 @@ import ROI, {GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, scree
 import ROIMenu from "./ROIMenu.js"
 
 class ROIManager {
-    constructor(browser, roiTable, top, roi) {
+    constructor(browser, roiTable, top, roiList) {
 
         this.browser = browser
         this.roiTable = roiTable
         this.top = top
-        this.roi = roi || []
+        this.roiList = roiList || []
         this.monitorBrowserEvents()
     }
 
     monitorBrowserEvents() {
-        this.browser.on('locuschange',       () => paint(this.browser, this.top, this.roi))
-        this.browser.on('trackremoved',      () => paint(this.browser, this.top, this.roi))
-        this.browser.on('trackorderchanged', () => paint(this.browser, this.top, this.roi))
+        this.browser.on('locuschange',       () => paint(this.browser, this.top, this.roiList))
+        this.browser.on('trackremoved',      () => paint(this.browser, this.top, this.roiList))
+        this.browser.on('trackorderchanged', () => paint(this.browser, this.top, this.roiList))
     }
 
     addROI(region) {
@@ -33,9 +33,9 @@ class ROIManager {
             }
 
 
-        this.roi.push(new ROI(config, this.browser.genome, GLOBAL_ROI_TYPE))
+        this.roiList.push(new ROI(config, this.browser.genome, GLOBAL_ROI_TYPE))
 
-        paint(this.browser, this.top, this.roi)
+        paint(this.browser, this.top, this.roiList)
     }
 
 }
