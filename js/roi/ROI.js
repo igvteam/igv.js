@@ -38,7 +38,6 @@ const GLOBAL_ROI_TYPE = 4
 class ROI {
 
     constructor(config, genome, type) {
-        this.config = config
         this.name = config.name
         this.featureSource = config.featureSource || FeatureSource(config, genome)
         this.color = config.color || ROI_HEADER_DEFAULT_COLOR
@@ -52,15 +51,16 @@ class ROI {
 
     draw(drawConfiguration) {
 
-        const regions = drawConfiguration.features
-        if (!regions) {
+        const { context, bpPerPixel, bpStart, pixelTop, pixelHeight, pixelWidth, features, } = drawConfiguration
+
+        if (!features) {
             return
         }
 
-        const endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1)
-        for (let { start:regionStartBP, end:regionEndBP } of regions) {
+        const endBP = bpStart + (pixelWidth * bpPerPixel) + 1
+        for (let { start:regionStartBP, end:regionEndBP } of features) {
 
-            if (regionEndBP < drawConfiguration.bpStart) {
+            if (regionEndBP < bpStart) {
                 continue
             }
 
@@ -68,8 +68,8 @@ class ROI {
                 break
             }
 
-            const { x, width } = screenCoordinates(regionStartBP, regionEndBP, drawConfiguration.bpStart, drawConfiguration.bpPerPixel)
-            IGVGraphics.fillRect(drawConfiguration.context, x, drawConfiguration.pixelTop, width, drawConfiguration.pixelHeight, {fillStyle: this.color})
+            const { x, width } = screenCoordinates(regionStartBP, regionEndBP, bpStart, bpPerPixel)
+            IGVGraphics.fillRect(context, x, pixelTop, width, pixelHeight, { fillStyle: this.color })
         }
     }
 }
