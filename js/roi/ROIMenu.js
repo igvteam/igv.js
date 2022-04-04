@@ -61,7 +61,6 @@ class ROIMenu {
         this.container.style.display = 'block'
     }
 
-
 }
 
 export default ROIMenu

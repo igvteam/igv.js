@@ -499,13 +499,13 @@ class Browser {
         }
 
         const roiTable = new ROITable(this.columnContainer)
+        const roiMenu = new ROIMenu(this.columnContainer)
         if (session.roi) {
-            this.roiManager = new ROIManager(this, roiTable, ideogramHeight, session.roi.map(r => {
-                r.menu = new ROIMenu(this.columnContainer)
+            this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, session.roi.map(r => {
                 return new ROI(r, this.genome, GLOBAL_ROI_TYPE)
             }))
         } else {
-            this.roiManager = new ROIManager(this, roiTable, ideogramHeight, undefined)
+            this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, undefined)
         }
 
         // Tracks.  Start with genome tracks, if any, then append session tracks
