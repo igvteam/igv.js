@@ -4,19 +4,17 @@ import ROI, {GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, scree
 import ROIMenu from "./ROIMenu.js"
 
 class ROIManager {
-    constructor(browser, roiTable, top, roiList) {
+    constructor(browser, roiMenu, roiTable, top, roiList) {
 
         this.browser = browser
+        this.roiMenu = roiMenu
         this.roiTable = roiTable
         this.top = top
         this.roiList = roiList || []
-        this.monitorBrowserEvents()
-    }
 
-    monitorBrowserEvents() {
-        this.browser.on('locuschange',       () => paint(this.browser, this.top, this.roiList))
-        this.browser.on('trackremoved',      () => paint(this.browser, this.top, this.roiList))
-        this.browser.on('trackorderchanged', () => paint(this.browser, this.top, this.roiList))
+        browser.on('locuschange',       () => this.paint(browser, top, this.roiList))
+        browser.on('trackremoved',      () => this.paint(browser, top, this.roiList))
+        browser.on('trackorderchanged', () => this.paint(browser, top, this.roiList))
     }
 
     addROI(region) {
@@ -35,96 +33,96 @@ class ROIManager {
 
         this.roiList.push(new ROI(config, this.browser.genome, GLOBAL_ROI_TYPE))
 
-        paint(this.browser, this.top, this.roiList)
+        this.paint(this.browser, this.top, this.roiList)
     }
 
-}
 
-async function paint(browser, top, roiList) {
+    async paint(browser, top, roiList) {
 
-    const columns = browser.columnContainer.querySelectorAll('.igv-column')
+        const columns = browser.columnContainer.querySelectorAll('.igv-column')
 
-    for (let i = 0; i < columns.length; i++) {
+        for (let i = 0; i < columns.length; i++) {
 
-        clearGlobalROIDOMElement(columns[i])
+            this.clearGlobalROIDOMElement(columns[i])
 
-        const { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
+            const { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
 
-        for (let roi of roiList) {
+            for (let roi of roiList) {
 
-            const regions = await roi.getFeatures(chr, startBP, endBP)
+                const regions = await roi.getFeatures(chr, startBP, endBP)
 
-            if (regions && regions.length > 0) {
+                if (regions && regions.length > 0) {
 
-                for (let { start:regionStartBP, end:regionEndBP } of regions) {
+                    for (let { start:regionStartBP, end:regionEndBP } of regions) {
 
-                    if (regionEndBP < startBP) {
-                        continue
+                        if (regionEndBP < startBP) {
+                            continue
+                        }
+
+                        if (regionStartBP > endBP) {
+                            break
+                        }
+
+                        regionStartBP = Math.max(regionStartBP, startBP)
+                        regionEndBP = Math.min(regionEndBP, endBP)
+                        columns[ i ].appendChild(this.createGlobalROIDOMElement(browser, browser.columnContainer, top, roi, regionStartBP, regionEndBP, startBP, bpp))
                     }
-
-                    if (regionStartBP > endBP) {
-                        break
-                    }
-
-                    regionStartBP = Math.max(regionStartBP, startBP)
-                    regionEndBP = Math.min(regionEndBP, endBP)
-                    columns[ i ].appendChild(createGlobalROIDOMElement(browser.columnContainer, top, roi, regionStartBP, regionEndBP, startBP, bpp))
                 }
+
             }
 
         }
 
     }
 
-}
+    createGlobalROIDOMElement(browser, columnContainer, top, roi, regionStartBP, regionEndBP, startBP, bpp) {
 
-function clearGlobalROIDOMElement(column) {
-    const regionElements = column.querySelectorAll('.igv-roi')
-    for (let i = 0; i < regionElements.length; i++) {
-        regionElements[ i ].remove()
+        const { x:regionX, width:regionWidth } = screenCoordinates(regionStartBP, regionEndBP, startBP, bpp)
+
+        // ROI container
+        const container = DOMUtils.div({class: 'igv-roi'})
+        container.style.top = `${top}px`
+        container.style.left = `${regionX}px`
+        container.style.width = `${regionWidth}px`
+        // container.style.backgroundColor = roi.color
+        container.style.backgroundColor = ROI_DEFAULT_COLOR
+
+        // header
+        const header = DOMUtils.div()
+        header.style.backgroundColor = roi.color
+        container.appendChild(header)
+
+        // Color and Alpha Picker
+        // const pickerConfig =
+        //     {
+        //         parent: header,
+        //         popup: 'right',
+        //         editorFormat: 'rgb',
+        //         editor:false,
+        //         color: header.style.backgroundColor,
+        //         onChange: ({rgbaString}) => {
+        //             header.style.backgroundColor = roi.color = rgbaString
+        //         }
+        //     }
+        //
+        // new Picker(pickerConfig)
+
+        header.addEventListener('click', event => {
+            const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
+            // console.log(`event.target.parentElement x ${ x } y ${ y }`)
+            this.roiMenu.present(x, y)
+        })
+
+        return container
     }
-}
 
-function createGlobalROIDOMElement(columnContainer, top, roi, regionStartBP, regionEndBP, startBP, bpp) {
+    clearGlobalROIDOMElement(column) {
+        const regionElements = column.querySelectorAll('.igv-roi')
+        for (let i = 0; i < regionElements.length; i++) {
+            regionElements[ i ].remove()
+        }
+    }
 
-    const { x:regionX, width:regionWidth } = screenCoordinates(regionStartBP, regionEndBP, startBP, bpp)
-
-    // ROI container
-    const container = DOMUtils.div({class: 'igv-roi'})
-    container.style.top = `${top}px`
-    container.style.left = `${regionX}px`
-    container.style.width = `${regionWidth}px`
-    // container.style.backgroundColor = roi.color
-    container.style.backgroundColor = ROI_DEFAULT_COLOR
-
-    // header
-    const header = DOMUtils.div()
-    header.style.backgroundColor = roi.color
-    container.appendChild(header)
-
-    // Color and Alpha Picker
-    // const pickerConfig =
-    //     {
-    //         parent: header,
-    //         popup: 'right',
-    //         editorFormat: 'rgb',
-    //         editor:false,
-    //         color: header.style.backgroundColor,
-    //         onChange: ({rgbaString}) => {
-    //             header.style.backgroundColor = roi.color = rgbaString
-    //         }
-    //     }
-    //
-    // new Picker(pickerConfig)
-
-    header.addEventListener('click', event => {
-
-        const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-        console.log(`event.target.parentElement x ${ x } y ${ y }`)
-        roi.menu.present(x, y)
-    })
-
-    return container
 }
 
 export default ROIManager
