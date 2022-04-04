@@ -592,7 +592,7 @@ class TrackViewport extends Viewport {
 
         viewport.addEventListener('click', (event) => {
 
-            if (this.enableClick) {
+            if (this.enableClick && this.canvas) {
                 if (3 === event.which || event.ctrlKey) {
                     return
                 }
