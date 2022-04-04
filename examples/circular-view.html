@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Circular Genome View</title>
+
+    <!-- IGV JS -->
+    <script src="../dist/igv.min.js"></script>
+
+    <!-- React (required for circular view)  -->
+    <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
+
+    <!-- JBrowe circular view -->
+    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.production.min.js"
+            crossorigin></script>
+
+    <style>
+        button[data-testid='circular_track_select'] {
+            display: none;
+        }
+    </style>
+
+</head>
+<body>
+
+<p>
+<h2>Circular genome view with alignment track</h2>
+
+<ul>
+    <li>Right click alignments and select <b>Show discordant pairs</b></li>
+    <li>Click on chord in circular view to see both ends in split screen</li>
+</ul>
+
+</p>
+
+<div style="flex; flex-direction: column;">
+    <div id="jbrowse_circular_genome_view"></div>
+    <div id="igvDiv"></div>
+</div>
+
+
+<script type="text/javascript">
+
+
+    // Start igv.js and create regions
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr17:64,040,802-64,045,633",
+            tracks: [
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.delly_noalt_filtered.vcf.gz",
+                    type: "variant",
+                    format: "vcf",
+                    name: "delly translocations",
+                    supportsWholeGenome: true,
+                    visibilityWindow: -1,
+                    showGenotypes: false,
+                    height: 40
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
+                    type: "alignment",
+                    format: "bam",
+                    name: "Alignments",
+                    showMismatches: false,
+                    height: 500,
+                    //maxFragmentLength: 1000000,  // 1 mb -- only interested in large deletions
+                    colorBy: "fragmentLength"
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById("igvDiv"), options)
+
+        .then(async function (browser) {
+            const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
+            browser.createCircularView(circularViewContainer, true)
+
+        })
+
+
+</script>
+
+</body>
+</html>
