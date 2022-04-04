@@ -50,7 +50,7 @@
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
     "chai": "^4.2.0",
-    "circular-view": "github:igvteam/circular-view#v0.2.1",
+    "circular-view": "github:igvteam/circular-view#v0.2.2",
     "core-js": "^3.20.3",
     "eslint": "^6.4.0",
     "esm": "^3.2.25",
