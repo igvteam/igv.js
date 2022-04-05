@@ -1,9 +1,51 @@
+
+$igv-roi-border-color: rgba(105, 105, 105, 0.5);
+
 $dimension: 24px;
 $igv-roi-table-width: 16 * $dimension;
 
 $igv-roi-table-border-radius: 4px;
 
 $igv-roi-table-font-face: 'Open Sans', sans-serif;
+
+// ROI container
+.igv-roi {
+  cursor: pointer;
+  z-index: 64;
+
+  position: absolute;
+  top:0;
+  bottom: 0;
+
+  pointer-events: none;
+
+  overflow: visible;
+
+  margin-top: 44px;
+
+  border-left-width: thin;
+  border-left-style: solid;
+  border-left-color: $igv-roi-border-color;
+
+  border-right-width: thin;
+  border-right-style: solid;
+  border-right-color: $igv-roi-border-color;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  // ROI header
+  >div {
+    position: relative;
+    pointer-events: auto;
+    width: 100%;
+    height: 8px;
+    background-color: dimgrey;
+  }
+}
 
 // menu container
 .igv-roi-menu {
