@@ -46,6 +46,8 @@ const knownFileExtensions = new Set([
     "bb",
     "bigbed",
     "biginteract",
+    "biggenepred",
+    "bignarrowpeak",
     "bw",
     "bigwig",
     "bam",
@@ -197,6 +199,8 @@ function inferTrackType(config) {
             case "bed":
             case "bigbed":
             case "bb":
+            case "biggenepred":
+            case "bignarrowpeak":
                 return "bedtype"
             default:
                 return "annotation"
