@@ -8,7 +8,7 @@ $igv-roi-table-border-radius: 4px;
 
 $igv-roi-table-font-face: 'Open Sans', sans-serif;
 
-// ROI container
+// ROISet container
 .igv-roi {
   cursor: pointer;
   z-index: 64;
@@ -37,7 +37,7 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
   justify-content: flex-start;
   align-items: flex-start;
 
-  // ROI header
+  // ROISet header
   >div {
     position: relative;
     pointer-events: auto;
