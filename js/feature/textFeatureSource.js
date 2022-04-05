@@ -53,7 +53,7 @@ class TextFeatureSource {
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType)
         this.maxWGCount = config.maxWGCount || DEFAULT_MAX_WG_COUNT
 
-        const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "biginteract", "tdf"])
+        const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "biginteract", "biggenepred", "bignarrowpeak" "tdf"])
 
         if (config.features && Array.isArray(config.features)) {
             // Explicit array of features
