@@ -23,8 +23,6 @@ $igv-column-shim-margin: 2px;
 $igv-zoom-in-notice-width: 128px;
 $igv-zoom-in-notice-height: 16px;
 
-$igv-roi-border-color: rgba(105, 105, 105, 0.5);
-
 @import "color";
 @import "font";
 @import "navbar";
@@ -112,45 +110,6 @@ $igv-roi-border-color: rgba(105, 105, 105, 0.5);
 .igv-column {
   position: relative;
   @include igv-column-base;
-
-  // ROI container
-  >.igv-roi {
-    cursor: pointer;
-    z-index: 64;
-
-    position: absolute;
-    top:0;
-    bottom: 0;
-
-    pointer-events: none;
-
-    overflow: visible;
-
-    margin-top: 44px;
-
-    border-left-width: thin;
-    border-left-style: solid;
-    border-left-color: $igv-roi-border-color;
-
-    border-right-width: thin;
-    border-right-style: solid;
-    border-right-color: $igv-roi-border-color;
-
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: flex-start;
-
-    // ROI header
-    >div {
-      position: relative;
-      pointer-events: auto;
-      width: 100%;
-      height: 8px;
-      background-color: dimgrey;
-    }
-  }
 
 }
 
