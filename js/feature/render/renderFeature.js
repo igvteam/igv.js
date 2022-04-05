@@ -217,10 +217,9 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         const textBox = ctx.measureText(name)
         const xleft = centerX - textBox.width / 2
         const xright = centerX + textBox.width / 2
-        if (options.labelAllFeatures || xleft > options.rowLastX[feature.row] || gtexSelection) {
-            options.rowLastX[feature.row] = xright
+        if (options.labelAllFeatures || xleft > options.rowLastLabelX[feature.row] || gtexSelection) {
+            options.rowLastLabelX[feature.row] = xright
             IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
-
         }
     } finally {
         ctx.restore()

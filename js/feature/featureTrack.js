@@ -186,24 +186,27 @@ class FeatureTrack extends TrackBase {
 
             const rowFeatureCount = []
             options.rowLastX = []
+            options.rowLastLabelX = []
             for (let feature of featureList) {
-                const row = feature.row || 0
-                if (rowFeatureCount[row] === undefined) {
-                    rowFeatureCount[row] = 1
-                } else {
-                    rowFeatureCount[row]++
+                if(feature.start > bpStart && feature.end < bpEnd) {
+                    const row = this.displayMode === "COLLAPSED" ? 0 : feature.row || 0
+                    if (rowFeatureCount[row] === undefined) {
+                        rowFeatureCount[row] = 1
+                    } else {
+                        rowFeatureCount[row]++
+                    }
+                    options.rowLastX[row] = -Number.MAX_SAFE_INTEGER
+                    options.rowLastLabelX[row] = -Number.MAX_SAFE_INTEGER
                 }
-                options.rowLastX[row] = -Number.MAX_SAFE_INTEGER
             }
+            const pixelsPerFeature = pixelWidth / Math.max(...rowFeatureCount)
 
             let lastPxEnd = []
             for (let feature of featureList) {
                 if (feature.end < bpStart) continue
                 if (feature.start > bpEnd) break
-
                 const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row
-                const featureDensity = pixelWidth / rowFeatureCount[row]
-                options.drawLabel = options.labelAllFeatures || featureDensity > 10
+                options.drawLabel = options.labelAllFeatures || pixelsPerFeature > 10
                 const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel)
                 const last = lastPxEnd[row]
                 if (!last || pxEnd > last) {
@@ -217,7 +220,6 @@ class FeatureTrack extends TrackBase {
                         ctx.globalAlpha = 1.0
                     }
                     lastPxEnd[row] = pxEnd
-
                 }
             }
 
