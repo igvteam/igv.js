@@ -29,17 +29,17 @@
                 "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/chm13v2.0/CHM13_v2.0.cytoBandMapped.bed",
                 "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/chm13v2.0/GCA_009914755.4.chromAlias.txt",
                 "tracks": [
-                    // {
-                    //     "id": "catLiftOffGenesV1",
-                    //     "name": "CAT/Liftoff Genes",
-                    //     "format": "bigBed",
-                    //     "description": " <a target = \"_blank\" href = \"https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/html/GCA_009914755.4_CHM13_T2T_v2.0.catLiftOffGenesV1.html\">CAT + Liftoff Gene Annotations</a>",
-                    //     "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_CHM13_T2T_v2.0.catLiftOffGenesV1/catLiftOffGenesV1.bb",
-                    //     "displayMode": "EXPANDED",
-                    //     "height": 500,
-                    //     "visibilityWindow": -1,
-                    //     "supportsWholeGenome": false
-                    // },
+                    {
+                        "id": "catLiftOffGenesV1",
+                        "name": "CAT/Liftoff Genes",
+                        "format": "bigBed",
+                        "description": " <a target = \"_blank\" href = \"https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/html/GCA_009914755.4_CHM13_T2T_v2.0.catLiftOffGenesV1.html\">CAT + Liftoff Gene Annotations</a>",
+                        "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_CHM13_T2T_v2.0.catLiftOffGenesV1/catLiftOffGenesV1.bb",
+                        "displayMode": "EXPANDED",
+                        "height": 500,
+                        "visibilityWindow": -1,
+                        "supportsWholeGenome": false
+                    },
                     {
                         "id": "augustus",
                         "name": "Augustus",
@@ -51,7 +51,19 @@
                         "height": 250,
                         "visibilityWindow": -1,
                         "supportsWholeGenome": false
+                    },
+                    {
+                        "id": "dbSNP155",
+                        "name": "dbSNP 155",
+                        "format": "vcf",
+                        "description": " <a target = \"_blank\" href = \"https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/html/GCA_009914755.4_CHM13_T2T_v2.0.dbSNP155.html\">dbSNP 155 (lifted)</a>",
+                        "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_CHM13_T2T_v2.0.dbSNP155/chm13v2.0_dbSNPv155.ncbi-names.vcf.gz",
+                        "indexURL": "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_CHM13_T2T_v2.0.dbSNP155/chm13v2.0_dbSNPv155.ncbi-names.vcf.gz.tbi",
+                        "visibilityWindow": 10000,
+                        "supportsWholeGenome": false,
+                        "nameField": "names"
                     }
+
                 ]
             }
 
