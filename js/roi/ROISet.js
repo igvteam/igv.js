@@ -25,52 +25,24 @@
  */
 
 import FeatureSource from '../feature/featureSource.js'
-import IGVGraphics from "../igv-canvas.js"
 import {appleCrayonRGBA} from '../util/colorPalletes.js'
 
 const ROI_DEFAULT_ALPHA = 1/16
 const ROI_DEFAULT_COLOR = appleCrayonRGBA('steel', ROI_DEFAULT_ALPHA)
 const ROI_HEADER_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 8 * ROI_DEFAULT_ALPHA)
 
-const TRACK_ROI_TYPE = 2
-const GLOBAL_ROI_TYPE = 4
+class ROISet {
 
-class ROI {
-
-    constructor(config, genome, type) {
+    constructor(config, genome) {
         this.name = config.name
         this.featureSource = config.featureSource || FeatureSource(config, genome)
         this.color = config.color || ROI_HEADER_DEFAULT_COLOR
-        this.type = type
     }
 
     async getFeatures(chr, start, end) {
         return this.featureSource.getFeatures({chr, start, end})
     }
 
-    draw(drawConfiguration) {
-
-        const { context, bpPerPixel, bpStart, pixelTop, pixelHeight, pixelWidth, features, } = drawConfiguration
-
-        if (!features) {
-            return
-        }
-
-        const endBP = bpStart + (pixelWidth * bpPerPixel) + 1
-        for (let { start:regionStartBP, end:regionEndBP } of features) {
-
-            if (regionEndBP < bpStart) {
-                continue
-            }
-
-            if (regionStartBP > endBP) {
-                break
-            }
-
-            const { x, width } = screenCoordinates(regionStartBP, regionEndBP, bpStart, bpPerPixel)
-            IGVGraphics.fillRect(context, x, pixelTop, width, pixelHeight, { fillStyle: this.color })
-        }
-    }
 }
 
 const SCREEN_COORDS_WIDTH_THRESHOLD = 3
@@ -90,5 +62,6 @@ function screenCoordinates(regionStartBP, regionEndBP, startBP, bpp) {
     return { x:xStart, width }
 }
 
-export { screenCoordinates, TRACK_ROI_TYPE, GLOBAL_ROI_TYPE, ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR }
-export default ROI
+export { ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, screenCoordinates }
+
+export default ROISet
