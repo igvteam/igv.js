@@ -27,7 +27,7 @@
 import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
 import {validateGenomicExtent} from "./util/igvUtils.js"
 import GenomeUtils from './genome/genome.js'
-import {ROI_HEADER_DEFAULT_COLOR} from "./roi/ROI.js"
+import {ROI_HEADER_DEFAULT_COLOR} from "./roi/ROISet.js"
 
 const RULER_SWEEPER_COLOR = 'rgba(68, 134, 247, 0.25)'
 
@@ -156,7 +156,7 @@ class RulerSweeper {
                     const shiftKeyPressed = event.shiftKey
 
                     if (true === shiftKeyPressed) {
-                        this.browser.roiManager.addROI(Object.assign({}, genomicExtent))
+                        this.browser.roiManager.addROIElement(Object.assign({}, genomicExtent))
                     } else {
 
                         validateGenomicExtent(this.browser.genome.getChromosome(this.referenceFrame.chr).bpLength, genomicExtent, this.browser.minimumBases())

@@ -39,7 +39,7 @@ import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js"
 import C2S from "./canvas2svg.js"
 import TrackFactory from "./trackFactory.js"
-import ROI, {GLOBAL_ROI_TYPE, TRACK_ROI_TYPE} from "./roi/ROI.js"
+import ROISet from "./roi/ROISet.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
@@ -77,6 +77,7 @@ import CustomButton from "./ui/customButton.js"
 import ROIManager from './roi/ROIManager.js'
 import ROITable from './roi/ROITable.js'
 import ROIMenu from './roi/ROIMenu.js'
+import TrackROISet from "./roi/trackROISet.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -391,7 +392,7 @@ class Browser {
      */
     async loadSession(options) {
 
-        this.roiList = []
+        this.roi = []
         let session
         if (options.url || options.file) {
             session = await loadSessionFile(options)
@@ -502,11 +503,13 @@ class Browser {
         const roiMenu = new ROIMenu(this.columnContainer)
         if (session.roi) {
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, session.roi.map(r => {
-                return new ROI(r, this.genome, GLOBAL_ROI_TYPE)
+                return new ROISet(r, this.genome)
             }))
         } else {
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, undefined)
         }
+
+        await this.roiManager.initialize()
 
         // Tracks.  Start with genome tracks, if any, then append session tracks
         const genomeTracks = genomeConfig.tracks || []
@@ -727,25 +730,33 @@ class Browser {
     }
 
     async loadROI(config) {
-        if (!this.roiList) {
-            this.roiList = []
+
+        console.error('browser.loadROI() is under development and not available')
+        return
+
+        if (!this.roi) {
+            this.roi = []
         }
         if (Array.isArray(config)) {
             for (let c of config) {
-                this.roiList.push(new ROI(c, this.genome, TRACK_ROI_TYPE))
+                this.roi.push(new ROISet(c, this.genome))
             }
         } else {
-            this.roiList.push(new ROI(config, this.genome, TRACK_ROI_TYPE))
+            this.roi.push(new ROISet(config, this.genome))
         }
-        // Force reload all views (force = true) to insure ROI features are loaded.  Wasteful but this function is
+        // Force reload all views (force = true) to insure ROISet features are loaded.  Wasteful but this function is
         // rarely called.
         await this.updateViews(true)
     }
 
     removeROI(roiToRemove) {
-        for (let i = 0; i < this.roiList.length; i++) {
-            if (this.roiList[i].name === roiToRemove.name) {
-                this.roiList.splice(i, 1)
+
+        console.error('browser.removeROI() is under development and not available')
+        return
+
+        for (let i = 0; i < this.roi.length; i++) {
+            if (this.roi[i].name === roiToRemove.name) {
+                this.roi.splice(i, 1)
                 break
             }
         }
@@ -755,7 +766,11 @@ class Browser {
     }
 
     clearROIs() {
-        this.roiList = []
+
+        console.error('browser.clearROIs() is under development and not available')
+        return
+
+        this.roi = []
         for (let tv of this.trackViews) {
             tv.repaintViews()
         }
@@ -908,7 +923,7 @@ class Browser {
         const track = TrackFactory.getTrack(type, config, this)
 
         if (track && config.roi && config.roi.length > 0) {
-            track.roiList = config.roi.map(r => new ROI(r, this.genome, TRACK_ROI_TYPE))
+            track.roi = config.roi.map(r => new TrackROISet(r, this.genome))
          }
 
         return track
