@@ -911,6 +911,33 @@
   to {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
+.igv-roi {
+  cursor: pointer;
+  z-index: 64;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  pointer-events: none;
+  overflow: visible;
+  margin-top: 44px;
+  border-left-width: thin;
+  border-left-style: solid;
+  border-left-color: rgba(105, 105, 105, 0.5);
+  border-right-width: thin;
+  border-right-style: solid;
+  border-right-color: rgba(105, 105, 105, 0.5);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start; }
+  .igv-roi > div {
+    position: relative;
+    pointer-events: auto;
+    width: 100%;
+    height: 8px;
+    background-color: dimgrey; }
+
 .igv-roi-menu {
   position: absolute;
   z-index: 1024;
@@ -1060,32 +1087,6 @@
   align-items: flex-start;
   box-sizing: border-box;
   height: 100%; }
-  .igv-column > .igv-roi {
-    cursor: pointer;
-    z-index: 64;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    pointer-events: none;
-    overflow: visible;
-    margin-top: 44px;
-    border-left-width: thin;
-    border-left-style: solid;
-    border-left-color: rgba(105, 105, 105, 0.5);
-    border-right-width: thin;
-    border-right-style: solid;
-    border-right-color: rgba(105, 105, 105, 0.5);
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: flex-start; }
-    .igv-column > .igv-roi > div {
-      position: relative;
-      pointer-events: auto;
-      width: 100%;
-      height: 8px;
-      background-color: dimgrey; }
 
 .igv-axis-column {
   position: relative;
