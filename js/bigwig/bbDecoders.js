@@ -133,13 +133,9 @@ function decodeInteract(feature, tokens) {
  */
 
 function decodeBigGenePred(feature, tokens) {
-
     decodeStandardFields(feature, tokens)
-
-    // frame shifts
-
+    // TODO frame shifts, extra gene names
 }
-
 
 // TODO -- copied from "ucsc.js", move to common file
 function findUTRs(exons, cdStart, cdEnd) {
