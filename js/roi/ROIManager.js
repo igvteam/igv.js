@@ -120,6 +120,7 @@ class ROIManager {
                     if (featureEndBP < startBP || featureStartBP > endBP || chr !== featureChr) {
 
                         if (featureIsInDOM) {
+                            console.log(`remove feature ${ featureKey }`)
                             el.remove()
                         }
 
@@ -163,57 +164,13 @@ class ROIManager {
         header.style.backgroundColor = color
         container.appendChild(header)
 
-        // header.addEventListener('click', event => {
-        //     const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-        //     this.roiMenu.present(x, y)
-        // })
+        header.addEventListener('click', event => {
+            const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
+            // this.roiMenu.present(x, y)
+            console.log(`${ Date.now() } feature key ${ featureKey }`)
+        })
 
         return container
-    }
-
-    clearGlobalROIDOMElement(column) {
-        const regionElements = column.querySelectorAll('.igv-roi')
-        for (let i = 0; i < regionElements.length; i++) {
-            regionElements[ i ].remove()
-        }
-    }
-
-    async paint(browser, top, roiSets) {
-
-        const columns = browser.columnContainer.querySelectorAll('.igv-column')
-
-        for (let i = 0; i < columns.length; i++) {
-
-            this.clearGlobalROIDOMElement(columns[i])
-
-            const { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
-
-            for (let roi of roiSets) {
-
-                const regions = await roi.getFeatures(chr, startBP, endBP)
-
-                if (regions && regions.length > 0) {
-
-                    for (let { start:regionStartBP, end:regionEndBP } of regions) {
-
-                        if (regionEndBP < startBP) {
-                            continue
-                        }
-
-                        if (regionStartBP > endBP) {
-                            break
-                        }
-
-                        regionStartBP = Math.max(regionStartBP, startBP)
-                        regionEndBP = Math.min(regionEndBP, endBP)
-                        columns[ i ].appendChild(this.createFeatureDOM(browser, browser.columnContainer, top, roi))
-                    }
-                }
-
-            }
-
-        }
-
     }
 
 }
