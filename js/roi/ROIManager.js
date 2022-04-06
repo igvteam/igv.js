@@ -166,7 +166,7 @@ class ROIManager {
 
         header.addEventListener('click', event => {
             const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-            // this.roiMenu.present(x, y)
+            this.roiMenu.present(x, y)
             console.log(`menu for feature ${ featureKey }`)
         })
 
