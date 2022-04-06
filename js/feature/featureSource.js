@@ -27,7 +27,7 @@ import TextFeatureSource from "./textFeatureSource.js"
 import BWSource from "../bigwig/bwSource.js"
 import TDFSource from "../tdf/tdfSource.js"
 
-const bbFormats = new Set('bigwig', 'bw', 'bigbed', 'bb', 'biginteract', 'biggenepred', 'bignarrowpeak')
+const bbFormats = new Set(['bigwig', 'bw', 'bigbed', 'bb', 'biginteract', 'biggenepred', 'bignarrowpeak'])
 
 function FeatureSource(config, genome) {
 

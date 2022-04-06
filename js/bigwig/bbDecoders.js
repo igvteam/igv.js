@@ -24,15 +24,17 @@ import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
 
-    if ("biginteract" === format || (autoSql && 'chromatinInteract' === autoSql.table)) {
+    if ("biginteract" === format || (autoSql && ('chromatinInteract' === autoSql.table) || 'interact' === autoSql.table)) {
         return decodeInteract
-    } else if ("biggenepred" === format) {
+    } else if ("biggenepred" === format|| (autoSql && 'bigGenePred' === autoSql.table)) {
+        return decodeBigGenePred
+    } else if ("bignarrowpeak" === format|| (autoSql && 'bigNarrowPeak' === autoSql.table)) {
         return decodeBigGenePred
     } else {
         const standardFieldCount = definedFieldCount - 3
         return function (feature, tokens) {
 
-            decodeStandardFields(feature, tokens)
+            decodeStandardFields(feature, tokens, standardFieldCount)
 
             if (autoSql) {
                 const extraStart = definedFieldCount
@@ -48,24 +50,24 @@ function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
     }
 }
 
-function decodeStandardFields(feature, tokens) {
+function decodeStandardFields(feature, tokens, standardFieldCount) {
 
-    if (tokens.length > 0) {
+    if (standardFieldCount > 0) {
         feature.name = tokens[0]
     }
-    if (tokens.length > 1) {
+    if (standardFieldCount > 1) {
         feature.score = Number(tokens[1])
     }
-    if (tokens.length > 2) {
+    if (standardFieldCount > 2) {
         feature.strand = tokens[2]
     }
-    if (tokens.length > 3) {
+    if (standardFieldCount > 3) {
         feature.cdStart = parseInt(tokens[3])
     }
-    if (tokens.length > 4) {
+    if (standardFieldCount > 4) {
         feature.cdEnd = parseInt(tokens[4])
     }
-    if (tokens.length > 5) {
+    if (standardFieldCount > 5) {
         if (tokens[5] !== "." && tokens[5] !== "0" && tokens[5] !== "-1") {
             const c = IGVColor.createColorString(tokens[5])
             feature.color = c.startsWith("rgb") ? c : undefined
@@ -133,7 +135,7 @@ function decodeInteract(feature, tokens) {
  */
 
 function decodeBigGenePred(feature, tokens) {
-    decodeStandardFields(feature, tokens)
+    decodeStandardFields(feature, tokens, 9)
     // TODO frame shifts, extra gene names
 }
 
