@@ -26,6 +26,10 @@
 import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 
+const fixColor = (colorString) => {
+    return (colorString.indexOf(",") > 0 && !colorString.startsWith("rgb")) ?
+        `rgb(${colorString})` : colorString
+}
 
 /**
  * A collection of properties and methods shared by all (or most) track types.
@@ -70,8 +74,8 @@ class TrackBase {
 
         this.order = config.order
 
-        this.color = config.color
-        this.altColor = config.altColor
+        if(config.color) this.color = fixColor(config.color)
+        if(config.altColor) this.altColor = fixColor(config.altColor)
         if ("civic-ws" === config.sourceType) {    // Ugly proxy for specialized track type
             this.defaultColor = "rgb(155,20,20)"
         } else {
