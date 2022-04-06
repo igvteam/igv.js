@@ -162,10 +162,10 @@ class TrackViewport extends Viewport {
             const track = this.trackView.track
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
             let roiFeatures = []
-            if (track.roi && track.roi.length > 0) {
-                for (let roiItem of track.roi) {
-                    const features = await roiItem.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
-                    roiFeatures.push({track: roiItem, features})
+            if (track.roiSets && track.roiSets.length > 0) {
+                for (let roiSet of track.roiSets) {
+                    const features = await roiSet.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+                    roiFeatures.push({track: roiSet, features})
                 }
             }
 

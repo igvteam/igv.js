@@ -392,7 +392,7 @@ class Browser {
      */
     async loadSession(options) {
 
-        this.roi = []
+        this.roiSets = []
         let session
         if (options.url || options.file) {
             session = await loadSessionFile(options)
@@ -734,15 +734,15 @@ class Browser {
         console.error('browser.loadROI() is under development and not available')
         return
 
-        if (!this.roi) {
-            this.roi = []
+        if (!this.roiSets) {
+            this.roiSets = []
         }
         if (Array.isArray(config)) {
             for (let c of config) {
-                this.roi.push(new ROISet(c, this.genome))
+                this.roiSets.push(new ROISet(c, this.genome))
             }
         } else {
-            this.roi.push(new ROISet(config, this.genome))
+            this.roiSets.push(new ROISet(config, this.genome))
         }
         // Force reload all views (force = true) to insure ROISet features are loaded.  Wasteful but this function is
         // rarely called.
@@ -754,9 +754,9 @@ class Browser {
         console.error('browser.removeROI() is under development and not available')
         return
 
-        for (let i = 0; i < this.roi.length; i++) {
-            if (this.roi[i].name === roiToRemove.name) {
-                this.roi.splice(i, 1)
+        for (let i = 0; i < this.roiSets.length; i++) {
+            if (this.roiSets[i].name === roiToRemove.name) {
+                this.roiSets.splice(i, 1)
                 break
             }
         }
@@ -770,7 +770,7 @@ class Browser {
         console.error('browser.clearROIs() is under development and not available')
         return
 
-        this.roi = []
+        this.roiSets = []
         for (let tv of this.trackViews) {
             tv.repaintViews()
         }
@@ -923,7 +923,7 @@ class Browser {
         const track = TrackFactory.getTrack(type, config, this)
 
         if (track && config.roi && config.roi.length > 0) {
-            track.roi = config.roi.map(r => new TrackROISet(r, this.genome))
+            track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
          }
 
         return track
