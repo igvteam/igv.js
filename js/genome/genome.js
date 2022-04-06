@@ -148,7 +148,7 @@ class Genome {
     constructor(config, sequence, ideograms, aliases) {
 
         this.config = config
-        this.id = config.id
+        this.id = config.id || generateGenomeID(config)
         this.sequence = sequence
         this.chromosomeNames = sequence.chromosomeNames
         this.chromosomes = sequence.chromosomes  // An object (functions as a dictionary)
@@ -468,6 +468,18 @@ function constructWG(genome, config) {
         return /^\d+$/.test(val)
     }
 
+}
+
+function generateGenomeID(config) {
+    if (config.id !== undefined) {
+        return config.id
+    } else if (config.fastaURL && StringUtils.isString(config.fastaURL)) {
+        return config.fastaURL
+    } else if (config.fastaURL && config.fastaURL.name) {
+        return config.fastaURL.name
+    } else {
+        return ("0000" + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)
+    }
 }
 
 export default GenomeUtils
