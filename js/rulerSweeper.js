@@ -156,7 +156,7 @@ class RulerSweeper {
                     const shiftKeyPressed = event.shiftKey
 
                     if (true === shiftKeyPressed) {
-                        this.browser.roiManager.addROIElement(Object.assign({}, genomicExtent))
+                        this.browser.roiManager.addROISet(Object.assign({ chr: this.referenceFrame.chr }, genomicExtent))
                     } else {
 
                         validateGenomicExtent(this.browser.genome.getChromosome(this.referenceFrame.chr).bpLength, genomicExtent, this.browser.minimumBases())
