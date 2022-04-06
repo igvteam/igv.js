@@ -1,34 +1,35 @@
 import Picker from '../../node_modules/vanilla-picker/dist/vanilla-picker.mjs'
-import {DOMUtils} from "../../node_modules/igv-utils/src/index.js"
+import {DOMUtils,StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import ROISet, {ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, screenCoordinates} from './ROISet.js'
-import ROIMenu from "./ROIMenu.js"
+import ROIMenu from './ROIMenu.js'
 
 class ROIManager {
-    constructor(browser, roiMenu, roiTable, top, roiElements) {
+    constructor(browser, roiMenu, roiTable, top, roiSets) {
 
         this.browser = browser
         this.roiMenu = roiMenu
         this.roiTable = roiTable
         this.top = top
-        this.roiElements = roiElements || []
+        this.roiSets = roiSets || []
 
-        // browser.on('locuschange',       () => this.paint(browser, top, this.roiElements))
-        // browser.on('trackremoved',      () => this.paint(browser, top, this.roiElements))
-        // browser.on('trackorderchanged', () => this.paint(browser, top, this.roiElements))
+        // browser.on('locuschange',       () => this.echoLocus())
+        browser.on('locuschange',       () => this.renderAllFeatureElements())
+        // browser.on('trackremoved',      () => this.paint(browser, top, this.roiSets))
+        // browser.on('trackorderchanged', () => this.paint(browser, top, this.roiSets))
     }
 
     async initialize() {
 
-        const promises = this.roiElements.map(roiElement => {
+        const promises = this.roiSets.map(roiSet => {
 
             const config =
                 {
                     browser: this.browser,
                     pixelTop: this.top,
-                    roiElement
+                    roiSet
                 };
 
-            return this.drawROIElement(config)
+            return this.presentFeatureElements(config)
 
         })
 
@@ -38,27 +39,9 @@ class ROIManager {
 
     }
 
-    async trivialRejectFeatures() {
+    addROISet(region) {
 
-        const reject = []
-        const accept = []
-        for (let roiElement of this.roiElements) {
-            for (let { chr, start:startBP, end:endBP, bpPerPixel:bpp } of this.browser.referenceFrameList) {
-                const features = await roiElement.getFeatures(chr, startBP, endBP)
-                if (features && features.length > 0) {
-                    for (let { start:featureStartBP, end:featureEndBP } of features) {
-                        if (featureStartBP < startBP || featureEndBP > endBP) {
-                            continue
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    addROIElement(region) {
-
-        const roiElementConfig =
+        const roiSetConfig =
             {
                 name: `roi-element-${ DOMUtils.guid() }`,
                 featureSource:
@@ -68,45 +51,92 @@ class ROIManager {
                 color: ROI_HEADER_DEFAULT_COLOR
             };
 
-        const roiElement = new ROISet(roiElementConfig, this.browser.genome)
-        this.roiElements.push(roiElement)
+        const roiSet = new ROISet(roiSetConfig, this.browser.genome)
+        this.roiSets.push(roiSet)
 
-        const config =
-            {
-                browser: this.browser,
-                pixelTop: this.top,
-                roiElement
-            };
-
-        this.drawROIElement(config)
+        this.presentFeatureElements({ browser: this.browser, pixelTop: this.top, roiSet })
 
     }
 
-    async drawROIElement({ browser, pixelTop, roiElement}) {
+    async echoLocus() {
+
+        const columns = this.browser.columnContainer.querySelectorAll('.igv-column')
+
+        for (let i = 0; i < columns.length; i++) {
+            let { chr, start:startBP, end:endBP, bpPerPixel:bpp } = this.browser.referenceFrameList[ i ]
+
+            // const regions = await this.roiSets[ 0 ].getFeatures(chr, startBP, endBP)
+            const regions = await this.roiSets[ 0 ].getFeatures(chr, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+
+            console.log(`frame(${i}) ${ chr } start ${ StringUtils.numberFormatter(Math.floor(startBP)) } region retrieved(${regions.length})`)
+
+        }
+
+    }
+
+    async renderAllFeatureElements() {
+
+        for (let roiSet of this.roiSets) {
+
+            const config =
+                {
+                    browser: this.browser,
+                    pixelTop: this.top,
+                    roiSet
+                };
+
+            await this.presentFeatureElements(config)
+
+        }
+    }
+
+    async presentFeatureElements({ browser, pixelTop, roiSet }) {
 
         const columns = browser.columnContainer.querySelectorAll('.igv-column')
 
         for (let i = 0; i < columns.length; i++) {
 
-            const { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
+            let { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
 
-            const regions = await roiElement.getFeatures(chr, startBP, endBP)
+            const regions = await roiSet.getFeatures(chr, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
 
             if (regions && regions.length > 0) {
 
-                for (let { start:featureStartBP, end:featureEndBP } of regions) {
+                for (let { chr:featureChr, start:featureStartBP, end:featureEndBP } of regions) {
 
-                    if (featureEndBP < startBP || featureStartBP > endBP) {
-                        continue
+                    featureStartBP = Math.floor(featureStartBP)
+                    featureEndBP = Math.floor(featureEndBP)
+
+                    const featureKey = `feature-key-${ featureStartBP }-${ featureEndBP }`
+                    const selector = `[data-feature="${ featureKey }"]`
+
+                    const el = columns[ i ].querySelector(selector)
+                    const featureIsInDOM = null !== el
+
+                    // console.log(`presentFeatureElements - selector ${ selector } ${ featureIsInDOM }`)
+
+                    // console.log(`reference frame start ${ StringUtils.numberFormatter(startBP) } end ${ StringUtils.numberFormatter(endBP) }`)
+
+                    if (featureEndBP < startBP || featureStartBP > endBP || chr !== featureChr) {
+
+                        if (featureIsInDOM) {
+                            el.remove()
+                        }
+
+                    } else {
+
+                        const { x:pixelX, width:pixelWidth } = screenCoordinates(Math.max(featureStartBP, startBP), Math.min(featureEndBP, endBP), startBP, bpp)
+
+                        if (featureIsInDOM) {
+                            el.style.left = `${pixelX}px`
+                            el.style.width = `${pixelWidth}px`
+                        } else {
+                            const featureDOM = this.createFeatureDOM(browser, browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet.color, featureKey)
+                            columns[ i ].appendChild(featureDOM)
+                        }
+
                     }
 
-                    featureStartBP = Math.max(featureStartBP, startBP)
-                    featureEndBP = Math.min(featureEndBP, endBP)
-
-                    const { x:pixelX, width:pixelWidth } = screenCoordinates(featureStartBP, featureEndBP, startBP, bpp)
-
-                    const featureDOM = this.createFeatureDOM(browser, browser.columnContainer, pixelTop, pixelX, pixelWidth, roiElement.color)
-                    columns[ i ].appendChild(featureDOM)
                 }
             }
 
@@ -114,7 +144,7 @@ class ROIManager {
 
     }
 
-    createFeatureDOM(browser, columnContainer, pixelTop, pixelX, pixelWidth, color) {
+    createFeatureDOM(browser, columnContainer, pixelTop, pixelX, pixelWidth, color, featureKey) {
 
         // ROISet container
         const container = DOMUtils.div({class: 'igv-roi'})
@@ -126,7 +156,7 @@ class ROIManager {
 
         container.style.backgroundColor = ROI_DEFAULT_COLOR
 
-        // container.dataset.roiElement = roiElement.name
+        container.dataset.feature = featureKey
 
         // header
         const header = DOMUtils.div()
@@ -148,7 +178,7 @@ class ROIManager {
         }
     }
 
-    async paint(browser, top, roiElements) {
+    async paint(browser, top, roiSets) {
 
         const columns = browser.columnContainer.querySelectorAll('.igv-column')
 
@@ -158,7 +188,7 @@ class ROIManager {
 
             const { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
 
-            for (let roi of roiElements) {
+            for (let roi of roiSets) {
 
                 const regions = await roi.getFeatures(chr, startBP, endBP)
 
