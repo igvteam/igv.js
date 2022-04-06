@@ -34,8 +34,22 @@ const ROI_HEADER_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 8 * ROI_DEFAULT_ALP
 class ROISet {
 
     constructor(config, genome) {
+
         this.name = config.name
+
+        this.isImmutable = config.url ? true : false
+
         this.featureSource = config.featureSource || FeatureSource(config, genome)
+
+        if (config.features) {
+            this.featureSource =
+                {
+                    getFeatures :(chr, start, end) => config.features.map(({ chr, start, end }) => {
+                        return { chr: genome.getChromosomeName(chr), start, end }
+                    })
+                }
+        }
+
         this.color = config.color || ROI_HEADER_DEFAULT_COLOR
     }
 
