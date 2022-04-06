@@ -1396,10 +1396,13 @@ class AlignmentTrack {
             case "pairOrientation":
 
                 if (this.pairOrientation && alignment.pairOrientation) {
-                    var oTypes = orientationTypes[this.pairOrientation]
+                    const oTypes = orientationTypes[this.pairOrientation]
                     if (oTypes) {
-                        var pairColor = this.pairColors[oTypes[alignment.pairOrientation]]
-                        if (pairColor) color = pairColor
+                        const pairColor = this.pairColors[oTypes[alignment.pairOrientation]]
+                        if (pairColor) {
+                            color = pairColor
+                            break
+                        }
                     }
                 }
                 if ("pairOrientation" === option) {
