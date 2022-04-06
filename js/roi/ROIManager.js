@@ -120,7 +120,7 @@ class ROIManager {
                     if (featureEndBP < startBP || featureStartBP > endBP || chr !== featureChr) {
 
                         if (featureIsInDOM) {
-                            console.log(`remove feature ${ featureKey }`)
+                            console.log(`remove   feature ${ featureKey }`)
                             el.remove()
                         }
 
@@ -167,7 +167,7 @@ class ROIManager {
         header.addEventListener('click', event => {
             const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
             // this.roiMenu.present(x, y)
-            console.log(`${ Date.now() } feature key ${ featureKey }`)
+            console.log(`menu for feature ${ featureKey }`)
         })
 
         return container
