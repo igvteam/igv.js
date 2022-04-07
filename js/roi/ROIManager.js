@@ -86,33 +86,32 @@ class ROIManager {
 
             if (regions && regions.length > 0) {
 
-                for (let { chr:featureChr, start:featureStartBP, end:featureEndBP } of regions) {
+                for (let r = 0; r < regions.length; r++ ) {
 
-                    featureStartBP = Math.floor(featureStartBP)
-                    featureEndBP = Math.floor(featureEndBP)
+                    const { chr:regionChr, start:regionStartBP, end:regionEndBP } = regions[ r ]
 
-                    const featureKey = `feature-key-${ featureStartBP }-${ featureEndBP }`
-                    const selector = `[data-feature="${ featureKey }"]`
+                    const regionKey = `region-key-${ regionStartBP }-${ regionEndBP }`
+                    const selector = `[data-region="${ regionKey }"]`
 
                     const el = columns[ i ].querySelector(selector)
-                    const featureIsInDOM = null !== el
+                    const isRegionInDOM = null !== el
 
-                    if (featureEndBP < startBP || featureStartBP > endBP || chr !== featureChr) {
+                    if (regionEndBP < startBP || regionStartBP > endBP || chr !== regionChr) {
 
-                        if (featureIsInDOM) {
+                        if (isRegionInDOM) {
                             el.remove()
                         }
 
                     } else {
 
-                        const { x:pixelX, width:pixelWidth } = screenCoordinates(Math.max(featureStartBP, startBP), Math.min(featureEndBP, endBP), startBP, bpp)
+                        const { x:pixelX, width:pixelWidth } = screenCoordinates(Math.max(regionStartBP, startBP), Math.min(regionEndBP, endBP), startBP, bpp)
 
-                        if (featureIsInDOM) {
+                        if (isRegionInDOM) {
                             el.style.left = `${pixelX}px`
                             el.style.width = `${pixelWidth}px`
                         } else {
-                            const featureDOM = this.createRegionDOM(browser, browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, featureKey)
-                            columns[ i ].appendChild(featureDOM)
+                            const element = this.createRegionElement(browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey)
+                            columns[ i ].appendChild(element)
                         }
 
                     }
@@ -124,9 +123,8 @@ class ROIManager {
 
     }
 
-    createRegionDOM(browser, columnContainer, pixelTop, pixelX, pixelWidth, roiSet, featureKey) {
+    createRegionElement(columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey) {
 
-        // ROISet container
         const container = DOMUtils.div({class: 'igv-roi'})
 
         container.style.top = `${pixelTop}px`
@@ -136,7 +134,7 @@ class ROIManager {
 
         container.style.backgroundColor = ROI_DEFAULT_COLOR
 
-        container.dataset.feature = featureKey
+        container.dataset.region = regionKey
 
         // header
         const header = DOMUtils.div()
@@ -147,8 +145,7 @@ class ROIManager {
 
             header.addEventListener('click', event => {
                 const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-                this.roiMenu.present(x, y)
-                console.log(`ROI Set "${ roiSet.name }" feature ${ featureKey }`)
+                this.roiMenu.present(x, y, roiSet, columnContainer, regionKey)
             })
 
         }
