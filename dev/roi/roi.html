@@ -38,17 +38,17 @@
         // Define two "region of interest" sets
 
         // first a global set
-        roi:
-            [
-                {
-                    name: 'ROI set 1',
-                    url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
-                    // url: './roi_dugla_one_region.bed',
-                    // url: './some_features.bed',
-                    indexed: false,
-                    // color: "rgba(255,1,199,0.25)"
-                },
-            ],
+        // roi:
+        //     [
+        //         {
+        //             name: 'ROI set 1',
+        //             url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
+        //             // url: './roi_dugla_one_region.bed',
+        //             // url: './some_features.bed',
+        //             indexed: false,
+        //             // color: "rgba(255,1,199,0.25)"
+        //         },
+        //     ],
 
         // second a track specific set
         tracks:
@@ -57,15 +57,15 @@
                     name: 'Some features',
                     url: 'https://s3.amazonaws.com/igv.org.test/data/roi/some_features.bed',
                     indexed: false,
-                    roi:
-                        [
-                            {
-                                name: 'ROI set 2',
-                                url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_2.bed',
-                                indexed: false,
-                                // color: "rgba(100,149,237,0.75)"
-                            },
-                        ]
+                    // roi:
+                    //     [
+                    //         {
+                    //             name: 'ROI set 2',
+                    //             url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_2.bed',
+                    //             indexed: false,
+                    //             // color: "rgba(100,149,237,0.75)"
+                    //         },
+                    //     ]
                 }
             ]
     };
