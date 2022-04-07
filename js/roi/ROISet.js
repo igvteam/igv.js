@@ -42,9 +42,10 @@ class ROISet {
         this.featureSource = config.featureSource || FeatureSource(config, genome)
 
         if (config.features) {
+            this.features = config.features.slice()
             this.featureSource =
                 {
-                    getFeatures :(chr, start, end) => config.features.map(({ chr, start, end }) => {
+                    getFeatures :(chr, start, end) => this.features.map(({ chr, start, end }) => {
                         return { chr: genome.getChromosomeName(chr), start, end }
                     })
                 }
