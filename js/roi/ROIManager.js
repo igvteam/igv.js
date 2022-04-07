@@ -1,7 +1,5 @@
-import Picker from '../../node_modules/vanilla-picker/dist/vanilla-picker.mjs'
 import {DOMUtils,StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import ROISet, {ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, screenCoordinates} from './ROISet.js'
-import ROIMenu from './ROIMenu.js'
 
 class ROIManager {
     constructor(browser, roiMenu, roiTable, top, roiSets) {
@@ -12,8 +10,19 @@ class ROIManager {
         this.top = top
         this.roiSets = roiSets || []
 
-        // browser.on('locuschange',       () => this.echoLocus())
-        browser.on('locuschange',       () => this.renderAllFeatureElements())
+        const interativeROISetConfig =
+            {
+                name: `Interactive ROI Set`,
+                features:
+                [
+
+                ],
+                color: ROI_HEADER_DEFAULT_COLOR
+            };
+
+        this.interativeROISet = new ROISet(interativeROISetConfig, browser.genome)
+
+        browser.on('locuschange',       () => this.renderAllROISets())
         // browser.on('trackremoved',      () => this.paint(browser, top, this.roiSets))
         // browser.on('trackorderchanged', () => this.paint(browser, top, this.roiSets))
     }
@@ -29,7 +38,7 @@ class ROIManager {
                     roiSet
                 };
 
-            return this.presentFeatureElements(config)
+            return this.renderROISet(config)
 
         })
 
@@ -39,44 +48,19 @@ class ROIManager {
 
     }
 
-    addROISet(region) {
+    updateInteractiveROISet(region) {
 
-        const roiSetConfig =
-            {
-                name: `roi-element-${ DOMUtils.guid() }`,
-                featureSource:
-                    {
-                        getFeatures :(chr, start, end) => [ region ]
-                    },
-                color: ROI_HEADER_DEFAULT_COLOR
-            };
+        this.interativeROISet.features.push(region)
 
-        const roiSet = new ROISet(roiSetConfig, this.browser.genome)
-        this.roiSets.push(roiSet)
-
-        this.presentFeatureElements({ browser: this.browser, pixelTop: this.top, roiSet })
+        this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: this.interativeROISet})
 
     }
 
-    async echoLocus() {
+    async renderAllROISets() {
 
-        const columns = this.browser.columnContainer.querySelectorAll('.igv-column')
+        const list = this.interativeROISet.features.length > 0 ? [ ...this.roiSets, this.interativeROISet ]  : this.roiSets
 
-        for (let i = 0; i < columns.length; i++) {
-            let { chr, start:startBP, end:endBP, bpPerPixel:bpp } = this.browser.referenceFrameList[ i ]
-
-            // const regions = await this.roiSets[ 0 ].getFeatures(chr, startBP, endBP)
-            const regions = await this.roiSets[ 0 ].getFeatures(chr, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
-
-            console.log(`frame(${i}) ${ chr } start ${ StringUtils.numberFormatter(Math.floor(startBP)) } region retrieved(${regions.length})`)
-
-        }
-
-    }
-
-    async renderAllFeatureElements() {
-
-        for (let roiSet of this.roiSets) {
+        for (let roiSet of list) {
 
             const config =
                 {
@@ -85,12 +69,12 @@ class ROIManager {
                     roiSet
                 };
 
-            await this.presentFeatureElements(config)
+            await this.renderROISet(config)
 
         }
     }
 
-    async presentFeatureElements({ browser, pixelTop, roiSet }) {
+    async renderROISet({browser, pixelTop, roiSet}) {
 
         const columns = browser.columnContainer.querySelectorAll('.igv-column')
 
@@ -113,14 +97,9 @@ class ROIManager {
                     const el = columns[ i ].querySelector(selector)
                     const featureIsInDOM = null !== el
 
-                    // console.log(`presentFeatureElements - selector ${ selector } ${ featureIsInDOM }`)
-
-                    // console.log(`reference frame start ${ StringUtils.numberFormatter(startBP) } end ${ StringUtils.numberFormatter(endBP) }`)
-
                     if (featureEndBP < startBP || featureStartBP > endBP || chr !== featureChr) {
 
                         if (featureIsInDOM) {
-                            console.log(`remove   feature ${ featureKey }`)
                             el.remove()
                         }
 
@@ -132,7 +111,7 @@ class ROIManager {
                             el.style.left = `${pixelX}px`
                             el.style.width = `${pixelWidth}px`
                         } else {
-                            const featureDOM = this.createFeatureDOM(browser, browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet.color, featureKey)
+                            const featureDOM = this.createRegionDOM(browser, browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, featureKey)
                             columns[ i ].appendChild(featureDOM)
                         }
 
@@ -145,7 +124,7 @@ class ROIManager {
 
     }
 
-    createFeatureDOM(browser, columnContainer, pixelTop, pixelX, pixelWidth, color, featureKey) {
+    createRegionDOM(browser, columnContainer, pixelTop, pixelX, pixelWidth, roiSet, featureKey) {
 
         // ROISet container
         const container = DOMUtils.div({class: 'igv-roi'})
@@ -161,14 +140,18 @@ class ROIManager {
 
         // header
         const header = DOMUtils.div()
-        header.style.backgroundColor = color
+        header.style.backgroundColor = roiSet.color
         container.appendChild(header)
 
-        header.addEventListener('click', event => {
-            const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-            this.roiMenu.present(x, y)
-            console.log(`menu for feature ${ featureKey }`)
-        })
+        if (false === roiSet.isImmutable) {
+
+            header.addEventListener('click', event => {
+                const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
+                this.roiMenu.present(x, y)
+                console.log(`ROI Set "${ roiSet.name }" feature ${ featureKey }`)
+            })
+
+        }
 
         return container
     }

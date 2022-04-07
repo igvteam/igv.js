@@ -148,15 +148,15 @@ class RulerSweeper {
 
                     genomicExtent =
                         {
-                            start: this.referenceFrame.calculateEnd(left),
-                            end: this.referenceFrame.calculateEnd(left+width),
+                            start: Math.floor(this.referenceFrame.calculateEnd(left)),
+                            end: Math.floor(this.referenceFrame.calculateEnd(left + width)),
                         }
 
 
                     const shiftKeyPressed = event.shiftKey
 
                     if (true === shiftKeyPressed) {
-                        this.browser.roiManager.addROISet(Object.assign({ chr: this.referenceFrame.chr }, genomicExtent))
+                        this.browser.roiManager.updateInteractiveROISet(Object.assign({ chr: this.referenceFrame.chr }, genomicExtent))
                     } else {
 
                         validateGenomicExtent(this.browser.genome.getChromosome(this.referenceFrame.chr).bpLength, genomicExtent, this.browser.minimumBases())
