@@ -392,7 +392,9 @@ class Browser {
      */
     async loadSession(options) {
 
+        // TODO: depricated
         this.roiSets = []
+
         let session
         if (options.url || options.file) {
             session = await loadSessionFile(options)
@@ -729,6 +731,7 @@ class Browser {
         return loadedTracks
     }
 
+    // TODO: depricated
     async loadROI(config) {
 
         console.error('browser.loadROI() is under development and not available')
@@ -749,6 +752,7 @@ class Browser {
         await this.updateViews(true)
     }
 
+    // TODO: depricated
     removeROI(roiToRemove) {
 
         console.error('browser.removeROI() is under development and not available')
@@ -765,6 +769,7 @@ class Browser {
         }
     }
 
+    // TODO: depricated
     clearROIs() {
 
         console.error('browser.clearROIs() is under development and not available')
@@ -1545,6 +1550,8 @@ class Browser {
         if (hasGtexSelections) {
             json["gtexSelections"] = gtexSelections
         }
+
+        json["roi"] = this.roiManager.toJSON()
 
         const trackJson = []
         const errors = []
