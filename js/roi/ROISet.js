@@ -58,6 +58,10 @@ class ROISet {
         return this.featureSource.getFeatures({chr, start, end})
     }
 
+    toJSON() {
+        return true === this.isImmutable ? {} : { name: this.name, color:this.color, features: this.features.slice() }
+    }
+
 }
 
 const SCREEN_COORDS_WIDTH_THRESHOLD = 3
