@@ -48,11 +48,19 @@ class ROIManager {
 
     }
 
-    updateInteractiveROISet(region) {
+    async updateInteractiveROISet(region) {
 
         this.interativeROISet.features.push(region)
 
-        this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: this.interativeROISet})
+        // const json = this.toJSON()
+        //
+        // const str = JSON.stringify(json)
+        // const parsed = JSON.parse(str)
+        //
+        // console.log(`${ JSON.stringify(json) }`)
+
+        await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: this.interativeROISet})
+
 
     }
 
@@ -153,6 +161,9 @@ class ROIManager {
         return container
     }
 
+    toJSON() {
+        return { roi: [ ...this.roiSets, this.interativeROISet ].filter(roiSet => !roiSet.isImmutable).map(roiSet => roiSet.toJSON()) }
+    }
 }
 
 export default ROIManager
