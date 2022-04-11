@@ -31,7 +31,7 @@ const makePairedAlignmentChords = (alignments) => {
                     mate: {
                         refName: shortChrName(a.secondAlignment.chr),
                         start: a.secondAlignment.start,
-                        end: a.secondAlignment.position,
+                        end: a.secondAlignment.end,
                     }
                 })
             }
