@@ -129,6 +129,10 @@ class PairedAlignment {
             return this.firstAlignment.mate.strand    // Assumption is mate is first-of-pair
         }
     }
+
+    hasTag(str) {
+        return this.firstAlignment.hasTag(str) || (this.secondAlignment &&  this.secondAlignment.hasTag(str))
+    }
 }
 
 export default PairedAlignment

@@ -20,27 +20,45 @@ const makePairedAlignmentChords = (alignments) => {
 
     const chords = []
     for (let a of alignments) {
-        const mate = a.mate
-        if (mate && mate.chr && mate.position) {
-            chords.push({
-                uniqueId: a.readName,
-                refName: shortChrName(a.chr),
-                start: a.start,
-                end: a.end,
-                mate: {
-                    refName: shortChrName(mate.chr),
-                    start: mate.position - 1,
-                    end: mate.position,
-                }
-            })
+
+        if(a.paired) {
+            if(a.firstAlignment && a.secondAlignment) {
+                chords.push({
+                    uniqueId: a.readName,
+                    refName: shortChrName(a.firstAlignment.chr),
+                    start: a.firstAlignment.start,
+                    end: a.firstAlignment.end,
+                    mate: {
+                        refName: shortChrName(a.secondAlignment.chr),
+                        start: a.secondAlignment.start,
+                        end: a.secondAlignment.position,
+                    }
+                })
+            }
+        }
+        else {
+            const mate = a.mate
+            if (mate && mate.chr && mate.position) {
+                chords.push({
+                    uniqueId: a.readName,
+                    refName: shortChrName(a.chr),
+                    start: a.start,
+                    end: a.end,
+                    mate: {
+                        refName: shortChrName(mate.chr),
+                        start: mate.position - 1,
+                        end: mate.position,
+                    }
+                })
+            }
         }
     }
     return chords
 }
 
 const makeSupplementalAlignmentChords = (alignments) => {
-    const chords = []
-    for (let a of alignments) {
+
+    const makeChords = (a) => {
         const sa = a.tags()['SA']
         const supAl = createSupplementaryAlignments(sa)
         let n = 0
@@ -58,6 +76,18 @@ const makeSupplementalAlignmentChords = (alignments) => {
                     }
                 })
             }
+        }
+    }
+
+    const chords = []
+    for (let a of alignments) {
+        if(a.paired) {
+            makeChords(a.firstAlignment)
+            if(a.secondAlignment) {
+                makeChords(a.secondAlignment)
+            }
+        } else {
+            makeChords(a)
         }
     }
     return chords

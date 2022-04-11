@@ -535,11 +535,18 @@ class BAMTrack extends TrackBase {
         const refFrame = viewport.referenceFrame
         for (let a of viewport.cachedFeatures.allAlignments()) {
             if (a.end >= refFrame.start
-                && a.start <= refFrame.end
-                && a.mate
-                && a.mate.chr
-                && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxTemplateLength)) {
-                inView.push(a)
+                && a.start <= refFrame.end) {
+                if (a.paired) {
+                    if (a.end - a.start > maxTemplateLength) {
+                        inView.push(a)
+                    }
+                } else {
+                    if (a.mate
+                        && a.mate.chr
+                        && (a.mate.chr !== a.chr || Math.max(a.fragmentLength) > maxTemplateLength)) {
+                        inView.push(a)
+                    }
+                }
             }
         }
         const chords = makePairedAlignmentChords(inView)
