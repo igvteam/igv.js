@@ -1031,7 +1031,7 @@
   text-align: start;
   vertical-align: middle;
   line-height: 24px;
-  background-color: rgba(255, 105, 180, 0.25); }
+  background-color: white; }
 
 .igv-roi-body-row:hover {
   cursor: pointer;
