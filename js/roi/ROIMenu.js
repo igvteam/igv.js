@@ -63,7 +63,7 @@ class ROIMenu {
 
         const lut =
             {
-                'delete': () => {
+                'Delete': () => {
 
                     this.container.style.display = 'none'
 
