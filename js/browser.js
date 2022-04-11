@@ -1036,7 +1036,16 @@ class Browser {
 
     }
 
+    /**
+     * API function to signal that this browser visibility has changed, e.g. from hiding/showing in a tab interface.
+     *
+     * @returns {Promise<void>}
+     */
     async visibilityChange() {
+        this.layoutChange()
+    }
+
+    async layoutChange() {
 
         const status = this.referenceFrameList.find(referenceFrame => referenceFrame.bpPerPixel < 0)
 
