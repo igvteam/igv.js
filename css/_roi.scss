@@ -186,7 +186,8 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
 
   line-height: $dimension;
 
-  background-color: rgba(255, 105, 180, 0.25);
+  //background-color: rgba(255, 105, 180, 0.25);
+  background-color: white;
 }
 
 .igv-roi-body-row:hover {
