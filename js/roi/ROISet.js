@@ -37,9 +37,12 @@ class ROISet {
 
         this.name = config.name
 
-        this.isImmutable = config.url ? true : false
-
-        this.featureSource = config.featureSource || FeatureSource(config, genome)
+        if (config.url) {
+            this.url = config.url
+            this.isImmutable = true
+        } else {
+            this.isImmutable = false
+        }
 
         if (config.features) {
             this.features = config.features.slice()
@@ -49,6 +52,8 @@ class ROISet {
                         return { chr: genome.getChromosomeName(chr), start, end }
                     })
                 }
+        } else {
+            this.featureSource = config.featureSource || FeatureSource(config, genome)
         }
 
         this.color = config.color || ROI_HEADER_DEFAULT_COLOR
@@ -59,7 +64,12 @@ class ROISet {
     }
 
     toJSON() {
-        return true === this.isImmutable ? {} : { name: this.name, color:this.color, features: this.features.slice() }
+
+        if (this.url) {
+            return { name: this.name, color:this.color, url: this.url }
+        } else {
+            return { name: this.name, color:this.color, features: this.features.slice() }
+        }
     }
 
 }
