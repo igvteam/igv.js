@@ -1,6 +1,5 @@
 
-$igv-roi-border-color: rgba(105, 105, 105, 0.5);
-
+$igv-roi-border-color: #7f7f7f;
 $dimension: 24px;
 $igv-roi-table-width: 16 * $dimension;
 
@@ -43,17 +42,17 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     pointer-events: auto;
     width: 100%;
     height: 8px;
-    background-color: dimgrey;
+    background-color: $igv-roi-border-color;
   }
 }
 
-// menu container
-.igv-roi-menu {
+// table container
+.igv-roi-table {
   position: absolute;
   z-index: 1024;
 
-  width:(4 * $dimension);
-  //height:(10 * $dimension);
+  width:(16 * $dimension);
+  height:(10 * $dimension);
 
   border-color: grey;
   border-radius: $igv-roi-table-border-radius;
@@ -74,22 +73,22 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
 
 }
 
-// table container
-.igv-roi-table {
+// menu container
+.igv-roi-menu {
   position: absolute;
   z-index: 1024;
 
-  width:(16 * $dimension);
-  height:(10 * $dimension);
+  width:(4 * $dimension);
+  //height:(10 * $dimension);
 
-  border-color: grey;
+  border-color: $igv-roi-border-color;
   border-radius: $igv-roi-table-border-radius;
   border-style: solid;
   border-width: thin;
 
   font-family: $igv-roi-table-font-face;
-  font-size: 12px;
-  font-weight: 400;
+  //font-size: 12px;
+  //font-weight: 400;
 
   background-color: white;
 
@@ -124,7 +123,7 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
   border-top-style: solid;
   border-top-width: 0;
 
-  border-bottom-color: grey;
+  border-bottom-color: $igv-roi-border-color;
   border-bottom-style: solid;
   border-bottom-width: thin;
 
@@ -180,7 +179,8 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
 
   padding-left: 8px;
 
-  color: grey;
+  //color: grey;
+  font-size: small;
   text-align: start;
   vertical-align: middle;
 

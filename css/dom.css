@@ -922,10 +922,10 @@
   margin-top: 44px;
   border-left-width: thin;
   border-left-style: solid;
-  border-left-color: rgba(105, 105, 105, 0.5);
+  border-left-color: #7f7f7f;
   border-right-width: thin;
   border-right-style: solid;
-  border-right-color: rgba(105, 105, 105, 0.5);
+  border-right-color: #7f7f7f;
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -936,12 +936,13 @@
     pointer-events: auto;
     width: 100%;
     height: 8px;
-    background-color: dimgrey; }
+    background-color: #7f7f7f; }
 
-.igv-roi-menu {
+.igv-roi-table {
   position: absolute;
   z-index: 1024;
-  width: 96px;
+  width: 384px;
+  height: 240px;
   border-color: grey;
   border-radius: 4px;
   border-style: solid;
@@ -956,18 +957,15 @@
   justify-content: flex-start;
   align-items: flex-start; }
 
-.igv-roi-table {
+.igv-roi-menu {
   position: absolute;
   z-index: 1024;
-  width: 384px;
-  height: 240px;
-  border-color: grey;
+  width: 96px;
+  border-color: #7f7f7f;
   border-radius: 4px;
   border-style: solid;
   border-width: thin;
   font-family: "Open Sans", sans-serif;
-  font-size: 12px;
-  font-weight: 400;
   background-color: white;
   display: flex;
   flex-flow: column;
@@ -991,7 +989,7 @@
   border-top-color: transparent;
   border-top-style: solid;
   border-top-width: 0;
-  border-bottom-color: grey;
+  border-bottom-color: #7f7f7f;
   border-bottom-style: solid;
   border-bottom-width: thin; }
   .igv-roi-header div {
@@ -1027,7 +1025,7 @@
 .igv-roi-body-row {
   height: 24px;
   padding-left: 8px;
-  color: grey;
+  font-size: small;
   text-align: start;
   vertical-align: middle;
   line-height: 24px;
