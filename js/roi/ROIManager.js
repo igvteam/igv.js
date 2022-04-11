@@ -162,7 +162,7 @@ class ROIManager {
     }
 
     toJSON() {
-        return [ ...this.roiSets, this.interativeROISet ].filter(roiSet => !roiSet.isImmutable).map(roiSet => roiSet.toJSON())
+        return [ ...this.roiSets, this.interativeROISet ].map(roiSet => roiSet.toJSON())
     }
 }
 
