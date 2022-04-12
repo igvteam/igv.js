@@ -592,6 +592,10 @@ class TrackViewport extends Viewport {
             menuItems.push({label: 'Save Image (PNG)', click: () => this.saveImage()})
             menuItems.push({label: 'Save Image (SVG)', click: () => this.saveSVG()})
 
+            if (this.browser.trackPopover) {
+                this.browser.trackPopover.dispose()
+            }
+
             this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
         })
 
@@ -601,6 +605,8 @@ class TrackViewport extends Viewport {
     addViewportClickHandler(viewport) {
 
         viewport.addEventListener('click', (event) => {
+
+            this.browser.menuPopup.hide()
 
             if (this.enableClick && this.canvas) {
 
@@ -680,17 +686,14 @@ class TrackViewport extends Viewport {
                                 this.browser.trackPopover = new Popover(this.browser.columnContainer)
                                 this.browser.trackPopover.presentContentWithEvent(event, popoverContent)
 
-                            } else {
-                                if (this.browser.trackPopover) {
-                                    this.browser.trackPopover.dispose()
-                                }
+                            } else if (this.browser.trackPopover) {
+                                this.browser.trackPopover.dispose()
                             }
 
                             window.clearTimeout(popupTimerID)
                             popupTimerID = undefined
                         }
 
-                        // popoverHandler()
                         popupTimerID = setTimeout(popoverHandler, this.browser.constants.doubleClickDelay)
                     }
                 }
