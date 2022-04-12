@@ -677,17 +677,17 @@ class TrackViewport extends Viewport {
                             // const str = popoverContent ?'popover content found' : 'NO popover content found'
                             // console.log(`${ str }`)
 
+                            if (this.trackView.trackGearPopup) {
+                                this.trackView.trackGearPopup.hide()
+                            }
+
+                            if (this.browser.trackPopover) {
+                                this.browser.trackPopover.dispose()
+                            }
+
                             if (popoverContent) {
-
-                                if (this.browser.trackPopover) {
-                                    this.browser.trackPopover.dispose()
-                                }
-
                                 this.browser.trackPopover = new Popover(this.browser.columnContainer)
                                 this.browser.trackPopover.presentContentWithEvent(event, popoverContent)
-
-                            } else if (this.browser.trackPopover) {
-                                this.browser.trackPopover.dispose()
                             }
 
                             window.clearTimeout(popupTimerID)

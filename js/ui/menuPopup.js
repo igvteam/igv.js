@@ -36,7 +36,7 @@ const MenuPopup = function (parent) {
     const header = DOMUtils.div({class: 'igv-menu-popup-header'})
     this.popover.appendChild(header)
 
-    UIUtils.attachDialogCloseHandlerWithParent(header, () => this.hide())
+    // UIUtils.attachDialogCloseHandlerWithParent(header, () => this.hide())
 
     this.popoverContent = DOMUtils.div()
     this.popover.appendChild(this.popoverContent)

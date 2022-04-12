@@ -739,14 +739,20 @@ class TrackView {
             // do nothing
         } else {
 
-            this.boundTrackGearClickHandler = trackGearClickHandler.bind(this)
-            this.gear.addEventListener('click', this.boundTrackGearClickHandler)
-
-            function trackGearClickHandler(event) {
+            const trackGearClickHandler = event => {
                 event.preventDefault()
                 event.stopPropagation()
-                this.trackGearPopup.presentMenuList(MenuUtils.trackMenuItemList(this))
+
+                if ('none' === this.trackGearPopup.popover.style.display) {
+                    this.trackGearPopup.presentMenuList(MenuUtils.trackMenuItemList(this))
+                } else {
+                    this.trackGearPopup.popover.style.display = 'none'
+                }
+
             }
+
+            this.boundTrackGearClickHandler = trackGearClickHandler.bind(this)
+            this.gear.addEventListener('click', this.boundTrackGearClickHandler)
 
         }
 
