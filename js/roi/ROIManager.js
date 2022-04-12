@@ -152,6 +152,9 @@ class ROIManager {
         if (false === roiSet.isImmutable) {
 
             header.addEventListener('click', event => {
+                event.preventDefault()
+                event.stopPropagation()
+
                 const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
                 this.roiMenu.present(x, y, roiSet, columnContainer, regionKey)
             })
