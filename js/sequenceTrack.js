@@ -283,7 +283,7 @@ class SequenceTrack {
                     if (options.bpPerPixel > 1 / 10) {
                         IGVGraphics.fillRect(ctx, xStart, y, xEnd - xStart, featureHeight, {fillStyle: color})
                     } else {
-                        let xPixel = 0.5 * (xStart + xEnd - ctx.measureText(letter).width)
+                        const xPixel = 0.5 * (xStart + xEnd - ctx.measureText(letter).width)
                         IGVGraphics.strokeText(ctx, letter, xPixel, featureHeight, {strokeStyle: color})
                     }
                 }
@@ -301,7 +301,7 @@ class SequenceTrack {
                     transSeq = sequence
                 }
 
-                let y = featureHeight
+                let y = dimen
                 let translatedSequence = this.translateSequence(transSeq)
                 for (let arr of translatedSequence) {
 
@@ -319,6 +319,8 @@ class SequenceTrack {
                         let color = 0 === idx % 2 ? 'rgb(160,160,160)' : 'rgb(224,224,224)'
 
                         let p0 = Math.floor(xSeed / options.bpPerPixel)
+                        console.log(`p0 ${ p0 }`)
+
                         let p1 = Math.floor((xSeed + 3) / options.bpPerPixel)
                         let pc = Math.round((p0 + p1) / 2)
 
