@@ -603,13 +603,10 @@ class TrackViewport extends Viewport {
         viewport.addEventListener('click', (event) => {
 
             if (this.enableClick && this.canvas) {
+
                 if (3 === event.which || event.ctrlKey) {
                     return
                 }
-
-                // Close any currently open popups
-                $('.igv-popover').hide()
-
 
                 if (this.browser.dragObject || this.browser.isScrolling) {
                     return
@@ -667,18 +664,34 @@ class TrackViewport extends Viewport {
 
                     } else if (typeof this.trackView.track.popupData === "function") {
 
-                        popupTimerID = setTimeout(() => {
+                        const popoverHandler = () => {
 
-                                const content = getPopupContent(event, this)
-                                if (content) {
-                                    if (this.popover) this.popover.dispose()
-                                    this.popover = new Popover(this.browser.columnContainer)
-                                    this.popover.presentContentWithEvent(event, content)
+                            const popoverContent = getPopupContent(event, this)
+
+                            // const str = popoverContent ?'popover content found' : 'NO popover content found'
+                            // console.log(`${ str }`)
+
+                            if (popoverContent) {
+
+                                if (this.browser.trackPopover) {
+                                    this.browser.trackPopover.dispose()
                                 }
-                                window.clearTimeout(popupTimerID)
-                                popupTimerID = undefined
-                            },
-                            this.browser.constants.doubleClickDelay)
+
+                                this.browser.trackPopover = new Popover(this.browser.columnContainer)
+                                this.browser.trackPopover.presentContentWithEvent(event, popoverContent)
+
+                            } else {
+                                if (this.browser.trackPopover) {
+                                    this.browser.trackPopover.dispose()
+                                }
+                            }
+
+                            window.clearTimeout(popupTimerID)
+                            popupTimerID = undefined
+                        }
+
+                        // popoverHandler()
+                        popupTimerID = setTimeout(popoverHandler, this.browser.constants.doubleClickDelay)
                     }
                 }
 
@@ -704,11 +717,11 @@ class TrackViewport extends Viewport {
             }
 
             if (str) {
-                if (this.popover) {
-                    this.popover.dispose()
+                if (this.browser.trackPopover) {
+                    this.browser.trackPopover.dispose()
                 }
-                this.popover = new Popover(this.browser.columnContainer, (track.name || ''))
-                this.popover.presentContentWithEvent(event, str)
+                this.browser.trackPopover = new Popover(this.browser.columnContainer, (track.name || ''))
+                this.browser.trackPopover.presentContentWithEvent(event, str)
             }
         })
     }
@@ -740,26 +753,30 @@ function getPopupContent(event, viewport) {
     const clickState = createClickState(event, viewport)
 
     if (undefined === clickState) {
-        return
+        return clickState
     }
 
     let track = viewport.trackView.track
     const dataList = track.popupData(clickState)
 
+    if (0 === dataList.length) {
+        return undefined
+    }
+
     const popupClickHandlerResult = viewport.browser.fireEvent('trackclick', [track, dataList])
 
-    let content
     if (undefined === popupClickHandlerResult || true === popupClickHandlerResult) {
         // Indicates handler did not handle the result, or the handler wishes default behavior to occur
         if (dataList && dataList.length > 0) {
-            content = formatPopoverText(dataList)
+            return formatPopoverText(dataList)
         }
 
     } else if (typeof popupClickHandlerResult === 'string') {
-        content = popupClickHandlerResult
+        return popupClickHandlerResult
+    } else {
+        return undefined
     }
 
-    return content
 }
 
 function formatPopoverText(nameValues) {
