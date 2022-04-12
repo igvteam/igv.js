@@ -715,26 +715,6 @@ class TrackViewport extends Viewport {
 
 }
 
-function mouseDownHandler(event) {
-    this.enableClick = true
-    this.browser.mouseDownOnViewport(event, this)
-    mouseDownCoords = DOMUtils.pageCoordinates(event)
-}
-
-function mouseUpHandler(event) {
-
-    // Any mouse up cancels drag and scrolling
-    if (this.browser.dragObject || this.browser.isScrolling) {
-        this.browser.cancelTrackPan()
-        // event.preventDefault();
-        // event.stopPropagation();
-        this.enableClick = false   // Until next mouse down
-    } else {
-        this.browser.cancelTrackPan()
-        this.browser.endTrackDrag()
-    }
-}
-
 function createClickState(event, viewport) {
 
     const referenceFrame = viewport.referenceFrame
