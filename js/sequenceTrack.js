@@ -29,6 +29,9 @@ import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
 import {appleCrayonRGBA} from "./util/colorPalletes.js"
 
+const TRACK_HEIGHT_FRAME_TRANSLATE = 115
+const TRACK_HEIGHT = 16
+
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
 
 const translationDict = {
@@ -118,7 +121,7 @@ class SequenceTrack {
         this.id = "sequence"
         this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot
         // this.height = 25
-        this.height = 16
+        this.height = TRACK_HEIGHT
         this.disableButtons = false
         this.order = config.order || defaultSequenceTrackOrder
         this.ignoreTrackMenu = false
@@ -143,14 +146,14 @@ class SequenceTrack {
                     this.frameTranslate = !this.frameTranslate
                     if (this.frameTranslate) {
                         for (let vp of this.trackView.viewports) {
-                            vp.setContentHeight(115)
+                            vp.setContentHeight(TRACK_HEIGHT_FRAME_TRANSLATE)
                         }
-                        this.trackView.setTrackHeight(115)
+                        this.trackView.setTrackHeight(TRACK_HEIGHT_FRAME_TRANSLATE)
                     } else {
                         for (let vp of this.trackView.viewports) {
-                            vp.setContentHeight(25)
+                            vp.setContentHeight(TRACK_HEIGHT)
                         }
-                        this.trackView.setTrackHeight(25)
+                        this.trackView.setTrackHeight(TRACK_HEIGHT)
                     }
                     this.trackView.repaintViews()
 
@@ -256,8 +259,9 @@ class SequenceTrack {
             const sequenceBpStart = options.features.bpStart
             const bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel)
 
-            const featureHeight = Math.floor(0.75 * this.height)
-            const y = Math.floor((this.height - featureHeight)/2)
+            const dimen = TRACK_HEIGHT
+            const featureHeight = Math.floor(0.75 * dimen)
+            const y = Math.floor((dimen - featureHeight)/2)
 
             for (let bp = sequenceBpStart; bp <= bpEnd; bp++) {
 
