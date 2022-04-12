@@ -13,41 +13,19 @@ class ROIMenu {
         this.container.appendChild(header)
 
         // dismiss button
-        const dismiss = DOMUtils.div()
-        header.appendChild(dismiss)
-        dismiss.appendChild(Icon.createIcon('times'))
-
-        dismiss.addEventListener('click', event => {
-            event.stopPropagation()
-            event.preventDefault()
-            this.container.style.display = 'none'
-        })
+        // const dismiss = DOMUtils.div()
+        // header.appendChild(dismiss)
+        // dismiss.appendChild(Icon.createIcon('times'))
+        //
+        // dismiss.addEventListener('click', event => {
+        //     event.stopPropagation()
+        //     event.preventDefault()
+        //     this.container.style.display = 'none'
+        // })
 
         // body container
         this.bodyContainer = DOMUtils.div({ class: 'igv-roi-body' })
         this.container.appendChild(this.bodyContainer)
-
-        // const colors =
-        //     [
-        //         'lavender',
-        //         'tangerine',
-        //         'honeydew',
-        //         'carnation'
-        //     ]
-        //
-        // const words =
-        //     [
-        //         'delete',
-        //         'set color',
-        //         'roi table',
-        //     ]
-        //
-        // words.forEach(word => {
-        //     const row = DOMUtils.div({ class: 'igv-roi-body-row' })
-        //     bodyContainer.appendChild(row)
-        //     // row.style.backgroundColor = appleCrayonRGB(colorName)
-        //     row.innerText = word
-        // })
 
         makeDraggable(this.container, header)
 
@@ -56,8 +34,6 @@ class ROIMenu {
     }
 
     present(x, y, roiSet, columnContainer, regionKey) {
-
-        // console.log(`ROI Set "${ roiSet.name }" feature ${ regionKey }`)
 
         removeAllChildNodes(this.bodyContainer)
 
@@ -101,6 +77,21 @@ class ROIMenu {
         this.container.style.left = `${ x }px`
         this.container.style.top  = `${ y }px`
         this.container.style.display = 'block'
+
+        columnContainer.addEventListener('click', event => {
+
+            event.preventDefault()
+            event.stopPropagation()
+
+            if (this.container.querySelector('.igv-roi-header') === event.target) {
+                console.log(`${ Date.now() } clicked header`)
+            } else {
+                this.container.style.display = 'none'
+            }
+
+
+        })
+
     }
 
 }
