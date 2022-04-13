@@ -562,6 +562,11 @@ class TrackViewport extends Viewport {
 
         viewport.addEventListener('contextmenu', (event) => {
 
+            event.preventDefault();
+            event.stopPropagation();
+
+            this.browser.cancelTrackPan()
+
             // Ignore if we are doing a drag.  This can happen with touch events.
             if (this.browser.dragObject) {
                 return false
@@ -572,8 +577,6 @@ class TrackViewport extends Viewport {
             if (undefined === clickState) {
                 return false
             }
-
-            event.preventDefault()
 
             // Track specific items
             let menuItems = []
@@ -730,20 +733,26 @@ class TrackViewport extends Viewport {
 
 function createClickState(event, viewport) {
 
-    const referenceFrame = viewport.referenceFrame
-    const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.contentDiv)
-    const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewport.canvas)
-    const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x))
+    if (viewport.contentDiv && viewport.canvas) {
 
-    return {
-        event,
-        viewport,
-        referenceFrame,
-        genomicLocation,
-        x: viewportCoords.x,
-        y: viewportCoords.y,
-        canvasX: canvasCoords.x,
-        canvasY: canvasCoords.y
+        const referenceFrame = viewport.referenceFrame
+        const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.contentDiv)
+        const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewport.canvas)
+        const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x))
+
+        return {
+            event,
+            viewport,
+            referenceFrame,
+            genomicLocation,
+            x: viewportCoords.x,
+            y: viewportCoords.y,
+            canvasX: canvasCoords.x,
+            canvasY: canvasCoords.y
+        }
+
+    } else {
+        return undefined
     }
 
 }

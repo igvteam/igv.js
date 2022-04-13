@@ -750,7 +750,7 @@
   font-size: small;
   font-weight: 400;
   color: #4b4b4b;
-  background: white;
+  background-color: white;
   border-radius: 2px;
   border-color: #7F7F7F;
   border-style: solid;
@@ -764,10 +764,7 @@
   .igv-menu-popup > div:not(:first-child) {
     width: 100%; }
     .igv-menu-popup > div:not(:first-child) > div {
-      background: white; }
-    .igv-menu-popup > div:not(:first-child) > div.context-menu {
-      padding-left: 4px;
-      padding-right: 4px; }
+      background-color: white; }
     .igv-menu-popup > div:not(:first-child) > div:last-child {
       border-bottom-left-radius: 2px;
       border-bottom-right-radius: 2px;
@@ -775,13 +772,24 @@
       border-bottom-style: solid;
       border-bottom-width: thin; }
     .igv-menu-popup > div:not(:first-child) > div:hover {
-      background: #efefef; }
+      background-color: #efefef; }
+
+.context-menu {
+  padding-left: 4px;
+  padding-right: 4px; }
+
+.context-menu:hover {
+  background-color: #f3f3f3; }
 
 .igv-menu-popup-shim {
   padding-left: 8px;
   padding-right: 8px;
   padding-bottom: 1px;
-  padding-top: 1px; }
+  padding-top: 1px;
+  background-color: white; }
+
+.igv-menu-popup-shim:hover {
+  background-color: #f3f3f3; }
 
 .igv-menu-popup-header {
   position: relative;
@@ -830,6 +838,9 @@
       position: absolute;
       width: 12px;
       height: 12px; }
+
+.igv-menu-popup-check-container:hover {
+  background-color: #f3f3f3; }
 
 .igv-user-feedback {
   position: fixed;

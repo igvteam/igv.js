@@ -21,7 +21,7 @@ $igv-menu-popup-grey: #7F7F7F;
   font-weight: 400;
   color: $igv-menu-popup-font-color;
 
-  background: white;
+  background-color: white;
 
   border-radius: $igv-menu-popup-border-radius;
   border-color: $igv-menu-popup-grey;
@@ -40,12 +40,7 @@ $igv-menu-popup-grey: #7F7F7F;
     width: 100%;
 
     > div {
-      background: white;
-    }
-
-    > div.context-menu {
-      padding-left: 4px;
-      padding-right: 4px;
+      background-color: white;
     }
 
     > div:last-child {
@@ -57,11 +52,20 @@ $igv-menu-popup-grey: #7F7F7F;
     }
 
     > div:hover {
-      background: #efefef;
+      background-color: #efefef;
     }
 
   }
 
+}
+
+.context-menu {
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+.context-menu:hover {
+  background-color: #f3f3f3;
 }
 
 .igv-menu-popup-shim {
@@ -69,6 +73,11 @@ $igv-menu-popup-grey: #7F7F7F;
   padding-right: 8px;
   padding-bottom: 1px;
   padding-top: 1px;
+  background-color: white;
+}
+
+.igv-menu-popup-shim:hover {
+  background-color: #f3f3f3;
 }
 
 .igv-menu-popup-header {
@@ -141,4 +150,8 @@ $igv-menu-popup-grey: #7F7F7F;
 
   }
 
+}
+
+.igv-menu-popup-check-container:hover {
+  background-color: #f3f3f3;
 }

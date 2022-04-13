@@ -28,105 +28,120 @@ import {DOMUtils, makeDraggable, UIUtils} from "../../node_modules/igv-utils/src
 import GenericColorPicker from './genericColorPicker.js'
 import {createCheckbox} from "../igv-icons.js"
 
-const MenuPopup = function (parent) {
+class MenuPopup {
 
-    this.popup = DOMUtils.div({class: 'igv-menu-popup'})
-    parent.appendChild(this.popup)
+    constructor(parent) {
 
-    const header = DOMUtils.div({class: 'igv-menu-popup-header'})
-    this.popup.appendChild(header)
+        this.popup = DOMUtils.div({class: 'igv-menu-popup'})
+        parent.appendChild(this.popup)
 
-    // UIUtils.attachDialogCloseHandlerWithParent(header, () => this.hide())
+        // const header = DOMUtils.div({class: 'igv-menu-popup-header'})
+        // this.popup.appendChild(header)
 
-    this.popoverContent = DOMUtils.div()
-    this.popup.appendChild(this.popoverContent)
+        // UIUtils.attachDialogCloseHandlerWithParent(header, () => this.hide())
 
-    makeDraggable(this.popup, header)
+        this.popoverContent = DOMUtils.div()
+        this.popup.appendChild(this.popoverContent)
 
-    // absorb clicks to prevent them bubbling up to parent DOM element
-    header.addEventListener('click', e => {
-        e.stopPropagation()
-        e.preventDefault()
+        // makeDraggable(this.popup, this.popup)
 
-    })
+        // absorb clicks to prevent them bubbling up to parent DOM element
+        // header.addEventListener('click', e => {
+        //     e.stopPropagation()
+        //     e.preventDefault()
+        //
+        // })
 
-    this.hide()
+        this.popup.style.display = 'none'
 
-}
+    }
 
-MenuPopup.prototype.hide = function () {
-    this.popup.style.display = 'none'
-}
+    presentMenuList(menuList) {
 
-MenuPopup.prototype.presentMenuList = function (menuList) {
+        hideAllMenuPopups()
 
-    hideAllMenuPopups()
+        if (menuList.length > 0) {
 
-    if (menuList.length > 0) {
+            this.popoverContent.innerHTML = ''
+
+            menuList = MenuUtils.trackMenuItemListHelper(menuList, this)
+
+            for (let item of menuList) {
+
+                if (item.init) {
+                    item.init()
+                }
+
+                let $e = item.object
+                if (0 === menuList.indexOf(item)) {
+                    $e.removeClass('igv-track-menu-border-top')
+                }
+
+                if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-menu-popup-check-container')) {
+                    // do nothing
+                } else if ($e.is('div')) {
+                    $e.addClass('igv-menu-popup-shim')
+                }
+
+                this.popoverContent.appendChild($e.get(0))
+
+            }
+
+            // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
+            //       yield a width of zero (0).
+            this.popup.style.display = 'flex'
+
+            const {width} = this.popup.getBoundingClientRect()
+
+            this.popup.style.left = `${-width}px`
+            this.popup.style.top = `${0}px`
+
+            document.addEventListener('click', event => {
+                event.stopPropagation()
+                hideAllMenuPopups()
+            })
+
+        }
+    }
+
+    presentTrackContextMenu(e, menuItems) {
 
         this.popoverContent.innerHTML = ''
 
-        menuList = MenuUtils.trackMenuItemListHelper(menuList, this)
-
-        for (let item of menuList) {
-
-            if (item.init) {
-                item.init()
-            }
-
-            let $e = item.object
-            if (0 === menuList.indexOf(item)) {
-                $e.removeClass('igv-track-menu-border-top')
-            }
-
-            if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-menu-popup-check-container')) {
-                // do nothing
-            } else if ($e.is('div')) {
-                $e.addClass('igv-menu-popup-shim')
-            }
-
-            this.popoverContent.appendChild($e.get(0))
-
+        const menuElements = createMenuElements(menuItems, this.popup)
+        for (let {el} of menuElements) {
+            this.popoverContent.appendChild(el)
         }
 
-        // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
-        //       yield a width of zero (0).
-        this.popup.style.display = 'flex'
+        present(e, this.popup)
 
-        const {width} = this.popup.getBoundingClientRect()
+    }
 
-        this.popup.style.left = `${-width}px`
-        this.popup.style.top = `${0}px`
+    hide() {
+        this.popup.style.display = 'none'
+    }
 
-        document.addEventListener('click', event => {
-            event.stopPropagation()
-            hideAllMenuPopups()
+    dispose() {
+
+        this.popoverContent.innerHTML = ''
+        this.popup.innerHTML = ''
+
+        Object.keys(this).forEach(function (key) {
+            this[key] = undefined
         })
-
     }
-}
-
-MenuPopup.prototype.presentTrackContextMenu = function (e, menuItems) {
-
-    this.popoverContent.innerHTML = ''
-
-    const menuElements = createMenuElements(menuItems, this.popup)
-    for (let {el} of menuElements) {
-        this.popoverContent.appendChild(el)
-    }
-
-    present(e, this.popup)
 
 }
 
-MenuPopup.prototype.dispose = function () {
+function hideAllMenuPopups() {
 
-    this.popoverContent.innerHTML = ''
-    this.popup.innerHTML = ''
+    document.removeEventListener('click', hideAllMenuPopups)
 
-    Object.keys(this).forEach(function (key) {
-        this[key] = undefined
-    })
+    const menus = document.querySelectorAll('.igv-menu-popup')
+    for (let menu of menus) {
+        menu.style.display = 'none'
+    }
+
 }
 
 function createMenuElements(itemList, popup) {
@@ -214,17 +229,6 @@ function present(e, popup) {
 
     popup.style.left = `${xmax > parentWidth ? (x - (xmax - parentWidth)) : x}px`
     popup.style.top = `${y}px`
-
-}
-
-const hideAllMenuPopups = () => {
-
-    document.removeEventListener('click', hideAllMenuPopups)
-
-    const menus = document.querySelectorAll('.igv-menu-popup')
-    for (let menu of menus) {
-        menu.style.display = 'none'
-    }
 
 }
 
