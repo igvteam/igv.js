@@ -27,10 +27,6 @@ import IGVGraphics from "./igv-canvas.js"
 import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
-import {appleCrayonRGBA} from "./util/colorPalletes.js"
-
-const TRACK_HEIGHT_FRAME_TRANSLATE = 115
-const TRACK_HEIGHT = 16
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
 
@@ -120,8 +116,7 @@ class SequenceTrack {
         this.name = "Sequence"
         this.id = "sequence"
         this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot
-        // this.height = 25
-        this.height = TRACK_HEIGHT
+        this.height = 25
         this.disableButtons = false
         this.order = config.order || defaultSequenceTrackOrder
         this.ignoreTrackMenu = false
@@ -146,14 +141,14 @@ class SequenceTrack {
                     this.frameTranslate = !this.frameTranslate
                     if (this.frameTranslate) {
                         for (let vp of this.trackView.viewports) {
-                            vp.setContentHeight(TRACK_HEIGHT_FRAME_TRANSLATE)
+                            vp.setContentHeight(115)
                         }
-                        this.trackView.setTrackHeight(TRACK_HEIGHT_FRAME_TRANSLATE)
+                        this.trackView.setTrackHeight(115)
                     } else {
                         for (let vp of this.trackView.viewports) {
-                            vp.setContentHeight(TRACK_HEIGHT)
+                            vp.setContentHeight(25)
                         }
-                        this.trackView.setTrackHeight(TRACK_HEIGHT)
+                        this.trackView.setTrackHeight(25)
                     }
                     this.trackView.repaintViews()
 
@@ -251,7 +246,6 @@ class SequenceTrack {
     draw(options) {
 
         const ctx = options.context
-        // IGVGraphics.fillRect(ctx, 0, 0, ctx.canvas.width, ctx.canvas.height, { fillStyle: appleCrayonRGBA('grape', 0.5) })
 
         if (options.features) {
 
@@ -259,13 +253,10 @@ class SequenceTrack {
             const sequenceBpStart = options.features.bpStart
             const bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel)
 
-            const dimen = TRACK_HEIGHT
-            const featureHeight = Math.floor(0.75 * dimen)
-            const y = Math.floor((dimen - featureHeight)/2)
-
+            let height = 15
             for (let bp = sequenceBpStart; bp <= bpEnd; bp++) {
 
-                const seqOffsetBp = Math.floor(bp - sequenceBpStart)
+                let seqOffsetBp = Math.floor(bp - sequenceBpStart)
 
                 if (seqOffsetBp < sequence.length) {
                     let letter = sequence[seqOffsetBp]
@@ -274,17 +265,18 @@ class SequenceTrack {
                         letter = complement[letter] || ""
                     }
 
-                    const offsetBP = bp - options.bpStart
-                    const xStart = offsetBP / options.bpPerPixel
-                    const xEnd = (offsetBP + 1) / options.bpPerPixel
+                    let offsetBP = bp - options.bpStart
+                    let aPixel = offsetBP / options.bpPerPixel
+                    let bPixel = (offsetBP + 1) / options.bpPerPixel
+                    let color = this.fillColor(letter)
 
-                    const color = this.fillColor(letter)
+                    // IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, { fillStyle: randomRGBConstantAlpha(150, 255, 0.75) });
 
                     if (options.bpPerPixel > 1 / 10) {
-                        IGVGraphics.fillRect(ctx, xStart, y, xEnd - xStart, featureHeight, {fillStyle: color})
+                        IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color})
                     } else {
-                        const xPixel = 0.5 * (xStart + xEnd - ctx.measureText(letter).width)
-                        IGVGraphics.strokeText(ctx, letter, xPixel, featureHeight, {strokeStyle: color})
+                        let xPixel = 0.5 * (aPixel + bPixel - ctx.measureText(letter).width)
+                        IGVGraphics.strokeText(ctx, letter, xPixel, height, {strokeStyle: color})
                     }
                 }
             }
@@ -301,7 +293,7 @@ class SequenceTrack {
                     transSeq = sequence
                 }
 
-                let y = dimen
+                let y = height
                 let translatedSequence = this.translateSequence(transSeq)
                 for (let arr of translatedSequence) {
 
@@ -319,8 +311,6 @@ class SequenceTrack {
                         let color = 0 === idx % 2 ? 'rgb(160,160,160)' : 'rgb(224,224,224)'
 
                         let p0 = Math.floor(xSeed / options.bpPerPixel)
-                        console.log(`p0 ${ p0 }`)
-
                         let p1 = Math.floor((xSeed + 3) / options.bpPerPixel)
                         let pc = Math.round((p0 + p1) / 2)
 
