@@ -43,11 +43,12 @@ const MenuPopup = function (parent) {
 
     makeDraggable(this.popup, header)
 
-    // header.addEventListener('click', e => {
-    //     e.stopPropagation()
-    //     e.preventDefault()
-    //     // absorb click to prevent it leaking through to parent DOM element
-    // })
+    // absorb clicks to prevent them bubbling up to parent DOM element
+    header.addEventListener('click', e => {
+        e.stopPropagation()
+        e.preventDefault()
+
+    })
 
     this.hide()
 
@@ -96,6 +97,11 @@ MenuPopup.prototype.presentMenuList = function (menuList) {
 
         this.popup.style.left = `${-width}px`
         this.popup.style.top = `${0}px`
+
+        document.addEventListener('click', event => {
+            event.stopPropagation()
+            hideAllMenuPopups()
+        })
 
     }
 }
@@ -213,9 +219,11 @@ function present(e, popup) {
 
 const hideAllMenuPopups = () => {
 
+    document.removeEventListener('click', hideAllMenuPopups)
+
     const menus = document.querySelectorAll('.igv-menu-popup')
-    for (let i = 0; i < menus.length; i++) {
-        menus[i].style.display = 'none'
+    for (let menu of menus) {
+        menu.style.display = 'none'
     }
 
 }

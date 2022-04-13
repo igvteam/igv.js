@@ -75,7 +75,8 @@ $igv-menu-popup-grey: #7F7F7F;
 
   position: relative;
   width: 100%;
-  height: 24px;
+  //height: 24px;
+  height: 8px;
   cursor: move;
 
   border-top-color: transparent;
@@ -94,14 +95,14 @@ $igv-menu-popup-grey: #7F7F7F;
   justify-content: flex-end;
   align-items: center;
 
-  div {
+  >div {
     margin-right: 4px;
     height: 12px;
     width: 12px;
     color: $igv-menu-popup-grey;
   }
 
-  div:hover {
+  >div:hover {
     cursor: pointer;
     color: #444;
   }
