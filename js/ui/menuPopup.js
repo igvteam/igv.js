@@ -30,31 +30,31 @@ import {createCheckbox} from "../igv-icons.js"
 
 const MenuPopup = function (parent) {
 
-    this.popover = DOMUtils.div({class: 'igv-menu-popup'})
-    parent.appendChild(this.popover)
+    this.popup = DOMUtils.div({class: 'igv-menu-popup'})
+    parent.appendChild(this.popup)
 
     const header = DOMUtils.div({class: 'igv-menu-popup-header'})
-    this.popover.appendChild(header)
+    this.popup.appendChild(header)
 
     // UIUtils.attachDialogCloseHandlerWithParent(header, () => this.hide())
 
     this.popoverContent = DOMUtils.div()
-    this.popover.appendChild(this.popoverContent)
+    this.popup.appendChild(this.popoverContent)
 
-    makeDraggable(this.popover, header)
+    makeDraggable(this.popup, header)
 
-    header.addEventListener('click', e => {
-        e.stopPropagation()
-        e.preventDefault()
-        // absorb click to prevent it leaking through to parent DOM element
-    })
+    // header.addEventListener('click', e => {
+    //     e.stopPropagation()
+    //     e.preventDefault()
+    //     // absorb click to prevent it leaking through to parent DOM element
+    // })
 
     this.hide()
 
 }
 
 MenuPopup.prototype.hide = function () {
-    this.popover.style.display = 'none'
+    this.popup.style.display = 'none'
 }
 
 MenuPopup.prototype.presentMenuList = function (menuList) {
@@ -90,12 +90,12 @@ MenuPopup.prototype.presentMenuList = function (menuList) {
 
         // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
         //       yield a width of zero (0).
-        this.popover.style.display = 'flex'
+        this.popup.style.display = 'flex'
 
-        const {width} = this.popover.getBoundingClientRect()
+        const {width} = this.popup.getBoundingClientRect()
 
-        this.popover.style.left = `${-width}px`
-        this.popover.style.top = `${0}px`
+        this.popup.style.left = `${-width}px`
+        this.popup.style.top = `${0}px`
 
     }
 }
@@ -104,26 +104,26 @@ MenuPopup.prototype.presentTrackContextMenu = function (e, menuItems) {
 
     this.popoverContent.innerHTML = ''
 
-    const menuElements = createMenuElements(menuItems, this.popover)
+    const menuElements = createMenuElements(menuItems, this.popup)
     for (let {el} of menuElements) {
         this.popoverContent.appendChild(el)
     }
 
-    present(e, this.popover)
+    present(e, this.popup)
 
 }
 
 MenuPopup.prototype.dispose = function () {
 
     this.popoverContent.innerHTML = ''
-    this.popover.innerHTML = ''
+    this.popup.innerHTML = ''
 
     Object.keys(this).forEach(function (key) {
         this[key] = undefined
     })
 }
 
-function createMenuElements(itemList, popover) {
+function createMenuElements(itemList, popup) {
 
     return itemList.map(item => {
 
@@ -145,7 +145,7 @@ function createMenuElements(itemList, popover) {
                 el = createCheckbox("Show all bases", item.value)
             } else if ("color" === item.type) {
 
-                const colorPicker = new GenericColorPicker({parent: popover.parentElement, width: 364})
+                const colorPicker = new GenericColorPicker({parent: popup.parentElement, width: 364})
                 colorPicker.configure(undefined, {color: color => item.click(color)})
 
                 el = DOMUtils.div({class: 'context-menu'})
@@ -154,7 +154,7 @@ function createMenuElements(itemList, popover) {
                 }
                 const clickHandler = e => {
                     colorPicker.show()
-                    DOMUtils.hide(popover)
+                    DOMUtils.hide(popup)
                     e.preventDefault()
                     e.stopPropagation()
                 }
@@ -182,7 +182,7 @@ function createMenuElements(itemList, popover) {
                 // eslint-disable-next-line no-inner-declarations
                 function handleClick(e) {
                     item.click()
-                    DOMUtils.hide(popover)
+                    DOMUtils.hide(popup)
                     e.preventDefault()
                     e.stopPropagation()
                 }
@@ -194,20 +194,20 @@ function createMenuElements(itemList, popover) {
 
 }
 
-function present(e, popover) {
+function present(e, popup) {
 
     // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
     //       yield a width of zero (0).
-    popover.style.display = 'flex'
+    popup.style.display = 'flex'
 
-    const {x, y} = DOMUtils.translateMouseCoordinates(e, popover.parentNode)
-    const {width} = popover.getBoundingClientRect()
+    const {x, y} = DOMUtils.translateMouseCoordinates(e, popup.parentNode)
+    const {width} = popup.getBoundingClientRect()
     const xmax = x + width
 
-    const {width: parentWidth} = popover.parentNode.getBoundingClientRect()
+    const {width: parentWidth} = popup.parentNode.getBoundingClientRect()
 
-    popover.style.left = `${xmax > parentWidth ? (x - (xmax - parentWidth)) : x}px`
-    popover.style.top = `${y}px`
+    popup.style.left = `${xmax > parentWidth ? (x - (xmax - parentWidth)) : x}px`
+    popup.style.top = `${y}px`
 
 }
 

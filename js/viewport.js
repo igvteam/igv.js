@@ -196,10 +196,6 @@ class Viewport {
      */
     dispose() {
 
-        if (this.popover) {
-            this.popover.dispose()
-        }
-
         this.$viewport.get(0).remove()
 
         // Null out all properties -- this should not be neccessary, but just in case there is a

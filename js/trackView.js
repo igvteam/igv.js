@@ -743,10 +743,10 @@ class TrackView {
                 event.preventDefault()
                 event.stopPropagation()
 
-                if ('none' === this.trackGearPopup.popover.style.display) {
+                if ('none' === this.trackGearPopup.popup.style.display) {
                     this.trackGearPopup.presentMenuList(MenuUtils.trackMenuItemList(this))
                 } else {
-                    this.trackGearPopup.popover.style.display = 'none'
+                    this.trackGearPopup.popup.style.display = 'none'
                 }
 
             }
