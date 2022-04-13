@@ -366,6 +366,11 @@ class FeatureTrack extends TrackBase {
     contextMenuItemList(clickState) {
 
         const features = this.clickedFeatures(clickState)
+
+        if (0 === features.length) {
+            return undefined
+        }
+
         if (features.length > 1) {
             features.sort((a, b) => (b.end - b.start) - (a.end - a.start))
         }
