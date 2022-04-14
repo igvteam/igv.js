@@ -32,88 +32,44 @@ $igv-menu-popup-grey: #7F7F7F;
   flex-flow: column;
   flex-wrap: nowrap;
   justify-content: flex-start;
-  align-items: flex-end;
+  align-items: stretch;
 
   text-align: left;
 
-  > div:not(:first-child) {
-    width: 100%;
-
-    > div {
-      background-color: white;
-    }
-
-    > div:last-child {
-      border-bottom-left-radius: $igv-menu-popup-border-radius;
-      border-bottom-right-radius: $igv-menu-popup-border-radius;
-      border-bottom-color: transparent;
-      border-bottom-style: solid;
-      border-bottom-width: thin;
-    }
-
-    > div:hover {
-      background-color: #efefef;
-    }
-
+  hr {
+    margin: unset;
+    border-top-color: $igv-menu-popup-grey;
   }
 
-}
-
-.context-menu {
-  padding-left: 4px;
-  padding-right: 4px;
-}
-
-.context-menu:hover {
-  background-color: #f3f3f3;
-}
-
-.igv-menu-popup-shim {
-  padding-left: 8px;
-  padding-right: 8px;
-  padding-bottom: 1px;
-  padding-top: 1px;
-  background-color: white;
-}
-
-.igv-menu-popup-shim:hover {
-  background-color: #f3f3f3;
-}
-
-.igv-menu-popup-header {
-
-  position: relative;
-  width: 100%;
-  //height: 24px;
-  height: 8px;
-  cursor: move;
-
-  border-top-color: transparent;
-  border-top-left-radius: $igv-menu-popup-border-radius;
-  border-top-right-radius: $igv-menu-popup-border-radius;
-
-  border-bottom-color: $igv-menu-popup-grey;
-  border-bottom-style: solid;
-  border-bottom-width: thin;
-
-  background-color: #eee;
-
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: flex-end;
-  align-items: center;
+  b {
+    padding-left: 8px;
+  }
 
   >div {
-    margin-right: 4px;
-    height: 12px;
-    width: 12px;
-    color: $igv-menu-popup-grey;
+    padding-left: 8px;
+    padding-right: 8px;
   }
 
   >div:hover {
-    cursor: pointer;
-    color: #444;
+    background-color: #f3f3f3;
+  }
+
+  > div:first-child {
+    margin-top: 8px;
+    border-top-left-radius: $igv-menu-popup-border-radius;
+    border-top-right-radius: $igv-menu-popup-border-radius;
+    border-top-color: transparent;
+    border-top-style: solid;
+    border-top-width: thin;
+  }
+
+  > div:last-child {
+    border-bottom-left-radius: $igv-menu-popup-border-radius;
+    border-bottom-right-radius: $igv-menu-popup-border-radius;
+    border-bottom-color: transparent;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+    margin-bottom: 8px;
   }
 
 }
@@ -126,18 +82,11 @@ $igv-menu-popup-grey: #7F7F7F;
   justify-content: flex-start;
   align-items: center;
 
-  width: 100%;
   height: 20px;
-  margin-right: 4px;
 
   background-color: transparent;
 
-  div {
-    padding-top: 2px;
-    padding-left: 8px;
-  }
-
-  div:first-child {
+  >div:first-child {
     position: relative;
     width: 12px;
     height: 12px;

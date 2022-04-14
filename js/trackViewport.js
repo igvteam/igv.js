@@ -675,7 +675,7 @@ class TrackViewport extends Viewport {
 
                         const popoverHandler = () => {
 
-                            const popoverContent = getPopupContent(event, this)
+                            const popupContent = getPopupContent(event, this)
 
                             if (this.trackView.trackGearPopup) {
                                 this.trackView.trackGearPopup.hide()
@@ -685,9 +685,9 @@ class TrackViewport extends Viewport {
                                 this.browser.trackPopover.dispose()
                             }
 
-                            if (popoverContent) {
+                            if (popupContent) {
                                 this.browser.trackPopover = new Popover(this.browser.columnContainer)
-                                this.browser.trackPopover.presentContentWithEvent(event, popoverContent)
+                                this.browser.trackPopover.presentContentWithEvent(event, popupContent)
                             }
 
                             window.clearTimeout(popupTimerID)

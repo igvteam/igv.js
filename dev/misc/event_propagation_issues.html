@@ -22,16 +22,66 @@
         genome: "hg19",
         tracks:
             [
-            {
-                name: 'Mixed pos neg bars',
-                url: '../../test/data/wig/mixedPosNeg.bedgraph',
-                indexed: false
-            },
-        ]
+                {
+                    name: 'Mixed pos neg bars',
+                    url: '../../test/data/wig/mixedPosNeg.bedgraph',
+                    indexed: false
+                },
+            ]
     };
 
+    const elaborate_config =
+        {
+            "version": "2.10.5",
+            "showSampleNames": false,
+            "genome":  "hg19",
+
+            // "locus":
+            //     [
+            //         "chr7:55,202,455-55,336,909",
+            //         "chr8:128,718,692-128,773,416",
+            //         "chr12:58,126,892-58,168,226"
+            //     ],
+
+            "locus": "chr8:128,738,984-128,747,482",
+
+            "tracks":
+                [
+                    {
+                        "url": "https://s3.amazonaws.com/igv.org.demo/GSM3553630_HF-3177_chiapet.trans.chiasig.itx.ge2.bedpe.gz",
+                        "name": "Trans Interactions",
+                        "format": "bedpe",
+                        "type": "interact",
+                        "color": "rgb(180,25,137)",
+                        "arcType": "chiapet",
+                        "arcOrientation": true,
+                        "showBlocks": false,
+                        "blockHeight": 3,
+                        "thickness": 1,
+                        "alpha": 0.02,
+                        "order": 5,
+                        "min": 0,
+                        "max": 459
+                    },
+                    {
+                        "url": "https://s3.amazonaws.com/igv.org.demo/GSM3553630_HF-3177_chiapet.cis.chiasig.sigf.itx.bedpe.gz",
+                        "name": "Cis Interactions",
+                        "format": "bedpe",
+                        "type": "interact",
+                        "color": "#ff2987",
+                        "arcType": "chiapetoutbound",
+                        "arcOrientation": false,
+                        "showBlocks": false,
+                        "blockHeight": 3,
+                        "thickness": 1,
+                        "alpha": 0.02,
+                        "order": 6
+                    },
+                ]
+        };
+
     (async () => {
-        const browser = await igv.createBrowser(document.getElementById("igv-container"), config)
+        const browser = await igv.createBrowser(document.getElementById("igv-container"), elaborate_config)
     })()
 
 

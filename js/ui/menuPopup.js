@@ -35,23 +35,6 @@ class MenuPopup {
         this.popup = DOMUtils.div({class: 'igv-menu-popup'})
         parent.appendChild(this.popup)
 
-        // const header = DOMUtils.div({class: 'igv-menu-popup-header'})
-        // this.popup.appendChild(header)
-
-        // UIUtils.attachDialogCloseHandlerWithParent(header, () => this.hide())
-
-        this.popoverContent = DOMUtils.div()
-        this.popup.appendChild(this.popoverContent)
-
-        // makeDraggable(this.popup, this.popup)
-
-        // absorb clicks to prevent them bubbling up to parent DOM element
-        // header.addEventListener('click', e => {
-        //     e.stopPropagation()
-        //     e.preventDefault()
-        //
-        // })
-
         this.popup.style.display = 'none'
 
     }
@@ -62,7 +45,7 @@ class MenuPopup {
 
         if (menuList.length > 0) {
 
-            this.popoverContent.innerHTML = ''
+            this.popup.innerHTML = ''
 
             menuList = MenuUtils.trackMenuItemListHelper(menuList, this)
 
@@ -72,23 +55,12 @@ class MenuPopup {
                     item.init()
                 }
 
-                let $e = item.object
-                if (0 === menuList.indexOf(item)) {
-                    $e.removeClass('igv-track-menu-border-top')
-                }
-
-                if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-menu-popup-check-container')) {
-                    // do nothing
-                } else if ($e.is('div')) {
-                    $e.addClass('igv-menu-popup-shim')
-                }
-
-                this.popoverContent.appendChild($e.get(0))
+                this.popup.appendChild(item.object.get(0))
 
             }
 
-            // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
-            //       yield a width of zero (0).
+            // NOTE: style.display most NOT be 'none' when calculating width.
+            // a display = 'none' will always yield a width of zero (0).
             this.popup.style.display = 'flex'
 
             const {width} = this.popup.getBoundingClientRect()
@@ -104,16 +76,16 @@ class MenuPopup {
         }
     }
 
-    presentTrackContextMenu(e, menuItems) {
+    presentTrackContextMenu(event, menuItems) {
 
-        this.popoverContent.innerHTML = ''
+        this.popup.innerHTML = ''
 
-        const menuElements = createMenuElements(menuItems, this.popup)
-        for (let {el} of menuElements) {
-            this.popoverContent.appendChild(el)
+        const menuElements = createMenuElements(this.popup, menuItems)
+        for (let { el } of menuElements) {
+            this.popup.appendChild(el)
         }
 
-        present(e, this.popup)
+        present(event, this.popup)
 
     }
 
@@ -123,7 +95,6 @@ class MenuPopup {
 
     dispose() {
 
-        this.popoverContent.innerHTML = ''
         this.popup.innerHTML = ''
 
         Object.keys(this).forEach(function (key) {
@@ -144,34 +115,34 @@ function hideAllMenuPopups() {
 
 }
 
-function createMenuElements(itemList, popup) {
+function createMenuElements(popup, menuItems) {
 
-    return itemList.map(item => {
+    return menuItems.map(menuItem => {
 
         let el
 
-        if (typeof item === 'string' && '<hr/>' === item) {
+        if (typeof menuItem === 'string' && '<hr/>' === menuItem) {
             el = document.createElement('hr')
-        } else if (typeof item === 'string') {
-            el = DOMUtils.div({class: 'context-menu'})
-            el.innerHTML = item
-        } else if (typeof item === 'Node') {
-            el = item
+        } else if (typeof menuItem === 'string') {
+            el = DOMUtils.div()
+            el.innerHTML = menuItem
+        } else if (typeof menuItem === 'Node') {
+            el = menuItem
         } else {
-            if (typeof item.init === 'function') {
-                item.init()
+            if (typeof menuItem.init === 'function') {
+                menuItem.init()
             }
 
-            if ("checkbox" === item.type) {
-                el = createCheckbox("Show all bases", item.value)
-            } else if ("color" === item.type) {
+            if ("checkbox" === menuItem.type) {
+                el = createCheckbox("Show all bases", menuItem.value)
+            } else if ("color" === menuItem.type) {
 
                 const colorPicker = new GenericColorPicker({parent: popup.parentElement, width: 364})
-                colorPicker.configure(undefined, {color: color => item.click(color)})
+                colorPicker.configure(undefined, {color: color => menuItem.click(color)})
 
-                el = DOMUtils.div({class: 'context-menu'})
-                if (typeof item.label === 'string') {
-                    el.innerHTML = item.label
+                el = DOMUtils.div()
+                if (typeof menuItem.label === 'string') {
+                    el.innerHTML = menuItem.label
                 }
                 const clickHandler = e => {
                     colorPicker.show()
@@ -186,13 +157,13 @@ function createMenuElements(itemList, popup) {
                     e.stopPropagation()
                 })
             } else {
-                el = DOMUtils.div({class: 'context-menu'})
-                if (typeof item.label === 'string') {
-                    el.innerHTML = item.label
+                el = DOMUtils.div()
+                if (typeof menuItem.label === 'string') {
+                    el.innerHTML = menuItem.label
                 }
             }
 
-            if (item.click && "color" !== item.type) {
+            if (menuItem.click && "color" !== menuItem.type) {
                 el.addEventListener('click', handleClick)
                 el.addEventListener('touchend', handleClick)
                 el.addEventListener('mouseup', function (e) {
@@ -202,7 +173,7 @@ function createMenuElements(itemList, popup) {
 
                 // eslint-disable-next-line no-inner-declarations
                 function handleClick(e) {
-                    item.click()
+                    menuItem.click()
                     DOMUtils.hide(popup)
                     e.preventDefault()
                     e.stopPropagation()
@@ -210,18 +181,18 @@ function createMenuElements(itemList, popup) {
             }
         }
 
-        return {el, init: item.init}
+        return {el, init: menuItem.init}
     })
 
 }
 
-function present(e, popup) {
+function present(event, popup) {
 
     // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
     //       yield a width of zero (0).
     popup.style.display = 'flex'
 
-    const {x, y} = DOMUtils.translateMouseCoordinates(e, popup.parentNode)
+    const {x, y} = DOMUtils.translateMouseCoordinates(event, popup.parentNode)
     const {width} = popup.getBoundingClientRect()
     const xmax = x + width
 
