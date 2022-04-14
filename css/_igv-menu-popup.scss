@@ -1,15 +1,19 @@
 
 $igv-menu-popup-font-face: 'Open Sans', sans-serif;
-$igv-menu-popup-border-radius: 2px;
+//$igv-menu-popup-border-radius: 2px;
+$igv-menu-popup-border-radius: 4px;
 $igv-menu-popup-font-color: #4b4b4b;
-$igv-menu-popup-grey: #7F7F7F;
+$igv-menu-popup-grey: rgba(127, 127, 127, 0.5);
+
+$igv-menu-popup-padding: 12px;
+$igv-menu-popup-padding-left: 12px;
+$igv-menu-popup-padding-right: 12px;
 
 .igv-menu-popup {
   position: absolute;
   top: 0;
   left: 0;
 
-  //min-width: 132px;
   width: max-content;
 
   z-index: 4096;
@@ -38,16 +42,16 @@ $igv-menu-popup-grey: #7F7F7F;
 
   hr {
     margin: unset;
-    border-top-color: $igv-menu-popup-grey;
+    border-top-color: rgba(128, 128, 128, 0.25);
   }
 
   b {
-    padding-left: 8px;
+    padding-left: $igv-menu-popup-padding;
   }
 
   >div {
-    padding-left: 8px;
-    padding-right: 8px;
+    padding-left: $igv-menu-popup-padding;
+    padding-right: $igv-menu-popup-padding;
   }
 
   >div:hover {

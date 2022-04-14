@@ -123,6 +123,11 @@ function createMenuElements(popup, menuItems) {
 
         if (typeof menuItem === 'string' && '<hr/>' === menuItem) {
             el = document.createElement('hr')
+        } else if (typeof menuItem === 'string' && menuItem.startsWith('<b>')) {
+
+            const fragment = document.createRange().createContextualFragment(menuItem)
+            el = fragment.firstChild
+
         } else if (typeof menuItem === 'string') {
             el = DOMUtils.div()
             el.innerHTML = menuItem
