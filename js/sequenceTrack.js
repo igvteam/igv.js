@@ -105,6 +105,12 @@ for (let i = 0; i < t1.length; i++) {
     complement[t1[i].toLowerCase()] = t2[i].toLowerCase()
 }
 
+const DEFAULT_HEIGHT = 25
+const TRANSLATED_HEIGHT = 115
+const SEQUENCE_HEIGHT = 15
+const FRAME_HEIGHT = 25
+const FRAME_BORDER = 5
+
 class SequenceTrack {
 
     constructor(config, browser) {
@@ -116,13 +122,13 @@ class SequenceTrack {
         this.name = "Sequence"
         this.id = "sequence"
         this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot
-        this.height = 25
         this.disableButtons = false
         this.order = config.order || defaultSequenceTrackOrder
         this.ignoreTrackMenu = false
 
-        this.reversed = false
-        this.frameTranslate = false
+        this.reversed = config.reversed === true
+        this.frameTranslate = config.frameTranslate === true
+        this.height = this.frameTranslate ? TRANSLATED_HEIGHT : DEFAULT_HEIGHT
 
     }
 
@@ -141,14 +147,14 @@ class SequenceTrack {
                     this.frameTranslate = !this.frameTranslate
                     if (this.frameTranslate) {
                         for (let vp of this.trackView.viewports) {
-                            vp.setContentHeight(115)
+                            vp.setContentHeight(TRANSLATED_HEIGHT)
                         }
-                        this.trackView.setTrackHeight(115)
+                        this.trackView.setTrackHeight(TRANSLATED_HEIGHT)
                     } else {
                         for (let vp of this.trackView.viewports) {
-                            vp.setContentHeight(25)
+                            vp.setContentHeight(DEFAULT_HEIGHT)
                         }
-                        this.trackView.setTrackHeight(25)
+                        this.trackView.setTrackHeight(DEFAULT_HEIGHT)
                     }
                     this.trackView.repaintViews()
 
@@ -247,9 +253,6 @@ class SequenceTrack {
     draw(options) {
 
         const ctx = options.context
-        const sequenceHeight = 15
-        const frameHeight = 25
-        const frameBorderWidth = 5
 
         if (options.features) {
 
@@ -276,17 +279,17 @@ class SequenceTrack {
                     const color = this.fillColor(baseLetter)
 
                     if (options.bpPerPixel > 1 / 10) {
-                        IGVGraphics.fillRect(ctx, aPixel, 5, pixelWidth, sequenceHeight - 5, {fillStyle: color})
+                        IGVGraphics.fillRect(ctx, aPixel, 5, pixelWidth, SEQUENCE_HEIGHT - 5, {fillStyle: color})
                     } else {
-                        let textPixel =aPixel + 0.5 *( pixelWidth - ctx.measureText(baseLetter).width)
-                        IGVGraphics.strokeText(ctx, baseLetter, textPixel, sequenceHeight, {strokeStyle: color})
+                        let textPixel = aPixel + 0.5 * (pixelWidth - ctx.measureText(baseLetter).width)
+                        IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
                     }
                 }
             }
 
             if (this.frameTranslate) {
 
-                let y = sequenceHeight + 2*frameBorderWidth
+                let y = SEQUENCE_HEIGHT + 2 * FRAME_BORDER
                 const translatedSequence = this.translateSequence(sequence)
 
                 for (let fNum = 0; fNum < translatedSequence.length; fNum++) {    // == 3, 1 for each frame
@@ -319,13 +322,13 @@ class SequenceTrack {
                             aaLabel = 'START' //Color blind accessible
                         }
 
-                        IGVGraphics.fillRect(ctx, p0, y, p1 - p0, frameHeight, {fillStyle: color})
+                        IGVGraphics.fillRect(ctx, p0, y, p1 - p0, FRAME_HEIGHT, {fillStyle: color})
 
                         if (options.bpPerPixel <= 1 / 10) {
                             IGVGraphics.strokeText(ctx, aaLabel, pc - (ctx.measureText(aaLabel).width / 2), y + 15)
                         }
                     }
-                    y += (frameHeight + frameBorderWidth)
+                    y += (FRAME_HEIGHT + FRAME_BORDER)
                 }
             }
         }
@@ -336,6 +339,7 @@ class SequenceTrack {
     }
 
     computePixelHeight(ignore) {
+        this.height = this.frameTranslate ? TRANSLATED_HEIGHT : DEFAULT_HEIGHT
         return this.height
     }
 
@@ -348,8 +352,21 @@ class SequenceTrack {
         } else {
             return 'rgb(0, 0, 150)'
         }
-
     }
+
+    /**
+     * Return the current state of the track.  Used to create sessions and bookmarks.
+     *
+     * @returns {*|{}}
+     */
+    getState() {
+
+        const config = typeof super.getState === 'function' ? super.getState() : {}
+        if (this.reversed) config.revealed = true
+        if (this.frameTranslate) config.frameTranslate = true
+        return config
+    }
+
 }
 
 export {defaultSequenceTrackOrder}
