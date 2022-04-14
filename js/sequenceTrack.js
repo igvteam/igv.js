@@ -247,6 +247,9 @@ class SequenceTrack {
     draw(options) {
 
         const ctx = options.context
+        const sequenceHeight = 15
+        const frameHeight = 25
+        const frameBorderWidth = 5
 
         if (options.features) {
 
@@ -261,41 +264,34 @@ class SequenceTrack {
             const sequenceBpStart = options.features.bpStart  // genomic position at start of sequence
             const bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel)
 
-            let height = 15
             for (let bp = Math.floor(options.bpStart); bp <= bpEnd; bp++) {
 
-                let seqOffsetBp = Math.floor(bp - sequenceBpStart)
+                const seqIdx = Math.floor(bp - sequenceBpStart)
 
-                if (seqOffsetBp < sequence.length) {
-                    let letter = sequence[seqOffsetBp]
-
+                if (seqIdx >= 0 && seqIdx < sequence.length) {
+                    const baseLetter = sequence[seqIdx]
                     const offsetBP = bp - options.bpStart
-                    let aPixel = offsetBP / options.bpPerPixel
-                    let bPixel = (offsetBP + 1) / options.bpPerPixel
-                    let color = this.fillColor(letter)
-
-                    // IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, { fillStyle: randomRGBConstantAlpha(150, 255, 0.75) });
+                    const aPixel = offsetBP / options.bpPerPixel
+                    const pixelWidth = 1 / options.bpPerPixel
+                    const color = this.fillColor(baseLetter)
 
                     if (options.bpPerPixel > 1 / 10) {
-                        IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color})
+                        IGVGraphics.fillRect(ctx, aPixel, 5, pixelWidth, sequenceHeight - 5, {fillStyle: color})
                     } else {
-                        let xPixel = 0.5 * (aPixel + bPixel - ctx.measureText(letter).width)
-                        IGVGraphics.strokeText(ctx, letter, xPixel, height, {strokeStyle: color})
+                        let textPixel =aPixel + 0.5 *( pixelWidth - ctx.measureText(baseLetter).width)
+                        IGVGraphics.strokeText(ctx, baseLetter, textPixel, sequenceHeight, {strokeStyle: color})
                     }
                 }
             }
 
             if (this.frameTranslate) {
 
-                let y = height
+                let y = sequenceHeight + 2*frameBorderWidth
                 const translatedSequence = this.translateSequence(sequence)
 
                 for (let fNum = 0; fNum < translatedSequence.length; fNum++) {    // == 3, 1 for each frame
 
                     const aaSequence = translatedSequence[fNum]  // AA sequence for this frame
-                    const h = 25
-
-                    y = (fNum === 0) ? y + 10 : y + 30 //Little less room at first.
 
                     for (let idx = 0; idx < aaSequence.length; idx++) {
 
@@ -309,30 +305,27 @@ class SequenceTrack {
                         const pc = Math.round((p0 + p1) / 2)
 
                         if (p1 < 0) {
-                            continue
+                            continue   // off left edge
                         } else if (p0 > options.pixelWidth) {
-                            break
+                            break      // off right edge
                         }
 
-                        let aaLabel
+                        let aaLabel = cv.aminoA
                         if (cv.aminoA.indexOf('STOP') > -1) {
                             color = 'rgb(255, 0, 0)'
                             aaLabel = 'STOP' //Color blind accessible
-                        } else {
-                            aaLabel = cv.aminoA
-                        }
-
-                        if (cv.aminoA === 'M') {
+                        } else if (cv.aminoA === 'M') {
                             color = 'rgb(0, 153, 0)'
                             aaLabel = 'START' //Color blind accessible
                         }
 
-                        IGVGraphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color})
+                        IGVGraphics.fillRect(ctx, p0, y, p1 - p0, frameHeight, {fillStyle: color})
 
                         if (options.bpPerPixel <= 1 / 10) {
                             IGVGraphics.strokeText(ctx, aaLabel, pc - (ctx.measureText(aaLabel).width / 2), y + 15)
                         }
                     }
+                    y += (frameHeight + frameBorderWidth)
                 }
             }
         }
