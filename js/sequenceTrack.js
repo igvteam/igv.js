@@ -231,7 +231,8 @@ class SequenceTrack {
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
-
+        start = Math.floor(start)
+        end = Math.floor(end)
         if (bpPerPixel && bpPerPixel > 1) {
             return null
         } else {
@@ -249,23 +250,26 @@ class SequenceTrack {
 
         if (options.features) {
 
-            const sequence = options.features.sequence
-            const sequenceBpStart = options.features.bpStart
+            let sequence = options.features.sequence
+
+            if (this.reversed) {
+                sequence = sequence.split('').map(function (cv) {
+                    return complement[cv]
+                }).join('')
+            }
+
+            const sequenceBpStart = options.features.bpStart  // genomic position at start of sequence
             const bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel)
 
             let height = 15
-            for (let bp = sequenceBpStart; bp <= bpEnd; bp++) {
+            for (let bp = Math.floor(options.bpStart); bp <= bpEnd; bp++) {
 
                 let seqOffsetBp = Math.floor(bp - sequenceBpStart)
 
                 if (seqOffsetBp < sequence.length) {
                     let letter = sequence[seqOffsetBp]
 
-                    if (this.reversed) {
-                        letter = complement[letter] || ""
-                    }
-
-                    let offsetBP = bp - options.bpStart
+                    const offsetBP = bp - options.bpStart
                     let aPixel = offsetBP / options.bpPerPixel
                     let bPixel = (offsetBP + 1) / options.bpPerPixel
                     let color = this.fillColor(letter)
@@ -283,53 +287,50 @@ class SequenceTrack {
 
             if (this.frameTranslate) {
 
-                let transSeq
-                if (this.reversed) {
-                    transSeq = sequence.split('').map(function (cv) {
-                        return complement[cv]
-                    })
-                    transSeq = transSeq.join('')
-                } else {
-                    transSeq = sequence
-                }
-
                 let y = height
-                let translatedSequence = this.translateSequence(transSeq)
-                for (let arr of translatedSequence) {
+                const translatedSequence = this.translateSequence(sequence)
 
-                    let i = translatedSequence.indexOf(arr)
-                    let fNum = i
-                    let h = 25
+                for (let fNum = 0; fNum < translatedSequence.length; fNum++) {    // == 3, 1 for each frame
 
-                    y = (i === 0) ? y + 10 : y + 30 //Little less room at first.
+                    const aaSequence = translatedSequence[fNum]  // AA sequence for this frame
+                    const h = 25
 
-                    for (let cv of arr) {
+                    y = (fNum === 0) ? y + 10 : y + 30 //Little less room at first.
 
-                        let aaS
-                        let idx = arr.indexOf(cv)
-                        let xSeed = (idx + fNum) + (2 * idx)
+                    for (let idx = 0; idx < aaSequence.length; idx++) {
+
                         let color = 0 === idx % 2 ? 'rgb(160,160,160)' : 'rgb(224,224,224)'
+                        const cv = aaSequence[idx]
 
-                        let p0 = Math.floor(xSeed / options.bpPerPixel)
-                        let p1 = Math.floor((xSeed + 3) / options.bpPerPixel)
-                        let pc = Math.round((p0 + p1) / 2)
+                        const bpPos = sequenceBpStart + fNum + (idx * 3)
+                        const bpOffset = bpPos - options.bpStart
+                        const p0 = Math.floor(bpOffset / options.bpPerPixel)
+                        const p1 = Math.floor((bpOffset + 3) / options.bpPerPixel)
+                        const pc = Math.round((p0 + p1) / 2)
 
+                        if (p1 < 0) {
+                            continue
+                        } else if (p0 > options.pixelWidth) {
+                            break
+                        }
+
+                        let aaLabel
                         if (cv.aminoA.indexOf('STOP') > -1) {
                             color = 'rgb(255, 0, 0)'
-                            aaS = 'STOP' //Color blind accessible
+                            aaLabel = 'STOP' //Color blind accessible
                         } else {
-                            aaS = cv.aminoA
+                            aaLabel = cv.aminoA
                         }
 
                         if (cv.aminoA === 'M') {
                             color = 'rgb(0, 153, 0)'
-                            aaS = 'START' //Color blind accessible
+                            aaLabel = 'START' //Color blind accessible
                         }
 
                         IGVGraphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color})
 
                         if (options.bpPerPixel <= 1 / 10) {
-                            IGVGraphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15)
+                            IGVGraphics.strokeText(ctx, aaLabel, pc - (ctx.measureText(aaLabel).width / 2), y + 15)
                         }
                     }
                 }
