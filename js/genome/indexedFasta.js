@@ -63,7 +63,9 @@ class FastaSequence {
 
     async getSequence(chr, start, end) {
 
-        if (!(this.interval && this.interval.contains(chr, start, end))) {
+        const hasCachedSquence = this.interval && this.interval.contains(chr, start, end)
+
+        if (!hasCachedSquence) {
 
             // Expand query, to minimum of 50kb
             let qstart = start
