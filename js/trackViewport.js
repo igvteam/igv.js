@@ -488,7 +488,11 @@ class TrackViewport extends Viewport {
         const start = referenceFrame.start
         const end = start + referenceFrame.toBP($(this.contentDiv).width())
         const bpPerPixel = referenceFrame.bpPerPixel
-        return (!this.featureCache.containsRange(chr, start, end, bpPerPixel))
+
+        // Expand region => TODO FIXME - this needs matched to the canvas size being loaded & the loadFeatures command.
+        const width = end - start
+
+        return (!this.featureCache.containsRange(chr, start - width, end + width, bpPerPixel))
     }
 
     createZoomInNotice($parent) {
