@@ -22,7 +22,14 @@
                 indexURL: '../../macFas5/macFas5.fa.fai'
             },
             loadDefaultGenomes: false,
-            locus: 'chr2:32,027,557-32,027,597'
+            locus: 'chr2:32,027,456-32,027,495',
+            tracks: [
+                {
+                    type: "sequence",
+                    order: -9007199254740991,
+                    frameTranslate: true
+                },
+            ]
         }
 
     igv.createBrowser(document.getElementById("container"), config)
