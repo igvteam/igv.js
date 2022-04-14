@@ -189,6 +189,17 @@ class TrackViewport extends Viewport {
         }
     }
 
+    repaintDimensions() {
+        const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
+        const pixelWidth = isWGV ? this.$viewport.width() : 3 * this.$viewport.width()
+        const bpPerPixel = this.referenceFrame.bpPerPixel
+        const startBP = this.referenceFrame.start - (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        const endBP = this.referenceFrame.end + (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        return {
+            startBP, endBP, pixelWidth
+        }
+    }
+
     /**
      * Repaint the canvas using the cached features
      *
@@ -207,7 +218,7 @@ class TrackViewport extends Viewport {
 
         // Canvas dimensions. There is no left-right panning for WGV so canvas width is viewport width.
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
-        const pixelWidth = isWGV ? this.$viewport.width() : 3 * this.$viewport.width()
+        const {startBP, endBP, pixelWidth} = this.repaintDimensions()
         const viewportHeight = this.$viewport.height()
         const contentHeight = this.getContentHeight()
         const minHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight  // Need to fill viewport for ROIs.
@@ -221,8 +232,8 @@ class TrackViewport extends Viewport {
         const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
 
         const bpPerPixel = this.referenceFrame.bpPerPixel
-        const startBP = this.referenceFrame.start - (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
-        const endBP = this.referenceFrame.end + (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        //const startBP = this.referenceFrame.start - (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        //const endBP = this.referenceFrame.end + (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
         const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / bpPerPixel)
 
         const newCanvas = $('<canvas class="igv-canvas">').get(0)
@@ -485,14 +496,9 @@ class TrackViewport extends Viewport {
         if (!this.featureCache) return true
         const referenceFrame = this.referenceFrame
         const chr = this.referenceFrame.chr
-        const start = referenceFrame.start
-        const end = start + referenceFrame.toBP($(this.contentDiv).width())
         const bpPerPixel = referenceFrame.bpPerPixel
-
-        // Expand region => TODO FIXME - this needs matched to the canvas size being loaded & the loadFeatures command.
-        const width = end - start
-
-        return (!this.featureCache.containsRange(chr, start - width, end + width, bpPerPixel))
+        const {startBP, endBP} = this.repaintDimensions()
+        return (!this.featureCache.containsRange(chr, startBP, endBP, bpPerPixel))
     }
 
     createZoomInNotice($parent) {
