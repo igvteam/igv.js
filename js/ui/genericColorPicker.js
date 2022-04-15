@@ -1,67 +1,52 @@
-import {appleCrayonPalette, DOMUtils} from '../../node_modules/igv-utils/src/index.js'
+import Picker from '../../node_modules/vanilla-picker/dist/vanilla-picker.mjs'
 import {GenericContainer} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {getColorNameRGBString, isValidColorName} from '../util/colorPalletes.js'
 
 class GenericColorPicker extends GenericContainer {
 
-    constructor({parent, width}) {
-        super({parent, width, border: '1px solid gray'})
-    }
+    constructor(parent) {
 
-    configure(defaultColors, colorHandlers) {
+        super({ parent, width: 250, border: '1px solid gray'})
 
-        this.colorHandlers = colorHandlers
+        this.activeColor = undefined
+        this.activeColorHandler = undefined
+        this.selectedTrackViews = undefined
 
-        // active color handler defaults to handler with 'color' as key
-        this.setActiveColorHandler('color')
-
-        this.createSwatches(defaultColors)
-
-    }
-
-    setActiveColorHandler(option) {
-        this.activeColorHandler = this.colorHandlers[option]
-    }
-
-    createSwatches(defaultColors) {
-
-        this.container.querySelectorAll('.igv-ui-color-swatch').forEach(swatch => swatch.remove())
-
-        const hexColorStrings = Object.values(appleCrayonPalette)
-
-        for (let hexColorString of hexColorStrings) {
-            const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
-            this.container.appendChild(swatch)
-            this.decorateSwatch(swatch, hexColorString)
-        }
-
-        if (defaultColors) {
-            for (let hexColorString of defaultColors) {
-                const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
-                this.container.appendChild(swatch)
-                this.decorateSwatch(swatch, hexColorString)
+        const config =
+            {
+                parent: this.container,
+                popup: false,
+                editor:'false',
+                editorFormat: 'rgb',
+                alpha: false,
+                onDone: () => this.hide(this.container)
             }
-        }
+
+        this.picker = new Picker(config)
 
     }
 
-    decorateSwatch(swatch, hexColorString) {
+    configure(initialColors, colorHandlers) {
+        this.initialColors = initialColors
+        this.colorHandlers = colorHandlers
+        this.setActiveColorHandler('color')
+    }
 
-        swatch.style.backgroundColor = hexColorString
+    setActiveColorHandler(key) {
 
-        swatch.addEventListener('mouseenter', () => swatch.style.borderColor = hexColorString)
+        if (isValidColorName(this.initialColors[ key ])) {
+            this.activeColor = getColorNameRGBString(this.initialColors[ key ])
+        } else {
+            this.activeColor = this.initialColors[ key ]
+        }
 
-        swatch.addEventListener('mouseleave', () => swatch.style.borderColor = 'white')
+        this.activeColorHandler = this.colorHandlers[ key ]
 
-        swatch.addEventListener('click', event => {
-            event.stopPropagation()
-            this.activeColorHandler(hexColorString)
-        })
-
-        swatch.addEventListener('touchend', event => {
-            event.stopPropagation()
-            this.activeColorHandler(hexColorString)
-        })
-
+        this.picker.onChange = ({ rgbString }) => this.activeColorHandler(rgbString)
+        const [ rgbPart, paren ] = this.activeColor.split(')')
+        const [ discard, r_g_b ] = rgbPart.split('(')
+        const rgbaString = `rgba(${ r_g_b },1.0)`
+        this.picker.setColor(rgbaString, true)
     }
 
 }
