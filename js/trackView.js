@@ -32,11 +32,12 @@ import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
 import SampleInfoViewport from "./sample/sampleInfoViewport.js";
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import MenuUtils from "./ui/menuUtils.js"
+import MenuUtils, { canShowColorPicker } from "./ui/menuUtils.js"
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['ruler', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
+const multiTrackSelectExclusionTypes = scrollbarExclusionTypes
 
 class TrackView {
 
@@ -182,30 +183,57 @@ class TrackView {
 
     presentColorPicker(key) {
 
-        if (false === colorPickerExclusionTypes.has(this.track.type)) {
+        if (false === colorPickerExclusionTypes.has(this.track.type) && true === canShowColorPicker(this.track)) {
 
-            const trackColors = []
             const color = this.track.color || this.track.defaultColor
-            if (StringUtils.isString(color)) {
-                trackColors.push(color)
-            }
-            if (this.track.altColor && StringUtils.isString(this.track.altColor)) {
-                trackColors.push(this.track.altColor)
-            }
-            const defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c))
-            const colorHandlers =
+            const colorString = StringUtils.isString(color) ? color : undefined
+
+            let initialColors =
                 {
-                    color: color => {
-                        this.track.color = color
+                    color: colorString,
+                    altColor: this.track.altColor && StringUtils.isString(this.track.altColor) ? this.track.altColor : undefined
+                }
+
+            let colorHandlers =
+                {
+                    color: rgbString => {
+                        this.track.color = rgbString
                         this.repaintViews()
                     },
-                    altColor: color => {
-                        this.track.altColor = color
-                        this.repaintViews()
-                    }
 
                 }
-            this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
+
+            if (initialColors.altColor) {
+                colorHandlers.altColor = rgbString => {
+                    this.track.altColor = rgbString
+                    this.repaintViews()
+                }
+            }
+
+
+            const selected = getMultiSelectedTrackViews(this.browser)
+            if (selected && new Set(selected).has(this)) {
+
+                initialColors =
+                    {
+                        color: colorString
+                    }
+
+                colorHandlers =
+                    {
+                        color: rgbString => {
+                            for (let trackView of selected) {
+                                trackView.track.color = rgbString
+                                trackView.repaintViews()
+                            }
+                        }
+                    }
+
+                this.browser.genericColorPicker.configure(initialColors, colorHandlers)
+            } else {
+                this.browser.genericColorPicker.configure(initialColors, colorHandlers)
+            }
+
             this.browser.genericColorPicker.setActiveColorHandler(key)
             this.browser.genericColorPicker.show()
         }
@@ -886,6 +914,29 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
 }
 
+function maxViewportContentHeight(viewports) {
+    const heights = viewports.map(viewport => viewport.getContentHeight())
+    return Math.max(...heights)
+}
 
-export {igv_axis_column_width}
+function getMultiSelectedTrackViews(browser) {
+
+    let candidates = browser.trackViews
+        .filter(({ track }) => {
+            return false === multiTrackSelectExclusionTypes.has(track.type)
+        })
+        .filter(({ namespace, dragHandle }) => {
+            return namespace === dragHandle.dataset.selected
+        })
+
+    // for (let { namespace } of candidates) {
+    //     console.log(`Multi-Select'ed TrackView ${ namespace }`)
+    // }
+
+    candidates = 0 === candidates.length ? undefined : candidates
+
+    return candidates
+}
+
+export {igv_axis_column_width, maxViewportContentHeight, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews}
 export default TrackView
