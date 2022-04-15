@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>Multi Select Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const config =
+        {
+            "version": "2.16.0",
+            "showSampleNames": false,
+            "reference": {
+                "id": "hg19",
+                "name": "Human (GRCh37/hg19)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+            },
+            "locus": "chr8:128,746,680-128,756,197",
+            "gtexSelections": {
+                "chr8:128,746,680-128,756,197": {
+                    "gene": "MYC",
+                    "snp": null
+                }
+            },
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "name": "Common SNPs (150)",
+                    "type": "snp",
+                    "format": "snp",
+                    "visibilityWindow": 10000,
+                    "height": 30,
+                    "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/snp150Common.txt.gz",
+                    "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/snp150Common.txt.gz.tbi",
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/snp/?term=$$",
+                    "order": 4
+                },
+                {
+                    "type": "variant",
+                    "format": "vcf",
+                    "url": "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz",
+                    "indexURL": "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz.tbi",
+                    "name": "1KG Phase 3 SVs",
+                    "visibilityWindow": 1666435,
+                    "color": "rgb(0,0,150)",
+                    "order": 5
+                },
+                {
+                    "name": "Homo sapiens A549 treated with 0.02% ethanol for 1 hour EP300 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF000NDX/@@download/ENCFF000NDX.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549 treated with 0.02% ethanol for 1 hour",
+                        "AssayType": "ChIP-seq",
+                        "Target": "EP300 ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "raw signal",
+                        "Format": "bigWig",
+                        "Lab": "Richard Myers, HAIB",
+                        "Accession": "ENCFF000NDX",
+                        "Experiment": "ENCSR000BPW"
+                    },
+                    "format": "bigwig",
+                    "type": "wig",
+                    "order": 6
+                },
+                {
+                    "name": "Homo sapiens A549 treated with 100 nM dexamethasone (agonist) for 1 hour H3K4me1 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF049AFK/@@download/ENCFF049AFK.bigWig",
+                    "color": "rgb(0,150,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549 treated with 100 nM dexamethasone (agonist) for 1 hour",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K4me1 ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Bradley Bernstein, Broad",
+                        "Accession": "ENCFF049AFK",
+                        "Experiment": "ENCSR000AVH"
+                    },
+                    "format": "bigwig",
+                    "type": "wig",
+                    "order": 7
+                },
+                {
+                    "name": "Homo sapiens adrenal gland tissue female adult (53 years) H3K27ac ",
+                    "url": "https://www.encodeproject.org/files/ENCFF256CHZ/@@download/ENCFF256CHZ.bigWig",
+                    "color": "rgb(200,0,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens adrenal gland tissue female adult (53 years)",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K27ac ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "signal p-value",
+                        "Format": "bigWig",
+                        "Lab": "Bradley Bernstein, Broad",
+                        "Accession": "ENCFF256CHZ",
+                        "Experiment": "ENCSR189QAD"
+                    },
+                    "format": "bigwig",
+                    "type": "wig",
+                    "order": 8
+                },
+                {
+                    "url": "https://www.dropbox.com/s/lka7ixgin5ne5xl/Breast.seg?dl=0",
+                    "filename": "Breast.seg",
+                    "name": "Breast.seg",
+                    "format": "seg",
+                    "type": "seg",
+                    "height": 300,
+                    "order": 9
+                },
+                {
+                    "url": "https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0",
+                    "filename": "GBMCopyNumber.seg.gz",
+                    "name": "GBMCopyNumber.seg.gz",
+                    "format": "seg",
+                    "type": "seg",
+                    "height": 300,
+                    "order": 10
+                },
+                {
+                    "sourceType": "gcs",
+                    "type": "alignment",
+                    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam",
+                    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam.bai",
+                    "name": "NA12877",
+                    "format": "bam",
+                    "order": 11
+                },
+                {
+                    "sourceType": "gcs",
+                    "type": "alignment",
+                    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12892_S1.bam",
+                    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12892_S1.bam.bai",
+                    "name": "NA12892",
+                    "format": "bam",
+                    "order": 12
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "id": "hg19_genes",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "removable": false,
+                    "order": 1000000,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById("myDiv"), config).then(function (browser) {
+    })
+
+
+</script>
+
+</body>
+
+</html>
+

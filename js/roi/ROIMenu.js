@@ -6,7 +6,7 @@ class ROIMenu {
         this.browser = browser
 
         // container
-        this.container = DOMUtils.div({ class: 'igv-roi-menu-next-gen' })
+        this.container = DOMUtils.div({ class: 'igv-roi-menu' })
         parent.appendChild(this.container)
 
         // header

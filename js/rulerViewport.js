@@ -147,7 +147,7 @@ class RulerViewport extends TrackViewport {
 
     mouseMove(event) {
 
-        if (true === this.browser.cursorGuideVisible) {
+        if (true === this.browser.doShowCursorGuide) {
 
             if (undefined === currentViewport) {
                 currentViewport = this
