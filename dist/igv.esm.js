@@ -16468,8 +16468,12 @@ const IGVColor = {
 
 let dragData$1;   // Its assumed we are only dragging one element at a time.
 
+let bbox = undefined;
 
-function makeDraggable$1(target, handle) {
+function makeDraggable$1(target, handle, constraint) {
+    if (constraint) {
+        bbox = Object.assign({}, constraint);
+    }
     handle.addEventListener('mousedown', dragStart$1.bind(target));
 }
 
@@ -16512,8 +16516,13 @@ function drag$1(event) {
     event.preventDefault();
     const dx = event.screenX - dragData$1.screenX;
     const dy = event.screenY - dragData$1.screenY;
-    this.style.left = `${dragData$1.left + dx}px`;
-    this.style.top = `${dragData$1.top + dy}px`;
+
+    // const left = bbox ? Math.max(bbox.minX, dragData.left + dx) : dragData.left + dx
+    const left = dragData$1.left + dx;
+    const  top = bbox ? Math.max(bbox.minY, dragData$1.top  + dy) : dragData$1.top  + dy;
+
+    this.style.left = `${ left }px`;
+    this.style.top  = `${  top }px`;
 }
 
 function dragEnd$1(event) {
@@ -16906,7 +16915,7 @@ async function loadURL(url, options) {
         const isChrome = navigator.userAgent.indexOf('Chrome') > -1;
         navigator.vendor.indexOf("Apple") === 0 && /\sSafari\//.test(navigator.userAgent);
 
-        if (range && isChrome && !isAmazonV4Signed(url)) {
+        if (range && isChrome && !isAmazonV4Signed(url) && !isGoogleStorageSigned(url)) {
             // Hack to prevent caching for byte-ranges. Attempt to fix net:err-cache errors in Chrome
             url += url.includes("?") ? "&" : "?";
             url += "someRandomSeed=" + Math.random().toString(36);
@@ -17097,6 +17106,10 @@ async function loadStringFromUrl(url, options) {
 
 function isAmazonV4Signed(url) {
     return url.indexOf("X-Amz-Signature") > -1;
+}
+
+function isGoogleStorageSigned(url) {
+    return url.indexOf("X-Goog-Signature") > -1;
 }
 
 function getOauthToken(url) {
