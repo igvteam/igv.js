@@ -1488,6 +1488,7 @@
   align-items: flex-start;
   box-sizing: border-box;
   height: 100%;
+<<<<<<< HEAD
 }
 
 .igv-sample-info-column {
@@ -1500,6 +1501,25 @@
   box-sizing: border-box;
   height: 100%;
 }
+=======
+  width: 50px; }
+  .igv-axis-column > div {
+    position: relative;
+    margin-top: 5px;
+    width: 100%; }
+    .igv-axis-column > div > div {
+      z-index: 512;
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      background-color: transparent; }
+      .igv-axis-column > div > div > input {
+        width: 100%;
+        height: 100%;
+        cursor: pointer; }
+>>>>>>> cfdbd15e (Update dom.scss package.json. Add multi-select.html.)
 
 .igv-sample-name-column {
   position: relative;
@@ -1556,6 +1576,7 @@
   box-sizing: border-box;
   height: 100%;
   width: 12px;
+<<<<<<< HEAD
   background-color: white;
 }
 .igv-track-drag-column > .igv-track-drag-handle {
@@ -1580,6 +1601,31 @@
   border-style: solid;
   border-width: 0;
 }
+=======
+  background-color: white; }
+  .igv-track-drag-column > .igv-track-drag-handle {
+    z-index: 512;
+    position: relative;
+    cursor: pointer;
+    margin-top: 5px;
+    width: 100%;
+    border-style: solid;
+    border-width: 0;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px; }
+  .igv-track-drag-column .igv-track-drag-handle-color {
+    background-color: #c4c4c4; }
+  .igv-track-drag-column .igv-track-drag-handle-hover-color {
+    background-color: #787878; }
+  .igv-track-drag-column .igv-track-drag-handle-selected-color {
+    background-color: #0963fa; }
+  .igv-track-drag-column > .igv-track-drag-shim {
+    position: relative;
+    margin-top: 5px;
+    width: 100%;
+    border-style: solid;
+    border-width: 0; }
+>>>>>>> cfdbd15e (Update dom.scss package.json. Add multi-select.html.)
 
 .igv-gear-menu-column {
   position: relative;
