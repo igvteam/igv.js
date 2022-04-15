@@ -13,7 +13,7 @@ package-lock.json
 /npm-debug.log
 /css/.sass-cache/
 /dev/css/.sass-cache/
-/dist/
+#/dist/
 /dev/oauth/google-oauth.html
 igv.css.map
 /dev/oauth/oauthConfig-private.js
