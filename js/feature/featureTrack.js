@@ -310,36 +310,40 @@ class FeatureTrack extends TrackBase {
 
         if (this.render === renderSnp) {
             menuItems.push('<hr/>')
-            for (let colorScheme of ["function", "class"]) {
-                menuItems.push({
-                    object: $(createCheckbox('Color by ' + colorScheme, colorScheme === this.colorBy)),
-                    click: () => {
-                        this.colorBy = colorScheme
-                        this.trackView.repaintViews()
-                    }
-                })
+
+            for (const colorScheme of ["function", "class"]) {
+
+                const object = $(createCheckbox(`Color by ${ colorScheme }`, colorScheme === this.colorBy))
+
+                function colorSchemeHandler() {
+                    this.colorBy = colorScheme
+                    this.trackView.repaintViews()
+                }
+                menuItems.push({ object, click:colorSchemeHandler })
             }
         }
 
         menuItems.push('<hr/>')
-        for (let displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
-            const lut =
-                {
-                    "COLLAPSED": "Collapse",
-                    "SQUISHED": "Squish",
-                    "EXPANDED": "Expand"
-                }
 
-            menuItems.push(
-                {
-                    object: $(createCheckbox(lut[displayMode], displayMode === this.displayMode)),
-                    click: () => {
-                        this.displayMode = displayMode
-                        this.config.displayMode = displayMode
-                        this.trackView.checkContentHeight()
-                        this.trackView.repaintViews()
-                    }
-                })
+        const lut =
+            {
+                "COLLAPSED": "Collapse",
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand"
+            };
+
+        for (const displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
+
+            const object = $(createCheckbox(lut[displayMode], displayMode === this.displayMode))
+
+            function displayModeHandler() {
+                this.displayMode = displayMode
+                this.config.displayMode = displayMode
+                this.trackView.checkContentHeight()
+                this.trackView.repaintViews()
+            }
+
+            menuItems.push({ object, click:displayModeHandler })
         }
 
         return menuItems

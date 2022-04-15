@@ -104,20 +104,20 @@ class WigTrack extends TrackBase {
     }
 
     menuItemList() {
-        let items = []
+        const items = []
 
         if (this.flipAxis !== undefined) {
             items.push('<hr>')
-            items.push({
-                label: "Flip y-axis",
-                click: () => {
-                    this.flipAxis = !this.flipAxis
-                    this.trackView.repaintViews()
-                }
-            })
+
+            function click() {
+                this.flipAxis = !this.flipAxis
+                this.trackView.repaintViews()
+            }
+
+            items.push({ label: 'Flip y-axis', click })
         }
 
-        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+        items.push(...this.numericDataMenuItems())
 
         return items
     }
@@ -329,6 +329,5 @@ class WigTrack extends TrackBase {
     }
 
 }
-
 
 export default WigTrack

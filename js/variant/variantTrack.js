@@ -564,9 +564,8 @@ class VariantTrack extends TrackBase {
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')})
             menuItems.push({
                 object: $(createCheckbox("Show Genotypes", this.showGenotypes)),
-                click: () => {
+                click: function showGenotypesHandler() {
                     this.showGenotypes = !this.showGenotypes
-                    //adjustTrackHeight();
                     this.trackView.checkContentHeight()
                     this.trackView.repaintViews()
                 }
@@ -585,7 +584,7 @@ class VariantTrack extends TrackBase {
             menuItems.push(
                 {
                     object: $(createCheckbox(lut[displayMode], displayMode === this.displayMode)),
-                    click: () => {
+                    click: function displayModeHandler() {
                         this.displayMode = displayMode
                         this.trackView.checkContentHeight()
                         this.trackView.repaintViews()
@@ -599,7 +598,7 @@ class VariantTrack extends TrackBase {
             menuItems.push('<hr>')
             menuItems.push({
                 label: 'Add SVs to circular view',
-                click: () => {
+                click: function circularViewHandler() {
                     const inView = []
                     for (let viewport of this.trackView.viewports) {
                         this.sendChordsForViewport(viewport)
@@ -657,7 +656,7 @@ class VariantTrack extends TrackBase {
     colorByCB(menuItem, showCheck) {
 
         const $e = $(createCheckbox(menuItem.label, showCheck))
-        const clickHandler = () => {
+        function clickHandler() {
 
             if (menuItem.key === this.colorBy) {
                 this.colorBy = undefined
