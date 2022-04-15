@@ -114,8 +114,30 @@ $igv-zoom-in-notice-height: 16px;
   width: $igv-axis-column-width;
 
   >div {
+    position: relative;
+
     margin-top: $igv-column-item-margin-top;
     width: 100%;
+
+    //background-color: rgba(101, 211, 19, 1);
+
+    >div {
+      z-index: 512;
+      position: absolute;
+      top:8px;
+      left: 8px;
+      width: fit-content;
+      height: fit-content;
+      background-color: transparent;
+      display: grid;
+      place-items: center;
+      >input {
+        display: block;
+        margin: unset;
+        cursor: pointer;
+      }
+    }
+
   }
 }
 
@@ -201,13 +223,18 @@ $igv-zoom-in-notice-height: 16px;
     border-width: 0;
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
+  }
 
+  .igv-track-drag-handle-color {
     background-color: #c4c4c4;
   }
 
-  .igv-track-drag-handle-hover {
+  .igv-track-drag-handle-hover-color {
     background-color: #787878;
-    //background-color: magenta;
+  }
+
+  .igv-track-drag-handle-selected-color {
+    background-color: #0963fa;
   }
 
   >.igv-track-drag-shim {

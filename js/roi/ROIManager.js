@@ -19,8 +19,8 @@ class ROIManager {
     async initialize() {
 
         if (this.roiSets.length > 0) {
-            this.browser.showROITableButton = true
-            this.browser.roiTableControl.setVisibility(this.browser.showROITableButton)
+            this.browser.doShowROITableButton = true
+            this.browser.roiTableControl.setVisibility(this.browser.doShowROITableButton)
         }
 
         const promises = this.roiSets.map(roiSet => this.renderROISet({
@@ -107,7 +107,7 @@ class ROIManager {
 
         userDefinedROISet.addFeature(feature)
 
-        if (false === this.browser.showROITableButton) {
+        if (false === this.browser.doShowROITableButton) {
             this.setROITableButtonVisibility(true)
         }
 
@@ -118,8 +118,8 @@ class ROIManager {
     }
 
     setROITableButtonVisibility(isVisible) {
-        this.browser.showROITableButton = isVisible
-        this.browser.roiTableControl.setVisibility(this.browser.showROITableButton)
+        this.browser.doShowROITableButton = isVisible
+        this.browser.roiTableControl.setVisibility(this.browser.doShowROITableButton)
     }
 
     async renderAllROISets() {

@@ -24,23 +24,38 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from "../../node_modules/igv-ui/dist/igv-ui.js"
+import NavbarButton from "../ui/navbarButton.js"
+import {sampleInfoImage, sampleInfoImageHover} from "../ui/navbarIcons/sampleInfo.js"
 
-class SampleInfoControl {
+class SampleInfoControl extends NavbarButton {
 
     constructor(parent, browser) {
 
-        this.button = DOMUtils.div({class: 'igv-navbar-button'})
-        parent.appendChild(this.button)
+        super(browser, parent, 'Sample Info', sampleInfoImage, sampleInfoImageHover, false)
 
-        this.button.innerText = 'Sample Info'
+        this.showSampleInfo = false
 
-        this.setButtonVisibility(false)
+        this.button.addEventListener('mouseenter', () => {
+            if (false === this.showSampleInfo) {
+                this.setState(true)
+            }
+        })
+
+        this.button.addEventListener('mouseleave', () => {
+            if (false === this.showSampleInfo) {
+                this.setState(false)
+            }
+        })
 
         this.button.addEventListener('click', () => {
 
             this.showSampleInfo = !this.showSampleInfo
-            this.setButtonState(this.showSampleInfo)
+
+            for (const {sampleInfoViewport} of browser.trackViews) {
+                false === this.showSampleInfo ? sampleInfoViewport.hide() : sampleInfoViewport.show()
+            }
+
+            this.setState(this.showSampleInfo)
 
             browser.layoutChange()
 
@@ -51,25 +66,14 @@ class SampleInfoControl {
     setButtonVisibility(isVisible) {
 
         this.showSampleInfo = isVisible
-        this.setButtonState(isVisible)
 
-        if (true === isVisible) {
+        this.setState(this.showSampleInfo)
+
+        if (true === this.showSampleInfo) {
             this.show()
         } else {
             this.hide()
         }
-    }
-
-    setButtonState(showSampleInfo) {
-        true === showSampleInfo ? this.button.classList.add('igv-navbar-button-clicked') : this.button.classList.remove('igv-navbar-button-clicked')
-    }
-
-    hide() {
-        this.button.style.display = 'none'
-    }
-
-    show() {
-        this.button.style.display = 'block'
     }
 
 }

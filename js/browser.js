@@ -21,19 +21,19 @@ import version from "./version.js"
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
-import NavbarManager from "./navbarManager.js"
+import {navbarDidResize} from "./responsiveNavbar.js"
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js"
 import WindowSizePanel from "./windowSizePanel.js"
 import CursorGuide from "./ui/cursorGuide.js"
 import CursorGuideButton from "./ui/cursorGuideButton.js"
 import CenterLineButton from './ui/centerLineButton.js'
 import TrackLabelControl from "./ui/trackLabelControl.js"
-import SampleNameControl from "./ui/sampleNameControl.js"
+import SampleNameControl from "./sample/sampleNameControl.js"
 import SampleInfoControl from "./sample/sampleInfoControl.js"
 import ZoomWidget from "./ui/zoomWidget.js"
 import DataRangeDialog from "./ui/dataRangeDialog.js"
 import HtsgetReader from "./htsget/htsgetReader.js"
-import SVGSaveControl from "./ui/svgSaveControl.js"
+import SaveImageControl from "./ui/saveImageControl.js"
 import MenuPopup from "./ui/menuPopup.js"
 import {viewportColumnManager} from './viewportColumnManager.js'
 import ViewportCenterLine from './ui/viewportCenterLine.js'
@@ -47,13 +47,14 @@ import ROIManager from './roi/ROIManager.js'
 import ROITable from './roi/ROITable.js'
 import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
-import ROITableControl from './ui/roiTableControl.js'
+import ROITableControl from './roi/roiTableControl.js'
 import SampleInfo from "./sample/sampleInfo.js"
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import HicFile from "./hic/straw/hicFile.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
 import Hub from "./ucsc/ucscHub.js"
-
+import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
+import MenuUtils from "./ui/menuUtils.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -87,6 +88,8 @@ class Browser {
         this.root.appendChild(this.columnContainer)
 
         this.menuPopup = new MenuPopup(this.columnContainer)
+
+        this.menuUtils = new MenuUtils(this)
 
         this.initialize(config)
 
@@ -143,19 +146,16 @@ class Browser {
             this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key]
         }
 
-        this.trackLabelsVisible = config.showTrackLabels
+        this.doShowTrackLabels = config.showTrackLabels
 
-        this.roiTableVisible = config.showROITable
-        this.showROITableButton = config.showROITableButton
+        this.doShowROITable = config.showROITable
+        this.doShowROITableButton = config.doShowROITableButton
 
-        this.isCenterLineVisible = config.showCenterGuide
+        this.doShowCenterLine = config.showCenterGuide
 
-        this.cursorGuideVisible = config.showCursorGuide
-
-        this.showSampleInfoButton = false
+        this.doShowCursorGuide = config.showCursorGuide
 
         this.showSampleNames = config.showSampleNames
-        this.showSampleNameButton = config.showSampleNameButton
 
         this.sampleNameViewportWidth = undefined
 
@@ -191,8 +191,6 @@ class Browser {
     }
 
     createStandardControls(config) {
-
-        this.navbarManager = new NavbarManager(this)
 
         const $navBar = $('<div>', {class: 'igv-navbar'})
         this.$navigation = $navBar
@@ -255,6 +253,8 @@ class Browser {
         $navbarRightContainer.append($toggle_button_container)
         this.$toggle_button_container = $toggle_button_container
 
+        this.multiTrackSelectButton = new MultiTrackSelectButton(this, $toggle_button_container.get(0))
+
         this.cursorGuide = new CursorGuide(this.columnContainer, this)
 
         this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
@@ -272,7 +272,7 @@ class Browser {
         this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
 
         if (true === config.showSVGButton) {
-            this.svgSaveControl = new SVGSaveControl($toggle_button_container.get(0), this)
+            this.saveImageControl = new SaveImageControl($toggle_button_container.get(0), this)
         }
 
         if (config.customButtons) {
@@ -790,11 +790,17 @@ class Browser {
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
 
-        this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV)
+        navbarDidResize(this, this.$navigation.width(), isWGV)
 
-        toggleTrackLabels(this.trackViews, this.trackLabelsVisible)
+        toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
-        this.setCenterLineAndCenterLineButtonVisibility(!GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
+        if (this.doShowCenterLine && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
+            this.centerLineButton.boundMouseClickHandler()
+        }
+
+        if (this.doShowCursorGuide && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
+            this.cursorGuideButton.boundMouseClickHandler()
+        }
 
     }
 
@@ -807,9 +813,9 @@ class Browser {
     }
 
     // cursor guide
-    setCursorGuideVisibility(cursorGuideVisible) {
+    setCursorGuideVisibility(doShowCursorGuide) {
 
-        if (cursorGuideVisible) {
+        if (doShowCursorGuide) {
             this.cursorGuide.show()
         } else {
             this.cursorGuide.hide()
@@ -821,27 +827,15 @@ class Browser {
     }
 
     // center line
-    setCenterLineVisibility(isCenterLineVisible) {
+    setCenterLineVisibility(doShowCenterLine) {
         for (let centerLine of this.centerLineList) {
-            if (true === isCenterLineVisible) {
+            if (true === doShowCenterLine) {
                 centerLine.show()
                 centerLine.repaint()
             } else {
                 centerLine.hide()
             }
         }
-    }
-
-    setCenterLineAndCenterLineButtonVisibility(isCenterLineVisible) {
-
-        for (let centerLine of this.centerLineList) {
-            const isShown = isCenterLineVisible && centerLine.isVisible
-            isShown ? centerLine.show() : centerLine.container.style.display = 'none'
-        }
-
-        const isShown = isCenterLineVisible && this.centerLineButton.isVisible
-        isShown ? this.centerLineButton.show() : this.centerLineButton.button.style.display = 'none'
-
     }
 
     /**
@@ -936,7 +930,7 @@ class Browser {
 
             const trackView = new TrackView(this, this.columnContainer, newTrack)
             this.trackViews.push(trackView)
-            toggleTrackLabels(this.trackViews, this.trackLabelsVisible)
+            toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
             if (typeof newTrack.postInit === 'function') {
                 try {
@@ -1347,7 +1341,7 @@ class Browser {
 
         if (this.referenceFrameList) {
             const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr)
-            this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV)
+            navbarDidResize(this, this.$navigation.width(), isWGV)
         }
 
         resize.call(this)

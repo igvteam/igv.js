@@ -106,18 +106,18 @@ class MergedTrack extends TrackBase {
     }
 
     menuItemList() {
-        let items = []
+        const items = []
         if (this.flipAxis !== undefined) {
             items.push({
                 label: "Flip y-axis",
-                click: () => {
+                click: function flipYAxisHandler(){
                     this.flipAxis = !this.flipAxis
                     this.trackView.repaintViews()
                 }
             })
         }
 
-        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+        items.push(...this.numericDataMenuItems())
 
         return items
     }
