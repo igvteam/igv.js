@@ -278,7 +278,7 @@ class Browser {
         this.dataRangeDialog = new DataRangeDialog($(this.root))
         this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${DOMUtils.guid()}`
 
-        this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432})
+        this.genericColorPicker = new GenericColorPicker(this.columnContainer)
         this.genericColorPicker.container.id = `igv-track-color-picker-${DOMUtils.guid()}`
 
         return $navBar

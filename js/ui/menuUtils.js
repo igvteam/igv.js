@@ -1,10 +1,15 @@
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
+import {getMultiSelectedTrackViews} from '../trackView.js'
 
 /**
  * Configure item list for track "gear" menu.
  * @param trackView
  */
+
+const colorPickerTrackTypeSet = new Set([ 'bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact' ])
+
 const MenuUtils = {
 
     trackMenuItemList: function (trackView) {
@@ -20,11 +25,15 @@ const MenuUtils = {
             menuItems.push(trackHeightMenuItem(trackView))
         }
 
-        if (this.showColorPicker(trackView.track)) {
+        if (canShowColorPicker(trackView.track)) {``
             menuItems.push('<hr/>')
             menuItems.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}))
             menuItems.push(unsetColorMenuItem({trackView, label: "Unset track color"}))
-            menuItems.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
+
+            if (trackView.track.altColor) {
+                menuItems.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
+            }
+
         }
 
         if (trackView.track.menuItemList) {
@@ -39,6 +48,33 @@ const MenuUtils = {
         if (trackView.track.removable !== false) {
             menuItems.push('<hr/>')
             menuItems.push(trackRemovalMenuItem(trackView))
+        }
+
+        if ('wig' === trackView.track.type) {
+
+            const selected = getMultiSelectedTrackViews(trackView.browser)
+
+            if (selected && new Set(selected).has(trackView)) {
+                menuItems.push('<hr/>')
+                menuItems.push(trackMergeMenuItem(trackView))
+            }
+
+        }
+
+        if ('wig' === trackView.track.type) {
+
+            const selected = getMultiSelectedTrackViews(trackView.browser)
+
+            if (selected && new Set(selected).has(trackView)) {
+                menuItems.push('<hr/>')
+                menuItems.push(groupAutoScaleMenuItem(trackView))
+            }
+
+        }
+
+        if ('merged' === trackView.track.type) {
+            menuItems.push('<hr/>')
+            menuItems.push(trackUnMergeMenuItem(trackView))
         }
 
         return menuItems
@@ -141,17 +177,6 @@ const MenuUtils = {
         return list
     },
 
-    showColorPicker(track) {
-        return (
-            undefined === track.type ||
-            "bedtype" === track.type ||
-            "alignment" === track.type ||
-            "annotation" === track.type ||
-            "variant" === track.type ||
-            "wig" === track.type) ||
-            'interact' === track.type
-    },
-
     createMenuItem(label, action) {
         const object = $('<div>')
         object.text(label)
@@ -159,6 +184,115 @@ const MenuUtils = {
     }
 }
 
+function groupAutoScaleMenuItem(trackView) {
+
+    const object = $('<div>')
+    object.text('AutoScale Group')
+
+    const click = () => {
+
+        const selectedTrackViews = getMultiSelectedTrackViews(trackView.browser)
+
+        if (selectedTrackViews) {
+
+            const scalableTrackViews = selectedTrackViews.filter(({ track }) => { return 'wig' === track.type })
+
+            if (scalableTrackViews.length > 0) {
+
+                const autoScaleGroupID = `auto-scale-group-${DOMUtils.guid()}`
+
+                for (trackView of scalableTrackViews) {
+
+                    if (undefined === trackView.track.autoscaleGroup) {
+                        trackView.track.autoscaleGroup = autoScaleGroupID
+                    }
+
+                } // for (scalableTrackViews)
+
+                trackView.browser.updateViews(true)
+
+            } // if (scalableTrackViews.length > 0)
+
+
+        } // if (selectedTrackViews)
+
+    }
+
+    return { object, click }
+
+}
+
+function trackMergeMenuItem(trackView) {
+
+    const object = $('<div>')
+    object.text('Merge tracks')
+
+    const click = () => {
+
+        const trackViews = getMultiSelectedTrackViews(trackView.browser)
+
+        if (trackViews) {
+
+            const trackOrders = []
+
+            const trackObjects = trackViews
+                .filter(({ track }) => { return 'wig' === track.type })
+                .map(({ track }) => { return track })
+
+            for (let trackObject of trackObjects) {
+                trackOrders.push(trackObject.order)
+                trackObject.config.color = trackObject.color
+            }
+
+            const tracks = trackObjects.map(trackObject => trackObject.config)
+
+            const browser = trackView.browser
+
+            for (let { track } of trackViews) {
+                browser.removeTrack(track)
+            }
+
+            const config =
+                {
+                    height: 128,
+                    name: `merged-tracks-${ DOMUtils.guid() }`,
+                    type: 'merged',
+                    order: Math.min(...trackOrders),
+                    tracks
+                }
+
+            browser.loadTrack(config)
+
+        }
+
+    }
+
+    return { object, click }
+
+}
+
+function trackUnMergeMenuItem(trackView) {
+
+    const object = $('<div>')
+    object.text('Separate tracks')
+
+    const click = () => {
+
+        const configs = trackView.track.config.tracks.map(mergedConfig => {
+            const config = { ...mergedConfig }
+            config.isMergedTrack = undefined
+            config.order = trackView.track.order
+            return config
+        })
+
+        const { browser, track } = trackView
+        browser.removeTrack(track)
+
+        browser.loadTrackList(configs)
+    }
+
+    return { object, click }
+}
 
 function visibilityWindowMenuItem(trackView) {
 
@@ -196,28 +330,42 @@ function trackRemovalMenuItem(trackView) {
     const object = $('<div>')
     object.text('Remove track')
 
-    return {object, click: () => trackView.browser.removeTrack(trackView.track)}
+    const click = () => {
+
+        const selected = getMultiSelectedTrackViews(trackView.browser)
+        if (selected && new Set(selected).has(trackView)) {
+
+            for (let { browser, track } of selected) {
+                browser.removeTrack(track)
+            }
+        } else {
+            trackView.browser.removeTrack(trackView.track)
+        }
+
+    }
+
+    return {object, click }
 
 }
 
 function colorPickerMenuItem({trackView, label, option}) {
 
-    const $e = $('<div>')
-    $e.text(label)
+    const object = $('<div>')
+    object.text(label)
 
     return {
-        object: $e,
+        object,
         click: () => trackView.presentColorPicker(option)
     }
 }
 
 function unsetColorMenuItem({trackView, label}) {
 
-    const $e = $('<div>')
-    $e.text(label)
+    const object = $('<div>')
+    object.text(label)
 
     return {
-        object: $e,
+        object,
         click: () => {
             trackView.track.color = undefined
             trackView.repaintViews()
@@ -263,24 +411,32 @@ function trackHeightMenuItem(trackView) {
 
             if (undefined !== number) {
 
-                // If explicitly setting the height adust min or max, if neccessary.
-                if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
-                    trackView.track.minHeight = number
-                }
-                if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
-                    trackView.track.minHeight = number
-                }
-                trackView.setTrackHeight(number, true)
+                const selected = getMultiSelectedTrackViews(trackView.browser)
 
-                trackView.checkContentHeight()
-                trackView.repaintViews()
+                const list = selected && new Set(selected).has(trackView) ? selected : [ trackView ]
 
+                for (let tv of list) {
 
-                // Explicitly setting track height turns off autoHeight
-                trackView.track.autoHeight = false
-            }
+                    // If explicitly setting the height adjust min or max, if necessary
+                    if (tv.track.minHeight !== undefined && tv.track.minHeight > number) {
+                        tv.track.minHeight = number
+                    }
+                    if (tv.track.maxHeight !== undefined && tv.track.maxHeight < number) {
+                        tv.track.minHeight = number
+                    }
+                    tv.setTrackHeight(number, true)
 
-        }
+                    tv.checkContentHeight()
+                    tv.repaintViews()
+
+                    // Explicitly setting track height turns off autoHeight
+                    tv.track.autoHeight = false
+
+                } // for (list)
+
+            } //if ()
+
+        } // callback
 
         const config =
             {
@@ -291,7 +447,7 @@ function trackHeightMenuItem(trackView) {
 
         trackView.browser.inputDialog.present(config, e)
 
-    }
+    } // click
 
     const object = $('<div>')
     object.text('Set track height')
@@ -309,5 +465,11 @@ function getTrackLabelText(track) {
 
     return txt
 }
+
+function canShowColorPicker(track) {
+    return undefined === track.type || colorPickerTrackTypeSet.has(track.type)
+}
+
+export { canShowColorPicker }
 
 export default MenuUtils
