@@ -42,10 +42,15 @@ const multiTrackSelectExclusionTypes = scrollbarExclusionTypes
 class TrackView {
 
     constructor(browser, columnContainer, track) {
+
+        this.namespace = `trackview-${DOMUtils.guid()}`
+
         this.browser = browser
         this.track = track
         track.trackView = this
+
         this.addDOMToColumnContainer(browser, columnContainer, browser.referenceFrameList)
+
     }
 
     /**
@@ -100,6 +105,9 @@ class TrackView {
         const axis = DOMUtils.div()
         browser.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
+        axis.dataset.tracktype = track.type
+
+
         axis.style.height = `${track.height}px`
 
         if (typeof track.paintAxis === 'function') {
@@ -116,6 +124,57 @@ class TrackView {
             this.axisCanvas.style.width = `${width}px`
             this.axisCanvas.style.height = `${height}px`
             axis.appendChild(this.axisCanvas)
+        }
+
+        if (false === multiTrackSelectExclusionTypes.has(this.track.type)) {
+            const trackSelectionContainer = DOMUtils.div()
+            axis.appendChild(trackSelectionContainer)
+
+            const html = `<input type="checkbox" name="track-select">`
+            const input = document.createRange().createContextualFragment(html).firstChild
+            trackSelectionContainer.appendChild(input)
+
+            input.addEventListener('change', event => {
+                setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
+            })
+
+            const enableTrackSelectInput = document.querySelector("[name=enable-multi-track-select]")
+            trackSelectionContainer.style.display = enableTrackSelectInput && enableTrackSelectInput.checked ? 'block' : 'none'
+
+            // trackSelectionContainer.style.display = true === browser.config.enabledMultiTrackSelect ? 'block' : 'none'
+
+        } else if ('ruler' === this.track.type) {
+
+            const container = DOMUtils.div()
+            axis.appendChild(container)
+
+            const html = `<input type="checkbox" name="enable-multi-track-select" title="toggle multi track selection">`
+            const input = document.createRange().createContextualFragment(html).firstChild
+            container.appendChild(input)
+
+            input.addEventListener('change', event => {
+
+                for (let trackView of this.browser.trackViews) {
+
+                    if (false === multiTrackSelectExclusionTypes.has(trackView.track.type)) {
+
+                        const container = trackView.axis.querySelector('div')
+
+                        if (true === input.checked) {
+                            container.style.display = 'block'
+                        } else {
+                            const trackSelectInput =  container.querySelector('[name=track-select]')
+                            trackSelectInput.checked = false
+                            setDragHandleSelectionState(trackView, trackView.dragHandle, false)
+                            container.style.display = 'none'
+                        }
+
+                    }
+
+                } // for (trackViews)
+            })
+
+            // container.style.display = true === browser.config.enabledMultiTrackSelect ? 'block' : 'none'
         }
 
         return axis
@@ -569,6 +628,27 @@ class TrackView {
         }
     }
 
+    viewportsToReload(force) {
+
+        // List of viewports that need reloading
+        const viewports = this.viewports.filter(viewport => {
+            if (!viewport.isVisible()) {
+                return false
+            }
+            if (!viewport.checkZoomIn()) {
+                return false
+            } else {
+                const referenceFrame = viewport.referenceFrame
+                const chr = viewport.referenceFrame.chr
+                const start = referenceFrame.start
+                const end = start + referenceFrame.toBP($(viewport.contentDiv).width())
+                const bpPerPixel = referenceFrame.bpPerPixel
+                return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel))
+            }
+        })
+        return viewports
+    }
+
     createTrackScrollbar(browser) {
 
         const outerScroll = DOMUtils.div()
@@ -588,13 +668,17 @@ class TrackView {
 
     createTrackDragHandle(browser) {
 
-        const className = 'ideogram' === this.track.type || 'ruler' === this.track.type ? 'igv-track-drag-shim' : 'igv-track-drag-handle'
-        this.dragHandle = DOMUtils.div({class: className})
+        if (true === multiTrackSelectExclusionTypes.has(this.track.type)) {
+            this.dragHandle = DOMUtils.div({ class: 'igv-track-drag-shim' })
+        } else {
+            this.dragHandle = DOMUtils.div({ class: 'igv-track-drag-handle' })
+            this.dragHandle.classList.add('igv-track-drag-handle-color')
+            this.dragHandle.dataset.selected = 'no'
+        }
+
         browser.columnContainer.querySelector('.igv-track-drag-column').appendChild(this.dragHandle)
-        this.dragHandle.style.height = `${this.track.height}px`
-
+        this.dragHandle.style.height = `${ this.track.height }px`
         this.addTrackDragMouseHandlers(browser)
-
     }
 
     createTrackGearPopup(browser) {
@@ -683,9 +767,7 @@ class TrackView {
 
     addTrackDragMouseHandlers(browser) {
 
-        if ('ideogram' === this.track.id || 'ruler' === this.track.id) {
-            // do nothing
-        } else {
+        if (false === multiTrackSelectExclusionTypes.has(this.track.type)) {
 
             let currentDragHandle = undefined
 
@@ -698,7 +780,10 @@ class TrackView {
                 event.preventDefault()
 
                 currentDragHandle = event.target
-                currentDragHandle.classList.add('igv-track-drag-handle-hover')
+                if ('no' === currentDragHandle.dataset.selected) {
+                    currentDragHandle.classList.remove('igv-track-drag-handle-color')
+                    currentDragHandle.classList.add('igv-track-drag-handle-hover-color')
+                }
 
                 browser.startTrackDrag(this)
 
@@ -713,7 +798,12 @@ class TrackView {
                 browser.endTrackDrag()
 
                 if (currentDragHandle && event.target !== currentDragHandle) {
-                    currentDragHandle.classList.remove('igv-track-drag-handle-hover')
+
+                    if ('no' === currentDragHandle.dataset.selected) {
+                        currentDragHandle.classList.remove('igv-track-drag-handle-hover-color')
+                        currentDragHandle.classList.add('igv-track-drag-handle-color')
+                    }
+
                 }
 
                 currentDragHandle = undefined
@@ -727,7 +817,10 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    event.target.classList.add('igv-track-drag-handle-hover')
+                    if ('no' === event.target.dataset.selected) {
+                        event.target.classList.remove('igv-track-drag-handle-color')
+                        event.target.classList.add('igv-track-drag-handle-hover-color')
+                    }
                 }
 
                 browser.updateTrackDrag(this)
@@ -735,11 +828,14 @@ class TrackView {
             }
 
             // Mouse Out
-            this.dragHandle.addEventListener('mouseout', e => {
-                e.preventDefault()
+            this.dragHandle.addEventListener('mouseout', event => {
+                event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    e.target.classList.remove('igv-track-drag-handle-hover')
+                    if ('no' === event.target.dataset.selected) {
+                        event.target.classList.remove('igv-track-drag-handle-hover-color')
+                        event.target.classList.add('igv-track-drag-handle-color')
+                    }
                 }
             })
 
@@ -750,7 +846,10 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    event.target.classList.remove('igv-track-drag-handle-hover')
+                    if ('no' === event.target.dataset.selected) {
+                        event.target.classList.remove('igv-track-drag-handle-hover-color')
+                        event.target.classList.add('igv-track-drag-handle-color')
+                    }
                 }
             }
 
@@ -760,7 +859,7 @@ class TrackView {
 
     removeTrackDragMouseHandlers() {
 
-        if ('ideogram' === this.track.id || 'ruler' === this.track.id) {
+        if ('ideogram' === this.track.type || 'ruler' === this.track.type) {
             // do nothing
         } else {
             this.dragHandle.removeEventListener('mousedown', this.boundTrackDragMouseDownHandler)
@@ -892,6 +991,22 @@ class TrackView {
 
     maxViewportContentHeight() {
         return Math.max(this.viewports.map(viewport => viewport.getContentHeight()))
+    }
+
+}
+
+function setDragHandleSelectionState(trackView, dragHandle, isSelected) {
+
+    if (isSelected) {
+        dragHandle.dataset.selected = trackView.namespace
+        dragHandle.classList.remove('igv-track-drag-handle-color')
+        dragHandle.classList.remove('igv-track-drag-handle-hover-color')
+        dragHandle.classList.add('igv-track-drag-handle-selected-color')
+    } else {
+        dragHandle.dataset.selected = 'no'
+        dragHandle.classList.remove('igv-track-drag-handle-hover-color')
+        dragHandle.classList.remove('igv-track-drag-handle-selected-color')
+        dragHandle.classList.add('igv-track-drag-handle-color')
     }
 
 }
