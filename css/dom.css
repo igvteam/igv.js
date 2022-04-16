@@ -1015,12 +1015,25 @@
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: stretch; }
+  .igv-roi-body > .igv-roi-table-body-row:not(:last-child) {
+    border-bottom-color: rgba(128, 128, 128, 0.5);
+    border-bottom-style: solid;
+    border-bottom-width: thin; }
   .igv-roi-body > div:last-child {
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
     border-bottom-color: transparent;
     border-bottom-style: solid;
     border-bottom-width: 0; }
+
+.igv-roi-table-body-row {
+  height: 24px;
+  padding-left: 8px;
+  font-size: small;
+  text-align: start;
+  vertical-align: middle;
+  line-height: 24px;
+  background-color: white; }
 
 .igv-roi-body-row {
   height: 24px;
