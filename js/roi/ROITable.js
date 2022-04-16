@@ -34,19 +34,30 @@ class ROITable {
                 'tangerine',
                 'honeydew',
                 'carnation'
-            ]
+            ];
 
-        colors.forEach(colorName => {
-            const row = DOMUtils.div({ class: 'igv-roi-body-row' })
+        [ 0, 1, 2, 3, 4 ].forEach((colorName, index) => {
+            const row = DOMUtils.div({ class: 'igv-roi-table-body-row' })
             bodyContainer.appendChild(row)
-            row.style.backgroundColor = appleCrayonRGB(colorName)
-            row.innerText = colorName
+            // row.style.backgroundColor = appleCrayonRGB(0 === index % 2 ? 'snow' : 'mercury')
+            // row.innerText = /*colorName*/''
         })
 
         makeDraggable(this.container, header)
 
         this.container.style.display = 'none'
 
+    }
+
+    present(x, y) {
+
+        // this.container.style.left = `${ x }px`
+        // this.container.style.top  = `${ y }px`
+
+        this.container.style.left = `${ 0 }px`
+        this.container.style.top  = `${ 0 }px`
+
+        this.container.style.display = 'flex'
     }
 }
 

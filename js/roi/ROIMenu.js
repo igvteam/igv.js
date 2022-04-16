@@ -33,11 +33,18 @@ class ROIMenu {
 
     }
 
-    present(x, y, roiSet, columnContainer, regionKey) {
+    present(x, y, roiSet, columnContainer, regionKey, roiTable) {
 
         removeAllChildNodes(this.bodyContainer)
 
-        const lut =
+        const presentLUT =
+            {
+                'Present Table': () => {
+                    roiTable.present(x, y)
+                },
+            };
+
+        const deleteLUT =
             {
                 'Delete': () => {
 
@@ -46,7 +53,7 @@ class ROIMenu {
                     const selector = `[data-region="${ regionKey }"]`
                     columnContainer.querySelectorAll(selector).forEach(node => node.remove())
 
-                    let [ _ignore_, __ignore__, ss, ee ] = regionKey.split('-')
+                    let [ _ignore_, _erongi_, ss, ee ] = regionKey.split('-')
                     ss = parseInt(ss)
                     ee = parseInt(ee)
 
@@ -60,23 +67,26 @@ class ROIMenu {
                         }
                     }
 
-                    console.log(`${ Date.now() } "${ roiSet.name }" indices ${ indices } index-to-remove ${indexToRemove  }`)
+                    // console.log(`${ Date.now() } "${ roiSet.name }" indices ${ indices } index-to-remove ${indexToRemove  }`)
+
                     roiSet.features.splice(indexToRemove, 1)
 
                 },
-            }
+            };
 
-        Object.keys(lut).forEach(word => {
+        const LUT = false === roiSet.isImmutable ? Object.assign(presentLUT, deleteLUT) : Object.assign({}, presentLUT)
+
+        Object.keys(LUT).forEach(word => {
 
             const row = DOMUtils.div({ class: 'igv-roi-body-row' })
             this.bodyContainer.appendChild(row)
             row.innerText = word
-            row.addEventListener('click', () => lut[ word ]())
+            row.addEventListener('click', () => LUT[ word ]())
         })
 
         this.container.style.left = `${ x }px`
         this.container.style.top  = `${ y }px`
-        this.container.style.display = 'block'
+        this.container.style.display = 'flex'
 
         columnContainer.addEventListener('click', event => {
 

@@ -49,19 +49,8 @@ class ROIManager {
     }
 
     async updateInteractiveROISet(region) {
-
         this.interativeROISet.features.push(region)
-
-        // const json = this.toJSON()
-        //
-        // const str = JSON.stringify(json)
-        // const parsed = JSON.parse(str)
-        //
-        // console.log(`${ JSON.stringify(json) }`)
-
         await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: this.interativeROISet})
-
-
     }
 
     async renderAllROISets() {
@@ -149,17 +138,17 @@ class ROIManager {
         header.style.backgroundColor = roiSet.color
         container.appendChild(header)
 
-        if (false === roiSet.isImmutable) {
+        // if (false === roiSet.isImmutable) {
 
             header.addEventListener('click', event => {
                 event.preventDefault()
                 event.stopPropagation()
 
                 const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-                this.roiMenu.present(x, y, roiSet, columnContainer, regionKey)
+                this.roiMenu.present(x, y, roiSet, columnContainer, regionKey, this.roiTable)
             })
 
-        }
+        // }
 
         return container
     }
