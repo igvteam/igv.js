@@ -4,8 +4,133 @@ $dimension: 24px;
 $igv-roi-table-width: 16 * $dimension;
 
 $igv-roi-table-border-radius: 2px;
+$igv-roi-dismiss-button-size: 12px;
 
 $igv-roi-table-font-face: 'Open Sans', sans-serif;
+
+// table container
+.igv-roi-table {
+  position: absolute;
+  z-index: 1024;
+
+  width:(16 * $dimension);
+
+  border-color: $igv-roi-border-color;
+  border-radius: $igv-roi-table-border-radius;
+  border-style: solid;
+  border-width: thin;
+
+  font-family: $igv-roi-table-font-face;
+  font-size: 12px;
+  font-weight: 400;
+
+  background-color: white;
+
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  // default div styling
+  >div {
+    width: 100%;
+    height: $dimension;
+
+    font-size: 14px;
+    text-align: start;
+    vertical-align: middle;
+    line-height: $dimension;
+
+    background-color: white;
+
+    border-bottom-color: $igv-roi-border-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+  }
+
+  // header
+  >div:nth-child(1) {
+
+    border-color: transparent;
+    border-top-left-radius: $igv-roi-table-border-radius;
+    border-top-right-radius: $igv-roi-table-border-radius;
+    border-top-width: 0;
+
+    border-bottom-color: $igv-roi-border-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
+    background-color: #D8D8D8;
+
+    cursor: move;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+
+    >div:first-child {
+      text-align: center;
+      width: calc(100% - 4px - #{$igv-roi-dismiss-button-size});
+      //background-color: rgba(3, 249, 135, 0.25);
+    }
+
+    >div:last-child {
+      margin-right: 4px;
+      margin-bottom: 2px;
+      height: $igv-roi-dismiss-button-size;
+      width: $igv-roi-dismiss-button-size;
+      color: $igv-roi-border-color;
+    }
+
+    >div:last-child:hover {
+      cursor: pointer;
+      color: #444;
+    }
+
+  }
+
+  // upper buttons
+  >div:nth-child(2) {
+    background-color: rgba(255, 127, 211, 0.49);
+  }
+
+  >.igv-roi-table-column-titles {
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: stretch;
+
+    background-color: rgba(1, 128, 255, 0.5);
+
+  }
+
+  >.igv-roi-table-row {
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: stretch;
+
+    background-color: rgba(108, 224, 120, 0.71);
+  }
+
+  // footer
+  >div:last-child {
+    border-color: transparent;
+    border-bottom-left-radius: $igv-roi-table-border-radius;
+    border-bottom-right-radius: $igv-roi-table-border-radius;
+    border-width: 0;
+    background-color: #D8D8D8;
+  }
+
+}
+
 
 // ROI region container
 .igv-roi-region {
@@ -43,33 +168,6 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     width: 100%;
     height: 8px;
   }
-}
-
-// table container
-.igv-roi-table {
-  position: absolute;
-  z-index: 1024;
-
-  width:(16 * $dimension);
-  height:(10 * $dimension);
-
-  border-color: grey;
-  border-radius: $igv-roi-table-border-radius;
-  border-style: solid;
-  border-width: thin;
-
-  font-family: $igv-roi-table-font-face;
-  font-size: 12px;
-  font-weight: 400;
-
-  background-color: white;
-
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: flex-start;
-
 }
 
 // menu container

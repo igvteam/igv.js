@@ -141,7 +141,7 @@ class ROIManager {
             event.stopPropagation()
 
             const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-            this.roiMenu.present(x, y, roiSet, columnContainer, regionKey, this.roiTable)
+            this.roiMenu.present(x, y, roiSet, columnContainer, regionKey, this)
         })
 
         return container
