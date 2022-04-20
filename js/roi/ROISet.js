@@ -30,9 +30,6 @@ import {appleCrayonRGBA, rgbaStringTokens} from '../util/colorPalletes.js'
 const ROI_DEFAULT_ALPHA = 1/16
 const ROI_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', ROI_DEFAULT_ALPHA)
 
-// TODO: Header is currently transparent. When menu is implemented header will have a color distinct from body color
-const ROI_HEADER_DEFAULT_COLOR = 'rgba(0,0,0,0)'
-
 class ROISet {
 
     constructor(config, genome) {
@@ -60,12 +57,12 @@ class ROISet {
 
         this.color = config.color || ROI_DEFAULT_COLOR
 
-        // Use ROI_HEADER_DEFAULT_COLOR (transparent) until header functionality becomes real
-        this.headerColor = ROI_HEADER_DEFAULT_COLOR
+        // TODO: Use transparent color until header functionality becomes real
+        // this.headerColor = 'rgba(0,0,0,0)'
 
         // Use body color with alpha pinned to 1
-        // const [ r, g, b, a ] = rgbaStringTokens(this.color)
-        // this.headerColor = `rgba(${ r },${ g },${ b },${ 1.0 })`
+        const [ r, g, b, a ] = rgbaStringTokens(this.color)
+        this.headerColor = `rgba(${ r },${ g },${ b },${ 1.0 })`
 
     }
 
@@ -101,6 +98,6 @@ function screenCoordinates(regionStartBP, regionEndBP, startBP, bpp) {
     return { x:xStart, width }
 }
 
-export { ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, screenCoordinates }
+export { ROI_DEFAULT_COLOR, screenCoordinates }
 
 export default ROISet

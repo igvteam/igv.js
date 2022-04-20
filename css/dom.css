@@ -911,7 +911,7 @@
   to {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg); } }
-.igv-roi {
+.igv-roi-region {
   cursor: pointer;
   z-index: 64;
   position: absolute;
@@ -927,12 +927,13 @@
   border-right-style: solid;
   border-right-color: #7f7f7f;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: nowrap;
   justify-content: flex-start;
-  align-items: flex-start; }
-  .igv-roi > div {
+  align-items: stretch; }
+  .igv-roi-region > div {
     position: relative;
+    pointer-events: auto;
     width: 100%;
     height: 8px; }
 
