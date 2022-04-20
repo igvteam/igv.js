@@ -26,14 +26,14 @@
 
 import FeatureSource from '../feature/featureSource.js'
 import IGVGraphics from "../igv-canvas.js"
-import { ROI_HEADER_DEFAULT_COLOR, screenCoordinates } from "./ROISet.js"
+import { ROI_DEFAULT_COLOR, screenCoordinates } from "./ROISet.js"
 
 class TrackROISet {
 
     constructor(config, genome) {
         this.name = config.name
         this.featureSource = config.featureSource || FeatureSource(config, genome)
-        this.color = config.color || ROI_HEADER_DEFAULT_COLOR
+        this.color = config.color || ROI_DEFAULT_COLOR
     }
 
     async getFeatures(chr, start, end) {
