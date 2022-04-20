@@ -7,8 +7,8 @@ $igv-roi-table-border-radius: 2px;
 
 $igv-roi-table-font-face: 'Open Sans', sans-serif;
 
-// ROISet container
-.igv-roi {
+// ROI region container
+.igv-roi-region {
   cursor: pointer;
   z-index: 64;
 
@@ -31,18 +31,17 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
   border-right-color: $igv-roi-border-color;
 
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex-wrap: nowrap;
   justify-content: flex-start;
-  align-items: flex-start;
+  align-items: stretch;
 
-  // ROISet header
+  // ROI region header
   >div {
     position: relative;
-    //pointer-events: auto;
+    pointer-events: auto;
     width: 100%;
     height: 8px;
-    //background-color: $igv-roi-border-color;
   }
 }
 

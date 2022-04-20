@@ -1,5 +1,5 @@
 import {DOMUtils,StringUtils} from '../../node_modules/igv-utils/src/index.js'
-import ROISet, {ROI_DEFAULT_COLOR, ROI_HEADER_DEFAULT_COLOR, screenCoordinates} from './ROISet.js'
+import ROISet, {ROI_DEFAULT_COLOR, screenCoordinates} from './ROISet.js'
 
 class ROIManager {
     constructor(browser, roiMenu, roiTable, top, roiSets) {
@@ -120,7 +120,7 @@ class ROIManager {
 
     createRegionElement(columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey) {
 
-        const container = DOMUtils.div({class: 'igv-roi'})
+        const container = DOMUtils.div({class: 'igv-roi-region'})
 
         container.style.top = `${pixelTop}px`
         container.style.left = `${pixelX}px`
@@ -136,17 +136,13 @@ class ROIManager {
         header.style.backgroundColor = roiSet.headerColor
         container.appendChild(header)
 
-        // if (false === roiSet.isImmutable) {
+        header.addEventListener('click', event => {
+            event.preventDefault()
+            event.stopPropagation()
 
-            header.addEventListener('click', event => {
-                event.preventDefault()
-                event.stopPropagation()
-
-                const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-                this.roiMenu.present(x, y, roiSet, columnContainer, regionKey, this.roiTable)
-            })
-
-        // }
+            const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
+            this.roiMenu.present(x, y, roiSet, columnContainer, regionKey, this.roiTable)
+        })
 
         return container
     }
