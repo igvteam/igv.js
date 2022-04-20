@@ -933,10 +933,8 @@
   align-items: flex-start; }
   .igv-roi > div {
     position: relative;
-    pointer-events: auto;
     width: 100%;
-    height: 8px;
-    background-color: #7f7f7f; }
+    height: 8px; }
 
 .igv-roi-table {
   position: absolute;

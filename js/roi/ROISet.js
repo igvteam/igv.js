@@ -25,11 +25,13 @@
  */
 
 import FeatureSource from '../feature/featureSource.js'
-import {appleCrayonRGBA} from '../util/colorPalletes.js'
+import {appleCrayonRGBA, rgbaStringTokens} from '../util/colorPalletes.js'
 
 const ROI_DEFAULT_ALPHA = 1/16
-const ROI_DEFAULT_COLOR = appleCrayonRGBA('steel', ROI_DEFAULT_ALPHA)
-const ROI_HEADER_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', 8 * ROI_DEFAULT_ALPHA)
+const ROI_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', ROI_DEFAULT_ALPHA)
+
+// TODO: Header is currently transparent. When menu is implemented header will have a color distinct from body color
+const ROI_HEADER_DEFAULT_COLOR = 'rgba(0,0,0,0)'
 
 class ROISet {
 
@@ -56,7 +58,15 @@ class ROISet {
             this.featureSource = config.featureSource || FeatureSource(config, genome)
         }
 
-        this.color = config.color || ROI_HEADER_DEFAULT_COLOR
+        this.color = config.color || ROI_DEFAULT_COLOR
+
+        // Use ROI_HEADER_DEFAULT_COLOR (transparent) until header functionality becomes real
+        this.headerColor = ROI_HEADER_DEFAULT_COLOR
+
+        // Use body color with alpha pinned to 1
+        // const [ r, g, b, a ] = rgbaStringTokens(this.color)
+        // this.headerColor = `rgba(${ r },${ g },${ b },${ 1.0 })`
+
     }
 
     async getFeatures(chr, start, end) {

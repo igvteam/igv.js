@@ -17,14 +17,12 @@ class ROIManager {
                 [
 
                 ],
-                color: ROI_HEADER_DEFAULT_COLOR
+                color: ROI_DEFAULT_COLOR
             };
 
         this.interativeROISet = new ROISet(interativeROISetConfig, browser.genome)
 
-        browser.on('locuschange',       () => this.renderAllROISets())
-        // browser.on('trackremoved',      () => this.paint(browser, top, this.roiSets))
-        // browser.on('trackorderchanged', () => this.paint(browser, top, this.roiSets))
+        browser.on('locuschange', () => this.renderAllROISets())
     }
 
     async initialize() {
@@ -129,13 +127,13 @@ class ROIManager {
 
         container.style.width = `${pixelWidth}px`
 
-        container.style.backgroundColor = ROI_DEFAULT_COLOR
+        container.style.backgroundColor = roiSet.color
 
         container.dataset.region = regionKey
 
         // header
         const header = DOMUtils.div()
-        header.style.backgroundColor = roiSet.color
+        header.style.backgroundColor = roiSet.headerColor
         container.appendChild(header)
 
         // if (false === roiSet.isImmutable) {
