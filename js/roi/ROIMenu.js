@@ -33,14 +33,14 @@ class ROIMenu {
 
     }
 
-    present(x, y, roiSet, columnContainer, regionKey, roiTable) {
+    present(x, y, roiSet, columnContainer, regionKey, roiManager) {
 
         removeAllChildNodes(this.bodyContainer)
 
         const presentLUT =
             {
                 'Present Table': () => {
-                    roiTable.present(x, y)
+                    roiManager.roiTable.present(x, y, roiManager.interativeROISet)
                 },
             };
 
