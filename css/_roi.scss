@@ -42,7 +42,7 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     vertical-align: middle;
     line-height: $dimension;
 
-    background-color: white;
+    //background-color: white;
 
     border-bottom-color: $igv-roi-border-color;
     border-bottom-style: solid;
@@ -94,19 +94,27 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
 
   // upper buttons
   >div:nth-child(2) {
-    background-color: rgba(255, 127, 211, 0.49);
+
+    background-color: #D8D8D8;
+
+    display: flex;
+    flex-flow: row-reverse;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+
+    >button {
+      cursor: pointer;
+    }
   }
 
   >.igv-roi-table-column-titles {
-
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-around;
     align-items: stretch;
-
-    background-color: rgba(1, 128, 255, 0.5);
-
+    background-color: #D8D8D8;
   }
 
   >.igv-roi-table-row {
@@ -116,21 +124,33 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     flex-wrap: nowrap;
     justify-content: space-around;
     align-items: stretch;
-
-    background-color: rgba(108, 224, 120, 0.71);
   }
 
-  // footer
+  // footer buttons
   >div:last-child {
     border-color: transparent;
     border-bottom-left-radius: $igv-roi-table-border-radius;
     border-bottom-right-radius: $igv-roi-table-border-radius;
     border-width: 0;
     background-color: #D8D8D8;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center;
+
+    >button {
+      cursor: pointer;
+    }
+
   }
 
 }
 
+.igv-roi-table-row-selected {
+  background-color: rgba(0, 0, 0, 0.05);
+}
 
 // ROI region container
 .igv-roi-region {
