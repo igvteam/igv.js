@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const div = document.getElementById("myDiv")
+    const options = {
+        locus: '1:67,655,272-67,684,468',
+        genome: "hg19",
+
+        // Define 2 "region of interest" sets, the first is global, the second specific to the track
+        roi:
+            [
+                {
+                    "name": "ROI with URL",
+                    "color": "rgba(255,1,199,0.25)",
+                    "url": "https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed"
+                },
+                {
+                    "name": "ROI with feature array",
+                    "color": "rgba(72,121,237,0.5)",
+                    "features": [
+                        {
+                            "chr": "1",
+                            "start": 67655415,
+                            "end": 67655611
+                        },
+                        {
+                            "chr": "1",
+                            "start": 67664225,
+                            "end": 67666281
+                        }
+                    ]
+                },
+                {
+                    "color": "rgba(3,249,135,0.0625)",
+                    "features": [
+                        {
+                            "chr": "chr1",
+                            "start": 67682776,
+                            "end": 67682980
+                        },
+                        {
+                            "chr": "chr1",
+                            "start": 67680501,
+                            "end": 67680559
+                        },
+                        {
+                            "chr": "chr1",
+                            "start": 67674900,
+                            "end": 67675280
+                        },
+                        {
+                            "chr": "chr1",
+                            "start": 67674375,
+                            "end": 67674667
+                        },
+                        {
+                            "chr": "chr1",
+                            "start": 67673121,
+                            "end": 67673530
+                        },
+                        {
+                            "chr": "chr1",
+                            "start": 67672217,
+                            "end": 67672655
+                        },
+                        {
+                            "chr": "chr1",
+                            "start": 67671313,
+                            "end": 67672100
+                        },
+                        {
+                            "chr": "chr1",
+                            "start": 67669796,
+                            "end": 67670613
+                        }
+                    ],
+                    "isUserDefined": true
+                }
+            ],
+        tracks:
+            [
+                {
+                    name: 'Some features',
+                    url: 'https://s3.amazonaws.com/igv.org.test/data/roi/some_features.bed',
+                    indexed: false,
+                }
+            ]
+    }
+
+    igv.createBrowser(div, options)
+
+</script>
+
+</body>
+
+</html>

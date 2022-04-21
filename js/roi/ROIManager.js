@@ -13,16 +13,31 @@ class ROIManager {
 
         this.top = top
 
-        this.roiSets = roiSets || []
+        this.roiSets = []
+        this.userDefinedROISet = undefined
 
-        const config =
-            {
-                isUserDefined: true,
-                features: [],
-                color: ROI_DEFAULT_COLOR
-            };
+        if (roiSets) {
 
-        this.userDefinedROISet = new ROISet(config, browser.genome)
+            for (let roiSet of roiSets) {
+                if (roiSet.isUserDefined) {
+                    this.userDefinedROISet = roiSet
+                } else {
+                    this.roiSets.push(roiSet)
+                }
+            }
+        }
+
+        if (undefined === this.userDefinedROISet) {
+
+            const config =
+                {
+                    isUserDefined: true,
+                    features: [],
+                    color: ROI_DEFAULT_COLOR
+                };
+
+            this.userDefinedROISet = new ROISet(config, browser.genome)
+        }
 
         browser.on('locuschange', () => this.renderAllROISets())
     }
@@ -156,7 +171,7 @@ class ROIManager {
     }
 }
 
-function deleteRegionWithKeyFromUserDefinedROiSet(userDefinedROISet, regionKey, columnContainer) {
+function deleteRegionWithKey(userDefinedROISet, regionKey, columnContainer) {
 
     const selector = `[data-region="${ regionKey }"]`
     columnContainer.querySelectorAll(selector).forEach(node => node.remove())
@@ -181,5 +196,5 @@ function deleteRegionWithKeyFromUserDefinedROiSet(userDefinedROISet, regionKey, 
 
 }
 
-export { deleteRegionWithKeyFromUserDefinedROiSet }
+export { deleteRegionWithKey }
 export default ROIManager

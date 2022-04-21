@@ -1,5 +1,5 @@
 import { StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
-import {deleteRegionWithKeyFromUserDefinedROiSet} from './ROIManager.js'
+import {deleteRegionWithKey} from './ROIManager.js'
 import {appleCrayonRGB, appleCrayonRGBA} from '../util/colorPalletes.js'
 
 const regionRemovalButtonStatusStack = []
@@ -17,7 +17,7 @@ class ROITable {
 
         this.columnTitle = createColumnTitleDOM(this.container)
 
-        this.footer = createFooterDOM(this.container)
+        this.footer = this.createFooterDOM(this.container)
 
         makeDraggable(this.container, this.header)
 
@@ -68,7 +68,7 @@ class ROITable {
             const removable = container.querySelectorAll('.igv-roi-table-row-selected')
 
             for (let regionElement of Array.from(removable)) {
-                deleteRegionWithKeyFromUserDefinedROiSet(this.browser.roiManager.userDefinedROISet, regionElement.dataset.region, this.browser.columnContainer)
+                deleteRegionWithKey(this.browser.roiManager.userDefinedROISet, regionElement.dataset.region, this.browser.columnContainer)
             }
 
         })
@@ -103,20 +103,47 @@ class ROITable {
         return dom
     }
 
-}
+    createFooterDOM(container) {
 
-const columnTitles =
-    [
-        'Chr',
-        'Start',
-        'End'
-    ]
+        const dom = DOMUtils.div()
+        container.appendChild(dom)
+
+        let fragment
+
+        // View Button
+        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-view-button">View</button>`)
+        dom.appendChild(fragment.firstChild)
+
+        const button = dom.querySelector('#igv-roi-table-view-button')
+        button.addEventListener('click', event => {
+            const json = this.browser.roiManager.toJSON()
+        })
+
+
+        // Import Button
+        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-import-button">Import</button>`)
+        dom.appendChild(fragment.firstChild)
+
+        // View Button
+        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-export-button">Export</button>`)
+        dom.appendChild(fragment.firstChild)
+
+        return dom
+    }
+
+}
 
 function createColumnTitleDOM(container) {
 
     const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
     container.appendChild(dom)
 
+    const columnTitles =
+        [
+            'Chr',
+            'Start',
+            'End'
+        ]
 
     columnTitles.forEach(title => {
         const col = DOMUtils.div()
@@ -151,28 +178,6 @@ function createHeaderDOM(container) {
 
     return header
 
-}
-
-function createFooterDOM(container) {
-
-    const dom = DOMUtils.div()
-    container.appendChild(dom)
-
-    let fragment
-
-    // View Button
-    fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-view-button">View</button>`)
-    dom.appendChild(fragment.firstChild)
-
-    // Import Button
-    fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-import-button">Import</button>`)
-    dom.appendChild(fragment.firstChild)
-
-    // View Button
-    fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-export-button">Export</button>`)
-    dom.appendChild(fragment.firstChild)
-
-    return dom
 }
 
 export default ROITable
