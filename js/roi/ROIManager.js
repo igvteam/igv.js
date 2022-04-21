@@ -10,17 +10,14 @@ class ROIManager {
         this.top = top
         this.roiSets = roiSets || []
 
-        const interativeROISetConfig =
+        const config =
             {
-                name: `Interactive ROI Set`,
-                features:
-                [
-
-                ],
+                isUserDefined: true,
+                features: [],
                 color: ROI_DEFAULT_COLOR
             };
 
-        this.interativeROISet = new ROISet(interativeROISetConfig, browser.genome)
+        this.userDefinedROISet = new ROISet(config, browser.genome)
 
         browser.on('locuschange', () => this.renderAllROISets())
     }
@@ -46,14 +43,14 @@ class ROIManager {
 
     }
 
-    async updateInteractiveROISet(region) {
-        this.interativeROISet.features.push(region)
-        await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: this.interativeROISet})
+    async updateUserDefinedROISet(region) {
+        this.userDefinedROISet.features.push(region)
+        await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: this.userDefinedROISet})
     }
 
     async renderAllROISets() {
 
-        const list = this.interativeROISet.features.length > 0 ? [ ...this.roiSets, this.interativeROISet ]  : this.roiSets
+        const list = this.userDefinedROISet.features.length > 0 ? [ ...this.roiSets, this.userDefinedROISet ]  : this.roiSets
 
         for (let roiSet of list) {
 
@@ -141,14 +138,15 @@ class ROIManager {
             event.stopPropagation()
 
             const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-            this.roiMenu.present(x, y, roiSet, columnContainer, regionKey, this)
+            // this.roiMenu.present(x, y, roiSet, columnContainer, regionKey, this)
+            this.roiTable.present(x, y, this.userDefinedROISet)
         })
 
         return container
     }
 
     toJSON() {
-        return [ ...this.roiSets, this.interativeROISet ].map(roiSet => roiSet.toJSON())
+        return [ ...this.roiSets, this.userDefinedROISet ].map(roiSet => roiSet.toJSON())
     }
 }
 

@@ -28,9 +28,10 @@ class ROITable {
 
     }
 
-    present(x, y, interativeROISet) {
+    present(x, y, userDefinedROISet) {
 
         const removable = this.container.querySelectorAll('.igv-roi-table-row')
+        Array.from(removable).forEach(el => el.remove())
 
         // this.container.style.left = `${ x }px`
         // this.container.style.top  = `${ y }px`
@@ -38,13 +39,15 @@ class ROITable {
         this.container.style.left = `${ 0 }px`
         this.container.style.top  = `${ 0 }px`
 
-        // const list = [ 0, 1, 2, 3, 4, 5, 6, 7, 8 ]
-        // interativeROISet.features.forEach(({ chr, start, end }) => {
-        //     const row = DOMUtils.div({ class: 'igv-roi-table-row' });
-        //     [ chr, start, end ]
-        //         .map((item, index) => 0 === index ? item : StringUtils.numberFormatter(item))
-        //     this.container.appendChild(row)
-        // })
+        if (userDefinedROISet.features && userDefinedROISet.features.length > 0) {
+
+            userDefinedROISet.features.reverse().forEach(({ chr, start, end }) => {
+                const row = createTableRowDOM(chr, start, end)
+                this.columnTitle.after(row)
+            })
+
+        }
+
 
 
         this.container.style.display = 'flex'
@@ -102,8 +105,7 @@ const columnTitles =
     [
         'Chr',
         'Start',
-        'End',
-        'ROI Set'
+        'End'
     ]
 
 function createColumnTitleDOM(container) {
@@ -121,8 +123,18 @@ function createColumnTitleDOM(container) {
     return dom
 }
 
-function createTableRowDOM(container) {
-    const dom = DOMUtils.div()
+function createTableRowDOM(chr, start, end) {
+
+    const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
+
+    const strings = [ chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end) ]
+    strings.forEach(string => {
+        const el = DOMUtils.div()
+        el.innerText = string
+        dom.appendChild(el)
+    })
+
+    return dom
 }
 
 export default ROITable
