@@ -67,7 +67,9 @@ class ROISet {
 
     toJSON() {
 
-        if (this.url) {
+        if (this.isUserDefined) {
+            return { color:this.color,features: this.features.slice(), isUserDefined: true }
+        } else if (this.url) {
             return { name: this.name, color:this.color, url: this.url }
         } else {
             return { name: this.name, color:this.color, features: this.features.slice() }
