@@ -5,9 +5,14 @@ class ROIManager {
     constructor(browser, roiMenu, roiTable, top, roiSets) {
 
         this.browser = browser
+
         this.roiMenu = roiMenu
+
         this.roiTable = roiTable
+        this.roiTable.browser = browser
+
         this.top = top
+
         this.roiSets = roiSets || []
 
         const config =
@@ -131,6 +136,7 @@ class ROIManager {
         // header
         const header = DOMUtils.div()
         header.style.backgroundColor = roiSet.headerColor
+
         container.appendChild(header)
 
         header.addEventListener('click', event => {

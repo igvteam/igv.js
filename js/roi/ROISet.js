@@ -35,13 +35,8 @@ class ROISet {
     constructor(config, genome) {
 
         this.name = config.name
-
-        if (config.url) {
-            this.url = config.url
-            this.isImmutable = true
-        } else {
-            this.isImmutable = false
-        }
+        this.url = config.url
+        this.isUserDefined = config.isUserDefined
 
         if (config.features) {
             this.features = config.features.slice()

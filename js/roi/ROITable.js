@@ -2,6 +2,8 @@ import { StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/i
 import {deleteRegionWithKeyFromUserDefinedROiSet} from './ROIManager.js'
 import {appleCrayonRGB, appleCrayonRGBA} from '../util/colorPalletes.js'
 
+const regionRemovalButtonStatusStack = []
+
 class ROITable {
 
     constructor(parent) {
@@ -36,10 +38,10 @@ class ROITable {
 
         if (userDefinedROISet.features && userDefinedROISet.features.length > 0) {
 
-            userDefinedROISet.features.reverse().forEach(({ chr, start, end }) => {
-                const row = createTableRowDOM(chr, start, end)
+            for (let { chr, start, end } of userDefinedROISet.features.reverse()) {
+                const row = this.createTableRowDOM(chr, start, end)
                 this.columnTitle.after(row)
-            })
+            }
 
         }
 
@@ -57,41 +59,57 @@ class ROITable {
 
         dom.appendChild(fragment.firstChild)
 
-        // dom.querySelector('#igv-roi-table-remove-button').addEventListener('click', event => {
-        //     event.stopPropagation()
-        //
-        //     const removable = container.querySelectorAll('.igv-roi-table-row-selected')
-        //
-        //     for (let regionElement of Array.from(removable)) {
-        //         deleteRegionWithKeyFromUserDefinedROiSet(this.browser.roiManager.userDefinedROISet, regionElement.dataset.region, this.browser.columnContainer)
-        //     }
-        //
-        // })
+        const button = dom.querySelector('#igv-roi-table-remove-button')
+        button.disabled = true
+
+        button.addEventListener('click', event => {
+            event.stopPropagation()
+
+            const removable = container.querySelectorAll('.igv-roi-table-row-selected')
+
+            for (let regionElement of Array.from(removable)) {
+                deleteRegionWithKeyFromUserDefinedROiSet(this.browser.roiManager.userDefinedROISet, regionElement.dataset.region, this.browser.columnContainer)
+            }
+
+        })
 
         return dom
     }
 
-}
+    createTableRowDOM(chr, start, end) {
 
-function createTableRowDOM(chr, start, end) {
+        const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
 
-    const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
+        dom.dataset.region = `region-key-${ start }-${ end }`
 
-    dom.dataset.region = `region-key-${ start }-${ end }`
+        const strings = [ chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end) ]
+        strings.forEach(string => {
+            const el = DOMUtils.div()
+            el.innerText = string
+            dom.appendChild(el)
+        })
 
-    const strings = [ chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end) ]
-    strings.forEach(string => {
-        const el = DOMUtils.div()
-        el.innerText = string
-        dom.appendChild(el)
-    })
+        const button = this.upperButton.querySelector('#igv-roi-table-remove-button')
 
-    dom.addEventListener('click', event => {
-        event.stopPropagation()
-        dom.classList.toggle('igv-roi-table-row-selected')
-    })
+        dom.addEventListener('click', event => {
 
-    return dom
+            event.stopPropagation()
+
+            dom.classList.toggle('igv-roi-table-row-selected')
+
+            if (dom.classList.contains('igv-roi-table-row-selected')) {
+                regionRemovalButtonStatusStack.push(1)
+            } else {
+                regionRemovalButtonStatusStack.pop()
+            }
+
+            button.disabled =  !(regionRemovalButtonStatusStack.length > 0)
+
+        })
+
+        return dom
+    }
+
 }
 
 const columnTitles =
