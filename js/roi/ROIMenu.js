@@ -40,7 +40,7 @@ class ROIMenu {
         const presentLUT =
             {
                 'Present Table': () => {
-                    roiManager.roiTable.present(x, y, roiManager.interativeROISet)
+                    roiManager.roiTable.present(x, y, roiManager.userDefinedROISet)
                 },
             };
 
