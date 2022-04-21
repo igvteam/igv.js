@@ -360,10 +360,15 @@ class SequenceTrack {
      * @returns {*|{}}
      */
     getState() {
-
-        const config = typeof super.getState === 'function' ? super.getState() : {}
-        if (this.reversed) config.revealed = true
-        if (this.frameTranslate) config.frameTranslate = true
+        const config = {
+            type: "sequence"
+        }
+        if (this.order !== defaultSequenceTrackOrder) {
+            config.order = this.order
+        }
+        if (this.reversed) {
+            config.revealed = true
+        }
         return config
     }
 
