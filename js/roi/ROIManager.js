@@ -150,4 +150,30 @@ class ROIManager {
     }
 }
 
+function deleteRegionWithKeyFromUserDefinedROiSet(userDefinedROISet, regionKey, columnContainer) {
+
+    const selector = `[data-region="${ regionKey }"]`
+    columnContainer.querySelectorAll(selector).forEach(node => node.remove())
+
+    let [ _ignore_, _erongi_, ss, ee ] = regionKey.split('-')
+    ss = parseInt(ss)
+    ee = parseInt(ee)
+
+    const indices = userDefinedROISet.features.map((feature, i) => i).join(' ')
+
+    let indexToRemove
+    for (let r = 0; r < userDefinedROISet.features.length; r++) {
+        const { start, end } = userDefinedROISet.features[ r ]
+        if (ss === start && ee === end) {
+            indexToRemove = r
+        }
+    }
+
+    // console.log(`${ Date.now() } "${ roiSet.name }" indices ${ indices } index-to-remove ${indexToRemove  }`)
+
+    userDefinedROISet.features.splice(indexToRemove, 1)
+
+}
+
+export { deleteRegionWithKeyFromUserDefinedROiSet }
 export default ROIManager
