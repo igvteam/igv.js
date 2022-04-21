@@ -79,30 +79,23 @@ class ROITable {
     createTableRowDOM(chr, start, end) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
-
         dom.dataset.region = `region-key-${ start }-${ end }`
 
         const strings = [ chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end) ]
-        strings.forEach(string => {
+        for (let string of strings) {
             const el = DOMUtils.div()
             el.innerText = string
             dom.appendChild(el)
-        })
+        }
 
         const button = this.upperButton.querySelector('#igv-roi-table-remove-button')
-
         dom.addEventListener('click', event => {
 
             event.stopPropagation()
 
             dom.classList.toggle('igv-roi-table-row-selected')
 
-            if (dom.classList.contains('igv-roi-table-row-selected')) {
-                regionRemovalButtonStatusStack.push(1)
-            } else {
-                regionRemovalButtonStatusStack.pop()
-            }
-
+            dom.classList.contains('igv-roi-table-row-selected') ? regionRemovalButtonStatusStack.push(1) : regionRemovalButtonStatusStack.pop()
             button.disabled =  !(regionRemovalButtonStatusStack.length > 0)
 
         })
