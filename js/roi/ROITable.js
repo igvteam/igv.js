@@ -2,7 +2,7 @@ import { StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/i
 import { createRegionKey, parseRegionKey, deleteRegionWithKey } from './ROIManager.js'
 import { appleCrayonRGB, appleCrayonRGBA } from '../util/colorPalletes.js'
 
-const regionRemovalButtonStatusStack = []
+const tableRowSelectionList = []
 
 class ROITable {
 
@@ -88,15 +88,21 @@ class ROITable {
             dom.appendChild(el)
         }
 
-        const button = this.upperButtonDOM.querySelector('#igv-roi-table-remove-button')
+        const regionRemovalButton = this.upperButtonDOM.querySelector('#igv-roi-table-remove-button')
+        
+        const regionViewButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
+        const regionImportButton = this.footerDOM.querySelector('#igv-roi-table-import-button')
+        const regionExportButton = this.footerDOM.querySelector('#igv-roi-table-export-button')
+
         dom.addEventListener('click', event => {
 
             event.stopPropagation()
 
             dom.classList.toggle('igv-roi-table-row-selected')
 
-            dom.classList.contains('igv-roi-table-row-selected') ? regionRemovalButtonStatusStack.push(1) : regionRemovalButtonStatusStack.pop()
-            button.disabled =  !(regionRemovalButtonStatusStack.length > 0)
+            dom.classList.contains('igv-roi-table-row-selected') ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
+
+            regionImportButton.disabled = regionExportButton.disabled = regionRemovalButton.disabled = regionViewButton.disabled = !(tableRowSelectionList.length > 0)
 
         })
 
@@ -114,8 +120,10 @@ class ROITable {
         fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-view-button">View</button>`)
         dom.appendChild(fragment.firstChild)
 
-        const button = dom.querySelector('#igv-roi-table-view-button')
-        button.addEventListener('click', event => {
+        const regionViewButton = dom.querySelector('#igv-roi-table-view-button')
+        regionViewButton.disabled = true
+
+        regionViewButton.addEventListener('click', event => {
 
             event.stopPropagation()
 
@@ -138,9 +146,27 @@ class ROITable {
         fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-import-button">Import</button>`)
         dom.appendChild(fragment.firstChild)
 
+        const regionImportButton = dom.querySelector('#igv-roi-table-import-button')
+        regionImportButton.disabled = true
+
+        regionImportButton.addEventListener('click', event => {
+
+            event.stopPropagation()
+
+        })
+
         // View Button
         fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-export-button">Export</button>`)
         dom.appendChild(fragment.firstChild)
+
+        const regionExportButton = dom.querySelector('#igv-roi-table-export-button')
+        regionExportButton.disabled = true
+
+        regionExportButton.addEventListener('click', event => {
+
+            event.stopPropagation()
+
+        })
 
         return dom
     }
