@@ -182,7 +182,7 @@ class TrackBase {
     }
 
     get supportsWholeGenome() {
-        return false
+        return this.config.supportsWholeGenome === true
     }
 
     /**
