@@ -91,7 +91,7 @@ class BWSource {
     }
 
     supportsWholeGenome() {
-        return this.reader.type === "bigwig" || this.defaultVisibilityWindow() <= 0
+        return this.reader.type === "bigwig"
     }
 
     async trackType() {

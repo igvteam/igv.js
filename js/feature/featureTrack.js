@@ -131,7 +131,15 @@ class FeatureTrack extends TrackBase {
     }
 
     get supportsWholeGenome() {
-        return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
+        if (this.config.supportsWholeGenome !== undefined) {
+            return this.config.supportsWholeGenome
+        } else if (this.featureSource && typeof this.featureSource.supportsWholeGenome === 'function') {
+            return this.featureSource.supportsWholeGenome()
+        } else {
+            if (this.visibilityWindow === undefined && (this.config.indexed === false || !this.config.indexURL)) {
+                return true
+            }
+        }
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
@@ -188,7 +196,7 @@ class FeatureTrack extends TrackBase {
             options.rowLastX = []
             options.rowLastLabelX = []
             for (let feature of featureList) {
-                if(feature.start > bpStart && feature.end < bpEnd) {
+                if (feature.start > bpStart && feature.end < bpEnd) {
                     const row = this.displayMode === "COLLAPSED" ? 0 : feature.row || 0
                     if (rowFeatureCount[row] === undefined) {
                         rowFeatureCount[row] = 1
