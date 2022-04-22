@@ -39,39 +39,12 @@ class ROIMenu {
 
         const presentLUT =
             {
-                'Present Table': () => {
-                    roiManager.roiTable.present(x, y, roiManager.userDefinedROISet)
-                },
+                'Present Table': () => {},
             };
 
         const deleteLUT =
             {
-                'Delete': () => {
-
-                    this.container.style.display = 'none'
-
-                    const selector = `[data-region="${ regionKey }"]`
-                    columnContainer.querySelectorAll(selector).forEach(node => node.remove())
-
-                    let [ _ignore_, _erongi_, ss, ee ] = regionKey.split('-')
-                    ss = parseInt(ss)
-                    ee = parseInt(ee)
-
-                    const indices = roiSet.features.map((feature, i) => i).join(' ')
-
-                    let indexToRemove
-                    for (let r = 0; r < roiSet.features.length; r++) {
-                        const { start, end } = roiSet.features[ r ]
-                        if (ss === start && ee === end) {
-                            indexToRemove = r
-                        }
-                    }
-
-                    // console.log(`${ Date.now() } "${ roiSet.name }" indices ${ indices } index-to-remove ${indexToRemove  }`)
-
-                    roiSet.features.splice(indexToRemove, 1)
-
-                },
+                'Delete': () => {},
             };
 
         const LUT = false === roiSet.isImmutable ? Object.assign(presentLUT, deleteLUT) : Object.assign({}, presentLUT)

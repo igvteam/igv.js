@@ -1,6 +1,6 @@
 import { StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
-import {deleteRegionWithKey} from './ROIManager.js'
-import {appleCrayonRGB, appleCrayonRGBA} from '../util/colorPalletes.js'
+import { createRegionKey, parseRegionKey, deleteRegionWithKey } from './ROIManager.js'
+import { appleCrayonRGB, appleCrayonRGBA } from '../util/colorPalletes.js'
 
 const regionRemovalButtonStatusStack = []
 
@@ -13,11 +13,11 @@ class ROITable {
 
         this.header = createHeaderDOM(this.container)
 
-        this.upperButton = this.createUpperButtonDOM(this.container)
+        this.upperButtonDOM = this.createUpperButtonDOM(this.container)
 
-        this.columnTitle = createColumnTitleDOM(this.container)
+        this.columnTitleDOM = createColumnTitleDOM(this.container)
 
-        this.footer = this.createFooterDOM(this.container)
+        this.footerDOM = this.createFooterDOM(this.container)
 
         makeDraggable(this.container, this.header)
 
@@ -40,7 +40,7 @@ class ROITable {
 
             for (let { chr, start, end } of userDefinedROISet.features.reverse()) {
                 const row = this.createTableRowDOM(chr, start, end)
-                this.columnTitle.after(row)
+                this.columnTitleDOM.after(row)
             }
 
         }
@@ -79,7 +79,7 @@ class ROITable {
     createTableRowDOM(chr, start, end) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
-        dom.dataset.region = `region-key-${ start }-${ end }`
+        dom.dataset.region = createRegionKey(chr, start, end)
 
         const strings = [ chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end) ]
         for (let string of strings) {
@@ -88,7 +88,7 @@ class ROITable {
             dom.appendChild(el)
         }
 
-        const button = this.upperButton.querySelector('#igv-roi-table-remove-button')
+        const button = this.upperButtonDOM.querySelector('#igv-roi-table-remove-button')
         dom.addEventListener('click', event => {
 
             event.stopPropagation()
@@ -116,7 +116,14 @@ class ROITable {
 
         const button = dom.querySelector('#igv-roi-table-view-button')
         button.addEventListener('click', event => {
-            const json = this.browser.roiManager.toJSON()
+
+            event.stopPropagation()
+
+            const selected = container.querySelectorAll('.igv-roi-table-row-selected')
+            for (let el of selected) {
+                console.log(`${el.dataset.region}`)
+            }
+
         })
 
 
