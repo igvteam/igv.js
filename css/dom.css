@@ -914,7 +914,7 @@
 .igv-roi-table {
   position: absolute;
   z-index: 1024;
-  width: 384px;
+  width: 480px;
   border-color: #7f7f7f;
   border-radius: 2px;
   border-style: solid;
@@ -934,18 +934,12 @@
     font-size: 14px;
     text-align: start;
     vertical-align: middle;
-    line-height: 24px;
-    border-bottom-color: #7f7f7f;
-    border-bottom-style: solid;
-    border-bottom-width: thin; }
+    line-height: 24px; }
   .igv-roi-table > div:nth-child(1) {
     border-color: transparent;
     border-top-left-radius: 2px;
     border-top-right-radius: 2px;
     border-top-width: 0;
-    border-bottom-color: #7f7f7f;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
     background-color: #D8D8D8;
     cursor: move;
     display: flex;
@@ -970,10 +964,13 @@
     line-height: 32px;
     background-color: #D8D8D8;
     display: flex;
-    flex-flow: row-reverse;
+    flex-flow: row;
     flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center; }
+    justify-content: space-around;
+    align-items: center;
+    border-bottom-color: #7f7f7f;
+    border-bottom-style: solid;
+    border-bottom-width: thin; }
     .igv-roi-table > div:nth-child(2) > button {
       cursor: pointer; }
   .igv-roi-table > .igv-roi-table-column-titles {
@@ -982,16 +979,21 @@
     flex-wrap: nowrap;
     justify-content: space-around;
     align-items: stretch;
-    background-color: #D8D8D8; }
+    background-color: #D8D8D8;
+    border-bottom-color: #7f7f7f;
+    border-bottom-style: solid;
+    border-bottom-width: thin; }
   .igv-roi-table > .igv-roi-table-row {
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-around;
     align-items: stretch; }
+  .igv-roi-table > .igv-roi-table-row:hover {
+    background-color: rgba(201, 201, 201, 0.25); }
   .igv-roi-table > div:last-child {
-    height: 32px;
-    line-height: 32px;
+    height: 24px;
+    line-height: 24px;
     border-color: transparent;
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
@@ -1001,7 +1003,10 @@
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-around;
-    align-items: center; }
+    align-items: center;
+    border-top-color: #7f7f7f;
+    border-top-style: solid;
+    border-top-width: thin; }
     .igv-roi-table > div:last-child > button {
       cursor: pointer; }
 

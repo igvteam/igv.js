@@ -18,7 +18,7 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
   position: absolute;
   z-index: 1024;
 
-  width:(16 * $dimension);
+  width:(20 * $dimension);
 
   border-color: $igv-roi-border-color;
   border-radius: $igv-roi-table-border-radius;
@@ -47,11 +47,9 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     vertical-align: middle;
     line-height: $dimension;
 
-    //background-color: white;
-
-    border-bottom-color: $igv-roi-border-color;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
+    //border-bottom-color: $igv-roi-border-color;
+    //border-bottom-style: solid;
+    //border-bottom-width: thin;
   }
 
   // header
@@ -61,10 +59,6 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     border-top-left-radius: $igv-roi-table-border-radius;
     border-top-right-radius: $igv-roi-table-border-radius;
     border-top-width: 0;
-
-    border-bottom-color: $igv-roi-border-color;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
 
     background-color: #D8D8D8;
 
@@ -106,14 +100,18 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     background-color: #D8D8D8;
 
     display: flex;
-    flex-flow: row-reverse;
+    flex-flow: row;
     flex-wrap: nowrap;
-    justify-content: flex-start;
+    justify-content: space-around;
     align-items: center;
 
     >button {
       cursor: pointer;
     }
+
+    border-bottom-color: $igv-roi-border-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
 
   }
 
@@ -123,7 +121,13 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     flex-wrap: nowrap;
     justify-content: space-around;
     align-items: stretch;
+
     background-color: #D8D8D8;
+
+    border-bottom-color: $igv-roi-border-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
   }
 
   >.igv-roi-table-row {
@@ -135,11 +139,15 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     align-items: stretch;
   }
 
+  >.igv-roi-table-row:hover {
+    background-color: rgba(201, 201, 201, 0.25);
+  }
+
   // footer buttons
   >div:last-child {
 
-    height: $dimension-large;
-    line-height: $dimension-large;
+    height: $dimension;
+    line-height: $dimension;
 
     border-color: transparent;
     border-bottom-left-radius: $igv-roi-table-border-radius;
@@ -156,6 +164,10 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     >button {
       cursor: pointer;
     }
+
+    border-top-color: $igv-roi-border-color;
+    border-top-style: solid;
+    border-top-width: thin;
 
   }
 
