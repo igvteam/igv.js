@@ -102,13 +102,13 @@ class ROIManager {
 
                     const { chr:regionChr, start:regionStartBP, end:regionEndBP } = regions[ r ]
 
-                    const regionKey = `region-key-${ regionStartBP }-${ regionEndBP }`
+                    const regionKey = createRegionKey(regionChr, regionStartBP, regionEndBP)
                     const selector = `[data-region="${ regionKey }"]`
 
                     const el = columns[ i ].querySelector(selector)
                     const isRegionInDOM = null !== el
 
-                    if (regionEndBP < startBP || regionStartBP > endBP || chr !== regionChr) {
+                    if (regionChr !== chr || regionEndBP < startBP || regionStartBP > endBP) {
 
                         if (isRegionInDOM) {
                             el.remove()
@@ -159,7 +159,6 @@ class ROIManager {
             event.stopPropagation()
 
             const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-            // this.roiMenu.present(x, y, roiSet, columnContainer, regionKey, this)
             this.roiTable.present(x, y, this.userDefinedROISet)
         })
 
@@ -171,21 +170,31 @@ class ROIManager {
     }
 }
 
+function createRegionKey(chr, start, end) {
+    return `region-key-${ chr }-${ start }-${ end }`
+}
+
+function parseRegionKey(regionKey) {
+    let [ _region_, _key_, chr, ss, ee ] = regionKey.split('-')
+    ss = parseInt(ss)
+    ee = parseInt(ee)
+
+    return { chr, start:ss, end:ee }
+}
+
 function deleteRegionWithKey(userDefinedROISet, regionKey, columnContainer) {
 
     const selector = `[data-region="${ regionKey }"]`
     columnContainer.querySelectorAll(selector).forEach(node => node.remove())
 
-    let [ _ignore_, _erongi_, ss, ee ] = regionKey.split('-')
-    ss = parseInt(ss)
-    ee = parseInt(ee)
+    const { chr:chrKey, start:startKey, end:endKey } = parseRegionKey(regionKey)
 
-    const indices = userDefinedROISet.features.map((feature, i) => i).join(' ')
+    // const indices = userDefinedROISet.features.map((feature, i) => i).join(' ')
 
     let indexToRemove
     for (let r = 0; r < userDefinedROISet.features.length; r++) {
-        const { start, end } = userDefinedROISet.features[ r ]
-        if (ss === start && ee === end) {
+        const { chr, start, end } = userDefinedROISet.features[ r ]
+        if (chrKey === chr && startKey === start && endKey === end) {
             indexToRemove = r
         }
     }
@@ -196,5 +205,5 @@ function deleteRegionWithKey(userDefinedROISet, regionKey, columnContainer) {
 
 }
 
-export { deleteRegionWithKey }
+export { createRegionKey, parseRegionKey, deleteRegionWithKey }
 export default ROIManager
