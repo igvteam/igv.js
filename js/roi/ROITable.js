@@ -1,4 +1,4 @@
-import { StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
+import { FileUtils, StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
 import { createRegionKey, parseRegionKey, deleteRegionWithKey } from './ROIManager.js'
 import { appleCrayonRGB, appleCrayonRGBA } from '../util/colorPalletes.js'
 
@@ -130,51 +130,67 @@ class ROITable {
         })
 
 
-        // Import Button
-        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-import-button">Import</button>`)
-        dom.appendChild(fragment.firstChild)
+        createROITableImportButton(dom, this.browser)
 
-        const regionImportButton = dom.querySelector('#igv-roi-table-import-button')
-        regionImportButton.disabled = true
-
-        regionImportButton.addEventListener('click', event => {
-
-            event.stopPropagation()
-
-        })
-
-        // View Button
-        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-export-button">Export</button>`)
-        dom.appendChild(fragment.firstChild)
-
-        const regionExportButton = dom.querySelector('#igv-roi-table-export-button')
-        regionExportButton.disabled = true
-
-        regionExportButton.addEventListener('click', event => {
-
-            event.stopPropagation()
-
-        })
+        createROITableExportButton(container, dom)
 
         return dom
     }
 
     setButtonState(isTableRowSelected) {
-
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
-
         const regionRemovalButton = this.upperButtonDOM.querySelector('#igv-roi-table-remove-button')
         const regionViewButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
-        const regionImportButton = this.footerDOM.querySelector('#igv-roi-table-import-button')
-        const regionExportButton = this.footerDOM.querySelector('#igv-roi-table-export-button')
-
-        regionImportButton.disabled =
-            regionExportButton.disabled =
-                regionRemovalButton.disabled =
-                    regionViewButton.disabled = !(tableRowSelectionList.length > 0)
-
+        regionRemovalButton.disabled = regionViewButton.disabled = !(tableRowSelectionList.length > 0)
     }
 
+}
+
+function createROITableImportButton(parent, browser) {
+
+    const button = DOMUtils.div({class: 'igv-roi-table-button'})
+    parent.append(button)
+
+    button.textContent = 'Import'
+    button.addEventListener('click', () => {
+        console.log('Import Regions from BED file')
+    })
+}
+
+function createROITableExportButton(container, parent) {
+
+    const button = DOMUtils.div({class: 'igv-roi-table-button'})
+    parent.append(button)
+
+    button.textContent = 'Export'
+    button.addEventListener('click', () => {
+
+        const elements = container.querySelectorAll('.igv-roi-table-row')
+        const lines = []
+        for (let el of elements) {
+            const { bedRecord } = parseRegionKey(el.dataset.region)
+            lines.push(bedRecord)
+        }
+
+        if (lines.length > 0) {
+
+            const blobParts = [ lines.join('\n') ]
+
+            const blobOptions =
+                {
+                    type : "text/plain;charset=utf-8"
+                }
+
+            const blob = new Blob(blobParts, blobOptions)
+
+            const path = 'igvjs-roi.bed'
+            const downloadUrl = URL.createObjectURL(blob)
+
+            FileUtils.download(path, downloadUrl)
+
+        }
+
+    })
 }
 
 function createColumnTitleDOM(container) {

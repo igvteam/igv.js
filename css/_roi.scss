@@ -1,7 +1,12 @@
 
-$igv-roi-border-color: #7f7f7f;
 $dimension: 24px;
+$dimension-large: 32px;
+
+$igv-roi-border-color: #7f7f7f;
+
 $igv-roi-table-width: 16 * $dimension;
+
+$igv-roi-table-button-height: 20px;
 
 $igv-roi-table-border-radius: 2px;
 $igv-roi-dismiss-button-size: 12px;
@@ -95,6 +100,9 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
   // upper buttons
   >div:nth-child(2) {
 
+    height: $dimension-large;
+    line-height: $dimension-large;
+
     background-color: #D8D8D8;
 
     display: flex;
@@ -106,6 +114,7 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
     >button {
       cursor: pointer;
     }
+
   }
 
   >.igv-roi-table-column-titles {
@@ -128,6 +137,10 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
 
   // footer buttons
   >div:last-child {
+
+    height: $dimension-large;
+    line-height: $dimension-large;
+
     border-color: transparent;
     border-bottom-left-radius: $igv-roi-table-border-radius;
     border-bottom-right-radius: $igv-roi-table-border-radius;
@@ -150,6 +163,40 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
 
 .igv-roi-table-row-selected {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.igv-roi-table-button {
+
+  height: $igv-roi-table-button-height;
+
+  user-select: none;
+
+  line-height: $igv-roi-table-button-height;
+
+  text-align: center;
+  vertical-align: middle;
+
+  font-family: $igv-default-font-face;
+  font-size: $igv-navbar-button-font-size;
+  font-weight: 200;
+
+  color: #363636;
+
+  padding-left: 6px;
+  padding-right: 6px;
+
+  background-color: rgba(0, 0, 0, 0.05);
+
+  border-color: #363636;
+  border-style: solid;
+  border-width: thin;
+  border-radius: $igv-roi-table-border-radius;
+}
+
+.igv-roi-table-button:hover {
+  cursor: pointer;
+  font-weight: 400;
+  background-color: rgba(0, 0, 0, 0.13);
 }
 
 // ROI region container

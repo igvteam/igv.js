@@ -179,7 +179,7 @@ function parseRegionKey(regionKey) {
     ss = parseInt(ss)
     ee = parseInt(ee)
 
-    return { chr, start:ss, end:ee, locus:`${chr}:${ss}-${ee}` }
+    return { chr, start:ss, end:ee, locus:`${chr}:${ss}-${ee}`, bedRecord:`${chr} ${ss} ${ee}` }
 }
 
 function deleteRegionWithKey(userDefinedROISet, regionKey, columnContainer) {
