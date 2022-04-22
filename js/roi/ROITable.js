@@ -13,7 +13,7 @@ class ROITable {
 
         const header = createHeaderDOM(this.container)
 
-        this.upperButtonDOM = this.createUpperButtonDOM(this.container)
+        this.upperButtonDOM = this.createButtonDOM(this.container)
 
         this.columnTitleDOM = createColumnTitleDOM(this.container)
 
@@ -48,21 +48,52 @@ class ROITable {
         this.container.style.display = 'flex'
     }
 
-    createUpperButtonDOM(container) {
+    createButtonDOM(container) {
 
         const dom = DOMUtils.div()
         container.appendChild(dom)
 
+        let fragment
+
+        // View Button
+        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-view-button">View</button>`)
+        dom.appendChild(fragment.firstChild)
+
+        const regionViewButton = dom.querySelector('#igv-roi-table-view-button')
+        regionViewButton.disabled = true
+
+        regionViewButton.addEventListener('click', event => {
+
+            event.stopPropagation()
+
+            const selected = container.querySelectorAll('.igv-roi-table-row-selected')
+            const loci = []
+            for (let el of selected) {
+                // console.log(`${el.dataset.region}`)
+                const { locus } = parseRegionKey(el.dataset.region)
+                loci.push(locus)
+            }
+
+            if (loci.length > 0) {
+                this.browser.search(loci.join(' '))
+            }
+
+        })
+
+        createROITableImportButton(dom, this.browser)
+
+        createROITableExportButton(container, dom)
+
         // Remove Button
         const html = `<button id="igv-roi-table-remove-button">Remove</button>`
-        const fragment = document.createRange().createContextualFragment(html)
+        fragment = document.createRange().createContextualFragment(html)
 
         dom.appendChild(fragment.firstChild)
 
-        const button = dom.querySelector('#igv-roi-table-remove-button')
-        button.disabled = true
+        const tableRowRemoveButton = dom.querySelector('#igv-roi-table-remove-button')
+        tableRowRemoveButton.disabled = true
 
-        button.addEventListener('click', event => {
+        tableRowRemoveButton.addEventListener('click', event => {
             event.stopPropagation()
 
             const removable = container.querySelectorAll('.igv-roi-table-row-selected')
@@ -98,6 +129,12 @@ class ROITable {
     }
 
     createFooterDOM(container) {
+        const dom = DOMUtils.div()
+        container.appendChild(dom)
+        return dom
+    }
+
+    __createFooterDOM(container) {
 
         const dom = DOMUtils.div()
         container.appendChild(dom)
@@ -129,7 +166,6 @@ class ROITable {
 
         })
 
-
         createROITableImportButton(dom, this.browser)
 
         createROITableExportButton(container, dom)
@@ -138,9 +174,12 @@ class ROITable {
     }
 
     setButtonState(isTableRowSelected) {
+
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
+
         const regionRemovalButton = this.upperButtonDOM.querySelector('#igv-roi-table-remove-button')
-        const regionViewButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
+        const    regionViewButton = this.upperButtonDOM.querySelector('#igv-roi-table-view-button')
+        
         regionRemovalButton.disabled = regionViewButton.disabled = !(tableRowSelectionList.length > 0)
     }
 
