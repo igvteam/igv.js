@@ -13,7 +13,7 @@ function pack(featureList, maxRows) {
         let r = 0
         const len = Math.min(rows.length, maxRows)
         for (r = 0; r < len; r++) {
-            if (feature.start > rows[r]) {
+            if (feature.start >= rows[r]) {
                 feature.row = r
                 rows[r] = feature.end
                 break
