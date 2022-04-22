@@ -188,9 +188,9 @@ class VariantTrack extends TrackBase {
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
         const vGap = ("SQUISHED" === this.displayMode) ? this.squishedVGap : this.expandedVGap
-        const rc = ("COLLAPSED" === this.displayMode) ? 1 : this.nVariantRows
+        const rowCount = ("COLLAPSED" === this.displayMode) ? 1 : this.nVariantRows
         const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
-        this.variantBandHeight = TOP_MARGIN + rc * (variantHeight + vGap)
+        this.variantBandHeight = TOP_MARGIN + rowCount * (variantHeight + vGap)
 
         const callSets = this.callSets
         const nCalls = this.getCallsetsLength()
@@ -323,15 +323,17 @@ class VariantTrack extends TrackBase {
         if (yOffset <= this.variantBandHeight) {
             // Variant
             const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
-            const variantRow = (Math.floor)((yOffset - TOP_MARGIN) / (variantHeight + vGap))
-            featureList = featureList.filter(f => f.row === variantRow)
+            const variantRow = Math.floor((yOffset - TOP_MARGIN) / (variantHeight + vGap))
+            if("COLLAPSED" !== this.displayMode) {
+                featureList = featureList.filter(f => f.row === variantRow)
+            }
         } else if (this.callSets) {
             const callSets = this.callSets
             const sampleY = yOffset - this.variantBandHeight
             const sampleRow = Math.floor(sampleY / this.sampleHeight)
             if (sampleRow >= 0 && sampleRow < callSets.length) {
                 const variantRow = Math.floor((sampleY - sampleRow * this.sampleHeight) / callHeight)
-                const variants = featureList.filter(f => f.row === variantRow)
+                const variants = "COLLAPSED" === this.displayMode ? featureList : featureList.filter(f => f.row === variantRow)
                 const cs = callSets[sampleRow]
                 featureList = variants.map(v => {
                     const call = v.calls[cs.id]
