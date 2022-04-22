@@ -120,8 +120,15 @@ class ROITable {
             event.stopPropagation()
 
             const selected = container.querySelectorAll('.igv-roi-table-row-selected')
+            const loci = []
             for (let el of selected) {
-                console.log(`${el.dataset.region}`)
+                // console.log(`${el.dataset.region}`)
+                const { locus } = parseRegionKey(el.dataset.region)
+                loci.push(locus)
+            }
+
+            if (loci.length > 0) {
+                this.browser.search(loci.join(' '))
             }
 
         })
