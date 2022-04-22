@@ -53,11 +53,11 @@ class ROISet {
         this.color = config.color || ROI_DEFAULT_COLOR
 
         // TODO: Use transparent color until header functionality becomes real
-        // this.headerColor = 'rgba(0,0,0,0)'
+        this.headerColor = 'rgba(0,0,0,0)'
 
         // Use body color with alpha pinned to 1
-        const [ r, g, b, a ] = rgbaStringTokens(this.color)
-        this.headerColor = `rgba(${ r },${ g },${ b },${ 1.0 })`
+        // const [ r, g, b, a ] = rgbaStringTokens(this.color)
+        // this.headerColor = `rgba(${ r },${ g },${ b },${ 1.0 })`
 
     }
 
