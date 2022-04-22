@@ -11,7 +11,7 @@ class ROITable {
         this.container = DOMUtils.div({ class: 'igv-roi-table' })
         parent.appendChild(this.container)
 
-        this.header = createHeaderDOM(this.container)
+        const header = createHeaderDOM(this.container)
 
         this.upperButtonDOM = this.createUpperButtonDOM(this.container)
 
@@ -19,7 +19,7 @@ class ROITable {
 
         this.footerDOM = this.createFooterDOM(this.container)
 
-        makeDraggable(this.container, this.header)
+        makeDraggable(this.container, header)
 
         this.container.style.display = 'none'
 
@@ -88,22 +88,10 @@ class ROITable {
             dom.appendChild(el)
         }
 
-        const regionRemovalButton = this.upperButtonDOM.querySelector('#igv-roi-table-remove-button')
-        
-        const regionViewButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
-        const regionImportButton = this.footerDOM.querySelector('#igv-roi-table-import-button')
-        const regionExportButton = this.footerDOM.querySelector('#igv-roi-table-export-button')
-
         dom.addEventListener('click', event => {
-
             event.stopPropagation()
-
             dom.classList.toggle('igv-roi-table-row-selected')
-
-            dom.classList.contains('igv-roi-table-row-selected') ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
-
-            regionImportButton.disabled = regionExportButton.disabled = regionRemovalButton.disabled = regionViewButton.disabled = !(tableRowSelectionList.length > 0)
-
+            this.setButtonState(dom.classList.contains('igv-roi-table-row-selected'))
         })
 
         return dom
@@ -169,6 +157,22 @@ class ROITable {
         })
 
         return dom
+    }
+
+    setButtonState(isTableRowSelected) {
+
+        isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
+
+        const regionRemovalButton = this.upperButtonDOM.querySelector('#igv-roi-table-remove-button')
+        const regionViewButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
+        const regionImportButton = this.footerDOM.querySelector('#igv-roi-table-import-button')
+        const regionExportButton = this.footerDOM.querySelector('#igv-roi-table-export-button')
+
+        regionImportButton.disabled =
+            regionExportButton.disabled =
+                regionRemovalButton.disabled =
+                    regionViewButton.disabled = !(tableRowSelectionList.length > 0)
+
     }
 
 }
