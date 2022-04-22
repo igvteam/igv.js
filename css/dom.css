@@ -966,6 +966,8 @@
       cursor: pointer;
       color: #444; }
   .igv-roi-table > div:nth-child(2) {
+    height: 32px;
+    line-height: 32px;
     background-color: #D8D8D8;
     display: flex;
     flex-flow: row-reverse;
@@ -988,6 +990,8 @@
     justify-content: space-around;
     align-items: stretch; }
   .igv-roi-table > div:last-child {
+    height: 32px;
+    line-height: 32px;
     border-color: transparent;
     border-bottom-left-radius: 2px;
     border-bottom-right-radius: 2px;
@@ -1003,6 +1007,29 @@
 
 .igv-roi-table-row-selected {
   background-color: rgba(0, 0, 0, 0.05); }
+
+.igv-roi-table-button {
+  height: 20px;
+  user-select: none;
+  line-height: 20px;
+  text-align: center;
+  vertical-align: middle;
+  font-family: "Open Sans", sans-serif;
+  font-size: 11px;
+  font-weight: 200;
+  color: #363636;
+  padding-left: 6px;
+  padding-right: 6px;
+  background-color: rgba(0, 0, 0, 0.05);
+  border-color: #363636;
+  border-style: solid;
+  border-width: thin;
+  border-radius: 2px; }
+
+.igv-roi-table-button:hover {
+  cursor: pointer;
+  font-weight: 400;
+  background-color: rgba(0, 0, 0, 0.13); }
 
 .igv-roi-region {
   cursor: pointer;
