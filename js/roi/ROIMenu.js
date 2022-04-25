@@ -2,7 +2,9 @@ import { DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/
 import {appleCrayonRGB, appleCrayonRGBA} from '../util/colorPalletes.js'
 
 class ROIMenu {
-    constructor(parent) {
+    constructor(browser, parent) {
+
+        this.browser = browser
 
         // container
         this.container = DOMUtils.div({ class: 'igv-roi-menu' })

@@ -6,12 +6,14 @@ const tableRowSelectionList = []
 
 class ROITable {
 
-    constructor(parent) {
+    constructor(browser, parent) {
+
+        this.browser = browser
 
         this.container = DOMUtils.div({ class: 'igv-roi-table' })
         parent.appendChild(this.container)
 
-        const header = createHeaderDOM(this.container)
+        const header = this.createHeaderDOM(this.container)
 
         this.upperButtonDOM = this.createButtonDOM(this.container)
 
@@ -19,9 +21,8 @@ class ROITable {
 
         this.footerDOM = this.createFooterDOM(this.container)
 
-        // TODO: must update igv-utils to get latest version of makeDraggable() that supports constraints
-        const { x:minX, y:minY } = document.querySelector('.igv-container').getBoundingClientRect()
-        makeDraggable(this.container, header, { minX, minY })
+        // const { x:minX, y:minY } = document.querySelector('.igv-container').getBoundingClientRect()
+        makeDraggable(this.container, header, { minX:0, minY:0 })
 
         this.container.style.display = 'none'
 
@@ -50,10 +51,39 @@ class ROITable {
         this.container.style.display = 'flex'
     }
 
+    dismiss() {
+        this.container.style.display = 'none'
+    }
+
     updateTable({ chr, start, end }) {
 
         const row = this.createTableRowDOM(chr, start, end)
         this.columnTitleDOM.after(row)
+
+    }
+
+    createHeaderDOM(container) {
+
+        // header
+        const header = DOMUtils.div()
+        container.appendChild(header)
+
+        // title
+        const title = DOMUtils.div()
+        header.appendChild(title)
+        title.innerText = 'Regions of Interest'
+
+        // dismiss button
+        const dismiss = DOMUtils.div()
+        header.appendChild(dismiss)
+        dismiss.appendChild(Icon.createIcon('times'))
+
+        dismiss.addEventListener('click', event => {
+            event.stopPropagation()
+            this.browser.roiTableControl.buttonHandler(false)
+        })
+
+        return header
 
     }
 
@@ -147,45 +177,6 @@ class ROITable {
         return dom
     }
 
-    __createFooterDOM(container) {
-
-        const dom = DOMUtils.div()
-        container.appendChild(dom)
-
-        let fragment
-
-        // View Button
-        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-view-button">View</button>`)
-        dom.appendChild(fragment.firstChild)
-
-        const regionViewButton = dom.querySelector('#igv-roi-table-view-button')
-        regionViewButton.disabled = true
-
-        regionViewButton.addEventListener('click', event => {
-
-            event.stopPropagation()
-
-            const selected = container.querySelectorAll('.igv-roi-table-row-selected')
-            const loci = []
-            for (let el of selected) {
-                // console.log(`${el.dataset.region}`)
-                const { locus } = parseRegionKey(el.dataset.region)
-                loci.push(locus)
-            }
-
-            if (loci.length > 0) {
-                this.browser.search(loci.join(' '))
-            }
-
-        })
-
-        createROITableImportButton(dom, this.browser)
-
-        createROITableExportButton(container, dom)
-
-        return dom
-    }
-
     setButtonState(isTableRowSelected) {
 
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
@@ -264,32 +255,6 @@ function createColumnTitleDOM(container) {
     })
 
     return dom
-}
-
-function createHeaderDOM(container) {
-
-    // header
-    const header = DOMUtils.div()
-    container.appendChild(header)
-
-    // title
-    const title = DOMUtils.div()
-    header.appendChild(title)
-    title.innerText = 'Regions of Interest'
-
-    // dismiss button
-    const dismiss = DOMUtils.div()
-    header.appendChild(dismiss)
-    dismiss.appendChild(Icon.createIcon('times'))
-
-    dismiss.addEventListener('click', event => {
-        event.stopPropagation()
-        event.preventDefault()
-        container.style.display = 'none'
-    })
-
-    return header
-
 }
 
 export default ROITable
