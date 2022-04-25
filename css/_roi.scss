@@ -58,12 +58,17 @@ $igv-roi-table-background-color: #eee;
   }
 
   // header
-  >div:nth-child(1) {
+  >div:first-child {
 
     border-color: transparent;
     border-top-left-radius: $igv-roi-table-border-radius;
     border-top-right-radius: $igv-roi-table-border-radius;
     border-top-width: 0;
+
+    border-bottom-color: $igv-roi-border-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
 
     background-color: $igv-roi-table-background-color;
 
@@ -97,28 +102,28 @@ $igv-roi-table-background-color: #eee;
   }
 
   // upper buttons
-  >div:nth-child(2) {
-
-    height: $dimension-large;
-    line-height: $dimension-large;
-
-    background-color: $igv-roi-table-background-color;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center;
-
-    >button {
-      cursor: pointer;
-    }
-
-    border-bottom-color: $igv-roi-border-color;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-
-  }
+  //>div:nth-child(2) {
+  //
+  //  height: $dimension-large;
+  //  line-height: $dimension-large;
+  //
+  //  background-color: $igv-roi-table-background-color;
+  //
+  //  display: flex;
+  //  flex-flow: row;
+  //  flex-wrap: nowrap;
+  //  justify-content: space-around;
+  //  align-items: center;
+  //
+  //  >button {
+  //    cursor: pointer;
+  //  }
+  //
+  //  border-bottom-color: $igv-roi-border-color;
+  //  border-bottom-style: solid;
+  //  border-bottom-width: thin;
+  //
+  //}
 
   // column titles
   >.igv-roi-table-column-titles {
@@ -175,13 +180,18 @@ $igv-roi-table-background-color: #eee;
   // footer buttons
   >div:last-child {
 
-    height: $dimension;
-    line-height: $dimension;
+    height: $dimension-large;
+    line-height: $dimension-large;
 
-    border-color: transparent;
+    border-top-color: $igv-roi-border-color;
+    border-top-style: solid;
+    border-top-width: thin;
+
+    border-bottom-color: transparent;
     border-bottom-left-radius: $igv-roi-table-border-radius;
     border-bottom-right-radius: $igv-roi-table-border-radius;
-    border-width: 0;
+    border-bottom-width: 0;
+
     background-color: $igv-roi-table-background-color;
 
     display: flex;
@@ -189,14 +199,6 @@ $igv-roi-table-background-color: #eee;
     flex-wrap: nowrap;
     justify-content: space-around;
     align-items: center;
-
-    >button {
-      cursor: pointer;
-    }
-
-    border-top-color: $igv-roi-border-color;
-    border-top-style: solid;
-    border-top-width: thin;
 
   }
 
@@ -218,7 +220,7 @@ $igv-roi-table-background-color: #eee;
   vertical-align: middle;
 
   font-family: $igv-default-font-face;
-  font-size: $igv-navbar-button-font-size;
+  font-size: 13px;
   font-weight: 400;
 
   color: black;
