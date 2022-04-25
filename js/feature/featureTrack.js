@@ -378,7 +378,7 @@ class FeatureTrack extends TrackBase {
         if (undefined === features || 0 === features.length) {
             return undefined
         }
-        
+
         if (features.length > 1) {
             features.sort((a, b) => (b.end - b.start) - (a.end - a.start))
         }

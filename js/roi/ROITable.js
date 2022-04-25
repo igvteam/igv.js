@@ -19,9 +19,10 @@ class ROITable {
 
         this.columnTitleDOM = createColumnTitleDOM(this.container)
 
+        this.tableRowContainerDOM = this.createTableRowContainerDOM(this.container)
+
         this.footerDOM = this.createFooterDOM(this.container)
 
-        // const { x:minX, y:minY } = document.querySelector('.igv-container').getBoundingClientRect()
         makeDraggable(this.container, header, { minX:0, minY:0 })
 
         this.container.style.display = 'none'
@@ -36,14 +37,15 @@ class ROITable {
         this.container.style.left = `${ 0 }px`
         this.container.style.top  = `${ 0 }px`
 
-        const removable = this.container.querySelectorAll('.igv-roi-table-row')
+        const removable = this.tableRowContainerDOM.querySelectorAll('.igv-roi-table-row')
         Array.from(removable).forEach(el => el.remove())
 
         if (userDefinedROISet.features && userDefinedROISet.features.length > 0) {
 
             for (let { chr, start, end } of userDefinedROISet.features.reverse()) {
                 const row = this.createTableRowDOM(chr, start, end)
-                this.columnTitleDOM.after(row)
+                // this.columnTitleDOM.after(row)
+                this.tableRowContainerDOM.appendChild(row)
             }
 
         }
@@ -58,8 +60,8 @@ class ROITable {
     updateTable({ chr, start, end }) {
 
         const row = this.createTableRowDOM(chr, start, end)
-        this.columnTitleDOM.after(row)
-
+        // this.columnTitleDOM.after(row)
+        this.tableRowContainerDOM.appendChild(row)
     }
 
     createHeaderDOM(container) {
@@ -146,6 +148,14 @@ class ROITable {
             }
 
         })
+
+        return dom
+    }
+
+    createTableRowContainerDOM(container) {
+
+        const dom = DOMUtils.div({ class: 'igv-roi-table-row-container' })
+        container.appendChild(dom)
 
         return dom
     }
