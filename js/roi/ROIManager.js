@@ -64,8 +64,13 @@ class ROIManager {
     }
 
     async updateUserDefinedROISet(region) {
+
         this.userDefinedROISet.features.push(region)
+
         await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: this.userDefinedROISet})
+
+        this.roiTable.updateTable(region)
+
     }
 
     async renderAllROISets() {

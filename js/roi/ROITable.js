@@ -19,7 +19,9 @@ class ROITable {
 
         this.footerDOM = this.createFooterDOM(this.container)
 
-        makeDraggable(this.container, header)
+        // TODO: must update igv-utils to get latest version of makeDraggable() that supports constraints
+        const { x:minX, y:minY } = document.querySelector('.igv-container').getBoundingClientRect()
+        makeDraggable(this.container, header, { minX, minY })
 
         this.container.style.display = 'none'
 
@@ -27,14 +29,14 @@ class ROITable {
 
     present(x, y, userDefinedROISet) {
 
-        const removable = this.container.querySelectorAll('.igv-roi-table-row')
-        Array.from(removable).forEach(el => el.remove())
-
         // this.container.style.left = `${ x }px`
         // this.container.style.top  = `${ y }px`
 
         this.container.style.left = `${ 0 }px`
         this.container.style.top  = `${ 0 }px`
+
+        const removable = this.container.querySelectorAll('.igv-roi-table-row')
+        Array.from(removable).forEach(el => el.remove())
 
         if (userDefinedROISet.features && userDefinedROISet.features.length > 0) {
 
@@ -46,6 +48,13 @@ class ROITable {
         }
 
         this.container.style.display = 'flex'
+    }
+
+    updateTable({ chr, start, end }) {
+
+        const row = this.createTableRowDOM(chr, start, end)
+        this.columnTitleDOM.after(row)
+
     }
 
     createButtonDOM(container) {
@@ -72,6 +81,10 @@ class ROITable {
                 // console.log(`${el.dataset.region}`)
                 const { locus } = parseRegionKey(el.dataset.region)
                 loci.push(locus)
+            }
+
+            for (let el of container.querySelectorAll('.igv-roi-table-row')) {
+                el.classList.remove('igv-roi-table-row-selected')
             }
 
             if (loci.length > 0) {
@@ -179,7 +192,7 @@ class ROITable {
 
         const regionRemovalButton = this.upperButtonDOM.querySelector('#igv-roi-table-remove-button')
         const    regionViewButton = this.upperButtonDOM.querySelector('#igv-roi-table-view-button')
-        
+
         regionRemovalButton.disabled = regionViewButton.disabled = !(tableRowSelectionList.length > 0)
     }
 
