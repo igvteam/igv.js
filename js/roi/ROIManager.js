@@ -108,9 +108,7 @@ class ROIManager {
                     const { chr:regionChr, start:regionStartBP, end:regionEndBP } = regions[ r ]
 
                     const regionKey = createRegionKey(regionChr, regionStartBP, regionEndBP)
-                    const selector = `[data-region="${ regionKey }"]`
-
-                    const el = columns[ i ].querySelector(selector)
+                    const el = columns[ i ].querySelector(createSelector(regionKey))
                     const isRegionInDOM = null !== el
 
                     if (regionChr !== chr || regionEndBP < startBP || regionStartBP > endBP) {
@@ -175,22 +173,9 @@ class ROIManager {
     }
 }
 
-function createRegionKey(chr, start, end) {
-    return `region-key-${ chr }-${ start }-${ end }`
-}
-
-function parseRegionKey(regionKey) {
-    let [ _region_, _key_, chr, ss, ee ] = regionKey.split('-')
-    ss = parseInt(ss)
-    ee = parseInt(ee)
-
-    return { chr, start:ss, end:ee, locus:`${chr}:${ss}-${ee}`, bedRecord:`${chr} ${ss} ${ee}` }
-}
-
 function deleteRegionWithKey(userDefinedROISet, regionKey, columnContainer) {
 
-    const selector = `[data-region="${ regionKey }"]`
-    columnContainer.querySelectorAll(selector).forEach(node => node.remove())
+    columnContainer.querySelectorAll(createSelector(regionKey)).forEach(node => node.remove())
 
     const { chr:chrKey, start:startKey, end:endKey } = parseRegionKey(regionKey)
 
@@ -210,5 +195,22 @@ function deleteRegionWithKey(userDefinedROISet, regionKey, columnContainer) {
 
 }
 
+function createRegionKey(chr, start, end) {
+    return `region-key-${ chr }-${ start }-${ end }`
+}
+
+function createSelector(regionKey) {
+    return `[data-region="${ regionKey }"]`
+}
+
+function parseRegionKey(regionKey) {
+    let [ _region_, _key_, chr, ss, ee ] = regionKey.split('-')
+    ss = parseInt(ss)
+    ee = parseInt(ee)
+
+    return { chr, start:ss, end:ee, locus:`${chr}:${ss}-${ee}`, bedRecord:`${chr} ${ss} ${ee}` }
+}
+
 export { createRegionKey, parseRegionKey, deleteRegionWithKey }
+
 export default ROIManager
