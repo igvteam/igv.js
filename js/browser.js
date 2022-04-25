@@ -78,6 +78,7 @@ import ROIManager from './roi/ROIManager.js'
 import ROITable from './roi/ROITable.js'
 import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
+import ROITableControl from './ui/roiTableControl.js'
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -148,6 +149,8 @@ class Browser {
         }
 
         this.trackLabelsVisible = config.showTrackLabels
+
+        this.roiTableVisible = config.showROITable
 
         this.isCenterLineVisible = config.showCenterGuide
 
@@ -257,6 +260,9 @@ class Browser {
 
         this.setTrackLabelVisibility(config.showTrackLabels)
         this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), this)
+
+        // ROI Control
+        this.roiTableControl = new ROITableControl($toggle_button_container.get(0), this)
 
         this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
 
@@ -501,8 +507,8 @@ class Browser {
             }
         }
 
-        const roiTable = new ROITable(this.columnContainer)
-        const roiMenu = new ROIMenu(this.columnContainer)
+        const roiTable = new ROITable(this, this.columnContainer)
+        const roiMenu = new ROIMenu(this, this.columnContainer)
         if (session.roi) {
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, session.roi.map(roiSetConfig => {
                 return new ROISet(roiSetConfig, this.genome)
@@ -674,6 +680,10 @@ class Browser {
 
     setTrackLabelVisibility(isVisible) {
         toggleTrackLabels(this.trackViews, isVisible)
+    }
+
+    setROITableVisibility(isVisible) {
+        true === isVisible ? this.roiManager.presentTable() : this.roiManager.dismissTable()
     }
 
     // cursor guide

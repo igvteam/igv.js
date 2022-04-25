@@ -9,7 +9,6 @@ class ROIManager {
         this.roiMenu = roiMenu
 
         this.roiTable = roiTable
-        this.roiTable.browser = browser
 
         this.top = top
 
@@ -61,6 +60,14 @@ class ROIManager {
             await Promise.all(promises)
         }
 
+    }
+
+    presentTable() {
+        this.roiTable.present(0, 0, this.userDefinedROISet)
+    }
+
+    dismissTable() {
+        this.roiTable.dismiss()
     }
 
     async updateUserDefinedROISet(region) {
@@ -157,13 +164,13 @@ class ROIManager {
 
         container.appendChild(header)
 
-        header.addEventListener('click', event => {
-            event.preventDefault()
-            event.stopPropagation()
-
-            const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-            this.roiTable.present(x, y, this.userDefinedROISet)
-        })
+        // header.addEventListener('click', event => {
+        //     event.preventDefault()
+        //     event.stopPropagation()
+        //
+        //     const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
+        //     this.roiTable.present(x, y, this.userDefinedROISet)
+        // })
 
         return container
     }
