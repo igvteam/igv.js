@@ -15,7 +15,7 @@ class ROITable {
 
         const header = this.createHeaderDOM(this.container)
 
-        this.upperButtonDOM = this.createButtonDOM(this.container)
+        // this.upperButtonDOM = this.createButtonDOM(this.container)
 
         this.columnTitleDOM = createColumnTitleDOM(this.container)
 
@@ -29,27 +29,9 @@ class ROITable {
 
     }
 
-    present(x, y, userDefinedROISet) {
-
-        // this.container.style.left = `${ x }px`
-        // this.container.style.top  = `${ y }px`
-
+    present() {
         this.container.style.left = `${ 0 }px`
         this.container.style.top  = `${ 0 }px`
-
-        const removable = this.tableRowContainerDOM.querySelectorAll('.igv-roi-table-row')
-        Array.from(removable).forEach(el => el.remove())
-
-        if (userDefinedROISet.features && userDefinedROISet.features.length > 0) {
-
-            for (let { chr, start, end } of userDefinedROISet.features.reverse()) {
-                const row = this.createTableRowDOM(chr, start, end)
-                // this.columnTitleDOM.after(row)
-                this.tableRowContainerDOM.appendChild(row)
-            }
-
-        }
-
         this.container.style.display = 'flex'
     }
 
@@ -57,11 +39,20 @@ class ROITable {
         this.container.style.display = 'none'
     }
 
-    updateTable({ chr, start, end }) {
+    renderTable(userDefinedROISet) {
 
-        const row = this.createTableRowDOM(chr, start, end)
-        // this.columnTitleDOM.after(row)
-        this.tableRowContainerDOM.appendChild(row)
+        Array.from(this.tableRowContainerDOM.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
+
+        if (userDefinedROISet.features && userDefinedROISet.features.length > 0) {
+
+            const sortedFeatures = userDefinedROISet.features.sort((a,b) => (a.chr.localeCompare(b.chr) || a.start - b.start || a.end - b.end))
+
+            for (let { chr, start, end } of sortedFeatures) {
+                const row = this.createTableRowDOM(chr, start, end)
+                this.tableRowContainerDOM.appendChild(row)
+            }
+
+        }
     }
 
     createHeaderDOM(container) {
@@ -100,10 +91,10 @@ class ROITable {
         fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-view-button">View</button>`)
         dom.appendChild(fragment.firstChild)
 
-        const regionViewButton = dom.querySelector('#igv-roi-table-view-button')
-        regionViewButton.disabled = true
+        const viewButton = dom.querySelector('#igv-roi-table-view-button')
+        viewButton.disabled = true
 
-        regionViewButton.addEventListener('click', event => {
+        viewButton.addEventListener('click', event => {
 
             event.stopPropagation()
 
@@ -125,20 +116,14 @@ class ROITable {
 
         })
 
-        createROITableImportButton(dom, this.browser)
-
-        createROITableExportButton(container, dom)
-
         // Remove Button
-        const html = `<button id="igv-roi-table-remove-button">Remove</button>`
-        fragment = document.createRange().createContextualFragment(html)
-
+        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-remove-button">Remove</button>`)
         dom.appendChild(fragment.firstChild)
 
-        const tableRowRemoveButton = dom.querySelector('#igv-roi-table-remove-button')
-        tableRowRemoveButton.disabled = true
+        const removeButton = dom.querySelector('#igv-roi-table-remove-button')
+        removeButton.disabled = true
 
-        tableRowRemoveButton.addEventListener('click', event => {
+        removeButton.addEventListener('click', event => {
             event.stopPropagation()
 
             const removable = container.querySelectorAll('.igv-roi-table-row-selected')
@@ -148,6 +133,12 @@ class ROITable {
             }
 
         })
+
+        // Import Button
+        createROITableImportButton(dom, this.browser)
+
+        // Export Button
+        createROITableExportButton(container, dom)
 
         return dom
     }
@@ -182,6 +173,69 @@ class ROITable {
     }
 
     createFooterDOM(container) {
+
+        const dom = DOMUtils.div()
+        container.appendChild(dom)
+
+        let fragment
+
+        // View Button
+        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-view-button">View</button>`)
+        dom.appendChild(fragment.firstChild)
+
+        const viewButton = dom.querySelector('#igv-roi-table-view-button')
+        viewButton.disabled = true
+
+        viewButton.addEventListener('click', event => {
+
+            event.stopPropagation()
+
+            const selected = container.querySelectorAll('.igv-roi-table-row-selected')
+            const loci = []
+            for (let el of selected) {
+                // console.log(`${el.dataset.region}`)
+                const { locus } = parseRegionKey(el.dataset.region)
+                loci.push(locus)
+            }
+
+            for (let el of container.querySelectorAll('.igv-roi-table-row')) {
+                el.classList.remove('igv-roi-table-row-selected')
+            }
+
+            if (loci.length > 0) {
+                this.browser.search(loci.join(' '))
+            }
+
+        })
+
+        // Remove Button
+        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-remove-button">Remove</button>`)
+        dom.appendChild(fragment.firstChild)
+
+        const removeButton = dom.querySelector('#igv-roi-table-remove-button')
+        removeButton.disabled = true
+
+        removeButton.addEventListener('click', event => {
+            event.stopPropagation()
+
+            const removable = container.querySelectorAll('.igv-roi-table-row-selected')
+
+            for (let regionElement of Array.from(removable)) {
+                deleteRegionWithKey(this.browser.roiManager.userDefinedROISet, regionElement.dataset.region, this.browser.columnContainer)
+            }
+
+        })
+
+        // Import Button
+        createROITableImportButton(dom, this.browser)
+
+        // Export Button
+        createROITableExportButton(container, dom)
+
+        return dom
+    }
+
+    __createFooterDOM(container) {
         const dom = DOMUtils.div()
         container.appendChild(dom)
         return dom
@@ -191,8 +245,8 @@ class ROITable {
 
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
 
-        const regionRemovalButton = this.upperButtonDOM.querySelector('#igv-roi-table-remove-button')
-        const    regionViewButton = this.upperButtonDOM.querySelector('#igv-roi-table-view-button')
+        const regionRemovalButton = this.footerDOM.querySelector('#igv-roi-table-remove-button')
+        const    regionViewButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
 
         regionRemovalButton.disabled = regionViewButton.disabled = !(tableRowSelectionList.length > 0)
     }

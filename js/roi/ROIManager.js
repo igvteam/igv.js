@@ -63,7 +63,7 @@ class ROIManager {
     }
 
     presentTable() {
-        this.roiTable.present(0, 0, this.userDefinedROISet)
+        this.roiTable.present()
     }
 
     dismissTable() {
@@ -76,7 +76,7 @@ class ROIManager {
 
         await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: this.userDefinedROISet})
 
-        this.roiTable.updateTable(region)
+        this.roiTable.renderTable(this.userDefinedROISet)
 
     }
 
@@ -158,19 +158,10 @@ class ROIManager {
 
         container.dataset.region = regionKey
 
-        // header
         const header = DOMUtils.div()
         header.style.backgroundColor = roiSet.headerColor
 
         container.appendChild(header)
-
-        // header.addEventListener('click', event => {
-        //     event.preventDefault()
-        //     event.stopPropagation()
-        //
-        //     const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-        //     this.roiTable.present(x, y, this.userDefinedROISet)
-        // })
 
         return container
     }

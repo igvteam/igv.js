@@ -935,11 +935,14 @@
     text-align: start;
     vertical-align: middle;
     line-height: 24px; }
-  .igv-roi-table > div:nth-child(1) {
+  .igv-roi-table > div:first-child {
     border-color: transparent;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border-top-width: 0;
+    border-bottom-color: #7f7f7f;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
     background-color: #eee;
     cursor: move;
     display: flex;
@@ -947,32 +950,18 @@
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center; }
-    .igv-roi-table > div:nth-child(1) > div:first-child {
+    .igv-roi-table > div:first-child > div:first-child {
       text-align: center;
       width: calc(100% - 4px - 12px); }
-    .igv-roi-table > div:nth-child(1) > div:last-child {
+    .igv-roi-table > div:first-child > div:last-child {
       margin-right: 4px;
       margin-bottom: 2px;
       height: 12px;
       width: 12px;
       color: #7f7f7f; }
-    .igv-roi-table > div:nth-child(1) > div:last-child:hover {
+    .igv-roi-table > div:first-child > div:last-child:hover {
       cursor: pointer;
       color: #444; }
-  .igv-roi-table > div:nth-child(2) {
-    height: 32px;
-    line-height: 32px;
-    background-color: #eee;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center;
-    border-bottom-color: #7f7f7f;
-    border-bottom-style: solid;
-    border-bottom-width: thin; }
-    .igv-roi-table > div:nth-child(2) > button {
-      cursor: pointer; }
   .igv-roi-table > .igv-roi-table-column-titles {
     display: flex;
     flex-flow: row;
@@ -1006,23 +995,21 @@
       justify-content: space-around;
       align-items: stretch; }
   .igv-roi-table > div:last-child {
-    height: 24px;
-    line-height: 24px;
-    border-color: transparent;
+    height: 32px;
+    line-height: 32px;
+    border-top-color: #7f7f7f;
+    border-top-style: solid;
+    border-top-width: thin;
+    border-bottom-color: transparent;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-    border-width: 0;
+    border-bottom-width: 0;
     background-color: #eee;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-around;
-    align-items: center;
-    border-top-color: #7f7f7f;
-    border-top-style: solid;
-    border-top-width: thin; }
-    .igv-roi-table > div:last-child > button {
-      cursor: pointer; }
+    align-items: center; }
 
 .igv-roi-table-row-selected {
   background-color: rgba(0, 0, 0, 0.05); }
@@ -1034,7 +1021,7 @@
   text-align: center;
   vertical-align: middle;
   font-family: "Open Sans", sans-serif;
-  font-size: 11px;
+  font-size: 13px;
   font-weight: 400;
   color: black;
   padding-left: 6px;
