@@ -1,6 +1,7 @@
 import { FileUtils, StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
 import { createRegionKey, parseRegionKey, deleteRegionWithKey } from './ROIManager.js'
 import { appleCrayonRGB, appleCrayonRGBA } from '../util/colorPalletes.js'
+import FeatureFileReader from "../feature/featureFileReader.js"
 
 const tableRowSelectionList = []
 
@@ -189,10 +190,10 @@ class ROITable {
 
             const [ file ] = event.target.files
 
-            const text = await file.text()
+            const reader = new FeatureFileReader({ url: file }, undefined)
+            const features = await reader.loadFeaturesNoIndex()
 
-            for (let line of text.trim().split('\n')) {
-                const [ chr, start, end ] = line.split('\t').map((item, index) => 0 === index ? item : parseInt(item))
+            for (let { chr, start, end } of features) {
                 await this.browser.roiManager.updateUserDefinedROISet({ chr, start, end })
             }
 
