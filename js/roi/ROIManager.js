@@ -60,6 +60,8 @@ class ROIManager {
             await Promise.all(promises)
         }
 
+        this.roiTable.renderTable(this.userDefinedROISet)
+
     }
 
     presentTable() {

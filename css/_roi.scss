@@ -101,30 +101,6 @@ $igv-roi-table-background-color: #eee;
 
   }
 
-  // upper buttons
-  //>div:nth-child(2) {
-  //
-  //  height: $dimension-large;
-  //  line-height: $dimension-large;
-  //
-  //  background-color: $igv-roi-table-background-color;
-  //
-  //  display: flex;
-  //  flex-flow: row;
-  //  flex-wrap: nowrap;
-  //  justify-content: space-around;
-  //  align-items: center;
-  //
-  //  >button {
-  //    cursor: pointer;
-  //  }
-  //
-  //  border-bottom-color: $igv-roi-border-color;
-  //  border-bottom-style: solid;
-  //  border-bottom-width: thin;
-  //
-  //}
-
   // column titles
   >.igv-roi-table-column-titles {
     display: flex;
@@ -133,14 +109,14 @@ $igv-roi-table-background-color: #eee;
     justify-content: space-around;
     align-items: stretch;
 
-    background-color: $igv-roi-table-background-color;
+    //background-color: $igv-roi-table-background-color;
+    background-color: white;
 
     border-bottom-color: $igv-roi-border-color;
     border-bottom-style: solid;
     border-bottom-width: thin;
 
   }
-
 
 // table row container
 >.igv-roi-table-row-container {
