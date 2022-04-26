@@ -1,5 +1,5 @@
 import {DOMUtils,StringUtils} from '../../node_modules/igv-utils/src/index.js'
-import ROISet, {ROI_DEFAULT_COLOR, screenCoordinates} from './ROISet.js'
+import ROISet, {ROI_USER_DEFINED_COLOR, screenCoordinates} from './ROISet.js'
 
 class ROIManager {
     constructor(browser, roiMenu, roiTable, top, roiSets) {
@@ -32,7 +32,7 @@ class ROIManager {
                 {
                     isUserDefined: true,
                     features: [],
-                    color: ROI_DEFAULT_COLOR
+                    color: ROI_USER_DEFINED_COLOR
                 };
 
             this.userDefinedROISet = new ROISet(config, browser.genome)
@@ -132,7 +132,7 @@ class ROIManager {
                             el.style.left = `${pixelX}px`
                             el.style.width = `${pixelWidth}px`
                         } else {
-                            const element = this.createRegionElement(browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey)
+                            const element = createRegionElement(browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey)
                             columns[ i ].appendChild(element)
                         }
 
@@ -145,30 +145,30 @@ class ROIManager {
 
     }
 
-    createRegionElement(columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey) {
-
-        const container = DOMUtils.div({class: 'igv-roi-region'})
-
-        container.style.top = `${pixelTop}px`
-        container.style.left = `${pixelX}px`
-
-        container.style.width = `${pixelWidth}px`
-
-        container.style.backgroundColor = roiSet.color
-
-        container.dataset.region = regionKey
-
-        const header = DOMUtils.div()
-        header.style.backgroundColor = roiSet.headerColor
-
-        container.appendChild(header)
-
-        return container
-    }
-
     toJSON() {
         return [ ...this.roiSets, this.userDefinedROISet ].map(roiSet => roiSet.toJSON())
     }
+}
+
+function createRegionElement(columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey) {
+
+    const container = DOMUtils.div({class: 'igv-roi-region'})
+
+    container.style.top = `${pixelTop}px`
+    container.style.left = `${pixelX}px`
+
+    container.style.width = `${pixelWidth}px`
+
+    container.style.backgroundColor = roiSet.color
+
+    container.dataset.region = regionKey
+
+    const header = DOMUtils.div()
+    header.style.backgroundColor = roiSet.headerColor
+
+    container.appendChild(header)
+
+    return container
 }
 
 function deleteRegionWithKey(userDefinedROISet, regionKey, columnContainer) {

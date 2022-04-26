@@ -27,7 +27,7 @@
 import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
 import {validateGenomicExtent} from "./util/igvUtils.js"
 import GenomeUtils from './genome/genome.js'
-import {ROI_DEFAULT_COLOR} from "./roi/ROISet.js"
+import { ROI_USER_DEFINED_COLOR } from "./roi/ROISet.js"
 
 const RULER_SWEEPER_COLOR = 'rgba(68, 134, 247, 0.25)'
 
@@ -97,7 +97,7 @@ class RulerSweeper {
 
 
             this.rulerSweeper.style.display = 'block'
-            this.rulerSweeper.style.backgroundColor = true === event.shiftKey ? ROI_DEFAULT_COLOR : RULER_SWEEPER_COLOR
+            this.rulerSweeper.style.backgroundColor = true === event.shiftKey ? ROI_USER_DEFINED_COLOR : RULER_SWEEPER_COLOR
 
             this.rulerSweeper.style.left = `${left}px`
             this.rulerSweeper.style.width = `${width}px`
