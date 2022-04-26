@@ -206,7 +206,7 @@ function parseRegionKey(regionKey) {
     ss = parseInt(ss)
     ee = parseInt(ee)
 
-    return { chr, start:ss, end:ee, locus:`${chr}:${ss}-${ee}`, bedRecord:`${chr} ${ss} ${ee}` }
+    return { chr, start:ss, end:ee, locus:`${chr}:${ss}-${ee}`, bedRecord:`${chr}\t${ss}\t${ee}` }
 }
 
 export { createRegionKey, parseRegionKey, deleteRegionWithKey }
