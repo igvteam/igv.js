@@ -113,7 +113,6 @@ class ROITable {
         container.appendChild(dom)
 
         // View Button
-
         const viewButton = DOMUtils.div({class: 'igv-roi-table-button'})
         dom.appendChild(viewButton)
 
@@ -146,7 +145,6 @@ class ROITable {
         })
 
         // Remove Button
-
         const removeButton = DOMUtils.div({class: 'igv-roi-table-button'})
         dom.appendChild(removeButton)
 
@@ -167,12 +165,39 @@ class ROITable {
         })
 
         // Import Button
-        createROITableImportButton(dom, this.browser)
+        this.createROITableImportButton(dom)
 
         // Export Button
         createROITableExportButton(container, dom)
 
         return dom
+    }
+
+    createROITableImportButton(parent) {
+
+        const html =
+            `<div class="igv-roi-file-input">
+            <input type="file" id="igv-roi-file-button" class="igv-roi-file"/>
+            <label for="igv-roi-file-button">Import</label>
+        </div>`
+
+        const fragment = document.createRange().createContextualFragment(html)
+        parent.appendChild(fragment.firstChild)
+
+        const button = document.querySelector('#igv-roi-file-button')
+        button.addEventListener('change', async event => {
+
+            const [ file ] = event.target.files
+
+            const text = await file.text()
+
+            for (let line of text.trim().split('\n')) {
+                const [ chr, start, end ] = line.split('\t').map((item, index) => 0 === index ? item : parseInt(item))
+                await this.browser.roiManager.updateUserDefinedROISet({ chr, start, end })
+            }
+
+        })
+
     }
 
     setButtonState(isTableRowSelected) {
@@ -188,17 +213,6 @@ class ROITable {
           viewButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
     }
 
-}
-
-function createROITableImportButton(parent, browser) {
-
-    const button = DOMUtils.div({class: 'igv-roi-table-button'})
-    parent.append(button)
-
-    button.textContent = 'Import'
-    button.addEventListener('click', () => {
-        console.log('Import Regions from BED file')
-    })
 }
 
 function createROITableExportButton(container, parent) {

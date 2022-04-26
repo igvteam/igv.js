@@ -1037,6 +1037,34 @@
   font-weight: 400;
   background-color: rgba(0, 0, 0, 0.13); }
 
+.igv-roi-file {
+  position: absolute;
+  z-index: -1;
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden; }
+
+.igv-roi-file-input label {
+  cursor: pointer;
+  position: relative;
+  display: block;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  vertical-align: middle;
+  font-family: "Open Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: black;
+  padding-left: 6px;
+  padding-right: 6px;
+  background-color: #efefef;
+  border-color: black;
+  border-style: solid;
+  border-width: thin;
+  border-radius: 3px; }
+
 .igv-roi-region {
   z-index: 64;
   position: absolute;
