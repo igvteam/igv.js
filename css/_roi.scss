@@ -244,7 +244,7 @@ $igv-roi-table-background-color: #eee;
 
 // ROI region container
 .igv-roi-region {
-  cursor: pointer;
+  //cursor: pointer;
   z-index: 64;
 
   position: absolute;
@@ -274,7 +274,7 @@ $igv-roi-table-background-color: #eee;
   // ROI region header
   >div {
     position: relative;
-    pointer-events: auto;
+    //pointer-events: auto;
     width: 100%;
     height: 8px;
   }

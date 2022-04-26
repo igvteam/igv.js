@@ -29,6 +29,11 @@ import {appleCrayonRGBA, rgbaStringTokens} from '../util/colorPalletes.js'
 
 const ROI_DEFAULT_ALPHA = 1/16
 const ROI_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', ROI_DEFAULT_ALPHA)
+const ROI_DEFAULT_HEADER_COLOR = 'rgba(0,0,0,0)'
+
+const ROI_USER_DEFINED_ALPHA = 1/12
+const ROI_USER_HEADER_DEFINED_COLOR = appleCrayonRGBA('sea_foam', 3/4)
+const ROI_USER_DEFINED_COLOR = appleCrayonRGBA('nickel', ROI_USER_DEFINED_ALPHA)
 
 class ROISet {
 
@@ -50,10 +55,14 @@ class ROISet {
             this.featureSource = config.featureSource || FeatureSource(config, genome)
         }
 
-        this.color = config.color || ROI_DEFAULT_COLOR
+        if (true === this.isUserDefined) {
+            this.color = ROI_USER_DEFINED_COLOR
+            this.headerColor = ROI_USER_HEADER_DEFINED_COLOR
+        } else {
+            this.color = config.color || ROI_DEFAULT_COLOR
+            this.headerColor = ROI_DEFAULT_HEADER_COLOR
+        }
 
-        // TODO: Use transparent color until header functionality becomes real
-        this.headerColor = 'rgba(0,0,0,0)'
 
         // Use body color with alpha pinned to 1
         // const [ r, g, b, a ] = rgbaStringTokens(this.color)
@@ -95,6 +104,6 @@ function screenCoordinates(regionStartBP, regionEndBP, startBP, bpp) {
     return { x:xStart, width }
 }
 
-export { ROI_DEFAULT_COLOR, screenCoordinates }
+export { ROI_DEFAULT_COLOR, ROI_USER_DEFINED_COLOR, screenCoordinates }
 
 export default ROISet

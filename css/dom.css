@@ -1038,7 +1038,6 @@
   background-color: rgba(0, 0, 0, 0.13); }
 
 .igv-roi-region {
-  cursor: pointer;
   z-index: 64;
   position: absolute;
   top: 0;
@@ -1059,7 +1058,6 @@
   align-items: stretch; }
   .igv-roi-region > div {
     position: relative;
-    pointer-events: auto;
     width: 100%;
     height: 8px; }
 
