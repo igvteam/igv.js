@@ -15,8 +15,6 @@ class ROITable {
 
         const header = this.createHeaderDOM(this.container)
 
-        // this.upperButtonDOM = this.createButtonDOM(this.container)
-
         this.columnTitleDOM = createColumnTitleDOM(this.container)
 
         this.tableRowContainerDOM = this.createTableRowContainerDOM(this.container)
@@ -80,69 +78,6 @@ class ROITable {
 
     }
 
-    createButtonDOM(container) {
-
-        const dom = DOMUtils.div()
-        container.appendChild(dom)
-
-        let fragment
-
-        // View Button
-        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-view-button">View</button>`)
-        dom.appendChild(fragment.firstChild)
-
-        const viewButton = dom.querySelector('#igv-roi-table-view-button')
-        viewButton.disabled = true
-
-        viewButton.addEventListener('click', event => {
-
-            event.stopPropagation()
-
-            const selected = container.querySelectorAll('.igv-roi-table-row-selected')
-            const loci = []
-            for (let el of selected) {
-                // console.log(`${el.dataset.region}`)
-                const { locus } = parseRegionKey(el.dataset.region)
-                loci.push(locus)
-            }
-
-            for (let el of container.querySelectorAll('.igv-roi-table-row')) {
-                el.classList.remove('igv-roi-table-row-selected')
-            }
-
-            if (loci.length > 0) {
-                this.browser.search(loci.join(' '))
-            }
-
-        })
-
-        // Remove Button
-        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-remove-button">Remove</button>`)
-        dom.appendChild(fragment.firstChild)
-
-        const removeButton = dom.querySelector('#igv-roi-table-remove-button')
-        removeButton.disabled = true
-
-        removeButton.addEventListener('click', event => {
-            event.stopPropagation()
-
-            const removable = container.querySelectorAll('.igv-roi-table-row-selected')
-
-            for (let regionElement of Array.from(removable)) {
-                deleteRegionWithKey(this.browser.roiManager.userDefinedROISet, regionElement.dataset.region, this.browser.columnContainer)
-            }
-
-        })
-
-        // Import Button
-        createROITableImportButton(dom, this.browser)
-
-        // Export Button
-        createROITableExportButton(container, dom)
-
-        return dom
-    }
-
     createTableRowContainerDOM(container) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-row-container' })
@@ -177,14 +112,14 @@ class ROITable {
         const dom = DOMUtils.div()
         container.appendChild(dom)
 
-        let fragment
-
         // View Button
-        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-view-button">View</button>`)
-        dom.appendChild(fragment.firstChild)
 
-        const viewButton = dom.querySelector('#igv-roi-table-view-button')
-        viewButton.disabled = true
+        const viewButton = DOMUtils.div({class: 'igv-roi-table-button'})
+        dom.appendChild(viewButton)
+
+        viewButton.id = 'igv-roi-table-view-button'
+        viewButton.textContent = 'View'
+        viewButton.style.pointerEvents = 'none'
 
         viewButton.addEventListener('click', event => {
 
@@ -202,6 +137,8 @@ class ROITable {
                 el.classList.remove('igv-roi-table-row-selected')
             }
 
+            this.setButtonState(false)
+
             if (loci.length > 0) {
                 this.browser.search(loci.join(' '))
             }
@@ -209,11 +146,13 @@ class ROITable {
         })
 
         // Remove Button
-        fragment = document.createRange().createContextualFragment(`<button id="igv-roi-table-remove-button">Remove</button>`)
-        dom.appendChild(fragment.firstChild)
 
-        const removeButton = dom.querySelector('#igv-roi-table-remove-button')
-        removeButton.disabled = true
+        const removeButton = DOMUtils.div({class: 'igv-roi-table-button'})
+        dom.appendChild(removeButton)
+
+        removeButton.id = 'igv-roi-table-remove-button'
+        removeButton.textContent = 'Remove'
+        removeButton.style.pointerEvents = 'none'
 
         removeButton.addEventListener('click', event => {
             event.stopPropagation()
@@ -224,6 +163,7 @@ class ROITable {
                 deleteRegionWithKey(this.browser.roiManager.userDefinedROISet, regionElement.dataset.region, this.browser.columnContainer)
             }
 
+            this.setButtonState(false)
         })
 
         // Import Button
@@ -235,20 +175,17 @@ class ROITable {
         return dom
     }
 
-    __createFooterDOM(container) {
-        const dom = DOMUtils.div()
-        container.appendChild(dom)
-        return dom
-    }
-
     setButtonState(isTableRowSelected) {
 
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
 
-        const regionRemovalButton = this.footerDOM.querySelector('#igv-roi-table-remove-button')
-        const    regionViewButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
+        const removeButton = this.footerDOM.querySelector('#igv-roi-table-remove-button')
+        const    viewButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
 
-        regionRemovalButton.disabled = regionViewButton.disabled = !(tableRowSelectionList.length > 0)
+        // removeButton.disabled = viewButton.disabled = !(tableRowSelectionList.length > 0)
+
+        removeButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
+          viewButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
     }
 
 }
