@@ -79,6 +79,10 @@ class ROIMenu {
 
     }
 
+    dispose() {
+        this.container.innerHTML = ''
+    }
+
 }
 
 function removeAllChildNodes(parent) {

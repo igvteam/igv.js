@@ -85,6 +85,12 @@ class ROISet {
         }
     }
 
+    dispose() {
+        for (let key of Object.keys(this)) {
+            this[key] = undefined
+        }
+    }
+
 }
 
 const SCREEN_COORDS_WIDTH_THRESHOLD = 3
