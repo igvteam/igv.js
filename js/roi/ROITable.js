@@ -92,8 +92,7 @@ class ROITable {
         const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
         dom.dataset.region = createRegionKey(chr, start, end)
 
-        const strings = [ chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end) ]
-        for (let string of strings) {
+        for (let string of [ chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end) ]) {
             const el = DOMUtils.div()
             el.innerText = string
             dom.appendChild(el)
