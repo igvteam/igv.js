@@ -985,15 +985,26 @@
     .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row {
       width: 100%;
       height: 24px;
-      font-size: 14px;
-      text-align: start;
-      vertical-align: middle;
-      line-height: 24px;
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
-      justify-content: space-around;
+      justify-content: flex-start;
       align-items: stretch; }
+      .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div {
+        font-size: 14px;
+        text-align: end;
+        vertical-align: middle;
+        line-height: 24px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        height: 24px;
+        margin-left: 4px;
+        margin-right: 4px; }
+      .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:first-child {
+        width: 40%; }
+      .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:not(:first-child) {
+        width: 30%; }
   .igv-roi-table > div:last-child {
     height: 32px;
     line-height: 32px;
