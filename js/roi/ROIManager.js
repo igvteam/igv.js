@@ -139,7 +139,7 @@ class ROIManager {
                             el.style.left = `${pixelX}px`
                             el.style.width = `${pixelWidth}px`
                         } else {
-                            const element = createRegionElement(pixelTop, pixelX, pixelWidth, roiSet, regionKey)
+                            const element = this.createRegionElement(browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey)
                             columns[ i ].appendChild(element)
                         }
 
@@ -150,6 +150,39 @@ class ROIManager {
 
         }
 
+    }
+
+    createRegionElement(columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey) {
+
+        const regionElement = DOMUtils.div({class: 'igv-roi-region'})
+
+        regionElement.style.top = `${pixelTop}px`
+        regionElement.style.left = `${pixelX}px`
+
+        regionElement.style.width = `${pixelWidth}px`
+
+        regionElement.style.backgroundColor = roiSet.color
+
+        regionElement.dataset.region = regionKey
+
+        const header = DOMUtils.div()
+        regionElement.appendChild(header)
+
+        header.style.backgroundColor = roiSet.headerColor
+
+        if (true === roiSet.isUserDefined) {
+
+            header.addEventListener('click', event => {
+                event.preventDefault()
+                event.stopPropagation()
+
+                const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
+                this.roiMenu.present(x, y, this, columnContainer, regionElement)
+            })
+
+        }
+
+        return regionElement
     }
 
     toJSON() {
@@ -188,27 +221,6 @@ class ROIManager {
 
 function locusChangeHandler() {
     this.renderAllROISets()
-}
-
-function createRegionElement(pixelTop, pixelX, pixelWidth, roiSet, regionKey) {
-
-    const container = DOMUtils.div({class: 'igv-roi-region'})
-
-    container.style.top = `${pixelTop}px`
-    container.style.left = `${pixelX}px`
-
-    container.style.width = `${pixelWidth}px`
-
-    container.style.backgroundColor = roiSet.color
-
-    container.dataset.region = regionKey
-
-    const header = DOMUtils.div()
-    header.style.backgroundColor = roiSet.headerColor
-
-    container.appendChild(header)
-
-    return container
 }
 
 function deleteRegionWithKey(userDefinedROISet, regionKey, columnContainer) {

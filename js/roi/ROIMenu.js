@@ -35,29 +35,16 @@ class ROIMenu {
 
     }
 
-    present(x, y, roiSet, columnContainer, regionKey, roiManager) {
+    present(x, y, roiManager, columnContainer, regionElement) {
 
         removeAllChildNodes(this.bodyContainer)
 
-        const presentLUT =
-            {
-                'Present Table': () => {},
-            };
+        const row = DOMUtils.div({ class: 'igv-roi-body-row' })
+        this.bodyContainer.appendChild(row)
 
-        const deleteLUT =
-            {
-                'Delete': () => {},
-            };
+        row.innerText = 'Delete'
 
-        const LUT = false === roiSet.isImmutable ? Object.assign(presentLUT, deleteLUT) : Object.assign({}, presentLUT)
-
-        Object.keys(LUT).forEach(word => {
-
-            const row = DOMUtils.div({ class: 'igv-roi-body-row' })
-            this.bodyContainer.appendChild(row)
-            row.innerText = word
-            row.addEventListener('click', () => LUT[ word ]())
-        })
+        row.addEventListener('click', () => roiManager.roiTable.removeRegionElement(regionElement))
 
         this.container.style.left = `${ x }px`
         this.container.style.top  = `${ y }px`
