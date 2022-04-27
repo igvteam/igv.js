@@ -507,6 +507,10 @@ class Browser {
             }
         }
 
+        if (this.roiManager) {
+            this.roiManager.dispose()
+        }
+
         const roiTable = new ROITable(this, this.columnContainer)
         const roiMenu = new ROIMenu(this, this.columnContainer)
         if (session.roi) {

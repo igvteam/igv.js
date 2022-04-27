@@ -213,6 +213,17 @@ class ROITable {
           viewButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
     }
 
+    dispose() {
+
+        this.browser.roiTableControl.buttonHandler(false)
+
+        this.container.innerHTML = ''
+
+        for (let key of Object.keys(this)) {
+            this[key] = undefined
+        }
+    }
+
 }
 
 function createROITableExportButton(container, parent) {

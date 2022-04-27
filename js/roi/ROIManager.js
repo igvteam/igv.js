@@ -1,6 +1,7 @@
 import {DOMUtils,StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import ROISet, {ROI_USER_DEFINED_COLOR, screenCoordinates} from './ROISet.js'
 
+
 class ROIManager {
     constructor(browser, roiMenu, roiTable, top, roiSets) {
 
@@ -38,7 +39,11 @@ class ROIManager {
             this.userDefinedROISet = new ROISet(config, browser.genome)
         }
 
-        browser.on('locuschange', () => this.renderAllROISets())
+        // browser.on('locuschange', this.renderAllROISets())
+
+        this.boundLocusChangeHandler = locusChangeHandler.bind(this)
+        browser.on('locuschange', this.boundLocusChangeHandler)
+
     }
 
     async initialize() {
@@ -134,7 +139,7 @@ class ROIManager {
                             el.style.left = `${pixelX}px`
                             el.style.width = `${pixelWidth}px`
                         } else {
-                            const element = createRegionElement(browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey)
+                            const element = createRegionElement(pixelTop, pixelX, pixelWidth, roiSet, regionKey)
                             columns[ i ].appendChild(element)
                         }
 
@@ -150,9 +155,42 @@ class ROIManager {
     toJSON() {
         return [ ...this.roiSets, this.userDefinedROISet ].map(roiSet => roiSet.toJSON())
     }
+
+    dispose() {
+
+        this.browser.off('locuschange', this.boundLocusChangeHandler)
+
+        const removable = this.browser.columnContainer.querySelectorAll('.igv-roi-region')
+
+        for (let el of removable) {
+            el.remove()
+        }
+
+        if (this.roiMenu) {
+            this.roiMenu.dispose()
+        }
+
+        if (this.roiTable) {
+            this.roiTable.dispose()
+        }
+
+        const list = [ ...this.roiSets, this.userDefinedROISet]
+        for (let roiSet of list) {
+            roiSet.dispose()
+        }
+
+        for (let key of Object.keys(this)) {
+            this[key] = undefined
+        }
+
+    }
 }
 
-function createRegionElement(columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey) {
+function locusChangeHandler() {
+    this.renderAllROISets()
+}
+
+function createRegionElement(pixelTop, pixelX, pixelWidth, roiSet, regionKey) {
 
     const container = DOMUtils.div({class: 'igv-roi-region'})
 
