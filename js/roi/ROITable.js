@@ -112,15 +112,15 @@ class ROITable {
         const dom = DOMUtils.div()
         container.appendChild(dom)
 
-        // View Button
-        const viewButton = DOMUtils.div({class: 'igv-roi-table-button'})
-        dom.appendChild(viewButton)
+        // Zoom Button
+        const zoomButton = DOMUtils.div({class: 'igv-roi-table-button'})
+        dom.appendChild(zoomButton)
 
-        viewButton.id = 'igv-roi-table-view-button'
-        viewButton.textContent = 'View'
-        viewButton.style.pointerEvents = 'none'
+        zoomButton.id = 'igv-roi-table-view-button'
+        zoomButton.textContent = 'Zoom'
+        zoomButton.style.pointerEvents = 'none'
 
-        viewButton.addEventListener('click', event => {
+        zoomButton.addEventListener('click', event => {
 
             event.stopPropagation()
 
@@ -142,26 +142,6 @@ class ROITable {
                 this.browser.search(loci.join(' '))
             }
 
-        })
-
-        // Remove Button
-        const removeButton = DOMUtils.div({class: 'igv-roi-table-button'})
-        dom.appendChild(removeButton)
-
-        removeButton.id = 'igv-roi-table-remove-button'
-        removeButton.textContent = 'Remove'
-        removeButton.style.pointerEvents = 'none'
-
-        removeButton.addEventListener('click', event => {
-            event.stopPropagation()
-
-            const removable = container.querySelectorAll('.igv-roi-table-row-selected')
-
-            for (let regionElement of Array.from(removable)) {
-                deleteRegionWithKey(this.browser.roiManager.userDefinedROISet, regionElement.dataset.region, this.browser.columnContainer)
-            }
-
-            this.setButtonState(false)
         })
 
         // Import Button
@@ -200,17 +180,15 @@ class ROITable {
 
     }
 
+    removeRegionElement(regionElement) {
+        deleteRegionWithKey(this.browser.roiManager.userDefinedROISet, regionElement.dataset.region, this.browser.columnContainer)
+        this.setButtonState(false)
+    }
+
     setButtonState(isTableRowSelected) {
-
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
-
-        const removeButton = this.footerDOM.querySelector('#igv-roi-table-remove-button')
-        const    viewButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
-
-        // removeButton.disabled = viewButton.disabled = !(tableRowSelectionList.length > 0)
-
-        removeButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
-          viewButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
+        const zoomButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
+        zoomButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
     }
 
     dispose() {
@@ -223,6 +201,10 @@ class ROITable {
             this[key] = undefined
         }
     }
+
+}
+
+function removeTableRows() {
 
 }
 

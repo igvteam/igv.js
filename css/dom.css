@@ -1098,7 +1098,9 @@
   .igv-roi-region > div {
     position: relative;
     width: 100%;
-    height: 8px; }
+    height: 8px;
+    cursor: pointer;
+    pointer-events: auto; }
 
 .igv-roi-menu {
   position: absolute;
