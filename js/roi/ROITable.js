@@ -166,17 +166,22 @@ class ROITable {
 
         const button = document.querySelector('#igv-roi-file-button')
         button.addEventListener('change', async event => {
-
+            event.stopPropagation()
+            
             const [ file ] = event.target.files
-
-            const reader = new FeatureFileReader({ url: file }, undefined)
-            const features = await reader.loadFeaturesNoIndex()
-
-            for (let { chr, start, end } of features) {
-                await this.browser.roiManager.updateUserDefinedROISet({ chr, start, end })
-            }
-
+            await this.import(file)
         })
+
+    }
+
+    async import(file) {
+
+        const reader = new FeatureFileReader({ url: file }, undefined)
+        const features = await reader.loadFeaturesNoIndex()
+
+        for (let { chr, start, end } of features) {
+            await this.browser.roiManager.updateUserDefinedROISet({ chr, start, end })
+        }
 
     }
 

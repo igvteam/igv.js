@@ -185,6 +185,10 @@ class ROIManager {
         return regionElement
     }
 
+    async import(file) {
+        await this.roiTable.import(file)
+    }
+
     toJSON() {
         return [ ...this.roiSets, this.userDefinedROISet ].map(roiSet => roiSet.toJSON())
     }
