@@ -23,7 +23,8 @@ $igv-roi-table-background-color: #eee;
   position: absolute;
   z-index: 1024;
 
-  width:(20 * $dimension);
+  //width:(20 * $dimension);
+  width: fit-content;
 
   border-color: $igv-roi-border-color;
   border-radius: $igv-roi-table-border-radius;
@@ -44,17 +45,13 @@ $igv-roi-table-background-color: #eee;
 
   // default div styling
   >div {
-    width: 100%;
+    //width: 100%;
     height: $dimension;
 
     font-size: 14px;
     text-align: start;
     vertical-align: middle;
     line-height: $dimension;
-
-    //border-bottom-color: $igv-roi-border-color;
-    //border-bottom-style: solid;
-    //border-bottom-width: thin;
   }
 
   // header
@@ -83,7 +80,6 @@ $igv-roi-table-background-color: #eee;
     >div:first-child {
       text-align: center;
       width: calc(100% - 4px - #{$igv-roi-dismiss-button-size});
-      //background-color: rgba(3, 249, 135, 0.25);
     }
 
     >div:last-child {
@@ -109,7 +105,6 @@ $igv-roi-table-background-color: #eee;
     justify-content: space-around;
     align-items: stretch;
 
-    //background-color: $igv-roi-table-background-color;
     background-color: white;
 
     border-bottom-color: $igv-roi-border-color;
@@ -121,11 +116,17 @@ $igv-roi-table-background-color: #eee;
 // table row container
 >.igv-roi-table-row-container {
 
-  width: 100%;
-  height: $igv-roi-table-row-container-height;
+  resize: vertical;
+  overflow: scroll;
+
+  //width: fit-content;
+  width:(20 * $dimension);
+
+  height: fit-content;
+
+  //height: $igv-roi-table-row-container-height;
 
   background-color:white;
-  overflow-y: auto;
 
   display: flex;
   flex-flow: column;
@@ -136,7 +137,7 @@ $igv-roi-table-background-color: #eee;
   // table row
   >.igv-roi-table-row {
 
-    width: 100%;
+    //width: 100%;
     height: $dimension;
 
 
