@@ -99,47 +99,10 @@ $igv-roi-table-background-color: #eee;
 
   // column titles
   >.igv-roi-table-column-titles {
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: stretch;
-
-    background-color: white;
-
-    border-bottom-color: $igv-roi-border-color;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-
-  }
-
-// table row container
->.igv-roi-table-row-container {
-
-  resize: vertical;
-  overflow: scroll;
-
-  //width: fit-content;
-  width:(20 * $dimension);
-
-  height: fit-content;
-
-  //height: $igv-roi-table-row-container-height;
-
-  background-color:white;
-
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: stretch;
-
-  // table row
-  >.igv-roi-table-row {
 
     //width: 100%;
     height: $dimension;
-
+    margin-right: 24px;
 
     display: flex;
     flex-flow: row;
@@ -172,9 +135,76 @@ $igv-roi-table-background-color: #eee;
       width: 30%;
     }
 
+    background-color: white;
+
+    border-bottom-color: $igv-roi-border-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
   }
 
-}
+  // table row container
+  >.igv-roi-table-row-container {
+
+    resize: vertical;
+    overflow: scroll;
+
+    //width: fit-content;
+    width:(20 * $dimension);
+
+    height: fit-content;
+
+    //height: $igv-roi-table-row-container-height;
+
+    background-color:white;
+
+    display: flex;
+    flex-flow: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+
+    // table row
+    >.igv-roi-table-row {
+
+      //width: 100%;
+      height: $dimension;
+
+
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: stretch;
+
+      >div {
+
+        font-size: 14px;
+        text-align: end;
+        vertical-align: middle;
+        line-height: $dimension;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        height: $dimension;
+
+        margin-left: 4px;
+        margin-right: 4px;
+      }
+
+      >div:first-child {
+        width: 40%;
+      }
+
+      >div:not(:first-child) {
+        width: 30%;
+      }
+
+    }
+
+  }
 
   // footer buttons
   >div:last-child {
