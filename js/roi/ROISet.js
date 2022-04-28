@@ -48,7 +48,8 @@ class ROISet {
             this.featureSource =
                 {
                     getFeatures :(chr, start, end) => this.features.map(({ chr, start, end }) => {
-                        return { chr: genome.getChromosomeName(chr), start, end }
+                        // return { chr: genome.getChromosomeName(chr), start, end }
+                        return { chr, start, end }
                     })
                 }
         } else {
@@ -72,6 +73,10 @@ class ROISet {
 
     async getFeatures(chr, start, end) {
         return this.featureSource.getFeatures({chr, start, end})
+    }
+
+    async getAllFeatures() {
+        return this.url ? await this.featureSource.reader.loadFeaturesNoIndex() : this.features
     }
 
     toJSON() {

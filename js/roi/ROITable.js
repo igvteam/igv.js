@@ -38,13 +38,13 @@ class ROITable {
         this.container.style.display = 'none'
     }
 
-    renderTable(userDefinedROISet) {
+    renderTable(features) {
 
         Array.from(this.tableRowContainerDOM.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
 
-        if (userDefinedROISet.features && userDefinedROISet.features.length > 0) {
+        if (features.length > 0) {
 
-            const sortedFeatures = userDefinedROISet.features.sort((a,b) => (a.chr.localeCompare(b.chr) || a.start - b.start || a.end - b.end))
+            const sortedFeatures = features.sort((a, b) => (a.chr.localeCompare(b.chr) || a.start - b.start || a.end - b.end))
 
             for (let { chr, start, end } of sortedFeatures) {
                 const row = this.createTableRowDOM(chr, start, end)

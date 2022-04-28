@@ -39,8 +39,6 @@ class ROIManager {
             this.userDefinedROISet = new ROISet(config, browser.genome)
         }
 
-        // browser.on('locuschange', this.renderAllROISets())
-
         this.boundLocusChangeHandler = locusChangeHandler.bind(this)
         browser.on('locuschange', this.boundLocusChangeHandler)
 
@@ -65,8 +63,22 @@ class ROIManager {
             await Promise.all(promises)
         }
 
-        this.roiTable.renderTable(this.userDefinedROISet)
+        const features = await this.getAllRegionFeatures()
+        this.roiTable.renderTable(features)
 
+    }
+
+    async getAllRegionFeatures() {
+
+        const features = []
+
+        const sets = this.userDefinedROISet.features.length > 0 ? [ ...this.roiSets, this.userDefinedROISet ] : this.roiSets.slice()
+        for (let set of sets) {
+            const regions = await set.getAllFeatures()
+            features.splice(features.length, 0, regions)
+        }
+
+        return features.flat()
     }
 
     presentTable() {
@@ -83,7 +95,8 @@ class ROIManager {
 
         await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: this.userDefinedROISet})
 
-        this.roiTable.renderTable(this.userDefinedROISet)
+        const features = await this.getAllRegionFeatures()
+        this.roiTable.renderTable(features)
 
     }
 
@@ -113,7 +126,8 @@ class ROIManager {
 
             let { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
 
-            const regions = await roiSet.getFeatures(chr, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+            // const regions = await roiSet.getFeatures(chr, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
+            const regions = await roiSet.getAllFeatures()
 
             if (regions && regions.length > 0) {
 
