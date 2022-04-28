@@ -144,34 +144,7 @@ class ROITable {
 
         })
 
-        // Import Button
-        // this.createROITableImportButton(dom)
-
-        // Export Button
-        // createROITableExportButton(container, dom)
-
         return dom
-    }
-
-    createROITableImportButton(parent) {
-
-        const html =
-            `<div class="igv-roi-file-input">
-            <input type="file" id="igv-roi-file-button" class="igv-roi-file"/>
-            <label for="igv-roi-file-button">Import</label>
-        </div>`
-
-        const fragment = document.createRange().createContextualFragment(html)
-        parent.appendChild(fragment.firstChild)
-
-        const button = document.querySelector('#igv-roi-file-button')
-        button.addEventListener('change', async event => {
-            event.stopPropagation()
-
-            const [ file ] = event.target.files
-            await this.import(file)
-        })
-
     }
 
     async import(file) {
@@ -233,15 +206,6 @@ class ROITable {
         }
     }
 
-}
-
-function createROITableExportButton(container, parent) {
-
-    const button = DOMUtils.div({class: 'igv-roi-table-button'})
-    parent.append(button)
-
-    button.textContent = 'Export'
-    button.addEventListener('click', () => this.export())
 }
 
 function createColumnTitleDOM(container) {

@@ -153,6 +153,7 @@ $igv-roi-table-background-color: #eee;
     width:(20 * $dimension);
 
     height: fit-content;
+    max-height: (20 * $dimension);
 
     //height: $igv-roi-table-row-container-height;
 
@@ -269,49 +270,6 @@ $igv-roi-table-background-color: #eee;
   cursor: pointer;
   font-weight: 400;
   background-color: rgba(0, 0, 0, 0.13);
-}
-
-.igv-roi-file {
-
-  position: absolute;
-  z-index: -1;
-
-  width: 0.1px;
-  height: 0.1px;
-
-  opacity: 0;
-
-  overflow: hidden;
-}
-
-.igv-roi-file-input label {
-
-  cursor: pointer;
-  position: relative;
-  display: block;
-
-  height: $igv-roi-table-button-height;
-
-  line-height: $igv-roi-table-button-height;
-
-  text-align: center;
-  vertical-align: middle;
-
-  font-family: $igv-default-font-face;
-  font-size: 13px;
-  font-weight: 400;
-
-  color: black;
-
-  padding-left: 6px;
-  padding-right: 6px;
-
-  background-color: rgb(239, 239, 239);
-
-  border-color: black;
-  border-style: solid;
-  border-width: thin;
-  border-radius: $igv-roi-table-button-radius;
 }
 
 // ROI region container
@@ -457,24 +415,6 @@ $igv-roi-table-background-color: #eee;
 
   }
 
-}
-
-// reusable row
-.igv-roi-table-body-row {
-
-  height: $dimension;
-
-  padding-left: 8px;
-
-  //color: grey;
-  font-size: small;
-  text-align: start;
-  vertical-align: middle;
-
-  line-height: $dimension;
-
-  //background-color: rgba(255, 105, 180, 0.25);
-  background-color: white;
 }
 
 // reusable row
