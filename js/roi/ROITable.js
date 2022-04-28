@@ -256,11 +256,17 @@ function createColumnTitleDOM(container) {
             'End'
         ]
 
-    columnTitles.forEach(title => {
+    for (let title of columnTitles) {
         const col = DOMUtils.div()
         col.innerText = title
         dom.appendChild(col)
-    })
+    }
+
+    // columnTitles.forEach(title => {
+    //     const col = DOMUtils.div()
+    //     col.innerText = title
+    //     dom.appendChild(col)
+    // })
 
     return dom
 }

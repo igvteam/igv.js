@@ -962,15 +962,32 @@
       cursor: pointer;
       color: #444; }
   .igv-roi-table > .igv-roi-table-column-titles {
+    height: 24px;
+    margin-right: 24px;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
-    justify-content: space-around;
+    justify-content: flex-start;
     align-items: stretch;
     background-color: white;
     border-bottom-color: #7f7f7f;
     border-bottom-style: solid;
     border-bottom-width: thin; }
+    .igv-roi-table > .igv-roi-table-column-titles > div {
+      font-size: 14px;
+      text-align: end;
+      vertical-align: middle;
+      line-height: 24px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      height: 24px;
+      margin-left: 4px;
+      margin-right: 4px; }
+    .igv-roi-table > .igv-roi-table-column-titles > div:first-child {
+      width: 40%; }
+    .igv-roi-table > .igv-roi-table-column-titles > div:not(:first-child) {
+      width: 30%; }
   .igv-roi-table > .igv-roi-table-row-container {
     resize: vertical;
     overflow: scroll;
