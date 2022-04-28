@@ -145,10 +145,10 @@ class ROITable {
         })
 
         // Import Button
-        this.createROITableImportButton(dom)
+        // this.createROITableImportButton(dom)
 
         // Export Button
-        createROITableExportButton(container, dom)
+        // createROITableExportButton(container, dom)
 
         return dom
     }
@@ -167,7 +167,7 @@ class ROITable {
         const button = document.querySelector('#igv-roi-file-button')
         button.addEventListener('change', async event => {
             event.stopPropagation()
-            
+
             const [ file ] = event.target.files
             await this.import(file)
         })
@@ -181,6 +181,32 @@ class ROITable {
 
         for (let { chr, start, end } of features) {
             await this.browser.roiManager.updateUserDefinedROISet({ chr, start, end })
+        }
+
+    }
+
+    export() {
+
+        const elements = this.tableRowContainerDOM.querySelectorAll('.igv-roi-table-row')
+        const lines = []
+        for (let el of elements) {
+            const { bedRecord } = parseRegionKey(el.dataset.region)
+            lines.push(bedRecord)
+        }
+
+        if (lines.length > 0) {
+
+            const blobParts = [ lines.join('\n') ]
+
+            const blobOptions =
+                {
+                    type : "text/plain;charset=utf-8"
+                }
+
+            const blob = new Blob(blobParts, blobOptions)
+            const path = 'igvjs-roi.bed'
+            const downloadUrl = URL.createObjectURL(blob)
+            FileUtils.download(path, downloadUrl)
         }
 
     }
@@ -209,44 +235,13 @@ class ROITable {
 
 }
 
-function removeTableRows() {
-
-}
-
 function createROITableExportButton(container, parent) {
 
     const button = DOMUtils.div({class: 'igv-roi-table-button'})
     parent.append(button)
 
     button.textContent = 'Export'
-    button.addEventListener('click', () => {
-
-        const elements = container.querySelectorAll('.igv-roi-table-row')
-        const lines = []
-        for (let el of elements) {
-            const { bedRecord } = parseRegionKey(el.dataset.region)
-            lines.push(bedRecord)
-        }
-
-        if (lines.length > 0) {
-
-            const blobParts = [ lines.join('\n') ]
-
-            const blobOptions =
-                {
-                    type : "text/plain;charset=utf-8"
-                }
-
-            const blob = new Blob(blobParts, blobOptions)
-
-            const path = 'igvjs-roi.bed'
-            const downloadUrl = URL.createObjectURL(blob)
-
-            FileUtils.download(path, downloadUrl)
-
-        }
-
-    })
+    button.addEventListener('click', () => this.export())
 }
 
 function createColumnTitleDOM(container) {
