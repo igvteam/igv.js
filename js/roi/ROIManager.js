@@ -189,6 +189,10 @@ class ROIManager {
         await this.roiTable.import(file)
     }
 
+    export() {
+        this.roiTable.export()
+    }
+
     toJSON() {
         return [ ...this.roiSets, this.userDefinedROISet ].map(roiSet => roiSet.toJSON())
     }
