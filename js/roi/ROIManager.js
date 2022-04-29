@@ -1,7 +1,6 @@
 import {DOMUtils,StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import ROISet, {ROI_USER_DEFINED_COLOR, screenCoordinates} from './ROISet.js'
 
-
 class ROIManager {
     constructor(browser, roiMenu, roiTable, top, roiSets) {
 
@@ -13,31 +12,7 @@ class ROIManager {
 
         this.top = top
 
-        this.roiSets = []
-        this.userDefinedROISet = undefined
-
-        if (roiSets) {
-
-            for (let roiSet of roiSets) {
-                if (roiSet.isUserDefined) {
-                    this.userDefinedROISet = roiSet
-                } else {
-                    this.roiSets.push(roiSet)
-                }
-            }
-        }
-
-        if (undefined === this.userDefinedROISet) {
-
-            const config =
-                {
-                    isUserDefined: true,
-                    features: [],
-                    color: ROI_USER_DEFINED_COLOR
-                };
-
-            this.userDefinedROISet = new ROISet(config, browser.genome)
-        }
+        this.roiSets = roiSets || []
 
         this.boundLocusChangeHandler = locusChangeHandler.bind(this)
         browser.on('locuschange', this.boundLocusChangeHandler)
@@ -46,18 +21,7 @@ class ROIManager {
 
     async initialize() {
 
-        const promises = this.roiSets.map(roiSet => {
-
-            const config =
-                {
-                    browser: this.browser,
-                    pixelTop: this.top,
-                    roiSet
-                };
-
-            return this.renderROISet(config)
-
-        })
+        const promises = this.roiSets.map(roiSet => this.renderROISet({ browser: this.browser, pixelTop: this.top, roiSet }))
 
         if (promises.length > 0) {
             await Promise.all(promises)
@@ -72,8 +36,7 @@ class ROIManager {
 
         const features = []
 
-        const sets = this.userDefinedROISet.features.length > 0 ? [ ...this.roiSets, this.userDefinedROISet ] : this.roiSets.slice()
-        for (let set of sets) {
+        for (let set of this.roiSets) {
             const regions = await set.getAllFeatures()
             features.splice(features.length, 0, regions)
         }
@@ -91,9 +54,40 @@ class ROIManager {
 
     async updateUserDefinedROISet(region) {
 
-        this.userDefinedROISet.features.push(region)
+        if (0 === this.roiSets.length) {
 
-        await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: this.userDefinedROISet})
+            const config =
+                {
+                    isUserDefined: true,
+                    features: [],
+                    color: ROI_USER_DEFINED_COLOR
+                };
+
+            this.roiSets.push(new ROISet(config, this.browser.genome))
+
+        } else {
+
+            const result = this.roiSets.filter(roiSet => true === roiSet.isUserDefined)
+
+            if (0 === result.length) {
+
+                const config =
+                    {
+                        isUserDefined: true,
+                        features: [],
+                        color: ROI_USER_DEFINED_COLOR
+                    };
+
+                this.roiSets.push(new ROISet(config, this.browser.genome))
+            }
+
+        }
+
+        const [ userDefinedROISet ] = this.roiSets.filter(roiSet => true === roiSet.isUserDefined)
+
+        userDefinedROISet.features.push(region)
+
+        await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: userDefinedROISet})
 
         const features = await this.getAllRegionFeatures()
         this.roiTable.renderTable(features)
@@ -102,19 +96,8 @@ class ROIManager {
 
     async renderAllROISets() {
 
-        const list = this.userDefinedROISet.features.length > 0 ? [ ...this.roiSets, this.userDefinedROISet ]  : this.roiSets
-
-        for (let roiSet of list) {
-
-            const config =
-                {
-                    browser: this.browser,
-                    pixelTop: this.top,
-                    roiSet
-                };
-
-            await this.renderROISet(config)
-
+        for (let roiSet of this.roiSets) {
+            await this.renderROISet({ browser: this.browser, pixelTop: this.top, roiSet })
         }
     }
 
@@ -126,7 +109,6 @@ class ROIManager {
 
             let { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
 
-            // const regions = await roiSet.getFeatures(chr, Number.MIN_SAFE_INTEGER, Number.MAX_SAFE_INTEGER)
             const regions = await roiSet.getAllFeatures()
 
             if (regions && regions.length > 0) {
@@ -208,7 +190,7 @@ class ROIManager {
     }
 
     toJSON() {
-        return [ ...this.roiSets, this.userDefinedROISet ].map(roiSet => roiSet.toJSON())
+        return this.roiSets.map(roiSet => roiSet.toJSON())
     }
 
     dispose() {
@@ -229,8 +211,7 @@ class ROIManager {
             this.roiTable.dispose()
         }
 
-        const list = [ ...this.roiSets, this.userDefinedROISet]
-        for (let roiSet of list) {
+        for (let roiSet of this.roiSets) {
             roiSet.dispose()
         }
 
@@ -245,7 +226,7 @@ function locusChangeHandler() {
     this.renderAllROISets()
 }
 
-function deleteRegionWithKey(userDefinedROISet, regionKey, columnContainer) {
+function deleteRegionWithKey(roiSets, regionKey, columnContainer) {
 
     columnContainer.querySelectorAll(createSelector(regionKey)).forEach(node => node.remove())
 
@@ -253,12 +234,17 @@ function deleteRegionWithKey(userDefinedROISet, regionKey, columnContainer) {
 
     // const indices = userDefinedROISet.features.map((feature, i) => i).join(' ')
 
+    const [ userDefinedROISet ] = roiSets.filter(roiSet => true === roiSet.isUserDefined)
+
     let indexToRemove
     for (let r = 0; r < userDefinedROISet.features.length; r++) {
+
         const { chr, start, end } = userDefinedROISet.features[ r ]
+
         if (chrKey === chr && startKey === start && endKey === end) {
             indexToRemove = r
         }
+
     }
 
     // console.log(`${ Date.now() } "${ roiSet.name }" indices ${ indices } index-to-remove ${indexToRemove  }`)
