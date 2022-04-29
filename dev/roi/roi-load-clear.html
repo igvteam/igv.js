@@ -7,13 +7,17 @@
     <meta content="" name="description">
     <meta content="" name="author">
     <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev - ROI - LoadROI</title>
+    <title>ROI - Load & Clear</title>
 
 </head>
 
 <body>
 
-<button id="roi-button">Load ROISet</button>
+<p>
+    <button id='roi-load-button'>Load ROI Set</button>
+    <button id='roi-clear-button'>Clear All ROI Sets</button>
+</p>
+
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
@@ -55,7 +59,8 @@
 
     (async () => {
         const browser = await igv.createBrowser(document.getElementById('myDiv'), browser_config)
-        document.getElementById("roi-button").addEventListener('click', () => browser.loadROI(roi_configs))
+        document.getElementById("roi-load-button").addEventListener('click', () => browser.loadROI(roi_configs))
+        document.getElementById("roi-clear-button").addEventListener('click', () => browser.clearROIs())
     })()
 
 </script>
