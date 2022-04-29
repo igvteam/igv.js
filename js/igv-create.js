@@ -136,7 +136,7 @@ function setDefaults(config) {
     }
 
     if (undefined === config.showROITableButton) {
-        config.showROITableButton = true
+        config.showROITableButton = false
     }
 
     if (undefined === config.showROITable) {

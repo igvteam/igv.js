@@ -151,6 +151,7 @@ class Browser {
         this.trackLabelsVisible = config.showTrackLabels
 
         this.roiTableVisible = config.showROITable
+        this.showROITableButton = config.showROITableButton
 
         this.isCenterLineVisible = config.showCenterGuide
 
