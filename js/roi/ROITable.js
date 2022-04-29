@@ -38,16 +38,16 @@ class ROITable {
         this.container.style.display = 'none'
     }
 
-    renderTable(features) {
+    renderTable(records) {
 
         Array.from(this.tableRowContainerDOM.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
 
-        if (features.length > 0) {
+        if (records.length > 0) {
 
-            const sortedFeatures = features.sort((a, b) => (a.chr.localeCompare(b.chr) || a.start - b.start || a.end - b.end))
+            const sortedFeatures = records.sort((a, b) => (a.chr.localeCompare(b.chr) || a.start - b.start || a.end - b.end))
 
-            for (let { chr, start, end } of sortedFeatures) {
-                const row = this.createTableRowDOM(chr, start, end)
+            for (let { name, chr, start, end } of sortedFeatures) {
+                const row = this.createTableRowDOM(name, chr, start, end)
                 this.tableRowContainerDOM.appendChild(row)
             }
 
@@ -87,12 +87,12 @@ class ROITable {
         return dom
     }
 
-    createTableRowDOM(chr, start, end) {
+    createTableRowDOM(name, chr, start, end) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
         dom.dataset.region = createRegionKey(chr, start, end)
 
-        for (let string of [ chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end) ]) {
+        for (let string of [ name, chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end) ]) {
             const el = DOMUtils.div()
             el.innerText = string
             dom.appendChild(el)
@@ -214,6 +214,7 @@ function createColumnTitleDOM(container) {
 
     const columnTitles =
         [
+            'Set',
             'Chr',
             'Start',
             'End'
@@ -224,12 +225,6 @@ function createColumnTitleDOM(container) {
         col.innerText = title
         dom.appendChild(col)
     }
-
-    // columnTitles.forEach(title => {
-    //     const col = DOMUtils.div()
-    //     col.innerText = title
-    //     dom.appendChild(col)
-    // })
 
     return dom
 }

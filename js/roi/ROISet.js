@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 import FeatureSource from '../feature/featureSource.js'
 import {appleCrayonRGBA, rgbaStringTokens} from '../util/colorPalletes.js'
 
@@ -39,9 +40,11 @@ class ROISet {
 
     constructor(config, genome) {
 
-        this.name = config.name
+
         this.url = config.url
         this.isUserDefined = config.isUserDefined
+
+        this.name = config.name || `roi-set-${ DOMUtils.guid() }`
 
         if (config.features) {
             this.features = config.features.slice()

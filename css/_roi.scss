@@ -100,7 +100,6 @@ $igv-roi-table-background-color: #eee;
   // column titles
   >.igv-roi-table-column-titles {
 
-    //width: 100%;
     height: $dimension;
     margin-right: 24px;
 
@@ -111,6 +110,9 @@ $igv-roi-table-background-color: #eee;
     align-items: stretch;
 
     >div {
+
+      // assumes: roi-set | chr | start | end
+      width: 25%;
 
       font-size: 14px;
       text-align: end;
@@ -123,16 +125,28 @@ $igv-roi-table-background-color: #eee;
 
       height: $dimension;
 
-      margin-left: 4px;
+      //margin-left: 4px;
       margin-right: 4px;
     }
 
-    >div:first-child {
-      width: 40%;
+    >div:hover {
+      background-color: #efefef;
     }
 
-    >div:not(:first-child) {
+    >div:nth-child(1) {
       width: 30%;
+    }
+
+    >div:nth-child(2) {
+      width: 30%;
+    }
+
+    >div:nth-child(3) {
+      width: 20%;
+    }
+
+    >div:nth-child(4) {
+      width: 20%;
     }
 
     background-color: white;
@@ -150,12 +164,10 @@ $igv-roi-table-background-color: #eee;
     overflow: scroll;
 
     //width: fit-content;
-    width:(20 * $dimension);
+    width:(24 * $dimension);
 
     height: fit-content;
     max-height: (20 * $dimension);
-
-    //height: $igv-roi-table-row-container-height;
 
     background-color:white;
 
@@ -168,9 +180,7 @@ $igv-roi-table-background-color: #eee;
     // table row
     >.igv-roi-table-row {
 
-      //width: 100%;
       height: $dimension;
-
 
       display: flex;
       flex-flow: row;
@@ -179,6 +189,9 @@ $igv-roi-table-background-color: #eee;
       align-items: stretch;
 
       >div {
+
+        // assumes: roi-set | chr | start | end
+        width: 25%;
 
         font-size: 14px;
         text-align: end;
@@ -191,16 +204,24 @@ $igv-roi-table-background-color: #eee;
 
         height: $dimension;
 
-        margin-left: 4px;
+        //margin-left: 4px;
         margin-right: 4px;
       }
 
-      >div:first-child {
-        width: 40%;
+      >div:nth-child(1) {
+        width: 30%;
       }
 
-      >div:not(:first-child) {
+      >div:nth-child(2) {
         width: 30%;
+      }
+
+      >div:nth-child(3) {
+        width: 20%;
+      }
+
+      >div:nth-child(4) {
+        width: 20%;
       }
 
     }

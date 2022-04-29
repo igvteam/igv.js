@@ -974,6 +974,7 @@
     border-bottom-style: solid;
     border-bottom-width: thin; }
     .igv-roi-table > .igv-roi-table-column-titles > div {
+      width: 25%;
       font-size: 14px;
       text-align: end;
       vertical-align: middle;
@@ -982,16 +983,21 @@
       overflow: hidden;
       text-overflow: ellipsis;
       height: 24px;
-      margin-left: 4px;
       margin-right: 4px; }
-    .igv-roi-table > .igv-roi-table-column-titles > div:first-child {
-      width: 40%; }
-    .igv-roi-table > .igv-roi-table-column-titles > div:not(:first-child) {
+    .igv-roi-table > .igv-roi-table-column-titles > div:hover {
+      background-color: #efefef; }
+    .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(1) {
       width: 30%; }
+    .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(2) {
+      width: 30%; }
+    .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(3) {
+      width: 20%; }
+    .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(4) {
+      width: 20%; }
   .igv-roi-table > .igv-roi-table-row-container {
     resize: vertical;
     overflow: scroll;
-    width: 480px;
+    width: 576px;
     height: fit-content;
     max-height: 480px;
     background-color: white;
@@ -1008,6 +1014,7 @@
       justify-content: flex-start;
       align-items: stretch; }
       .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div {
+        width: 25%;
         font-size: 14px;
         text-align: end;
         vertical-align: middle;
@@ -1016,12 +1023,15 @@
         overflow: hidden;
         text-overflow: ellipsis;
         height: 24px;
-        margin-left: 4px;
         margin-right: 4px; }
-      .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:first-child {
-        width: 40%; }
-      .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:not(:first-child) {
+      .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:nth-child(1) {
         width: 30%; }
+      .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:nth-child(2) {
+        width: 30%; }
+      .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:nth-child(3) {
+        width: 20%; }
+      .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:nth-child(4) {
+        width: 20%; }
   .igv-roi-table > div:last-child {
     height: 32px;
     line-height: 32px;
