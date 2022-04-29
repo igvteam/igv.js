@@ -32,21 +32,22 @@ class ROIManager {
             await Promise.all(promises)
         }
 
-        const features = await this.getAllRegionFeatures()
-        this.roiTable.renderTable(features)
+        const records = await this.getTableRecords()
+        this.roiTable.renderTable(records)
 
     }
 
-    async getAllRegionFeatures() {
+    async getTableRecords() {
 
-        const features = []
+        const records = []
 
         for (let set of this.roiSets) {
             const regions = await set.getAllFeatures()
-            features.splice(features.length, 0, regions)
+            const acc = regions.map(region => Object.assign({ name:set.name }, region))
+            records.push(...acc)
         }
 
-        return features.flat()
+        return records
     }
 
     presentTable() {
@@ -99,9 +100,8 @@ class ROIManager {
 
         await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: userDefinedROISet})
 
-        const features = await this.getAllRegionFeatures()
-        this.roiTable.renderTable(features)
-
+        const records = await this.getTableRecords()
+        this.roiTable.renderTable(records)
     }
 
     async renderAllROISets() {
