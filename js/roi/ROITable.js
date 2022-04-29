@@ -112,22 +112,21 @@ class ROITable {
         const dom = DOMUtils.div()
         container.appendChild(dom)
 
-        // Zoom Button
-        const zoomButton = DOMUtils.div({class: 'igv-roi-table-button'})
-        dom.appendChild(zoomButton)
+        // Go To Button
+        const gotoButton = DOMUtils.div({class: 'igv-roi-table-button'})
+        dom.appendChild(gotoButton)
 
-        zoomButton.id = 'igv-roi-table-view-button'
-        zoomButton.textContent = 'Zoom'
-        zoomButton.style.pointerEvents = 'none'
+        gotoButton.id = 'igv-roi-table-view-button'
+        gotoButton.textContent = 'Go To'
+        gotoButton.style.pointerEvents = 'none'
 
-        zoomButton.addEventListener('click', event => {
+        gotoButton.addEventListener('click', event => {
 
             event.stopPropagation()
 
             const selected = container.querySelectorAll('.igv-roi-table-row-selected')
             const loci = []
             for (let el of selected) {
-                // console.log(`${el.dataset.region}`)
                 const { locus } = parseRegionKey(el.dataset.region)
                 loci.push(locus)
             }
@@ -185,14 +184,14 @@ class ROITable {
     }
 
     removeRegionElement(regionElement) {
-        deleteRegionWithKey(this.browser.roiManager.userDefinedROISet, regionElement.dataset.region, this.browser.columnContainer)
+        deleteRegionWithKey(this.browser.roiManager.roiSets, regionElement.dataset.region, this.browser.columnContainer)
         this.setButtonState(false)
     }
 
     setButtonState(isTableRowSelected) {
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
-        const zoomButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
-        zoomButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
+        const gotoButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
+        gotoButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
     }
 
     dispose() {
