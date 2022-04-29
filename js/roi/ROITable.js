@@ -28,6 +28,13 @@ class ROITable {
 
     }
 
+    clearTable() {
+        const elements = this.tableRowContainerDOM.querySelectorAll('.igv-roi-table-row')
+        for (let el of elements) {
+            el.remove()
+        }
+    }
+
     present() {
         this.container.style.left = `${ 0 }px`
         this.container.style.top  = `${ 0 }px`

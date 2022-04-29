@@ -37,6 +37,35 @@ class ROIManager {
 
     }
 
+    async loadROI(config, genome) {
+
+        const configs = Array.isArray(config) ? config : [ config ]
+
+        for (let c of configs) {
+            this.roiSets.push(new ROISet(c, genome))
+        }
+
+        await this.initialize()
+
+    }
+
+    clearROIs() {
+
+        this.roiTable.clearTable()
+
+        const elements = this.browser.columnContainer.querySelectorAll('.igv-roi-region')
+        for (let el of elements) {
+            el.remove()
+        }
+
+        for (let roiSet of this.roiSets) {
+            roiSet.dispose()
+        }
+
+        this.roiSets = []
+
+    }
+
     async getTableRecords() {
 
         const records = []
