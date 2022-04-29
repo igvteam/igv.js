@@ -746,54 +746,12 @@ class Browser {
         return loadedTracks
     }
 
-    // TODO: depricated
     async loadROI(config) {
-
-        console.error('browser.loadROI() is under development and not available')
-        return
-
-        if (!this.roiSets) {
-            this.roiSets = []
-        }
-        if (Array.isArray(config)) {
-            for (let c of config) {
-                this.roiSets.push(new ROISet(c, this.genome))
-            }
-        } else {
-            this.roiSets.push(new ROISet(config, this.genome))
-        }
-        // Force reload all views (force = true) to insure ROISet features are loaded.  Wasteful but this function is
-        // rarely called.
-        await this.updateViews(true)
+        await this.roiManager.loadROI(config, this.genome)
     }
 
-    // TODO: depricated
-    removeROI(roiToRemove) {
-
-        console.error('browser.removeROI() is under development and not available')
-        return
-
-        for (let i = 0; i < this.roiSets.length; i++) {
-            if (this.roiSets[i].name === roiToRemove.name) {
-                this.roiSets.splice(i, 1)
-                break
-            }
-        }
-        for (let tv of this.trackViews) {
-            tv.repaintViews()
-        }
-    }
-
-    // TODO: depricated
     clearROIs() {
-
-        console.error('browser.clearROIs() is under development and not available')
-        return
-
-        this.roiSets = []
-        for (let tv of this.trackViews) {
-            tv.repaintViews()
-        }
+        this.roiManager.clearROIs()
     }
 
     getRulerTrackView() {
