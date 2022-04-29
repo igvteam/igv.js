@@ -40,7 +40,7 @@ class ROITableControl {
 
         this.browser = browser
 
-        this.setVisibility(browser.config.showROITableButton)
+        this.setVisibility(browser.showROITableButton)
 
         this.setState(browser.roiTableVisible)
     }
