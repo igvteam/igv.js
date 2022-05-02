@@ -984,8 +984,6 @@
       text-overflow: ellipsis;
       height: 24px;
       margin-right: 4px; }
-    .igv-roi-table > .igv-roi-table-column-titles > div:hover {
-      background-color: #efefef; }
     .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(1) {
       width: 30%; }
     .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(2) {
