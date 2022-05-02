@@ -80,6 +80,41 @@
                     name: "Color by REGIONID",
                     colorBy: "REGIONID",
                     visibilityWindow: -1
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color by ALT",
+                    colorBy: "ALT",
+                    colorTable: {
+                        "<DEL>": "#ff2101",
+                        "<INS>": "#001888",
+                        "<DUP>": "#028401",
+                        "<INV>": "#008688",
+                        "<CNV>": "#8931ff",
+                        "<BND>": "#891100",
+                        "*": "#002eff"
+                    },
+                    visibilityWindow: -1
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color by FILTER",
+                    colorBy: "FILTER",
+                    colorTable: {
+                        "FAIL": "#ff2101",
+                        "PASS": "#028401",
+                        ".": "#891100",
+                        "*": "#002eff"
+                    },
+                    visibilityWindow: -1
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Default Color",
+                    visibilityWindow: -1
                 }
             ]
         };
