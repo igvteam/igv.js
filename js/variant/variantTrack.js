@@ -31,13 +31,15 @@ import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
-import {FileUtils, IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 const isString = StringUtils.isString
 
 
 const DEFAULT_VISIBILITY_WINDOW = 1000000
 const TOP_MARGIN = 10
+const STANDARD_FIELDS = new Map([["REF", "referenceBases"], ["ALT", "alternateBases"], ["QUAL", "quality"], ["FILTER", "filter"]])
+
 
 class VariantTrack extends TrackBase {
 
@@ -79,7 +81,6 @@ class VariantTrack extends TrackBase {
             this.colorTables = new Map()
             this.colorTables.set(config.colorBy, new ColorTable(config.colorTable))
         }
-        this._color = config.color
 
         this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes
 
@@ -290,14 +291,21 @@ class VariantTrack extends TrackBase {
         let variantColor
 
         if (this.colorBy) {
-            const value = v.info[this.colorBy]
-            variantColor = this.getVariantColorTable(this.colorBy).getColor(value)
+            const colorBy = this.colorBy
+            let value
+            if (v.info.hasOwnProperty(colorBy)) {
+                value = v.info[colorBy]
+            } else if (STANDARD_FIELDS.has(colorBy)) {
+                const key = STANDARD_FIELDS.get(colorBy)
+                value = v[key]
+            }
+            variantColor = this.getVariantColorTable(colorBy).getColor(value)
             if (!variantColor) {
                 variantColor = "gray"
             }
 
         } else if (this._color) {
-            variantColor = this.color
+            variantColor = (typeof this._color === "function") ? this._color(variant) : this._color
         } else if ("NONVARIANT" === v.type) {
             variantColor = this.nonRefColor
         } else if ("MIXED" === v.type) {
@@ -308,9 +316,6 @@ class VariantTrack extends TrackBase {
         return variantColor
     }
 
-    get color() {
-        return this._color ? ((typeof this._color === "function") ? this._color(v) : this._color) : this.defaultColor
-    }
 
     clickedFeatures(clickState, features) {
 
@@ -324,7 +329,7 @@ class VariantTrack extends TrackBase {
             // Variant
             const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
             const variantRow = Math.floor((yOffset - TOP_MARGIN) / (variantHeight + vGap))
-            if("COLLAPSED" !== this.displayMode) {
+            if ("COLLAPSED" !== this.displayMode) {
                 featureList = featureList.filter(f => f.row === variantRow)
             }
         } else if (this.callSets) {
@@ -548,7 +553,7 @@ class VariantTrack extends TrackBase {
                 click: () => {
                     const inView = []
                     for (let viewport of this.trackView.viewports) {
-                       this.sendChordsForViewport(viewport)
+                        this.sendChordsForViewport(viewport)
                     }
                 }
             })

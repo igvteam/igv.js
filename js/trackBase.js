@@ -27,8 +27,12 @@ import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 
 const fixColor = (colorString) => {
-    return (colorString.indexOf(",") > 0 && !colorString.startsWith("rgb")) ?
-        `rgb(${colorString})` : colorString
+    if(StringUtils.isString(colorString)) {
+        return (colorString.indexOf(",") > 0 && !colorString.startsWith("rgb(")) ?
+            `rgb(${colorString})` : colorString
+    } else {
+        return colorString;
+    }
 }
 
 /**
