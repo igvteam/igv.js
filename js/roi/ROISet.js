@@ -24,27 +24,28 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
+import {DOMUtils,FileUtils} from '../../node_modules/igv-utils/src/index.js'
 import FeatureSource from '../feature/featureSource.js'
 import {appleCrayonRGBA, rgbaStringTokens} from '../util/colorPalletes.js'
 
+const appleCrayonColorName = 'fern'
+
 const ROI_DEFAULT_ALPHA = 1/16
-const ROI_DEFAULT_COLOR = appleCrayonRGBA('sea_foam', ROI_DEFAULT_ALPHA)
+const ROI_DEFAULT_COLOR = appleCrayonRGBA(appleCrayonColorName, ROI_DEFAULT_ALPHA)
 const ROI_DEFAULT_HEADER_COLOR = 'rgba(0,0,0,0)'
 
 const ROI_USER_DEFINED_ALPHA = 1/12
-const ROI_USER_HEADER_DEFINED_COLOR = appleCrayonRGBA('sea_foam', 3/4)
+const ROI_USER_HEADER_DEFINED_COLOR = appleCrayonRGBA(appleCrayonColorName, 2/4)
 const ROI_USER_DEFINED_COLOR = appleCrayonRGBA('nickel', ROI_USER_DEFINED_ALPHA)
 
 class ROISet {
 
     constructor(config, genome) {
 
-
         this.url = config.url
         this.isUserDefined = config.isUserDefined
 
-        this.name = config.name || `roi-set-${ DOMUtils.guid() }`
+        this.name = this.url ? (config.name || FileUtils.getFilename(config.url)) : (config.name || '')
 
         if (config.features) {
             this.features = config.features.slice()
@@ -87,9 +88,9 @@ class ROISet {
         if (this.isUserDefined) {
             return { color:this.color,features: this.features.slice(), isUserDefined: true }
         } else if (this.url) {
-            return { name: this.name, color:this.color, url: this.url }
+            return '' === this.name ? { color:this.color, url: this.url } : { name: this.name, color:this.color, url: this.url }
         } else {
-            return { name: this.name, color:this.color, features: this.features.slice() }
+            return '' === this.name ? { color:this.color, features: this.features.slice() } : { name: this.name, color:this.color, features: this.features.slice() }
         }
     }
 

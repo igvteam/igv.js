@@ -1,5 +1,5 @@
 import { DOMUtils } from '../../node_modules/igv-utils/src/index.js'
-import {deleteRegionWithKey, parseRegionKey} from './ROIManager.js'
+import {parseRegionKey} from './ROIManager.js'
 
 class ROIMenu {
     constructor(browser, parent) {
@@ -39,7 +39,7 @@ class ROIMenu {
         row.addEventListener('click', event => {
             event.stopPropagation()
             this.container.style.display = 'none'
-            deleteRegionWithKey(this.browser.roiManager.roiSets, regionElement.dataset.region, this.browser.columnContainer)
+            this.browser.roiManager.deleteRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
         })
 
         this.container.style.left = `${ x }px`
