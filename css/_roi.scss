@@ -23,7 +23,6 @@ $igv-roi-table-background-color: #eee;
   position: absolute;
   z-index: 1024;
 
-  //width:(20 * $dimension);
   width: fit-content;
 
   border-color: $igv-roi-border-color;
@@ -166,7 +165,9 @@ $igv-roi-table-background-color: #eee;
     //width: fit-content;
     width:(24 * $dimension);
 
-    height: fit-content;
+    //height: fit-content;
+
+    min-height: (3 * $dimension);
     max-height: (20 * $dimension);
 
     background-color:white;
@@ -293,7 +294,7 @@ $igv-roi-table-background-color: #eee;
   background-color: rgba(0, 0, 0, 0.13);
 }
 
-// ROI region container
+// region container
 .igv-roi-region {
   z-index: 64;
 
@@ -339,7 +340,6 @@ $igv-roi-table-background-color: #eee;
   z-index: 1024;
 
   width:(4 * $dimension);
-  //height:(10 * $dimension);
 
   border-color: $igv-roi-border-color;
   border-radius: $igv-roi-table-border-radius;
@@ -347,72 +347,8 @@ $igv-roi-table-background-color: #eee;
   border-width: thin;
 
   font-family: $igv-roi-table-font-face;
-  //font-size: 12px;
-  //font-weight: 400;
 
   background-color: white;
-
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: flex-start;
-
-}
-
-// reusable header
-.igv-roi-header {
-
-  position: relative;
-
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: flex-end;
-  align-items: center;
-
-  width: 100%;
-  height: $dimension;
-  cursor: move;
-
-  background-color: #eee;
-
-  border-top-left-radius: $igv-roi-table-border-radius;
-  border-top-right-radius: $igv-roi-table-border-radius;
-  border-top-color: transparent;
-  border-top-style: solid;
-  border-top-width: 0;
-
-  border-bottom-color: $igv-roi-border-color;
-  border-bottom-style: solid;
-  border-bottom-width: thin;
-
-  div {
-    margin-right: 4px;
-    margin-bottom: 2px;
-    height: 12px;
-    width: 12px;
-    color: gray;
-  }
-
-  div:hover {
-    cursor: pointer;
-    color: #444;
-  }
-
-}
-
-// reusable body
-.igv-roi-body {
-  width: 100%;
-
-  background-color: white;
-
-  border-bottom-left-radius: $igv-roi-table-border-radius;
-  border-bottom-right-radius: $igv-roi-table-border-radius;
-  border-bottom-color: transparent;
-  border-bottom-style: solid;
-  border-bottom-width: 0;
 
   display: flex;
   flex-flow: column;
@@ -420,10 +356,20 @@ $igv-roi-table-background-color: #eee;
   justify-content: flex-start;
   align-items: stretch;
 
-  > .igv-roi-table-body-row:not(:last-child) {
+  > div:not(:last-child) {
     border-bottom-color: rgba(128, 128, 128, 0.50);
     border-bottom-style: solid;
     border-bottom-width: thin;
+  }
+
+  >div:first-child {
+
+    border-top-left-radius: $igv-roi-table-border-radius;
+    border-top-right-radius: $igv-roi-table-border-radius;
+    border-top-color: transparent;
+    border-top-style: solid;
+    border-top-width: 0;
+
   }
 
   >div:last-child {
@@ -436,9 +382,9 @@ $igv-roi-table-background-color: #eee;
 
   }
 
+
 }
 
-// reusable row
 .igv-roi-body-row {
 
   height: $dimension;
@@ -452,7 +398,6 @@ $igv-roi-table-background-color: #eee;
 
   line-height: $dimension;
 
-  //background-color: rgba(255, 105, 180, 0.25);
   background-color: white;
 }
 
@@ -460,3 +405,4 @@ $igv-roi-table-background-color: #eee;
   cursor: pointer;
   background-color: #f4f4f4;
 }
+
