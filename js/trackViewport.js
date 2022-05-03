@@ -589,7 +589,7 @@ class TrackViewport extends Viewport {
                 menuItems.push({label: $('<HR>')})
             }
 
-            menuItems.push({label: 'Save Image (PNG)', click: () => this.saveImage()})
+            menuItems.push({label: 'Save Image (PNG)', click: () => this.savePNG()})
             menuItems.push({label: 'Save Image (SVG)', click: () => this.saveSVG()})
 
             this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
