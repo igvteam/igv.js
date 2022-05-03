@@ -1,5 +1,5 @@
 import { FileUtils, StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
-import { createRegionKey, parseRegionKey, deleteRegionWithKey } from './ROIManager.js'
+import { createRegionKey, parseRegionKey } from './ROIManager.js'
 import { appleCrayonRGB, appleCrayonRGBA } from '../util/colorPalletes.js'
 import FeatureFileReader from "../feature/featureFileReader.js"
 
@@ -99,7 +99,7 @@ class ROITable {
         const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
         dom.dataset.region = createRegionKey(chr, start, end)
 
-        for (let string of [ name, chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end) ]) {
+        for (let string of [ chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end), name ]) {
             const el = DOMUtils.div()
             el.innerText = string
             dom.appendChild(el)
@@ -190,11 +190,6 @@ class ROITable {
 
     }
 
-    removeRegionElement(regionElement) {
-        deleteRegionWithKey(this.browser.roiManager.roiSets, regionElement.dataset.region, this.browser.columnContainer)
-        this.setButtonState(false)
-    }
-
     setButtonState(isTableRowSelected) {
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
         const gotoButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
@@ -221,10 +216,10 @@ function createColumnTitleDOM(container) {
 
     const columnTitles =
         [
-            'Set',
             'Chr',
             'Start',
-            'End'
+            'End',
+            'Set',
         ]
 
     for (let title of columnTitles) {

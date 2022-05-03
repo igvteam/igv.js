@@ -123,14 +123,18 @@ class ROIManager {
         userDefinedROISet.features.push(region)
 
         if (false === this.browser.showROITableButton) {
-            this.browser.showROITableButton = true
-            this.browser.roiTableControl.setVisibility(this.browser.showROITableButton)
+            this.setROIButtonVisibility(true)
         }
 
         await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: userDefinedROISet})
 
         const records = await this.getTableRecords()
         this.roiTable.renderTable(records)
+    }
+
+    setROIButtonVisibility(isVisible) {
+        this.browser.showROITableButton = isVisible
+        this.browser.roiTableControl.setVisibility(this.browser.showROITableButton)
     }
 
     async renderAllROISets() {
@@ -220,6 +224,42 @@ class ROIManager {
         return regionElement
     }
 
+    async deleteRegionWithKey(regionKey, columnContainer) {
+
+        columnContainer.querySelectorAll(createSelector(regionKey)).forEach(node => node.remove())
+
+        const { chr:chrKey, start:startKey, end:endKey } = parseRegionKey(regionKey)
+
+        // const indices = userDefinedROISet.features.map((feature, i) => i).join(' ')
+
+        const [ userDefinedROISet ] = this.roiSets.filter(roiSet => true === roiSet.isUserDefined)
+
+        let indexToRemove
+        for (let r = 0; r < userDefinedROISet.features.length; r++) {
+
+            const { chr, start, end } = userDefinedROISet.features[ r ]
+
+            if (chrKey === chr && startKey === start && endKey === end) {
+                indexToRemove = r
+            }
+
+        }
+
+        // console.log(`${ Date.now() } "${ roiSet.name }" indices ${ indices } index-to-remove ${indexToRemove  }`)
+
+        userDefinedROISet.features.splice(indexToRemove, 1)
+
+        const allFeatures = await this.getTableRecords()
+
+        // console.log(`userDefinedROISet.features(${ allFeatures.length })`)
+
+        if (0 === allFeatures.length) {
+            this.browser.roiTableControl.buttonHandler(false)
+            this.setROIButtonVisibility(false)
+        }
+
+    }
+
     async import(file) {
         await this.roiTable.import(file)
     }
@@ -265,33 +305,6 @@ function locusChangeHandler() {
     this.renderAllROISets()
 }
 
-function deleteRegionWithKey(roiSets, regionKey, columnContainer) {
-
-    columnContainer.querySelectorAll(createSelector(regionKey)).forEach(node => node.remove())
-
-    const { chr:chrKey, start:startKey, end:endKey } = parseRegionKey(regionKey)
-
-    // const indices = userDefinedROISet.features.map((feature, i) => i).join(' ')
-
-    const [ userDefinedROISet ] = roiSets.filter(roiSet => true === roiSet.isUserDefined)
-
-    let indexToRemove
-    for (let r = 0; r < userDefinedROISet.features.length; r++) {
-
-        const { chr, start, end } = userDefinedROISet.features[ r ]
-
-        if (chrKey === chr && startKey === start && endKey === end) {
-            indexToRemove = r
-        }
-
-    }
-
-    // console.log(`${ Date.now() } "${ roiSet.name }" indices ${ indices } index-to-remove ${indexToRemove  }`)
-
-    userDefinedROISet.features.splice(indexToRemove, 1)
-
-}
-
 function createRegionKey(chr, start, end) {
     return `region-key-${ chr }-${ start }-${ end }`
 }
@@ -308,6 +321,6 @@ function parseRegionKey(regionKey) {
     return { chr, start:ss, end:ee, locus:`${chr}:${ss}-${ee}`, bedRecord:`${chr}\t${ss}\t${ee}` }
 }
 
-export { createRegionKey, parseRegionKey, deleteRegionWithKey }
+export { createRegionKey, parseRegionKey }
 
 export default ROIManager
