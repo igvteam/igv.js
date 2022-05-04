@@ -515,9 +515,8 @@ class Browser {
         const roiTable = new ROITable(this, this.columnContainer)
         const roiMenu = new ROIMenu(this, this.columnContainer)
         if (session.roi) {
-            this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, session.roi.map(roiSetConfig => {
-                return new ROISet(roiSetConfig, this.genome)
-            }))
+            session.roi.filter(config => config.features && undefined === config.name).map((fc, index) => fc.name = `Static ROI array ${ index }`)
+            this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, session.roi.map(roiSetConfig => new ROISet(roiSetConfig, this.genome)))
         } else {
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, undefined)
         }
