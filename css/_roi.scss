@@ -126,19 +126,20 @@ $igv-roi-table-background-color: #eee;
     }
 
     >div:nth-child(1) {
-      width: 30%;
+      width: 25%;
     }
 
     >div:nth-child(2) {
-      width: 20%;
+      width: 100px;
     }
 
     >div:nth-child(3) {
-      width: 20%;
+      width:100px;
     }
 
     >div:nth-child(4) {
-      width: 30%;
+      width: 25%;
+      margin-right: 8px;
     }
 
     background-color: white;
@@ -155,7 +156,7 @@ $igv-roi-table-background-color: #eee;
     resize: both;
     overflow: scroll;
 
-    min-width:(24 * $dimension);
+    min-width:512px;
 
     min-height: (3 * $dimension);
     max-height: (20 * $dimension);
@@ -197,19 +198,19 @@ $igv-roi-table-background-color: #eee;
       }
 
       >div:nth-child(1) {
-        width: 30%;
+        width: 25%;
       }
 
       >div:nth-child(2) {
-        width: 20%;
+        width: 100px;
       }
 
       >div:nth-child(3) {
-        width: 20%;
+        width:100px;
       }
 
       >div:nth-child(4) {
-        width: 30%;
+        width: 25%;
         margin-right: 8px;
       }
 
