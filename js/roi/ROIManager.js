@@ -123,7 +123,7 @@ class ROIManager {
         userDefinedROISet.features.push(region)
 
         if (false === this.browser.showROITableButton) {
-            this.setROIButtonVisibility(true)
+            this.setROITableButtonVisibility(true)
         }
 
         await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: userDefinedROISet})
@@ -132,7 +132,7 @@ class ROIManager {
         this.roiTable.renderTable(records)
     }
 
-    setROIButtonVisibility(isVisible) {
+    setROITableButtonVisibility(isVisible) {
         this.browser.showROITableButton = isVisible
         this.browser.roiTableControl.setVisibility(this.browser.showROITableButton)
     }
@@ -255,7 +255,7 @@ class ROIManager {
 
         if (0 === allFeatures.length) {
             this.browser.roiTableControl.buttonHandler(false)
-            this.setROIButtonVisibility(false)
+            this.setROITableButtonVisibility(false)
         }
 
     }
