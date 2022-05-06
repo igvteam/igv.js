@@ -102,7 +102,7 @@ class GWASTrack extends TrackBase {
     }
 
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return true
     }
 
@@ -213,7 +213,7 @@ class GWASTrack extends TrackBase {
 
         let data = []
         const track = clickState.viewport.trackView.track
-        const features = clickState.viewport.getCachedFeatures()
+        const features = clickState.viewport.cachedFeatures
 
         if (features) {
             let count = 0

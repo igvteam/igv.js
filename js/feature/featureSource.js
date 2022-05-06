@@ -27,11 +27,12 @@ import TextFeatureSource from "./textFeatureSource.js"
 import BWSource from "../bigwig/bwSource.js"
 import TDFSource from "../tdf/tdfSource.js"
 
+const bbFormats = new Set(['bigwig', 'bw', 'bigbed', 'bb', 'biginteract', 'biggenepred', 'bignarrowpeak'])
 
 function FeatureSource(config, genome) {
 
     const format = config.format ? config.format.toLowerCase() : undefined
-    if ('bigwig' === format || 'bigbed' === format || 'bb' === format) {
+    if (bbFormats.has(format)) {
         return new BWSource(config, genome)
     } else if ("tdf" === format) {
         return new TDFSource(config, genome)

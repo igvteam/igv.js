@@ -1,0 +1,22 @@
+
+<html >
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<script>
+
+    fetch('https://dl.dropboxusercontent.com/s/zx7owfskn0jk6ab/heart_slc25a3.cram?dl=0', {
+        method: 'GET',
+        headers: {
+            //range: 'bytes:1-1000'
+        }
+
+    }).then(x => x.blob().then(y => console.log(y)))
+
+</script>
+
+</body>
+</html>

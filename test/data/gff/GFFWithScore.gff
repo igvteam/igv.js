@@ -1,0 +1,6 @@
+##gff-version 3
+##sequence-region 1_pilon 1 4215054
+chr1	feature	peak	1650596	1665689	0.004226614290639252	+	.	ROI Detected=1;engineered_read_rate=0.03225806451612903;peak_prominences=0.010518934081346423
+chr1	feature	peak	3575146	3590145	0.004866576525554385	+	.	ROI Detected=1;engineered_read_rate=0.029411764705882353;peak_prominences=0.0030959752321981435
+chr1	feature	peak	3444831	3459830	0.004917009909145034	+	.	ROI Detected=1;engineered_read_rate=0.022222222222222223;ki_cluster_density_e_value=0.14528782662300455;peak_prominences=0.0029914529914529912
+chr1	feature	peak	3486328	3501327	0.004917009909145034	+	.	ROI Detected=1;engineered_read_rate=0.023255813953488372;ki_cluster_density_e_value=0.13851412941883356;peak_prominences=0.0019792182088075212

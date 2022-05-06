@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>1000 Genomes Cram file</h1>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr21:26,055,336-26,056,708",
+            tracks:
+                [
+                    {
+                        "name": "unexpectedPair",
+                        "sourceType": "gcs",
+                        "type": "alignment",
+                        "url": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam",
+                        "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam.bai",
+                        "format": "bam",
+                        "colorBy": "unexpectedPair",
+                        "displayMode": "SQUISHED"
+                    },
+                    {
+                        "name": "tlen",
+                        "sourceType": "gcs",
+                        "type": "alignment",
+                        "url": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam",
+                        "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam.bai",
+                        "format": "bam",
+                        "colorBy": "tlen",
+                        "displayMode": "SQUISHED"
+                    },
+                    {
+                        "name": "pairOrientation",
+                        "sourceType": "gcs",
+                        "type": "alignment",
+                        "url": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam",
+                        "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam.bai",
+                        "format": "bam",
+                        "colorBy": "pairOrientation",
+                        "displayMode": "SQUISHED"
+                    },
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

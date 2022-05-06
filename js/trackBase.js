@@ -26,6 +26,14 @@
 import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 
+const fixColor = (colorString) => {
+    if(StringUtils.isString(colorString)) {
+        return (colorString.indexOf(",") > 0 && !colorString.startsWith("rgb(")) ?
+            `rgb(${colorString})` : colorString
+    } else {
+        return colorString;
+    }
+}
 
 /**
  * A collection of properties and methods shared by all (or most) track types.
@@ -70,8 +78,8 @@ class TrackBase {
 
         this.order = config.order
 
-        this.color = config.color
-        this.altColor = config.altColor
+        if(config.color) this.color = fixColor(config.color)
+        if(config.altColor) this.altColor = fixColor(config.altColor)
         if ("civic-ws" === config.sourceType) {    // Ugly proxy for specialized track type
             this.defaultColor = "rgb(155,20,20)"
         } else {
@@ -161,14 +169,15 @@ class TrackBase {
 
         // Check for non-json-if-yable properties.  Perhaps we should test what can be saved.
         for (let key of Object.keys(state)) {
-            if (typeof state[key] === 'function') {
+            const value = state[key]
+            if (typeof value === 'function') {
                 throw Error(`Property '${key}' of track '${this.name} is a function. Functions cannot be saved in sessions.`)
             }
-            if (FileUtils.isFile(state[key])) {
+            if (value instanceof File) {   // Test specifically for File.  Other types of File-like objects might be savable
                 const str = `Track ${this.name} is a local file. Sessions cannot be saved with local file references.`
                 throw Error(str)
             }
-            if (state[key] instanceof Promise) {
+            if (value instanceof Promise) {
                 throw Error(`Property '${key}' of track '${this.name} is a Promise. Promises cannot be saved in sessions.`)
             }
         }
@@ -176,8 +185,8 @@ class TrackBase {
         return state
     }
 
-    supportsWholeGenome() {
-        return false
+    get supportsWholeGenome() {
+        return this.config.supportsWholeGenome === true
     }
 
     /**
@@ -314,7 +323,7 @@ class TrackBase {
 
         // We use the cached features rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (!features) features = clickState.viewport.getCachedFeatures()
+        if (!features) features = clickState.viewport.cachedFeatures
 
         if (!features || features.length === 0) {
             return []

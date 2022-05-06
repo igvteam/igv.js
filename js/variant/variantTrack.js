@@ -30,14 +30,16 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
-import {makeVCFChords} from "../jbrowse/circularViewUtils.js"
-import {FileUtils, IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
+import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 const isString = StringUtils.isString
 
 
 const DEFAULT_VISIBILITY_WINDOW = 1000000
 const TOP_MARGIN = 10
+const STANDARD_FIELDS = new Map([["REF", "referenceBases"], ["ALT", "alternateBases"], ["QUAL", "quality"], ["FILTER", "filter"]])
+
 
 class VariantTrack extends TrackBase {
 
@@ -79,7 +81,7 @@ class VariantTrack extends TrackBase {
             this.colorTables = new Map()
             this.colorTables.set(config.colorBy, new ColorTable(config.colorTable))
         }
-        this._color = config.color
+
         this._strokecolor = config.strokecolor
         this._context_hook = config.context_hook
 
@@ -107,7 +109,7 @@ class VariantTrack extends TrackBase {
 
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return this.config.indexed === false || this.config.supportsWholeGenome === true
     }
 
@@ -190,9 +192,9 @@ class VariantTrack extends TrackBase {
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
         const vGap = ("SQUISHED" === this.displayMode) ? this.squishedVGap : this.expandedVGap
-        const rc = ("COLLAPSED" === this.displayMode) ? 1 : this.nVariantRows
+        const rowCount = ("COLLAPSED" === this.displayMode) ? 1 : this.nVariantRows
         const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
-        this.variantBandHeight = TOP_MARGIN + rc * (variantHeight + vGap)
+        this.variantBandHeight = TOP_MARGIN + rowCount * (variantHeight + vGap)
 
         const callSets = this.callSets
         const nCalls = this.getCallsetsLength()
@@ -303,14 +305,21 @@ class VariantTrack extends TrackBase {
         let variantColor
 
         if (this.colorBy) {
-            const value = v.info[this.colorBy]
-            variantColor = this.getVariantColorTable(this.colorBy).getColor(value)
+            const colorBy = this.colorBy
+            let value
+            if (v.info.hasOwnProperty(colorBy)) {
+                value = v.info[colorBy]
+            } else if (STANDARD_FIELDS.has(colorBy)) {
+                const key = STANDARD_FIELDS.get(colorBy)
+                value = v[key]
+            }
+            variantColor = this.getVariantColorTable(colorBy).getColor(value)
             if (!variantColor) {
                 variantColor = "gray"
             }
 
         } else if (this._color) {
-            variantColor = (typeof this._color === "function") ? this._color(v) : this._color
+            variantColor = (typeof this._color === "function") ? this._color(variant) : this._color
         } else if ("NONVARIANT" === v.type) {
             variantColor = this.nonRefColor
         } else if ("MIXED" === v.type) {
@@ -357,15 +366,17 @@ class VariantTrack extends TrackBase {
         if (yOffset <= this.variantBandHeight) {
             // Variant
             const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
-            const variantRow = (Math.floor)((yOffset - TOP_MARGIN) / (variantHeight + vGap))
-            featureList = featureList.filter(f => f.row === variantRow)
+            const variantRow = Math.floor((yOffset - TOP_MARGIN) / (variantHeight + vGap))
+            if ("COLLAPSED" !== this.displayMode) {
+                featureList = featureList.filter(f => f.row === variantRow)
+            }
         } else if (this.callSets) {
             const callSets = this.callSets
             const sampleY = yOffset - this.variantBandHeight
             const sampleRow = Math.floor(sampleY / this.sampleHeight)
             if (sampleRow >= 0 && sampleRow < callSets.length) {
                 const variantRow = Math.floor((sampleY - sampleRow * this.sampleHeight) / callHeight)
-                const variants = featureList.filter(f => f.row === variantRow)
+                const variants = "COLLAPSED" === this.displayMode ? featureList : featureList.filter(f => f.row === variantRow)
                 const cs = callSets[sampleRow]
                 featureList = variants.map(v => {
                     const call = v.calls[cs.id]
@@ -572,7 +583,7 @@ class VariantTrack extends TrackBase {
         }
 
         // Experimental JBrowse circular view integration
-        if (this.browser.circularView && true === this.browser.circularViewVisible) {
+        if (this.browser.circularView) {
 
             menuItems.push('<hr>')
             menuItems.push({
@@ -580,17 +591,8 @@ class VariantTrack extends TrackBase {
                 click: () => {
                     const inView = []
                     for (let viewport of this.trackView.viewports) {
-                        const refFrame = viewport.referenceFrame
-                        for (let f of viewport.getCachedFeatures()) {
-                            if (f.end >= refFrame.start && f.start <= refFrame.end) {
-                                inView.push(f)
-                            }
-                        }
+                        this.sendChordsForViewport(viewport)
                     }
-
-                    const chords = makeVCFChords(inView)
-                    const color = IGVColor.addAlpha(this._color || this.defaultColor, 0.5)
-                    this.browser.circularView.addChords(chords, {track: this.name, color: color})
                 }
             })
         }
@@ -602,20 +604,14 @@ class VariantTrack extends TrackBase {
     contextMenuItemList(clickState) {
 
         // Experimental JBrowse circular view integration
-        if (this.browser.circularView && true === this.browser.circularViewVisible) {
+        if (this.browser.circularView) {
             const viewport = clickState.viewport
             const list = []
 
             list.push({
                 label: 'Add SVs to Circular View',
                 click: () => {
-                    const refFrame = viewport.referenceFrame
-                    const inView = "all" === refFrame.chr ?
-                        this.featureSource.getAllFeatures() :
-                        this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
-                    const chords = makeVCFChords(inView)
-                    const color = IGVColor.addAlpha(this._color || this.defaultColor, 0.5)
-                    this.browser.circularView.addChords(chords, {track: this.name, color: color})
+                    this.sendChordsForViewport(viewport)
                 }
             })
 
@@ -624,6 +620,15 @@ class VariantTrack extends TrackBase {
         }
     }
 
+
+    sendChordsForViewport(viewport) {
+        const refFrame = viewport.referenceFrame
+        const inView = "all" === refFrame.chr ?
+            this.featureSource.getAllFeatures() :
+            this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
+        const chords = makeVCFChords(inView)
+        sendChords(chords, this, refFrame, 0.5)
+    }
 
     /**
      * Create a "color by" checkbox menu item, optionally initially checked

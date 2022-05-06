@@ -26,6 +26,7 @@
 import IGVGraphics from "./igv-canvas.js"
 import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {isSecureContext} from "./util/igvUtils.js"
+import {reverseComplementSequence} from "./util/sequenceUtils.js"
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
 
@@ -104,6 +105,12 @@ for (let i = 0; i < t1.length; i++) {
     complement[t1[i].toLowerCase()] = t2[i].toLowerCase()
 }
 
+const DEFAULT_HEIGHT = 25
+const TRANSLATED_HEIGHT = 115
+const SEQUENCE_HEIGHT = 15
+const FRAME_HEIGHT = 25
+const FRAME_BORDER = 5
+
 class SequenceTrack {
 
     constructor(config, browser) {
@@ -115,18 +122,17 @@ class SequenceTrack {
         this.name = "Sequence"
         this.id = "sequence"
         this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot
-        this.height = 25
         this.disableButtons = false
         this.order = config.order || defaultSequenceTrackOrder
         this.ignoreTrackMenu = false
 
-        this.reversed = false
-        this.frameTranslate = false
+        this.reversed = config.reversed === true
+        this.frameTranslate = config.frameTranslate === true
+        this.height = this.frameTranslate ? TRANSLATED_HEIGHT : DEFAULT_HEIGHT
 
     }
 
     menuItemList() {
-
         return [
             {
                 name: this.reversed ? "Forward" : "Reverse",
@@ -141,14 +147,14 @@ class SequenceTrack {
                     this.frameTranslate = !this.frameTranslate
                     if (this.frameTranslate) {
                         for (let vp of this.trackView.viewports) {
-                            vp.setContentHeight(115)
+                            vp.setContentHeight(TRANSLATED_HEIGHT)
                         }
-                        this.trackView.setTrackHeight(115)
+                        this.trackView.setTrackHeight(TRANSLATED_HEIGHT)
                     } else {
                         for (let vp of this.trackView.viewports) {
-                            vp.setContentHeight(25)
+                            vp.setContentHeight(DEFAULT_HEIGHT)
                         }
-                        this.trackView.setTrackHeight(25)
+                        this.trackView.setTrackHeight(DEFAULT_HEIGHT)
                     }
                     this.trackView.repaintViews()
 
@@ -161,17 +167,20 @@ class SequenceTrack {
     contextMenuItemList(clickState) {
         const viewport = clickState.viewport
         if (viewport.referenceFrame.bpPerPixel <= 1) {
+            const pixelWidth = viewport.getWidth()
+            const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel
+            const chr = viewport.referenceFrame.chr
+            const start = Math.floor(viewport.referenceFrame.start)
+            const end = Math.ceil(start + bpWindow)
             const items = [
                 {
-                    label: 'View visible sequence...',
+                    label: this.reversed ? 'View visible sequence (reversed)...' : 'View visible sequence...',
                     click: async () => {
-                        const pixelWidth = viewport.getWidth()
-                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel
-                        const chr = viewport.referenceFrame.chr
-                        const start = viewport.referenceFrame.start
-                        const end = start + bpWindow
-                        const sequence = await this.browser.genome.sequence.getSequence(chr, start, end)
-                        Alert.presentAlert(sequence)
+                        let seq = await this.browser.genome.sequence.getSequence(chr, start, end)
+                        if (this.reversed) {
+                            seq = reverseComplementSequence(seq)
+                        }
+                        Alert.presentAlert(seq)
                     }
                 }
             ]
@@ -179,14 +188,18 @@ class SequenceTrack {
                 items.push({
                     label: 'Copy visible sequence',
                     click: async () => {
-                        const pixelWidth = viewport.getWidth()
-                        const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel
-                        const chr = viewport.referenceFrame.chr
-                        const start = viewport.referenceFrame.start
-                        const end = start + bpWindow
-                        const sequence = await this.browser.genome.sequence.getSequence(chr, start, end)
-                        navigator.clipboard.writeText(sequence)
+                        let seq = await this.browser.genome.sequence.getSequence(chr, start, end)
+                        if (this.reversed) {
+                            seq = reverseComplementSequence(seq)
+                        }
+                        try {
+                            await navigator.clipboard.writeText(seq)
+                        } catch (e) {
+                            console.error(e)
+                            Alert.presentAlert(`error copying sequence to clipboard ${e}`)
+                        }
                     }
+
                 })
             }
             items.push('<hr/>')
@@ -224,7 +237,8 @@ class SequenceTrack {
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
-
+        start = Math.floor(start)
+        end = Math.floor(end)
         if (bpPerPixel && bpPerPixel > 1) {
             return null
         } else {
@@ -242,99 +256,90 @@ class SequenceTrack {
 
         if (options.features) {
 
-            const sequence = options.features.sequence
-            const sequenceBpStart = options.features.bpStart
+            let sequence = options.features.sequence
+
+            if (this.reversed) {
+                sequence = sequence.split('').map(function (cv) {
+                    return complement[cv]
+                }).join('')
+            }
+
+            const sequenceBpStart = options.features.bpStart  // genomic position at start of sequence
             const bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel)
 
-            let height = 15
-            for (let bp = sequenceBpStart; bp <= bpEnd; bp++) {
+            for (let bp = Math.floor(options.bpStart); bp <= bpEnd; bp++) {
 
-                let seqOffsetBp = Math.floor(bp - sequenceBpStart)
+                const seqIdx = Math.floor(bp - sequenceBpStart)
 
-                if (seqOffsetBp < sequence.length) {
-                    let letter = sequence[seqOffsetBp]
-
-                    if (this.reversed) {
-                        letter = complement[letter] || ""
-                    }
-
-                    let offsetBP = bp - options.bpStart
-                    let aPixel = offsetBP / options.bpPerPixel
-                    let bPixel = (offsetBP + 1) / options.bpPerPixel
-                    let color = this.fillColor(letter)
-
-                    // IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, { fillStyle: randomRGBConstantAlpha(150, 255, 0.75) });
+                if (seqIdx >= 0 && seqIdx < sequence.length) {
+                    const baseLetter = sequence[seqIdx]
+                    const offsetBP = bp - options.bpStart
+                    const aPixel = offsetBP / options.bpPerPixel
+                    const pixelWidth = 1 / options.bpPerPixel
+                    const color = this.fillColor(baseLetter)
 
                     if (options.bpPerPixel > 1 / 10) {
-                        IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color})
+                        IGVGraphics.fillRect(ctx, aPixel, 5, pixelWidth, SEQUENCE_HEIGHT - 5, {fillStyle: color})
                     } else {
-                        let xPixel = 0.5 * (aPixel + bPixel - ctx.measureText(letter).width)
-                        IGVGraphics.strokeText(ctx, letter, xPixel, height, {strokeStyle: color})
+                        let textPixel = aPixel + 0.5 * (pixelWidth - ctx.measureText(baseLetter).width)
+                        IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
                     }
                 }
             }
 
             if (this.frameTranslate) {
 
-                let transSeq
-                if (this.reversed) {
-                    transSeq = sequence.split('').map(function (cv) {
-                        return complement[cv]
-                    })
-                    transSeq = transSeq.join('')
-                } else {
-                    transSeq = sequence
-                }
+                let y = SEQUENCE_HEIGHT + 2 * FRAME_BORDER
+                const translatedSequence = this.translateSequence(sequence)
 
-                let y = height
-                let translatedSequence = this.translateSequence(transSeq)
-                for (let arr of translatedSequence) {
+                for (let fNum = 0; fNum < translatedSequence.length; fNum++) {    // == 3, 1 for each frame
 
-                    let i = translatedSequence.indexOf(arr)
-                    let fNum = i
-                    let h = 25
+                    const aaSequence = translatedSequence[fNum]  // AA sequence for this frame
 
-                    y = (i === 0) ? y + 10 : y + 30 //Little less room at first.
+                    for (let idx = 0; idx < aaSequence.length; idx++) {
 
-                    for (let cv of arr) {
-
-                        let aaS
-                        let idx = arr.indexOf(cv)
-                        let xSeed = (idx + fNum) + (2 * idx)
                         let color = 0 === idx % 2 ? 'rgb(160,160,160)' : 'rgb(224,224,224)'
+                        const cv = aaSequence[idx]
 
-                        let p0 = Math.floor(xSeed / options.bpPerPixel)
-                        let p1 = Math.floor((xSeed + 3) / options.bpPerPixel)
-                        let pc = Math.round((p0 + p1) / 2)
+                        const bpPos = sequenceBpStart + fNum + (idx * 3)
+                        const bpOffset = bpPos - options.bpStart
+                        const p0 = Math.floor(bpOffset / options.bpPerPixel)
+                        const p1 = Math.floor((bpOffset + 3) / options.bpPerPixel)
+                        const pc = Math.round((p0 + p1) / 2)
 
+                        if (p1 < 0) {
+                            continue   // off left edge
+                        } else if (p0 > options.pixelWidth) {
+                            break      // off right edge
+                        }
+
+                        let aaLabel = cv.aminoA
                         if (cv.aminoA.indexOf('STOP') > -1) {
                             color = 'rgb(255, 0, 0)'
-                            aaS = 'STOP' //Color blind accessible
-                        } else {
-                            aaS = cv.aminoA
-                        }
-
-                        if (cv.aminoA === 'M') {
+                            aaLabel = 'STOP' //Color blind accessible
+                        } else if (cv.aminoA === 'M') {
                             color = 'rgb(0, 153, 0)'
-                            aaS = 'START' //Color blind accessible
+                            aaLabel = 'START' //Color blind accessible
                         }
 
-                        IGVGraphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color})
+                        IGVGraphics.fillRect(ctx, p0, y, p1 - p0, FRAME_HEIGHT, {fillStyle: color})
 
                         if (options.bpPerPixel <= 1 / 10) {
-                            IGVGraphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15)
+                            IGVGraphics.strokeText(ctx, aaLabel, pc - (ctx.measureText(aaLabel).width / 2), y + 15)
                         }
                     }
+                    y += (FRAME_HEIGHT + FRAME_BORDER)
                 }
             }
         }
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return false
     }
 
     computePixelHeight(ignore) {
+        this.height = this.frameTranslate ? TRANSLATED_HEIGHT : DEFAULT_HEIGHT
         return this.height
     }
 
@@ -347,8 +352,26 @@ class SequenceTrack {
         } else {
             return 'rgb(0, 0, 150)'
         }
-
     }
+
+    /**
+     * Return the current state of the track.  Used to create sessions and bookmarks.
+     *
+     * @returns {*|{}}
+     */
+    getState() {
+        const config = {
+            type: "sequence"
+        }
+        if (this.order !== defaultSequenceTrackOrder) {
+            config.order = this.order
+        }
+        if (this.reversed) {
+            config.revealed = true
+        }
+        return config
+    }
+
 }
 
 export {defaultSequenceTrackOrder}

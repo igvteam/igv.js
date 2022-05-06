@@ -45,6 +45,9 @@ const knownFileExtensions = new Set([
     "vcf",
     "bb",
     "bigbed",
+    "biginteract",
+    "biggenepred",
+    "bignarrowpeak",
     "bw",
     "bigwig",
     "bam",
@@ -187,6 +190,7 @@ function inferTrackType(config) {
                 return "alignment"
             case "bedpe":
             case "bedpe-loop":
+            case "biginteract":
                 return "interact"
             case "bp":
                 return "arc"
@@ -195,6 +199,8 @@ function inferTrackType(config) {
             case "bed":
             case "bigbed":
             case "bb":
+            case "biggenepred":
+            case "bignarrowpeak":
                 return "bedtype"
             default:
                 return "annotation"

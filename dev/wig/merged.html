@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>Merged track</h1>
+
+<p>
+    A combined (overlaid) track from 2 bigWig tracks.
+</p>
+
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js"
+
+    var options =
+        {
+            genome: "hg19",
+            tracks: [
+                {
+                    "type": "wig",
+                    "format": "bigwig",
+                    "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                    "color": "red",
+                    "name": "ENCFF000ASJ"
+                },
+                {
+                    "type": "wig",
+                    "format": "bigwig",
+                    "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                    "color": "green",
+                    "name": "ENCFF351WPV"
+                },
+                {
+                    name: "Merged - autoscaled",
+                    type: "merged",
+                    autoscale: true,
+                    tracks: [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red"
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green"
+                        }
+                    ]
+                },
+                {
+                    name: "Merged - fixed scale",
+                    type: "merged",
+                    min: 0,
+                    max: 50,
+                    tracks: [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red"
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green"
+                        }
+                    ]
+                },
+                {
+                    name: "Merged - individually scaled",
+                    type: "merged",
+                    min: 0,
+                    max: 50,
+                    autoscale: false,
+                    tracks: [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red",
+                            "max": 100
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green",
+                            "max": 25
+                        }
+                    ]
+                }
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+        })
+
+
+</script>
+
+</body>
+
+</html>

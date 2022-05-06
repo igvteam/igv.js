@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<div id="container"></div>
+
+<script type="module">
+
+    import igv from '../../js/index.js'
+
+    const config =
+        {
+            reference: {
+                fastaURL: '../../macFas5/macFas5.fa',
+                indexURL: '../../macFas5/macFas5.fa.fai'
+            },
+            loadDefaultGenomes: false,
+            locus: 'chr2:32,027,456-32,027,495',
+            tracks: [
+                {
+                    type: "sequence",
+                    order: -9007199254740991,
+                    frameTranslate: true
+                },
+            ]
+        }
+
+    igv.createBrowser(document.getElementById("container"), config)
+        .then(() => console.log("Created IGV browser"))
+
+
+</script>
+
+</body>
+
+</html>

@@ -38,15 +38,10 @@ const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 class TrackView {
 
     constructor(browser, columnContainer, track) {
-
-        this.namespace = `trackview-${DOMUtils.guid()}`
-
         this.browser = browser
         this.track = track
         track.trackView = this
-
         this.addDOMToColumnContainer(browser, columnContainer, browser.referenceFrameList)
-
     }
 
     /**
@@ -70,7 +65,7 @@ class TrackView {
         // Axis
         this.axis = this.createAxis(browser, this.track)
 
-        // Track Viewports
+        // Create a viewport for each reference frame
         this.viewports = []
         const viewportWidth = browser.calculateViewportWidth(referenceFrameList.length)
         const viewportColumns = columnContainer.querySelectorAll('.igv-column')
@@ -143,7 +138,6 @@ class TrackView {
 
         // Track Viewports
         for (let viewport of this.viewports) {
-            viewport.removeMouseHandlers()
             viewport.$viewport.remove()
         }
 
@@ -209,19 +203,14 @@ class TrackView {
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
 
             const trackColors = []
-
             const color = this.track.color || this.track.defaultColor
-
             if (StringUtils.isString(color)) {
                 trackColors.push(color)
             }
-
             if (this.track.altColor && StringUtils.isString(this.track.altColor)) {
                 trackColors.push(this.track.altColor)
             }
-
             const defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c))
-
             const colorHandlers =
                 {
                     color: color => {
@@ -234,7 +223,6 @@ class TrackView {
                     }
 
                 }
-
             this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
             this.browser.genericColorPicker.setActiveColorHandler(key)
             this.browser.genericColorPicker.show()
@@ -248,7 +236,6 @@ class TrackView {
             if (this.track.minHeight) {
                 newHeight = Math.max(this.track.minHeight, newHeight)
             }
-
             if (this.track.maxHeight) {
                 newHeight = Math.min(this.track.maxHeight, newHeight)
             }
@@ -268,9 +255,8 @@ class TrackView {
 
         this.sampleNameViewport.viewport.style.height = `${newHeight}px`
 
-        // If the track does not manage its own content height set it here
+        // If the track does not manage its own content height set it equal to the viewport height here
         if (typeof this.track.computePixelHeight !== "function") {
-
             for (let vp of this.viewports) {
                 vp.setContentHeight(newHeight)
             }
@@ -327,15 +313,6 @@ class TrackView {
         }
     }
 
-    resize(viewportWidth) {
-
-        for (let viewport of this.viewports) {
-            viewport.setWidth(viewportWidth)
-        }
-
-        this.updateViews(true)
-    }
-
     /**
      * Repaint all viewports without loading any new data.   Use this for events that change visual aspect of data,
      * e.g. color, sort order, etc, but do not change the genomic state.
@@ -343,7 +320,9 @@ class TrackView {
     repaintViews() {
 
         for (let viewport of this.viewports) {
-            viewport.repaint()
+            if (viewport.isVisible()) {
+                viewport.repaint()
+            }
         }
 
         if (typeof this.track.paintAxis === 'function') {
@@ -352,7 +331,6 @@ class TrackView {
 
         // Repaint sample names last
         this.repaintSamples()
-
     }
 
     repaintSamples() {
@@ -369,9 +347,24 @@ class TrackView {
     }
 
     /**
-     * Update viewports to reflect current genomic state, possibly loading additional data.
+     * Called in response to a window resize event, change in # of multilocus panels, or other event that changes
+     * the width of the track view.
+     *
+     * @param viewportWidth  The width of each viewport in this track view.
      */
-    async updateViews(force) {
+    resize(viewportWidth) {
+        for (let viewport of this.viewports) {
+            viewport.setWidth(viewportWidth)
+        }
+    }
+
+    /**
+     * Update viewports to reflect current genomic state, possibly loading additional data.
+     *
+     * @param force - if true, force a repaint even if no new data is loaded
+     * @returns {Promise<void>}
+     */
+    async updateViews() {
 
         if (!(this.browser && this.browser.referenceFrameList)) return
 
@@ -380,31 +373,38 @@ class TrackView {
         // Shift viewports left/right to current genomic state (pans canvas)
         visibleViewports.forEach(viewport => viewport.shift())
 
-        const isDragging = this.browser.dragObject
-
-        if (isDragging) {
+        // If dragging (panning) return
+        if (this.browser.dragObject) {
             return
         }
 
-        // rpv: viewports whose image (canvas) does not fully cover current genomic range
-        const reloadableViewports = this.viewportsToReload(force)
+        // Get viewports to repaint
+        let viewportsToRepaint = (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler') ?
+            visibleViewports :
+            visibleViewports.filter(vp => vp.needsRepaint())
+
+        // Filter zoomed out views.  This has the side effect or turning off or no the zoomed out notice
+        viewportsToRepaint = viewportsToRepaint.filter(viewport => viewport.checkZoomIn())
+
+        // Get viewports that require a data load
+        const viewportsToReload = viewportsToRepaint.filter(viewport => viewport.needsReload())
 
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
-        for (let viewport of reloadableViewports) {
+        for (let viewport of viewportsToReload) {
             await viewport.loadFeatures()
         }
-        
+
         if (this.disposed) return   // Track was removed during load
 
-        // Very special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
+        // Special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
         // section depends on data from all the views.  We only need to adjust this however if any data was loaded
         // (i.e. reloadableViewports.length > 0)
-        if (this.track && typeof this.track.variantRowCount === 'function' && reloadableViewports.length > 0) {
+        if (this.track && typeof this.track.variantRowCount === 'function' && viewportsToReload.length > 0) {
             let maxRow = 0
             for (let viewport of this.viewports) {
-                if (viewport.tile && viewport.tile.features) {
-                    maxRow = Math.max(maxRow, viewport.tile.features.reduce((a, f) => Math.max(a, f.row || 0), 0))
+                if (viewport.featureCache && viewport.featureCache.features) {
+                    maxRow = Math.max(maxRow, viewport.featureCache.features.reduce((a, f) => Math.max(a, f.row || 0), 0))
                 }
             }
             const current = this.track.nVariantRows
@@ -416,19 +416,18 @@ class TrackView {
             }
         }
 
-
         if (this.track.autoscale) {
             let allFeatures = []
             for (let visibleViewport of visibleViewports) {
                 const referenceFrame = visibleViewport.referenceFrame
                 const start = referenceFrame.start
                 const end = start + referenceFrame.toBP($(visibleViewport.contentDiv).width())
-                if (visibleViewport.tile && visibleViewport.tile.features) {
-                    if (typeof visibleViewport.tile.features.getMax === 'function') {
-                        const max = visibleViewport.tile.features.getMax(start, end)
+                if (visibleViewport.featureCache && visibleViewport.featureCache.features) {
+                    if (typeof visibleViewport.featureCache.features.getMax === 'function') {
+                        const max = visibleViewport.featureCache.features.getMax(start, end)
                         allFeatures.push({value: max})
                     } else {
-                        allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(visibleViewport.tile.features, start, end))
+                        allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(visibleViewport.featureCache.features, start, end))
                     }
                 }
             }
@@ -439,15 +438,8 @@ class TrackView {
             }
         }
 
-        // Must repaint all viewports if autoscaling
-        if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup)) {
-            for (let visibleViewport of visibleViewports) {
-                visibleViewport.repaint()
-            }
-        } else {
-            for (let vp of reloadableViewports) {
-                vp.repaint()
-            }
+        for (let vp of viewportsToRepaint) {
+            vp.repaint()
         }
 
         this.adjustTrackHeight()
@@ -475,34 +467,29 @@ class TrackView {
     }
 
     /**
-     * Return a promise to get all in-view features.  Used for group autoscaling.
+     * Return a promise to get all in-view features across all viewports.  Used for group autoscaling.
      */
-    async getInViewFeatures(force) {
+    async getInViewFeatures() {
 
         if (!(this.browser && this.browser.referenceFrameList)) {
             return []
         }
 
-        // List of viewports that need reloading
-        const rpV = this.viewportsToReload(force)
-        const promises = rpV.map(function (vp) {
-            return vp.loadFeatures()
-        })
-
-        await Promise.all(promises)
-
         let allFeatures = []
         for (let vp of this.viewports) {
-            if (vp.tile && vp.tile.features) {
+            if (vp.needsReload()) {
+                await vp.loadFeatures()
+            }
+            if (vp.featureCache && vp.featureCache.features) {
                 const referenceFrame = vp.referenceFrame
                 const start = referenceFrame.start
                 const end = start + referenceFrame.toBP($(vp.contentDiv).width())
 
-                if (typeof vp.tile.features.getMax === 'function') {
-                    const max = vp.tile.features.getMax(start, end)
+                if (typeof vp.featureCache.features.getMax === 'function') {
+                    const max = vp.featureCache.features.getMax(start, end)
                     allFeatures.push({value: max})
                 } else {
-                    allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end))
+                    allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.featureCache.features, start, end))
                 }
             }
         }
@@ -541,27 +528,6 @@ class TrackView {
             }
             this.updateScrollbar()
         }
-    }
-
-    viewportsToReload(force) {
-
-        // List of viewports that need reloading
-        const viewports = this.viewports.filter(viewport => {
-            if (!viewport.isVisible()) {
-                return false
-            }
-            if (!viewport.checkZoomIn()) {
-                return false
-            } else {
-                const referenceFrame = viewport.referenceFrame
-                const chr = viewport.referenceFrame.chr
-                const start = referenceFrame.start
-                const end = start + referenceFrame.toBP($(viewport.contentDiv).width())
-                const bpPerPixel = referenceFrame.bpPerPixel
-                return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel))
-            }
-        })
-        return viewports
     }
 
     createTrackScrollbar(browser) {
@@ -678,7 +644,7 @@ class TrackView {
 
     addTrackDragMouseHandlers(browser) {
 
-        if ('ideogram' === this.track.type || 'ruler' === this.track.type) {
+        if ('ideogram' === this.track.id || 'ruler' === this.track.id) {
             // do nothing
         } else {
 
@@ -757,7 +723,7 @@ class TrackView {
 
     removeTrackDragMouseHandlers() {
 
-        if ('ideogram' === this.track.type || 'ruler' === this.track.type) {
+        if ('ideogram' === this.track.id || 'ruler' === this.track.id) {
             // do nothing
         } else {
             this.dragHandle.removeEventListener('mousedown', this.boundTrackDragMouseDownHandler)

@@ -47,7 +47,7 @@ async function createBrowser(parentDiv, config) {
 
     setDefaults(config)
 
-    if (config.queryParametersSupported !== false) {
+    if (config.queryParametersSupported) {
         extractQuery(config)
     }
     if (config.apiKey) {
@@ -111,10 +111,6 @@ async function visibilityChange() {
 
 function setDefaults(config) {
 
-    if (undefined === config.promisified) {
-        config.promisified = false
-    }
-
     if (undefined === config.minimumBases) {
         config.minimumBases = 40
     }
@@ -143,8 +139,9 @@ function setDefaults(config) {
         config.showCursorTrackingGuideButton = true
     }
 
-    if (undefined === config.showCursorTrackingGuide) {
-        config.showCursorTrackingGuide = false
+
+    if (undefined === config.showCursorGuide) {
+        config.showCursorGuide = config.showCursorTrackingGuide || false   // showCursorTrackingGuide is a synonym
     }
 
     if (undefined === config.showCenterGuideButton) {
@@ -235,6 +232,8 @@ function extractQuery(config) {
                     config[key] = value
                 }
                 i = j + 1
+            } else {
+                i++;
             }
         }
     }
@@ -270,8 +269,3 @@ async function createTrack(config, browser) {
 }
 
 export {createTrack, createBrowser, removeBrowser, removeAllBrowsers, visibilityChange}
-
-
-
-
-

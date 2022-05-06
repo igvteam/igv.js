@@ -1,30 +1,8 @@
-//table chromatinInteract
-// "Chromatin interaction between two regions"
-//     (
-//     string chrom;      "Chromosome (or contig, scaffold, etc.). For interchromosomal, use 2 records"
-//     uint chromStart;   "Start position of lower region. For interchromosomal, set to chromStart of this region"
-//     uint chromEnd;     "End position of upper region. For interchromosomal, set to chromEnd of this region"
-//     string name;       "Name of item, for display"
-//     uint score;        "Score from 0-1000"
-//     double value;      "Strength of interaction or other data value. Typically basis for score"
-//     string exp;        "Experiment name (metadata for filtering). Use . if not applicable"
-//     string color;      "Item color.  Specified as r,g,b or hexadecimal #RRGGBB or html color name, as in //www.w3.org/TR/css3-color/#html4."
-//     string region1Chrom;  "Chromosome of lower region. For non-directional interchromosomal, chrom of this region."
-//     uint region1Start;  "Start position of lower/this region"
-//     uint region1End;    "End position in chromosome of lower/this region"
-//     string region1Name;  "Identifier of lower/this region"
-//     string region1Strand; "Orientation of lower/this region: + or -.  Use . if not applicable"
-//     string region2Chrom; "Chromosome of upper region. For non-directional interchromosomal, chrom of other region"
-//     uint region2Start;  "Start position in chromosome of upper/this region"
-//     uint region2End;    "End position in chromosome of upper/this region"
-//     string region2Name; "Identifier of upper/this region"
-//     string region2Strand; "Orientation of upper/this region: + or -.  Use . if not applicable"
-//     )
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
-function getDecoder(definedFieldCount, fieldCount, autoSql) {
+function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
 
-    if (autoSql && 'chromatinInteract' === autoSql.table) {
+    if ("biginteract" === format || (autoSql && ('chromatinInteract' === autoSql.table) || 'interact' === autoSql.table)) {
         return decodeInteract
     } else {
         const standardFieldCount = definedFieldCount - 3
@@ -61,6 +39,7 @@ function getDecoder(definedFieldCount, fieldCount, autoSql) {
                     const eEnd = eStart + parseInt(exonSizes[i])
                     exons.push({start: eStart, end: eEnd})
                 }
+                findUTRs(exons, feature.cdStart, feature.cdEnd)
                 feature.exons = exons
             }
 
@@ -78,6 +57,28 @@ function getDecoder(definedFieldCount, fieldCount, autoSql) {
         }
     }
 
+    //table chromatinInteract
+// "Chromatin interaction between two regions"
+//     (
+//     string chrom;      "Chromosome (or contig, scaffold, etc.). For interchromosomal, use 2 records"
+//     uint chromStart;   "Start position of lower region. For interchromosomal, set to chromStart of this region"
+//     uint chromEnd;     "End position of upper region. For interchromosomal, set to chromEnd of this region"
+//     string name;       "Name of item, for display"
+//     uint score;        "Score from 0-1000"
+//     double value;      "Strength of interaction or other data value. Typically basis for score"
+//     string exp;        "Experiment name (metadata for filtering). Use . if not applicable"
+//     string color;      "Item color.  Specified as r,g,b or hexadecimal #RRGGBB or html color name, as in //www.w3.org/TR/css3-color/#html4."
+//     string region1Chrom;  "Chromosome of lower region. For non-directional interchromosomal, chrom of this region."
+//     uint region1Start;  "Start position of lower/this region"
+//     uint region1End;    "End position in chromosome of lower/this region"
+//     string region1Name;  "Identifier of lower/this region"
+//     string region1Strand; "Orientation of lower/this region: + or -.  Use . if not applicable"
+//     string region2Chrom; "Chromosome of upper region. For non-directional interchromosomal, chrom of other region"
+//     uint region2Start;  "Start position in chromosome of upper/this region"
+//     uint region2End;    "End position in chromosome of upper/this region"
+//     string region2Name; "Identifier of upper/this region"
+//     string region2Strand; "Orientation of upper/this region: + or -.  Use . if not applicable"
+//     )
     function decodeInteract(feature, tokens) {
 
         feature.chr1 = tokens[5]
@@ -94,6 +95,24 @@ function getDecoder(definedFieldCount, fieldCount, autoSql) {
         feature.color = tokens[4] === '.' ? undefined : tokens[4] === "0" ? "rgb(0,0,0)" : tokens[4]
 
         return feature
+    }
+}
+
+function findUTRs(exons, cdStart, cdEnd) {
+
+    for (let exon of exons) {
+        const end = exon.end
+        const start = exon.start
+        if (end < cdStart || start > cdEnd) {
+            exon.utr = true
+        } else {
+            if (cdStart >= start && cdStart <= end) {
+                exon.cdStart = cdStart
+            }
+            if (cdEnd >= start && cdEnd <= end) {
+                exon.cdEnd = cdEnd
+            }
+        }
     }
 }
 

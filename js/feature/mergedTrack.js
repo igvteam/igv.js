@@ -25,11 +25,19 @@
  */
 
 import TrackBase from "../trackBase.js"
+import paintAxis from "../util/paintAxis.js"
+import MenuUtils from "../ui/menuUtils.js"
 
+/**
+ * Represents 2 or more wig tracks overlaid on a common viewport.
+ */
 class MergedTrack extends TrackBase {
 
     constructor(config, browser) {
         super(config, browser)
+        this.type = "merged"
+        this.featureType = 'numeric'
+        this.paintAxis = paintAxis
     }
 
     init(config) {
@@ -39,21 +47,6 @@ class MergedTrack extends TrackBase {
 
         super.init(config)
     }
-
-    get height() {
-        return this._height
-    }
-
-    set height(h) {
-        this._height = h
-        if (this.tracks) {
-            for (let t of this.tracks) {
-                t.height = h
-                t.config.height = h
-            }
-        }
-    }
-
 
     async postInit() {
 
@@ -74,11 +67,55 @@ class MergedTrack extends TrackBase {
             }
         }
 
-        this.height = this.config.height || 100
+        this.flipAxis = this.config.flipAxis ? this.config.flipAxis : false
+        this.logScale = this.config.logScale ? this.config.logScale : false
+        this.autoscale = this.config.autoscale || this.config.max === undefined
+        if (!this.autoscale) {
+            this.dataRange = {
+                min: this.config.min || 0,
+                max: this.config.max
+            }
+        }
+        for (let t of this.tracks) {
+            t.autoscale = false
+            t.dataRange = this.dataRange
+        }
+
+        this.height = this.config.height || 50
 
         return Promise.all(p)
     }
 
+    get height() {
+        return this._height
+    }
+
+    set height(h) {
+        this._height = h
+        if (this.tracks) {
+            for (let t of this.tracks) {
+                t.height = h
+                t.config.height = h
+            }
+        }
+    }
+
+    menuItemList() {
+        let items = []
+        if (this.flipAxis !== undefined) {
+            items.push({
+                label: "Flip y-axis",
+                click: () => {
+                    this.flipAxis = !this.flipAxis
+                    this.trackView.repaintViews()
+                }
+            })
+        }
+
+        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+
+        return items
+    }
 
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
 
@@ -88,44 +125,26 @@ class MergedTrack extends TrackBase {
 
     draw(options) {
 
-        var i, len, mergedFeatures, trackOptions, dataRange
+        const mergedFeatures = options.features    // Array of feature arrays, 1 for each track
 
-        mergedFeatures = options.features    // Array of feature arrays, 1 for each track
-
-        dataRange = autoscale(options.referenceFrame.chr, mergedFeatures)
-
-        //IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
-        for (i = 0, len = this.tracks.length; i < len; i++) {
-
-            trackOptions = Object.assign({}, options)
-            trackOptions.features = mergedFeatures[i]
-            this.tracks[i].dataRange = dataRange
-            this.tracks[i].draw(trackOptions)
+        if (this.autoscale) {
+            this.dataRange = autoscale(options.referenceFrame.chr, mergedFeatures)
         }
 
-    }
-
-    paintAxis(ctx, pixelWidth, pixelHeight) {
-
-        var i, len, autoscale, track
-
-        autoscale = true   // Hardcoded for now
-
-        for (i = 0, len = this.tracks.length; i < len; i++) {
-
-            track = this.tracks[i]
-
-            if (typeof track.paintAxis === 'function') {
-                track.paintAxis(ctx, pixelWidth, pixelHeight)
-                if (autoscale) break
-            }
+        for (let i = 0, len = this.tracks.length; i < len; i++) {
+            const trackOptions = Object.assign({}, options)
+            trackOptions.features = mergedFeatures[i]
+            this.tracks[i].dataRange = this.dataRange
+            this.tracks[i].flipAxis = this.flipAxis
+            this.tracks[i].logScale = this.logScale
+            this.tracks[i].graphType = this.graphType
+            this.tracks[i].draw(trackOptions)
         }
     }
 
     popupData(clickState, features) {
 
-        const featuresArray = features || clickState.viewport.getCachedFeatures()
+        const featuresArray = features || clickState.viewport.cachedFeatures
 
         if (featuresArray && featuresArray.length === this.tracks.length) {
             // Array of feature arrays, 1 for each track
@@ -142,43 +161,23 @@ class MergedTrack extends TrackBase {
     }
 
 
-    supportsWholeGenome() {
-        const b = this.tracks.every(track => track.supportsWholeGenome())
-        return b
+    get supportsWholeGenome() {
+        return this.tracks.every(track => track.supportsWholeGenome())
     }
 }
 
 function autoscale(chr, featureArrays) {
 
-
-    var min = 0,
-        max = -Number.MAX_VALUE,
-        allValues
-
-    // if (chr === 'all') {
-    //     allValues = [];
-    //     featureArrays.forEach(function (features) {
-    //         features.forEach(function (f) {
-    //             if (!Number.isNaN(f.value)) {
-    //                 allValues.push(f.value);
-    //             }
-    //         });
-    //     });
-    //
-    //     min = Math.min(0, IGVMath.percentile(allValues, .1));
-    //     max = IGVMath.percentile(allValues, 99.9);
-    //
-    // }
-    // else {
-    featureArrays.forEach(function (features, i) {
-        features.forEach(function (f) {
+    let min = 0
+    let max = -Number.MAX_VALUE
+    for(let features of featureArrays) {
+        for(let f of features) {
             if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
                 min = Math.min(min, f.value)
                 max = Math.max(max, f.value)
             }
-        })
-    })
-    //  }
+        }
+    }
     return {min: min, max: max}
 }
 

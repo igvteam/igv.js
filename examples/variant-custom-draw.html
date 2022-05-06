@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <meta charset="utf-8">
+    <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
+    <title>igv.js</title>
+
+    <!-- IGV JS -->
+    <script src="../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+<h3>Example illustrating options for coloring VCF variants</h3>
+<h4>
+    <ol>
+        <li>color function</li>
+        <li>INFO tag with color table</li>
+        <li>INFO tag with default colors</li>
+        <li>INFO tag with strokecolor</li>
+        <li>INFO tag with contexthook</li>
+    </ol>
+</h4>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script>
+
+    function drawTrianglerect(context, x, y, w, h){
+      let n=Math.floor(w/h)
+      let p = (w % h)/2
+
+      context.clearRect(x, y, w, h)
+      context.fillRect(x,y,w,h/2)
+
+      for (var i = 0; i < n; i++) {
+         drawTriangle(context, p+x+(i)*h, y, h, h)
+      }
+
+    }
+
+    function drawTriangle(context, x, y, w, h){
+      // context.clearRect(x, y, w, h)
+
+      context.beginPath()
+      context.moveTo(x, y)
+      context.lineTo(x+w/2, y+h)
+      context.lineTo(x+w, y)
+      context.closePath()
+      context.fill()
+    }
+
+    function drawCirclerect(context, x, y, w, h){
+      let n=Math.floor(w/h)
+      let p = (w % h)/2
+
+      context.clearRect(x, y, w, h)
+      context.fillRect(x,y,w,h/2)
+
+      for (var i = 0; i < n; i++) {
+         drawCircle(context, p+x+(i)*h, y, h, h)
+      }
+
+    }
+
+
+    function drawCircle(context, x, y, w, h){
+      // context.clearRect(x, y, w, h)
+
+      context.beginPath()
+      context.arc(x+w/2, y+h/2, h/2, 0, 2 * Math.PI);
+      context.fill()
+    }
+
+    function drawRoundrect(context, x, y, w, h){
+      let radius = 5;
+      context.clearRect(x, y, w, h);
+      context.beginPath()
+      context.moveTo(x + radius, y)
+      context.lineTo(x + w - radius, y)
+      context.quadraticCurveTo(x + w, y, x + w, y + radius)
+      context.lineTo(x + w, y + h - radius)
+      context.quadraticCurveTo(x + w, y + h, x + w - radius, y + h)
+      context.lineTo(x + radius, y + h)
+      context.quadraticCurveTo(x, y + h, x, y + h - radius)
+      context.lineTo(x, y + radius)
+      context.quadraticCurveTo(x, y, x + radius, y)
+      context.closePath()
+      // context.stroke()
+      context.fill()
+    }
+
+    const options =
+        {
+            locus: "chr22",
+            genome: "hg38",
+            tracks: [
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color by function, SVTYPE",
+                    visibilityWindow: -1,
+                    color: function (variant) {
+                        const svtype = variant.info["SVTYPE"];
+                        switch (svtype) {
+                            case 'DEL':
+                                return "#ff2101";
+                            case 'INS':
+                                return "#001888";
+                            case 'DUP':
+                                return "#028401";
+                            case 'INV':
+                                return "#008688";
+                            case 'CNV':
+                                return "#8931ff";
+                            case 'BND':
+                                return "#891100";
+                            default:
+                                return "#002eff";
+                        }
+                    }
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color by table, SVTYPE",
+                    visibilityWindow: -1,
+                    colorBy: "SVTYPE",
+                    colorTable: {
+                        "DEL": "#ff2101",
+                        "INS": "#001888",
+                        "DUP": "#028401",
+                        "INV": "#008688",
+                        "CNV": "#8931ff",
+                        "BND": "#891100",
+                        "*": "#002eff"
+                    }
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color by REGIONID",
+                    colorBy: "REGIONID",
+                    visibilityWindow: -1
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color strokecolor",
+                    colorBy: "SVTYPE",
+                    visibilityWindow: -1,
+                    strokecolor: function (variant) {
+                      // stroke outline in red for variants with AF below 1%
+                      const mc = parseFloat(variant.info["AF"]);
+                      if (mc<0.05){
+                        return "red";
+                      }else if (mc>0.2) { //stroke in green for variants with AF above 20%
+                        return "green";
+                      }
+                    }
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color context hook",
+                    colorBy: "SVTYPE",
+                    visibilityWindow: -1,
+                    context_hook: function(variant, context, x, y, w, h){
+                      const mc = parseFloat(variant.info["AF"]);
+
+                      if (mc < 0.05){
+                        drawCirclerect(context, x, y, w, h)
+                      }else if (mc < 0.5 ) {
+                        drawTrianglerect(context, x, y, w, h)
+                      }else if (mc > 0.2) {
+                        context.strokeStyle = 'green'
+                        context.lineWidth = 1
+                        context.strokeRect(x, y, w, h)
+                      }
+
+                    }
+                }
+
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+
+        .then(function (browser) {
+
+        });
+
+</script>
+
+</body>
+
+</html>

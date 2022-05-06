@@ -137,8 +137,7 @@ class CramReader {
         const header = await this.getHeader()
         const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr
         const chrIdx = header.chrToIndex[queryChr]
-        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd,
-            this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold)
+        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
 
         if (chrIdx === undefined) {
             return alignmentContainer

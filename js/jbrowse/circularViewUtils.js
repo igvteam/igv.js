@@ -2,6 +2,7 @@ import {getChrColor} from "../bam/bamTrack.js"
 import Locus from "../locus.js"
 import {CircularView} from "../../node_modules/circular-view/dist/circular-view.js"
 import {createSupplementaryAlignments} from "../bam/supplementaryAlignment.js"
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 /**
  * The minimum length for a VCF structural variant.  VCF records < this length are ignored in the circular view
@@ -19,27 +20,45 @@ const makePairedAlignmentChords = (alignments) => {
 
     const chords = []
     for (let a of alignments) {
-        const mate = a.mate
-        if (mate && mate.chr && mate.position) {
-            chords.push({
-                uniqueId: a.readName,
-                refName: shortChrName(a.chr),
-                start: a.start,
-                end: a.end,
-                mate: {
-                    refName: shortChrName(mate.chr),
-                    start: mate.position - 1,
-                    end: mate.position,
-                }
-            })
+
+        if(a.paired) {
+            if(a.firstAlignment && a.secondAlignment) {
+                chords.push({
+                    uniqueId: a.readName,
+                    refName: shortChrName(a.firstAlignment.chr),
+                    start: a.firstAlignment.start,
+                    end: a.firstAlignment.end,
+                    mate: {
+                        refName: shortChrName(a.secondAlignment.chr),
+                        start: a.secondAlignment.start,
+                        end: a.secondAlignment.end,
+                    }
+                })
+            }
+        }
+        else {
+            const mate = a.mate
+            if (mate && mate.chr && mate.position) {
+                chords.push({
+                    uniqueId: a.readName,
+                    refName: shortChrName(a.chr),
+                    start: a.start,
+                    end: a.end,
+                    mate: {
+                        refName: shortChrName(mate.chr),
+                        start: mate.position - 1,
+                        end: mate.position,
+                    }
+                })
+            }
         }
     }
     return chords
 }
 
 const makeSupplementalAlignmentChords = (alignments) => {
-    const chords = []
-    for (let a of alignments) {
+
+    const makeChords = (a) => {
         const sa = a.tags()['SA']
         const supAl = createSupplementaryAlignments(sa)
         let n = 0
@@ -57,6 +76,18 @@ const makeSupplementalAlignmentChords = (alignments) => {
                     }
                 })
             }
+        }
+    }
+
+    const chords = []
+    for (let a of alignments) {
+        if(a.paired) {
+            makeChords(a.firstAlignment)
+            if(a.secondAlignment) {
+                makeChords(a.secondAlignment)
+            }
+        } else {
+            makeChords(a)
         }
     }
     return chords
@@ -131,6 +162,22 @@ function makeCircViewChromosomes(genome) {
     return regions
 }
 
+function sendChords(chords, track, refFrame, alpha) {
+
+    const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? track.color : getChrColor(refFrame.chr), alpha)
+    const trackColor = IGVColor.addAlpha(track.color || 'rgb(0,0,255)', alpha)
+
+    // name the chord set to include locus and filtering information
+    const encodedName = track.name.replaceAll(' ', '%20')
+    const chordSetName = "all" === refFrame.chr ? encodedName :
+        `${encodedName}  ${refFrame.chr}:${refFrame.start}-${refFrame.end}`
+    track.browser.circularView.addChords(chords, {track: chordSetName, color: chordSetColor, trackColor: trackColor})
+
+    // show circular view if hidden
+    if(!track.browser.circularViewVisible) track.browser.circularViewVisible = true
+
+}
+
 
 function createCircularView(el, browser) {
 
@@ -140,38 +187,31 @@ function createCircularView(el, browser) {
 
             const f1 = feature.data
             const f2 = f1.mate
-            const flanking = 2000
+            addFrameForFeature(f1)
+            addFrameForFeature(f2)
 
-            const l1 = new Locus({chr: browser.genome.getChromosomeName(f1.refName), start: f1.start, end: f1.end})
-            const l2 = new Locus({chr: browser.genome.getChromosomeName(f2.refName), start: f2.start, end: f2.end})
+            function addFrameForFeature(feature) {
 
-            let loci
-
-            // If there is overlap with current loci
-
-            loci = browser.currentLoci().map(str => Locus.fromLocusString(str))
-
-            if (loci.some(locus => locus.contains(l1)) || loci.some(locus => locus.contains(l2))) {
-                for (let l of [l1, l2]) {
-                    if (!loci.some(locus => {
-                        return locus.contains(l)
-                    })) {
-                        // add flanking
-                        l.start = Math.max(0, l.start - flanking)
-                        l.end += flanking
-                        loci.push(l)
+                feature.chr = browser.genome.getChromosomeName(feature.refName)
+                let frameFound = false
+                for (let referenceFrame of browser.referenceFrameList) {
+                    const l = Locus.fromLocusString(referenceFrame.getLocusString())
+                    if (l.contains(feature)) {
+                        frameFound = true
+                        break
+                    } else if (l.overlaps(feature)) {
+                        referenceFrame.extend(feature)
+                        frameFound = true
+                        break
                     }
                 }
-            } else {
-                l1.start = Math.max(0, l1.start - flanking)
-                l1.end += flanking
-                l2.start = Math.max(0, l2.start - flanking)
-                l2.end += flanking
-                loci = [l1, l2]
-            }
+                if (!frameFound) {
+                    const flanking = 2000
+                    const center = (feature.start + feature.end) / 2
+                    browser.addMultiLocusPanel(feature.chr, center - flanking, center + flanking)
 
-            const searchString = loci.map(l => l.getLocusString()).join(" ")
-            browser.search(searchString)
+                }
+            }
         }
     })
 
@@ -185,6 +225,7 @@ export {
     makeSupplementalAlignmentChords,
     makeVCFChords,
     createCircularView,
-    makeCircViewChromosomes
+    makeCircViewChromosomes,
+    sendChords
 }
 

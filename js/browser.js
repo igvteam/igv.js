@@ -43,7 +43,7 @@ import ROI from "./roi.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
-import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js"
+import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
 import {buildOptions, createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import GtexUtils from "./gtex/gtexUtils.js"
@@ -73,6 +73,7 @@ import RulerTrack from "./rulerTrack.js"
 import GtexSelection from "./gtex/gtexSelection.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
+import CustomButton from "./ui/customButton.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -146,7 +147,7 @@ class Browser {
 
         this.isCenterLineVisible = config.showCenterGuide
 
-        this.cursorGuideVisible = config.showCursorTrackingGuide
+        this.cursorGuideVisible = config.showCursorGuide
 
         this.showSampleNames = config.showSampleNames
         this.showSampleNameButton = config.showSampleNameButton
@@ -257,6 +258,12 @@ class Browser {
 
         if (true === config.showSVGButton) {
             this.svgSaveControl = new SVGSaveControl($toggle_button_container.get(0), this)
+        }
+
+        if (config.customButtons) {
+            for (let b of config.customButtons) {
+                new CustomButton($toggle_button_container.get(0), this, b)
+            }
         }
 
         this.zoomWidget = new ZoomWidget(this, $navbarRightContainer.get(0))
@@ -417,7 +424,6 @@ class Browser {
                     return undefined
                 }
             }
-
         }
     }
 
@@ -462,7 +468,9 @@ class Browser {
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
         if (false !== session.showIdeogram) {
-            this.trackViews.push(new TrackView(this, this.columnContainer, new IdeogramTrack(this)))
+            const ideogramTrack = new IdeogramTrack(this)
+            ideogramTrack.id = 'ideogram'
+            this.trackViews.push(new TrackView(this, this.columnContainer, ideogramTrack))
         }
 
         if (false !== session.showRuler) {
@@ -506,6 +514,11 @@ class Browser {
         }
 
         await this.loadTrackList(trackConfigurations)
+
+        // The ruler and ideogram tracks are not explicitly loaded, but needs updated nonetheless.
+        for (let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler' || tv.track.type === 'ideogram')) {
+            rtv.updateViews()
+        }
 
         this.updateUIWithReferenceFrameList()
 
@@ -685,23 +698,19 @@ class Browser {
 
     async loadTrackList(configList) {
 
-        try {
-            const promises = []
-            for (let config of configList) {
-                promises.push(this.loadTrack(config, false))
-            }
-
-            const loadedTracks = await Promise.all(promises)
-            const groupAutoscaleViews = this.trackViews.filter(function (trackView) {
-                return trackView.track.autoscaleGroup
-            })
-            if (groupAutoscaleViews.length > 0) {
-                this.updateViews(groupAutoscaleViews)
-            }
-            return loadedTracks
-        } finally {
-            await this.resize()
+        const promises = []
+        for (let config of configList) {
+            promises.push(this.loadTrack(config))
         }
+
+        const loadedTracks = await Promise.all(promises)
+        const groupAutoscaleViews = this.trackViews.filter(function (trackView) {
+            return trackView.track.autoscaleGroup
+        })
+        if (groupAutoscaleViews.length > 0) {
+            this.updateViews()
+        }
+        return loadedTracks
     }
 
     async loadROI(config) {
@@ -715,6 +724,8 @@ class Browser {
         } else {
             this.roi.push(new ROI(config, this.genome))
         }
+        // Force reload all views (force = true) to insure ROI features are loaded.  Wasteful but this function is
+        // rarely called.
         await this.updateViews(true)
     }
 
@@ -726,14 +737,14 @@ class Browser {
             }
         }
         for (let tv of this.trackViews) {
-            tv.updateViews(true)
+            tv.repaintViews()
         }
     }
 
     clearROIs() {
         this.roi = []
         for (let tv of this.trackViews) {
-            tv.updateViews(true)
+            tv.repaintViews()
         }
     }
 
@@ -745,24 +756,12 @@ class Browser {
     /**
      * Return a promise to load a track.
      *
-     * Each track is associated with the following DOM elements
-     *
-     *      leftHandGutter  - div on the left for track controls and legend
-     *      contentDiv  - a div element wrapping all the track content.  Height can be > viewportDiv height
-     *      viewportDiv - a div element through which the track is viewed.  This might have a vertical scrollbar
-     *      canvas     - canvas element upon which the track is drawn.  Child of contentDiv
-     *
-     * The width of all elements should be equal.  Height of the viewportDiv is controlled by the user, but never
-     * greater than the contentDiv height.   Height of contentDiv and canvas are equal, and governed by the data
-     * loaded.
-     *
-     *
      * @param config
      * @param doResize - undefined by default
      * @returns {*}
      */
 
-    async loadTrack(config, doResize) {
+    async loadTrack(config) {
 
 
         // config might be json
@@ -830,13 +829,6 @@ class Browser {
             }
             msg += (": " + config.url)
             Alert.presentAlert(new Error(msg), undefined)
-        } finally {
-            // TODO: If loadTrack() is called individually - not via loadTrackList() - call this.resize()
-            if (false === doResize) {
-                // do nothing
-            } else {
-                await this.resize()
-            }
         }
     }
 
@@ -1044,7 +1036,16 @@ class Browser {
 
     }
 
+    /**
+     * API function to signal that this browser visibility has changed, e.g. from hiding/showing in a tab interface.
+     *
+     * @returns {Promise<void>}
+     */
     async visibilityChange() {
+        this.layoutChange()
+    }
+
+    async layoutChange() {
 
         const status = this.referenceFrameList.find(referenceFrame => referenceFrame.bpPerPixel < 0)
 
@@ -1060,44 +1061,11 @@ class Browser {
             this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV)
         }
 
-        await this.resize()
+        resize.call(this)
+        await this.updateViews()
     }
 
-    async resize() {
-
-        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
-
-        for (let referenceFrame of this.referenceFrameList) {
-
-            const index = this.referenceFrameList.indexOf(referenceFrame)
-
-            const {chr, genome} = referenceFrame
-
-            const {bpLength} = genome.getChromosome(referenceFrame.chr)
-
-            const viewportWidthBP = referenceFrame.toBP(viewportWidth)
-
-            // viewportWidthBP > bpLength occurs when locus is full chromosome and user widens browser
-            if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
-                // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) bpp. viewport ${ StringUtils.numberFormatter(viewportWidthBP) } > ${ StringUtils.numberFormatter(bpLength) }.`)
-                referenceFrame.bpPerPixel = bpLength / viewportWidth
-            } else {
-                // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) end.`)
-                referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
-            }
-
-            for (let {viewports} of this.trackViews) {
-                viewports[index].setWidth(viewportWidth)
-            }
-
-        }
-
-        await this.updateViews(true)
-
-        this.updateUIWithReferenceFrameList()
-    }
-
-    async updateViews(force) {
+    async updateViews() {
 
         const trackViews = this.trackViews
 
@@ -1110,7 +1078,7 @@ class Browser {
         // Don't autoscale while dragging.
         if (this.dragObject) {
             for (let trackView of trackViews) {
-                await trackView.updateViews(force)
+                await trackView.updateViews()
             }
         } else {
             // Group autoscale
@@ -1155,19 +1123,25 @@ class Browser {
                     for (let trackView of groupTrackViews) {
                         trackView.track.dataRange = dataRange
                         trackView.track.autoscale = false
-                        p.push(trackView.updateViews(force))
+                        p.push(trackView.updateViews())
                     }
                     await Promise.all(p)
                 }
 
             }
 
-            await Promise.all(otherTracks.map(tv => tv.updateViews(force)))
+            await Promise.all(otherTracks.map(tv => tv.updateViews()))
             // for (let trackView of otherTracks) {
             //     await trackView.updateViews(force);
             // }
         }
 
+    }
+
+    repaintViews() {
+        for (let trackView of this.trackViews) {
+            trackView.repaintViews()
+        }
     }
 
     updateLocusSearchWidget() {
@@ -1234,49 +1208,50 @@ class Browser {
         }
     }
 
-    async presentMultiLocusPanel(alignment, referenceFrameLeft) {
+    /**
+     * Add a new multi-locus panel for the specified region
+     * @param chr
+     * @param start
+     * @param end
+     * @param referenceFrameLeft - optional, if supplied new panel should be placed to the immediate right
+     */
+    async addMultiLocusPanel(chr, start, end, referenceFrameLeft) {
 
         // account for reduced viewport width as a result of adding right mate pair panel
         const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length)
-
         const scaleFactor = this.calculateViewportWidth(this.referenceFrameList.length) / this.calculateViewportWidth(1 + this.referenceFrameList.length)
-        adjustReferenceFrame(scaleFactor, referenceFrameLeft, viewportWidth, alignment.start, alignment.lengthOnRef)
+        for (let refFrame of this.referenceFrameList) {
+            refFrame.bpPerPixel *= scaleFactor
+        }
 
-        // create right mate pair reference frame
-        const mateChrName = this.genome.getChromosomeName(alignment.mate.chr)
+        const bpp = (end - start) / viewportWidth
+        const newReferenceFrame = new ReferenceFrame(this.genome, chr, start, end, bpp)
+        const indexLeft = referenceFrameLeft ? this.referenceFrameList.indexOf(referenceFrameLeft) : this.referenceFrameList.length - 1
+        const indexRight = 1 + indexLeft
 
-        const referenceFrameRight = createReferenceFrameWithAlignment(this.genome, mateChrName, referenceFrameLeft.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef)
-
-        // add right mate panel beside left mate panel
-        const indexLeft = this.referenceFrameList.indexOf(referenceFrameLeft)
-        const indexRight = 1 + (this.referenceFrameList.indexOf(referenceFrameLeft))
-
+        // TODO -- this is really ugly
         const {$viewport} = this.trackViews[0].viewports[indexLeft]
         const viewportColumn = viewportColumnManager.insertAfter($viewport.get(0).parentElement)
 
         if (indexRight === this.referenceFrameList.length) {
-
-            this.referenceFrameList.push(referenceFrameRight)
-
+            this.referenceFrameList.push(newReferenceFrame)
             for (let trackView of this.trackViews) {
-                const viewport = createViewport(trackView, viewportColumn, referenceFrameRight)
+                const viewport = createViewport(trackView, viewportColumn, newReferenceFrame)
                 trackView.viewports.push(viewport)
             }
-
         } else {
-
-            this.referenceFrameList.splice(indexRight, 0, referenceFrameRight)
-
+            this.referenceFrameList.splice(indexRight, 0, newReferenceFrame)
             for (let trackView of this.trackViews) {
-                const viewport = createViewport(trackView, viewportColumn, referenceFrameRight)
+                const viewport = createViewport(trackView, viewportColumn, newReferenceFrame)
                 trackView.viewports.splice(indexRight, 0, viewport)
             }
-
         }
+
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
-        await this.resize()
+        resize.call(this)
+        await this.updateViews(true)
     }
 
     async removeMultiLocusPanel(referenceFrame) {
@@ -1305,50 +1280,13 @@ class Browser {
 
     }
 
-    async selectMultiLocusPanel(referenceFrame) {
-
-        const referenceFrameIndex = this.referenceFrameList.indexOf(referenceFrame)
-
-        // Remove columns for unselected panels
-        this.columnContainer.querySelectorAll('.igv-column').forEach((column, c) => {
-            if (c === referenceFrameIndex) {
-                // do nothing
-
-            } else {
-
-                column.remove()
-            }
-        })
-
-        // Remove all column shims
-        this.columnContainer.querySelectorAll('.igv-column-shim').forEach(shim => shim.remove())
-
-        // Discard viewports
-        for (let trackView of this.trackViews) {
-
-            const retain = trackView.viewports[referenceFrameIndex]
-            trackView.viewports.filter((viewport, i) => i !== referenceFrameIndex).forEach(viewport => viewport.dispose())
-            trackView.viewports = [retain]
-
-        }
-
-        const viewportWidth = this.calculateViewportWidth(1)
-        referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth
-
-        this.referenceFrameList = [referenceFrame]
-
-        this.trackViews.forEach(({viewports}) => viewports.forEach(viewport => viewport.setWidth(viewportWidth)))
-
-
-        this.centerLineList = this.createCenterLineList(this.columnContainer)
-
-        this.updateUIWithReferenceFrameList()
-
-        await this.updateViews(true)
-
-    }
-
-    async selectMultiLocusPanel(referenceFrame) {
+    /**
+     * Goto the locus represented by the selected referenceFrame, discarding all other panels
+     *
+     * @param referenceFrame
+     * @returns {Promise<void>}
+     */
+    async gotoMultilocusPanel(referenceFrame) {
 
         const referenceFrameIndex = this.referenceFrameList.indexOf(referenceFrame)
 
@@ -1404,7 +1342,7 @@ class Browser {
 
         this.updateUIWithReferenceFrameList()
 
-        await this.updateViews(true)
+        await this.updateViews()
 
     }
 
@@ -1573,6 +1511,7 @@ class Browser {
         // Build locus array (multi-locus view).  Use the first track to extract the loci, any track could be used.
         const locus = []
         const gtexSelections = {}
+        let hasGtexSelections = false
         let anyTrackView = this.trackViews[0]
         for (let {referenceFrame} of anyTrackView.viewports) {
             const locusString = referenceFrame.getLocusString()
@@ -1583,12 +1522,11 @@ class Browser {
                     snp: referenceFrame.selection.snp
                 }
                 gtexSelections[locusString] = selection
+                hasGtexSelections = true
             }
         }
         json["locus"] = locus.length === 1 ? locus[0] : locus
-
-        const gtexKeys = Object.getOwnPropertyNames(gtexSelections)
-        if (gtexKeys.length > 0) {
+        if (hasGtexSelections) {
             json["gtexSelections"] = gtexSelections
         }
 
@@ -1612,27 +1550,20 @@ class Browser {
                     trackJson.push(config)
                 }
             } catch (e) {
-                errors.push(e)
+                console.error(`Track: ${track.name}: ${e}`)
+                errors.push(`Track: ${track.name}: ${e}`)
             }
         }
 
         if (errors.length > 0) {
             let n = 1
-            let message = 'Errors encountered saving session:'
+            let message = 'Errors encountered saving session: </br>'
             for (let e of errors) {
-                message += ` (${n++}) ${e.toString()}.`
+                message += ` (${n++}) ${e.toString()} <br/>`
             }
             throw Error(message)
         }
 
-
-        const locaTrackFiles = trackJson.filter((track) => {
-            track.url && FileUtils.isFile(track.url)
-        })
-
-        if (locaTrackFiles.length > 0) {
-            throw new Error(`Error. Sessions cannot include local file references.`)
-        }
 
         json["tracks"] = trackJson
 
@@ -1650,16 +1581,6 @@ class Browser {
         const idx = path.indexOf("?")
         const surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + this.compressedSession()
         return surl
-    }
-
-    currentLoci() {
-        const loci = []
-        const anyTrackView = this.trackViews[0]
-        for (let {referenceFrame} of anyTrackView.viewports) {
-            const locusString = referenceFrame.getLocusString()
-            loci.push(locusString)
-        }
-        return loci
     }
 
     /**
@@ -1699,12 +1620,22 @@ class Browser {
 
     }
 
+    /**
+     * Track drag here refers to vertical dragging to reorder tracks, not horizontal panning.
+     *
+     * @param trackView
+     */
     startTrackDrag(trackView) {
 
         this.dragTrack = trackView
 
     }
 
+    /**
+     * Track drag here refers to vertical dragging to reorder tracks, not horizontal panning.
+     *
+     * @param dragDestination
+     */
     updateTrackDrag(dragDestination) {
 
         if (dragDestination && this.dragTrack) {
@@ -1779,12 +1710,9 @@ class Browser {
     }
 
     addWindowResizeHandler() {
-        this.boundWindowResizeHandler = windowResizeHandler.bind(this)
+        // Create a copy of the prototype "resize" function bound to this instance.  Neccessary to support removing.
+        this.boundWindowResizeHandler = resize.bind(this)
         window.addEventListener('resize', this.boundWindowResizeHandler)
-
-        function windowResizeHandler() {
-            this.resize()
-        }
     }
 
     removeWindowResizeHandler() {
@@ -1860,6 +1788,7 @@ class Browser {
     }
 
     createCircularView(container, show) {
+        show = show === true   // convert undefined to boolean
         this.circularView = createCircularView(container, this)
         this.circularViewControl = new CircularViewControl(this.$toggle_button_container.get(0), this)
         this.circularView.setAssembly({
@@ -1867,8 +1796,8 @@ class Browser {
             id: this.genome.id,
             chromosomes: makeCircViewChromosomes(this.genome)
         })
-        this.circularViewVisible = show === true
-
+        this.circularViewVisible = show
+        return this.circularView
     }
 
     get circularViewVisible() {
@@ -1882,6 +1811,50 @@ class Browser {
         }
     }
 }
+
+/**
+ * Function called win window is resized, or visibility changed (e.g. "show" from a tab).  This is a function rather
+ * than class method because it needs to be copied and bound to specific instances of browser to support listener
+ * removal
+ *
+ * @returns {Promise<void>}
+ */
+async function resize() {
+
+    const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
+
+    for (let referenceFrame of this.referenceFrameList) {
+
+        const index = this.referenceFrameList.indexOf(referenceFrame)
+
+        const {chr, genome} = referenceFrame
+
+        const {bpLength} = genome.getChromosome(referenceFrame.chr)
+
+        const viewportWidthBP = referenceFrame.toBP(viewportWidth)
+
+        // viewportWidthBP > bpLength occurs when locus is full chromosome and user widens browser
+        if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
+            // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) bpp. viewport ${ StringUtils.numberFormatter(viewportWidthBP) } > ${ StringUtils.numberFormatter(bpLength) }.`)
+            referenceFrame.bpPerPixel = bpLength / viewportWidth
+        } else {
+            // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) end.`)
+            referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
+        }
+
+        for (let {viewports} of this.trackViews) {
+            viewports[index].setWidth(viewportWidth)
+        }
+
+    }
+
+    this.updateUIWithReferenceFrameList()
+
+     //TODO -- update view only if needed.  Reducing size never needed.  Increasing size maybe
+
+     await this.updateViews(true)
+}
+
 
 function handleMouseMove(e) {
 

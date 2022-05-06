@@ -36,27 +36,16 @@ class IdeogramViewport extends TrackViewport {
 
     initializationHelper() {
 
-        this.$ideogramCanvas = $('<canvas>', {class: 'igv-ideogram-canvas'})
-        this.$ideogramCanvas.insertBefore(this.$canvas)
-
-        const canvas = this.$ideogramCanvas.get(0)
-        this.ideogram_ctx = canvas.getContext('2d')
-
-        this.$canvas.remove()
-        this.canvas = undefined
-        this.ctx = undefined
+        this.canvas = document.createElement('canvas')
+        this.canvas.className = 'igv-ideogram-canvas'
+        this.$content.append($(this.canvas))
+        this.ideogram_ctx = this.canvas.getContext('2d')
 
         this.addMouseHandlers()
-
     }
 
     addMouseHandlers() {
         this.addViewportClickHandler(this.$viewport.get(0))
-    }
-
-    removeMouseHandlers() {
-        this.removeViewportClickHandler(this.$viewport.get(0))
-
     }
 
     addViewportClickHandler(viewport) {
@@ -93,10 +82,6 @@ class IdeogramViewport extends TrackViewport {
 
     }
 
-    removeViewportClickHandler(viewport) {
-        viewport.removeEventListener('click', this.boundClickHandler)
-    }
-
     setWidth(width) {
         this.$viewport.width(width)
     }
@@ -115,13 +100,11 @@ class IdeogramViewport extends TrackViewport {
         context.restore()
     }
 
-    async repaint() {
+    repaint() {
         this.draw({referenceFrame: this.referenceFrame})
     }
 
     draw({referenceFrame}) {
-
-        this.$canvas.hide()
 
         IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, this.$viewport.width(), this.$viewport.height())
 

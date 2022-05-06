@@ -24,3 +24,4 @@ igv.css.map
 /deploy/
 /config_demo.json
 /dev/oauth/oauthConfigPrivate.js
+/encode/

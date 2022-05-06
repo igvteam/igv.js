@@ -53,7 +53,7 @@ class SampleNameControl {
                 }
             }
 
-            browser.resize()
+            browser.layoutChange()
 
 
         })

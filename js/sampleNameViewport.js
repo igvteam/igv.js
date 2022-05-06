@@ -170,7 +170,7 @@ class SampleNameViewport {
                         for (let {sampleNameViewport} of this.browser.trackViews) {
                             sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
                         }
-                        this.browser.resize()
+                        this.browser.layoutChange()
                     }
                 }
 

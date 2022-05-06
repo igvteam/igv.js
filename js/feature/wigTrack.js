@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import FeatureSource from './featureSource.js'
 import TDFSource from "../tdf/tdfSource.js"
 import TrackBase from "../trackBase.js"
@@ -32,7 +31,6 @@ import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import MenuUtils from "../ui/menuUtils.js"
-import {createCheckbox} from "../igv-icons.js"
 
 const DEFAULT_COLOR = "rgb(150,150,150)"
 
@@ -51,13 +49,11 @@ class WigTrack extends TrackBase {
         this.paintAxis = paintAxis
 
         const format = config.format ? config.format.toLowerCase() : config.format
+        this.flipAxis = config.flipAxis ? config.flipAxis : false
+        this.logScale = config.logScale ? config.logScale : false
         if ("bigwig" === format) {
-            this.flipAxis = config.flipAxis ? config.flipAxis : false
-            this.logScale = config.logScale ? config.logScale : false
             this.featureSource = new BWSource(config, this.browser.genome)
         } else if ("tdf" === format) {
-            this.flipAxis = config.flipAxis ? config.flipAxis : false
-            this.logScale = config.logScale ? config.logScale : false
             this.featureSource = new TDFSource(config, this.browser.genome)
         } else {
             this.featureSource = FeatureSource(config, this.browser.genome)
@@ -109,7 +105,7 @@ class WigTrack extends TrackBase {
         let items = []
         if (this.flipAxis !== undefined) {
             items.push({
-                label:"Flip y-axis",
+                label: "Flip y-axis",
                 click: () => {
                     this.flipAxis = !this.flipAxis
                     this.trackView.repaintViews()
@@ -293,7 +289,7 @@ class WigTrack extends TrackBase {
         }
     }
 
-    supportsWholeGenome() {
+    get supportsWholeGenome() {
         return !this.config.indexURL && this.config.supportsWholeGenome !== false
     }
 

@@ -56,13 +56,13 @@ class Viewport {
         this.$content.height(this.$viewport.height())
         this.contentDiv = this.$content.get(0)
 
-        this.$canvas = $('<canvas>')
-        this.$content.append(this.$canvas)
+        // this.$canvas = $('<canvas>')
+        // this.$content.append(this.$canvas)
+        //
+        // this.canvas = this.$canvas.get(0)
+        // this.ctx = this.canvas.getContext("2d")
 
-        this.canvas = this.$canvas.get(0)
-        this.ctx = this.canvas.getContext("2d")
-
-        this.setWidth(width)
+        this.$viewport.width(width)
 
         this.initializationHelper()
 
@@ -129,14 +129,13 @@ class Viewport {
         console.log('Viewport - draw(drawConfiguration, features, roiFeatures)')
     }
 
-    checkContentHeight() {
+    checkContentHeight(features) {
 
         let track = this.trackView.track
-
+        features = features || this.cachedFeatures
         if ("FILL" === track.displayMode) {
             this.setContentHeight(this.$viewport.height())
         } else if (typeof track.computePixelHeight === 'function') {
-            let features = this.cachedFeatures
             if (features && features.length > 0) {
                 let requiredContentHeight = track.computePixelHeight(features)
                 let currentContentHeight = this.$content.height()
@@ -152,12 +151,10 @@ class Viewport {
     }
 
     setContentHeight(contentHeight) {
+
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
         contentHeight = Math.min(contentHeight, 32000)
-
         this.$content.height(contentHeight)
-
-        if (this.tile) this.tile.invalidate = true
     }
 
     isLoading() {
@@ -174,8 +171,6 @@ class Viewport {
 
     setWidth(width) {
         this.$viewport.width(width)
-        this.canvas.style.width = (`${width}px`)
-        this.canvas.setAttribute('width', width)
     }
 
     getWidth() {
@@ -204,8 +199,6 @@ class Viewport {
         if (this.popover) {
             this.popover.dispose()
         }
-
-        this.removeMouseHandlers()
 
         this.$viewport.get(0).remove()
 

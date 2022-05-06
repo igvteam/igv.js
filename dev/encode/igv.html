@@ -1,0 +1,173 @@
+<head>
+
+    <link rel="stylesheet" href="https://unpkg.com/@reservoirgenomics/resglass@1.20.5/dist/hglib.css">
+    <script crossorigin src="https://unpkg.com/higlass-plugins@0.2.1/dist/higlass-plugins.min.js">
+
+    </script>
+    <script crossorigin src="https://unpkg.com/@reservoirgenomics/resglass@1.20.5/dist/hglib.js">
+
+    </script>
+
+    <meta charset="UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Juicebox</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+    <!-- Font Awesome CSS-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- Juicebox CSS-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/juicebox.js@2.2.0/dist/css/juicebox.css">
+
+    <!-- Juicebox JS -->
+    <script src="https://cdn.jsdelivr.net/npm/juicebox.js@2.2.1/dist/juicebox.min.js"></script>
+
+    <!-- IGV JS -->
+    <script src="https://cdn.jsdelivr.net/npm/igv@2.11.2/dist/igv.min.js"></script>
+
+
+
+</head>
+<body>
+
+<div id="igv-container" style="width: auto; margin-left: 10px; border: 1px solid black;">
+</div>
+
+<div id="juicebox-container" style="margin-top: 20px;  margin-left: 10px;display:flex">
+</div>
+
+
+<script>
+    const juiceboxConfig = {
+        browsers: [
+            {
+                genome: "hg38",
+                url: "https://www.encodeproject.org/files/ENCFF020DPP/@@download/ENCFF020DPP.hic",
+                name: "HepG2 HiC",
+                locus: "chr1:19,150,000-19,250,000",
+                normalization: "SCALE",
+                //resolution: 1000
+                width: 850
+            },
+            {
+                genome: "hg38",
+                url: "https://www.encodeproject.org/files/ENCFF020DPP/@@download/ENCFF020DPP.hic",
+                name: "HepG2 HiC",
+                locus: "chr1:19,150,000-19,250,000",
+                normalization: "SCALE",
+                width: 850
+                //resolution: 1000
+            }
+        ]
+    }
+
+    juicebox.init(document.getElementById("juicebox-container"), juiceboxConfig)
+        .then(function (hicBrowser) {
+            hicBrowser.set
+        })
+
+</script>
+
+
+<script>
+    const igvConfig =
+        {
+            genome: "hg38",
+            locus: "chr1:19,150,000-19,250,000",
+            tracks: [
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF056AAI/@@download/ENCFF056AAI.bigInteract",
+                    format: "biginteract",
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF004DTQ/@@download/ENCFF004DTQ.bigWig",
+                    name: "HepG2 miRNA (plus strand)",
+                    color: "rgb(200,0,0)",
+                    format: "bigwig",
+                    type: "wig"
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF646XYR/@@download/ENCFF646XYR.bigWig",
+                    name: "HepG2 miRNA (minus strand)",
+                    color: "rgb(200,0,0)",
+                    format: "bigwig",
+                    type: "wig"
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF908VIH/@@download/ENCFF908VIH.bigWig",
+                    name: "HepG2 total RNA-seq (plus strand)",
+                    color: "rgb(0,200,0)",
+                    format: "bigwig",
+                    type: "wig"
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF991LOA/@@download/ENCFF991LOA.bigWig",
+                    name: "HepG2 total RNA-seq (minus strand)",
+                    color: "rgb(0,200,0)",
+                    format: "bigwig",
+                    type: "wig",
+                    flipAxis: true
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF285FQS/@@download/ENCFF285FQS.bigWig",
+                    name: "HepG2 ATAC-seq",
+                    color: "rgb(200,0,150)",
+                    format: "bigwig",
+                    type: "wig"
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF645ZUY/@@download/ENCFF645ZUY.bigWig",
+                    name: "HepG2 H3K4me3",
+                    color: "rgb(200,0,150)",
+                    format: "bigwig",
+                    type: "wig"
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF113VII/@@download/ENCFF113VII.bigWig",
+                    name: "HepG2 H3K27ac",
+                    color: "rgb(200,0,150)",
+                    format: "bigwig",
+                    type: "wig"
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF113VII/@@download/ENCFF113VII.bigWig",
+                    name: "HepG2 DNase-seq",
+                    color: "rgb(200,0,150)",
+                    format: "bigwig",
+                    type: "wig"
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF364UNM/@@download/ENCFF364UNM.bedpe.gz",
+                    type: "interact",
+                    format: "bedpe",
+                    name: "HepG2 POLR2A ChIA-PET",
+                    arcType: "nested",
+                    color: "rgb(0,0,150)",
+                    showBlocks: true,
+                    visibilityWindow: 10000000,
+                    height: 100
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF299NHM/@@download/ENCFF299NHM.bedpe.gz",
+                    type: "interact",
+                    format: "bedpe",
+                    name: "HepG2 CTCF ChIA-PET",
+                    arcType: "nested",
+                    color: "rgb(0,0,150)",
+                    showBlocks: true,
+                    visibilityWindow: 10000000,
+                    height: 100
+                },
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF545CMV/@@download/ENCFF545CMV.bigWig",
+                    name: "HepG2 genome compartments",
+                    format: "bigwig",
+                    type: "wig"
+                }
+            ]
+        }
+    igv.createBrowser(document.getElementById("igv-container"), igvConfig)
+
+
+</script>
+</body>

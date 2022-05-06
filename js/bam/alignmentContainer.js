@@ -25,10 +25,14 @@
  */
 import PairedAlignment from "./pairedAlignment.js"
 import {canBePaired, packAlignmentRows, pairAlignments, unpairAlignments} from "./alignmentUtils.js"
+import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 
 
 class AlignmentContainer {
-    constructor(chr, start, end, samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold) {
+
+    //            this.config.samplingWindowSize, this.config.samplingDepth,
+    //             this.config.pairsSupported, this.config.alleleFreqThreshold)
+    constructor(chr, start, end, {samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold}) {
 
         this.chr = chr
         this.start = Math.floor(start)
@@ -56,16 +60,11 @@ class AlignmentContainer {
             return alignment.isMapped() && !alignment.isFailsVendorQualityCheck()
         }
 
-        this.pairedEndStats = new PairedEndStats()
     }
 
     push(alignment) {
 
         if (this.filter(alignment) === false) return
-
-        if (alignment.isPaired()) {
-            this.pairedEndStats.push(alignment)
-        }
 
         this.coverageMap.incCounts(alignment)   // Count coverage before any downsampling
 
@@ -98,8 +97,6 @@ class AlignmentContainer {
 
         this.pairsCache = undefined
         this.downsampledReads = undefined
-
-        this.pairedEndStats.compute()
     }
 
     contains(chr, start, end) {
@@ -407,69 +404,6 @@ class DownsampledInterval {
             {name: "start", value: this.start + 1},
             {name: "end", value: this.end},
             {name: "# downsampled:", value: this.counts}]
-    }
-}
-
-class PairedEndStats {
-
-    constructor(lowerPercentile, upperPercentile) {
-        this.totalCount = 0
-        this.frCount = 0
-        this.rfCount = 0
-        this.ffCount = 0
-        this.sumF = 0
-        this.sumF2 = 0
-        //this.lp = lowerPercentile === undefined ? 0.005 : lowerPercentile;
-        //this.up = upperPercentile === undefined ? 0.995 : upperPercentile;
-        //this.digest = new Digest();
-    }
-
-    push(alignment) {
-
-        if (alignment.isProperPair()) {
-
-            var fragmentLength = Math.abs(alignment.fragmentLength)
-            //this.digest.push(fragmentLength);
-            this.sumF += fragmentLength
-            this.sumF2 += fragmentLength * fragmentLength
-
-            var po = alignment.pairOrientation
-
-            if (typeof po === "string" && po.length === 4) {
-                var tmp = '' + po.charAt(0) + po.charAt(2)
-                switch (tmp) {
-                    case 'FF':
-                    case 'RR':
-                        this.ffCount++
-                        break
-                    case "FR":
-                        this.frCount++
-                        break
-                    case"RF":
-                        this.rfCount++
-                }
-            }
-            this.totalCount++
-        }
-    }
-
-    compute() {
-
-        if (this.totalCount > 100) {
-            if (this.ffCount / this.totalCount > 0.9) this.orienation = "ff"
-            else if (this.frCount / this.totalCount > 0.9) this.orienation = "fr"
-            else if (this.rfCount / this.totalCount > 0.9) this.orienation = "rf"
-
-
-            var fMean = this.sumF / this.totalCount
-            var stdDev = Math.sqrt((this.totalCount * this.sumF2 - this.sumF * this.sumF) / (this.totalCount * this.totalCount))
-            this.lowerFragmentLength = fMean - 3 * stdDev
-            this.upperFragmentLength = fMean + 3 * stdDev
-
-            //this.lowerFragmentLength = this.digest.percentile(this.lp);
-            //this.upperFragmentLength = this.digest.percentile(this.up);
-            //this.digest = undefined;
-        }
     }
 }
 

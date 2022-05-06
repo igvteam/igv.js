@@ -14,8 +14,7 @@ class Locus {
     }
 
     overlaps(locus) {
-        return locus.chr === this.chr
-            && !(locus.end < this.start || locus.start > this.end)
+        return locus.chr === this.chr && !(locus.end < this.start || locus.start > this.end)
     }
 
     extend(l) {

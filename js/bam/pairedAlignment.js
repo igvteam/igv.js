@@ -107,6 +107,18 @@ class PairedAlignment {
         return true // By definition
     }
 
+    isMateMapped() {
+        return true // By definition
+    }
+
+    isProperPair() {
+        return this.firstAlignment.isProperPair()
+    }
+
+    get fragmentLength() {
+        return Math.abs(this.firstAlignment.fragmentLength)
+    }
+
     firstOfPairStrand() {
 
         if (this.firstAlignment.isFirstOfPair()) {
@@ -116,6 +128,10 @@ class PairedAlignment {
         } else {
             return this.firstAlignment.mate.strand    // Assumption is mate is first-of-pair
         }
+    }
+
+    hasTag(str) {
+        return this.firstAlignment.hasTag(str) || (this.secondAlignment &&  this.secondAlignment.hasTag(str))
     }
 }
 
