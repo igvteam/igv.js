@@ -21,93 +21,59 @@
 
     import igv from "../../js/index.js"
 
-    const div = document.getElementById("myDiv")
-    const options = {
-        locus: '1:67,655,272-67,684,468',
-        genome: "hg19",
-
-        // Define 2 "region of interest" sets, the first is global, the second specific to the track
-        roi:
-            [
-                {
-                    "name": "ROI with URL",
-                    "color": "rgba(255,1,199,0.25)",
-                    "url": "https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed"
-                },
-                {
-                    "name": "ROI with feature array",
-                    "color": "rgba(72,121,237,0.5)",
-                    "features": [
-                        {
-                            "chr": "chr1",
-                            "start": 67655415,
-                            "end": 67655611
-                        },
-                        {
-                            "chr": "chr1",
-                            "start": 67664225,
-                            "end": 67666281
-                        }
-                    ]
-                },
-                {
-                    "color": "rgba(3,249,135,0.0625)",
-                    "features": [
-                        {
-                            "chr": "chr1",
-                            "start": 67682776,
-                            "end": 67682980
-                        },
-                        {
-                            "chr": "chr1",
-                            "start": 67680501,
-                            "end": 67680559
-                        },
-                        {
-                            "chr": "chr1",
-                            "start": 67674900,
-                            "end": 67675280
-                        },
-                        {
-                            "chr": "chr1",
-                            "start": 67674375,
-                            "end": 67674667
-                        },
-                        {
-                            "chr": "chr1",
-                            "start": 67673121,
-                            "end": 67673530
-                        },
-                        {
-                            "chr": "chr1",
-                            "start": 67672217,
-                            "end": 67672655
-                        },
-                        {
-                            "chr": "chr1",
-                            "start": 67671313,
-                            "end": 67672100
-                        },
-                        {
-                            "chr": "chr1",
-                            "start": 67669796,
-                            "end": 67670613
-                        }
-                    ],
-                    "isUserDefined": true
-                }
-            ],
-        tracks:
-            [
-                {
-                    name: 'Some features',
-                    url: 'https://s3.amazonaws.com/igv.org.test/data/roi/some_features.bed',
-                    indexed: false,
-                }
-            ]
+    const session = {
+        "version": "2.12.6",
+        "showSampleNames": false,
+        "reference": {
+            "id": "hg19",
+            "name": "Human (GRCh37/hg19)",
+            "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+            "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+            "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+            "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+            "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+        },
+        "locus": "chr4:57,217,983-57,805,688",
+        "roi": [
+            {
+                // "color": "rgba(136,135,135,0.08333333333333333)",
+                "features": [
+                    {
+                        "chr": "chr4",
+                        "start": 57482584,
+                        "end": 57540635
+                    },
+                    {
+                        "chr": "chr4",
+                        "start": 57563585,
+                        "end": 57627486
+                    }
+                ],
+                "isUserDefined": true
+            }
+        ],
+        "tracks": [
+            {
+                "type": "sequence",
+                "order": -9007199254740991
+            },
+            {
+                "name": "Refseq Genes",
+                "format": "refgene",
+                "id": "hg19_genes",
+                "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz",
+                "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz.tbi",
+                "visibilityWindow": -1,
+                "supportsWholeGenome": false,
+                "removable": false,
+                "order": 1000000,
+                "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                "type": "annotation"
+            }
+        ]
     }
 
-    igv.createBrowser(div, options)
+    igv.createBrowser(document.getElementById("myDiv"), session)
 
 </script>
 
