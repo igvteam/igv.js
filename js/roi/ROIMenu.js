@@ -13,7 +13,7 @@ class ROIMenu {
 
     }
 
-    present(x, y, roiManager, columnContainer, regionElement) {
+    present(x, y, roiManager, columnContainer, regionElement, isDeletable) {
 
         removeAllChildNodes(this.container)
 
@@ -31,16 +31,20 @@ class ROIMenu {
             this.browser.search(locus)
         })
 
-        // Delete
-        row = DOMUtils.div({ class: 'igv-roi-body-row' })
-        row.innerText = 'Delete'
-        this.container.appendChild(row)
+        if (true === isDeletable) {
 
-        row.addEventListener('click', event => {
-            event.stopPropagation()
-            this.container.style.display = 'none'
-            this.browser.roiManager.deleteRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
-        })
+            // Delete
+            row = DOMUtils.div({ class: 'igv-roi-body-row' })
+            row.innerText = 'Delete'
+            this.container.appendChild(row)
+
+            row.addEventListener('click', event => {
+                event.stopPropagation()
+                this.container.style.display = 'none'
+                this.browser.roiManager.deleteRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
+            })
+
+        }
 
         this.container.style.left = `${ x }px`
         this.container.style.top  = `${ y }px`

@@ -209,17 +209,13 @@ class ROIManager {
 
         header.style.backgroundColor = roiSet.headerColor
 
-        if (true === roiSet.isUserDefined) {
+        header.addEventListener('click', event => {
+            event.preventDefault()
+            event.stopPropagation()
 
-            header.addEventListener('click', event => {
-                event.preventDefault()
-                event.stopPropagation()
-
-                const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-                this.roiMenu.present(x, y, this, columnContainer, regionElement)
-            })
-
-        }
+            const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
+            this.roiMenu.present(x, y, this, columnContainer, regionElement, roiSet.isUserDefined)
+        })
 
         return regionElement
     }

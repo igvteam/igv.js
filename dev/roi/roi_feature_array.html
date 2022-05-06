@@ -21,7 +21,6 @@
 
     import igv from "../../js/index.js"
 
-    const div = document.getElementById("myDiv")
     const options = {
         locus: '1:67,655,272-67,684,468',
         genome: "hg19",
@@ -111,12 +110,14 @@
             "genome": "hg19",
             "locus": "chr1:67,655,272-67,684,468",
             "roi": [
+                // {
+                //     "name": "URL Feature Set",
+                //     "color": "rgba(255,1,199,0.25)",
+                //     "url": "https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed"
+                // },
                 {
-                    "name": "URL Feature Set",
-                    "color": "rgba(255,1,199,0.25)",
-                    "url": "https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed"
-                },
-                {
+                    "name": "H! I'm User Defined",
+                    "isUserDefined": true,
                     "color": "rgba(72,121,237,0.54)",
                     "features": [
                         {
@@ -198,7 +199,8 @@
             ]
 
         };
-    igv.createBrowser(div, no_name_feature_array_config)
+
+    igv.createBrowser(document.getElementById('myDiv'), no_name_feature_array_config)
 
 </script>
 
