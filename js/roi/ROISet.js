@@ -62,7 +62,7 @@ class ROISet {
 
         if (true === this.isUserDefined) {
             this.color = ROI_USER_DEFINED_COLOR
-            this.headerColor = ROI_USER_HEADER_DEFINED_COLOR
+            this.headerColor = config.color || ROI_USER_HEADER_DEFINED_COLOR
         } else {
             this.color = config.color || ROI_DEFAULT_COLOR
             this.headerColor = ROI_DEFAULT_HEADER_COLOR
