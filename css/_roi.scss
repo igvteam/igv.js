@@ -87,6 +87,10 @@ $igv-roi-table-background-color: #eee;
       height: $igv-roi-dismiss-button-size;
       width: $igv-roi-dismiss-button-size;
       color: $igv-roi-border-color;
+
+      >svg {
+        display: block;
+      }
     }
 
     >div:last-child:hover {

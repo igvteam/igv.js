@@ -958,6 +958,8 @@
       height: 12px;
       width: 12px;
       color: #7f7f7f; }
+      .igv-roi-table > div:first-child > div:last-child > svg {
+        display: block; }
     .igv-roi-table > div:first-child > div:last-child:hover {
       cursor: pointer;
       color: #444; }
