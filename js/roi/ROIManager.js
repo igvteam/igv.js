@@ -204,18 +204,21 @@ class ROIManager {
 
         regionElement.dataset.region = regionKey
 
-        const header = DOMUtils.div()
-        regionElement.appendChild(header)
+        if (true === roiSet.isUserDefined) {
 
-        header.style.backgroundColor = roiSet.headerColor
+            const header = DOMUtils.div()
+            regionElement.appendChild(header)
 
-        header.addEventListener('click', event => {
-            event.preventDefault()
-            event.stopPropagation()
+            header.style.backgroundColor = roiSet.headerColor
 
-            const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-            this.roiMenu.present(x, y, this, columnContainer, regionElement, roiSet.isUserDefined)
-        })
+            header.addEventListener('click', event => {
+                event.preventDefault()
+                event.stopPropagation()
+
+                const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
+                this.roiMenu.present(x, y, this, columnContainer, regionElement)
+            })
+        }
 
         return regionElement
     }

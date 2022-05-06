@@ -61,17 +61,23 @@ class ROISet {
         }
 
         if (true === this.isUserDefined) {
+
             this.color = ROI_USER_DEFINED_COLOR
             this.headerColor = config.color || ROI_USER_HEADER_DEFINED_COLOR
+
         } else {
+
             this.color = config.color || ROI_DEFAULT_COLOR
+
             this.headerColor = ROI_DEFAULT_HEADER_COLOR
+
+            // Use body color with alpha pinned to 1
+            // const [ r, g, b, discard ] = rgbaStringTokens(this.color)
+            // this.headerColor = `rgba(${ r },${ g },${ b },${ 1.0 })`
+
         }
 
 
-        // Use body color with alpha pinned to 1
-        // const [ r, g, b, a ] = rgbaStringTokens(this.color)
-        // this.headerColor = `rgba(${ r },${ g },${ b },${ 1.0 })`
 
     }
 
