@@ -125,6 +125,6 @@ function screenCoordinates(regionStartBP, regionEndBP, startBP, bpp) {
     return { x:xStart, width }
 }
 
-export { ROI_DEFAULT_COLOR, ROI_USER_DEFINED_COLOR, screenCoordinates }
+export { ROI_DEFAULT_COLOR, ROI_USER_HEADER_DEFINED_COLOR, ROI_USER_DEFINED_COLOR, screenCoordinates }
 
 export default ROISet

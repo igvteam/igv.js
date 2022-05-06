@@ -1,5 +1,5 @@
 import {DOMUtils,StringUtils} from '../../node_modules/igv-utils/src/index.js'
-import ROISet, {ROI_USER_DEFINED_COLOR, screenCoordinates} from './ROISet.js'
+import ROISet, {ROI_USER_HEADER_DEFINED_COLOR, screenCoordinates} from './ROISet.js'
 
 class ROIManager {
     constructor(browser, roiMenu, roiTable, top, roiSets) {
@@ -95,7 +95,7 @@ class ROIManager {
                 {
                     isUserDefined: true,
                     features: [],
-                    color: ROI_USER_DEFINED_COLOR
+                    color: ROI_USER_HEADER_DEFINED_COLOR
                 };
 
             this.roiSets.push(new ROISet(config, this.browser.genome))
@@ -110,7 +110,7 @@ class ROIManager {
                     {
                         isUserDefined: true,
                         features: [],
-                        color: ROI_USER_DEFINED_COLOR
+                        color: ROI_USER_HEADER_DEFINED_COLOR
                     };
 
                 this.roiSets.push(new ROISet(config, this.browser.genome))
