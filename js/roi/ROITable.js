@@ -53,8 +53,8 @@ class ROITable {
 
             const sortedFeatures = records.sort((a, b) => (a.chr.localeCompare(b.chr) || a.start - b.start || a.end - b.end))
 
-            for (let { name, chr, start, end } of sortedFeatures) {
-                const row = this.createTableRowDOM(name, chr, start, end)
+            for (let { name:setName, chr, start, end } of sortedFeatures) {
+                const row = this.createTableRowDOM(setName, chr, start, end)
                 this.tableRowContainerDOM.appendChild(row)
             }
 
@@ -94,12 +94,21 @@ class ROITable {
         return dom
     }
 
-    createTableRowDOM(name, chr, start, end) {
+    createTableRowDOM(setName, chr, start, end) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
         dom.dataset.region = createRegionKey(chr, start, end)
 
-        for (let string of [ chr, StringUtils.numberFormatter(start), StringUtils.numberFormatter(end), name ]) {
+        const strings =
+            [
+                chr,
+                StringUtils.numberFormatter(start),
+                StringUtils.numberFormatter(end),
+                `description-${ DOMUtils.guid() }`,
+                setName
+            ];
+
+        for (let string of strings) {
             const el = DOMUtils.div()
             el.innerText = string
             dom.appendChild(el)
@@ -219,6 +228,7 @@ function createColumnTitleDOM(container) {
             'Chr',
             'Start',
             'End',
+            'Description',
             'Set',
         ]
 

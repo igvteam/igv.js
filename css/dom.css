@@ -965,40 +965,45 @@
       color: #444; }
   .igv-roi-table > .igv-roi-table-column-titles {
     height: 24px;
-    margin-right: 24px;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
-    justify-content: flex-start;
+    justify-content: stretch;
     align-items: stretch;
+    padding-right: 16px;
     background-color: white;
     border-bottom-color: #7f7f7f;
     border-bottom-style: solid;
     border-bottom-width: thin; }
     .igv-roi-table > .igv-roi-table-column-titles > div {
       font-size: 14px;
-      text-align: end;
       vertical-align: middle;
       line-height: 24px;
+      height: 24px;
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: ellipsis;
-      height: 24px;
-      margin-right: 4px; }
+      text-overflow: ellipsis; }
     .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(1) {
-      width: 25%; }
+      margin-left: 4px;
+      text-align: start;
+      width: 20%; }
     .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(2) {
-      width: 100px; }
+      text-align: end;
+      width: 15%; }
     .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(3) {
-      width: 100px; }
+      text-align: end;
+      width: 15%; }
     .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(4) {
-      width: 25%;
-      margin-right: 8px; }
+      margin-left: 4px;
+      width: 30%; }
+    .igv-roi-table > .igv-roi-table-column-titles > div:nth-child(5) {
+      width: 20%; }
   .igv-roi-table > .igv-roi-table-row-container {
     resize: both;
     overflow: scroll;
     min-width: 512px;
     min-height: 72px;
+    height: 144px;
     max-height: 480px;
     background-color: white;
     display: flex;
@@ -1011,27 +1016,31 @@
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
-      justify-content: flex-start;
+      justify-content: stretch;
       align-items: stretch; }
       .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div {
         font-size: 14px;
-        text-align: end;
         vertical-align: middle;
         line-height: 24px;
+        height: 24px;
         white-space: nowrap;
         overflow: hidden;
-        text-overflow: ellipsis;
-        height: 24px;
-        margin-right: 4px; }
+        text-overflow: ellipsis; }
       .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:nth-child(1) {
-        width: 25%; }
+        margin-left: 4px;
+        text-align: start;
+        width: 20%; }
       .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:nth-child(2) {
-        width: 100px; }
+        text-align: end;
+        width: 15%; }
       .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:nth-child(3) {
-        width: 100px; }
+        text-align: end;
+        width: 15%; }
       .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:nth-child(4) {
-        width: 25%;
-        margin-right: 8px; }
+        margin-left: 4px;
+        width: 30%; }
+      .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:nth-child(5) {
+        width: 20%; }
   .igv-roi-table > div:last-child {
     height: 32px;
     line-height: 32px;
