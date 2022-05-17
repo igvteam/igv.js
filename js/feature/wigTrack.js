@@ -201,6 +201,8 @@ class WigTrack extends TrackBase {
                         const px = x + width / 2
                         IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color})
 
+                    } else if(this.graphType === "line"){
+                        IGVGraphics.strokeLine(ctx, x, y, x + width, y, {"fillStyle": color, "strokeStyle": color})
                     } else {
                         let height = y - y0
                         const pixelEnd = x + width
