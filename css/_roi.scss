@@ -104,46 +104,56 @@ $igv-roi-table-background-color: #eee;
   >.igv-roi-table-column-titles {
 
     height: $dimension;
-    margin-right: 24px;
 
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
-    justify-content: flex-start;
+    justify-content: stretch;
     align-items: stretch;
 
-    // assumes: chr | start | end | roi-set
+    // to compensate for resize area in table row
+    padding-right: 16px;
 
     >div {
       font-size: 14px;
-      text-align: end;
       vertical-align: middle;
       line-height: $dimension;
+
+      height: $dimension;
 
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-
-      height: $dimension;
-
-      margin-right: 4px;
     }
 
+    // chr
     >div:nth-child(1) {
-      width: 25%;
+      margin-left: 4px;
+      text-align: start;
+      width: 20%;
     }
 
+    // start
     >div:nth-child(2) {
-      width: 100px;
+      text-align: end;
+      width: 15%;
     }
 
+    // end
     >div:nth-child(3) {
-      width:100px;
+      text-align: end;
+      width:15%;
     }
 
+    // description
     >div:nth-child(4) {
-      width: 25%;
-      margin-right: 8px;
+      margin-left: 4px;
+      width: 30%;
+    }
+
+    // set
+    >div:nth-child(5) {
+      width: 20%;
     }
 
     background-color: white;
@@ -163,6 +173,7 @@ $igv-roi-table-background-color: #eee;
     min-width:512px;
 
     min-height: (3 * $dimension);
+    height: (6 * $dimension);
     max-height: (20 * $dimension);
 
     background-color:white;
@@ -181,41 +192,49 @@ $igv-roi-table-background-color: #eee;
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
-      justify-content: flex-start;
+      justify-content: stretch;
       align-items: stretch;
-
-      // assumes: chr | start | end | roi-set
 
       >div {
         font-size: 14px;
-        text-align: end;
         vertical-align: middle;
         line-height: $dimension;
+
+        height: $dimension;
 
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
 
-        height: $dimension;
-
-        margin-right: 4px;
       }
 
+      // chr
       >div:nth-child(1) {
-        width: 25%;
+        margin-left: 4px;
+        text-align: start;
+        width: 20%;
       }
 
+      // start
       >div:nth-child(2) {
-        width: 100px;
+        text-align: end;
+        width: 15%;
       }
 
+      // end
       >div:nth-child(3) {
-        width:100px;
+        text-align: end;
+        width:15%;
       }
 
       >div:nth-child(4) {
-        width: 25%;
-        margin-right: 8px;
+        margin-left: 4px;
+        width: 30%;
+      }
+
+      // set
+      >div:nth-child(5) {
+        width: 20%;
       }
 
     }
