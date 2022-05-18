@@ -20,15 +20,28 @@ class ROIMenu {
         let row
 
         // Go To
+        // row = DOMUtils.div({ class: 'igv-roi-body-row' })
+        // row.innerText = 'Go To'
+        // this.container.appendChild(row)
+        //
+        // row.addEventListener('click', event => {
+        //     event.stopPropagation()
+        //     this.container.style.display = 'none'
+        //     const { locus } = parseRegionKey(regionElement.dataset.region)
+        //     this.browser.search(locus)
+        // })
+
+        // Set Description
         row = DOMUtils.div({ class: 'igv-roi-body-row' })
-        row.innerText = 'Go To'
+        row.innerText = 'Set Description'
         this.container.appendChild(row)
 
         row.addEventListener('click', event => {
             event.stopPropagation()
-            this.container.style.display = 'none'
-            const { locus } = parseRegionKey(regionElement.dataset.region)
-            this.browser.search(locus)
+            alert('TODO: Add set description functionality')
+            // this.container.style.display = 'none'
+            // const { locus } = parseRegionKey(regionElement.dataset.region)
+            // this.browser.search(locus)
         })
 
         // Delete

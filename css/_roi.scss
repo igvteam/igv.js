@@ -119,6 +119,10 @@ $igv-roi-table-background-color: #eee;
       vertical-align: middle;
       line-height: $dimension;
 
+      text-align: center;
+      margin-left: 4px;
+      margin-right: 4px;
+
       height: $dimension;
 
       white-space: nowrap;
@@ -128,26 +132,21 @@ $igv-roi-table-background-color: #eee;
 
     // chr
     >div:nth-child(1) {
-      margin-left: 4px;
-      text-align: start;
       width: 20%;
     }
 
     // start
     >div:nth-child(2) {
-      text-align: end;
       width: 15%;
     }
 
     // end
     >div:nth-child(3) {
-      text-align: end;
       width:15%;
     }
 
     // description
     >div:nth-child(4) {
-      margin-left: 4px;
       width: 30%;
     }
 
@@ -200,6 +199,10 @@ $igv-roi-table-background-color: #eee;
         vertical-align: middle;
         line-height: $dimension;
 
+        text-align: center;
+        margin-left: 4px;
+        margin-right: 4px;
+
         height: $dimension;
 
         white-space: nowrap;
@@ -210,25 +213,20 @@ $igv-roi-table-background-color: #eee;
 
       // chr
       >div:nth-child(1) {
-        margin-left: 4px;
-        text-align: start;
         width: 20%;
       }
 
       // start
       >div:nth-child(2) {
-        text-align: end;
         width: 15%;
       }
 
       // end
       >div:nth-child(3) {
-        text-align: end;
         width:15%;
       }
 
       >div:nth-child(4) {
-        margin-left: 4px;
         width: 30%;
       }
 
@@ -351,7 +349,7 @@ $igv-roi-table-background-color: #eee;
   position: absolute;
   z-index: 1024;
 
-  width:(4 * $dimension);
+  width:(5 * $dimension);
 
   border-color: $igv-roi-border-color;
   border-radius: $igv-roi-table-border-radius;
