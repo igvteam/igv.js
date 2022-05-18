@@ -1146,6 +1146,30 @@
   line-height: 24px;
   background-color: white; }
 
+.igv-roi-menu-row-edit-description {
+  height: 24px;
+  width: -webkit-fill-available;
+  font-size: small;
+  text-align: start;
+  vertical-align: middle;
+  line-height: 24px;
+  background-color: white; }
+  .igv-roi-menu-row-edit-description > input {
+    display: block;
+    width: -webkit-fill-available; }
+
+.igv-roi-body-row-content-editable {
+  caret-color: red;
+  height: 24px;
+  max-height: 24px;
+  word-wrap: break-word;
+  padding-left: 8px;
+  font-size: small;
+  text-align: start;
+  vertical-align: middle;
+  line-height: 24px;
+  background-color: white; }
+
 .igv-roi-body-row:hover {
   cursor: pointer;
   background-color: #f4f4f4; }

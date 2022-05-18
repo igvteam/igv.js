@@ -409,10 +409,51 @@ $igv-roi-table-background-color: #eee;
   line-height: $dimension;
 
   background-color: white;
+
+}
+
+.igv-roi-menu-row-edit-description {
+
+  height: $dimension;
+
+  width: -webkit-fill-available;
+
+  font-size: small;
+  text-align: start;
+  vertical-align: middle;
+
+  line-height: $dimension;
+
+  background-color: white;
+
+  >input {
+    display: block;
+    width: -webkit-fill-available;
+  }
+}
+
+.igv-roi-body-row-content-editable {
+
+  caret-color: red;
+
+  height: $dimension;
+  max-height: $dimension;
+
+  word-wrap: break-word;
+
+  padding-left: 8px;
+
+  //color: grey;
+  font-size: small;
+  text-align: start;
+  vertical-align: middle;
+
+  line-height: $dimension;
+
+  background-color: white;
 }
 
 .igv-roi-body-row:hover {
   cursor: pointer;
   background-color: #f4f4f4;
 }
-

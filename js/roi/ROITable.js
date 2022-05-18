@@ -51,10 +51,10 @@ class ROITable {
 
         if (records.length > 0) {
 
-            const sortedFeatures = records.sort((a, b) => (a.chr.localeCompare(b.chr) || a.start - b.start || a.end - b.end))
+            const sortedRecords = records.sort((a, b) => (a.feature.chr.localeCompare(b.feature.chr) || a.feature.start - b.feature.start || a.feature.end - b.feature.end))
 
-            for (let { name:setName, chr, start, end } of sortedFeatures) {
-                const row = this.createTableRowDOM(setName, chr, start, end)
+            for (let record of sortedRecords) {
+                const row = this.createTableRowDOM(record)
                 this.tableRowContainerDOM.appendChild(row)
             }
 
@@ -94,17 +94,19 @@ class ROITable {
         return dom
     }
 
-    createTableRowDOM(setName, chr, start, end) {
+    createTableRowDOM(record) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
-        dom.dataset.region = createRegionKey(chr, start, end)
+
+        const { setName, feature } = record
+        dom.dataset.region = createRegionKey(feature.chr, feature.start, feature.end)
 
         const strings =
             [
-                chr,
-                StringUtils.numberFormatter(start),
-                StringUtils.numberFormatter(end),
-                `description-${ DOMUtils.guid() }`,
+                feature.chr,
+                StringUtils.numberFormatter(feature.start),
+                StringUtils.numberFormatter(feature.end),
+                feature.name || `no description ${ DOMUtils.guid()}`,
                 setName
             ];
 
@@ -167,8 +169,8 @@ class ROITable {
         const reader = new FeatureFileReader({ url: file }, undefined)
         const features = await reader.loadFeaturesNoIndex()
 
-        for (let { chr, start, end } of features) {
-            await this.browser.roiManager.updateUserDefinedROISet({ chr, start, end })
+        for (let feature of features) {
+            await this.browser.roiManager.updateUserDefinedROISet(features)
         }
 
     }

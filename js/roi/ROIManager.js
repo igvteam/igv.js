@@ -70,9 +70,13 @@ class ROIManager {
 
         const records = []
 
-        for (let set of this.roiSets) {
-            const regions = await set.getAllFeatures()
-            const acc = regions.map(region => Object.assign({ name:set.name }, region))
+        for (let roiSet of this.roiSets) {
+            const features = await roiSet.getAllFeatures()
+
+            const setName = roiSet.isUserDefined ? 'No Name (User Defined)' : (roiSet.name || 'No Name')
+            const acc = features.map(feature => {
+                return { setName, feature }
+            } )
             records.push(...acc)
         }
 
@@ -83,11 +87,16 @@ class ROIManager {
         this.roiTable.present()
     }
 
+    async repaintTable() {
+        const records = await this.getTableRecords()
+        this.roiTable.renderTable(records)
+    }
+
     dismissTable() {
         this.roiTable.dismiss()
     }
 
-    async updateUserDefinedROISet(region) {
+    async updateUserDefinedROISet(feature) {
 
         if (0 === this.roiSets.length) {
 
@@ -102,9 +111,9 @@ class ROIManager {
 
         } else {
 
-            const result = this.roiSets.filter(roiSet => true === roiSet.isUserDefined)
+            const result = this.getUserDefinedROISet()
 
-            if (0 === result.length) {
+            if (undefined === result) {
 
                 const config =
                     {
@@ -118,9 +127,8 @@ class ROIManager {
 
         }
 
-        const [ userDefinedROISet ] = this.roiSets.filter(roiSet => true === roiSet.isUserDefined)
-
-        userDefinedROISet.features.push(region)
+        const userDefinedROISet = this.getUserDefinedROISet()
+        userDefinedROISet.features.push(feature)
 
         if (false === this.browser.showROITableButton) {
             this.setROITableButtonVisibility(true)
@@ -152,13 +160,13 @@ class ROIManager {
 
             let { chr, start:startBP, end:endBP, bpPerPixel:bpp } = browser.referenceFrameList[ i ]
 
-            const regions = await roiSet.getAllFeatures()
+            const features = await roiSet.getAllFeatures()
 
-            if (regions && regions.length > 0) {
+            if (features && features.length > 0) {
 
-                for (let r = 0; r < regions.length; r++ ) {
+                for (let r = 0; r < features.length; r++ ) {
 
-                    const { chr:regionChr, start:regionStartBP, end:regionEndBP } = regions[ r ]
+                    const { chr:regionChr, start:regionStartBP, end:regionEndBP } = features[ r ]
 
                     const regionKey = createRegionKey(regionChr, regionStartBP, regionEndBP)
                     const el = columns[ i ].querySelector(createSelector(regionKey))
@@ -223,6 +231,34 @@ class ROIManager {
         return regionElement
     }
 
+    async findFeatureWithRegionKey(regionKey) {
+
+        const { chr:chrKey, start:startKey, end:endKey } = parseRegionKey(regionKey)
+
+        const userDefinedROISet = this.getUserDefinedROISet()
+
+        for (let i = 0; i < userDefinedROISet.features.length; i++) {
+
+            const { chr, start, end } = userDefinedROISet.features[ i ]
+
+            if (chrKey === chr && startKey === start && endKey === end) {
+                return { feature: userDefinedROISet.features[ i ], index: i }
+            }
+
+        }
+
+        return undefined
+    }
+
+    getUserDefinedROISet() {
+        const [ userDefinedROISet ] = this.roiSets.filter(roiSet => true === roiSet.isUserDefined)
+        return userDefinedROISet
+    }
+
+    getFeatureWithUserDefinedROISet() {
+
+    }
+
     async deleteRegionWithKey(regionKey, columnContainer) {
 
         columnContainer.querySelectorAll(createSelector(regionKey)).forEach(node => node.remove())
@@ -231,7 +267,7 @@ class ROIManager {
 
         // const indices = userDefinedROISet.features.map((feature, i) => i).join(' ')
 
-        const [ userDefinedROISet ] = this.roiSets.filter(roiSet => true === roiSet.isUserDefined)
+        const userDefinedROISet = this.getUserDefinedROISet()
 
         let indexToRemove
         for (let r = 0; r < userDefinedROISet.features.length; r++) {
@@ -244,15 +280,11 @@ class ROIManager {
 
         }
 
-        // console.log(`${ Date.now() } "${ roiSet.name }" indices ${ indices } index-to-remove ${indexToRemove  }`)
-
         userDefinedROISet.features.splice(indexToRemove, 1)
 
-        const allFeatures = await this.getTableRecords()
+        const records = await this.getTableRecords()
 
-        // console.log(`userDefinedROISet.features(${ allFeatures.length })`)
-
-        if (0 === allFeatures.length) {
+        if (0 === records.length) {
             this.browser.roiTableControl.buttonHandler(false)
             this.setROITableButtonVisibility(false)
         }

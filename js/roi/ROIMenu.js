@@ -13,36 +13,54 @@ class ROIMenu {
 
     }
 
-    present(x, y, roiManager, columnContainer, regionElement) {
+    async present(x, y, roiManager, columnContainer, regionElement) {
 
         removeAllChildNodes(this.container)
+
+        const { index } = await this.browser.roiManager.findFeatureWithRegionKey(regionElement.dataset.region)
+        const userDefinedROISet = this.browser.roiManager.getUserDefinedROISet()
+        const feature = userDefinedROISet.features[ index ]
 
         let row
 
         // Go To
-        // row = DOMUtils.div({ class: 'igv-roi-body-row' })
-        // row.innerText = 'Go To'
-        // this.container.appendChild(row)
-        //
-        // row.addEventListener('click', event => {
-        //     event.stopPropagation()
-        //     this.container.style.display = 'none'
-        //     const { locus } = parseRegionKey(regionElement.dataset.region)
-        //     this.browser.search(locus)
-        // })
-
-        // Set Description
         row = DOMUtils.div({ class: 'igv-roi-body-row' })
-        row.innerText = 'Set Description'
+        row.innerText = 'Go To'
         this.container.appendChild(row)
 
         row.addEventListener('click', event => {
             event.stopPropagation()
-            alert('TODO: Add set description functionality')
-            // this.container.style.display = 'none'
-            // const { locus } = parseRegionKey(regionElement.dataset.region)
-            // this.browser.search(locus)
+            this.container.style.display = 'none'
+            const { locus } = parseRegionKey(regionElement.dataset.region)
+            this.browser.search(locus)
         })
+
+        // Edit Description
+        row = DOMUtils.div({ class: 'igv-roi-menu-row-edit-description' })
+        this.container.appendChild(row)
+
+        row.addEventListener('click', e => {
+            e.stopPropagation()
+        })
+
+        const input = document.createElement('input')
+        input.setAttribute('type', 'text')
+        input.setAttribute('placeholder', feature.name || 'Edit Description')
+        input.value = feature.name || ''
+
+        input.addEventListener('change', async e => {
+
+            e.stopPropagation()
+
+            const { index } = await this.browser.roiManager.findFeatureWithRegionKey(regionElement.dataset.region)
+            const userDefinedROISet = this.browser.roiManager.getUserDefinedROISet()
+            const feature = userDefinedROISet.features[ index ]
+            feature.name = input.value
+
+            await this.browser.roiManager.repaintTable()
+        })
+
+        row.appendChild(input)
 
         // Delete
         row = DOMUtils.div({ class: 'igv-roi-body-row' })
