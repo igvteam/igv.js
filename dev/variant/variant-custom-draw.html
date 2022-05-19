@@ -7,20 +7,25 @@
     <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
     <title>igv.js</title>
 
-    <!-- IGV JS -->
-    <script src="../dist/igv.min.js"></script>
 
 </head>
 
 <body>
 
-<h3>Example illustrating options for customized drawing of variants</h3>
-
+<h3>Example illustrating options for coloring VCF variants</h3>
+<h4>
+    <ol>
+        <li>INFO tag with borderColor</li>
+        <li>INFO tag with customDraw</li>
+    </ol>
+</h4>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 
-<script>
+<script type="module">
+
+    import igv from "../../js"
 
     function drawTrianglerect(context, x, y, w, h) {
         let n = Math.floor(w / h)
@@ -47,9 +52,9 @@
     }
 
     function drawCirclerect(context, x, y, w, h) {
-
         let n = Math.floor(w / h)
         let p = (w % h) / 2
+
         context.clearRect(x, y, w, h)
         context.fillRect(x, y, w, h / 2)
 
@@ -91,11 +96,10 @@
             locus: "chr22",
             genome: "hg38",
             tracks: [
-
                 {
                     url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
-                    name: "Color by SVTYPE with border",
+                    name: "Color borderColor",
                     colorBy: "SVTYPE",
                     visibilityWindow: -1,
                     borderColor: function (variant) {
@@ -111,7 +115,7 @@
                 {
                     url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
-                    name: "Color by SVTYPE - custom draw",
+                    name: "Color context hook",
                     colorBy: "SVTYPE",
                     visibilityWindow: -1,
                     customDraw: function (variant, context, x, y, w, h) {

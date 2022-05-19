@@ -82,8 +82,8 @@ class VariantTrack extends TrackBase {
             this.colorTables.set(config.colorBy, new ColorTable(config.colorTable))
         }
 
-        this._strokecolor = config.strokecolor
-        this._context_hook = config.context_hook
+        this._borderColor = config.borderColor
+        this._customDraw = config.customDraw
 
         this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes
 
@@ -211,6 +211,8 @@ class VariantTrack extends TrackBase {
             // Loop through variants.  A variant == a row in a VCF file
             for (let variant of features) {
 
+                context.save();
+
                 if (variant.end < bpStart) continue
                 if (variant.start > bpEnd) break
 
@@ -230,17 +232,26 @@ class VariantTrack extends TrackBase {
                     w -= 2
                 }
                 context.fillStyle = this.getVariantColor(variant)
-                context.fillRect(x, y, w, h)
 
-                //only paint stroke if a color is defined
-                let strokecolor = this.getVariantStrokecolor(variant)
-                if (strokecolor){
-                  context.strokeStyle = strokecolor
-                  context.strokeRect(x, y, w, h)
+                // call hook if _customDraw fn is defined
+                let customDraw = false
+                if (typeof this._customDraw === "function") {
+                    customDraw = this.callCustomDraw(variant, context, x, y, w, h)
                 }
 
-                // call hook if _context_hook fn is defined
-                this.callContextHook(variant, context, x, y, w, h)
+                if (!customDraw) {
+                    // Default draw
+
+                    context.fillRect(x, y, w, h)
+
+                    //only paint stroke if a color is defined
+                    let borderColor = this.getvariantStrokeColor(variant)
+                    if (borderColor) {
+                        context.strokeStyle = borderColor
+                        context.strokeRect(x, y, w, h)
+                    }
+                }
+
 
                 variant.pixelRect = {x, y, w, h}
 
@@ -292,6 +303,8 @@ class VariantTrack extends TrackBase {
                         sampleNumber++
                     }
                 }
+
+                context.restore();
             }
 
         } else {
@@ -330,29 +343,26 @@ class VariantTrack extends TrackBase {
         return variantColor
     }
 
-    getVariantStrokecolor(variant) {
+    getvariantStrokeColor(variant) {
 
         const v = variant._f || variant
         let variantStrokeColor
 
-        if (this._strokecolor) {
-            variantStrokeColor = (typeof this._strokecolor === "function") ? this._strokecolor(v) : this._strokecolor
+        if (this._borderColor) {
+            variantStrokeColor = (typeof this._borderColor === "function") ? this._borderColor(v) : this._borderColor
         } else {
             variantStrokeColor = undefined
         }
         return variantStrokeColor
     }
 
-    callContextHook(variant, context, x, y, w, h) {
-        if (this._context_hook) {
-          if (typeof this._context_hook === "function") {
-            const v = variant._f || variant
+    callCustomDraw(variant, context, x, y, w, h) {
+        context.save()
+        // If the custom draw function explicitly returns false pass it along, otherwise return true (i.e. true by default)
+        const returnCode = false !== this._customDraw(variant, context, x, y, w, h)
+        context.restore()
+        return returnCode
 
-            context.save()
-            this._context_hook(v, context, x, y, w, h)
-            context.restore()
-          }
-        }
     }
 
     clickedFeatures(clickState, features) {
