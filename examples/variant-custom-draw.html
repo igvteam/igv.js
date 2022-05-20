@@ -150,37 +150,39 @@
                 {
                     url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
-                    name: "Color by ALT",
-                    colorBy: "ALT",
-                    colorTable: {
-                        "<DEL>": "#ff2101",
-                        "<INS>": "#001888",
-                        "<DUP>": "#028401",
-                        "<INV>": "#008688",
-                        "<CNV>": "#8931ff",
-                        "<BND>": "#891100",
-                        "*": "#002eff"
-                    },
-                    visibilityWindow: -1
+                    name: "Color strokecolor",
+                    colorBy: "SVTYPE",
+                    visibilityWindow: -1,
+                    strokecolor: function (variant) {
+                      // stroke outline in red for variants with AF below 1%
+                      const mc = parseFloat(variant.info["AF"]);
+                      if (mc<0.05){
+                        return "red";
+                      }else if (mc>0.2) { //stroke in green for variants with AF above 20%
+                        return "green";
+                      }
+                    }
                 },
                 {
                     url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
-                    name: "Color by FILTER",
-                    colorBy: "FILTER",
-                    colorTable: {
-                        "FAIL": "#ff2101",
-                        "PASS": "#028401",
-                        ".": "#891100",
-                        "*": "#002eff"
-                    },
-                    visibilityWindow: -1
-                },
-                {
-                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
-                    name: "Default Color",
-                    visibilityWindow: -1
+                    name: "Color context hook",
+                    colorBy: "SVTYPE",
+                    visibilityWindow: -1,
+                    context_hook: function(variant, context, x, y, w, h){
+                      const mc = parseFloat(variant.info["AF"]);
+
+                      if (mc < 0.05){
+                        drawCirclerect(context, x, y, w, h)
+                      }else if (mc < 0.5 ) {
+                        drawTrianglerect(context, x, y, w, h)
+                      }else if (mc > 0.2) {
+                        context.strokeStyle = 'green'
+                        context.lineWidth = 1
+                        context.strokeRect(x, y, w, h)
+                      }
+
+                    }
                 }
 
             ]
