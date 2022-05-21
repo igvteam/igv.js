@@ -73,7 +73,7 @@ class ROIManager {
         for (let roiSet of this.roiSets) {
             const features = await roiSet.getAllFeatures()
 
-            const setName = roiSet.isUserDefined ? '-' : (roiSet.name || '-')
+            const setName = roiSet.isUserDefined ? '' : (roiSet.name || '')
             const acc = features.map(feature => {
                 return { setName, feature }
             } )

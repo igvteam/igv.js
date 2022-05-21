@@ -106,7 +106,7 @@ class ROITable {
                 feature.chr,
                 StringUtils.numberFormatter(feature.start),
                 StringUtils.numberFormatter(feature.end),
-                feature.name || '-',
+                feature.name || '',
                 setName
             ];
 
