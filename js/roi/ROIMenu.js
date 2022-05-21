@@ -24,16 +24,17 @@ class ROIMenu {
         let row
 
         // Go To
-        row = DOMUtils.div({ class: 'igv-roi-body-row' })
-        row.innerText = 'Go To'
-        this.container.appendChild(row)
-
-        row.addEventListener('click', event => {
-            event.stopPropagation()
-            this.container.style.display = 'none'
-            const { locus } = parseRegionKey(regionElement.dataset.region)
-            this.browser.search(locus)
-        })
+        // row = DOMUtils.div({ class: 'igv-roi-menu-row' })
+        // row.innerText = 'Go To'
+        // this.container.appendChild(row)
+        //
+        // row.addEventListener('click', event => {
+        //     event.stopPropagation()
+        //     this.container.style.display = 'none'
+        //
+        //     const { locus } = parseRegionKey(regionElement.dataset.region)
+        //     this.browser.search(locus)
+        // })
 
         // Edit Description
         row = DOMUtils.div({ class: 'igv-roi-menu-row-edit-description' })
@@ -57,13 +58,16 @@ class ROIMenu {
             const feature = userDefinedROISet.features[ index ]
             feature.name = input.value
 
+            input.blur()
+            this.container.style.display = 'none'
+
             await this.browser.roiManager.repaintTable()
         })
 
         row.appendChild(input)
 
         // Delete
-        row = DOMUtils.div({ class: 'igv-roi-body-row' })
+        row = DOMUtils.div({ class: 'igv-roi-menu-row' })
         row.innerText = 'Delete'
         this.container.appendChild(row)
 

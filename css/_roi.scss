@@ -237,6 +237,9 @@ $igv-roi-table-background-color: #eee;
 
     }
 
+    >.igv-roi-table-row-hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
   }
 
   // footer buttons
@@ -395,7 +398,7 @@ $igv-roi-table-background-color: #eee;
 
 }
 
-.igv-roi-body-row {
+.igv-roi-menu-row {
 
   height: $dimension;
 
@@ -430,30 +433,4 @@ $igv-roi-table-background-color: #eee;
     display: block;
     width: -webkit-fill-available;
   }
-}
-
-.igv-roi-body-row-content-editable {
-
-  caret-color: red;
-
-  height: $dimension;
-  max-height: $dimension;
-
-  word-wrap: break-word;
-
-  padding-left: 8px;
-
-  //color: grey;
-  font-size: small;
-  text-align: start;
-  vertical-align: middle;
-
-  line-height: $dimension;
-
-  background-color: white;
-}
-
-.igv-roi-body-row:hover {
-  cursor: pointer;
-  background-color: #f4f4f4;
 }

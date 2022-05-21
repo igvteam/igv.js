@@ -106,7 +106,7 @@ class ROITable {
                 feature.chr,
                 StringUtils.numberFormatter(feature.start),
                 StringUtils.numberFormatter(feature.end),
-                feature.name || `no description ${ DOMUtils.guid()}`,
+                feature.name || '-',
                 setName
             ];
 
@@ -116,10 +116,21 @@ class ROITable {
             dom.appendChild(el)
         }
 
-        dom.addEventListener('click', event => {
+        dom.addEventListener('mousedown', event => {
             event.stopPropagation()
+
             dom.classList.toggle('igv-roi-table-row-selected')
+            dom.classList.contains('igv-roi-table-row-selected') ? dom.classList.remove('igv-roi-table-row-hover') : dom.classList.add('igv-roi-table-row-hover')
+
             this.setButtonState(dom.classList.contains('igv-roi-table-row-selected'))
+        })
+
+        dom.addEventListener('mouseover', e => {
+            dom.classList.contains('igv-roi-table-row-selected') ? dom.classList.remove('igv-roi-table-row-hover') : dom.classList.add('igv-roi-table-row-hover')
+        })
+
+        dom.addEventListener('mouseout', e => {
+            dom.classList.remove('igv-roi-table-row-hover')
         })
 
         return dom

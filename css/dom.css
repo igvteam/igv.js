@@ -1037,6 +1037,8 @@
         width: 30%; }
       .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:nth-child(5) {
         width: 20%; }
+    .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row-hover {
+      background-color: rgba(0, 0, 0, 0.04); }
   .igv-roi-table > div:last-child {
     height: 32px;
     line-height: 32px;
@@ -1137,7 +1139,7 @@
     border-bottom-style: solid;
     border-bottom-width: 0; }
 
-.igv-roi-body-row {
+.igv-roi-menu-row {
   height: 24px;
   padding-left: 8px;
   font-size: small;
@@ -1157,22 +1159,6 @@
   .igv-roi-menu-row-edit-description > input {
     display: block;
     width: -webkit-fill-available; }
-
-.igv-roi-body-row-content-editable {
-  caret-color: red;
-  height: 24px;
-  max-height: 24px;
-  word-wrap: break-word;
-  padding-left: 8px;
-  font-size: small;
-  text-align: start;
-  vertical-align: middle;
-  line-height: 24px;
-  background-color: white; }
-
-.igv-roi-body-row:hover {
-  cursor: pointer;
-  background-color: #f4f4f4; }
 
 .igv-container {
   position: relative;
