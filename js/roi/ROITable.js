@@ -7,16 +7,18 @@ const tableRowSelectionList = []
 
 class ROITable {
 
-    constructor(browser, parent) {
+    constructor(browser, parent, hasROISetNames) {
 
         this.browser = browser
 
-        this.container = DOMUtils.div({ class: 'igv-roi-table' })
+        this.container = DOMUtils.div({ class: hasROISetNames ? 'igv-roi-table' : 'igv-roi-table-four-column' })
         parent.appendChild(this.container)
+
+        this.hasROISetNames = hasROISetNames
 
         const header = this.createHeaderDOM(this.container)
 
-        this.columnTitleDOM = createColumnTitleDOM(this.container)
+        this.columnTitleDOM = createColumnTitleDOM(this.container, hasROISetNames)
 
         this.tableRowContainerDOM = this.createTableRowContainerDOM(this.container)
 
@@ -101,7 +103,7 @@ class ROITable {
         const { setName, feature } = record
         dom.dataset.region = createRegionKey(feature.chr, feature.start, feature.end)
 
-        const strings =
+        let strings =
             [
                 feature.chr,
                 StringUtils.numberFormatter(feature.start),
@@ -109,6 +111,10 @@ class ROITable {
                 feature.name || '',
                 setName
             ];
+
+        if (false === this.hasROISetNames) {
+            strings = strings.slice(0, 4)
+        }
 
         for (let string of strings) {
             const el = DOMUtils.div()
@@ -231,12 +237,12 @@ class ROITable {
 
 }
 
-function createColumnTitleDOM(container) {
+function createColumnTitleDOM(container, hasROISetNames) {
 
     const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
     container.appendChild(dom)
 
-    const columnTitles =
+    let columnTitles =
         [
             'Chr',
             'Start',
@@ -244,6 +250,11 @@ function createColumnTitleDOM(container) {
             'Description',
             'ROI Set',
         ]
+
+
+    if (false === hasROISetNames) {
+        columnTitles = columnTitles.slice(0, 4)
+    }
 
     for (let title of columnTitles) {
         const col = DOMUtils.div()

@@ -512,14 +512,21 @@ class Browser {
             this.roiManager.dispose()
         }
 
-        const roiTable = new ROITable(this, this.columnContainer)
         const roiMenu = new ROIMenu(this, this.columnContainer)
         if (session.roi) {
-            // session.roi.filter(config => config.features && undefined === config.name && undefined === config.isUserDefined).map((fc, index) => fc.name = `Static ROI array ${ 1 + index }`)
-            session.roi.filter(config => config.features && config.isUserDefined).map((c, index) => c.name = '')
+
+            session.roi.filter(config => config.features && config.isUserDefined).map((c, index) => c.name = undefined)
+
             const roiSetList = session.roi.map(c => new ROISet(c, this.genome))
+
+            const named = roiSetList.filter(({ name }) => name !== undefined)
+
+            const roiTable = new ROITable(this, this.columnContainer, (named.length > 0))
+
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, roiSetList)
         } else {
+
+            const roiTable = new ROITable(this, this.columnContainer, false)
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, undefined)
         }
 

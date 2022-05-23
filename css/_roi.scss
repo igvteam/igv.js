@@ -269,6 +269,247 @@ $igv-roi-table-background-color: #eee;
 
 }
 
+// table container
+.igv-roi-table-four-column {
+  position: absolute;
+  z-index: 1024;
+
+  width: fit-content;
+
+  border-color: $igv-roi-border-color;
+  border-radius: $igv-roi-table-border-radius;
+  border-style: solid;
+  border-width: thin;
+
+  font-family: $igv-roi-table-font-face;
+  font-size: 12px;
+  font-weight: 400;
+
+  background-color: white;
+
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  // default div styling
+  >div {
+    //width: 100%;
+    height: $dimension;
+
+    font-size: 14px;
+    text-align: start;
+    vertical-align: middle;
+    line-height: $dimension;
+  }
+
+  // header
+  >div:first-child {
+
+    border-color: transparent;
+    border-top-left-radius: $igv-roi-table-border-radius;
+    border-top-right-radius: $igv-roi-table-border-radius;
+    border-top-width: 0;
+
+    border-bottom-color: $igv-roi-border-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
+
+    background-color: $igv-roi-table-background-color;
+
+    cursor: move;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+
+    >div:first-child {
+      text-align: center;
+      width: calc(100% - 4px - #{$igv-roi-dismiss-button-size});
+    }
+
+    >div:last-child {
+      margin-right: 4px;
+      margin-bottom: 2px;
+      height: $igv-roi-dismiss-button-size;
+      width: $igv-roi-dismiss-button-size;
+      color: $igv-roi-border-color;
+
+      >svg {
+        display: block;
+      }
+    }
+
+    >div:last-child:hover {
+      cursor: pointer;
+      color: #444;
+    }
+
+  }
+
+  // column titles
+  >.igv-roi-table-column-titles {
+
+    height: $dimension;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: stretch;
+    align-items: stretch;
+
+    // to compensate for resize area in table row
+    padding-right: 16px;
+
+    >div {
+      font-size: 14px;
+      vertical-align: middle;
+      line-height: $dimension;
+
+      text-align: center;
+      margin-left: 4px;
+      margin-right: 4px;
+
+      height: $dimension;
+
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    // chr
+    >div:nth-child(1) {
+      width: 25%;
+    }
+
+    // start
+    >div:nth-child(2) {
+      width: 20%;
+    }
+
+    // end
+    >div:nth-child(3) {
+      width:20%;
+    }
+
+    // description
+    >div:nth-child(4) {
+      width: 35%;
+    }
+
+    background-color: white;
+
+    border-bottom-color: $igv-roi-border-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
+  }
+
+  // table row container
+  >.igv-roi-table-row-container {
+
+    resize: both;
+    overflow: scroll;
+
+    min-width:512px;
+
+    min-height: (3 * $dimension);
+    height: (6 * $dimension);
+    max-height: (20 * $dimension);
+
+    background-color:white;
+
+    display: flex;
+    flex-flow: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+
+    // table row
+    >.igv-roi-table-row {
+
+      height: $dimension;
+
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: stretch;
+      align-items: stretch;
+
+      >div {
+        font-size: 14px;
+        vertical-align: middle;
+        line-height: $dimension;
+
+        text-align: center;
+        margin-left: 4px;
+        margin-right: 4px;
+
+        height: $dimension;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+      }
+
+      // chr
+      >div:nth-child(1) {
+        width: 25%;
+      }
+
+      // start
+      >div:nth-child(2) {
+        width: 20%;
+      }
+
+      // end
+      >div:nth-child(3) {
+        width:20%;
+      }
+
+      >div:nth-child(4) {
+        width: 35%;
+      }
+
+    }
+
+    >.igv-roi-table-row-hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+
+  // footer buttons
+  >div:last-child {
+
+    height: $dimension-large;
+    line-height: $dimension-large;
+
+    border-top-color: $igv-roi-border-color;
+    border-top-style: solid;
+    border-top-width: thin;
+
+    border-bottom-color: transparent;
+    border-bottom-left-radius: $igv-roi-table-border-radius;
+    border-bottom-right-radius: $igv-roi-table-border-radius;
+    border-bottom-width: 0;
+
+    //background-color: $igv-roi-table-background-color;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center;
+
+  }
+
+}
+
 .igv-roi-table-row-selected {
   background-color: rgba(0, 0, 0, 0.125);
 }

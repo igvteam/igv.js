@@ -45,7 +45,7 @@ class ROISet {
         this.url = config.url
         this.isUserDefined = config.isUserDefined
 
-        this.name = this.url ? (config.name || FileUtils.getFilename(config.url)) : (config.name || '')
+        this.name = this.url ? FileUtils.getFilename(config.url) : config.name
 
         if (config.features) {
             this.features = config.features.slice()
