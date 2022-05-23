@@ -36,7 +36,7 @@ class ROIMenu {
         //     this.browser.search(locus)
         // })
 
-        // Edit Description
+        // Description:
         row = DOMUtils.div({ class: 'igv-roi-menu-row-edit-description' })
         this.container.appendChild(row)
 
@@ -44,9 +44,21 @@ class ROIMenu {
             e.stopPropagation()
         })
 
+        const str = 'description-input'
+
+        const label = document.createElement('label')
+        row.appendChild(label)
+
+        label.setAttribute('for', str)
+        label.innerText = 'Description:'
+
         const input = document.createElement('input')
+        row.appendChild(input)
+
         input.setAttribute('type', 'text')
-        input.setAttribute('placeholder', feature.name || 'Edit Description')
+        input.setAttribute('name', str)
+        // input.setAttribute('placeholder', feature.name || 'Edit Description')
+        input.setAttribute('placeholder', '')
         input.value = feature.name || ''
 
         input.addEventListener('change', async e => {
@@ -64,11 +76,10 @@ class ROIMenu {
             await this.browser.roiManager.repaintTable()
         })
 
-        row.appendChild(input)
 
         // Delete
         row = DOMUtils.div({ class: 'igv-roi-menu-row' })
-        row.innerText = 'Delete'
+        row.innerText = 'Delete region'
         this.container.appendChild(row)
 
         row.addEventListener('click', event => {

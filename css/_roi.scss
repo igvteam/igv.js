@@ -352,7 +352,7 @@ $igv-roi-table-background-color: #eee;
   position: absolute;
   z-index: 1024;
 
-  width:(5 * $dimension);
+  width:(6 * $dimension);
 
   border-color: $igv-roi-border-color;
   border-radius: $igv-roi-table-border-radius;
@@ -404,7 +404,6 @@ $igv-roi-table-background-color: #eee;
 
   padding-left: 8px;
 
-  //color: grey;
   font-size: small;
   text-align: start;
   vertical-align: middle;
@@ -417,20 +416,40 @@ $igv-roi-table-background-color: #eee;
 
 .igv-roi-menu-row-edit-description {
 
-  height: $dimension;
-
   width: -webkit-fill-available;
 
   font-size: small;
   text-align: start;
   vertical-align: middle;
 
-  line-height: $dimension;
-
   background-color: white;
+
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-bottom: 4px;
+
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: stretch;
+  align-items: stretch;
+
+  >label {
+    margin-left: 2px;
+    margin-bottom: 0;
+    display: block;
+    //height: $dimension;
+    //line-height: $dimension;
+    width: -webkit-fill-available;
+  }
 
   >input {
     display: block;
+    margin-left: 2px;
+    margin-right: 2px;
+    margin-bottom: 1px;
+    //height: $dimension;
+    //line-height: $dimension;
     width: -webkit-fill-available;
   }
 }

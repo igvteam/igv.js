@@ -242,7 +242,7 @@ function createColumnTitleDOM(container) {
             'Start',
             'End',
             'Description',
-            'Set',
+            'ROI Set',
         ]
 
     for (let title of columnTitles) {
