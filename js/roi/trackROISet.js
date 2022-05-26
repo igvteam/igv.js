@@ -23,70 +23,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import FeatureSource from './feature/featureSource.js'
-import IGVGraphics from "./igv-canvas.js"
 
-var defaultHighlightColor = "rgba(68, 134, 247, 0.25)"
+import FeatureSource from '../feature/featureSource.js'
+import IGVGraphics from "../igv-canvas.js"
+import { ROI_DEFAULT_COLOR, screenCoordinates } from "./ROISet.js"
 
-class ROI {
+class TrackROISet {
 
     constructor(config, genome) {
-        this.config = config
         this.name = config.name
-        this.roiSource = FeatureSource(config, genome)
-        this.color = config.color || defaultHighlightColor
+        this.featureSource = config.featureSource || FeatureSource(config, genome)
+        this.color = config.color || ROI_DEFAULT_COLOR
     }
 
     async getFeatures(chr, start, end) {
-        return this.roiSource.getFeatures({chr, start, end})
+        return this.featureSource.getFeatures({chr, start, end})
     }
 
     draw(drawConfiguration) {
 
-        var endBP,
-            region,
-            coord,
-            regions
+        const { context, bpPerPixel, bpStart, pixelTop, pixelHeight, pixelWidth, features, } = drawConfiguration
 
-        regions = drawConfiguration.features
-        if (!regions) {
+        if (!features) {
             return
         }
 
-        endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1)
-        for (var i = 0, len = regions.length; i < len; i++) {
+        const endBP = bpStart + (pixelWidth * bpPerPixel) + 1
+        for (let { start:regionStartBP, end:regionEndBP } of features) {
 
-            region = regions[i]
-            if (region.end < drawConfiguration.bpStart) {
+            if (regionEndBP < bpStart) {
                 continue
             }
 
-            if (region.start > endBP) {
+            if (regionStartBP > endBP) {
                 break
             }
 
-            coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel)
-            IGVGraphics.fillRect(drawConfiguration.context, coord.x, drawConfiguration.pixelTop, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color})
+            const { x, width } = screenCoordinates(regionStartBP, regionEndBP, bpStart, bpPerPixel)
+            IGVGraphics.fillRect(context, x, pixelTop, width, pixelHeight, { fillStyle: this.color })
         }
     }
 }
 
-function coordinates(region, startBP, bpp) {
-
-    var ss,
-        ee,
-        width
-
-    ss = Math.round((region.start - startBP) / bpp)
-    ee = Math.round((region.end - startBP) / bpp)
-    width = ee - ss
-
-    if (width < 3) {
-        width = 3
-        ss -= 1
-    }
-
-    return {x: ss, width: width}
-}
-
-export default ROI
+export default TrackROISet

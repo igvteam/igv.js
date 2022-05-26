@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const options = {
+        locus: '1:67,655,272-67,684,468',
+        genome: "hg19",
+
+        // Define 2 "region of interest" sets, the first is global, the second specific to the track
+        roi: [
+            {
+                name: 'ROI with URL',
+                url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
+                // url: './igvjs-roi.bed',
+                indexed: false,
+                color: "rgba(255,1,199,0.25)"
+            },
+            {
+                // name: 'ROI with feature array',
+                features:
+                    [
+                        {
+                            chr: "chr1", start: 67655415, end: 67655611
+                        },
+                        {
+                            chr: "chr1", start: 67664225, end: 67666281
+                        }
+
+                    ],
+                color: "rgba(72,121,237,0.5)"
+
+            },
+            {
+                // name: 'ROI with feature array',
+                features:
+                    [
+                        {
+                            chr: "chr1", start: 67655415, end: 67655611
+                        },
+                        {
+                            chr: "chr1", start: 67664225, end: 67666281
+                        }
+
+                    ],
+                color: "rgba(72,121,237,0.5)"
+
+            },
+            {
+                // name: 'ROI with feature array',
+                features:
+                    [
+                        {
+                            chr: "chr1", start: 67655415, end: 67655611
+                        },
+                        {
+                            chr: "chr1", start: 67664225, end: 67666281
+                        }
+
+                    ],
+                color: "rgba(72,121,237,0.5)"
+
+            },
+            {
+                // name: 'ROI with feature array',
+                features:
+                    [
+                        {
+                            chr: "chr1", start: 67655415, end: 67655611
+                        },
+                        {
+                            chr: "chr1", start: 67664225, end: 67666281
+                        }
+
+                    ],
+                color: "rgba(72,121,237,0.5)"
+
+            },
+        ],
+        tracks:
+            [
+                {
+                    name: 'Some features',
+                    url: 'https://s3.amazonaws.com/igv.org.test/data/roi/some_features.bed',
+                    indexed: false,
+                }
+            ]
+    };
+
+    const no_name_feature_array_config =
+        {
+            "genome": "hg19",
+            "locus": "chr1:67,655,272-67,684,468",
+            "roi":
+                [
+                    // {
+                    //     "name": "URL Feature Set",
+                    //     "color": "rgba(255,1,199,0.25)",
+                    //     "url": "https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed"
+                    // },
+                    {
+                        "isUserDefined": true,
+                        "color": "rgba(72,121,237,0.72)",
+                        "features":
+                            [
+                                {
+                                    "chr": "chr1",
+                                    "start": 67655415,
+                                    "end": 67655611
+                                },
+                                {
+                                    "chr": "chr1",
+                                    "start": 67664225,
+                                    "end": 67666281
+                                }
+                            ]
+                    },
+                    {
+                        // "name": "Feature List Set",
+                        "color": "rgba(3,249,135,0.5)",
+                        "features": [
+                            {
+                                "chr": "chr1",
+                                "start": 67670000,
+                                "end": 67671080
+                            },
+                            {
+                                "chr": "chr1",
+                                "start": 67672095,
+                                "end": 67673993
+                            },
+                            {
+                                "chr": "chr1",
+                                "start": 67674681,
+                                "end": 67675237
+                            },
+                            {
+                                "chr": "chr1",
+                                "start": 67676055,
+                                "end": 67676710
+                            },
+                            {
+                                "chr": "chr1",
+                                "start": 67677561,
+                                "end": 67677888
+                            },
+                            {
+                                "chr": "chr1",
+                                "start": 67679263,
+                                "end": 67679394
+                            },
+                            {
+                                "chr": "chr1",
+                                "start": 67679950,
+                                "end": 67680180
+                            },
+                            {
+                                "chr": "chr1",
+                                "start": 67681849,
+                                "end": 67682340
+                            }
+                        ]
+                    }
+                ],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "id": "hg19_genes",
+                    "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz",
+                    "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz.tbi",
+                    "visibilityWindow": -1,
+                    "supportsWholeGenome": false,
+                    "removable": false,
+                    "order": 1000000,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation"
+                }
+            ]
+
+        };
+
+    igv.createBrowser(document.getElementById('myDiv'), no_name_feature_array_config)
+
+</script>
+
+</body>
+
+</html>
