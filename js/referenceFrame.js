@@ -24,7 +24,7 @@
  */
 
 import {DOMUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
-import {prettyBasePairNumber, validateLocusExtent} from "./util/igvUtils.js"
+import {prettyBasePairNumber, validateGenomicExtent} from "./util/igvUtils.js"
 import GtexSelection from "./gtex/gtexSelection.js"
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
@@ -196,7 +196,7 @@ function createReferenceFrameList(loci, genome, browserFlanking, minimumBases, v
 
         // Validate the range.  This potentionally modifies start & end of locus.
         const chromosome = genome.getChromosome(locus.chr)
-        validateLocusExtent(chromosome.bpLength, locus, minimumBases)
+        validateGenomicExtent(chromosome.bpLength, locus, minimumBases)
 
         const referenceFrame = new ReferenceFrame(genome,
             locus.chr,

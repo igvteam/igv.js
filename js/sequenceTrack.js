@@ -110,6 +110,7 @@ const TRANSLATED_HEIGHT = 115
 const SEQUENCE_HEIGHT = 15
 const FRAME_HEIGHT = 25
 const FRAME_BORDER = 5
+const BP_PER_PIXEL_THRESHOLD = 1/10
 
 class SequenceTrack {
 
@@ -278,8 +279,8 @@ class SequenceTrack {
                     const pixelWidth = 1 / options.bpPerPixel
                     const color = this.fillColor(baseLetter)
 
-                    if (options.bpPerPixel > 1 / 10) {
-                        IGVGraphics.fillRect(ctx, aPixel, 5, pixelWidth, SEQUENCE_HEIGHT - 5, {fillStyle: color})
+                    if (options.bpPerPixel > BP_PER_PIXEL_THRESHOLD) {
+                        IGVGraphics.fillRect(ctx, aPixel, FRAME_BORDER, pixelWidth, SEQUENCE_HEIGHT - FRAME_BORDER, {fillStyle: color})
                     } else {
                         let textPixel = aPixel + 0.5 * (pixelWidth - ctx.measureText(baseLetter).width)
                         IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
