@@ -35,8 +35,10 @@ $igv-zoom-in-notice-height: 16px;
 @import "igv-menu-popup";
 @import "igv-user-feedback";
 @import "spinner";
+@import "roi";
 
 @mixin igv-column-base {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -108,6 +110,7 @@ $igv-zoom-in-notice-height: 16px;
 .igv-column {
   position: relative;
   @include igv-column-base;
+
 }
 
 .igv-axis-column {

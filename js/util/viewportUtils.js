@@ -35,7 +35,13 @@ function createViewport(trackView, column, referenceFrame, width) {
     } else if ('ideogram' === trackView.track.id) {
         return new IdeogramViewport(trackView, column, referenceFrame, width)
     } else {
-        return new TrackViewport(trackView, column, referenceFrame, width)
+        const viewportObject = new TrackViewport(trackView, column, referenceFrame, width)
+
+        // if ('sequence' === trackView.track.type) {
+        //     viewportObject.$viewport.get(0).style.marginTop = '0px'
+        // }
+
+        return viewportObject
     }
 }
 

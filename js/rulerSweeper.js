@@ -24,17 +24,24 @@
  * THE SOFTWARE.
  */
 
-import {validateLocusExtent} from "./util/igvUtils.js"
 import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
+import {validateGenomicExtent} from "./util/igvUtils.js"
 import GenomeUtils from './genome/genome.js'
+import { ROI_USER_DEFINED_COLOR } from "./roi/ROISet.js"
+
+const RULER_SWEEPER_COLOR = 'rgba(68, 134, 247, 0.25)'
 
 class RulerSweeper {
 
-    constructor(rulerViewport) {
-        this.rulerSweeper = DOMUtils.div({class: 'igv-ruler-sweeper'})
-        rulerViewport.contentDiv.appendChild(this.rulerSweeper)
+    constructor(rulerViewport, column, browser, referenceFrame) {
 
         this.rulerViewport = rulerViewport
+
+        this.rulerSweeper = DOMUtils.div({class: 'igv-ruler-sweeper'})
+        column.appendChild(this.rulerSweeper)
+
+        this.browser = browser
+        this.referenceFrame = referenceFrame
 
         this.isMouseHandlers = undefined
 
@@ -43,23 +50,20 @@ class RulerSweeper {
 
     addBrowserObserver() {
 
-        // Viewport Content
-        this.boundObserverHandler = observerHandler.bind(this)
-        this.rulerViewport.browser.on('locuschange', this.boundObserverHandler)
-
-        function observerHandler() {
-            if (this.rulerViewport.referenceFrame) {
-                if (GenomeUtils.isWholeGenomeView(this.rulerViewport.referenceFrame.chr)) {
-                    this.removeMouseHandlers()
-                } else {
-                    this.addMouseHandlers()
-                }
+        const observerHandler = () => {
+            if (this.referenceFrame) {
+                GenomeUtils.isWholeGenomeView(this.referenceFrame.chr) ? this.removeMouseHandlers() : this.addMouseHandlers()
             }
         }
+
+        // Viewport Content
+        this.boundObserverHandler = observerHandler.bind(this)
+        this.browser.on('locuschange', this.boundObserverHandler)
+
     }
 
     removeBrowserObserver() {
-        this.rulerViewport.browser.off('locuschange', this.boundObserverHandler)
+        this.browser.off('locuschange', this.boundObserverHandler)
     }
 
     addMouseHandlers() {
@@ -68,14 +72,14 @@ class RulerSweeper {
             return
         }
 
+        const threshold = 1
+
         let isMouseDown
         let isMouseIn
         let mouseDownX
         let left
         let width
         let dx
-
-        let threshold = 1
 
         // Viewport Content
         this.boundContentMouseDownHandler = contentMouseDownHandler.bind(this)
@@ -91,7 +95,9 @@ class RulerSweeper {
 
             width = threshold
 
+
             this.rulerSweeper.style.display = 'block'
+            this.rulerSweeper.style.backgroundColor = true === event.shiftKey ? ROI_USER_DEFINED_COLOR : RULER_SWEEPER_COLOR
 
             this.rulerSweeper.style.left = `${left}px`
             this.rulerSweeper.style.width = `${width}px`
@@ -103,8 +109,6 @@ class RulerSweeper {
         document.addEventListener('mousemove', this.boundDocumentMouseMoveHandler)
 
         function documentMouseMoveHandler(event) {
-
-            // console.log(`${ Date.now() } RulerSweeper - documentMouseMoveHandler - target ${ event.target.nodeName }`)
 
             let mouseCurrentX
 
@@ -132,9 +136,7 @@ class RulerSweeper {
 
         function documentMouseUpHandler(event) {
 
-            // console.log(`${ Date.now() } RulerSweeper - documentMouseUpHandler - target ${ event.target.nodeName }`)
-
-            let extent
+            let genomicExtent
 
             if (true === isMouseDown && true === isMouseIn) {
 
@@ -142,23 +144,27 @@ class RulerSweeper {
 
                 this.rulerSweeper.style.display = 'none'
 
-
                 if (width > threshold) {
 
-                    extent = {
-                        start: bp(this.rulerViewport.referenceFrame, left),
-                        end: bp(this.rulerViewport.referenceFrame, left + width)
+                    genomicExtent =
+                        {
+                            start: Math.floor(this.referenceFrame.calculateEnd(left)),
+                            end: Math.floor(this.referenceFrame.calculateEnd(left + width)),
+                        }
+
+
+                    const shiftKeyPressed = event.shiftKey
+
+                    if (true === shiftKeyPressed) {
+                        this.browser.roiManager.updateUserDefinedROISet(Object.assign({chr: this.referenceFrame.chr}, genomicExtent))
+                    } else {
+
+                        validateGenomicExtent(this.browser.genome.getChromosome(this.referenceFrame.chr).bpLength, genomicExtent, this.browser.minimumBases())
+                        updateReferenceFrame(this.referenceFrame, genomicExtent, this.rulerViewport.contentDiv.clientWidth)
+                        this.browser.updateViews(this.referenceFrame)
+
                     }
 
-                    validateLocusExtent(this.rulerViewport.browser.genome.getChromosome(this.rulerViewport.referenceFrame.chr).bpLength, extent, this.rulerViewport.browser.minimumBases())
-
-                    const newStart = Math.round(extent.start)
-                    const newEnd = Math.round(extent.end)
-                    this.rulerViewport.referenceFrame.bpPerPixel = (newEnd - newStart) / this.rulerViewport.contentDiv.clientWidth
-                    this.rulerViewport.referenceFrame.start = newStart
-                    this.rulerViewport.referenceFrame.end = newEnd
-
-                    this.rulerViewport.browser.updateViews()
                 }
 
             }
@@ -183,8 +189,10 @@ class RulerSweeper {
 
 }
 
-function bp(referenceFrame, pixel) {
-    return referenceFrame.start + (pixel * referenceFrame.bpPerPixel)
+function updateReferenceFrame(referenceFrame, genomicExtent, pixelWidth) {
+    referenceFrame.start = Math.round(genomicExtent.start)
+    referenceFrame.end = Math.round(genomicExtent.end)
+    referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / pixelWidth
 }
 
 export default RulerSweeper

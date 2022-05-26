@@ -39,12 +39,12 @@ import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js"
 import C2S from "./canvas2svg.js"
 import TrackFactory from "./trackFactory.js"
-import ROI from "./roi.js"
+import ROISet from "./roi/ROISet.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
-import {buildOptions, createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
+import {buildOptions, createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import GtexUtils from "./gtex/gtexUtils.js"
 import {defaultSequenceTrackOrder} from './sequenceTrack.js'
@@ -74,6 +74,11 @@ import GtexSelection from "./gtex/gtexSelection.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import CustomButton from "./ui/customButton.js"
+import ROIManager from './roi/ROIManager.js'
+import ROITable from './roi/ROITable.js'
+import ROIMenu from './roi/ROIMenu.js'
+import TrackROISet from "./roi/trackROISet.js"
+import ROITableControl from './ui/roiTableControl.js'
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -144,6 +149,9 @@ class Browser {
         }
 
         this.trackLabelsVisible = config.showTrackLabels
+
+        this.roiTableVisible = config.showROITable
+        this.showROITableButton = config.showROITableButton
 
         this.isCenterLineVisible = config.showCenterGuide
 
@@ -253,6 +261,9 @@ class Browser {
 
         this.setTrackLabelVisibility(config.showTrackLabels)
         this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), this)
+
+        // ROI Control
+        this.roiTableControl = new ROITableControl($toggle_button_container.get(0), this)
 
         this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
 
@@ -388,7 +399,9 @@ class Browser {
      */
     async loadSession(options) {
 
-        this.roi = []
+        // TODO: depricated
+        this.roiSets = []
+
         let session
         if (options.url || options.file) {
             session = await loadSessionFile(options)
@@ -467,10 +480,17 @@ class Browser {
 
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
+        let ideogramHeight = 0
         if (false !== session.showIdeogram) {
-            const ideogramTrack = new IdeogramTrack(this)
-            ideogramTrack.id = 'ideogram'
-            this.trackViews.push(new TrackView(this, this.columnContainer, ideogramTrack))
+
+            const track = new IdeogramTrack(this)
+            track.id = 'ideogram'
+
+            const trackView = new TrackView(this, this.columnContainer, track)
+            const { $viewport } = trackView.viewports[ 0 ]
+            ideogramHeight = getElementAbsoluteHeight($viewport.get(0))
+
+            this.trackViews.push(trackView)
         }
 
         if (false !== session.showRuler) {
@@ -488,12 +508,29 @@ class Browser {
             }
         }
 
-        if (session.roi) {
-            this.roi = []
-            for (let r of session.roi) {
-                this.roi.push(new ROI(r, this.genome))
-            }
+        if (this.roiManager) {
+            this.roiManager.dispose()
         }
+
+        const roiMenu = new ROIMenu(this, this.columnContainer)
+        if (session.roi) {
+
+            session.roi.filter(config => config.features && config.isUserDefined).map((c, index) => c.name = undefined)
+
+            const roiSetList = session.roi.map(c => new ROISet(c, this.genome))
+
+            const named = roiSetList.filter(({ name }) => name !== undefined)
+
+            const roiTable = new ROITable(this, this.columnContainer, (named.length > 0))
+
+            this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, roiSetList)
+        } else {
+
+            const roiTable = new ROITable(this, this.columnContainer, false)
+            this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, undefined)
+        }
+
+        await this.roiManager.initialize()
 
         // Tracks.  Start with genome tracks, if any, then append session tracks
         const genomeTracks = genomeConfig.tracks || []
@@ -658,6 +695,10 @@ class Browser {
         toggleTrackLabels(this.trackViews, isVisible)
     }
 
+    setROITableVisibility(isVisible) {
+        true === isVisible ? this.roiManager.presentTable() : this.roiManager.dismissTable()
+    }
+
     // cursor guide
     setCursorGuideVisibility(cursorGuideVisible) {
 
@@ -714,38 +755,11 @@ class Browser {
     }
 
     async loadROI(config) {
-        if (!this.roi) {
-            this.roi = []
-        }
-        if (Array.isArray(config)) {
-            for (let c of config) {
-                this.roi.push(new ROI(c, this.genome))
-            }
-        } else {
-            this.roi.push(new ROI(config, this.genome))
-        }
-        // Force reload all views (force = true) to insure ROI features are loaded.  Wasteful but this function is
-        // rarely called.
-        await this.updateViews(true)
-    }
-
-    removeROI(roiToRemove) {
-        for (let i = 0; i < this.roi.length; i++) {
-            if (this.roi[i].name === roiToRemove.name) {
-                this.roi.splice(i, 1)
-                break
-            }
-        }
-        for (let tv of this.trackViews) {
-            tv.repaintViews()
-        }
+        await this.roiManager.loadROI(config, this.genome)
     }
 
     clearROIs() {
-        this.roi = []
-        for (let tv of this.trackViews) {
-            tv.repaintViews()
-        }
+        this.roiManager.clearROIs()
     }
 
     getRulerTrackView() {
@@ -757,7 +771,6 @@ class Browser {
      * Return a promise to load a track.
      *
      * @param config
-     * @param doResize - undefined by default
      * @returns {*}
      */
 
@@ -894,12 +907,10 @@ class Browser {
         }
 
         const track = TrackFactory.getTrack(type, config, this)
-        if (track && config.roi) {
-            track.roi = []
-            for (let r of config.roi) {
-                track.roi.push(new ROI(r, this.genome))
-            }
-        }
+
+        if (track && config.roi && config.roi.length > 0) {
+            track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
+         }
 
         return track
 
@@ -1529,6 +1540,8 @@ class Browser {
         if (hasGtexSelections) {
             json["gtexSelections"] = gtexSelections
         }
+
+        json["roi"] = this.roiManager.toJSON()
 
         const trackJson = []
         const errors = []

@@ -384,6 +384,21 @@ function randomGrey(min, max) {
 
 }
 
+function rgbaStringTokens(rgbaString) {
+
+    if (rgbaString.startsWith('rgba(')) {
+
+        const [ignore, pass0 ] = rgbaString.split('(')
+
+        const [ rgba ] = pass0.split(')')
+
+        return rgba.split(',').map((string, index) => index < 3 ? parseInt(string) : parseFloat(string))
+
+    } else {
+        return undefined
+    }
+}
+
 export {
     appleCrayonRGB,
     appleCrayonRGBA,
@@ -396,5 +411,6 @@ export {
     greyScale,
     randomGrey,
     randomRGB,
-    randomRGBConstantAlpha
+    randomRGBConstantAlpha,
+    rgbaStringTokens
 }
