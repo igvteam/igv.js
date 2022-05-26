@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>ROI - Load & Clear</title>
+
+</head>
+
+<body>
+
+<p>
+    <button id='roi-load-button'>Load ROI Set</button>
+    <button id='roi-clear-button'>Clear All ROI Sets</button>
+</p>
+
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const browser_config =
+        {
+            locus: '1:67,655,272-67,684,468',
+            genome: "hg19",
+            tracks:
+                [
+                    {
+                        name: 'Some Features',
+                        url: 'https://s3.amazonaws.com/igv.org.test/data/roi/some_features.bed',
+                        indexed: false,
+                    }
+                ]
+        };
+
+    const roi_configs =
+        [
+            {
+                name: 'ROI set 1',
+                url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
+                indexed: false,
+                color: "rgba(68, 134, 247, 0.25)"
+            },
+            {
+                name: 'ROI set 2',
+                url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_2.bed',
+                indexed: false,
+                color: "rgba(0, 150, 50, 0.25)"
+            }
+        ];
+
+    (async () => {
+        const browser = await igv.createBrowser(document.getElementById('myDiv'), browser_config)
+        document.getElementById("roi-load-button").addEventListener('click', () => browser.loadROI(roi_configs))
+        document.getElementById("roi-clear-button").addEventListener('click', () => browser.clearROIs())
+    })()
+
+</script>
+
+</body>
+
+</html>
