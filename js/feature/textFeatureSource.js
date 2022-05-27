@@ -33,8 +33,8 @@ import ImmVarReader from "../gtex/immvarReader.js"
 import Ga4ghVariantReader from "../ga4gh/ga4ghVariantReader.js"
 import CivicReader from "../civic/civicReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
-import pack from "../feature/featurePacker.js"
 import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
+import {computeWGFeatures, packFeatures} from "./featureUtils.js"
 
 const DEFAULT_MAX_WG_COUNT = 10000
 
@@ -141,7 +141,7 @@ class TextFeatureSource {
      * range requested.
      *
      * This function is quite complex due to the variety of reader types backing it, some indexed, some queryable,
-     * some not.  The whole scheme could use a refactoring.
+     * some not.
      *
      * @param chr
      * @param start
@@ -154,11 +154,11 @@ class TextFeatureSource {
         const queryChr = genome ? genome.getChromosomeName(chr) : chr
         const isWholeGenome = ("all" === queryChr.toLowerCase())
 
-        // Various conditions that can create a feature load
-        // * view is "whole genome" but no features are loaded
-        // * cache is disabled
-        // * cache does not contain requested range
-        if ((isWholeGenome && !this.getWGFeatures) ||
+        // Various conditions that can require a feature load
+        //   * view is "whole genome" but no features are loaded
+        //   * cache is disabled
+        //   * cache does not contain requested range
+        if ((isWholeGenome && !this.wgFeatures && this.supportsWholeGenome()) ||
             this.config.disableCache ||
             !this.featureCache ||
             !this.featureCache.containsRange(new GenomicInterval(queryChr, start, end))) {
@@ -167,10 +167,10 @@ class TextFeatureSource {
 
         if (isWholeGenome) {
             if (!this.wgFeatures) {
-                if (this.queryable) {   // queryable sources don't support whole genome view
-                    this.wgFeatures = []
+                if (this.supportsWholeGenome()) {
+                    this.wgFeatures = computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.maxWGCount)
                 } else {
-                    this.wgFeatures = this.getWGFeatures(this.featureCache.getAllFeatures())
+                    this.wgFeatures = []
                 }
             }
             return this.wgFeatures
@@ -179,12 +179,16 @@ class TextFeatureSource {
         }
     }
 
+    supportsWholeGenome() {
+        return !this.queryable;   // queryable (indexed, web services) sources don't support whole genome view
+    }
+
     // TODO -- experimental, will only work for non-indexed sources
     getAllFeatures() {
         if (this.queryable) {   // queryable sources don't support all features
             return []
         } else {
-            return this.getWGFeatures(this.featureCache.getAllFeatures())
+            return this.featureCache.getAllFeatures()
         }
     }
 
@@ -267,84 +271,8 @@ class TextFeatureSource {
             }
         }
     }
-
-    // TODO -- filter by pixel size
-    getWGFeatures(allFeatures) {
-
-        const makeWGFeature = (f) => {
-            const wg = Object.assign({}, f)
-            wg.chr = "all"
-            wg.start = genome.getGenomeCoordinate(f.chr, f.start)
-            wg.end = genome.getGenomeCoordinate(f.chr, f.end)
-            wg._f = f
-            // Don't draw exons in whole genome view
-            if (wg["exons"]) delete wg["exons"]
-            return wg
-        }
-
-        const genome = this.genome
-        const wgChromosomeNames = new Set(genome.wgChromosomeNames)
-        const wgFeatures = []
-        let count = 0
-        const max = this.maxWGCount
-        for (let c of genome.wgChromosomeNames) {
-
-            const features = allFeatures[c]
-
-            if (features) {
-                for (let f of features) {
-                    let queryChr = genome.getChromosomeName(f.chr)
-                    if (wgChromosomeNames.has(queryChr)) {
-                        if (wgFeatures.length < max) {
-                            wgFeatures.push(makeWGFeature(f))
-                        } else {
-                            //Reservoir sampling
-                            const samplingProb = max / (count + 1)
-                            if (Math.random() < samplingProb) {
-                                const idx = Math.floor(Math.random() * (max - 1))
-                                wgFeatures[idx] = makeWGFeature(f)
-                            }
-                        }
-                    }
-                    count++
-                }
-            }
-        }
-
-        wgFeatures.sort(function (a, b) {
-            return a.start - b.start
-        })
-
-        return wgFeatures
-
-    }
 }
 
-function packFeatures(features, maxRows) {
-
-    maxRows = maxRows || 1000
-    if (features == null || features.length === 0) {
-        return
-    }
-    // Segregate by chromosome
-    const chrFeatureMap = {}
-    const chrs = []
-    for (let feature of features) {
-        const chr = feature.chr
-        let flist = chrFeatureMap[chr]
-        if (!flist) {
-            flist = []
-            chrFeatureMap[chr] = flist
-            chrs.push(chr)
-        }
-        flist.push(feature)
-    }
-
-    // Loop through chrosomosomes and pack features;
-    for (let chr of chrs) {
-        pack(chrFeatureMap[chr], maxRows)
-    }
-}
 
 /**
  * This function is used to apply properties normally added during parsing to  features supplied directly in the
