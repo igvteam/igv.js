@@ -208,7 +208,7 @@ class RnaStructTrack extends TrackBase {
 
         if (features && features.length > 0) {
 
-            return TrackBase.extractPopupData(features[0], this.getGenomeId())
+            return this.extractPopupData(features[0], this.getGenomeId())
 
         }
     }
