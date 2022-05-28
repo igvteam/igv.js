@@ -1,7 +1,5 @@
-import { FileUtils, StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
+import { StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
 import { createRegionKey, parseRegionKey } from './ROIManager.js'
-import { appleCrayonRGB, appleCrayonRGBA } from '../util/colorPalletes.js'
-import FeatureFileReader from "../feature/featureFileReader.js"
 
 const tableRowSelectionList = []
 
@@ -181,42 +179,6 @@ class ROITable {
         return dom
     }
 
-    async import(file) {
-
-        const reader = new FeatureFileReader({ url: file }, undefined)
-        const features = await reader.loadFeaturesNoIndex()
-
-        for (let feature of features) {
-            await this.browser.roiManager.updateUserDefinedROISet(features)
-        }
-
-    }
-
-    export() {
-
-        const elements = this.tableRowContainerDOM.querySelectorAll('.igv-roi-table-row')
-        const lines = []
-        for (let el of elements) {
-            const { bedRecord } = parseRegionKey(el.dataset.region)
-            lines.push(bedRecord)
-        }
-
-        if (lines.length > 0) {
-
-            const blobParts = [ lines.join('\n') ]
-
-            const blobOptions =
-                {
-                    type : "text/plain;charset=utf-8"
-                }
-
-            const blob = new Blob(blobParts, blobOptions)
-            const path = 'igvjs-roi.bed'
-            const downloadUrl = URL.createObjectURL(blob)
-            FileUtils.download(path, downloadUrl)
-        }
-
-    }
 
     setButtonState(isTableRowSelected) {
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
