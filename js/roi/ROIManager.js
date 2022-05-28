@@ -131,7 +131,6 @@ class ROIManager {
 
             let {chr, start: viewStart, end: viewEnd, bpPerPixel} = browser.referenceFrameList[i]
 
-            const inViewKeys = new Set()
             const elements = columns[i].querySelectorAll('.igv-roi-region')
             for (let el of elements) {
                 const regionKey = el.dataset.region

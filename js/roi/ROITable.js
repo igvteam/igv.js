@@ -1,6 +1,5 @@
-import { FileUtils, StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
+import { StringUtils, DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
 import { createRegionKey, parseRegionKey } from './ROIManager.js'
-import FeatureFileReader from "../feature/featureFileReader.js"
 
 const tableRowSelectionList = []
 
@@ -178,17 +177,6 @@ class ROITable {
         })
 
         return dom
-    }
-
-    async import(file) {
-
-        const reader = new FeatureFileReader({ url: file }, undefined)
-        const features = await reader.loadFeaturesNoIndex()
-
-        for (let feature of features) {
-            await this.browser.roiManager.updateUserDefinedROISet(features)
-        }
-
     }
 
 
