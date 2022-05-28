@@ -24,18 +24,21 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils,FileUtils} from '../../node_modules/igv-utils/src/index.js'
+import {FileUtils, FeatureCache, StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import FeatureSource from '../feature/featureSource.js'
-import {appleCrayonRGBA, rgbaStringTokens} from '../util/colorPalletes.js'
+import {appleCrayonRGBA} from '../util/colorPalletes.js'
+import {computeWGFeatures} from "../feature/featureUtils.js"
+import * as TrackUtils from "../util/trackUtils.js"
+
 
 const appleCrayonColorName = 'fern'
 
-const ROI_DEFAULT_ALPHA = 1/16
+const ROI_DEFAULT_ALPHA = 1 / 16
 const ROI_DEFAULT_COLOR = appleCrayonRGBA(appleCrayonColorName, ROI_DEFAULT_ALPHA)
 const ROI_DEFAULT_HEADER_COLOR = 'rgba(0,0,0,0)'
 
-const ROI_USER_DEFINED_ALPHA = 1/12
-const ROI_USER_HEADER_DEFINED_COLOR = appleCrayonRGBA(appleCrayonColorName, 2/4)
+const ROI_USER_DEFINED_ALPHA = 1 / 12
+const ROI_USER_HEADER_DEFINED_COLOR = appleCrayonRGBA(appleCrayonColorName, 2 / 4)
 const ROI_USER_DEFINED_COLOR = appleCrayonRGBA('nickel', ROI_USER_DEFINED_ALPHA)
 
 class ROISet {
@@ -45,15 +48,25 @@ class ROISet {
         this.url = config.url
         this.isUserDefined = config.isUserDefined
 
-        this.name = this.url ? FileUtils.getFilename(config.url) : config.name
+        if (config.name) {
+            this.name = config.name
+        } else if (config.url && FileUtils.isFile(config.url)) {
+            this.name = config.url.name
+        } else if (config.url && StringUtils.isString(config.url) && !config.url.startsWith("data:")) {
+            this.name = FileUtils.getFilename(config.url)
+        }
 
-        if (config.features) {
-            this.features = config.features.slice()
-            this.featureSource =
-                {
-                    getFeatures : () => this.features
-                }
+        if (config.isUserDefined) {
+            this.featureSource = new DynamicFeatureSource(config.features, genome)
+        } else if (config.features) {
+            this.featureSource = new StaticFeatureSource(config.features, genome)
         } else {
+            if (config.format) {
+                config.format = config.format.toLowerCase()
+            } else {
+                const filename = FileUtils.getFilename(config.url)
+                config.format = TrackUtils.inferFileFormat(filename)
+            }
             this.featureSource = config.featureSource || FeatureSource(config, genome)
         }
 
@@ -73,9 +86,6 @@ class ROISet {
             // this.headerColor = `rgba(${ r },${ g },${ b },${ 1.0 })`
 
         }
-
-
-
     }
 
     async getFeatures(chr, start, end) {
@@ -83,17 +93,39 @@ class ROISet {
     }
 
     async getAllFeatures() {
-        return this.url ? await this.featureSource.reader.loadFeaturesNoIndex() : this.features
+        return typeof this.featureSource.getAllFeatures === 'function' ? await this.featureSource.getAllFeatures() : {}
+    }
+
+    addFeature(feature) {
+        if (this.isUserDefined) {
+            this.featureSource.addFeature(feature)
+        } else {
+            console.error("Attempt to add ROI to non user-defined set")
+        }
+    }
+
+    removeFeature(feature) {
+        if (this.isUserDefined) {
+            this.featureSource.removeFeature(feature)
+        } else {
+            console.error("Attempt to remove ROI from non user-defined set")
+        }
     }
 
     toJSON() {
-
-        if (this.isUserDefined) {
-            return { color:this.color,features: this.features.slice(), isUserDefined: true }
-        } else if (this.url) {
-            return '' === this.name ? { color:this.color, url: this.url } : { name: this.name, color:this.color, url: this.url }
+        if (this.url) {
+            return '' === this.name ? {color: this.color, url: this.url} : {
+                name: this.name,
+                color: this.color,
+                url: this.url
+            }
         } else {
-            return '' === this.name ? { color:this.color, features: this.features.slice() } : { name: this.name, color:this.color, features: this.features.slice() }
+            const features = this.featureSource.getAllFeatures()
+            return '' === this.name ? {color: this.color, features: features} : {
+                name: this.name,
+                color: this.color,
+                features: features
+            }
         }
     }
 
@@ -119,9 +151,92 @@ function screenCoordinates(regionStartBP, regionEndBP, startBP, bpp) {
         xStart -= 1
     }
 
-    return { x:xStart, width }
+    return {x: xStart, width}
 }
 
-export { ROI_DEFAULT_COLOR, ROI_USER_HEADER_DEFINED_COLOR, ROI_USER_DEFINED_COLOR, screenCoordinates }
+class StaticFeatureSource {
+    constructor(features, genome) {
+        this.featureCache = new FeatureCache(features, genome)
+        this.genome = genome
+    }
+
+    getFeatures({chr, start, end}) {
+        if (chr.toLowerCase() === 'all') {
+            return computeWGFeatures(this.featureCache.getAllFeatures(), this.genome)
+        } else {
+            return this.featureCache.queryFeatures(chr, start, end)
+        }
+    }
+
+    getAllFeatures() {
+        return this.featureCache.getAllFeatures()
+    }
+
+    supportsWholeGenome() {
+        return true
+    }
+}
+
+/**
+ * Special feature source that allows addition of features dynamically, for supporting user-defined genomes
+ */
+class DynamicFeatureSource {
+
+    constructor(features, genome) {
+        this.featureMap = {}
+        this.genome = genome
+
+        for (let feature of features) {
+            let featureList = this.featureMap[feature.chr]
+            if (!featureList) {
+                featureList = []
+                this.featureMap[feature.chr] = featureList
+            }
+            featureList.push(feature)
+        }
+
+        for (let key of Object.keys(this.featureMap)) {
+            this.featureMap[key].sort((a, b) => a.start - b.start)
+        }
+    }
+
+    getFeatures({chr, start, end}) {
+        if (chr.toLowerCase() === 'all') {
+            return computeWGFeatures(this.featureMap, this.genome)
+        } else {
+            // TODO -- this use of filter is O(N), and might not scale well for large feature lists.
+            const featureList = this.featureMap[chr]
+            return featureList ? featureList.filter(feature => feature.end > start && feature.start < end) : []
+        }
+    }
+
+    getAllFeatures() {
+        return this.featureMap
+    }
+
+    supportsWholeGenome() {
+        return true
+    }
+
+    addFeature(feature) {
+        let featureList = this.featureMap[feature.chr]
+        if (!featureList) {
+            featureList = []
+            this.featureMap[feature.chr] = featureList
+        }
+        featureList.push(feature)
+        featureList.sort((a, b) => a.start - b.start)
+    }
+
+    removeFeature(feature) {
+        let featureList = this.featureMap[feature.chr]
+        if (featureList) {
+            this.featureMap[feature.chr] = featureList.filter(f => f.start === feature.start && f.end === feature.end)
+        }
+    }
+}
+
+
+export {ROI_DEFAULT_COLOR, ROI_USER_HEADER_DEFINED_COLOR, ROI_USER_DEFINED_COLOR, screenCoordinates}
 
 export default ROISet
