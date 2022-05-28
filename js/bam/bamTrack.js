@@ -638,7 +638,7 @@ class CoverageTrack {
         let color
         if (this.parent.coverageColor) {
             color = this.parent.coverageColor
-        } else if (this.parent.color !== undefined) {
+        } else if (this.parent.color !== undefined && typeof this.parent.color !== "function") {
             color = IGVColor.darkenLighten(this.parent.color, -35)
         } else {
             color = DEFAULT_COVERAGE_COLOR
@@ -1367,7 +1367,10 @@ class AlignmentTrack {
             case "firstOfPairStrand":
             case "pairOrientation":
             case "tag":
-                return this.parent.color || DEFAULT_CONNECTOR_COLOR
+                if (this.parent.color) {
+                    return (typeof this.parent.color === "function") ? this.parent.color(alignment) : this.parent.color
+                }
+                return DEFAULT_CONNECTOR_COLOR
             default:
                 return this.getAlignmentColor(alignment)
 
@@ -1376,7 +1379,10 @@ class AlignmentTrack {
 
     getAlignmentColor(alignment) {
 
-        let color = this.parent.color || DEFAULT_ALIGNMENT_COLOR   // The default color if nothing else applies
+        let color = DEFAULT_ALIGNMENT_COLOR   // The default color if nothing else applies
+        if (this.parent.color) {
+            color = (typeof this.parent.color === "function") ? this.parent.color(alignment) : this.parent.color
+        }
         const option = this.colorBy
         switch (option) {
             case "strand":
@@ -1445,9 +1451,6 @@ class AlignmentTrack {
                     }
                 }
                 break
-
-            default:
-                color = this.parent.color || DEFAULT_ALIGNMENT_COLOR
         }
 
         return color
