@@ -1,5 +1,4 @@
 import { DOMUtils } from '../../node_modules/igv-utils/src/index.js'
-import {parseRegionKey} from './ROIManager.js'
 
 class ROIMenu {
     constructor(browser, parent) {
@@ -17,9 +16,7 @@ class ROIMenu {
 
         removeAllChildNodes(this.container)
 
-        const { index } = await this.browser.roiManager.findFeatureWithRegionKey(regionElement.dataset.region)
-        const userDefinedROISet = this.browser.roiManager.getUserDefinedROISet()
-        const feature = userDefinedROISet.features[ index ]
+        const feature = await this.browser.roiManager.findFeatureWithRegionKey(regionElement.dataset.region)
 
         let row
 
@@ -65,9 +62,7 @@ class ROIMenu {
 
             e.stopPropagation()
 
-            const { index } = await this.browser.roiManager.findFeatureWithRegionKey(regionElement.dataset.region)
-            const userDefinedROISet = this.browser.roiManager.getUserDefinedROISet()
-            const feature = userDefinedROISet.features[ index ]
+            const feature = await this.browser.roiManager.findFeatureWithRegionKey(regionElement.dataset.region)
             feature.name = input.value
 
             input.blur()
