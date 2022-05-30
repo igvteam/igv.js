@@ -48,7 +48,7 @@ function createVCFVariant(tokens) {
         }
     }
     variant.init()
-    return variant;
+    return variant
 }
 
 
@@ -266,7 +266,11 @@ class Variant {
 
         return fields
 
-    };
+    }
+
+    getInfo(tag) {
+        return this.info ? this.info[tag] : undefined;
+    }
 
     isRefBlock() {
         return "NONVARIANT" === this.type
