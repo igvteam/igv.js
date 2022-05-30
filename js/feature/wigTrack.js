@@ -51,7 +51,10 @@ class WigTrack extends TrackBase {
         const format = config.format ? config.format.toLowerCase() : config.format
         this.flipAxis = config.flipAxis ? config.flipAxis : false
         this.logScale = config.logScale ? config.logScale : false
-        if ("bigwig" === format) {
+        if (config.featureSource) {
+            this.featureSource = config.featureSource
+            delete config.featureSource
+        } else if ("bigwig" === format) {
             this.featureSource = new BWSource(config, this.browser.genome)
         } else if ("tdf" === format) {
             this.featureSource = new TDFSource(config, this.browser.genome)

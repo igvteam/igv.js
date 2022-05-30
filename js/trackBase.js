@@ -132,6 +132,18 @@ class TrackBase {
         this.init(config)
     }
 
+    clearCachedFeatures() {
+        if(this.trackView) {
+            this.trackView.clearCachedFeatures();
+        }
+    }
+
+    updateViews() {
+        if(this.trackView) {
+            this.trackView.updateViews()
+        }
+    }
+
     /**
      * Default implementation -- update config with current values.
      * to create session object for bookmarking, sharing.  Updates the track "config" object to reflect the

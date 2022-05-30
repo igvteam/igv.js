@@ -121,6 +121,10 @@ class Viewport {
         return undefined
     }
 
+    clearCache() {
+
+    }
+
     async repaint() {
         console.log('Viewport - repaint()')
     }
