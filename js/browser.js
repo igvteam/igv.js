@@ -324,6 +324,23 @@ class Browser {
     };
 
     /**
+     * PUBLIC API FUNCTION
+     *
+     * Return the current genomic region as a locus string, or array of locus strings if in multi-locus view
+     * @returns {string|*[]|*}
+     */
+    currentLoci() {
+        const noCommaLocusString = (rf) => `${rf.chr}:${rf.start + 1}-${rf.end}`
+        if (undefined === this.referenceFrameList || 0 === this.referenceFrameList.length) {
+            return ""
+        } else if (1 === this.referenceFrameList.length) {
+            return noCommaLocusString(this.referenceFrameList[0])
+        } else {
+            return this.referenceFrameList.map(rf => noCommaLocusString(rf))
+        }
+    }
+
+    /**
      * Render browse display as SVG
      * @returns {string}
      */
@@ -487,7 +504,7 @@ class Browser {
             track.id = 'ideogram'
 
             const trackView = new TrackView(this, this.columnContainer, track)
-            const { $viewport } = trackView.viewports[ 0 ]
+            const {$viewport} = trackView.viewports[0]
             ideogramHeight = getElementAbsoluteHeight($viewport.get(0))
 
             this.trackViews.push(trackView)
@@ -519,7 +536,7 @@ class Browser {
 
             const roiSetList = session.roi.map(c => new ROISet(c, this.genome))
 
-            const named = roiSetList.filter(({ name }) => name !== undefined)
+            const named = roiSetList.filter(({name}) => name !== undefined)
 
             const roiTable = new ROITable(this, this.columnContainer, (named.length > 0))
 
@@ -910,7 +927,7 @@ class Browser {
 
         if (track && config.roi && config.roi.length > 0) {
             track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
-         }
+        }
 
         return track
 
@@ -1625,13 +1642,16 @@ class Browser {
         this.isScrolling = false
         this.vpMouseDown = undefined
 
-
         if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
             this.updateViews()
             this.fireEvent('trackdragend')
         }
-
     }
+
+    isTrackPanning() {
+        return this.dragObject
+    }
+
 
     /**
      * Track drag here refers to vertical dragging to reorder tracks, not horizontal panning.
@@ -1695,6 +1715,9 @@ class Browser {
         }
     }
 
+    /**
+     * End vertical dragging of tracks (i.e. track re-order, not horizontal panning of data)
+     */
     endTrackDrag() {
         if (this.dragTrack) {
             // this.dragTrack.$trackDragScrim.hide();
@@ -1863,9 +1886,9 @@ async function resize() {
 
     this.updateUIWithReferenceFrameList()
 
-     //TODO -- update view only if needed.  Reducing size never needed.  Increasing size maybe
+    //TODO -- update view only if needed.  Reducing size never needed.  Increasing size maybe
 
-     await this.updateViews(true)
+    await this.updateViews(true)
 }
 
 
