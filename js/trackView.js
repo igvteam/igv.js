@@ -450,6 +450,12 @@ class TrackView {
         this.updateRulerViewportLabels()
     }
 
+    clearCachedFeatures() {
+        for(let viewport of this.viewports) {
+            viewport.clearCache();
+        }
+    }
+
     updateRulerViewportLabels() {
 
         const viewportWidth = this.browser.calculateViewportWidth(this.viewports.length)
