@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>igv</title>
+
+</head>
+
+<body>
+
+<h1>Non-indexed VCF - explicit depth track update</h1>
+
+<p>
+<h2>This example illustrates user-controlled updates of a coverage track computed from the "DP" field of an
+    associated VCF track.</h2>
+<b>
+    <ul>
+        <li>Note: The VCF track is not indexed, and takes ~10 seconds or longer to load.</li>
+        <li>To update coverage track for the region in view set the bin size (integer) and click
+            the <i>Update</i> button.
+        </li>
+    </ul>
+</b>
+</p>
+
+<label for="bin_size_input">Bin Size</label>
+<input type="text" id="bin_size_input" value="50000"/>
+<button id="update_button">Update</button>
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    // Import igv.js from either prebuilt package at igv.org, or local source code (index.js).
+    //import igv from "https://igv.org/web/snapshot/dist/igv.esm.js"
+    import igv from "../../js/index.js"
+
+    import {computeDepthFeatures} from "./computeDepthFeatures.js"
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr22"
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+
+        .then(async function (browser) {
+
+            // Non-indexed VCF track.  The entire VCF file is read on initial load
+            const vcfTrack = await browser.loadTrack({
+                id: "vcf_track",
+                type: "variant",
+                name: "1KG Snps - chr22",
+                url: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz",
+                indexed: false
+            })
+
+            // Wig track with explicit features, initially set to an empty array.
+            const wigTrack = await browser.loadTrack({
+                id: "wig_track",
+                type: "wig",
+                name: "Depth",
+                features: []     // !important -- signals track that features will be exlicitly defined
+            })
+
+            // Grab the feature source to perform feature updates.
+            const wigFeatureSource = wigTrack.featureSource     // TODO -- a little ugly this
+
+            // Update the coverage track.  This function is triggered by the "Update" button
+            function updateCoverageTrack(binSize) {
+                const allVariants = vcfTrack.featureSource.getAllFeatures()
+                const wigFeatures = computeDepthFeatures(allVariants, binSize)
+                wigFeatureSource.updateFeatures(wigFeatures)
+                wigTrack.clearCachedFeatures()
+                wigTrack.updateViews()
+            }
+
+
+            document.getElementById("update_button").addEventListener("click", () => {
+                const binSize = Number.parseInt(document.getElementById("bin_size_input").value)
+                updateCoverageTrack(binSize)
+            })
+
+        })
+
+
+</script>
+
+</body>
+
+</html>

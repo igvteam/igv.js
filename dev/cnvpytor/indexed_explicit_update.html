@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>igv</title>
+
+</head>
+
+<body>
+
+<h1>Indexed VCF - explicit depth track update</h1>
+
+<p>
+<h2>This example illustrates user-controlled updates of a coverage track computed from the "DP" field of an associated
+    indexed VCF track.
+</h2>
+<b>
+    <ul>
+        <li>To update coverage track for the region in view set the bin size (integer) anc clicke the <i>Update</i>
+            button.
+        </li>
+    </ul>
+</b>
+</p>
+
+<label for="bin_size_input">Bin Size</label>
+<input type="text" id="bin_size_input" value="1000"/>
+<button id="update_button">Update</button>
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    // Import igv.js from either prebuilt package at igv.org, or local source code (index.js).
+    //import igv from "https://igv.org/web/snapshot/dist/igv.esm.js"
+    import igv from "../../js/index.js"
+
+    import {computeDepthFeatures} from "./computeDepthFeatures.js"
+
+    const options =
+        {
+            genome: "hg19",
+            locus: ["chr22:50,097,641-50,248,914", "chr22:20,598,741-20,750,014"]
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+
+        .then(async function (browser) {
+
+            // Indexed VCF track with a visibility window of 1 MB
+            const vcfTrack = await browser.loadTrack({
+                id: "vcf_track",
+                type: "variant",
+                name: "1KG Snps - chr22",
+                url: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz",
+                indexURL: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz.tbi",
+                visibilityWindow: 1000000
+            })
+
+
+            // Wig track with explicit features, initially set to an empty array.
+            const coverageTrack = await browser.loadTrack({
+                id: "wig_track",
+                type: "wig",
+                name: "Depth",
+                visibilityWindow: vcfTrack.visibilityWindow,
+                features: []    // ! Important, signals track that features will be supplied explicitly
+            })
+
+            // Grab the feature source to perform feature updates.
+            const coverageFeatureSource = coverageTrack.featureSource
+
+            // Update coverage track. This is triggered by the "Update" button.
+            async function updateCoverageTrack(binSize) {
+
+                // Flag to expand genomic range to allow some panning side to side
+                const expand = true
+
+                let loci = parseLocus(browser.currentLoci())
+
+                // In multi locus mode there can be multiple genomic regions in view.   Loop through them building
+                // a dictionary of {chr -> array of vcf features}
+                const variantDict = {}
+                for (let locus of loci) {
+                    const chr = locus.chr
+                    const regionWidth = locus.end - locus.start
+                    const queryStart = expand ? locus.start - regionWidth : locus.start
+                    const queryEnd = expand ? locus.end + regionWidth : locus.end
+                    const variants = await vcfTrack.getFeatures(chr, queryStart, queryEnd)
+
+                    if (variantDict.hasOwnProperty(chr)) {
+                        const mergedList = variantDict[chr].concat(variants)
+                        mergedList.sort((a, b) => a.start - b.start)
+                        variantDict[chr] = mergedList
+                    } else {
+                        variantDict[chr] = variants
+                    }
+                }
+
+                // Compute coverage depth
+                const wigFeatures = computeDepthFeatures(variantDict, binSize)
+
+                // Update feature source and force a coverage track repaint
+                coverageFeatureSource.updateFeatures(wigFeatures)
+                coverageTrack.clearCachedFeatures()
+                coverageTrack.updateViews()
+            }
+
+            document.getElementById("update_button").addEventListener("click", () => {
+                const binSize = Number.parseInt(document.getElementById("bin_size_input").value)
+                updateCoverageTrack(binSize)
+            })
+        })
+
+    // Locus object might be an array (multi-locus mode), or string (normal mode).   For generality convert to
+    // an array if needed and treat as multi-locus view of size 1.
+    function parseLocus(locusObject) {
+        const parseLocusStr = (str) => {
+            const t = str.split(":")
+            const se = t[1].split("-")
+            return {chr: t[0], start: Number.parseInt(se[0]), end: Number.parseInt(se[1])}
+        }
+        if (Array.isArray(locusObject)) {
+            return locusObject.map(str => parseLocusStr(str))
+        } else {
+            return [parseLocusStr(locusObject)]
+        }
+    }
+
+</script>
+
+</body>
+
+</html>
