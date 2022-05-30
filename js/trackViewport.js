@@ -466,6 +466,10 @@ class TrackViewport extends Viewport {
         return this.featureCache ? this.featureCache.features : []
     }
 
+    clearCache() {
+        this.featureCache = undefined;
+    }
+
     async getFeatures(track, chr, start, end, bpPerPixel) {
 
         if (this.featureCache && this.featureCache.containsRange(chr, start, end, bpPerPixel)) {
