@@ -55,16 +55,7 @@ class TextFeatureSource {
 
         const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "biginteract", "biggenepred", "bignarrowpeak", "tdf"])
 
-        if (config.features && Array.isArray(config.features)) {
-            // Explicit array of features
-            let features = fixFeatures(config.features, genome)
-            packFeatures(features)
-            if (config.mappings) {
-                mapProperties(features, config.mappings)
-            }
-            this.queryable = false
-            this.featureCache = new FeatureCache(features, genome)
-        } else if (config.reader) {
+        if (config.reader) {
             // Explicit reader implementation
             this.reader = config.reader
             this.queryable = config.queryable !== false
@@ -180,12 +171,12 @@ class TextFeatureSource {
     }
 
     supportsWholeGenome() {
-        return !this.queryable;   // queryable (indexed, web services) sources don't support whole genome view
+        return !this.queryable   // queryable (indexed, web services) sources don't support whole genome view
     }
 
     // TODO -- experimental, will only work for non-indexed sources
     getAllFeatures() {
-        if (this.queryable) {   // queryable sources don't support all features
+        if (this.queryable || !this.featureCache) {   // queryable sources don't support all features
             return []
         } else {
             return this.featureCache.getAllFeatures()
@@ -271,6 +262,7 @@ class TextFeatureSource {
             }
         }
     }
+
 }
 
 
@@ -325,16 +317,5 @@ function fixFeatures(features, genome) {
 
     return features
 }
-
-
-function mapProperties(features, mappings) {
-    let mappingKeys = Object.keys(mappings)
-    features.forEach(function (f) {
-        mappingKeys.forEach(function (key) {
-            f[key] = f[mappings[key]]
-        })
-    })
-}
-
 
 export default TextFeatureSource
