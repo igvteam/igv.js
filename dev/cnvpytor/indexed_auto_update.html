@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>indel</title>
+
+</head>
+
+<body>
+
+<h1>Indexed VCF - automatic depth track updates</h1>
+
+<p>
+<h2>This example illustrates use of a custom FeatureSource class to calculate binned coverage depth from the "DP"
+    info tag of a VCF track.
+</h2>
+<ul>
+    <b>
+        <li>The coverage track calculation perfomed automatically as needed in the <i>getFeatures</i> function of the
+            data source.
+        </li>
+        <li>Bin size is set automatically to ~ 100 bins over the genomic range in view.</li>
+    </b>
+</ul>
+</p>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    // Import igv.js from either prebuilt package at igv.org, or local source code (index.js).
+    //import igv from "https://igv.org/web/snapshot/dist/igv.esm.js"
+    import igv from "../../js/index.js"
+
+    import {computeDepthFeatures} from "./computeDepthFeatures.js"
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr22:50,135,460-50,211,747"
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+
+        .then(async function (browser) {
+
+            // Indexed VCF track with a visibility window of 1 MB
+            const vcfTrack = await browser.loadTrack({
+                id: "vcf_track",
+                type: "variant",
+                name: "1KG Snps - chr22",
+                url: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz",
+                indexURL: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz.tbi",
+                visibilityWindow: 1000000
+            })
+
+            // Wig track for coverage depth with custom data source
+            const wigTrack = await browser.loadTrack({
+                id: "wig_track",
+                type: "wig",
+                name: "Depth",
+                visibilityWindow: vcfTrack.visibilityWindow,
+                featureSource: new DepthFeatureSource(vcfTrack)
+            })
+        })
+
+    // Custom data source class, the getFeatures method is called automatically by igv.js as needed to paint track
+    class DepthFeatureSource {
+
+        constructor(vcfTrack) {
+            this.vcfTrack = vcfTrack
+        }
+
+        /**
+         * Return a promise for wig features for a genomic range
+         * @param chr
+         * @param start
+         * @param end
+         * @returns {Promise<[]>}
+         */
+        async getFeatures({chr, start, end}) {
+
+            const variantDict = {}
+            variantDict[chr] = await this.vcfTrack.getFeatures(chr, start, end)
+            const binSize = Math.max(100, (end - start) / (3*100))     // Requested range is ~ 3 X screen width
+            const wigFeatures = computeDepthFeatures(variantDict, binSize)
+            return wigFeatures
+        }
+    }
+</script>
+
+</body>
+
+</html>
