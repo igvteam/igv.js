@@ -14,12 +14,12 @@ class GWASParser {
             }
             this.posCol = config.columns.position - 1
             this.chrCol = config.columns.chromosome - 1
-            this.pvalueCol = config.columns.value - 1
+            this.valueCol = config.columns.value - 1
         } else {
             // Defaults -- can be overriden in header
             this.posCol = 2
             this.chrCol = 1
-            this.pvalueCol = 3
+            this.valueCol = 3
         }
     }
 
