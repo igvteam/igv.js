@@ -116,26 +116,27 @@
                     //     "color": "rgba(255,1,199,0.25)",
                     //     "url": "https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed"
                     // },
-                    {
-                        "isUserDefined": true,
-                        "color": "rgba(72,121,237,0.72)",
-                        "features":
-                            [
-                                {
-                                    "chr": "chr1",
-                                    "start": 67655415,
-                                    "end": 67655611
-                                },
-                                {
-                                    "chr": "chr1",
-                                    "start": 67664225,
-                                    "end": 67666281
-                                }
-                            ]
-                    },
+                    // {
+                    //     "isUserDefined": true,
+                    //     "color": "rgba(237,72,155,0.72)",
+                    //     "features":
+                    //         [
+                    //             // {
+                    //             //     "chr": "chr1",
+                    //             //     "start": 67655415,
+                    //             //     "end": 67655611
+                    //             // },
+                    //             // {
+                    //             //     "chr": "chr1",
+                    //             //     "start": 67664225,
+                    //             //     "end": 67666281
+                    //             // }
+                    //         ]
+                    // },
                     {
                         // "name": "Feature List Set",
-                        "color": "rgba(3,249,135,0.5)",
+                        // "isUserDefined": true,
+                        "color": "rgba(3,52,249,0.5)",
                         "features": [
                             {
                                 "chr": "chr1",
@@ -202,7 +203,11 @@
 
         };
 
-    igv.createBrowser(document.getElementById('myDiv'), no_name_feature_array_config)
+    (async () => {
+        const browser = await igv.createBrowser(document.getElementById('myDiv'), no_name_feature_array_config)
+        browser.getUserDefinedROIs()
+    })()
+
 
 </script>
 
