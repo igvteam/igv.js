@@ -379,6 +379,12 @@ class Coverage {
         this.threshold = alleleThreshold
     }
 
+    hoverText() {
+        const pos = this.posA + this.posT + this.posC + this.posG + this.posN
+        const neg = this.negA + this.negT + this.negC + this.negG + this.negN
+        return `${this.total } (${pos}+, ${neg}-)`
+    }
+
     isMismatch(refBase) {
         const threshold = this.threshold * ((this.qualityWeight && this.qual) ? this.qual : this.total)
         let mismatchQualitySum = 0

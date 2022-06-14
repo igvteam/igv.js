@@ -13,6 +13,7 @@ const NOT_LOADED_MESSAGE = 'Error loading track data'
 
 let mouseDownCoords
 let lastClickTime = 0
+let lastHoverUpdateTime = 0
 let popupTimerID
 
 class TrackViewport extends Viewport {
@@ -467,7 +468,7 @@ class TrackViewport extends Viewport {
     }
 
     clearCache() {
-        this.featureCache = undefined;
+        this.featureCache = undefined
     }
 
     async getFeatures(track, chr, start, end, bpPerPixel) {
@@ -529,6 +530,7 @@ class TrackViewport extends Viewport {
 
         this.addViewportContextMenuHandler(viewport)
 
+        // Mouse down
         const md = (event) => {
             this.enableClick = true
             this.browser.mouseDownOnViewport(event, this)
@@ -537,6 +539,7 @@ class TrackViewport extends Viewport {
         viewport.addEventListener('mousedown', md)
         viewport.addEventListener('touchstart', md)
 
+        // Mouse up
         const mu = (event) => {
             // Any mouse up cancels drag and scrolling
             if (this.browser.dragObject || this.browser.isScrolling) {
@@ -549,9 +552,27 @@ class TrackViewport extends Viewport {
                 this.browser.endTrackDrag()
             }
         }
-
         viewport.addEventListener('mouseup', mu)
         viewport.addEventListener('touchend', mu)
+
+        // Mouse move
+        if (typeof this.trackView.track._hoverText === 'function') {
+            viewport.addEventListener('mousemove', (event => {
+                if (Date.now() - lastHoverUpdateTime > 100) {
+                    lastHoverUpdateTime = Date.now()
+                    const clickState = createClickState(event, this)
+                    if (clickState) {
+                        const hoverText = this.trackView.track._hoverText(clickState)
+                        if (hoverText) {
+                            this.$viewport[0].setAttribute("title", hoverText)
+                        } else {
+                            this.$viewport[0].removeAttribute("title")
+                        }
+                    }
+                }
+            }))
+
+        }
 
         this.addViewportClickHandler(this.$viewport.get(0))
 
@@ -718,27 +739,9 @@ class TrackViewport extends Viewport {
 
 }
 
-function mouseDownHandler(event) {
-    this.enableClick = true
-    this.browser.mouseDownOnViewport(event, this)
-    mouseDownCoords = DOMUtils.pageCoordinates(event)
-}
-
-function mouseUpHandler(event) {
-
-    // Any mouse up cancels drag and scrolling
-    if (this.browser.dragObject || this.browser.isScrolling) {
-        this.browser.cancelTrackPan()
-        // event.preventDefault();
-        // event.stopPropagation();
-        this.enableClick = false   // Until next mouse down
-    } else {
-        this.browser.cancelTrackPan()
-        this.browser.endTrackDrag()
-    }
-}
-
 function createClickState(event, viewport) {
+
+    if (!viewport.contentDiv || !viewport.canvas) return  // Can happen during initialization
 
     const referenceFrame = viewport.referenceFrame
     const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.contentDiv)
