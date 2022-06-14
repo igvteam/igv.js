@@ -27,11 +27,11 @@ import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 
 const fixColor = (colorString) => {
-    if(StringUtils.isString(colorString)) {
+    if (StringUtils.isString(colorString)) {
         return (colorString.indexOf(",") > 0 && !colorString.startsWith("rgb(")) ?
             `rgb(${colorString})` : colorString
     } else {
-        return colorString;
+        return colorString
     }
 }
 
@@ -78,8 +78,8 @@ class TrackBase {
 
         this.order = config.order
 
-        if(config.color) this.color = fixColor(config.color)
-        if(config.altColor) this.altColor = fixColor(config.altColor)
+        if (config.color) this.color = fixColor(config.color)
+        if (config.altColor) this.altColor = fixColor(config.altColor)
         if ("civic-ws" === config.sourceType) {    // Ugly proxy for specialized track type
             this.defaultColor = "rgb(155,20,20)"
         } else {
@@ -110,6 +110,10 @@ class TrackBase {
                 this.description = () => config.description
             }
         }
+
+        if(config.hoverTextFields) {
+            this.hoverTextFields = config.hoverTextFields;
+        }
     }
 
     get name() {
@@ -133,13 +137,13 @@ class TrackBase {
     }
 
     clearCachedFeatures() {
-        if(this.trackView) {
-            this.trackView.clearCachedFeatures();
+        if (this.trackView) {
+            this.trackView.clearCachedFeatures()
         }
     }
 
     updateViews() {
-        if(this.trackView) {
+        if (this.trackView) {
             this.trackView.updateViews()
         }
     }
@@ -433,6 +437,66 @@ class TrackBase {
 
         return data
 
+    }
+
+    /**
+     * Return a plain string for descriptive text given the list of features.  The string is used to set a "title"
+     * attribute and cannot contain any html.
+     *
+     * @returns {undefined}
+     */
+    _hoverText(clickState) {
+
+        const features = this.clickedFeatures(clickState)
+
+        if (features && features.length > 0) {
+            let str = ""
+            for (let i = 0; i < features.length; i++) {
+                if (i === 10) {
+                    str += "; ..."
+                    break
+                }
+                if (!features[i]) continue
+
+                const f = features[i]._f || features[i]
+                if (str.length > 0) str += "\n"
+
+                if(this.hoverTextFields) {
+                    str = ""
+                    for(let field of this.hoverTextFields) {
+                        if(str.length > 0) str += "\n"
+                        if(f.hasOwnProperty(field)) {
+                            str += f[field]
+                        } else if(typeof f.getAttribute === "function") {
+                            str += f.getAttribute(field)
+                        }
+                    }
+                }
+                else if (typeof this.config.hoverText === 'function') {
+                    str += this.config.hoverText(f)
+                } else if (typeof f.hoverText === 'function') {
+                    str += f.hoverText()
+                } else {
+                   str += this.hoverText(f);
+                }
+            }
+            return str
+        }
+    }
+
+    /**
+     * Default hoverText function.  Can be overridden in track configuration or subclasses
+     *
+     * @param f - feature hovered over
+     */
+    hoverText(f) {
+        let str = ""
+        if (f.name) {
+            str += f.name
+            if (f.value) str += ": "
+        }
+        if (f.value) str += f.value   // TODO format value if number
+        return str;
     }
 
     /**

@@ -234,11 +234,14 @@ class BAMTrack extends TrackBase {
      * @param features
      */
     clickedFeatures(clickState) {
+
+        let clickedObject;
         if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
-            return [this.coverageTrack.getClickedObject(clickState)]
+            clickedObject = this.coverageTrack.getClickedObject(clickState)
         } else {
-            return [this.alignmentTrack.getClickedObject(clickState)]
+            clickedObject = this.alignmentTrack.getClickedObject(clickState)
         }
+        return clickedObject ? [clickedObject] : undefined
     }
 
     menuItemList() {
@@ -761,6 +764,7 @@ class CoverageTrack {
         return nameValues
 
     }
+
 }
 
 class AlignmentTrack {
