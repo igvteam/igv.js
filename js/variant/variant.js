@@ -218,7 +218,6 @@ class Variant {
         }
     }
 
-
     popupData(genomicLocation, genomeId) {
 
 
@@ -265,7 +264,10 @@ class Variant {
         }
 
         return fields
+    }
 
+    hoverText() {
+        return `${this.names}  ${this.referenceBases}->${this.alternateBases}`
     }
 
     getInfo(tag) {
