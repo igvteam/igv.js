@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="https://igv.org/web/https://igv.org/web/img/favicon.ico" rel="shortcut icon">
+
+    <title>igv.js</title>
+
+
+</head>
+
+<body>
+
+<h1>Example illustrating embedding features in a track in lieu of a URL</h1>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+    const igvDiv = document.getElementById("igv-div");
+
+    class MockFile {
+        constructor(str) {
+            this.name = ""
+            this.blob = new Blob([str])
+        }
+
+        slice(start, end) {
+            return this.blob.slice(start, end)
+        }
+
+        arrayBuffer() {
+            return this.blob.arrayBuffer()
+        }
+    }
+
+    const fastaData = ">one\n" +
+        "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\n" +
+        "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\n" +
+        "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\n" +
+        "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNN\n" +
+        ">two\n" +
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n" +
+        ">one_seq1\n" +
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA\n" +
+        ">one_seq2\n" +
+        "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA]n"
+
+    const fastaIndex = "one\t120\t5\t30\t32\n" +
+        "two30\t149\t30\t32\n" +
+        "one_seq1\t30\t30\t30\t32\n" +
+        "one_seq2 30\t90\t30\t32\n"
+
+    const fastaBlob = new MockFile(fastaData)
+    const indexBlob = new MockFile(fastaIndex)
+
+
+    const options =
+        {
+            reference: {
+                fastaURL: fastaBlob,
+                indexed: false
+            }
+        }
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+
+</script>
+
+</body>
+
+</html>
