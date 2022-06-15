@@ -111,14 +111,14 @@
             "locus": "chr1:67,655,272-67,684,468",
             "roi":
                 [
-                    // {
-                    //     "name": "URL Feature Set",
-                    //     "color": "rgba(255,1,199,0.25)",
-                    //     "url": "https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed"
-                    // },
+                    {
+                        "name": "URL Feature Set",
+                        "color": "rgba(255,1,199,0.25)",
+                        "url": "https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed"
+                    },
                     {
                         "isUserDefined": true,
-                        "color": "rgba(72,121,237,0.72)",
+                        "color": "rgba(72,121,237,0.54)",
                         "features":
                             [
                                 {
@@ -133,52 +133,53 @@
                                 }
                             ]
                     },
-                    {
-                        // "name": "Feature List Set",
-                        "color": "rgba(3,249,135,0.5)",
-                        "features": [
-                            {
-                                "chr": "chr1",
-                                "start": 67670000,
-                                "end": 67671080
-                            },
-                            {
-                                "chr": "chr1",
-                                "start": 67672095,
-                                "end": 67673993
-                            },
-                            {
-                                "chr": "chr1",
-                                "start": 67674681,
-                                "end": 67675237
-                            },
-                            {
-                                "chr": "chr1",
-                                "start": 67676055,
-                                "end": 67676710
-                            },
-                            {
-                                "chr": "chr1",
-                                "start": 67677561,
-                                "end": 67677888
-                            },
-                            {
-                                "chr": "chr1",
-                                "start": 67679263,
-                                "end": 67679394
-                            },
-                            {
-                                "chr": "chr1",
-                                "start": 67679950,
-                                "end": 67680180
-                            },
-                            {
-                                "chr": "chr1",
-                                "start": 67681849,
-                                "end": 67682340
-                            }
-                        ]
-                    }
+                    // {
+                    //     // "name": "Feature List Set",
+                    //     // "isUserDefined": true,
+                    //     "color": "rgba(3,52,249,0.5)",
+                    //     "features": [
+                    //         {
+                    //             "chr": "chr1",
+                    //             "start": 67670000,
+                    //             "end": 67671080
+                    //         },
+                    //         {
+                    //             "chr": "chr1",
+                    //             "start": 67672095,
+                    //             "end": 67673993
+                    //         },
+                    //         {
+                    //             "chr": "chr1",
+                    //             "start": 67674681,
+                    //             "end": 67675237
+                    //         },
+                    //         {
+                    //             "chr": "chr1",
+                    //             "start": 67676055,
+                    //             "end": 67676710
+                    //         },
+                    //         {
+                    //             "chr": "chr1",
+                    //             "start": 67677561,
+                    //             "end": 67677888
+                    //         },
+                    //         {
+                    //             "chr": "chr1",
+                    //             "start": 67679263,
+                    //             "end": 67679394
+                    //         },
+                    //         {
+                    //             "chr": "chr1",
+                    //             "start": 67679950,
+                    //             "end": 67680180
+                    //         },
+                    //         {
+                    //             "chr": "chr1",
+                    //             "start": 67681849,
+                    //             "end": 67682340
+                    //         }
+                    //     ]
+                    // }
                 ],
             "tracks": [
                 {
@@ -202,7 +203,11 @@
 
         };
 
-    igv.createBrowser(document.getElementById('myDiv'), no_name_feature_array_config)
+    (async () => {
+        const browser = await igv.createBrowser(document.getElementById('myDiv'), no_name_feature_array_config)
+        browser.getUserDefinedROIs()
+    })()
+
 
 </script>
 

@@ -16,7 +16,7 @@ class ROIMenu {
 
         removeAllChildNodes(this.container)
 
-        const feature = await this.browser.roiManager.findFeatureWithRegionKey(regionElement.dataset.region)
+        const feature = await this.browser.roiManager.findUserDefinedRegionWithKey(regionElement.dataset.region)
 
         let row
 
@@ -62,7 +62,7 @@ class ROIMenu {
 
             e.stopPropagation()
 
-            const feature = await this.browser.roiManager.findFeatureWithRegionKey(regionElement.dataset.region)
+            const feature = await this.browser.roiManager.findUserDefinedRegionWithKey(regionElement.dataset.region)
             feature.name = input.value
 
             input.blur()
@@ -80,7 +80,7 @@ class ROIMenu {
         row.addEventListener('click', event => {
             event.stopPropagation()
             this.container.style.display = 'none'
-            this.browser.roiManager.deleteRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
+            this.browser.roiManager.deleteUserDefinedRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
         })
 
         this.container.style.left = `${ x }px`

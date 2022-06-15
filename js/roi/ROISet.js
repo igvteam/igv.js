@@ -33,12 +33,12 @@ import * as TrackUtils from "../util/trackUtils.js"
 
 const appleCrayonColorName = 'fern'
 
-const ROI_DEFAULT_ALPHA = 1 / 16
+const ROI_DEFAULT_ALPHA = 1/16
 const ROI_DEFAULT_COLOR = appleCrayonRGBA(appleCrayonColorName, ROI_DEFAULT_ALPHA)
 const ROI_DEFAULT_HEADER_COLOR = 'rgba(0,0,0,0)'
 
-const ROI_USER_DEFINED_ALPHA = 1 / 12
-const ROI_USER_HEADER_DEFINED_COLOR = appleCrayonRGBA(appleCrayonColorName, 2 / 4)
+const ROI_USER_DEFINED_ALPHA = 1/12
+const ROI_USER_HEADER_DEFINED_COLOR = appleCrayonRGBA(appleCrayonColorName, 1)
 const ROI_USER_DEFINED_COLOR = appleCrayonRGBA('nickel', ROI_USER_DEFINED_ALPHA)
 
 class ROISet {

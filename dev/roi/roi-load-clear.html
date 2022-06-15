@@ -29,7 +29,10 @@
 
     const browser_config =
         {
-            locus: '1:67,655,272-67,684,468',
+            // user defined roi locus
+            locus: "chr1:67,646,911-67,676,107",
+
+            // locus: '1:67,655,272-67,684,468',
             genome: "hg19",
             tracks:
                 [
@@ -44,17 +47,34 @@
     const roi_configs =
         [
             {
-                name: 'ROI set 1',
-                url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
-                indexed: false,
-                color: "rgba(68, 134, 247, 0.25)"
+                isUserDefined: true,
+                color: "rgba(237,72,155,0.72)",
+                features:
+                    [
+                        {
+                            chr: "chr1",
+                            start: 67655415,
+                            end: 67655611
+                        },
+                        {
+                            chr: "chr1",
+                            start: 67664225,
+                            end: 67666281
+                        }
+                    ]
             },
-            {
-                name: 'ROI set 2',
-                url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_2.bed',
-                indexed: false,
-                color: "rgba(0, 150, 50, 0.25)"
-            }
+            // {
+            //     name: 'ROI set 1',
+            //     url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
+            //     indexed: false,
+            //     color: "rgba(68, 134, 247, 0.25)"
+            // },
+            // {
+            //     name: 'ROI set 2',
+            //     url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_2.bed',
+            //     indexed: false,
+            //     color: "rgba(0, 150, 50, 0.25)"
+            // }
         ];
 
     (async () => {
