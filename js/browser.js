@@ -779,6 +779,11 @@ class Browser {
         this.roiManager.clearROIs()
     }
 
+    /**
+     * Return a promise for the list of user-defined regions-of-interest
+     * 
+     * NOTE: public API function
+     */
     async getUserDefinedROIs() {
 
         if (this.roiManager) {
