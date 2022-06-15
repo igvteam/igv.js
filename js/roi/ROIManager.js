@@ -97,7 +97,11 @@ class ROIManager {
 
     async updateUserDefinedROISet(feature) {
 
-        const userDefinedROISet = this.getUserDefinedROISet()
+        let userDefinedROISet = await this.getUserDefinedROISet()
+
+        if (undefined === userDefinedROISet) {
+            userDefinedROISet = this.initializeUserDefinedROISet()
+        }
 
         userDefinedROISet.addFeature(feature)
 
@@ -200,44 +204,43 @@ class ROIManager {
         return regionElement
     }
 
-    async findFeatureWithRegionKey(regionKey) {
+    async getUserDefinedROISet() {
 
-        const {chr, start, end} = parseRegionKey(regionKey)
-        const userDefinedROISet = this.getUserDefinedROISet()
+        const userDefinedROISet = this.roiSets.find(roiSet => true === roiSet.isUserDefined)
 
         if (userDefinedROISet) {
-            const features = await userDefinedROISet.getFeatures(chr, start, end)
-
-            for (let feature of features) {
-                if (feature.chr === chr && feature.start >= start && feature.end <= end) {
-                    return feature
-                }
-            }
+            const features = await userDefinedROISet.getAllFeatures()
+            return features ? userDefinedROISet : undefined
+        } else {
+            return userDefinedROISet
         }
-        return undefined
+
     }
 
-    getUserDefinedROISet() {
-        let userDefinedROISet = this.roiSets.find(roiSet => true === roiSet.isUserDefined)
-        if (!userDefinedROISet) {
-            const config =
-                {
-                    isUserDefined: true,
-                    features: []
-                }
-            userDefinedROISet = new ROISet(config, this.browser.genome)
-            this.roiSets.push(userDefinedROISet)
-        }
+    initializeUserDefinedROISet() {
+
+        const config =
+            {
+                isUserDefined: true,
+                features: []
+            }
+        const userDefinedROISet = new ROISet(config, this.browser.genome)
+        this.roiSets.push(userDefinedROISet)
+
         return userDefinedROISet
     }
 
-    async deleteRegionWithKey(regionKey, columnContainer) {
+    async deleteUserDefinedRegionWithKey(regionKey, columnContainer) {
 
         columnContainer.querySelectorAll(createSelector(regionKey)).forEach(node => node.remove())
 
-        const feature = this.findFeatureWithRegionKey(regionKey)
+        const feature = this.findUserDefinedRegionWithKey(regionKey)
 
-        this.getUserDefinedROISet().removeFeature(feature)
+        const set = await this.getUserDefinedROISet()
+
+        if (set) {
+            set.removeFeature(feature)
+        }
 
         const records = await this.getTableRecords()
 
@@ -246,6 +249,24 @@ class ROIManager {
             this.setROITableButtonVisibility(false)
         }
 
+    }
+
+    async findUserDefinedRegionWithKey(regionKey) {
+
+        const {chr, start, end} = parseRegionKey(regionKey)
+        const set = await this.getUserDefinedROISet()
+
+        if (set) {
+            const features = await set.getFeatures(chr, start, end)
+
+            for (let feature of features) {
+                if (feature.chr === chr && feature.start >= start && feature.end <= end) {
+                    return feature
+                }
+            }
+        }
+
+        return undefined
     }
 
     toJSON() {
