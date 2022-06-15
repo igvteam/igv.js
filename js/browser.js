@@ -779,6 +779,37 @@ class Browser {
         this.roiManager.clearROIs()
     }
 
+    /**
+     * Return a promise for the list of user-defined regions-of-interest
+     * 
+     * NOTE: public API function
+     */
+    async getUserDefinedROIs() {
+
+        if (this.roiManager) {
+
+            const set = await this.roiManager.getUserDefinedROISet()
+            if (undefined === set) {
+                return undefined
+            }
+
+            const featureHash = await set.getAllFeatures()
+
+            const featureList = []
+            for (let value of Object.values(featureHash)) {
+                featureList.push(...value)
+            }
+
+            console.log(`user defined set - features ${ featureList }`)
+
+            return 0 === featureList.length ? undefined : featureList
+
+        } else {
+            return undefined
+        }
+
+    }
+
     getRulerTrackView() {
         const list = this.trackViews.filter(({track}) => 'ruler' === track.id)
         return list.length > 0 ? list[0] : undefined
