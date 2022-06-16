@@ -783,8 +783,10 @@ class AlignmentTrack {
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)"
         this.insertionColor = config.insertionColor || "rgb(138, 94, 161)"
         this.insertionTextColor = config.insertionTextColor || "white"
+        this.showInsertionText = config.showInsertionText === undefined ? false : !!config.showInsertionText
         this.deletionColor = config.deletionColor || "black"
         this.deletionTextColor = config.deletionTextColor || "black"
+        this.showDeletionText = config.showDeletionText === undefined ? false : !!config.showDeletionText
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)"
         this.pairConnectorColor = config.pairConnectorColor
 
@@ -1009,7 +1011,7 @@ class AlignmentTrack {
                     })
 
                     // Add gap width as text like Java IGV if it fits nicely and is a multi-base gap
-                    if (gap.len > 1 && lineWidth >= gapTextWidth + 8) {
+                    if (this.showDeletionText && gap.len > 1 && lineWidth >= gapTextWidth + 8) {
                         const textStart = gapCenter - (gapTextWidth / 2)
                         IGVGraphics.fillRect(ctx, textStart - 1, yRect - 1, gapTextWidth + 2, 12, {fillStyle: "white"})
                         IGVGraphics.fillText(ctx, gapLenText, textStart, yRect + 10, {
@@ -1037,7 +1039,9 @@ class AlignmentTrack {
                     const insertLenText = insertionBlock.len.toString()
 
                     const textPixelWidth = 2 + (insertLenText.length * 6)
-                    const basePixelWidth = insertionBlock.len === 1 ? 2 : Math.round(insertionBlock.len / bpPerPixel)
+                    const basePixelWidth = (!this.showInsertionText || insertionBlock.len === 1)
+                        ? 2
+                        : Math.round(insertionBlock.len / bpPerPixel)
                     const widthBlock = Math.max(Math.min(textPixelWidth, basePixelWidth), 2)
 
                     const xBlockStart = (refOffset / bpPerPixel) - (widthBlock / 2)
@@ -1054,7 +1058,7 @@ class AlignmentTrack {
                         // Show # of inserted bases as text if it's a multi-base insertion and the insertion block
                         // is wide enough to hold text (its size is capped at the text label size, but can be smaller
                         // if the browser is zoomed out and the insertion is small)
-                        if (insertionBlock.len > 1 && basePixelWidth > textPixelWidth) {
+                        if (this.showInsertionText && insertionBlock.len > 1 && basePixelWidth > textPixelWidth) {
                             IGVGraphics.fillText(ctx, insertLenText, xBlockStart + 1, yRect + 10, {
                                 'font': 'normal 10px monospace',
                                 'fillStyle': this.insertionTextColor,
