@@ -967,7 +967,10 @@ class AlignmentTrack {
             }
             IGVGraphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor})
 
-            let lastBlockEnd
+            // Save bases to draw into an array for later drawing, so they can be overlaid on insertion blocks,
+            // which is relevant if we have insertions with size label
+            const basesToDraw = []
+
             for (let b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
 
                 const block = blocks[b]
@@ -976,11 +979,42 @@ class AlignmentTrack {
                 // If this is not the last block, and the next block starts before the orign (off screen to left) then skip.
                 if ((b !== blocks.length - 1) && blocks[b + 1].start < bpStart) continue
 
-                drawBlock.call(this, block, b)
+                // drawBlock returns bases to draw, which are drawn on top of insertion blocks (if they're wider than
+                // the space between two bases) like in Java IGV
+                basesToDraw.push(...drawBlock.call(this, block, b))
 
                 if ((block.start + block.len) > bpEnd) {
                     // Do this after drawBlock to insure gaps are drawn
                     break
+                }
+            }
+
+            if (alignment.gaps) {
+                const yStrokedLine = yRect + alignmentHeight / 2
+                for (let gap of alignment.gaps) {
+                    const sPixel = (gap.start - bpStart) / bpPerPixel
+                    const ePixel = ((gap.start + gap.len) - bpStart) / bpPerPixel
+                    const lineWidth = ePixel - sPixel
+                    const gapLenText = gap.len.toString()
+                    const gapTextWidth = gapLenText.length * 6
+                    const gapCenter = sPixel + (lineWidth / 2)
+
+                    const color = ("D" === gap.type) ? this.deletionColor : this.skippedColor
+
+                    IGVGraphics.strokeLine(ctx, sPixel, yStrokedLine, ePixel, yStrokedLine, {
+                        strokeStyle: color,
+                        lineWidth: 2,
+                    })
+
+                    // Add gap width as text like Java IGV if it fits nicely and is a multi-base gap
+                    if (gap.len > 1 && lineWidth >= gapTextWidth + 8) {
+                        const textStart = gapCenter - (gapTextWidth / 2)
+                        IGVGraphics.fillRect(ctx, textStart - 1, yRect - 1, gapTextWidth + 2, 12, {fillStyle: "white"})
+                        IGVGraphics.fillText(ctx, gapLenText, textStart, yRect + 10, {
+                            'font': 'normal 10px monospace',
+                            'fillStyle': 'black',
+                        })
+                    }
                 }
             }
 
@@ -996,28 +1030,47 @@ class AlignmentTrack {
                     if (insertionBlock.start > bpEnd) {
                         break
                     }
+
                     const refOffset = insertionBlock.start - bpStart
-                    const xBlockStart = refOffset / bpPerPixel - 1
+                    const insertLenText = insertionBlock.len.toString()
+
+                    const textPixelWidth = 2 + (insertLenText.length * 6)
+                    const basePixelWidth = insertionBlock.len === 1 ? 2 : Math.round(insertionBlock.len / bpPerPixel)
+                    const widthBlock = Math.max(Math.min(textPixelWidth, basePixelWidth), 2)
+
+                    const xBlockStart = (refOffset / bpPerPixel) - (widthBlock / 2)
                     if ((xBlockStart - lastXBlockStart) > 2) {
-                        const widthBlock = 3
-                        IGVGraphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: this.insertionColor})
+                        const props = {fillStyle: this.insertionColor}
+                        IGVGraphics.fillRect(ctx, xBlockStart, yRect, widthBlock, alignmentHeight, props)
+
+                        // Draw decorations like Java IGV to make an 'I' shape
+                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect, 2, 2, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect + alignmentHeight - 2, 2, 2, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart + widthBlock, yRect, 2, 2, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart + widthBlock, yRect + alignmentHeight - 2, 2, 2, props)
+
+                        // Show # of inserted bases as text if it's a multi-base insertion and the insertion block
+                        // is wide enough to hold text (its size is capped at the text label size, but can be smaller
+                        // if the browser is zoomed out and the insertion is small)
+                        if (insertionBlock.len > 1 && basePixelWidth > textPixelWidth) {
+                            IGVGraphics.fillText(ctx, insertLenText, xBlockStart + 1, yRect + 10, {
+                                'font': 'normal 10px monospace',
+                                'fillStyle': 'white',  // TODO: configurable
+                            })
+                        }
                         lastXBlockStart = xBlockStart
                     }
                 }
             }
 
-            if (alignment.gaps) {
-                const yStrokedLine = yRect + alignmentHeight / 2
-                for (let gap of alignment.gaps) {
-                    const sPixel = (gap.start - bpStart) / bpPerPixel
-                    const ePixel = ((gap.start + gap.len) - bpStart) / bpPerPixel
-                    const color = ("D" === gap.type) ? this.deletionColor : this.skippedColor
-                    IGVGraphics.strokeLine(ctx, sPixel, yStrokedLine, ePixel, yStrokedLine, {strokeStyle: color})
-                }
-            }
+            basesToDraw.forEach(({bbox, baseColor, readChar}) => {
+                renderBlockOrReadChar(ctx, bpPerPixel, bbox, baseColor, readChar);
+            });
 
 
             function drawBlock(block, b) {
+                // Collect bases to draw for later rendering
+                const blockBasesToDraw = []
 
                 const offsetBP = block.start - alignmentContainer.start
                 const blockStartPixel = (block.start - bpStart) / bpPerPixel
@@ -1102,7 +1155,7 @@ class AlignmentTrack {
                 }
 
 
-                // Read base coloring coloring
+                // Read base coloring
 
                 if (isSoftClip ||
                     showAllBases ||
@@ -1135,16 +1188,23 @@ class AlignmentTrack {
                             if (baseColor) {
                                 const xPixel = ((block.start + i) - bpStart) / bpPerPixel
                                 const widthPixel = Math.max(1, 1 / bpPerPixel)
-                                renderBlockOrReadChar(ctx, bpPerPixel, {
-                                    x: xPixel,
-                                    y: yRect,
-                                    width: widthPixel,
-                                    height: alignmentHeight
-                                }, baseColor, readChar)
+
+                                blockBasesToDraw.push({
+                                    bbox: {
+                                        x: xPixel,
+                                        y: yRect,
+                                        width: widthPixel,
+                                        height: alignmentHeight
+                                    },
+                                    baseColor,
+                                    readChar,
+                                })
                             }
                         }
                     }
                 }
+
+                return blockBasesToDraw
             }
 
             function renderBlockOrReadChar(context, bpp, bbox, color, char) {
