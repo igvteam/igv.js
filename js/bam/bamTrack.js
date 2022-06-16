@@ -782,7 +782,9 @@ class AlignmentTrack {
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)"
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)"
         this.insertionColor = config.insertionColor || "rgb(138, 94, 161)"
+        this.insertionTextColor = config.insertionTextColor || "white"
         this.deletionColor = config.deletionColor || "black"
+        this.deletionTextColor = config.deletionTextColor || "black"
         this.skippedColor = config.skippedColor || "rgb(150, 170, 170)"
         this.pairConnectorColor = config.pairConnectorColor
 
@@ -1012,7 +1014,7 @@ class AlignmentTrack {
                         IGVGraphics.fillRect(ctx, textStart - 1, yRect - 1, gapTextWidth + 2, 12, {fillStyle: "white"})
                         IGVGraphics.fillText(ctx, gapLenText, textStart, yRect + 10, {
                             'font': 'normal 10px monospace',
-                            'fillStyle': 'black',
+                            'fillStyle': this.deletionTextColor,
                         })
                     }
                 }
@@ -1055,7 +1057,7 @@ class AlignmentTrack {
                         if (insertionBlock.len > 1 && basePixelWidth > textPixelWidth) {
                             IGVGraphics.fillText(ctx, insertLenText, xBlockStart + 1, yRect + 10, {
                                 'font': 'normal 10px monospace',
-                                'fillStyle': 'white',  // TODO: configurable
+                                'fillStyle': this.insertionTextColor,
                             })
                         }
                         lastXBlockStart = xBlockStart
