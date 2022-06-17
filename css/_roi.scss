@@ -1,4 +1,6 @@
 
+$igv-roi-grey: #7F7F7F;
+
 $dimension: 24px;
 $dimension-large: 32px;
 
@@ -589,6 +591,91 @@ $igv-roi-table-background-color: #eee;
 }
 
 // menu container
+.igv-roi-menu-next-gen {
+
+  position: absolute;
+  z-index: 1024;
+
+  font-family: $igv-roi-table-font-face;
+  background-color: white;
+
+  width:(8 * $dimension);
+
+  border-color: $igv-roi-border-color;
+  border-radius: $igv-roi-table-border-radius;
+  border-style: solid;
+  border-width: thin;
+
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  // header
+  >div:first-child {
+    height: $dimension;
+
+    background-color: $igv-roi-border-color;
+
+    border-top-left-radius: $igv-roi-table-border-radius;
+    border-top-right-radius: $igv-roi-table-border-radius;
+    border-top-color: transparent;
+    border-top-style: solid;
+    border-top-width: 0;
+
+    border-bottom-style: solid;
+    border-bottom-width: 0;
+    border-bottom-color: $igv-roi-border-color;
+
+  }
+
+  // body
+  >div:last-child {
+
+    //background-color: rgba(94, 255, 1, 0.5);
+    background-color: white;
+
+    border-bottom-left-radius: $igv-roi-table-border-radius;
+    border-bottom-right-radius: $igv-roi-table-border-radius;
+    border-bottom-color: transparent;
+    border-bottom-style: solid;
+    border-bottom-width: 0;
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: stretch;
+
+    >div {
+      cursor: pointer;
+
+      height: $dimension;
+      margin-left: 4px;
+
+      text-align: start;
+      vertical-align: middle;
+
+      border-bottom-style: solid;
+      border-bottom-width: thin;
+      border-bottom-color: $igv-roi-border-color;
+    }
+
+    >div:hover {
+      background-color: rgba(127, 127, 127, 0.1);
+    }
+
+    >div:last-child {
+      text-align: center;
+      margin: unset;
+      border-bottom-width: 0;
+      border-bottom-color: transparent;
+    }
+  }
+
+}
+
 .igv-roi-menu {
   position: absolute;
   z-index: 1024;
