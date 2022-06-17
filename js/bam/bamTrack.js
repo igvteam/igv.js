@@ -1047,13 +1047,11 @@ class AlignmentTrack {
                     const xBlockStart = (refOffset / bpPerPixel) - (widthBlock / 2)
                     if ((xBlockStart - lastXBlockStart) > 2) {
                         const props = {fillStyle: this.insertionColor}
-                        IGVGraphics.fillRect(ctx, xBlockStart, yRect, widthBlock, alignmentHeight, props)
 
                         // Draw decorations like Java IGV to make an 'I' shape
-                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect, 2, 2, props)
-                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect + alignmentHeight - 2, 2, 2, props)
-                        IGVGraphics.fillRect(ctx, xBlockStart + widthBlock, yRect, 2, 2, props)
-                        IGVGraphics.fillRect(ctx, xBlockStart + widthBlock, yRect + alignmentHeight - 2, 2, 2, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect, widthBlock + 4, 2, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart, yRect + 2, widthBlock, alignmentHeight - 4, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect + alignmentHeight - 2, widthBlock + 4, 2, props)
 
                         // Show # of inserted bases as text if it's a multi-base insertion and the insertion block
                         // is wide enough to hold text (its size is capped at the text label size, but can be smaller
