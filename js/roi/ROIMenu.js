@@ -1,4 +1,4 @@
-import { DOMUtils } from '../../node_modules/igv-utils/src/index.js'
+import { DOMUtils, UIUtils } from '../../node_modules/igv-utils/src/index.js'
 
 class ROIMenu {
     constructor(browser, parent) {
@@ -13,19 +13,11 @@ class ROIMenu {
         const header = DOMUtils.div()
         this.container.appendChild(header)
 
+        UIUtils.attachDialogCloseHandlerWithParent(header, () => this.container.style.display = 'none')
+
         // body
         this.body = DOMUtils.div()
         this.container.appendChild(this.body)
-
-        // // description
-        // const description = DOMUtils.div()
-        // body.appendChild(description)
-        // description.innerText = 'Description'
-        //
-        // // delete
-        // const _delete_ = DOMUtils.div()
-        // body.appendChild(_delete_)
-        // _delete_.innerText = 'Delete'
 
         this.container.style.display = 'none'
 
@@ -35,21 +27,35 @@ class ROIMenu {
 
         removeAllChildNodes(this.body)
 
-        // description
+        const feature = await this.browser.roiManager.findUserDefinedRegionWithKey(regionElement.dataset.region)
+
+        // Description Copy
+        const _description_copy_ = DOMUtils.div()
+        this.body.appendChild(_description_copy_)
+
+        const placeholder = 'Description'
+        const str = (feature.name || placeholder)
+
+        _description_copy_.innerText = str
+        _description_copy_.setAttribute('title', str)
+        placeholder === str ? _description_copy_.classList.add('igv-roi-placeholder') : _description_copy_.classList.remove('igv-roi-placeholder')
+
+
+        // Set Description
         const description = DOMUtils.div()
         this.body.appendChild(description)
-        description.innerText = 'Description'
-
-        const feature = await this.browser.roiManager.findUserDefinedRegionWithKey(regionElement.dataset.region)
+        description.innerText = 'Set Description'
 
         description.addEventListener('click', event => {
 
             event.stopPropagation()
 
+            this.container.style.display = 'none'
+
             const callback = () => {
 
-                const value = this.browser.inputDialog.input.value
-                feature.name = ('' === value || undefined === value) ? 'untitled' : value.trim()
+                const value = this.browser.inputDialog.input.value || ''
+                feature.name = value.trim()
 
                 this.container.style.display = 'none'
 
@@ -58,8 +64,8 @@ class ROIMenu {
 
             const config =
                 {
-                    label: 'Set Description',
-                    value: (feature.name || 'unnamed'),
+                    label: 'Description',
+                    value: (feature.name || ''),
                     callback
                 }
 
@@ -68,11 +74,10 @@ class ROIMenu {
         })
 
 
-
-        // delete
+        // Delete Region
         const _delete_ = DOMUtils.div()
         this.body.appendChild(_delete_)
-        _delete_.innerText = 'Delete'
+        _delete_.innerText = 'Delete Region'
 
         _delete_.addEventListener('click', event => {
             event.stopPropagation()
