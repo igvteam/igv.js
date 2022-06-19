@@ -229,10 +229,11 @@ class DynamicFeatureSource {
         featureList.sort((a, b) => a.start - b.start)
     }
 
-    removeFeature(feature) {
-        let featureList = this.featureMap[feature.chr]
-        if (featureList) {
-            this.featureMap[feature.chr] = featureList.filter(f => f.start === feature.start && f.end === feature.end)
+    removeFeature({ chr, start, end }) {
+        
+        if (this.featureMap[ chr ]) {
+            const match = `${chr}-${start}-${end}`
+            this.featureMap[ chr ] = this.featureMap[ chr ].filter(feature => match !== `${feature.chr}-${feature.start}-${feature.end}`)
         }
     }
 }

@@ -781,7 +781,7 @@ class Browser {
 
     /**
      * Return a promise for the list of user-defined regions-of-interest
-     * 
+     *
      * NOTE: public API function
      */
     async getUserDefinedROIs() {
@@ -799,8 +799,6 @@ class Browser {
             for (let value of Object.values(featureHash)) {
                 featureList.push(...value)
             }
-
-            console.log(`user defined set - features ${ featureList }`)
 
             return 0 === featureList.length ? undefined : featureList
 
