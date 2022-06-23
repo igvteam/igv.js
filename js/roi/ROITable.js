@@ -22,7 +22,12 @@ class ROITable {
 
         this.footerDOM = this.createFooterDOM(this.container)
 
-        makeDraggable(this.container, header, { minX:0, minY:0 })
+        const { y:y_root } = browser.root.getBoundingClientRect()
+        const { y:y_parent } = parent.getBoundingClientRect()
+
+        const constraint = -(y_parent - y_root)
+
+        makeDraggable(this.container, header, { minX:0, minY:constraint })
 
         this.container.style.display = 'none'
 
