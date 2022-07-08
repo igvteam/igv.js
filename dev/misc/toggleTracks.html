@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+    <button id="load_track_button">Load Track</button>
+    <button id="unload_track_button">Unload Track</button>
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const div = document.getElementById("myDiv")
+    const options = {
+        genome: "hg19"
+    }
+
+    igv.createBrowser(div, options)
+        .then(function (browser) {
+
+            let track
+
+            document.getElementById("load_track_button").addEventListener("click", async () => {
+                track = await browser.loadTrack({
+                    type: "wig",
+                    format: "bigwig",
+                    url: "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+                    name: "Encode bigwig"
+                })
+            })
+
+            document.getElementById("unload_track_button").addEventListener("click", async () => {
+                browser.removeTrack(track)
+            })
+
+        })
+
+
+</script>
+
+</body>
+
+</html>
+

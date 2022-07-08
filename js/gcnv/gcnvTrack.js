@@ -46,6 +46,7 @@ class GCNVTrack extends TrackBase {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
+            if(this.disposed) return;   // This track was removed during async load
             this.sampleNames = this.header.columnNames.slice(3)
 
             // Set generic properties from track line
