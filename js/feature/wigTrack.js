@@ -78,6 +78,7 @@ class WigTrack extends TrackBase {
 
     async postInit() {
         const header = await this.getHeader()
+        if(this.disposed) return;   // This track was removed during async load
         if (header) this.setTrackProperties(header)
     }
 

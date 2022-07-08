@@ -472,13 +472,6 @@ class BAMTrack extends TrackBase {
     }
 
     /**
-     * Called when the track is removed.  Do any needed cleanup here
-     */
-    dispose() {
-        this.trackView = undefined
-    }
-
-    /**
      * Return the current state of the track.  Used to create sessions and bookmarks.
      *
      * @returns {*|{}}

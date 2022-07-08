@@ -781,7 +781,7 @@ class Browser {
 
     /**
      * Return a promise for the list of user-defined regions-of-interest
-     * 
+     *
      * NOTE: public API function
      */
     async getUserDefinedROIs() {
@@ -800,7 +800,7 @@ class Browser {
                 featureList.push(...value)
             }
 
-            console.log(`user defined set - features ${ featureList }`)
+            console.log(`user defined set - features ${featureList}`)
 
             return 0 === featureList.length ? undefined : featureList
 
@@ -835,8 +835,7 @@ class Browser {
             const newTrack = await this.createTrack(config)
 
             if (undefined === newTrack) {
-                Alert.presentAlert(new Error(`Unknown file type: ${config.url || config}`), undefined)
-                return newTrack
+                 return
             }
 
             // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
@@ -858,6 +857,7 @@ class Browser {
                     trackView.stopSpinner()
                 }
             }
+
 
             if (!newTrack.autoscaleGroup) {
                 // Group autoscale will get updated later (as a group)
@@ -955,13 +955,17 @@ class Browser {
         }
 
         const track = TrackFactory.getTrack(type, config, this)
+        if (undefined === track) {
+            Alert.presentAlert(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
+            return
+        } else {
 
-        if (track && config.roi && config.roi.length > 0) {
-            track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
+            if (config.roi && config.roi.length > 0) {
+                track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
+            }
+
+            return track
         }
-
-        return track
-
     }
 
 
@@ -1043,7 +1047,9 @@ class Browser {
         this.trackViews.splice(this.trackViews.indexOf(track.trackView), 1)
         this.fireEvent('trackremoved', [track])
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
-        track.trackView.dispose()
+        if(track.trackView) {
+            track.trackView.dispose()
+        }
     }
 
     /**
