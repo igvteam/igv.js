@@ -313,6 +313,23 @@ class Browser {
     };
 
     /**
+     * PUBLIC API FUNCTION
+     *
+     * Return the current genomic region as a locus string, or array of locus strings if in multi-locus view
+     * @returns {string|*[]|*}
+     */
+    currentLoci() {
+        const noCommaLocusString = (rf) => `${rf.chr}:${rf.start + 1}-${rf.end}`
+        if (undefined === this.referenceFrameList || 0 === this.referenceFrameList.length) {
+            return ""
+        } else if (1 === this.referenceFrameList.length) {
+            return noCommaLocusString(this.referenceFrameList[0])
+        } else {
+            return this.referenceFrameList.map(rf => noCommaLocusString(rf))
+        }
+    }
+
+    /**
      * Render browse display as SVG
      * @returns {string}
      */
@@ -984,7 +1001,9 @@ class Browser {
         this.trackViews.splice(this.trackViews.indexOf(track.trackView), 1)
         this.fireEvent('trackremoved', [track])
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
-        track.trackView.dispose()
+        if(track.trackView) {
+            track.trackView.dispose()
+        }
     }
 
     /**

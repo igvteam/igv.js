@@ -211,6 +211,8 @@ class TrackBase {
      */
     setTrackProperties(properties) {
 
+        if(this.disposed) return;   // This track was removed during async load
+
         const tracklineConfg = {}
         let tokens
         for (let key of Object.keys(properties)) {
@@ -464,6 +466,20 @@ class TrackBase {
         }
         str += '</div>'
         return str
+    }
+
+    /**
+     * Track has been permanently removed.  Release resources and other cleanup
+     */
+    dispose() {
+
+        this.disposed = true
+
+        // This should not be neccessary, but in case there is some unknown reference holding onto this track object,
+        // for example in client code, release any resources here.
+        for (let key of Object.keys(this)) {
+            this[key] = undefined
+        }
     }
 
     static getCravatLink(chr, position, ref, alt, genomeID) {

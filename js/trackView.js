@@ -788,18 +788,6 @@ class TrackView {
             this.track.dispose()
         }
 
-        // TODO: Perhaps better done in track/trackBase
-        const track = this.track
-
-        if (typeof track.dispose === 'function') {
-            track.dispose()
-        }
-
-        for (let key of Object.keys(track)) {
-            track[key] = undefined
-        }
-
-
         for (let key of Object.keys(this)) {
             this[key] = undefined
         }
