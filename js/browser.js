@@ -987,6 +987,14 @@ class Browser {
         return this.trackViews.filter(tv => tv.track && tv.track.name).map(tv => tv.track.name)
     }
 
+    /**
+     * NOTE: Public API function
+     *
+     * Remove all tracks matching the given name.  Usually this will be a single track, but there is no
+     * guarantee names are unique
+     *
+     * @param name
+     */
     removeTrackByName(name) {
         const copy = this.trackViews.slice()
         for (let trackView of copy) {
@@ -996,12 +1004,28 @@ class Browser {
         }
     }
 
+    /**
+     * NOTE: Public API function
+     *
+     * Remove the given track.  If it has already been removed this is a no-op.
+     *
+     * @param track
+     */
     removeTrack(track) {
+        for (let trackView of this.trackViews) {
+            if (track === trackView.track) {
+                this._removeTrack(trackView.track)
+                break
+            }
+        }
+    }
 
+    _removeTrack(track) {
+        if(track.disposed) return
         this.trackViews.splice(this.trackViews.indexOf(track.trackView), 1)
         this.fireEvent('trackremoved', [track])
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
-        if(track.trackView) {
+        if (track.trackView) {
             track.trackView.dispose()
         }
     }
@@ -1869,9 +1893,9 @@ async function resize() {
 
     this.updateUIWithReferenceFrameList()
 
-     //TODO -- update view only if needed.  Reducing size never needed.  Increasing size maybe
+    //TODO -- update view only if needed.  Reducing size never needed.  Increasing size maybe
 
-     await this.updateViews(true)
+    await this.updateViews(true)
 }
 
 
