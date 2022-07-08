@@ -115,6 +115,7 @@ class FeatureTrack extends TrackBase {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
+            if(this.disposed) return;   // This track was removed during async load
         }
 
         // Set properties from track line
