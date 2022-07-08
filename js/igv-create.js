@@ -84,7 +84,6 @@ async function createBrowser(parentDiv, config) {
 
 }
 
-
 function removeBrowser(browser) {
     browser.dispose()
     browser.root.remove()
@@ -97,6 +96,10 @@ function removeAllBrowsers() {
         browser.root.remove()
     }
     allBrowsers = []
+}
+
+function getAllBrowsers() {
+    return allBrowsers;
 }
 
 /**
@@ -276,4 +279,4 @@ async function createTrack(config, browser) {
     return await Browser.prototype.createTrack.call(browser, config)
 }
 
-export {createTrack, createBrowser, removeBrowser, removeAllBrowsers, visibilityChange}
+export {createTrack, createBrowser, removeBrowser, removeAllBrowsers, getAllBrowsers, visibilityChange}
