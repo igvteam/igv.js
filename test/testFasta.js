@@ -91,10 +91,12 @@ suite("testFasta", function () {
     })
 
 
-    // >chr1:1000001-1000025
-    // GGGCACAGCCTCACCCAGGAAAGCA
-
-    test("FastaSequence - Test fasta with start offset", async function () {
+    /**
+     * Test "old" syntax partial fasta (pre multi-locus support)
+     */
+    test("FastaSequence - Test partial fasta", async function () {
+        // >chr1:1000001-1000025
+        // GGGCACAGCCTCACCCAGGAAAGCA
 
         const fasta = await loadFasta({fastaURL: require.resolve("./data/fasta/sliced.fasta"), indexed: false})
 
@@ -109,10 +111,61 @@ suite("testFasta", function () {
         assert.equal(seq, expected)
 
         // way....   Off left side
-        expected = "**********"
+        expected = undefined
 
         seq = await fasta.getSequence("chr1", 10, 20)
         assert.equal(seq, expected)
+
+        // No length token
+        const chr1 = fasta.chromosomes["chr1"]
+        assert.equal(chr1.bpLength, 1000025)
+
+    })
+
+
+    /**
+     * Test multi-locus sliced fasta wiht 2 sequences on chr1
+     */
+    test("FastaSequence - Test mutli-slice partial fasta", async function () {
+
+        // >chr1:2000001-2000025 @len=249250621
+        // TTTGCTGAGGATTGGGCTTGGGTAC
+        // >chr3:2000001-2000025 @len=198022430
+        // TTTGCTGAGGATTGGGCTTGGGTAC
+        // >chr1:1000001-1000025 @len=249250621
+        // GGGCACAGCCTCACCCAGGAAAGCA
+
+        const fasta = await loadFasta({fastaURL: require.resolve("./data/fasta/sliced2.fasta"), indexed: false})
+
+        let expected = "GGGCACAGCCTCACCCAGGAAAGCA"
+        let seq = await fasta.getSequence("chr1", 1000000, 1000025)
+        assert.equal(seq, expected)
+
+
+        // Off left side
+        expected = "*****GGGCA"
+        seq = await fasta.getSequence("chr1", 999995, 1000005)
+        assert.equal(seq, expected)
+
+        // way....   Off left side
+        expected = undefined
+
+        seq = await fasta.getSequence("chr1", 10, 20)
+        assert.equal(seq, expected)
+
+        expected = "TTTGCTGAGGATTGGGCTTGGGTAC"
+        seq = await fasta.getSequence("chr1", 2000000, 2000025)
+        assert.equal(seq, expected)
+
+
+        // Off left side
+        expected = "*****TTTGC"
+        seq = await fasta.getSequence("chr1", 1999995, 2000005)
+        assert.equal(seq, expected)
+
+        const chr1 = fasta.chromosomes["chr1"]
+        assert.equal(chr1.bpLength, 249250621)
+
 
     })
 
