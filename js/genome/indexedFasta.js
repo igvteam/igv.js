@@ -120,7 +120,7 @@ class FastaSequence {
 
                     this.chromosomeNames.push(chr)
                     this.index[chr] = indexEntry
-                    this.chromosomes[chr] = new Chromosome(chr, order++, 0, size)
+                    this.chromosomes[chr] = new Chromosome(chr, order++, size)
                 }
             }
             return this.index

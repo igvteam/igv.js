@@ -110,7 +110,7 @@ const TRANSLATED_HEIGHT = 115
 const SEQUENCE_HEIGHT = 15
 const FRAME_HEIGHT = 25
 const FRAME_BORDER = 5
-const BP_PER_PIXEL_THRESHOLD = 1/10
+const BP_PER_PIXEL_THRESHOLD = 1 / 10
 
 class SequenceTrack {
 
@@ -178,7 +178,9 @@ class SequenceTrack {
                     label: this.reversed ? 'View visible sequence (reversed)...' : 'View visible sequence...',
                     click: async () => {
                         let seq = await this.browser.genome.sequence.getSequence(chr, start, end)
-                        if (this.reversed) {
+                        if (!seq) {
+                            seq = "Unknown sequence"
+                        } else if (this.reversed) {
                             seq = reverseComplementSequence(seq)
                         }
                         Alert.presentAlert(seq)
@@ -190,7 +192,9 @@ class SequenceTrack {
                     label: 'Copy visible sequence',
                     click: async () => {
                         let seq = await this.browser.genome.sequence.getSequence(chr, start, end)
-                        if (this.reversed) {
+                        if (!seq) {
+                            seq = "Unknown sequence"
+                        } else if (this.reversed) {
                             seq = reverseComplementSequence(seq)
                         }
                         try {
@@ -258,6 +262,10 @@ class SequenceTrack {
         if (options.features) {
 
             let sequence = options.features.sequence
+            if(!sequence) {
+                console.error("No sequence")
+                return
+            }
 
             if (this.reversed) {
                 sequence = sequence.split('').map(function (cv) {
