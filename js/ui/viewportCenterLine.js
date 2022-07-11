@@ -46,24 +46,19 @@ class ViewportCenterLine {
 
     repaint() {
 
-        const left = Math.floor(this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)/2)
-
         if (this.referenceFrame) {
 
             const ppb = 1.0 / this.referenceFrame.bpPerPixel
-
             if (ppb > 1) {
-                this.container.style.left = `${left}px`
-                this.container.style.width = `${Math.floor(this.referenceFrame.toPixels(1))}px`
+                const width = Math.floor(this.referenceFrame.toPixels(1))
+                this.container.style.width = `${width}px`
                 this.container.classList.remove('igv-center-line-thin')
                 this.container.classList.add('igv-center-line-wide')
             } else {
-                this.container.style.left = `${left}px`
                 this.container.style.width = '1px'
                 this.container.classList.remove('igv-center-line-wide')
                 this.container.classList.add('igv-center-line-thin')
             }
-
         }
     }
 
