@@ -115,6 +115,8 @@ class BamAlignmentRow {
                 }
             case "MQ":
                 return alignment.mq === undefined ? Number.MAX_VALUE : -alignment.mq
+            case "ALIGNED_READ_LENGTH":
+                return -alignment.lengthOnRef
             default:
                 return Number.MAX_VALUE
         }
