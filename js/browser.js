@@ -804,8 +804,6 @@ class Browser {
                 featureList.push(...value)
             }
 
-            console.log(`user defined set - features ${featureList}`)
-
             return 0 === featureList.length ? undefined : featureList
 
         } else {
