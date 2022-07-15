@@ -31,15 +31,15 @@ import {computeWGFeatures} from "../feature/featureUtils.js"
 import * as TrackUtils from "../util/trackUtils.js"
 
 
-const appleCrayonColorName = 'fern'
+const appleCrayonColorName = 'nickel'
 
-const ROI_DEFAULT_ALPHA = 1/16
+const ROI_DEFAULT_ALPHA = 2/16
+
 const ROI_DEFAULT_COLOR = appleCrayonRGBA(appleCrayonColorName, ROI_DEFAULT_ALPHA)
 const ROI_DEFAULT_HEADER_COLOR = 'rgba(0,0,0,0)'
 
-const ROI_USER_DEFINED_ALPHA = 1/12
-const ROI_USER_HEADER_DEFINED_COLOR = appleCrayonRGBA(appleCrayonColorName, 1)
-const ROI_USER_DEFINED_COLOR = appleCrayonRGBA('nickel', ROI_USER_DEFINED_ALPHA)
+const ROI_USER_HEADER_DEFINED_COLOR = 'rgba(155,185,129,1)'
+const ROI_USER_DEFINED_COLOR = ROI_DEFAULT_COLOR
 
 class ROISet {
 
@@ -73,6 +73,7 @@ class ROISet {
         if (true === this.isUserDefined) {
 
             this.color = config.color || ROI_USER_DEFINED_COLOR
+
             this.headerColor = ROI_USER_HEADER_DEFINED_COLOR
 
         } else {
@@ -228,15 +229,16 @@ class DynamicFeatureSource {
         featureList.sort((a, b) => a.start - b.start)
     }
 
-    removeFeature(feature) {
-        let featureList = this.featureMap[feature.chr]
-        if (featureList) {
-            this.featureMap[feature.chr] = featureList.filter(f => f.start === feature.start && f.end === feature.end)
+    removeFeature({ chr, start, end }) {
+        
+        if (this.featureMap[ chr ]) {
+            const match = `${chr}-${start}-${end}`
+            this.featureMap[ chr ] = this.featureMap[ chr ].filter(feature => match !== `${feature.chr}-${feature.start}-${feature.end}`)
         }
     }
 }
 
 
-export {ROI_DEFAULT_COLOR, ROI_USER_HEADER_DEFINED_COLOR, ROI_USER_DEFINED_COLOR, screenCoordinates}
+export {ROI_DEFAULT_COLOR, ROI_USER_DEFINED_COLOR, screenCoordinates}
 
 export default ROISet
