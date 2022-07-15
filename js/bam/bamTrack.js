@@ -1193,6 +1193,7 @@ class AlignmentTrack {
         list.push({label: '&nbsp; chromosome of mate', click: () => sortByOption("MATE_CHR")})
         list.push({label: '&nbsp; mapping quality', click: () => sortByOption("MQ")})
         list.push({label: '&nbsp; read name', click: () => sortByOption("READ_NAME")})
+        list.push({label: '&nbsp; aligned read length', click: () => sortByOption("ALIGNED_READ_LENGTH")})
         list.push({
             label: '&nbsp; tag', click: () => {
                 const cs = this.parent.sortObject
