@@ -95,6 +95,7 @@ class VariantTrack extends TrackBase {
     async postInit() {
 
         this.header = await this.getHeader()   // cricital, don't remove'
+        if(this.disposed) return;   // This track was removed during async load
         if (undefined === this.visibilityWindow && this.config.indexed !== false) {
             const fn = FileUtils.isFile(this.config.url) ? this.config.url.name : this.config.url
             if (isString(fn) && fn.toLowerCase().includes("gnomad")) {

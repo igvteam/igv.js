@@ -655,7 +655,11 @@ class Browser {
     }
 
     updateNavbarDOMWithGenome(genome) {
-        this.$current_genome.text(genome.id || '')
+
+        // If the genome is defined directly from a fasta file or data url the "id" will be the full url.  Don't display
+        // this.
+        let genomeLabel = (genome.id && genome.id.length < 10 ? genome.id : '')
+        this.$current_genome.text(genomeLabel)
         this.$current_genome.attr('title', genome.id || '')
         this.chromosomeSelectWidget.update(genome)
     }
@@ -833,8 +837,7 @@ class Browser {
             const newTrack = await this.createTrack(config)
 
             if (undefined === newTrack) {
-                Alert.presentAlert(new Error(`Unknown file type: ${config.url || config}`), undefined)
-                return newTrack
+                 return
             }
 
             // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
@@ -856,6 +859,7 @@ class Browser {
                     trackView.stopSpinner()
                 }
             }
+
 
             if (!newTrack.autoscaleGroup) {
                 // Group autoscale will get updated later (as a group)
@@ -953,13 +957,17 @@ class Browser {
         }
 
         const track = TrackFactory.getTrack(type, config, this)
+        if (undefined === track) {
+            Alert.presentAlert(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
+            return
+        } else {
 
-        if (track && config.roi && config.roi.length > 0) {
-            track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
+            if (config.roi && config.roi.length > 0) {
+                track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
+            }
+
+            return track
         }
-
-        return track
-
     }
 
 
@@ -1027,6 +1035,14 @@ class Browser {
         return this.trackViews.filter(tv => tv.track && tv.track.name).map(tv => tv.track.name)
     }
 
+    /**
+     * NOTE: Public API function
+     *
+     * Remove all tracks matching the given name.  Usually this will be a single track, but there is no
+     * guarantee names are unique
+     *
+     * @param name
+     */
     removeTrackByName(name) {
         const copy = this.trackViews.slice()
         for (let trackView of copy) {
@@ -1036,12 +1052,30 @@ class Browser {
         }
     }
 
+    /**
+     * NOTE: Public API function
+     *
+     * Remove the given track.  If it has already been removed this is a no-op.
+     *
+     * @param track
+     */
     removeTrack(track) {
+        for (let trackView of this.trackViews) {
+            if (track === trackView.track) {
+                this._removeTrack(trackView.track)
+                break
+            }
+        }
+    }
 
+    _removeTrack(track) {
+        if(track.disposed) return
         this.trackViews.splice(this.trackViews.indexOf(track.trackView), 1)
         this.fireEvent('trackremoved', [track])
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
-        track.trackView.dispose()
+        if (track.trackView) {
+            track.trackView.dispose()
+        }
     }
 
     /**

@@ -22,11 +22,12 @@ class ROITable {
 
         this.footerDOM = this.createFooterDOM(this.container)
 
-        const { y:yRoot } = browser.root.getBoundingClientRect()
-        const { y:yColumnContainer } = browser.columnContainer.getBoundingClientRect()
+        const { y:y_root } = browser.root.getBoundingClientRect()
+        const { y:y_parent } = parent.getBoundingClientRect()
 
-        console.log(`ROI Table - y delta ${ yRoot - yColumnContainer }`)
-        makeDraggable(this.container, header, { minY: (yRoot - yColumnContainer) })
+        const constraint = -(y_parent - y_root)
+
+        makeDraggable(this.container, header, { minX:0, minY:constraint })
 
         this.container.style.display = 'none'
 

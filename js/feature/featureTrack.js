@@ -115,6 +115,7 @@ class FeatureTrack extends TrackBase {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
+            if(this.disposed) return;   // This track was removed during async load
         }
 
         // Set properties from track line
@@ -389,10 +390,12 @@ class FeatureTrack extends TrackBase {
                 label: 'View feature sequence',
                 click: async () => {
                     let seq = await this.browser.genome.getSequence(f.chr, f.start, f.end)
-                    if (f.strand === '-') {
+                    if (!seq) {
+                        seq = "Unknown sequence"
+                    }
+                    else if (f.strand === '-') {
                         seq = reverseComplementSequence(seq)
                     }
-                    if (!seq) seq = "Unknown sequence"
                     Alert.presentAlert(seq)
 
                 }
@@ -404,7 +407,10 @@ class FeatureTrack extends TrackBase {
                         label: 'Copy feature sequence',
                         click: async () => {
                             let seq = await this.browser.genome.getSequence(f.chr, f.start, f.end)
-                            if (f.strand === '-') {
+                            if (!seq) {
+                                seq = "Unknown sequence"
+                            }
+                            else if (f.strand === '-') {
                                 seq = reverseComplementSequence(seq)
                             }
                             try {
