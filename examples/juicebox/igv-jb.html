@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IGV-JB</title>
+    <!-- Font Awesome CSS-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- Juicebox CSS-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/juicebox.js@2.2.2/dist/css/juicebox.css">
+
+</head>
+<body>
+
+<div style="display:flex">
+    <div id="jbDiv"></div>
+    <div id="igvDiv" style="flex-grow:0;flex-shrink:0;flex-basis: 900px"></div>
+</div>
+
+<script type="module">
+
+    import juicebox from "https://cdn.jsdelivr.net/npm/juicebox.js@2.2.2/dist/juicebox.esm.js"
+    import igv from "https://cdn.jsdelivr.net/npm/igv@2.12.6/dist/igv.esm.min.js"
+
+    const jbConfig = {
+        "url": "https://hicfiles.s3.amazonaws.com/hiseq/gm12878/dilution/combined.hic",
+        "name": "GM12878",
+        "state": "8,8,6,5019.8614387040925,5017.416175745596,640,640,1.7275014631202374,NONE",
+        "colorScale": "568,255,0,0",
+        "nvi": "11664249584,33929"
+    }
+
+    // Start igv.js and create regions
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr8:125,435,405-133,904,633",
+            "tracks": [
+                {
+                    "url": "https://www.encodeproject.org/files/ENCFF000ARZ/@@download/ENCFF000ARZ.bigWig",
+                    "name": "H3K4me1 ",
+                    "min": 0,
+                    "max": 30,
+                    "color": "rgb(0,150,0)"
+                },
+                {
+                    "url": "https://www.encodeproject.org/files/ENCFF000ASF/@@download/ENCFF000ASF.bigWig",
+                    "name": "H3K4me3 ",
+                    "min": 0,
+                    "max": 30,
+                    "color": "rgb(0,150,0)"
+                },
+                {
+                    "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                    "name": "H3K27ac ",
+                    "min": 0,
+                    "max": 30,
+                    "color": "rgb(200,0,0)"
+                },
+                {
+                    "url": "https://www.encodeproject.org/files/ENCFF000ARJ/@@download/ENCFF000ARJ.bigWig",
+                    "name": "CTCF ",
+                    "max": 30
+                }
+
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv")
+    igv.createBrowser(igvDiv, options)
+        .then(async function (igvBrowser) {
+            const container = document.getElementById("jbDiv")
+            juicebox.init(container, jbConfig)
+                .then(function (hicBrowser) {
+
+                    console.log("Juicebox loaded")
+
+                    hicBrowser.eventBus.subscribe("LocusChange", evt => {
+                        console.log(evt)
+                        const gsx = hicBrowser.genomicState('x')
+                        const gsy = hicBrowser.genomicState('y')
+                        const chr = gsx.chromosome.name
+                        const ss = Math.min(gsx.startBP, gsy.startBP)
+                        const ee = Math.max(gsx.endBP, gsy.endBP)
+                        const bpp = gsx.bpp
+
+                        const referenceFrame = igvBrowser.referenceFrameList[0]
+                        const chr1 = igvBrowser.genome.getChromosomeName(chr)
+
+                        if (referenceFrame.chr === chr1) {
+                            referenceFrame.start = ss
+                            //referenceFrame.end = ee
+                            const width = igvBrowser.calculateViewportWidth(igvBrowser.referenceFrameList.length)
+                            const bpp = (ee - ss) / width
+                            const r = bpp / referenceFrame.bpPerPixel
+                            if (r > 1.05 || r < 0.95)
+                                referenceFrame.bpPerPixel = (ee - ss) / width
+                            console.log(referenceFrame.bpPerPixel)
+                            igvBrowser.updateViews()
+                        } else {
+                            const locus = `${chr}:${ss + 1}-${ee}`
+                            igvBrowser.search(locus)
+                        }
+                        //console.log(gsx)
+                    })
+
+                    hicBrowser.setCustomCrosshairsHandler(s => {
+                        //console.log(s)
+                        const binSize = hicBrowser.getSyncState().binSize
+
+                        const gsx = hicBrowser.genomicState('x')
+                        const gsy = hicBrowser.genomicState('y')
+                        //console.log(gsx)
+
+                        const roi1 = {chr: gsx.chromosome.name, start: s.xBP - binSize / 2, end: s.xBP + binSize / 2}
+                        const roi2 = {chr: gsy.chromosome.name, start: s.yBP - binSize / 2, end: s.yBP + binSize / 2}
+                        igvBrowser.clearROIs()
+                        igvBrowser.loadROI({color: "rgba(50,0,250,0.2)", features: [roi1, roi2]})
+                    })
+                    // this.customCrosshairsHandler({
+                    //     xBP,
+                    //     yBP,
+                    //     startXBP,
+                    //     startYBP,
+                    //     endXBP,
+                    //     endYBP,
+                    //     interpolantX: xNormalized,
+                    //     interpolantY: yNormalized
+                    // });
+
+                    //hicBrowser.goto("8", 122660070, 131053694,"8", 122660070, 131053694, 25000)
+                })
+
+        })
+
+
+</script>
+
+</body>
+</html>
