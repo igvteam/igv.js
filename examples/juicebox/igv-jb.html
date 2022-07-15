@@ -76,7 +76,6 @@
                     console.log("Juicebox loaded")
 
                     hicBrowser.eventBus.subscribe("LocusChange", evt => {
-                        console.log(evt)
                         const gsx = hicBrowser.genomicState('x')
                         const gsy = hicBrowser.genomicState('y')
                         const chr = gsx.chromosome.name
@@ -95,7 +94,6 @@
                             const r = bpp / referenceFrame.bpPerPixel
                             if (r > 1.05 || r < 0.95)
                                 referenceFrame.bpPerPixel = (ee - ss) / width
-                            console.log(referenceFrame.bpPerPixel)
                             igvBrowser.updateViews()
                         } else {
                             const locus = `${chr}:${ss + 1}-${ee}`
