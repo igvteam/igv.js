@@ -234,7 +234,7 @@ class ROIManager {
 
         columnContainer.querySelectorAll(createSelector(regionKey)).forEach(node => node.remove())
 
-        const feature = this.findUserDefinedRegionWithKey(regionKey)
+        const feature = await this.findUserDefinedRegionWithKey(regionKey)
 
         const set = await this.getUserDefinedROISet()
 
