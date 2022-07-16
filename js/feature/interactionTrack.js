@@ -50,6 +50,8 @@ function getArcType(config) {
     }
 }
 
+const DEFAULT_ARC_COLOR = "rgb(180,25,137)"
+
 class InteractionTrack extends TrackBase {
 
     constructor(config, browser) {
@@ -68,7 +70,7 @@ class InteractionTrack extends TrackBase {
         this.showBlocks = config.showBlocks === undefined ? true : config.showBlocks
         this.blockHeight = config.blockHeight || 3
         this.thickness = config.thickness || 1
-        this.color = config.color || "rgb(180,25,137)"
+        this.color = config.color
         this.alpha = config.alpha || 0.02  // was: 0.15
         this.painter = {flipAxis: !this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
 
@@ -172,7 +174,7 @@ class InteractionTrack extends TrackBase {
                 // Reset transient property drawState.  An undefined value => feature has not been drawn.
                 feature.drawState = undefined
 
-                let color = feature.color || this.color
+                let color = this.color || feature.color || DEFAULT_ARC_COLOR
                 if (color && this.config.useScore) {
                     color = getAlphaColor(color, scoreShade(feature.score))
                 }
