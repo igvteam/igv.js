@@ -811,7 +811,7 @@ function getWGFeatures(allFeatures) {
         if (chrFeatures) {
             for (let f of chrFeatures) {
                 if (!f.dup) {
-                    const bin = f.score ? Math.min(nBins - 1, Math.floor(Math.log(f.score) / binSize)) : 0
+                    const bin = f.score  ? Math.max(0, Math.min(nBins - 1, Math.floor(Math.log(f.score) / binSize))) : 0
                     if (binnedFeatures[bin].length < featuresPerBin) {
                         binnedFeatures[bin].push(makeWGFeature(f))
                     } else {
