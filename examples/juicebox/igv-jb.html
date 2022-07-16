@@ -16,6 +16,7 @@
     <div id="jbDiv"></div>
     <div id="igvDiv" style="flex-grow:0;flex-shrink:0;flex-basis: 950px"></div>
 </div>
+<button id="projectButton">Project contacts</button>
 
 <script type="module">
 
@@ -90,7 +91,7 @@
                     "arcType": "nested",
                     "arcOrientation": false,
                     "thickness": 1,
-                    "alpha": 0.02
+                    height: 240
                 }
             ]
         }
@@ -98,6 +99,17 @@
     const igvDiv = document.getElementById("igvDiv")
     igv.createBrowser(igvDiv, options)
         .then(async function (igvBrowser) {
+
+            // Wig track with explicit features, initially set to an empty array.
+            const interactionTrack = await igvBrowser.loadTrack({
+                id: "interactions",
+                type: "interact",
+                name: "Contacts",
+                //color: "rgba(180, 25, 137, 0.05)",
+                height: 125,
+                features: []    // ! Important, signals track that features will be supplied explicitly
+            })
+
             const container = document.getElementById("jbDiv")
             juicebox.init(container, jbConfig)
                 .then(function (hicBrowser) {
@@ -156,9 +168,63 @@
                     // });
 
                     //hicBrowser.goto("8", 122660070, 131053694,"8", 122660070, 131053694, 25000)
+
+                    document.getElementById("projectButton").addEventListener("click", () => getContactRecords())
+
+                    async function getContactRecords() {
+                        const viewportWidth = hicBrowser.contactMatrixView.$viewport[0].clientWidth
+                        const {chr1Name, chr2Name, binSize, binX, binY, pixelSize} = hicBrowser.getSyncState()
+                        const widthInBP = viewportWidth * binSize / pixelSize
+                        const region1 = {chr: chr1Name, start: binX * binSize, end: binX * binSize + widthInBP}
+                        const region2 = {chr: chr2Name, start: binY * binSize, end: binY * binSize + widthInBP}
+                        const records = await hicBrowser.dataset.getContactRecords("NONE", region1, region2, "BP", binSize)
+                        //console.log(records)
+
+                        const features = []
+                        const counts = []
+                        for (let rec of records) {
+
+                            const {bin1, bin2, counts} = rec
+                            // Skip diagonal
+                            if (Math.abs(bin1 - bin2) <= 10) continue
+
+                            if (counts < 100) continue
+
+                            const color = hicBrowser.contactMatrixView.colorScale.getColor(counts);
+                            const rgba = `rgba(${color.red},${color.green},${color.blue},${0.5 * color.alpha/255})`
+
+                            features.push({
+                                chr1: "chr" + chr1Name,
+                                start1: bin1 * binSize,
+                                end1: bin1 * binSize + binSize,
+                                chr2: "chr" + chr2Name,
+                                start2: bin2 * binSize,
+                                end2: bin2 * binSize + binSize,
+                                color: rgba
+                            })
+
+                            for(let feature of features) {
+                                feature.chr = feature.chr1
+                                feature.start = Math.min(feature.start1, feature.start2)
+                                feature.end = Math.max(feature.end1, feature.end2)
+                            }
+                        }
+                        interactionTrack.featureSource.updateFeatures(features)
+                        interactionTrack.clearCachedFeatures()
+                        interactionTrack.updateViews()
+
+                    }
                 })
 
         })
+
+
+    // chr1Name: this.dataset.chromosomes[this.state.chr1].name,
+    //     chr2Name: this.dataset.chromosomes[this.state.chr2].name,
+    //     binSize: this.dataset.bpResolutions[this.state.zoom],
+    //     binX: this.state.x,            // TODO -- tranlsate to lower right corner
+    //     binY: this.state.y,
+    //     pixelSize: this.state.pixelSize
 
 
 </script>
