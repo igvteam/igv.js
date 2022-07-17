@@ -116,7 +116,28 @@
 
                     console.log("Juicebox loaded")
 
-                    hicBrowser.eventBus.subscribe("LocusChange", evt => {
+                    let igvLocusChangeTS = 0
+                    let jbLocusChageTS = 0
+
+                    const lcFn = evt => {
+
+                        if(Date.now() - jbLocusChageTS < 1000) return
+
+                        const rf = evt[0]
+                        //hicBrowser.goto(rf.chr, rf.start, rf.end, rf.chr, rf.start, rf.end)
+                        igvLocusChangeTS = Date.now()
+                        hicBrowser.parseGotoInput(`${rf.chr}:${Math.floor(rf.start)}-${Math.floor(rf.end)}`)
+                    }
+
+                    igvBrowser.on('locuschange', throttle(lcFn, 1000))
+
+                    hicBrowser.eventBus.subscribe("LocusChange", throttle(evt => {
+
+                        if(Date.now() - igvLocusChangeTS < 1000) {
+                            return
+                        }
+
+                        jbLocusChageTS = Date.now()
                         const gsx = hicBrowser.genomicState('x')
                         const gsy = hicBrowser.genomicState('y')
                         const chr = gsx.chromosome.name
@@ -141,7 +162,7 @@
                             igvBrowser.search(locus)
                         }
                         //console.log(gsx)
-                    })
+                    }), 1000)
 
                     hicBrowser.setCustomCrosshairsHandler(s => {
                         //console.log(s)
@@ -239,6 +260,18 @@
 
     }
 
+    function throttle (callback, limit) {
+        let waiting = false;                      // Initially, we're not waiting
+        return function () {                      // We return a throttled function
+            if (!waiting) {                       // If we're not waiting
+                callback.apply(this, arguments);  // Execute users function
+                waiting = true;                   // Prevent future invocations
+                setTimeout(function () {          // After a period of time
+                    waiting = false;              // And allow future invocations
+                }, limit);
+            }
+        }
+    }
 
     // chr1Name: this.dataset.chromosomes[this.state.chr1].name,
     //     chr2Name: this.dataset.chromosomes[this.state.chr2].name,
