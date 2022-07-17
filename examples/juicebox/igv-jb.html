@@ -12,11 +12,22 @@
 </head>
 <body>
 
+<h1>Demonstration of Juicebox <-> IGV interaction</h1>
+
+<b>
+<ul>
+    <li>Navigation is synched</li>
+    <li>Cross hairs in JB => vertical bars in IGV</li>
+    <li>"Project Contacts" => Contact records with significant counts represented as arcs in IGV</li>
+</ul>
+</b>
+<div>
+<button id="projectButton">Project contacts</button>
+</div>
 <div style="display:flex">
     <div id="jbDiv"></div>
     <div id="igvDiv" style="flex-grow:0;flex-shrink:0;flex-basis: 950px"></div>
 </div>
-<button id="projectButton">Project contacts</button>
 
 <script type="module">
 
