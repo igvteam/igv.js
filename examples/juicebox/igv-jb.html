@@ -119,49 +119,76 @@
                     let igvLocusChangeTS = 0
                     let jbLocusChageTS = 0
 
-                    const lcFn = evt => {
+                    const lcFn = referenceFrameList => {
 
-                        if(Date.now() - jbLocusChageTS < 1000) return
+                        if (Date.now() - jbLocusChageTS < 1000) return
 
-                        const rf = evt[0]
-                        //hicBrowser.goto(rf.chr, rf.start, rf.end, rf.chr, rf.start, rf.end)
                         igvLocusChangeTS = Date.now()
-                        hicBrowser.parseGotoInput(`${rf.chr}:${Math.floor(rf.start)}-${Math.floor(rf.end)}`)
+
+                        const locusString = referenceFrameList.map(rf => `${rf.chr}:${Math.floor(rf.start)}-${Math.floor(rf.end)}`).join(' ')
+                        hicBrowser.parseGotoInput(locusString)
                     }
 
                     igvBrowser.on('locuschange', throttle(lcFn, 1000))
 
                     hicBrowser.eventBus.subscribe("LocusChange", throttle(evt => {
 
-                        if(Date.now() - igvLocusChangeTS < 1000) {
+                        if (Date.now() - igvLocusChangeTS < 1000) {
                             return
                         }
 
                         jbLocusChageTS = Date.now()
-                        const gsx = hicBrowser.genomicState('x')
-                        const gsy = hicBrowser.genomicState('y')
-                        const chr = gsx.chromosome.name
-                        const ss = Math.min(gsx.startBP, gsy.startBP)
-                        const ee = Math.max(gsx.endBP, gsy.endBP)
-                        const bpp = gsx.bpp
+                        const gs1 = hicBrowser.genomicState('x')
+                        const gs2 = hicBrowser.genomicState('y')
+                        const chr1 = igvBrowser.genome.getChromosomeName(gs1.chromosome.name)
+                        const chr2 = igvBrowser.genome.getChromosomeName(gs2.chromosome.name)
+                        const start1 = gs1.startBP
+                        const start2 = gs2.startBP
 
-                        const referenceFrame = igvBrowser.referenceFrameList[0]
-                        const chr1 = igvBrowser.genome.getChromosomeName(chr)
+                        // Bug in juicebox genomic state
+                        const end1 = Math.min(gs1.endBP, gs1.chromosome.size)
+                        const end2 = Math.min(gs2.endBP, gs2.chromosome.size)
 
-                        if (referenceFrame.chr === chr1) {
-                            referenceFrame.start = ss
-                            //referenceFrame.end = ee
+                        const ss = Math.min(start1, start2)
+                        const ee = Math.max(end1, end2)
+
+                        const rf1 = igvBrowser.referenceFrameList.find(rf => rf.chr === chr1)
+                        const rf2 = igvBrowser.referenceFrameList.find(rf => rf.chr === chr2)
+
+                        if (rf1 && rf2) {
+
                             const width = igvBrowser.calculateViewportWidth(igvBrowser.referenceFrameList.length)
-                            const bpp = (ee - ss) / width
-                            const r = bpp / referenceFrame.bpPerPixel
-                            if (r > 1.05 || r < 0.95)
-                                referenceFrame.bpPerPixel = (ee - ss) / width
+
+                            if (chr1 === chr2) {
+                                rf1.start = ss
+                                const bpp = (ee - ss) / width
+                                const r = bpp / rf1.bpPerPixel
+                                if (r > 1.05 || r < 0.95) {
+                                    rf1.bpPerPixel = bpp
+                                }
+                            } else {
+                                rf1.start = start1
+                                let bpp = (end1 - start1) / width
+                                let r = bpp / rf1.bpPerPixel
+                                if (r > 1.05 || r < 0.95) {
+                                    rf1.bpPerPixel = bpp
+                                }
+                                rf2.start = start2
+                                bpp = (end2 - start2) / width
+                                r = bpp / rf2.bpPerPixel
+                                if (r > 1.05 || r < 0.95) {
+                                    rf2.bpPerPixel = bpp
+                                }
+                            }
+
                             igvBrowser.updateViews()
                         } else {
-                            const locus = `${chr}:${ss + 1}-${ee}`
+                            const locus = chr1 === chr2 ?
+                                `${chr1}:${ss + 1}-${ee}` :
+                                `${chr1}:${start1 + 1}-${end1} ${chr2}:${start2 + 1}-${end2}`
                             igvBrowser.search(locus)
                         }
-                        //console.log(gsx)
+
                     }), 1000)
 
                     hicBrowser.setCustomCrosshairsHandler(s => {
@@ -260,15 +287,15 @@
 
     }
 
-    function throttle (callback, limit) {
-        let waiting = false;                      // Initially, we're not waiting
+    function throttle(callback, limit) {
+        let waiting = false                      // Initially, we're not waiting
         return function () {                      // We return a throttled function
             if (!waiting) {                       // If we're not waiting
-                callback.apply(this, arguments);  // Execute users function
-                waiting = true;                   // Prevent future invocations
+                callback.apply(this, arguments)  // Execute users function
+                waiting = true                   // Prevent future invocations
                 setTimeout(function () {          // After a period of time
-                    waiting = false;              // And allow future invocations
-                }, limit);
+                    waiting = false              // And allow future invocations
+                }, limit)
             }
         }
     }
