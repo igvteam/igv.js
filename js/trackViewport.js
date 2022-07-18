@@ -269,7 +269,7 @@ class TrackViewport extends Viewport {
             }
 
         this.draw(drawConfiguration, features, roiFeatures)
-        
+
         if (this.canvas) {
             $(this.canvas).remove()
         }
@@ -280,12 +280,12 @@ class TrackViewport extends Viewport {
     }
 
     refresh() {
-        if(!this.canvas) return;
+        if (!(this.canvas && this.featureCache)) return
 
         const drawConfiguration = this.canvas._data
-        drawConfiguration.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        drawConfiguration.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
         const {features, roiFeatures} = this.featureCache
-        this.draw(drawConfiguration, features, roiFeatures);
+        this.draw(drawConfiguration, features, roiFeatures)
     }
 
     /**
@@ -473,6 +473,7 @@ class TrackViewport extends Viewport {
 
     clearCache() {
         this.featureCache = undefined
+        if (this.canvas) this.canvas._data = undefined
     }
 
     async getFeatures(track, chr, start, end, bpPerPixel) {
