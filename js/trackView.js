@@ -378,13 +378,8 @@ class TrackView {
             return
         }
 
-        // Get viewports to repaint
-        let viewportsToRepaint = (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler') ?
-            visibleViewports :
-            visibleViewports.filter(vp => vp.needsRepaint())
-
         // Filter zoomed out views.  This has the side effect or turning off or no the zoomed out notice
-        viewportsToRepaint = viewportsToRepaint.filter(viewport => viewport.checkZoomIn())
+        const viewportsToRepaint = visibleViewports.filter(vp => vp.needsRepaint()).filter(viewport => viewport.checkZoomIn())
 
         // Get viewports that require a data load
         const viewportsToReload = viewportsToRepaint.filter(viewport => viewport.needsReload())
@@ -438,8 +433,13 @@ class TrackView {
             }
         }
 
-        for (let vp of viewportsToRepaint) {
-            vp.repaint()
+        const refreshView = (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler')
+        for (let vp of visibleViewports) {
+            if (viewportsToRepaint.includes(vp)) {
+                vp.repaint()
+            } else if (refreshView) {
+                vp.refresh()
+            }
         }
 
         this.adjustTrackHeight()
@@ -451,8 +451,8 @@ class TrackView {
     }
 
     clearCachedFeatures() {
-        for(let viewport of this.viewports) {
-            viewport.clearCache();
+        for (let viewport of this.viewports) {
+            viewport.clearCache()
         }
     }
 
@@ -482,20 +482,27 @@ class TrackView {
         }
 
         let allFeatures = []
-        for (let vp of this.viewports) {
-            if (vp.needsReload()) {
+        const visibleViewports = this.viewports.filter(viewport => viewport.isVisible())
+        for (let vp of visibleViewports) {
+
+            const referenceFrame = vp.referenceFrame
+            const {chr, start, bpPerPixel} = vp.referenceFrame
+            const end = start + referenceFrame.toBP($(vp.contentDiv).width())
+            const needsReload = !vp.featureCache || !vp.featureCache.containsRange(chr, start, end, bpPerPixel)
+
+            if (needsReload) {
                 await vp.loadFeatures()
             }
             if (vp.featureCache && vp.featureCache.features) {
-                const referenceFrame = vp.referenceFrame
-                const start = referenceFrame.start
-                const end = start + referenceFrame.toBP($(vp.contentDiv).width())
 
                 if (typeof vp.featureCache.features.getMax === 'function') {
                     const max = vp.featureCache.features.getMax(start, end)
                     allFeatures.push({value: max})
                 } else {
-                    allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.featureCache.features, start, end))
+                    const vpFeatures = typeof vp.featureCache.queryFeatures === 'function' ?
+                        vp.featureCache.queryFeatures(chr, start, end) :
+                        FeatureUtils.findOverlapping(vp.featureCache.features, start, end)
+                    allFeatures = allFeatures.concat(vpFeatures)
                 }
             }
         }

@@ -48,14 +48,14 @@ class TrackROISet {
             return
         }
 
-        const endBP = bpStart + (pixelWidth * bpPerPixel) + 1
+        const bpEnd = bpStart + (pixelWidth * bpPerPixel) + 1
         for (let { start:regionStartBP, end:regionEndBP } of features) {
 
             if (regionEndBP < bpStart) {
                 continue
             }
 
-            if (regionStartBP > endBP) {
+            if (regionStartBP > bpEnd) {
                 break
             }
 
