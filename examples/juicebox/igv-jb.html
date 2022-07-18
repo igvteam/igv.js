@@ -233,7 +233,8 @@
                         const widthInBP = viewportWidth * binSize / pixelSize
                         const region1 = {chr: chr1Name, start: binX * binSize, end: binX * binSize + widthInBP}
                         const region2 = {chr: chr2Name, start: binY * binSize, end: binY * binSize + widthInBP}
-                        const records = await hicBrowser.dataset.getContactRecords("NONE", region1, region2, "BP", binSize)
+                        const normalization = hicBrowser.state.normalization || "NONE"
+                        const records = await hicBrowser.dataset.getContactRecords(normalization, region1, region2, "BP", binSize)
                         //console.log(records)
 
                         // Count statistics
