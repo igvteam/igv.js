@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IGV-JB</title>
+    <!-- Font Awesome CSS-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- Juicebox CSS-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/juicebox.js@2.2.2/dist/css/juicebox.css">
+
+</head>
+<body>
+
+<div id="igvDiv"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    // Start igv.js and create regions
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr8:125,435,405-133,904,633",
+            "tracks": [
+                {
+                    "name": "HAP-1 HiC",
+                    "url": "https://www.encodeproject.org/files/ENCFF817TXQ/@@download/ENCFF817TXQ.bedpe.gz",
+                    "metadata": {
+                        "Biosample": "Homo sapiens HAP-1",
+                        "AssayType": "HiC",
+                        "Target": "",
+                        "BioRep": "1,2,3",
+                        "TechRep": "1_1,1_2,1_3,2_1,3_1",
+                        "OutputType": "long range chromatin interactions",
+                        "Format": "bedpe",
+                        "Lab": "Erez Aiden, Baylor",
+                        "Accession": "ENCFF817TXQ",
+                        "Experiment": "ENCSR390HMC"
+                    },
+                    "format": "bedpe",
+                    "type": "interact",
+                    "color": "rgb(180,25,137)",
+                    "arcType": "nested",
+                    "arcOrientation": false,
+                    "thickness": 1,
+                    height: 240
+                }
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv")
+    igv.createBrowser(igvDiv, options)
+        .then(async function (igvBrowser) {
+
+        })
+
+
+
+</script>
+
+</body>
+</html>
