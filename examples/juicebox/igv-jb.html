@@ -50,7 +50,7 @@
     }
 
     // Start igv.js and create regions
-    const options =
+    const igvConfig =
         {
             genome: "hg19",
             locus: "chr8:125,435,405-133,904,633",
@@ -107,11 +107,11 @@
             ]
         }
 
-    const igvDiv = document.getElementById("igvDiv")
-    igv.createBrowser(igvDiv, options)
+    igv.createBrowser(document.getElementById("igvDiv"), igvConfig)
+
         .then(async function (igvBrowser) {
 
-            // Wig track with explicit features, initially set to an empty array.
+            // Add track for contact records, initially set to an empty array.
             const interactionTrack = await igvBrowser.loadTrack({
                 id: "interactions",
                 type: "interact",
@@ -121,27 +121,23 @@
                 features: []    // ! Important, signals track that features will be supplied explicitly
             })
 
-            const container = document.getElementById("jbDiv")
-            juicebox.init(container, jbConfig)
-                .then(function (hicBrowser) {
+            juicebox.init(document.getElementById("jbDiv"), jbConfig)
 
-                    console.log("Juicebox loaded")
+                .then(function (hicBrowser) {
 
                     let igvLocusChangeTS = 0
                     let jbLocusChageTS = 0
 
+                    // Callback for an IGV locus change
                     const lcFn = referenceFrameList => {
-
                         if (Date.now() - jbLocusChageTS < 1000) return
-
                         igvLocusChangeTS = Date.now()
-
-                        const locusString = referenceFrameList.map(rf => `${rf.chr}:${Math.floor(rf.start)}-${Math.floor(rf.end)}`).join(' ')
+                        const locusString = referenceFrameList.map(rf => `${rf.chr}:${Math.max(1, Math.ceil(rf.start))}-${Math.floor(rf.end)}`).join(' ')
                         hicBrowser.parseGotoInput(locusString)
                     }
-
                     igvBrowser.on('locuschange', throttle(lcFn, 1000))
 
+                    // Callback for a JB locus change
                     hicBrowser.eventBus.subscribe("LocusChange", throttle(evt => {
 
                         if (Date.now() - igvLocusChangeTS < 1000) {
@@ -153,8 +149,8 @@
                         const gs2 = hicBrowser.genomicState('y')
                         const chr1 = igvBrowser.genome.getChromosomeName(gs1.chromosome.name)
                         const chr2 = igvBrowser.genome.getChromosomeName(gs2.chromosome.name)
-                        const start1 = gs1.startBP
-                        const start2 = gs2.startBP
+                        const start1 = Math.max(0, gs1.startBP)
+                        const start2 = Math.max(0, gs2.startBP)
 
                         // Bug in juicebox genomic state
                         const end1 = Math.min(gs1.endBP, gs1.chromosome.size)
@@ -228,9 +224,9 @@
 
                     //hicBrowser.goto("8", 122660070, 131053694,"8", 122660070, 131053694, 25000)
 
-                    document.getElementById("projectButton").addEventListener("click", () => getContactRecords())
+                    document.getElementById("projectButton").addEventListener("click", () => projectContacts())
 
-                    async function getContactRecords() {
+                    async function projectContacts() {
                         const viewportWidth = hicBrowser.contactMatrixView.$viewport[0].clientWidth
                         const {chr1Name, chr2Name, binSize, binX, binY, pixelSize} = hicBrowser.getSyncState()
                         const widthInBP = viewportWidth * binSize / pixelSize
@@ -261,14 +257,25 @@
                             const rgba = `rgba(${color.red},${color.green},${color.blue},${0.5 * color.alpha / 255})`
 
                             features.push({
-                                chr1: "chr" + chr1Name,
+                                chr1: igvBrowser.genome.getChromosomeName(chr1Name),
                                 start1: bin1 * binSize,
                                 end1: bin1 * binSize + binSize,
-                                chr2: "chr" + chr2Name,
+                                chr2: igvBrowser.genome.getChromosomeName(chr2Name),
                                 start2: bin2 * binSize,
                                 end2: bin2 * binSize + binSize,
                                 color: rgba
                             })
+                            if(chr1Name !== chr2Name) {
+                                features.push({
+                                    chr2: igvBrowser.genome.getChromosomeName(chr1Name),
+                                    start2: bin1 * binSize,
+                                    end2: bin1 * binSize + binSize,
+                                    chr1: igvBrowser.genome.getChromosomeName(chr2Name),
+                                    start1: bin2 * binSize,
+                                    end1: bin2 * binSize + binSize,
+                                    color: rgba
+                                })
+                            }
 
                             for (let feature of features) {
                                 feature.chr = feature.chr1
