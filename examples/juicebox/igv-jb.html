@@ -135,12 +135,12 @@
                         const locusString = referenceFrameList.map(rf => `${rf.chr}:${Math.max(1, Math.ceil(rf.start))}-${Math.floor(rf.end)}`).join(' ')
                         hicBrowser.parseGotoInput(locusString)
                     }
-                    igvBrowser.on('locuschange', throttle(lcFn, 1000))
+                    igvBrowser.on('locuschange', throttle(lcFn, 100))
 
                     // Callback for a JB locus change
                     hicBrowser.eventBus.subscribe("LocusChange", throttle(evt => {
 
-                        if (Date.now() - igvLocusChangeTS < 1000) {
+                        if (Date.now() - igvLocusChangeTS < 100) {
                             return
                         }
 
