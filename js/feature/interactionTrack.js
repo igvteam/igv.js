@@ -266,7 +266,7 @@ class InteractionTrack extends TrackBase {
             for (let feature of featureList) {
                 let pixelStart = (feature.start - bpStart) / xScale
                 let pixelEnd = (feature.end - bpStart) / xScale
-                if (pixelEnd >= 0 && pixelStart <= pixelWidth) {
+                if (pixelStart >= 0 && pixelEnd <= pixelWidth) {
                     max = Math.max(max, pixelEnd - pixelStart)
                 }
             }
@@ -744,7 +744,7 @@ function estimateTheta(x) {
     let thetaLeft = idx === 0 ? 0 : theta[idx - 1]
     let thetaRight = idx < theta.length ? theta[idx] : Math.PI / 2
 
-    return thetaLeft + r * (thetaRight - thetaLeft)
+    return Math.min(Math.PI/2,  (thetaLeft + r * (thetaRight - thetaLeft)))
 
 }
 
