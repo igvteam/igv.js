@@ -140,10 +140,10 @@ class ROISet {
 
 const SCREEN_COORDS_WIDTH_THRESHOLD = 3
 
-function screenCoordinates(regionStartBP, regionEndBP, startBP, bpp) {
+function screenCoordinates(regionStartBP, regionEndBP, bpStart, bpp) {
 
-    let xStart = Math.round((regionStartBP - startBP) / bpp)
-    const xEnd = Math.round((regionEndBP - startBP) / bpp)
+    let xStart = Math.round((regionStartBP - bpStart) / bpp)
+    const xEnd = Math.round((regionEndBP - bpStart) / bpp)
 
     let width = xEnd - xStart
 

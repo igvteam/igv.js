@@ -134,9 +134,9 @@ class TrackViewport extends Viewport {
         const referenceFrame = this.referenceFrame
         if (this.canvas &&
             this.canvas._data &&
-            this.canvas._data.chr === this.referenceFrame.chr &&
+            this.canvas._data.referenceFrame.chr === this.referenceFrame.chr &&
             this.canvas._data.bpPerPixel === referenceFrame.bpPerPixel) {
-            const pixelOffset = Math.round((this.canvas._data.startBP - referenceFrame.start) / referenceFrame.bpPerPixel)
+            const pixelOffset = Math.round((this.canvas._data.bpStart - referenceFrame.start) / referenceFrame.bpPerPixel)
             this.canvas.style.left = pixelOffset + "px"
         }
     }
@@ -193,10 +193,10 @@ class TrackViewport extends Viewport {
         const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
         const pixelWidth = isWGV ? this.$viewport.width() : 3 * this.$viewport.width()
         const bpPerPixel = this.referenceFrame.bpPerPixel
-        const startBP = this.referenceFrame.start - (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
-        const endBP = this.referenceFrame.end + (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        const bpStart = this.referenceFrame.start - (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        const bpEnd = this.referenceFrame.end + (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
         return {
-            startBP, endBP, pixelWidth
+            bpStart, bpEnd, pixelWidth
         }
     }
 
@@ -210,7 +210,7 @@ class TrackViewport extends Viewport {
             return
         }
 
-        let {features, roiFeatures} = this.featureCache
+        const {features, roiFeatures} = this.featureCache
         //this.tile.bpPerPixel = this.referenceFrame.bpPerPixel
 
         // const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
@@ -218,7 +218,7 @@ class TrackViewport extends Viewport {
 
         // Canvas dimensions. There is no left-right panning for WGV so canvas width is viewport width.
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
-        const {startBP, endBP, pixelWidth} = this.repaintDimensions()
+        const {bpStart, bpEnd, pixelWidth} = this.repaintDimensions()
         const viewportHeight = this.$viewport.height()
         const contentHeight = this.getContentHeight()
         const minHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight  // Need to fill viewport for ROIs.
@@ -232,9 +232,9 @@ class TrackViewport extends Viewport {
         const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
 
         const bpPerPixel = this.referenceFrame.bpPerPixel
-        //const startBP = this.referenceFrame.start - (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
-        //const endBP = this.referenceFrame.end + (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
-        const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / bpPerPixel)
+        //const bpStart = this.referenceFrame.start - (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        //const bpEnd = this.referenceFrame.end + (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / bpPerPixel)
 
         const newCanvas = $('<canvas class="igv-canvas">').get(0)
         newCanvas.style.width = pixelWidth + "px"
@@ -259,8 +259,8 @@ class TrackViewport extends Viewport {
                 pixelWidth,
                 pixelHeight,
                 pixelTop: canvasTop,
-                bpStart: startBP,
-                bpEnd: endBP,
+                bpStart: bpStart,
+                bpEnd: bpEnd,
                 bpPerPixel,
                 referenceFrame: this.referenceFrame,
                 selection: this.selection,
@@ -269,19 +269,23 @@ class TrackViewport extends Viewport {
             }
 
         this.draw(drawConfiguration, features, roiFeatures)
-
-        this.featureCache.canvasTop = canvasTop
-        this.featureCache.height = pixelHeight
-
+        
         if (this.canvas) {
             $(this.canvas).remove()
         }
-        newCanvas._data = {
-            chr: this.featureCache.chr, bpPerPixel, startBP, endBP, pixelHeight, pixelTop: canvasTop
-        }
+        newCanvas._data = drawConfiguration
         this.canvas = newCanvas
         this.$content.append($(newCanvas))
 
+    }
+
+    refresh() {
+        if(!this.canvas) return;
+
+        const drawConfiguration = this.canvas._data
+        drawConfiguration.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        const {features, roiFeatures} = this.featureCache
+        this.draw(drawConfiguration, features, roiFeatures);
     }
 
     /**
@@ -490,19 +494,17 @@ class TrackViewport extends Viewport {
 
         const data = this.canvas._data
         return !data ||
-            this.referenceFrame.start < data.startBP ||
-            this.referenceFrame.end > data.endBP ||
-            this.referenceFrame.chr !== data.chr ||
+            this.referenceFrame.start < data.bpStart ||
+            this.referenceFrame.end > data.bpEnd ||
+            this.referenceFrame.chr !== data.referenceFrame.chr ||
             this.referenceFrame.bpPerPixel != data.bpPerPixel
     }
 
     needsReload() {
         if (!this.featureCache) return true
-        const referenceFrame = this.referenceFrame
-        const chr = this.referenceFrame.chr
-        const bpPerPixel = referenceFrame.bpPerPixel
-        const {startBP, endBP} = this.repaintDimensions()
-        return (!this.featureCache.containsRange(chr, startBP, endBP, bpPerPixel))
+        const {chr, bpPerPixel} = this.referenceFrame
+        const {bpStart, bpEnd} = this.repaintDimensions()
+        return (!this.featureCache.containsRange(chr, bpStart, bpEnd, bpPerPixel))
     }
 
     createZoomInNotice($parent) {
@@ -812,8 +814,8 @@ class FeatureCache {
 
     constructor(chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures, multiresolution) {
         this.chr = chr
-        this.startBP = tileStart
-        this.endBP = tileEnd
+        this.bpStart = tileStart
+        this.bpEnd = tileEnd
         this.bpPerPixel = bpPerPixel
         this.features = features
         this.roiFeatures = roiFeatures
@@ -825,11 +827,11 @@ class FeatureCache {
         // For multi-resolution tracks allow for a 2X change in bpPerPixel
         const r = this.multiresolution ? this.bpPerPixel / bpPerPixel : 1
 
-        return start >= this.startBP && end <= this.endBP && chr === this.chr && r > 0.5 && r < 2
+        return start >= this.bpStart && end <= this.bpEnd && chr === this.chr && r > 0.5 && r < 2
     }
 
     overlapsRange(chr, start, end) {
-        return this.chr === chr && end >= this.startBP && start <= this.endBP
+        return this.chr === chr && end >= this.bpStart && start <= this.bpEnd
     }
 }
 

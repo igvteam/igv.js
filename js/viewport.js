@@ -126,7 +126,6 @@ class Viewport {
     }
 
     async repaint() {
-        console.log('Viewport - repaint()')
     }
 
     draw(drawConfiguration, features, roiFeatures) {
