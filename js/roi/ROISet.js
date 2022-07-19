@@ -46,7 +46,7 @@ class ROISet {
     constructor(config, genome) {
 
         this.url = config.url
-        this.editable = config.editable
+        this.isUserDefined = config.isUserDefined
 
         if (config.name) {
             this.name = config.name
@@ -56,7 +56,7 @@ class ROISet {
             this.name = FileUtils.getFilename(config.url)
         }
 
-        if (config.editable) {
+        if (config.isUserDefined) {
             this.featureSource = new DynamicFeatureSource(config.features, genome)
         } else if (config.features) {
             this.featureSource = new StaticFeatureSource(config.features, genome)
@@ -70,7 +70,7 @@ class ROISet {
             this.featureSource = config.featureSource || FeatureSource(config, genome)
         }
 
-        if (true === this.editable) {
+        if (true === this.isUserDefined) {
 
             this.color = config.color || ROI_USER_DEFINED_COLOR
 
@@ -98,7 +98,7 @@ class ROISet {
     }
 
     addFeature(feature) {
-        if (this.editable) {
+        if (this.isUserDefined) {
             this.featureSource.addFeature(feature)
         } else {
             console.error("Attempt to add ROI to non user-defined set")
@@ -106,7 +106,7 @@ class ROISet {
     }
 
     removeFeature(feature) {
-        if (this.editable) {
+        if (this.isUserDefined) {
             this.featureSource.removeFeature(feature)
         } else {
             console.error("Attempt to remove ROI from non user-defined set")

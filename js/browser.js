@@ -532,7 +532,7 @@ class Browser {
         const roiMenu = new ROIMenu(this, this.columnContainer)
         if (session.roi) {
 
-            session.roi.filter(config => config.features && config.editable).map((c, index) => c.name = undefined)
+            session.roi.filter(config => config.features && config.isUserDefined).map((c, index) => c.name = undefined)
 
             const roiSetList = session.roi.map(c => new ROISet(c, this.genome))
 
