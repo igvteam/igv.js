@@ -205,16 +205,7 @@ class ROIManager {
     }
 
     async getUserDefinedROISet() {
-
-        const userDefinedROISet = this.roiSets.find(roiSet => true === roiSet.isUserDefined)
-
-        if (userDefinedROISet) {
-            const features = await userDefinedROISet.getAllFeatures()
-            return features ? userDefinedROISet : undefined
-        } else {
-            return userDefinedROISet
-        }
-
+        return this.roiSets.find(roiSet => true === roiSet.isUserDefined)
     }
 
     initializeUserDefinedROISet() {
