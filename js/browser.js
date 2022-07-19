@@ -794,7 +794,7 @@ class Browser {
 
             const set = await this.roiManager.getUserDefinedROISet()
             if (undefined === set) {
-                return undefined
+                return []
             }
 
             const featureHash = await set.getAllFeatures()
@@ -804,10 +804,10 @@ class Browser {
                 featureList.push(...value)
             }
 
-            return 0 === featureList.length ? undefined : featureList
+            return featureList
 
         } else {
-            return undefined
+            return []
         }
 
     }
