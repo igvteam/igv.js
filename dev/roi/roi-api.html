@@ -13,26 +13,29 @@
 
 <body>
 
+<h2>Example illustrating browser region-of-interest API functions</h2>
+
 <p>
     <button id='roi-load-button'>Load ROI Set</button>
     <button id='roi-clear-button'>Clear All ROI Sets</button>
+    <button id='roi-get-button'>Get User-Defined ROIs</button>
 </p>
 
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
+<div>
+<h3>User defined ROIs:</h3>
+<div id="user-defined-rois"></div>
 </div>
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     const browser_config =
         {
-            // user defined roi locus
             locus: "chr1:67,646,911-67,676,107",
-
-            // locus: '1:67,655,272-67,684,468',
             genome: "hg19",
             tracks:
                 [
@@ -42,12 +45,11 @@
                         indexed: false,
                     }
                 ]
-        };
+        }
 
     const roi_configs =
         [
             {
-                isUserDefined: true,
                 color: "rgba(237,72,155,0.72)",
                 features:
                     [
@@ -63,24 +65,29 @@
                         }
                     ]
             },
-            // {
-            //     name: 'ROI set 1',
-            //     url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
-            //     indexed: false,
-            //     color: "rgba(68, 134, 247, 0.25)"
-            // },
-            // {
-            //     name: 'ROI set 2',
-            //     url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_2.bed',
-            //     indexed: false,
-            //     color: "rgba(0, 150, 50, 0.25)"
-            // }
+
         ];
 
     (async () => {
         const browser = await igv.createBrowser(document.getElementById('myDiv'), browser_config)
         document.getElementById("roi-load-button").addEventListener('click', () => browser.loadROI(roi_configs))
         document.getElementById("roi-clear-button").addEventListener('click', () => browser.clearROIs())
+        document.getElementById("roi-get-button").addEventListener('click', async () => {
+
+            const div = document.getElementById("user-defined-rois")
+            div.innerHTML = ""
+            const list = document.createElement("ul")
+            div.appendChild(list)
+
+            const rois = await browser.getUserDefinedROIs()
+            if (rois) {
+                for (let r of rois) {
+                    const li = document.createElement('li')
+                    li.innerText = `${r.chr}:${r.start + 1}-${r.end}`
+                    list.appendChild(li)
+                }
+            }
+        })
     })()
 
 </script>

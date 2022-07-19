@@ -28,20 +28,62 @@
 
         genome: "hg19",
 
-        // Define two "region of interest" sets
-
-        // a global set
+        // Define two global "region of interest" sets, the first with a bed file, the second with an explicit array
+        // of regions
         roi:
             [
                 {
                     name: 'ROI set 1',
                     url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
-                    // url: 'https://s3.amazonaws.com/igv.org.test/data/roi/some_features.bed',
-                    // url: './roi_dugla_one_region.bed',
-                    // url: './some_features.bed',
                     indexed: false,
-                    color: "rgba(94,255,1,0.5)"
+                    color: "rgba(94,255,1,0.25)"
                 },
+                {
+                    name: "ROI set 2",
+                    color: "rgba(3,52,249,0.25)",
+                    features: [
+                        {
+                            chr: "chr1",
+                            start: 67670000,
+                            end: 67671080
+                        },
+                        {
+                            chr: "chr1",
+                            start: 67672095,
+                            end: 67673993
+                        },
+                        {
+                            chr: "chr1",
+                            start: 67674681,
+                            end: 67675237
+                        },
+                        {
+                            chr: "chr1",
+                            start: 67676055,
+                            end: 67676710
+                        },
+                        {
+                            chr: "chr1",
+                            start: 67677561,
+                            end: 67677888
+                        },
+                        {
+                            chr: "chr1",
+                            start: 67679263,
+                            end: 67679394
+                        },
+                        {
+                            chr: "chr1",
+                            start: 67679950,
+                            end: 67680180
+                        },
+                        {
+                            chr: "chr1",
+                            start: 67681849,
+                            end: 67682340
+                        }
+                    ]
+                }
             ],
 
         // a track specific set
