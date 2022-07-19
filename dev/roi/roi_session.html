@@ -13,6 +13,8 @@
 
 <body>
 
+<h2>Tests loading a session with a user-defined ROI set</h2>
+
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
 </div>
@@ -36,7 +38,6 @@
         "locus": "chr4:57,217,983-57,805,688",
         "roi": [
             {
-                // "color": "rgba(136,135,135,0.08333333333333333)",
                 "features": [
                     {
                         "chr": "chr4",
@@ -73,7 +74,11 @@
         ]
     }
 
-    igv.createBrowser(document.getElementById("myDiv"), session)
+    igv.createBrowser(document.getElementById("myDiv"), {genome: "hg19"})
+        .then(function (browser) {
+            browser.loadSession(session)
+
+        })
 
 </script>
 
