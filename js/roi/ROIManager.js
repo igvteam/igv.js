@@ -70,7 +70,7 @@ class ROIManager {
         const records = []
 
         for (let roiSet of this.roiSets) {
-            const setName = roiSet.isUserDefined ? '' : (roiSet.name || '')
+            const setName = roiSet.editable ? '' : (roiSet.name || '')
             const allFeatures = await roiSet.getAllFeatures()
             for (let chr of Object.keys(allFeatures)) {
                 for (let feature of allFeatures[chr]) {
@@ -185,7 +185,7 @@ class ROIManager {
 
         regionElement.dataset.region = regionKey
 
-        if (true === roiSet.isUserDefined) {
+        if (true === roiSet.editable) {
 
             const header = DOMUtils.div()
             regionElement.appendChild(header)
@@ -206,7 +206,7 @@ class ROIManager {
 
     async getUserDefinedROISet() {
 
-        const userDefinedROISet = this.roiSets.find(roiSet => true === roiSet.isUserDefined)
+        const userDefinedROISet = this.roiSets.find(roiSet => true === roiSet.editable)
 
         if (userDefinedROISet) {
             const features = await userDefinedROISet.getAllFeatures()
@@ -221,7 +221,7 @@ class ROIManager {
 
         const config =
             {
-                isUserDefined: true,
+                editable: true,
                 features: []
             }
         const userDefinedROISet = new ROISet(config, this.browser.genome)
