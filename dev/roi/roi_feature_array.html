@@ -103,7 +103,7 @@
                     indexed: false,
                 }
             ]
-    };
+    }
 
     const no_name_feature_array_config =
         {
@@ -113,12 +113,12 @@
                 [
                     {
                         "name": "URL Feature Set",
-                        // "color": "rgba(255,1,199,0.25)",
+                        "color": "rgba(255,1,199,0.25)",
                         "url": "https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed"
                     },
                     {
-                        "isUserDefined": true,
-                        // "color": "rgba(72,121,237,0.54)",
+                        "editable": true,
+                        "color": "rgba(72,121,237,0.54)",
                         "features":
                             [
                                 {
@@ -135,7 +135,7 @@
                     },
                     // {
                     //     // "name": "Feature List Set",
-                    //     // "isUserDefined": true,
+                    //     // "editable": true,
                     //     "color": "rgba(3,52,249,0.5)",
                     //     "features": [
                     //         {
@@ -181,25 +181,7 @@
                     //     ]
                     // }
                 ],
-            "tracks": [
-                {
-                    "type": "sequence",
-                    "order": -9007199254740991
-                },
-                {
-                    "name": "Refseq Genes",
-                    "format": "refgene",
-                    "id": "hg19_genes",
-                    "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz",
-                    "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz.tbi",
-                    "visibilityWindow": -1,
-                    "supportsWholeGenome": false,
-                    "removable": false,
-                    "order": 1000000,
-                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
-                    "type": "annotation"
-                }
-            ]
+
 
         };
 
