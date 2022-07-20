@@ -92,9 +92,25 @@ async function search(browser, string) {
 
 function parseLocusString(browser, locus) {
 
+    // Check for tab delimited locus string
+    const tabTokens = locus.split('\t')
+    if (tabTokens.length >= 3) {
+        // Possibly a tab-delimited locus
+        try {
+            const chr = browser.genome.getChromosomeName(tabTokens[0])
+            const start = parseInt(tabTokens[1].replace(/,/g, ''), 10) - 1
+            const end = parseInt(tabTokens[2].replace(/,/g, ''), 10)
+            if (!isNaN(start) && !isNaN(end)) {
+                return {chr, start, end}
+            }
+        } catch (e) {
+            // Not a tab delimited locus, apparently, but not really an error as that was a guess
+        }
+
+    }
+
     const a = locus.split(':')
     const chr = a[0]
-
     if ('all' === chr && browser.genome.getChromosome(chr)) {
         return {chr, start: 0, end: browser.genome.getChromosome(chr).bpLength}
 
