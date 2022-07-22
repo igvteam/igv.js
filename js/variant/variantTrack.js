@@ -253,44 +253,46 @@ class VariantTrack extends TrackBase {
                     this.sampleHeight = nVariantRows * (callHeight + vGap)  // For each sample, there is a call for each variant at this position
 
                     let sampleNumber = 0
-                    for (let callSet of callSets) {
-                        const call = variant.calls[callSet.id]
-                        if (call) {
-                            const row = "COLLAPSED" === this.displayMode ? 0 : variant.row
-                            const py = this.sampleYOffset + sampleNumber * this.sampleHeight + row * (callHeight + vGap)
-                            let allVar = true  // until proven otherwise
-                            let allRef = true
-                            let noCall = false
+                    if(callSets && variant.calls) {
+                        for (let callSet of callSets) {
+                            const call = variant.calls[callSet.id]
+                            if (call) {
+                                const row = "COLLAPSED" === this.displayMode ? 0 : variant.row
+                                const py = this.sampleYOffset + sampleNumber * this.sampleHeight + row * (callHeight + vGap)
+                                let allVar = true  // until proven otherwise
+                                let allRef = true
+                                let noCall = false
 
-                            if (call.genotype) {
-                                for (let g of call.genotype) {
-                                    if ('.' === g) {
-                                        noCall = true
-                                        break
-                                    } else {
-                                        if (g !== 0) allRef = false
-                                        if (g === 0) allVar = false
+                                if (call.genotype) {
+                                    for (let g of call.genotype) {
+                                        if ('.' === g) {
+                                            noCall = true
+                                            break
+                                        } else {
+                                            if (g !== 0) allRef = false
+                                            if (g === 0) allVar = false
+                                        }
                                     }
                                 }
+
+                                if (!call.genotype) {
+                                    context.fillStyle = this.noGenotypeColor
+                                } else if (noCall) {
+                                    context.fillStyle = this.noCallColor
+                                } else if (allRef) {
+                                    context.fillStyle = this.homrefColor
+                                } else if (allVar) {
+                                    context.fillStyle = this.homvarColor
+                                } else {
+                                    context.fillStyle = this.hetvarColor
+                                }
+
+                                context.fillRect(x, py, w, callHeight)
+
+                                callSet.pixelRect = {x, y: py, w, h: callHeight}
                             }
-
-                            if (!call.genotype) {
-                                context.fillStyle = this.noGenotypeColor
-                            } else if (noCall) {
-                                context.fillStyle = this.noCallColor
-                            } else if (allRef) {
-                                context.fillStyle = this.homrefColor
-                            } else if (allVar) {
-                                context.fillStyle = this.homvarColor
-                            } else {
-                                context.fillStyle = this.hetvarColor
-                            }
-
-                            context.fillRect(x, py, w, callHeight)
-
-                            callSet.pixelRect = {x, y: py, w, h: callHeight}
+                            sampleNumber++
                         }
-                        sampleNumber++
                     }
                 }
             }
