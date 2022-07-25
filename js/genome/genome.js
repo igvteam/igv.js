@@ -43,17 +43,19 @@ const GenomeUtils = {
         const aliasURL = options.aliasURL
         const sequence = await loadFasta(options)
 
-        let cytobands
-        if (cytobandUrl) {
-            cytobands = await loadCytobands(cytobandUrl, sequence.config)
-        }
-
         let aliases
         if (aliasURL) {
             aliases = await loadAliases(aliasURL, sequence.config)
         }
 
-        return new Genome(options, sequence, cytobands, aliases)
+        const genome = new Genome(options, sequence, aliases)
+
+        // Delay loading cytbands untils after genome initialization to use chromosome aliases (1 vs chr1, etc).
+        if (cytobandUrl) {
+            genome.cytobands  = await loadCytobands(cytobandUrl, sequence.config, genome)
+        }
+
+        return genome
     },
 
     initializeGenomes: async function (config) {
@@ -145,14 +147,13 @@ const GenomeUtils = {
 
 class Genome {
 
-    constructor(config, sequence, ideograms, aliases) {
+    constructor(config, sequence, aliases) {
 
         this.config = config
         this.id = config.id || generateGenomeID(config)
         this.sequence = sequence
         this.chromosomeNames = sequence.chromosomeNames
         this.chromosomes = sequence.chromosomes  // An object (functions as a dictionary)
-        this.ideograms = ideograms
         this.featureDB = {}   // Hash of name -> feature, used for search function.
 
         this.wholeGenomeView = config.wholeGenomeView === undefined || config.wholeGenomeView
@@ -242,7 +243,7 @@ class Genome {
     }
 
     getCytobands(chr) {
-        return this.ideograms ? this.ideograms[chr] : null
+        return this.cytobands ? this.cytobands[chr] : null
     }
 
     getLongestChromosome() {
@@ -359,7 +360,7 @@ class Genome {
     }
 }
 
-async function loadCytobands(cytobandUrl, config) {
+async function loadCytobands(cytobandUrl, config, genome) {
 
     let data
     if (isDataURL(cytobandUrl)) {
@@ -385,7 +386,7 @@ async function loadCytobands(cytobandUrl, config) {
     const lines = splitLines(data)
     for (let line of lines) {
         var tokens = line.split("\t")
-        var chr = tokens[0]
+        var chr = genome.getChromosomeName(tokens[0])
         if (!lastChr) lastChr = chr
 
         if (chr !== lastChr) {
