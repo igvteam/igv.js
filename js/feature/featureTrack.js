@@ -208,7 +208,8 @@ class FeatureTrack extends TrackBase {
                     options.rowLastLabelX[row] = -Number.MAX_SAFE_INTEGER
                 }
             }
-            const pixelsPerFeature = pixelWidth / Math.max(...rowFeatureCount)
+            const maxFeatureCount = Math.max(1,  Math.max(...rowFeatureCount))
+            const pixelsPerFeature = pixelWidth / maxFeatureCount
 
             let lastPxEnd = []
             for (let feature of featureList) {
