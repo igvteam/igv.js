@@ -63,7 +63,7 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
             py = this.margin
         }
 
-        const pixelWidth = options.pixelWidth
+        const pixelWidth = options.pixelWidth   // typical 3*viewportWidth
 
         const cy = py + h / 2
         const h2 = h / 2
@@ -169,8 +169,8 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
 /**
  * @param ctx       the canvas 2d context
  * @param feature
- * @param featureX  feature start x-coordinate
- * @param featureX1 feature end x-coordinate
+ * @param featureX  feature start in pixel coordinates
+ * @param featureX1 feature end in pixel coordinates
  * @param featureY  feature y-coordinate
  * @param windowX   visible window start x-coordinate
  * @param windowX1  visible window end x-coordinate
@@ -191,7 +191,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         let pixelXOffset = options.pixelXOffset || 0
         const t1 = Math.max(featureX, -pixelXOffset)
         const t2 = Math.min(featureX1, -pixelXOffset + options.viewportWidth)
-        const centerX = (t1 + t2) / 2
+        let centerX = (t1 + t2) / 2
 
         let transform
         if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
@@ -217,10 +217,12 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         const textBox = ctx.measureText(name)
         const xleft = centerX - textBox.width / 2
         const xright = centerX + textBox.width / 2
-        if (options.labelAllFeatures || xleft > options.rowLastLabelX[feature.row] || gtexSelection) {
+        const lastLabelX = options.rowLastLabelX[feature.row] || -Number.MAX_SAFE_INTEGER
+        if (options.labelAllFeatures || xleft > lastLabelX || gtexSelection) {
             options.rowLastLabelX[feature.row] = xright
             IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
         }
+        
     } finally {
         ctx.restore()
     }
