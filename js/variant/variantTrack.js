@@ -197,7 +197,10 @@ class VariantTrack extends TrackBase {
         const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
         this.variantBandHeight = TOP_MARGIN + rowCount * (variantHeight + vGap)
 
-        const callSets = this.callSets
+        let callSets = this.callSets
+        if(!callSets && this._f) {
+            callSets = this._f.callSets   // "Complementary" variant for structural variants
+        }
         const nCalls = this.getCallsetsLength()
         if (callSets && nCalls > 0 && this.showGenotypes !== false) {
             IGVGraphics.strokeLine(context, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '})
