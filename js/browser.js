@@ -1476,7 +1476,7 @@ class Browser {
         if (loci && loci.length > 0) {
 
             // create reference frame list based on search loci
-            this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length))
+            this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length), this.isSoftclipped())
 
             // discard viewport DOM elements
             for (let trackView of this.trackViews) {
@@ -1713,6 +1713,11 @@ class Browser {
 
     isTrackPanning() {
         return this.dragObject
+    }
+
+    isSoftclipped() {
+        const result = this.trackViews.find(tv => tv.track.showSoftClips === true)
+        return result !== undefined
     }
 
 
@@ -1985,7 +1990,9 @@ function handleMouseMove(e) {
         }
 
         if (this.dragObject) {
-            const viewChanged = referenceFrame.shiftPixels(this.vpMouseDown.lastMouseX - x, viewport.$viewport.width())
+            const clampDrag = !this.isSoftclipped()
+            let deltaX = this.vpMouseDown.lastMouseX - x
+            const viewChanged = referenceFrame.shiftPixels(deltaX, viewport.$viewport.width(), clampDrag)
             if (viewChanged) {
                 this.updateViews()
             }
