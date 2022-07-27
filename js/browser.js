@@ -758,11 +758,18 @@ class Browser {
 
     }
 
+    /**
+     * Public API function
+     *
+     * Load a list of tracks
+     * @param configList
+     * @returns {Promise<*>}
+     */
     async loadTrackList(configList) {
 
         const promises = []
         for (let config of configList) {
-            promises.push(this.loadTrack(config))
+            promises.push(this._loadTrack(config))
         }
 
         const loadedTracks = await Promise.all(promises)
@@ -775,46 +782,25 @@ class Browser {
         return loadedTracks
     }
 
-    async loadROI(config) {
-        await this.roiManager.loadROI(config, this.genome)
-    }
-
-    clearROIs() {
-        this.roiManager.clearROIs()
-    }
-
     /**
-     * Return a promise for the list of user-defined regions-of-interest
+     * Public API function
      *
-     * NOTE: public API function
+     * Load an individual track.  If part of an autoscale group force general update
+     *
+     * @param config
+     * @returns {Promise<*>}
      */
-    async getUserDefinedROIs() {
+    async loadTrack(config) {
 
-        if (this.roiManager) {
+        const newTrack = this._loadTrack(config)
 
-            const set = await this.roiManager.getUserDefinedROISet()
-            if (undefined === set) {
-                return []
-            }
-
-            const featureHash = await set.getAllFeatures()
-
-            const featureList = []
-            for (let value of Object.values(featureHash)) {
-                featureList.push(...value)
-            }
-
-            return featureList
-
-        } else {
-            return []
+        if(config.autoscaleGroup) {
+            // Await newTrack load and update all views
+            await newTrack
+            this.updateViews()
         }
 
-    }
-
-    getRulerTrackView() {
-        const list = this.trackViews.filter(({track}) => 'ruler' === track.id)
-        return list.length > 0 ? list[0] : undefined
+        return newTrack
     }
 
     /**
@@ -824,7 +810,7 @@ class Browser {
      * @returns {*}
      */
 
-    async loadTrack(config) {
+    async _loadTrack(config, forceUpdate) {
 
 
         // config might be json
@@ -837,7 +823,7 @@ class Browser {
             const newTrack = await this.createTrack(config)
 
             if (undefined === newTrack) {
-                 return
+                return
             }
 
             // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
@@ -893,6 +879,49 @@ class Browser {
             msg += (": " + config.url)
             Alert.presentAlert(new Error(msg), undefined)
         }
+    }
+
+
+    async loadROI(config) {
+        await this.roiManager.loadROI(config, this.genome)
+    }
+
+    clearROIs() {
+        this.roiManager.clearROIs()
+    }
+
+    /**
+     * Return a promise for the list of user-defined regions-of-interest
+     *
+     * NOTE: public API function
+     */
+    async getUserDefinedROIs() {
+
+        if (this.roiManager) {
+
+            const set = await this.roiManager.getUserDefinedROISet()
+            if (undefined === set) {
+                return []
+            }
+
+            const featureHash = await set.getAllFeatures()
+
+            const featureList = []
+            for (let value of Object.values(featureHash)) {
+                featureList.push(...value)
+            }
+
+            return featureList
+
+        } else {
+            return []
+        }
+
+    }
+
+    getRulerTrackView() {
+        const list = this.trackViews.filter(({track}) => 'ruler' === track.id)
+        return list.length > 0 ? list[0] : undefined
     }
 
     /**
@@ -1069,7 +1098,7 @@ class Browser {
     }
 
     _removeTrack(track) {
-        if(track.disposed) return
+        if (track.disposed) return
         this.trackViews.splice(this.trackViews.indexOf(track.trackView), 1)
         this.fireEvent('trackremoved', [track])
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
