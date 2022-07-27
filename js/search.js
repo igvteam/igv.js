@@ -153,6 +153,7 @@ function parseLocusString(browser, locus) {
             extent.end = extent.start + 1
 
             if (1 === b.length) {
+                // Don't clamp coordinates if single coordinate is supplied.
                 extent.start -= 20
                 extent.end += 20
             }
@@ -164,13 +165,13 @@ function parseLocusString(browser, locus) {
                 } else {
                     extent.end = parseInt(numeric, 10)
                 }
-            }
 
-            // Allow negative coordinates only if browser is softclipped, i.e. there is at least alignment track with softclipping on
-            if(extent.start < 0 && !browser.isSoftclipped()) {
-                const delta = -extent.start
-                extent.start += delta
-                extent.end += delta
+                // Allow negative coordinates only if browser is softclipped, i.e. there is at least alignment track with softclipping on
+                if (extent.start < 0 && !browser.isSoftclipped()) {
+                    const delta = -extent.start
+                    extent.start += delta
+                    extent.end += delta
+                }
             }
         }
 
