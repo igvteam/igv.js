@@ -16,8 +16,10 @@
 <body>
 
 <h1>Group Autoscale</h1>
-<button id="loadtracks_button"
-">Load Tracks</button>
+<button id="loadtracks_button">Load All Tracks</button>
+<button id="track1_button">Load Track 1</button>
+<button id="track2_button">Load Track 2</button>
+<button id="track3_button">Load Track 3</button>
 
 <div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto"/>
 <script type="module">
@@ -59,6 +61,15 @@
         .then(function (browser) {
             document.getElementById("loadtracks_button").addEventListener("click", () => {
                 browser.loadTrackList(histone_tracks)
+            })
+            document.getElementById("track1_button").addEventListener("click", () => {
+                browser.loadTrackList([histone_tracks[0]])
+            })
+            document.getElementById("track2_button").addEventListener("click", () => {
+                browser.loadTrack(histone_tracks[1])
+            })
+            document.getElementById("track3_button").addEventListener("click", () => {
+                browser.loadTrack(histone_tracks[2])
             })
         })
 
