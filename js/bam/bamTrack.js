@@ -1161,14 +1161,18 @@ class AlignmentTrack {
                     const seq = alignment.seq ? alignment.seq.toUpperCase() : undefined
                     const qual = alignment.qual
                     const seqOffset = block.seqOffset
+                    const widthPixel = Math.max(1, 1 / bpPerPixel)
 
 
                     for (let i = 0, len = block.len; i < len; i++) {
 
-                        if (offsetBP + i < 0) continue
+                        const xPixel = ((block.start + i) - bpStart) / bpPerPixel
+
+                        if (xPixel + widthPixel < 0) continue   // Off left edge
+                        if (xPixel > pixelWidth) break  // Off right edge
 
                         let readChar = seq ? seq.charAt(seqOffset + i) : ''
-                        const refChar = referenceSequence.charAt(offsetBP + i)
+                        const refChar = offsetBP + i >= 0 ? referenceSequence.charAt(offsetBP + i) : ''
 
                         if (readChar === "=") {
                             readChar = refChar
@@ -1183,9 +1187,6 @@ class AlignmentTrack {
                                 baseColor = nucleotideColors[readChar]
                             }
                             if (baseColor) {
-                                const xPixel = ((block.start + i) - bpStart) / bpPerPixel
-                                const widthPixel = Math.max(1, 1 / bpPerPixel)
-
                                 blockBasesToDraw.push({
                                     bbox: {
                                         x: xPixel,
