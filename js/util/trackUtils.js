@@ -23,9 +23,10 @@
  * THE SOFTWARE.
  */
 
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import FileFormats from "./fileFormats.js"
 import {isHiccups} from "../feature/decode/bedpe.js"
+import {buildOptions} from "./igvUtils.js"
 
 const knownFileExtensions = new Set([
 
@@ -253,11 +254,9 @@ function translateDeprecatedTypes(config) {
 async function inferFileFormatFromHeader(config) {
 
     if (config.url) {
-        const firstBytes = igvxhr.loadString(config.url, buildOptions(config, {range: {start: 0, size: 1000}}))
-        const dataWrapper = getDataWrapper(firstBytes)
-        const line = dataWrapper.nextLine()
-        if(line) {
-            const columnNames = new Set(line.split('\t'))
+        const firstBytes = await igvxhr.loadString(config.url, buildOptions(config, {range: {start: 0, size: 1000}}))
+        if(firstBytes) {
+            const columnNames = firstBytes.split('\n')[0].split('\t')
             if(isHiccups(columnNames)) {
                 return "hiccups"
             }

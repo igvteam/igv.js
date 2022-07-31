@@ -168,11 +168,10 @@ suite("testBedpe", function () {
         const start = 1;
         const end = Number.MAX_SAFE_INTEGER;
         const featureSource = FeatureSource({
-                url: require.resolve('./data/bedpe/hiccups_encode.tsv'),
-                format: 'bedpe'
+                url: require.resolve('./data/bedpe/hiccups_encode.tsv')
             },
             genome);
-
+        await featureSource.getHeader()
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
         assert.equal(features.length, 2)
