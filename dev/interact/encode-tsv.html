@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IGV-JB</title>
+    <!-- Font Awesome CSS-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- Juicebox CSS-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/juicebox.js@2.2.2/dist/css/juicebox.css">
+
+</head>
+<body>
+
+<div id="igvDiv"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    // Start igv.js and create regions
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr8:125,435,405-133,904,633",
+            "tracks": [
+                {
+                    "name": "ENCODE TSV",
+                    "url": "https://www.encodeproject.org/files/ENCFF385DHX/@@download/ENCFF385DHX.tsv",
+                    "format": "bedpe",
+                    "type": "interact"
+                }
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv")
+    igv.createBrowser(igvDiv, options)
+        .then(async function (igvBrowser) {
+
+        })
+
+
+
+</script>
+
+</body>
+</html>
