@@ -947,10 +947,18 @@ class Browser {
                 if (!filename) {
                     filename = await getFilename(url)
                 }
-                config.format = TrackUtils.inferFileFormat(filename)
-                if (!config.format && (config.sourceType === undefined || config.sourceType === "htsget")) {
-                    // Check for htsget URL.  This is a longshot
-                    await HtsgetReader.inferFormat(config)
+
+                const format = TrackUtils.inferFileFormat(filename)
+
+                if("tsv" === format) {
+                    config.format = await TrackUtils.inferFileFormatFromHeader(config)
+                } else if (format) {
+                    config.format = format
+                } else {
+                    if (config.sourceType === undefined || config.sourceType === "htsget") {
+                        // Check for htsget URL.  This is a longshot
+                        await HtsgetReader.inferFormat(config)
+                    }
                 }
             }
         }
