@@ -611,11 +611,13 @@ class InteractionTrack extends TrackBase {
 
             if (f.extras && this.header && this.header.columnNames) {
                 const columnNames = this.header.columnNames
-                for (let i = 10; i < columnNames.length; i++) {
+                const stdColumns = this.header.hiccups ? 6 : 10
+                for (let i = stdColumns; i < columnNames.length; i++) {
+                    if(this.header.colorColumn === i) continue;
                     if (columnNames[i] === 'info') {
-                        extractInfoColumn(data, f.extras[i - 10])
+                        extractInfoColumn(data, f.extras[i - stdColumns])
                     } else {
-                        data.push({name: columnNames[i], value: f.extras[i - 10]})
+                        data.push({name: columnNames[i], value: f.extras[i - stdColumns]})
                     }
                 }
             }
