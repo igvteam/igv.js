@@ -759,11 +759,10 @@ class Browser {
     }
 
     /**
-     * Public API function
+     * Public API function. Load a list of tracks.
      *
-     * Load a list of tracks
-     * @param configList
-     * @returns {Promise<*>}
+     * @param configList  Array of track configurations
+     * @returns {Promise<*>}  Promise for track objects
      */
     async loadTrackList(configList) {
 
@@ -785,10 +784,10 @@ class Browser {
     /**
      * Public API function
      *
-     * Load an individual track.  If part of an autoscale group force general update
+     * Load an individual track.  If part of an autoscale group force a general update
      *
-     * @param config
-     * @returns {Promise<*>}
+     * @param config  A track configuration
+     * @returns {Promise<*>}  Promise for track object
      */
     async loadTrack(config) {
 
@@ -804,14 +803,13 @@ class Browser {
     }
 
     /**
-     * Return a promise to load a track.
+     * Return a promise to load a track.   Private function used by loadTrack() and loadTrackList()
      *
      * @param config
      * @returns {*}
      */
 
-    async _loadTrack(config, forceUpdate) {
-
+    async _loadTrack(config) {
 
         // config might be json
         if (StringUtils.isString(config)) {
@@ -845,7 +843,6 @@ class Browser {
                     trackView.stopSpinner()
                 }
             }
-
 
             if (!newTrack.autoscaleGroup) {
                 // Group autoscale will get updated later (as a group)
@@ -881,19 +878,26 @@ class Browser {
         }
     }
 
-
+    /**
+     * Public API function - load a region of interest
+     *
+     * @param config  A "track" configuration object, or array of objects,  of type == "annotation" (bed, gff, etc)
+     *
+     * @returns {Promise<void>}
+     */
     async loadROI(config) {
         await this.roiManager.loadROI(config, this.genome)
     }
 
+    /**
+     * Public API function - clear all regions of interest (ROI), including preloaded and user-defined ROIs
+     */
     clearROIs() {
         this.roiManager.clearROIs()
     }
 
     /**
-     * Return a promise for the list of user-defined regions-of-interest
-     *
-     * NOTE: public API function
+     * Public API function. Return a promise for the list of user-defined regions-of-interest
      */
     async getUserDefinedROIs() {
 
@@ -905,7 +909,6 @@ class Browser {
             }
 
             const featureHash = await set.getAllFeatures()
-
             const featureList = []
             for (let value of Object.values(featureHash)) {
                 featureList.push(...value)
@@ -916,7 +919,6 @@ class Browser {
         } else {
             return []
         }
-
     }
 
     getRulerTrackView() {
