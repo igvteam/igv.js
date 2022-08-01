@@ -24,8 +24,9 @@
  * THE SOFTWARE.
  */
 
-import {FileUtils, FeatureCache, StringUtils} from '../../node_modules/igv-utils/src/index.js'
+import {FileUtils, StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import FeatureSource from '../feature/featureSource.js'
+import StaticFeatureSource from "../feature/staticFeatureSource.js"
 import {appleCrayonRGBA} from '../util/colorPalletes.js'
 import {computeWGFeatures} from "../feature/featureUtils.js"
 import * as TrackUtils from "../util/trackUtils.js"
@@ -59,7 +60,7 @@ class ROISet {
         if (config.isUserDefined) {
             this.featureSource = new DynamicFeatureSource(config.features, genome)
         } else if (config.features) {
-            this.featureSource = new StaticFeatureSource(config.features, genome)
+            this.featureSource = new StaticFeatureSource(config, genome)
         } else {
             if (config.format) {
                 config.format = config.format.toLowerCase()
@@ -115,13 +116,17 @@ class ROISet {
 
     toJSON() {
         if (this.url) {
-            return '' === this.name ? {color: this.color, url: this.url} : {
-                name: this.name,
-                color: this.color,
-                url: this.url
-            }
+            return '' === this.name ?
+                {color: this.color, url: this.url} :
+                {name: this.name, color: this.color, url: this.url}
         } else {
-            const features = this.featureSource.getAllFeatures()
+            const featureMap = this.featureSource.getAllFeatures()
+            const features = []
+            for(let chr of Object.keys(featureMap)) {
+                for(let f of featureMap[chr]) {
+                    features.push(f)
+                }
+            }
             return '' === this.name ? {color: this.color, features: features} : {
                 name: this.name,
                 color: this.color,
@@ -155,31 +160,9 @@ function screenCoordinates(regionStartBP, regionEndBP, bpStart, bpp) {
     return {x: xStart, width}
 }
 
-class StaticFeatureSource {
-    constructor(features, genome) {
-        this.featureCache = new FeatureCache(features, genome)
-        this.genome = genome
-    }
-
-    getFeatures({chr, start, end}) {
-        if (chr.toLowerCase() === 'all') {
-            return computeWGFeatures(this.featureCache.getAllFeatures(), this.genome)
-        } else {
-            return this.featureCache.queryFeatures(chr, start, end)
-        }
-    }
-
-    getAllFeatures() {
-        return this.featureCache.getAllFeatures()
-    }
-
-    supportsWholeGenome() {
-        return true
-    }
-}
 
 /**
- * Special feature source that allows addition of features dynamically, for supporting user-defined genomes
+ * Special feature source that allows addition of features dynamically
  */
 class DynamicFeatureSource {
 
