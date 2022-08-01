@@ -90,6 +90,11 @@ class StaticFeatureSource {
         return this.featureCache.getAllFeatures()
     }
 
+    supportsWholeGenome() {
+        return true
+    }
+
+
 }
 
 
