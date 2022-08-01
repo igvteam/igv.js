@@ -2,6 +2,7 @@ import {DOMUtils, StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import ROISet, {screenCoordinates} from './ROISet.js'
 
 class ROIManager {
+
     constructor(browser, roiMenu, roiTable, top, roiSets) {
 
         this.browser = browser
