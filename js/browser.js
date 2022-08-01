@@ -532,12 +532,8 @@ class Browser {
         const roiMenu = new ROIMenu(this, this.columnContainer)
         if (session.roi) {
 
-            session.roi.filter(config => config.features && config.isUserDefined).map((c, index) => c.name = undefined)
-
             const roiSetList = session.roi.map(c => new ROISet(c, this.genome))
-
-            const named = roiSetList.filter(({name}) => name !== undefined)
-
+            const named = roiSetList.filter(({name}) => name !== undefined && name.length > 0)
             const roiTable = new ROITable(this, this.columnContainer, (named.length > 0))
 
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, roiSetList)
