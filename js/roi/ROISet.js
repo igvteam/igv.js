@@ -34,7 +34,7 @@ import * as TrackUtils from "../util/trackUtils.js"
 
 const appleCrayonColorName = 'nickel'
 
-const ROI_DEFAULT_ALPHA = 2/16
+const ROI_DEFAULT_ALPHA = 2 / 16
 
 const ROI_DEFAULT_COLOR = appleCrayonRGBA(appleCrayonColorName, ROI_DEFAULT_ALPHA)
 const ROI_DEFAULT_HEADER_COLOR = 'rgba(0,0,0,0)'
@@ -47,7 +47,6 @@ class ROISet {
     constructor(config, genome) {
 
         this.url = config.url
-        this.isUserDefined = config.isUserDefined
 
         if (config.name) {
             this.name = config.name
@@ -57,10 +56,10 @@ class ROISet {
             this.name = FileUtils.getFilename(config.url)
         }
 
-        if (config.isUserDefined) {
+        this.isUserDefined = config.isUserDefined
+
+        if (config.features) {
             this.featureSource = new DynamicFeatureSource(config.features, genome)
-        } else if (config.features) {
-            this.featureSource = new StaticFeatureSource(config, genome)
         } else {
             if (config.format) {
                 config.format = config.format.toLowerCase()
@@ -80,7 +79,6 @@ class ROISet {
         } else {
 
             this.color = config.color || ROI_DEFAULT_COLOR
-
             this.headerColor = ROI_DEFAULT_HEADER_COLOR
 
             // Use body color with alpha pinned to 1
@@ -116,22 +114,16 @@ class ROISet {
 
     toJSON() {
         if (this.url) {
-            return '' === this.name ?
-                {color: this.color, url: this.url} :
-                {name: this.name, color: this.color, url: this.url}
+            return {name: this.name, color: this.color, url: this.url, isUserDefined: this.isUserDefined}
         } else {
             const featureMap = this.featureSource.getAllFeatures()
             const features = []
-            for(let chr of Object.keys(featureMap)) {
-                for(let f of featureMap[chr]) {
+            for (let chr of Object.keys(featureMap)) {
+                for (let f of featureMap[chr]) {
                     features.push(f)
                 }
             }
-            return '' === this.name ? {color: this.color, features: features} : {
-                name: this.name,
-                color: this.color,
-                features: features
-            }
+            return {name: this.name, color: this.color, features: features, isUserDefined: this.isUserDefined}
         }
     }
 
@@ -212,11 +204,11 @@ class DynamicFeatureSource {
         featureList.sort((a, b) => a.start - b.start)
     }
 
-    removeFeature({ chr, start, end }) {
-        
-        if (this.featureMap[ chr ]) {
+    removeFeature({chr, start, end}) {
+
+        if (this.featureMap[chr]) {
             const match = `${chr}-${start}-${end}`
-            this.featureMap[ chr ] = this.featureMap[ chr ].filter(feature => match !== `${feature.chr}-${feature.start}-${feature.end}`)
+            this.featureMap[chr] = this.featureMap[chr].filter(feature => match !== `${feature.chr}-${feature.start}-${feature.end}`)
         }
     }
 }
