@@ -26,7 +26,6 @@
 
 import {FileUtils, StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import FeatureSource from '../feature/featureSource.js'
-import StaticFeatureSource from "../feature/staticFeatureSource.js"
 import {appleCrayonRGBA} from '../util/colorPalletes.js'
 import {computeWGFeatures} from "../feature/featureUtils.js"
 import * as TrackUtils from "../util/trackUtils.js"
@@ -37,9 +36,9 @@ const appleCrayonColorName = 'nickel'
 const ROI_DEFAULT_ALPHA = 2 / 16
 
 const ROI_DEFAULT_COLOR = appleCrayonRGBA(appleCrayonColorName, ROI_DEFAULT_ALPHA)
-const ROI_DEFAULT_HEADER_COLOR = 'rgba(0,0,0,0)'
+const ROI_DEFAULT_HEADER_COLOR = 'rgb(190,190,190)'
 
-const ROI_USER_HEADER_DEFINED_COLOR = 'rgba(155,185,129,1)'
+const ROI_USER_HEADER_DEFINED_COLOR = 'rgba(155,185,129)'
 const ROI_USER_DEFINED_COLOR = ROI_DEFAULT_COLOR
 
 class ROISet {
@@ -71,9 +70,7 @@ class ROISet {
         }
 
         if (true === this.isUserDefined) {
-
             this.color = config.color || ROI_USER_DEFINED_COLOR
-
             this.headerColor = ROI_USER_HEADER_DEFINED_COLOR
 
         } else {

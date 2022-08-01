@@ -1,5 +1,6 @@
-import {DOMUtils, StringUtils} from '../../node_modules/igv-utils/src/index.js'
+import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
 import ROISet, {screenCoordinates} from './ROISet.js'
+import {Popover} from '../../node_modules/igv-ui/dist/igv-ui.js'
 
 class ROIManager {
 
@@ -164,8 +165,9 @@ class ROIManager {
                     if (el) {
                         el.style.left = `${pixelX}px`
                         el.style.width = `${pixelWidth}px`
+
                     } else {
-                        const element = this.createRegionElement(browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey)
+                        const element = this.createRegionElement(browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey, feature.name)
                         columns[i].appendChild(element)
                     }
                 }
@@ -173,26 +175,22 @@ class ROIManager {
         }
     }
 
-    createRegionElement(columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey) {
+    createRegionElement(columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey, name) {
 
         const regionElement = DOMUtils.div({class: 'igv-roi-region'})
 
         regionElement.style.top = `${pixelTop}px`
         regionElement.style.left = `${pixelX}px`
-
         regionElement.style.width = `${pixelWidth}px`
-
         regionElement.style.backgroundColor = roiSet.color
-
         regionElement.dataset.region = regionKey
 
+        const header = DOMUtils.div()
+        regionElement.appendChild(header)
+
+        header.style.backgroundColor = roiSet.headerColor
+
         if (true === roiSet.isUserDefined) {
-
-            const header = DOMUtils.div()
-            regionElement.appendChild(header)
-
-            header.style.backgroundColor = roiSet.headerColor
-
             header.addEventListener('click', event => {
                 event.preventDefault()
                 event.stopPropagation()
@@ -200,6 +198,18 @@ class ROIManager {
                 const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
                 this.roiMenu.present(x, y, this, columnContainer, regionElement)
             })
+        } else if (name) {
+            header.addEventListener('click', event => {
+                event.preventDefault()
+                event.stopPropagation()
+                if (this.popover) {
+                    this.popover.dispose()
+                }
+                this.popover = new Popover(columnContainer, roiSet.name)
+                this.popover.presentContentWithEvent(event, name)
+            })
+        } else {
+            header.style.pointerEvents = 'none'
         }
 
         return regionElement
