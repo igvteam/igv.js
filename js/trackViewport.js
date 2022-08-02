@@ -3,7 +3,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import {Alert, Popover} from '../node_modules/igv-ui/dist/igv-ui.js'
+import {Popover} from '../node_modules/igv-ui/dist/igv-ui.js'
 import Viewport from "./viewport.js"
 import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js"
 import C2S from "./canvas2svg.js"
@@ -180,7 +180,7 @@ class TrackViewport extends Viewport {
             // Track might have been removed during load
             if (this.trackView && this.trackView.disposed !== true) {
                 this.showMessage(NOT_LOADED_MESSAGE)
-                Alert.presentAlert(error)
+                this.browser.alert.present(error)
                 console.error(error)
             }
         } finally {

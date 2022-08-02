@@ -24,7 +24,6 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import {Alert,} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import FeatureSource from './featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
@@ -397,7 +396,7 @@ class FeatureTrack extends TrackBase {
                     else if (f.strand === '-') {
                         seq = reverseComplementSequence(seq)
                     }
-                    Alert.presentAlert(seq)
+                    this.browser.alert.present(seq)
 
                 }
             }]
@@ -418,7 +417,7 @@ class FeatureTrack extends TrackBase {
                                 await navigator.clipboard.writeText(seq)
                             } catch (e) {
                                 console.error(e)
-                                Alert.presentAlert(`error copying sequence to clipboard ${e}`)
+                                this.browser.alert.present(`error copying sequence to clipboard ${e}`)
                             }
                         }
                     }

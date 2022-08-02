@@ -24,7 +24,6 @@
  */
 
 import IGVGraphics from "./igv-canvas.js"
-import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
 
@@ -183,7 +182,7 @@ class SequenceTrack {
                         } else if (this.reversed) {
                             seq = reverseComplementSequence(seq)
                         }
-                        Alert.presentAlert(seq)
+                        this.browser.alert.present(seq)
                     }
                 }
             ]
@@ -201,7 +200,7 @@ class SequenceTrack {
                             await navigator.clipboard.writeText(seq)
                         } catch (e) {
                             console.error(e)
-                            Alert.presentAlert(`error copying sequence to clipboard ${e}`)
+                            this.browser.alert.present(`error copying sequence to clipboard ${e}`)
                         }
                     }
 

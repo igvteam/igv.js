@@ -24,7 +24,6 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import BamSource from "./bamSource.js"
 import PairedAlignment from "./pairedAlignment.js"
 import TrackBase from "../trackBase.js"
@@ -1311,7 +1310,7 @@ class AlignmentTrack {
                                     const frameEnd = clickedAlignment.mate.position + bpWidth / 2
                                     this.browser.addMultiLocusPanel(clickedAlignment.mate.chr, frameStart, frameEnd, referenceFrame)
                                 } else {
-                                    Alert.presentAlert(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`)
+                                    this.browser.alert.present(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`)
                                 }
                             }
                         },
@@ -1324,9 +1323,9 @@ class AlignmentTrack {
                     click: () => {
                         const seqstring = clickedAlignment.seq //.map(b => String.fromCharCode(b)).join("");
                         if (!seqstring || "*" === seqstring) {
-                            Alert.presentAlert("Read sequence: *")
+                            this.browser.alert.present("Read sequence: *")
                         } else {
-                            Alert.presentAlert(seqstring)
+                            this.browser.alert.present(seqstring)
                         }
                     }
                 })
@@ -1341,7 +1340,7 @@ class AlignmentTrack {
                                 await navigator.clipboard.writeText(seq)
                             } catch (e) {
                                 console.error(e)
-                                Alert.presentAlert(`error copying sequence to clipboard ${e}`)
+                                this.browser.alert.present(`error copying sequence to clipboard ${e}`)
                             }
 
                         }
