@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import {Alert, InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js'
+import {Alert, InputDialog, GenericColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {
     BGZip,
     DOMUtils,
@@ -66,7 +66,6 @@ import HtsgetReader from "./htsget/htsgetReader.js"
 import SVGSaveControl from "./ui/svgSaveControl.js"
 import MenuPopup from "./ui/menuPopup.js"
 import {viewportColumnManager} from './viewportColumnManager.js'
-import GenericColorPicker from './ui/genericColorPicker.js'
 import ViewportCenterLine from './ui/viewportCenterLine.js'
 import IdeogramTrack from "./ideogramTrack.js"
 import RulerTrack from "./rulerTrack.js"

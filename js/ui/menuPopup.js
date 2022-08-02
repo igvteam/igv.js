@@ -25,7 +25,7 @@
 
 import MenuUtils from "./menuUtils.js"
 import {DOMUtils, makeDraggable, UIUtils} from "../../node_modules/igv-utils/src/index.js"
-import GenericColorPicker from './genericColorPicker.js'
+import {GenericColorPicker} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {createCheckbox} from "../igv-icons.js"
 
 const MenuPopup = function (parent) {
