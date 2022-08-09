@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import {Alert, InputDialog, GenericColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js'
+import {InputDialog, GenericColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {
     BGZip,
     DOMUtils,
@@ -35,6 +35,7 @@ import {
     StringUtils,
     URIUtils
 } from "../node_modules/igv-utils/src/index.js"
+import Alert from './ui/alert.js'
 import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js"
 import C2S from "./canvas2svg.js"
@@ -107,7 +108,7 @@ class Browser {
         this.root = DOMUtils.div({class: 'igv-container'})
         parentDiv.appendChild(this.root)
 
-        Alert.init(this.root)
+        this.alert = new Alert(this.root)
 
         this.columnContainer = DOMUtils.div({class: 'igv-column-container'})
         this.root.appendChild(this.columnContainer)
@@ -285,7 +286,7 @@ class Browser {
         this.inputDialog = new InputDialog(this.root)
         this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
 
-        this.dataRangeDialog = new DataRangeDialog($(this.root))
+        this.dataRangeDialog = new DataRangeDialog(this, $(this.root))
         this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${DOMUtils.guid()}`
 
         this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432})
@@ -489,7 +490,7 @@ class Browser {
         // Track gear column
         createColumn(this.columnContainer, 'igv-gear-menu-column')
 
-        const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome)
+        const genomeConfig = await GenomeUtils.expandReference(this.alert, (session.reference || session.genome))
         await this.loadReference(genomeConfig, session.locus)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
@@ -668,7 +669,7 @@ class Browser {
      */
     async loadGenome(idOrConfig) {
 
-        const genomeConfig = await GenomeUtils.expandReference(idOrConfig)
+        const genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
         await this.loadReference(genomeConfig, undefined)
 
         const tracks = genomeConfig.tracks || []
@@ -869,7 +870,7 @@ class Browser {
                 msg = httpMessages[msg]
             }
             msg += (": " + config.url)
-            Alert.presentAlert(new Error(msg), undefined)
+            this.alert.present(new Error(msg), undefined)
         }
     }
 
@@ -992,8 +993,7 @@ class Browser {
 
         const track = TrackFactory.getTrack(type, config, this)
         if (undefined === track) {
-            Alert.presentAlert(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
-            return
+            this.alert.present(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
         } else {
 
             if (config.roi && config.roi.length > 0) {
@@ -1490,7 +1490,7 @@ class Browser {
     async doSearch(string, init) {
         const success = await this.search(string, init)
         if (!success) {
-            Alert.presentAlert(new Error(`Unrecognized locus: <b> ${string} </b>`))
+            this.alert.present(new Error(`Unrecognized locus: <b> ${string} </b>`))
         }
         return success
     }
