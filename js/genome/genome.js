@@ -27,7 +27,6 @@ import {loadFasta} from "./fasta.js"
 import Cytoband from "./cytoband.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import version from "../version.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json"
@@ -110,7 +109,7 @@ const GenomeUtils = {
     },
 
     // Expand a genome id to a reference object, if needed
-    expandReference: function (idOrConfig) {
+    expandReference: function (alert, idOrConfig) {
 
         // idOrConfig might be json
         if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
@@ -135,7 +134,7 @@ const GenomeUtils = {
             const knownGenomes = GenomeUtils.KNOWN_GENOMES
             const reference = knownGenomes[genomeID]
             if (!reference) {
-                Alert.presentAlert(new Error(`Unknown genome id: ${genomeID}`), undefined)
+                alert.present(new Error(`Unknown genome id: ${genomeID}`), undefined)
             }
             return reference
         } else {
