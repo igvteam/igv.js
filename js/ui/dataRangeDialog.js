@@ -24,13 +24,14 @@
  * THE SOFTWARE.
  */
 
-import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {makeDraggable, UIUtils} from "../../node_modules/igv-utils/src/index.js"
 
 class DataRangeDialog {
 
-    constructor($parent, alert) {
+    constructor(browser, $parent, alert) {
+
+        this.browser = browser
 
         // dialog container
         this.$container = $("<div>", {class: 'igv-generic-dialog-container'})
@@ -136,7 +137,7 @@ class DataRangeDialog {
         const min = Number(this.$minimum_input.val())
         const max = Number(this.$maximum_input.val())
         if (isNaN(min) || isNaN(max)) {
-            Alert.presentAlert(new Error('Must input numeric values'), undefined)
+            this.browser.alert.present(new Error('Must input numeric values'), undefined)
         } else {
             trackView.setDataRange(min, max)
         }
