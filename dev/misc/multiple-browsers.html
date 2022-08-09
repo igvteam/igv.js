@@ -68,10 +68,13 @@
         };
 
     (async () => {
-        await igv.createBrowser(document.getElementById("ba"), config_a)
-        await igv.createBrowser(document.getElementById("bb"), config_b)
-        await igv.createBrowser(document.getElementById("bc"), config_a)
-        await igv.createBrowser(document.getElementById("bd"), config_b)
+        const ba = await igv.createBrowser(document.getElementById("ba"), config_a);
+        const bb = await igv.createBrowser(document.getElementById("bb"), config_b);
+        const bc = await igv.createBrowser(document.getElementById("bc"), config_a);
+        const bd = await igv.createBrowser(document.getElementById("bd"), config_b);
+
+        // [ ba, bb, bc, bd ].forEach(browser => browser.alert.present(`ALERT: ${ browser.namespace }`))
+
     })()
 
 
