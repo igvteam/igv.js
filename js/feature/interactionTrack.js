@@ -518,16 +518,26 @@ class InteractionTrack extends TrackBase {
             })
         }
 
+        if (this.browser.juiceboxPanel) {
+            items.push('<hr/>')
+            items.push({
+                label: 'Present Juicebox Panel',
+                click: () => this.browser.juiceboxPanel.present()
+            })
+        }
+
         return items
     }
 
     contextMenuItemList(clickState) {
 
-        // Experimental JBrowse feature
-        if (this.browser.circularView ) {
-            const viewport = clickState.viewport
-            const list = []
+        const list = []
 
+        // Experimental JBrowse feature
+        if (this.browser.circularView) {
+            const viewport = clickState.viewport
+
+            // CircularView
             list.push({
                 label: 'Add interactions to circular view',
                 click: () => {
@@ -538,8 +548,22 @@ class InteractionTrack extends TrackBase {
             })
 
             list.push('<hr/>')
-            return list
         }
+
+        // Experimental JuiceboxJS integration
+        if (this.browser.juiceboxPanel) {
+
+            // Juicebox Controls
+            list.push({
+                label: 'Present Juicebox Panel',
+                click: () => this.browser.juiceboxPanel.present()
+            })
+
+            list.push('<hr/>')
+        }
+
+        return list
+
     }
 
     /**

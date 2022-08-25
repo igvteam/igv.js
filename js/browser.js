@@ -126,6 +126,8 @@ class Browser {
             doubleClickDelay: config.doubleClickDelay || 500
         }
 
+        this.juiceboxPanel = undefined
+
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = {}
 
