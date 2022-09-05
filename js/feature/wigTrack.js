@@ -88,6 +88,7 @@ class WigTrack extends TrackBase {
             start,
             end,
             bpPerPixel,
+            visibilityWindow: this.visibilityWindow,
             windowFunction: this.windowFunction
         })
         if (this.normalize && this.featureSource.normalizationFactor) {
