@@ -387,6 +387,11 @@ class TrackView {
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
         for (let viewport of viewportsToReload) {
+
+            if ('interact' === viewport.trackView.track.type) {
+                viewport.trackView.track.clearCachedFeatures()
+            }
+
             await viewport.loadFeatures()
         }
 

@@ -491,21 +491,32 @@ class TrackViewport extends Viewport {
 
     needsRepaint() {
 
-        if (!this.canvas) return true
+        if ('interact' === this.trackView.track.type) {
+            return true
+        } else if (undefined === this.canvas) {
+            return true
+        } else {
+            const data = this.canvas._data
+            return !data ||
+                this.referenceFrame.start < data.bpStart ||
+                this.referenceFrame.end > data.bpEnd ||
+                this.referenceFrame.chr !== data.referenceFrame.chr ||
+                this.referenceFrame.bpPerPixel !== data.bpPerPixel
+        }
 
-        const data = this.canvas._data
-        return !data ||
-            this.referenceFrame.start < data.bpStart ||
-            this.referenceFrame.end > data.bpEnd ||
-            this.referenceFrame.chr !== data.referenceFrame.chr ||
-            this.referenceFrame.bpPerPixel != data.bpPerPixel
     }
 
     needsReload() {
-        if (!this.featureCache) return true
-        const {chr, bpPerPixel} = this.referenceFrame
-        const {bpStart, bpEnd} = this.repaintDimensions()
-        return (!this.featureCache.containsRange(chr, bpStart, bpEnd, bpPerPixel))
+
+        if ('interact' === this.trackView.track.type) {
+            return true
+        } else if (undefined === this.featureCache) {
+            return true
+        } else {
+            const {chr, bpPerPixel} = this.referenceFrame
+            const {bpStart, bpEnd} = this.repaintDimensions()
+            return (!this.featureCache.containsRange(chr, bpStart, bpEnd, bpPerPixel))
+        }
     }
 
     createZoomInNotice($parent) {
