@@ -23,6 +23,7 @@
     var options =
         {
             genome: "hg19",
+            locus: "chr4:40,174,668-40,221,204",
             tracks: [
                 {
                     "type": "wig",
@@ -74,29 +75,6 @@
                             "format": "bigwig",
                             "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
                             "color": "green"
-                        }
-                    ]
-                },
-                {
-                    name: "Merged - individually scaled",
-                    type: "merged",
-                    min: 0,
-                    max: 50,
-                    autoscale: false,
-                    tracks: [
-                        {
-                            "type": "wig",
-                            "format": "bigwig",
-                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
-                            "color": "red",
-                            "max": 100
-                        },
-                        {
-                            "type": "wig",
-                            "format": "bigwig",
-                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
-                            "color": "green",
-                            "max": 25
                         }
                     ]
                 }
