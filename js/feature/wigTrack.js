@@ -108,7 +108,9 @@ class WigTrack extends TrackBase {
 
     menuItemList() {
         let items = []
+
         if (this.flipAxis !== undefined) {
+            items.push('<hr>')
             items.push({
                 label: "Flip y-axis",
                 click: () => {

@@ -179,10 +179,16 @@ class InteractionTrack extends TrackBase {
                 // Reset transient property drawState.  An undefined value => feature has not been drawn.
                 feature.drawState = undefined
 
-                let color = this.color || feature.color || DEFAULT_ARC_COLOR
-                if (color && this.config.useScore) {
-                    color = getAlphaColor(color, scoreShade(feature.score))
+                let color
+                if(typeof this.color === 'function') {
+                    color = this.color(feature)
+                } else {
+                    color = this.color || feature.color || DEFAULT_ARC_COLOR
+                    if (color && this.config.useScore) {
+                        color = getAlphaColor(color, scoreShade(feature.score))
+                    }
                 }
+
                 ctx.lineWidth = feature.thickness || this.thickness || 1
 
                 if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
@@ -457,18 +463,10 @@ class InteractionTrack extends TrackBase {
 
     menuItemList() {
 
-        let items = [
-
-            {
-                name: "Set track color",
-                click: () => {
-                    this.trackView.presentColorPicker()
-                }
-            },
-            '<hr/>'
-        ]
+        let items = []
 
         if (this.hasValue) {
+            items.push("<hr/>")
             const lut =
                 {
                     "nested": "Nested",
