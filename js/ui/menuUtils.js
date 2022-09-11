@@ -24,7 +24,9 @@ const MenuUtils = {
             menuItems.push('<hr/>')
             menuItems.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}))
             menuItems.push(unsetColorMenuItem({trackView, label: "Unset track color"}))
-            menuItems.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
+           if(trackView.track.config.type === 'wig' || trackView.track.config.type === 'annotation') {
+               menuItems.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
+           }
         }
 
         if (trackView.track.menuItemList) {
