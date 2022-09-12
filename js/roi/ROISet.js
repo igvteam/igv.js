@@ -160,10 +160,14 @@ class DynamicFeatureSource {
         this.genome = genome
 
         for (let feature of features) {
-            let featureList = this.featureMap[feature.chr]
+
+            // Store as canonical chr name (i.e. translate aliases)
+            const chrKey = genome ? genome.getChromosomeName(feature.chr) : feature.chr
+
+            let featureList = this.featureMap[chrKey]
             if (!featureList) {
                 featureList = []
-                this.featureMap[feature.chr] = featureList
+                this.featureMap[chrKey] = featureList
             }
             featureList.push(feature)
         }
