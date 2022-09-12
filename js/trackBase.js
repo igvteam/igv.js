@@ -63,6 +63,7 @@ class TrackBase {
         this.config = config
         this.url = config.url
         this.type = config.type
+        this.multiresolution = config.multiresolution === true
 
         this.supportHiDPI = config.supportHiDPI === undefined ? true : config.supportHiDPI
 

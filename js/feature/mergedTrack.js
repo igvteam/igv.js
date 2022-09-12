@@ -100,6 +100,10 @@ class MergedTrack extends TrackBase {
         }
     }
 
+    get multiresolution() {
+        return this.tracks.some(t => t.multiresolution === true)
+    }
+
     menuItemList() {
         let items = []
         if (this.flipAxis !== undefined) {
@@ -170,8 +174,8 @@ function autoscale(chr, featureArrays) {
 
     let min = 0
     let max = -Number.MAX_VALUE
-    for(let features of featureArrays) {
-        for(let f of features) {
+    for (let features of featureArrays) {
+        for (let f of features) {
             if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
                 min = Math.min(min, f.value)
                 max = Math.max(max, f.value)

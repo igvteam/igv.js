@@ -30,14 +30,16 @@
     var options =
         {
             genome: "hg19",
-            locus: "chr2:65,489,209-65,795,733",
+            locus: "chr2:68,594,602-69,265,450",
             tracks: [
                 {
                     id: "jb-interactions",
                     type: "interact",
                     name: "Contacts",
                     height: 125,
-                    featureSource
+                    featureSource,
+                    visibilityWindow: 10000000,
+                    multiresolution: true
                 }
             ]
         }
