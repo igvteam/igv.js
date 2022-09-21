@@ -64,20 +64,15 @@ class BamAlignmentRow {
 
     }
 
-    updateScore(options, alignmentContainer) {
-        this.score = this.calculateScore(options, alignmentContainer)
-    }
-
-    calculateScore({position, option, direction, tag}, alignmentContainer) {
+    getSortValue({position, option, tag}, alignmentContainer) {
 
         if (!option) option = "BASE"
 
         const alignment = this.findAlignment(position)
-        if (undefined === alignment) {
-            return Number.MAX_VALUE * (direction ? 1 : -1)
+        if (undefined === alignment) {  // This condition should never occur
+            return Number.MAX_VALUE
         }
 
-        let mate
         switch (option) {
             case "NUCLEOTIDE":
             case "BASE": {
@@ -88,31 +83,16 @@ class BamAlignmentRow {
             case "START":
                 return alignment.start
             case "TAG": {
-
-                const tagValue = alignment.tags()[tag]
-                if (tagValue !== undefined) {
-                    return isString(tagValue) ? hashCode(tagValue) : tagValue
-                } else {
-                    return Number.MAX_VALUE
-                }
+                return alignment.tags()[tag]
             }
             case "READ_NAME":
-                return hashCode(alignment.readName)
+                return alignment.readName
             case "INSERT_SIZE":
                 return -Math.abs(alignment.fragmentLength)
             case "GAP_SIZE":
                 return -alignment.gapSizeAt(position)
             case "MATE_CHR":
-                mate = alignment.mate
-                if (!mate) {
-                    return Number.MAX_VALUE
-                } else {
-                    if (mate.chr === alignment.chr) {
-                        return Number.MAX_VALUE - 1
-                    } else {
-                        return hashCode(mate.chr)
-                    }
-                }
+                return alignment.mate
             case "MQ":
                 return alignment.mq === undefined ? Number.MAX_VALUE : -alignment.mq
             case "ALIGNED_READ_LENGTH":
@@ -175,6 +155,8 @@ class BamAlignmentRow {
             return baseScore
         }
     }
+
+
 }
 
 export default BamAlignmentRow
