@@ -122,7 +122,7 @@ class BAMTrack extends TrackBase {
             if (vp.containsPosition(options.chr, options.position)) {
                 const alignmentContainer = vp.cachedFeatures
                 if (alignmentContainer) {
-                    sortAlignmentRows(options, alignmentContainer)
+                    alignmentContainer.sortRows(options)
                     vp.repaint()
                 }
             }
@@ -166,7 +166,7 @@ class BAMTrack extends TrackBase {
         const sort = this.sortObject
         if (sort) {
             if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
-                sortAlignmentRows(sort, alignmentContainer)
+                alignmentContainer.sortRows(sort)
             }
         }
 
@@ -234,7 +234,7 @@ class BAMTrack extends TrackBase {
      */
     clickedFeatures(clickState) {
 
-        let clickedObject;
+        let clickedObject
         if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
             clickedObject = this.coverageTrack.getClickedObject(clickState)
         } else {
@@ -1060,8 +1060,8 @@ class AlignmentTrack {
             }
 
             basesToDraw.forEach(({bbox, baseColor, readChar}) => {
-                renderBlockOrReadChar(ctx, bpPerPixel, bbox, baseColor, readChar);
-            });
+                renderBlockOrReadChar(ctx, bpPerPixel, bbox, baseColor, readChar)
+            })
 
 
             function drawBlock(block, b) {
@@ -1246,7 +1246,7 @@ class AlignmentTrack {
                 direction: direction
             }
             this.parent.sortObject = newSortObject
-            sortAlignmentRows(newSortObject, viewport.cachedFeatures)
+            viewport.cachedFeatures.sortRows(newSortObject)
             viewport.repaint()
         }
         list.push('<b>Sort by...</b>')
@@ -1277,7 +1277,7 @@ class AlignmentTrack {
                                 }
                                 this.sortByTag = tag
                                 this.parent.sortObject = newSortObject
-                                sortAlignmentRows(newSortObject, viewport.cachedFeatures)
+                                viewport.cachedFeatures.sortRows(newSortObject)
                                 viewport.repaint()
                             }
                         }
@@ -1518,21 +1518,6 @@ class AlignmentTrack {
         return color
 
     }
-}
-
-function sortAlignmentRows(options, alignmentContainer) {
-
-    const direction = options.direction
-
-    for (let row of alignmentContainer.packedAlignmentRows) {
-        row.updateScore(options, alignmentContainer)
-    }
-
-    alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
-        const i = rowA.score > rowB.score ? 1 : (rowA.score < rowB.score ? -1 : 0)
-        return true === direction ? i : -i
-    })
-
 }
 
 function shadedBaseColor(qual, baseColor) {
