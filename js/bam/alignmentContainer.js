@@ -154,6 +154,39 @@ class AlignmentContainer {
     getMax(start, end) {
         return this.coverageMap.getMax(start, end)
     }
+
+    sortRows(options) {
+
+        const newRows = []
+        const undefinedRow = []
+        for (let row of this.packedAlignmentRows) {
+            const alignment = row.findAlignment(options.position)
+            if (undefined !== alignment) {
+                newRows.push(row)
+            } else {
+                undefinedRow.push(row)
+            }
+        }
+
+        newRows.sort((rowA, rowB) => {
+            const direction = options.direction
+            const rowAValue = rowA.getSortValue(options, this)
+            const rowBValue = rowB.getSortValue(options, this)
+
+            if (rowBValue === undefined && rowBValue !== undefined) return 1
+            else if (rowAValue !== undefined && rowBValue === undefined) return -1
+
+            const i = rowAValue > rowBValue ? 1 : (rowAValue < rowBValue ? -1 : 0)
+            return true === direction ? i : -i
+        })
+
+        for (let row of undefinedRow) {
+            newRows.push(row)
+        }
+
+        this.packedAlignmentRows = newRows
+    }
+
 }
 
 
@@ -382,7 +415,7 @@ class Coverage {
     hoverText() {
         const pos = this.posA + this.posT + this.posC + this.posG + this.posN
         const neg = this.negA + this.negT + this.negC + this.negG + this.negN
-        return `${this.total } (${pos}+, ${neg}-)`
+        return `${this.total} (${pos}+, ${neg}-)`
     }
 
     isMismatch(refBase) {
