@@ -28,7 +28,7 @@ import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/sr
 
 const fixColor = (colorString) => {
     if (StringUtils.isString(colorString)) {
-        return (colorString.indexOf(",") > 0 && !colorString.startsWith("rgb(")) ?
+        return (colorString.indexOf(",") > 0 && !(colorString.startsWith("rgb(") || colorString.startsWith("rgba("))) ?
             `rgb(${colorString})` : colorString
     } else {
         return colorString
