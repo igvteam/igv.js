@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>igv</title>
+
+</head>
+
+<body>
+
+<h1>Indexed VCF - automatic depth track updates</h1>
+
+<p>
+    <b>This example illustrates use of a custom FeatureSource class to calculate binned coverage depth from the "DP"
+        info tag of a VCF track.
+    </b>
+<ul>
+    <b>
+        <li>The coverage track calculation perfomed automatically as needed in the <i>getFeatures</i> function of the
+            data source.
+        </li>
+        <li>Bin size is set automatically to ~ 100 bins over the genomic range in view.</li>
+        <li>Only the region in view is calculated.</li>
+        <li><a href="https://raw.githubusercontent.com/igvteam/igv.js/master/examples/cnvpytor/indexed_auto_update.html"
+               target="_blank">Source code</a></li>
+    </b>
+</ul>
+</p>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../dist/igv.esm.js"
+    import {computeDepthFeatures} from "./js/computeDepthFeatures.js"
+
+    class DepthFeatureSource {
+
+        constructor(vcfTrackID, multiplier) {
+            this.vcfTrackID = vcfTrackID
+            this.multiplier = multiplier || 1
+        }
+
+        /**
+         * Return a promise for wig features for a genomic range
+         * @param chr
+         * @param start
+         * @param end
+         * @returns {Promise<[]>}
+         */
+        async getFeatures({chr, start, end}) {
+
+            if (!igvBrowser) return undefined
+
+            const vcfTrack = igvBrowser.findTracks("id", this.vcfTrackID)[0]
+            if (!vcfTrack) return []
+
+            const variantDict = {}
+            variantDict[chr] = await vcfTrack.getFeatures(chr, start, end)
+            const binSize = Math.max(100, (end - start) / (3 * 100))     // Requested range is ~ 3 X screen width
+            const wigFeatures = computeDepthFeatures(variantDict, binSize)
+            for(let f of wigFeatures) {
+                f.value = f.value * this.multiplier
+            }
+            return wigFeatures
+        }
+    }
+
+    let igvBrowser
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr22:50,135,460-50,211,747",
+            tracks: [
+                {
+                    id: "vcf_track",
+                    type: "variant",
+                    name: "1KG Snps - chr22",
+                    url: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz.tbi",
+                    visibilityWindow: 1000000
+                },
+
+                {
+                    name: "Merged - fixed scale",
+                    type: "merged",
+                    min: 0,
+                    max: 30000,
+                    tracks: [
+                        {
+                            type: "wig",
+                            name: "track 1",
+                            color: "rgba(200,0,0, 0.5)",
+                            visibilityWindow: 1000000,
+                            featureSource: new DepthFeatureSource("vcf_track", 1.0)
+                        },
+                        {
+                            type: "wig",
+                            name: "track 2",
+                            color: "rgba(0,0,200, 0.5)",
+                            visibilityWindow: 1000000,
+                            featureSource: new DepthFeatureSource("vcf_track", 0.5)
+                        }
+                    ]
+
+                }
+
+            ]
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+
+        .then(async function (browser) {
+            igvBrowser = browser
+            igvBrowser.zoomIn()   // hack to force an initial paint of wig track.
+        })
+
+    // Custom data source class, the getFeatures method is called automatically by igv.js as needed to paint track
+
+</script>
+
+</body>
+
+</html>
