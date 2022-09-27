@@ -45,9 +45,6 @@ class BamSource {
         this.genome = genome
 
         if (isDataURL(config.url)) {
-            if ("cram" === config.format) {
-                throw "CRAM data uris are not supported"
-            }
             this.config.indexed = false
         }
 
