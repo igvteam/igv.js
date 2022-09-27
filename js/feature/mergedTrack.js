@@ -38,6 +38,7 @@ class MergedTrack extends TrackBase {
         this.type = "merged"
         this.featureType = 'numeric'
         this.paintAxis = paintAxis
+        this.graphType = config.graphType
     }
 
     init(config) {
@@ -137,7 +138,9 @@ class MergedTrack extends TrackBase {
             this.tracks[i].dataRange = this.dataRange
             this.tracks[i].flipAxis = this.flipAxis
             this.tracks[i].logScale = this.logScale
-            this.tracks[i].graphType = this.graphType
+            if(this.graphType){
+                this.tracks[i].graphType = this.graphType
+            }
             this.tracks[i].draw(trackOptions)
         }
     }
@@ -162,7 +165,7 @@ class MergedTrack extends TrackBase {
 
 
     get supportsWholeGenome() {
-        return this.tracks.every(track => track.supportsWholeGenome())
+        return this.tracks.every(track => track.supportsWholeGenome)
     }
 }
 
