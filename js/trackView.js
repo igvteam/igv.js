@@ -412,17 +412,18 @@ class TrackView {
         }
 
         if (this.track.autoscale) {
-            let allFeatures = []
+            let allFeatures
             for (let visibleViewport of visibleViewports) {
                 const referenceFrame = visibleViewport.referenceFrame
                 const start = referenceFrame.start
                 const end = start + referenceFrame.toBP($(visibleViewport.contentDiv).width())
                 if (visibleViewport.featureCache && visibleViewport.featureCache.features) {
+                    // If the "features" object has a getMax function use it.  Currently only alignmentContainer implements this, for coverage.
                     if (typeof visibleViewport.featureCache.features.getMax === 'function') {
                         const max = visibleViewport.featureCache.features.getMax(start, end)
-                        allFeatures.push({value: max})
+                        allFeatures = [{value: max}]
                     } else {
-                        allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(visibleViewport.featureCache.features, start, end))
+                        allFeatures = FeatureUtils.findOverlapping(visibleViewport.featureCache.features, start, end)
                     }
                 }
             }
