@@ -118,27 +118,27 @@ class MergedTrack extends TrackBase {
         return items
     }
 
+    /**
+     * Returns a MergedFeatureCollection containing an array of features for the specified range, 1 for each track.
+     */
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
 
         const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
-        return Promise.all(promises)
+        const featureArrays = await Promise.all(promises)
+        return new MergedFeatureCollection(featureArrays)
     }
 
     draw(options) {
 
-        const mergedFeatures = options.features    // Array of feature arrays, 1 for each track
-
-        if (this.autoscale) {
-            this.dataRange = autoscale(options.referenceFrame.chr, mergedFeatures)
-        }
+        const mergedFeatures = options.features    // A MergedFeatureCollection
 
         for (let i = 0, len = this.tracks.length; i < len; i++) {
             const trackOptions = Object.assign({}, options)
-            trackOptions.features = mergedFeatures[i]
+            trackOptions.features = mergedFeatures.featureArrays[i]
             this.tracks[i].dataRange = this.dataRange
             this.tracks[i].flipAxis = this.flipAxis
             this.tracks[i].logScale = this.logScale
-            if(this.graphType){
+            if (this.graphType) {
                 this.tracks[i].graphType = this.graphType
             }
             this.tracks[i].draw(trackOptions)
@@ -169,19 +169,29 @@ class MergedTrack extends TrackBase {
     }
 }
 
-function autoscale(chr, featureArrays) {
 
-    let min = 0
-    let max = -Number.MAX_VALUE
-    for(let features of featureArrays) {
-        for(let f of features) {
-            if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
-                min = Math.min(min, f.value)
+class MergedFeatureCollection {
+
+    constructor(featureArrays) {
+        this.featureArrays = featureArrays
+    }
+
+    getMax(start, end) {
+        let max = -Number.MAX_VALUE
+        for (let a of this.featureArrays) {
+            for (let f of a) {
+                if (f.end < start) {
+                    continue
+                }
+                if (f.start > end) {
+                    break
+                }
                 max = Math.max(max, f.value)
             }
         }
+        return max
     }
-    return {min: min, max: max}
+
 }
 
 export default MergedTrack
