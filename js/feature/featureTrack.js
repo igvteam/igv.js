@@ -110,7 +110,7 @@ class FeatureTrack extends TrackBase {
         this.useScore = config.useScore
 
         if ('refgene' === this.config.format) {
-            this.removable = true
+            // this.removable = true
             this.format = this.config.format
         }
     }
