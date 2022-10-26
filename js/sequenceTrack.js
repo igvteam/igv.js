@@ -119,9 +119,9 @@ class SequenceTrack {
 
     constructor(config, browser) {
 
-        this.type = "sequence"
+        this.type = this.format = "sequence"
         this.browser = browser
-        this.removable = false
+        // this.removable = false
         this.config = config
         this.name = config.name
         this.id = config.id
