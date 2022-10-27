@@ -143,10 +143,9 @@ class CSIIndex {
                 for (let bin = binRange[0]; bin <= binRange[1]; bin++) {
                     if (ba.binIndex[bin]) {
                         const binChunks = ba.binIndex[bin]
-                        const nchnk = binChunks.length
-                        for (let c = 0; c < nchnk; ++c) {
-                            const cs = binChunks[c][0]
-                            const ce = binChunks[c][1]
+                        for (let c of binChunks) {
+                            const cs = c[0]
+                            const ce = c[1]
                             chunks.push({minv: cs, maxv: ce, bin: bin})
                         }
                     }
@@ -164,7 +163,7 @@ class CSIIndex {
     reg2bins(beg, end) {
         beg -= 1 // < convert to 1-based closed
         if (beg < 1) beg = 1
-        if (end > 2 ** 50) end = 2 ** 34 // 17 GiB ought to be enough for anybody
+        if (end > 2 ** 34) end = 2 ** 34 // 17 GiB ought to be enough for anybody
         end -= 1
         let l = 0
         let t = 0
@@ -173,25 +172,18 @@ class CSIIndex {
         for (; l <= this.depth; s -= 3, t += (1 << l * 3), l += 1) {
             const b = t + (beg >> s)
             const e = t + (end >> s)
-            if (e - b + bins.length > this.maxBinNumber)
-                throw new Error(
-                    `query ${beg}-${end} is too large for current binning scheme (shift ${this.minShift}, depth ${this.depth}), try a smaller query or a coarser index binning scheme`,
-                )
-            //for (let i = b; i <= e; i += 1) bins.push(i)
+            //
+            // ITS NOT CLEAR WHERE THIS TEST CAME FROM,  but maxBinNumber is never set, and its not clear what it represents.
+            // if (e - b + bins.length > this.maxBinNumber)
+            //     throw new Error(
+            //         `query ${beg}-${end} is too large for current binning scheme (shift ${this.minShift}, depth ${this.depth}), try a smaller query or a coarser index binning scheme`,
+            //     )
+            //
             bins.push([b, e])
         }
         return bins
     }
 
-    // function reg2bins(beg, end, min_shift, depth) {
-    //     let l, t, n, s = min_shift + depth * 3;
-    //     const bins = [];
-    //     for (--end, l = n = t = 0; l <= depth; s -= 3, t += 1 << l * 3, ++l) {
-    //         let b = t + (beg >> s), e = t + (end >> s), i;
-    //         for (i = b; i <= e; ++i) bins[n++] = i;
-    //     }
-    //     return bins;
-    // }
 
     bin_limit() {
         return ((1 << (this.depth + 1) * 3) - 1) / 7
