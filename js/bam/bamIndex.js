@@ -151,11 +151,10 @@ class BamIndex {
             for (let binRange of overlappingBins) {
                 for (let bin = binRange[0]; bin <= binRange[1]; bin++) {
                     if (ba.binIndex[bin]) {
-                        const binChunks = ba.binIndex[bin],
-                            nchnk = binChunks.length
-                        for (let c = 0; c < nchnk; ++c) {
-                            const cs = binChunks[c][0]
-                            const ce = binChunks[c][1]
+                        const binChunks = ba.binIndex[bin];
+                        for (let c of binChunks) {
+                            const cs = c[0]
+                            const ce = c[1]
                             chunks.push({minv: cs, maxv: ce, bin: bin})
                         }
                     }
@@ -167,7 +166,7 @@ class BamIndex {
             let lowest = null
             const minLin = Math.min(min >> 14, nintv - 1)
             const maxLin = Math.min(max >> 14, nintv - 1)
-            for (let i = minLin; i <= maxLin; ++i) {
+            for (let i = minLin; i < maxLin; i++) {
                 const vp = ba.linearIndex[i]
                 if (vp) {
                     // todo -- I think, but am not sure, that the values in the linear index have to be in increasing order.  So the first non-null should be minimum
