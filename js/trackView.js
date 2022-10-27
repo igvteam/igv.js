@@ -32,7 +32,7 @@ import SampleNameViewport from './sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import MenuUtils from "./ui/menuUtils.js"
 
-const scrollbarExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
+const scrollbarExclusionTypes = new Set(['ruler', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 
 class TrackView {
