@@ -15,6 +15,10 @@ class RulerViewport extends TrackViewport {
         super(trackView, $viewportColumn, referenceFrame, width)
     }
 
+    get contentDiv() {
+        return this.$viewport.get(0)
+    }
+
     initializationHelper() {
 
         this.$multiLocusCloseButton = $('<div>', {class: 'igv-multi-locus-close-button'})
