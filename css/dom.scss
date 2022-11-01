@@ -73,7 +73,18 @@ $igv-zoom-in-notice-height: 16px;
 
   overflow-x: hidden;
   overflow-y: hidden;
+  width: 100%;
 
+  >canvas {
+    position: relative;
+    display: block;
+  }
+
+}
+
+.igv-canvas {
+  position: relative;
+  display: block;
 }
 
 .igv-viewport-content {

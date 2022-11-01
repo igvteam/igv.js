@@ -33,7 +33,7 @@ class SampleNameViewport {
         this.viewport.appendChild(this.canvas)
         this.ctx = this.canvas.getContext("2d")
 
-        this.trackScrollDelta = 0
+        //this.trackScrollDelta = 0
 
         this.contentTop = 0
 
@@ -65,13 +65,11 @@ class SampleNameViewport {
     }
 
     setTop(contentTop) {
-
         if (typeof this.trackView.track.getSamples === 'function') {
             this.contentTop = contentTop
             const samples = this.trackView.track.getSamples()
             this.repaint(samples)
         }
-
     }
 
     setWidth(width) {

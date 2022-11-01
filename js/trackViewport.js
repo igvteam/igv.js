@@ -30,7 +30,8 @@ class TrackViewport extends Viewport {
 
         const track = this.trackView.track
         if ('sequence' !== track.type) {
-            this.$zoomInNotice = this.createZoomInNotice(this.$content)
+            //this.$zoomInNotice = this.createZoomInNotice(this.$content)
+            this.$zoomInNotice = this.createZoomInNotice(this.$viewport)
         }
 
         if (track.name && "sequence" !== track.id) {
@@ -148,7 +149,8 @@ class TrackViewport extends Viewport {
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength
-        const pixelWidth = this.$content.width()// * 3;
+        //const pixelWidth = this.$content.width()// * 3;
+        const pixelWidth = this.$viewport.width()// * 3;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel
         const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth))
         const bpEnd = Math.ceil(Math.min(chrLength, referenceFrame.start + bpWidth + bpWidth))  // Add one screen width to end
@@ -205,7 +207,7 @@ class TrackViewport extends Viewport {
      *
      */
     repaint() {
-
+console.log("repaint")
         if (undefined === this.featureCache) {
             return
         }
@@ -229,14 +231,17 @@ class TrackViewport extends Viewport {
             }
             return
         }
-        const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
+        //const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
+        const canvasTop = Math.max(0, -(this.getContentTop()) - viewportHeight)
 
         const bpPerPixel = this.referenceFrame.bpPerPixel
         //const bpStart = this.referenceFrame.start - (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
         //const bpEnd = this.referenceFrame.end + (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
         const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / bpPerPixel)
 
-        const newCanvas = $('<canvas class="igv-canvas">').get(0)
+        const newCanvas = document.createElement('canvas')//  $('<canvas class="igv-canvas">').get(0)
+        newCanvas.style.position = 'relative'
+        newCanvas.style.display = 'block'
         newCanvas.style.width = pixelWidth + "px"
         newCanvas.style.height = pixelHeight + "px"
         newCanvas.style.left = pixelXOffset + "px"
@@ -275,7 +280,8 @@ class TrackViewport extends Viewport {
         }
         newCanvas._data = drawConfiguration
         this.canvas = newCanvas
-        this.$content.append($(newCanvas))
+        //this.$content.append($(newCanvas))
+        this.$viewport.append($(newCanvas))
 
     }
 
@@ -744,10 +750,10 @@ class TrackViewport extends Viewport {
 
 function createClickState(event, viewport) {
 
-    if (!viewport.contentDiv || !viewport.canvas) return  // Can happen during initialization
+    if (!viewport.canvas) return  // Can happen during initialization
 
     const referenceFrame = viewport.referenceFrame
-    const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.contentDiv)
+    const viewportCoords = DOMUtils.translateMouseCoordinates(event, viewport.$viewport.get(0))
     const canvasCoords = DOMUtils.translateMouseCoordinates(event, viewport.canvas)
     const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x))
 
@@ -756,7 +762,6 @@ function createClickState(event, viewport) {
         viewport,
         referenceFrame,
         genomicLocation,
-        x: viewportCoords.x,
         y: viewportCoords.y,
         canvasX: canvasCoords.x,
         canvasY: canvasCoords.y

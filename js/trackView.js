@@ -302,7 +302,7 @@ class TrackView {
             viewport.setTop(contentTop)
         }
 
-        this.sampleNameViewport.trackScrollDelta = delta
+        //this.sampleNameViewport.trackScrollDelta = delta
         this.sampleNameViewport.setTop(contentTop)
 
     }

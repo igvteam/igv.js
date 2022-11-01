@@ -50,11 +50,12 @@ class Viewport {
             this.alert = new AlertDialog(this.$viewport.get(0))
         }
 
-        this.$content = $("<div>", {class: 'igv-viewport-content'})
-        this.$viewport.append(this.$content)
+        //this.$content = $("<div>", {class: 'igv-viewport-content'})
+        //this.$viewport.append(this.$content)
 
-        this.$content.height(this.$viewport.height())
-        this.contentDiv = this.$content.get(0)
+        //this.$content.height(this.$viewport.height())
+        this.contentHeight = this.$viewport.height()
+        //this.contentDiv = this.$content.get(0)
 
         // this.$canvas = $('<canvas>')
         // this.$content.append(this.$canvas)
@@ -76,7 +77,8 @@ class Viewport {
         if (!this.messageDiv) {
             this.messageDiv = document.createElement('div')
             this.messageDiv.className = 'igv-viewport-message'
-            this.contentDiv.append(this.messageDiv)
+            //this.contentDiv.append(this.messageDiv)
+            this.$viewport.append($(this.messageDiv))
         }
         this.messageDiv.textContent = message
         this.messageDiv.style.display = 'inline-block'
@@ -105,15 +107,17 @@ class Viewport {
 
     setTop(contentTop) {
 
+        this.contentTop = contentTop
         const viewportHeight = this.$viewport.height()
         const viewTop = -contentTop
         const viewBottom = viewTop + viewportHeight
 
-        this.$content.css('top', `${contentTop}px`)
-
-        if (undefined === this.canvasVerticalRange || this.canvasVerticalRange.bottom < viewBottom || this.canvasVerticalRange.top > viewTop) {
-            this.repaint()
-        }
+        //this.$content.css('top', `${contentTop}px`)
+        //
+        // if (undefined === this.canvasVerticalRange || this.canvasVerticalRange.bottom < viewBottom || this.canvasVerticalRange.top > viewTop) {
+        //     console.log("Repaint " + this.canvasVerticalRange)
+             this.repaint()
+        // }
 
     }
 
@@ -141,7 +145,8 @@ class Viewport {
         } else if (typeof track.computePixelHeight === 'function') {
             if (features && features.length > 0) {
                 let requiredContentHeight = track.computePixelHeight(features)
-                let currentContentHeight = this.$content.height()
+                //let currentContentHeight = this.$content.height()
+                let currentContentHeight = this.contentHeight
                 if (requiredContentHeight !== currentContentHeight) {
                     this.setContentHeight(requiredContentHeight)
                 }
@@ -150,14 +155,16 @@ class Viewport {
     }
 
     getContentHeight() {
-        return this.$content.height()
+        //return this.$content.height()
+        return this.contentHeight
     }
 
     setContentHeight(contentHeight) {
 
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
         contentHeight = Math.min(contentHeight, 32000)
-        this.$content.height(contentHeight)
+        //this.$content.height(contentHeight)
+        this.contentHeight = contentHeight
     }
 
     isLoading() {
@@ -181,7 +188,8 @@ class Viewport {
     }
 
     getContentTop() {
-        return this.contentDiv.offsetTop
+        return this.contentTop
+        //return this.contentDiv.offsetTop
     }
 
     containsPosition(chr, position) {

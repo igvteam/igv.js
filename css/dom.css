@@ -1593,6 +1593,16 @@
   margin-top: 5px;
   overflow-x: hidden;
   overflow-y: hidden;
+  width: 100%;
+}
+.igv-viewport > canvas {
+  position: relative;
+  display: block;
+}
+
+.igv-canvas {
+  position: relative;
+  display: block;
 }
 
 .igv-viewport-content {

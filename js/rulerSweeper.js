@@ -83,7 +83,7 @@ class RulerSweeper {
 
         // Viewport Content
         this.boundContentMouseDownHandler = contentMouseDownHandler.bind(this)
-        this.rulerViewport.contentDiv.addEventListener('mousedown', this.boundContentMouseDownHandler)
+        //this.rulerViewport.contentDiv.addEventListener('mousedown', this.boundContentMouseDownHandler)
 
         function contentMouseDownHandler(event) {
 
