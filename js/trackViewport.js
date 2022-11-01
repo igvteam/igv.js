@@ -349,35 +349,49 @@ class TrackViewport extends Viewport {
 
     saveSVG() {
 
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect()
+        const marginTop = 32
+
+        let {width, height} = this.browser.columnContainer.getBoundingClientRect()
+
+        const h_render = 8000
 
         const config =
             {
+
                 width,
-                height,
+                height: h_render,
+
+                backdropColor: 'white',
+
+                multiLocusGap: 0,
+
                 viewbox:
                     {
                         x: 0,
-                        y: -this.$content.position().top,
+                        y: 0,
                         width,
-                        height
+                        height: h_render
                     }
 
             }
 
         const context = new C2S(config)
 
+        const { y } = this.$viewport.get(0).getBoundingClientRect()
+        this.trackView.renderSVGContext(context, {deltaX: 0, deltaY: -y+marginTop })
+
+        // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
+        context.setHeight(height)
+
         const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
-
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
-        const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
-
-        this.drawSVGWithContext(context, width, height, id, 0, 0, 0)
 
         const svg = context.getSerializedSvg(true)
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
 
+        const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
         FileUtils.download(`${id}.svg`, data)
+
     }
 
     // called by trackView.renderSVGContext() when rendering

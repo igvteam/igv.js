@@ -120,7 +120,7 @@
                 ]
             };
 
-        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), track_svg_bug)
+        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), config)
 
         // $('#igv-draw-svg-button').on('click', () => browser.renderSVG($('#igv-svg-container')))
         $('#igv-draw-svg-button').on('click', () => browser.saveSVGtoFile({ $container: $('#igv-svg-container') }))
