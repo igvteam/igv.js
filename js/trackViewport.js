@@ -297,13 +297,11 @@ class TrackViewport extends Viewport {
      */
     draw(drawConfiguration, features, roiFeatures) {
 
-        // console.log(`${ Date.now() } viewport draw(). track ${ this.trackView.track.type }. content-css-top ${ this.$content.css('top') }. canvas-top ${ drawConfiguration.pixelTop }.`)
-
-        if (features) {
+        if (features && features.length > 0) {
             drawConfiguration.features = features
             this.trackView.track.draw(drawConfiguration)
         }
-        if (roiFeatures) {
+        if (roiFeatures && roiFeatures.length > 0) {
             for (let r of roiFeatures) {
                 drawConfiguration.features = r.features
                 r.track.draw(drawConfiguration)
@@ -459,7 +457,7 @@ class TrackViewport extends Viewport {
                 selection: this.selection
             }
 
-        const features = this.featureCache ? this.featureCache.features : []
+        const features = this.featureCache ? this.featureCache.features : undefined
         const roiFeatures = this.featureCache ? this.featureCache.roiFeatures : undefined
         this.draw(config, features, roiFeatures)
 

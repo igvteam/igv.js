@@ -346,11 +346,11 @@ class Browser {
      */
     toSVG() {
 
-        let {x, y, width, height} = this.columnContainer.getBoundingClientRect()
+        const {y, width, height} = this.columnContainer.getBoundingClientRect()
 
         const h_render = 8000
 
-        let context = new C2S(
+        const context = new C2S(
             {
 
                 width,
@@ -370,13 +370,14 @@ class Browser {
 
             })
 
-        const dx = x
-
         // tracks -> SVG
         for (let trackView of this.trackViews) {
-            trackView.renderSVGContext(context, {deltaX: 0, deltaY: -y})
-        }
 
+            if ('annotation' === trackView.track.type) {
+                trackView.renderSVGContext(context, {deltaX: 0, deltaY: -y})
+            }
+
+        }
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
         context.setHeight(height)
 
