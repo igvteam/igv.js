@@ -297,7 +297,7 @@ class TrackViewport extends Viewport {
      */
     draw(drawConfiguration, features, roiFeatures) {
 
-        if (features && features.length > 0) {
+        if (features) {
             drawConfiguration.features = features
             this.trackView.track.draw(drawConfiguration)
         }
