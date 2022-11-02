@@ -157,9 +157,9 @@ class RnaStructTrack extends TrackBase {
         }
     }
 
-    clickedFeatures(clickState, features) {
+    clickedFeatures(clickState) {
 
-        features = super.clickedFeatures(clickState, features)
+        const features = super.clickedFeatures(clickState)
 
         const clicked = []
 
@@ -199,12 +199,9 @@ class RnaStructTrack extends TrackBase {
         return clicked
     }
 
-    popupData(clickState, features) {
+    popupData(clickState) {
 
-        // We use the featureCache property rather than method to avoid async load.  If the
-        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-
-        features = this.clickedFeatures(clickState, features)
+        const features = this.clickedFeatures(clickState)
 
         if (features && features.length > 0) {
 
