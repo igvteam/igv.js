@@ -410,8 +410,8 @@ class TrackViewport extends Viewport {
 
         const context = new C2S(config)
 
-        const {y} = this.$viewport.get(0).getBoundingClientRect()
-        this.renderSVGContext(context, {deltaX: 0, deltaY: -y + marginTop})
+        const { y } = this.$viewport.get(0).getBoundingClientRect()
+        this.trackView.renderSVGContext(context, {deltaX: 0, deltaY: -y+marginTop })
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
         context.setHeight(height)
@@ -442,7 +442,7 @@ class TrackViewport extends Viewport {
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
         const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
 
-        const {top: yScrollDelta} = this.$viewport.position()
+        const yScrollDelta = this.contentTop
 
         const {width, height} = this.$viewport.get(0).getBoundingClientRect()
 
@@ -632,40 +632,40 @@ class TrackViewport extends Viewport {
 
     addViewportContextMenuHandler(viewport) {
 
-        // viewport.addEventListener('contextmenu', (event) => {
-        //
-        //     // Ignore if we are doing a drag.  This can happen with touch events.
-        //     if (this.browser.dragObject) {
-        //         return false
-        //     }
-        //
-        //     const clickState = this.createClickState(event)
-        //
-        //     if (undefined === clickState) {
-        //         return false
-        //     }
-        //
-        //     event.preventDefault()
-        //
-        //     // Track specific items
-        //     let menuItems = []
-        //     if (typeof this.trackView.track.contextMenuItemList === "function") {
-        //         const trackMenuItems = this.trackView.track.contextMenuItemList(clickState)
-        //         if (trackMenuItems) {
-        //             menuItems = trackMenuItems
-        //         }
-        //     }
-        //
-        //     // Add items common to all tracks
-        //     if (menuItems.length > 0) {
-        //         menuItems.push({label: $('<HR>')})
-        //     }
-        //
-        //     menuItems.push({label: 'Save Image (PNG)', click: () => this.savePNG()})
-        //     menuItems.push({label: 'Save Image (SVG)', click: () => this.saveSVG()})
-        //
-        //     this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
-        // })
+        viewport.addEventListener('contextmenu', (event) => {
+
+            // Ignore if we are doing a drag.  This can happen with touch events.
+            if (this.browser.dragObject) {
+                return false
+            }
+
+            const clickState = this.createClickState(event)
+
+            if (undefined === clickState) {
+                return false
+            }
+
+            event.preventDefault()
+
+            // Track specific items
+            let menuItems = []
+            if (typeof this.trackView.track.contextMenuItemList === "function") {
+                const trackMenuItems = this.trackView.track.contextMenuItemList(clickState)
+                if (trackMenuItems) {
+                    menuItems = trackMenuItems
+                }
+            }
+
+            // Add items common to all tracks
+            if (menuItems.length > 0) {
+                menuItems.push({label: $('<HR>')})
+            }
+
+            menuItems.push({label: 'Save Image (PNG)', click: () => this.savePNG()})
+            menuItems.push({label: 'Save Image (SVG)', click: () => this.saveSVG()})
+
+            this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
+        })
 
     }
 
