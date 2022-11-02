@@ -330,7 +330,7 @@ class TrackBase {
     }
 
     /**
-     * Return the features clicked over.  Default implementation assumes a single row of features and only considers
+     * Return the features clicked over.  Default implementation assumes an array of features and only considers
      * the genomic location.   Overriden by most subclasses.
      *
      * @param clickState
@@ -343,7 +343,7 @@ class TrackBase {
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         const features = clickState.viewport.cachedFeatures
 
-        if (!features || features.length === 0) {
+        if (!features || !Array.isArray(features) || features.length === 0) {
             return []
         }
 

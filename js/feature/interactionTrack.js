@@ -590,9 +590,9 @@ class InteractionTrack extends TrackBase {
         // }
     }
 
-    popupData(clickState) {
+    popupData(clickState, features) {
 
-        const features = this.clickedFeatures(clickState)
+        if(features === undefined) features = this.clickedFeatures(clickState)
 
         const data = []
         for (let feature of features) {

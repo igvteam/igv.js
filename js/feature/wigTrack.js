@@ -243,12 +243,9 @@ class WigTrack extends TrackBase {
         }
     }
 
-    popupData(clickState) {
+    popupData(clickState, features) {
 
-        // We use the featureCache property rather than method to avoid async load.  If the
-        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-
-        const features = this.clickedFeatures(clickState)
+        if(features === undefined) features = this.clickedFeatures(clickState)
 
         if (features && features.length > 0) {
 

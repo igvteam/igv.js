@@ -210,11 +210,12 @@ class GWASTrack extends TrackBase {
         }
     }
 
-    popupData(clickState) {
+    popupData(clickState, features) {
+
+        if(features === undefined) features =  clickState.viewport.cachedFeatures
 
         let data = []
         const track = clickState.viewport.trackView.track
-        const features = clickState.viewport.cachedFeatures
 
         if (features) {
             let count = 0

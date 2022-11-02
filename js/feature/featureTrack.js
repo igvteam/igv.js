@@ -114,7 +114,7 @@ class FeatureTrack extends TrackBase {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
-            if(this.disposed) return;   // This track was removed during async load
+            if (this.disposed) return   // This track was removed during async load
         }
 
         // Set properties from track line
@@ -207,7 +207,7 @@ class FeatureTrack extends TrackBase {
                     options.rowLastLabelX[row] = -Number.MAX_SAFE_INTEGER
                 }
             }
-            const maxFeatureCount = Math.max(1,  Math.max(...rowFeatureCount))
+            const maxFeatureCount = Math.max(1, Math.max(...rowFeatureCount))
             const pixelsPerFeature = pixelWidth / maxFeatureCount
 
             let lastPxEnd = []
@@ -263,11 +263,10 @@ class FeatureTrack extends TrackBase {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    popupData(clickState) {
+    popupData(clickState, features) {
 
-        const features = this.clickedFeatures(clickState)
+        if (features === undefined) features = this.clickedFeatures(clickState)
         const genomicLocation = clickState.genomicLocation
-
         const data = []
         for (let feature of features) {
 
@@ -392,8 +391,7 @@ class FeatureTrack extends TrackBase {
                     let seq = await this.browser.genome.getSequence(f.chr, f.start, f.end)
                     if (!seq) {
                         seq = "Unknown sequence"
-                    }
-                    else if (f.strand === '-') {
+                    } else if (f.strand === '-') {
                         seq = reverseComplementSequence(seq)
                     }
                     this.browser.alert.present(seq)
@@ -409,8 +407,7 @@ class FeatureTrack extends TrackBase {
                             let seq = await this.browser.genome.getSequence(f.chr, f.start, f.end)
                             if (!seq) {
                                 seq = "Unknown sequence"
-                            }
-                            else if (f.strand === '-') {
+                            } else if (f.strand === '-') {
                                 seq = reverseComplementSequence(seq)
                             }
                             try {
