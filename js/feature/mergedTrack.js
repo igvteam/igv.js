@@ -145,21 +145,24 @@ class MergedTrack extends TrackBase {
         }
     }
 
-    popupData(clickState, features) {
+    popupData(clickState) {
 
-        const featuresArray = features || clickState.viewport.cachedFeatures
+        if(clickState.viewport && clickState.viewport.cachedFeatures) {
 
-        if (featuresArray && featuresArray.length === this.tracks.length) {
-            // Array of feature arrays, 1 for each track
-            const popupData = []
-            for (let i = 0; i < this.tracks.length; i++) {
-                if (i > 0) popupData.push('<hr/>')
-                popupData.push(`<div style=background-color:rgb(245,245,245);border-bottom-style:dashed;border-bottom-width:1px;padding-bottom:5px;padding-top:10px;font-weight:bold;font-size:larger >${this.tracks[i].name}</div>`)
-                const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i])
-                popupData.push(...trackPopupData)
+            const featuresArray = clickState.viewport.cachedFeatures.featureArrays
 
+            if (featuresArray && featuresArray.length === this.tracks.length) {
+                // Array of feature arrays, 1 for each track
+                const popupData = []
+                for (let i = 0; i < this.tracks.length; i++) {
+                    if (i > 0) popupData.push('<hr/>')
+                    popupData.push(`<div style=background-color:rgb(245,245,245);border-bottom-style:dashed;border-bottom-width:1px;padding-bottom:5px;padding-top:10px;font-weight:bold;font-size:larger >${this.tracks[i].name}</div>`)
+                    const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i])
+                    popupData.push(...trackPopupData)
+
+                }
+                return popupData
             }
-            return popupData
         }
     }
 
