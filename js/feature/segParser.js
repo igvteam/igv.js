@@ -189,12 +189,6 @@ class SegFeature {
         return pd
     }
 
-    hoverText() {
-
-        return `${this.sample}: ${this.value}`
-    }
-
-
     extractCravatLink(genomeId) {
 
         let ref, alt
