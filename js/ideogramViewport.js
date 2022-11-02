@@ -38,7 +38,8 @@ class IdeogramViewport extends TrackViewport {
 
         this.canvas = document.createElement('canvas')
         this.canvas.className = 'igv-ideogram-canvas'
-        this.$content.append($(this.canvas))
+        //this.$content.append($(this.canvas))
+        this.$viewport.append($(this.canvas))
         this.ideogram_ctx = this.canvas.getContext('2d')
 
         this.addMouseHandlers()

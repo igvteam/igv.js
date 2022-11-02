@@ -416,7 +416,7 @@ class TrackView {
             for (let visibleViewport of visibleViewports) {
                 const referenceFrame = visibleViewport.referenceFrame
                 const start = referenceFrame.start
-                const end = start + referenceFrame.toBP($(visibleViewport.contentDiv).width())
+                const end = start + referenceFrame.toBP(visibleViewport.getWidth())
                 if (visibleViewport.featureCache && visibleViewport.featureCache.features) {
                     // If the "features" object has a getMax function use it.  Currently only alignmentContainer implements this, for coverage.
                     if (typeof visibleViewport.featureCache.features.getMax === 'function') {
@@ -488,7 +488,7 @@ class TrackView {
 
             const referenceFrame = vp.referenceFrame
             const {chr, start, bpPerPixel} = vp.referenceFrame
-            const end = start + referenceFrame.toBP($(vp.contentDiv).width())
+            const end = start + referenceFrame.toBP(vp.getWidth())
             const needsReload = !vp.featureCache || !vp.featureCache.containsRange(chr, start, end, bpPerPixel)
 
             if (needsReload) {
