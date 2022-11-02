@@ -262,7 +262,6 @@ class SequenceTrack {
 
             let sequence = options.features.sequence
             if(!sequence) {
-                console.error("No sequence")
                 return
             }
 
