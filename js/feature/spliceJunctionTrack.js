@@ -385,9 +385,9 @@ class SpliceJunctionTrack extends TrackBase {
         ctx.fillText(label, junctionMiddlePx - ctx.measureText(label).width / 2, (7 * topY + cy) / 8)
     }
 
-    clickedFeatures(clickState, features) {
+    clickedFeatures(clickState) {
 
-        const allFeatures = super.clickedFeatures(clickState, features)
+        const allFeatures = super.clickedFeatures(clickState)
 
         return allFeatures.filter(function (feature) {
             return (feature.isVisible && feature.attributes)
@@ -397,9 +397,9 @@ class SpliceJunctionTrack extends TrackBase {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    popupData(clickState, features) {
+    popupData(clickState) {
 
-        features = this.clickedFeatures(clickState, features)
+        const features = this.clickedFeatures(clickState)
         const genomicLocation = clickState.genomicLocation
 
         const data = []

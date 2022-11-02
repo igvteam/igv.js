@@ -238,10 +238,10 @@ class FeatureTrack extends TrackBase {
 
     };
 
-    clickedFeatures(clickState, features) {
+    clickedFeatures(clickState) {
 
         const y = clickState.y - this.margin
-        const allFeatures = super.clickedFeatures(clickState, features)
+        const allFeatures = super.clickedFeatures(clickState)
 
         let row
         switch (this.displayMode) {
@@ -263,9 +263,9 @@ class FeatureTrack extends TrackBase {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    popupData(clickState, features) {
+    popupData(clickState) {
 
-        features = this.clickedFeatures(clickState, features)
+        const features = this.clickedFeatures(clickState)
         const genomicLocation = clickState.genomicLocation
 
         const data = []
