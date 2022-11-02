@@ -361,9 +361,9 @@ class VariantTrack extends TrackBase {
         }
     }
 
-    clickedFeatures(clickState, features) {
+    clickedFeatures(clickState) {
 
-        let featureList = super.clickedFeatures(clickState, features)
+        let featureList = super.clickedFeatures(clickState)
 
         const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
         const callHeight = vGap + ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight)
@@ -399,9 +399,9 @@ class VariantTrack extends TrackBase {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    popupData(clickState, features) {
+    popupData(clickState) {
 
-        const featureList = this.clickedFeatures(clickState, features)
+        const featureList = this.clickedFeatures(clickState)
         const genomicLocation = clickState.genomicLocation
         const genomeID = this.browser.genome.id
         const sampleInformation = this.browser.sampleInformation

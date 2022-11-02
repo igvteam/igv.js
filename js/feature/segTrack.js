@@ -404,9 +404,9 @@ class SegTrack extends TrackBase {
 
     }
 
-    clickedFeatures(clickState, features) {
+    clickedFeatures(clickState) {
 
-        const allFeatures = super.clickedFeatures(clickState, features)
+        const allFeatures = super.clickedFeatures(clickState)
         const y = clickState.y
         return allFeatures.filter(function (feature) {
             const rect = feature.pixelRect
