@@ -79,7 +79,7 @@ class SpliceJunctionTrack extends TrackBase {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
-            if(this.disposed) return;   // This track was removed during async load
+            if (this.disposed) return   // This track was removed during async load
         }
 
         // Set properties from track line
@@ -397,9 +397,9 @@ class SpliceJunctionTrack extends TrackBase {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    popupData(clickState) {
+    popupData(clickState, features) {
 
-        const features = this.clickedFeatures(clickState)
+        if (features === undefined) features = this.clickedFeatures(clickState)
         const genomicLocation = clickState.genomicLocation
 
         const data = []

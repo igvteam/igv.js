@@ -199,9 +199,9 @@ class RnaStructTrack extends TrackBase {
         return clicked
     }
 
-    popupData(clickState) {
+    popupData(clickState, features) {
 
-        const features = this.clickedFeatures(clickState)
+        if(features === undefined) features = this.clickedFeatures(clickState)
 
         if (features && features.length > 0) {
 
