@@ -534,25 +534,15 @@ class TrackViewport extends Viewport {
     }
 
     async getFeatures(track, chr, start, end, bpPerPixel) {
-
-
-
-
-        const features = await track.getFeatures(chr, start, end, bpPerPixel, this)
-        this.checkContentHeight(features)
-
-        return features
-
-
-        // if (this.featureCache && this.featureCache.containsRange(chr, start, end, bpPerPixel)) {
-        //     return this.featureCache.features
-        // } else if (typeof track.getFeatures === "function") {
-        //     const features = await track.getFeatures(chr, start, end, bpPerPixel, this)
-        //     this.checkContentHeight(features)
-        //     return features
-        // } else {
-        //     return undefined
-        // }
+        if (this.featureCache && this.featureCache.containsRange(chr, start, end, bpPerPixel)) {
+            return this.featureCache.features
+        } else if (typeof track.getFeatures === "function") {
+            const features = await track.getFeatures(chr, start, end, bpPerPixel, this)
+            this.checkContentHeight(features)
+            return features
+        } else {
+            return undefined
+        }
     }
 
     needsRepaint() {
