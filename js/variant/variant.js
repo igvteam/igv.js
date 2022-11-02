@@ -265,10 +265,6 @@ class Variant {
         return fields
     }
 
-    hoverText() {
-        return `${this.names}  ${this.referenceBases}->${this.alternateBases}`
-    }
-
     getInfo(tag) {
         return this.info ? this.info[tag] : undefined;
     }

@@ -615,22 +615,21 @@ class TrackViewport extends Viewport {
         viewport.addEventListener('touchend', mu)
 
         // Mouse move
-        if (typeof this.trackView.track._hoverText === 'function') {
+        if (typeof this.trackView.track.hoverText === 'function') {
             viewport.addEventListener('mousemove', (event => {
-                if (Date.now() - lastHoverUpdateTime > 100) {
+                if (event.buttons === 0 && (Date.now() - lastHoverUpdateTime > 100)) {
                     lastHoverUpdateTime = Date.now()
                     const clickState = this.createClickState(event)
                     if (clickState) {
-                        const hoverText = this.trackView.track._hoverText(clickState)
-                        if (hoverText) {
-                            this.$viewport[0].setAttribute("title", hoverText)
+                        const tooltip = this.trackView.track.hoverText(clickState)
+                        if (tooltip) {
+                            this.$viewport[0].setAttribute("title", tooltip)
                         } else {
                             this.$viewport[0].removeAttribute("title")
                         }
                     }
                 }
             }))
-
         }
 
         this.addViewportClickHandler(this.$viewport.get(0))
