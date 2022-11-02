@@ -148,10 +148,6 @@ class BamAlignment {
         return (genomicLocation >= s && genomicLocation <= (s + l))
     }
 
-    hoverText() {
-        return this.readName;
-    }
-
     popupData(genomicLocation) {
 
         // if the user clicks on a base next to an insertion, show just the

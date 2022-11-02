@@ -415,8 +415,11 @@ class SegTrack extends TrackBase {
 
     }
 
-    hoverText(feature) {
-        return `${feature.sample}: ${feature.value}`
+    hoverText(clickState) {
+        const features = this.clickedFeatures(clickState)
+        if(features && features.length > 0) {
+            return `${features[0].sample}: ${features[0].value}`
+        }
     }
 
     popupData(clickState, featureList) {

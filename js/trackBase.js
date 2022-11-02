@@ -56,6 +56,7 @@ class TrackBase {
      * @param config
      */
     init(config) {
+
         if (config.displayMode) {
             config.displayMode = config.displayMode.toUpperCase()
         }
@@ -111,8 +112,12 @@ class TrackBase {
             }
         }
 
-        if(config.hoverTextFields) {
-            this.hoverTextFields = config.hoverTextFields;
+        // Support for mouse hover text.  This can be expensive, off by default.
+        // this.hoverText = function(clickState) => return tool tip text
+        if (config.hoverTextFields) {
+            this.hoverText = hoverText.bind(this)
+        } else if (typeof this.config.hoverText === 'function') {
+            this.hoverText = this.config.hoverText
         }
     }
 
@@ -227,7 +232,7 @@ class TrackBase {
      */
     setTrackProperties(properties) {
 
-        if(this.disposed) return;   // This track was removed during async load
+        if (this.disposed) return   // This track was removed during async load
 
         const tracklineConfg = {}
         let tokens
@@ -441,65 +446,6 @@ class TrackBase {
 
     }
 
-    /**
-     * Return a plain string for descriptive text given the list of features.  The string is used to set a "title"
-     * attribute and cannot contain any html.
-     *
-     * @returns {undefined}
-     */
-    _hoverText(clickState) {
-
-        const features = this.clickedFeatures(clickState)
-
-        if (features && features.length > 0) {
-            let str = ""
-            for (let i = 0; i < features.length; i++) {
-                if (i === 10) {
-                    str += "; ..."
-                    break
-                }
-                if (!features[i]) continue
-
-                const f = features[i]._f || features[i]
-                if (str.length > 0) str += "\n"
-
-                if(this.hoverTextFields) {
-                    str = ""
-                    for(let field of this.hoverTextFields) {
-                        if(str.length > 0) str += "\n"
-                        if(f.hasOwnProperty(field)) {
-                            str += f[field]
-                        } else if(typeof f.getAttribute === "function") {
-                            str += f.getAttribute(field)
-                        }
-                    }
-                }
-                else if (typeof this.config.hoverText === 'function') {
-                    str += this.config.hoverText(f)
-                } else if (typeof f.hoverText === 'function') {
-                    str += f.hoverText()
-                } else {
-                   str += this.hoverText(f);
-                }
-            }
-            return str
-        }
-    }
-
-    /**
-     * Default hoverText function.  Can be overridden in track configuration or subclasses
-     *
-     * @param f - feature hovered over
-     */
-    hoverText(f) {
-        let str = ""
-        if (f.name) {
-            str += f.name
-            if (f.value) str += ": "
-        }
-        if (f.value) str += f.value   // TODO format value if number
-        return str;
-    }
 
     /**
      * Default track description -- displayed on click of track label.  This can be overriden in the track
@@ -572,6 +518,38 @@ class TrackBase {
     }
 }
 
+function hoverText(clickState) {
+
+    if (!this.hoverTextFields) return
+
+    const features = this.clickedFeatures(clickState)
+
+    if (features && features.length > 0) {
+        let str = ""
+        for (let i = 0; i < features.length; i++) {
+            if (i === 10) {
+                str += "; ..."
+                break
+            }
+            if (!features[i]) continue
+
+            const f = features[i]._f || features[i]
+            if (str.length > 0) str += "\n"
+
+            str = ""
+            for (let field of this.hoverTextFields) {
+                if (str.length > 0) str += "\n"
+                if (f.hasOwnProperty(field)) {
+                    str += f[field]
+                } else if (typeof f.getAttribute === "function") {
+                    str += f.getAttribute(field)
+                }
+            }
+
+        }
+        return str
+    }
+}
 
 /**
  * Map UCSC track line "type" setting to file format.  In igv.js "type" refers to the track type, not the input file format
