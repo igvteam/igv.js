@@ -27,6 +27,8 @@
 import TrackBase from "../trackBase.js"
 import paintAxis from "../util/paintAxis.js"
 import MenuUtils from "../ui/menuUtils.js"
+import {FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
+
 
 /**
  * Represents 2 or more wig tracks overlaid on a common viewport.
@@ -164,6 +166,32 @@ class MergedTrack extends TrackBase {
                 return popupData
             }
         }
+    }
+
+    clickedFeatures(clickState) {
+
+
+        // We use the cached features rather than method to avoid async load.  If the
+        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+        const mergedFeaturesCollection = clickState.viewport.cachedFeatures
+
+        if(!mergedFeaturesCollection) {
+            return [];
+        }
+
+        const genomicLocation = clickState.genomicLocation
+        const clickedFeatures = [];
+        for(let features of mergedFeaturesCollection.featureArrays) {
+            // When zoomed out we need some tolerance around genomicLocation
+            const tolerance = (clickState.referenceFrame.bpPerPixel > 0.2) ? 3 * clickState.referenceFrame.bpPerPixel : 0.2
+            const ss = genomicLocation - tolerance
+            const ee = genomicLocation + tolerance
+            const tmp = (FeatureUtils.findOverlapping(features, ss, ee))
+            for(let f of tmp) {
+                clickedFeatures.push(f)
+            }
+        }
+        return clickedFeatures;
     }
 
 

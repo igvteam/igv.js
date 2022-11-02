@@ -421,7 +421,7 @@ class SegTrack extends TrackBase {
 
     popupData(clickState, featureList) {
 
-        featureList = this.clickedFeatures(clickState)
+        if(featureList === undefined) featureList = this.clickedFeatures(clickState)
 
         const items = []
 

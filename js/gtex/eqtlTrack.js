@@ -204,9 +204,9 @@ class EqtlTrack extends TrackBase {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    popupData(clickState) {
+    popupData(clickState, features) {
 
-        let features = clickState.viewport.cachedFeatures
+        if(features === undefined) features = clickState.viewport.cachedFeatures
         if (!features || features.length === 0) return []
 
         const tolerance = 3
