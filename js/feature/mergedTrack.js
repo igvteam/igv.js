@@ -180,13 +180,15 @@ class MergedFeatureCollection {
         let max = -Number.MAX_VALUE
         for (let a of this.featureArrays) {
             for (let f of a) {
-                if (f.end < start) {
-                    continue
+                if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
+                    if (f.end < start) {
+                        continue
+                    }
+                    if (f.start > end) {
+                        break
+                    }
+                    max = Math.max(max, f.value)
                 }
-                if (f.start > end) {
-                    break
-                }
-                max = Math.max(max, f.value)
             }
         }
         return max
