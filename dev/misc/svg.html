@@ -90,37 +90,6 @@
             ]
         };
 
-        const track_svg_bug =
-            {
-                genome: 'hg19',
-                locus: 'myc',
-                showSampleNames: false,
-                tracks: [
-                    {
-                        name: "Segmented Copy Number",
-                        type: "seg",
-                        format: "seg",
-                        url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                    },
-                    // {
-                    //     name: "Indexed",
-                    //     type: "seg",
-                    //     format: "seg",
-                    //     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                    //     indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
-                    // },
-                    // {
-                    //     name: "Indexed with visibility window",
-                    //     type: "seg",
-                    //     format: "seg",
-                    //     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                    //     indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
-                    //     visibilityWindow: "100000000"
-                    // },
-                ]
-            };
-
-        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), track_svg_bug)
 
         // $('#igv-draw-svg-button').on('click', () => browser.renderSVG($('#igv-svg-container')))
         $('#igv-draw-svg-button').on('click', () => browser.saveSVGtoFile({ $container: $('#igv-svg-container') }))
