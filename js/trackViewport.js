@@ -383,6 +383,7 @@ class TrackViewport extends Viewport {
     saveSVG() {
 
         const marginTop = 32
+        const marginLeft = 32
 
         let {width, height} = this.browser.columnContainer.getBoundingClientRect()
 
@@ -410,8 +411,13 @@ class TrackViewport extends Viewport {
 
         const context = new C2S(config)
 
-        const { y } = this.$viewport.get(0).getBoundingClientRect()
-        this.trackView.renderSVGContext(context, {deltaX: 0, deltaY: -y+marginTop })
+        const delta =
+            {
+                deltaX: marginLeft,
+                deltaY: marginTop
+            }
+
+        this.renderViewportToSVG(context, delta)
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
         context.setHeight(height)
@@ -430,23 +436,28 @@ class TrackViewport extends Viewport {
     // called by trackView.renderSVGContext() when rendering
     // entire browser as SVG
 
-    renderSVGContext(context, {deltaX, deltaY}) {
+    renderViewportToSVG(context, {deltaX, deltaY}) {
 
-        // Nothing to do if zoomInNotice is active
         if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
             return
         }
 
-        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
-
-        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
-        const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
-
-        const yScrollDelta = this.contentTop
-
         const {width, height} = this.$viewport.get(0).getBoundingClientRect()
 
-        this.drawSVGWithContext(context, width, height, id, deltaX, deltaY + yScrollDelta, -yScrollDelta)
+        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
+        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
+        const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
+        this.drawSVGWithContext(context, width, height, id, deltaX, deltaY + this.contentTop, -this.contentTop)
+
+    }
+
+    renderSVGContext(context, {deltaX, deltaY}) {
+
+        this.renderViewportToSVG(context, {deltaX, deltaY})
+
+        if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
+            return
+        }
 
         if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
             const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0))
