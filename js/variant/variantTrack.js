@@ -399,9 +399,9 @@ class VariantTrack extends TrackBase {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    popupData(clickState) {
+    popupData(clickState, featureList) {
 
-        const featureList = this.clickedFeatures(clickState)
+        if(featureList === undefined) featureList = this.clickedFeatures(clickState)
         const genomicLocation = clickState.genomicLocation
         const genomeID = this.browser.genome.id
         const sampleInformation = this.browser.sampleInformation

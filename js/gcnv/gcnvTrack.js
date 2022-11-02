@@ -322,12 +322,12 @@ class GCNVTrack extends TrackBase {
         return []
     }
 
-    popupData(clickState) {
+    popupData(clickState, features) {
 
-        const featureList = this.clickedFeatures(clickState)
+        if(features === undefined) features = this.clickedFeatures(clickState)
 
         const items = []
-        featureList.forEach(function (f) {
+        features.forEach(function (f) {
             for (let property of Object.keys(f)) {
                 if (isSimpleType(f[property])) {
                     items.push({name: property, value: f[property]})
