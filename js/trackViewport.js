@@ -91,10 +91,6 @@ class TrackViewport extends Viewport {
             }
         }
 
-        if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel) {
-            console.log(`bpp ${ Math.round(this.referenceFrame.bpPerPixel) } threshold ${ bppFeatureFetchThreshold }`)
-        }
-
         if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > bppFeatureFetchThreshold) {
             $(this.canvas).remove()
             this.canvas = undefined
