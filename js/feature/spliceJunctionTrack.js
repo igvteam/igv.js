@@ -137,7 +137,7 @@ class SpliceJunctionTrack extends TrackBase {
             junctionRenderingContext.referenceFrame = options.viewport.referenceFrame
             junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start
             junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart +
-                junctionRenderingContext.referenceFrame.toBP(viewport.getWidth())
+                junctionRenderingContext.referenceFrame.toBP(options.viewport.getWidth())
 
             // For a given viewport, records where features that are < 2px in width have been rendered already.
             // This prevents wasteful rendering of multiple such features onto the same pixels.
