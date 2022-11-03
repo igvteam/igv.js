@@ -358,5 +358,22 @@ suite("testBed", function () {
         assert.equal(23, features.length);   // # of features over this region
     })
 
+    test("gffTags/nameField", async function () {
+        const config = {
+            type: "annotation",
+            format: "bed",
+            delimiter: "\t",
+            indexed: false,
+            nameField: "Key1",
+            url: require.resolve("./data/bed/gfftags.bed")
+        }
+        const reader = new FeatureFileReader(config);
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        assert.ok(features);
+        assert.equal(features.length, 3);
+        assert.equal(features[1].name, 'terminator');
+        assert.equal(features[2].name, 'M13 origin');
+    })
+
 })
 
