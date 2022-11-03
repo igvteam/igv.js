@@ -111,6 +111,8 @@ const FRAME_HEIGHT = 25
 const FRAME_BORDER = 5
 const BP_PER_PIXEL_THRESHOLD = 1 / 10
 
+const bppFeatureFetchThreshold = 10
+
 class SequenceTrack {
 
     constructor(config, browser) {
@@ -163,7 +165,6 @@ class SequenceTrack {
         ]
     }
 
-
     contextMenuItemList(clickState) {
         const viewport = clickState.viewport
         if (viewport.referenceFrame.bpPerPixel <= 1) {
@@ -214,7 +215,6 @@ class SequenceTrack {
         }
     }
 
-
     translateSequence(seq) {
 
         const threeFrame = [[], [], []]
@@ -241,9 +241,11 @@ class SequenceTrack {
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
+
         start = Math.floor(start)
         end = Math.floor(end)
-        if (bpPerPixel && bpPerPixel > 1) {
+
+        if (bpPerPixel && bpPerPixel > bppFeatureFetchThreshold) {
             return null
         } else {
             const sequence = await this.browser.genome.sequence.getSequence(chr, start, end)
@@ -381,7 +383,7 @@ class SequenceTrack {
 
 }
 
-export {defaultSequenceTrackOrder}
+export {defaultSequenceTrackOrder, bppFeatureFetchThreshold}
 
 export default SequenceTrack
 
