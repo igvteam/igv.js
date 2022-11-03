@@ -300,6 +300,12 @@ const IGVGraphics = {
         for (let x = 0; x < ctx.canvas.width; x++) {
             IGVGraphics.fillRect(ctx, x, 0, 1, ctx.canvas.height, { fillStyle: randomRGB(100, 250) })
         }
+    },
+
+    labelTransformWithContext: (ctx, exe) => {
+        ctx.translate(exe, 0);
+        ctx.scale(-1, 1);
+        ctx.translate(-exe, 0);
     }
 
 }

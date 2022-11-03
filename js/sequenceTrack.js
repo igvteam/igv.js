@@ -323,8 +323,20 @@ class SequenceTrack {
                     if (options.bpPerPixel > BP_PER_PIXEL_THRESHOLD) {
                         IGVGraphics.fillRect(ctx, aPixel, FRAME_BORDER, pixelWidth, SEQUENCE_HEIGHT - FRAME_BORDER, {fillStyle: color})
                     } else {
-                        let textPixel = aPixel + 0.5 * (pixelWidth - ctx.measureText(baseLetter).width)
-                        IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
+                        const textPixel = aPixel + 0.5 * (pixelWidth - ctx.measureText(baseLetter).width)
+
+
+
+
+                        if ('y' === options.axis) {
+                            ctx.save()
+                            IGVGraphics.labelTransformWithContext(ctx, textPixel)
+                            IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
+                            ctx.restore()
+                        } else {
+                            IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
+                        }
+
                     }
                 }
             }

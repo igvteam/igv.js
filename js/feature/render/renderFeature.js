@@ -27,12 +27,6 @@ export function calculateFeatureCoordinates(feature, bpStart, xScale) {
     }
 }
 
-function labelTransformWithContext(context, exe) {
-    context.translate(exe, 0);
-    context.scale(-1, 1);
-    context.translate(-exe, 0);
-}
-
 /**
  *
  * @param feature
@@ -229,7 +223,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
 
             if ('y' === options.axis) {
                 ctx.save()
-                labelTransformWithContext(ctx, centerX)
+                IGVGraphics.labelTransformWithContext(ctx, centerX)
                 IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
                 ctx.restore()
             } else {
