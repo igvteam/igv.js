@@ -8,6 +8,7 @@ import Viewport from "./viewport.js"
 import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genome.js"
+import {bppFeatureFetchThreshold} from "./sequenceTrack.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
@@ -90,7 +91,7 @@ class TrackViewport extends Viewport {
             }
         }
 
-        if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > 1) {
+        if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > bppFeatureFetchThreshold) {
             $(this.canvas).remove()
             this.canvas = undefined
             //this.featureCache = undefined
@@ -533,7 +534,6 @@ class TrackViewport extends Viewport {
     }
 
     async getFeatures(track, chr, start, end, bpPerPixel) {
-
         if (this.featureCache && this.featureCache.containsRange(chr, start, end, bpPerPixel)) {
             return this.featureCache.features
         } else if (typeof track.getFeatures === "function") {
