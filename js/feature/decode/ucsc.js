@@ -34,7 +34,10 @@ function decodeBed(tokens, header) {
                 const attributeKVs = parseAttributeString(tokens[3], '=')
                 feature.attributes = {}
                 for (let kv of attributeKVs) {
-                    feature.attributes[kv[0]] = kv[1]
+                    feature.attributes[kv[0]] = kv[1];
+                    if (header.nameField != undefined && kv[0] === header.nameField) {
+                        feature.name = kv[1];
+                    }
                 }
             }
             if (!feature.name) {
