@@ -1591,6 +1591,7 @@
 .igv-viewport {
   position: relative;
   margin-top: 5px;
+  line-height: 1;
   overflow-x: hidden;
   overflow-y: hidden;
 }
