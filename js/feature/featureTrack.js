@@ -110,9 +110,10 @@ class FeatureTrack extends TrackBase {
         this.useScore = config.useScore
 
         // JuiceboxJS compatibility
-        if ('refgene' === this.config.format) {
+        if ('refgene' === config.format) {
             this.removable = true
-            this.format = this.config.format
+            this.format = config.format
+            console.log(`Feature Track - type ${ this.type } config.format(${ config.format }) format ${ this.format }`)
         }
     }
 
