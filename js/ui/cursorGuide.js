@@ -56,45 +56,33 @@ class CursorGuide {
 
             const target = document.elementFromPoint(event.clientX, event.clientY)
 
-            let viewport = undefined
+            const viewport = findAncestorOfClass(target, 'igv-viewport')
 
-            if (target.parentElement) {
+            if (viewport && browser.getRulerTrackView()) {
 
-                if (target.parentElement.classList.contains('igv-viewport-content')) {
-                    viewport = target.parentElement.parentElement
-                } else if (target.parentElement.classList.contains('igv-viewport') && target.classList.contains('igv-viewport-content')) {
-                    viewport = target.parentElement
+                this.verticalGuide.style.left = `${x}px`
+
+                const columns = browser.root.querySelectorAll('.igv-column')
+                let index = undefined
+                const viewportParent = viewport.parentElement
+                for (let i = 0; i < columns.length; i++) {
+                    if (undefined === index && viewportParent === columns[i]) {
+                        index = i
+                    }
                 }
 
-                if (viewport && browser.getRulerTrackView()) {
+                const rulerViewport = browser.getRulerTrackView().viewports[index]
+                const result = rulerViewport.mouseMove(event)
 
-                    this.verticalGuide.style.left = `${x}px`
+                if (result) {
 
-                    const columns = browser.root.querySelectorAll('.igv-column')
-                    let index = undefined
-                    const viewportParent = viewport.parentElement
-                    for (let i = 0; i < columns.length; i++) {
-                        if (undefined === index && viewportParent === columns[i]) {
-                            index = i
-                        }
+                    const {start, bp, end} = result
+                    const interpolant = (bp - start) / (end - start)
+
+                    if (this.customMouseHandler) {
+                        this.customMouseHandler({start, bp, end, interpolant})
                     }
-
-                    const rulerViewport = browser.getRulerTrackView().viewports[index]
-                    const result = rulerViewport.mouseMove(event)
-
-                    if (result) {
-
-                        const {start, bp, end} = result
-                        const interpolant = (bp - start) / (end - start)
-
-                        if (this.customMouseHandler) {
-                            this.customMouseHandler({start, bp, end, interpolant})
-                        }
-
-                    }
-
                 }
-
             }
 
         }
@@ -130,6 +118,25 @@ class CursorGuide {
         }
 
     }
+
+}
+
+/**
+ * Walk up the tree until a parent is found with the given classname.  If no ancestor is found return undefined.
+ * @param target
+ * @param classname
+ * @returns {*}
+ */
+function findAncestorOfClass(target, classname) {
+
+    while (target.parentElement) {
+        if (target.parentElement.classList.contains(classname)) {
+            return target.parentElement
+        } else {
+            target = tearget.parentElement
+        }
+    }
+    return undefined
 
 }
 
