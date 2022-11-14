@@ -549,7 +549,7 @@ class Browser {
         const trackConfigurations = session.tracks ? genomeTracks.concat(session.tracks) : genomeTracks
 
         // Insure that we always have a sequence track with no explicit URL (=> the reference genome sequence track)
-        const pushSequenceTrack = trackConfigurations.filter(track => 'sequence' === track.type && !track.url &&!track.fastaURL).length === 0
+        const pushSequenceTrack = trackConfigurations.filter(track => 'sequence' === track.type && !track.url && !track.fastaURL).length === 0
         if (pushSequenceTrack /*&& false !== this.config.showSequence*/) {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
@@ -950,7 +950,7 @@ class Browser {
                 } else if (format) {
                     config.format = format
                 } else {
-                    if (config.sourceType === undefined || config.sourceType === "htsget") {
+                    if (config.sourceType === "htsget") {
                         // Check for htsget URL.  This is a longshot
                         await HtsgetReader.inferFormat(config)
                     }
