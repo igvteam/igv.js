@@ -548,8 +548,8 @@ class Browser {
         const genomeTracks = genomeConfig.tracks || []
         const trackConfigurations = session.tracks ? genomeTracks.concat(session.tracks) : genomeTracks
 
-        // Insure that we always have a sequence track
-        const pushSequenceTrack = trackConfigurations.filter(track => track.type === 'sequence').length === 0
+        // Insure that we always have a sequence track with no explicit URL (=> the reference genome sequence track)
+        const pushSequenceTrack = trackConfigurations.filter(track => 'sequence' === track.type && !track.url &&!track.fastaURL).length === 0
         if (pushSequenceTrack /*&& false !== this.config.showSequence*/) {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
