@@ -122,8 +122,8 @@ class SequenceTrack {
         this.browser = browser
         this.removable = false
         this.config = config
-        this.name = config.name || "Sequence"
-        this.id = config.id || "sequence"
+        this.name = config.name
+        this.id = config.id
         this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot
         this.disableButtons = false
         this.order = config.order || defaultSequenceTrackOrder
@@ -137,6 +137,13 @@ class SequenceTrack {
         if(config.url) {
             config.fastaURL = config.url
         }
+
+        if(!config.fastaURL) {
+            // Mark this as the genome reference sequence ==> backward compatibility convention
+            this.id = config.id || "sequence"
+        }
+
+
     }
 
     menuItemList() {
