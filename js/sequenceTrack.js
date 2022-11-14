@@ -144,7 +144,8 @@ class SequenceTrack {
             this.id = config.id || "sequence"
         }
 
-
+        // JuiceboxJS compatibility
+        this.removable = true
     }
 
     menuItemList() {

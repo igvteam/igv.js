@@ -109,8 +109,9 @@ class FeatureTrack extends TrackBase {
         //UCSC useScore option
         this.useScore = config.useScore
 
+        // JuiceboxJS compatibility
         if ('refgene' === this.config.format) {
-            // this.removable = true
+            this.removable = true
             this.format = this.config.format
         }
     }
