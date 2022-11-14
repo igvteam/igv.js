@@ -17,21 +17,21 @@
 
     import igv from '../../js/index.js'
 
-
-    const config = {
-        locus: "chr1:248752514",
-        reference: {
-            id: "hg38",
-            fastaURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
-            indexURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
-        },
-        tracks: [{
-            type: "sequence",
-            name: "Broad GATK",     // <= Optional
-            fastaURL: "https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta",
-            indexURL: "https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
-        }]
-    }
+    const config =
+        {
+            // locus: "all",
+            locus: "chr8:70,717,709-70,723,498",
+            genome: "mm10",
+            tracks:
+                [
+                    {
+                        type: "sequence",
+                        name: "Broad GATK",     // <= Optional
+                        fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa.fai"
+                    }
+                ]
+        }
 
     igv.createBrowser(document.getElementById('igv-app-container'), config)
 

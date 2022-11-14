@@ -23,8 +23,29 @@
             {
                 genome: 'hg19',
                 locus: 'myc',
-                showIdeogram: false,
+                // showIdeogram: false,
                 // showRuler: false
+                tracks:
+                [
+                    // gene track
+                    {
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai"
+                    },
+                    // // sequence track
+                    // {
+                    //     "name": "Dugla Testing Refseq Genes as Plain Ole Track",
+                    //     "format": "refgene",
+                    //     "id": "dugla_test_gene_track",
+                    //     "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz",
+                    //     "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz.tbi",
+                    //     "visibilityWindow": -1,
+                    //     "supportsWholeGenome": false,
+                    //     "removable": false,
+                    //     "order": 1000000,
+                    //     "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$"
+                    // },
+                ]
             }
 
         const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
