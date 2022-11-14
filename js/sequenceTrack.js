@@ -26,6 +26,7 @@
 import IGVGraphics from "./igv-canvas.js"
 import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
+import {loadFasta} from "./genome/fasta.js"
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
 
@@ -121,8 +122,8 @@ class SequenceTrack {
         this.browser = browser
         this.removable = false
         this.config = config
-        this.name = "Sequence"
-        this.id = "sequence"
+        this.name = config.name || "Sequence"
+        this.id = config.id || "sequence"
         this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot
         this.disableButtons = false
         this.order = config.order || defaultSequenceTrackOrder
@@ -132,6 +133,10 @@ class SequenceTrack {
         this.frameTranslate = config.frameTranslate === true
         this.height = this.frameTranslate ? TRANSLATED_HEIGHT : DEFAULT_HEIGHT
 
+        // Hack for backward compatibility
+        if(config.url) {
+            config.fastaURL = config.url
+        }
     }
 
     menuItemList() {
@@ -240,6 +245,24 @@ class SequenceTrack {
         return threeFrame
     }
 
+    /**
+     * Return the source for sequence.  If an explicit fasta url is defined, use it, otherwise fetch sequence
+     * from the current genome
+     * *
+     * @returns {Promise<WrappedFasta|*>}
+     */
+    async getSequenceSource() {
+        if(this.config.fastaURL) {
+            if(!this.fasta) {
+                this.fasta = new WrappedFasta(this.config, this.browser.genome)
+                await this.fasta.init()
+            }
+            return this.fasta
+        } else {
+            return this.browser.genome.sequence
+        }
+    }
+
     async getFeatures(chr, start, end, bpPerPixel) {
 
         start = Math.floor(start)
@@ -248,7 +271,8 @@ class SequenceTrack {
         if (bpPerPixel && bpPerPixel > bppFeatureFetchThreshold) {
             return null
         } else {
-            const sequence = await this.browser.genome.sequence.getSequence(chr, start, end)
+            const sequenceSource = await this.getSequenceSource()
+            const sequence = await sequenceSource.getSequence(chr, start, end)
             return {
                 bpStart: start,
                 sequence: sequence
@@ -379,6 +403,33 @@ class SequenceTrack {
             config.revealed = true
         }
         return config
+    }
+
+}
+
+/**
+ * Wrapper for a Fasta object that does chr name alias translation.   This is not neccessary for the genome fasta,
+ * as it defines the reference name, but can be neccessary if loading an additional fasta as a track
+ *
+ */
+class WrappedFasta {
+
+    constructor(config, genome) {
+        this.config = config;
+        this.genome = genome
+    }
+
+    async init() {
+        this.fasta = await loadFasta(this.config)
+        this.chrNameMap = new Map()
+        for(let name of this.fasta.chromosomeNames) {
+            this.chrNameMap.set(this.genome.getChromosomeName(name), name)
+        }
+    }
+
+    async getSequence(chr, start, end) {
+        const chrName = this.chrNameMap.has(chr) ? this.chrNameMap.get(chr) : chr
+        return this.fasta.getSequence(chrName, start, end)
     }
 
 }
