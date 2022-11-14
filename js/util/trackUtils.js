@@ -66,7 +66,10 @@ const knownFileExtensions = new Set([
     "maf",
     "mut",
     "tsv",
-    "hiccups"
+    "hiccups",
+    "fasta",
+    "fa",
+    "fna"
 ])
 
 /**
@@ -139,6 +142,10 @@ function inferFileFormat(fn) {
             return "bigwig"
         case "bb":
             return "bigbed"
+        case "fasta":
+        case "fa":
+        case "fna":
+            return "fasta"
         default:
             if (knownFileExtensions.has(ext)) {
                 return ext
@@ -207,6 +214,8 @@ function inferTrackType(config) {
             case "biggenepred":
             case "bignarrowpeak":
                 return "bedtype"
+            case "fasta":
+                return "sequence"
             default:
                 return "annotation"
         }
