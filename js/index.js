@@ -1,5 +1,6 @@
 // Defines the top-level API for the igv module
 
+import {igvxhr, oauth} from "../node_modules/igv-utils/src/index.js"
 import MenuUtils from "./ui/menuUtils.js"
 import DataRangeDialog from "./ui/dataRangeDialog.js"
 import IGVGraphics from "./igv-canvas.js"
@@ -8,7 +9,8 @@ import {doAutoscale} from "./util/igvUtils.js"
 import embedCss from "./embedCss.js"
 import version from "./version.js"
 import TrackView from "./trackView.js"
-import {igvxhr, oauth} from "../node_modules/igv-utils/src/index.js"
+import {loadFasta} from "./genome/fasta.js";
+import GenomeUtils from "./genome/genome.js";
 
 const setApiKey = igvxhr.setApiKey
 
@@ -37,6 +39,8 @@ export default {
     version,
     setApiKey,
     doAutoscale,
-    TrackView
+    TrackView,
+    loadFasta,
+    GenomeUtils
 }
 

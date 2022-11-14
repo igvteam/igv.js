@@ -31,6 +31,8 @@
 //    IGVGraphics.strokeLine(context, 0, 0, 10, 10);
 //
 
+import {randomRGB} from "./util/colorPalletes.js";
+
 var debug = false
 
 var log = function (msg) {
@@ -292,8 +294,13 @@ const IGVGraphics = {
         if (fill) {
             ctx.fill()
         }
-    }
+    },
 
+    drawRandomColorVerticalLines: ctx => {
+        for (let x = 0; x < ctx.canvas.width; x++) {
+            IGVGraphics.fillRect(ctx, x, 0, 1, ctx.canvas.height, { fillStyle: randomRGB(100, 250) })
+        }
+    }
 
 }
 
