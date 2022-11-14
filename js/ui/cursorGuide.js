@@ -133,7 +133,7 @@ function findAncestorOfClass(target, classname) {
         if (target.parentElement.classList.contains(classname)) {
             return target.parentElement
         } else {
-            target = tearget.parentElement
+            target = target.parentElement
         }
     }
     return undefined
