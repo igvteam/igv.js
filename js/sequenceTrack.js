@@ -27,6 +27,7 @@ import IGVGraphics from "./igv-canvas.js"
 import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
 import {loadFasta} from "./genome/fasta.js"
+import {defaultNucleotideColors} from "./util/nucleotideColors.js";
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
 
@@ -312,11 +313,12 @@ class SequenceTrack {
                 const seqIdx = Math.floor(bp - sequenceBpStart)
 
                 if (seqIdx >= 0 && seqIdx < sequence.length) {
-                    const baseLetter = sequence[seqIdx]
+
                     const offsetBP = bp - options.bpStart
                     const aPixel = offsetBP / options.bpPerPixel
                     const pixelWidth = 1 / options.bpPerPixel
-                    const color = this.fillColor(baseLetter)
+                    const baseLetter = sequence[seqIdx]
+                    const color = this.fillColor(baseLetter.toUpperCase())
 
                     if (options.bpPerPixel > BP_PER_PIXEL_THRESHOLD) {
                         IGVGraphics.fillRect(ctx, aPixel, FRAME_BORDER, pixelWidth, SEQUENCE_HEIGHT - FRAME_BORDER, {fillStyle: color})
@@ -388,7 +390,8 @@ class SequenceTrack {
         if (this.color) {
             return this.color
         } else if ("dna" === this.sequenceType) {
-            return this.browser.nucleotideColors[index] || 'gray'
+            // return this.browser.nucleotideColors[index] || 'gray'
+            return defaultNucleotideColors[index] || 'gray'
         } else {
             return 'rgb(0, 0, 150)'
         }
