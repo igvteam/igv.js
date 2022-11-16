@@ -1,46 +1,18 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>All demo</title>
-</head>
-
-<body>
-
-<div id="igv-centering-container">
-    <div id='igv-app-container'></div>
-</div>
-
-</body>
-
-<script type="module">
-
-    import igv from '../../js/index.js'
-
-    const config =
-        {
-            // locus: "all",
-            locus: "chr8:70,717,709-70,723,498",
-            genome: "mm10",
-            tracks:
-                [
-                    // {
-                    //     type: "sequence",
-                    //     name: "Broad GATK",     // <= Optional
-                    //     url: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa",
-                    //     indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa.fai"
-                    // },
-                    {
-                        // name: "Refseq Genes - As Track",
-                        format: "refgene",
-                        url: "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefSeq.sorted.txt.gz.tbi",
-                    }
-                ]
-        }
-
-    igv.createBrowser(document.getElementById('igv-app-container'), config)
+  import igv from '../../js/index.js'
 
 
-</script>
-</html>
+    const config = {
+        locus: "chr1:248752514",
+        reference: {
+            id: "hg38",
+            fastaURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+            indexURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
+        },
+        tracks: [{
+            type: "sequence",
+            name: "Broad GATK",     // <= Optional
+            fastaURL: "https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta",
+            indexURL: "https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
+        }]
+    }
+    
