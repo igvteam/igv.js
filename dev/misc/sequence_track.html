@@ -1,4 +1,21 @@
-  import igv from '../../js/index.js'
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>All demo</title>
+</head>
+
+<body>
+
+<div id="igv-centering-container">
+    <div id='igv-app-container'></div>
+</div>
+
+</body>
+
+<script type="module">
+
+    import igv from '../../js/index.js'
 
 
     const config = {
@@ -15,4 +32,9 @@
             indexURL: "https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
         }]
     }
-    
+
+    igv.createBrowser(document.getElementById('igv-app-container'), config)
+
+
+</script>
+</html>
