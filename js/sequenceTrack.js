@@ -119,10 +119,10 @@ class SequenceTrack {
 
     constructor(config, browser) {
 
-        this.type = this.format = "sequence"
-        this.browser = browser
-        this.removable = false
         this.config = config
+        this.browser = browser
+        this.type = "sequence"
+        this.removable = config.removable === undefined ? true : config.removable      // Defaults to true
         this.name = config.name
         this.id = config.id
         this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot
@@ -144,8 +144,6 @@ class SequenceTrack {
             this.id = config.id || "sequence"
         }
 
-        // JuiceboxJS compatibility
-        this.removable = true
     }
 
     menuItemList() {
