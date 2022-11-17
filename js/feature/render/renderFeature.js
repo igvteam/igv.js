@@ -220,9 +220,17 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         const lastLabelX = options.rowLastLabelX[feature.row] || -Number.MAX_SAFE_INTEGER
         if (options.labelAllFeatures || xleft > lastLabelX || gtexSelection) {
             options.rowLastLabelX[feature.row] = xright
-            IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
+
+            if ('y' === options.axis) {
+                ctx.save()
+                IGVGraphics.labelTransformWithContext(ctx, centerX)
+                IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
+                ctx.restore()
+            } else {
+                IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
+            }
         }
-        
+
     } finally {
         ctx.restore()
     }
