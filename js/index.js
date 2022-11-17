@@ -7,7 +7,9 @@ import {createBrowser, createTrack, removeAllBrowsers, removeBrowser, visibility
 import {doAutoscale} from "./util/igvUtils.js"
 import embedCss from "./embedCss.js"
 import version from "./version.js"
-import GenomeUtils from "./genome/genome.js";
+import TrackView from "./trackView.js"
+import GenomeUtils from "./genome/genome.js"
+import {igvxhr, oauth} from "../node_modules/igv-utils/src/index.js"
 
 const setApiKey = igvxhr.setApiKey
 
@@ -36,6 +38,7 @@ export default {
     version,
     setApiKey,
     doAutoscale,
+    TrackView,
     GenomeUtils
 }
 
