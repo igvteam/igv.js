@@ -27,6 +27,7 @@ import IGVGraphics from "./igv-canvas.js"
 import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
 import {loadFasta} from "./genome/fasta.js"
+import {defaultNucleotideColors} from "./util/nucleotideColors.js";
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
 
@@ -118,10 +119,10 @@ class SequenceTrack {
 
     constructor(config, browser) {
 
-        this.type = "sequence"
-        this.browser = browser
-        this.removable = false
         this.config = config
+        this.browser = browser
+        this.type = "sequence"
+        this.removable = config.removable === undefined ? true : config.removable      // Defaults to true
         this.name = config.name
         this.id = config.id
         this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot
@@ -142,7 +143,6 @@ class SequenceTrack {
             // Mark this as the genome reference sequence ==> backward compatibility convention
             this.id = config.id || "sequence"
         }
-
 
     }
 
@@ -312,17 +312,30 @@ class SequenceTrack {
                 const seqIdx = Math.floor(bp - sequenceBpStart)
 
                 if (seqIdx >= 0 && seqIdx < sequence.length) {
-                    const baseLetter = sequence[seqIdx]
+
                     const offsetBP = bp - options.bpStart
                     const aPixel = offsetBP / options.bpPerPixel
                     const pixelWidth = 1 / options.bpPerPixel
-                    const color = this.fillColor(baseLetter)
+                    const baseLetter = sequence[seqIdx]
+                    const color = this.fillColor(baseLetter.toUpperCase())
 
                     if (options.bpPerPixel > BP_PER_PIXEL_THRESHOLD) {
                         IGVGraphics.fillRect(ctx, aPixel, FRAME_BORDER, pixelWidth, SEQUENCE_HEIGHT - FRAME_BORDER, {fillStyle: color})
                     } else {
-                        let textPixel = aPixel + 0.5 * (pixelWidth - ctx.measureText(baseLetter).width)
-                        IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
+                        const textPixel = aPixel + 0.5 * (pixelWidth - ctx.measureText(baseLetter).width)
+
+
+
+
+                        if ('y' === options.axis) {
+                            ctx.save()
+                            IGVGraphics.labelTransformWithContext(ctx, textPixel)
+                            IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
+                            ctx.restore()
+                        } else {
+                            IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
+                        }
+
                     }
                 }
             }
@@ -388,7 +401,8 @@ class SequenceTrack {
         if (this.color) {
             return this.color
         } else if ("dna" === this.sequenceType) {
-            return this.browser.nucleotideColors[index] || 'gray'
+            // return this.browser.nucleotideColors[index] || 'gray'
+            return defaultNucleotideColors[index] || 'gray'
         } else {
             return 'rgb(0, 0, 150)'
         }
