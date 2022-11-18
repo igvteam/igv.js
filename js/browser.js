@@ -788,7 +788,7 @@ class Browser {
 
         const newTrack = this._loadTrack(config)
 
-        if(config.autoscaleGroup) {
+        if (config.autoscaleGroup) {
             // Await newTrack load and update all views
             await newTrack
             this.updateViews()
@@ -929,7 +929,7 @@ class Browser {
     async createTrack(config) {
 
         // Resolve function and promise urls
-        let url = await URIUtils.resolveURL(config.url)
+        let url = await URIUtils.resolveURL(config.url || config.fastaURL)
         if (StringUtils.isString(url)) {
             url = url.trim()
         }
@@ -937,6 +937,8 @@ class Browser {
         if (url) {
             if (config.format) {
                 config.format = config.format.toLowerCase()
+            } else if (config.fastaURL) {
+                config.format = "fasta"  // by definition
             } else {
                 let filename = config.filename
                 if (!filename) {
@@ -945,7 +947,7 @@ class Browser {
 
                 const format = TrackUtils.inferFileFormat(filename)
 
-                if("tsv" === format) {
+                if ("tsv" === format) {
                     config.format = await TrackUtils.inferFileFormatFromHeader(config)
                 } else if (format) {
                     config.format = format
