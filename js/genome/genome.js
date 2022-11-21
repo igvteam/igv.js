@@ -61,46 +61,35 @@ const GenomeUtils = {
 
         if (!GenomeUtils.KNOWN_GENOMES) {
 
-            const table = {}
+            GenomeUtils.KNOWN_GENOMES = {}
 
-            // Get default genomes
-            if (config.loadDefaultGenomes !== false) {
+            try {
+                const url = `${ config.genome || DEFAULT_GENOMES_URL }?randomSeed=${ Math.random().toString(36) }&version=${ version() }`
+                const jsonArray = await igvxhr.loadJson(url, {timeout: 5000})
+                updateKnownGenomesTable(GenomeUtils.KNOWN_GENOMES, jsonArray)
+            } catch (e) {
+                console.error(e)
                 try {
-                    const url = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`  // prevent caching
-                    const jsonArray = await igvxhr.loadJson(url, {timeout: 5000})
-                    processJson(jsonArray)
+                    const url = `${ config.genome || BACKUP_GENOMES_URL }?randomSeed=${ Math.random().toString(36) }&version=${ version() }`
+                    const jsonArray = await igvxhr.loadJson(url, {})
+                    updateKnownGenomesTable(GenomeUtils.KNOWN_GENOMES, jsonArray)
                 } catch (e) {
                     console.error(e)
-                    try {
-                        const url = BACKUP_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`  // prevent caching
-                        const jsonArray = await igvxhr.loadJson(url, {})
-                        processJson(jsonArray)
-                    } catch (e) {
-                        console.error(e)
-                        console.warn("Errors loading default genome definitions.")
-                    }
+                    console.warn("Errors loading default genome definitions.")
                 }
             }
 
             // Add user-defined genomes
-            const genomeList = config.genomeList || config.genomes
+            const genomeList = config.genomeList
             if (genomeList) {
                 if (typeof genomeList === 'string') {
                     const jsonArray = await igvxhr.loadJson(genomeList, {})
-                    processJson(jsonArray)
+                    updateKnownGenomesTable(GenomeUtils.KNOWN_GENOMES, jsonArray)
                 } else {
-                    processJson(genomeList)
+                    updateKnownGenomesTable(GenomeUtils.KNOWN_GENOMES, genomeList)
                 }
             }
 
-            GenomeUtils.KNOWN_GENOMES = table
-
-            function processJson(jsonArray) {
-                jsonArray.forEach(function (json) {
-                    table[json.id] = json
-                })
-                return table
-            }
         }
     },
 
@@ -143,6 +132,11 @@ const GenomeUtils = {
     }
 }
 
+function updateKnownGenomesTable(knownGenomesTable, jsonArray) {
+    for (const json of jsonArray) {
+        knownGenomesTable[ json.id ] = json
+    }
+}
 
 class Genome {
 
