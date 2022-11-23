@@ -24,6 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
+import GenomeUtils from "./genome/genome.js"
 
 class NavbarManager {
 
@@ -31,8 +32,8 @@ class NavbarManager {
         this.browser = browser
     }
 
-    navbarDidResize(width, isWholeGenomeView) {
-        this.updateNavbar(this.createResponsiveClassSchedule(width, isWholeGenomeView))
+    navbarDidResize(width) {
+        this.updateNavbar(this.createResponsiveClassSchedule(width))
     }
 
     updateNavbar(responsiveClassSchedule) {
@@ -44,11 +45,16 @@ class NavbarManager {
         $(this.browser.zoomWidget.zoomContainer).addClass(responsiveClassSchedule.zoomContainer)
     }
 
-    createResponsiveClassSchedule(navbarWidth, isWholeGenomeView) {
+    createResponsiveClassSchedule(navbarWidth) {
 
         let candidates = {}
 
-        if (isWholeGenomeView) {
+        const isWGV = this.browser.isMultiLocusWholeGenomeView() ||
+            (this.browser.referenceFrameList &&
+                GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr))
+
+
+        if (isWGV) {
             this.browser.windowSizePanel.hide()
         } else {
             this.browser.windowSizePanel.show()
@@ -69,7 +75,7 @@ class NavbarManager {
             this.browser.windowSizePanel.hide()
         }
 
-        if (isWholeGenomeView) {
+        if (isWGV) {
             candidates['zoomContainer'] = 'igv-zoom-widget-hidden'
         }
 
