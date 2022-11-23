@@ -1,0 +1,40 @@
+<html>
+<head>
+    <title>igv.js embedding example</title>
+</head>
+
+<body>
+
+<div id="igvDiv"></div>
+
+<script type="module">
+
+    import igv from "https://cdn.jsdelivr.net/npm/igv@2.13.6/dist/igv.esm.min.js"
+
+    const config = {
+        reference: "hg38",
+        locus: "myc",
+        tracks: [
+            {
+                name: "GM12878 H3K27ac ",
+                url: "https://www.encodeproject.org/files/ENCFF716VWO/@@download/ENCFF716VWO.bigWig",
+                color: "rgb(200,0,0)",
+                type: "wig",
+                format: "bigwig"
+            },
+            {
+                name: "GM12878 H3K4me3 ",
+                url: "https://www.encodeproject.org/files/ENCFF669DTI/@@download/ENCFF669DTI.bigWig",
+                color: "rgb(0,150,0)",
+                format: "bigwig",
+                type: "wig"
+            }
+        ]
+    }
+
+    igv.createBrowser(document.getElementById("igvDiv"), config)
+
+</script>
+
+</body>
+</html>
