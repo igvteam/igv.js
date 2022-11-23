@@ -77,8 +77,7 @@ async function createBrowser(parentDiv, config) {
         await browser.loadSessionObject(config)
     }
 
-    const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr)
-    browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV)
+    browser.navbarManager.navbarDidResize(browser.$navigation.width())
 
     return browser
 
