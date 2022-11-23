@@ -489,7 +489,14 @@ class Browser {
         // Track gear column
         createColumn(this.columnContainer, 'igv-gear-menu-column')
 
-        const genomeConfig = await GenomeUtils.expandReference(this.alert, (session.reference || session.genome))
+        const genomeOrReference = session.reference || session.genome
+        if(!genomeOrReference) {
+            console.warn("No genome or reference object specified")
+            return;
+        }
+        const genomeConfig = await GenomeUtils.expandReference(this.alert, genomeOrReference)
+
+
         await this.loadReference(genomeConfig, session.locus)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
