@@ -19,18 +19,58 @@
 
 
     const config = {
-        locus: "chr1:248752514",
+        locus: ["chr1:248752514", "chrY:57,217,299-57,217,380"],
         reference: {
             id: "hg38",
             fastaURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
             indexURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
         },
-        tracks: [{
-            type: "sequence",
-            name: "Broad GATK",     // <= Optional
-            fastaURL: "https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta",
-            indexURL: "https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
-        }]
+        tracks: [
+            {
+                type: "sequence",
+                name: "GRCh38",
+                fastaURL: "https://storage.googleapis.com/genomics-public-data/references/hg38/v0/GRCh38.primary_assembly.genome.fa",
+                indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/GRCh38.primary_assembly.genome.fa.fai"
+            },
+            {
+                type: "sequence",
+                name: "Amazon 1KG",
+                fastaURL: "https://1000genomes.s3.amazonaws.com/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa",
+                indexURL: "https://1000genomes.s3.amazonaws.com/technical/reference/GRCh38_reference_genome/GRCh38_full_analysis_set_plus_decoy_hla.fa.fai",
+            },
+            {
+                type: "sequence",
+                name: "Broad GATK",
+                fastaURL: "https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta",
+                indexURL: "https://storage.googleapis.com/gcp-public-data--broad-references/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
+            },
+            {
+                type: "sequence",
+                name: "GRCh38 - Verily",
+                fastaURL: "https://storage.googleapis.com/genomics-public-data/references/GRCh38_Verily/GRCh38_Verily_v1.genome.fa",
+                indexURL: "https://storage.googleapis.com/genomics-public-data/references/GRCh38_Verily/GRCh38_Verily_v1.genome.fa.fai"
+            },
+            // Broad references not configured for CORS
+            // {
+            //     type: "sequence",
+            //     name: "Broad Reference AWS hg38",
+            //     fastaURL: "https://broad-references.s3.amazonaws.com/hg38/v0/Homo_sapiens_assembly38.fasta",
+            //     indexURL: "https://broad-references.s3.amazonaws.com/hg38/v0/Homo_sapiens_assembly38.fasta.fai"
+            // }, {
+            //     type: "sequence",
+            //     name: "Broad Reference 1KG",
+            //     fastaURL: "https://broad-references.s3.amazonaws.com/Homo_sapiens_assembly19_1000genomes_decoy/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
+            //     indexURL: "https://broad-references.s3.amazonaws.com/Homo_sapiens_assembly19_1000genomes_decoy/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai"
+            // },
+            {
+                type: "annotation",
+                name: "Masks",
+                url: "https://s3.amazonaws.com/igv.org.genomes/hg38/LCR-hs38.bed.gz",
+                indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/LCR-hs38.bed.gz.tbi"
+            }
+
+
+        ]
     }
 
     igv.createBrowser(document.getElementById('igv-app-container'), config)
