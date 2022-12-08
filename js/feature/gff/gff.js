@@ -10,7 +10,7 @@ function decode(tokens, header) {
 
     const delim = ('gff3' === format) ? '=' : ' '
     return new GFFFeature({
-        source: tokens[1],
+        source: decodeGFFAttribute(tokens[1]),
         type: tokens[2],
         chr: tokens[0],
         start: parseInt(tokens[3]) - 1,
@@ -121,7 +121,7 @@ function parseAttributeString(attributeString, keyValueDelim) {
         const idx = kv.indexOf(keyValueDelim)
         if (idx > 0 && idx < kv.length - 1) {
             const key = kv.substring(0, idx)
-            let value = stripQuotes(decodeURIComponent(kv.substring(idx + 1).trim()))
+            let value = stripQuotes(decodeGFFAttribute(kv.substring(idx + 1).trim()))
             attributes.push([key, value])
         }
     }
@@ -135,8 +135,57 @@ function stripQuotes(value) {
     return value
 }
 
+// GFF3 attributes have specific percent encoding rules, the list below are required, all others are forbidden
+/*
+tab (%09)
+newline (%0A)
+carriage return (%0D)
+% percent (%25)
+control characters (%00 through %1F, %7F)
+In addition, the following characters have reserved meanings in column 9 and must be escaped when used in other contexts:
+; semicolon (%3B)
+= equals (%3D)
+& ampersand (%26)
+, comma (%2C)
+ */
 
-export {decodeGFF3, decodeGTF, parseAttributeString}
+const encodings = new Map([
+    ["%09", "\t"],
+    ["%0A", "\n"],
+    ["%0D", "\r"],
+    ["%25", "%"],
+    ["%3B", ";"],
+    ["%3D", "="],
+    ["%26", "&"],
+    ["%2C", ","]
+])
+
+function decodeGFFAttribute(str) {
+
+    if (!str.includes("%")) {
+        return str
+    }
+    let decoded = ""
+    for (let i = 0; i < str.length; i++) {
+
+        if (str.charCodeAt(i) === 37 && i < str.length - 2) {
+            const key = str.substring(i, i + 3)
+            if (encodings.has(key)) {
+                decoded += encodings.get(key)
+            } else {
+                decoded += key
+            }
+            i += 2
+        } else {
+            decoded += str.charAt(i)
+        }
+    }
+    return decoded
+
+}
+
+
+export {decodeGFF3, decodeGTF, parseAttributeString, decodeGFFAttribute}
 
 
 

@@ -4,7 +4,7 @@ import FeatureFileReader from "../js/feature/featureFileReader.js";
 import {assert} from 'chai';
 import {genome} from "./utils/Genome.js";
 import GFFHelper from "../js/feature/gff/gffHelper.js";
-import {parseAttributeString} from "../js/feature/gff/gff.js";
+import {parseAttributeString, decodeGFFAttribute} from "../js/feature/gff/gff.js";
 
 suite("testGFF", function () {
 
@@ -275,6 +275,25 @@ CDS	        73222	73222
         assert.ok(chr2Features);
         assert.equal(1, chr2Features.length);
         assert.equal(5, chr2Features[0].exons.length); // ensure features chromosome is specified chromosome
+    })
+
+    /*
+        ["09", "\t"],
+    ["%0A", "\n"],
+    ["%0D", "\r"],
+    ["%25", "%"],
+    ["%3B", ";"],
+    ["%3D", "="]
+    ["%26", "&"],
+    ["%2C", ","]])
+     */
+    test("GFF3 attribute encoding", function () {
+
+        const encoded = "aaa%09b%0Acd%0De%25fgh%3Bijk%3Dlm%26nop%2C"
+        const expected = "aaa\tb\ncd\re%fgh;ijk=lm&nop,"
+
+        const decoded = decodeGFFAttribute(encoded)
+        assert.equal(expected, decoded)
 
     })
 })
