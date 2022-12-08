@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>All demo</title>
+</head>
+
+<body>
+
+<div id="igv-centering-container">
+    <div id='igv-app-container'></div>
+</div>
+
+</body>
+
+<script type="module">
+
+    import igv from '../../js/index.js'
+
+
+    const config = {
+        locus: "chrY:59363450-59363531",
+        reference: {
+            "id": "hg19",
+            "name": "Human (GRCh37/hg19)",
+            "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+            "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+        },
+        tracks: [
+            {
+                type: "sequence",
+                name: "1KG",
+                fastaURL: "https://storage.googleapis.com/genomics-public-data/references/Homo_sapiens_assembly19_1000genomes_decoy/Homo_sapiens_assembly19_1000genomes_decoy.fasta",
+                indexURL: "https://storage.googleapis.com/genomics-public-data/references/Homo_sapiens_assembly19_1000genomes_decoy/Homo_sapiens_assembly19_1000genomes_decoy.fasta.fai"
+            },
+            // BroadReferences not configured for CORS
+            // {
+            //     type: "sequence",
+            //     name: "Broad Reference",
+            //     fastaURL: "https://broad-references.s3.amazonaws.com/hg19/v0/Homo_sapiens_assembly19.fasta",
+            //     indexURL: "https://broad-references.s3.amazonaws.com/hg19/v0/Homo_sapiens_assembly19.fasta.fai"
+            // }
+        ]
+    }
+
+    igv.createBrowser(document.getElementById('igv-app-container'), config)
+
+
+</script>
+</html>
