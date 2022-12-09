@@ -36,9 +36,6 @@ export default {
     setOauthToken,
     oauth,
     version,
-    setApiKey,
-    doAutoscale,
-    TrackView,
-    GenomeUtils
+    setApiKey
 }
 
