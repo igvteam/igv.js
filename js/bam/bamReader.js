@@ -29,6 +29,7 @@ import AlignmentContainer from "./alignmentContainer.js"
 import BamUtils from "./bamUtils.js"
 import {BGZip, igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
+import BGZBlockLoader from "./bgzBlockLoader.js"
 
 /**
  * Class for reading a bam file
@@ -44,6 +45,8 @@ class BamReader {
         this.bamPath = config.url
         this.baiPath = config.indexURL
         BamUtils.setReaderDefaults(this, config)
+
+        this._blockLoader = new BGZBlockLoader(config)
     }
 
     async readAlignments(chr, bpStart, bpEnd) {
@@ -59,37 +62,18 @@ class BamReader {
         } else {
 
             const bamIndex = await this.getIndex()
-            const chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd)
+            const chunks = bamIndex.chunksForRange(chrId, bpStart, bpEnd)
 
             if (!chunks || chunks.length === 0) {
                 return alignmentContainer
             }
 
-            let counter = 1
             for (let c of chunks) {
-
-                let lastBlockSize
-                if (c.maxv.offset === 0) {
-                    lastBlockSize = 0    // Don't need to read the last block.
-                } else {
-                    const bsizeOptions = buildOptions(this.config, {range: {start: c.maxv.block, size: 26}})
-                    const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
-                    lastBlockSize = BGZip.bgzBlockSize(abuffer)
-                }
-                const fetchMin = c.minv.block
-                const fetchMax = c.maxv.block + lastBlockSize
-                const range = {start: fetchMin, size: fetchMax - fetchMin + 1}
-
-                const compressed = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config, {range: range}))
-
-                var ba = BGZip.unbgzf(compressed) //new Uint8Array(BGZip.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                const ba = await this._blockLoader.getData(c.minv.block, c.maxv.block)
                 const done = BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter)
-
                 if (done) {
-                    //    console.log(`Loaded ${counter} chunks out of  ${chunks.length}`);
                     break
                 }
-                counter++
             }
             alignmentContainer.finish()
             return alignmentContainer
