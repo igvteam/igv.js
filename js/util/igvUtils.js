@@ -75,7 +75,7 @@ function buildOptions(config, options) {
 const doAutoscale = function (features) {
     var min, max
 
-    if (features.length > 0) {
+    if (features && features.length > 0) {
         min = Number.MAX_VALUE
         max = -Number.MAX_VALUE
 

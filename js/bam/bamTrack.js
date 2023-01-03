@@ -246,7 +246,9 @@ class BAMTrack extends TrackBase {
     hoverText(clickState) {
         if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
             const clickedObject = this.coverageTrack.getClickedObject(clickState)
-            return clickedObject.hoverText()
+            if(clickedObject) {
+                return clickedObject.hoverText()
+            }
         }
 
     }

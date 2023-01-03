@@ -1,4 +1,4 @@
-import BGZipLineReader from "../js/util/BGZipLineReader.js";
+import BGZLineReader from "../js/util/bgzLineReader.js";
 import "./utils/mockObjects.js"
 import {assert} from 'chai';
 
@@ -10,7 +10,7 @@ suite("testBGZipLineReader", function () {
             url: require.resolve("./data/gcnv/gcnv_large.bed.gz")
         };
 
-        const reader = new BGZipLineReader(config);
+        const reader = new BGZLineReader(config);
         const headerLine = await reader.nextLine();
         const columnCount = headerLine.split("\t").length;
 
@@ -34,7 +34,7 @@ suite("testBGZipLineReader", function () {
             bgzip: true
         };
 
-        const reader = new BGZipLineReader(config);
+        const reader = new BGZLineReader(config);
         const headerLine = await reader.nextLine();
 
         let lineCount = 0;
