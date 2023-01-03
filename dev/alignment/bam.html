@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg19",
+            locus: [
+                "chr1:155,153,822-155,155,105"
+            ],
+            tracks: [
+                {
+                    type: "alignment",
+                    url: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam",
+                    indexURL: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam.bai",
+                    name: "NA12878 - cache on",
+                },
+                {
+                    type: "alignment",
+                    url: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam",
+                    indexURL: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam.bai",
+                    cacheBlocks: false,
+                    name: "NA12878 - cache off",
+                }
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

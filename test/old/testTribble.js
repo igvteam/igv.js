@@ -43,7 +43,7 @@ function testTribble() {
 
                 ok(index);
 
-                //var blocks = index.blocksForRange("chr1", 0, Number.MAX_VALUE);
+                //var blocks = index.chunksForRange("chr1", 0, Number.MAX_VALUE);
                 //
                 //ok(blocks);
 

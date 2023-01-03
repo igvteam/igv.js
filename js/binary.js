@@ -221,6 +221,10 @@ class VPointer {
             (this.block === vp.block && this.offset > vp.offset)
     }
 
+    isEqualTo(vp) {
+        return this.block === vp.block && this.offset === vp.offset
+    }
+
     print() {
         return "" + this.block + ":" + this.offset
     }
