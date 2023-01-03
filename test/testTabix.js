@@ -10,7 +10,7 @@ suite("testTabix", function () {
         const refID = 26,
             beg = 55369194,
             end = 55369443,
-            indexPath = require.resolve("./data/tabix/sorted.genes.gtf.gz.tbi"),
+            indexPath = require.resolve("./data/tabix/refGene.hg19.bed.gz.tbi"),
             config = {};
 
         const tbiIndex = await loadIndex(indexPath, config);
