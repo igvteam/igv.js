@@ -119,7 +119,7 @@ class TribbleIndex {
      * @param min  genomic start position
      * @param max  genomic end position
      */
-    blocksForRange(queryChr, min, max) { //function (refId, min, max) {
+    chunksForRange(queryChr, min, max) { //function (refId, min, max) {
 
         const self = this
         const chrIdx = this.chrIndex[queryChr]

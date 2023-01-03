@@ -1,7 +1,7 @@
-// Represents a BAM index.
-// Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
+// Represents a CSI Bam or Tabix index
 
 import BinaryParser from "../binary.js"
+import {optimizeChunks} from "./indexUtils.js"
 
 const CSI1_MAGIC = 21582659 // CSI\1
 const CSI2_MAGIC = 38359875 // CSI\2
@@ -128,7 +128,7 @@ class CSIIndex {
      * @param max  genomic end position
      * @param return an array of {minv: {filePointer, offset}, {maxv: {filePointer, offset}}
      */
-    blocksForRange(refId, min, max) {
+    chunksForRange(refId, min, max) {
 
         const ba = this.indices[refId]
         if (!ba) {
@@ -190,55 +190,5 @@ class CSIIndex {
     }
 
 }
-
-function optimizeChunks(chunks, lowest) {
-
-    const mergedChunks = []
-    let lastChunk = null
-
-    if (chunks.length === 0) return chunks
-
-    chunks.sort(function (c0, c1) {
-        const dif = c0.minv.block - c1.minv.block
-        if (dif !== 0) {
-            return dif
-        } else {
-            return c0.minv.offset - c1.minv.offset
-        }
-    })
-
-    chunks.forEach(function (chunk) {
-
-        if (!lowest || chunk.maxv.isGreaterThan(lowest)) {
-            if (lastChunk === null) {
-                mergedChunks.push(chunk)
-                lastChunk = chunk
-            } else {
-                if (canMerge(lastChunk, chunk)) {
-                    if (chunk.maxv.isGreaterThan(lastChunk.maxv)) {
-                        lastChunk.maxv = chunk.maxv
-                    }
-                } else {
-                    mergedChunks.push(chunk)
-                    lastChunk = chunk
-                }
-            }
-        } else {
-            //console.log(`skipping chunk ${chunk.minv.block} - ${chunk.maxv.block}`)
-        }
-    })
-
-    return mergedChunks
-}
-
-function canMerge(chunk1, chunk2) {
-    return (chunk2.minv.block - chunk1.maxv.block) < 65000 &&
-        (chunk2.maxv.block - chunk1.minv.block) < 5000000
-    // lastChunk.minv.block === lastChunk.maxv.block &&
-    // lastChunk.maxv.block === chunk.minv.block &&
-    // chunk.minv.block === chunk.maxv.block
-
-}
-
 
 export {parseCsiIndex}

@@ -32,7 +32,8 @@ import GWASParser from "../gwas/gwasParser.js"
 import AEDParser from "../aed/AEDParser.js"
 import {loadIndex} from "../bam/indexFactory.js"
 import getDataWrapper from "./dataWrapper.js"
-import BGZipLineReader from "../util/BGZipLineReader.js"
+import BGZLineReader from "../util/bgzLineReader.js"
+import BGZBlockLoader from "../bam/bgzBlockLoader.js"
 
 /**
  * Reader for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -66,6 +67,7 @@ class FeatureFileReader {
         if (this.config.format === "vcf" && !this.config.indexURL) {
             console.warn("Warning: index file not specified.  The entire vcf file will be loaded.")
         }
+
     }
 
     async defaultVisibilityWindow() {
@@ -123,7 +125,8 @@ class FeatureFileReader {
 
                 let dataWrapper
                 if (index.tabix) {
-                    dataWrapper = new BGZipLineReader(this.config)
+                    this._blockLoader = new BGZBlockLoader(this.config);
+                    dataWrapper = new BGZLineReader(this.config)
                 } else {
                     // Tribble
                     const maxSize = Object.values(index.chrIndex)
@@ -209,51 +212,27 @@ class FeatureFileReader {
         }
 
         const genome = this.genome
-        const blocks = this.index.blocksForRange(refId, start, end)
-        if (!blocks || blocks.length === 0) {
+        const chunks = this.index.chunksForRange(refId, start, end)
+        if (!chunks || chunks.length === 0) {
             return []
         } else {
             const allFeatures = []
-            for (let block of blocks) {
-
-                const startPos = block.minv.block
-                const startOffset = block.minv.offset
-                const endOffset = block.maxv.offset
-                let endPos
-
-                if (tabix) {
-                    let lastBlockSize = 0
-                    if (endOffset > 0) {
-                        const bsizeOptions = buildOptions(config, {
-                            range: {
-                                start: block.maxv.block,
-                                size: 26
-                            }
-                        })
-                        const abuffer = await igvxhr.loadArrayBuffer(config.url, bsizeOptions)
-                        lastBlockSize = BGZip.bgzBlockSize(abuffer)
-                    }
-                    endPos = block.maxv.block + lastBlockSize
-                } else {
-                    endPos = block.maxv.block
-                }
-
-                const options = buildOptions(config, {
-                    range: {
-                        start: startPos,
-                        size: endPos - startPos + 1
-                    }
-                })
+            for (let chunk of chunks) {
 
                 let inflated
                 if (tabix) {
-                    const data = await igvxhr.loadArrayBuffer(config.url, options)
-                    inflated = BGZip.unbgzf(data)
+                    inflated = await this._blockLoader.getData(chunk.minv.block, chunk.maxv.block)
                 } else {
+                    const options = buildOptions(config, {
+                        range: {
+                            start: chunk.minv.block,
+                            size: chunk.maxv.block - chunk.minv.block + 1
+                        }
+                    })
                     inflated = await igvxhr.loadString(config.url, options)
                 }
 
-                const slicedData = startOffset ? inflated.slice(startOffset) : inflated
+                const slicedData = chunk.minv.offset ? inflated.slice(chunk.minv.offset) : inflated
                 const dataWrapper = getDataWrapper(slicedData)
                 let slicedFeatures = await parser.parseFeatures(dataWrapper)
 

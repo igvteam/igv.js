@@ -1,7 +1,12 @@
 import {buildOptions} from "../util/igvUtils.js"
 import {BGZip, igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
-class BGZipLineReader {
+/**
+ * Class to iterate line-by-line over a BGZipped text file.  This class is useful for iterating from the start of
+ * the file.  Not useful for indexed queries.
+ */
+
+class BGZLineReader {
 
     constructor(config) {
         this.config = config
@@ -68,4 +73,4 @@ class BGZipLineReader {
 
 }
 
-export default BGZipLineReader
+export default BGZLineReader
