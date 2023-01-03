@@ -16,7 +16,7 @@ suite("testTabix", function () {
         const tbiIndex = await loadIndex(indexPath, config);
         assert.ok(tbiIndex);
 
-        const blocks = tbiIndex.blocksForRange(refID, beg, end);
+        const blocks = tbiIndex.chunksForRange(refID, beg, end);
         assert.equal(blocks.length, 1)
         assert.equal(1640062, blocks[0].minv.block)
 
@@ -34,7 +34,7 @@ suite("testTabix", function () {
         const csiIndex = await loadIndex(indexPath, config);
         assert.ok(csiIndex);
 
-        const blocks = csiIndex.blocksForRange(refID, beg, end);
+        const blocks = csiIndex.chunksForRange(refID, beg, end);
         assert.ok(blocks.length > 0)
 
     })
