@@ -1,4 +1,6 @@
 
+$igv-multi-locus-ruler-label-height: 12px;
+
 .igv-zoom-in-notice-container {
 
   z-index: 1024;
@@ -79,8 +81,8 @@
   padding-left: 2px;
   padding-right: 2px;
 
-  width: 18px;
-  height: 18px;
+  width: $igv-multi-locus-ruler-label-height;
+  height: $igv-multi-locus-ruler-label-height;
 
   color: #666666;
   background-color: white;
@@ -107,7 +109,7 @@
   left: 0;
 
   width: 100%;
-  height: 14px;
+  height: $igv-multi-locus-ruler-label-height;
 
   display: flex;
   flex-flow: row;
@@ -117,8 +119,7 @@
 
   >div {
     font-family: $igv-default-font-face;
-    font-size: 14px;
-    font-weight: 400;
+    font-size: $igv-multi-locus-ruler-label-height;
     color: rgb(16, 16, 16);
     background-color: white;
   }

@@ -174,7 +174,7 @@ class ReferenceFrame {
         const {chr, start, end } = this.getPresentationLocusComponents(pixels)
         const ss = Math.floor(this.start) + 1
         const ee = Math.round(this.start + this.bpPerPixel * pixels)
-        return `${margin}${chr}:${start}-${end}${margin}${space}${prettyBasePairNumber(ee - ss)}${margin}`
+        return `${margin}${chr}:${start}-${end}${margin}(${prettyBasePairNumber(ee - ss)})${margin}`
     }
 
     getPresentationLocusComponents(pixels) {

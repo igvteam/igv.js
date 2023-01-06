@@ -32,10 +32,10 @@ class RulerViewport extends TrackViewport {
         this.$rulerLabel = $('<div>', {class: 'igv-multi-locus-ruler-label'})
         this.$viewport.append(this.$rulerLabel)
 
-        // insert a pair of divs, one for locus one for length
+        const labelToggleHandler = e => {
 
-        const handler = e => {
             e.stopPropagation()
+
             const el = e.target
             const [ a, b ] = this.$rulerLabel.get(0).querySelectorAll('div')
 
@@ -52,11 +52,11 @@ class RulerViewport extends TrackViewport {
         let div
         div = document.createElement('div')
         this.$rulerLabel.append($(div))
-        div.addEventListener('click', handler)
+        // div.addEventListener('click', labelToggleHandler)
 
-        div = document.createElement('div')
-        this.$rulerLabel.append($(div))
-        div.addEventListener('click', handler)
+        // div = document.createElement('div')
+        // this.$rulerLabel.append($(div))
+        // div.addEventListener('click', labelToggleHandler)
 
         this.$tooltip = $('<div>', {class: 'igv-ruler-tooltip'})
         this.$tooltip.height(this.$viewport.height())
@@ -79,10 +79,22 @@ class RulerViewport extends TrackViewport {
 
         this.$rulerLabel.get(0).style.backgroundColor = getChrColor(this.referenceFrame.chr)
 
-        const divs = this.$rulerLabel.get(0).querySelectorAll('div')
-        divs[ 0 ].innerHTML = `${ this.referenceFrame.getMultiLocusLabelLocusOnly(viewportWidth)}`
-        divs[ 1 ].innerHTML = `${ this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth)}`
+        const div = this.$rulerLabel.get(0).querySelector('div')
+        div.innerHTML = `${ this.referenceFrame.getMultiLocusLabel(viewportWidth)}`
 
+        this.$rulerLabel.show()
+        this.$multiLocusCloseButton.show()
+    }
+
+    __presentLocusLabel(viewportWidth) {
+
+        this.$rulerLabel.get(0).style.backgroundColor = getChrColor(this.referenceFrame.chr)
+
+        const divs = this.$rulerLabel.get(0).querySelectorAll('div')
+
+        divs[ 0 ].innerHTML = `${ this.referenceFrame.getMultiLocusLabelLocusOnly(viewportWidth)}`
+
+        divs[ 1 ].innerHTML = `${ this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth)}`
         divs[ 1 ].style.display = 'none'
 
         this.$rulerLabel.show()
