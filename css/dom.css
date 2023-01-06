@@ -354,12 +354,15 @@
   justify-content: center;
   align-items: center;
 }
-.igv-multi-locus-ruler-label div {
+.igv-multi-locus-ruler-label > div {
   font-family: "Open Sans", sans-serif;
   font-size: 14px;
   font-weight: 400;
   color: rgb(16, 16, 16);
   background-color: white;
+}
+.igv-multi-locus-ruler-label > div {
+  cursor: pointer;
 }
 
 .igv-multi-locus-ruler-label-square-dot {
@@ -385,10 +388,6 @@
   font-size: 14px;
   font-weight: 400;
   color: rgb(16, 16, 16);
-}
-
-.igv-multi-locus-ruler-label:hover {
-  cursor: pointer;
 }
 
 .igv-ruler-sweeper {

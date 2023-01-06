@@ -1,13 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+<meta charset="utf-8">
 <head>
-    <meta charset="utf-8">
     <meta content="Jim Robinson" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
-    <title>igv.js</title>
-
-    <!-- IGV JS -->
-    <script src="../dist/igv.min.js"></script>
+    <title>Multi Locus Example</title>
 </head>
 
 <body>
@@ -16,9 +13,13 @@
 
 <div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
-<script type="text/javascript">
+</body>
 
-    document.addEventListener("DOMContentLoaded", function () {
+<script type="module">
+
+    import igv from '../js/index.js'
+
+    (async () => {
 
         const options =
             {
@@ -36,16 +37,11 @@
                 ]
             };
 
-        const igvDiv = document.getElementById("igv-div");
+        const browser = await igv.createBrowser(document.getElementById('igv-div'), options)
+        console.log(`${ browser.guid } is good to go`)
 
-        igv.createBrowser(igvDiv, options)
-            .then(function (browser) {
-                console.log("Created IGV browser");
-            })
-    })
+    })()
 
 </script>
-
-</body>
 
 </html>
