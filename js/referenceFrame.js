@@ -159,7 +159,7 @@ class ReferenceFrame {
         const space = '&nbsp &nbsp'
         const ss = Math.floor(this.start) + 1
         const ee = Math.round(this.start + this.bpPerPixel * pixels)
-        return `${margin}${this.chr}${space}${prettyBasePairNumber(ee - ss)}${margin}`
+        return `${margin}${this.chr}${margin}${prettyBasePairNumber(ee - ss)}${margin}`
     }
 
     getMultiLocusLabelLocusOnly(pixels) {

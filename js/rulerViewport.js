@@ -77,13 +77,23 @@ class RulerViewport extends TrackViewport {
 
     presentLocusLabel(viewportWidth) {
 
+        this.$multiLocusCloseButton.show()
+
+        this.$rulerLabel.show()
         this.$rulerLabel.get(0).style.backgroundColor = getChrColor(this.referenceFrame.chr)
 
         const div = this.$rulerLabel.get(0).querySelector('div')
         div.innerHTML = `${ this.referenceFrame.getMultiLocusLabel(viewportWidth)}`
 
-        this.$rulerLabel.show()
-        this.$multiLocusCloseButton.show()
+        const { width } = this.$rulerLabel.get(0).getBoundingClientRect()
+        const { width:ww } = div.getBoundingClientRect()
+
+        if (width - ww < 10) {
+            div.innerHTML = `${ this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth)}`
+        }
+
+        // console.log(`parent ${ StringUtils.numberFormatter(Math.floor(width)) } child ${ StringUtils.numberFormatter(Math.floor(ww)) }`)
+
     }
 
     __presentLocusLabel(viewportWidth) {
