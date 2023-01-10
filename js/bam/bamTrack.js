@@ -36,6 +36,8 @@ import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {makePairedAlignmentChords, makeSupplementalAlignmentChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import PairedEndStats from "./pairedEndStats.js"
+import {createBlatTrack} from "../blat/blatClient.js"
+import {reverseComplementSequence} from "../util/sequenceUtils.js"
 
 const alignmentStartGap = 5
 const downsampleRowHeight = 5
@@ -44,6 +46,7 @@ const DEFAULT_TRACK_HEIGHT = 300
 const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)"
 const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
+const MINIMUM_BLAT_LENGTH = 20
 
 class BAMTrack extends TrackBase {
 
@@ -1355,6 +1358,40 @@ class AlignmentTrack {
 
                         }
                     })
+                }
+
+                // TODO if genome supports blat
+                const seqstring = clickedAlignment.seq
+                if (seqstring && "*" != seqstring) {
+                    list.push({
+                        label: 'BLAT read sequence',
+                        click: () => {
+                            const seq = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(seqstring) : seqstring
+                            createBlatTrack(seq, this.browser)
+                        }
+                    })
+
+                    const softClips = clickedAlignment.softClippedBlocks()
+                    if (softClips.left && softClips.left.len > MINIMUM_BLAT_LENGTH) {
+                        list.push({
+                            label: 'BLAT left soft-clipped sequence',
+                            click: () => {
+                                const clippedSequence = seqstring.substr(softClips.left.seqOffset, softClips.left.len)
+                                const seq = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(clippedSequence) : clippedSequence
+                                createBlatTrack(seq, this.browser)
+                            }
+                        })
+                    }
+                    if (softClips.right && softClips.right.length > MINIMUM_BLAT_LENGTH) {
+                        list.push({
+                            label: 'BLAT right soft-clipped sequence',
+                            click: () => {
+                                const clippedSequence = seqstring.substr(softClips.right.seqOffset, softClips.right.len)
+                                const seq = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(clippedSequence) : clippedSequence
+                                createBlatTrack(seq, this.browser)
+                            }
+                        })
+                    }
                 }
 
                 list.push('<hr/>')

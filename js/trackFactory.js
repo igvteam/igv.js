@@ -12,6 +12,7 @@ import GCNVTrack from "./gcnv/gcnvTrack.js"
 import RnaStructTrack from "./rna/rnaStruct.js"
 import IdeogramTrack from "./ideogramTrack.js"
 import SpliceJunctionTrack from "./feature/spliceJunctionTrack.js"
+import BlatTrack from "./blat/blatTrack.js"
 
 const trackFunctions =
     new Map([
@@ -31,7 +32,8 @@ const trackFunctions =
         ['gwas', (config, browser) => new GWASTrack(config, browser)],
         ['arc', (config, browser) => new RnaStructTrack(config, browser)],
         ['gcnv', (config, browser) => new GCNVTrack(config, browser)],
-        ['junction', (config, browser) => new SpliceJunctionTrack(config, browser)]
+        ['junction', (config, browser) => new SpliceJunctionTrack(config, browser)],
+        ['blat', (config, browser) => new BlatTrack(config, browser)]
     ])
 
 
