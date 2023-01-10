@@ -34,9 +34,9 @@ function decodeBed(tokens, header) {
                 const attributeKVs = parseAttributeString(tokens[3], '=')
                 feature.attributes = {}
                 for (let kv of attributeKVs) {
-                    feature.attributes[kv[0]] = kv[1];
+                    feature.attributes[kv[0]] = kv[1]
                     if (header.nameField != undefined && kv[0] === header.nameField) {
-                        feature.name = kv[1];
+                        feature.name = kv[1]
                     }
                 }
             }
@@ -79,27 +79,11 @@ function decodeBed(tokens, header) {
         }
 
         if (tokens.length > 11) {
-            const exonCount = parseInt(tokens[9])
-            // Some basic validation
-            if (exonCount > 1000) {
-                // unlikely
-                return feature
-            }
-
-            const exonSizes = tokens[10].replace(/,$/, '').split(',')
-            const exonStarts = tokens[11].replace(/,$/, '').split(',')
-            if (!(exonSizes.length === exonStarts.length && exonCount === exonSizes.length)) {
-                return feature
-            }
-
-            const exons = []
-            for (let i = 0; i < exonCount; i++) {
-                const eStart = start + parseInt(exonStarts[i])
-                const eEnd = eStart + parseInt(exonSizes[i])
-                exons.push({start: eStart, end: eEnd})
-            }
+            const exons = decodeExons(tokens[9], tokens[10], tokens[11])
+            if (exons.length > 0) {
             findUTRs(exons, feature.cdStart, feature.cdEnd)
             feature.exons = exons
+        }
         }
 
         // Optional extra columns
@@ -124,7 +108,10 @@ function decodeBed(tokens, header) {
 
 /**
  * Decode a UCSC repeat masker record.
- *
+ */
+function decodeRepeatMasker(tokens, header) {
+
+    /**
  * Columns, from UCSC documentation
  *
  * 0  bin    585    smallint(5) unsigned    Indexing field to speed chromosome range queries.
@@ -145,8 +132,6 @@ function decodeBed(tokens, header) {
  * 15 repLeft    0    int(11)    -#bases after match (if strand is +) or start (if strand is -) in repeat sequence
  * 16 id    1    char(1)    First digit of id field in RepeatMasker .out file. Best ignored.
  */
-function decodeRepeatMasker(tokens, header) {
-
     if (tokens.length <= 15) return undefined
 
     const feature = {
@@ -195,17 +180,8 @@ function decodeGenePred(tokens, header) {
             cdStart: cdStart,
             cdEnd: cdEnd,
             id: tokens[0 + shift]
-        },
-        exonCount = parseInt(tokens[7 + shift]),
-        exonStarts = tokens[8 + shift].split(','),
-        exonEnds = tokens[9 + shift].split(','),
-        exons = []
-
-    for (let i = 0; i < exonCount; i++) {
-        const start = parseInt(exonStarts[i])
-        const end = parseInt(exonEnds[i])
-        exons.push({start: start, end: end})
     }
+    const exons = decodeExons(parseInt(tokens[7 + shift]), tokens[8 + shift], tokens[9 + shift])
     findUTRs(exons, cdStart, cdEnd)
 
     feature.exons = exons
@@ -238,17 +214,9 @@ function decodeGenePredExt(tokens, header) {
             cdStart: cdStart,
             cdEnd: cdEnd,
             id: tokens[0 + shift]
-        },
-        exonCount = parseInt(tokens[7 + shift]),
-        exonStarts = tokens[8 + shift].split(','),
-        exonEnds = tokens[9 + shift].split(','),
-        exons = []
-
-    for (let i = 0; i < exonCount; i++) {
-        const start = parseInt(exonStarts[i])
-        const end = parseInt(exonEnds[i])
-        exons.push({start: start, end: end})
     }
+
+    const exons = decodeExons(parseInt(tokens[7 + shift]), tokens[8 + shift], tokens[9 + shift])
     findUTRs(exons, cdStart, cdEnd)
 
     feature.exons = exons
@@ -279,22 +247,82 @@ function decodeReflat(tokens, header) {
             end: parseInt(tokens[5 + shift]),
             cdStart: cdStart,
             cdEnd: cdEnd
-        },
-        exonCount = parseInt(tokens[8 + shift]),
-        exonStarts = tokens[9 + shift].split(','),
-        exonEnds = tokens[10 + shift].split(','),
-        exons = []
+    }
 
+    const exons = decodeExons(parseInt(tokens[8 + shift]), tokens[9 + shift], tokens[10 + shift])
+    findUTRs(exons, cdStart, cdEnd)
+    feature.exons = exons
+
+    return feature
+}
+
+/**
+ * Decode a UCS PSL record *
+ * @param tokens
+ * @param header
+ * @returns {DecodeError|UCSCBedFeature|undefined}
+ */
+function decodePSL(tokens, header) {
+
+    /*
+    * 0 matches - Number of bases that match that aren't repeats
+    * 1 misMatches - Number of bases that don't match
+    * 2 repMatches - Number of bases that match but are part of repeats
+    * 3 nCount - Number of "N" bases
+    * 4 qNumInsert - Number of inserts in query
+    * 5 qBaseInsert - Number of bases inserted in query
+    * 6 tNumInsert - Number of inserts in target
+    * 7 tBaseInsert - Number of bases inserted in target
+    * 8 strand - "+" or "-" for query strand. For translated alignments, second "+"or "-" is for target genomic strand.
+    * 9 qName - Query sequence name
+    * 10 qSize - Query sequence size.
+    * 11 qStart - Alignment start position in query
+    * 12 qEnd - Alignment end position in query
+    * 13 tName - Target sequence name
+    * 14 tSize - Target sequence size
+    * 15 tStart - Alignment start position in target
+    * 16 tEnd - Alignment end position in target
+    * 17 blockCount - Number of blocks in the alignment (a block contains no gaps)
+    * 18 blockSizes - Comma-separated list of sizes of each block. If the query is a protein and the target the genome, blockSizes are in amino acids. See below for more information on protein query PSLs.
+    * 19 qStarts - Comma-separated list of starting positions of each block in query
+    * 20 tStarts - Comma-separated list of starting positions of each block in target
+     */
+
+
+    if (tokens.length < 21) return undefined
+
+    const chr = tokens[13]
+    const start = parseInt(tokens[15])
+    const end = parseInt(tokens[16])
+    const strand = tokens[8].charAt(0)
+    const exonCount = parseInt(tokens[17])
+    const exons = []
+    const exonStarts = tokens[20].replace(/,$/, '').split(',')
+    const exonSizes = tokens[18].replace(/,$/, '').split(',')
+
+    for (let i = 0; i < exonCount; i++) {
+        const start = parseInt(exonStarts[i])
+        const end = start + parseInt(exonSizes[i])
+        exons.push({start: start, end: end})
+    }
+
+    return new PSLFeature({chr, start, end, strand, exons, tokens})
+}
+
+
+function decodeExons(exonCountToken, exonStartsToken, exonEndsToken) {
+
+    const exonCount = parseInt(exonCountToken)
+    const exonStarts = exonStartsToken.replace(/,$/, '').split(',')
+    const exonEnds = exonEndsToken.replace(/,$/, '').split(',')
+    const exons = []
     for (let i = 0; i < exonCount; i++) {
         const start = parseInt(exonStarts[i])
         const end = parseInt(exonEnds[i])
         exons.push({start: start, end: end})
     }
-    findUTRs(exons, cdStart, cdEnd)
+    return exons
 
-    feature.exons = exons
-
-    return feature
 }
 
 function findUTRs(exons, cdStart, cdEnd) {
@@ -454,8 +482,88 @@ class UCSCBedFeature {
     }
 }
 
+/*
+* 0 matches - Number of bases that match that aren't repeats
+* 1 misMatches - Number of bases that don't match
+* 2 repMatches - Number of bases that match but are part of repeats
+* 3 nCount - Number of "N" bases
+* 4 qNumInsert - Number of inserts in query
+* 5 qBaseInsert - Number of bases inserted in query
+* 6 tNumInsert - Number of inserts in target
+* 7 tBaseInsert - Number of bases inserted in target
+* 8 strand - "+" or "-" for query strand. For translated alignments, second "+"or "-" is for target genomic strand.
+* 9 qName - Query sequence name
+* 10 qSize - Query sequence size.
+* 11 qStart - Alignment start position in query
+* 12 qEnd - Alignment end position in query
+* 13 tName - Target sequence name
+* 14 tSize - Target sequence size
+* 15 tStart - Alignment start position in target
+* 16 tEnd - Alignment end position in target
+* 17 blockCount - Number of blocks in the alignment (a block contains no gaps)
+* 18 blockSizes - Comma-separated list of sizes of each block. If the query is a protein and the target the genome, blockSizes are in amino acids. See below for more information on protein query PSLs.
+* 19 qStarts - Comma-separated list of starting positions of each block in query
+* 20 tStarts - Comma-separated list of starting positions of each block in target
+ */
+
+class PSLFeature {
+
+
+    constructor(properties) {
+        Object.assign(this, properties)
+    }
+
+    get score() {
+        const tokens = this.tokens
+        const match = parseInt(tokens[0])
+        const repMatch = parseInt(tokens[2])
+        const misMatch = parseInt(tokens[1])
+        const qGapCount = parseInt(tokens[4])
+        const tGapCount = parseInt(tokens[6])
+        const qSize = parseInt(tokens[10])
+        return Math.floor((1000 * (match + repMatch - misMatch - qGapCount - tGapCount)) / qSize)
+    }
+
+    get matches() {
+        return this.tokens[0]
+    }
+
+    get misMatches() {
+        return this.tokens[1]
+    }
+
+    get repMatches() {
+        return this.tokens[2]
+    }
+
+    get nCount() {
+        return this.tokens[3]
+    }
+
+    get qNumInsert() {
+        return this.tokens[4]
+    }
+
+    get qBaseInsert() {
+        return this.tokens[5]
+    }
+
+    get tNumInsert() {
+        return this.tokens[6]
+    }
+
+    get tBaseInsert() {
+        return this.tokens[7]
+
+    }
+
+
+    //            //headers: ["chr", "start", "end", "strand", "score", "match", "mis-match", "rep. match", "N's", "Q gap count", "Q gap bases", "T gap count", "T gap bases"],
+
+}
+
 export {
     decodeBed, decodeBedGraph, decodeGenePred, decodeGenePredExt, decodePeak, decodeReflat, decodeRepeatMasker,
-    decodeSNP, decodeWig
+    decodeSNP, decodeWig, decodePSL
 }
 
