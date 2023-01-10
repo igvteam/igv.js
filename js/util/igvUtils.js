@@ -79,12 +79,12 @@ const doAutoscale = function (features) {
         min = Number.MAX_VALUE
         max = -Number.MAX_VALUE
 
-        features.forEach(function (f) {
+        for(let f of features) {
             if (!Number.isNaN(f.value)) {
                 min = Math.min(min, f.value)
                 max = Math.max(max, f.value)
             }
-        })
+        }
 
         // Insure we have a zero baseline
         if (max > 0) min = Math.min(0, min)

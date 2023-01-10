@@ -300,6 +300,28 @@ class BamAlignment {
         }
         return 0
     }
+
+    /**
+     * Return soft clipped blocks, if they exist, keyed by alignment end (left or right)
+     */
+    softClippedBlocks() {
+        let left
+        let right
+        let interiorSeen
+        for(let b of this.blocks) {
+            if('S' === b.type) {
+                if(interiorSeen) {
+                    right = b
+                } else {
+                    left = b
+                }
+            } else if('H' !== b.type) {
+                interiorSeen = true
+            }
+        }
+        return {left, right}
+    }
+
 }
 
 function blockAtGenomicLocation(blocks, genomicLocation) {
