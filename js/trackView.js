@@ -423,7 +423,14 @@ class TrackView {
                         const max = visibleViewport.featureCache.features.getMax(start, end)
                         allFeatures = [{value: max}]
                     } else {
-                        allFeatures = FeatureUtils.findOverlapping(visibleViewport.featureCache.features, start, end)
+                        const viewFeatures = FeatureUtils.findOverlapping(visibleViewport.featureCache.features, start, end)
+                        if(!allFeatures) {
+                            allFeatures = viewFeatures
+                        } else {
+                            for(let f of viewFeatures) {
+                                allFeatures.push(f)
+                            }
+                        }
                     }
                 }
             }
