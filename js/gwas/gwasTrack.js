@@ -29,8 +29,9 @@ import IGVGraphics from "../igv-canvas.js"
 import {BinnedColorScale, ConstantColorScale} from "../util/colorScale.js"
 import {doAutoscale} from "../util/igvUtils.js"
 import MenuUtils from "../ui/menuUtils.js"
-import gwasColors from "./gwasColors.js"
-import {randomColor} from "../util/colorPalletes.js"
+import GWASColors from "./gwasColors.js"
+import {ColorTable, randomColor} from "../util/colorPalletes.js"
+import GwasColors from "./gwasColors.js"
 
 const DEFAULT_POPOVER_WINDOW = 100000000
 
@@ -59,14 +60,19 @@ class GWASTrack extends TrackBase {
         this.dotSize = config.dotSize || 3
         this.popoverWindow = (config.popoverWindow === undefined ? DEFAULT_POPOVER_WINDOW : config.popoverWindow)
 
-        this.colorScales = config.color ?
-            new ConstantColorScale(config.color) :
-            {
-                "*": new BinnedColorScale(config.colorScale || {
-                    thresholds: [5e-8, 5e-4, 0.5],
-                    colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"],
-                })
-            }
+        // Color settings
+        if (this.useChrColors) {
+            this.colorScale = new ColorTable(config.colorTable || GWASColors)
+        } else if (config.color) {
+            this.colorScale = new ConstantColorScale(config.color)
+        } else {
+            this.colorScale =
+                new BinnedColorScale(config.colorScale ||
+                    {
+                        thresholds: [5e-8, 5e-4, 0.5],
+                        colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"],
+                    })
+        }
 
         this.featureSource = FeatureSource(config, this.browser.genome)
     }
@@ -75,7 +81,7 @@ class GWASTrack extends TrackBase {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
-            if(this.disposed) return;   // This track was removed during async load
+            if (this.disposed) return   // This track was removed during async load
         }
 
         // Set properties from track line
@@ -133,20 +139,20 @@ class GWASTrack extends TrackBase {
                 if (pos < bpStart) continue
                 if (pos > bpEnd) break
 
-                const colorScale = this.getColorScale(variant._f ? variant._f.chr : variant.chr)
-
-                let color
                 let val
                 if (this.posteriorProbability) {
                     val = variant[this.valueProperty]
-                    color = colorScale.getColor(val)
                 } else {
                     const pvalue = variant[this.valueProperty]
                     if (!pvalue) continue
                     val = -Math.log10(pvalue)
-                    color = colorScale.getColor(val)
                 }
 
+                const colorKey = this.useChrColors ?
+                    variant._f ? variant._f.chr : variant.chr :
+                    val
+
+                const color = this.colorScale.getColor(colorKey)
                 const yScale = (this.dataRange.max - this.dataRange.min) / pixelHeight
                 const px = Math.round((pos - bpStart) / bpPerPixel)
                 const py = Math.max(this.dotSize, pixelHeight - Math.round((val - this.dataRange.min) / yScale))
@@ -158,21 +164,6 @@ class GWASTrack extends TrackBase {
                 variant.px = px
                 variant.py = py
             }
-        }
-    }
-
-    getColorScale(chr) {
-
-        if (this.useChrColors) {
-            let cs = this.colorScales[chr]
-            if (!cs) {
-                const color = gwasColors[chr] || randomColor()
-                cs = new ConstantColorScale(color)
-                this.colorScales[chr] = cs
-            }
-            return cs
-        } else {
-            return this.colorScales("*")
         }
     }
 
@@ -212,7 +203,7 @@ class GWASTrack extends TrackBase {
 
     popupData(clickState, features) {
 
-        if(features === undefined) features =  clickState.viewport.cachedFeatures
+        if (features === undefined) features = clickState.viewport.cachedFeatures
 
         let data = []
         const track = clickState.viewport.trackView.track
@@ -273,13 +264,10 @@ class GWASTrack extends TrackBase {
         } else {
             // No features -- pick something reasonable for PPAs and p-values
             if (this.posteriorProbability) {
-                this.dataRange.min = this.config.min || 0
-                this.dataRange.max = this.config.max || 1
+                this.dataRange = {min: this.config.min || 0, max: this.config.max || 1}
             } else {
-                this.dataRange.max = this.config.max || 25
-                this.dataRange.min = this.config.min || 0
+                this.dataRange = {min: this.config.max || 25, max: this.config.min || 0}
             }
-
         }
 
         return this.dataRange
