@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const options = {
+        "genome": "hg19",
+        "locus": "chr22:24,376,166-24,376,456",
+        "tracks": [
+            {
+                "name": "BAM",
+                "url": "https://s3.amazonaws.com/igv.org.demo/gstt1_sample.bam",
+                "indexURL": "https://s3.amazonaws.com/igv.org.demo/gstt1_sample.bam.bai",
+                "format": "bam",
+                "type": "alignment"
+            }
+        ]
+    }
+
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+        })
+
+
+</script>
+
+</body>
+
+</html>

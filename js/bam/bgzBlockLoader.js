@@ -26,13 +26,17 @@ class BGZBlockLoader {
     /**
      * Return inflated data from startBlock through endBlock as an UInt8Array
      *
-     * @param startBlock
-     * @param endBlock
+     * @param minv minimum virtual pointer  {block, offset}
+     * @param maxv maximum virtual pointer  {block, offset}
      * @returns {Promise<Uint8Array>}
      */
-    async getData(startBlock, endBlock) {
+    async getData(minv, maxv) {
 
-        const blocks = await this.getInflatedBlocks(startBlock, endBlock)
+        const startBlock = minv.block
+        const endBlock = maxv.block
+        const skipEnd = maxv.offset === 0
+
+        const blocks = await this.getInflatedBlocks(startBlock, endBlock, skipEnd)
         if (blocks.length === 1) {
             return blocks[0]
         }
@@ -57,10 +61,10 @@ class BGZBlockLoader {
      * @param endBlock
      * @returns {Promise<*[Uint8Array]>}
      */
-    async getInflatedBlocks(startBlock, endBlock) {
+    async getInflatedBlocks(startBlock, endBlock, skipEnd) {
 
         if (!this.cacheBlocks) {
-            const buffer = await this.loadBLockData(startBlock, endBlock)
+            const buffer = await this.loadBLockData(startBlock, endBlock, {skipEnd})
             return inflateBlocks(buffer)
         } else {
 
@@ -76,7 +80,7 @@ class BGZBlockLoader {
                 let buffer
                 if (!c || (c.startBlock > endBlock || c.endBlock < startBlock)) {
                     // no overlap with cache
-                    buffer = await this.loadBLockData(startBlock, endBlock)
+                    buffer = await this.loadBLockData(startBlock, endBlock, {skipEnd})
                 } else {
 
                     //console.log("Some overlap")
@@ -115,11 +119,17 @@ class BGZBlockLoader {
 
                     // Load end blocks, if any
                     if (endBlock > c.endBlock) {
-                        const endBuffer = await this.loadBLockData(c.endBlock, endBlock, {skipStart: true})
+                        const endBuffer = await this.loadBLockData(c.endBlock, endBlock, {skipStart: true, skipEnd})
                         arrayBuffers.push(endBuffer)
                     }
 
                     buffer = concatenateArrayBuffers(arrayBuffers)
+                }
+
+                // If skipEnd === true we need to find boundary of last block in cache
+                if(skipEnd) {
+                    const boundaries = findBlockBoundaries(buffer)
+                    endBlock = boundaries[boundaries.length - 1]
                 }
 
                 this.cache = {startBlock, endBlock, buffer}
