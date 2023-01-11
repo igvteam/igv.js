@@ -69,8 +69,10 @@ class BGZBlockLoader {
         } else {
 
             const c = this.cache
-            if (c && (c.startBlock <= startBlock && c.endBlock >= endBlock)) {
-                //console.log("Complete overlap")
+            if (c &&
+                c.startBlock <= startBlock &&
+                (c.endBlock >= endBlock || skipEnd && c.nextEndBlock === endBlock)) {
+                console.log("Complete overlap")
                 const startOffset = startBlock - c.startBlock
                 const endOffset = endBlock - c.startBlock
                 return inflateBlocks(c.buffer, startOffset, endOffset)
@@ -127,12 +129,13 @@ class BGZBlockLoader {
                 }
 
                 // If skipEnd === true we need to find boundary of last block in cache
+                let nextEndBlock = endBlock
                 if(skipEnd) {
                     const boundaries = findBlockBoundaries(buffer)
                     endBlock = boundaries[boundaries.length - 1]
                 }
 
-                this.cache = {startBlock, endBlock, buffer}
+                this.cache = {startBlock, endBlock, nextEndBlock, buffer}
                 return inflateBlocks(buffer)
             }
         }
