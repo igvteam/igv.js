@@ -54,7 +54,7 @@
     "core-js": "^3.20.3",
     "eslint": "^6.4.0",
     "esm": "^3.2.25",
-    "igv-ui": "github:igvteam/igv-ui#v1.3.0",
+    "igv-ui": "github:igvteam/igv-ui#v1.4.0",
     "igv-utils": "github:igvteam/igv-utils#v1.3.14",
     "mocha": "^8.1.3",
     "regenerator-runtime": "^0.13.3",
