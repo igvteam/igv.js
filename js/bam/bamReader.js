@@ -69,7 +69,7 @@ class BamReader {
             }
 
             for (let c of chunks) {
-                const ba = await this._blockLoader.getData(c.minv.block, c.maxv.block)
+                const ba = await this._blockLoader.getData(c.minv, c.maxv)
                 const done = BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter)
                 if (done) {
                     break
