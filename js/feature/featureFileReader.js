@@ -221,7 +221,7 @@ class FeatureFileReader {
 
                 let inflated
                 if (tabix) {
-                    inflated = await this._blockLoader.getData(chunk.minv.block, chunk.maxv.block)
+                    inflated = await this._blockLoader.getData(chunk.minv, chunk.maxv)
                 } else {
                     const options = buildOptions(config, {
                         range: {
