@@ -7,6 +7,12 @@
 
 igv.js is an embeddable interactive genome visualization component developed by the 
  [Integrative Genomics Viewer (IGV)](https://igv.org) team. 
+
+## Citing igv.js
+
+James T Robinson, Helga Thorvaldsdottir, Douglass Turner, Jill P Mesirov, igv.js: an embeddable JavaScript 
+implementation of the Integrative Genomics Viewer (IGV), Bioinformatics, Volume 39, Issue 1, January 2023, 
+btac830, https://doi.org/10.1093/bioinformatics/btac830
  
 Below are examples and a quickstart guide.  See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.  
 
