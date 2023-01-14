@@ -15,20 +15,20 @@ class ROITable {
 
         this.hasROISetNames = hasROISetNames
 
-        const header = this.createHeaderDOM(this.container)
+        this.createHeaderDOM(this.container)
 
-        this.columnTitleDOM = createColumnTitleDOM(this.container, hasROISetNames)
+        this.createColumnTitleDOM(this.container, hasROISetNames)
 
-        this.tableRowContainerDOM = this.createTableRowContainerDOM(this.container)
+        this.createTableRowContainerDOM(this.container)
 
-        this.footerDOM = this.createFooterDOM(this.container)
+        this.createFooterDOM(this.container)
 
         const { y:y_root } = browser.root.getBoundingClientRect()
         const { y:y_parent } = parent.getBoundingClientRect()
 
         const constraint = -(y_parent - y_root)
 
-        makeDraggable(this.container, header, { minX:0, minY:constraint })
+        makeDraggable(this.container, this.header, { minX:0, minY:constraint })
 
         this.container.style.display = 'none'
 
@@ -70,17 +70,17 @@ class ROITable {
     createHeaderDOM(container) {
 
         // header
-        const header = DOMUtils.div()
-        container.appendChild(header)
+        const dom = DOMUtils.div()
+        container.appendChild(dom)
 
         // title
         const title = DOMUtils.div()
-        header.appendChild(title)
+        dom.appendChild(title)
         title.innerText = 'Regions of Interest'
 
         // dismiss button
         const dismiss = DOMUtils.div()
-        header.appendChild(dismiss)
+        dom.appendChild(dismiss)
         dismiss.appendChild(Icon.createIcon('times'))
 
         dismiss.addEventListener('click', event => {
@@ -88,7 +88,7 @@ class ROITable {
             this.browser.roiTableControl.buttonHandler(false)
         })
 
-        return header
+        this.header = dom
 
     }
 
@@ -97,7 +97,7 @@ class ROITable {
         const dom = DOMUtils.div({ class: 'igv-roi-table-row-container' })
         container.appendChild(dom)
 
-        return dom
+        this.tableRowContainerDOM = dom
     }
 
     createTableRowDOM(record) {
@@ -182,9 +182,34 @@ class ROITable {
 
         })
 
-        return dom
+        this.footerDOM = dom
     }
 
+    createColumnTitleDOM(container, hasROISetNames) {
+
+        const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
+        container.appendChild(dom)
+
+        let columnTitles =
+            [
+                'Chr',
+                'Start',
+                'End',
+                'Description',
+                'ROI Set',
+            ]
+
+        if (false === hasROISetNames) {
+            columnTitles = columnTitles.slice(0, 4)
+        }
+
+        for (let title of columnTitles) {
+            const col = DOMUtils.div()
+            col.innerText = title
+            dom.appendChild(col)
+        }
+
+    }
 
     setButtonState(isTableRowSelected) {
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
@@ -203,34 +228,6 @@ class ROITable {
         }
     }
 
-}
-
-function createColumnTitleDOM(container, hasROISetNames) {
-
-    const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
-    container.appendChild(dom)
-
-    let columnTitles =
-        [
-            'Chr',
-            'Start',
-            'End',
-            'Description',
-            'ROI Set',
-        ]
-
-
-    if (false === hasROISetNames) {
-        columnTitles = columnTitles.slice(0, 4)
-    }
-
-    for (let title of columnTitles) {
-        const col = DOMUtils.div()
-        col.innerText = title
-        dom.appendChild(col)
-    }
-
-    return dom
 }
 
 export default ROITable
