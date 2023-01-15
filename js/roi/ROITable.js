@@ -1,5 +1,11 @@
+<<<<<<< HEAD
 import { DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-ui/dist/igv-ui.js'
+=======
+
+import { DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-ui/src/index.js'
+>>>>>>> 242a705c (Refactors to support table generalization)
 import { StringUtils} from '../../node_modules/igv-utils/src/index.js'
+
 import { createRegionKey, parseRegionKey } from './ROIManager.js'
 import RegionTableBase from './regionTableBase.js'
 
@@ -7,51 +13,48 @@ class ROITable extends RegionTableBase {
 
     constructor(browser, parent, hasROISetNames) {
 
-        super(browser)
-
-        this.container = DOMUtils.div({ class: hasROISetNames ? 'igv-roi-table' : 'igv-roi-table-four-column' })
-        parent.appendChild(this.container)
+        super(browser, parent)
 
         this.hasROISetNames = hasROISetNames
 
         const headerConfig =
             {
+                browser,
+                parent,
                 container: this.container,
                 title: 'Regions of Interest',
                 dismissHandler: () => browser.roiTableControl.buttonHandler(false)
             }
         this.headerDOM(headerConfig)
 
-        const columnTitleConfig =
-            {
-                container: this.container,
-                titleList:
-                [
-                    'Chr',
-                    'Start',
-                    'End',
-                    'Description',
-                ]
-            };
+        const columnTitleConfig = { container: this.container }
 
         if (true === hasROISetNames) {
-            columnTitleConfig.titleList.push('ROI Set')
+            columnTitleConfig.titleList =
+                [
+                    { label: 'Chr', width: '20%' },
+                    { label: 'Start', width: '15%' },
+                    { label: 'End', width: '15%' },
+                    { label: 'Description', width: '30%' },
+                    { label: 'ROI Set', width: '20%' }
+                ]
+        } else {
+            columnTitleConfig.titleList =
+                [
+                    { label: 'Chr', width: '25%' },
+                    { label: 'Start', width: '20%' },
+                    { label: 'End', width: '20%' },
+                    { label: 'Description', width: '35%' }
+                ]
         }
+
+        this.columnLayout = columnTitleConfig.titleList.slice().map(({ width }) => width)
 
         this.columnTitleDOM(columnTitleConfig)
 
         this.rowContainerDOM(this.container)
 
         this.footerDOM(this.container)
-
-        const { y:y_root } = browser.root.getBoundingClientRect()
-        const { y:y_parent } = parent.getBoundingClientRect()
-
-        const constraint = -(y_parent - y_root)
-
-        makeDraggable(this.container, this.header, { minX:0, minY:constraint })
-
-        this.container.style.display = 'none'
 
     }
 
@@ -91,10 +94,11 @@ class ROITable extends RegionTableBase {
             strings = strings.slice(0, 4)
         }
 
-        for (let string of strings) {
+        for (let i = 0; i < strings.length; i++) {
             const el = DOMUtils.div()
-            el.innerText = string
             dom.appendChild(el)
+            el.innerText = strings[ i ]
+            el.style.width = this.columnLayout[ i ]
         }
 
         dom.addEventListener('mousedown', event => {
