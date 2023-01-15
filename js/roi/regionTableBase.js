@@ -1,13 +1,15 @@
-import {DOMUtils, Icon} from '../../node_modules/igv-utils/src/index.js'
+import { makeDraggable, DOMUtils, Icon } from '../../node_modules/igv-utils/src/index.js'
 
 const tableRowSelectionList = []
 
 class RegionTableBase {
-    constructor(browser) {
+    constructor(browser, parent) {
         this.browser = browser
+        this.container = DOMUtils.div({ class: 'igv-roi-table' })
+        parent.appendChild(this.container)
     }
 
-    headerDOM({container, title, dismissHandler}) {
+    headerDOM({ browser, parent, container, title, dismissHandler}) {
 
         // header
         const dom = DOMUtils.div()
@@ -28,6 +30,13 @@ class RegionTableBase {
             dismissHandler()
         })
 
+        const { y:y_root } = browser.root.getBoundingClientRect()
+        const { y:y_parent } = parent.getBoundingClientRect()
+        const constraint = -(y_parent - y_root)
+        makeDraggable(container, dom, { minX:0, minY:constraint })
+
+        container.style.display = 'none'
+
         this.header = dom
 
     }
@@ -37,10 +46,11 @@ class RegionTableBase {
         const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
         container.appendChild(dom)
 
-        for (let title of titleList) {
+        for (const { label, width } of titleList) {
             const col = DOMUtils.div()
-            col.innerText = title
             dom.appendChild(col)
+            col.style.width = width
+            col.innerText = label
         }
 
     }
