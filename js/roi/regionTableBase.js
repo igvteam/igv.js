@@ -9,7 +9,7 @@ class RegionTableBase {
         parent.appendChild(this.container)
     }
 
-    headerDOM({ browser, parent, container, title, dismissHandler}) {
+    set headerDOM({ browser, parent, container, title, dismissHandler }) {
 
         // header
         const dom = DOMUtils.div()
@@ -37,11 +37,15 @@ class RegionTableBase {
 
         container.style.display = 'none'
 
-        this.header = dom
+        this._headerDOM = dom
 
     }
 
-    columnTitleDOM({container, titleList}) {
+    get headerDOM() {
+        return this._headerDOM
+    }
+
+    set columnTitleDOM({ container, titleList }) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
         container.appendChild(dom)
@@ -55,16 +59,20 @@ class RegionTableBase {
 
     }
 
-    rowContainerDOM(container) {
+    set rowContainerDOM(container) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-row-container' })
         container.appendChild(dom)
 
-        this.tableRowContainerDOM = dom
+        this._rowContainerDOM = dom
+    }
+
+    get rowContainerDOM() {
+        return this._rowContainerDOM
     }
 
     clearTable() {
-        const elements = this.tableRowContainerDOM.querySelectorAll('.igv-roi-table-row')
+        const elements = this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')
         for (let el of elements) {
             el.remove()
         }
