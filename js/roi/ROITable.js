@@ -17,7 +17,7 @@ class ROITable extends RegionTableBase {
 
         this.hasROISetNames = hasROISetNames
 
-        const headerConfig =
+        this.headerDOM =
             {
                 browser,
                 parent,
@@ -25,42 +25,26 @@ class ROITable extends RegionTableBase {
                 title: 'Regions of Interest',
                 dismissHandler: () => browser.roiTableControl.buttonHandler(false)
             }
-        this.headerDOM(headerConfig)
 
-        const columnTitleConfig = { container: this.container }
+        const columnTitleConfig =
+            {
+                container: this.container,
+                titleList: getColumnTitleList(hasROISetNames)
+            }
 
-        if (true === hasROISetNames) {
-            columnTitleConfig.titleList =
-                [
-                    { label: 'Chr', width: '20%' },
-                    { label: 'Start', width: '15%' },
-                    { label: 'End', width: '15%' },
-                    { label: 'Description', width: '30%' },
-                    { label: 'ROI Set', width: '20%' }
-                ]
-        } else {
-            columnTitleConfig.titleList =
-                [
-                    { label: 'Chr', width: '25%' },
-                    { label: 'Start', width: '20%' },
-                    { label: 'End', width: '20%' },
-                    { label: 'Description', width: '35%' }
-                ]
-        }
+        this.columnTitleDOM = columnTitleConfig
 
         this.columnLayout = columnTitleConfig.titleList.slice().map(({ width }) => width)
 
-        this.columnTitleDOM(columnTitleConfig)
+        this.rowContainerDOM = this.container
 
-        this.rowContainerDOM(this.container)
-
-        this.footerDOM(this.container)
+        this.footerDOM = this.container
 
     }
 
     renderTable(records) {
 
-        Array.from(this.tableRowContainerDOM.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
+        Array.from(this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
 
         if (records.length > 0) {
 
@@ -68,7 +52,7 @@ class ROITable extends RegionTableBase {
 
             for (let record of sortedRecords) {
                 const row = this.tableRowDOM(record)
-                this.tableRowContainerDOM.appendChild(row)
+                this.rowContainerDOM.appendChild(row)
             }
 
         }
@@ -121,7 +105,7 @@ class ROITable extends RegionTableBase {
         return dom
     }
 
-    footerDOM(container) {
+    set footerDOM(container) {
 
         const dom = DOMUtils.div()
         container.appendChild(dom)
@@ -157,7 +141,11 @@ class ROITable extends RegionTableBase {
 
         })
 
-        this.footerDOM = dom
+        this._footerDOM = dom
+    }
+
+    get footerDOM() {
+        return this._footerDOM
     }
 
     dispose() {
@@ -169,6 +157,27 @@ class ROITable extends RegionTableBase {
         for (let key of Object.keys(this)) {
             this[key] = undefined
         }
+    }
+
+}
+
+function getColumnTitleList(hasROISetNames) {
+
+    if (true === hasROISetNames) {
+        return [
+            { label: 'Chr', width: '20%' },
+            { label: 'Start', width: '15%' },
+            { label: 'End', width: '15%' },
+            { label: 'Description', width: '30%' },
+            { label: 'ROI Set', width: '20%' }
+        ]
+    } else {
+        return [
+            { label: 'Chr', width: '25%' },
+            { label: 'Start', width: '20%' },
+            { label: 'End', width: '20%' },
+            { label: 'Description', width: '35%' }
+        ]
     }
 
 }
