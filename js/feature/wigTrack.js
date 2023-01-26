@@ -78,7 +78,7 @@ class WigTrack extends TrackBase {
 
     async postInit() {
         const header = await this.getHeader()
-        if(this.disposed) return;   // This track was removed during async load
+        if (this.disposed) return   // This track was removed during async load
         if (header) this.setTrackProperties(header)
     }
 
@@ -163,9 +163,6 @@ class WigTrack extends TrackBase {
         const pixelWidth = options.pixelWidth
         const pixelHeight = options.pixelHeight
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        let lastPixelEnd = -1
-        let lastValue = -1
-        let lastNegValue = 1
         const posColor = this.color || DEFAULT_COLOR
 
         let baselineColor
@@ -186,6 +183,9 @@ class WigTrack extends TrackBase {
             // nothing to paint.
             if (this.dataRange.max > this.dataRange.min) {
 
+                let lastPixelEnd = -1
+                let lastY
+                let lastValue = -1
                 const y0 = yScale(0)
                 for (let f of features) {
 
@@ -208,15 +208,22 @@ class WigTrack extends TrackBase {
                         const px = x + width / 2
                         IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color})
 
+                    } else if (this.graphType === "line") {
+                        if(lastY != undefined) {
+                            IGVGraphics.strokeLine(ctx, lastPixelEnd, lastY, x, y, {"fillStyle": color, "strokeStyle": color})
+                        }
+                        IGVGraphics.strokeLine(ctx, x, y, x + width, y, {"fillStyle": color, "strokeStyle": color})
                     } else {
                         let height = y - y0
                         const pixelEnd = x + width
                         if (pixelEnd > lastPixelEnd || (f.value >= 0 && f.value > lastValue) || (f.value < 0 && f.value < lastNegValue)) {
                             IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
                         }
-                        lastValue = f.value
-                        lastPixelEnd = pixelEnd
                     }
+                    lastPixelEnd = x + width
+                    lastValue = f.value
+                    lastY = y;
+
                 }
 
                 // If the track includes negative values draw a baseline
@@ -245,7 +252,7 @@ class WigTrack extends TrackBase {
 
     popupData(clickState, features) {
 
-        if(features === undefined) features = this.clickedFeatures(clickState)
+        if (features === undefined) features = this.clickedFeatures(clickState)
 
         if (features && features.length > 0) {
 
