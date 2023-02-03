@@ -51,7 +51,6 @@ class CNVPytorTrack extends TrackBase {
     this.graphType = "points"
     // this.defaultScale = true
     if (!config.max){
-      this.defaultScale = true
       this.autoscale = false
     }
    
