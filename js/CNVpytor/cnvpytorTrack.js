@@ -42,7 +42,7 @@ import { createCheckbox } from "../igv-icons.js"
 const DEFAULT_TRACK_HEIGHT = 150
 const DEFAULT_BAF_TRACK_HEIGHT = 100
 
-class cnvpytorTrack extends TrackBase {
+class CNVPytorTrack extends TrackBase {
 
   constructor(config, browser) {
     super(config, browser)
@@ -446,4 +446,4 @@ function autoscale(chr, featureArrays) {
   return { min: min, max: max }
 }
 
-export default cnvpytorTrack
+export default CNVPytorTrack
