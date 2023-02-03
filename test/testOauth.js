@@ -1,7 +1,15 @@
 import "./utils/mockObjects.js"
-import igv from "../js/index.js";
 import {assert} from 'chai';
+import {oauth} from "../node_modules/igv-utils/src/index.js"
 
+
+// Use a mock IGV object.  We need to avoid importing index.js for this test.
+
+const igv = {
+    oauth,
+    setGoogleOauthToken: (accessToken) => {return oauth.setToken(accessToken)},
+    setOauthToken: (accessToken, host) => {return oauth.setToken(accessToken, host)}
+}
 /**
  * Created by Jim Robinson on 9/15/2018
  *
