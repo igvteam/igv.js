@@ -13,6 +13,8 @@ import RnaStructTrack from "./rna/rnaStruct.js"
 import IdeogramTrack from "./ideogramTrack.js"
 import SpliceJunctionTrack from "./feature/spliceJunctionTrack.js"
 import BlatTrack from "./blat/blatTrack.js"
+import cnvpytorTrack from "./CNVpytor/cnvpytorTrack.js"
+
 
 const trackFunctions =
     new Map([
@@ -33,7 +35,8 @@ const trackFunctions =
         ['arc', (config, browser) => new RnaStructTrack(config, browser)],
         ['gcnv', (config, browser) => new GCNVTrack(config, browser)],
         ['junction', (config, browser) => new SpliceJunctionTrack(config, browser)],
-        ['blat', (config, browser) => new BlatTrack(config, browser)]
+        ['blat', (config, browser) => new BlatTrack(config, browser)],
+        ['cnvpytor', (config, browser) => new cnvpytorTrack(config, browser)],
     ])
 
 
