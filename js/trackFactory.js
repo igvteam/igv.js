@@ -13,7 +13,7 @@ import RnaStructTrack from "./rna/rnaStruct.js"
 import IdeogramTrack from "./ideogramTrack.js"
 import SpliceJunctionTrack from "./feature/spliceJunctionTrack.js"
 import BlatTrack from "./blat/blatTrack.js"
-import CNVPytorTrack from "./CNVpytor/cnvpytorTrack.js"
+//import CNVPytorTrack from "./CNVpytor/cnvpytorTrack.js"
 
 
 const trackFunctions =
@@ -36,7 +36,7 @@ const trackFunctions =
         ['gcnv', (config, browser) => new GCNVTrack(config, browser)],
         ['junction', (config, browser) => new SpliceJunctionTrack(config, browser)],
         ['blat', (config, browser) => new BlatTrack(config, browser)],
-        ['cnvpytor', (config, browser) => new CNVPytorTrack(config, browser)],
+        //['cnvpytor', (config, browser) => new CNVPytorTrack(config, browser)],
     ])
 
 
@@ -81,5 +81,7 @@ const getTrack = function (type, config, browser) {
 export default {
     tracks: trackFunctions,
     addTrack: addTrackCreatorFunction,
+    trackFunctions,
+    addTrackCreatorFunction,
     getTrack
 }
