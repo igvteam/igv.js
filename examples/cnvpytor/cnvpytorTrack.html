@@ -19,7 +19,7 @@
     const options =
         {
             genome: "hg19",
-            locus: "chr22:50,135,460-50,211,747"
+            locus: "chr16"
         }
 
     igv.createBrowser(document.getElementById('igvDiv'), options)
@@ -29,7 +29,7 @@
             const pytorTrack = await browser.loadTrack({
                 id: "pytor_track",
                 type: "cnvpytor",
-                name: "HepG2",
+                name: "HepG2 Pytor",
                 url: "https://storage.googleapis.com/cnvpytor_data/HepG2_WGS.pytor",
                 
             })
