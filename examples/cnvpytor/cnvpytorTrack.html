@@ -8,7 +8,7 @@
 
 <body>
 
-<h1>CNVpytor Track</h1>
+<center>CNVpytor Track</center>
 
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
@@ -26,12 +26,10 @@
 
         .then(async function (browser) {
 
-            // Indexed VCF track with a visibility window of 1 MB
             const pytorTrack = await browser.loadTrack({
                 id: "pytor_track",
                 type: "cnvpytor",
                 name: "HepG2",
-                graphType: "points",
                 url: "https://storage.googleapis.com/cnvpytor_data/HepG2_WGS.pytor",
                 
             })

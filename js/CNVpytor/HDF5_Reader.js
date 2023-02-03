@@ -1,5 +1,5 @@
 //import h5wasm from "https://cdn.jsdelivr.net/npm/h5wasm@0.4.9/dist/esm/hdf5_hl.js";
-import h5wasm from  '../../node_modules/h5wasm/dist/esm/hdf5_hl.js'
+import {h5wasm} from  '../../node_modules/h5wasm/dist/esm/hdf5_hl.js'
 
 class Read_HDF5{
     
