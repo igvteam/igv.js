@@ -39,7 +39,7 @@ import { createCheckbox } from "../igv-icons.js"
  * Represents 2 or more wig tracks overlaid on a common viewport.
  */
 
-const DEFAULT_TRACK_HEIGHT = 150
+const DEFAULT_TRACK_HEIGHT = 250
 const DEFAULT_BAF_TRACK_HEIGHT = 100
 
 class CNVPytorTrack extends TrackBase {
