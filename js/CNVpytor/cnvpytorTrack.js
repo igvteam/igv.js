@@ -49,7 +49,7 @@ class CNVPytorTrack extends TrackBase {
     this.featureType = 'numeric'
     this.paintAxis = paintAxis
     this.graphType = "points"
-    // this.defaultScale = true
+    this.defaultScale = true
     if (!config.max){
       this.autoscale = false
     }
