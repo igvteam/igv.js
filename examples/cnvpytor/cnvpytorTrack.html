@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>igv</title>
+
+</head>
+
+<body>
+
+<h1>CNVpytor Track</h1>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr22:50,135,460-50,211,747"
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+
+        .then(async function (browser) {
+
+            // Indexed VCF track with a visibility window of 1 MB
+            const pytorTrack = await browser.loadTrack({
+                id: "pytor_track",
+                type: "cnvpytor",
+                name: "HepG2",
+                graphType: "points",
+                url: "https://storage.googleapis.com/cnvpytor_data/HepG2_WGS.pytor",
+                
+            })
+
+        })
+
+
+</script>
+
+</body>
+
+</html>
