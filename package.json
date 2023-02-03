@@ -55,7 +55,6 @@
     "core-js": "^3.20.3",
     "eslint": "^6.4.0",
     "esm": "^3.2.25",
-    "h5wasm": "^0.4.9",
     "igv-ui": "github:igvteam/igv-ui#v1.4.0",
     "igv-utils": "github:igvteam/igv-utils#v1.3.14",
     "mocha": "^8.1.3",
