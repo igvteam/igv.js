@@ -27,35 +27,40 @@
     const db = "hg38"
 
     document.getElementById("blatButton").addEventListener("click", async e => {
+
         const userSeq = document.getElementById("userSeqInput").textContent.trim()
-        const results = await blat(userSeq, db)
+        try {
 
-        const tableData = {
-            title: "<b>BLAT Results</b>:  click on row to go to alignment",
-            headers: ["chr", "start", "end", "strand", "score", "match", "mis-match", "rep. match", "N's", "Q gap count", "Q gap bases", "T gap count", "T gap bases"],
-            rows: results.map(f => [
-                f.chr,
-                (f.start + 1),
-                f.end,
-                f.strand,
-                f.score,
-                f.matches,
-                f.misMatches,
-                f.repMatches,
-                f.nCount,
-                f.qNumInsert,
-                f.qBaseInsert,
-                f.tNumInsert,
-                f.tBaseInsert
-            ]),
-            rowClickHandler: (rowData) => {
-                console.log(`${rowData[0]}:${parseInt(rowData[1]) - 1}-${rowData[2]}`)
+            const results = await blat(userSeq, db)
+
+            const tableData = {
+                title: "<b>BLAT Results</b>:  click on row to go to alignment",
+                headers: ["chr", "start", "end", "strand", "score", "match", "mis-match", "rep. match", "N's", "Q gap count", "Q gap bases", "T gap count", "T gap bases"],
+                rows: results.map(f => [
+                    f.chr,
+                    (f.start + 1),
+                    f.end,
+                    f.strand,
+                    f.score,
+                    f.matches,
+                    f.misMatches,
+                    f.repMatches,
+                    f.nCount,
+                    f.qNumInsert,
+                    f.qBaseInsert,
+                    f.tNumInsert,
+                    f.tBaseInsert
+                ]),
+                rowClickHandler: (rowData) => {
+                    console.log(`${rowData[0]}:${parseInt(rowData[1]) - 1}-${rowData[2]}`)
+                }
             }
+            const table = new IGVTable(document.getElementById("content"), tableData)
+            table.show()
+        } catch (e) {
+            console.error(e)
+            alert(e)
         }
-        const table = new IGVTable(document.getElementById("content"), tableData)
-        table.show()
-
-
     })
 
 
