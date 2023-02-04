@@ -366,7 +366,7 @@ class CNVPytorTrack extends TrackBase {
             const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
             return Promise.all(promises)
         } else {
-            return []  // This can happen if a redraw is triggered before the track has initialized.
+            return undefined  // This can happen if a redraw is triggered before the track has initialized.
         }
     }
 
@@ -374,7 +374,7 @@ class CNVPytorTrack extends TrackBase {
 
         // const mergedFeatures = options.features    // Array of feature arrays, 1 for each track
         const mergedFeatures = options.features
-
+        if(!mergedFeatures) return
 
         if (this.defaultScale) {
             if (this.signal_name == 'rd_snp') {
@@ -399,16 +399,18 @@ class CNVPytorTrack extends TrackBase {
             this.dataRange = autoscale(options.referenceFrame.chr, mergedFeatures)
         }
 
-        for (let i = 0, len = this.tracks.length; i < len; i++) {
-            const trackOptions = Object.assign({}, options)
-            trackOptions.features = mergedFeatures[i]
-            this.tracks[i].dataRange = this.dataRange
-            this.tracks[i].flipAxis = this.flipAxis
-            this.tracks[i].logScale = this.logScale
-            if (this.graphType) {
-                this.tracks[i].graphType = this.graphType
+        if(this.tracks) {
+            for (let i = 0, len = this.tracks.length; i < len; i++) {
+                const trackOptions = Object.assign({}, options)
+                trackOptions.features = mergedFeatures[i]
+                this.tracks[i].dataRange = this.dataRange
+                this.tracks[i].flipAxis = this.flipAxis
+                this.tracks[i].logScale = this.logScale
+                if (this.graphType) {
+                    this.tracks[i].graphType = this.graphType
+                }
+                this.tracks[i].draw(trackOptions)
             }
-            this.tracks[i].draw(trackOptions)
         }
     }
 
