@@ -362,8 +362,12 @@ class CNVPytorTrack extends TrackBase {
 
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
 
-        const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
-        return Promise.all(promises)
+        if(this.tracks) {
+            const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
+            return Promise.all(promises)
+        } else {
+            return []  // This can happen if a redraw is triggered before the track has initialized.
+        }
     }
 
     draw(options) {
