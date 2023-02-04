@@ -191,20 +191,22 @@ class TrackViewport extends Viewport {
         try {
             const track = this.trackView.track
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
-            let roiFeatures = []
-            if (track.roiSets && track.roiSets.length > 0) {
-                for (let roiSet of track.roiSets) {
-                    const features = await roiSet.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
-                    roiFeatures.push({track: roiSet, features})
+            if(features) {
+                let roiFeatures = []
+                if (track.roiSets && track.roiSets.length > 0) {
+                    for (let roiSet of track.roiSets) {
+                        const features = await roiSet.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
+                        roiFeatures.push({track: roiSet, features})
+                    }
                 }
-            }
 
-            const mr = track && ("wig" === track.type || "merged" === track.type)   // wig tracks are potentially multiresolution (e.g. bigwig)
-            this.featureCache = new FeatureCache(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures, mr)
-            this.loading = false
-            this.hideMessage()
-            this.stopSpinner()
-            return this.featureCache
+                const mr = track && ("wig" === track.type || "merged" === track.type)   // wig tracks are potentially multiresolution (e.g. bigwig)
+                this.featureCache = new FeatureCache(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures, mr)
+                this.loading = false
+                this.hideMessage()
+                this.stopSpinner()
+                return this.featureCache
+            }
         } catch (error) {
             // Track might have been removed during load
             if (this.trackView && this.trackView.disposed !== true) {
