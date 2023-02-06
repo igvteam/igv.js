@@ -12,7 +12,7 @@ suite("testSeg", function () {
 
         this.timeout(100000);
 
-        const url = dataURL + "seg/segmented_data_080520.seg.gz";
+        const url = "https://www.dropbox.com/s/h1rotg4xgn1bq8a/segmented_data_080520.seg.gz?dl=0";
         const featureSource = FeatureSource(
             {format: 'seg', url: url, indexed: false},
             genome);
@@ -40,7 +40,7 @@ suite("testSeg", function () {
         };
 
         const genome = await GenomeUtils.loadGenome(reference)
-        const url = dataURL + "seg/segmented_data_080520.seg.gz";
+        const url = "https://www.dropbox.com/s/h1rotg4xgn1bq8a/segmented_data_080520.seg.gz?dl=0";
         const featureSource = FeatureSource({format: 'seg', url: url, indexed: false, maxWGCount: Number.MAX_SAFE_INTEGER}, genome);
         const chr = "all";
         const features = await featureSource.getFeatures({chr})
