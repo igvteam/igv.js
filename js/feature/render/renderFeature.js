@@ -1,6 +1,5 @@
 import GtexUtils from "../../gtex/gtexUtils.js"
 import IGVGraphics from "../../igv-canvas.js"
-import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
 
 /**
  * @param feature
@@ -46,7 +45,7 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
         ctx.fillStyle = this.defaultColor
         ctx.strokeStyle = this.defaultColor
 
-        const color = getColorForFeature.call(this, feature)
+        const color = this.getColorForFeature(feature)
         ctx.fillStyle = color
         ctx.strokeStyle = color
 
@@ -199,7 +198,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         }
         const labelY = getFeatureLabelY(featureY, transform)
 
-        let color = getColorForFeature.call(this, feature)
+        let color = this.getColorForFeature(feature)
         let geneColor
         let gtexSelection = false
         if (referenceFrame.selection && GtexUtils.gtexLoaded) {
@@ -241,47 +240,3 @@ function getFeatureLabelY(featureY, transform) {
 }
 
 
-/**
- * Return color for feature.  Called in the context of a FeatureTrack instance.
- * @param feature
- * @returns {string}
- */
-
-function getColorForFeature(feature) {
-
-    let color
-    if (this.altColor && "-" === feature.strand) {
-        color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor
-    } else if (this.color) {
-        color = (typeof this.color === "function") ? this.color(feature) : this.color  // Explicit setting via menu, or possibly track line if !config.color
-    } else if (this.colorBy) {
-        const value = feature.getAttributeValue ?
-            feature.getAttributeValue(this.colorBy) :
-            feature[this.colorBy]
-        color = this.colorTable.getColor(value)
-    } else if (feature.color) {
-        color = feature.color   // Explicit color for feature
-    } else {
-        color = this.defaultColor   // Track default
-    }
-
-    if (feature.alpha && feature.alpha !== 1) {
-        color = IGVColor.addAlpha(color, feature.alpha)
-    } else if (this.useScore && feature.score && !Number.isNaN(feature.score)) {
-        // UCSC useScore option, for scores between 0-1000.  See https://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK
-        const min = this.config.min ? this.config.min : 0 //getViewLimitMin(track);
-        const max = this.config.max ? this.config.max : 1000 //getViewLimitMax(track);
-        const alpha = getAlpha(min, max, feature.score)
-        feature.alpha = alpha    // Avoid computing again
-        color = IGVColor.addAlpha(color, alpha)
-    }
-
-
-    function getAlpha(min, max, score) {
-        const binWidth = (max - min) / 9
-        const binNumber = Math.floor((score - min) / binWidth)
-        return Math.min(1.0, 0.2 + (binNumber * 0.8) / 9)
-    }
-
-    return color
-}

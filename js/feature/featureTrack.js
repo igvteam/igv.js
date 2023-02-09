@@ -1,28 +1,3 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import FeatureSource from './featureSource.js'
 import TrackBase from "../trackBase.js"
@@ -35,6 +10,7 @@ import {renderFusionJuncSpan} from "./render/renderFusionJunction.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {isSecureContext} from "../util/igvUtils.js"
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 
 class FeatureTrack extends TrackBase {
@@ -423,9 +399,7 @@ class FeatureTrack extends TrackBase {
             list.push('<hr/>')
             return list
         } else {
-
             return undefined
-
         }
     }
 
@@ -451,6 +425,52 @@ class FeatureTrack extends TrackBase {
         }
 
     };
+
+    /**
+     * Return color for feature.
+     * @param feature
+     * @returns {string}
+     */
+
+    getColorForFeature(feature) {
+
+        let color
+        if (this.altColor && "-" === feature.strand) {
+            color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor
+        } else if (this.color) {
+            color = (typeof this.color === "function") ? this.color(feature) : this.color  // Explicit setting via menu, or possibly track line if !config.color
+        } else if (this.colorBy) {
+            const value = feature.getAttributeValue ?
+                feature.getAttributeValue(this.colorBy) :
+                feature[this.colorBy]
+            color = this.colorTable.getColor(value)
+        } else if (feature.color) {
+            color = feature.color   // Explicit color for feature
+        } else {
+            color = this.defaultColor   // Track default
+        }
+
+        if (feature.alpha && feature.alpha !== 1) {
+            color = IGVColor.addAlpha(color, feature.alpha)
+        } else if (this.useScore && feature.score && !Number.isNaN(feature.score)) {
+            // UCSC useScore option, for scores between 0-1000.  See https://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK
+            const min = this.config.min ? this.config.min : 0 //getViewLimitMin(track);
+            const max = this.config.max ? this.config.max : 1000 //getViewLimitMax(track);
+            const alpha = getAlpha(min, max, feature.score)
+            feature.alpha = alpha    // Avoid computing again
+            color = IGVColor.addAlpha(color, alpha)
+        }
+
+
+        function getAlpha(min, max, score) {
+            const binWidth = (max - min) / 9
+            const binNumber = Math.floor((score - min) / binWidth)
+            return Math.min(1.0, 0.2 + (binNumber * 0.8) / 9)
+        }
+
+        return color
+    }
+
 
     /**
      * Called when the track is removed.  Do any needed cleanup here
