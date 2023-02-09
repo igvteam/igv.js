@@ -1,24 +1,25 @@
 import h5wasm from "https://cdn.jsdelivr.net/npm/h5wasm@0.4.9/dist/esm/hdf5_hl.js";
-//import h5wasm from  '../../node_modules/h5wasm/dist/esm/hdf5_hl.js'
+
 
 class Read_HDF5{
-    
+    /**
+     * Reads a cnvpytor file
+     * 
+     * @param {Path} h5_file - path for the pytor file
+     * @param {Number} bin_size - Bin size
+     */
     constructor(h5_file, bin_size=100000){
-        /* 
-        Reads a cnvytor file
-
-        parameters
-        -------------
-        h5_file: cnvpytor file   
-        */
         this.h5_file = h5_file;
         this.bin_size = bin_size;
         this.random_name = "pytor_" + make_random_id(10) + ".h5"
         
     }
     
+    /**
+     * 
+     * @returns h5 object
+     */
     async fetch(){
-        /* return a h5 object */
 
         // the WASM loads asychronously, and you can get the module like this:
         const Module = await h5wasm.ready;
@@ -32,8 +33,11 @@ class Read_HDF5{
         return f
         
     }
+    /**
+     * 
+     * @returns list of keys of the pytor file
+     */
     async get_keys(){
-        /* returns a list of keys of the pytor file*/
         let h5_obj = await this.fetch();
         return h5_obj.keys()
     }
@@ -42,13 +46,10 @@ class Read_HDF5{
         let h5_obj = await this.fetch();
         let h5_obj_keys = h5_obj.keys();
 
-        // console.log(h5_obj_keys)
-
         let signal_bin = new ParseSignals(h5_obj_keys);
         this.rd_bins = signal_bin.get_rd_bins()
 
         
-        // let bin_size = this.bin_size
         if(! this.rd_bins.includes(bin_size)){
             bin_size = this.rd_bins[rd_bins.length-1];    
         }
@@ -96,18 +97,18 @@ class Read_HDF5{
         }
         this.callers = []
         if (wigFeatures_rd_call_combined.length != 0){
-            this.callers.push('MeanShift')
+            this.callers.push('ReadDepth')
         }
         if (wigFeatures_rd_call_combined.length != 0){
-            this.callers.push('Combined')
+            this.callers.push('2D')
         }
 
         var obj = {}
         var signal_obj = {
             "RD_Raw": wigFeatures,
             "RD_Raw_gc_coor" : wigFeatures_gc,
-            "MeanShift": wigFeatures_rd_call_meanshift,
-            "Combined": wigFeatures_rd_call_combined,
+            "ReadDepth": wigFeatures_rd_call_meanshift,
+            "2D": wigFeatures_rd_call_combined,
             "BAF1": wigFeatures_baf1,
             "BAF2": wigFeatures_baf2
         }
@@ -153,16 +154,14 @@ class Read_HDF5{
         return chr_wig
         
     }
+    /**
+     * 
+     * @param {*} h5_obj - cnvpytor read object
+     * @param {*} h5_obj_keys -  a list of available signal names
+     * @param {*} bin_size - bin size
+     * @returns - a list for rd statistics information 
+     */
     rd_stat(h5_obj, h5_obj_keys, bin_size){
-        /* 
-        returns a list for rd statistics information 
-        paramter
-        ---------
-        h5_obj: cnvpytor read object
-        h5_obj_keys: a list of available signal names
-        bin_size: bin size
-        
-        */
         
         let rd_stat_signal =  `rd_stat_${bin_size}_auto`
         let rd_stat;
