@@ -63,7 +63,7 @@ class CNVPytorTrack extends TrackBase {
         this.graphType = config.graphType || "points"
         this.bin_size = config.bin_size || 100000
         this.signal_name = config.signal_name || "rd_snp"
-        this.cnv_caller = config.cnv_caller || 'Combined'
+        this.cnv_caller = config.cnv_caller || '2D'
         this.colors = config.colors || ['gray', 'black', 'green', 'blue']
         this.colors.push(this.colors[3])
         super.init(config)
@@ -124,13 +124,13 @@ class CNVPytorTrack extends TrackBase {
             this.wigFeatures_obj[this.bin_size] = {
                 "RD_Raw": wigFeatures[0],
                 "RD_Raw_gc_coor": wigFeatures[1],
-                "MeanShift": wigFeatures[2],
-                "Combined": [],
+                "ReadDepth": wigFeatures[2],
+                "2D": [],
                 "BAF1": bafFeatures[0],
                 "BAF2": bafFeatures[1]
             }
             this.rd_bins = [this.bin_size]
-            this.available_callers = ["MeanShift"]
+            this.available_callers = ["ReadDepth"]
             this.set_available_callers()
 
         } else {
