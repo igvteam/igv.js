@@ -1,5 +1,5 @@
 import { range_function, getDistParams } from './GeneralUtil.js'
-import cdf from 'https://cdn.jsdelivr.net/gh/stdlib-js/stats-base-dists-t-cdf@esm/index.mjs';
+import t_dist from './t_dist.js'
 
 
 class GetFit {
@@ -121,7 +121,7 @@ class DataStat {
 function t_test_1_sample(mean, m, s, n) {
     if (s == 0) s = 1;
     var t = ((mean - m) / s) * Math.sqrt(n)
-    var p = 1.0 - cdf(Math.abs(t), (n - 1))
+    var p = 1.0 - t_dist.TdistributionCDF(Math.abs(t), (n - 1))
     return p
 }
 
@@ -132,7 +132,7 @@ function t_test_2_samples(m1, s1, n1, m2, s2, n2) {
     var df = ((s1 ** 2 / n1 + s2 ** 2 / n2) ** 2 * (n1 - 1) * (n2 - 1)) /
         ((s1 ** 4 * (n2 - 1)) / n1 ** 2 + (s2 ** 4 * (n1 - 1)) / n2 ** 2);
 
-    var p = 1.0 - cdf(Math.abs(t), parseInt(df + 0.5))
+    var p = 1.0 - t_dist.TdistributionCDF(Math.abs(t), parseInt(df + 0.5))
 
     return p
 }

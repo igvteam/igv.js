@@ -47,7 +47,7 @@ class CNVPytorTrack extends TrackBase {
         super(config, browser)
         this.featureType = 'numeric'
         this.paintAxis = paintAxis
-        this.graphType = "points"
+        
         this.defaultScale = true
         if (!config.max) {
             this.autoscale = false
@@ -60,11 +60,12 @@ class CNVPytorTrack extends TrackBase {
     async init(config) {
 
         this.type = "cnvpytor"
+        this.graphType = config.graphType || "points"
         this.bin_size = config.bin_size || 100000
         this.signal_name = config.signal_name || "rd_snp"
         this.cnv_caller = config.cnv_caller || 'Combined'
-        this.colors = config.colors || ['gray', 'black', 'green', 'blue', 'blue']
-
+        this.colors = config.colors || ['gray', 'black', 'green', 'blue']
+        this.colors.push(this.colors[3])
         super.init(config)
 
     }
