@@ -26,6 +26,8 @@
 import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 
+const DEFAULT_COLOR = 'rgb(150,150,150)'
+
 const fixColor = (colorString) => {
     if (StringUtils.isString(colorString)) {
         return (colorString.indexOf(",") > 0 && !(colorString.startsWith("rgb(") || colorString.startsWith("rgba("))) ?
@@ -488,6 +490,15 @@ class TrackBase {
         }
         str += '</div>'
         return str
+    }
+
+    /**
+     * Return color for a specific feature of this track.  This default implementation is overriden by subclasses*
+     * @param f
+     * @returns {*|string|string}
+     */
+    getColorForFeature(f) {
+       return (typeof this.color === "function") ? this.color(feature) : this.color || DEFAULT_COLOR
     }
 
     /**
