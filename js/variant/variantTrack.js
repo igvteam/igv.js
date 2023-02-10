@@ -233,7 +233,7 @@ class VariantTrack extends TrackBase {
                     x += 1
                     w -= 2
                 }
-                context.fillStyle = this.getVariantColor(variant)
+                context.fillStyle = this.getColorForFeature(variant)
                 context.fillRect(x, y, w, h)
 
                 //only paint stroke if a color is defined
@@ -305,7 +305,8 @@ class VariantTrack extends TrackBase {
         }
     };
 
-    getVariantColor(variant) {
+
+    getColorForFeature(variant) {
 
         const v = variant._f || variant
         let variantColor
@@ -335,6 +336,8 @@ class VariantTrack extends TrackBase {
         }
         return variantColor
     }
+
+
 
     getVariantStrokecolor(variant) {
 
