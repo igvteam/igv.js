@@ -200,8 +200,7 @@ class WigTrack extends TrackBase {
                     const rectEnd = Math.ceil((f.end - bpStart) / bpPerPixel)
                     const width = Math.max(1, rectEnd - x)
 
-                    let c = (f.value < 0 && this.altColor) ? this.altColor : posColor
-                    const color = (typeof c === "function") ? c(f.value) : c
+                    const color = this.getColorForFeature(f)
 
                     if (this.graphType === "points") {
                         const pointSize = this.config.pointSize || 3
@@ -302,6 +301,17 @@ class WigTrack extends TrackBase {
 
     get supportsWholeGenome() {
         return !this.config.indexURL && this.config.supportsWholeGenome !== false
+    }
+
+    /**
+     * Return color for feature.
+     * @param feature
+     * @returns {string}
+     */
+
+    getColorForFeature(f) {
+        let c = (f.value < 0 && this.altColor) ? this.altColor : this.color || DEFAULT_COLOR
+        return (typeof c === "function") ? c(f.value) : c
     }
 
     /**
