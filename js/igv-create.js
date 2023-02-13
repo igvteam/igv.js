@@ -26,6 +26,8 @@
 import {GoogleAuth, igvxhr, oauth} from '../node_modules/igv-utils/src/index.js'
 import Browser from "./browser.js"
 import GenomeUtils from "./genome/genome.js"
+import CNVPytorTrack from "./CNVpytor/cnvpytorTrack.js"
+import TrackFactory from "./trackFactory.js"
 
 let allBrowsers = []
 
@@ -44,6 +46,9 @@ async function createBrowser(parentDiv, config) {
     if (!GenomeUtils.KNOWN_GENOMES) {
         await GenomeUtils.initializeGenomes(config)
     }
+
+    // if cnvpytor
+    TrackFactory.addTrackCreatorFunction('cnvpytor', (config, browser) => new CNVPytorTrack(config, browser))
 
     setDefaults(config)
 
