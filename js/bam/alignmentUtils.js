@@ -1,6 +1,8 @@
 import PairedAlignment from "./pairedAlignment.js"
 import BamAlignmentRow from "./bamAlignmentRow.js"
 
+const alignmentSpace = 2
+
 function canBePaired(alignment) {
     return alignment.isPaired() &&
         alignment.mate &&
@@ -52,79 +54,70 @@ function unpairAlignments(rows) {
 
 function packAlignmentRows(alignments, start, end, showSoftClips) {
 
+    //console.log(`packAlignmentRows ${start} ${end}`)
+    //const t0 = Date.now()
+
     if (!alignments) {
         return undefined
     } else if (alignments.length === 0) {
         return []
     } else {
-
         alignments.sort(function (a, b) {
             return showSoftClips ? a.scStart - b.scStart : a.start - b.start
         })
-        // bucketStart = Math.max(start, alignments[0].start);
-        const firstAlignment = alignments[0]
-        let bucketStart = Math.max(start, showSoftClips ? firstAlignment.scStart : firstAlignment.start)
-        let nextStart = bucketStart
 
-        const bucketList = []
-        for (let alignment of alignments) {
-            //var buckListIndex = Math.max(0, alignment.start - bucketStart);
-            const s = showSoftClips ? alignment.scStart : alignment.start
-            const buckListIndex = Math.max(0, s - bucketStart)
-            if (bucketList[buckListIndex] === undefined) {
-                bucketList[buckListIndex] = []
-            }
-            bucketList[buckListIndex].push(alignment)
-        }
-
-        let allocatedCount = 0
-        let lastAllocatedCount = 0
         const packedAlignmentRows = []
-        const alignmentSpace = 2
-        try {
-            while (allocatedCount < alignments.length) {
-                const alignmentRow = new BamAlignmentRow()
-                while (nextStart <= end) {
-                    let bucket = undefined
-                    let index
-                    while (!bucket && nextStart <= end) {
-                        index = nextStart - bucketStart
-                        if (bucketList[index] === undefined) {
-                            ++nextStart                     // No alignments at this index
-                        } else {
-                            bucket = bucketList[index]
-                        }
-                    } // while (bucket)
-                    if (!bucket) {
-                        break
-                    }
-                    const alignment = bucket.pop()
-                    if (0 === bucket.length) {
-                        bucketList[index] = undefined
-                    }
-
-                    alignmentRow.alignments.push(alignment)
-                    nextStart = showSoftClips ?
-                        alignment.scStart + alignment.scLengthOnRef + alignmentSpace :
-                        alignment.start + alignment.lengthOnRef + alignmentSpace
-                    ++allocatedCount
-                } // while (nextStart)
-
-                if (alignmentRow.alignments.length > 0) {
-                    packedAlignmentRows.push(alignmentRow)
-                }
-
-                nextStart = bucketStart
-                if (allocatedCount === lastAllocatedCount) break   // Protect from infinite loops
-                lastAllocatedCount = allocatedCount
-            } // while (allocatedCount)
-        } catch (e) {
-            console.error(e)
-            throw e
+        let alignmentRow
+        let nextStart = 0
+        let nextIDX = 0
+        const allocated = new Set()
+        const startNewRow = () => {
+            alignmentRow = new BamAlignmentRow()
+            packedAlignmentRows.push(alignmentRow)
+            nextStart = 0
+            nextIDX = 0
+            allocated.clear()
         }
+        startNewRow()
 
+        while (alignments.length > 0) {
+            if (nextIDX >= 0 && nextIDX < alignments.length) {
+                const alignment = alignments[nextIDX]
+                allocated.add(alignment)
+                alignmentRow.alignments.push(alignment)
+                nextStart = showSoftClips ?
+                    alignment.scStart + alignment.scLengthOnRef + alignmentSpace :
+                    alignment.start + alignment.lengthOnRef + alignmentSpace
+                nextIDX = binarySearch(alignments, (a) => (showSoftClips ? a.scStart : a.start) > nextStart, nextIDX)
+            } else {
+                // Remove allocated alignments and start new row
+                alignments = alignments.filter(a => !allocated.has(a))
+                startNewRow()
+            }
+        }
+        //console.log(`Done in ${Date.now() - t0} ms`)
         return packedAlignmentRows
     }
 }
+
+
+/**
+ * Return 0 <= i <= array.length such that !pred(array[i - 1]) && pred(array[i]).
+ *
+ * returns an index 0 ≤ i ≤ array.length such that the given predicate is false for array[i - 1] and true for array[i]* *
+ */
+function binarySearch(array, pred, min) {
+    let lo = min - 1, hi = array.length
+    while (1 + lo < hi) {
+        const mi = lo + ((hi - lo) >> 1)
+        if (pred(array[mi])) {
+            hi = mi
+        } else {
+            lo = mi
+        }
+    }
+    return hi
+}
+
 
 export {canBePaired, pairAlignments, unpairAlignments, packAlignmentRows}
