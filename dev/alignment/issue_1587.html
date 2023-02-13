@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<button id="loadButton">Load</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            "genome": "hg38",
+            "locus": "chr1:198,683,443-198,713,056"
+        }
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+            document.getElementById("loadButton").addEventListener("click", () => {
+                browser.loadTrack({
+                    "name": "BAM",
+                    "url": "https://www.dropbox.com/s/ga5d4audgvopv5d/ptprc.bam?dl=0",
+                    "indexURL": "https://www.dropbox.com/s/9kjwo1ukkpwetrx/ptprc.bam.bai?dl=0",
+                    "format": "bam",
+                    "type": "alignment",
+                    "height": "900",
+                })
+
+            })
+        })
+
+
+</script>
+
+</body>
+
+</html>
