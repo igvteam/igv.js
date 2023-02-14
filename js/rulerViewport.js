@@ -89,7 +89,7 @@ class RulerViewport extends TrackViewport {
         textDiv.innerHTML = `${ this.referenceFrame.getMultiLocusLabel(viewportWidth) }`
         const { width:textDivWidth } = textDiv.getBoundingClientRect()
 
-        if (textDivWidth/width > 0.75) {
+        if (textDivWidth/width > 0.5) {
             textDiv.innerHTML = `${ this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth) }`
         }
 
