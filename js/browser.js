@@ -29,7 +29,7 @@ import {
     BGZip,
     DOMUtils,
     FileUtils,
-    GoogleUtils,
+    GoogleDrive,
     Icon,
     igvxhr,
     StringUtils,
@@ -1910,7 +1910,7 @@ class Browser {
     }
 
     async getDriveFileInfo(googleDriveURL) {
-        const id = GoogleUtils.getGoogleDriveFileID(googleDriveURL)
+        const id = GoogleDrive.getGoogleDriveFileID(googleDriveURL)
         const endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true"
         return igvxhr.loadJson(endPoint, buildOptions({}))
     }
