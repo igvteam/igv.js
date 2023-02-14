@@ -82,33 +82,19 @@ class RulerViewport extends TrackViewport {
         this.$rulerLabel.show()
         this.$rulerLabel.get(0).style.backgroundColor = getChrColor(this.referenceFrame.chr)
 
-        const div = this.$rulerLabel.get(0).querySelector('div')
-        div.innerHTML = `${ this.referenceFrame.getMultiLocusLabel(viewportWidth)}`
+        const textDiv = this.$rulerLabel.get(0).querySelector('div')
 
         const { width } = this.$rulerLabel.get(0).getBoundingClientRect()
-        const { width:ww } = div.getBoundingClientRect()
 
-        if (width - ww < 10) {
-            div.innerHTML = `${ this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth)}`
+        textDiv.innerHTML = `${ this.referenceFrame.getMultiLocusLabel(viewportWidth) }`
+        const { width:textDivWidth } = textDiv.getBoundingClientRect()
+
+        if (textDivWidth/width > 0.75) {
+            textDiv.innerHTML = `${ this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth) }`
         }
 
-        // console.log(`parent ${ StringUtils.numberFormatter(Math.floor(width)) } child ${ StringUtils.numberFormatter(Math.floor(ww)) }`)
+        console.log(`${ Date.now() } textDiv ${ StringUtils.numberFormatter(Math.floor(textDivWidth)) }`)
 
-    }
-
-    __presentLocusLabel(viewportWidth) {
-
-        this.$rulerLabel.get(0).style.backgroundColor = getChrColor(this.referenceFrame.chr)
-
-        const divs = this.$rulerLabel.get(0).querySelectorAll('div')
-
-        divs[ 0 ].innerHTML = `${ this.referenceFrame.getMultiLocusLabelLocusOnly(viewportWidth)}`
-
-        divs[ 1 ].innerHTML = `${ this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth)}`
-        divs[ 1 ].style.display = 'none'
-
-        this.$rulerLabel.show()
-        this.$multiLocusCloseButton.show()
     }
 
     // Use in conjuction with .igv-multi-locus-ruler-label-square-dot css class (_dom-misc.scss)
