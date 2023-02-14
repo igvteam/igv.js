@@ -37,7 +37,7 @@ import {
 } from "../node_modules/igv-utils/src/index.js"
 import Alert from './ui/alert.js'
 import * as TrackUtils from './util/trackUtils.js'
-import TrackView, {igv_axis_column_width, maxViewportContentHeight} from "./trackView.js"
+import TrackView, {igv_axis_column_width} from "./trackView.js"
 import C2S from "./canvas2svg.js"
 import TrackFactory from "./trackFactory.js"
 import ROISet from "./roi/ROISet.js"
@@ -2023,9 +2023,10 @@ function handleMouseMove(e) {
             } else {
                 if (this.vpMouseDown.mouseDownY &&
                     Math.abs(y - this.vpMouseDown.mouseDownY) > this.constants.scrollThreshold) {
+                    // Scrolling => dragging track vertically
                     this.isScrolling = true
                     const viewportHeight = viewport.$viewport.height()
-                    const contentHeight = maxViewportContentHeight(viewport.trackView.viewports)
+                    const contentHeight = viewport.trackView.maxViewportContentHeight()
                     this.vpMouseDown.r = viewportHeight / contentHeight
                 }
             }
