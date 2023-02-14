@@ -52,11 +52,11 @@ class RulerViewport extends TrackViewport {
         let div
         div = document.createElement('div')
         this.$rulerLabel.append($(div))
-        // div.addEventListener('click', labelToggleHandler)
 
-        // div = document.createElement('div')
-        // this.$rulerLabel.append($(div))
-        // div.addEventListener('click', labelToggleHandler)
+        this.$rulerLabel.get(0).addEventListener('click', async event => {
+            event.stopPropagation()
+            await this.browser.gotoMultilocusPanel(this.referenceFrame)
+        })
 
         this.$tooltip = $('<div>', {class: 'igv-ruler-tooltip'})
         this.$tooltip.height(this.$viewport.height())
