@@ -32,6 +32,7 @@ import SampleNameViewport from './sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import MenuUtils from "./ui/menuUtils.js"
 
+const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['ruler', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 
@@ -278,7 +279,7 @@ class TrackView {
         const viewportHeight = this.viewports[0].$viewport.height()
         this.outerScroll.style.height = `${viewportHeight}px`
 
-        const viewportContentHeight = maxViewportContentHeight(this.viewports)
+        const viewportContentHeight = this.maxViewportContentHeight()
         const innerScrollHeight = Math.round((viewportHeight / viewportContentHeight) * viewportHeight)
 
         if (viewportContentHeight > viewportHeight) {
@@ -295,7 +296,7 @@ class TrackView {
         const top = Math.min(Math.max(0, y), this.outerScroll.clientHeight - this.innerScroll.clientHeight)
         $(this.innerScroll).css('top', `${top}px`)
 
-        const contentHeight = maxViewportContentHeight(this.viewports)
+        const contentHeight = this.maxViewportContentHeight()
         const contentTop = -Math.round(top * (contentHeight / this.viewports[0].$viewport.height()))
 
         for (let viewport of this.viewports) {
@@ -412,7 +413,7 @@ class TrackView {
         }
 
         if (this.track.autoscale) {
-            let allFeatures
+            let allFeatures = []
             for (let visibleViewport of visibleViewports) {
                 const referenceFrame = visibleViewport.referenceFrame
                 const start = referenceFrame.start
@@ -421,15 +422,11 @@ class TrackView {
                     // If the "features" object has a getMax function use it.  Currently only alignmentContainer implements this, for coverage.
                     if (typeof visibleViewport.featureCache.features.getMax === 'function') {
                         const max = visibleViewport.featureCache.features.getMax(start, end)
-                        allFeatures = [{value: max}]
+                        allFeatures.push({value: max})
                     } else {
                         const viewFeatures = FeatureUtils.findOverlapping(visibleViewport.featureCache.features, start, end)
-                        if(!allFeatures) {
-                            allFeatures = viewFeatures
-                        } else {
-                            for(let f of viewFeatures) {
-                                allFeatures.push(f)
-                            }
+                        for (let f of viewFeatures) {
+                            allFeatures.push(f)
                         }
                     }
                 }
@@ -522,29 +519,28 @@ class TrackView {
         for (let viewport of this.viewports) {
             viewport.checkContentHeight()
         }
-
         this.adjustTrackHeight()
+
     }
 
     adjustTrackHeight() {
 
-        var maxHeight = maxViewportContentHeight(this.viewports)
+        var contentHeight = this.maxViewportContentHeight()
         if (this.track.autoHeight) {
-            this.setTrackHeight(maxHeight, false)
+            this.setTrackHeight(contentHeight, false)
         } else if (this.track.paintAxis) {   // Avoid duplication, paintAxis is already called in setTrackHeight
             this.paintAxis()
         }
 
         if (false === scrollbarExclusionTypes.has(this.track.type)) {
 
+            // Adjust scrollbar, if needed, to insure content is in view
             const currentTop = this.viewports[0].getContentTop()
-
-            const heights = this.viewports.map(viewport => viewport.getContentHeight())
-            const minContentHeight = Math.min(...heights)
-            const newTop = Math.min(0, this.viewports[0].$viewport.height() - minContentHeight)
-            if (currentTop < newTop) {
-                for (let viewport of this.viewports) {
-                    viewport.$content.css('top', `${newTop}px`)
+            const viewportHeight = this.viewports[0].$viewport.height()
+            const minTop = Math.min(0, viewportHeight - contentHeight)
+            if(currentTop < minTop) {
+                 for (let viewport of this.viewports) {
+                    viewport.setTop(minTop)
                 }
             }
             this.updateScrollbar()
@@ -692,8 +688,6 @@ class TrackView {
 
             function documentTrackDragMouseUpHandler(event) {
 
-                // console.log(`${ Date.now() } TrackView - documentTrackDragMouseUpHandler - target ${ event.target.nodeName }`)
-
                 browser.endTrackDrag()
 
                 if (currentDragHandle && event.target !== currentDragHandle) {
@@ -839,6 +833,10 @@ class TrackView {
         }
     }
 
+    maxViewportContentHeight() {
+        return Math.max(this.viewports.map(viewport => viewport.getContentHeight()))
+    }
+
 }
 
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
@@ -860,13 +858,5 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 }
 
 
-// css - $igv-axis-column-width: 50px;
-const igv_axis_column_width = 50
-
-function maxViewportContentHeight(viewports) {
-    const heights = viewports.map(viewport => viewport.getContentHeight())
-    return Math.max(...heights)
-}
-
-export {igv_axis_column_width, maxViewportContentHeight}
+export {igv_axis_column_width}
 export default TrackView
