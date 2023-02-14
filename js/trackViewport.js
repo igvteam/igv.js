@@ -8,7 +8,7 @@ import Viewport from "./viewport.js"
 import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genome.js"
-import {bppFeatureFetchThreshold} from "./sequenceTrack.js";
+import {bppFeatureFetchThreshold} from "./sequenceTrack.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
@@ -151,6 +151,7 @@ class TrackViewport extends Viewport {
      *
      */
     setTop(contentTop) {
+
         super.setTop(contentTop)
 
         if (!this.canvas) {
@@ -158,15 +159,15 @@ class TrackViewport extends Viewport {
         } else {
             // See if currently painted canvas covers the vertical range of the viewport.  If not repaint
             const h = this.$viewport.height()
-            const vt = contentTop + this.canvas._data.canvasTop
-            const vb = contentTop + this.canvas._data.canvasBottom
+            const vt = contentTop + this.canvas._data.pixelTop
+            const vb = vt + this.canvas._data.pixelHeight
             if (vt > 0 || vb < h) {
                 this.repaint()
             }
         }
 
         // Now offset backing canvas to align with the contentTop visual offset.
-        let offset = contentTop + this.canvas._data.canvasTop
+        let offset = contentTop + this.canvas._data.pixelTop
         this.canvas.style.top = `${offset}px`
     }
 
@@ -191,7 +192,7 @@ class TrackViewport extends Viewport {
         try {
             const track = this.trackView.track
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
-            if(features) {
+            if (features) {
                 let roiFeatures = []
                 if (track.roiSets && track.roiSets.length > 0) {
                     for (let roiSet of track.roiSets) {
@@ -254,20 +255,19 @@ class TrackViewport extends Viewport {
         const {bpStart, bpEnd, pixelWidth} = this.repaintDimensions()
         const viewportHeight = this.$viewport.height()
         const contentHeight = this.getContentHeight()
-        const minHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight  // Need to fill viewport for ROIs.
-        const pixelHeight = Math.min(minHeight, 3 * viewportHeight)
+        const maxHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight  // Need to fill viewport for ROIs.
+        const pixelHeight = Math.min(maxHeight, 3 * viewportHeight)
         if (0 === pixelWidth || 0 === pixelHeight) {
             if (this.canvas) {
                 $(this.canvas).remove()
             }
             return
         }
-        const canvasTop = Math.max(0, -this.contentTop - viewportHeight)
-
+        const pixelTop = Math.max(0, -this.contentTop - Math.floor(pixelHeight / 3))
 
         const bpPerPixel = this.referenceFrame.bpPerPixel
         const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / bpPerPixel)
-
+        const canvasTop = (this.contentTop || 0) + pixelTop
         const newCanvas = document.createElement('canvas')//  $('<canvas class="igv-canvas">').get(0)
         newCanvas.style.position = 'relative'
         newCanvas.style.display = 'block'
@@ -284,7 +284,7 @@ class TrackViewport extends Viewport {
 
         const ctx = newCanvas.getContext("2d")
         ctx.scale(devicePixelRatio, devicePixelRatio)
-        ctx.translate(0, -canvasTop)
+        ctx.translate(0, -pixelTop)
 
         const drawConfiguration =
             {
@@ -292,12 +292,10 @@ class TrackViewport extends Viewport {
                 pixelXOffset,
                 pixelWidth,
                 pixelHeight,
-                pixelTop: canvasTop,
-                bpStart: bpStart,
+                pixelTop,
+                bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel,
-                canvasTop,
-                canvasBottom: canvasTop + pixelHeight,
                 referenceFrame: this.referenceFrame,
                 selection: this.selection,
                 viewport: this,
@@ -362,7 +360,7 @@ class TrackViewport extends Viewport {
         if (!this.canvas) return
 
         const canvasMetadata = this.canvas._data
-        const canvasTop = canvasMetadata ? canvasMetadata.canvasTop : 0
+        const canvasTop = canvasMetadata ? canvasMetadata.pixelTop : 0
         const devicePixelRatio = window.devicePixelRatio
         const w = this.$viewport.width() * devicePixelRatio
         const h = this.$viewport.height() * devicePixelRatio
