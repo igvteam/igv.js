@@ -69,7 +69,8 @@ const knownFileExtensions = new Set([
     "hiccups",
     "fasta",
     "fa",
-    "fna"
+    "fna",
+    "pytor"
 ])
 
 /**
@@ -216,6 +217,8 @@ function inferTrackType(config) {
                 return "bedtype"
             case "fasta":
                 return "sequence"
+            case "pytor":
+                return "cnvpytor"
             default:
                 return "annotation"
         }
