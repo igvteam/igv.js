@@ -19,23 +19,18 @@
     const options =
         {
             genome: "hg19",
-            locus: "chr16"
+            locus: "chr16",
+            tracks: [
+                {
+                    type: "cnvpytor",
+                    name: "HepG2 VCF",
+                    url: "https://storage.googleapis.com/cnvpytor_data/HepG2.vcf.gz",
+
+                }
+            ]
         }
 
     igv.createBrowser(document.getElementById('igvDiv'), options)
-
-        .then(async function (browser) {
-
-            // Indexed VCF track with a visibility window of 1 MB
-            const pytorTrack = await browser.loadTrack({
-                id: "pytor_track_VCF",
-                type: "cnvpytor",
-                name: "HepG2 VCF",
-                url: "https://storage.googleapis.com/cnvpytor_data/HepG2.vcf.gz",
-                
-            })
-
-        })
 
 
 </script>
