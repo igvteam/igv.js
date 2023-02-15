@@ -36,7 +36,7 @@ const trackFunctions =
         ['gcnv', (config, browser) => new GCNVTrack(config, browser)],
         ['junction', (config, browser) => new SpliceJunctionTrack(config, browser)],
         ['blat', (config, browser) => new BlatTrack(config, browser)],
-        //['cnvpytor', (config, browser) => new CNVPytorTrack(config, browser)],
+        ['cnvpytor', (config, browser) => new CNVPytorTrack(config, browser)]
     ])
 
 
