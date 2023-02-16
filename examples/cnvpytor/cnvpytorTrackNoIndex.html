@@ -24,7 +24,6 @@
 <script type="module">
 
     import igv from "../../dist/igv.esm.js"
-    //import igv from "../../js/index.js"
 
     const options =
         {
@@ -33,9 +32,9 @@
             tracks: [
                 {
                     type: "cnvpytor",
-                    name: "HepG2 Pytor indexed",
-                    indexed: true,
-                    url: "https://igv-genepattern-org.s3.amazonaws.com/test/hdf5/HepG2_WGS.indexed.pytor"
+                    name: "HepG2 Pytor",
+                    indexed: true,   // File is not actually indexed,  but this will force the jsfive reader
+                    url: "https://storage.googleapis.com/cnvpytor_data/HepG2_WGS.pytor",
                 }
             ]
         }
