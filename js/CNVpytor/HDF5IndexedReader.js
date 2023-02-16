@@ -14,7 +14,7 @@ class Read_HDF5_Indexed{
     async fetch(){
 
         if(!this.h5_obj) {
-            this.h5_obj = await openH5File({url: this.h5_file, bufferSize: 200000000})
+            this.h5_obj = await openH5File({url: this.h5_file, bufferSize: 1000000})
         }
         return this.h5_obj
     }
@@ -22,6 +22,7 @@ class Read_HDF5_Indexed{
     async get_keys(){
         /* returns a list of keys of the pytor file*/
         let h5_obj = await this.fetch();
+
         return h5_obj.keys
     }
 
@@ -41,7 +42,9 @@ class Read_HDF5_Indexed{
 
         const chr_ds = await h5_obj.get("rd_chromosomes")
         const type = await chr_ds.dtype
+        const t0 = Date.now()
         let rd_chromosomes = await chr_ds.value
+        //console.log(`get_rd_signal rd_chromosomes  ${Date.now() - t0}`)
         //rd_chromosomes = fixString(rd_chromosomes)
         let rd_flag = ""
 
@@ -126,7 +129,9 @@ class Read_HDF5_Indexed{
         let mosaic_call_segments = `his_rd_p_${chrom}_${bin_size}_partition_GC_mosaic_segments_2d`
         if (h5_obj_keys.includes(mosaic_call_segments)){
             const chrom_dataset = await h5_obj.get(mosaic_call_segments)
+            const t0 = Date.now()
             let chrom_data = await chrom_dataset.value
+            //console.log(`rd_call_combined ${mosaic_call_segments}  ${Date.now() - t0}`)
             segments = this.decode_segments(chrom_data)
             
         }
@@ -161,7 +166,9 @@ class Read_HDF5_Indexed{
         let rd_stat;
         if (h5_obj_keys.includes(rd_stat_signal)){
             const rd_stat_dataset = await h5_obj.get(rd_stat_signal)
+            const t0 = Date.now()
             rd_stat = await rd_stat_dataset.value
+            //console.log(`rd_stat_signal ${rd_stat_signal}  ${Date.now() - t0}`)
         }
         return rd_stat
     }
@@ -173,7 +180,9 @@ class Read_HDF5_Indexed{
         
         if (h5_obj_keys.includes(signal_name)){
             const chrom_dataset = await h5_obj.get(signal_name)
+            const t0 = Date.now()
             let chrom_data = await chrom_dataset.value
+            //console.log(`chr_signal ${signal_name}  ${Date.now() - t0}`)
             chrom_data.forEach((bin_value, bin_idx) => {
                 chr_wig.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: (bin_value/rd_stat[4]) *2})
             });
