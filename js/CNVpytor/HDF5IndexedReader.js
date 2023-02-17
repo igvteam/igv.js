@@ -14,7 +14,11 @@ class Read_HDF5_Indexed{
     async fetch(){
 
         if(!this.h5_obj) {
-            this.h5_obj = await openH5File({url: this.h5_file, bufferSize: 1000000})
+            this.h5_obj = await openH5File({
+                url: this.h5_file,
+                fetchSize: 1000000,
+                maxSize: 200000000
+            })
         }
         return this.h5_obj
     }
