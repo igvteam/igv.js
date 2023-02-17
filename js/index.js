@@ -9,6 +9,7 @@ import embedCss from "./embedCss.js"
 import version from "./version.js"
 import TrackView from "./trackView.js"
 import GenomeUtils from "./genome/genome.js"
+import * as TrackUtils from "./util/trackUtils.js"
 import {igvxhr, oauth} from "../node_modules/igv-utils/src/index.js"
 
 const setApiKey = igvxhr.setApiKey
@@ -24,6 +25,7 @@ function setOauthToken(accessToken, host) {
 }
 
 export default {
+    TrackUtils,
     IGVGraphics,
     MenuUtils,
     DataRangeDialog,
