@@ -89,9 +89,9 @@ class BufferedFile3 {
 
     constructor(args) {
         this.file = args.file;
-        this.size = args.size || 2000;
+        this.fetchSize = args.fetchSize || 2000;
+        this.maxSize = args.maxSize || 1000000;
         this.buffers = [];
-        this.maxBuffersLength = args.maxBuffersLength || 10000;
     }
 
     async read(position, length) {
@@ -102,11 +102,7 @@ class BufferedFile3 {
         // See if any buffers completely contain request, if so we're done
         for(let buffer of overlappingBuffers) {
             if(buffer.contains(position, position + length)) {
-                const start = position;
-                const bufferStart = buffer.start;
-                const sliceStart = start - bufferStart;
-                const sliceEnd = sliceStart + length;
-                return buffer.slice(sliceStart, sliceEnd)
+              return buffer.slice(position, position + length)
             }
         }
 
@@ -114,10 +110,10 @@ class BufferedFile3 {
         if(overlappingBuffers.length === 0) {
 
             // No overlap with any existing buffer
-            let size = Math.max(length, this.size);
+            let size = Math.max(length, this.fetchSize);
 
             // Find index of first buffer to the right, if any, to potentially limit size
-            this.buffers = this.buffers.sort((a, b) => a.start - b.start);
+            this.buffers.sort((a, b) => a.start - b.start);
             const idx = binarySearch(this.buffers, (b) => b.start > position, 0);
             if(idx < this.buffers.length) {
                 size = Math.min(size, this.buffers[idx].start - position);
@@ -125,72 +121,75 @@ class BufferedFile3 {
 
             const bufferStart = position;
             const bufferData = await this.file.read(bufferStart, size);
-            const bufferLength = bufferData.byteLength;
-            const buffer = new Buffer$1(bufferStart, bufferLength, bufferData);
+            const buffer = new Buffer$1(bufferStart, bufferData);
             this.addBuffer(buffer);
 
-            const sliceStart = position - bufferStart;
-            const sliceEnd = sliceStart + length;
-            return buffer.slice(sliceStart, sliceEnd)
-        }
+            return buffer.slice(position, position + length)
+        } else {
 
+            // Some overlap.   Fill gaps
+            overlappingBuffers.sort((a, b) => a.start - b.start);
+            const allBuffers = [];
+            let currentEnd = position;
+            for (let ob of overlappingBuffers) {
+                if (currentEnd < ob.start) {
+                    const bufferStart = currentEnd;
+                    const bufferSize = ob.start - currentEnd;
+                    const bufferData = await this.file.read(bufferStart, bufferSize);
+                    const buffer = new Buffer$1(bufferStart, bufferData);
+                    allBuffers.push(buffer);
+                }
+                allBuffers.push(ob);
+                currentEnd = ob.end;
+            }
 
-        // Some overlap.   Fill gaps
-        overlappingBuffers = overlappingBuffers.sort((a, b) => a.start - b.start);
-        const allBuffers = [];
-        let currentEnd = position;
-        for(let ob of overlappingBuffers) {
-            if(currentEnd < ob.start) {
+            // Check end
+            const requestedEnd = position + length;
+            if (requestedEnd > currentEnd) {
                 const bufferStart = currentEnd;
-                const bufferSize = ob.start - currentEnd;
+                const bufferSize = requestedEnd - bufferStart;
                 const bufferData = await this.file.read(bufferStart, bufferSize);
-                const bufferLength = bufferData.byteLength;
-                const buffer = new Buffer$1(bufferStart, bufferLength, bufferData);
+                const buffer = new Buffer$1(bufferStart, bufferData);
                 allBuffers.push(buffer);
             }
-            allBuffers.push(ob);
-            currentEnd = ob.end;
+
+            const newStart = allBuffers[0].start;
+            const newArrayBuffer = concatArrayBuffers(allBuffers.map(b => b.buffer));
+            const newBuffer = new Buffer$1(newStart, newArrayBuffer);
+
+            // Replace the overlapping buffers with the new composite one
+            const tmp = new Set(overlappingBuffers);
+            this.buffers = this.buffers.filter(b => !tmp.has(b));
+            this.addBuffer(newBuffer);
+
+            return newBuffer.slice(position, position + length)
         }
-
-        // Check end
-        const requestedEnd = position + length;
-        if(requestedEnd > currentEnd) {
-            const bufferStart = currentEnd;
-            const bufferSize = requestedEnd - bufferStart;
-            const bufferData = await this.file.read(bufferStart, bufferSize);
-            const bufferLength = bufferData.byteLength;
-            const buffer = new Buffer$1(bufferStart, bufferLength, bufferData);
-            allBuffers.push(buffer);
-        }
-
-        const newStart = allBuffers[0].start;
-        allBuffers[allBuffers.length - 1].end;
-        const newArrayBuffer = concatArrayBuffers(allBuffers.map(b => b.buffer));
-        const newBuffer = new Buffer$1(newStart, newArrayBuffer.byteLength, newArrayBuffer);
-        const sliceStart = position - newStart;
-        const sliceEnd = sliceStart + length;
-
-        // Replace the overlapping buffers with the new one
-        const tmp = new Set(overlappingBuffers);
-        const newBuffers = [];
-        for(let b of this.buffers) {
-            if(!tmp.has(b)) {
-                newBuffers.push(b);
-            }
-        }
-        newBuffers.push(newBuffer);
-        this.buffers = newBuffers;
-
-        return newBuffer.slice(sliceStart, sliceEnd)
-
 
     }
 
     addBuffer(buffer) {
-        if (this.buffers.length > this.maxBuffersLength) {
-            this.buffers = this.buffers.slice(1);
+
+        const size = this.buffers.reduce((a,b) => a + b.size, 0) + buffer.size;
+        if(size > this.maxSize) {
+            // console.log(`max buffer size exceeded`)
+            const overage = size - this.maxSize;
+            this.buffers.sort((a,b) => a.creationTime - b.creationTime);
+            let sum = 0;
+            let i;
+            for(i=0; i<this.buffers.length; i++) {
+                sum += this.buffers[i].size;
+                if(sum > overage) {
+                    break
+                }
+            }
+            // console.log('removing buffers')
+            // for(let j=0; j<i; j++) console.log(`  ${this.buffers[j].toString()}`)
+            this.buffers = (i < this.buffers.length - 1)  ? this.buffers.slice(i)  : [];
         }
-        this.buffers.push(buffer);
+
+        if(buffer.size < this.maxSize) {
+            this.buffers.push(buffer);
+        }
     }
 
 
@@ -199,18 +198,25 @@ class BufferedFile3 {
 
 let Buffer$1 = class Buffer {
 
-    constructor(bufferStart, bufferLength, buffer) {
+    constructor(bufferStart, buffer) {
+        this.creationTime = Date.now();
         this.start = bufferStart;
-        this.length = bufferLength;
-        this.end = bufferStart + bufferLength;
         this.buffer = buffer;
     }
 
     slice(start, end) {
-        if(start < 0 || end - start > this.buffer.byteLength) {
+        if(start < this.start || end - start > this.buffer.byteLength) {
             throw Error("buffer bounds error")
         }
-        return this.buffer.slice(start, end)
+        return this.buffer.slice(start - this.start, end - this.start)
+    }
+
+    get end() {
+        return this.start + this.buffer.byteLength
+    }
+
+    get size() {
+        return this.buffer.byteLength
     }
 
     contains(start, end) {
@@ -222,8 +228,7 @@ let Buffer$1 = class Buffer {
     }
 
     toString() {
-        return `${this.start} - ${this.end}`
-
+        return `Buffer ${this.creationTime}   ${this.start} - ${this.end}`
     }
 
 };
@@ -4807,9 +4812,8 @@ async function openH5File(options) {
 
     const isRemote = options.url !== undefined;
     let fileReader = getReaderFor(options);
-    const bufferSize = options.bufferSize || 4000;
     if (isRemote) {
-        fileReader = new BufferedFile3({file: fileReader, size: bufferSize});
+        fileReader = new BufferedFile3({file: fileReader, fetchSize: options.fetchSize, maxSize: options.maxSize});
     }
     const asyncBuffer = new AsyncBuffer(fileReader);
 
