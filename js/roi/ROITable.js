@@ -7,13 +7,12 @@ import { DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-ui/src/ind
 import { StringUtils} from '../../node_modules/igv-utils/src/index.js'
 
 import { createRegionKey, parseRegionKey } from './ROIManager.js'
-import RegionTableBase from './regionTableBase.js'
+import RegionTableBase from '../ui/regionTableBase.js'
 
 class ROITable extends RegionTableBase {
 
     constructor(config) {
         super(config)
-        this.footerDOM = this.container
     }
 
     renderTable(records) {
