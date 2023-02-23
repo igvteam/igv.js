@@ -21,6 +21,8 @@ class RegionTableBase {
 
         this.rowContainerDOM = this.container
 
+        this.footerDOM = this.container
+
     }
 
     set headerDOM({ browser, parent, headerTitle, dismissHandler }) {
