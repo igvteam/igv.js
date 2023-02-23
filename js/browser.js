@@ -504,16 +504,30 @@ class Browser {
         }
 
         const roiMenu = new ROIMenu(this, this.columnContainer)
+        const roiTableConfig =
+            {
+                browser: this,
+                parent: this.columnContainer,
+                headerTitle: 'Regions of Interest',
+                dismissHandler: () => this.roiTableControl.buttonHandler(false)
+            }
         if (session.roi) {
 
             const roiSetList = session.roi.map(c => new ROISet(c, this.genome))
+
             const named = roiSetList.filter(({name}) => name !== undefined && name.length > 0)
-            const roiTable = new ROITable(this, this.columnContainer, (named.length > 0))
+
+            roiTableConfig.columnTitles = ROITable.getColumnTitlesConfiguration(named.length > 0)
+
+            const roiTable = new ROITable(roiTableConfig)
 
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, roiSetList)
         } else {
 
-            const roiTable = new ROITable(this, this.columnContainer, false)
+            roiTableConfig.columnTitles = ROITable.getColumnTitlesConfiguration(false)
+
+            const roiTable = new ROITable(roiTableConfig)
+            
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, undefined)
         }
 
@@ -523,7 +537,7 @@ class Browser {
         const genomeTracks = genomeConfig.tracks || []
         const trackConfigurations = session.tracks ? genomeTracks.concat(session.tracks) : genomeTracks
 
-        // Insure that we always have a sequence track with no explicit URL (=> the reference genome sequence track)
+        // Ensure that we always have a sequence track with no explicit URL (=> the reference genome sequence track)
         const pushSequenceTrack = trackConfigurations.filter(track => 'sequence' === track.type && !track.url && !track.fastaURL).length === 0
         if (pushSequenceTrack /*&& false !== this.config.showSequence*/) {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder})
