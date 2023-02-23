@@ -527,7 +527,7 @@ class Browser {
             roiTableConfig.columnTitles = ROITable.getColumnTitlesConfiguration(false)
 
             const roiTable = new ROITable(roiTableConfig)
-            
+
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, undefined)
         }
 
