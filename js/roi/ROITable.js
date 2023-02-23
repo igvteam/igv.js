@@ -11,35 +11,9 @@ import RegionTableBase from './regionTableBase.js'
 
 class ROITable extends RegionTableBase {
 
-    constructor(browser, parent, hasROISetNames) {
-
-        super(browser, parent)
-
-        this.hasROISetNames = hasROISetNames
-
-        this.headerDOM =
-            {
-                browser,
-                parent,
-                container: this.container,
-                title: 'Regions of Interest',
-                dismissHandler: () => browser.roiTableControl.buttonHandler(false)
-            }
-
-        const columnTitleConfig =
-            {
-                container: this.container,
-                titleList: getColumnTitleList(hasROISetNames)
-            }
-
-        this.columnTitleDOM = columnTitleConfig
-
-        this.columnLayout = columnTitleConfig.titleList.slice().map(({ width }) => width)
-
-        this.rowContainerDOM = this.container
-
+    constructor(config) {
+        super(config)
         this.footerDOM = this.container
-
     }
 
     renderTable(records) {
@@ -74,7 +48,7 @@ class ROITable extends RegionTableBase {
                 setName
             ];
 
-        if (false === this.hasROISetNames) {
+        if (4 === this.columnLayout.length) {
             strings = strings.slice(0, 4)
         }
 
@@ -107,18 +81,9 @@ class ROITable extends RegionTableBase {
 
     set footerDOM(container) {
 
-        const dom = DOMUtils.div()
-        container.appendChild(dom)
+        super.footerDOM = container
 
-        // Go To Button
-        const gotoButton = DOMUtils.div({class: 'igv-roi-table-button'})
-        dom.appendChild(gotoButton)
-
-        gotoButton.id = 'igv-roi-table-view-button'
-        gotoButton.textContent = 'Go To'
-        gotoButton.style.pointerEvents = 'none'
-
-        gotoButton.addEventListener('click', event => {
+        this.gotoButton.addEventListener('click', event => {
 
             event.stopPropagation()
 
@@ -140,46 +105,34 @@ class ROITable extends RegionTableBase {
             }
 
         })
-
-        this._footerDOM = dom
-    }
-
-    get footerDOM() {
-        return this._footerDOM
     }
 
     dispose() {
-
         this.browser.roiTableControl.buttonHandler(false)
+        super.dispose()
+    }
 
-        this.container.innerHTML = ''
+    static getColumnTitlesConfiguration(doIncludeROISetNames) {
 
-        for (let key of Object.keys(this)) {
-            this[key] = undefined
+        if (true === doIncludeROISetNames) {
+
+            return [
+                    { label: 'Chr', width: '20%' },
+                    { label: 'Start', width: '15%' },
+                    { label: 'End', width: '15%' },
+                    { label: 'Description', width: '30%' },
+                    { label: 'ROI Set', width: '20%' }
+                ]
+        } else {
+            return [
+                    { label: 'Chr', width: '25%' },
+                    { label: 'Start', width: '20%' },
+                    { label: 'End', width: '20%' },
+                    { label: 'Description', width: '35%' }
+                ]
         }
+
     }
 
 }
-
-function getColumnTitleList(hasROISetNames) {
-
-    if (true === hasROISetNames) {
-        return [
-            { label: 'Chr', width: '20%' },
-            { label: 'Start', width: '15%' },
-            { label: 'End', width: '15%' },
-            { label: 'Description', width: '30%' },
-            { label: 'ROI Set', width: '20%' }
-        ]
-    } else {
-        return [
-            { label: 'Chr', width: '25%' },
-            { label: 'Start', width: '20%' },
-            { label: 'End', width: '20%' },
-            { label: 'Description', width: '35%' }
-        ]
-    }
-
-}
-
 export default ROITable
