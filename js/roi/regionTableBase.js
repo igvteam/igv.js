@@ -3,22 +3,36 @@ import { makeDraggable, DOMUtils, Icon } from '../../node_modules/igv-utils/src/
 const tableRowSelectionList = []
 
 class RegionTableBase {
-    constructor(browser, parent) {
-        this.browser = browser
+    constructor(config) {
+
+        this.config = Object.assign({}, config)
+
+        this.browser = config.browser
+
         this.container = DOMUtils.div({ class: 'igv-roi-table' })
-        parent.appendChild(this.container)
+
+        config.parent.appendChild(this.container)
+
+        this.headerDOM = config
+
+        this.columnTitleDOM = config.columnTitles
+
+        this.columnLayout = config.columnTitles.slice().map(({ width }) => width)
+
+        this.rowContainerDOM = this.container
+
     }
 
-    set headerDOM({ browser, parent, container, title, dismissHandler }) {
+    set headerDOM({ browser, parent, headerTitle, dismissHandler }) {
 
         // header
         const dom = DOMUtils.div()
-        container.appendChild(dom)
+        this.container.appendChild(dom)
 
         // title
         const div = DOMUtils.div()
         dom.appendChild(div)
-        div.innerText = title
+        div.innerText = headerTitle
 
         // dismiss button
         const dismiss = DOMUtils.div()
@@ -33,9 +47,9 @@ class RegionTableBase {
         const { y:y_root } = browser.root.getBoundingClientRect()
         const { y:y_parent } = parent.getBoundingClientRect()
         const constraint = -(y_parent - y_root)
-        makeDraggable(container, dom, { minX:0, minY:constraint })
+        makeDraggable(this.container, dom, { minX:0, minY:constraint })
 
-        container.style.display = 'none'
+        this.container.style.display = 'none'
 
         this._headerDOM = dom
 
@@ -45,10 +59,10 @@ class RegionTableBase {
         return this._headerDOM
     }
 
-    set columnTitleDOM({ container, titleList }) {
+    set columnTitleDOM(titleList) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
-        container.appendChild(dom)
+        this.container.appendChild(dom)
 
         for (const { label, width } of titleList) {
             const col = DOMUtils.div()
@@ -71,6 +85,29 @@ class RegionTableBase {
         return this._rowContainerDOM
     }
 
+    set footerDOM(container) {
+
+        const dom = DOMUtils.div()
+        container.appendChild(dom)
+
+        // Go To Button
+        const gotoButton = DOMUtils.div({class: 'igv-roi-table-button'})
+        dom.appendChild(gotoButton)
+
+        gotoButton.id = 'igv-roi-table-view-button'
+        gotoButton.textContent = 'Go To'
+        gotoButton.style.pointerEvents = 'none'
+
+        this._footerDOM = dom
+
+        this.gotoButton = gotoButton
+
+    }
+
+    get footerDOM() {
+        return this._footerDOM
+    }
+
     clearTable() {
         const elements = this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')
         for (let el of elements) {
@@ -80,8 +117,7 @@ class RegionTableBase {
 
     setButtonState(isTableRowSelected) {
         isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
-        const gotoButton = this.footerDOM.querySelector('#igv-roi-table-view-button')
-        gotoButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
+        this.gotoButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
     }
 
     present() {
@@ -92,6 +128,15 @@ class RegionTableBase {
 
     dismiss() {
         this.container.style.display = 'none'
+    }
+
+    dispose() {
+
+        this.container.innerHTML = ''
+
+        for (let key of Object.keys(this)) {
+            this[key] = undefined
+        }
     }
 
 }
