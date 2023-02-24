@@ -517,14 +517,14 @@ class Browser {
 
             const named = roiSetList.filter(({name}) => name !== undefined && name.length > 0)
 
-            roiTableConfig.columnTitles = ROITable.getColumnTitlesConfiguration(named.length > 0)
+            roiTableConfig.columnFormat = ROITable.getColumnFormatConfiguration(named.length > 0)
 
             const roiTable = new ROITable(roiTableConfig)
 
             this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, roiSetList)
         } else {
 
-            roiTableConfig.columnTitles = ROITable.getColumnTitlesConfiguration(false)
+            roiTableConfig.columnFormat = ROITable.getColumnFormatConfiguration(false)
 
             const roiTable = new ROITable(roiTableConfig)
 

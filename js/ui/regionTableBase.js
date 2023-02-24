@@ -5,8 +5,6 @@ const tableRowSelectionList = []
 class RegionTableBase {
     constructor(config) {
 
-        this.config = Object.assign({}, config)
-
         this.browser = config.browser
 
         this.container = DOMUtils.div({ class: 'igv-roi-table' })
@@ -15,9 +13,9 @@ class RegionTableBase {
 
         this.headerDOM = config
 
-        this.columnTitleDOM = config.columnTitles
+        this.columnTitleDOM = config.columnFormat
 
-        this.columnLayout = config.columnTitles.slice().map(({ width }) => width)
+        this.columnFormat = config.columnFormat
 
         this.rowContainerDOM = this.container
 
@@ -55,10 +53,6 @@ class RegionTableBase {
 
         this._headerDOM = dom
 
-    }
-
-    get headerDOM() {
-        return this._headerDOM
     }
 
     set columnTitleDOM(titleList) {
@@ -104,10 +98,6 @@ class RegionTableBase {
 
         this.gotoButton = gotoButton
 
-    }
-
-    get footerDOM() {
-        return this._footerDOM
     }
 
     clearTable() {
