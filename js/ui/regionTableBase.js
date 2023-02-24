@@ -71,12 +71,12 @@ class RegionTableBase {
         }
     }
 
-    set columnTitleDOM(titleList) {
+    set columnTitleDOM(columnFormat) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
         this.container.appendChild(dom)
 
-        for (const { label, width } of titleList) {
+        for (const { label, width } of columnFormat) {
             const col = DOMUtils.div()
             dom.appendChild(col)
             col.style.width = width
