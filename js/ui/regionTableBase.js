@@ -1,4 +1,4 @@
-import { makeDraggable, DOMUtils, Icon } from '../../node_modules/igv-utils/src/index.js'
+import { DOMUtils, makeDraggable, Icon } from '../../node_modules/igv-ui/src/index.js'
 
 const tableRowSelectionList = []
 
