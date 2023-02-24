@@ -197,7 +197,6 @@ $igv-roi-table-background-color: #eee;
     border-bottom-style: solid;
     border-bottom-width: thin;
 
-
     background-color: $igv-roi-table-background-color;
 
     cursor: move;
@@ -229,6 +228,20 @@ $igv-roi-table-background-color: #eee;
       cursor: pointer;
       color: #444;
     }
+
+  }
+
+  // description
+  >.igv-roi-table-description {
+    padding: 4px;
+    color: #ff2987;
+    background-color: moccasin;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
 
   }
 
