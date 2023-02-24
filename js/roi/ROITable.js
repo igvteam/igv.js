@@ -47,7 +47,7 @@ class ROITable extends RegionTableBase {
                 setName
             ];
 
-        if (4 === this.columnLayout.length) {
+        if (4 === this.columnFormat.length) {
             strings = strings.slice(0, 4)
         }
 
@@ -55,7 +55,7 @@ class ROITable extends RegionTableBase {
             const el = DOMUtils.div()
             dom.appendChild(el)
             el.innerText = strings[ i ]
-            el.style.width = this.columnLayout[ i ]
+            el.style.width = this.columnFormat[ i ].width
         }
 
         dom.addEventListener('mousedown', event => {
@@ -111,7 +111,7 @@ class ROITable extends RegionTableBase {
         super.dispose()
     }
 
-    static getColumnTitlesConfiguration(doIncludeROISetNames) {
+    static getColumnFormatConfiguration(doIncludeROISetNames) {
 
         if (true === doIncludeROISetNames) {
 
