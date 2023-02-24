@@ -15,13 +15,13 @@
 
 <script type="module">
 
-    import {createBrowser, removeBrowser} from "../js/igv-create.js";
+    import {createBrowser, removeBrowser} from "../js/igv-create.js"
 
-    const div = document.getElementById("igvDiv");
-    const n = 10;
-    let i = 0;
+    const div = document.getElementById("igvDiv")
+    const n = 10
+    let i = 0
 
-    createRemove();
+    createRemove()
 
     function createRemove() {
 
@@ -33,19 +33,19 @@
 
                 const id = setTimeout(function () {
 
-                    clearTimeout(id);
+                    clearTimeout(id)
 
-                    removeBrowser(browser);
+                    removeBrowser(browser)
 
                     if (++i < n) {
-                        createRemove();
+                        createRemove()
                     }
 
-                }, 3000);
+                }, 3000)
 
             })
             .catch(function (error) {
-                console.error(error);
+                console.error(error)
             })
     }
 

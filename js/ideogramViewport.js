@@ -25,7 +25,7 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
-import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
+import {DOMUtils} from "../node_modules/igv-ui/src/index.js"
 import TrackViewport from "./trackViewport.js"
 
 class IdeogramViewport extends TrackViewport {
