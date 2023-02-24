@@ -23,7 +23,8 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {DOMUtils} from "../node_modules/igv-ui/src/index.js"
 import {prettyBasePairNumber, validateGenomicExtent} from "./util/igvUtils.js"
 import GtexSelection from "./gtex/gtexSelection.js"
 

@@ -1,4 +1,4 @@
-import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
+import {DOMUtils} from '../node_modules/igv-ui/src/index.js'
 import {appleCrayonRGB} from './util/colorPalletes.js'
 
 const maxFontSize = 10

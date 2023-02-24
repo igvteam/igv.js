@@ -18,7 +18,7 @@ suite("test SA tag", function () {
             '8:126,480,853-126,481,009 (+) = 156bp @MAPQ: 60 NM: 21'
         ]
 
-        for(let i=0; i<5; i++) {
+        for (let i = 0; i < 5; i++) {
             assert.equal(supAlignments[i].printString(), saString[i])
         }
 

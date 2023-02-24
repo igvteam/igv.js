@@ -1,6 +1,6 @@
 function runIntervalTreeTests() {
 
-    module("Interval Tree");
+    module("Interval Tree")
 
     //test("Point search", function () {
     //
@@ -54,10 +54,10 @@ function runIntervalTreeTests() {
     asyncTest("Query peak features in interval", function () {
 
         var url = "data/peak/test.broadPeak",
-            featureSource;
+            featureSource
 
-        featureSource = new igv.FeatureSource({type: 'bed', url: url});
-        ok(featureSource);
+        featureSource = new igv.FeatureSource({type: 'bed', url: url})
+        ok(featureSource)
 
         featureSource.getFeatures("chr22", 16847690, 16857344, function (featureList) {
 
@@ -67,12 +67,12 @@ function runIntervalTreeTests() {
             //    prettyNumbers.push(str);
             //});
 
-            ok(featureList);
+            ok(featureList)
             //equal(featureList.length, 2);
 
-            start();
+            start()
 
-        }, undefined);
+        }, undefined)
 
         //featureSource.getFeatures("chr22", igv.numberUnFormatter("16,847,690"), igv.numberUnFormatter("16,857,344"), function(featureList) {
         //
@@ -84,7 +84,7 @@ function runIntervalTreeTests() {
         //}, undefined);
 
 
-    });
+    })
 
 
 }

@@ -24,8 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
-import {AlertDialog} from '../node_modules/igv-ui/dist/igv-ui.js'
+import {DOMUtils, AlertDialog} from '../node_modules/igv-ui/src/index.js'
 import SequenceTrack from "./sequenceTrack.js"
 
 class Viewport {
