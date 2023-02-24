@@ -13,13 +13,15 @@ class RegionTableBase {
 
         this.headerDOM = config
 
-        this.columnTitleDOM = config.columnFormat
+        this.descriptionDOM = config
 
-        this.columnFormat = config.columnFormat
+        this.columnTitleDOM = config.columnFormat
 
         this.rowContainerDOM = this.container
 
         this.footerDOM = this.container
+
+        this.columnFormat = config.columnFormat
 
     }
 
@@ -29,12 +31,12 @@ class RegionTableBase {
         const dom = DOMUtils.div()
         this.container.appendChild(dom)
 
-        // title
+        // header title
         const div = DOMUtils.div()
         dom.appendChild(div)
         div.innerText = headerTitle
 
-        // dismiss button
+        // table dismiss button
         const dismiss = DOMUtils.div()
         dom.appendChild(dismiss)
         dismiss.appendChild(Icon.createIcon('times'))
@@ -53,6 +55,20 @@ class RegionTableBase {
 
         this._headerDOM = dom
 
+    }
+
+    set descriptionDOM(config) {
+
+        // description
+        const dom = DOMUtils.div({ class: 'igv-roi-table-description' })
+        this.container.appendChild(dom)
+        dom.innerText = 'this is a description'
+
+        if (config.description) {
+
+        } else {
+
+        }
     }
 
     set columnTitleDOM(titleList) {

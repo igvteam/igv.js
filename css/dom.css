@@ -1176,6 +1176,16 @@
   cursor: pointer;
   color: #444;
 }
+.igv-roi-table > .igv-roi-table-description {
+  padding: 4px;
+  color: #ff2987;
+  background-color: moccasin;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+}
 .igv-roi-table > .igv-roi-table-column-titles {
   height: 24px;
   display: flex;
