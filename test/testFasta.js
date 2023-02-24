@@ -72,7 +72,8 @@ suite("testFasta", function () {
         // >chr1:1000001-1000025
         // GGGCACAGCCTCACCCAGGAAAGCA
 
-        const fasta = await loadFasta({fastaURL: require.resolve("./data/fasta/sliced.fasta"), indexed: false})
+        const fasta = await loadFasta({fastaURL: "test/data/fasta/sliced.fasta"), indexed: false
+    })
 
         let expected = "GGGCACAGCCTCACCCAGGAAAGCA"
         let seq = await fasta.getSequence("chr1", 1000000, 1000025)
@@ -109,7 +110,8 @@ suite("testFasta", function () {
         // >chr1:1000001-1000025 @len=249250621
         // GGGCACAGCCTCACCCAGGAAAGCA
 
-        const fasta = await loadFasta({fastaURL: require.resolve("./data/fasta/sliced2.fasta"), indexed: false})
+        const fasta = await loadFasta({fastaURL: "test/data/fasta/sliced2.fasta"), indexed: false
+    })
 
         let expected = "GGGCACAGCCTCACCCAGGAAAGCA"
         let seq = await fasta.getSequence("chr1", 1000000, 1000025)

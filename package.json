@@ -1,9 +1,10 @@
 {
   "name": "igv",
-  "version": "2.13.9",
+  "version": "2.14.0",
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
+  "type": "module",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "files": [
     "dist/**"
@@ -11,8 +12,8 @@
   "scripts": {
     "prepack": "npm run build",
     "prepare": "npm run build",
-    "build": "node scripts/updateVersion.js && node scripts/generateEmbedCss.js && npx rollup --config",
-    "test": "mocha -u tdd -r esm"
+    "build": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config",
+    "test": "mocha -ui tdd"
   },
   "author": {
     "name": "Jim Robinson"
@@ -30,7 +31,8 @@
   "keywords": [
     "IGV",
     "genomics",
-    "visualization"
+    "visualization",
+    "bioinformatics"
   ],
   "license": "MIT",
   "repository": {
@@ -50,20 +52,19 @@
     "@xmldom/xmldom": "^0.7.5",
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
-    "chai": "^4.2.0",
     "circular-view": "github:igvteam/circular-view#v0.2.3",
     "core-js": "^3.20.3",
     "eslint": "^6.4.0",
-    "esm": "^3.2.25",
-    "igv-ui": "github:igvteam/igv-ui#v1.4.1",
-    "igv-utils": "github:igvteam/igv-utils#v1.3.16",
-    "mocha": "^8.1.3",
+    "igv-ui": "github:igvteam/igv-ui",
+    "igv-utils": "github:igvteam/igv-utils",
     "regenerator-runtime": "^0.13.3",
     "rollup": "^2.66.0",
     "rollup-plugin-copy": "^3.3.0",
     "rollup-plugin-terser": "^7.0.2",
     "sass": "^1.45.1",
     "vanilla-picker": "^2.12.1",
-    "w3c-xmlhttprequest": "^3.0.0"
+    "w3c-xmlhttprequest": "^3.0.0",
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0"
   }
 }

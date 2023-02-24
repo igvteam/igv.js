@@ -1,4 +1,4 @@
-import { AlertDialog } from '../../node_modules/igv-ui/dist/igv-ui.js'
+import { AlertDialog } from '../../node_modules/igv-ui/src/index.js'
 
 class Alert {
     constructor(parent) {

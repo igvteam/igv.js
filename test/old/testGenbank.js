@@ -1,27 +1,29 @@
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
-import {setup} from "../util/setup.js";
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {setup} from "../util/setup.js"
 import GenbankParser from "../../js/gbk/genbank.js"
 
 suite("testGenbank", function () {
 
-    setup();
+    setup()
 
     test("pten genbank", async function () {
 
-        const url = require.resolve("./data/gbk/pten_test.gbk");
-        const parser = new GenbankParser({});
+        const url = "test/data/gbk/pten_test.gbk"
+    )
 
-        const data = await igvxhr.loadString(url, {});
-        const features = parser.parseFeatures(data);
-        const expectedTypes = ["gene", "mRNA", "CDS", "gene", "variation", "variation"];
-        const expectedStarts = [0, 0, 1032, 82042, -79, 10554];
-        const expectedEnds = [105338, 105338, 102035, 82643, -78, 10555];
+        const parser = new GenbankParser({})
+
+        const data = await igvxhr.loadString(url, {})
+        const features = parser.parseFeatures(data)
+        const expectedTypes = ["gene", "mRNA", "CDS", "gene", "variation", "variation"]
+        const expectedStarts = [0, 0, 1032, 82042, -79, 10554]
+        const expectedEnds = [105338, 105338, 102035, 82643, -78, 10555]
 
         for (let i = 0; i < expectedTypes.length; i++) {
-            const bf = features[i];
-            assertEquals(expectedTypes[i], bf.type);
-            assertEquals(expectedStarts[i], bf.start);
-            assertEquals(expectedEnds[i], bf.end);
+            const bf = features[i]
+            assertEquals(expectedTypes[i], bf.type)
+            assertEquals(expectedStarts[i], bf.start)
+            assertEquals(expectedEnds[i], bf.end)
         }
 
     })

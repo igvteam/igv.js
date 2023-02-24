@@ -1,6 +1,6 @@
 function runImmVarTests() {
 
-    module("dataLoader");
+    module("dataLoader")
 
     var json =
         {
@@ -40,7 +40,7 @@ function runImmVarTests() {
                     "position": 5618646
                 }
             ]
-        };
+        }
 
 
     asyncTest("immvar", function () {
@@ -48,17 +48,17 @@ function runImmVarTests() {
         var url = "http://immvar.broadinstitute.org:3000/load_data",
             range = {chr: "chr10", start: 6090663, end: 6146339},
             task = null,
-            source;
+            source
 
-        var source = new igv.ImmVarReader({url: url, cellConditionId: 1, pValueField: "p_value"});
+        var source = new igv.ImmVarReader({url: url, cellConditionId: 1, pValueField: "p_value"})
 
         source.readFeatures(function (features) {
 
-            ok(features);
+            ok(features)
 
-            start();
+            start()
 
-        }, task, range);
+        }, task, range)
     })
 
 }
