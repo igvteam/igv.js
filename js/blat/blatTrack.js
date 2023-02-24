@@ -1,4 +1,4 @@
-import {IGVTable} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {IGVTable} from '../../node_modules/igv-ui/src/index.js'
 import FeatureTrack from "../feature/featureTrack.js"
 
 

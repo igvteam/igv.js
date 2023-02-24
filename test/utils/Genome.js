@@ -34,14 +34,14 @@ const genome = {
 
     getChromosomeName: function (chr) {
         return chr.toLowerCase() === "all" ? "all" :
-            chr.startsWith("chr") ? chr : "chr" + chr;
+            chr.startsWith("chr") ? chr : "chr" + chr
     },
 
     getChromosome: function (chr) {
 
-        const name = this.getChromosomeName(chr);
-        const bpLength = sizes[name];
-        return bpLength ? {name, bpLength} : undefined;
+        const name = this.getChromosomeName(chr)
+        const bpLength = sizes[name]
+        return bpLength ? {name, bpLength} : undefined
     },
 
     wgChromosomeNames: Object.keys(sizes),

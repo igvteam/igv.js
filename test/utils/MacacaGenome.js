@@ -31,13 +31,13 @@ const macacaGenome = {
     id: "macac_fascicularis_5.0",
 
     getChromosomeName: function (chr) {
-        return chr.startsWith("chr") ? chr.substring(3) : chr;
+        return chr.startsWith("chr") ? chr.substring(3) : chr
     },
 
     getChromosome: function (chr) {
-        const name = this.getChromosomeName(chr);
-        const bpLength = sizes[name];
-        return bpLength ? {name, bpLength} : undefined;
+        const name = this.getChromosomeName(chr)
+        const bpLength = sizes[name]
+        return bpLength ? {name, bpLength} : undefined
     }
 }
 

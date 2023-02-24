@@ -4,7 +4,7 @@ function testTribble() {
 
     //mock object
     if (igv === undefined) {
-        igv = {};
+        igv = {}
     }
 
     igv.browser = {
@@ -18,38 +18,38 @@ function testTribble() {
                 return chr
             }
         }
-    };
+    }
 
     asyncTest("Tribble index", function () {
 
         var config,
             featureSource,
-            index;
+            index
 
         config = {
             type: 'bedgraph',
             url: '//data.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph'
-        };
+        }
 
-        featureSource = new igv.FeatureSource(config);
-        ok(featureSource);
+        featureSource = new igv.FeatureSource(config)
+        ok(featureSource)
 
-        index = config.url + ".idx";
+        index = config.url + ".idx"
 
         igv.loadTribbleIndex(
             index,
             config,
             function (index) {
 
-                ok(index);
+                ok(index)
 
                 //var blocks = index.chunksForRange("chr1", 0, Number.MAX_VALUE);
                 //
                 //ok(blocks);
 
-                start();
-            });
-    });
+                start()
+            })
+    })
 
 
     //asyncTest("Non-existent index", function () {
