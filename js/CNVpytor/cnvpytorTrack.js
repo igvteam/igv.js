@@ -27,7 +27,8 @@
 import TrackBase from "../trackBase.js"
 import paintAxis from "../util/paintAxis.js"
 import MenuUtils from "../ui/menuUtils.js"
-import Read_HDF5 from "./HDF5_Reader.js"
+import HDF5Reader from "./HDF5_Reader.js"
+import HDF5IndexedReader from "./HDF5IndexedReader.js"
 import {CNVpytorVCF} from "./cnvpytorVCF.js"
 import FeatureSource from '../feature/featureSource.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
@@ -134,8 +135,7 @@ class CNVPytorTrack extends TrackBase {
             this.set_available_callers()
 
         } else {
-            this.cnvpytor_obj = new Read_HDF5.Read_HDF5(this.config.url, this.bin_size)
-
+            this.cnvpytor_obj =   new HDF5IndexedReader(this.config.url, this.bin_size)
             this.wigFeatures_obj = await this.cnvpytor_obj.get_rd_signal(this.bin_size)
             this.rd_bins = this.cnvpytor_obj.rd_bins
             this.available_callers = this.cnvpytor_obj.callers
