@@ -20,22 +20,6 @@ class ROITable extends RegionTableBase {
         super(config)
     }
 
-    renderTable(records) {
-
-        Array.from(this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
-
-        if (records.length > 0) {
-
-            const sortedRecords = records.sort((a, b) => (a.feature.chr.localeCompare(b.feature.chr) || a.feature.start - b.feature.start || a.feature.end - b.feature.end))
-
-            for (let record of sortedRecords) {
-                const row = this.tableRowDOM(record)
-                this.rowContainerDOM.appendChild(row)
-            }
-
-        }
-    }
-
     tableRowDOM(record) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
@@ -63,22 +47,7 @@ class ROITable extends RegionTableBase {
             el.style.width = this.columnFormat[ i ].width
         }
 
-        dom.addEventListener('mousedown', event => {
-            event.stopPropagation()
-
-            dom.classList.toggle('igv-roi-table-row-selected')
-            dom.classList.contains('igv-roi-table-row-selected') ? dom.classList.remove('igv-roi-table-row-hover') : dom.classList.add('igv-roi-table-row-hover')
-
-            this.setButtonState(dom.classList.contains('igv-roi-table-row-selected'))
-        })
-
-        dom.addEventListener('mouseover', e => {
-            dom.classList.contains('igv-roi-table-row-selected') ? dom.classList.remove('igv-roi-table-row-hover') : dom.classList.add('igv-roi-table-row-hover')
-        })
-
-        dom.addEventListener('mouseout', e => {
-            dom.classList.remove('igv-roi-table-row-hover')
-        })
+        this.tableRowDOMHelper(dom)
 
         return dom
     }
@@ -102,13 +71,29 @@ class ROITable extends RegionTableBase {
                 el.classList.remove('igv-roi-table-row-selected')
             }
 
-            this.setButtonState(false)
+            this.setTableRowSelectionState(false)
 
             if (loci.length > 0) {
                 this.browser.search(loci.join(' '))
             }
 
         })
+    }
+
+    renderTable(records) {
+
+        Array.from(this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
+
+        if (records.length > 0) {
+
+            const sortedRecords = records.sort((a, b) => (a.feature.chr.localeCompare(b.feature.chr) || a.feature.start - b.feature.start || a.feature.end - b.feature.end))
+
+            for (let record of sortedRecords) {
+                const row = this.tableRowDOM(record)
+                this.rowContainerDOM.appendChild(row)
+            }
+
+        }
     }
 
     dispose() {
