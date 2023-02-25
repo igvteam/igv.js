@@ -11,11 +11,11 @@ suite("testBedpe", function () {
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
-                url: 'test/data/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt'),
-            format: 'bedpe'
-    },
-        genome
-    )
+                url: 'test/data/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt',
+                format: 'bedpe'
+            },
+            genome
+        )
 
 
         const features = await featureSource.getFeatures({chr, start, end})
@@ -32,11 +32,11 @@ suite("testBedpe", function () {
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
-                url: 'test/data/bedpe/hiccups_loops.bedpe'),
-            format: 'bedpe'
-    },
-        genome
-    )
+                url: 'test/data/bedpe/hiccups_loops.bedpe',
+                format: 'bedpe'
+            },
+            genome
+        )
 
 
         const features = await featureSource.getFeatures({chr, start, end})
@@ -53,11 +53,11 @@ suite("testBedpe", function () {
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
-                url: 'test/data/bedpe/inter_chr_simulated.bedpe'),
-            format: 'bedpe'
-    },
-        genome
-    )
+                url: 'test/data/bedpe/inter_chr_simulated.bedpe',
+                format: 'bedpe'
+            },
+            genome
+        )
 
 
         const features = await featureSource.getFeatures({chr, start, end})
@@ -75,11 +75,11 @@ suite("testBedpe", function () {
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
-                url: 'test/data/bedpe/sv_calls.10X.bedpe'),
-            format: 'bedpe'
-    },
-        genome
-    )
+                url: 'test/data/bedpe/sv_calls.10X.bedpe',
+                format: 'bedpe'
+            },
+            genome
+        )
 
 
         const features = await featureSource.getFeatures({chr, start, end})
@@ -97,11 +97,11 @@ suite("testBedpe", function () {
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
-                url: 'test/data/bedpe/large_sv_calls.10X.bedpe'),
-            format: 'bedpe'
-    },
-        genome
-    )
+                url: 'test/data/bedpe/large_sv_calls.10X.bedpe',
+                format: 'bedpe'
+            },
+            genome
+        )
 
 
         const features = await featureSource.getFeatures({chr, start, end})
@@ -116,8 +116,8 @@ suite("testBedpe", function () {
 
         const reader = new FeatureFileReader({
             format: 'bedpe',
-            url: 'test/data/bedpe/inter_chr_simulated.bedpe')
-    })
+            url: 'test/data/bedpe/inter_chr_simulated.bedpe'
+        })
 
 
         const features = await reader.loadFeaturesNoIndex()
@@ -139,11 +139,11 @@ suite("testBedpe", function () {
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
-                url: 'test/data/bedpe/interactExample1.txt'),
-            format: 'interact'
-    },
-        genome
-    )
+                url: 'test/data/bedpe/interactExample1.txt',
+                format: 'interact'
+            },
+            genome
+        )
 
 
         const features = await featureSource.getFeatures({chr, start, end})
@@ -162,11 +162,11 @@ suite("testBedpe", function () {
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
-                url: 'test/data/bedpe/sv_calls.10X.bedpe'),
-            format: 'bedpe'
-    },
-        genome
-    )
+                url: 'test/data/bedpe/sv_calls.10X.bedpe',
+                format: 'bedpe'
+            },
+            genome
+        )
 
 
         const features = await featureSource.getFeatures({chr, start, end})
@@ -183,10 +183,10 @@ suite("testBedpe", function () {
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
-            url: 'test/data/bedpe/hiccups_encode.tsv')
-    },
-        genome
-    )
+                url: 'test/data/bedpe/hiccups_encode.tsv'
+            },
+            genome
+        )
 
         await featureSource.getHeader()
         const features = await featureSource.getFeatures({chr, start, end})

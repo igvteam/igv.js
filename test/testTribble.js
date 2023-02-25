@@ -16,11 +16,9 @@ suite("testTribble", function () {
     test("vcf indexed", async function () {
 
         const config = {
-            url: "test/data/vcf/SRP32_v4.sorted.0.vcf"
-    ),
-        indexURL: "test/data/vcf/SRP32_v4.sorted.0.vcf.idx"
-    )
-    }
+            url: "test/data/vcf/SRP32_v4.sorted.0.vcf",
+            indexURL: "test/data/vcf/SRP32_v4.sorted.0.vcf.idx"
+        }
 
 
         const browser = {genome}

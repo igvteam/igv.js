@@ -14,7 +14,7 @@ suite("testAlignmentUtils", function () {
 
         const bamReader = new BamReaderNonIndexed({
                 type: 'bam',
-                url: 'test/data/bam/gstt1_sample.bam'),
+                url: 'test/data/bam/gstt1_sample.bam',
             indexed: false
     })
 

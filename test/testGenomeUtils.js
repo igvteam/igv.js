@@ -9,8 +9,7 @@ suite("testGenomeUtils", function () {
         this.timeout(100000)
         const config = {
             genomeList: "test/data/genomes/altGenomes.json"
-    )
-    }
+        }
 
         await GenomeUtils.initializeGenomes(config)
         assert.ok(GenomeUtils.KNOWN_GENOMES["_sacCer3"])

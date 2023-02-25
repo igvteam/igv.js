@@ -11,7 +11,6 @@ suite("testTabix", function () {
             beg = 55369194,
             end = 55369443,
             indexPath = "test/data/tabix/refGene.hg19.bed.gz.tbi"
-    ),
         config = {}
 
         const tbiIndex = await loadIndex(indexPath, config)
@@ -30,7 +29,7 @@ suite("testTabix", function () {
             beg = 1226000,
             end = 1227000,
             indexPath = "test/data/tabix/csi-test.vcf.gz.csi"
-    ),
+
         config = {}
 
         const csiIndex = await loadIndex(indexPath, config)
@@ -48,11 +47,10 @@ suite("testTabix", function () {
             end = 1227000
 
         const reader = new FeatureFileReader({
-                format: "vcf",
-                url: "test/data/tabix/csi-test.vcf.gz"),
+            format: "vcf",
+            url: "test/data/tabix/csi-test.vcf.gz",
             indexURL: "test/data/tabix/csi-test.vcf.gz.csi"
-    )
-    })
+        })
 
         await reader.readHeader()
         const features = await reader.readFeatures(chr, beg, end)

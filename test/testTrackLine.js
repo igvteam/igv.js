@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import WigTrack from "../js/feature/wigTrack"
+import WigTrack from "../js/feature/wigTrack.js"
 import {genome} from "./utils/Genome.js"
 
 suite("testTrackLine", function () {
@@ -11,7 +11,6 @@ suite("testTrackLine", function () {
     test("trackline settings", async function () {
 
         const path = "test/data/wig/fixedStep-example.wig"
-    )
 
         const config = {format: 'wig', url: path}
         const track = new WigTrack(config, browser)
@@ -33,7 +32,6 @@ suite("testTrackLine", function () {
     test("trackline override", async function () {
 
         const path = "test/data/wig/fixedStep-example.wig"
-    )
 
         const config = {
             format: 'wig',

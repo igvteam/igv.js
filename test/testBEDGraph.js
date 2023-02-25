@@ -13,7 +13,7 @@ suite("testBedGraph", function () {
             end = 49304701,
             featureSource = FeatureSource({
                 format: 'bedgraph',
-                url: 'test/data/wig/bedgraph-example-uscs.bedgraph')
+                url: 'test/data/wig/bedgraph-example-uscs.bedgraph'
     },
         genome
     )

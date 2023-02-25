@@ -4,8 +4,9 @@ import {assert} from 'chai'
 
 suite("testBGZipLineReader", function () {
 
-    test("long lines - local file", async function () {
+    test("long lines ", async function () {
 
+        // Test of a line spanning multiple bgzip blocks
         const config = {
             url: "test/data/gcnv/gcnv_large.bed.gz"
         }
@@ -14,6 +15,9 @@ suite("testBGZipLineReader", function () {
         const reader = new BGZLineReader(config)
         const headerLine = await reader.nextLine()
         const columnCount = headerLine.split("\t").length
+
+        assert.equal(44292, headerLine.length)
+        assert.ok(headerLine.endsWith("xx-1915xxxxxxx1xx03xx1xxxxxexxxx"))
 
         let lineCount = 0
         let line
@@ -40,7 +44,7 @@ suite("testBGZipLineReader", function () {
 
         let lineCount = 0
         let line
-        while ((line = await reader.nextLine() !== undefined) && lineCount < 2000) {
+        while ((line = await reader.nextLine()) && lineCount < 2000) {
             lineCount++
         }
         assert.equal(lineCount, 2000)
