@@ -24,7 +24,7 @@
  */
 
 import {FileUtils, GoogleAuth, GoogleDrive, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import {DOMUtils} from "../../node_modules/igv-ui/src/index"
+import {DOMUtils} from "../../node_modules/igv-ui/src/index.js"
 
 const extend = function (parent, child) {
 
