@@ -4,15 +4,14 @@ import FeatureFileReader from "../js/feature/featureFileReader.js"
 import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import {assert} from 'chai'
 import getDataWrapper from "../js/feature/dataWrapper.js"
-import {genome} from "./utils/Genome"
-import Browser from "../js/browser"
+import {genome} from "./utils/Genome.js"
+import Browser from "../js/browser.js"
 
 
 suite("testVariant", function () {
 
     test("Test gcvf non-ref variants", async function () {
         const url = "test/data/vcf/gvcf_non_ref.vcf"
-    )
 
         const data = await igvxhr.loadString(url)
         const parser = new VcfParser()
@@ -30,7 +29,6 @@ suite("testVariant", function () {
 
     test("Test gcvf mixed variants", async function () {
         const url = "test/data/vcf/gvcf_mixed.vcf"
-    )
 
         const data = await igvxhr.loadString(url)
         const parser = new VcfParser()
@@ -47,11 +45,10 @@ suite("testVariant", function () {
 
     test("No variants", async function () {
         const reader = new FeatureFileReader({
-                format: "vcf",
-                url: "test/data/vcf/NoVariantsVCF/novariants.vcf.gz"),
+            format: "vcf",
+            url: "test/data/vcf/NoVariantsVCF/novariants.vcf.gz",
             indexURL: "test/data/vcf/NoVariantsVCF/novariants.vcf.gz.tbi"
-    )
-    })
+        })
 
         const features = await reader.readFeatures("chr1", 1, 1000)
         assert.equal(features.length, 0)
@@ -67,8 +64,8 @@ suite("testVariant", function () {
         // 20	1234580	insertion	ACA	ACAT
 
         const url = "test/data/vcf/example.vcf"
-    )
-          // Example from 4.2 spec
+
+        // Example from 4.2 spec
         const data = await igvxhr.loadString(url, {})
         const parser = new VcfParser()
 
@@ -109,7 +106,6 @@ suite("testVariant", function () {
     test("CNV (explicit END field)", async function () {
 
         const url = "test/data/vcf/cnv.vcf"
-    )
 
         const data = await igvxhr.loadString(url, {})
         const parser = new VcfParser()
@@ -132,7 +128,6 @@ suite("testVariant", function () {
     test("Sniffles <TRA> records", async function () {
 
         const url = "test/data/vcf/SKBR3_Sniffles_variants_tra.vcf"
-    )
 
         const data = await igvxhr.loadString(url, {})
         const parser = new VcfParser()
@@ -151,11 +146,9 @@ suite("testVariant", function () {
 
     test("tribble indexed - large header", async function () {
         const config = {
-            url: "test/data/vcf/large_header.vcf"
-    ),
-        indexURL: "test/data/vcf/large_header.vcf.idx"
-    )
-    }
+            url: "test/data/vcf/large_header.vcf",
+            indexURL: "test/data/vcf/large_header.vcf.idx"
+        }
 
 
         const browser = {genome}
@@ -173,11 +166,10 @@ suite("testVariant", function () {
 
     test("tabix indexed - large header", async function () {
         const config = {
-            url: "test/data/vcf/large_header.vcf"
-    ),
-        indexURL: "test/data/vcf/large_header.vcf.idx"
-    )
-    }
+            url: "test/data/vcf/large_header.vcf",
+            indexURL: "test/data/vcf/large_header.vcf.idx"
+
+        }
 
 
         const browser = {genome}
@@ -196,7 +188,6 @@ suite("testVariant", function () {
     test("parse svtype = BND ", async function () {
 
         const url = "test/data/vcf/svtype_BND.vcf"
-    )
 
         const data = await igvxhr.loadString(url, {})
         const parser = new VcfParser()
@@ -212,10 +203,9 @@ suite("testVariant", function () {
     test("track svtype = BND", async function () {
 
         const config = {
-            url: "test/data/vcf/svtype_BND.vcf"
-    ),
-        indexed: false
-    }
+            url: "test/data/vcf/svtype_BND.vcf",
+            indexed: false
+        }
 
 
         const browser = {genome}

@@ -14,12 +14,12 @@ suite("testGFF", function () {
         const start = 1
         const end = 10000
         const featureReader = new FeatureFileReader({
-                url: 'test/data/gff/eden.gff'),
-            format: 'gff3',
-            filterTypes: []
-    },
-        genome
-    )
+                url: 'test/data/gff/eden.gff',
+                format: 'gff3',
+                filterTypes: []
+            },
+            genome
+        )
 
 
         // Fetch "raw" features (constituitive parts)
@@ -54,12 +54,12 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
     test("ENSEMBL GFF transcript", async function () {
 
         const featureReader = new FeatureFileReader({
-                url: 'test/data/gff/Ensembl_MYC-205.gff3'),
-            format: 'gff3',
-            filterTypes: []
-    },
-        genome
-    )
+                url: 'test/data/gff/Ensembl_MYC-205.gff3',
+                format: 'gff3',
+                filterTypes: []
+            },
+            genome
+        )
 
 
         // Fetch "raw" features (constituitive parts)
@@ -77,12 +77,12 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
     test("ENSEMBL GFF region", async function () {
 
         const featureReader = new FeatureFileReader({
-                url: 'test/data/gff/Ensembl_MYC-region.gff3'),
-            format: 'gff3',
-            filterTypes: []
-    },
-        genome
-    )
+                url: 'test/data/gff/Ensembl_MYC-region.gff3',
+                format: 'gff3',
+                filterTypes: []
+            },
+            genome
+        )
 
 
         // Fetch "raw" features (constituitive parts)
@@ -104,12 +104,12 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
 
         const featureReader = new FeatureFileReader({
-                url: 'test/data/gff/NCBI_hg38_MYC.gtf'),
-            format: 'gtf',
-            filterTypes: []
-    },
-        genome
-    )
+                url: 'test/data/gff/NCBI_hg38_MYC.gtf',
+                format: 'gtf',
+                filterTypes: []
+            },
+            genome
+        )
 
 
         // Fetch "raw" features (constituitive parts)
@@ -137,12 +137,12 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
     test("gencode lincRNA gtf", async function () {
 
         const featureReader = new FeatureFileReader({
-                url: 'test/data/gff/gencode-lincRNA.gtf'),
-            format: 'gtf',
-            filterTypes: []
-    },
-        genome
-    )
+                url: 'test/data/gff/gencode-lincRNA.gtf',
+                format: 'gtf',
+                filterTypes: []
+            },
+            genome
+        )
 
 
         // Fetch "raw" features (constituitive parts)
@@ -161,12 +161,12 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
     test("Ensembl transcript gtf", async function () {
 
         const featureReader = new FeatureFileReader({
-                url: 'test/data/gff/Ensembl-transcript.gtf'),
-            format: 'gtf',
-            filterTypes: []
-    },
-        genome
-    )
+                url: 'test/data/gff/Ensembl-transcript.gtf',
+                format: 'gtf',
+                filterTypes: []
+            },
+            genome
+        )
 
 
         // Fetch "raw" features (constituitive parts)
@@ -202,12 +202,12 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
     test("washU gtf", async function () {
 
         const featureReader = new FeatureFileReader({
-                url: 'test/data/gff/wustl.gtf'),
-            format: 'gtf',
-            filterTypes: []
-    },
-        genome
-    )
+                url: 'test/data/gff/wustl.gtf',
+                format: 'gtf',
+                filterTypes: []
+            },
+            genome
+        )
 
 
         // Fetch "raw" features (constituitive parts)
@@ -259,12 +259,12 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
         const start = 0
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
-                url: 'test/data/gff/eden.gff'),
-            format: 'gff3',
-            filterTypes: []
-    },
-        genome
-    )
+                url: 'test/data/gff/eden.gff',
+                format: 'gff3',
+                filterTypes: []
+            },
+            genome
+        )
 
 
         const features = await featureSource.getFeatures({chr, start, end})
@@ -277,11 +277,11 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
     test("Multiline feature", async function () {
 
         const featureSource = FeatureSource({
-                url: 'test/data/gff/multi_line_feature.gff3'),
-            format: 'gff3'
-    },
-        genome
-    )
+                url: 'test/data/gff/multi_line_feature.gff3',
+                format: 'gff3'
+            },
+            genome
+        )
 
 
         const chr1Features = await featureSource.getFeatures({chr: "chr1", start: 500000, end: 600000})

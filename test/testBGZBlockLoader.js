@@ -9,7 +9,6 @@ suite("test BGZBlockLoader", function () {
 
     test("inflate blocks", async function () {
         const path = "test/data/tabix/sorted.genes.gtf.gz"
-    )
         const b = fs.readFileSync(path)
         const arrayBuffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength)
 
@@ -36,8 +35,7 @@ suite("test BGZBlockLoader", function () {
 
         const config = {
             url: "test/data/tabix/sorted.genes.gtf.gz"
-    ),
-    }
+        }
 
         const positions = [113873, 118394, 122728, 127139, 131295]
 
@@ -55,8 +53,7 @@ suite("test BGZBlockLoader", function () {
         const endBlock = 131295
         const config = {
             url: "test/data/tabix/sorted.genes.gtf.gz"
-    ),
-    }
+        }
 
         const loader = new BGZBlockLoader(config)
         const blocks = await loader.getInflatedBlocks(startBlock, endBlock)
@@ -72,8 +69,7 @@ suite("test BGZBlockLoader", function () {
 
         const config = {
             url: "test/data/tabix/sorted.genes.gtf.gz"
-    ),
-    }
+        }
 
         const loader = new BGZBlockLoader(config)
 
@@ -97,8 +93,7 @@ suite("test BGZBlockLoader", function () {
 
         const config = {
             url: "test/data/tabix/sorted.genes.gtf.gz"
-    ),
-    }
+        }
 
         const loader = new BGZBlockLoader(config)
 
@@ -121,8 +116,7 @@ suite("test BGZBlockLoader", function () {
 
         const config = {
             url: "test/data/tabix/sorted.genes.gtf.gz"
-    ),
-    }
+        }
 
         const loader = new BGZBlockLoader(config)
 
@@ -147,8 +141,7 @@ suite("test BGZBlockLoader", function () {
 
         const config = {
             url: "test/data/tabix/sorted.genes.gtf.gz"
-    ),
-    }
+        }
 
         const loader = new BGZBlockLoader(config)
 
@@ -170,8 +163,8 @@ suite("test BGZBlockLoader", function () {
     test("bam", async function () {
         const config = {
             url: "test/data/bam/gstt1_sample.bam"
-    ),
-    }
+
+        }
         const positions = [0, 766, 15628, 30107, 43153, 55599, 60844]
         const sizes = [1479, 65220, 65171, 65262, 65240, 26657]
         for (let i = 0; i < positions.length - 1; i++) {
