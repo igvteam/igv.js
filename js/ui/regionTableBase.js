@@ -1,7 +1,5 @@
 import { DOMUtils, makeDraggable, Icon } from '../../node_modules/igv-ui/src/index.js'
 
-const tableRowSelectionList = []
-
 class RegionTableBase {
     constructor(config) {
 
@@ -22,6 +20,8 @@ class RegionTableBase {
         this.footerDOM = this.container
 
         this.columnFormat = config.columnFormat
+
+        this.tableRowSelectionList = []
 
     }
 
@@ -116,6 +116,28 @@ class RegionTableBase {
 
     }
 
+    tableRowDOMHelper(dom) {
+
+        dom.addEventListener('mousedown', event => {
+            event.stopPropagation()
+
+            dom.classList.toggle('igv-roi-table-row-selected')
+            dom.classList.contains('igv-roi-table-row-selected') ? dom.classList.remove('igv-roi-table-row-hover') : dom.classList.add('igv-roi-table-row-hover')
+
+            this.setTableRowSelectionState(dom.classList.contains('igv-roi-table-row-selected'))
+        })
+
+        dom.addEventListener('mouseover', e => {
+            dom.classList.contains('igv-roi-table-row-selected') ? dom.classList.remove('igv-roi-table-row-hover') : dom.classList.add('igv-roi-table-row-hover')
+        })
+
+        dom.addEventListener('mouseout', e => {
+            dom.classList.remove('igv-roi-table-row-hover')
+        })
+
+    }
+
+
     clearTable() {
         const elements = this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')
         for (let el of elements) {
@@ -123,9 +145,9 @@ class RegionTableBase {
         }
     }
 
-    setButtonState(isTableRowSelected) {
-        isTableRowSelected ? tableRowSelectionList.push(1) : tableRowSelectionList.pop()
-        this.gotoButton.style.pointerEvents = tableRowSelectionList.length > 0 ? 'auto' : 'none'
+    setTableRowSelectionState(isTableRowSelected) {
+        isTableRowSelected ? this.tableRowSelectionList.push(1) : this.tableRowSelectionList.pop()
+        this.gotoButton.style.pointerEvents = this.tableRowSelectionList.length > 0 ? 'auto' : 'none'
     }
 
     present() {
