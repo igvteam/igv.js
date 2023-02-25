@@ -135,11 +135,7 @@ class CNVPytorTrack extends TrackBase {
             this.set_available_callers()
 
         } else {
-            this.cnvpytor_obj = this.config.indexed ?
-                new HDF5IndexedReader(this.config.url, this.bin_size) :
-                new HDF5Reader(this.config.url, this.bin_size)
-
-
+            this.cnvpytor_obj =   new HDF5IndexedReader(this.config.url, this.bin_size)
             this.wigFeatures_obj = await this.cnvpytor_obj.get_rd_signal(this.bin_size)
             this.rd_bins = this.cnvpytor_obj.rd_bins
             this.available_callers = this.cnvpytor_obj.callers
