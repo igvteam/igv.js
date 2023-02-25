@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import {igvxhr} from "../node_modules/igv-utils/src/index.js"
-import XMLSession from "../js/session/igvXmlSession"
+import XMLSession from "../js/session/igvXmlSession.js"
 
 suite("testXMLSession", function () {
 
@@ -12,7 +12,6 @@ suite("testXMLSession", function () {
     test("merge track session", async function () {
 
         const sessionPath = "test/data/session/session-merged.xml"
-    )
 
         const xmlString = await igvxhr.loadString(sessionPath, {})
         const sessionObject = new XMLSession(xmlString, knownGenomes)

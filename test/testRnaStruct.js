@@ -20,14 +20,15 @@ suite("testRnaStruct", function () {
 
     test('Test parsing .bp file', async function () {
 
-        const rnaStruct = new RnaStructTrack({url: 'test/data/bp/example.bp')
-    },
-        browser
-    )
+        const rnaStruct = new RnaStructTrack({
+                url: 'test/data/bp/example.bp',
+                browser
+            }
+        )
 
         const features = await rnaStruct.getFeatures('1', 1, 100)
         assert.ok(features)
         assert.equal(features.length, 8)
 
     })
-})
+    })

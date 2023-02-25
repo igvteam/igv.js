@@ -6,7 +6,6 @@ suite("testRnaStruct", function () {
 
     test('Load Plink', async function () {
         const sampleInformation = await loadPlinkFile('test/data/misc/pedigree.fam')
-    )
 
         const attributes = sampleInformation.getAttributes('SS0012979')
         assert.ok(attributes)

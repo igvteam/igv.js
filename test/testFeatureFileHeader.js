@@ -16,8 +16,8 @@ suite("testTrackLine", function () {
 
         const featureReader = new FeatureFileReader({
             format: 'bedgraph',
-            url: 'test/data/wig/bedgraph-example-uscs.bedgraph')
-    })
+            url: 'test/data/wig/bedgraph-example-uscs.bedgraph'
+        })
 
 
         //track type=bedGraph name="BedGraph Format" description="BedGraph format" visibility=full color=200,100,0 altColor=0,100,200 priority=20
@@ -34,8 +34,8 @@ suite("testTrackLine", function () {
 
         const featureReader = new FeatureFileReader({
             format: 'bedpe',
-            url: 'test/data/bedpe/hiccups_loops.bedpe')
-    })
+            url: 'test/data/bedpe/hiccups_loops.bedpe'
+        })
 
 
         //chr1	x1	x2	chr2	y1	y2	name	score	strand1	strand2	color	observed	expectedBL	expectedDonut	expectedH	expectedV	fdrBL	fdrDonut	fdrH	fdrV	numCollapsed	centroid1	centroid2	radius

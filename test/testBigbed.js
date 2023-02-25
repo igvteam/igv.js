@@ -2,14 +2,12 @@ import "./utils/mockObjects.js"
 import BWSource from "../js/bigwig/bwSource.js"
 import {parseAutoSQL} from "../js/util/ucscUtils.js"
 import {assert} from 'chai'
-import {fileToDataURL} from "./utils/URLUtils"
+import {fileToDataURL} from "./utils/URLUtils.js"
 
 suite("testBigBed", function () {
 
     test("bed9+2 features", async function () {
-        const url = ("test/data/bb/myBigBed2.bb")
-    )
-
+        const url = "test/data/bb/myBigBed2.bb"
         const chr = "chr7"
         const start = 0
         const end = Number.MAX_SAFE_INTEGER
@@ -31,7 +29,6 @@ suite("testBigBed", function () {
 
     test("bed9+2 features - dataURL", async function () {
         const url = await fileToDataURL("test/data/bb/myBigBed2.bb")
-    )
 
         const chr = "chr7"
         const start = 0
@@ -54,7 +51,6 @@ suite("testBigBed", function () {
 
     test("interact features", async function () {
         const url = "test/data/bb/interactExample3.inter.bb"
-    )
 
         const chr = "chr3"
         const start = 63702628
@@ -78,7 +74,7 @@ suite("testBigBed", function () {
 
     test("interact features - dataURL", async function () {
         const url = await fileToDataURL("test/data/bb/interactExample3.inter.bb")
-    )
+
 
         const chr = "chr3"
         const start = 63702628
