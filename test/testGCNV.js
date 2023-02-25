@@ -9,10 +9,10 @@ suite("testGCNV", function () {
     test("gcnv", async function () {
 
         const featureSource = FeatureSource({
-            url: "test/data/gcnv/gcnv_track_example_data.chr22.bed")
-    },
-        genome
-    )
+                url: "test/data/gcnv/gcnv_track_example_data.chr22.bed"
+            },
+            genome
+        )
 
 
         const trackType = await featureSource.trackType()
@@ -31,13 +31,12 @@ suite("testGCNV", function () {
     test("long lines", async function () {
 
         const featureSource = FeatureSource({
-                url: "test/data/gcnv/gcnv_large.bed.gz"),
-            indexURL: "test/data/gcnv/gcnv_large.bed.gz.tbi"
-    ),
-        format: 'gcnv',
-    },
-        genome
-    )
+                url: "test/data/gcnv/gcnv_large.bed.gz",
+                indexURL: "test/data/gcnv/gcnv_large.bed.gz.tbi",
+                format: 'gcnv',
+            },
+            genome
+        )
 
 
         await featureSource.getHeader()

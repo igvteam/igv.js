@@ -8,10 +8,10 @@ suite("testWig", function () {
     test("wig fixed step", async function () {
 
         const path = "test/data/wig/fixedStep-example.wig"
-    ),
-        featureSource = FeatureSource(
-            {format: 'wig', url: path},
-            genome),
+
+        const featureSource = FeatureSource(
+                {format: 'wig', url: path},
+                genome),
             chr = "chr19",
             start = 49300000,
             end = 49400000
@@ -28,7 +28,6 @@ suite("testWig", function () {
     test("wig variable step", async function () {
 
         const url = "test/data/wig/variableStep-example.wig"
-    )
 
         const wigFeatureSource = FeatureSource(
             {format: 'wig', url: url},

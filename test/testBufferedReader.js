@@ -7,7 +7,6 @@ suite("testBigWig", function () {
     test("read", async function () {
 
         const url = 'test/data/misc/BufferedReaderTest.bin'
-    )
 
         const range = {start: 25, size: 100}
         const bufferedReader = new BufferedReader({url: url}, 16)

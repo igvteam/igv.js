@@ -3,7 +3,7 @@ import FeatureFileReader from "../js/feature/featureFileReader.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai'
 import {genome} from "./utils/Genome.js"
-import GenomeUtils from "../js/genome/genome"
+import GenomeUtils from "../js/genome/genome.js"
 
 suite("testBed", function () {
 
