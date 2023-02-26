@@ -11,7 +11,7 @@ suite("testTabix", function () {
             beg = 55369194,
             end = 55369443,
             indexPath = "test/data/tabix/refGene.hg19.bed.gz.tbi"
-        config = {}
+        const config = {}
 
         const tbiIndex = await loadIndex(indexPath, config)
         assert.ok(tbiIndex)
@@ -30,7 +30,7 @@ suite("testTabix", function () {
             end = 1227000,
             indexPath = "test/data/tabix/csi-test.vcf.gz.csi"
 
-        config = {}
+        const config = {}
 
         const csiIndex = await loadIndex(indexPath, config)
         assert.ok(csiIndex)
