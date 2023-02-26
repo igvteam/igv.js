@@ -38,7 +38,7 @@ Below are examples and a quickstart guide.  See the [Wiki](https://github.com/ig
 ## Installation
 igv.js consists of a single javascript file with no external dependencies.  
 
-Pre-built files for ES5 (igv.min.js) and ES6 (igv.esm.min.js)
+Pre-built files for script include, AMD, or CJS module systems (igv.min.js) and an ES6 module (igv.esm.min.js)
 can be downloaded from [https://cdn.jsdelivr.net/npm/igv@2.13.9/dist/](https://cdn.jsdelivr.net/npm/igv@2.13.9/dist/). 
 
 To import igv as an ES6 module
@@ -116,7 +116,7 @@ npm run build
 
 This creates a dist folder with the following files
 
-* igv.js - ES5 compatible UMDS file for script include, AMD, or CJS modules.  A script include will define an "igv" global.
+* igv.js - UMDS file for script include, AMD, or CJS modules.  A script include will define an "igv" global.
 * igv.min.js - minified version of igv.js
 * igv.esm.js --  ES6 module 
 * igv.esm.min.js --  minified version of igv.esm.js
@@ -145,7 +145,7 @@ Then open [http://localhost:8080/examples](http://localhost:8080/examples) in a 
 
 # Supported Browsers
 
-igv.js require a modern web browser with support for Javascript ECMAScript 2015. 
+igv.js require a modern web browser with support for Javascript ECMAScript 2015 (ES6). 
 
 # License
 
