@@ -53,7 +53,6 @@ class BGZLineReader {
         })
         const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions)
         const bufferSize = BGZip.bgzBlockSize(abuffer)
-        //console.log(`next block ${this.filePtr}  ${bufferSize}`);
 
         if (bufferSize === 0) {
             this.eof = true
@@ -66,6 +65,9 @@ class BGZLineReader {
                 this.eof = true // Assumption
             }
             this.buffer = BGZip.unbgzf(data)
+            if(this.buffer.byteLength == 0) {
+                this.eof = true
+            }
             this.bufferPtr = 0
             this.filePtr += data.byteLength //data.byteLength;
         }
