@@ -1,8 +1,6 @@
-//import h5wasm from "https://cdn.jsdelivr.net/npm/h5wasm@0.4.9/dist/esm/hdf5_hl.js";
-//import h5wasm from  '../../node_modules/h5wasm/dist/esm/hdf5_hl.js'
 import {openH5File} from "../vendor/hdf5-indexed-reader.esm.js"
 
-class Read_HDF5_Indexed{
+class HDF5Reader {
     
     constructor(h5_file, bin_size=100000){
 
@@ -296,4 +294,4 @@ function create_nested_array(value, shape) {
 
 
 
-export default Read_HDF5_Indexed
+export default HDF5Reader
