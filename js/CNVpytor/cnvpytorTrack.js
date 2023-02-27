@@ -27,7 +27,6 @@
 import TrackBase from "../trackBase.js"
 import paintAxis from "../util/paintAxis.js"
 import MenuUtils from "../ui/menuUtils.js"
-import HDF5Reader from "./HDF5_Reader.js"
 import HDF5IndexedReader from "./HDF5IndexedReader.js"
 import {CNVpytorVCF} from "./cnvpytorVCF.js"
 import FeatureSource from '../feature/featureSource.js'
