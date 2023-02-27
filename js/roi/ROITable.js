@@ -1,4 +1,4 @@
-import { DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-ui/src/index.js'
+import { DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-ui/dist/igv-ui.js'
 import { StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import { createRegionKey, parseRegionKey } from './ROIManager.js'
 
