@@ -1,8 +1,8 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import {InputDialog, GenericColorPicker} from '../node_modules/igv-ui/src/index.js'
+import {InputDialog, GenericColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {BGZip, FileUtils, igvxhr, StringUtils, URIUtils} from "../node_modules/igv-utils/src/index.js"
-import {DOMUtils, Icon} from "../node_modules/igv-ui/src/index.js"
+import {DOMUtils, Icon} from "../node_modules/igv-ui/dist/igv-ui.js"
 import Alert from './ui/alert.js'
 import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width} from "./trackView.js"

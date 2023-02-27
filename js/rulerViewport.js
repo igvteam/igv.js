@@ -3,7 +3,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js"
 import RulerSweeper from "./rulerSweeper.js"
 import GenomeUtils from "./genome/genome.js"
 import {IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js"
-import {DOMUtils, Icon} from "../node_modules/igv-ui/src/index.js"
+import {DOMUtils, Icon} from "../node_modules/igv-ui/dist/igv-ui.js"
 import {getChrColor} from "./bam/bamTrack.js"
 
 let timer
