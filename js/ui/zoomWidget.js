@@ -1,4 +1,4 @@
-import {DOMUtils, Icon} from '../../node_modules/igv-ui/src/index.js'
+import {DOMUtils, Icon} from '../../node_modules/igv-ui/dist/igv-ui.js'
 
 const sliderMin = 0
 let sliderMax = 23

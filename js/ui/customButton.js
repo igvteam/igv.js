@@ -2,7 +2,7 @@
  * User supplied button for the navbar
  */
 
-import {DOMUtils} from '../../node_modules/igv-ui/src/index.js'
+import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 
 const CustomButton = function (parent, browser, b) {
 

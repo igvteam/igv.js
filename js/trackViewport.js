@@ -3,10 +3,10 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import {Popover} from '../node_modules/igv-ui/src/index.js'
+import {Popover} from '../node_modules/igv-ui/dist/igv-ui.js'
 import Viewport from "./viewport.js"
 import {FileUtils} from "../node_modules/igv-utils/src/index.js"
-import {DOMUtils} from "../node_modules/igv-ui/src/index.js"
+import {DOMUtils} from "../node_modules/igv-ui/dist/igv-ui.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genome.js"
 import {bppFeatureFetchThreshold} from "./sequenceTrack.js"
