@@ -13,6 +13,7 @@ import RnaStructTrack from "./rna/rnaStruct.js"
 import IdeogramTrack from "./ideogramTrack.js"
 import SpliceJunctionTrack from "./feature/spliceJunctionTrack.js"
 import BlatTrack from "./blat/blatTrack.js"
+import CNVPytorTrack from "./CNVpytor/cnvpytorTrack.js"
 //import CNVPytorTrack from "./CNVpytor/cnvpytorTrack.js"
 
 
