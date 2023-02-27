@@ -1,9 +1,5 @@
-const isNode =
-    typeof process !== 'undefined' &&
-    process.versions != null &&
-    process.versions.node != null;
 
-const crossFetch = isNode ? require("node-fetch") : fetch;
+const crossFetch =   fetch
 
 class RemoteFile {
 
@@ -271,16 +267,12 @@ function binarySearch(array, pred, min) {
     return hi
 }
 
-let fs;
-if (isNode) {
-    fs = require('fs');
-} else {
-    fs = {
+let fs = {
         openSync: () => {throw Error("NodeLocalFile only supported in node.js environments")},
         readSync: () => {throw Error("NodeLocalFile only supported in node.js environments")},
         statSync: () => {throw Error("NodeLocalFile only supported in node.js environments")},
     };
-}
+
 
 class NodeLocalFile {
 
