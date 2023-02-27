@@ -1,6 +1,6 @@
 
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import {makeDraggable, UIUtils} from "../../node_modules/igv-ui/src/index.js"
+import {makeDraggable, UIUtils} from "../../node_modules/igv-ui/dist/igv-ui.js"
 
 class DataRangeDialog {
 

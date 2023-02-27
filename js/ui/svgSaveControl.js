@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-ui/src/index.js'
+import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 
 const SVGSaveControl = function (parent, browser) {
     const button = DOMUtils.div({class: 'igv-navbar-button'})
