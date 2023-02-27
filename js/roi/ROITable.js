@@ -1,15 +1,5 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
-import { DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-ui/dist/igv-ui.js'
-=======
-
-import { DOMUtils, Icon, makeDraggable } from '../../node_modules/igv-ui/src/index.js'
->>>>>>> 242a705c (Refactors to support table generalization)
-import { StringUtils} from '../../node_modules/igv-utils/src/index.js'
-=======
-import { DOMUtils } from '../../node_modules/igv-ui/src/index.js'
+import { DOMUtils } from '../../node_modules/igv-ui/dist/igv-ui.js'
 import { StringUtils } from '../../node_modules/igv-utils/src/index.js'
->>>>>>> d276b919 (rebase pain)
 
 import { createRegionKey, parseRegionKey } from './ROIManager.js'
 import RegionTableBase from '../ui/regionTableBase.js'
