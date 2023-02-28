@@ -21,22 +21,6 @@
 
     const tableData =
         {
-            headers:
-                [
-                    "chr",
-                    "start",
-                    "end",
-                    "strand",
-                    "score",
-                    "match",
-                    "mis-match",
-                    "rep. match",
-                    "N's",
-                    "Q gap count",
-                    "Q gap bases",
-                    "T gap count",
-                    "T gap bases"
-                ],
             rows:
                 [
                     ["chr8", "128747591", "128749088", "+", "1000", "1477", "0", "0", "0", "0", "0", "0", "0"],
@@ -135,10 +119,10 @@
             const config =
                 {
                     browser,
-                    columnFormat: tableData.headers.slice(),
                     parent: document.getElementById('igv-container'),
                     headerTitle: 'BLAT Results',
                     dismissHandler: () => blatTable.dismiss(),
+                    columnFormat: BLATTable.getColumnFormatConfiguration(),
                     gotoButtonHandler: BLATTable.gotoButtonHandler
                 }
 
