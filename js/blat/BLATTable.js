@@ -1,7 +1,7 @@
-import {StringUtils} from '../../node_modules/igv-utils/src/index.js'
-import {DOMUtils} from '../../node_modules/igv-ui/src/index.js'
+import { DOMUtils } from '../../node_modules/igv-ui/dist/igv-ui.js'
+import { StringUtils } from '../../node_modules/igv-utils/src/index.js'
 
-import RegionTableBase from './regionTableBase.js'
+import RegionTableBase from '../ui/regionTableBase.js'
 
 class BLATTable extends RegionTableBase {
     constructor(config) {
@@ -52,6 +52,32 @@ class BLATTable extends RegionTableBase {
             }
 
         }
+
+    }
+
+    static gotoButtonHandler (event) {
+
+        event.stopPropagation()
+
+        const selectedRows = this.container.querySelectorAll('.igv-roi-table-row-selected')
+
+        const loci = []
+        for (const row of selectedRows) {
+
+            const record = []
+            row.querySelectorAll('div').forEach(el => record.push(el.innerText))
+
+            const [ chr, start, end ] = record
+            loci.push(`${ chr }:${ start }-${ end }`)
+        }
+
+        for (const el of this.container.querySelectorAll('.igv-roi-table-row')) {
+            el.classList.remove('igv-roi-table-row-selected')
+        }
+
+        this.setTableRowSelectionState(false)
+
+        console.log(`browser search( ${loci.join(' ')} )`)
 
     }
 
