@@ -42,34 +42,6 @@ class ROITable extends RegionTableBase {
         return dom
     }
 
-    set footerDOM(container) {
-
-        super.footerDOM = container
-
-        this.gotoButton.addEventListener('click', event => {
-
-            event.stopPropagation()
-
-            const selected = container.querySelectorAll('.igv-roi-table-row-selected')
-            const loci = []
-            for (let el of selected) {
-                const { locus } = parseRegionKey(el.dataset.region)
-                loci.push(locus)
-            }
-
-            for (let el of container.querySelectorAll('.igv-roi-table-row')) {
-                el.classList.remove('igv-roi-table-row-selected')
-            }
-
-            this.setTableRowSelectionState(false)
-
-            if (loci.length > 0) {
-                this.browser.search(loci.join(' '))
-            }
-
-        })
-    }
-
     renderTable(records) {
 
         Array.from(this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
@@ -87,6 +59,9 @@ class ROITable extends RegionTableBase {
     }
 
     dispose() {
+
+        document.removeEventListener('click', this.boundGotoButtonHandler)
+
         this.browser.roiTableControl.buttonHandler(false)
         super.dispose()
     }
@@ -109,6 +84,29 @@ class ROITable extends RegionTableBase {
                     { label: 'End', width: '20%' },
                     { label: 'Description', width: '35%' }
                 ]
+        }
+
+    }
+
+    static gotoButtonHandler (event) {
+
+        event.stopPropagation()
+
+        const selected = container.querySelectorAll('.igv-roi-table-row-selected')
+        const loci = []
+        for (let el of selected) {
+            const { locus } = parseRegionKey(el.dataset.region)
+            loci.push(locus)
+        }
+
+        for (let el of container.querySelectorAll('.igv-roi-table-row')) {
+            el.classList.remove('igv-roi-table-row-selected')
+        }
+
+        this.setTableRowSelectionState(false)
+
+        if (loci.length > 0) {
+            this.browser.search(loci.join(' '))
         }
 
     }
