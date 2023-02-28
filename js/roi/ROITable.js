@@ -92,14 +92,14 @@ class ROITable extends RegionTableBase {
 
         event.stopPropagation()
 
-        const selected = container.querySelectorAll('.igv-roi-table-row-selected')
+        const selected = this.container.querySelectorAll('.igv-roi-table-row-selected')
         const loci = []
         for (let el of selected) {
             const { locus } = parseRegionKey(el.dataset.region)
             loci.push(locus)
         }
 
-        for (let el of container.querySelectorAll('.igv-roi-table-row')) {
+        for (let el of this.container.querySelectorAll('.igv-roi-table-row')) {
             el.classList.remove('igv-roi-table-row-selected')
         }
 

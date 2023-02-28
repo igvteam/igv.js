@@ -23,14 +23,32 @@
 <script type="module">
 
     import igv from '../../js/index.js'
-    import BLATTable from '../../js/ui/BLATTable.js'
-    import {blat} from "../../js/blat/blatClient.js"
+    import BLATTable from '../../js/blat/BLATTable.js'
+    import {blat} from '../../js/blat/blatClient.js'
 
     const db = 'hg38'
     let blatTable = undefined
 
-    const tableData = {}
-    tableData.headers = ["chr", "start", "end", "strand", "score", "match", "mis-match", "rep. match", "N's", "Q gap count", "Q gap bases", "T gap count", "T gap bases"]
+    const tableData =
+        {
+
+        }
+    tableData.headers =
+        [
+            "chr",
+            "start",
+            "end",
+            "strand",
+            "score",
+            "match",
+            "mis-match",
+            "rep. match",
+            "N's",
+            "Q gap count",
+            "Q gap bases",
+            "T gap count",
+            "T gap bases"
+        ]
 
     document.getElementById("blatButton").addEventListener("click", async e => {
 
@@ -55,8 +73,6 @@
                 f.tBaseInsert
             ])
 
-            tableData.rowClickHandler = rowData => console.log(`${rowData[0]}:${parseInt(rowData[1]) - 1}-${rowData[2]}`)
-
             blatTable.renderTable(tableData.rows)
             blatTable.present()
 
@@ -71,6 +87,7 @@
             genome: 'hg19',
             locus: 'myc',
         };
+
     igv.createBrowser(document.getElementById('igv-container'), options)
         .then(browser => {
 
@@ -81,14 +98,12 @@
                     parent: document.getElementById('igv-container'),
                     headerTitle: 'BLAT Results',
                     dismissHandler: () => blatTable.dismiss(),
-                    gotoButtonHandler: () => console.log('Yo. Goto Button Handler here.')
+                    gotoButtonHandler: BLATTable.gotoButtonHandler
                 };
 
             blatTable = new BLATTable(config)
 
         })
-
-
 
 </script>
 
