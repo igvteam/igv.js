@@ -4,20 +4,17 @@ import { StringUtils } from '../../node_modules/igv-utils/src/index.js'
 import RegionTableBase from '../ui/regionTableBase.js'
 
 class BLATTable extends RegionTableBase {
-    constructor(config) {
-        super(config)
-    }
 
     set columnTitleDOM(columnFormat) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
         this.container.appendChild(dom)
 
-        for (const string of columnFormat) {
+        for (const format of columnFormat) {
             const col = DOMUtils.div()
             dom.appendChild(col)
-            col.style.width = 'fit-content'
-            col.innerText = string
+            col.style.width = format.width || 'fit-content'
+            col.innerText = format.label
         }
 
     }
@@ -31,8 +28,10 @@ class BLATTable extends RegionTableBase {
         for (const string of pretty) {
             const el = DOMUtils.div()
             dom.appendChild(el)
+
+            const format = this.columnFormat[ pretty.indexOf(string) ]
+            el.style.width = format.width || 'fit-content'
             el.innerText = string
-            el.style.width = 'fit-content'
         }
 
         this.tableRowDOMHelper(dom)
@@ -53,6 +52,25 @@ class BLATTable extends RegionTableBase {
 
         }
 
+    }
+
+    static getColumnFormatConfiguration() {
+
+        return [
+            { label: 'chr', width: '80px' },
+            { label: 'start', width: '170px' },
+            { label: 'end', width: '170px' },
+            { label: 'strand' },
+            { label: 'score' },
+            { label: 'match' },
+            { label: "mis-match" },
+            { label: "rep. match" },
+            { label: "N's" },
+            { label: 'Q gap count' },
+            { label: 'Q gap bases' },
+            { label: 'T gap count' },
+            { label: 'T gap bases' },
+        ]
     }
 
     static gotoButtonHandler (event) {
