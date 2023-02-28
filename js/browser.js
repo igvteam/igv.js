@@ -509,7 +509,8 @@ class Browser {
                 browser: this,
                 parent: this.columnContainer,
                 headerTitle: 'Regions of Interest',
-                dismissHandler: () => this.roiTableControl.buttonHandler(false)
+                dismissHandler: () => this.roiTableControl.buttonHandler(false),
+                gotoButtonHandler: ROITable.gotoButtonHandler
             }
         if (session.roi) {
 

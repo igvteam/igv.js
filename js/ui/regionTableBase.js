@@ -17,7 +17,7 @@ class RegionTableBase {
 
         this.rowContainerDOM = this.container
 
-        this.footerDOM = this.container
+        this.footerDOM = config.gotoButtonHandler
 
         this.columnFormat = config.columnFormat
 
@@ -41,10 +41,14 @@ class RegionTableBase {
         dom.appendChild(dismiss)
         dismiss.appendChild(Icon.createIcon('times'))
 
-        dismiss.addEventListener('click', event => {
+        this.boundDismissHandler = mouseClickHandler.bind(this)
+
+        dismiss.addEventListener('click', this.boundDismissHandler)
+
+        function mouseClickHandler (event) {
             event.stopPropagation()
             dismissHandler()
-        })
+        }
 
         const { y:y_root } = browser.root.getBoundingClientRect()
         const { y:y_parent } = parent.getBoundingClientRect()
@@ -97,10 +101,10 @@ class RegionTableBase {
         return this._rowContainerDOM
     }
 
-    set footerDOM(container) {
+    set footerDOM(gotoButtonHandler) {
 
         const dom = DOMUtils.div()
-        container.appendChild(dom)
+        this.container.appendChild(dom)
 
         // Go To Button
         const gotoButton = DOMUtils.div({class: 'igv-roi-table-button'})
@@ -113,6 +117,10 @@ class RegionTableBase {
         this._footerDOM = dom
 
         this.gotoButton = gotoButton
+
+        this.boundGotoButtonHandler = gotoButtonHandler.bind(this)
+
+        this.gotoButton.addEventListener('click', this.boundGotoButtonHandler)
 
     }
 
@@ -137,7 +145,6 @@ class RegionTableBase {
 
     }
 
-
     clearTable() {
         const elements = this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')
         for (let el of elements) {
@@ -161,6 +168,8 @@ class RegionTableBase {
     }
 
     dispose() {
+
+        document.removeEventListener('click', this.boundDismissHandler)
 
         this.container.innerHTML = ''
 
