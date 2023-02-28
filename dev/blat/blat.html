@@ -80,7 +80,8 @@
                     columnFormat: tableData.headers.slice(),
                     parent: document.getElementById('igv-container'),
                     headerTitle: 'BLAT Results',
-                    dismissHandler: () => blatTable.dismiss()
+                    dismissHandler: () => blatTable.dismiss(),
+                    gotoButtonHandler: () => console.log('Yo. Goto Button Handler here.')
                 };
 
             blatTable = new BLATTable(config)
