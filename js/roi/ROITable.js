@@ -6,10 +6,6 @@ import RegionTableBase from '../ui/regionTableBase.js'
 
 class ROITable extends RegionTableBase {
 
-    constructor(config) {
-        super(config)
-    }
-
     tableRowDOM(record) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-row' })
@@ -33,8 +29,8 @@ class ROITable extends RegionTableBase {
         for (let i = 0; i < strings.length; i++) {
             const el = DOMUtils.div()
             dom.appendChild(el)
-            el.innerText = strings[ i ]
             el.style.width = this.columnFormat[ i ].width
+            el.innerText = strings[ i ]
         }
 
         this.tableRowDOMHelper(dom)
