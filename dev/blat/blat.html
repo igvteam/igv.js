@@ -94,10 +94,10 @@
             const config =
                 {
                     browser,
-                    columnFormat: tableData.headers.slice(),
                     parent: document.getElementById('igv-container'),
                     headerTitle: 'BLAT Results',
                     dismissHandler: () => blatTable.dismiss(),
+                    columnFormat: BLATTable.getColumnFormatConfiguration(),
                     gotoButtonHandler: BLATTable.gotoButtonHandler
                 };
 
