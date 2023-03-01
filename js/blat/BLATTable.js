@@ -25,13 +25,14 @@ class BLATTable extends RegionTableBase {
 
         const pretty = record.map(item => isFinite(item) ? StringUtils.numberFormatter(item) : item)
 
-        for (const string of pretty) {
+        for (let i = 0; i < pretty.length; i++) {
+
             const el = DOMUtils.div()
             dom.appendChild(el)
 
-            const format = this.columnFormat[ pretty.indexOf(string) ]
+            const format = this.columnFormat[ i ]
             el.style.width = format.width || 'fit-content'
-            el.innerText = string
+            el.innerText = pretty[ i ]
         }
 
         this.tableRowDOMHelper(dom)
@@ -57,19 +58,19 @@ class BLATTable extends RegionTableBase {
     static getColumnFormatConfiguration() {
 
         return [
-            { label: 'chr', width: '80px' },
-            { label: 'start', width: '170px' },
-            { label: 'end', width: '170px' },
-            { label: 'strand' },
-            { label: 'score' },
-            { label: 'match' },
-            { label: "mis-match" },
-            { label: "rep. match" },
-            { label: "N's" },
-            { label: 'Q gap count' },
-            { label: 'Q gap bases' },
-            { label: 'T gap count' },
-            { label: 'T gap bases' },
+            { label:         'chr', width: '80px' },
+            { label:       'start', width: '170px' },
+            { label:         'end', width: '170px' },
+            { label:      'strand', width: '64px' },
+            { label:       'score', width: '64px' },
+            { label:       'match', width: '64px' },
+            { label:   "mis-match", width: '70px' },
+            { label:  "rep. match", width: '75px' },
+            { label:         "N's", width: '32px' },
+            { label: 'Q gap count', width: '90px' },
+            { label: 'Q gap bases', width: '90px' },
+            { label: 'T gap count', width: '80px' },
+            { label: 'T gap bases', width: '90px' },
         ]
     }
 
