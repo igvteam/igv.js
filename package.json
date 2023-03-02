@@ -52,6 +52,7 @@
     "eslint": "^6.4.0",
     "igv-ui": "github:igvteam/igv-ui",
     "igv-utils": "github:igvteam/igv-utils",
+    "hdf5-indexed-reader": "github:/jrobinso/hdf5-indexed-reader",
     "mocha": "^10.2.0",
     "rollup": "^2.66.0",
     "rollup-plugin-copy": "^3.3.0",
