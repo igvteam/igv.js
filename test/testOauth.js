@@ -1,7 +1,8 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import {oauth} from "../node_modules/igv-utils/src/index.js"
+import _igv from "../js/index.js"
 
+const oauth = _igv.oauth
 
 // Use a mock IGV object.  We need to avoid importing index.js for this test.
 
@@ -25,11 +26,10 @@ suite("testOauth", function () {
     test("Test google token", function () {
 
         igv.oauth.setToken("foo")
-        assert.equal(igv.oauth.google.access_token, "foo")
         assert.equal(igv.oauth.getToken(), "foo")
 
         igv.oauth.removeToken()
-        assert.ok(undefined === igv.oauth.google.access_token)
+        assert.ok(undefined === igv.oauth.getToken())
 
         // Legacy method
         // igv.setGoogleOauthToken("foo");
