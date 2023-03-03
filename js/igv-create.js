@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {GoogleAuth, igvxhr, oauth} from '../node_modules/igv-utils/src/index.js'
+import {GoogleAuth, igvxhr} from '../node_modules/igv-utils/src/index.js'
 import Browser from "./browser.js"
 import GenomeUtils from "./genome/genome.js"
 
@@ -54,7 +54,7 @@ async function createBrowser(parentDiv, config) {
         igvxhr.setApiKey(config.apiKey)
     }
     if (config.oauthToken) {
-        oauth.setToken(config.oauthToken)
+        igvxhr.setOauthToken(config.oauthToken)
     }
     if (config.clientId && (!GoogleAuth.isInitialized())) {
         await GoogleAuth.init({
