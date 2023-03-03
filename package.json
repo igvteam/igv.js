@@ -43,22 +43,21 @@
   "devDependencies": {
     "@rollup/plugin-babel": "^5.3.0",
     "@rollup/plugin-strip": "^3.0.1",
-    "@xmldom/xmldom": "^0.7.5",
+    "@rollup/plugin-terser": "^0.4.0",
+    "@xmldom/xmldom": "^0.7.9",
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
     "chai": "^4.3.7",
     "circular-view": "github:igvteam/circular-view",
     "core-js": "^3.20.3",
     "eslint": "^6.4.0",
+    "hdf5-indexed-reader": "github:/jrobinso/hdf5-indexed-reader",
     "igv-ui": "github:igvteam/igv-ui",
     "igv-utils": "github:igvteam/igv-utils",
-    "hdf5-indexed-reader": "github:/jrobinso/hdf5-indexed-reader",
     "mocha": "^10.2.0",
     "rollup": "^2.66.0",
     "rollup-plugin-copy": "^3.3.0",
-    "rollup-plugin-terser": "^7.0.2",
     "sass": "^1.45.1",
-    "w3c-xmlhttprequest": "^3.0.0",
-    "xmldom": "^0.6.0"
+    "w3c-xmlhttprequest": "^3.0.0"
   }
 }

@@ -18,13 +18,11 @@ function setGoogleOauthToken(accessToken) {
 }
 
 function setOauthToken(accessToken, host) {
-    return oauth.setOauthToken(accessToken, host)
+    return igvxhr.setOauthToken(accessToken, host)
 }
 
 // Backward compatibility
-const oauth = {
-    setToken: (token) => {igvxhr.setOauthToken(token)}
-}
+const oauth = igvxhr.oauth
 
 export default {
     TrackUtils,
