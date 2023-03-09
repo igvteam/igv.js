@@ -1,4 +1,4 @@
-import { DOMUtils, makeDraggable, Icon } from '../../node_modules/igv-ui/src/index.js'
+import { DOMUtils, makeDraggable, Icon } from '../../node_modules/igv-ui/dist/igv-ui.js'
 
 class RegionTableBase {
     constructor(config) {
