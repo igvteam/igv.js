@@ -27,7 +27,8 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import {doAutoscale} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
-import {DOMUtils, FeatureUtils, Icon, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js'
+import {FeatureUtils, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js'
+import {DOMUtils, Icon} from '../node_modules/igv-ui/src/index.js'
 import SampleNameViewport from './sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import MenuUtils from "./ui/menuUtils.js"

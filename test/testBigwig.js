@@ -1,8 +1,8 @@
 import "./utils/mockObjects.js"
-import BWSource from "../js/bigwig/bwSource.js";
-import BWReader from "../js/bigwig/bwReader.js";
+import BWSource from "../js/bigwig/bwSource.js"
+import BWReader from "../js/bigwig/bwReader.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import {assert} from 'chai';
+import {assert} from 'chai'
 
 suite("testBigWig", function () {
 
@@ -110,35 +110,35 @@ suite("testBigWig", function () {
 
     test("Uncompressed bigwig", async function () {
 
-        this.timeout(10000);
+        this.timeout(10000)
 
         //chr21:19,146,376-19,193,466
         const url = "https://s3.amazonaws.com/igv.org.test/data/uncompressed.bw",
             chr = "chr21",
             start = 0,
             end = Number.MAX_SAFE_INTEGER,
-            bpPerPixel = 6191354.824;    // To match iOS unit test
+            bpPerPixel = 6191354.824    // To match iOS unit test
 
-        const bwReader = new BWReader({url: url});
-        const features = await bwReader.readFeatures(chr, start, chr, end, bpPerPixel);
-        assert.equal(features.length, 8);   // Verified in iPad app
+        const bwReader = new BWReader({url: url})
+        const features = await bwReader.readFeatures(chr, start, chr, end, bpPerPixel)
+        assert.equal(features.length, 8)   // Verified in iPad app
 
-    });
+    })
 
     test("bigbed", async function () {
 
-        this.timeout(10000);
+        this.timeout(10000)
 
         const url = "https://s3.amazonaws.com/igv.org.genomes/hg38/clinvarMain.bb",
             chr = "chr22",
             start = 23786974,
-            end = 23787050;
+            end = 23787050
 
-        const bwReader = new BWReader({url: url});
-        const features = await bwReader.readFeatures(chr, start, chr, end);
-        assert.equal(features.length, 3);
+        const bwReader = new BWReader({url: url})
+        const features = await bwReader.readFeatures(chr, start, chr, end)
+        assert.equal(features.length, 3)
 
-    });
+    })
 
 
     // test("Zoom data", async function () {

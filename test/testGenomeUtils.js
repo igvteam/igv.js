@@ -1,26 +1,27 @@
 import "./utils/mockObjects.js"
 import GenomeUtils from "../js/genome/genome.js"
-import {assert} from 'chai';
+import {assert} from 'chai'
 
 suite("testGenomeUtils", function () {
 
     test("agument default genome list 1", async function () {
 
-        this.timeout(100000);
+        this.timeout(100000)
         const config = {
-            genomeList: require.resolve("./data/genomes/altGenomes.json")
-        }
+            genomeList: "test/data/genomes/altGenomes.json"
+    )
+    }
 
-        await GenomeUtils.initializeGenomes(config);
-        assert.ok(GenomeUtils.KNOWN_GENOMES["_sacCer3"]);
-        assert.ok(GenomeUtils.KNOWN_GENOMES["sacCer3"]);
+        await GenomeUtils.initializeGenomes(config)
+        assert.ok(GenomeUtils.KNOWN_GENOMES["_sacCer3"])
+        assert.ok(GenomeUtils.KNOWN_GENOMES["sacCer3"])
 
     })
 
     test("agument default genome list 2", async function () {
 
-        this.timeout(100000);
-        GenomeUtils.KNOWN_GENOMES = undefined;   // reset
+        this.timeout(100000)
+        GenomeUtils.KNOWN_GENOMES = undefined   // reset
 
         const config = {
             genomeList: [
@@ -61,16 +62,16 @@ suite("testGenomeUtils", function () {
             ]
         }
 
-        await GenomeUtils.initializeGenomes(config);
-        assert.ok(GenomeUtils.KNOWN_GENOMES["_sacCer3"]);
-        assert.ok(GenomeUtils.KNOWN_GENOMES["sacCer3"]);
+        await GenomeUtils.initializeGenomes(config)
+        assert.ok(GenomeUtils.KNOWN_GENOMES["_sacCer3"])
+        assert.ok(GenomeUtils.KNOWN_GENOMES["sacCer3"])
 
     })
 
     test("replace default genome list", async function () {
 
-        this.timeout(100000);
-        GenomeUtils.KNOWN_GENOMES = undefined;   // reset
+        this.timeout(100000)
+        GenomeUtils.KNOWN_GENOMES = undefined   // reset
 
         const config = {
             loadDefaultGenomes: false,
@@ -112,9 +113,9 @@ suite("testGenomeUtils", function () {
             ]
         }
 
-        await GenomeUtils.initializeGenomes(config);
-        assert.ok(GenomeUtils.KNOWN_GENOMES["_sacCer3"]);
-        assert.isUndefined(GenomeUtils.KNOWN_GENOMES["sacCer3"]);
+        await GenomeUtils.initializeGenomes(config)
+        assert.ok(GenomeUtils.KNOWN_GENOMES["_sacCer3"])
+        assert.isUndefined(GenomeUtils.KNOWN_GENOMES["sacCer3"])
 
     })
 
