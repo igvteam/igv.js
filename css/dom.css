@@ -1177,12 +1177,17 @@
   color: #444;
 }
 .igv-roi-table > .igv-roi-table-description {
+  height: fit-content;
   padding: 4px;
+  margin-left: 4px;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: center;
+  border-bottom-color: #7f7f7f;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
 }
 .igv-roi-table > .igv-roi-table-column-titles {
   height: 24px;
@@ -1201,9 +1206,8 @@
   font-size: 14px;
   vertical-align: middle;
   line-height: 24px;
-  text-align: center;
-  margin-left: 4px;
-  margin-right: 4px;
+  text-align: left;
+  margin-left: 8px;
   height: 24px;
   white-space: nowrap;
   overflow: hidden;
@@ -1235,9 +1239,8 @@
   font-size: 14px;
   vertical-align: middle;
   line-height: 24px;
-  text-align: center;
-  margin-left: 4px;
-  margin-right: 4px;
+  text-align: left;
+  margin-left: 8px;
   height: 24px;
   white-space: nowrap;
   overflow: hidden;

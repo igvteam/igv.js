@@ -232,7 +232,11 @@ $igv-roi-table-background-color: #eee;
 
   // description
   >.igv-roi-table-description {
+
+    height: fit-content;
     padding: 4px;
+    margin-left: 4px;
+
     //color: #ff2987;
     //background-color: moccasin;
 
@@ -241,6 +245,10 @@ $igv-roi-table-background-color: #eee;
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: center;
+
+    border-bottom-color: $igv-roi-border-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
 
   }
 
@@ -263,9 +271,11 @@ $igv-roi-table-background-color: #eee;
       vertical-align: middle;
       line-height: $dimension;
 
-      text-align: center;
-      margin-left: 4px;
-      margin-right: 4px;
+      //text-align: center;
+      text-align: left;
+
+      margin-left: 8px;
+      //margin-right: 4px;
 
       height: $dimension;
 
@@ -318,9 +328,11 @@ $igv-roi-table-background-color: #eee;
         vertical-align: middle;
         line-height: $dimension;
 
-        text-align: center;
-        margin-left: 4px;
-        margin-right: 4px;
+        //text-align: center;
+        text-align: left;
+
+        margin-left: 8px;
+        //margin-right: 4px;
 
         height: $dimension;
 
