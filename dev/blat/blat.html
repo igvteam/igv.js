@@ -23,7 +23,7 @@
 <script type="module">
 
     import igv from '../../js/index.js'
-    import BLATTable from '../../js/blat/BLATTable.js'
+    import BlatTable from '../../js/blat/blatTable.js'
     import {blat} from '../../js/blat/blatClient.js'
 
     const db = 'hg38'
@@ -97,11 +97,11 @@
                     parent: document.getElementById('igv-container'),
                     headerTitle: 'BLAT Results',
                     dismissHandler: () => blatTable.dismiss(),
-                    columnFormat: BLATTable.getColumnFormatConfiguration(),
-                    gotoButtonHandler: BLATTable.gotoButtonHandler
+                    columnFormat: BlatTable.getColumnFormatConfiguration(),
+                    gotoButtonHandler: BlatTable.gotoButtonHandler
                 };
 
-            blatTable = new BLATTable(config)
+            blatTable = new BlatTable(config)
 
         })
 
