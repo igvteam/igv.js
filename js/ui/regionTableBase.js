@@ -3,6 +3,8 @@ import { DOMUtils, makeDraggable, Icon } from '../../node_modules/igv-ui/dist/ig
 class RegionTableBase {
     constructor(config) {
 
+        this.config = config
+
         this.browser = config.browser
 
         this.container = DOMUtils.div({ class: 'igv-roi-table' })
@@ -66,13 +68,7 @@ class RegionTableBase {
         // description
         const dom = DOMUtils.div({ class: 'igv-roi-table-description' })
         this.container.appendChild(dom)
-        dom.innerText = 'this is a description'
-
-        if (config.description) {
-
-        } else {
-
-        }
+        dom.innerHTML = config.description || 'this is a description'
     }
 
     set columnTitleDOM(columnFormat) {
@@ -159,7 +155,11 @@ class RegionTableBase {
 
     present() {
         this.container.style.left = `${ 0 }px`
-        this.container.style.top  = `${ 0 }px`
+
+        const { y:y_root } = this.browser.root.getBoundingClientRect()
+        const { y:y_parent } = this.config.parent.getBoundingClientRect()
+
+        this.container.style.top  = `${ y_root - y_parent }px`
         this.container.style.display = 'flex'
     }
 
@@ -169,13 +169,15 @@ class RegionTableBase {
 
     dispose() {
 
-        document.removeEventListener('click', this.boundDismissHandler)
-
         this.container.innerHTML = ''
+        this.container.remove()
 
-        for (let key of Object.keys(this)) {
+        for (const key of Object.keys(this)) {
             this[key] = undefined
         }
+
+        document.removeEventListener('click', this.boundDismissHandler)
+
     }
 
 }
