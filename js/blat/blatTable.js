@@ -3,7 +3,7 @@ import { StringUtils } from '../../node_modules/igv-utils/src/index.js'
 
 import RegionTableBase from '../ui/regionTableBase.js'
 
-class BLATTable extends RegionTableBase {
+class BlatTable extends RegionTableBase {
 
     set columnTitleDOM(columnFormat) {
 
@@ -102,4 +102,4 @@ class BLATTable extends RegionTableBase {
 
 }
 
-export default BLATTable
+export default BlatTable
