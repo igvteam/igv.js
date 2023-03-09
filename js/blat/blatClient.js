@@ -40,11 +40,9 @@ async function createBlatTrack(userSeq, browser) {
         features: features
     }
 
-    //const track = new BlatTrack(trackConfig, browser)
-
     const track = await browser.loadTrack(trackConfig)
 
-    track.openTableView()
+    track.openTableView(userSeq)
 
 }
 
