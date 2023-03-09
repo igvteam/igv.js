@@ -58,18 +58,18 @@ class BlatTable extends RegionTableBase {
     static getColumnFormatConfiguration() {
 
         return [
-            { label:         'chr', width: '80px' },
-            { label:       'start', width: '170px' },
-            { label:         'end', width: '170px' },
-            { label:      'strand', width: '64px' },
-            { label:       'score', width: '64px' },
-            { label:       'match', width: '64px' },
+            { label:         'chr', width: '60px' },
+            { label:       'start', width: '100px' },
+            { label:         'end', width: '100px' },
+            { label:      'strand', width: '50px' },
+            { label:       'score', width: '50px' },
+            { label:       'match', width: '50px' },
             { label:   "mis-match", width: '70px' },
-            { label:  "rep. match", width: '75px' },
+            { label:  "rep. match", width: '70px' },
             { label:         "N's", width: '32px' },
             { label: 'Q gap count', width: '90px' },
             { label: 'Q gap bases', width: '90px' },
-            { label: 'T gap count', width: '80px' },
+            { label: 'T gap count', width: '90px' },
             { label: 'T gap bases', width: '90px' },
         ]
     }
@@ -96,7 +96,9 @@ class BlatTable extends RegionTableBase {
 
         this.setTableRowSelectionState(false)
 
-        console.log(`browser search( ${loci.join(' ')} )`)
+        this.browser.search(loci.join(' '))
+
+        // console.log(`browser search( ${loci.join(' ')} )`)
 
     }
 
