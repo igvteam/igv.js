@@ -36,6 +36,7 @@ async function createBlatTrack(userSeq, browser) {
 
     const trackConfig = {
         type: 'blat',
+        name: 'blat results',
         features: features
     }
 
