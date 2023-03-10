@@ -7,10 +7,10 @@ class BlatTrack extends FeatureTrack {
 
     constructor(config, browser) {
         super(config, browser)
-        if (this.name) {
+        if (!this.name) {
             this.name = 'Blat Results'
         }
-
+        this.sequence = config.sequence
         this.table = undefined
     }
 
@@ -45,7 +45,7 @@ class BlatTrack extends FeatureTrack {
                     browser: this.browser,
                     parent: this.browser.parent,
                     headerTitle: this.name,
-                    description: `BLAT result for query sequence:<br>${ seq }`,
+                    description: `BLAT result for query sequence:<br>${ this.sequence }`,
                     dismissHandler: () => {
                         this.table.dismiss()
                         this.table.dispose()
