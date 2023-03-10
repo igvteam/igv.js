@@ -81,9 +81,9 @@ function decodeBed(tokens, header) {
         if (tokens.length > 11) {
             const exons = decodeExons(tokens[9], tokens[10], tokens[11])
             if (exons.length > 0) {
-            findUTRs(exons, feature.cdStart, feature.cdEnd)
-            feature.exons = exons
-        }
+                findUTRs(exons, feature.cdStart, feature.cdEnd)
+                feature.exons = exons
+            }
         }
 
         // Optional extra columns
@@ -112,26 +112,26 @@ function decodeBed(tokens, header) {
 function decodeRepeatMasker(tokens, header) {
 
     /**
- * Columns, from UCSC documentation
- *
- * 0  bin    585    smallint(5) unsigned    Indexing field to speed chromosome range queries.
- * 1  swScore    1504    int(10) unsigned    Smith Waterman alignment score
- * 2  milliDiv    13    int(10) unsigned    Base mismatches in parts per thousand
- * 3  milliDel    4    int(10) unsigned    Bases deleted in parts per thousand
- * 4  milliIns    13    int(10) unsigned    Bases inserted in parts per thousand
- * 5  genoName    chr1    varchar(255)    Genomic sequence name
- * 6  genoStart    10000    int(10) unsigned    Start in genomic sequence
- * 7  genoEnd    10468    int(10) unsigned    End in genomic sequence
- * 8  genoLeft    -249240153    int(11)    -#bases after match in genomic sequence
- * 9  strand    +    char(1)    Relative orientation + or -
- * 10 repName    (CCCTAA)n    varchar(255)    Name of repeat
- * 11 repClass    Simple_repeat    varchar(255)    Class of repeat
- * 12 repFamily    Simple_repeat    varchar(255)    Family of repeat
- * 13 repStart    1    int(11)    Start (if strand is +) or -#bases after match (if strand is -) in repeat sequence
- * 14 repEnd    463    int(11)    End in repeat sequence
- * 15 repLeft    0    int(11)    -#bases after match (if strand is +) or start (if strand is -) in repeat sequence
- * 16 id    1    char(1)    First digit of id field in RepeatMasker .out file. Best ignored.
- */
+     * Columns, from UCSC documentation
+     *
+     * 0  bin    585    smallint(5) unsigned    Indexing field to speed chromosome range queries.
+     * 1  swScore    1504    int(10) unsigned    Smith Waterman alignment score
+     * 2  milliDiv    13    int(10) unsigned    Base mismatches in parts per thousand
+     * 3  milliDel    4    int(10) unsigned    Bases deleted in parts per thousand
+     * 4  milliIns    13    int(10) unsigned    Bases inserted in parts per thousand
+     * 5  genoName    chr1    varchar(255)    Genomic sequence name
+     * 6  genoStart    10000    int(10) unsigned    Start in genomic sequence
+     * 7  genoEnd    10468    int(10) unsigned    End in genomic sequence
+     * 8  genoLeft    -249240153    int(11)    -#bases after match in genomic sequence
+     * 9  strand    +    char(1)    Relative orientation + or -
+     * 10 repName    (CCCTAA)n    varchar(255)    Name of repeat
+     * 11 repClass    Simple_repeat    varchar(255)    Class of repeat
+     * 12 repFamily    Simple_repeat    varchar(255)    Family of repeat
+     * 13 repStart    1    int(11)    Start (if strand is +) or -#bases after match (if strand is -) in repeat sequence
+     * 14 repEnd    463    int(11)    End in repeat sequence
+     * 15 repLeft    0    int(11)    -#bases after match (if strand is +) or start (if strand is -) in repeat sequence
+     * 16 id    1    char(1)    First digit of id field in RepeatMasker .out file. Best ignored.
+     */
     if (tokens.length <= 15) return undefined
 
     const feature = {
@@ -172,14 +172,14 @@ function decodeGenePred(tokens, header) {
     const cdStart = parseInt(tokens[5 + shift])
     const cdEnd = parseInt(tokens[6 + shift])
     var feature = {
-            name: tokens[0 + shift],
-            chr: tokens[1 + shift],
-            strand: tokens[2 + shift],
-            start: parseInt(tokens[3 + shift]),
-            end: parseInt(tokens[4 + shift]),
-            cdStart: cdStart,
-            cdEnd: cdEnd,
-            id: tokens[0 + shift]
+        name: tokens[0 + shift],
+        chr: tokens[1 + shift],
+        strand: tokens[2 + shift],
+        start: parseInt(tokens[3 + shift]),
+        end: parseInt(tokens[4 + shift]),
+        cdStart: cdStart,
+        cdEnd: cdEnd,
+        id: tokens[0 + shift]
     }
     const exons = decodeExons(parseInt(tokens[7 + shift]), tokens[8 + shift], tokens[9 + shift])
     findUTRs(exons, cdStart, cdEnd)
@@ -206,14 +206,14 @@ function decodeGenePredExt(tokens, header) {
     const cdStart = parseInt(tokens[5 + shift])
     const cdEnd = parseInt(tokens[6 + shift])
     const feature = {
-            name: tokens[11 + shift],
-            chr: tokens[1 + shift],
-            strand: tokens[2 + shift],
-            start: parseInt(tokens[3 + shift]),
-            end: parseInt(tokens[4 + shift]),
-            cdStart: cdStart,
-            cdEnd: cdEnd,
-            id: tokens[0 + shift]
+        name: tokens[11 + shift],
+        chr: tokens[1 + shift],
+        strand: tokens[2 + shift],
+        start: parseInt(tokens[3 + shift]),
+        end: parseInt(tokens[4 + shift]),
+        cdStart: cdStart,
+        cdEnd: cdEnd,
+        id: tokens[0 + shift]
     }
 
     const exons = decodeExons(parseInt(tokens[7 + shift]), tokens[8 + shift], tokens[9 + shift])
@@ -239,14 +239,14 @@ function decodeReflat(tokens, header) {
     const cdStart = parseInt(tokens[6 + shift])
     const cdEnd = parseInt(tokens[7 + shift])
     var feature = {
-            name: tokens[0 + shift],
-            id: tokens[1 + shift],
-            chr: tokens[2 + shift],
-            strand: tokens[3 + shift],
-            start: parseInt(tokens[4 + shift]),
-            end: parseInt(tokens[5 + shift]),
-            cdStart: cdStart,
-            cdEnd: cdEnd
+        name: tokens[0 + shift],
+        id: tokens[1 + shift],
+        chr: tokens[2 + shift],
+        strand: tokens[3 + shift],
+        start: parseInt(tokens[4 + shift]),
+        end: parseInt(tokens[5 + shift]),
+        cdStart: cdStart,
+        cdEnd: cdEnd
     }
 
     const exons = decodeExons(parseInt(tokens[8 + shift]), tokens[9 + shift], tokens[10 + shift])
@@ -557,8 +557,23 @@ class PSLFeature {
 
     }
 
-
-    //            //headers: ["chr", "start", "end", "strand", "score", "match", "mis-match", "rep. match", "N's", "Q gap count", "Q gap bases", "T gap count", "T gap bases"],
+    popupData() {
+        return [
+            {name: 'chr', value: this.chr},
+            {name: 'start', value: this.start + 1},
+            {name: 'end', value: this.end},
+            {name: 'strand', value: this.strand},
+            {name: 'score', value: this.score},
+            {name: 'match', value: this.matches},
+            {name: "mis-match", value: this.misMatches},
+            {name: "rep. match", value: this.repMatches},
+            {name: "N's", value: this.nCount},
+            {name: 'Q gap count', value: this.qNumInsert},
+            {name: 'Q gap bases', value: this.qBaseInsert},
+            {name: 'T gap count', value: this.tNumInsert},
+            {name: 'T gap bases', value: this.tBaseInsert},
+        ]
+    }
 
 }
 
