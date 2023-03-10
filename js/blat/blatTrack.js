@@ -45,7 +45,7 @@ class BlatTrack extends FeatureTrack {
                     browser: this.browser,
                     parent: this.browser.parent,
                     headerTitle: this.name,
-                    description: `BLAT result for query sequence<br>${ seq }`,
+                    description: `BLAT result for query sequence:<br>${ seq }`,
                     dismissHandler: () => {
                         this.table.dismiss()
                         this.table.dispose()
