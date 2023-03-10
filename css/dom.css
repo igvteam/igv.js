@@ -1207,7 +1207,7 @@
   vertical-align: middle;
   line-height: 24px;
   text-align: left;
-  margin-left: 8px;
+  margin-left: 4px;
   height: 24px;
   white-space: nowrap;
   overflow: hidden;
@@ -1222,7 +1222,6 @@
 .igv-roi-table > .igv-roi-table-row-container {
   resize: both;
   overflow: scroll;
-  min-width: 512px;
   min-height: 72px;
   height: 144px;
   max-height: 480px;
@@ -1246,7 +1245,7 @@
   vertical-align: middle;
   line-height: 24px;
   text-align: left;
-  margin-left: 8px;
+  margin-left: 4px;
   height: 24px;
   white-space: nowrap;
   overflow: hidden;
