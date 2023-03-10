@@ -237,18 +237,11 @@ $igv-roi-table-background-color: #eee;
     padding: 4px;
     margin-left: 4px;
 
-    //color: #ff2987;
-    //background-color: moccasin;
-
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: center;
-
-    border-bottom-color: $igv-roi-border-color;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
 
   }
 
@@ -266,29 +259,40 @@ $igv-roi-table-background-color: #eee;
     // to compensate for resize area in table row
     padding-right: 16px;
 
+    background-color: white;
+
+    border-top-color: $igv-roi-border-color;
+    border-top-style: solid;
+    border-top-width: thin;
+
+    border-bottom-color: $igv-roi-border-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
     >div {
       font-size: 14px;
       vertical-align: middle;
       line-height: $dimension;
 
-      //text-align: center;
       text-align: left;
 
       margin-left: 8px;
-      //margin-right: 4px;
 
       height: $dimension;
 
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+
+      border-right-color: $igv-roi-border-color;
+      border-right-style: solid;
+      border-right-width: thin;
+
     }
 
-    background-color: white;
-
-    border-bottom-color: $igv-roi-border-color;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
+    >div:last-child {
+      border-right: unset;
+    }
 
   }
 
@@ -328,11 +332,9 @@ $igv-roi-table-background-color: #eee;
         vertical-align: middle;
         line-height: $dimension;
 
-        //text-align: center;
         text-align: left;
 
         margin-left: 8px;
-        //margin-right: 4px;
 
         height: $dimension;
 
@@ -340,6 +342,13 @@ $igv-roi-table-background-color: #eee;
         overflow: hidden;
         text-overflow: ellipsis;
 
+        border-right-color: transparent;
+        border-right-style: solid;
+        border-right-width: thin;
+      }
+
+      >div:last-child {
+        border-right: unset;
       }
 
     }
