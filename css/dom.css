@@ -1185,9 +1185,6 @@
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: center;
-  border-bottom-color: #7f7f7f;
-  border-bottom-style: solid;
-  border-bottom-width: thin;
 }
 .igv-roi-table > .igv-roi-table-column-titles {
   height: 24px;
@@ -1198,6 +1195,9 @@
   align-items: stretch;
   padding-right: 16px;
   background-color: white;
+  border-top-color: #7f7f7f;
+  border-top-style: solid;
+  border-top-width: thin;
   border-bottom-color: #7f7f7f;
   border-bottom-style: solid;
   border-bottom-width: thin;
@@ -1212,6 +1212,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border-right-color: #7f7f7f;
+  border-right-style: solid;
+  border-right-width: thin;
+}
+.igv-roi-table > .igv-roi-table-column-titles > div:last-child {
+  border-right: unset;
 }
 .igv-roi-table > .igv-roi-table-row-container {
   resize: both;
@@ -1245,6 +1251,12 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  border-right-color: transparent;
+  border-right-style: solid;
+  border-right-width: thin;
+}
+.igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row > div:last-child {
+  border-right: unset;
 }
 .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row-hover {
   background-color: rgba(0, 0, 0, 0.04);
