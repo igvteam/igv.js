@@ -202,6 +202,11 @@ class FeatureFileReader {
 
     async loadFeaturesWithIndex(chr, start, end) {
 
+        // insure that header has been loaded -- tabix _blockLoader is initialized as side effect
+        if(!this.dataURI && !this.header) {
+            await this.readHeader()
+        }
+
         //console.log("Using index"
         const config = this.config
         const parser = this.parser
