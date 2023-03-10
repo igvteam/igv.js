@@ -70,6 +70,10 @@ class CNVPytorTrack extends TrackBase {
 
     }
 
+    get supportsWholeGenome() {
+        return true
+    }
+
     get_signals() {
         let signals = []
 
@@ -432,10 +436,6 @@ class CNVPytorTrack extends TrackBase {
         }
     }
 
-
-    get supportsWholeGenome() {
-        return this.tracks.every(track => track.supportsWholeGenome)
-    }
 }
 
 function autoscale(chr, featureArrays) {
