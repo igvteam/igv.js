@@ -13,6 +13,7 @@
     "prepack": "npm run build",
     "prepare": "npm run build",
     "build": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config",
+    "build_iife": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config rollup.config.iife.js",
     "test": "mocha -ui tdd"
   },
   "author": {
@@ -51,7 +52,7 @@
     "circular-view": "github:igvteam/circular-view#v0.2.4",
     "core-js": "^3.20.3",
     "eslint": "^6.4.0",
-    "hdf5-indexed-reader": "github:/jrobinso/hdf5-indexed-reader",
+    "hdf5-indexed-reader": "github:/jrobinso/hdf5-indexed-reader#v0.5.1",
     "igv-ui": "github:igvteam/igv-ui#v1.5.0",
     "igv-utils": "github:igvteam/igv-utils#v1.4.0",
     "mocha": "^10.2.0",
