@@ -1604,6 +1604,10 @@ class Browser {
         }
     }
 
+    /**
+     * Return a json-like object (note not a json string) representing the current state.
+     *
+     */
     toJSON() {
 
         const json = {
@@ -1618,9 +1622,9 @@ class Browser {
         }
 
         json["reference"] = this.genome.toJSON()
-        if (FileUtils.isFilePath(json.reference.fastaURL)) {
+        if (json.reference.fastaURL instanceof File) {   // Test specifically for File.  Other types of File-like objects might be savable) {
             throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`)
-        } else if (FileUtils.isFilePath(json.reference.indexURL)) {
+        } else if (json.reference.indexURL instanceof File) {   // Test specifically for File.  Other types of File-like objects might be savable) {
             throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`)
         }
 

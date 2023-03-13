@@ -72,7 +72,7 @@ class BGZBlockLoader {
             if (c &&
                 c.startBlock <= startBlock &&
                 (c.endBlock >= endBlock || skipEnd && c.nextEndBlock === endBlock)) {
-                console.log("Complete overlap")
+                //console.log("Complete overlap")
                 const startOffset = startBlock - c.startBlock
                 const endOffset = endBlock - c.startBlock
                 return inflateBlocks(c.buffer, startOffset, endOffset)
