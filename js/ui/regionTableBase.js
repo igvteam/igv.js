@@ -65,10 +65,14 @@ class RegionTableBase {
 
     set descriptionDOM(config) {
 
-        // description
-        const dom = DOMUtils.div({ class: 'igv-roi-table-description' })
-        this.container.appendChild(dom)
-        dom.innerHTML = config.description || 'this is a description'
+        if (config.description) {
+
+            const dom = DOMUtils.div({ class: 'igv-roi-table-description' })
+            this.container.appendChild(dom)
+
+            dom.innerHTML = config.description
+        }
+
     }
 
     set columnTitleDOM(columnFormat) {
@@ -89,6 +93,8 @@ class RegionTableBase {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-row-container' })
         container.appendChild(dom)
+
+        dom.style.minWidth = this.config.width
 
         this._rowContainerDOM = dom
     }
