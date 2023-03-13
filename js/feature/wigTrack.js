@@ -169,7 +169,7 @@ class WigTrack extends TrackBase {
         if (typeof posColor === "string" && posColor.startsWith("rgb(")) {
             baselineColor = IGVColor.addAlpha(posColor, 0.1)
         }
-
+        let lastNegValue = 1
         const scaleFactor = this.getScaleFactor(this.dataRange.min, this.dataRange.max, options.pixelHeight, this.logScale)
         const yScale = (yValue) => this.logScale
             ? this.computeYPixelValueInLogScale(yValue, scaleFactor)
@@ -185,7 +185,6 @@ class WigTrack extends TrackBase {
 
                 let lastPixelEnd = -1
                 let lastY
-                let lastValue = -1
                 const y0 = yScale(0)
                 for (let f of features) {
 
@@ -208,21 +207,20 @@ class WigTrack extends TrackBase {
                         IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color})
 
                     } else if (this.graphType === "line") {
-                        if(lastY != undefined) {
-                            IGVGraphics.strokeLine(ctx, lastPixelEnd, lastY, x, y, {"fillStyle": color, "strokeStyle": color})
+                        if (lastY != undefined) {
+                            IGVGraphics.strokeLine(ctx, lastPixelEnd, lastY, x, y, {
+                                "fillStyle": color,
+                                "strokeStyle": color
+                            })
                         }
                         IGVGraphics.strokeLine(ctx, x, y, x + width, y, {"fillStyle": color, "strokeStyle": color})
                     } else {
-                        let height = y - y0
-                        const pixelEnd = x + width
-                        if (pixelEnd > lastPixelEnd || (f.value >= 0 && f.value > lastValue) || (f.value < 0 && f.value < lastNegValue)) {
-                            IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
-                        }
+                        const height = y - y0
+                        IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
+
                     }
                     lastPixelEnd = x + width
-                    lastValue = f.value
-                    lastY = y;
-
+                    lastY = y
                 }
 
                 // If the track includes negative values draw a baseline

@@ -52,10 +52,10 @@
 
     document.getElementById("blatButton").addEventListener("click", async e => {
 
-        const userSeq = document.getElementById("userSeqInput").textContent.trim()
+        const sequence = document.getElementById("userSeqInput").textContent.trim()
         try {
 
-            const results = await blat(userSeq, db)
+            const results = await blat(sequence, db)
 
             tableData.rows = results.map(f => [
                 f.chr,
