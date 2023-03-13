@@ -5,6 +5,11 @@ import { createRegionKey, parseRegionKey } from './ROIManager.js'
 import RegionTableBase from '../ui/regionTableBase.js'
 
 class ROITable extends RegionTableBase {
+    constructor(config) {
+
+        const cooked = Object.assign({ 'width':'512px' }, config)
+        super(cooked)
+    }
 
     tableRowDOM(record) {
 

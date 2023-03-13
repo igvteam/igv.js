@@ -5,6 +5,13 @@ import RegionTableBase from '../ui/regionTableBase.js'
 
 class BlatTable extends RegionTableBase {
 
+    constructor(config) {
+
+        const cooked = Object.assign({ 'width':'1040px' }, config)
+        super(cooked)
+    }
+
+
     set columnTitleDOM(columnFormat) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
@@ -57,6 +64,7 @@ class BlatTable extends RegionTableBase {
 
     static getColumnFormatConfiguration() {
 
+        /*
         return [
             { label:         'chr', width: '60px' },
             { label:       'start', width: '100px' },
@@ -71,6 +79,23 @@ class BlatTable extends RegionTableBase {
             { label: 'Q gap bases', width: '90px' },
             { label: 'T gap count', width: '90px' },
             { label: 'T gap bases', width: '90px' },
+        ]
+        */
+
+        return [
+            { label:         'chr', width: '7%' },
+            { label:       'start', width: '12%' },
+            { label:         'end', width: '12%' },
+            { label:      'strand', width: '5%' },
+            { label:       'score', width: '5%' },
+            { label:       'match', width: '5%' },
+            { label:   "mis-match", width: '7%' },
+            { label:  "rep. match", width: '7%' },
+            { label:         "N's", width: '3%' },
+            { label: 'Q gap count', width: '9%' },
+            { label: 'Q gap bases', width: '9%' },
+            { label: 'T gap count', width: '9%' },
+            { label: 'T gap bases', width: '9%' },
         ]
     }
 
