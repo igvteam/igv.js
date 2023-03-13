@@ -1,5 +1,6 @@
 import FeatureTrack from "../feature/featureTrack.js"
 import BlatTable from "./blatTable.js"
+import {blat} from "./blatClient.js"
 
 
 class BlatTrack extends FeatureTrack {
@@ -14,15 +15,9 @@ class BlatTrack extends FeatureTrack {
         this.table = undefined
     }
 
-    openTableView(seq) {
+    openTableView() {
 
         if (undefined === this.table) {
-
-            // const dev_null = this.config.features.map(feature => {
-            //     const kv = Object.entries(feature)
-            //     return kv
-            // })
-
 
             const rows = this.config.features.map(f => [
                 f.chr,
@@ -44,8 +39,8 @@ class BlatTrack extends FeatureTrack {
                 {
                     browser: this.browser,
                     parent: this.browser.parent,
-                    headerTitle: this.name,
-                    description: `BLAT results for query sequence:<br>${ this.sequence }`,
+                    headerTitle: this.config.title,
+                    description: `BLAT result for query sequence:<br>${ this.sequence }`,
                     dismissHandler: () => {
                         this.table.dismiss()
                         this.table.dispose()
@@ -92,4 +87,25 @@ class BlatTrack extends FeatureTrack {
 }
 
 
+async function createBlatTrack({sequence, browser, name, title}) {
+
+    const db = browser.genome.id   // TODO -- blat specific property
+
+    const features = await blat(sequence, db)
+
+    const trackConfig = {
+        type: 'blat',
+        name: name || 'blat results',
+        title: title || 'blat results',
+        sequence: sequence,
+        features: features
+    }
+
+    const track = await browser.loadTrack(trackConfig)
+
+    track.openTableView()
+
+}
+
 export default BlatTrack
+export {createBlatTrack}
