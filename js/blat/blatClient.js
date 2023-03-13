@@ -28,24 +28,6 @@ async function blat(userSeq, db) {
     return features
 }
 
-async function createBlatTrack(userSeq, browser) {
-
-    const db = browser.genome.id   // TODO -- blat specific property
-
-    const features = await blat(userSeq, db)
-
-    const trackConfig = {
-        type: 'blat',
-        name: 'blat results',
-        sequence: userSeq,
-        features: features
-    }
-
-    const track = await browser.loadTrack(trackConfig)
-
-    track.openTableView()
-
-}
 
 
-export {blat, createBlatTrack}
+export {blat}

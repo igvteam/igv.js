@@ -36,7 +36,7 @@ import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {makePairedAlignmentChords, makeSupplementalAlignmentChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import PairedEndStats from "./pairedEndStats.js"
-import {createBlatTrack} from "../blat/blatClient.js"
+import {createBlatTrack} from "../blat/blatTrack.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"
 
 const alignmentStartGap = 5
@@ -249,7 +249,7 @@ class BAMTrack extends TrackBase {
     hoverText(clickState) {
         if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
             const clickedObject = this.coverageTrack.getClickedObject(clickState)
-            if(clickedObject) {
+            if (clickedObject) {
                 return clickedObject.hoverText()
             }
         }
@@ -1366,8 +1366,10 @@ class AlignmentTrack {
                     list.push({
                         label: 'BLAT read sequence',
                         click: () => {
-                            const seq = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(seqstring) : seqstring
-                            createBlatTrack(seq, this.browser)
+                            const sequence = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(seqstring) : seqstring
+                            const name = `${clickedAlignment.readName} - blat`
+                            const title = `${this.parent.name} - ${name}`
+                            createBlatTrack({sequence, browser: this.browser, name, title})
                         }
                     })
 
@@ -1377,8 +1379,10 @@ class AlignmentTrack {
                             label: 'BLAT left soft-clipped sequence',
                             click: () => {
                                 const clippedSequence = seqstring.substr(softClips.left.seqOffset, softClips.left.len)
-                                const seq = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(clippedSequence) : clippedSequence
-                                createBlatTrack(seq, this.browser)
+                                const sequence = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(clippedSequence) : clippedSequence
+                                const name = `${clickedAlignment.readName} - blat left clip`
+                                const title = `${this.parent.name} - ${name}`
+                                createBlatTrack({sequence, browser: this.browser, name, title})
                             }
                         })
                     }
@@ -1387,8 +1391,10 @@ class AlignmentTrack {
                             label: 'BLAT right soft-clipped sequence',
                             click: () => {
                                 const clippedSequence = seqstring.substr(softClips.right.seqOffset, softClips.right.len)
-                                const seq = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(clippedSequence) : clippedSequence
-                                createBlatTrack(seq, this.browser)
+                                const sequence = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(clippedSequence) : clippedSequence
+                                const name = `${clickedAlignment.readName} - blat right clip`
+                                const title = `${this.parent.name} - ${name}`
+                                createBlatTrack({sequence, browser: this.browser, name, title})
                             }
                         })
                     }
