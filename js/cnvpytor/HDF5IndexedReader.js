@@ -90,18 +90,18 @@ class HDF5Reader {
         }
         this.callers = []
         if (wigFeatures_rd_call_combined.length != 0){
-            this.callers.push('MeanShift')
+            this.callers.push('ReadDepth')
         }
         if (wigFeatures_rd_call_combined.length != 0){
-            this.callers.push('Combined')
+            this.callers.push('2D')
         }
 
         var obj = {}
         var signal_obj = {
             "RD_Raw": wigFeatures,
             "RD_Raw_gc_coor" : wigFeatures_gc,
-            "MeanShift": wigFeatures_rd_call_meanshift,
-            "Combined": wigFeatures_rd_call_combined,
+            "ReadDepth": wigFeatures_rd_call_meanshift,
+            "2D": wigFeatures_rd_call_combined,
             "BAF1": wigFeatures_baf1,
             "BAF2": wigFeatures_baf2
         }

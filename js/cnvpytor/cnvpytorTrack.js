@@ -32,6 +32,7 @@ import {CNVpytorVCF} from "./cnvpytorVCF.js"
 import FeatureSource from '../feature/featureSource.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
+import IGVGraphics from "../igv-canvas.js"
 
 
 /**
@@ -48,8 +49,8 @@ class CNVPytorTrack extends TrackBase {
         this.featureType = 'numeric'
         this.paintAxis = paintAxis
         
-        this.defaultScale = true
         if (!config.max) {
+            this.defaultScale = true
             this.autoscale = false
         }
 
@@ -65,7 +66,6 @@ class CNVPytorTrack extends TrackBase {
         this.signal_name = config.signal_name || "rd_snp"
         this.cnv_caller = config.cnv_caller || '2D'
         this.colors = config.colors || ['gray', 'black', 'green', 'blue']
-        this.colors.push(this.colors[3])
         super.init(config)
 
     }
@@ -93,16 +93,15 @@ class CNVPytorTrack extends TrackBase {
     }
 
     get_signal_colors() {
-        let signal_colors
-        if (this.signal_name == 'rd_snp') {
-            signal_colors = this.colors
-        } else if (this.signal_name == 'rd') {
-            signal_colors = this.colors
-        } else if (this.signal_name == 'snp') {
-            signal_colors = this.colors.slice(-2)
-        } else if (this.signal_name == 'cnh') {
-            signal_colors = this.colors.slice(2, 3)
-        }
+        
+        let signal_colors = [
+            { singal_name: 'RD_Raw', color: this.colors[0] },
+            { singal_name: 'RD_Raw_gc_coor', color: this.colors[1] },
+            { singal_name: 'ReadDepth', color: this.colors[2] },
+            { singal_name: '2D', color: this.colors[2] },
+            { singal_name: 'BAF1', color: this.colors[3] },
+            { singal_name: 'BAF2', color: this.colors[3] },
+        ]
         return signal_colors
     }
 
@@ -120,10 +119,12 @@ class CNVPytorTrack extends TrackBase {
             }, Object.create(null))
 
             const cnvpytor_obj = new CNVpytorVCF(allVariants, this.bin_size)
-            const wigFeatures = await cnvpytor_obj.computeReadDepth()
-            const bafFeatures = await cnvpytor_obj.computeBAF_v2()
-
-            // const bafFeatures = [[], []]
+            //const wigFeatures = await cnvpytor_obj.computeReadDepth()
+            //const bafFeatures = await cnvpytor_obj.computeBAF_v2()
+            const dataWigs = await cnvpytor_obj.read_rd_baf()
+            const wigFeatures = dataWigs[0]
+            const bafFeatures = dataWigs[1]
+            
             this.wigFeatures_obj = {}
             this.wigFeatures_obj[this.bin_size] = {
                 "RD_Raw": wigFeatures[0],
@@ -162,7 +163,7 @@ class CNVPytorTrack extends TrackBase {
                     tconf.isMergedTrack = true
                     tconf.features = wig
                     tconf.name = signal_name
-                    tconf.color = this.signal_colors[i]
+                    tconf.color = this.signal_colors.filter(x => x.singal_name === signal_name).map(x => x.color)
                     const t = await this.browser.createTrack(tconf)
                     if (t) {
                         t.autoscale = false     // Scaling done from merged track
@@ -313,9 +314,7 @@ class CNVPytorTrack extends TrackBase {
         const p = []
 
         if (!(bin_size in this.wigFeatures_obj)) {
-            console.log(bin_size, ": not found")
             this.wigFeatures_obj = {...this.wigFeatures_obj, ...await this.cnvpytor_obj.get_rd_signal(bin_size)}
-            console.log(this.wigFeatures_obj)
         }
 
         this.signals = this.get_signals()
@@ -330,7 +329,7 @@ class CNVPytorTrack extends TrackBase {
                 tconf.isMergedTrack = true
                 tconf.features = wig
                 tconf.name = signal_name
-                tconf.color = this.signal_colors[i]
+                tconf.color = this.signal_colors.filter(x => x.singal_name === signal_name).map(x => x.color) 
                 const t = await this.browser.createTrack(tconf)
                 if (t) {
                     t.autoscale = false     // Scaling done from merged track
@@ -374,6 +373,27 @@ class CNVPytorTrack extends TrackBase {
         }
     }
 
+    // TODO: refactor to igvUtils.js
+    getScaleFactor(min, max, height, logScale) {
+        const scale = logScale ? height / (Math.log10(max + 1) - (min <= 0 ? 0 : Math.log10(min + 1))) : height / (max - min)
+        return scale
+    }
+
+    computeYPixelValue(yValue, yScaleFactor) {
+        return (this.flipAxis ? (yValue - this.dataRange.min) : (this.dataRange.max - yValue)) * yScaleFactor
+    }
+
+    computeYPixelValueInLogScale(yValue, yScaleFactor) {
+        let maxValue = this.dataRange.max
+        let minValue = this.dataRange.min
+        if (maxValue <= 0) return 0 // TODO:
+        if (minValue <= -1) minValue = 0
+        minValue = (minValue <= 0) ? 0 : Math.log10(minValue + 1)
+        maxValue = Math.log10(maxValue + 1)
+        yValue = Math.log10(yValue + 1)
+        return ((this.flipAxis ? (yValue - minValue) : (maxValue - yValue)) * yScaleFactor)
+    }
+
     draw(options) {
 
         // const mergedFeatures = options.features    // Array of feature arrays, 1 for each track
@@ -383,18 +403,18 @@ class CNVPytorTrack extends TrackBase {
         if (this.defaultScale) {
             if (this.signal_name == 'rd_snp') {
                 this.dataRange = {
-                    min: this.config.min || -2,
-                    max: this.config.max || 6
+                    min: this.config.min || this.dataRange.min || -2,
+                    max: this.config.max || this.dataRange.max || 6
                 }
             } else if (this.signal_name == 'rd') {
                 this.dataRange = {
-                    min: this.config.min || 0,
-                    max: this.config.max || 6
+                    min: this.config.min || this.dataRange.min || 0,
+                    max: this.config.max || this.dataRange.max || 6
                 }
             } else if (this.signal_name == 'snp') {
                 this.dataRange = {
-                    min: this.config.min || -2,
-                    max: this.config.max || 0
+                    min: this.config.min || this.dataRange.min || -2,
+                    max: this.config.max || this.dataRange.max || 0
                 }
             }
         }
@@ -414,6 +434,27 @@ class CNVPytorTrack extends TrackBase {
                     this.tracks[i].graphType = this.graphType
                 }
                 this.tracks[i].draw(trackOptions)
+            }
+        }
+
+        // guides lines
+        const scaleFactor = this.getScaleFactor(this.dataRange.min, this.dataRange.max, options.pixelHeight, this.logScale)
+        const yScale = (yValue) => this.logScale
+            ? this.computeYPixelValueInLogScale(yValue, scaleFactor)
+            : this.computeYPixelValue(yValue, scaleFactor)
+
+         // Draw guidelines
+         if (this.config.hasOwnProperty('guideLines')) {
+            for (let line of this.config.guideLines) {
+                if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
+                    let y = yScale(line.y)
+                    let props = {
+                        'strokeStyle': line['color'],
+                        'strokeWidth': 1
+                    }
+                    if (line['dotted']) IGVGraphics.dashedLine(options.context, 0, y, options.pixelWidth, y, 5, props)
+                    else IGVGraphics.strokeLine(options.context, 0, y, options.pixelWidth, y, props)
+                }
             }
         }
     }

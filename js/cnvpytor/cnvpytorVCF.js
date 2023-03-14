@@ -384,6 +384,152 @@ class CNVpytorVCF {
         return bins
     }
 
+    async read_rd_baf(){
+        
+        const chromosomes = Object.keys(this.allVariants)
+        var wigFeatures = {}
+
+        for (let chr of chromosomes) {
+            const variants = this.allVariants[chr]
+            var featureBin;
+            if (variants.length === 0) continue
+            for (let snp of variants) {
+                featureBin = Math.max(Math.floor(snp.start / this.rowBinSize), 0)
+                if (!wigFeatures[chr]) { wigFeatures[chr] = [] }
+                if (!wigFeatures[chr][featureBin]) {
+
+                    wigFeatures[chr][featureBin] = {
+                        chr,
+                        start: featureBin * this.rowBinSize,
+                        end: (featureBin + 1) * this.rowBinSize,
+                        // value: 0,
+                        dp_sum_score: 0,
+                        dp_count: 0,
+                        hets_count:0,
+                        hets: [],
+                        //likelihood_score: [],
+                    };
+                }
+                const calls = snp.calls[9]
+                const dpValue = calls.info["DP"]
+                if (dpValue) {
+                    
+                    wigFeatures[chr][featureBin].dp_sum_score += Number.parseInt(dpValue)
+                    wigFeatures[chr][featureBin].dp_count++
+                }
+                
+                let ad_score = calls.info["AD"].split(',')
+                let genotype = calls.genotype
+                if ((genotype[0] == 0 && genotype[1] == 1) || (genotype[0] == 1 && genotype[1] == 0)) {
+                    //apply the beta function
+                    wigFeatures[chr][featureBin].hets_count++;
+                    let ad_a = parseInt(ad_score[0]), ad_b = parseInt(ad_score[1])
+                    wigFeatures[chr][featureBin].hets.push({ref:ad_a, alt:ad_b})
+                }
+           
+            }
+        
+        }
+        
+        var avgbin = this.adjust_bin_size(wigFeatures)
+        
+        let finalFeatureSet = this.readDepthMeanshift(avgbin)
+        
+        //var rawbinScore = this.formatDataStructure(avgbin, 'binScore', globamMean)
+        var baf = this.formatDataStructure_BAF(avgbin, 'max_likelihood')
+
+        return [finalFeatureSet, baf]
+    }
+
+    formatDataStructure_BAF(wigFeatures, feature_column, scaling_factor = 2) {
+        const baf1 = []
+        const baf2 = []
+        for (const [chr, wig] of Object.entries(wigFeatures)) {
+
+            wig.forEach(sample => {
+                delete sample.likelihood_score;
+                var baf1_value = { ...sample }
+                var baf2_value = { ...sample }
+                
+                let value = sample[feature_column]
+                if (value != 0.5){
+                    baf2_value.value = -2 * (1 - value)
+                    baf2.push(baf2_value)
+                }
+                baf1_value.value = -2 * value
+                baf1.push(baf1_value)
+                    
+            })
+        }
+        
+
+        return [baf1, baf2]
+    }
+    
+    adjust_bin_size(wigFeatures){
+        const chromosomes = Object.keys(this.allVariants)
+        // adjust the bin values to actual bin size
+        var avgbin = {}
+        for (let chr of chromosomes) {
+            if (!avgbin[chr]) { avgbin[chr] = [] }
+            for (let k = 0; k < wigFeatures[chr].length / this.binFactor; k++) {
+                const featureBin = k
+                if (!avgbin[chr][k]) {
+                    avgbin[chr][k] = {
+                        chr,
+                        start: featureBin * this.binSize,
+                        end: (featureBin + 1) * this.binSize,
+                        dp_count: 0,
+                        hets_count: 0,
+                        binScore: 0,
+                        likelihood_score: [],
+                    }
+                }
+
+                for (var j = k * 10; j < 10 * k + 10; j++) {
+                   
+                    if (wigFeatures[chr][j]) {
+                        var tmp_score = parseInt(wigFeatures[chr][j].dp_sum_score / wigFeatures[chr][j].dp_count) * 100;
+                        avgbin[chr][k].binScore += tmp_score;
+                        avgbin[chr][k].dp_count += wigFeatures[chr][j].dp_count
+                        avgbin[chr][k].hets_count += wigFeatures[chr][j].hets_count
+
+                        if (wigFeatures[chr][j].hets.length != 0){
+                        
+                            
+                            wigFeatures[chr][j].hets.forEach((hets, hets_idx) => {
+                                if(avgbin[chr][k].likelihood_score.length == 0){
+                                    avgbin[chr][k].likelihood_score = linspace(0, 1, 100).map((value, index) => {
+                                        return beta(hets.ref, hets.alt, value);
+                                    });
+                                }
+                                else{
+                                    var likelihood_sum = 0
+                                    avgbin[chr][k].likelihood_score = linspace(0, 1, 100).map((value, index) => {
+                                        var likelihood_value = avgbin[chr][k].likelihood_score[index] * beta(hets.ref, hets.alt, value);
+                                        likelihood_sum += likelihood_value;
+                                        return likelihood_value;
+                                    });
+
+                                    avgbin[chr][k].likelihood_score = linspace(0, 1, 100).map((value, index) => {
+                                        return avgbin[chr][k].likelihood_score[index] / likelihood_sum;
+                                    });
+                       
+                                }
+                            });
+                            
+                            // avgbin[chr][k].likelihood_score *= wigFeatures[chr][j].likelihood_score
+                        }
+                    }
+                }
+
+                const updated_bin = this.get_max_min_score(avgbin[chr][k])
+                avgbin[chr][k].max_likelihood = updated_bin.value
+            }
+        }
+        return avgbin
+    }
+
 }
 
 function beta(a, b, p, phased = true) {
