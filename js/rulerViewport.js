@@ -94,7 +94,7 @@ class RulerViewport extends TrackViewport {
             textDiv.innerHTML = `${ this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth) }`
         }
 
-        console.log(`${ Date.now() } textDiv ${ StringUtils.numberFormatter(Math.floor(textDivWidth)) }`)
+        //console.log(`${ Date.now() } textDiv ${ StringUtils.numberFormatter(Math.floor(textDivWidth)) }`)
 
     }
 
