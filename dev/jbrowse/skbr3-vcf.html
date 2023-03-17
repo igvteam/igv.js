@@ -5,14 +5,9 @@
     <title>Circular View</title>
     <!-- The commented scripts below are the minified production versions of the
       other scripts -->
-    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin="anonymous"></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin="anonymous"></script>
-    <!--    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.development.js"
-                crossorigin="anonymous"></script>-->
-    <script
-            src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.production.min.js"
-            crossorigin="anonymous"
-    ></script>
+    <script src="https://unpkg.com/react@16.14.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.14.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view@1.6.9/dist/react-circular-genome-view.umd.production.min.js"></script>
 
     <!--    <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
         <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
@@ -46,7 +41,7 @@
 
 <script type="module">
 
-    import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
+    import {makeDraggable} from '../../node_modules/igv-ui/dist/igv-ui.js'
     import igv from "../../js/index.js";
 
     // Start igv.js and create regions
@@ -76,7 +71,8 @@
                     showGenotypes: false,
                     height: 40
                 }
-            ]
+            ],
+            showCircularView: true
         };
 
     var igvDiv = document.getElementById("igvDiv");
@@ -87,7 +83,8 @@
             const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
             browser.createCircularView(circularViewContainer, true);
             makeDraggable(circularViewContainer, browser.circularView.toolbar);
-            browser.circularView.setSize(640);
+            browser.circularView.setSize(512)
+
 
         })
 
