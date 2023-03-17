@@ -9,6 +9,9 @@ class BlatTable extends RegionTableBase {
 
         const cooked = Object.assign({ 'width':'1040px' }, config)
         super(cooked)
+
+        this.descriptionDOM = config
+
     }
 
 
@@ -22,6 +25,25 @@ class BlatTable extends RegionTableBase {
             dom.appendChild(col)
             col.style.width = format.width || 'fit-content'
             col.innerText = format.label
+        }
+
+    }
+
+    set descriptionDOM(config) {
+
+        if (config.description) {
+
+            let dom
+
+            const found = this.container.querySelector('.igv-roi-table-column-titles')
+            dom = DOMUtils.div({ class: 'igv-roi-table-description' })
+            this.container.insertBefore(dom, found)
+            dom.innerHTML = config.description
+
+            dom = DOMUtils.div({ class: 'igv-roi-table-goto-explainer' })
+            this.container.insertBefore(dom, found)
+            dom.innerHTML = `Select one or more rows and click Go To to view the regions`
+
         }
 
     }
