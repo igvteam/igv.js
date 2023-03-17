@@ -632,9 +632,16 @@ class VariantTrack extends TrackBase {
 
     sendChordsForViewport(viewport) {
         const refFrame = viewport.referenceFrame
-        const inView = "all" === refFrame.chr ?
-            this.featureSource.getAllFeatures() :
-            this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
+        let inView
+        if("all" === refFrame.chr) {
+            const all = this.featureSource.getAllFeatures()
+            const arrays = Object.keys(all).map(k => all[k])
+            inView = [].concat(...arrays)
+        } else {
+          inView = this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
+
+        }
+
         const chords = makeVCFChords(inView)
         sendChords(chords, this, refFrame, 0.5)
     }
