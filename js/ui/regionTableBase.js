@@ -13,8 +13,6 @@ class RegionTableBase {
 
         this.headerDOM = config
 
-        this.descriptionDOM = config
-
         this.columnTitleDOM = config.columnFormat
 
         this.rowContainerDOM = this.container
@@ -60,18 +58,6 @@ class RegionTableBase {
         this.container.style.display = 'none'
 
         this._headerDOM = dom
-
-    }
-
-    set descriptionDOM(config) {
-
-        if (config.description) {
-
-            const dom = DOMUtils.div({ class: 'igv-roi-table-description' })
-            this.container.appendChild(dom)
-
-            dom.innerHTML = config.description
-        }
 
     }
 
