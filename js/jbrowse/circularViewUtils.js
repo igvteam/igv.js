@@ -164,8 +164,10 @@ function makeCircViewChromosomes(genome) {
 
 function sendChords(chords, track, refFrame, alpha) {
 
-    const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? track.color : getChrColor(refFrame.chr), alpha)
-    const trackColor = IGVColor.addAlpha(track.color || 'rgb(0,0,255)', alpha)
+    const baseColor =  track.color || 'rgb(0,0,255)'
+
+    const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? baseColor : getChrColor(refFrame.chr), alpha)
+    const trackColor = IGVColor.addAlpha(baseColor, alpha)
 
     // name the chord set to include locus and filtering information
     const encodedName = track.name.replaceAll(' ', '%20')
