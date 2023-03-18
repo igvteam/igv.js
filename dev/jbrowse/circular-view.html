@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <title>Circular Genome View</title>
 
-    <!-- IGV JS -->
-    <script src="../dist/igv.min.js"></script>
-
     <!-- React (required for circular view)  -->
     <script src="https://unpkg.com/react@16.14.0/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@16.14.0/umd/react-dom.development.js"></script>
@@ -37,8 +34,9 @@
 </div>
 
 
-<script type="text/javascript">
+<script type="module">
 
+    import igv from "../../js/index.js"
 
     // Start igv.js and create regions
     var options =
