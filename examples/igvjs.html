@@ -10,34 +10,29 @@
 
     <title>IGV</title>
 
-    <!-- IGV JS-->
-    <script type="application/javascript" src="../dist/igv.min.js"></script>
 
 </head>
 
 <body>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
-    <h1>Blank browser to demonstrate loading igv sessions and files from html links.  See igv-links.html</h1>
+    <h1>Blank browser to demonstrate loading igv sessions and files from html links. See igv-links.html</h1>
 </div>
 
-<script type="text/javascript">
+<script type="module">
 
-    document.addEventListener("DOMContentLoaded", function () {
+    import igv from "../dist/igv.esm.min.js"
 
-        var div = document.getElementById("myDiv");
+    const div = document.getElementById("myDiv")
 
-        igv
-                .createBrowser(div, {
-                    genome: "hg19",
-                    queryParametersSupported: true
-                })
-                .then(function (browser) {
-                    console.log("Browser ready");
-                })
-
-
-    })
+    igv
+        .createBrowser(div, {
+            genome: "hg19",
+            queryParametersSupported: true
+        })
+        .then(function (browser) {
+            console.log("Browser ready")
+        })
 
 
 </script>
