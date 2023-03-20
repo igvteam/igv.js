@@ -6,10 +6,6 @@
     <meta charset="utf-8">
     <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
     <title>igv.js</title>
-
-    <!-- IGV JS -->
-    <script src="../dist/igv.min.js"></script>
-
 </head>
 
 <body>
@@ -28,7 +24,9 @@
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 
-<script>
+<script type="module">
+
+    import igv from "../dist/igv.esm.min.js"
 
     function drawTrianglerect(context, x, y, w, h){
       let n=Math.floor(w/h)
