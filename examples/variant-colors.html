@@ -6,10 +6,6 @@
     <meta charset="utf-8">
     <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
     <title>igv.js</title>
-
-    <!-- IGV JS -->
-    <script src="../dist/igv.min.js"></script>
-
 </head>
 
 <body>
@@ -28,70 +24,72 @@
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 
-<script>
+<script type="module">
 
-    function drawTrianglerect(context, x, y, w, h){
-      let n=Math.floor(w/h)
-      let p = (w % h)/2
+    import igv from "../dist/igv.esm.min.js"
 
-      context.clearRect(x, y, w, h)
-      context.fillRect(x,y,w,h/2)
+    function drawTrianglerect(context, x, y, w, h) {
+        let n = Math.floor(w / h)
+        let p = (w % h) / 2
 
-      for (var i = 0; i < n; i++) {
-         drawTriangle(context, p+x+(i)*h, y, h, h)
-      }
+        context.clearRect(x, y, w, h)
+        context.fillRect(x, y, w, h / 2)
 
-    }
-
-    function drawTriangle(context, x, y, w, h){
-      // context.clearRect(x, y, w, h)
-
-      context.beginPath()
-      context.moveTo(x, y)
-      context.lineTo(x+w/2, y+h)
-      context.lineTo(x+w, y)
-      context.closePath()
-      context.fill()
-    }
-
-    function drawCirclerect(context, x, y, w, h){
-      let n=Math.floor(w/h)
-      let p = (w % h)/2
-
-      context.clearRect(x, y, w, h)
-      context.fillRect(x,y,w,h/2)
-
-      for (var i = 0; i < n; i++) {
-         drawCircle(context, p+x+(i)*h, y, h, h)
-      }
+        for (var i = 0; i < n; i++) {
+            drawTriangle(context, p + x + (i) * h, y, h, h)
+        }
 
     }
 
+    function drawTriangle(context, x, y, w, h) {
+        // context.clearRect(x, y, w, h)
 
-    function drawCircle(context, x, y, w, h){
-      // context.clearRect(x, y, w, h)
-
-      context.beginPath()
-      context.arc(x+w/2, y+h/2, h/2, 0, 2 * Math.PI);
-      context.fill()
+        context.beginPath()
+        context.moveTo(x, y)
+        context.lineTo(x + w / 2, y + h)
+        context.lineTo(x + w, y)
+        context.closePath()
+        context.fill()
     }
 
-    function drawRoundrect(context, x, y, w, h){
-      let radius = 5;
-      context.clearRect(x, y, w, h);
-      context.beginPath()
-      context.moveTo(x + radius, y)
-      context.lineTo(x + w - radius, y)
-      context.quadraticCurveTo(x + w, y, x + w, y + radius)
-      context.lineTo(x + w, y + h - radius)
-      context.quadraticCurveTo(x + w, y + h, x + w - radius, y + h)
-      context.lineTo(x + radius, y + h)
-      context.quadraticCurveTo(x, y + h, x, y + h - radius)
-      context.lineTo(x, y + radius)
-      context.quadraticCurveTo(x, y, x + radius, y)
-      context.closePath()
-      // context.stroke()
-      context.fill()
+    function drawCirclerect(context, x, y, w, h) {
+        let n = Math.floor(w / h)
+        let p = (w % h) / 2
+
+        context.clearRect(x, y, w, h)
+        context.fillRect(x, y, w, h / 2)
+
+        for (var i = 0; i < n; i++) {
+            drawCircle(context, p + x + (i) * h, y, h, h)
+        }
+
+    }
+
+
+    function drawCircle(context, x, y, w, h) {
+        // context.clearRect(x, y, w, h)
+
+        context.beginPath()
+        context.arc(x + w / 2, y + h / 2, h / 2, 0, 2 * Math.PI)
+        context.fill()
+    }
+
+    function drawRoundrect(context, x, y, w, h) {
+        let radius = 5
+        context.clearRect(x, y, w, h)
+        context.beginPath()
+        context.moveTo(x + radius, y)
+        context.lineTo(x + w - radius, y)
+        context.quadraticCurveTo(x + w, y, x + w, y + radius)
+        context.lineTo(x + w, y + h - radius)
+        context.quadraticCurveTo(x + w, y + h, x + w - radius, y + h)
+        context.lineTo(x + radius, y + h)
+        context.quadraticCurveTo(x, y + h, x, y + h - radius)
+        context.lineTo(x, y + radius)
+        context.quadraticCurveTo(x, y, x + radius, y)
+        context.closePath()
+        // context.stroke()
+        context.fill()
     }
 
     const options =
@@ -105,22 +103,22 @@
                     name: "Color by function, SVTYPE",
                     visibilityWindow: -1,
                     color: function (variant) {
-                        const svtype = variant.info["SVTYPE"];
+                        const svtype = variant.info["SVTYPE"]
                         switch (svtype) {
                             case 'DEL':
-                                return "#ff2101";
+                                return "#ff2101"
                             case 'INS':
-                                return "#001888";
+                                return "#001888"
                             case 'DUP':
-                                return "#028401";
+                                return "#028401"
                             case 'INV':
-                                return "#008688";
+                                return "#008688"
                             case 'CNV':
-                                return "#8931ff";
+                                return "#8931ff"
                             case 'BND':
-                                return "#891100";
+                                return "#891100"
                             default:
-                                return "#002eff";
+                                return "#002eff"
                         }
                     }
                 },
@@ -186,13 +184,13 @@
             ]
         }
 
-    const igvDiv = document.getElementById("igvDiv");
+    const igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
 
         .then(function (browser) {
 
-        });
+        })
 
 </script>
 

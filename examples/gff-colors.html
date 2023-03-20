@@ -4,8 +4,6 @@
     <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
     <title>igv.js</title>
 
-    <!-- IGV JS -->
-    <script src="../dist/igv.min.js"></script>
 
 </head>
 
@@ -16,17 +14,18 @@
     <ol>
         <li>color by attribute (column 9)</li>
         <li>color by source (column 2)</li>
-        <li>color by source with color table </li>
+        <li>color by source with color table</li>
         <li>color by strand</li>
     </ol>
 </h4>
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
-<script>
+<script type="module">
 
+    import igv from "../dist/igv.esm.min.js"
 
-    var options =
+    const options =
         {
             genome: "hg38",
             locus: "chr22:21,913,513-22,216,565",
@@ -123,7 +122,7 @@
                 ]
         }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
@@ -132,7 +131,8 @@
 
 </script>
 
-<p><pre>
+<p>
+<pre>
         var options =
         {
             genome: "hg38",
@@ -229,7 +229,8 @@
                     }
                 ]
         }
-</pre></p>
+</pre>
+</p>
 
 </body>
 
