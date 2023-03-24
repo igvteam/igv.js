@@ -35,11 +35,13 @@ class HDF5Reader {
 
         // console.log(h5_obj_keys)
         let signal_bin = new ParseSignals(h5_obj_keys);
-        this.rd_bins = signal_bin.get_rd_bins()
+        let rd_bins = signal_bin.get_rd_bins()
+        let snp_bins = signal_bin.get_snp_bins()
+        this.available_bins = [...new Set(rd_bins, snp_bins)]
 
         // let bin_size = this.bin_size
-        if(! this.rd_bins.includes(bin_size)){
-            bin_size = this.rd_bins[rd_bins.length-1];    
+        if(! this.available_bins.includes(bin_size)){
+            bin_size = this.available_bins.at(-1);    
         }
 
         const chr_ds = await h5_obj.get("rd_chromosomes")
@@ -83,6 +85,9 @@ class HDF5Reader {
             // baf likelihood
             let signal_baf_1 = `snp_likelihood_${chrom}_${bin_size}_mask`
             let chr_wig_bafs = await this.get_baf_signals(h5_obj, h5_obj_keys, chrom, bin_size, signal_baf_1)
+
+            // let signal_baf_1 = `snp_i1_${chrom}_${bin_size}_mask`
+            // let chr_wig_bafs = await this.get_baf_signals_v2(h5_obj, h5_obj_keys, chrom, bin_size, signal_baf_1)
 
             wigFeatures_baf1 = wigFeatures_baf1.concat(chr_wig_bafs[0])
             wigFeatures_baf2 = wigFeatures_baf2.concat(chr_wig_bafs[1])
@@ -210,6 +215,28 @@ class HDF5Reader {
             });
         }
         return [chr_wig_1, chr_wig_2]
+    }
+
+    async get_baf_signals_v2(h5_obj, h5_obj_keys, chrom, bin_size, signal_name){
+        
+        /* return two list of dictionary*/
+        let chr_wig_1 = [];
+        let chr_wig_2 = [];
+        if (h5_obj_keys.includes(signal_name)){
+            let chrom_dataset = await h5_obj.get(signal_name)
+            let chrom_data = await chrom_dataset.to_array() //create_nested_array(value, shape)
+            chrom_data.forEach((lh, bin_idx) => {
+                if (!isNaN(lh)){
+                    chr_wig_1.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: -2 * ( 0.5 - lh )})
+                    if(lh != 0.5){
+                        chr_wig_2.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: -2 * ( 0.5 + lh )})
+                    }
+                }
+            });
+        }
+        console.log(chrom, chr_wig_1, chr_wig_2)
+        return [chr_wig_1, chr_wig_2]
+
     }
 }
 

@@ -119,29 +119,43 @@ class CNVPytorTrack extends TrackBase {
             }, Object.create(null))
 
             const cnvpytor_obj = new CNVpytorVCF(allVariants, this.bin_size)
-            //const wigFeatures = await cnvpytor_obj.computeReadDepth()
-            //const bafFeatures = await cnvpytor_obj.computeBAF_v2()
-            const dataWigs = await cnvpytor_obj.read_rd_baf()
-            const wigFeatures = dataWigs[0]
-            const bafFeatures = dataWigs[1]
             
+            let wigFeatures;
+            let bafFeatures;
             this.wigFeatures_obj = {}
-            this.wigFeatures_obj[this.bin_size] = {
-                "RD_Raw": wigFeatures[0],
-                "RD_Raw_gc_coor": wigFeatures[1],
-                "ReadDepth": wigFeatures[2],
-                "2D": [],
-                "BAF1": bafFeatures[0],
-                "BAF2": bafFeatures[1]
+            this.wigFeatures_obj[this.bin_size] = {}
+
+            let dataWigs;
+            if(this.config.cnv_caller == '2D'){
+                
+                dataWigs = await cnvpytor_obj.read_rd_baf('2D')
+
+                wigFeatures = dataWigs[0]
+                bafFeatures = dataWigs[1]
+                this.wigFeatures_obj[this.bin_size]['2D'] = wigFeatures[2]
+
+                this.available_callers = ['2D']
+            }else{
+                dataWigs = await cnvpytor_obj.read_rd_baf()
+                wigFeatures = dataWigs[0]
+                bafFeatures = dataWigs[1]
+                this.wigFeatures_obj[this.bin_size]['ReadDepth'] = wigFeatures[2]
+                this.available_callers = ['ReadDepth']
             }
-            this.rd_bins = [this.bin_size]
-            this.available_callers = ["ReadDepth"]
+            
+            this.wigFeatures_obj[this.bin_size]['RD_Raw'] = wigFeatures[0]
+            this.wigFeatures_obj[this.bin_size]['RD_Raw_gc_coor'] = wigFeatures[1]
+            this.wigFeatures_obj[this.bin_size]['BAF1'] = bafFeatures[0]
+            this.wigFeatures_obj[this.bin_size]['BAF2'] = bafFeatures[1]
+            
+            this.available_bins = [this.bin_size]
+            
             this.set_available_callers()
 
         } else {
             this.cnvpytor_obj =   new HDF5IndexedReader(this.config.url, this.bin_size)
             this.wigFeatures_obj = await this.cnvpytor_obj.get_rd_signal(this.bin_size)
-            this.rd_bins = this.cnvpytor_obj.rd_bins
+            this.available_bins = this.cnvpytor_obj.available_bins
             this.available_callers = this.cnvpytor_obj.callers
             this.set_available_callers()
         }
@@ -256,7 +270,7 @@ class CNVPytorTrack extends TrackBase {
 
         items.push('<hr/>')
         items.push("Bin Sizes")
-        for (let rd_bin of this.rd_bins) {
+        for (let rd_bin of this.available_bins) {
             const checkBox = createCheckbox(rd_bin, rd_bin === this.bin_size)
             items.push({
                 object: $(checkBox),
