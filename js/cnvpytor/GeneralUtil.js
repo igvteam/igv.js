@@ -1,4 +1,44 @@
 
+class GetFit {
+  constructor(allBins) {
+      this.allBins = allBins
+  }
+  getValues() {
+      const bins = Object.values(this.allBins).reduce(
+          (binResult, bin) => { return binResult.concat(bin.filter(a => a.binScore > 0).map(a => a.binScore)) }, [])
+      return bins
+  }
+  getMean(data) {
+      return (data.reduce(function (a, b) { return a + b; }) / data.length);
+  }
+  fit_data() {
+      let rd_list = this.getValues()
+      let distParmas = getDistParams(rd_list)
+      return distParmas
+  }
+
+  histogram(data, bins) {
+      const step = bins[1] - bins[0];
+      const hist_bins = [];
+
+      data.forEach((value, index) => {
+          bins.forEach((bin_value, bin_index) => {
+              if (!hist_bins[bin_value]) {
+                  hist_bins[bin_value] = { count: 0 };
+              }
+              if (bin_value <= value && value < bin_value + step) {
+                  hist_bins[bin_value].count++;
+                  return false;
+              }
+          });
+      });
+      const dist_p = []
+      hist_bins.forEach((bin, index) => { dist_p.push(bin.count); });
+      return dist_p
+  }
+
+}
+
 function range_function(start, stop, step) {
   const data_array = Array(Math.ceil((stop - start) / step))
     .fill(start)
@@ -43,4 +83,17 @@ function getDistParams(bins) {
   return [mean, std]
 }
 
-export { range_function, getDistParams };
+function linspace(a, b, n) {
+  if (typeof n === "undefined") n = Math.max(Math.round(b - a) + 1, 1);
+  if (n < 2) {
+      return n === 1 ? [a] : [];
+  }
+  var ret = Array(n);
+  n--;
+  for (let i = n; i >= 0; i--) {
+      ret[i] = (i * b + (n - i) * a) / n;
+  }
+  return ret;
+}
+
+export default { range_function, getDistParams, linspace, GetFit};

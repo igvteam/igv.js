@@ -1,46 +1,7 @@
-import { range_function, getDistParams } from './GeneralUtil.js'
+
+import g_utils from './GeneralUtil.js'
 import t_dist from './t_dist.js'
 
-
-class GetFit {
-    constructor(allBins) {
-        this.allBins = allBins
-    }
-    getValues() {
-        const bins = Object.values(this.allBins).reduce(
-            (binResult, bin) => { return binResult.concat(bin.filter(a => a.binScore > 0).map(a => a.binScore)) }, [])
-        return bins
-    }
-    getMean(data) {
-        return (data.reduce(function (a, b) { return a + b; }) / data.length);
-    }
-    fit_data() {
-        let rd_list = this.getValues()
-        let distParmas = getDistParams(rd_list)
-        return distParmas
-    }
-
-    histogram(data, bins) {
-        const step = bins[1] - bins[0];
-        const hist_bins = [];
-
-        data.forEach((value, index) => {
-            bins.forEach((bin_value, bin_index) => {
-                if (!hist_bins[bin_value]) {
-                    hist_bins[bin_value] = { count: 0 };
-                }
-                if (bin_value <= value && value < bin_value + step) {
-                    hist_bins[bin_value].count++;
-                    return false;
-                }
-            });
-        });
-        const dist_p = []
-        hist_bins.forEach((bin, index) => { dist_p.push(bin.count); });
-        return dist_p
-    }
-
-}
 
 function erf(x) {
     var m = 1.0, s = 1.0, sum = x * 1.0;
@@ -695,4 +656,4 @@ export class Partition {
 
 
 
-export { GetFit };
+export default { Partition };

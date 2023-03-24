@@ -144,4 +144,23 @@ function lgamma(xg){
     return Math.log(gamma(xg))
 }
 
-export default {TdistributionCDF, gamma};
+function t_test_1_sample(mean, m, s, n) {
+    if (s == 0) s = 1;
+    var t = ((mean - m) / s) * Math.sqrt(n)
+    var p = 1.0 - TdistributionCDF(Math.abs(t), (n - 1))
+    return p
+}
+
+function t_test_2_samples(m1, s1, n1, m2, s2, n2) {
+    if (s1 == 0) s1 = 1;
+    if (s2 == 0) s2 = 1;
+    var t = (m1 - m2) / Math.sqrt(s1 ** 2 / n1 + s2 ** 2 / n2);
+    var df = ((s1 ** 2 / n1 + s2 ** 2 / n2) ** 2 * (n1 - 1) * (n2 - 1)) /
+        ((s1 ** 4 * (n2 - 1)) / n1 ** 2 + (s2 ** 4 * (n1 - 1)) / n2 ** 2);
+
+    var p = 1.0 - TdistributionCDF(Math.abs(t), parseInt(df + 0.5))
+
+    return p
+}
+
+export default {TdistributionCDF, gamma, t_test_1_sample, t_test_2_samples};
