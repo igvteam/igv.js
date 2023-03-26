@@ -79,7 +79,25 @@ function decodeBed(tokens, header) {
         }
 
         if (tokens.length > 11) {
-            const exons = decodeExons(tokens[9], tokens[10], tokens[11])
+            const exonCount = parseInt(tokens[9])
+            // Some basic validation
+            if (exonCount > 1000) {
+                // unlikely
+                return feature
+            }
+
+            const exonSizes = tokens[10].replace(/,$/, '').split(',')
+            const exonStarts = tokens[11].replace(/,$/, '').split(',')
+            if (!(exonSizes.length === exonStarts.length && exonCount === exonSizes.length)) {
+                return feature
+            }
+
+            const exons = []
+            for (let i = 0; i < exonCount; i++) {
+                const eStart = start + parseInt(exonStarts[i])
+                const eEnd = eStart + parseInt(exonSizes[i])
+                exons.push({start: eStart, end: eEnd})
+            }
             if (exons.length > 0) {
                 findUTRs(exons, feature.cdStart, feature.cdEnd)
                 feature.exons = exons
@@ -103,7 +121,6 @@ function decodeBed(tokens, header) {
     }
 
     return feature
-
 }
 
 /**
