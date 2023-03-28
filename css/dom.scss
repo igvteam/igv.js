@@ -107,10 +107,36 @@ $igv-zoom-in-notice-height: 16px;
   background-color: $igv-apple_crayon_iron;
 }
 
-.igv-column {
-  position: relative;
+.igv-sample-info-column {
+
   @include igv-column-base;
 
+  >div {
+
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    margin-top: $igv-column-item-margin-top;
+    min-width: 2px;
+    background-color: lightskyblue;
+
+    >div {
+      width: 8px;
+      height: 100%;
+    }
+
+    >div:hover {
+      width: 6px;
+      cursor: pointer;
+      border-width: 1px;
+      border-style: solid;
+      border-color: grey;
+    }
+
+  }
 }
 
 .igv-axis-column {
@@ -123,6 +149,12 @@ $igv-zoom-in-notice-height: 16px;
     margin-top: $igv-column-item-margin-top;
     width: 100%;
   }
+}
+
+.igv-column {
+  position: relative;
+  @include igv-column-base;
+
 }
 
 .igv-sample-name-column {

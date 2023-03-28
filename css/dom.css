@@ -1462,8 +1462,7 @@
   background-color: #545453;
 }
 
-.igv-column {
-  position: relative;
+.igv-sample-info-column {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -1472,6 +1471,27 @@
   align-items: flex-start;
   box-sizing: border-box;
   height: 100%;
+}
+.igv-sample-info-column > div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin-top: 5px;
+  min-width: 2px;
+  background-color: lightskyblue;
+}
+.igv-sample-info-column > div > div {
+  width: 8px;
+  height: 100%;
+}
+.igv-sample-info-column > div > div:hover {
+  width: 6px;
+  cursor: pointer;
+  border-width: 1px;
+  border-style: solid;
+  border-color: grey;
 }
 
 .igv-axis-column {
@@ -1488,6 +1508,18 @@
 .igv-axis-column > div {
   margin-top: 5px;
   width: 100%;
+}
+
+.igv-column {
+  position: relative;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  box-sizing: border-box;
+  height: 100%;
 }
 
 .igv-sample-name-column {
