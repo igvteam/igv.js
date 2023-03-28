@@ -243,6 +243,8 @@ class TrackView {
 
         this.track.height = newHeight
 
+        this.sampleInfo.style.height = `${newHeight}px`
+
         this.resizeAxisCanvas(this.axis.clientWidth, this.track.height)
 
         if (typeof this.track.paintAxis === 'function') {
