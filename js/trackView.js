@@ -32,10 +32,12 @@ import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
 import SampleNameViewport from './sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import MenuUtils from "./ui/menuUtils.js"
+import {randomRGB} from './util/colorPalletes.js'
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['ruler', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
+const sampleInfoExclusionTypes = new Set(['annotation', 'ruler', 'sequence', 'ideogram'])
 
 class TrackView {
 
@@ -64,6 +66,9 @@ class TrackView {
 
     addDOMToColumnContainer(browser, columnContainer, referenceFrameList) {
 
+        // Sample Info
+        this.sampleInfo = this.createSampleInfo(browser, this.track)
+
         // Axis
         this.axis = this.createAxis(browser, this.track)
 
@@ -87,6 +92,29 @@ class TrackView {
 
         // Track Gear
         this.createTrackGearPopup(browser)
+
+    }
+
+    createSampleInfo(browser, track) {
+
+        const sampleInfo = DOMUtils.div()
+        browser.columnContainer.querySelector('.igv-sample-info-column').appendChild(sampleInfo)
+
+        sampleInfo.style.height = `${track.height}px`
+
+        if (false === sampleInfoExclusionTypes.has(track.type)) {
+
+            const html = `<div></div><div></div><div></div><div></div>`
+            sampleInfo.innerHTML = html
+
+            sampleInfo.querySelectorAll('div').forEach(el => {
+                el.style.backgroundColor = randomRGB(128, 255)
+            })
+        }
+
+
+
+        return sampleInfo
 
     }
 
@@ -128,36 +156,6 @@ class TrackView {
             this.axisCanvas.style.height = `${height}px`
 
         }
-    }
-
-    removeDOMFromColumnContainer() {
-
-        // Axis
-        if (this.boundAxisClickHander) {
-            this.removeAxisEventListener(this.axis)
-        }
-        this.axis.remove()
-
-        // Track Viewports
-        for (let viewport of this.viewports) {
-            viewport.$viewport.remove()
-        }
-
-        // SampleName Viewport
-        this.sampleNameViewport.dispose()
-
-        // empty trackScrollbar Column
-        this.removeTrackScrollMouseHandlers()
-        this.outerScroll.remove()
-
-        // empty trackDrag Column
-        this.removeTrackDragMouseHandlers()
-        this.dragHandle.remove()
-
-        // empty trackGear Column
-        this.removeTrackGearMouseHandlers()
-        this.gearContainer.remove()
-
     }
 
     renderSVGContext(context, {deltaX, deltaY}) {
@@ -777,10 +775,45 @@ class TrackView {
 
     }
 
+    removeDOMFromColumnContainer() {
+
+        // Sample Info
+        this.sampleInfo.remove()
+
+        // Axis
+        if (this.boundAxisClickHander) {
+            this.removeAxisEventListener(this.axis)
+        }
+        this.axis.remove()
+
+        // Track Viewports
+        for (let viewport of this.viewports) {
+            viewport.$viewport.remove()
+        }
+
+        // SampleName Viewport
+        this.sampleNameViewport.dispose()
+
+        // empty trackScrollbar Column
+        this.removeTrackScrollMouseHandlers()
+        this.outerScroll.remove()
+
+        // empty trackDrag Column
+        this.removeTrackDragMouseHandlers()
+        this.dragHandle.remove()
+
+        // empty trackGear Column
+        this.removeTrackGearMouseHandlers()
+        this.gearContainer.remove()
+
+    }
+
     /**
      * Do any cleanup here
      */
     dispose() {
+
+        this.sampleInfo.remove()
 
         this.removeAxisEventListener(this.axis)
         this.axis.remove()
