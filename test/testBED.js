@@ -370,9 +370,11 @@ suite("testBed", function () {
         const reader = new FeatureFileReader(config)
         const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE)
         assert.ok(features)
-        assert.equal(features.length, 3)
+        assert.equal(features.length, 4)
         assert.equal(features[1].name, 'terminator')
         assert.equal(features[2].name, 'M13 origin')
+        assert.equal(features[3].name, 'M13 origin')
+        assert.equal("Baz", features[3].getAttributeValue("Key 2"))
     })
 
 })
