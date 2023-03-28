@@ -307,11 +307,16 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
      */
     test("GFF3 attribute encoding", function () {
 
-        const encoded = "aaa%09b%0Acd%0De%25fgh%3Bijk%3Dlm%26nop%2C"
-        const expected = "aaa\tb\ncd\re%fgh;ijk=lm&nop,"
+        // all allowable characters from GFF3 spec should be decoded;
+        // others (here %20 = space) should be left as-is
+        const encoded = "aaa%09b%0Acd%0De%25fgh%3Bijk%3Dlm%26nop%2C%20"
+        const expected = "aaa\tb\ncd\re%fgh;ijk=lm&nop,%20"
+        const expected_relaxed = "aaa\tb\ncd\re%fgh;ijk=lm&nop, "
 
         const decoded = decodeGFFAttribute(encoded)
         assert.equal(expected, decoded)
+        const decoded_relaxed = decodeGFFAttribute(encoded, true)
+        assert.equal(expected_relaxed, decoded_relaxed)
 
     })
 })

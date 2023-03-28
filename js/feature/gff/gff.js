@@ -113,15 +113,15 @@ function decodeGTF(tokens, header) {
  * @param keyValueDelim
  * @returns {[]}
  */
-function parseAttributeString(attributeString, keyValueDelim) {
+function parseAttributeString(attributeString, keyValueDelim, relaxed = false) {
     // parse 'attributes' string (see column 9 docs in https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md)
     var attributes = []
     for (let kv of attributeString.split(';')) {
         kv = kv.trim()
         const idx = kv.indexOf(keyValueDelim)
         if (idx > 0 && idx < kv.length - 1) {
-            const key = kv.substring(0, idx)
-            let value = stripQuotes(decodeGFFAttribute(kv.substring(idx + 1).trim()))
+            const key = stripQuotes(decodeGFFAttribute(kv.substring(0, idx).trim(), relaxed))
+            let value = stripQuotes(decodeGFFAttribute(kv.substring(idx + 1).trim(), relaxed))
             attributes.push([key, value])
         }
     }
@@ -160,10 +160,13 @@ const encodings = new Map([
     ["%2C", ","]
 ])
 
-function decodeGFFAttribute(str) {
+function decodeGFFAttribute(str, relaxed = false) {
 
     if (!str.includes("%")) {
         return str
+    }
+    if (relaxed) {
+        return decodeURIComponent(str);
     }
     let decoded = ""
     for (let i = 0; i < str.length; i++) {

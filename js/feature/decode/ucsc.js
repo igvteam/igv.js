@@ -31,7 +31,7 @@ function decodeBed(tokens, header) {
 
             // Potentially parse name field as GFF column 9 style streng.
             if (tokens[3].indexOf(';') > 0 && tokens[3].indexOf('=') > 0) {
-                const attributeKVs = parseAttributeString(tokens[3], '=')
+                const attributeKVs = parseAttributeString(tokens[3], '=', true)
                 feature.attributes = {}
                 for (let kv of attributeKVs) {
                     feature.attributes[kv[0]] = kv[1]
