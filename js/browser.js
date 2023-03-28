@@ -1289,18 +1289,13 @@ class Browser {
         let {width} = this.columnContainer.getBoundingClientRect()
 
         const sampleNameViewportWidth = this.getSampleNameViewportWidth()
+        const {width:sampleInfoWidth} = this.columnContainer.querySelector('.igv-sample-info-column').getBoundingClientRect()
 
-        width -= igv_axis_column_width + sampleNameViewportWidth + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
+        width -= sampleInfoWidth + igv_axis_column_width + sampleNameViewportWidth + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
 
         width -= column_multi_locus_shim_width * (columnCount - 1)
 
         return Math.floor(width / columnCount)
-    }
-
-    getCenterLineXOffset() {
-        let {width: columnContainerWidth} = this.columnContainer.getBoundingClientRect()
-        columnContainerWidth -= igv_axis_column_width + this.getSampleNameViewportWidth() + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
-        return Math.floor(columnContainerWidth / 2 + igv_axis_column_width)
     }
 
     minimumBases() {
