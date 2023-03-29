@@ -1,4 +1,4 @@
-track type=wiggle_0 graphType=points name="truc" description="une description" visibility=full color=50,150,255 yLineMark=11.76 yLineOnOff=on
+track type=wiggle_0 graphType=points name="truc" description="une description" visibility=full color=50,150,255 yLineMark=11.76 yLineOnOff=on viewLimits=0:200
 #bedGraph section chr8:29205997-29207881
 chr8	29206434	29206438	38.7646
 chr8	29206438	29206439	40.272
