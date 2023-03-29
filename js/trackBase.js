@@ -291,6 +291,8 @@ class TrackBase {
                         }
                         tracklineConfg.autoscale = false
                         tracklineConfg.dataRange = {min, max}
+                        this.viewLimitMin = min
+                        this.viewLimitMax = max
                     }
                 case "name":
                     tracklineConfg[key] = properties[key]
