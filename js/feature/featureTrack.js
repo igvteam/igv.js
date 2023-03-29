@@ -454,8 +454,8 @@ class FeatureTrack extends TrackBase {
             color = IGVColor.addAlpha(color, feature.alpha)
         } else if (this.useScore && feature.score && !Number.isNaN(feature.score)) {
             // UCSC useScore option, for scores between 0-1000.  See https://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK
-            const min = this.config.min ? this.config.min : 0 //getViewLimitMin(track);
-            const max = this.config.max ? this.config.max : 1000 //getViewLimitMax(track);
+            const min = this.config.min ? this.config.min : this.viewLimitMin ? this.viewLimitMin : 0
+            const max = this.config.max ? this.config.max : this.viewLimitMax ? this.viewLimitMax : 1000
             const alpha = getAlpha(min, max, feature.score)
             feature.alpha = alpha    // Avoid computing again
             color = IGVColor.addAlpha(color, alpha)
