@@ -67,7 +67,7 @@ function optimizeChunks(chunks, lowest) {
 function canMerge(chunk1, chunk2) {
     const gap = chunk2.minv.block - chunk1.maxv.block
     const sizeEstimate = chunk1.maxv.block - chunk1.minv.block
-    return gap < 65000 && sizeEstimate < 5000000
+    return sizeEstimate < 5000000
 }
 
 export {optimizeChunks}
