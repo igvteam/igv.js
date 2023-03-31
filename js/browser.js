@@ -1262,6 +1262,7 @@ class Browser {
 
     updateLocusSearchWidget() {
 
+        if(!this.referenceFrameList) return
         const referenceFrameList = this.referenceFrameList
 
         // Update end position of reference frames based on pixel widths.  This is hacky, but its been done here
@@ -1315,6 +1316,8 @@ class Browser {
 
     async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
 
+        if(!this.referenceFrameList) return
+
         const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
         let referenceFrames = referenceFrameOrUndefined ? [referenceFrameOrUndefined] : this.referenceFrameList
@@ -1332,6 +1335,8 @@ class Browser {
      * @param referenceFrameLeft - optional, if supplied new panel should be placed to the immediate right
      */
     async addMultiLocusPanel(chr, start, end, referenceFrameLeft) {
+
+        if(!this.referenceFrameList) return
 
         // account for reduced viewport width as a result of adding right mate pair panel
         const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length)
@@ -1947,6 +1952,8 @@ class Browser {
  * @returns {Promise<void>}
  */
 async function resize() {
+
+    if(!this.referenceFrameList) return
 
     const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
