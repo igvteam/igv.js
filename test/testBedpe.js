@@ -183,6 +183,7 @@ suite("testBedpe", function () {
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
+            format: 'bedpe',
                 url: 'test/data/bedpe/hiccups_encode.tsv'
             },
             genome
