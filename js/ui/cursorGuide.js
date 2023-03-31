@@ -26,6 +26,19 @@ class CursorGuide {
 
         function mouseMoveHandler(event) {
 
+            const tag = event.target.tagName
+            console.log(`tag ${ tag }`)
+
+            // const classes = event.target.classList
+            // const iterator = classes.entries()
+            //
+            // const list = []
+            // for (const value of iterator) {
+            //     list.push(value)
+            // }
+            //
+            // console.log(`classes ${ list.join(' ')}`)
+
             const {x, y} = DOMUtils.translateMouseCoordinates(event, this.columnContainer)
             this.horizontalGuide.style.top = `${y}px`
 
