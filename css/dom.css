@@ -1182,8 +1182,9 @@
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: center;
+  word-break: break-all;
+  max-height: 300px;
+  overflow-y: auto;
 }
 .igv-roi-table > .igv-roi-table-goto-explainer {
   margin-left: 4px;
@@ -1224,7 +1225,6 @@
   border-right: unset;
 }
 .igv-roi-table > .igv-roi-table-row-container {
-  resize: both;
   overflow: scroll;
   min-height: 72px;
   height: 144px;
