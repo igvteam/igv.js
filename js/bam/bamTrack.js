@@ -36,7 +36,7 @@ import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {makePairedAlignmentChords, makeSupplementalAlignmentChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import PairedEndStats from "./pairedEndStats.js"
-import {createBlatTrack} from "../blat/blatTrack.js"
+import {createBlatTrack, maxSequenceSize} from "../blat/blatTrack.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"
 
 const alignmentStartGap = 5
@@ -1363,18 +1363,21 @@ class AlignmentTrack {
                 // TODO if genome supports blat
                 const seqstring = clickedAlignment.seq
                 if (seqstring && "*" != seqstring) {
-                    list.push({
-                        label: 'BLAT read sequence',
-                        click: () => {
-                            const sequence = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(seqstring) : seqstring
-                            const name = `${clickedAlignment.readName} - blat`
-                            const title = `${this.parent.name} - ${name}`
-                            createBlatTrack({sequence, browser: this.browser, name, title})
-                        }
-                    })
+
+                    if(seqstring.length < maxSequenceSize) {
+                        list.push({
+                            label: 'BLAT read sequence',
+                            click: () => {
+                                const sequence = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(seqstring) : seqstring
+                                const name = `${clickedAlignment.readName} - blat`
+                                const title = `${this.parent.name} - ${name}`
+                                createBlatTrack({sequence, browser: this.browser, name, title})
+                            }
+                        })
+                    }
 
                     const softClips = clickedAlignment.softClippedBlocks()
-                    if (softClips.left && softClips.left.len > MINIMUM_BLAT_LENGTH) {
+                    if (softClips.left && softClips.left.len > MINIMUM_BLAT_LENGTH && softClips.left.len < maxSequenceSize) {
                         list.push({
                             label: 'BLAT left soft-clipped sequence',
                             click: () => {
@@ -1386,7 +1389,7 @@ class AlignmentTrack {
                             }
                         })
                     }
-                    if (softClips.right && softClips.right.length > MINIMUM_BLAT_LENGTH) {
+                    if (softClips.right && softClips.right.len > MINIMUM_BLAT_LENGTH && softClips.right.len < maxSequenceSize) {
                         list.push({
                             label: 'BLAT right soft-clipped sequence',
                             click: () => {
