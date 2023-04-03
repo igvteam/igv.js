@@ -8,6 +8,10 @@ class RegionTableBase {
         this.browser = config.browser
 
         this.container = DOMUtils.div({ class: 'igv-roi-table' })
+        if(config.width) {
+            this.container.style.width = config.width
+
+        }
 
         config.parent.appendChild(this.container)
 
