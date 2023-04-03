@@ -1,4 +1,3 @@
-
 $igv-roi-font-face: 'Open Sans', sans-serif;
 $igv-roi-font-color: #4b4b4b;
 $igv-roi-font-translucent-color: rgba(75, 75, 75, 0.6);
@@ -11,7 +10,7 @@ $igv-roi-menu-header-height: 24px;
 $dimension: 24px;
 $dimension-large: 32px;
 
-$igv-roi-table-row-container-height:5 * $dimension;
+$igv-roi-table-row-container-height: 5 * $dimension;
 
 $igv-roi-border-color: #7f7f7f;
 
@@ -40,7 +39,7 @@ $igv-roi-table-background-color: #eee;
 
   background-color: white;
 
-  width:(8 * $dimension);
+  width: (8 * $dimension);
 
   border-radius: $igv-roi-border-radius;
   border-color: $igv-roi-grey;
@@ -54,7 +53,7 @@ $igv-roi-table-background-color: #eee;
   align-items: stretch;
 
   // header
-  >div:first-child {
+  > div:first-child {
     height: $igv-roi-menu-header-height;
 
     border-top-color: transparent;
@@ -73,14 +72,14 @@ $igv-roi-table-background-color: #eee;
     justify-content: flex-end;
     align-items: center;
 
-    >div {
+    > div {
       margin-right: 4px;
       height: 12px;
       width: 12px;
       color: $igv-roi-grey;
     }
 
-    >div:hover {
+    > div:hover {
       cursor: pointer;
       color: #444;
     }
@@ -88,7 +87,7 @@ $igv-roi-table-background-color: #eee;
   }
 
   // body
-  >div:last-child {
+  > div:last-child {
 
     //background-color: rgba(94, 255, 1, 0.5);
     background-color: white;
@@ -109,7 +108,7 @@ $igv-roi-table-background-color: #eee;
     vertical-align: middle;
     //cursor: pointer;
 
-    >div {
+    > div {
       height: $dimension;
       padding-left: 4px;
 
@@ -118,7 +117,7 @@ $igv-roi-table-background-color: #eee;
       border-bottom-color: $igv-roi-border-color;
     }
 
-    >div:not(:first-child):hover {
+    > div:not(:first-child):hover {
       background-color: rgba(127, 127, 127, 0.1);
     }
 
@@ -135,7 +134,7 @@ $igv-roi-table-background-color: #eee;
       text-overflow: ellipsis;
     }
 
-    >div:last-child {
+    > div:last-child {
       border-bottom-width: 0;
       border-bottom-color: transparent;
     }
@@ -175,7 +174,7 @@ $igv-roi-table-background-color: #eee;
   align-items: stretch;
 
   // default div styling
-  >div {
+  > div {
     height: $dimension;
 
     font-size: 14px;
@@ -185,7 +184,7 @@ $igv-roi-table-background-color: #eee;
   }
 
   // header
-  >div:first-child {
+  > div:first-child {
 
     border-color: transparent;
     border-top-left-radius: $igv-roi-table-border-radius;
@@ -206,24 +205,24 @@ $igv-roi-table-background-color: #eee;
     justify-content: space-between;
     align-items: center;
 
-    >div:first-child {
+    > div:first-child {
       text-align: center;
       width: calc(100% - 4px - #{$igv-roi-dismiss-button-size});
     }
 
-    >div:last-child {
+    > div:last-child {
       margin-right: 4px;
       margin-bottom: 2px;
       height: $igv-roi-dismiss-button-size;
       width: $igv-roi-dismiss-button-size;
       color: $igv-roi-border-color;
 
-      >svg {
+      > svg {
         display: block;
       }
     }
 
-    >div:last-child:hover {
+    > div:last-child:hover {
       cursor: pointer;
       color: #444;
     }
@@ -233,7 +232,7 @@ $igv-roi-table-background-color: #eee;
   cursor: default;
 
   // description
-  >.igv-roi-table-description {
+  > .igv-roi-table-description {
 
     height: fit-content;
     padding: 4px;
@@ -247,14 +246,17 @@ $igv-roi-table-background-color: #eee;
     overflow-y: auto;
   }
 
-  >.igv-roi-table-goto-explainer {
+  > .igv-roi-table-goto-explainer {
     margin-left: 4px;
     color: #7F7F7F;
     font-style: italic;
+    border-top: solid lightgray;
+    margin-top: 5px;
   }
 
+
   // column titles
-  >.igv-roi-table-column-titles {
+  > .igv-roi-table-column-titles {
 
     height: $dimension;
 
@@ -277,7 +279,7 @@ $igv-roi-table-background-color: #eee;
     border-bottom-style: solid;
     border-bottom-width: thin;
 
-    >div {
+    > div {
       font-size: 14px;
       vertical-align: middle;
       line-height: $dimension;
@@ -298,14 +300,14 @@ $igv-roi-table-background-color: #eee;
 
     }
 
-    >div:last-child {
+    > div:last-child {
       border-right: unset;
     }
 
   }
 
   // table row container
-  >.igv-roi-table-row-container {
+  > .igv-roi-table-row-container {
 
     //resize: both;
     overflow: scroll;
@@ -316,7 +318,7 @@ $igv-roi-table-background-color: #eee;
     height: (6 * $dimension);
     max-height: (20 * $dimension);
 
-    background-color:white;
+    background-color: white;
 
     display: flex;
     flex-flow: column;
@@ -325,7 +327,7 @@ $igv-roi-table-background-color: #eee;
     align-items: stretch;
 
     // table row
-    >.igv-roi-table-row {
+    > .igv-roi-table-row {
 
       height: $dimension;
 
@@ -335,7 +337,7 @@ $igv-roi-table-background-color: #eee;
       justify-content: stretch;
       align-items: stretch;
 
-      >div {
+      > div {
         font-size: 14px;
         vertical-align: middle;
         line-height: $dimension;
@@ -355,19 +357,19 @@ $igv-roi-table-background-color: #eee;
         border-right-width: thin;
       }
 
-      >div:last-child {
+      > div:last-child {
         border-right: unset;
       }
 
     }
 
-    >.igv-roi-table-row-hover {
+    > .igv-roi-table-row-hover {
       background-color: rgba(0, 0, 0, 0.04);
     }
   }
 
   // footer buttons
-  >div:last-child {
+  > div:last-child {
 
     height: $dimension-large;
     line-height: $dimension-large;
@@ -381,7 +383,7 @@ $igv-roi-table-background-color: #eee;
     border-bottom-right-radius: $igv-roi-table-border-radius;
     border-bottom-width: 0;
 
-    //background-color: $igv-roi-table-background-color;
+    background-color: $igv-roi-table-background-color;
 
     display: flex;
     flex-flow: row;
@@ -437,7 +439,7 @@ $igv-roi-table-background-color: #eee;
   z-index: 64;
 
   position: absolute;
-  top:0;
+  top: 0;
   bottom: 0;
 
   pointer-events: none;
@@ -461,7 +463,7 @@ $igv-roi-table-background-color: #eee;
   align-items: stretch;
 
   // ROI region header
-  >div {
+  > div {
     position: relative;
     width: 100%;
     height: 8px;
@@ -476,7 +478,7 @@ $igv-roi-table-background-color: #eee;
   position: absolute;
   z-index: 1024;
 
-  width:(6 * $dimension);
+  width: (6 * $dimension);
 
   border-color: $igv-roi-border-color;
   border-radius: $igv-roi-table-border-radius;
@@ -499,7 +501,7 @@ $igv-roi-table-background-color: #eee;
     border-bottom-width: thin;
   }
 
-  >div:first-child {
+  > div:first-child {
 
     border-top-left-radius: $igv-roi-table-border-radius;
     border-top-right-radius: $igv-roi-table-border-radius;
@@ -509,7 +511,7 @@ $igv-roi-table-background-color: #eee;
 
   }
 
-  >div:last-child {
+  > div:last-child {
 
     border-bottom-left-radius: $igv-roi-table-border-radius;
     border-bottom-right-radius: $igv-roi-table-border-radius;
@@ -558,7 +560,7 @@ $igv-roi-table-background-color: #eee;
   justify-content: stretch;
   align-items: stretch;
 
-  >label {
+  > label {
     margin-left: 2px;
     margin-bottom: 0;
     display: block;
@@ -567,7 +569,7 @@ $igv-roi-table-background-color: #eee;
     width: -webkit-fill-available;
   }
 
-  >input {
+  > input {
     display: block;
     margin-left: 2px;
     margin-right: 2px;
