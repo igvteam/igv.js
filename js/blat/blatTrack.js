@@ -89,26 +89,34 @@ class BlatTrack extends FeatureTrack {
 
 async function createBlatTrack({sequence, browser, name, title}) {
 
-    if(sequence.length > maxSequenceSize) {
+    if (sequence.length > maxSequenceSize) {
         browser.alert.present(`Sequence size exceeds maximum allowed length (${sequence.length} > ${maxSequenceSize})`)
         return
     }
 
     const db = browser.genome.id   // TODO -- blat specific property
 
-    const features = await blat(sequence, db)
+    const url = browser.config["blatServerURL"]
 
-    const trackConfig = {
-        type: 'blat',
-        name: name || 'blat results',
-        title: title || 'blat results',
-        sequence: sequence,
-        features: features
+    try {
+
+        const features = await blat({url, userSeq: sequence, db})
+        const trackConfig = {
+            type: 'blat',
+            name: name || 'blat results',
+            title: title || 'blat results',
+            sequence: sequence,
+            altColor: 'rgb(176, 176, 236)',
+            color: 'rgb(236, 176, 176)',
+            features: features
+        }
+
+        const track = await browser.loadTrack(trackConfig)
+        track.openTableView()
+
+    } catch (e) {
+        browser.alert.present(`Error performing blat search:  ${e}`)
     }
-
-    const track = await browser.loadTrack(trackConfig)
-
-    track.openTableView()
 
 }
 
