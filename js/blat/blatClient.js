@@ -6,20 +6,18 @@ http://genome.ucsc.edu/cgi-bin/hgBlat
 &output=json
  */
 
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {decodePSL} from "../feature/decode/ucsc.js"
-import BlatTrack from "./blatTrack.js"
-
 
 //const blatServer = "https://genome.ucsc.edu/cgi-bin/hgBlat"
-//const blatServer = "https://igv.org/services/blat.php"
-const blatServer = "http://localhost:8000/blat.php"
+const defaultBlatServer = "https://igv.org/services/blatUCSC.php"
+//const blatServer = "http://localhost:8000/blatUCSC.php"
 
 
-async function blat(userSeq, db) {
+async function blat({url, userSeq, db}) {
 
+    url = url || defaultBlatServer
 
-    const results = await postData(blatServer, userSeq, db)
+    const results = await postData(url, userSeq, db)
 
     const fields = results.fields
 
