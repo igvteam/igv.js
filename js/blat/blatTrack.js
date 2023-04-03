@@ -2,9 +2,9 @@ import FeatureTrack from "../feature/featureTrack.js"
 import BlatTable from "./blatTable.js"
 import {blat} from "./blatClient.js"
 
+const maxSequenceSize = 25000
 
 class BlatTrack extends FeatureTrack {
-
 
     constructor(config, browser) {
         super(config, browser)
@@ -40,7 +40,7 @@ class BlatTrack extends FeatureTrack {
                     browser: this.browser,
                     parent: this.browser.parent,
                     headerTitle: this.config.title,
-                    description: `BLAT result for query sequence:<br>${ this.sequence }`,
+                    description: this.sequence,
                     dismissHandler: () => {
                         this.table.dismiss()
                         this.table.dispose()
@@ -89,6 +89,11 @@ class BlatTrack extends FeatureTrack {
 
 async function createBlatTrack({sequence, browser, name, title}) {
 
+    if(sequence.length > maxSequenceSize) {
+        browser.alert.present(`Sequence size exceeds maximum allowed length (${sequence.length} > ${maxSequenceSize})`)
+        return
+    }
+
     const db = browser.genome.id   // TODO -- blat specific property
 
     const features = await blat(sequence, db)
@@ -108,4 +113,4 @@ async function createBlatTrack({sequence, browser, name, title}) {
 }
 
 export default BlatTrack
-export {createBlatTrack}
+export {createBlatTrack, maxSequenceSize}
