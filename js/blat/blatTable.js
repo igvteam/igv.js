@@ -18,6 +18,7 @@ class BlatTable extends RegionTableBase {
     set columnTitleDOM(columnFormat) {
 
         const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
+        this.columnTitlesDiv = dom
         this.container.appendChild(dom)
 
         for (const format of columnFormat) {
@@ -35,13 +36,16 @@ class BlatTable extends RegionTableBase {
 
             let dom
 
-            const found = this.container.querySelector('.igv-roi-table-column-titles')
             dom = DOMUtils.div({ class: 'igv-roi-table-description' })
-            this.container.insertBefore(dom, found)
+            this.container.insertBefore(dom, this.columnTitlesDiv)
+            dom.innerHTML = `BLAT result for query sequence:`
+
+            dom = DOMUtils.div({ class: 'igv-roi-table-description' })
+            this.container.insertBefore(dom, this.columnTitlesDiv)
             dom.innerHTML = config.description
 
             dom = DOMUtils.div({ class: 'igv-roi-table-goto-explainer' })
-            this.container.insertBefore(dom, found)
+            this.container.insertBefore(dom, this.columnTitlesDiv)
             dom.innerHTML = `Select one or more rows and click Go To to view the regions`
 
         }

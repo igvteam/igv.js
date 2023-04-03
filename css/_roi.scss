@@ -242,9 +242,9 @@ $igv-roi-table-background-color: #eee;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
   }
 
   >.igv-roi-table-goto-explainer {
@@ -307,7 +307,7 @@ $igv-roi-table-background-color: #eee;
   // table row container
   >.igv-roi-table-row-container {
 
-    resize: both;
+    //resize: both;
     overflow: scroll;
 
     //min-width:512px;
