@@ -12,20 +12,30 @@ import BlatTrack from "./blatTrack.js"
 
 
 //const blatServer = "https://genome.ucsc.edu/cgi-bin/hgBlat"
-const blatServer = "https://igv.org/services/blat.php"
+//const blatServer = "https://igv.org/services/blat.php"
+const blatServer = "http://localhost:8000/blat.php"
 
 
 async function blat(userSeq, db) {
 
-    const url = `${blatServer}?userSeq=${userSeq}&type=DNA&db=${db}&output=json`
 
-    const results = await igvxhr.loadJson(url, {})
+    const results = await postData(blatServer, userSeq, db)
 
     const fields = results.fields
 
     const features = results.blat.map(decodePSL)
 
     return features
+}
+
+async function postData(url = "", userSeq, db) {
+
+    const data = new URLSearchParams();
+    data.append("userSeq", userSeq);
+    data.append("db", db);
+
+    const response = await fetch(url, { method: "post", body: data })
+    return response.json(); // parses JSON response into native JavaScript objects
 }
 
 
