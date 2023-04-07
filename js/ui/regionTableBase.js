@@ -8,10 +8,10 @@ class RegionTableBase {
         this.browser = config.browser
 
         this.container = DOMUtils.div({ class: 'igv-roi-table' })
-        if(config.width) {
-            this.container.style.width = config.width
-
-        }
+        // if(config.width) {
+        //     this.container.style.width = config.width
+        //
+        // }
 
         config.parent.appendChild(this.container)
 
@@ -84,7 +84,7 @@ class RegionTableBase {
         const dom = DOMUtils.div({ class: 'igv-roi-table-row-container' })
         container.appendChild(dom)
 
-        dom.style.minWidth = this.config.width
+        // dom.style.minWidth = this.config.width
 
         this._rowContainerDOM = dom
     }
