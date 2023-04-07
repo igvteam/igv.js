@@ -7,7 +7,7 @@ class BlatTable extends RegionTableBase {
 
     constructor(config) {
 
-        const cooked = Object.assign({ 'width':'1040px' }, config)
+        const cooked = Object.assign({ 'width':'1024px' }, config)
         super(cooked)
 
         this.descriptionDOM = config

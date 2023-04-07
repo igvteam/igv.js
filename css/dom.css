@@ -1120,7 +1120,8 @@
   z-index: 1024;
   overflow: auto;
   resize: both;
-  max-width: 1024px;
+  width: 960px;
+  max-width: 1600px;
   border-color: #7f7f7f;
   border-radius: 4px;
   border-style: solid;
@@ -1189,11 +1190,12 @@
   overflow-y: auto;
 }
 .igv-roi-table > .igv-roi-table-goto-explainer {
+  margin-top: 5px;
   margin-left: 4px;
   color: #7F7F7F;
   font-style: italic;
+  height: 24px;
   border-top: solid lightgray;
-  margin-top: 5px;
 }
 .igv-roi-table > .igv-roi-table-column-titles {
   height: 24px;
@@ -1230,8 +1232,8 @@
 }
 .igv-roi-table > .igv-roi-table-row-container {
   overflow: scroll;
-  height: fit-content;
-  max-height: 480px;
+  height: 360px;
+  max-height: fit-content;
   background-color: white;
   display: flex;
   flex-flow: column;

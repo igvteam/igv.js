@@ -154,7 +154,8 @@ $igv-roi-table-background-color: #eee;
 
   overflow: auto;
   resize: both;
-  max-width: 1024px;
+  width: 960px;
+  max-width: 1600px;
 
   border-color: $igv-roi-border-color;
   border-radius: $igv-roi-table-border-radius;
@@ -247,11 +248,14 @@ $igv-roi-table-background-color: #eee;
   }
 
   > .igv-roi-table-goto-explainer {
+    margin-top: 5px;
     margin-left: 4px;
     color: #7F7F7F;
     font-style: italic;
+
+    height: $dimension;
+
     border-top: solid lightgray;
-    margin-top: 5px;
   }
 
   // column titles
@@ -310,12 +314,8 @@ $igv-roi-table-background-color: #eee;
 
     overflow: scroll;
 
-    height: fit-content;
-    max-height: (20 * $dimension);
-
-    //min-height: (3 * $dimension);
-    //height: (6 * $dimension);
-    //max-height: (20 * $dimension);
+    height: (15 * $dimension);
+    max-height: fit-content;
 
     background-color: white;
 
