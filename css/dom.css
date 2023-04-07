@@ -1118,7 +1118,9 @@
 .igv-roi-table {
   position: absolute;
   z-index: 1024;
-  width: fit-content;
+  overflow: auto;
+  resize: both;
+  max-width: 1024px;
   border-color: #7f7f7f;
   border-radius: 4px;
   border-style: solid;
@@ -1130,7 +1132,7 @@
   display: flex;
   flex-flow: column;
   flex-wrap: nowrap;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: stretch;
   cursor: default;
 }
@@ -1228,8 +1230,7 @@
 }
 .igv-roi-table > .igv-roi-table-row-container {
   overflow: scroll;
-  min-height: 72px;
-  height: 144px;
+  height: fit-content;
   max-height: 480px;
   background-color: white;
   display: flex;
