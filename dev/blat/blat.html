@@ -7,13 +7,6 @@
 </head>
 <body>
 
-
-<label for="userSeqInput" style="display:block; margin-bottom: 10px">Sequence</label>
-
-<textarea rows="5" cols="200" id="userSeqInput">
-    CTAATCAtctacactggtttctactgaaatgtctgttgtcatagacttaattgtgtcttcagatacagcagttctgttatttctgagttttacctggggcaagagaatctttagcaagtttaaaggcacctatatctggaatcacccctccctccagatgaatatcacagactctcccattaaaggtcttgccTTCCTTGATAGCATCATCACTCCA
-</textarea>
-
 <button id="blatButton" style="display: block">BLAT</button>
 
 <div id='igv-container' style="padding-top: 50px;padding-bottom: 20px; height: auto">
@@ -26,8 +19,11 @@
     import BlatTable from '../../js/blat/blatTable.js'
     import {blat} from '../../js/blat/blatClient.js'
 
-    const db = 'hg38'
-    let blatTable = undefined
+    let blatTable
+    const sequence =
+        'CTAATCAtctacactggtttctactgaaatgtctgttgtcatagacttaattgtgtcttcagatacagcagttctgttatttctgagttttacctggggcaagagaatctttagcaagtttaaaggcacctatatctggaatcacccctccctccagatgaatatcacagactctcccattaaaggtcttgccTTCCTTGATAGCATCATCACTCCA'
+
+    let igvBrowser
 
     const tableData =
         {
@@ -51,11 +47,10 @@
         ]
 
     document.getElementById("blatButton").addEventListener("click", async e => {
-
-        const sequence = document.getElementById("userSeqInput").textContent.trim()
+        
         try {
 
-            const results = await blat(sequence, db)
+            const results = await blat({ userSeq:sequence, db:'hg19' })
 
             tableData.rows = results.map(f => [
                 f.chr,
@@ -73,29 +68,12 @@
                 f.tBaseInsert
             ])
 
-            blatTable.renderTable(tableData.rows)
-            blatTable.present()
-
-        } catch (e) {
-            console.error(e)
-            alert(e)
-        }
-    })
-
-    const options =
-        {
-            genome: 'hg19',
-            locus: 'myc',
-        };
-
-    igv.createBrowser(document.getElementById('igv-container'), options)
-        .then(browser => {
-
             const config =
                 {
-                    browser,
+                    browser: igvBrowser,
                     parent: document.getElementById('igv-container'),
                     headerTitle: 'BLAT Results',
+                    description: `${ sequence }${ sequence }${ sequence }${ sequence }${ sequence }${ sequence }`,
                     dismissHandler: () => blatTable.dismiss(),
                     columnFormat: BlatTable.getColumnFormatConfiguration(),
                     gotoButtonHandler: BlatTable.gotoButtonHandler
@@ -103,7 +81,18 @@
 
             blatTable = new BlatTable(config)
 
-        })
+            blatTable.renderTable(tableData.rows)
+            blatTable.present()
+
+
+        } catch (e) {
+            console.error(e)
+            alert(e)
+        }
+    })
+
+    igv.createBrowser(document.getElementById('igv-container'), { genome: 'hg19', locus: 'myc' })
+        .then(browser => igvBrowser = browser)
 
 </script>
 
