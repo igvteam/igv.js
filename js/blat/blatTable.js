@@ -20,14 +20,20 @@ class BlatTable extends RegionTableBase {
 
             let dom
 
+            // BLAT result for query sequence
             dom = DOMUtils.div({ class: 'igv-roi-table-description' })
             this.tableDOM.insertBefore(dom, this.tableColumnTitles)
+            dom.style.height = 'auto'
             dom.innerHTML = `BLAT result for query sequence:`
 
+            // CTAATCAtctacactggtttctactg ...
             dom = DOMUtils.div({ class: 'igv-roi-table-description' })
             this.tableDOM.insertBefore(dom, this.tableColumnTitles)
+            dom.style.height = 'auto'
+            dom.style.maxHeight = '128px'
             dom.innerHTML = config.description
 
+            // Select one or more rows ...
             dom = DOMUtils.div({ class: 'igv-roi-table-goto-explainer' })
             this.tableDOM.insertBefore(dom, this.tableColumnTitles)
             dom.innerHTML = `Select one or more rows and click Go To to view the regions`
