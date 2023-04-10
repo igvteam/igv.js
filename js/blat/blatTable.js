@@ -14,22 +14,6 @@ class BlatTable extends RegionTableBase {
 
     }
 
-
-    set columnTitleDOM(columnFormat) {
-
-        const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
-        this.columnTitlesDiv = dom
-        this.container.appendChild(dom)
-
-        for (const format of columnFormat) {
-            const col = DOMUtils.div()
-            dom.appendChild(col)
-            col.style.width = format.width || 'fit-content'
-            col.innerText = format.label
-        }
-
-    }
-
     set descriptionDOM(config) {
 
         if (config.description) {
@@ -37,15 +21,15 @@ class BlatTable extends RegionTableBase {
             let dom
 
             dom = DOMUtils.div({ class: 'igv-roi-table-description' })
-            this.container.insertBefore(dom, this.columnTitlesDiv)
+            this.tableDOM.insertBefore(dom, this.tableColumnTitles)
             dom.innerHTML = `BLAT result for query sequence:`
 
             dom = DOMUtils.div({ class: 'igv-roi-table-description' })
-            this.container.insertBefore(dom, this.columnTitlesDiv)
+            this.tableDOM.insertBefore(dom, this.tableColumnTitles)
             dom.innerHTML = config.description
 
             dom = DOMUtils.div({ class: 'igv-roi-table-goto-explainer' })
-            this.container.insertBefore(dom, this.columnTitlesDiv)
+            this.tableDOM.insertBefore(dom, this.tableColumnTitles)
             dom.innerHTML = `Select one or more rows and click Go To to view the regions`
 
         }
@@ -75,13 +59,13 @@ class BlatTable extends RegionTableBase {
 
     renderTable(records) {
 
-        Array.from(this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
+        Array.from(this.tableRowContainer.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
 
         if (records.length > 0) {
 
             for (let record of records) {
                 const row = this.tableRowDOM(record)
-                this.rowContainerDOM.appendChild(row)
+                this.tableRowContainer.appendChild(row)
             }
 
         }
@@ -129,7 +113,7 @@ class BlatTable extends RegionTableBase {
 
         event.stopPropagation()
 
-        const selectedRows = this.container.querySelectorAll('.igv-roi-table-row-selected')
+        const selectedRows = this.tableDOM.querySelectorAll('.igv-roi-table-row-selected')
 
         const loci = []
         for (const row of selectedRows) {
@@ -141,7 +125,7 @@ class BlatTable extends RegionTableBase {
             loci.push(`${ chr }:${ start }-${ end }`)
         }
 
-        for (const el of this.container.querySelectorAll('.igv-roi-table-row')) {
+        for (const el of this.tableDOM.querySelectorAll('.igv-roi-table-row')) {
             el.classList.remove('igv-roi-table-row-selected')
         }
 
