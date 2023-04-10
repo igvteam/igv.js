@@ -1177,15 +1177,13 @@
   color: #444;
 }
 .igv-roi-table > .igv-roi-table-description {
-  height: fit-content;
   padding: 4px;
   margin-left: 4px;
+  word-break: break-all;
+  overflow-y: auto;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
-  word-break: break-all;
-  max-height: 300px;
-  overflow-y: auto;
   background-color: transparent;
 }
 .igv-roi-table > .igv-roi-table-goto-explainer {
