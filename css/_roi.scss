@@ -152,9 +152,9 @@ $igv-roi-table-background-color: #eee;
   position: absolute;
   z-index: 1024;
 
-  overflow: auto;
-  resize: both;
-  width: 960px;
+  //overflow: auto;
+  //resize: both;
+  width: min-content;
   max-width: 1600px;
 
   border-color: $igv-roi-border-color;
@@ -171,7 +171,7 @@ $igv-roi-table-background-color: #eee;
   display: flex;
   flex-flow: column;
   flex-wrap: nowrap;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: stretch;
 
   // default div styling
@@ -245,6 +245,8 @@ $igv-roi-table-background-color: #eee;
     word-break: break-all;
     max-height: 300px;
     overflow-y: auto;
+
+    background-color: transparent;
   }
 
   > .igv-roi-table-goto-explainer {
@@ -256,6 +258,8 @@ $igv-roi-table-background-color: #eee;
     height: $dimension;
 
     border-top: solid lightgray;
+
+    background-color: transparent;
   }
 
   // column titles
@@ -293,7 +297,7 @@ $igv-roi-table-background-color: #eee;
 
       height: $dimension;
 
-      white-space: nowrap;
+      //white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
 
@@ -312,12 +316,14 @@ $igv-roi-table-background-color: #eee;
   // table row container
   > .igv-roi-table-row-container {
 
-    overflow: scroll;
+    overflow: auto;
+    resize: both;
+
+    max-width: 1600px;
 
     height: (15 * $dimension);
-    max-height: fit-content;
 
-    background-color: white;
+    background-color: transparent;
 
     display: flex;
     flex-flow: column;

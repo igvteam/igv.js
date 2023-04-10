@@ -7,27 +7,27 @@ class RegionTableBase {
 
         this.browser = config.browser
 
-        this.container = DOMUtils.div({ class: 'igv-roi-table' })
-        if(config.width) {
-            let [ w ] = config.width.split('px')
-            w = parseInt(w, 10)
-            this.container.style.width = `${Math.min(w, 1600)}px`
-
-        }
-
-        config.parent.appendChild(this.container)
-
-        this.headerDOM = config
-
-        this.columnTitleDOM = config.columnFormat
-
-        this.rowContainerDOM = this.container
-
-        this.footerDOM = config.gotoButtonHandler
-
         this.columnFormat = config.columnFormat
 
         this.tableRowSelectionList = []
+
+        this.tableDOM = DOMUtils.div({ class: 'igv-roi-table' })
+        // if(config.width) {
+        //     let [ w ] = config.width.split('px')
+        //     w = parseInt(w, 10)
+        //     this.tableDOM.style.width = `${Math.min(w, 1600)}px`
+        //
+        // }
+
+        config.parent.appendChild(this.tableDOM)
+
+        this.headerDOM = config
+
+        this.tableColumnTitles = this.tableDOM
+
+        this.tableRowContainer = this.tableDOM
+
+        this.footerDOM = config.gotoButtonHandler
 
     }
 
@@ -35,7 +35,7 @@ class RegionTableBase {
 
         // header
         const dom = DOMUtils.div()
-        this.container.appendChild(dom)
+        this.tableDOM.appendChild(dom)
 
         // header title
         const div = DOMUtils.div()
@@ -59,46 +59,51 @@ class RegionTableBase {
         const { y:y_root } = browser.root.getBoundingClientRect()
         const { y:y_parent } = parent.getBoundingClientRect()
         const constraint = -(y_parent - y_root)
-        makeDraggable(this.container, dom, { minX:0, minY:constraint })
+        makeDraggable(this.tableDOM, dom, { minX:0, minY:constraint })
 
-        this.container.style.display = 'none'
+        this.tableDOM.style.display = 'none'
 
         this._headerDOM = dom
 
     }
 
-    set columnTitleDOM(columnFormat) {
+    set tableColumnTitles(tableDOM) {
 
-        const dom = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
-        this.container.appendChild(dom)
+        const tblColumnTitles = DOMUtils.div({ class: 'igv-roi-table-column-titles' })
+        tableDOM.appendChild(tblColumnTitles)
 
-        for (const { label, width } of columnFormat) {
+        for (const { label, width } of this.columnFormat) {
             const col = DOMUtils.div()
-            dom.appendChild(col)
+            tblColumnTitles.appendChild(col)
             col.style.width = width
             col.innerText = label
         }
 
+        this._tableColumnTitlesDOM = tblColumnTitles
+
     }
 
-    set rowContainerDOM(container) {
-
-        const dom = DOMUtils.div({ class: 'igv-roi-table-row-container' })
-        container.appendChild(dom)
-
-        // dom.style.minWidth = this.config.width
-
-        this._rowContainerDOM = dom
+    get tableColumnTitles() {
+        return this._tableColumnTitlesDOM
     }
 
-    get rowContainerDOM() {
-        return this._rowContainerDOM
+    set tableRowContainer(container) {
+
+        const tblRowContainer = DOMUtils.div({ class: 'igv-roi-table-row-container' })
+        container.appendChild(tblRowContainer)
+
+        this._tableRowContainerDOM = tblRowContainer
+
+    }
+
+    get tableRowContainer() {
+        return this._tableRowContainerDOM
     }
 
     set footerDOM(gotoButtonHandler) {
 
         const dom = DOMUtils.div()
-        this.container.appendChild(dom)
+        this.tableDOM.appendChild(dom)
 
         // Go To Button
         const gotoButton = DOMUtils.div({class: 'igv-roi-table-button'})
@@ -140,7 +145,7 @@ class RegionTableBase {
     }
 
     clearTable() {
-        const elements = this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')
+        const elements = this.tableRowContainer.querySelectorAll('.igv-roi-table-row')
         for (let el of elements) {
             el.remove()
         }
@@ -152,23 +157,23 @@ class RegionTableBase {
     }
 
     present() {
-        this.container.style.left = `${ 0 }px`
+        this.tableDOM.style.left = `${ 0 }px`
 
         const { y:y_root } = this.browser.root.getBoundingClientRect()
         const { y:y_parent } = this.config.parent.getBoundingClientRect()
 
-        this.container.style.top  = `${ y_root - y_parent }px`
-        this.container.style.display = 'flex'
+        this.tableDOM.style.top  = `${ y_root - y_parent }px`
+        this.tableDOM.style.display = 'flex'
     }
 
     dismiss() {
-        this.container.style.display = 'none'
+        this.tableDOM.style.display = 'none'
     }
 
     dispose() {
 
-        this.container.innerHTML = ''
-        this.container.remove()
+        this.tableDOM.innerHTML = ''
+        this.tableDOM.remove()
 
         for (const key of Object.keys(this)) {
             this[key] = undefined

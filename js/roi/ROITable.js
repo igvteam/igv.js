@@ -45,7 +45,7 @@ class ROITable extends RegionTableBase {
 
     renderTable(records) {
 
-        Array.from(this.rowContainerDOM.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
+        Array.from(this.tableRowContainer.querySelectorAll('.igv-roi-table-row')).forEach(el => el.remove())
 
         if (records.length > 0) {
 
@@ -53,7 +53,7 @@ class ROITable extends RegionTableBase {
 
             for (let record of sortedRecords) {
                 const row = this.tableRowDOM(record)
-                this.rowContainerDOM.appendChild(row)
+                this.tableRowContainer.appendChild(row)
             }
 
         }
@@ -93,14 +93,14 @@ class ROITable extends RegionTableBase {
 
         event.stopPropagation()
 
-        const selected = this.container.querySelectorAll('.igv-roi-table-row-selected')
+        const selected = this.tableDOM.querySelectorAll('.igv-roi-table-row-selected')
         const loci = []
         for (let el of selected) {
             const { locus } = parseRegionKey(el.dataset.region)
             loci.push(locus)
         }
 
-        for (let el of this.container.querySelectorAll('.igv-roi-table-row')) {
+        for (let el of this.tableDOM.querySelectorAll('.igv-roi-table-row')) {
             el.classList.remove('igv-roi-table-row-selected')
         }
 
