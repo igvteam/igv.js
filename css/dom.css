@@ -1160,6 +1160,11 @@
 }
 .igv-roi-table > div:first-child > div:first-child {
   text-align: center;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  margin-left: 4px;
+  margin-right: 4px;
   width: calc(100% - 4px - 12px);
 }
 .igv-roi-table > div:first-child > div:last-child {
