@@ -40,7 +40,7 @@ class RegionTableBase {
         // header title
         const div = DOMUtils.div()
         dom.appendChild(div)
-        div.innerText = headerTitle
+        div.innerHTML = headerTitle
 
         // table dismiss button
         const dismiss = DOMUtils.div()
