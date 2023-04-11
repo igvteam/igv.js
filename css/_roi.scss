@@ -207,7 +207,15 @@ $igv-roi-table-background-color: #eee;
     align-items: center;
 
     > div:first-child {
+
       text-align: center;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      
+      overflow: hidden;
+
+      margin-left: 4px;
+      margin-right: 4px;
       width: calc(100% - 4px - #{$igv-roi-dismiss-button-size});
     }
 
