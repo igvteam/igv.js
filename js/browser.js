@@ -438,11 +438,11 @@ class Browser {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
         }
 
-        // sample info column
-        createColumn(this.columnContainer, 'igv-sample-info-column')
-
         // axis column
         createColumn(this.columnContainer, 'igv-axis-column')
+
+        // sample info column
+        createColumn(this.columnContainer, 'igv-sample-info-column')
 
         // SampleName column
         createColumn(this.columnContainer, 'igv-sample-name-column')
@@ -627,7 +627,7 @@ class Browser {
         }
 
         // discard all columns
-        const elements = this.columnContainer.querySelectorAll('.igv-sample-info-column, .igv-axis-column, .igv-column-shim, .igv-column, .igv-sample-name-column, .igv-scrollbar-column, .igv-track-drag-column, .igv-gear-menu-column')
+        const elements = this.columnContainer.querySelectorAll('.igv-axis-column, .igv-column-shim, .igv-column, .igv-sample-info-column, .igv-sample-name-column, .igv-scrollbar-column, .igv-track-drag-column, .igv-gear-menu-column')
         elements.forEach(column => column.remove())
 
         this.trackViews = []
@@ -1017,15 +1017,15 @@ class Browser {
         })
 
         // discard current track order
-        for (let {sampleInfo, axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
-
-            sampleInfo.remove()
+        for (let {axis, viewports, sampleInfo, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
             axis.remove()
 
             for (let {$viewport} of viewports) {
                 $viewport.detach()
             }
+
+            sampleInfo.remove()
 
             sampleNameViewport.viewport.remove()
 
@@ -1037,9 +1037,7 @@ class Browser {
         // Reattach the divs to the dom in the correct order
         const viewportColumns = this.columnContainer.querySelectorAll('.igv-column')
 
-        for (let {sampleInfo, axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
-
-            this.columnContainer.querySelector('.igv-sample-info-column').appendChild(sampleInfo)
+        for (let {axis, viewports, sampleInfo, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
             this.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
@@ -1047,6 +1045,8 @@ class Browser {
                 const {$viewport} = viewports[i]
                 viewportColumns[i].appendChild($viewport.get(0))
             }
+
+            this.columnContainer.querySelector('.igv-sample-info-column').appendChild(sampleInfo)
 
             this.columnContainer.querySelector('.igv-sample-name-column').appendChild(sampleNameViewport.viewport)
 
@@ -1516,7 +1516,7 @@ class Browser {
             this.columnContainer.querySelectorAll('.igv-column-shim, .igv-column').forEach(el => el.remove())
 
             // Insert viewport columns preceding the sample-name column
-            viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-name-column'), this.referenceFrameList.length)
+            viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-info-column'), this.referenceFrameList.length)
 
             this.centerLineList = this.createCenterLineList(this.columnContainer)
 

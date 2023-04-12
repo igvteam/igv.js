@@ -66,9 +66,6 @@ class TrackView {
 
     addDOMToColumnContainer(browser, columnContainer, referenceFrameList) {
 
-        // Sample Info
-        this.sampleInfo = this.createSampleInfo(browser, this.track)
-
         // Axis
         this.axis = this.createAxis(browser, this.track)
 
@@ -80,6 +77,9 @@ class TrackView {
             const viewport = createViewport(this, viewportColumns[i], referenceFrameList[i], viewportWidth)
             this.viewports.push(viewport)
         }
+
+        // Sample Info
+        this.sampleInfo = this.createSampleInfo(browser, this.track)
 
         // SampleName Viewport
         this.sampleNameViewport = new SampleNameViewport(this, browser.columnContainer.querySelector('.igv-sample-name-column'), undefined, browser.sampleNameViewportWidth)
@@ -779,9 +779,6 @@ class TrackView {
 
     removeDOMFromColumnContainer() {
 
-        // Sample Info
-        this.sampleInfo.remove()
-
         // Axis
         if (this.boundAxisClickHander) {
             this.removeAxisEventListener(this.axis)
@@ -792,6 +789,9 @@ class TrackView {
         for (let viewport of this.viewports) {
             viewport.$viewport.remove()
         }
+
+        // Sample Info
+        this.sampleInfo.remove()
 
         // SampleName Viewport
         this.sampleNameViewport.dispose()
@@ -815,14 +815,14 @@ class TrackView {
      */
     dispose() {
 
-        this.sampleInfo.remove()
-
         this.removeAxisEventListener(this.axis)
         this.axis.remove()
 
         for (let viewport of this.viewports) {
             viewport.dispose()
         }
+
+        this.sampleInfo.remove()
 
         this.sampleNameViewport.dispose()
 
