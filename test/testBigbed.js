@@ -3,6 +3,7 @@ import BWSource from "../js/bigwig/bwSource.js"
 import {parseAutoSQL} from "../js/util/ucscUtils.js"
 import {assert} from 'chai'
 import {fileToDataURL} from "./utils/URLUtils.js"
+import BWReader from "../js/bigwig/bwReader.js"
 
 suite("testBigBed", function () {
 
@@ -131,6 +132,21 @@ table chromatinInteract
         assert.equal(r2s.type, 'string')
         assert.equal(r2s.name, 'region2Strand')
         assert.equal(r2s.description, 'Orientation of upper/this region: + or -.  Use . if not applicable')
+    })
+
+    test("clinvar", async function () {
+
+        this.timeout(10000)
+
+        const url = "https://s3.amazonaws.com/igv.org.genomes/hg38/clinvarMain.bb",
+            chr = "chr22",
+            start = 23786974,
+            end = 23787050
+
+        const bwReader = new BWReader({url: url})
+        const features = await bwReader.readFeatures(chr, start, chr, end)
+        assert.equal(features.length, 3)
+
     })
 })
 
