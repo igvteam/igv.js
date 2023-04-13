@@ -125,20 +125,27 @@ suite("testBigWig", function () {
 
     })
 
-    test("bigbed", async function () {
+    test("fixstep bigwig", async function () {
 
         this.timeout(10000)
 
-        const url = "https://s3.amazonaws.com/igv.org.genomes/hg38/clinvarMain.bb",
-            chr = "chr22",
-            start = 23786974,
-            end = 23787050
+        //chr21:19,146,376-19,193,466
+        const url = "test/data/bb/fixedStep.bw",
+            chr = "chr1",
+            start = 0,
+            end = Number.MAX_SAFE_INTEGER
 
         const bwReader = new BWReader({url: url})
         const features = await bwReader.readFeatures(chr, start, chr, end)
-        assert.equal(features.length, 3)
+        assert.equal(features.length, 9)   // Verified in iPad app
+
+        // Test that span = 1 (git issue #1627)
+        for(let f of features) {
+            assert.equal(1, f.end - f.start)
+        }
 
     })
+
 
 
     // test("Zoom data", async function () {

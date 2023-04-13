@@ -630,7 +630,6 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
                 case 3:  // Fixed step
                     value = binaryParser.getFloat()
                     chromEnd = chromStart + itemSpan
-                    chromStart += itemStep
                     break
             }
 
@@ -640,7 +639,10 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
             if (Number.isFinite(value)) {
                 const chr = chrDict[chromId]
                 featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value})
+            }
 
+            if(type === 3) {
+                chromStart += itemStep   // Fixed step
             }
         }
     }
