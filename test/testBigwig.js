@@ -6,6 +6,60 @@ import {assert} from 'chai'
 
 suite("testBigWig", function () {
 
+    test("Uncompressed bigwig", async function () {
+
+        this.timeout(10000)
+
+        //chr21:19,146,376-19,193,466
+        const url = "https://s3.amazonaws.com/igv.org.test/data/uncompressed.bw",
+            chr = "chr21",
+            start = 0,
+            end = Number.MAX_SAFE_INTEGER,
+            bpPerPixel = 6191354.824    // To match iOS unit test
+
+        const bwReader = new BWReader({url: url})
+        const features = await bwReader.readFeatures(chr, start, chr, end, bpPerPixel)
+        assert.equal(features.length, 8)   // Verified in iPad app
+
+    })
+
+    test("bigwig", async function () {
+
+        this.timeout(10000)
+
+        //chr21:19,146,376-19,193,466
+        const url = "test/data/bb/fixedStep.bw"
+        const chr = "chr1"
+        const bwReader = new BWReader({url: url})
+
+        let start = 10006
+        let end = 10040
+        let features = await bwReader.readFeatures(chr, start, chr, end)
+        assert.equal(features.length, 35)
+
+        //fixedStep chrom=chr1 start=10006 step=1 span=1
+        start --;  // Wig fixed and variable step use 1-based coordinates
+        for (let f of features) {
+            assert.equal(start, f.start)
+            assert.equal( f.end - f.start, 1)
+            start += 1
+        }
+
+
+        //#bedGraph section chr1:10040-10051
+        // chr1	10040	10046	0.120034
+        // chr1	10046	10051	0.121634
+        start = 10040
+        end = 10051
+        assert.equal(features.length, 35)   // Verified in iPad app
+        features = await bwReader.readFeatures(chr, start, chr, end)
+        assert.equal(features.length, 2)
+        assert.equal(features[0].start, 10040)
+        assert.equal(features[0].end, 10046)
+
+
+    })
+
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
 
 //     test("No data", async function () {
@@ -107,46 +161,6 @@ suite("testBigWig", function () {
 //         assert.ok(features);
 //         assert.equal(features.length, 337);   // Verified in iPad app
 //     });
-
-    test("Uncompressed bigwig", async function () {
-
-        this.timeout(10000)
-
-        //chr21:19,146,376-19,193,466
-        const url = "https://s3.amazonaws.com/igv.org.test/data/uncompressed.bw",
-            chr = "chr21",
-            start = 0,
-            end = Number.MAX_SAFE_INTEGER,
-            bpPerPixel = 6191354.824    // To match iOS unit test
-
-        const bwReader = new BWReader({url: url})
-        const features = await bwReader.readFeatures(chr, start, chr, end, bpPerPixel)
-        assert.equal(features.length, 8)   // Verified in iPad app
-
-    })
-
-    test("fixstep bigwig", async function () {
-
-        this.timeout(10000)
-
-        //chr21:19,146,376-19,193,466
-        const url = "test/data/bb/fixedStep.bw",
-            chr = "chr1",
-            start = 0,
-            end = Number.MAX_SAFE_INTEGER
-
-        const bwReader = new BWReader({url: url})
-        const features = await bwReader.readFeatures(chr, start, chr, end)
-        assert.equal(features.length, 9)   // Verified in iPad app
-
-        // Test that span = 1 (git issue #1627)
-        for(let f of features) {
-            assert.equal(1, f.end - f.start)
-        }
-
-    })
-
-
 
     // test("Zoom data", async function () {
     //
