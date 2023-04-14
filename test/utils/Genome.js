@@ -1,4 +1,5 @@
 // Mock genome object, based on hg38
+import Genome from "../../js/genome/genome.js"
 
 const sizes = {
     chr1: 248956422,
@@ -28,26 +29,63 @@ const sizes = {
     chrM: 16569
 }
 
-const genome = {
+function createGenome() {
+    return {
 
-    id: "hg38",
+        id: "hg38",
 
-    getChromosomeName: function (chr) {
-        return chr.toLowerCase() === "all" ? "all" :
-            chr.startsWith("chr") ? chr : "chr" + chr
-    },
+        getChromosomeName: function (chr) {
+            return chr.toLowerCase() === "all" ? "all" :
+                chr.startsWith("chr") ? chr : "chr" + chr
+        },
 
-    getChromosome: function (chr) {
+        getChromosome: function (chr) {
 
-        const name = this.getChromosomeName(chr)
-        const bpLength = sizes[name]
-        return bpLength ? {name, bpLength} : undefined
-    },
+            const name = this.getChromosomeName(chr)
+            const bpLength = sizes[name]
+            return bpLength ? {name, bpLength} : undefined
+        },
 
-    wgChromosomeNames: Object.keys(sizes),
+        wgChromosomeNames: Object.keys(sizes),
 
-    featureDB: {}
+        featureDB: new Map(),
+
+        addFeaturesToDB: function (featureList, config) {
+
+            const insertFeature = (name, feature) => {
+                const current = this.featureDB.get(name)
+                if (current) {
+                    feature = (feature.end - feature.start) > (current.end - current.start) ? feature : current
+
+                }
+                this.featureDB.set(name, feature)
+            }
+
+            for (let feature of featureList) {
+                if (feature.name) {
+                    insertFeature(feature.name.toUpperCase(), feature)
+                }
+                if (feature.gene && feature.gene.name) {
+                    insertFeature(feature.gene.name.toUpperCase(), feature)
+                }
+
+                if (config.searchableFields) {
+                    for (let f of config.searchableFields) {
+                        const value = feature.getAttributeValue(f)
+                        if (value) {
+                            if (value.indexOf(" ") > 0) {
+                                insertFeature(value.replaceAll(" ", "+").toUpperCase(), feature)
+                            } else {
+                                insertFeature(value.toUpperCase(), feature)
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+    }
 }
 
-export {genome}
+export {createGenome}
 

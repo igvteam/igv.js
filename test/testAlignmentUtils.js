@@ -13,10 +13,10 @@ suite("testAlignmentUtils", function () {
         const end = 24385311
 
         const bamReader = new BamReaderNonIndexed({
-                type: 'bam',
-                url: 'test/data/bam/gstt1_sample.bam',
+            type: 'bam',
+            url: 'test/data/bam/gstt1_sample.bam',
             indexed: false
-    })
+        })
 
         const alignmentContainer = await bamReader.readAlignments(chr, start, end)
 

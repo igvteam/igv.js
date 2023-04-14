@@ -39,10 +39,10 @@ suite("testBigWig", function () {
 
         //fixedStep chrom=chr1 start=10006 step=1 span=1
         // Wig fixed and variable step use 1-based coordinates
-        start --;
+        start--
         for (let f of features) {
             assert.equal(start, f.start)
-            assert.equal( f.end - f.start, 1)
+            assert.equal(f.end - f.start, 1)
             start += 1
         }
 

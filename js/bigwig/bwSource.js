@@ -33,6 +33,7 @@ class BWSource {
         this.genome = genome
         this.format = config.format || "bigwig"
         this.wgValues = {}
+        this.queryable = true
     }
 
     async getFeatures({chr, start, end, bpPerPixel, windowFunction}) {
