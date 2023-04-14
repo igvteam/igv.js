@@ -32,25 +32,38 @@ import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import MenuUtils from "../ui/menuUtils.js"
 
-const DEFAULT_COLOR = "rgb(150,150,150)"
-
 class WigTrack extends TrackBase {
+
+    static defaults = {
+        height: 50,
+        color: 'rgb(150, 150, 150)',
+        flipAxis: false,
+        logScale: false,
+        windowFunction: 'mean',
+        graphType: 'bar',
+        autoscale: true,
+        normalize: undefined,
+        scaleFactor: undefined
+    }
 
     constructor(config, browser) {
         super(config, browser)
     }
 
     init(config) {
+
         super.init(config)
 
+        // Set default properties
+        for(let key of Object.keys(WigTrack.defaults)) {
+            this[key] = config.hasOwnProperty(key) ? config[key] : WigTrack.defaults[key]
+        }
+
         this.type = "wig"
-        this.height = config.height || 50
         this.featureType = 'numeric'
         this.paintAxis = paintAxis
 
         const format = config.format ? config.format.toLowerCase() : config.format
-        this.flipAxis = config.flipAxis ? config.flipAxis : false
-        this.logScale = config.logScale ? config.logScale : false
         if (config.featureSource) {
             this.featureSource = config.featureSource
             delete config.featureSource
@@ -62,18 +75,16 @@ class WigTrack extends TrackBase {
             this.featureSource = FeatureSource(config, this.browser.genome)
         }
 
-        this.autoscale = config.autoscale || config.max === undefined
-        if (!this.autoscale) {
+
+        // Override autoscale default
+        if(config.max === undefined || config.autoscale === true) {
+            this.autoscale = true
+        } else {
             this.dataRange = {
                 min: config.min || 0,
                 max: config.max
             }
         }
-
-        this.windowFunction = config.windowFunction || "mean"
-        this.graphType = config.graphType || "bar"
-        this.normalize = config.normalize  // boolean, for use with "TDF" files
-        this.scaleFactor = config.scaleFactor  // optional scale factor, ignored if normalize === true;
     }
 
     async postInit() {
@@ -163,7 +174,7 @@ class WigTrack extends TrackBase {
         const pixelWidth = options.pixelWidth
         const pixelHeight = options.pixelHeight
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        const posColor = this.color || DEFAULT_COLOR
+        const posColor = this.color || WigTrack.defaults.color
 
         let baselineColor
         if (typeof posColor === "string" && posColor.startsWith("rgb(")) {
@@ -308,7 +319,7 @@ class WigTrack extends TrackBase {
      */
 
     getColorForFeature(f) {
-        let c = (f.value < 0 && this.altColor) ? this.altColor : this.color || DEFAULT_COLOR
+        let c = (f.value < 0 && this.altColor) ? this.altColor : this.color || WigTrack.defaults.color
         return (typeof c === "function") ? c(f.value) : c
     }
 
@@ -319,20 +330,6 @@ class WigTrack extends TrackBase {
         this.trackView = undefined
     }
 
-    /**
-     * Return the current state of the track.  Used to create sessions and bookmarks.
-     *
-     * @returns {*|{}}
-     */
-    getState() {
-
-        const config = super.getState()
-
-        if (this.flipAxis !== undefined) config.flipAxis = this.flipAxis
-        if (this.logScale !== undefined) config.logScale = this.logScale
-
-        return config
-    }
 }
 
 

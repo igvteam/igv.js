@@ -6,6 +6,8 @@
 
 <body>
 
+<button id="log-state">Log Session</button>
+
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
@@ -26,6 +28,8 @@
                         url: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam",
                         indexURL: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam.bai",
                         name: "NA12878 - cache on",
+                        height: 250,
+                        showCoverage: false
                     },
                     // {
                     //     type: "alignment",
@@ -39,7 +43,7 @@
 
     igv.createBrowser(document.getElementById('igvDiv'), config)
         .then(browser => {
-            console.log(`browser ${ browser.guid } is good to go`)
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
         })
 
 
