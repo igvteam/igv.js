@@ -73,11 +73,6 @@ class InteractionTrack extends TrackBase {
 
         super.init(config)
 
-        // Set default properties
-        for (let key of Object.keys(InteractionTrack.defaults)) {
-            this[key] = config.hasOwnProperty(key) ? config[key] : InteractionTrack.defaults[key]
-        }
-
         this.sinTheta = Math.sin(this.theta)
         this.cosTheta = Math.cos(this.theta)
         this.arcType = getArcType(config)   // nested | proportional | inView | partialInView
