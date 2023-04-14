@@ -72,7 +72,6 @@ suite("testCRAM", function () {
     )
 
 
-
         const alignmentContainer = await cramReader.readAlignments('chr1', 155140000, 155160000)
 
         // 2 alignments, 1 paired and 1 single

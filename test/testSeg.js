@@ -2,7 +2,9 @@ import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import GenomeUtils from "../js/genome/genome.js"
 import {assert} from 'chai'
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 
 suite("testSeg", function () {
 

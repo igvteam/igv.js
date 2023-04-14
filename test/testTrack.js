@@ -6,7 +6,9 @@ import VariantTrack from "../js/variant/variantTrack.js"
 import InteractionTrack from "../js/feature/interactionTrack.js"
 import BlatTrack from "../js/blat/blatTrack.js"
 import FeatureTrack from "../js/feature/featureTrack.js"
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 
 suite("test getState()", function () {
 
@@ -22,7 +24,7 @@ suite("test getState()", function () {
 
         // Assert properties are == default value
         const defaults = WigTrack.defaults
-        for(let key of Object.keys(defaults)) {
+        for (let key of Object.keys(defaults)) {
             assert.equal(track[key], defaults[key])
         }
 
@@ -57,8 +59,8 @@ suite("test getState()", function () {
 
         // Assert properties are == default value
         const defaults = WigTrack.defaults
-        for(let key of Object.keys(defaults)) {
-            if(trackLineProperties.has(key)) continue
+        for (let key of Object.keys(defaults)) {
+            if (trackLineProperties.has(key)) continue
             assert.equal(track[key], defaults[key], key)
         }
 
@@ -86,8 +88,8 @@ suite("test getState()", function () {
 
         // Assert properties are == default value
         const defaults = WigTrack.defaults
-        for(let key of Object.keys(defaults)) {
-            if(trackLineProperties.has(key)) continue
+        for (let key of Object.keys(defaults)) {
+            if (trackLineProperties.has(key)) continue
             assert.equal(track[key], defaults[key], key)
         }
 
@@ -106,13 +108,13 @@ suite("test getState()", function () {
 
         // Assert properties are == default values
         const defaults = BAMTrack.defaults
-        for(let key of Object.keys(defaults)) {
+        for (let key of Object.keys(defaults)) {
             assert.equal(track[key], defaults[key])
         }
 
         // All properties are default => should not be in "state"
         const stateProperties = new Set(Object.keys(track.getState()))
-        for(let key of Object.keys(defaults)) {
+        for (let key of Object.keys(defaults)) {
             assert(!stateProperties.has(key))
         }
 
@@ -134,13 +136,13 @@ suite("test getState()", function () {
 
         // Assert properties are == default values
         const defaults = VariantTrack.defaults
-        for(let key of Object.keys(defaults)) {
+        for (let key of Object.keys(defaults)) {
             assert.equal(track[key], defaults[key])
         }
 
         // All properties are default => should not be in "state"
         const stateProperties = new Set(Object.keys(track.getState()))
-        for(let key of Object.keys(defaults)) {
+        for (let key of Object.keys(defaults)) {
             assert(!stateProperties.has(key))
         }
 
@@ -159,13 +161,13 @@ suite("test getState()", function () {
 
         // Assert properties are == default values
         const defaults = InteractionTrack.defaults
-        for(let key of Object.keys(defaults)) {
+        for (let key of Object.keys(defaults)) {
             assert.equal(track[key], defaults[key])
         }
 
         // All properties are default => should not be in "state"
         const stateProperties = new Set(Object.keys(track.getState()))
-        for(let key of Object.keys(defaults)) {
+        for (let key of Object.keys(defaults)) {
             assert(!stateProperties.has(key))
         }
 
@@ -187,10 +189,9 @@ suite("test getState()", function () {
 
         // Assert properties are == default values
         const defaults = FeatureTrack.defaults
-        for(let key of Object.keys(defaults)) {
+        for (let key of Object.keys(defaults)) {
             assert.equal(track[key], defaults[key])
         }
-
 
 
     })

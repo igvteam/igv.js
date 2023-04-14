@@ -13,6 +13,8 @@ suite("testRnaStruct", function () {
             },
             getChromosome: function (chrName) {
                 return {bpLength: Number.MAX_SAFE_INTEGER}
+            },
+            addFeaturesToDB: function () {
             }
         },
         constants: {}

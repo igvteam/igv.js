@@ -1,7 +1,9 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import WigTrack from "../js/feature/wigTrack.js"
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 
 suite("testTrackLine", function () {
 

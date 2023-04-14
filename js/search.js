@@ -46,7 +46,7 @@ async function search(browser, string) {
         let locusObject = parseLocusString(browser, locus)
 
         if (!locusObject) {
-            const feature = browser.genome.featureDB[locus.toUpperCase()]
+            const feature = browser.genome.featureDB.get(locus.toUpperCase())
             if (feature) {
                 locusObject = {
                     chr: feature.chr,

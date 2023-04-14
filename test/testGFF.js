@@ -2,7 +2,9 @@ import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import {assert} from 'chai'
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 import GFFHelper from "../js/feature/gff/gffHelper.js"
 import {parseAttributeString, decodeGFFAttribute} from "../js/feature/gff/gff.js"
 
