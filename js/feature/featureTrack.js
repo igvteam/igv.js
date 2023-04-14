@@ -15,6 +15,17 @@ import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 class FeatureTrack extends TrackBase {
 
+    static defaults = {
+        type: "annotation",
+        maxRows: 1000, // protects against pathological feature packing cases (# of rows of overlapping feaures)
+        displayMode: "EXPANDED", // COLLAPSED | EXPANDED | SQUISHED
+        margin: 10,
+        featureHeight: 14,
+        autoHeight: false,
+        useScore: false
+    }
+
+
     constructor(config, browser) {
         super(config, browser)
     }
@@ -22,12 +33,8 @@ class FeatureTrack extends TrackBase {
     init(config) {
         super.init(config)
 
-        this.type = config.type || "annotation"
 
-        // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
-        this.maxRows = config.maxRows === undefined ? 1000 : config.maxRows
-
-        this.displayMode = config.displayMode || "EXPANDED"    // COLLAPSED | EXPANDED | SQUISHED
+        // Obscure option, not common or supoorted, included for backward compatibility
         this.labelDisplayMode = config.labelDisplayMode
 
         if (config._featureSource) {
@@ -38,12 +45,6 @@ class FeatureTrack extends TrackBase {
                 config.featureSource :
                 FeatureSource(config, this.browser.genome)
         }
-
-        // Set default heights
-        this.autoHeight = config.autoHeight
-        this.margin = config.margin === undefined ? 10 : config.margin
-
-        this.featureHeight = config.featureHeight || 14
 
         if ("FusionJuncSpan" === config.type) {
             this.render = config.render || renderFusionJuncSpan
@@ -81,9 +82,6 @@ class FeatureTrack extends TrackBase {
                 }
             }
         }
-
-        //UCSC useScore option
-        this.useScore = config.useScore
     }
 
     async postInit() {

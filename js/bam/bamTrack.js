@@ -41,7 +41,6 @@ import {reverseComplementSequence} from "../util/sequenceUtils.js"
 
 const alignmentStartGap = 5
 const downsampleRowHeight = 5
-const DEFAULT_COVERAGE_TRACK_HEIGHT = 50
 const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)"
 const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
@@ -62,7 +61,8 @@ class BAMTrack extends TrackBase {
         showMismatches: true,
         color: DEFAULT_ALIGNMENT_COLOR,
         coverageColor: DEFAULT_COVERAGE_COLOR,
-        height: 300
+        height: 300,
+        coverageTrackHeight: 50
     }
 
     constructor(config, browser) {
@@ -79,12 +79,6 @@ class BAMTrack extends TrackBase {
         this.alignmentTrack = new AlignmentTrack(config, this)
         this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
 
-        // Set default properties, with possible config override
-        for (let key of Object.keys(BAMTrack.defaults)) {
-            this[key] = config.hasOwnProperty(key) ? config[key] : BAMTrack.defaults[key]
-        }
-
-
         // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
         // are present for a given reference frame the last one will take precedence
         if (config.sort) {
@@ -100,8 +94,8 @@ class BAMTrack extends TrackBase {
 
     set height(h) {
         this._height = h
-        if (this.coverageTrack && this.showAlignments) {
-            this.alignmentTrack.height = this.showCoverage ? h - this.coverageTrack.height : h
+        if (this.showAlignments) {
+            this.alignmentTrack.height = this.showCoverage ? h - this.coverageTrackHeight : h
         }
     }
 
@@ -188,7 +182,7 @@ class BAMTrack extends TrackBase {
      * @returns {number}
      */
     computePixelHeight(alignmentContainer) {
-        return (this.showCoverage ? this.coverageTrack.height : 0) +
+        return (this.showCoverage ? this.coverageTrackHeight : 0) +
             (this.showAlignments ? this.alignmentTrack.computePixelHeight(alignmentContainer) : 0)
     }
 
@@ -196,7 +190,7 @@ class BAMTrack extends TrackBase {
 
         IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
-        if (true === this.showCoverage && this.coverageTrack.height > 0) {
+        if (true === this.showCoverage && this.coverageTrackHeight > 0) {
             this.trackView.axisCanvas.style.display = 'block'
             this.coverageTrack.draw(options)
         } else {
@@ -211,12 +205,12 @@ class BAMTrack extends TrackBase {
 
     paintAxis(ctx, pixelWidth, pixelHeight) {
 
-        this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height)
+        this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrackHeight)
 
         // if (this.browser.isMultiLocusMode()) {
         //     ctx.clearRect(0, 0, pixelWidth, pixelHeight);
         // } else {
-        //     this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
+        //     this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrackHeight);
         // }
     }
 
@@ -225,7 +219,7 @@ class BAMTrack extends TrackBase {
     }
 
     popupData(clickState) {
-        if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
+        if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrackHeight) {
             return this.coverageTrack.popupData(clickState)
         } else {
             return this.alignmentTrack.popupData(clickState)
@@ -240,7 +234,7 @@ class BAMTrack extends TrackBase {
     clickedFeatures(clickState) {
 
         let clickedObject
-        if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
+        if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrackHeight) {
             clickedObject = this.coverageTrack.getClickedObject(clickState)
         } else {
             clickedObject = this.alignmentTrack.getClickedObject(clickState)
@@ -249,7 +243,7 @@ class BAMTrack extends TrackBase {
     }
 
     hoverText(clickState) {
-        if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrack.height) {
+        if (true === this.showCoverage && clickState.y >= this.coverageTrack.top && clickState.y < this.coverageTrackHeight) {
             const clickedObject = this.coverageTrack.getClickedObject(clickState)
             if (clickedObject) {
                 return clickedObject.hoverText()
@@ -290,7 +284,7 @@ class BAMTrack extends TrackBase {
         const adjustTrackHeight = () => {
             if (!this.autoHeight) {
                 const h =
-                    (this.showCoverage ? this.coverageTrack.height : 0) +
+                    (this.showCoverage ? this.coverageTrackHeight : 0) +
                     (this.showAlignments ? this.alignmentTrack.height : 0)
                 this.trackView.setTrackHeight(h)
             }
@@ -604,7 +598,6 @@ class CoverageTrack {
     constructor(config, parent) {
         this.parent = parent
         this.featureSource = parent.featureSource
-        this.height = config.coverageTrackHeight !== undefined ? config.coverageTrackHeight : DEFAULT_COVERAGE_TRACK_HEIGHT
 
         this.paintAxis = paintAxis
         this.top = 0
@@ -617,6 +610,10 @@ class CoverageTrack {
             }
         }
 
+    }
+
+    get height() {
+        return this.parent.coverageTrackHeight
     }
 
     draw(options) {
