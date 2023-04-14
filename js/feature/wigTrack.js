@@ -37,6 +37,7 @@ class WigTrack extends TrackBase {
     static defaults = {
         height: 50,
         color: 'rgb(150, 150, 150)',
+        altColor: 'rgb(150, 150, 150)',
         flipAxis: false,
         logScale: false,
         windowFunction: 'mean',
@@ -53,11 +54,6 @@ class WigTrack extends TrackBase {
     init(config) {
 
         super.init(config)
-
-        // Set default properties
-        for(let key of Object.keys(WigTrack.defaults)) {
-            this[key] = config.hasOwnProperty(key) ? config[key] : WigTrack.defaults[key]
-        }
 
         this.type = "wig"
         this.featureType = 'numeric'

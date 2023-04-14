@@ -49,6 +49,7 @@ class TrackBase {
     static defaults = {
         height: 50,
         color: 'rgb(0, 0, 150)',
+        altColor: 'rgb(0, 0, 150)',
         autoHeight: false,
         visibilityWindow: undefined,
         supportHiDPI: true
@@ -74,18 +75,17 @@ class TrackBase {
         }
 
         // Set default properties
-        const skipKeys = this.constructor.defaults ? new Set(Object.keys(this.constructor.defaults)) : new Set()
-        for(let key of Object.keys(TrackBase.defaults)) {
-            if(skipKeys.has(key)) continue
-            this[key] = config.hasOwnProperty(key) ? config[key] : TrackBase.defaults[key]
+        const defaults = Object.assign({}, TrackBase.defaults)
+        if(this.constructor.defaults) {
+            for(let key of Object.keys(this.constructor.defaults)) {
+                defaults[key] = this.constructor.defaults[key]
+            }
+        }
+        for(let key of Object.keys(defaults)) {
+            this[key] = config.hasOwnProperty(key) ? config[key] : defaults[key]
             if(key === 'color' || key === 'altColor') {
                 this[key] = fixColor(this[key])
             }
-        }
-
-        // Special override for civic track
-        if (!config.color && "civic-ws" === config.sourceType) {
-            this.color = "rgb(155,20,20)"
         }
 
         if (config.name || config.label) {
@@ -97,7 +97,7 @@ class TrackBase {
         }
 
         this.url = config.url
-        this.type = config.type
+        if(this.config.type) this.type = this.config.type
         this.id = this.config.id === undefined ? this.name : this.config.id
         this.order = config.order
         this.autoscaleGroup = config.autoscaleGroup
@@ -500,7 +500,7 @@ class TrackBase {
      * @returns {*|string|string}
      */
     getColorForFeature(f) {
-        return (typeof this.color === "function") ? this.color(feature) : this.color || DEFAULT_COLOR
+        return (typeof this.color === "function") ? this.color(feature) : this.color
     }
 
     /**

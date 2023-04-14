@@ -66,7 +66,6 @@ class VariantTrack extends TrackBase {
         visibilityWindow: undefined,
         labelDisplayMode: undefined,
         type: "variant"
-
     }
 
     constructor(config, browser) {
@@ -77,11 +76,6 @@ class VariantTrack extends TrackBase {
 
         super.init(config)
 
-
-        // Set default properties
-        for (let key of Object.keys(VariantTrack.defaults)) {
-            this[key] = config.hasOwnProperty(key) ? config[key] : VariantTrack.defaults[key]
-        }
         this.expandedVariantHeight = config.expandedVariantHeight || config.variantHeight || 10
 
         this.featureSource = FeatureSource(config, this.browser.genome)
