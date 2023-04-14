@@ -62,6 +62,7 @@ const igv_track_gear_menu_column_width = 28
 const column_multi_locus_shim_width = 2 + 1 + 2
 
 const defaultSampleNameViewportWidth = 200
+const defaultSampleInfoViewportWidth = 200
 
 class Browser {
 
@@ -128,6 +129,7 @@ class Browser {
         this.showSampleNames = config.showSampleNames
         this.showSampleNameButton = config.showSampleNameButton
         this.sampleNameViewportWidth = config.sampleNameViewportWidth || defaultSampleNameViewportWidth
+        this.sampleInfoViewportWidth = defaultSampleInfoViewportWidth
 
         if (config.search) {
             this.searchConfig = {
@@ -266,6 +268,10 @@ class Browser {
 
     getSampleNameViewportWidth() {
         return false === this.showSampleNames ? 0 : this.sampleNameViewportWidth
+    }
+
+    getSampleInfoViewportWidth() {
+        return this.sampleInfoViewportWidth
     }
 
     isMultiLocusMode() {
@@ -1017,7 +1023,7 @@ class Browser {
         })
 
         // discard current track order
-        for (let {axis, viewports, sampleInfo, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
+        for (let {axis, viewports, sampleInfoViewport, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
             axis.remove()
 
@@ -1025,7 +1031,7 @@ class Browser {
                 $viewport.detach()
             }
 
-            sampleInfo.remove()
+            sampleInfoViewport.viewport.remove()
 
             sampleNameViewport.viewport.remove()
 
@@ -1037,7 +1043,7 @@ class Browser {
         // Reattach the divs to the dom in the correct order
         const viewportColumns = this.columnContainer.querySelectorAll('.igv-column')
 
-        for (let {axis, viewports, sampleInfo, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
+        for (let {axis, viewports, sampleInfoViewport, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
             this.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
@@ -1046,7 +1052,7 @@ class Browser {
                 viewportColumns[i].appendChild($viewport.get(0))
             }
 
-            this.columnContainer.querySelector('.igv-sample-info-column').appendChild(sampleInfo)
+            this.columnContainer.querySelector('.igv-sample-info-column').appendChild(sampleInfoViewport.viewport)
 
             this.columnContainer.querySelector('.igv-sample-name-column').appendChild(sampleNameViewport.viewport)
 
@@ -1289,9 +1295,9 @@ class Browser {
         let {width} = this.columnContainer.getBoundingClientRect()
 
         const sampleNameViewportWidth = this.getSampleNameViewportWidth()
-        const {width:sampleInfoWidth} = this.columnContainer.querySelector('.igv-sample-info-column').getBoundingClientRect()
+        const sampleInfoViewportWidth = this.getSampleInfoViewportWidth()
 
-        width -= sampleInfoWidth + igv_axis_column_width + sampleNameViewportWidth + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
+        width -= igv_axis_column_width + sampleInfoViewportWidth + sampleNameViewportWidth + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
 
         width -= column_multi_locus_shim_width * (columnCount - 1)
 
