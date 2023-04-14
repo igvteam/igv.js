@@ -1,7 +1,9 @@
 import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai'
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 
 suite("testBedGraph", function () {
 
@@ -12,11 +14,11 @@ suite("testBedGraph", function () {
             start = 49302001,
             end = 49304701,
             featureSource = FeatureSource({
-                format: 'bedgraph',
-                url: 'test/data/wig/bedgraph-example-uscs.bedgraph'
-    },
-        genome
-    )
+                    format: 'bedgraph',
+                    url: 'test/data/wig/bedgraph-example-uscs.bedgraph'
+                },
+                genome
+            )
 
 
         const features = await featureSource.getFeatures({chr, start, end})

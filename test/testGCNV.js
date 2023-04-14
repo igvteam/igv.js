@@ -1,7 +1,9 @@
 import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai'
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 import Browser from "../js/browser.js"
 
 suite("testGCNV", function () {

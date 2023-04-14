@@ -2,12 +2,14 @@ import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import {assert} from 'chai'
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 
 suite("testBedpe", function () {
 
     test("No header line -- column 7 score", async function () {
-        const chr = "chr12"
+        const chr = "12"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
@@ -183,7 +185,7 @@ suite("testBedpe", function () {
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
         const featureSource = FeatureSource({
-            format: 'bedpe',
+                format: 'bedpe',
                 url: 'test/data/bedpe/hiccups_encode.tsv'
             },
             genome

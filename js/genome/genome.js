@@ -51,7 +51,7 @@ const GenomeUtils = {
 
         // Delay loading cytbands untils after genome initialization to use chromosome aliases (1 vs chr1, etc).
         if (cytobandUrl) {
-            genome.cytobands  = await loadCytobands(cytobandUrl, sequence.config, genome)
+            genome.cytobands = await loadCytobands(cytobandUrl, sequence.config, genome)
         }
 
         return genome
@@ -153,7 +153,7 @@ class Genome {
         this.sequence = sequence
         this.chromosomeNames = sequence.chromosomeNames
         this.chromosomes = sequence.chromosomes  // An object (functions as a dictionary)
-        this.featureDB = {}   // Hash of name -> feature, used for search function.
+        this.featureDB = new Map()   // Hash of name -> feature, used for search function.
 
         this.wholeGenomeView = config.wholeGenomeView === undefined || config.wholeGenomeView
         if (this.wholeGenomeView && Object.keys(sequence.chromosomes).length > 1) {
@@ -356,6 +356,40 @@ class Genome {
     async getSequence(chr, start, end) {
         chr = this.getChromosomeName(chr)
         return this.sequence.getSequence(chr, start, end)
+    }
+
+    addFeaturesToDB(featureList, config) {
+
+        const insertFeature = (name, feature) => {
+            const current = this.featureDB.get(name)
+            if (current) {
+                feature = (feature.end - feature.start) > (current.end - current.start) ? feature : current
+
+            }
+            this.featureDB.set(name, feature)
+        }
+
+        for (let feature of featureList) {
+            if (feature.name) {
+                insertFeature(feature.name.toUpperCase(), feature)
+            }
+            if (feature.gene && feature.gene.name) {
+                insertFeature(feature.gene.name.toUpperCase(), feature)
+            }
+
+            if (config.searchableFields) {
+                for (let f of config.searchableFields) {
+                    const value = feature.getAttributeValue(f)
+                    if (value) {
+                        if (value.indexOf(" ") > 0) {
+                            insertFeature(value.replaceAll(" ", "+").toUpperCase(), feature)
+                        } else {
+                            insertFeature(value.toUpperCase(), feature)
+                        }
+                    }
+                }
+            }
+        }
     }
 }
 

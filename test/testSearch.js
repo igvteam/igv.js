@@ -1,15 +1,15 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 import {parseLocusString, searchWebService} from "../js/search.js"
 import search from "../js/search.js"
 
 suite("testSearch", function () {
 
-    genome.featureDB = {
-        "MUC1": {chr: "chr1", start: 155185820, end: 155192900}, // coords are off on purpose, for test
-        "FOO BAR": {chr: "chrX", start: 1, end: 2}   // for testing feature names with spaces
-    }
+    genome.addFeaturesToDB([{chr: "chrX", name: "FOO BAR", start: 1, end: 2}], {})   // for testing feature names with spaces
+
 
     const browser = {
         genome: genome,
@@ -103,8 +103,8 @@ suite("testSearch", function () {
 
         const locus3 = results[2]
         assert.equal(locus3.chr, "chr1")
-        assert.equal(locus3.start, 155185820)
-        assert.equal(locus3.end, 155192900)
+        assert.equal(locus3.start, 155185822)
+        assert.equal(locus3.end, 155192915)
         assert.equal(locus3.locusSearchString, s3)
     })
 
