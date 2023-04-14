@@ -42,7 +42,6 @@ import {reverseComplementSequence} from "../util/sequenceUtils.js"
 const alignmentStartGap = 5
 const downsampleRowHeight = 5
 const DEFAULT_COVERAGE_TRACK_HEIGHT = 50
-const DEFAULT_TRACK_HEIGHT = 300
 const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)"
 const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
@@ -50,35 +49,41 @@ const MINIMUM_BLAT_LENGTH = 20
 
 class BAMTrack extends TrackBase {
 
+    static defaults = {
+        alleleFreqThreshold: 0.2,
+        visibilityWindow: 30000,
+        showCoverage: true,
+        showAlignments: true,
+        viewAsPairs: false,
+        pairsSupported: true,
+        showSoftClips: false,
+        showAllBases: false,
+        showInsertions: true,
+        showMismatches: true,
+        color: DEFAULT_ALIGNMENT_COLOR,
+        coverageColor: DEFAULT_COVERAGE_COLOR,
+        height: 300
+    }
+
     constructor(config, browser) {
         super(config, browser)
     }
 
     init(config) {
+
         super.init(config)
         this.type = "alignment"
 
-        if (config.alleleFreqThreshold === undefined) {
-            config.alleleFreqThreshold = 0.2
-        }
-
         this.featureSource = new BamSource(config, this.browser)
-
-        this.showCoverage = config.showCoverage === undefined ? true : config.showCoverage
-        this.showAlignments = config.showAlignments === undefined ? true : config.showAlignments
-
         this.coverageTrack = new CoverageTrack(config, this)
         this.alignmentTrack = new AlignmentTrack(config, this)
         this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
-        this.visibilityWindow = config.visibilityWindow || 30000
-        this.viewAsPairs = config.viewAsPairs
-        this.pairsSupported = config.pairsSupported !== false
-        this.showSoftClips = config.showSoftClips
-        this.showAllBases = config.showAllBases
-        this.showInsertions = false !== config.showInsertions
-        this.showMismatches = false !== config.showMismatches
-        this.color = config.color
-        this.coverageColor = config.coverageColor
+
+        // Set default properties, with possible config override
+        for (let key of Object.keys(BAMTrack.defaults)) {
+            this[key] = config.hasOwnProperty(key) ? config[key] : BAMTrack.defaults[key]
+        }
+
 
         // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
         // are present for a given reference frame the last one will take precedence
@@ -91,8 +96,6 @@ class BAMTrack extends TrackBase {
             }
         }
 
-        // Invoke height setter last to allocated to coverage and alignment tracks
-        this.height = (config.height !== undefined ? config.height : DEFAULT_TRACK_HEIGHT)
     }
 
     set height(h) {
@@ -186,8 +189,7 @@ class BAMTrack extends TrackBase {
      */
     computePixelHeight(alignmentContainer) {
         return (this.showCoverage ? this.coverageTrack.height : 0) +
-            (this.showAlignments ? this.alignmentTrack.computePixelHeight(alignmentContainer) : 0) +
-            15
+            (this.showAlignments ? this.alignmentTrack.computePixelHeight(alignmentContainer) : 0)
     }
 
     draw(options) {
@@ -287,7 +289,7 @@ class BAMTrack extends TrackBase {
         // Show coverage / alignment options
         const adjustTrackHeight = () => {
             if (!this.autoHeight) {
-                const h = 15 +
+                const h =
                     (this.showCoverage ? this.coverageTrack.height : 0) +
                     (this.showAlignments ? this.alignmentTrack.height : 0)
                 this.trackView.setTrackHeight(h)
@@ -1364,7 +1366,7 @@ class AlignmentTrack {
                 const seqstring = clickedAlignment.seq
                 if (seqstring && "*" != seqstring) {
 
-                    if(seqstring.length < maxSequenceSize) {
+                    if (seqstring.length < maxSequenceSize) {
                         list.push({
                             label: 'BLAT read sequence',
                             click: () => {

@@ -447,7 +447,7 @@ class FeatureTrack extends TrackBase {
         } else if (feature.color) {
             color = feature.color   // Explicit color for feature
         } else {
-            color = this.defaultColor   // Track default
+            color = this.color   // Track default
         }
 
         if (feature.alpha && feature.alpha !== 1) {
