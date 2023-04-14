@@ -4,7 +4,9 @@ import FeatureFileReader from "../js/feature/featureFileReader.js"
 import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import {assert} from 'chai'
 import getDataWrapper from "../js/feature/dataWrapper.js"
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 import Browser from "../js/browser.js"
 
 

@@ -2,7 +2,9 @@ import "./utils/mockObjects.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai'
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 import GenomeUtils from "../js/genome/genome.js"
 
 suite("testBed", function () {
@@ -330,7 +332,7 @@ suite("testBed", function () {
         const featureSource = FeatureSource(config, genome)
         await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
 
-        const found = genome.featureDB["KAN2 MARKER"]
+        const found = genome.featureDB.get("KAN2 MARKER")
         assert.ok(found)
 
     })

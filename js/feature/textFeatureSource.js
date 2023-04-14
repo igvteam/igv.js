@@ -55,6 +55,7 @@ class TextFeatureSource {
 
         const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "biginteract", "biggenepred", "bignarrowpeak", "tdf"])
 
+        this.queryable = config.queryable === true   // False by default, unless explicitly set
         if (config.reader) {
             // Explicit reader implementation
             this.reader = config.reader
@@ -90,6 +91,11 @@ class TextFeatureSource {
                 // Leav undefined -- will defer until we know if reader has an index
             }
         }
+
+        // Set  searchable unless explicitly turned off, or track uses in indexed or otherwise queryable
+        // feature source.  queryable => features loaded on demand (by query)
+        this.searchable = config.searchable === true || config.searchableFields || (config.searchable !== false && !this.queryable)
+
     }
 
     async defaultVisibilityWindow() {
@@ -230,39 +236,13 @@ class TextFeatureSource {
             this.featureCache = new FeatureCache(features, this.genome, genomicInterval)
 
             // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-            if (this.config.searchable || this.config.searchableFields) {
-                this.addFeaturesToDB(features)
+            if (this.searchable) {
+                this.genome.addFeaturesToDB(features, this.config)
             }
         } else {
             this.featureCache = new FeatureCache([], genomicInterval)     // Empty cache
         }
     }
-
-    addFeaturesToDB(featureList) {
-        for (let feature of featureList) {
-            if (feature.name) {
-                this.genome.featureDB[feature.name.toUpperCase()] = feature
-            }
-            if (feature.gene && feature.gene.name) {
-                this.genome.featureDB[feature.gene.name.toUpperCase()] = feature
-            }
-
-            if (this.config.searchableFields) {
-                for (let f of this.config.searchableFields) {
-                    const value = feature.getAttributeValue(f)
-                    if (value) {
-                        if (value.indexOf(" ") > 0) {
-                            this.genome.featureDB[value.replaceAll(" ", "+").toUpperCase()] = feature
-                            this.genome.featureDB[value.replaceAll(" ", "%20").toUpperCase()] = feature
-                        } else {
-                            this.genome.featureDB[value.toUpperCase()] = feature
-                        }
-                    }
-                }
-            }
-        }
-    }
-
 }
 
 

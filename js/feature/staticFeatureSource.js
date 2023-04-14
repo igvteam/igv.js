@@ -39,8 +39,8 @@ class StaticFeatureSource {
         this.config = config
         this.genome = genome
         this.queryable = false
+        this.searchable = config.searchable !== false  // searchable by default
         this.updateFeatures(config.features)
-
     }
 
     updateFeatures(features) {
@@ -50,6 +50,10 @@ class StaticFeatureSource {
             mapProperties(features, this.config.mappings)
         }
         this.featureCache = new FeatureCache(features, this.genome)
+
+        if (this.searchable || this.config.searchableFields) {
+            this.genome.addFeaturesToDB(features, this.config)
+        }
     }
 
     /**

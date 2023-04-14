@@ -1,6 +1,8 @@
 import {assert} from 'chai'
 import "./utils/mockObjects.js"
-import {genome} from "./utils/Genome.js"
+import {createGenome} from "./utils/Genome.js"
+
+const genome = createGenome()
 import {loadIndex} from "../js/bam/indexFactory.js"
 import Browser from "../js/browser.js"
 
