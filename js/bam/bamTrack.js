@@ -71,12 +71,13 @@ class BAMTrack extends TrackBase {
 
     init(config) {
 
-        super.init(config)
         this.type = "alignment"
-
         this.featureSource = new BamSource(config, this.browser)
         this.coverageTrack = new CoverageTrack(config, this)
         this.alignmentTrack = new AlignmentTrack(config, this)
+
+        super.init(config)
+
         this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
 
         // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
