@@ -38,7 +38,8 @@ suite("testBigWig", function () {
         assert.equal(features.length, 35)
 
         //fixedStep chrom=chr1 start=10006 step=1 span=1
-        start --;  // Wig fixed and variable step use 1-based coordinates
+        // Wig fixed and variable step use 1-based coordinates
+        start --;
         for (let f of features) {
             assert.equal(start, f.start)
             assert.equal( f.end - f.start, 1)
@@ -47,9 +48,10 @@ suite("testBigWig", function () {
 
 
         //#bedGraph section chr1:10040-10051
+        // bedgraph uses 0-based coordinates
         // chr1	10040	10046	0.120034
         // chr1	10046	10051	0.121634
-        start = 10040
+        start = 10041
         end = 10051
         assert.equal(features.length, 35)   // Verified in iPad app
         features = await bwReader.readFeatures(chr, start, chr, end)
