@@ -29,15 +29,14 @@ import {doAutoscale} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import {FeatureUtils, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js'
 import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
+import SampleInfoViewport from "./sampleInfoViewport.js";
 import SampleNameViewport from './sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import MenuUtils from "./ui/menuUtils.js"
-import {randomRGB} from './util/colorPalletes.js'
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['ruler', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
-const sampleInfoExclusionTypes = new Set(['annotation', 'ruler', 'sequence', 'ideogram'])
 
 class TrackView {
 
@@ -79,7 +78,7 @@ class TrackView {
         }
 
         // Sample Info
-        this.sampleInfo = this.createSampleInfo(browser, this.track)
+        this.sampleInfoViewport = new SampleInfoViewport(this, browser.columnContainer.querySelector('.igv-sample-name-column'), browser.sampleInfoViewportWidth)
 
         // SampleName Viewport
         this.sampleNameViewport = new SampleNameViewport(this, browser.columnContainer.querySelector('.igv-sample-name-column'), undefined, browser.sampleNameViewportWidth)
@@ -92,29 +91,6 @@ class TrackView {
 
         // Track Gear
         this.createTrackGearPopup(browser)
-
-    }
-
-    createSampleInfo(browser, track) {
-
-        const sampleInfo = DOMUtils.div()
-        browser.columnContainer.querySelector('.igv-sample-info-column').appendChild(sampleInfo)
-
-        sampleInfo.style.height = `${track.height}px`
-
-        if (false === sampleInfoExclusionTypes.has(track.type)) {
-
-            const html = `<div></div><div></div><div></div><div></div>`
-            sampleInfo.innerHTML = html
-
-            sampleInfo.querySelectorAll('div').forEach(el => {
-                el.style.backgroundColor = randomRGB(128, 255)
-            })
-        }
-
-
-
-        return sampleInfo
 
     }
 
@@ -243,8 +219,6 @@ class TrackView {
 
         this.track.height = newHeight
 
-        this.sampleInfo.style.height = `${newHeight}px`
-
         this.resizeAxisCanvas(this.axis.clientWidth, this.track.height)
 
         if (typeof this.track.paintAxis === 'function') {
@@ -254,6 +228,8 @@ class TrackView {
         for (let {$viewport} of this.viewports) {
             $viewport.height(newHeight)
         }
+
+        this.sampleInfoViewport.viewport.style.height = `${newHeight}px`
 
         this.sampleNameViewport.viewport.style.height = `${newHeight}px`
 
@@ -304,6 +280,8 @@ class TrackView {
             viewport.setTop(contentTop)
         }
 
+        this.sampleInfoViewport.setTop(contentTop)
+
         this.sampleNameViewport.trackScrollDelta = delta
         this.sampleNameViewport.setTop(contentTop)
 
@@ -331,8 +309,16 @@ class TrackView {
             this.paintAxis()
         }
 
-        // Repaint sample names last
+        this.repaintSampleInfo()
+
         this.repaintSamples()
+    }
+
+    repaintSampleInfo() {
+        if (typeof this.track.getSamples === 'function') {
+            const samples = this.track.getSamples()
+            this.sampleInfoViewport.repaint(samples)
+        }
     }
 
     repaintSamples() {
@@ -450,7 +436,8 @@ class TrackView {
 
         this.adjustTrackHeight()
 
-        // Repaint sample names last
+        this.repaintSampleInfo()
+
         this.repaintSamples()
 
         this.updateRulerViewportLabels()
@@ -790,8 +777,8 @@ class TrackView {
             viewport.$viewport.remove()
         }
 
-        // Sample Info
-        this.sampleInfo.remove()
+        // Sample Info Viewport
+        this.sampleInfoViewport.dispose()
 
         // SampleName Viewport
         this.sampleNameViewport.dispose()
@@ -822,7 +809,7 @@ class TrackView {
             viewport.dispose()
         }
 
-        this.sampleInfo.remove()
+        this.sampleNameViewport.dispose()
 
         this.sampleNameViewport.dispose()
 
