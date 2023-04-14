@@ -604,7 +604,8 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
 
     const binaryParser = new BinaryParser(data)
     const chromId = binaryParser.getInt()
-    let chromStart = binaryParser.getInt()
+    const blockStart = binaryParser.getInt()
+    let chromStart = blockStart
     let chromEnd = binaryParser.getInt()
     const itemStep = binaryParser.getInt()
     const itemSpan = binaryParser.getInt()
@@ -614,6 +615,7 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
 
     if (chromId >= chrIdx1 && chromId <= chrIdx2) {
 
+        let idx = 0;
         while (itemCount-- > 0) {
             let value
             switch (type) {
@@ -629,7 +631,9 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
                     break
                 case 3:  // Fixed step
                     value = binaryParser.getFloat()
+                    chromStart = blockStart + idx * itemStep
                     chromEnd = chromStart + itemSpan
+                    idx++
                     break
             }
 
@@ -641,9 +645,6 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
                 featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value})
             }
 
-            if(type === 3) {
-                chromStart += itemStep   // Fixed step
-            }
         }
     }
 }
