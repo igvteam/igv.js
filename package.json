@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": "2.15.4",
+  "version": "2.15.5",
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
@@ -51,7 +51,7 @@
     "chai": "^4.3.7",
     "circular-view": "github:igvteam/circular-view#v0.2.4",
     "eslint": "^6.4.0",
-    "hdf5-indexed-reader": "github:/jrobinso/hdf5-indexed-reader#v0.5.2",
+    "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v0.5.2",
     "igv-ui": "github:igvteam/igv-ui#v1.5.0",
     "igv-utils": "github:igvteam/igv-utils#v1.4.4",
     "mocha": "^10.2.0",
