@@ -1,5 +1,6 @@
 import {DOMUtils} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {randomRGBConstantAlpha} from './util/colorPalletes.js'
+import {defaultSampleInfoAttributeWidth,defaultSampleInfoViewportWidth} from './browser.js'
 
 class SampleInfoViewport {
 
@@ -82,7 +83,10 @@ class SampleInfoViewport {
         const viewportHeight = this.viewport.getBoundingClientRect().height
         let y = (samples.yOffset || 0) + this.contentTop    // contentTop will always be a negative number (top relative to viewport)
 
+        const shimTop = 1
+        const shimBot = 2
         const height = samples.height
+        let index = 0
         for (const name of samples.names) {
 
             if (y > viewportHeight) {
@@ -91,8 +95,10 @@ class SampleInfoViewport {
 
             if (y + height > 0) {
 
-                context.fillStyle = this.diagnosticColors[ samples.names.indexOf(name) ]
-                context.fillRect(0, y+1, context.canvas.width, height-2)
+                for (let x = 0; x < defaultSampleInfoViewportWidth; x += defaultSampleInfoAttributeWidth) {
+                    context.fillStyle = this.diagnosticColors[ samples.names.indexOf(name) ]
+                    context.fillRect(x, y + shimTop, defaultSampleInfoAttributeWidth, height - shimBot)
+                }
 
             }
 
@@ -174,4 +180,49 @@ class SampleInfoViewport {
         this.viewport.remove()
     }
 }
+
+async function loadSampleInfoFile(file) {
+
+    try {
+        const response = await fetch(file)
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`)
+        }
+        const string = await response.text()
+
+        processSampleInfoFile(string)
+    } catch (error) {
+        console.error('Failed to load configuration file:', error)
+    }
+}
+
+function processSampleInfoFile(string) {
+
+    const lines = string.split('\r').filter(l => l !== '')
+
+    // sample table
+    let sampleTable = undefined
+    for (const line of lines) {
+        if ('#sampleTable' === line) {
+            sampleTable = {}
+        }
+
+    }
+
+
+    const parts = lines.shift().split('\t')
+    parts.shift() // discard 'Linking_id' value
+    const descriptions = parts.slice()
+
+    const re = /\s+/
+    for (const line of lines) {
+        const values = line.split(re)
+        console.log(`${ values[ 0 ]}`)
+    }
+
+
+}
+
+export { loadSampleInfoFile, processSampleInfoFile }
+
 export default SampleInfoViewport
