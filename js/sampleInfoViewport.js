@@ -22,7 +22,7 @@ class SampleInfoViewport {
 
         this.diagnosticColors = []
         for (let y = 0; y < this.ctx.canvas.height; y++) {
-            this.diagnosticColors.push(randomRGBConstantAlpha(150, 250, 0.75))
+            this.diagnosticColors.push(randomRGBConstantAlpha(150, 250, 0.85))
         }
 
         this.contentTop = 0
@@ -92,7 +92,7 @@ class SampleInfoViewport {
             if (y + height > 0) {
 
                 context.fillStyle = this.diagnosticColors[ samples.names.indexOf(name) ]
-                context.fillRect(0, y, context.canvas.width, height)
+                context.fillRect(0, y+1, context.canvas.width, height-2)
 
             }
 
