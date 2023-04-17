@@ -809,7 +809,7 @@ class TrackView {
             viewport.dispose()
         }
 
-        this.sampleNameViewport.dispose()
+        this.sampleInfoViewport.dispose()
 
         this.sampleNameViewport.dispose()
 
