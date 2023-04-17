@@ -19,11 +19,12 @@
 
     const div = document.getElementById("myDiv")
 
-    const seg_track_bug_config =
+    const config =
         {
             genome: "hg19",
             // locus: [ 'myc', 'ace' ],
             locus: 'ace',
+            // locus: 'all',
             showSampleNames: true,
             showCursorGuide: true,
             tracks: [
@@ -31,60 +32,33 @@
                     name: "Segmented Copy Number",
                     type: "seg",
                     format: "seg",
-                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    url:'https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0'
                 },
-                {
-                    name: "Indexed",
-                    type: "seg",
-                    format: "seg",
-                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
-                },
-                {
-                    name: "Indexed with visibility window",
-                    type: "seg",
-                    format: "seg",
-                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
-                    visibilityWindow: "100000000"
-                },
+                // {
+                //     name: "Segmented Copy Number",
+                //     type: "seg",
+                //     format: "seg",
+                //     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                // },
+                // {
+                //     name: "Indexed",
+                //     type: "seg",
+                //     format: "seg",
+                //     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                //     indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
+                // },
+                // {
+                //     name: "Indexed with visibility window",
+                //     type: "seg",
+                //     format: "seg",
+                //     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                //     indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
+                //     visibilityWindow: "100000000"
+                // },
             ]
         };
 
-    const config = {
-        locus: '19:49301000-49305700',
-        genome: "hg19",
-        tracks: [
-            {
-                name: 'All negative bars',
-                url: '../../test/data/wig/allNegativewig.bedgraph',
-                indexed: false
-            },
-            // {
-            //     name: 'Mixed pos neg bars',
-            //     url: '../../test/data/wig/mixedPosNeg.bedgraph',
-            //     indexed: false
-            // },
-            // {
-            //     name: 'All pos points',
-            //     url: '../../test/data/wig/allPositive.bedgraph',
-            //     indexed: false,
-            //     graphType: "points",
-            //     guideLines: [
-            //         {dotted: true, y: 0, color: "green"},
-            //         {dotted: true, y: 0.25, color: "blue"},
-            //         {dotted: true, y: 0.5, color: "red"}
-            //     ]
-            // },
-            // {
-            //     name: 'All pos bars',
-            //     url: '../../test/data/wig/allPositive.bedgraph',
-            //     indexed: false
-            // },
-        ]
-    };
-
-    igv.createBrowser(document.getElementById("myDiv"), seg_track_bug_config)
+    igv.createBrowser(document.getElementById("myDiv"), config)
         .then(browser => {
             console.log(`browser ${ browser.guid } is good to go.`)
     })

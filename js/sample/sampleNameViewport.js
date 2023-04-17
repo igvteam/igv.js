@@ -1,10 +1,20 @@
-import {DOMUtils} from '../node_modules/igv-ui/dist/igv-ui.js'
-import {randomRGBConstantAlpha} from './util/colorPalletes.js'
-import {defaultSampleInfoAttributeWidth,defaultSampleInfoViewportWidth} from './browser.js'
+import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {appleCrayonRGB} from '../util/colorPalletes.js'
 
-class SampleInfoViewport {
+const maxFontSize = 10
 
-    constructor(trackView, column, width) {
+const fontConfigureTemplate =
+    {
+        // font: '2pt sans-serif',
+        textAlign: 'start',
+        textBaseline: 'bottom',
+        strokeStyle: 'black',
+        fillStyle: 'black'
+    }
+
+class SampleNameViewport {
+
+    constructor(trackView, column, unused, width) {
 
         this.guid = DOMUtils.guid()
         this.trackView = trackView
@@ -15,29 +25,32 @@ class SampleInfoViewport {
 
         column.appendChild(this.viewport)
 
-        this.viewport.style.height = `${trackView.track.height}px`
+        if (trackView.track.height) {
+            this.viewport.style.height = `${trackView.track.height}px`
+        }
 
         this.canvas = document.createElement('canvas')
         this.viewport.appendChild(this.canvas)
         this.ctx = this.canvas.getContext("2d")
 
-        this.diagnosticColors = []
-        for (let y = 0; y < this.ctx.canvas.height; y++) {
-            this.diagnosticColors.push(randomRGBConstantAlpha(150, 250, 0.85))
-        }
+        this.trackScrollDelta = 0
 
         this.contentTop = 0
 
         this.setWidth(width)
 
-        // this.addMouseHandlers()
+        if (false === this.browser.showSampleNames) {
+            this.hide()
+        }
+
+        this.addMouseHandlers()
     }
 
     checkCanvas() {
 
         const dpi = window.devicePixelRatio
         const requiredHeight = this.viewport.clientHeight
-        const requiredWidth = this.browser.sampleInfoViewportWidth
+        const requiredWidth = this.browser.sampleNameViewportWidth
 
         if (this.canvas.width !== requiredWidth * dpi || this.canvas.height !== requiredHeight * dpi) {
             const canvas = this.canvas
@@ -66,6 +79,14 @@ class SampleInfoViewport {
         this.checkCanvas()
     }
 
+    show() {
+        this.viewport.style.display = 'block'
+    }
+
+    hide() {
+        this.viewport.style.display = 'none'
+    }
+
     async repaint(samples) {
 
         this.checkCanvas()
@@ -78,33 +99,28 @@ class SampleInfoViewport {
             return
         }
 
+        configureFont(context, fontConfigureTemplate, samples.height)
+        const sampleNameXShim = 4
+
         context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+
+        context.fillStyle = appleCrayonRGB('lead')
 
         const viewportHeight = this.viewport.getBoundingClientRect().height
         let y = (samples.yOffset || 0) + this.contentTop    // contentTop will always be a negative number (top relative to viewport)
 
-        const shimTop = 1
-        const shimBot = 2
-        const height = samples.height
-        let index = 0
-        for (const name of samples.names) {
-
+        for (let name of samples.names) {
             if (y > viewportHeight) {
                 break
             }
-
-            if (y + height > 0) {
-
-                for (let x = 0; x < defaultSampleInfoViewportWidth; x += defaultSampleInfoAttributeWidth) {
-                    context.fillStyle = this.diagnosticColors[ samples.names.indexOf(name) ]
-                    context.fillRect(x, y + shimTop, defaultSampleInfoAttributeWidth, height - shimBot)
-                }
+            if (y + samples.height > 0) {
+                const text = name
+                const yFont = getYFont(context, text, y, samples.height)
+                context.fillText(text, sampleNameXShim, yFont)
 
             }
-
-            y += height
+            y += samples.height
         }
-
     }
 
     renderSVGContext(context, {deltaX, deltaY}) {
@@ -167,62 +183,28 @@ class SampleInfoViewport {
         viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
     }
 
-    show() {
-        this.viewport.style.display = 'block'
-    }
-
-    hide() {
-        this.viewport.style.display = 'none'
-    }
-
     dispose() {
         this.removeMouseHandlers()
         this.viewport.remove()
     }
 }
 
-async function loadSampleInfoFile(file) {
-
-    try {
-        const response = await fetch(file)
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`)
-        }
-        const string = await response.text()
-
-        processSampleInfoFile(string)
-    } catch (error) {
-        console.error('Failed to load configuration file:', error)
-    }
+function getYFont(context, text, y, height) {
+    const shim = getSampleNameYShim(context, text, height)
+    return y + height - getSampleNameYShim(context, text, height)
 }
 
-function processSampleInfoFile(string) {
-
-    const lines = string.split('\r').filter(l => l !== '')
-
-    // sample table
-    let sampleTable = undefined
-    for (const line of lines) {
-        if ('#sampleTable' === line) {
-            sampleTable = {}
-        }
-
-    }
-
-
-    const parts = lines.shift().split('\t')
-    parts.shift() // discard 'Linking_id' value
-    const descriptions = parts.slice()
-
-    const re = /\s+/
-    for (const line of lines) {
-        const values = line.split(re)
-        console.log(`${ values[ 0 ]}`)
-    }
-
-
+function getSampleNameYShim(context, text, h) {
+    const {actualBoundingBoxAscent, actualBoundingBoxDescent} = context.measureText(text)
+    return (h - (actualBoundingBoxAscent + actualBoundingBoxDescent)) / 2
 }
 
-export { loadSampleInfoFile, processSampleInfoFile }
+function configureFont(ctx, {textAlign, textBaseline, strokeStyle, fillStyle}, sampleHeight) {
+    const pixels = Math.min(sampleHeight, maxFontSize)
+    ctx.font = `${pixels}px sans-serif`
+    ctx.textAlign = textAlign
+    ctx.textBaseline = textBaseline
+    ctx.fillStyle = fillStyle
+}
 
-export default SampleInfoViewport
+export default SampleNameViewport
