@@ -62,7 +62,8 @@ const igv_track_gear_menu_column_width = 28
 const column_multi_locus_shim_width = 2 + 1 + 2
 
 const defaultSampleNameViewportWidth = 200
-const defaultSampleInfoViewportWidth = 200
+const defaultSampleInfoViewportWidth = 128
+const defaultSampleInfoAttributeWidth = 128 / 4
 
 class Browser {
 
@@ -2099,6 +2100,6 @@ async function searchWebService(browser, locus, searchConfig) {
     return {result: result, locusSearchString: locus}
 }
 
-export {searchWebService}
+export {searchWebService,defaultSampleInfoAttributeWidth,defaultSampleInfoViewportWidth}
 export default Browser
 
