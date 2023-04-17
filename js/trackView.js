@@ -29,8 +29,8 @@ import {doAutoscale} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import {FeatureUtils, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js'
 import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
-import SampleInfoViewport from "./sampleInfoViewport.js";
-import SampleNameViewport from './sampleNameViewport.js'
+import SampleInfoViewport from "./sample/sampleInfoViewport.js";
+import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import MenuUtils from "./ui/menuUtils.js"
 

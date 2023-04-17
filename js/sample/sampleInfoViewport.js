@@ -1,20 +1,11 @@
-import {DOMUtils} from '../node_modules/igv-ui/dist/igv-ui.js'
-import {appleCrayonRGB} from './util/colorPalletes.js'
+import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {randomRGBConstantAlpha} from '../util/colorPalletes.js'
+import {defaultSampleInfoAttributeWidth,defaultSampleInfoViewportWidth} from '../browser.js'
+import {attributeRangeLUT, copyNumberDictionary, stringToRBGString} from './sampleInfo.js'
 
-const maxFontSize = 10
+class SampleInfoViewport {
 
-const fontConfigureTemplate =
-    {
-        // font: '2pt sans-serif',
-        textAlign: 'start',
-        textBaseline: 'bottom',
-        strokeStyle: 'black',
-        fillStyle: 'black'
-    }
-
-class SampleNameViewport {
-
-    constructor(trackView, column, unused, width) {
+    constructor(trackView, column, width) {
 
         this.guid = DOMUtils.guid()
         this.trackView = trackView
@@ -25,32 +16,29 @@ class SampleNameViewport {
 
         column.appendChild(this.viewport)
 
-        if (trackView.track.height) {
-            this.viewport.style.height = `${trackView.track.height}px`
-        }
+        this.viewport.style.height = `${trackView.track.height}px`
 
         this.canvas = document.createElement('canvas')
         this.viewport.appendChild(this.canvas)
         this.ctx = this.canvas.getContext("2d")
 
-        this.trackScrollDelta = 0
+        this.diagnosticColors = []
+        for (let y = 0; y < this.ctx.canvas.height; y++) {
+            this.diagnosticColors.push(randomRGBConstantAlpha(150, 250, 0.85))
+        }
 
         this.contentTop = 0
 
         this.setWidth(width)
 
-        if (false === this.browser.showSampleNames) {
-            this.hide()
-        }
-
-        this.addMouseHandlers()
+        // this.addMouseHandlers()
     }
 
     checkCanvas() {
 
         const dpi = window.devicePixelRatio
         const requiredHeight = this.viewport.clientHeight
-        const requiredWidth = this.browser.sampleNameViewportWidth
+        const requiredWidth = this.browser.sampleInfoViewportWidth
 
         if (this.canvas.width !== requiredWidth * dpi || this.canvas.height !== requiredHeight * dpi) {
             const canvas = this.canvas
@@ -79,14 +67,6 @@ class SampleNameViewport {
         this.checkCanvas()
     }
 
-    show() {
-        this.viewport.style.display = 'block'
-    }
-
-    hide() {
-        this.viewport.style.display = 'none'
-    }
-
     async repaint(samples) {
 
         this.checkCanvas()
@@ -99,28 +79,40 @@ class SampleNameViewport {
             return
         }
 
-        configureFont(context, fontConfigureTemplate, samples.height)
-        const sampleNameXShim = 4
-
         context.clearRect(0, 0, context.canvas.width, context.canvas.height)
-
-        context.fillStyle = appleCrayonRGB('lead')
 
         const viewportHeight = this.viewport.getBoundingClientRect().height
         let y = (samples.yOffset || 0) + this.contentTop    // contentTop will always be a negative number (top relative to viewport)
 
-        for (let name of samples.names) {
+        const shimTop = 1
+        const shimBot = 2
+        const height = samples.height
+        let index = 0
+        for (const name of samples.names) {
+
             if (y > viewportHeight) {
                 break
             }
-            if (y + samples.height > 0) {
-                const text = name
-                const yFont = getYFont(context, text, y, samples.height)
-                context.fillText(text, sampleNameXShim, yFont)
+
+            if (y + height > 0) {
+
+                const attributes = copyNumberDictionary[ name ]
+
+                context.fillStyle = stringToRBGString(attributes[ 'Subtype' ])
+                context.fillRect(0, y + shimTop, defaultSampleInfoViewportWidth, height - shimBot)
+
+
+                // for (let x = 0; x < defaultSampleInfoViewportWidth; x += defaultSampleInfoAttributeWidth) {
+                //     // context.fillStyle = this.diagnosticColors[ samples.names.indexOf(name) ]
+                //     context.fillStyle = stringToRBGString(name)
+                //     context.fillRect(x, y + shimTop, defaultSampleInfoAttributeWidth, height - shimBot)
+                // }
 
             }
-            y += samples.height
+
+            y += height
         }
+
     }
 
     renderSVGContext(context, {deltaX, deltaY}) {
@@ -183,28 +175,19 @@ class SampleNameViewport {
         viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
     }
 
+    show() {
+        this.viewport.style.display = 'block'
+    }
+
+    hide() {
+        this.viewport.style.display = 'none'
+    }
+
     dispose() {
         this.removeMouseHandlers()
         this.viewport.remove()
     }
 }
 
-function getYFont(context, text, y, height) {
-    const shim = getSampleNameYShim(context, text, height)
-    return y + height - getSampleNameYShim(context, text, height)
-}
 
-function getSampleNameYShim(context, text, h) {
-    const {actualBoundingBoxAscent, actualBoundingBoxDescent} = context.measureText(text)
-    return (h - (actualBoundingBoxAscent + actualBoundingBoxDescent)) / 2
-}
-
-function configureFont(ctx, {textAlign, textBaseline, strokeStyle, fillStyle}, sampleHeight) {
-    const pixels = Math.min(sampleHeight, maxFontSize)
-    ctx.font = `${pixels}px sans-serif`
-    ctx.textAlign = textAlign
-    ctx.textBaseline = textBaseline
-    ctx.fillStyle = fillStyle
-}
-
-export default SampleNameViewport
+export default SampleInfoViewport
