@@ -80,6 +80,17 @@ const sampleInfo =
 
         },
 
+        getColorWithAttribute: (attribute, value) => {
+            if (typeof value === "string") {
+                return stringToRBGString(value)
+            } else {
+                const [ min, max ] = attributeRangeLUT[ attribute ]
+                const interpolant = (value - min) / (max - min)
+                const str = interpolant.toString()
+                return stringToRBGString(str)
+            }
+
+        }
     };
 
 
@@ -127,4 +138,4 @@ function stringToRBGString(str) {
 
 
 // identify an array that is predominantly numerical and replace string with undefined
-export { sampleInfo, attributeRangeLUT, copyNumberDictionary, stringToRBGString }
+export { sampleInfo, copyNumberDictionary }

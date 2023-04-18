@@ -1,7 +1,7 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {randomRGBConstantAlpha} from '../util/colorPalletes.js'
 import {defaultSampleInfoAttributeWidth,defaultSampleInfoViewportWidth} from '../browser.js'
-import {attributeRangeLUT, copyNumberDictionary, stringToRBGString} from './sampleInfo.js'
+import {copyNumberDictionary, sampleInfo} from './sampleInfo.js'
 
 class SampleInfoViewport {
 
@@ -87,7 +87,6 @@ class SampleInfoViewport {
         const shimTop = 1
         const shimBot = 2
         const height = samples.height
-        let index = 0
         for (const name of samples.names) {
 
             if (y > viewportHeight) {
@@ -97,16 +96,13 @@ class SampleInfoViewport {
             if (y + height > 0) {
 
                 const attributes = copyNumberDictionary[ name ]
+                const entries = Object.entries(attributes)
 
-                context.fillStyle = stringToRBGString(attributes[ 'Subtype' ])
-                context.fillRect(0, y + shimTop, defaultSampleInfoViewportWidth, height - shimBot)
-
-
-                // for (let x = 0; x < defaultSampleInfoViewportWidth; x += defaultSampleInfoAttributeWidth) {
-                //     // context.fillStyle = this.diagnosticColors[ samples.names.indexOf(name) ]
-                //     context.fillStyle = stringToRBGString(name)
-                //     context.fillRect(x, y + shimTop, defaultSampleInfoAttributeWidth, height - shimBot)
-                // }
+                for (let i = 0, x = 0; x < defaultSampleInfoViewportWidth; i++, x += defaultSampleInfoAttributeWidth) {
+                    const [ attribute, value ] = entries[ i ]
+                    context.fillStyle = sampleInfo.getColorWithAttribute(attribute, value)
+                    context.fillRect(x, y + shimTop, defaultSampleInfoAttributeWidth, height - shimBot)
+                }
 
             }
 
@@ -188,6 +184,5 @@ class SampleInfoViewport {
         this.viewport.remove()
     }
 }
-
 
 export default SampleInfoViewport
