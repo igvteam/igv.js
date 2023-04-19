@@ -45,7 +45,7 @@ const sampleInfo =
 
             sampleInfo.createAttributeRangeLUT()
 
-            console.log('done')
+            console.log('sample info dictionary is complete')
 
         },
 
