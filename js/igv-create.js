@@ -48,8 +48,6 @@ async function createBrowser(parentDiv, config) {
 
     setDefaults(config)
 
-    sampleInfo.ingestSampleTable()
-
     if (config.queryParametersSupported) {
         extractQuery(config)
     }
