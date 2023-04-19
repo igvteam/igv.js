@@ -98,10 +98,15 @@ class SampleInfoViewport {
                 const attributes = copyNumberDictionary[ name ]
                 const entries = Object.entries(attributes)
 
-                for (let i = 0, x = 0; x < defaultSampleInfoViewportWidth; i++, x += defaultSampleInfoAttributeWidth) {
-                    const [ attribute, value ] = entries[ i ]
-                    context.fillStyle = sampleInfo.getColorWithAttribute(attribute, value)
-                    context.fillRect(x, y + shimTop, defaultSampleInfoAttributeWidth, height - shimBot)
+                const w = Math.floor(defaultSampleInfoViewportWidth/entries.length)
+                let x = 0;
+                for (const [ attribute, value ] of entries) {
+
+                    if ('NA' !== value) {
+                        context.fillStyle = sampleInfo.getColorWithAttribute(attribute, value)
+                        context.fillRect(x, y + shimTop, w, height - shimBot)
+                    }
+                    x += w
                 }
 
             }
