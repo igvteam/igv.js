@@ -78,7 +78,7 @@ class TrackView {
         }
 
         // Sample Info
-        this.sampleInfoViewport = new SampleInfoViewport(this, browser.columnContainer.querySelector('.igv-sample-name-column'), browser.sampleInfoViewportWidth)
+        this.sampleInfoViewport = new SampleInfoViewport(this, browser.columnContainer.querySelector('.igv-sample-info-column'), browser.sampleInfoViewportWidth)
 
         // SampleName Viewport
         this.sampleNameViewport = new SampleNameViewport(this, browser.columnContainer.querySelector('.igv-sample-name-column'), undefined, browser.sampleNameViewportWidth)

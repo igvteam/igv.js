@@ -1522,7 +1522,7 @@ class Browser {
             // discard ONLY viewport columns
             this.columnContainer.querySelectorAll('.igv-column-shim, .igv-column').forEach(el => el.remove())
 
-            // Insert viewport columns preceding the sample-name column
+            // Insert viewport columns preceding the sample info column
             viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-info-column'), this.referenceFrameList.length)
 
             this.centerLineList = this.createCenterLineList(this.columnContainer)
