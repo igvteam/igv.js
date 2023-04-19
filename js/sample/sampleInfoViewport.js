@@ -1,6 +1,6 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
-import {randomRGBConstantAlpha} from '../util/colorPalletes.js'
-import {defaultSampleInfoAttributeWidth,defaultSampleInfoViewportWidth} from '../browser.js'
+import {appleCrayonRGB, randomRGBConstantAlpha} from '../util/colorPalletes.js'
+import {defaultSampleInfoViewportWidth} from '../browser.js'
 import {copyNumberDictionary, sampleInfo} from './sampleInfo.js'
 
 class SampleInfoViewport {
@@ -22,10 +22,10 @@ class SampleInfoViewport {
         this.viewport.appendChild(this.canvas)
         this.ctx = this.canvas.getContext("2d")
 
-        this.diagnosticColors = []
-        for (let y = 0; y < this.ctx.canvas.height; y++) {
-            this.diagnosticColors.push(randomRGBConstantAlpha(150, 250, 0.85))
-        }
+        // this.diagnosticColors = []
+        // for (let y = 0; y < this.ctx.canvas.height; y++) {
+        //     this.diagnosticColors.push(randomRGBConstantAlpha(150, 250, 0.85))
+        // }
 
         this.contentTop = 0
 
@@ -67,6 +67,17 @@ class SampleInfoViewport {
         this.checkCanvas()
     }
 
+    static async update(browser) {
+
+        for (const { sampleInfoViewport } of browser.trackViews) {
+            if (typeof sampleInfoViewport.trackView.track.getSamples === 'function') {
+                const samples = sampleInfoViewport.trackView.track.getSamples()
+                sampleInfoViewport.repaint(samples)
+            }
+        }
+
+    }
+
     async repaint(samples) {
 
         this.checkCanvas()
@@ -75,105 +86,52 @@ class SampleInfoViewport {
 
     draw({context, samples}) {
 
-        if (!samples || samples.names.length === 0/* || samples.height < 1*/) {
-            return
-        }
-
         context.clearRect(0, 0, context.canvas.width, context.canvas.height)
 
-        const viewportHeight = this.viewport.getBoundingClientRect().height
-        let y = (samples.yOffset || 0) + this.contentTop    // contentTop will always be a negative number (top relative to viewport)
+        context.fillStyle = appleCrayonRGB('snow')
+        context.fillRect(0, 0, context.canvas.width, context.canvas.height)
 
-        const shimTop = 1
-        const shimBot = 2
-        const height = samples.height
-        for (const name of samples.names) {
+        if (samples && samples.names.length > 0) {
 
-            if (y > viewportHeight) {
-                break
-            }
+            const viewportHeight = this.viewport.getBoundingClientRect().height
+            let y = (samples.yOffset || 0) + this.contentTop    // contentTop will always be a negative number (top relative to viewport)
 
-            if (y + height > 0) {
+            const shimTop = 1
+            const shimBot = 2
+            const height = samples.height
+            for (const name of samples.names) {
 
-                const attributes = copyNumberDictionary[ name ]
-                const entries = Object.entries(attributes)
-
-                const w = Math.floor(defaultSampleInfoViewportWidth/entries.length)
-                let x = 0;
-                for (const [ attribute, value ] of entries) {
-
-                    if ('NA' !== value) {
-                        context.fillStyle = sampleInfo.getColorWithAttribute(attribute, value)
-                        context.fillRect(x, y + shimTop, w, height - shimBot)
-                    }
-                    x += w
+                if (y > viewportHeight) {
+                    break
                 }
 
-            }
+                if (y + height > 0) {
 
-            y += height
-        }
+                    if (copyNumberDictionary && copyNumberDictionary[ name ]) {
 
-    }
+                        const attributes = copyNumberDictionary[ name ]
+                        const entries = Object.entries(attributes)
 
-    renderSVGContext(context, {deltaX, deltaY}) {
+                        const w = Math.floor(defaultSampleInfoViewportWidth/entries.length)
+                        let x = 0;
+                        for (const [ attribute, value ] of entries) {
 
-        if (typeof this.trackView.track.getSamples === 'function') {
-
-            const samples = this.trackView.track.getSamples()
-
-            const yScrollDelta = 0   // This is not relevant, scrolling is handled in "draw"
-
-            const {width, height} = this.viewport.getBoundingClientRect()
-
-            const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
-            const id = `${str}_sample_names_guid_${DOMUtils.guid()}`
-
-            context.saveWithTranslationAndClipRect(id, deltaX, deltaY + yScrollDelta, width, height, -yScrollDelta)
-
-            this.draw({context, samples})
-
-            context.restore()
-        }
-    }
-
-    addMouseHandlers() {
-        this.addViewportContextMenuHandler(this.viewport)
-    }
-
-    removeMouseHandlers() {
-        this.removeViewportContextMenuHandler(this.viewport)
-    }
-
-    addViewportContextMenuHandler(viewport) {
-        this.boundContextMenuHandler = contextMenuHandler.bind(this)
-        viewport.addEventListener('contextmenu', this.boundContextMenuHandler)
-
-        function contextMenuHandler(event) {
-
-            event.preventDefault()
-            event.stopPropagation()
-
-            const config =
-                {
-                    label: 'Name Panel Width',
-                    value: this.browser.sampleNameViewportWidth,
-                    callback: newWidth => {
-                        this.browser.sampleNameViewportWidth = parseInt(newWidth)
-                        for (let {sampleNameViewport} of this.browser.trackViews) {
-                            sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
+                            if ('NA' !== value) {
+                                context.fillStyle = sampleInfo.getAttributeColor(attribute, value)
+                                context.fillRect(x, y + shimTop, w, height - shimBot)
+                            }
+                            x += w
                         }
-                        this.browser.layoutChange()
                     }
+
                 }
 
-            this.browser.inputDialog.present(config, event)
+                y += height
+            }
+
         }
 
-    }
 
-    removeViewportContextMenuHandler(viewport) {
-        viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
     }
 
     show() {
@@ -185,7 +143,6 @@ class SampleInfoViewport {
     }
 
     dispose() {
-        this.removeMouseHandlers()
         this.viewport.remove()
     }
 }

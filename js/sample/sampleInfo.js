@@ -1,14 +1,63 @@
-import { sampleTable } from '../../sampleTableListConfig.js'
-import { copyNumber } from '../../copyNumberListConfig.js'
+import {igvxhr} from '../../node_modules/igv-utils/src/index.js'
+import SampleInfoViewport from "./sampleInfoViewport.js";
 
 let attributes
 let attributeRangeLUT
-let copyNumberDictionary
-let sampleDictionary
+let copyNumberDictionary = {}
+let sampleDictionary = {}
 
 const sampleInfo =
     {
-        ingestSampleTable: () => {
+        loadSampleInfoFile: async (browser, path) => {
+            let string
+            try {
+                string = await igvxhr.loadString(path)
+                await sampleInfo.processSampleInfoFileAsString(browser, string)
+            } catch (e) {
+                console.error(e.message)
+            }
+
+        },
+
+        processSampleInfoFileAsString: async (browser, string) => {
+            const lines = string.split('\r').filter(line => line.length > 0)
+
+            const sampleTable = []
+            const copyNumber = []
+            let isSampleTable = false
+            let isCopyNumber = false
+            for (const line of lines) {
+
+                if (line.startsWith('#sampleTable')) {
+                    isSampleTable = true
+                    isCopyNumber = false
+                }
+
+                if (line.startsWith('#sampleMapping') || line.startsWith('#mutations') || line.startsWith('#colors')) {
+                    isSampleTable = false
+                    isCopyNumber = false
+                }
+
+                if (line.startsWith('#copynumber')) {
+                    isSampleTable = false
+                    isCopyNumber = true
+                }
+
+                if (false === isCopyNumber && true === isSampleTable) {
+                    sampleTable.push(line)
+                }
+
+                if (true === isCopyNumber && false === isSampleTable) {
+                    copyNumber.push(line)
+                }
+            }
+            sampleTable.shift()
+            copyNumber.shift()
+
+            await sampleInfo.buildDictionaries(browser, sampleTable, copyNumber)
+        },
+
+        buildDictionaries: async (browser, sampleTable, copyNumber) => {
 
             const lines = sampleTable.slice()
 
@@ -17,7 +66,7 @@ const sampleInfo =
 
             attributes = scratch.map(label => label.split(' ').join('_'))
 
-            sampleDictionary = {}
+            // sampleDictionary = {}
 
             for (const line of lines) {
 
@@ -37,7 +86,7 @@ const sampleInfo =
                 sampleDictionary[ key ] = toNumericalRepresentation(value)
             }
 
-            copyNumberDictionary = {}
+            // copyNumberDictionary = {}
             for (const line of copyNumber) {
                 const [ a, b ] = line.split('\t')
                 copyNumberDictionary[ a ] = Object.assign({}, sampleDictionary[ b ])
@@ -45,8 +94,7 @@ const sampleInfo =
 
             sampleInfo.createAttributeRangeLUT()
 
-            console.log('sample info dictionary is complete')
-
+            await SampleInfoViewport.update(browser)
         },
 
         createAttributeRangeLUT: () => {
@@ -56,6 +104,10 @@ const sampleInfo =
                 for (const attribute of attributes) {
 
                     let item = value[ attribute ]
+
+                    if (undefined === item) {
+                        console.log('whoops')
+                    }
 
                     if (typeof item === 'number' || (item.length > 0 && 'NA' !== item)) {
 
@@ -71,23 +123,22 @@ const sampleInfo =
 
             } // for (Object.values(sampleDictionary))
 
-
+            // remove duplicates
             for (const key of Object.keys(attributeRangeLUT)) {
-                // remove duplicates
                 const list = Array.from( new Set( attributeRangeLUT[ key ].slice()) )
                 attributeRangeLUT[ key ] = sortArrayAndMinMax(list)
             }
 
         },
 
-        getColorWithAttribute: (attribute, value) => {
+        getAttributeColor: (attribute, value) => {
             if (typeof value === "string") {
-                return stringToRBGString(value)
+                return stringToRGBString(value)
             } else {
                 const [ min, max ] = attributeRangeLUT[ attribute ]
                 const interpolant = (value - min) / (max - min)
                 const str = interpolant.toString()
-                return stringToRBGString(str)
+                return stringToRGBString(str)
             }
 
         }
@@ -107,8 +158,6 @@ function toNumericalRepresentation(obj) {
     return result
 }
 
-
-
 function sortArrayAndMinMax(array) {
     let result
     if (typeof array[0] === "number") {
@@ -121,7 +170,7 @@ function sortArrayAndMinMax(array) {
 
 }
 
-function stringToRBGString(str) {
+function stringToRGBString(str) {
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);
@@ -135,7 +184,6 @@ function stringToRBGString(str) {
 
     return `rgb(${color.join(', ')})`;
 }
-
 
 // identify an array that is predominantly numerical and replace string with undefined
 export { sampleInfo, copyNumberDictionary }

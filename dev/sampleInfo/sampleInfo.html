@@ -5,9 +5,17 @@
     <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
+    <script src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="1h7gqkxv11tb4d2"></script>
+
 </head>
 
 <body>
+
+<input id="fileInput" type="file">
+<input id="processFileInput" type="button" value="Process">
+
+<input  id="urlInput" type="text" placeholder="Enter URL">
+<input  id="processURLInput" type="button" value="Process URL">
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
@@ -15,9 +23,8 @@
 
 <script type="module">
 
+    import {sampleInfo} from "../../js/sample/sampleInfo.js";
     import igv from '../../js/index.js'
-
-    const div = document.getElementById("myDiv")
 
     const config =
         {
@@ -34,35 +41,26 @@
                     format: "seg",
                     url:'https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0'
                 },
-                // {
-                //     name: "Segmented Copy Number",
-                //     type: "seg",
-                //     format: "seg",
-                //     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                // },
-                // {
-                //     name: "Indexed",
-                //     type: "seg",
-                //     format: "seg",
-                //     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                //     indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
-                // },
-                // {
-                //     name: "Indexed with visibility window",
-                //     type: "seg",
-                //     format: "seg",
-                //     url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                //     indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
-                //     visibilityWindow: "100000000"
-                // },
             ]
         };
 
-    igv.createBrowser(document.getElementById("myDiv"), config)
-        .then(browser => {
-            console.log(`browser ${ browser.guid } is good to go.`)
-    })
+    let browser
+    (async () => {
+        browser = await igv.createBrowser(document.getElementById('myDiv'), config)
+        console.log(`browser ${ browser.guid } is good to go.`)
+        document.getElementById('processFileInput').addEventListener('click', processFile)
+        document.getElementById('processURLInput').addEventListener('click', processUrl)
+    })()
 
+    async function processFile() {
+        const [ file ] = document.getElementById("fileInput").files
+        await sampleInfo.loadSampleInfoFile(browser, file)
+    }
+
+    async function processUrl() {
+        const url = document.getElementById("urlInput").value
+        await sampleInfo.loadSampleInfoFile(browser, url)
+    }
 
 </script>
 
