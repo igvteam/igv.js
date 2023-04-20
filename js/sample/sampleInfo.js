@@ -132,14 +132,21 @@ const sampleInfo =
         },
 
         getAttributeColor: (attribute, value) => {
+
+            return stringToRGBString(typeof value === "string" ? value : value.toString())
+
             if (typeof value === "string") {
                 return stringToRGBString(value)
             } else {
+
+                // TODO: No need for any of this. Just map value -> color directly
+
                 const [ min, max ] = attributeRangeLUT[ attribute ]
                 const interpolant = (value - min) / (max - min)
                 const str = interpolant.toString()
                 return stringToRGBString(str)
             }
+
 
         }
     };
@@ -171,6 +178,7 @@ function sortArrayAndMinMax(array) {
 }
 
 function stringToRGBString(str) {
+
     let hash = 0;
     for (let i = 0; i < str.length; i++) {
         hash = str.charCodeAt(i) + ((hash << 5) - hash);

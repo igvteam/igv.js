@@ -13,14 +13,7 @@ import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
-import {
-    buildOptions,
-    createColumn,
-    doAutoscale,
-    getElementAbsoluteHeight,
-    getFilename,
-    mapUrl
-} from "./util/igvUtils.js"
+import {createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import GtexUtils from "./gtex/gtexUtils.js"
 import {defaultSequenceTrackOrder} from './sequenceTrack.js'
