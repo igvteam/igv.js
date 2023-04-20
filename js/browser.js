@@ -13,7 +13,14 @@ import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
-import {buildOptions, createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
+import {
+    buildOptions,
+    createColumn,
+    doAutoscale,
+    getElementAbsoluteHeight,
+    getFilename,
+    mapUrl
+} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import GtexUtils from "./gtex/gtexUtils.js"
 import {defaultSequenceTrackOrder} from './sequenceTrack.js'
@@ -47,6 +54,7 @@ import ROITable from './roi/ROITable.js'
 import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
 import ROITableControl from './ui/roiTableControl.js'
+import {sampleInfo} from "./sample/sampleInfo.js";
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -756,6 +764,18 @@ class Browser {
      * @returns {Promise<*>}  Promise for track objects
      */
     async loadTrackList(configList) {
+
+        const [ config ] = configList
+        if ('sequence' !== config.type && 'refgene' !== config.format) {
+
+            const extension = getFileExtension(config.url)
+
+            if ('txt' === extension) {
+                await sampleInfo.loadSampleInfoFile(this, config.url)
+                return undefined
+
+            }
+        }
 
         const promises = []
         for (let config of configList) {
@@ -1947,6 +1967,28 @@ class Browser {
             this.circularViewControl.setState(isVisible)
         }
     }
+}
+
+function getFileExtension(input) {
+    let fileName;
+
+    // Check if input is a File object or a URL string
+    if (input instanceof File) {
+        fileName = input.name;
+    } else if (typeof input === 'string') {
+        fileName = input;
+    } else {
+        throw new Error('Input must be a File object or a URL string');
+    }
+
+    // Extract the file extension
+    const fileExtension = fileName.split('.').pop();
+
+    // If the URL is from Dropbox, the extension may be followed by a query string
+    // Remove the query string, if present
+    const cleanFileExtension = fileExtension.split('?')[0];
+
+    return cleanFileExtension;
 }
 
 /**
