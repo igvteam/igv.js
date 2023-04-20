@@ -1,5 +1,6 @@
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
-import {appleCrayonRGB, randomRGBConstantAlpha} from '../util/colorPalletes.js'
+import {appleCrayonRGB} from '../util/colorPalletes.js'
 import {defaultSampleInfoViewportWidth} from '../browser.js'
 import {copyNumberDictionary, sampleInfo} from './sampleInfo.js'
 
@@ -22,16 +23,12 @@ class SampleInfoViewport {
         this.viewport.appendChild(this.canvas)
         this.ctx = this.canvas.getContext("2d")
 
-        // this.diagnosticColors = []
-        // for (let y = 0; y < this.ctx.canvas.height; y++) {
-        //     this.diagnosticColors.push(randomRGBConstantAlpha(150, 250, 0.85))
-        // }
-
         this.contentTop = 0
+        this.hitList = undefined
 
         this.setWidth(width)
 
-        // this.addMouseHandlers()
+        this.addMouseHandlers()
     }
 
     checkCanvas() {
@@ -94,18 +91,26 @@ class SampleInfoViewport {
         if (samples && samples.names.length > 0) {
 
             const viewportHeight = this.viewport.getBoundingClientRect().height
-            let y = (samples.yOffset || 0) + this.contentTop    // contentTop will always be a negative number (top relative to viewport)
 
-            const shimTop = 1
-            const shimBot = 2
-            const height = samples.height
+            let shim = 1
+
+            const tileHeight = samples.height
+            if (tileHeight < 2*shim) {
+                shim = 0
+            }
+
+            let y = this.contentTop
+            this.hitList = {}
             for (const name of samples.names) {
 
                 if (y > viewportHeight) {
+                    // for (const key of Object.keys(this.hitList)) {
+                    //     console.log(`${ key }`)
+                    // }
                     break
                 }
 
-                if (y + height > 0) {
+                if (y + tileHeight > 0) {
 
                     if (copyNumberDictionary && copyNumberDictionary[ name ]) {
 
@@ -114,11 +119,17 @@ class SampleInfoViewport {
 
                         const w = Math.floor(defaultSampleInfoViewportWidth/entries.length)
                         let x = 0;
-                        for (const [ attribute, value ] of entries) {
-
+                        for (const entry of entries) {
+                            const [ attribute, value ] = entry
                             if ('NA' !== value) {
                                 context.fillStyle = sampleInfo.getAttributeColor(attribute, value)
-                                context.fillRect(x, y + shimTop, w, height - shimBot)
+
+                                const yy = y+shim
+                                const hh = tileHeight-(2*shim)
+                                context.fillRect(x, yy, w, hh)
+
+                                const key = `${Math.floor(x)}%${Math.floor(yy)}%${Math.ceil(w)}%${Math.ceil(hh)}`
+                                this.hitList[ key ] = `${attribute}:${value}`
                             }
                             x += w
                         }
@@ -126,12 +137,50 @@ class SampleInfoViewport {
 
                 }
 
-                y += height
+                y += tileHeight
             }
 
         }
 
 
+    }
+
+    addMouseHandlers() {
+        this.addViewportMouseHandler(this.viewport)
+    }
+
+    addViewportMouseHandler(viewport) {
+
+        this.boundMouseMoveHandler = mouseMove.bind(this)
+        viewport.addEventListener('mousemove', this.boundMouseMoveHandler)
+
+        function mouseMove(event) {
+            event.stopPropagation()
+            let { x, y } = DOMUtils.translateMouseCoordinates(event, this.viewport)
+
+            if (this.hitList) {
+
+                for (const [ bbox, value ] of Object.entries(this.hitList)) {
+                    const [xx, yy, width, height ] = bbox.split('%').map(str => parseInt(str, 10))
+                    if (x < xx || x > xx+width || y < yy || y > yy+height) {
+                        continue
+                    }
+
+                    // console.log(`${ Date.now() } ${ value }`)
+                    viewport.setAttribute('title', value)
+                }
+
+            }
+        }
+
+    }
+
+    removeMouseHandlers() {
+        this.removeViewportMouseHandler(this.viewport)
+    }
+
+    removeViewportMouseHandler(viewport) {
+        viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
 
     show() {
@@ -143,6 +192,7 @@ class SampleInfoViewport {
     }
 
     dispose() {
+        this.removeMouseHandlers()
         this.viewport.remove()
     }
 }
