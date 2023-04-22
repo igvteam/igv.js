@@ -294,9 +294,8 @@ class SegTrack extends TrackBase {
                 f.pixelRect = {x, y, w, h}
 
                 // Use for diagnostic rendering
-                context.fillStyle = randomRGB(180, 240)
-                // context.fillStyle = randomGrey(200, 255)
-                // context.fillStyle = color
+                // context.fillStyle = randomRGB(180, 240)
+                context.fillStyle = color
 
                 // console.log(`${ this.type } render. y(${ y }) height(${ h })`)
                 context.fillRect(x, y, w, h)

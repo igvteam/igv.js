@@ -1499,6 +1499,7 @@
   align-items: flex-start;
   box-sizing: border-box;
   height: 100%;
+  cursor: pointer;
 }
 
 .igv-sample-name-column {
