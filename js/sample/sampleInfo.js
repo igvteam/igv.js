@@ -129,6 +129,17 @@ const sampleInfo =
                 attributeRangeLUT[ key ] = sortArrayAndMinMax(list)
             }
 
+            // clean up oddball cases.
+            const isNumber = element => typeof element === 'number'
+            const isString = element => typeof element === 'string'
+
+            for (let key of Object.keys(attributeRangeLUT)) {
+                const values = attributeRangeLUT[ key ]
+                if (true === values.some(isString) && true === values.some(isNumber)) {
+                    console.log(`${ values.join('%')}`)
+                    attributeRangeLUT[ key ] = values.filter(value => typeof value === 'string')
+                }
+            }
         },
 
         getAttributeColor: (attribute, value) => {
