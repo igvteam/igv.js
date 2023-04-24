@@ -1,11 +1,30 @@
 import {igvxhr} from '../../node_modules/igv-utils/src/index.js'
 import SampleInfoViewport from "./sampleInfoViewport.js";
+import {appleCrayonRGBA} from "../util/colorPalletes.js";
 
 let attributes
 let attributeRangeLUT
 let copyNumberDictionary = {}
 let sampleDictionary = {}
 
+const appleCrayonLUT =
+    {
+        maraschino: "#ff2101",
+        tangerine: "#ff8802",
+        lemon: "#fffa03",
+        lime: "#83f902",
+        spring: "#05f802",
+        sea_foam: "#03f987",
+        turquoise: "#00fdff",
+        aqua: "#008cff",
+        blueberry: "#002eff",
+        grape: "#8931ff",
+        magenta: "#ff39ff",
+        strawberry: "#ff2987",
+
+    };
+
+const appleCrayonNames = Object.keys(appleCrayonLUT)
 const sampleInfo =
     {
         loadSampleInfoFile: async (browser, path) => {
@@ -144,20 +163,17 @@ const sampleInfo =
 
         getAttributeColor: (attribute, value) => {
 
-            return stringToRGBString(typeof value === "string" ? value : value.toString())
-
             if (typeof value === "string") {
                 return stringToRGBString(value)
             } else {
 
-                // TODO: No need for any of this. Just map value -> color directly
-
                 const [ min, max ] = attributeRangeLUT[ attribute ]
-                const interpolant = (value - min) / (max - min)
-                const str = interpolant.toString()
-                return stringToRGBString(str)
-            }
+                const alpha = (value - min) / (max - min)
 
+                const index = Object.keys(attributeRangeLUT).indexOf(attribute)
+                const appleCrayonName = appleCrayonNames[ index ]
+                return appleCrayonRGBA(appleCrayonName, alpha)
+            }
 
         }
     };
