@@ -153,13 +153,14 @@ const sampleInfo =
                 const [ min, max ] = attributeRangeLUT[ attribute ]
                 const alpha = (value - min) / (max - min)
 
+                // 20 distinct colors
                 const [ r, g, b ] = yet_another_palette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
                 return `rgba(${r},${g},${b},${alpha})`
 
                 // apple crayon
-                const index = Object.keys(attributeRangeLUT).indexOf(attribute)
-                const appleCrayonName = appleCrayonNames[ index ]
-                return appleCrayonRGBA(appleCrayonName, alpha)
+                // const index = Object.keys(attributeRangeLUT).indexOf(attribute)
+                // const appleCrayonName = appleCrayonNames[ index ]
+                // return appleCrayonRGBA(appleCrayonName, alpha)
             }
 
         }
