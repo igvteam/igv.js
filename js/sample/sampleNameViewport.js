@@ -145,18 +145,30 @@ class SampleNameViewport {
     }
 
     addMouseHandlers() {
-        this.addViewportContextMenuHandler(this.viewport)
+        this.addViewportMouseHandlers(this.viewport)
     }
 
     removeMouseHandlers() {
-        this.removeViewportContextMenuHandler(this.viewport)
+        this.removeViewportMouseHandlers(this.viewport)
     }
 
-    addViewportContextMenuHandler(viewport) {
+    addViewportMouseHandlers(viewport) {
+
         this.boundContextMenuHandler = contextMenuHandler.bind(this)
         viewport.addEventListener('contextmenu', this.boundContextMenuHandler)
 
         function contextMenuHandler(event) {
+
+            event.preventDefault()
+            event.stopPropagation()
+
+            alert('Yo! Some context.')
+        }
+
+        this.boundClickHandler = clickHandler.bind(this)
+        viewport.addEventListener('click', this.boundClickHandler)
+
+        function clickHandler(event) {
 
             event.preventDefault()
             event.stopPropagation()
@@ -179,8 +191,9 @@ class SampleNameViewport {
 
     }
 
-    removeViewportContextMenuHandler(viewport) {
+    removeViewportMouseHandlers(viewport) {
         viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
+        viewport.removeEventListener('click', this.boundClickHandler)
     }
 
     dispose() {
