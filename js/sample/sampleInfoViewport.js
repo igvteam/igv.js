@@ -104,9 +104,6 @@ class SampleInfoViewport {
             for (const name of samples.names) {
 
                 if (y > viewportHeight) {
-                    // for (const key of Object.keys(this.hitList)) {
-                    //     console.log(`${ key }`)
-                    // }
                     break
                 }
 
@@ -129,7 +126,8 @@ class SampleInfoViewport {
                                 context.fillRect(x, yy, w, hh)
 
                                 const key = `${Math.floor(x)}%${Math.floor(yy)}%${Math.ceil(w)}%${Math.ceil(hh)}`
-                                this.hitList[ key ] = `${attribute}:${value}`
+                                const str = attribute.split('_').join(' ')
+                                this.hitList[ key ] = `${str} ${value}`
                             }
                             x += w
                         }
