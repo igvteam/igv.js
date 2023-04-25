@@ -12,6 +12,8 @@ const fontConfigureTemplate =
         fillStyle: 'black'
     }
 
+let sortDirection = 1
+
 class SampleNameViewport {
 
     constructor(trackView, column, unused, width) {
@@ -162,7 +164,19 @@ class SampleNameViewport {
             event.preventDefault()
             event.stopPropagation()
 
-            alert('Yo! Some context.')
+            const menuItems =
+                [
+                    {
+                        label: 'Sort by Sample Key',
+                        click: () => {
+                            this.trackView.track.sampleKeys.sort((a, b) => sortDirection * a.localeCompare(b))
+                            this.trackView.repaintViews()
+                            sortDirection = -1 * sortDirection
+                        }
+                    }
+                ]
+
+            this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
         }
 
         this.boundClickHandler = clickHandler.bind(this)
