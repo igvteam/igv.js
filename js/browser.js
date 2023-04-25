@@ -64,8 +64,6 @@ const column_multi_locus_shim_width = 2 + 1 + 2
 
 const defaultSampleNameViewportWidth = 200
 const defaultSampleInfoViewportWidth = 128
-const defaultSampleInfoAttributeWidth = 128 / 8
-
 class Browser {
 
     constructor(config, parentDiv) {
@@ -2135,6 +2133,6 @@ async function searchWebService(browser, locus, searchConfig) {
     return {result: result, locusSearchString: locus}
 }
 
-export {searchWebService,defaultSampleInfoAttributeWidth,defaultSampleInfoViewportWidth}
+export {searchWebService,defaultSampleInfoViewportWidth}
 export default Browser
 
