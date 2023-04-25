@@ -1,30 +1,13 @@
 import {igvxhr} from '../../node_modules/igv-utils/src/index.js'
 import SampleInfoViewport from "./sampleInfoViewport.js";
 import {appleCrayonRGBA} from "../util/colorPalletes.js";
+import { appleCrayonNames, yet_another_palette } from './sampleInfoPaletteLibrary.js'
 
 let attributes
 let attributeRangeLUT
 let copyNumberDictionary = {}
 let sampleDictionary = {}
 
-const appleCrayonLUT =
-    {
-        maraschino: "#ff2101",
-        tangerine: "#ff8802",
-        lemon: "#fffa03",
-        lime: "#83f902",
-        spring: "#05f802",
-        sea_foam: "#03f987",
-        turquoise: "#00fdff",
-        aqua: "#008cff",
-        blueberry: "#002eff",
-        grape: "#8931ff",
-        magenta: "#ff39ff",
-        strawberry: "#ff2987",
-
-    };
-
-const appleCrayonNames = Object.keys(appleCrayonLUT)
 const sampleInfo =
     {
         loadSampleInfoFile: async (browser, path) => {
@@ -155,7 +138,7 @@ const sampleInfo =
             for (let key of Object.keys(attributeRangeLUT)) {
                 const values = attributeRangeLUT[ key ]
                 if (true === values.some(isString) && true === values.some(isNumber)) {
-                    console.log(`${ values.join('%')}`)
+                    // console.log(`${ values.join('%')}`)
                     attributeRangeLUT[ key ] = values.filter(value => typeof value === 'string')
                 }
             }
@@ -170,6 +153,10 @@ const sampleInfo =
                 const [ min, max ] = attributeRangeLUT[ attribute ]
                 const alpha = (value - min) / (max - min)
 
+                const [ r, g, b ] = yet_another_palette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
+                return `rgba(${r},${g},${b},${alpha})`
+
+                // apple crayon
                 const index = Object.keys(attributeRangeLUT).indexOf(attribute)
                 const appleCrayonName = appleCrayonNames[ index ]
                 return appleCrayonRGBA(appleCrayonName, alpha)
