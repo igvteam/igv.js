@@ -147,17 +147,9 @@ class SampleNameViewport {
     }
 
     addMouseHandlers() {
-        this.addViewportMouseHandlers(this.viewport)
-    }
-
-    removeMouseHandlers() {
-        this.removeViewportMouseHandlers(this.viewport)
-    }
-
-    addViewportMouseHandlers(viewport) {
 
         this.boundContextMenuHandler = contextMenuHandler.bind(this)
-        viewport.addEventListener('contextmenu', this.boundContextMenuHandler)
+        this.viewport.addEventListener('contextmenu', this.boundContextMenuHandler)
 
         function contextMenuHandler(event) {
 
@@ -180,7 +172,7 @@ class SampleNameViewport {
         }
 
         this.boundClickHandler = clickHandler.bind(this)
-        viewport.addEventListener('click', this.boundClickHandler)
+        this.viewport.addEventListener('click', this.boundClickHandler)
 
         function clickHandler(event) {
 
@@ -202,14 +194,12 @@ class SampleNameViewport {
 
             this.browser.inputDialog.present(config, event)
         }
-
     }
 
-    removeViewportMouseHandlers(viewport) {
-        viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
-        viewport.removeEventListener('click', this.boundClickHandler)
+    removeMouseHandlers() {
+        this.viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
+        this.viewport.removeEventListener('click', this.boundClickHandler)
     }
-
     dispose() {
         this.removeMouseHandlers()
         this.viewport.remove()
