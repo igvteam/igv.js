@@ -112,12 +112,12 @@ class SampleInfoViewport {
                     if (copyNumberDictionary && copyNumberDictionary[ name ]) {
 
                         const attributes = copyNumberDictionary[ name ]
-                        const entries = Object.entries(attributes)
+                        const attributeEntries = Object.entries(attributes)
 
-                        const w = Math.floor(defaultSampleInfoViewportWidth/entries.length)
+                        const w = Math.floor(defaultSampleInfoViewportWidth/attributeEntries.length)
                         let x = 0;
-                        for (const entry of entries) {
-                            const [ attribute, value ] = entry
+                        for (const attributeEntry of attributeEntries) {
+                            const [ attribute, value ] = attributeEntry
                             if ('NA' !== value) {
                                 context.fillStyle = sampleInfo.getAttributeColor(attribute, value)
 
@@ -125,9 +125,9 @@ class SampleInfoViewport {
                                 const hh = tileHeight-(2*shim)
                                 context.fillRect(x, yy, w, hh)
 
-                                const key = `${Math.floor(x)}%${Math.floor(yy)}%${Math.ceil(w)}%${Math.ceil(hh)}`
+                                const key = `${Math.floor(x)}#${Math.floor(yy)}#${Math.ceil(w)}#${Math.ceil(hh)}`
                                 const str = attribute.split('_').join(' ')
-                                this.hitList[ key ] = `${str} ${value}`
+                                this.hitList[ key ] = `${str}#${value}`
                             }
                             x += w
                         }
@@ -144,13 +144,40 @@ class SampleInfoViewport {
     }
 
     addMouseHandlers() {
-        this.addViewportMouseHandler(this.viewport)
-    }
 
-    addViewportMouseHandler(viewport) {
+        this.boundMouseClickHandler = mouseClick.bind(this)
+        this.viewport.addEventListener('click', this.boundMouseClickHandler)
+
+        function mouseClick(event) {
+            event.stopPropagation()
+            const { x } = DOMUtils.translateMouseCoordinates(event, this.viewport)
+
+            if (this.hitList) {
+
+                let hit = undefined
+                for (const entry of Object.entries(this.hitList)) {
+
+                    const [ bbox, value ] = entry
+
+                    const [xx, _ignore, width, __ignore ] = bbox.split('#').map(str => parseInt(str, 10))
+                    if (x < xx || x > xx+width) {
+                        // do nuthin
+                    } else {
+                        [ hit ] = value.split('#')
+                        break
+                    }
+
+                } // for (Object.values(this.hitList))
+
+                if (hit) {
+                    console.log(`attribute ${ hit }`)
+                }
+
+            } // if (this.hitList)
+        }
 
         this.boundMouseMoveHandler = mouseMove.bind(this)
-        viewport.addEventListener('mousemove', this.boundMouseMoveHandler)
+        this.viewport.addEventListener('mousemove', this.boundMouseMoveHandler)
 
         function mouseMove(event) {
             event.stopPropagation()
@@ -159,28 +186,23 @@ class SampleInfoViewport {
             if (this.hitList) {
 
                 for (const [ bbox, value ] of Object.entries(this.hitList)) {
-                    const [xx, yy, width, height ] = bbox.split('%').map(str => parseInt(str, 10))
+                    const [xx, yy, width, height ] = bbox.split('#').map(str => parseInt(str, 10))
                     if (x < xx || x > xx+width || y < yy || y > yy+height) {
                         continue
                     }
 
                     // console.log(`${ Date.now() } ${ value }`)
-                    viewport.setAttribute('title', value)
+                    this.viewport.setAttribute('title', value)
                 }
 
             }
         }
 
     }
-
     removeMouseHandlers() {
-        this.removeViewportMouseHandler(this.viewport)
+        this.viewport.removeEventListener('mousemove', this.boundMouseClickHandler)
+        this.viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
-
-    removeViewportMouseHandler(viewport) {
-        viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
-    }
-
     show() {
         this.viewport.style.display = 'block'
     }
