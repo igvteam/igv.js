@@ -491,7 +491,7 @@ function monitorTrackDrag(track) {
 
     function onDragEnd() {
         if (track.trackView && track.displayMode !== "SQUISHED") {
-            track.trackView.repaintViews()      // TODO -- refine this to the viewport that was dragged after DOM refactor
+            track.trackView.updateViews()      // TODO -- refine this to the viewport that was dragged after DOM refactor
         }
     }
 
