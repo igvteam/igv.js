@@ -55,7 +55,7 @@ class TextFeatureSource {
 
         const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "biginteract", "biggenepred", "bignarrowpeak", "tdf"])
 
-        this.queryable = config.queryable === true   // False by default, unless explicitly set
+        this.queryable = config.indexURL || config.queryable === true   // False by default, unless explicitly set
         if (config.reader) {
             // Explicit reader implementation
             this.reader = config.reader
@@ -155,6 +155,7 @@ class TextFeatureSource {
         //   * view is "whole genome" but no features are loaded
         //   * cache is disabled
         //   * cache does not contain requested range
+       // const containsRange = this.featureCache.containsRange(new GenomicInterval(queryChr, start, end))
         if ((isWholeGenome && !this.wgFeatures && this.supportsWholeGenome()) ||
             this.config.disableCache ||
             !this.featureCache ||
