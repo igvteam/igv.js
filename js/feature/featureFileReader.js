@@ -50,7 +50,8 @@ class FeatureFileReader {
         this.config = config || {}
         this.genome = genome
         this.indexURL = config.indexURL
-        this.indexed = config.indexed
+        this.indexed = config.indexed || this.indexURL !== undefined
+        this.queryable = this.indexed
 
         if (FileUtils.isFile(this.config.url)) {
             this.filename = this.config.url.name
