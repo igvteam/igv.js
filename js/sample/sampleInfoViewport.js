@@ -129,21 +129,28 @@ class SampleInfoViewport {
 
                             const key = `${Math.floor(x)}#${Math.floor(yy)}#${Math.ceil(w)}#${Math.ceil(hh)}`
                             this.hitList[ key ] = `${attribute}#${value}`
-                            x += w
-                        }
-                    }
 
-                }
+                            x += w
+                        } // for (attributeEntries)
+
+                    } // if (copyNumberDictionary && copyNumberDictionary[ name ])
+
+                } // if (y + tileHeight > 0)
 
                 y += tileHeight
-            }
+
+            } // for (sample.names)
 
         }
-
 
     }
 
     addMouseHandlers() {
+        this.addMouseClickHandler()
+        this.addMouseMoveHandler()
+    }
+
+    addMouseClickHandler() {
 
         this.boundMouseClickHandler = mouseClick.bind(this)
         this.viewport.addEventListener('click', this.boundMouseClickHandler)
@@ -152,9 +159,9 @@ class SampleInfoViewport {
 
             event.stopPropagation()
 
-            const { x } = DOMUtils.translateMouseCoordinates(event, this.viewport)
-
             if (this.hitList) {
+
+                const { x } = DOMUtils.translateMouseCoordinates(event, this.viewport)
 
                 let hit = undefined
                 for (const entry of Object.entries(this.hitList)) {
@@ -187,21 +194,23 @@ class SampleInfoViewport {
 
                     this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
 
-                } // if (hit)
+                }
 
-
-            } // if (this.hitList)
-
+            }
         }
+    }
+
+    addMouseMoveHandler() {
 
         this.boundMouseMoveHandler = mouseMove.bind(this)
         this.viewport.addEventListener('mousemove', this.boundMouseMoveHandler)
 
         function mouseMove(event) {
             event.stopPropagation()
-            let { x, y } = DOMUtils.translateMouseCoordinates(event, this.viewport)
 
             if (this.hitList) {
+
+                const { x, y } = DOMUtils.translateMouseCoordinates(event, this.viewport)
 
                 for (const [ bbox, value ] of Object.entries(this.hitList)) {
                     const [xx, yy, width, height ] = bbox.split('#').map(str => parseInt(str, 10))
@@ -209,14 +218,12 @@ class SampleInfoViewport {
                         continue
                     }
 
-                    // console.log(`${ Date.now() } ${ value }`)
                     this.viewport.setAttribute('title', value)
                 }
-
             }
         }
-
     }
+
     removeMouseHandlers() {
         this.viewport.removeEventListener('mousemove', this.boundMouseClickHandler)
         this.viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
