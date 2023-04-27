@@ -1,6 +1,6 @@
 import {igvxhr} from '../../node_modules/igv-utils/src/index.js'
 import SampleInfoViewport from "./sampleInfoViewport.js";
-import {appleCrayonRGBA} from "../util/colorPalletes.js";
+import {appleCrayonRGB, appleCrayonRGBA} from "../util/colorPalletes.js";
 import { appleCrayonNames, yet_another_palette } from './sampleInfoPaletteLibrary.js'
 
 let attributes
@@ -84,11 +84,10 @@ const sampleInfo =
 
             } // for (lines)
 
-            for (const [ key, value ] of Object.entries(sampleDictionary)) {
-                sampleDictionary[ key ] = toNumericalRepresentation(value)
+            for (const [ key, record ] of Object.entries(sampleDictionary)) {
+                sampleDictionary[ key ] = toNumericalRepresentation(record)
             }
 
-            // copyNumberDictionary = {}
             for (const line of copyNumber) {
                 const [ a, b ] = line.split('\t')
                 copyNumberDictionary[ a ] = Object.assign({}, sampleDictionary[ b ])
@@ -100,6 +99,7 @@ const sampleInfo =
         },
 
         createAttributeRangeLUT: () => {
+
             attributeRangeLUT = {}
             for (const value of Object.values(sampleDictionary)) {
 
@@ -111,46 +111,55 @@ const sampleInfo =
                         console.log('whoops')
                     }
 
-                    if (typeof item === 'number' || (item.length > 0 && 'NA' !== item)) {
+                    if (undefined === attributeRangeLUT[ attribute ]) {
+                        attributeRangeLUT[ attribute ] = []
+                    }
 
-                        if (undefined === attributeRangeLUT[ attribute ]) {
-                            attributeRangeLUT[ attribute ] = []
-                        }
+                    attributeRangeLUT[ attribute ].push(item)
 
-                        attributeRangeLUT[ attribute ].push(item)
-
-                    } // if (item.length > 0 && 'NA' !== item)
-
-                } // for (labels)
+                } // for (attributes)
 
             } // for (Object.values(sampleDictionary))
 
-            // remove duplicates
-            for (const key of Object.keys(attributeRangeLUT)) {
-                const list = Array.from( new Set( attributeRangeLUT[ key ].slice()) )
-                attributeRangeLUT[ key ] = sortArrayAndMinMax(list)
-            }
 
             // clean up oddball cases.
             const isNumber = element => typeof element === 'number'
             const isString = element => typeof element === 'string'
 
-            for (let key of Object.keys(attributeRangeLUT)) {
-                const values = attributeRangeLUT[ key ]
-                if (true === values.some(isString) && true === values.some(isNumber)) {
-                    // console.log(`${ values.join('%')}`)
-                    attributeRangeLUT[ key ] = values.filter(value => typeof value === 'string')
+            // remove duplicates
+            for (const key of Object.keys(attributeRangeLUT)) {
+                const list = Array.from( new Set( attributeRangeLUT[ key ].slice()) )
+
+                if (true === list.some(isString) && true === list.some(isNumber)) {
+                    attributeRangeLUT[ key ] = list.filter(item => !isString(item))
+                } else {
+                    attributeRangeLUT[ key ] = list
                 }
+
+                if (!attributeRangeLUT[ key ].some(isString)) {
+                    const clone = attributeRangeLUT[ key ].slice()
+                    attributeRangeLUT[ key ] = [ Math.min(...clone), Math.max(...clone) ]
+                }
+
             }
+
+            console.log('done')
         },
 
         getAttributeColor: (attribute, value) => {
 
-            if (typeof value === "string") {
+            if ('NA' === value) {
+                return appleCrayonRGB('snow')
+            } else if (typeof value === "string") {
                 return stringToRGBString(value)
             } else {
 
                 const [ min, max ] = attributeRangeLUT[ attribute ]
+
+                if (0 === min && 0 === max) {
+                    return appleCrayonRGB('snow')
+                }
+
                 const alpha = (value - min) / (max - min)
 
                 // 20 distinct colors
@@ -163,6 +172,24 @@ const sampleInfo =
                 // return appleCrayonRGBA(appleCrayonName, alpha)
             }
 
+        },
+
+        sortSampleKeysByAttribute : (sampleKeys, attribute, sortDirection) => {
+
+            sampleKeys.sort((a, b) => {
+
+                const aa = copyNumberDictionary[ a ][ attribute ]
+                const bb = copyNumberDictionary[ b ][ attribute ]
+
+                if (typeof aa === 'string' && typeof bb === 'string') {
+                    return aa.localeCompare(bb)
+                }
+
+                if (typeof aa === 'number' && typeof bb === 'number') {
+                    return (aa - bb)
+                }
+
+            })
         }
     };
 
@@ -178,18 +205,6 @@ function toNumericalRepresentation(obj) {
     }
 
     return result
-}
-
-function sortArrayAndMinMax(array) {
-    let result
-    if (typeof array[0] === "number") {
-        result = array.sort((a, b) => a - b)
-        return [ result[ 0 ], result[ result.length - 1] ]
-    } else if (typeof array[0] === "string") {
-        return array.sort((a, b) => a.localeCompare(b))
-    }
-
-
 }
 
 function stringToRGBString(str) {
