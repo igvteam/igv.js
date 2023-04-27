@@ -142,8 +142,7 @@ const sampleInfo =
                 }
 
             }
-
-            console.log('done')
+            
         },
 
         getAttributeColor: (attribute, value) => {
