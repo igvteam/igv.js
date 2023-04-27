@@ -3,7 +3,7 @@
 // supports 'GET' only
 // support range header, responseType
 
-import {XMLHttpRequestLocal} from './XMLHttpRequestLocal.js'
+import {XMLHttpRequestLocal} from './XMLHttpRequestLocal.js';
 import {XMLHttpRequest} from './w3XMLHttpRequest.js'
 
 /**
@@ -13,48 +13,56 @@ import {XMLHttpRequest} from './w3XMLHttpRequest.js'
 class XMLHttpRequestMock {
 
     constructor() {
-        this.local = new XMLHttpRequestLocal()
-        this.remote = new XMLHttpRequest()
-        this.status = undefined
-        this.onload = undefined
-        this.onerror = undefined
-        this.ontimeout = undefined
-        this.onabort = undefined
-        this.response = undefined
-        this.headers = new Map()
+        this.local = new XMLHttpRequestLocal();
+        this.remote = new XMLHttpRequest();
+        this.status = undefined;
+        this.onload = undefined;
+        this.onerror = undefined;
+        this.ontimeout = undefined;
+        this.onabort = undefined;
+        this.response = undefined;
+        this.headers = new Map();
     }
 
     open(method, url) {
         if (url.startsWith("http://") || url.startsWith("https://")) {
-            this.impl = new XMLHttpRequest()
+            this.impl = new XMLHttpRequest();
         } else {
-            this.impl = new XMLHttpRequestLocal()
+            this.impl = new XMLHttpRequestLocal();
         }
-        this.impl.open(method, url)
+        this.impl.open(method, url);
     }
 
     setRequestHeader(key, value) {
-        this.impl.setRequestHeader(key, value)
+        this.impl.setRequestHeader(key, value);
     }
 
     send() {
-        const self = this
-        this.impl.responseType = this.responseType
-        this.impl.onerror = this.onerror
-        this.impl.ontimeout = this.ontimeout
-        this.impl.onabort = this.onabort
+        const self = this;
+        this.impl.responseType = this.responseType;
+        this.impl.onerror = this.onerror;
+        this.impl.ontimeout = this.ontimeout;
+        this.impl.onabort = this.onabort;
         if (typeof this.onload === 'function') {
             this.impl.onload = function () {
-                self.status = self.impl.status
-                self.response = self.impl.response
-                self.onload()
+                self.status = self.impl.status;
+                self.response = self.impl.response;
+                self.onload();
             }
         }
-        this.impl.send()
+        this.impl.send();
     }
 
     abort() {
-        this.impl.abort()
+        this.impl.abort();
+    }
+
+    getAllReponseHeaders() {
+        return this.impl.getAllResponseHeaders()
+    }
+
+    getResponseHeader(name) {
+        return this.impl.getResponseHeader(name)
     }
 }
 
