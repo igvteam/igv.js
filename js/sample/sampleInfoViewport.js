@@ -180,7 +180,7 @@ class SampleInfoViewport {
                                 click: () => {
                                     this.trackView.track.sampleKeys = sampleInfo.getSortedSampleKeysByAttribute(this.trackView.track.sampleKeys, hit, sortDirection)
                                     this.trackView.repaintViews()
-                                    sortDirection = -1 * sortDirection
+                                    sortDirection *= -1
                                 }
                             }
                         ]
