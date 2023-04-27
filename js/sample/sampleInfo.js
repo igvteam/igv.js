@@ -142,7 +142,7 @@ const sampleInfo =
                 }
 
             }
-            
+
         },
 
         getAttributeColor: (attribute, value) => {
@@ -173,7 +173,7 @@ const sampleInfo =
 
         },
 
-        sortSampleKeysByAttribute : (sampleKeys, attribute, sortDirection) => {
+        getSortedSampleKeysByAttribute : (sampleKeys, attribute, sortDirection) => {
 
             const numbers = sampleKeys.filter(key => {
                 const value = copyNumberDictionary[ key ][ attribute ]
