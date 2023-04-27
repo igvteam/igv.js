@@ -155,11 +155,14 @@ const sampleInfo =
 
                 const [ min, max ] = attributeRangeLUT[ attribute ]
 
+                // a hack required to handle attributes that should have string values
+                // but the actual data has 0 as well.
                 if (0 === min && 0 === max) {
                     return appleCrayonRGB('snow')
                 }
 
-                const alpha = (value - min) / (max - min)
+                const lowerAlphaThreshold = 2e-1
+                const alpha = Math.max((value - min) / (max - min), lowerAlphaThreshold)
 
                 // 20 distinct colors
                 const [ r, g, b ] = yet_another_palette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
