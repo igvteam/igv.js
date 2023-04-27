@@ -1,8 +1,9 @@
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import {defaultSampleInfoViewportWidth} from '../browser.js'
 import {copyNumberDictionary, sampleInfo} from './sampleInfo.js'
+
+let sortDirection = 1
 
 class SampleInfoViewport {
 
@@ -117,18 +118,17 @@ class SampleInfoViewport {
                         const w = Math.floor(defaultSampleInfoViewportWidth/attributeEntries.length)
                         let x = 0;
                         for (const attributeEntry of attributeEntries) {
+
                             const [ attribute, value ] = attributeEntry
-                            if ('NA' !== value) {
-                                context.fillStyle = sampleInfo.getAttributeColor(attribute, value)
 
-                                const yy = y+shim
-                                const hh = tileHeight-(2*shim)
-                                context.fillRect(x, yy, w, hh)
+                            context.fillStyle = sampleInfo.getAttributeColor(attribute, value)
 
-                                const key = `${Math.floor(x)}#${Math.floor(yy)}#${Math.ceil(w)}#${Math.ceil(hh)}`
-                                const str = attribute.split('_').join(' ')
-                                this.hitList[ key ] = `${str}#${value}`
-                            }
+                            const yy = y+shim
+                            const hh = tileHeight-(2*shim)
+                            context.fillRect(x, yy, w, hh)
+
+                            const key = `${Math.floor(x)}#${Math.floor(yy)}#${Math.ceil(w)}#${Math.ceil(hh)}`
+                            this.hitList[ key ] = `${attribute}#${value}`
                             x += w
                         }
                     }
@@ -149,7 +149,9 @@ class SampleInfoViewport {
         this.viewport.addEventListener('click', this.boundMouseClickHandler)
 
         function mouseClick(event) {
+
             event.stopPropagation()
+
             const { x } = DOMUtils.translateMouseCoordinates(event, this.viewport)
 
             if (this.hitList) {
@@ -170,10 +172,26 @@ class SampleInfoViewport {
                 } // for (Object.values(this.hitList))
 
                 if (hit) {
-                    console.log(`attribute ${ hit }`)
-                }
+
+                    const menuItems =
+                        [
+                            {
+                                label: `Sort by ${ hit }`,
+                                click: () => {
+                                    sampleInfo.sortSampleKeysByAttribute(this.trackView.track.sampleKeys, hit, sortDirection)
+                                    this.trackView.repaintViews()
+                                    sortDirection = -1 * sortDirection
+                                }
+                            }
+                        ]
+
+                    this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
+
+                } // if (hit)
+
 
             } // if (this.hitList)
+
         }
 
         this.boundMouseMoveHandler = mouseMove.bind(this)
