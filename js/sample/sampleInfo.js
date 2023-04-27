@@ -176,20 +176,36 @@ const sampleInfo =
 
         sortSampleKeysByAttribute : (sampleKeys, attribute, sortDirection) => {
 
-            sampleKeys.sort((a, b) => {
+            const numbers = sampleKeys.filter(key => {
+                const value = copyNumberDictionary[ key ][ attribute ]
+                return typeof value === 'number'
+            })
+
+            const strings = sampleKeys.filter(key => {
+                const value = copyNumberDictionary[ key ][ attribute ]
+                return typeof value === 'string'
+            })
+
+            const compare = (a, b) => {
 
                 const aa = copyNumberDictionary[ a ][ attribute ]
                 const bb = copyNumberDictionary[ b ][ attribute ]
 
                 if (typeof aa === 'string' && typeof bb === 'string') {
-                    return aa.localeCompare(bb)
+                    return sortDirection * aa.localeCompare(bb)
                 }
 
                 if (typeof aa === 'number' && typeof bb === 'number') {
-                    return (aa - bb)
+                    return sortDirection * (aa - bb)
                 }
 
-            })
+            }
+
+            numbers.sort(compare)
+            strings.sort(compare)
+
+            return -1 === sortDirection ? [ ...numbers, ...strings ] : [ ...strings, ...numbers ]
+
         }
     };
 
