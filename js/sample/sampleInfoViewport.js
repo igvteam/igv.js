@@ -178,7 +178,7 @@ class SampleInfoViewport {
                             {
                                 label: `Sort by ${ hit }`,
                                 click: () => {
-                                    this.trackView.track.sampleKeys = sampleInfo.sortSampleKeysByAttribute(this.trackView.track.sampleKeys, hit, sortDirection)
+                                    this.trackView.track.sampleKeys = sampleInfo.getSortedSampleKeysByAttribute(this.trackView.track.sampleKeys, hit, sortDirection)
                                     this.trackView.repaintViews()
                                     sortDirection = -1 * sortDirection
                                 }
