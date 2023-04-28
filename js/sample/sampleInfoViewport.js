@@ -210,15 +210,23 @@ class SampleInfoViewport {
 
             if (this.hitList) {
 
+                const entries = Object.entries(this.hitList)
+
                 const { x, y } = DOMUtils.translateMouseCoordinates(event, this.viewport)
 
-                for (const [ bbox, value ] of Object.entries(this.hitList)) {
+                this.viewport.setAttribute('title', '')
+
+                for (const [ bbox, value ] of entries) {
                     const [xx, yy, width, height ] = bbox.split('#').map(str => parseInt(str, 10))
                     if (x < xx || x > xx+width || y < yy || y > yy+height) {
-                        continue
+                        // do nothing
+                    } else {
+                        const [ a, b ] = value.split('#')
+                        this.viewport.setAttribute('title', `${ a.split('_') } ${ b }`)
+                        break
                     }
 
-                    this.viewport.setAttribute('title', value)
+
                 }
             }
         }

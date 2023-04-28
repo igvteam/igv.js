@@ -1,6 +1,6 @@
 import {igvxhr} from '../../node_modules/igv-utils/src/index.js'
 import SampleInfoViewport from "./sampleInfoViewport.js";
-import {appleCrayonRGB, appleCrayonRGBA} from "../util/colorPalletes.js";
+import {appleCrayonRGB, appleCrayonRGBA, randomRGB} from "../util/colorPalletes.js";
 import { appleCrayonNames, yet_another_palette } from './sampleInfoPaletteLibrary.js'
 
 let attributes
@@ -146,6 +146,10 @@ const sampleInfo =
         },
 
         getAttributeColor: (attribute, value) => {
+
+            // Use for diagnostic rendering
+            return randomRGB(180, 240)
+
 
             if ('NA' === value) {
                 return appleCrayonRGB('snow')
