@@ -148,9 +148,8 @@ const sampleInfo =
         getAttributeColor: (attribute, value) => {
 
             // Use for diagnostic rendering
-            return randomRGB(180, 240)
-
-
+            // return randomRGB(180, 240)
+            
             if ('NA' === value) {
                 return appleCrayonRGB('snow')
             } else if (typeof value === "string") {
