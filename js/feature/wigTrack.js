@@ -65,10 +65,13 @@ class WigTrack extends TrackBase {
             delete config.featureSource
         } else if ("bigwig" === format) {
             this.featureSource = new BWSource(config, this.browser.genome)
+            this.resolutionAware = true
         } else if ("tdf" === format) {
             this.featureSource = new TDFSource(config, this.browser.genome)
+            this.resolutionAware = true
         } else {
             this.featureSource = FeatureSource(config, this.browser.genome)
+            this.resolutionAware = false
         }
 
 
