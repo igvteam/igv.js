@@ -34,21 +34,14 @@ fixedStep chrom=chr1 start=10006 step=1 span=1
 0.115232
 0.115232
 0.116833
-#bedGraph section chr1:10040-10051
-chr1	10040	10046	0.120034
-chr1	10046	10051	0.121634
 fixedStep chrom=chr1 start=10052 step=1 span=1
 0.123235
-#bedGraph section chr1:10052-10058
-chr1	10052	10058	0.124835
 fixedStep chrom=chr1 start=10059 step=1 span=1
 0.126436
 0.129636
 0.129636
 0.129636
 0.129636
-#bedGraph section chr1:10063-10070
-chr1	10063	10070	0.131237
 fixedStep chrom=chr1 start=10071 step=1 span=1
 0.134438
 0.136038
