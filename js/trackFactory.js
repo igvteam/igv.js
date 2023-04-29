@@ -42,16 +42,13 @@ const trackFunctions =
 
 
 /**
- * Add a track constructor  the the factory lookup table.
- *
- * @param type
- * @param track
+ * Return a track of the given type, passing configuration and a point to the IGV "Browser" object to its constructor function*
+ * @param type -- track type (string)
+ * @param config -- track configuration object
+ * @param browser -- the IGV "Browser" object
+ * @returns {IdeogramTrack|undefined}
  */
-const addTrackCreatorFunction = function (type, track) {
-    trackFunctions.set(type, track)
-}
-
-const getTrack = function (type, config, browser) {
+function getTrack (type, config, browser) {
 
     let trackKey
     switch (type) {
@@ -79,10 +76,25 @@ const getTrack = function (type, config, browser) {
         undefined
 }
 
-export default {
-    tracks: trackFunctions,
-    addTrack: addTrackCreatorFunction,
+/**
+ * Add a track creator function to the factory lookup table.  Legacy function, superceded by registerTrackClass.
+ *
+ * @param type
+ * @param track
+ */
+function registerTrackClass(type, trackClass) {
+    trackFunctions.set(type, (config, browser) => new trackClass(config, browser))
+}
+
+
+
+function registerTrackCreatorFunction (type, track) {
+    trackFunctions.set(type, track)
+}
+
+export {
+    getTrack,
     trackFunctions,
-    addTrackCreatorFunction,
-    getTrack
+    registerTrackClass,
+    registerTrackCreatorFunction
 }
