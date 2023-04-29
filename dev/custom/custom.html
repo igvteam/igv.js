@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dev - alignment - bam</title>
+</head>
+
+<body>
+
+<button id="log-state">Log Session</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    class CustomTrack extends igv.TrackBase {
+
+        constructor(config, browser) {
+            super(config, browser)
+            this.resolutionAware = true
+        }
+
+        async getFeatures(chr, start, end, bpPerPixel) {
+
+            const binSize = bpPerPixel * 10
+            const features = []
+            for(let s = Math.max(0, start); s <= end; s += binSize) {
+                features.push({
+                    chr: chr,
+                    start: s,
+                    end: s + binSize,
+                    value: Math.random()
+                })
+            }
+            return features
+        }
+
+        draw(options) {
+
+            const features = options.features
+            const ctx = options.context
+            const bpPerPixel = options.bpPerPixel
+            const bpStart = options.bpStart
+            const pixelWidth = options.pixelWidth
+            const pixelHeight = options.pixelHeight
+
+            ctx.fillStyle = this.color || 'blue'
+            for (let f of features) {
+
+                const x = Math.floor((f.start - bpStart) / bpPerPixel)
+                const rectEnd = Math.ceil((f.end - bpStart) / bpPerPixel)
+                const width = Math.max(1, rectEnd - x)
+
+                const height = f.value * pixelHeight    // For this track f.value is in the rang 0-1
+                const y = pixelHeight - height
+
+                ctx.fillRect(x, y, width, height)
+            }
+
+        }
+
+
+    }
+
+    igv.registerTrackClass("custom", CustomTrack)
+
+    const config = {
+        genome: "hg19",
+        tracks: [
+            {
+                type: "custom",
+                height: 50
+            }
+
+        ]
+    }
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+        .then(browser => {
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+        })
+
+
+</script>
+
+</body>
+
+</html>
