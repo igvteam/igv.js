@@ -7,7 +7,7 @@ import Alert from './ui/alert.js'
 import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width} from "./trackView.js"
 import C2S from "./canvas2svg.js"
-import TrackFactory from "./trackFactory.js"
+import {getTrack} from "./trackFactory.js"
 import ROISet from "./roi/ROISet.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
@@ -271,10 +271,6 @@ class Browser {
     isMultiLocusMode() {
         return this.referenceFrameList && this.referenceFrameList.length > 1
     };
-
-    addTrackToFactory(name, track) {
-        TrackFactory.addTrack(name, track)
-    }
 
     isMultiLocusWholeGenomeView() {
 
@@ -982,7 +978,7 @@ class Browser {
             }
         }
 
-        const track = TrackFactory.getTrack(type, config, this)
+        const track = getTrack(type, config, this)
         if (undefined === track) {
             this.alert.present(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
         } else {
