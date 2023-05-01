@@ -1,4 +1,4 @@
-import {BGZip} from "../../../../igv-utils/src/index.js"
+import {BGZip} from "../../../node_modules/igv-utils/src/index.js"
 import IGVRemoteFile from "./io/igvRemoteFile.js"
 import BrowserLocalFile from './io/browserLocalFile.js';
 import ThrottledFile from './io/throttledFile.js';
