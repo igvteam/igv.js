@@ -385,6 +385,10 @@ class HicFile {
                         }
                     }
                 }
+
+                if(this.percentile95 === undefined && block.records.length > 10) {
+                    this.percentile95 = computePercentile(block.records, 95)
+                }
             }
         }
 
@@ -913,6 +917,17 @@ class BlockCache {
     has(resolution, key) {
         return this.resolution === resolution && this.map.has(key);
     }
+}
+
+function computePercentile(records, p) {
+    const counts = records.map(r => r.counts)
+    counts.sort(function (a, b) {
+        return a - b;
+    })
+    const idx = Math.floor((p / 100) * records.length);
+    return counts[idx];
+
+    // return HICMath.percentile(array, p);
 }
 
 

@@ -51,7 +51,7 @@ class SegTrack extends TrackBase {
                     this.colorTable = new ColorTable(MUT_COLORS)
                     break
                 case "shoebox":
-                    this.colorScale = config.colorScale ? HicColorScale.parse(config.colorScale) : new HicColorScale()
+                    if (config.colorScale) this.sbColorScale =  HicColorScale.parse(config.colorScale)
                     break
                 default:
                     // Color scales for "seg" (copy number) tracks.
@@ -74,7 +74,6 @@ class SegTrack extends TrackBase {
             this.squishedRowHeight = config.squishedRowHeight || 1
             this.displayMode = config.displayMode || "SQUISHED"
             this.visibilityWindow = config.visibilityWindow === undefined ? 1000000 : config.visibilityWindow
-            this.colorScale = config.colorScale ? HicColorScale.parse(config.colorScale) : new HicColorScale()
         } else {
             this.featureSource = FeatureSource(configCopy, this.browser.genome)
         }
@@ -104,13 +103,31 @@ class SegTrack extends TrackBase {
                 "FILL": "Fill"
             }
 
+        if (this.type === 'shoebox' && this.sbColorScale) {
+            menuItems.push('<hr/>')
+            menuItems.push({
+                object: $('<div>Color Threshold</div>'),
+                click: e => {
+                    this.browser.inputDialog.present({
+                        label: 'Color Scale Threshold',
+                        value: this.sbColorScale.threshold,
+                        callback: () => {
+                            const t = Number(this.browser.inputDialog.input.value, 10)
+                            if(t) {
+                                this.sbColorScale.setThreshold(t)
+                                this.trackView.repaintViews()
+                            }
+                        }
+                    })
+                }
+
+            })
+        }
+
         menuItems.push('<hr/>')
         menuItems.push("DisplayMode:")
-
         const displayOptions = this.type === 'seg' || this.type === 'shoebox' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"]
-
         for (let displayMode of displayOptions) {
-
             const checkBox = createCheckbox(lut[displayMode], displayMode === this.displayMode)
             menuItems.push(
                 {
@@ -160,6 +177,11 @@ class SegTrack extends TrackBase {
 
             this.checkForLog(features)
 
+            if (this.type === "shoebox" && !this.sbColorScale) {
+                const threshold = this.featureSource.hicFile.percentile95 || 2000
+                this.sbColorScale = new HicColorScale({threshold, r: 0, g: 0, b: 255})
+            }
+
             // New segments could conceivably add new samples
             this.updateSampleKeys(features)
 
@@ -185,9 +207,6 @@ class SegTrack extends TrackBase {
                     border = 1
             }
             const rowHeight = this.sampleHeight
-
-
-            // this.featureMap = new Map()
 
             for (let segment of features) {
                 segment.pixelRect = undefined   // !important, reset this in case segment is not drawn
@@ -245,7 +264,7 @@ class SegTrack extends TrackBase {
                         x -= 1
                     }
                 } else if ("shoebox" === this.type) {
-                    color = this.colorScale.getColor(f.value)
+                    color = this.sbColorScale.getColor(f.value)
                     let sh = rowHeight
                     if (rowHeight < 0.25) {
                         const f = 0.1 + 2 * Math.abs(f.value)

@@ -9,7 +9,7 @@ const MenuUtils = {
 
     trackMenuItemList: function (trackView) {
 
-        const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp'])
+        const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp', 'shoebox'])
 
         const hasVizWindow = trackView.track.config && trackView.track.config.visibilityWindow !== undefined
 

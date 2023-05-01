@@ -30,3 +30,6 @@ igv.css.map
 /deployShoebox.sh
 /examples/shoebox.html
 /dev/shoebox/shoebox.html
+/dev/shoebox/juicebox-model1.session
+/dev/shoebox/juicebox-model1.json
+/dev/shoebox/juicebox-model2.json
