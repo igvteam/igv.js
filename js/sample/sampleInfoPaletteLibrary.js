@@ -18,7 +18,7 @@ const appleCrayonLUT =
 const appleCrayonNames = Object.keys(appleCrayonLUT)
 
 // https://sashamaps.net/docs/resources/20-colors/
-const yet_another_palette_src =
+const distinctColorsPaletteSrcStrings =
     [
             'rgb(230, 25, 75)',
             'rgb(60, 180, 75)',
@@ -38,11 +38,11 @@ const yet_another_palette_src =
             'rgb(128, 128, 128)',
     ]
 
-const yet_another_palette = yet_another_palette_src.map(str => {
+const distinctColorsPalette = distinctColorsPaletteSrcStrings.map(str => {
         const [ _0, g, _1] = str.split(',')
         const [ _2, r ] = _0.split('(')
         const [ b, _3 ] = _1.split(')')
         return [ r, g, b ]
 })
 
-export { appleCrayonNames, yet_another_palette }
+export { appleCrayonNames, distinctColorsPalette }
