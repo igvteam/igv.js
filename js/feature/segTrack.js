@@ -106,10 +106,10 @@ class SegTrack extends TrackBase {
         if (this.type === 'shoebox' && this.sbColorScale) {
             menuItems.push('<hr/>')
             menuItems.push({
-                object: $('<div>Color Threshold</div>'),
+                object: $('<div>Set color scale threshold</div>'),
                 click: e => {
                     this.browser.inputDialog.present({
-                        label: 'Set color scale threshold',
+                        label: 'Color Scale Threshold',
                         value: this.sbColorScale.threshold,
                         callback: () => {
                             const t = Number(this.browser.inputDialog.input.value, 10)
@@ -118,7 +118,7 @@ class SegTrack extends TrackBase {
                                 this.trackView.repaintViews()
                             }
                         }
-                    })
+                    }, e)
                 }
 
             })
