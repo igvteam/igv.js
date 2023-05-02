@@ -1,7 +1,7 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import {defaultSampleInfoViewportWidth} from '../browser.js'
-import {copyNumberDictionary, sampleInfo} from './sampleInfo.js'
+import {sampleDictionary, copyNumberDictionary, sampleInfo} from './sampleInfo.js'
 
 let sortDirection = 1
 
@@ -110,9 +110,16 @@ class SampleInfoViewport {
 
                 if (y + tileHeight > 0) {
 
-                    if (copyNumberDictionary && copyNumberDictionary[ name ]) {
+                    let dictionary
+                    if (copyNumberDictionary) {
+                        dictionary = copyNumberDictionary
+                    } else if (sampleDictionary) {
+                        dictionary = sampleDictionary
+                    }
 
-                        const attributes = copyNumberDictionary[ name ]
+                    if (dictionary && dictionary[ name ]) {
+
+                        const attributes = dictionary[ name ]
                         const attributeEntries = Object.entries(attributes)
 
                         const w = Math.floor(defaultSampleInfoViewportWidth/attributeEntries.length)
@@ -133,7 +140,7 @@ class SampleInfoViewport {
                             x += w
                         } // for (attributeEntries)
 
-                    } // if (copyNumberDictionary && copyNumberDictionary[ name ])
+                    } // if (dictionary && dictionary[ name ])
 
                 } // if (y + tileHeight > 0)
 
