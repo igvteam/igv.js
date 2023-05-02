@@ -22,127 +22,81 @@ const sampleInfo =
         },
 
         processSampleInfoFileAsString: async (browser, string) => {
-            const lines = string.split('\r').filter(line => line.length > 0)
 
-            const sampleTable = []
-            const copyNumber = []
-            let isSampleTable = false
-            let isCopyNumber = false
-            for (const line of lines) {
+            const raw = string.split('#').filter(line => line.length > 0)
 
-                if (line.startsWith('#sampleTable')) {
-                    isSampleTable = true
-                    isCopyNumber = false
+            // const cooked = []
+            // for (let part of raw) {
+            //     const tmp = part.replace(/\t+/g, "\t")
+            //     cooked.push(tmp)
+            //
+            // }
+
+            createSampleDictionary(raw[0], raw.length > 0)
+
+            let copyNumber
+            if (raw.length > 0) {
+
+                [ copyNumber ] = raw.filter(string => string.startsWith('copynumber'))
+                copyNumber = copyNumber.split('\r')
+                copyNumber.shift()
+
+                for (const line of copyNumber) {
+                    const [ a, b ] = line.split('\t')
+                    copyNumberDictionary[ a ] = Object.assign({}, sampleDictionary[ b ])
                 }
 
-                if (line.startsWith('#sampleMapping') || line.startsWith('#mutations') || line.startsWith('#colors')) {
-                    isSampleTable = false
-                    isCopyNumber = false
-                }
-
-                if (line.startsWith('#copynumber')) {
-                    isSampleTable = false
-                    isCopyNumber = true
-                }
-
-                if (false === isCopyNumber && true === isSampleTable) {
-                    sampleTable.push(line)
-                }
-
-                if (true === isCopyNumber && false === isSampleTable) {
-                    copyNumber.push(line)
-                }
-            }
-            sampleTable.shift()
-            copyNumber.shift()
-
-            await sampleInfo.buildDictionaries(browser, sampleTable, copyNumber)
-        },
-
-        buildDictionaries: async (browser, sampleTable, copyNumber) => {
-
-            const lines = sampleTable.slice()
-
-            const scratch = lines.shift().split('\t')
-            scratch.shift()
-
-            attributes = scratch.map(label => label.split(' ').join('_'))
-
-            // sampleDictionary = {}
-
-            for (const line of lines) {
-
-                const record = line.split('\t')
-                const _key_ = record.shift()
-
-                sampleDictionary[ _key_ ] = {}
-                for (let i = 0; i < record.length; i++) {
-                    const obj = {}
-                    obj[ attributes[ i ] ] = record[ i ]
-                    Object.assign(sampleDictionary[ _key_ ], obj)
-                }
-
-            } // for (lines)
-
-            for (const [ key, record ] of Object.entries(sampleDictionary)) {
-                sampleDictionary[ key ] = toNumericalRepresentation(record)
             }
 
-            for (const line of copyNumber) {
-                const [ a, b ] = line.split('\t')
-                copyNumberDictionary[ a ] = Object.assign({}, sampleDictionary[ b ])
-            }
-
-            sampleInfo.createAttributeRangeLUT()
+            attributeRangeLUT = sampleInfo.createAttributeRangeLUT()
 
             await SampleInfoViewport.update(browser)
+
         },
 
         createAttributeRangeLUT: () => {
 
-            attributeRangeLUT = {}
+            const lut= {}
             for (const value of Object.values(sampleDictionary)) {
 
                 for (const attribute of attributes) {
 
                     let item = value[ attribute ]
 
-                    if (undefined === item) {
-                        console.log('whoops')
+                    if (undefined === lut[ attribute ]) {
+                        lut[ attribute ] = []
                     }
 
-                    if (undefined === attributeRangeLUT[ attribute ]) {
-                        attributeRangeLUT[ attribute ] = []
-                    }
-
-                    attributeRangeLUT[ attribute ].push(item)
+                    lut[ attribute ].push(item)
 
                 } // for (attributes)
 
             } // for (Object.values(sampleDictionary))
-
 
             // clean up oddball cases.
             const isNumber = element => typeof element === 'number'
             const isString = element => typeof element === 'string'
 
             // remove duplicates
-            for (const key of Object.keys(attributeRangeLUT)) {
-                const list = Array.from( new Set( attributeRangeLUT[ key ].slice()) )
+            for (const key of Object.keys(lut)) {
+                const multiples = lut[ key ]
+                const set = new Set( multiples )
+                const list = Array.from( set )
 
                 if (true === list.some(isString) && true === list.some(isNumber)) {
-                    attributeRangeLUT[ key ] = list.filter(item => !isString(item))
+                    lut[ key ] = list.filter(item => !isString(item))
                 } else {
-                    attributeRangeLUT[ key ] = list
+                    lut[ key ] = list
                 }
 
-                if (!attributeRangeLUT[ key ].some(isString)) {
-                    const clone = attributeRangeLUT[ key ].slice()
-                    attributeRangeLUT[ key ] = [ Math.min(...clone), Math.max(...clone) ]
+                if (!lut[ key ].some(isString)) {
+                    const clone = lut[ key ].slice()
+                    lut[ key ] = [ Math.min(...clone), Math.max(...clone) ]
                 }
 
             }
 
+            return lut
         },
 
         getAttributeColor: (attribute, value) => {
@@ -211,9 +165,130 @@ const sampleInfo =
 
             return -1 === sortDirection ? [ ...numbers, ...strings ] : [ ...strings, ...numbers ]
 
-        }
+        },
+
+        ____processSampleInfoFileAsString: async (browser, string) => {
+
+            const lines = string.split('\r').filter(line => line.length > 0)
+
+            const sampleTable = []
+            const copyNumber = []
+
+            let isSampleTable = false
+            let isCopyNumber = false
+            for (const line of lines) {
+
+                if (line.startsWith('#sampleTable')) {
+                    isSampleTable = true
+                    isCopyNumber = false
+                }
+
+                if (line.startsWith('#sampleMapping') || line.startsWith('#mutations') || line.startsWith('#colors')) {
+                    isSampleTable = false
+                    isCopyNumber = false
+                }
+
+                if (line.startsWith('#copynumber')) {
+                    isSampleTable = false
+                    isCopyNumber = true
+                }
+
+                if (false === isCopyNumber && true === isSampleTable) {
+                    sampleTable.push(line)
+                }
+
+                if (true === isCopyNumber && false === isSampleTable) {
+                    copyNumber.push(line)
+                }
+            }
+
+            sampleTable.shift()
+            copyNumber.shift()
+
+            await sampleInfo.buildDictionaries(browser, sampleTable, copyNumber)
+        },
+
+        ____buildDictionaries: async (browser, sampleTable, copyNumber) => {
+
+            const lines = sampleTable.slice()
+
+            const scratch = lines.shift().split('\t')
+            scratch.shift()
+
+            attributes = scratch.map(label => label.split(' ').join('_'))
+
+            // sampleDictionary = {}
+
+            for (const line of lines) {
+
+                const record = line.split('\t')
+                const _key_ = record.shift()
+
+                sampleDictionary[ _key_ ] = {}
+                for (let i = 0; i < record.length; i++) {
+                    const obj = {}
+                    obj[ attributes[ i ] ] = record[ i ]
+                    Object.assign(sampleDictionary[ _key_ ], obj)
+                }
+
+            } // for (lines)
+
+            for (const [ key, record ] of Object.entries(sampleDictionary)) {
+                sampleDictionary[ key ] = toNumericalRepresentation(record)
+            }
+
+            for (const line of copyNumber) {
+                const [ a, b ] = line.split('\t')
+                copyNumberDictionary[ a ] = Object.assign({}, sampleDictionary[ b ])
+            }
+
+            sampleInfo.createAttributeRangeLUT()
+
+            await SampleInfoViewport.update(browser)
+        },
     };
 
+function createSampleDictionary(string, doSampleMapping) {
+
+    const lines = string.split('\r')
+
+    // discard "sampleTable"
+    if (true === doSampleMapping) {
+        lines.shift()
+    }
+
+    // shift attribute labels
+    const scratch = lines.shift().split('\t')
+
+    // discard "Linking_id"
+    if (true === doSampleMapping) {
+        scratch.shift()
+    }
+
+
+    attributes = scratch.map(label => label.split(' ').join('_'))
+
+    const cooked = lines.filter(line => line.length > 0)
+
+    for (const line of cooked) {
+
+        const record = line.split('\t')
+        const _key_ = record.shift()
+
+        sampleDictionary[ _key_ ] = {}
+        for (let i = 0; i < record.length; i++) {
+            const obj = {}
+            obj[ attributes[ i ] ] = "" === record[ i ] ? 'NA' : record[ i ]
+            Object.assign(sampleDictionary[ _key_ ], obj)
+        }
+
+    } // for (lines)
+
+    for (const [ key, record ] of Object.entries(sampleDictionary)) {
+        sampleDictionary[ key ] = toNumericalRepresentation(record)
+    }
+
+}
 
 function toNumericalRepresentation(obj) {
 
@@ -245,4 +320,4 @@ function stringToRGBString(str) {
 }
 
 // identify an array that is predominantly numerical and replace string with undefined
-export { sampleInfo, copyNumberDictionary }
+export { sampleInfo, sampleDictionary, copyNumberDictionary }
