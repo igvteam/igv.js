@@ -34,3 +34,4 @@ global.DOMParser = DOMParser
 global.atob = atob
 
 global.btoa = btoa
+
