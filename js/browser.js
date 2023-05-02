@@ -47,6 +47,7 @@ import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
 import ROITableControl from './ui/roiTableControl.js'
 import HicFile from "./hic/straw/hicFile.js"
+import {translateSession} from "./hic/shoeboxUtils.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -430,6 +431,11 @@ class Browser {
 
         // prepare to load a new session, discarding DOM and state
         this.cleanHouseForSession()
+
+        // Check for juicebox session
+        if(session.browsers) {
+            session = await translateSession(session)
+        }
 
         this.showSampleNames = session.showSampleNames || false
         this.sampleNameControl.setState(this.showSampleNames === true)

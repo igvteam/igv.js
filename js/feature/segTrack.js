@@ -109,7 +109,7 @@ class SegTrack extends TrackBase {
                 object: $('<div>Color Threshold</div>'),
                 click: e => {
                     this.browser.inputDialog.present({
-                        label: 'Color Scale Threshold',
+                        label: 'Set color scale threshold',
                         value: this.sbColorScale.threshold,
                         callback: () => {
                             const t = Number(this.browser.inputDialog.input.value, 10)
@@ -170,7 +170,7 @@ class SegTrack extends TrackBase {
 
 
     draw({context, renderSVG, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
-        console.log(`draw ${features.length}`)
+
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
         if (features && features.length > 0) {
@@ -303,8 +303,6 @@ class SegTrack extends TrackBase {
                 context.fillRect(x, y, w, h)
                 drawCount++
             }
-            console.log(`drew ${drawCount}`)
-
         } else {
             //console.log("No feature list");
         }
