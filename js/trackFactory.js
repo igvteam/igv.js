@@ -25,6 +25,7 @@ const trackFunctions =
         ['seg', (config, browser) => new SegTrack(config, browser)],
         ['mut', (config, browser) => new SegTrack(config, browser)],
         ['maf', (config, browser) => new SegTrack(config, browser)],
+        ['shoebox', (config, browser) => new SegTrack(config, browser)],
         ['wig', (config, browser) => new WigTrack(config, browser)],
         ['merged', (config, browser) => new MergedTrack(config, browser)],
         ['alignment', (config, browser) => new BAMTrack(config, browser)],
