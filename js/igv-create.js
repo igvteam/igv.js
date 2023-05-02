@@ -69,9 +69,10 @@ async function createBrowser(parentDiv, config) {
     allBrowsers.push(browser)
 
     // Load initial session
-    if (config.sessionURL) {
+    const sessionURL = config.sessionURL || config.session
+    if (sessionURL) {
         await browser.loadSession({
-            url: config.sessionURL
+            url: sessionURL
         })
     } else {
         await browser.loadSessionObject(config)
