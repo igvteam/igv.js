@@ -70,7 +70,8 @@ const knownFileExtensions = new Set([
     "fasta",
     "fa",
     "fna",
-    "pytor"
+    "pytor",
+    "hic"
 ])
 
 /**
