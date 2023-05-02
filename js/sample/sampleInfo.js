@@ -1,7 +1,7 @@
 import {igvxhr} from '../../node_modules/igv-utils/src/index.js'
 import SampleInfoViewport from "./sampleInfoViewport.js";
 import {appleCrayonRGB, appleCrayonRGBA, randomRGB} from "../util/colorPalletes.js";
-import { appleCrayonNames, yet_another_palette } from './sampleInfoPaletteLibrary.js'
+import { appleCrayonNames, distinctColorsPalette } from './sampleInfoPaletteLibrary.js'
 
 let attributes
 let attributeRangeLUT
@@ -149,7 +149,7 @@ const sampleInfo =
 
             // Use for diagnostic rendering
             // return randomRGB(180, 240)
-            
+
             if ('NA' === value) {
                 return appleCrayonRGB('snow')
             } else if (typeof value === "string") {
@@ -168,7 +168,7 @@ const sampleInfo =
                 const alpha = Math.max((value - min) / (max - min), lowerAlphaThreshold)
 
                 // 20 distinct colors
-                const [ r, g, b ] = yet_another_palette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
+                const [ r, g, b ] = distinctColorsPalette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
                 return `rgba(${r},${g},${b},${alpha})`
 
                 // apple crayon
