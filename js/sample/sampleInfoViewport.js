@@ -1,7 +1,7 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import {defaultSampleInfoViewportWidth} from '../browser.js'
-import {sampleDictionary, copyNumberDictionary, sampleInfo} from './sampleInfo.js'
+import {sampleDictionary, sampleInfo} from './sampleInfo.js'
 
 let sortDirection = 1
 
@@ -110,35 +110,34 @@ class SampleInfoViewport {
 
                 if (y + tileHeight > 0) {
 
-                    let dictionary
-                    if (copyNumberDictionary) {
-                        dictionary = copyNumberDictionary
-                    } else if (sampleDictionary) {
-                        dictionary = sampleDictionary
-                    }
+                    if (sampleDictionary) {
 
-                    if (dictionary && dictionary[ name ]) {
+                        const attributes = sampleInfo.getAttributes(name)
 
-                        const attributes = dictionary[ name ]
-                        const attributeEntries = Object.entries(attributes)
+                        if (attributes) {
 
-                        const w = Math.floor(defaultSampleInfoViewportWidth/attributeEntries.length)
-                        let x = 0;
-                        for (const attributeEntry of attributeEntries) {
+                            const attributeEntries = Object.entries(attributes)
 
-                            const [ attribute, value ] = attributeEntry
+                            const w = Math.floor(defaultSampleInfoViewportWidth/attributeEntries.length)
+                            let x = 0;
+                            for (const attributeEntry of attributeEntries) {
 
-                            context.fillStyle = sampleInfo.getAttributeColor(attribute, value)
+                                const [ attribute, value ] = attributeEntry
 
-                            const yy = y+shim
-                            const hh = tileHeight-(2*shim)
-                            context.fillRect(x, yy, w, hh)
+                                context.fillStyle = sampleInfo.getAttributeColor(attribute, value)
 
-                            const key = `${Math.floor(x)}#${Math.floor(yy)}#${Math.ceil(w)}#${Math.ceil(hh)}`
-                            this.hitList[ key ] = `${attribute}#${value}`
+                                const yy = y+shim
+                                const hh = tileHeight-(2*shim)
+                                context.fillRect(x, yy, w, hh)
 
-                            x += w
-                        } // for (attributeEntries)
+                                const key = `${Math.floor(x)}#${Math.floor(yy)}#${Math.ceil(w)}#${Math.ceil(hh)}`
+                                this.hitList[ key ] = `${attribute}#${value}`
+
+                                x += w
+
+                            } // for (attributeEntries)
+
+                        } // if (attributes)
 
                     } // if (dictionary && dictionary[ name ])
 
