@@ -1,6 +1,6 @@
 import {igvxhr} from '../../node_modules/igv-utils/src/index.js'
 import SampleInfoViewport from "./sampleInfoViewport.js";
-import {appleCrayonRGB, appleCrayonRGBA, randomRGB} from "../util/colorPalletes.js";
+import {appleCrayonRGB, appleCrayonRGBA, randomRGB, rgbStringLerp} from "../util/colorPalletes.js";
 import { appleCrayonNames, distinctColorsPalette } from './sampleInfoPaletteLibrary.js'
 
 let attributes
@@ -70,8 +70,52 @@ const sampleInfo =
                     colorSettings = colorSettings.split('\r').filter(line => line.length > 0)
                     colorSettings.shift()
 
+                    const clampLerpRGB = rangeString => {
+                        const [ a, b ] = rangeString.split(':').map(string => parseFloat(string))
+                        return `clampLerpRGB(${ a },${ b }`
+                    }
+
                     const colorTable = colorSettings.map(setting => {
-                        return setting.split('\t').map((token, index) => 0 === index ? token.split(' ').join('_') : token)
+
+                        const mapped = setting.split('\t').map((token, index, array) => {
+
+                            switch (index) {
+                                case 0:
+                                    return token.split(' ').join('_')
+                                case 1:
+                                    return 4 === array.length ? token.split(':').map(str => parseFloat(str)) : token
+                                case 2:
+                                    return `rgb(${ token })`
+                                case 3:
+                                    return `rgb(${ token })`
+                            }
+
+                        });
+
+                        // [
+                        //     "sil_width",
+                        //     [
+                        //         -0.1,
+                        //         0.5
+                        //     ],
+                        //     "rgb(0,0,255)",
+                        //     "rgb(255,0,0)"
+                        // ]
+
+                        if (4 === mapped.length && Array.isArray(mapped[ 1 ])) {
+
+                            const [ a, b ] = mapped[ 1 ]
+                            const [ attribute, _ignore_, rgbA, rgbB ] = mapped
+
+                            const clampedLerpRGB = attributeValue => {
+                                const interpolant = Math.min(Math.max(attributeValue, a), b)
+                                return rgbStringLerp(rgbA, rgbB, interpolant)
+                            }
+
+                            return [ attribute, clampedLerpRGB ]
+                        }
+
+                        return mapped
                     })
 
                     console.log('done')

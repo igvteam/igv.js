@@ -399,6 +399,34 @@ function rgbaStringTokens(rgbaString) {
     }
 }
 
+function rgbStringTokens(rgbString) {
+
+    if (rgbString.startsWith('rgb(')) {
+
+        const [ignore, pass0 ] = rgbString.split('(')
+
+        const [ rgb ] = pass0.split(')')
+
+        return rgb.split(',').map(string => parseInt(string))
+
+    } else {
+        return undefined
+    }
+}
+
+function rgbStringLerp(_a, _b, interpolant) {
+    const [ rA, gA, bA ] = rgbaStringTokens(_a)
+    const [ rB, gB, bB ] = rgbaStringTokens(_b)
+    const [ r, g, b ] =
+        [
+            Math.floor(IGVMath.lerp(rA, rB, interpolant)),
+            Math.floor(IGVMath.lerp(gA, gB, interpolant)),
+            Math.floor(IGVMath.lerp(bA, bB, interpolant))
+        ]
+
+    return rgbColor(r, g, b)
+}
+
 export {
     appleCrayonRGB,
     appleCrayonRGBA,
@@ -412,5 +440,6 @@ export {
     randomGrey,
     randomRGB,
     randomRGBConstantAlpha,
-    rgbaStringTokens
+    rgbaStringTokens,
+    rgbStringLerp
 }
