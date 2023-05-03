@@ -23,25 +23,37 @@ const sampleInfo =
 
         processSampleInfoFileAsString: async (browser, string) => {
 
-            const parts = string.split('#').filter(line => line.length > 0)
+            // split file into sections: samples, sample-mapping, etc.
+            const sections = string.split('#').filter(line => line.length > 0)
 
-            updateSampleDictionary(parts[0], parts.length > 0)
+            // First section is always samples
+            updateSampleDictionary(sections[0], sections.length > 0)
 
-            let copyNumber
-            if (parts.length > 0) {
+            // Establish the range of values for each attribute
+            attributeRangeLUT = createAttributeRangeLUT(sampleDictionary)
 
-                [ copyNumber ] = parts.filter(string => string.startsWith('copynumber'))
-                copyNumber = copyNumber.split('\r')
-                copyNumber.shift()
+            // If there are more sections look for the copy-number section
+            if (sections.length > 1) {
 
-                for (const line of copyNumber) {
-                    const [ a, b ] = line.split('\t')
-                    copyNumberDictionary[ a ] = Object.assign({}, sampleDictionary[ b ])
+                const found = sections.filter(string => string.startsWith('copynumber'))
+
+                if (found.length > 0) {
+
+                    // Get the copy-number section. It is one long string
+                    let copyNumber = found[ 0 ]
+
+                    // split into lines
+                    copyNumber = copyNumber.split('\r').filter(line => line.length > 0)
+                    copyNumber.shift()
+
+                    for (const line of copyNumber) {
+                        const [ a, b ] = line.split('\t')
+                        copyNumberDictionary[ a ] = Object.assign({}, sampleDictionary[ b ])
+                    }
+
                 }
 
             }
-
-            attributeRangeLUT = createAttributeRangeLUT(sampleDictionary)
 
             await SampleInfoViewport.update(browser)
 
