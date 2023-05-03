@@ -40,8 +40,10 @@ const sampleInfo =
             // If there are more sections look for the copy-number section
             if (sections.length > 1) {
 
-                const found = sections.filter(string => string.startsWith('copynumber'))
+                let found
 
+                // copy-number
+                found = sections.filter(string => string.startsWith('copynumber'))
                 if (found.length > 0) {
 
                     // Get the copy-number section. It is one long string
@@ -57,6 +59,25 @@ const sampleInfo =
                     }
 
                 }
+
+                // color
+                found = sections.filter(string => string.startsWith('colors'))
+                if (found.length > 0) {
+
+                    let colorSettings = found[ 0 ]
+
+                    // split into lines
+                    colorSettings = colorSettings.split('\r').filter(line => line.length > 0)
+                    colorSettings.shift()
+
+                    const colorTable = colorSettings.map(setting => {
+                        return setting.split('\t').map((token, index) => 0 === index ? token.split(' ').join('_') : token)
+                    })
+
+                    console.log('done')
+
+                }
+
 
             }
 
