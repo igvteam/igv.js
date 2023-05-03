@@ -6,10 +6,15 @@ import { appleCrayonNames, distinctColorsPalette } from './sampleInfoPaletteLibr
 let attributes
 let attributeRangeLUT
 let copyNumberDictionary = {}
-let sampleDictionary = {}
+let sampleDictionary
 
 const sampleInfo =
     {
+        getAttributes: key => {
+            let sampleKey = copyNumberDictionary[ key ] || key
+            return sampleDictionary[ sampleKey ]
+        },
+
         loadSampleInfoFile: async (browser, path) => {
             let string
             try {
@@ -48,7 +53,7 @@ const sampleInfo =
 
                     for (const line of copyNumber) {
                         const [ a, b ] = line.split('\t')
-                        copyNumberDictionary[ a ] = Object.assign({}, sampleDictionary[ b ])
+                        copyNumberDictionary[ a ] = b
                     }
 
                 }
@@ -96,19 +101,19 @@ const sampleInfo =
         getSortedSampleKeysByAttribute : (sampleKeys, attribute, sortDirection) => {
 
             const numbers = sampleKeys.filter(key => {
-                const value = copyNumberDictionary[ key ][ attribute ]
+                const value = sampleInfo.getAttributes(key)[ attribute ]
                 return typeof value === 'number'
             })
 
             const strings = sampleKeys.filter(key => {
-                const value = copyNumberDictionary[ key ][ attribute ]
+                const value = sampleInfo.getAttributes(key)[ attribute ]
                 return typeof value === 'string'
             })
 
             const compare = (a, b) => {
 
-                const aa = copyNumberDictionary[ a ][ attribute ]
-                const bb = copyNumberDictionary[ b ][ attribute ]
+                const aa = sampleInfo.getAttributes(a)[ attribute ]
+                const bb = sampleInfo.getAttributes(b)[ attribute ]
 
                 if (typeof aa === 'string' && typeof bb === 'string') {
                     return sortDirection * aa.localeCompare(bb)
@@ -199,7 +204,12 @@ function updateSampleDictionary(sampleTableAsString, doSampleMapping) {
         const record = line.split('\t')
         const _key_ = record.shift()
 
+        if (undefined === sampleDictionary) {
+            sampleDictionary = {}
+        }
+
         sampleDictionary[ _key_ ] = {}
+
         for (let i = 0; i < record.length; i++) {
             const obj = {}
             obj[ attributes[ i ] ] = "" === record[ i ] ? 'NA' : record[ i ]
@@ -244,4 +254,4 @@ function stringToRGBString(str) {
 }
 
 // identify an array that is predominantly numerical and replace string with undefined
-export { sampleInfo, sampleDictionary, copyNumberDictionary }
+export { sampleInfo, sampleDictionary }
