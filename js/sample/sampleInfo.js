@@ -64,10 +64,24 @@ const sampleInfo =
             // Use for diagnostic rendering
             // return randomRGB(180, 240)
 
-            if ('NA' === value) {
-                return appleCrayonRGB('snow')
+            let color
+
+            if ('-' === value) {
+
+                color = appleCrayonRGB('snow')
+
+            } else if (typeof value === "string" && colorDictionary[ value ]) {
+
+                color = colorDictionary[ value ]()
+
+            } else if (colorDictionary[ attribute ]) {
+
+                color = colorDictionary[ attribute ](value)
+
             } else if (typeof value === "string") {
-                return stringToRGBString(value)
+
+                color = stringToRGBString(value)
+
             } else {
 
                 const [ min, max ] = attributeRangeLUT[ attribute ]
@@ -75,21 +89,24 @@ const sampleInfo =
                 // a hack required to handle attributes that should have string values
                 // but the actual data has 0 as well.
                 if (0 === min && 0 === max) {
-                    return appleCrayonRGB('snow')
+
+                    color = appleCrayonRGB('snow')
+
+                } else {
+
+                    const lowerAlphaThreshold = 2e-1
+                    const alpha = Math.max((value - min) / (max - min), lowerAlphaThreshold)
+
+                    // 20 distinct colors
+                    const [ r, g, b ] = distinctColorsPalette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
+                    color = `rgba(${r},${g},${b},${alpha})`
+
                 }
 
-                const lowerAlphaThreshold = 2e-1
-                const alpha = Math.max((value - min) / (max - min), lowerAlphaThreshold)
+             }
 
-                // 20 distinct colors
-                const [ r, g, b ] = distinctColorsPalette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
-                return `rgba(${r},${g},${b},${alpha})`
-
-                // apple crayon
-                // const index = Object.keys(attributeRangeLUT).indexOf(attribute)
-                // const appleCrayonName = appleCrayonNames[ index ]
-                // return appleCrayonRGBA(appleCrayonName, alpha)
-            }
+            console.log(`${ attribute } ${ value } ${ color }`)
+            return color
 
         },
 
@@ -186,8 +203,7 @@ function createColorScheme(sections) {
 
         const triplets = mappings
             .filter(mapping => 3 === mapping.length && !mapping.includes('*'))
-            // exclude color spec with a min:max attribute value range
-            .filter(([ a, b, c ]) => !b.includes(':'))
+            .filter(([ a, b, c ]) => !Array.isArray(b))
 
         const tmp = {}
         for (const triplet of triplets) {
@@ -195,12 +211,15 @@ function createColorScheme(sections) {
             if (undefined === tmp[ attribute ]) {
                 tmp[ attribute ] = {}
             }
-            tmp[ attribute ][ value ] = rgb
+            tmp[ attribute ][ value.toUpperCase() ] = rgb
         }
 
         for (const [k, v] of Object.entries(tmp)) {
             const lut = Object.assign({}, v)
-            colorDictionary[ k ] = attributeValue => lut[ attributeValue ]
+            colorDictionary[ k ] = attributeValue => {
+                const color = lut[ attributeValue.toUpperCase() ]
+                return color
+            }
         }
 
         const clamped = mappings.filter(mapping => Array.isArray(mapping[ 1 ]))
@@ -329,7 +348,7 @@ function updateSampleDictionary(sampleTableAsString, doSampleMapping) {
 
         for (let i = 0; i < record.length; i++) {
             const obj = {}
-            obj[ attributes[ i ] ] = "" === record[ i ] ? 'NA' : record[ i ]
+            obj[ attributes[ i ] ] = "" === record[ i ] ? '-' : record[ i ]
             Object.assign(sampleDictionary[ _key_ ], obj)
         }
 

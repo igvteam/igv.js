@@ -415,8 +415,8 @@ function rgbStringTokens(rgbString) {
 }
 
 function rgbStringLerp(_a, _b, interpolant) {
-    const [ rA, gA, bA ] = rgbaStringTokens(_a)
-    const [ rB, gB, bB ] = rgbaStringTokens(_b)
+    const [ rA, gA, bA ] = rgbStringTokens(_a)
+    const [ rB, gB, bB ] = rgbStringTokens(_b)
     const [ r, g, b ] =
         [
             Math.floor(IGVMath.lerp(rA, rB, interpolant)),
