@@ -441,5 +441,6 @@ export {
     randomRGB,
     randomRGBConstantAlpha,
     rgbaStringTokens,
+    rgbStringTokens,
     rgbStringLerp
 }

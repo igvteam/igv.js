@@ -1,10 +1,19 @@
 import {igvxhr} from '../../node_modules/igv-utils/src/index.js'
 import SampleInfoViewport from "./sampleInfoViewport.js";
-import {appleCrayonRGB, appleCrayonRGBA, randomRGB, rgbStringLerp} from "../util/colorPalletes.js";
+import {
+    appleCrayonRGB,
+    appleCrayonRGBA,
+    randomRGB,
+    rgbaColor,
+    rgbStringLerp,
+    rgbStringTokens
+} from "../util/colorPalletes.js";
 import { appleCrayonNames, distinctColorsPalette } from './sampleInfoPaletteLibrary.js'
 
 let attributes
 let attributeRangeLUT
+let attributeValueColorLUT
+let attributeColorLUT
 let copyNumberDictionary = {}
 let sampleDictionary
 
@@ -39,90 +48,8 @@ const sampleInfo =
 
             // If there are more sections look for the copy-number section
             if (sections.length > 1) {
-
-                let found
-
-                // copy-number
-                found = sections.filter(string => string.startsWith('copynumber'))
-                if (found.length > 0) {
-
-                    // Get the copy-number section. It is one long string
-                    let copyNumber = found[ 0 ]
-
-                    // split into lines
-                    copyNumber = copyNumber.split('\r').filter(line => line.length > 0)
-                    copyNumber.shift()
-
-                    for (const line of copyNumber) {
-                        const [ a, b ] = line.split('\t')
-                        copyNumberDictionary[ a ] = b
-                    }
-
-                }
-
-                // color
-                found = sections.filter(string => string.startsWith('colors'))
-                if (found.length > 0) {
-
-                    let colorSettings = found[ 0 ]
-
-                    // split into lines
-                    colorSettings = colorSettings.split('\r').filter(line => line.length > 0)
-                    colorSettings.shift()
-
-                    const clampLerpRGB = rangeString => {
-                        const [ a, b ] = rangeString.split(':').map(string => parseFloat(string))
-                        return `clampLerpRGB(${ a },${ b }`
-                    }
-
-                    const colorTable = colorSettings.map(setting => {
-
-                        const mapped = setting.split('\t').map((token, index, array) => {
-
-                            switch (index) {
-                                case 0:
-                                    return token.split(' ').join('_')
-                                case 1:
-                                    return 4 === array.length ? token.split(':').map(str => parseFloat(str)) : token
-                                case 2:
-                                    return `rgb(${ token })`
-                                case 3:
-                                    return `rgb(${ token })`
-                            }
-
-                        });
-
-                        // [
-                        //     "sil_width",
-                        //     [
-                        //         -0.1,
-                        //         0.5
-                        //     ],
-                        //     "rgb(0,0,255)",
-                        //     "rgb(255,0,0)"
-                        // ]
-
-                        if (4 === mapped.length && Array.isArray(mapped[ 1 ])) {
-
-                            const [ a, b ] = mapped[ 1 ]
-                            const [ attribute, _ignore_, rgbA, rgbB ] = mapped
-
-                            const clampedLerpRGB = attributeValue => {
-                                const interpolant = Math.min(Math.max(attributeValue, a), b)
-                                return rgbStringLerp(rgbA, rgbB, interpolant)
-                            }
-
-                            return [ attribute, clampedLerpRGB ]
-                        }
-
-                        return mapped
-                    })
-
-                    console.log('done')
-
-                }
-
-
+                createSampleMappingTables(sections, 'copynumber')
+                createColorScheme(sections)
             }
 
             await SampleInfoViewport.update(browser)
@@ -197,6 +124,123 @@ const sampleInfo =
 
         }
     };
+
+function createSampleMappingTables(sections, sectionName) {
+
+    let found
+    if ('copynumber' === sectionName) {
+        found = sections.filter(string => string.startsWith(sectionName))
+        if (found.length > 0) {
+
+            // Get the copy-number section. It is one long string
+            let copyNumber = found[ 0 ]
+
+            // split into lines
+            copyNumber = copyNumber.split('\r').filter(line => line.length > 0)
+            copyNumber.shift()
+
+            for (const line of copyNumber) {
+                const [ a, b ] = line.split('\t')
+                copyNumberDictionary[ a ] = b
+            }
+
+        }
+    }
+
+}
+
+function createColorScheme(sections) {
+
+    const found = sections.filter(string => string.startsWith('colors'))
+
+    const dictionary = {}
+    if (found.length > 0) {
+
+        let colorSettings = found[ 0 ]
+
+        colorSettings = colorSettings.split('\r').filter(line => line.length > 0)
+        colorSettings.shift()
+
+        const mappings = colorSettings.map(setting => setting.split('\t').map((token, index, array) => {
+
+            switch (index) {
+                case 0:
+                    return token.split(' ').join('_')
+                case 1:
+                    return 4 === array.length ? token.split(':').map(str => parseFloat(str)) : token
+                case 2:
+                    return `rgb(${ token })`
+                case 3:
+                    return `rgb(${ token })`
+            }
+
+
+        }))
+
+        const triples = mappings
+            .filter(mapping => 3 === mapping.length && !mapping.includes('*'))
+            .filter(([ a, b, c ]) => !b.includes(':'))
+
+        const tmp = {}
+        for (const triple of triples) {
+            const [ attribute, value, rgb ] = triple
+            if (undefined === tmp[ attribute ]) {
+                tmp[ attribute ] = {}
+            }
+            tmp[ attribute ][ value ] = rgb
+        }
+
+        for (const [k, v] of Object.entries(tmp)) {
+            const lut = Object.assign({}, v)
+            dictionary[ k ] = attributeValue => lut[ attributeValue ]
+        }
+
+        const clamped = mappings.filter(mapping => Array.isArray(mapping[ 1 ]))
+
+        for (const cl of clamped) {
+            const [ a, b ] = cl[ 1 ]
+            const attribute = cl[ 0 ]
+
+            if (3 === cl.length) {
+
+                const [ r, g, b ] = rgbStringTokens(cl[ 2 ])
+
+                dictionary[ attribute ] = attributeValue => {
+                    const interpolant = Math.min(Math.max(attributeValue, a), b)
+                    return rgbaColor(r, g, b, interpolant)
+                }
+
+            } else if (4 === cl.length) {
+
+                const [ a, b ] = cl[ 1 ]
+                const [ attribute, ignore, rgbA, rgbB ] = cl
+
+                dictionary[ attribute ] = attributeValue => {
+                    const interpolant = Math.min(Math.max(attributeValue, a), b)
+                    return rgbStringLerp(rgbA, rgbB, interpolant)
+                }
+            }
+        }
+
+        const stars = mappings.filter(mapping => 3 === mapping.length && mapping.includes('*'))
+
+        for (const star of stars) {
+
+            if ('*' === star[ 1 ]) {
+                const [ attribute, s, rgb ] = star
+                dictionary[ attribute ] = () => rgb
+            } else if ('*' === star[ 0 ]) {
+                const [ s, attributeValue, rgb ] = star
+                dictionary[ attributeValue ] = () => rgb
+            }
+
+        }
+
+        console.log('done')
+
+    }
+
+}
 
 function createAttributeRangeLUT(dictionary) {
 
