@@ -3,8 +3,6 @@ import {appleCrayonRGB} from '../util/colorPalletes.js'
 import {defaultSampleInfoViewportWidth} from '../browser.js'
 import {sampleDictionary, sampleInfo} from './sampleInfo.js'
 
-let sortDirection = 1
-
 class SampleInfoViewport {
 
     constructor(trackView, column, width) {
@@ -152,58 +150,7 @@ class SampleInfoViewport {
     }
 
     addMouseHandlers() {
-        this.addMouseClickHandler()
         this.addMouseMoveHandler()
-    }
-
-    addMouseClickHandler() {
-
-        this.boundMouseClickHandler = mouseClick.bind(this)
-        this.viewport.addEventListener('click', this.boundMouseClickHandler)
-
-        function mouseClick(event) {
-
-            event.stopPropagation()
-
-            if (this.hitList) {
-
-                const { x } = DOMUtils.translateMouseCoordinates(event, this.viewport)
-
-                let hit = undefined
-                for (const entry of Object.entries(this.hitList)) {
-
-                    const [ bbox, value ] = entry
-
-                    const [xx, _ignore, width, __ignore ] = bbox.split('#').map(str => parseInt(str, 10))
-                    if (x < xx || x > xx+width) {
-                        // do nuthin
-                    } else {
-                        [ hit ] = value.split('#')
-                        break
-                    }
-
-                } // for (Object.values(this.hitList))
-
-                if (hit) {
-
-                    const menuItems =
-                        [
-                            {
-                                label: `Sort by ${ hit }`,
-                                click: () => {
-                                    this.trackView.track.sampleKeys = sampleInfo.getSortedSampleKeysByAttribute(this.trackView.track.sampleKeys, hit, sortDirection)
-                                    this.trackView.repaintViews()
-                                    sortDirection *= -1
-                                }
-                            }
-                        ]
-
-                    this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
-
-                }
-
-            }
-        }
     }
 
     addMouseMoveHandler() {
@@ -239,7 +186,6 @@ class SampleInfoViewport {
     }
 
     removeMouseHandlers() {
-        this.viewport.removeEventListener('mousemove', this.boundMouseClickHandler)
         this.viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
     show() {

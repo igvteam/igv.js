@@ -31,6 +31,7 @@ import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "../igv-icons.js"
 import {GradientColorScale} from "../util/colorScale.js"
 import {ColorTable, randomRGB} from "../util/colorPalletes.js"
+import {sampleDictionary, sampleInfo} from "../sample/sampleInfo.js";
 
 class SegTrack extends TrackBase {
 
@@ -121,6 +122,18 @@ class SegTrack extends TrackBase {
     menuItemList() {
 
         const menuItems = []
+
+        menuItems.push('<hr/>')
+        menuItems.push(sortBySampleName(this.trackView))
+
+        if (sampleDictionary) {
+            menuItems.push('<hr/>')
+            menuItems.push("Sort By Attribute:")
+            for (const attribute of sampleInfo.getAttributeList()) {
+                menuItems.push(sortByAttribute(this.trackView, attribute))
+            }
+        }
+
         const lut =
             {
                 "SQUISHED": "Squish",
@@ -507,6 +520,37 @@ class SegTrack extends TrackBase {
             }
         }
     }
+}
+
+let sortDirection = 1
+function sortBySampleName(trackView) {
+
+    const object = $('<div>')
+    object.text('Sort by Sample Names')
+
+    const click = () => {
+        trackView.track.sampleKeys.sort((a, b) => sortDirection * a.localeCompare(b))
+        trackView.repaintViews()
+        sortDirection = -1 * sortDirection
+    }
+
+    return { object, click }
+
+}
+
+function sortByAttribute(trackView, attribute) {
+
+    const object = $('<div>')
+    object.text(attribute.split('_').join(' '))
+
+    const click = () => {
+        trackView.track.sampleKeys = sampleInfo.getSortedSampleKeysByAttribute(trackView.track.sampleKeys, attribute, sortDirection)
+        trackView.repaintViews()
+        sortDirection *= -1
+    }
+
+    return { object, click }
+
 }
 
 // Mut and MAF file default color table

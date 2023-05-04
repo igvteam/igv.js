@@ -12,13 +12,15 @@ import { appleCrayonNames, distinctColorsPalette } from './sampleInfoPaletteLibr
 
 let attributes
 let attributeRangeLUT
-let attributeValueColorLUT
-let attributeColorLUT
 let copyNumberDictionary = {}
 let sampleDictionary
 
 const sampleInfo =
     {
+        getAttributeList: () => {
+            return attributes
+        },
+
         getAttributes: key => {
             let sampleKey = copyNumberDictionary[ key ] || key
             return sampleDictionary[ sampleKey ]
