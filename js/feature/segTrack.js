@@ -129,7 +129,7 @@ class SegTrack extends TrackBase {
         if (sampleDictionary) {
             menuItems.push('<hr/>')
             menuItems.push("Sort By Attribute:")
-            for (const attribute of sampleInfo.getAttributeList()) {
+            for (const attribute of sampleInfo.getAttributeTypeList()) {
                 menuItems.push(sortByAttribute(this.trackView, attribute))
             }
         }

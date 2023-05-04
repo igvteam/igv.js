@@ -12,12 +12,13 @@ import { appleCrayonNames, distinctColorsPalette } from './sampleInfoPaletteLibr
 
 let attributes
 let attributeRangeLUT
-let copyNumberDictionary = {}
 let sampleDictionary
+let copyNumberDictionary
+let colorDictionary
 
 const sampleInfo =
     {
-        getAttributeList: () => {
+        getAttributeTypeList: () => {
             return attributes
         },
 
@@ -143,6 +144,10 @@ function createSampleMappingTables(sections, sectionName) {
 
             for (const line of copyNumber) {
                 const [ a, b ] = line.split('\t')
+
+                if (undefined === copyNumberDictionary) {
+                    copyNumberDictionary = {}
+                }
                 copyNumberDictionary[ a ] = b
             }
 
@@ -155,7 +160,7 @@ function createColorScheme(sections) {
 
     const found = sections.filter(string => string.startsWith('colors'))
 
-    const dictionary = {}
+    colorDictionary = {}
     if (found.length > 0) {
 
         let colorSettings = found[ 0 ]
@@ -169,7 +174,7 @@ function createColorScheme(sections) {
                 case 0:
                     return token.split(' ').join('_')
                 case 1:
-                    return 4 === array.length ? token.split(':').map(str => parseFloat(str)) : token
+                    return token.includes(':') ? token.split(':').map(str => parseFloat(str)) : token
                 case 2:
                     return `rgb(${ token })`
                 case 3:
@@ -179,13 +184,14 @@ function createColorScheme(sections) {
 
         }))
 
-        const triples = mappings
+        const triplets = mappings
             .filter(mapping => 3 === mapping.length && !mapping.includes('*'))
+            // exclude color spec with a min:max attribute value range
             .filter(([ a, b, c ]) => !b.includes(':'))
 
         const tmp = {}
-        for (const triple of triples) {
-            const [ attribute, value, rgb ] = triple
+        for (const triplet of triplets) {
+            const [ attribute, value, rgb ] = triplet
             if (undefined === tmp[ attribute ]) {
                 tmp[ attribute ] = {}
             }
@@ -194,7 +200,7 @@ function createColorScheme(sections) {
 
         for (const [k, v] of Object.entries(tmp)) {
             const lut = Object.assign({}, v)
-            dictionary[ k ] = attributeValue => lut[ attributeValue ]
+            colorDictionary[ k ] = attributeValue => lut[ attributeValue ]
         }
 
         const clamped = mappings.filter(mapping => Array.isArray(mapping[ 1 ]))
@@ -207,7 +213,7 @@ function createColorScheme(sections) {
 
                 const [ r, g, b ] = rgbStringTokens(cl[ 2 ])
 
-                dictionary[ attribute ] = attributeValue => {
+                colorDictionary[ attribute ] = attributeValue => {
                     const interpolant = Math.min(Math.max(attributeValue, a), b)
                     return rgbaColor(r, g, b, interpolant)
                 }
@@ -217,7 +223,7 @@ function createColorScheme(sections) {
                 const [ a, b ] = cl[ 1 ]
                 const [ attribute, ignore, rgbA, rgbB ] = cl
 
-                dictionary[ attribute ] = attributeValue => {
+                colorDictionary[ attribute ] = attributeValue => {
                     const interpolant = Math.min(Math.max(attributeValue, a), b)
                     return rgbStringLerp(rgbA, rgbB, interpolant)
                 }
@@ -230,10 +236,10 @@ function createColorScheme(sections) {
 
             if ('*' === star[ 1 ]) {
                 const [ attribute, s, rgb ] = star
-                dictionary[ attribute ] = () => rgb
+                colorDictionary[ attribute ] = () => rgb
             } else if ('*' === star[ 0 ]) {
                 const [ s, attributeValue, rgb ] = star
-                dictionary[ attributeValue ] = () => rgb
+                colorDictionary[ attributeValue ] = () => rgb
             }
 
         }
