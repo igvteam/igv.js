@@ -26,7 +26,6 @@
 import {GoogleAuth, igvxhr} from '../node_modules/igv-utils/src/index.js'
 import Browser from "./browser.js"
 import GenomeUtils from "./genome/genome.js"
-import {sampleInfo} from './sample/sampleInfo.js'
 
 let allBrowsers = []
 

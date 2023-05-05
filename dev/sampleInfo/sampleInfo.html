@@ -23,7 +23,6 @@
 
 <script type="module">
 
-    import {sampleInfo} from "../../js/sample/sampleInfo.js";
     import igv from '../../js/index.js'
 
     const config =
@@ -54,12 +53,12 @@
 
     async function processFile() {
         const [ file ] = document.getElementById("fileInput").files
-        await sampleInfo.loadSampleInfoFile(browser, file)
+        await browser.sampleInfo.loadSampleInfoFile(browser, file)
     }
 
     async function processUrl() {
         const url = document.getElementById("urlInput").value
-        await sampleInfo.loadSampleInfoFile(browser, url)
+        await browser.sampleInfo.loadSampleInfoFile(browser, url)
     }
 
 </script>

@@ -16,146 +16,154 @@ let sampleDictionary
 let copyNumberDictionary
 let colorDictionary = {}
 
-const sampleInfo =
-    {
-        isInitialized: () => {
-            if (undefined === sampleDictionary) {
-                return false
-            } else {
-                return true
-            }
-        },
+class SampleInfo {
+    constructor(browser) {
 
-        getAttributeCount: () => {
-            return sampleInfo.getAttributeTypeList().length
-        },
+        browser.on('trackorderchanged', list => {
+            console.log(`${ Date.now() } - SampleInfo: track did load`)
+            browser.layoutChange()
+        })
 
-        getAttributeTypeList: () => {
-            return attributes
-        },
+    }
 
-        getAttributes: key => {
-            let sampleKey = copyNumberDictionary[ key ] || key
-            return sampleDictionary[ sampleKey ]
-        },
+    isInitialized(){
+        if (undefined === sampleDictionary) {
+            return false
+        } else {
+            return true
+        }
+    }
 
-        loadSampleInfoFile: async (browser, path) => {
-            let string
-            try {
-                string = await igvxhr.loadString(path)
-                await sampleInfo.processSampleInfoFileAsString(browser, string)
-            } catch (e) {
-                console.error(e.message)
-            }
+    getAttributeCount() {
+        return this.getAttributeTypeList().length
+    }
 
-        },
+    getAttributeTypeList() {
+        return attributes
+    }
 
-        processSampleInfoFileAsString: async (browser, string) => {
+    getAttributes(key) {
+        let sampleKey = copyNumberDictionary[ key ] || key
+        return sampleDictionary[ sampleKey ]
+    }
 
-            // split file into sections: samples, sample-mapping, etc.
-            const sections = string.split('#').filter(line => line.length > 0)
+    async loadSampleInfoFile(browser, path) {
+        let string
+        try {
+            string = await igvxhr.loadString(path)
+            await this.processSampleInfoFileAsString(browser, string)
+        } catch (e) {
+            console.error(e.message)
+        }
 
-            // First section is always samples
-            updateSampleDictionary(sections[0], sections.length > 0)
+    }
 
-            // Establish the range of values for each attribute
-            attributeRangeLUT = createAttributeRangeLUT(sampleDictionary)
+    async processSampleInfoFileAsString(browser, string) {
 
-            // If there are more sections look for the copy-number section
-            if (sections.length > 1) {
-                createSampleMappingTables(sections, 'copynumber')
-                createColorScheme(sections)
-            }
+        // split file into sections: samples, sample-mapping, etc.
+        const sections = string.split('#').filter(line => line.length > 0)
 
-            await SampleInfoViewport.update(browser)
+        // First section is always samples
+        updateSampleDictionary(sections[0], sections.length > 0)
 
-        },
+        // Establish the range of values for each attribute
+        attributeRangeLUT = createAttributeRangeLUT(sampleDictionary)
 
-        getAttributeColor: (attribute, value) => {
+        // If there are more sections look for the copy-number section
+        if (sections.length > 1) {
+            createSampleMappingTables(sections, 'copynumber')
+            createColorScheme(sections)
+        }
 
-            // Use for diagnostic rendering
-            // return randomRGB(180, 240)
+        await SampleInfoViewport.update(browser)
 
-            let color
+    }
 
-            if ('-' === value) {
+    getAttributeColor(attribute, value) {
+
+        // Use for diagnostic rendering
+        // return randomRGB(180, 240)
+
+        let color
+
+        if ('-' === value) {
+
+            color = appleCrayonRGB('snow')
+
+        } else if (typeof value === "string" && colorDictionary[ value ]) {
+
+            color = colorDictionary[ value ]()
+
+        } else if (colorDictionary[ attribute ]) {
+
+            color = colorDictionary[ attribute ](value)
+
+        } else if (typeof value === "string") {
+
+            color = stringToRGBString(value)
+
+        } else {
+
+            const [ min, max ] = attributeRangeLUT[ attribute ]
+
+            // a hack required to handle attributes that should have string values
+            // but the actual data has 0 as well.
+            if (0 === min && 0 === max) {
 
                 color = appleCrayonRGB('snow')
 
-            } else if (typeof value === "string" && colorDictionary[ value ]) {
-
-                color = colorDictionary[ value ]()
-
-            } else if (colorDictionary[ attribute ]) {
-
-                color = colorDictionary[ attribute ](value)
-
-            } else if (typeof value === "string") {
-
-                color = stringToRGBString(value)
-
             } else {
 
-                const [ min, max ] = attributeRangeLUT[ attribute ]
+                const lowerAlphaThreshold = 2e-1
+                const alpha = Math.max((value - min) / (max - min), lowerAlphaThreshold)
 
-                // a hack required to handle attributes that should have string values
-                // but the actual data has 0 as well.
-                if (0 === min && 0 === max) {
-
-                    color = appleCrayonRGB('snow')
-
-                } else {
-
-                    const lowerAlphaThreshold = 2e-1
-                    const alpha = Math.max((value - min) / (max - min), lowerAlphaThreshold)
-
-                    // 20 distinct colors
-                    const [ r, g, b ] = distinctColorsPalette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
-                    color = `rgba(${r},${g},${b},${alpha})`
-
-                }
-
-             }
-
-            console.log(`${ attribute } ${ value } ${ color }`)
-            return color
-
-        },
-
-        getSortedSampleKeysByAttribute : (sampleKeys, attribute, sortDirection) => {
-
-            const numbers = sampleKeys.filter(key => {
-                const value = sampleInfo.getAttributes(key)[ attribute ]
-                return typeof value === 'number'
-            })
-
-            const strings = sampleKeys.filter(key => {
-                const value = sampleInfo.getAttributes(key)[ attribute ]
-                return typeof value === 'string'
-            })
-
-            const compare = (a, b) => {
-
-                const aa = sampleInfo.getAttributes(a)[ attribute ]
-                const bb = sampleInfo.getAttributes(b)[ attribute ]
-
-                if (typeof aa === 'string' && typeof bb === 'string') {
-                    return sortDirection * aa.localeCompare(bb)
-                }
-
-                if (typeof aa === 'number' && typeof bb === 'number') {
-                    return sortDirection * (aa - bb)
-                }
+                // 20 distinct colors
+                const [ r, g, b ] = distinctColorsPalette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
+                color = `rgba(${r},${g},${b},${alpha})`
 
             }
 
-            numbers.sort(compare)
-            strings.sort(compare)
+        }
 
-            return -1 === sortDirection ? [ ...numbers, ...strings ] : [ ...strings, ...numbers ]
+        return color
+
+    }
+
+    getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
+
+        const numbers = sampleKeys.filter(key => {
+            const value = this.getAttributes(key)[ attribute ]
+            return typeof value === 'number'
+        })
+
+        const strings = sampleKeys.filter(key => {
+            const value = this.getAttributes(key)[ attribute ]
+            return typeof value === 'string'
+        })
+
+        const compare = (a, b) => {
+
+            const aa = this.getAttributes(a)[ attribute ]
+            const bb = this.getAttributes(b)[ attribute ]
+
+            if (typeof aa === 'string' && typeof bb === 'string') {
+                return sortDirection * aa.localeCompare(bb)
+            }
+
+            if (typeof aa === 'number' && typeof bb === 'number') {
+                return sortDirection * (aa - bb)
+            }
 
         }
-    };
+
+        numbers.sort(compare)
+        strings.sort(compare)
+
+        return -1 === sortDirection ? [ ...numbers, ...strings ] : [ ...strings, ...numbers ]
+
+    }
+
+}
 
 function createSampleMappingTables(sections, sectionName) {
 
@@ -401,4 +409,6 @@ function stringToRGBString(str) {
 }
 
 // identify an array that is predominantly numerical and replace string with undefined
-export { sampleInfo, sampleDictionary }
+export { sampleDictionary }
+
+export default SampleInfo
