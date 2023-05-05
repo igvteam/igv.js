@@ -48,6 +48,7 @@ import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
 import ROITableControl from './ui/roiTableControl.js'
 import {sampleInfo} from "./sample/sampleInfo.js";
+import SampleInfoViewport from "./sample/sampleInfoViewport.js";
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -63,7 +64,6 @@ const igv_track_gear_menu_column_width = 28
 const column_multi_locus_shim_width = 2 + 1 + 2
 
 const defaultSampleNameViewportWidth = 200
-const defaultSampleInfoViewportWidth = 128
 class Browser {
 
     constructor(config, parentDiv) {
@@ -129,7 +129,6 @@ class Browser {
         this.showSampleNames = config.showSampleNames
         this.showSampleNameButton = config.showSampleNameButton
         this.sampleNameViewportWidth = config.sampleNameViewportWidth || defaultSampleNameViewportWidth
-        this.sampleInfoViewportWidth = defaultSampleInfoViewportWidth
 
         if (config.search) {
             this.searchConfig = {
@@ -271,7 +270,7 @@ class Browser {
     }
 
     getSampleInfoViewportWidth() {
-        return this.sampleInfoViewportWidth
+        return SampleInfoViewport.getSampleInfoColumnWidth()
     }
 
     isMultiLocusMode() {
@@ -2133,6 +2132,6 @@ async function searchWebService(browser, locus, searchConfig) {
     return {result: result, locusSearchString: locus}
 }
 
-export {searchWebService,defaultSampleInfoViewportWidth}
+export {searchWebService}
 export default Browser
 
