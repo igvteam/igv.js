@@ -18,6 +18,14 @@ let colorDictionary = {}
 
 const sampleInfo =
     {
+        isInitialized: () => {
+            if (undefined === sampleDictionary) {
+                return false
+            } else {
+                return true
+            }
+        },
+
         getAttributeCount: () => {
             return sampleInfo.getAttributeTypeList().length
         },

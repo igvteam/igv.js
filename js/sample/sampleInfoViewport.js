@@ -1,7 +1,8 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
-import {defaultSampleInfoViewportWidth} from '../browser.js'
 import {sampleDictionary, sampleInfo} from './sampleInfo.js'
+
+const sampleInfoTileWidth = 8
 
 class SampleInfoViewport {
 
@@ -28,6 +29,11 @@ class SampleInfoViewport {
         this.setWidth(width)
 
         this.addMouseHandlers()
+    }
+
+    static getSampleInfoColumnWidth() {
+        const width = sampleInfo.isInitialized() ? sampleInfo.getAttributeCount() * sampleInfoTileWidth : 128
+        return width
     }
 
     checkCanvas() {
@@ -65,12 +71,18 @@ class SampleInfoViewport {
 
     static async update(browser) {
 
-        for (const { sampleInfoViewport } of browser.trackViews) {
-            if (typeof sampleInfoViewport.trackView.track.getSamples === 'function') {
-                const samples = sampleInfoViewport.trackView.track.getSamples()
-                sampleInfoViewport.repaint(samples)
-            }
+        for (const {sampleNameViewport} of browser.trackViews) {
+            sampleNameViewport.setWidth(SampleInfoViewport.getSampleInfoColumnWidth())
         }
+
+        await browser.layoutChange()
+
+        // for (const { sampleInfoViewport } of browser.trackViews) {
+        //     if (typeof sampleInfoViewport.trackView.track.getSamples === 'function') {
+        //         const samples = sampleInfoViewport.trackView.track.getSamples()
+        //         sampleInfoViewport.repaint(samples)
+        //     }
+        // }
 
     }
 
@@ -116,7 +128,6 @@ class SampleInfoViewport {
 
                             const attributeEntries = Object.entries(attributes)
 
-                            const w = Math.floor(defaultSampleInfoViewportWidth/attributeEntries.length)
                             let x = 0;
                             for (const attributeEntry of attributeEntries) {
 
@@ -126,12 +137,12 @@ class SampleInfoViewport {
 
                                 const yy = y+shim
                                 const hh = tileHeight-(2*shim)
-                                context.fillRect(x, yy, w, hh)
+                                context.fillRect(x, yy, sampleInfoTileWidth, hh)
 
-                                const key = `${Math.floor(x)}#${Math.floor(yy)}#${Math.ceil(w)}#${Math.ceil(hh)}`
+                                const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
                                 this.hitList[ key ] = `${attribute}#${value}`
 
-                                x += w
+                                x += sampleInfoTileWidth
 
                             } // for (attributeEntries)
 
