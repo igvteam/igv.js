@@ -31,7 +31,7 @@ import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "../igv-icons.js"
 import {GradientColorScale} from "../util/colorScale.js"
 import {ColorTable, randomRGB} from "../util/colorPalletes.js"
-import {sampleDictionary, sampleInfo} from "../sample/sampleInfo.js";
+import {sampleDictionary} from "../sample/sampleInfo.js";
 
 class SegTrack extends TrackBase {
 
@@ -129,7 +129,7 @@ class SegTrack extends TrackBase {
         if (sampleDictionary) {
             menuItems.push('<hr/>')
             menuItems.push("Sort By Attribute:")
-            for (const attribute of sampleInfo.getAttributeTypeList()) {
+            for (const attribute of this.browser.sampleInfo.getAttributeTypeList()) {
                 menuItems.push(sortByAttribute(this.trackView, attribute))
             }
         }
@@ -544,7 +544,7 @@ function sortByAttribute(trackView, attribute) {
     object.text(attribute.split('_').join(' '))
 
     const click = () => {
-        trackView.track.sampleKeys = sampleInfo.getSortedSampleKeysByAttribute(trackView.track.sampleKeys, attribute, sortDirection)
+        trackView.track.sampleKeys = trackView.browser.sampleInfo.getSortedSampleKeysByAttribute(trackView.track.sampleKeys, attribute, sortDirection)
         trackView.repaintViews()
         sortDirection *= -1
     }

@@ -47,7 +47,7 @@ import ROITable from './roi/ROITable.js'
 import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
 import ROITableControl from './ui/roiTableControl.js'
-import {sampleInfo} from "./sample/sampleInfo.js";
+import SampleInfo from "./sample/sampleInfo.js";
 import SampleInfoViewport from "./sample/sampleInfoViewport.js";
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -99,6 +99,8 @@ class Browser {
         this.eventHandlers = {}
 
         this.addMouseHandlers()
+
+        this.sampleInfo = new SampleInfo(this)
 
         this.setControls(config)
     }
@@ -270,7 +272,7 @@ class Browser {
     }
 
     getSampleInfoViewportWidth() {
-        return SampleInfoViewport.getSampleInfoColumnWidth()
+        return SampleInfoViewport.getSampleInfoColumnWidth(this)
     }
 
     isMultiLocusMode() {
@@ -761,7 +763,7 @@ class Browser {
             const extension = getFileExtension(config.url)
 
             if ('txt' === extension) {
-                await sampleInfo.loadSampleInfoFile(this, config.url)
+                await this.sampleInfo.loadSampleInfoFile(this, config.url)
                 return undefined
 
             }

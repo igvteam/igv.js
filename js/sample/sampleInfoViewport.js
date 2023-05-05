@@ -1,6 +1,6 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
-import {sampleDictionary, sampleInfo} from './sampleInfo.js'
+import { sampleDictionary } from './sampleInfo.js'
 
 const sampleInfoTileWidth = 16
 
@@ -31,8 +31,9 @@ class SampleInfoViewport {
         this.addMouseHandlers()
     }
 
-    static getSampleInfoColumnWidth() {
-        return sampleInfo.isInitialized() ? sampleInfo.getAttributeCount() * sampleInfoTileWidth : 0
+    static getSampleInfoColumnWidth(browser) {
+        const found = browser.findTracks('type', 'seg')
+        return (found.length > 0 && browser.sampleInfo.isInitialized()) ? browser.sampleInfo.getAttributeCount() * sampleInfoTileWidth : 0
     }
 
     checkCanvas() {
@@ -71,7 +72,7 @@ class SampleInfoViewport {
     static async update(browser) {
 
         for (const {sampleNameViewport} of browser.trackViews) {
-            sampleNameViewport.setWidth(SampleInfoViewport.getSampleInfoColumnWidth())
+            sampleNameViewport.setWidth(SampleInfoViewport.getSampleInfoColumnWidth(browser))
         }
 
         await browser.layoutChange()
@@ -114,7 +115,7 @@ class SampleInfoViewport {
 
                     if (sampleDictionary) {
 
-                        const attributes = sampleInfo.getAttributes(name)
+                        const attributes = this.browser.sampleInfo.getAttributes(name)
 
                         if (attributes) {
 
@@ -125,7 +126,7 @@ class SampleInfoViewport {
 
                                 const [ attribute, value ] = attributeEntry
 
-                                context.fillStyle = sampleInfo.getAttributeColor(attribute, value)
+                                context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
 
                                 const yy = y+shim
                                 const hh = tileHeight-(2*shim)
