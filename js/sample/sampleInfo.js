@@ -18,6 +18,10 @@ let colorDictionary = {}
 
 const sampleInfo =
     {
+        getAttributeCount: () => {
+            return sampleInfo.getAttributeTypeList().length
+        },
+
         getAttributeTypeList: () => {
             return attributes
         },
