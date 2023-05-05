@@ -14,7 +14,7 @@ let attributes
 let attributeRangeLUT
 let sampleDictionary
 let copyNumberDictionary
-let colorDictionary
+let colorDictionary = {}
 
 const sampleInfo =
     {
@@ -177,7 +177,6 @@ function createColorScheme(sections) {
 
     const found = sections.filter(string => string.startsWith('colors'))
 
-    colorDictionary = {}
     if (found.length > 0) {
 
         let colorSettings = found[ 0 ]
