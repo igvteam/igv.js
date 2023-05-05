@@ -2,7 +2,7 @@ import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import {sampleDictionary, sampleInfo} from './sampleInfo.js'
 
-const sampleInfoTileWidth = 8
+const sampleInfoTileWidth = 16
 
 class SampleInfoViewport {
 
@@ -32,15 +32,14 @@ class SampleInfoViewport {
     }
 
     static getSampleInfoColumnWidth() {
-        const width = sampleInfo.isInitialized() ? sampleInfo.getAttributeCount() * sampleInfoTileWidth : 128
-        return width
+        return sampleInfo.isInitialized() ? sampleInfo.getAttributeCount() * sampleInfoTileWidth : 0
     }
 
     checkCanvas() {
 
         const dpi = window.devicePixelRatio
         const requiredHeight = this.viewport.clientHeight
-        const requiredWidth = this.browser.sampleInfoViewportWidth
+        const requiredWidth = this.browser.getSampleInfoViewportWidth()
 
         if (this.canvas.width !== requiredWidth * dpi || this.canvas.height !== requiredHeight * dpi) {
             const canvas = this.canvas
@@ -76,13 +75,6 @@ class SampleInfoViewport {
         }
 
         await browser.layoutChange()
-
-        // for (const { sampleInfoViewport } of browser.trackViews) {
-        //     if (typeof sampleInfoViewport.trackView.track.getSamples === 'function') {
-        //         const samples = sampleInfoViewport.trackView.track.getSamples()
-        //         sampleInfoViewport.repaint(samples)
-        //     }
-        // }
 
     }
 
