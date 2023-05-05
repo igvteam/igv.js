@@ -77,7 +77,7 @@ class BufferedReader {
                 } catch (e1) {
                     console.error(e1)
                 }
-
+                throw e
             }
         }
     }
