@@ -1305,10 +1305,7 @@ class Browser {
 
         let {width} = this.columnContainer.getBoundingClientRect()
 
-        const sampleNameViewportWidth = this.getSampleNameViewportWidth()
-        const sampleInfoViewportWidth = this.getSampleInfoViewportWidth()
-
-        width -= igv_axis_column_width + sampleInfoViewportWidth + sampleNameViewportWidth + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
+        width -= igv_axis_column_width + this.getSampleInfoViewportWidth() + this.getSampleNameViewportWidth() + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
 
         width -= column_multi_locus_shim_width * (columnCount - 1)
 
