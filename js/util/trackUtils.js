@@ -281,4 +281,4 @@ async function inferFileFormatFromHeader(config) {
 }
 
 
-export {knownFileExtensions, getFormat, inferFileFormat, inferFileFormatFromHeader, inferTrackType, inferIndexPath}
+export {knownFileExtensions, getFormat, inferFileFormat, inferFileFormatFromHeader, inferTrackType, inferIndexPath, FileFormats}
