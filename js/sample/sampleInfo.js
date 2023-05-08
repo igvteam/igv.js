@@ -20,13 +20,19 @@ class SampleInfo {
     constructor(browser) {
 
         browser.on('trackorderchanged', list => {
-            console.log(`${ Date.now() } - SampleInfo: track did load`)
-            browser.layoutChange()
+
+            if (this.isInitialized()) {
+                console.log(`${ Date.now() } - SampleInfo: track did load (trackorderchanged event)`)
+
+                browser.layoutChange()
+            }
+
         })
 
     }
 
     isInitialized(){
+
         if (undefined === sampleDictionary) {
             return false
         } else {
@@ -281,8 +287,6 @@ function createColorScheme(sections) {
             }
 
         }
-
-        console.log('done')
 
     }
 
