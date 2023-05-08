@@ -21,9 +21,9 @@ class SampleInfo {
 
         browser.on('trackorderchanged', list => {
 
+            console.log(`${ Date.now() } - SampleInfo: trackorderchanged ${ list.join(' ')}`)
+            
             if (this.isInitialized()) {
-                console.log(`${ Date.now() } - SampleInfo: track did load (trackorderchanged event)`)
-
                 browser.layoutChange()
             }
 
@@ -61,6 +61,8 @@ class SampleInfo {
         } catch (e) {
             console.error(e.message)
         }
+
+        console.log('SampleInfo - file loaded.')
 
     }
 
