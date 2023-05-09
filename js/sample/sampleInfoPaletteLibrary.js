@@ -1,22 +1,3 @@
-
-const appleCrayonLUT =
-    {
-            maraschino: "#ff2101",
-            tangerine: "#ff8802",
-            lemon: "#fffa03",
-            lime: "#83f902",
-            spring: "#05f802",
-            sea_foam: "#03f987",
-            turquoise: "#00fdff",
-            aqua: "#008cff",
-            blueberry: "#002eff",
-            grape: "#8931ff",
-            magenta: "#ff39ff",
-            strawberry: "#ff2987",
-
-    };
-const appleCrayonNames = Object.keys(appleCrayonLUT)
-
 // https://sashamaps.net/docs/resources/20-colors/
 const distinctColorsPaletteSrcStrings =
     [
@@ -45,4 +26,4 @@ const distinctColorsPalette = distinctColorsPaletteSrcStrings.map(str => {
         return [ r, g, b ]
 })
 
-export { appleCrayonNames, distinctColorsPalette }
+export { distinctColorsPalette }
