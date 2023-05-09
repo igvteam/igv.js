@@ -21,8 +21,8 @@ class SampleInfo {
 
         browser.on('trackorderchanged', list => {
 
-            console.log(`${ Date.now() } - SampleInfo: trackorderchanged ${ list.join(' ')}`)
-            
+            console.log(`${ Date.now() } - SampleInfo(${ this.isInitialized() ? 'initialized' : 'uninitialized' }): trackorderchanged ${ list.join(' ')}`)
+
             if (this.isInitialized()) {
                 browser.layoutChange()
             }
@@ -49,7 +49,8 @@ class SampleInfo {
     }
 
     getAttributes(key) {
-        let sampleKey = copyNumberDictionary[ key ] || key
+
+        const sampleKey = undefined === copyNumberDictionary ? key : (copyNumberDictionary[ key ] || key)
         return sampleDictionary[ sampleKey ]
     }
 
