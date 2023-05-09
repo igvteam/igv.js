@@ -8,7 +8,7 @@ import {
     rgbStringLerp,
     rgbStringTokens
 } from "../util/colorPalletes.js";
-import { appleCrayonNames, distinctColorsPalette } from './sampleInfoPaletteLibrary.js'
+import { distinctColorsPalette } from './sampleInfoPaletteLibrary.js'
 
 let attributes
 let attributeRangeLUT
