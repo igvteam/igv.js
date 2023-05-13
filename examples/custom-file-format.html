@@ -11,16 +11,8 @@
 
     import igv from "../dist/igv.esm.min.js"
 
-    igv.TrackUtils.FileFormats["dragenrohbed"] = {
-        fields:
-            [
-                'chr',
-                'start',
-                'end',
-                'score',
-                'hom',
-                'het'
-            ]}
+    const dragenrohbedFormatFields = ['chr', 'start', 'end', 'score', 'hom', 'het']
+    igv.registerFileFormats("dragenrohbed", dragenrohbedFormatFields)
 
     const config = {
         reference: "hg38",
