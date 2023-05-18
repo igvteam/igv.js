@@ -1,6 +1,6 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
-import { sampleDictionary } from './sampleInfo.js'
+import {emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
 
 const sampleInfoTileWidth = 16
 
@@ -179,7 +179,7 @@ class SampleInfoViewport {
                         // do nothing
                     } else {
                         const [ a, b ] = value.split('#')
-                        this.viewport.setAttribute('title', `${ a.split('_') } ${ b }`)
+                        this.viewport.setAttribute('title', `${ a.split(emptySpaceReplacement).join(' ') }: ${ b }`)
                         break
                     }
 

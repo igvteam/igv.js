@@ -16,6 +16,8 @@ let sampleDictionary
 let copyNumberDictionary
 let colorDictionary = {}
 
+const emptySpaceReplacement = '|'
+
 class SampleInfo {
     constructor(browser) {
 
@@ -357,7 +359,7 @@ function updateSampleDictionary(sampleTableAsString, doSampleMapping) {
         scratch.shift()
     }
 
-    attributes = scratch.map(label => label.split(' ').join('_'))
+    attributes = scratch.map(label => label.split(' ').join(emptySpaceReplacement))
 
     const cooked = lines.filter(line => line.length > 0)
 
@@ -374,7 +376,13 @@ function updateSampleDictionary(sampleTableAsString, doSampleMapping) {
 
         for (let i = 0; i < record.length; i++) {
             const obj = {}
-            obj[ attributes[ i ] ] = "" === record[ i ] ? '-' : record[ i ]
+
+            if ("" === record[ i ]) {
+                obj[ attributes[ i ] ] = '-'
+            } else {
+                obj[ attributes[ i ] ] = record[ i ]
+            }
+
             Object.assign(sampleDictionary[ _key_ ], obj)
         }
 
@@ -416,6 +424,6 @@ function stringToRGBString(str) {
 }
 
 // identify an array that is predominantly numerical and replace string with undefined
-export { sampleDictionary }
+export { sampleDictionary, emptySpaceReplacement }
 
 export default SampleInfo
