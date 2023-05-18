@@ -179,11 +179,9 @@ class SampleInfoViewport {
                         // do nothing
                     } else {
                         const [ a, b ] = value.split('#')
-                        this.viewport.setAttribute('title', `${ a.split(emptySpaceReplacement).join(' ') }: ${ b }`)
+                        this.viewport.setAttribute('title', `${ a.split(emptySpaceReplacement).join(' ') }: ${ '-' === b ? '' : b }`)
                         break
                     }
-
-
                 }
             }
         }

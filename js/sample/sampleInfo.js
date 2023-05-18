@@ -1,11 +1,12 @@
 import {igvxhr} from '../../node_modules/igv-utils/src/index.js'
+import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 import SampleInfoViewport from "./sampleInfoViewport.js";
 import {
     appleCrayonRGB,
     appleCrayonRGBA,
     randomRGB,
     rgbaColor,
-    rgbStringLerp,
+    rgbStringHeatMapLerp, rgbStringLerp,
     rgbStringTokens
 } from "../util/colorPalletes.js";
 import { distinctColorsPalette } from './sampleInfoPaletteLibrary.js'
@@ -17,6 +18,7 @@ let copyNumberDictionary
 let colorDictionary = {}
 
 const emptySpaceReplacement = '|'
+const colorForNA = appleCrayonRGB('magnesium')
 
 class SampleInfo {
     constructor(browser) {
@@ -95,6 +97,10 @@ class SampleInfo {
         // Use for diagnostic rendering
         // return randomRGB(180, 240)
 
+        if (attribute === 'Secondary|or|Recurrent') {
+            console.log(`${ attribute } : ${ value }`)
+        }
+
         let color
 
         if ('-' === value) {
@@ -117,22 +123,12 @@ class SampleInfo {
 
             const [ min, max ] = attributeRangeLUT[ attribute ]
 
-            // a hack required to handle attributes that should have string values
-            // but the actual data has 0 as well.
-            if (0 === min && 0 === max) {
+            const lowerAlphaThreshold = 2e-1
+            const alpha = Math.max((value - min) / (max - min), lowerAlphaThreshold)
 
-                color = appleCrayonRGB('snow')
-
-            } else {
-
-                const lowerAlphaThreshold = 2e-1
-                const alpha = Math.max((value - min) / (max - min), lowerAlphaThreshold)
-
-                // 20 distinct colors
-                const [ r, g, b ] = distinctColorsPalette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
-                color = `rgba(${r},${g},${b},${alpha})`
-
-            }
+            // 20 distinct colors
+            const [ r, g, b ] = distinctColorsPalette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
+            color = `rgba(${r},${g},${b},${alpha})`
 
         }
 
@@ -219,7 +215,7 @@ function createColorScheme(sections) {
 
             switch (index) {
                 case 0:
-                    return token.split(' ').join('_')
+                    return token.split(' ').join(emptySpaceReplacement)
                 case 1:
                     return token.includes(':') ? token.split(':').map(str => parseFloat(str)) : token
                 case 2:
@@ -247,7 +243,9 @@ function createColorScheme(sections) {
         for (const [k, v] of Object.entries(tmp)) {
             const lut = Object.assign({}, v)
             colorDictionary[ k ] = attributeValue => {
-                const color = lut[ attributeValue.toUpperCase() ]
+
+                const key = attributeValue.toUpperCase()
+                const color = lut[ key ] || appleCrayonRGB('snow')
                 return color
             }
         }
@@ -260,11 +258,12 @@ function createColorScheme(sections) {
 
             if (3 === cl.length) {
 
-                const [ r, g, b ] = rgbStringTokens(cl[ 2 ])
+                const [ _r, _g, _b ] = rgbStringTokens(cl[ 2 ])
 
                 colorDictionary[ attribute ] = attributeValue => {
-                    const interpolant = Math.min(Math.max(attributeValue, a), b)
-                    return rgbaColor(r, g, b, interpolant)
+                    attributeValue = IGVMath.clamp(attributeValue, a, b)
+                    const interpolant = (attributeValue - a)/(b - a)
+                    return rgbaColor(_r, _g, _b, interpolant)
                 }
 
             } else if (4 === cl.length) {
@@ -273,21 +272,36 @@ function createColorScheme(sections) {
                 const [ attribute, ignore, rgbA, rgbB ] = cl
 
                 colorDictionary[ attribute ] = attributeValue => {
-                    const interpolant = Math.min(Math.max(attributeValue, a), b)
-                    return rgbStringLerp(rgbA, rgbB, interpolant)
+                    attributeValue = IGVMath.clamp(attributeValue, a, b)
+                    const interpolant = (attributeValue - a)/(b - a)
+                    return rgbStringHeatMapLerp(rgbA, rgbB, interpolant)
                 }
             }
         }
 
-        const stars = mappings.filter(mapping => 3 === mapping.length && mapping.includes('*'))
+        const wildCards = mappings.filter(mapping => 3 === mapping.length && mapping.includes('*'))
 
-        for (const star of stars) {
+        for (const wildCard of wildCards) {
 
-            if ('*' === star[ 1 ]) {
-                const [ attribute, s, rgb ] = star
-                colorDictionary[ attribute ] = () => rgb
-            } else if ('*' === star[ 0 ]) {
-                const [ s, attributeValue, rgb ] = star
+            if ('*' === wildCard[ 1 ]) {
+                const [ attribute, star, rgb ] = wildCard
+
+                colorDictionary[ attribute ] = attributeValue => {
+
+                    if ('NA' === attributeValue) {
+                        return colorForNA
+                    } else {
+                        const [ min, max ] = attributeRangeLUT[ attribute ]
+                        const interpolant = (attributeValue - min) / (max - min)
+
+                        const [ r, g, b ] = rgbStringTokens(rgb)
+                        return rgbaColor(r, g, b, interpolant)
+                    }
+
+                }
+
+            } else if ('*' === wildCard[ 0 ]) {
+                const [ star, attributeValue, rgb ] = wildCard
                 colorDictionary[ attributeValue ] = () => rgb
             }
 

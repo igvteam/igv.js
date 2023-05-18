@@ -427,6 +427,44 @@ function rgbStringLerp(_a, _b, interpolant) {
     return rgbColor(r, g, b)
 }
 
+const fudge = 0.005
+function rgbStringHeatMapLerp(_a, _b, interpolant) {
+
+    if (interpolant < fudge) {
+        return _a
+    } else if (interpolant > 1.0 - fudge) {
+        return _b
+    } else {
+        let rA, gA, bA
+        let rB, gB, bB
+        if (interpolant < 0.5) {
+
+            interpolant /= .5;
+
+            [ rA, gA, bA ] = rgbStringTokens(_a);
+            [ rB, gB, bB ] = rgbStringTokens(appleCrayonRGB('snow'));
+        } else {
+
+            interpolant = (interpolant - .5) / .5;
+
+            [ rA, gA, bA ] = rgbStringTokens(appleCrayonRGB('snow'));
+            [ rB, gB, bB ] = rgbStringTokens(_b);
+        }
+
+        const [ r, g, b ] =
+            [
+                Math.floor(IGVMath.lerp(rA, rB, interpolant)),
+                Math.floor(IGVMath.lerp(gA, gB, interpolant)),
+                Math.floor(IGVMath.lerp(bA, bB, interpolant))
+            ]
+
+        return rgbColor(r, g, b)
+
+    }
+
+
+}
+
 export {
     appleCrayonRGB,
     appleCrayonRGBA,
@@ -442,5 +480,6 @@ export {
     randomRGBConstantAlpha,
     rgbaStringTokens,
     rgbStringTokens,
-    rgbStringLerp
+    rgbStringLerp,
+    rgbStringHeatMapLerp
 }
