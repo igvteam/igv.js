@@ -37,6 +37,8 @@ class SampleNameViewport {
 
         this.contentTop = 0
 
+        this.sortDirection = 1
+
         this.setWidth(width)
 
         if (false === this.browser.showSampleNames) {
