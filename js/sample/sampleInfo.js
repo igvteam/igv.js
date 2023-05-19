@@ -97,9 +97,9 @@ class SampleInfo {
         // Use for diagnostic rendering
         // return randomRGB(180, 240)
 
-        if (attribute === 'Secondary|or|Recurrent') {
-            console.log(`${ attribute } : ${ value }`)
-        }
+        // if (value === 'NA') {
+        //     console.log(`${ attribute } : ${ value }`)
+        // }
 
         let color
 
@@ -117,16 +117,19 @@ class SampleInfo {
 
         } else if (typeof value === "string") {
 
-            color = stringToRGBString(value)
+            color = 'NA' === value ? colorForNA : stringToRGBString(value)
 
         } else {
+
+            if ('%|Tumor|Nuclei' === attribute) {
+                console.log(`${ attribute } : ${ value }`)
+            }
 
             const [ min, max ] = attributeRangeLUT[ attribute ]
 
             const lowerAlphaThreshold = 2e-1
             const alpha = Math.max((value - min) / (max - min), lowerAlphaThreshold)
 
-            // 20 distinct colors
             const [ r, g, b ] = distinctColorsPalette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
             color = `rgba(${r},${g},${b},${alpha})`
 

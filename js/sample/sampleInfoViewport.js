@@ -99,7 +99,8 @@ class SampleInfoViewport {
             let shim = 1
 
             const tileHeight = samples.height
-            if (tileHeight < 2*shim) {
+
+            if (Math.abs(tileHeight - 2*shim) < 1) {
                 shim = 0
             }
 
