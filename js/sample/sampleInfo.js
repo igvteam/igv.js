@@ -121,9 +121,9 @@ class SampleInfo {
 
         } else {
 
-            if ('%|Tumor|Nuclei' === attribute) {
-                console.log(`${ attribute } : ${ value }`)
-            }
+            // if ('%|Tumor|Nuclei' === attribute) {
+            //     console.log(`${ attribute } : ${ value }`)
+            // }
 
             const [ min, max ] = attributeRangeLUT[ attribute ]
 

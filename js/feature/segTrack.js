@@ -469,7 +469,7 @@ class SegTrack extends TrackBase {
         const genomicLocation = clickState.genomicLocation
 
         // Define a region 5 "pixels" wide in genomic coordinates
-        const sortDirection = this.config.sort ?
+        const direction = this.config.sort ?
             (this.config.sort.direction === "ASC" ? "DESC" : "ASC") :      // Toggle from previous sort
             "DESC"
         const bpWidth = referenceFrame.toBP(2.5)
@@ -488,7 +488,7 @@ class SegTrack extends TrackBase {
 
 
                     const sort = {
-                        direction: sortDirection,
+                        direction,
                         chr: clickState.viewport.referenceFrame.chr,
                         start: genomicLocation - bpWidth,
                         end: genomicLocation + bpWidth
@@ -522,16 +522,15 @@ class SegTrack extends TrackBase {
     }
 }
 
-let sortDirection = 1
 function sortBySampleName(trackView) {
 
     const object = $('<div>')
     object.text('Sort by sample names')
 
     const click = () => {
-        trackView.track.sampleKeys.sort((a, b) => sortDirection * a.localeCompare(b))
+        trackView.track.sampleKeys.sort((a, b) => trackView.sampleNameViewport.sortDirection * a.localeCompare(b))
         trackView.repaintViews()
-        sortDirection = -1 * sortDirection
+        trackView.sampleNameViewport.sortDirection *= -1
     }
 
     return { object, click }
@@ -544,9 +543,9 @@ function sortByAttribute(trackView, attribute) {
     object.html(`&nbsp;&nbsp;${ attribute.split(emptySpaceReplacement).join(' ') }`)
 
     const click = () => {
-        trackView.track.sampleKeys = trackView.browser.sampleInfo.getSortedSampleKeysByAttribute(trackView.track.sampleKeys, attribute, sortDirection)
+        trackView.track.sampleKeys = trackView.browser.sampleInfo.getSortedSampleKeysByAttribute(trackView.track.sampleKeys, attribute, trackView.sampleInfoViewport.sortDirection)
         trackView.repaintViews()
-        sortDirection *= -1
+        trackView.sampleInfoViewport.sortDirection *= -1
     }
 
     return { object, click }

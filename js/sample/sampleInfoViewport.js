@@ -26,6 +26,8 @@ class SampleInfoViewport {
         this.contentTop = 0
         this.hitList = undefined
 
+        this.sortDirection = 1
+
         this.setWidth(width)
 
         this.addMouseHandlers()
