@@ -63,7 +63,6 @@ const igv_track_gear_menu_column_width = 28
 // $igv-column-shim-margin: 2px;
 const column_multi_locus_shim_width = 2 + 1 + 2
 
-const defaultSampleNameViewportWidth = 200
 class Browser {
 
     constructor(config, parentDiv) {
@@ -98,6 +97,17 @@ class Browser {
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = {}
 
+        this.on('trackremoved', () => {
+            const found = this.findTracks('type', 'seg')
+            if (0 === found.length) {
+                this.sampleNameViewportWidth = undefined
+                this.showSampleNames = false
+                this.sampleNameControl.setState(this.showSampleNames)
+                this.sampleNameControl.hide()
+                this.layoutChange()
+            }
+        })
+
         this.addMouseHandlers()
 
         this.sampleInfo = new SampleInfo(this)
@@ -130,7 +140,12 @@ class Browser {
 
         this.showSampleNames = config.showSampleNames
         this.showSampleNameButton = config.showSampleNameButton
-        this.sampleNameViewportWidth = config.sampleNameViewportWidth || defaultSampleNameViewportWidth
+
+        this.sampleNameViewportWidth = undefined
+
+        if (config.sampleNameViewportWidth) {
+            this.sampleNameViewportWidth = config.sampleNameViewportWidth
+        }
 
         if (config.search) {
             this.searchConfig = {
@@ -268,7 +283,13 @@ class Browser {
     }
 
     getSampleNameViewportWidth() {
-        return false === this.showSampleNames ? 0 : this.sampleNameViewportWidth
+
+        if (undefined === this.sampleNameViewportWidth) {
+            return 0
+        } else {
+            return false === this.showSampleNames ? 0 : this.sampleNameViewportWidth
+        }
+
     }
 
     getSampleInfoViewportWidth() {
@@ -1636,7 +1657,8 @@ class Browser {
         if (this.showSampleNames !== undefined) {
             json['showSampleNames'] = this.showSampleNames
         }
-        if (this.sampleNameViewportWidth !== defaultSampleNameViewportWidth) {
+
+        if (this.sampleNameViewportWidth) {
             json['sampleNameViewportWidth'] = this.sampleNameViewportWidth
         }
 

@@ -1,5 +1,7 @@
+import {StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
+
 
 const maxFontSize = 10
 
@@ -91,8 +93,17 @@ class SampleNameViewport {
 
     async repaint(samples) {
 
-        this.checkCanvas()
-        this.draw({context: this.ctx, samples})
+        if (true === this.browser.showSampleNames) {
+            this.checkCanvas()
+            this.draw({context: this.ctx, samples})
+
+            if (undefined === this.browser.sampleNameViewportWidth) {
+                const lengths = samples.names.map(name =>  this.ctx.measureText(name).width)
+                this.browser.sampleNameViewportWidth = Math.ceil(Math.max(...lengths))
+                this.browser.layoutChange()
+            }
+
+        }
     }
 
     draw({context, samples}) {
@@ -123,6 +134,7 @@ class SampleNameViewport {
             }
             y += samples.height
         }
+
     }
 
     renderSVGContext(context, {deltaX, deltaY}) {
@@ -162,9 +174,9 @@ class SampleNameViewport {
                     value: this.browser.sampleNameViewportWidth,
                     callback: newWidth => {
                         this.browser.sampleNameViewportWidth = parseInt(newWidth)
-                        for (let {sampleNameViewport} of this.browser.trackViews) {
-                            sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
-                        }
+                        // for (let {sampleNameViewport} of this.browser.trackViews) {
+                        //     sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
+                        // }
                         this.browser.layoutChange()
                     }
                 }
