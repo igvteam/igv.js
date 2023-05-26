@@ -3,6 +3,8 @@ import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 
 
+const maxSampleNameViewportWidth = 200
+const fudgeTextMetricWidth = 4
 const maxFontSize = 10
 
 const fontConfigureTemplate =
@@ -99,7 +101,7 @@ class SampleNameViewport {
 
             if (undefined === this.browser.sampleNameViewportWidth) {
                 const lengths = samples.names.map(name =>  this.ctx.measureText(name).width)
-                this.browser.sampleNameViewportWidth = Math.ceil(Math.max(...lengths))
+                this.browser.sampleNameViewportWidth = Math.min(maxSampleNameViewportWidth, fudgeTextMetricWidth + Math.ceil(Math.max(...lengths)))
                 this.browser.layoutChange()
             }
 
