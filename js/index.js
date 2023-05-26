@@ -40,8 +40,6 @@ export default {
     oauth,
     version,
     setApiKey,
-    registerTrackClass,
-    registerTrackCreatorFunction,
     registerFileFormats
 }
 
