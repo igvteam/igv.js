@@ -1,0 +1,50 @@
+<html>
+<head>
+    <title>igv.js embedding example</title>
+</head>
+
+<body>
+
+<div id="igvDiv"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.min.js"
+
+    const dragenrohbedFormatFields = ['chr', 'start', 'end', 'score', 'hom', 'het']
+    igv.registerFileFormats("dragenrohbed", dragenrohbedFormatFields)
+
+    const config = {
+        reference: "hg38",
+        locus: "chr8:1246755-1353734",
+        tracks: [
+            {
+                name: "GM12878 H3K27ac ",
+                url: "https://www.encodeproject.org/files/ENCFF716VWO/@@download/ENCFF716VWO.bigWig",
+                color: "rgb(200,0,0)",
+                type: "wig",
+                format: "bigwig"
+            },
+            {
+                name: "GM12878 H3K4me3 ",
+                url: "https://www.encodeproject.org/files/ENCFF669DTI/@@download/ENCFF669DTI.bigWig",
+                color: "rgb(0,150,0)",
+                format: "bigwig",
+                type: "wig"
+            },
+            {
+                name: 'ILMN Dragen ROH',
+                url: './Example.dragen.roh.bed',
+                color: '#03A9F4',
+                type: 'annotation',
+                format: 'dragenrohbed',
+            }
+        ]
+    }
+
+    const browser = await igv.createBrowser(document.getElementById("igvDiv"), config)
+
+</script>
+
+</body>
+</html>
