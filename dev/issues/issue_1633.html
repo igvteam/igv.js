@@ -11,7 +11,7 @@
 
 <script type="module">
 
-    import igv from "https://cdn.jsdelivr.net/npm/igv@2.15.5/dist/igv.esm.js"
+    import igv from "../../js/index.js"
 
     var options =
         {
@@ -23,15 +23,15 @@
                     format: 'gff3',
                     url: 'https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/Homo_sapiens.GRCh38.109.chr.sorted.gff3.gz',
                     indexURL: "https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/Homo_sapiens.GRCh38.109.chr.sorted.gff3.gz.tbi",
-                    height: 600
+                    autoHeight: true
                 },
-                {
-                    type: 'annotation',
-                    format: 'gff3',
-                    url: 'https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/homo_sapiens.GRCh38.sorted.gff3.gz',
-                    indexURL: "https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/homo_sapiens.GRCh38.sorted.gff3.gz.tbi",
-                    height: 600
-                }
+                // {
+                //     type: 'annotation',
+                //     format: 'gff3',
+                //     url: 'https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/homo_sapiens.GRCh38.sorted.gff3.gz',
+                //     indexURL: "https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/homo_sapiens.GRCh38.sorted.gff3.gz.tbi",
+                //     height: 600
+                // }
             ]
         }
 
