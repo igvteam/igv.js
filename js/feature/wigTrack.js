@@ -32,12 +32,12 @@ import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import MenuUtils from "../ui/menuUtils.js"
 
+const DEFAULT_COLOR = 'rgb(150, 150, 150)'
+
 class WigTrack extends TrackBase {
 
     static defaults = {
         height: 50,
-        color: 'rgb(150, 150, 150)',
-        altColor: 'rgb(150, 150, 150)',
         flipAxis: false,
         logScale: false,
         windowFunction: 'mean',
@@ -170,7 +170,7 @@ class WigTrack extends TrackBase {
         const pixelWidth = options.pixelWidth
         const pixelHeight = options.pixelHeight
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        const posColor = this.color || WigTrack.defaults.color
+        const posColor = this.color || DEFAULT_COLOR
 
         let baselineColor
         if (typeof posColor === "string" && posColor.startsWith("rgb(")) {
@@ -315,7 +315,7 @@ class WigTrack extends TrackBase {
      */
 
     getColorForFeature(f) {
-        let c = (f.value < 0 && this.altColor) ? this.altColor : this.color || WigTrack.defaults.color
+        let c = (f.value < 0 && this.altColor) ? this.altColor : this.color || DEFAULT_COLOR
         return (typeof c === "function") ? c(f.value) : c
     }
 
