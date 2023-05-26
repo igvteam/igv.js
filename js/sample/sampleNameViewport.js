@@ -163,7 +163,7 @@ class SampleNameViewport {
     addMouseHandlers() {
 
         this.boundClickHandler = clickHandler.bind(this)
-        this.viewport.addEventListener('click', this.boundClickHandler)
+        this.viewport.addEventListener('contextmenu', this.boundClickHandler)
 
         function clickHandler(event) {
 
@@ -188,7 +188,7 @@ class SampleNameViewport {
     }
 
     removeMouseHandlers() {
-        this.viewport.removeEventListener('click', this.boundClickHandler)
+        this.viewport.removeEventListener('contextmenu', this.boundClickHandler)
     }
     dispose() {
         this.removeMouseHandlers()
