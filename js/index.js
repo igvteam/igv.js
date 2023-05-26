@@ -7,6 +7,7 @@ import {createBrowser, createTrack, removeAllBrowsers, removeBrowser, visibility
 import embedCss from "./embedCss.js"
 import version from "./version.js"
 import * as TrackUtils from "./util/trackUtils.js"
+import {registerFileFormats} from "./util/trackUtils.js"
 import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 
 const setApiKey = igvxhr.setApiKey
@@ -38,6 +39,9 @@ export default {
     setOauthToken,
     oauth,
     version,
-    setApiKey
+    setApiKey,
+    registerTrackClass,
+    registerTrackCreatorFunction,
+    registerFileFormats
 }
 
