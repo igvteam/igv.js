@@ -48,8 +48,6 @@ class TrackBase {
 
     static defaults = {
         height: 50,
-        color: 'rgb(0, 0, 150)',
-        altColor: 'rgb(0, 0, 150)',
         autoHeight: false,
         visibilityWindow: undefined,
         supportHiDPI: true
