@@ -78,6 +78,10 @@ class BAMTrack extends TrackBase {
 
         this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
 
+        if(!this.showAlignments) {
+            this._height = this.coverageTrackHeight
+        }
+
         // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
         // are present for a given reference frame the last one will take precedence
         if (config.sort) {
