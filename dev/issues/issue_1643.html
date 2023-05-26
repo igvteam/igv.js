@@ -1,0 +1,35 @@
+<html>
+<body>
+
+<div id="igvDiv"></div>
+<script type="module">
+    import igv from "../../js/index.js"
+
+    var options =
+        {
+            reference: {
+                fastaURL: "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa",
+                indexURL: "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa.fai"
+            },
+            locus: "X:73,819,307-73,856,333",
+            tracks: [
+                {
+                    type: 'annotation',
+                    format: 'gff3',
+                    url: 'https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/homo_sapiens.GRCh38.sorted.gff3.gz',
+                    indexURL: "https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/homo_sapiens.GRCh38.sorted.gff3.gz.tbi",
+                    height: 600,
+                    color: "red"
+                }
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+        })
+
+</script>
+</body>
+</html>

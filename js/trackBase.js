@@ -49,7 +49,9 @@ class TrackBase {
     static defaults = {
         height: 50,
         autoHeight: false,
-        visibilityWindow: undefined,
+        visibilityWindow: undefined,   // Identifies property that should be copied from config
+        color: undefined,  // Identifies property that should be copied from config
+        altColor: undefined,  // Identifies property that should be copied from config
         supportHiDPI: true
     }
 
