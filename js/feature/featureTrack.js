@@ -12,6 +12,9 @@ import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
+const DEFAULT_COLOR = 'rgb(0, 0, 150)'
+const DEFAULT_ALT_COLOR = 'rgb(0, 0, 150)'
+
 
 class FeatureTrack extends TrackBase {
 
@@ -433,8 +436,8 @@ class FeatureTrack extends TrackBase {
     getColorForFeature(feature) {
 
         let color
-        if (this.altColor && "-" === feature.strand) {
-            color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor
+        if ("-" === feature.strand) {
+            color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor ? this.altColor : DEFAULT_ALT_COLOR
         } else if (this.color) {
             color = (typeof this.color === "function") ? this.color(feature) : this.color  // Explicit setting via menu, or possibly track line if !config.color
         } else if (this.colorBy) {
@@ -445,7 +448,7 @@ class FeatureTrack extends TrackBase {
         } else if (feature.color) {
             color = feature.color   // Explicit color for feature
         } else {
-            color = this.color   // Track default
+            color = DEFAULT_COLOR   // Track default
         }
 
         if (feature.alpha && feature.alpha !== 1) {

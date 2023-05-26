@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+Demonstration of Bigbed with feature colors
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chrM",
+            tracks:
+                [
+                    {
+                        name: "ClinVar",
+                        type: "annotation",
+                        format: "bigBed",
+                        url: "https://hgdownload.soe.ucsc.edu/gbdb/hg19/bbi/clinvar/clinvarMain.bb",
+                        displayMode: "EXPANDED",
+                        visibilityWindow: -1,
+                        order: Number.MIN_VALUE,
+                    }
+                ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+        })
+
+
+</script>
+
+</body>
+
+</html>
