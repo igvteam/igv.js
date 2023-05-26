@@ -279,5 +279,9 @@ async function inferFileFormatFromHeader(config) {
 
 }
 
+function registerFileFormats(name, fields) {
+    FileFormats[name] = {fields: fields}
+}
 
-export {knownFileExtensions, getFormat, inferFileFormat, inferFileFormatFromHeader, inferTrackType, inferIndexPath}
+
+export {knownFileExtensions, getFormat, inferFileFormat, inferFileFormatFromHeader, inferTrackType, inferIndexPath, registerFileFormats}
