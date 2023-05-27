@@ -5,9 +5,11 @@ import IGVGraphics from "../igv-canvas.js"
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "../igv-icons.js"
 import {GradientColorScale} from "../util/colorScale.js"
-import {ColorTable} from "../util/colorPalletes.js"
+import {ColorTable, randomRGB} from "../util/colorPalletes.js"
+import {emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js";
 import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
+
 
 class SegTrack extends TrackBase {
 
@@ -96,6 +98,18 @@ class SegTrack extends TrackBase {
     menuItemList() {
 
         const menuItems = []
+
+        menuItems.push('<hr/>')
+        menuItems.push(sortBySampleName(this.trackView))
+
+        if (sampleDictionary) {
+            menuItems.push('<hr/>')
+            menuItems.push("Sort by attribute:")
+            for (const attribute of this.browser.sampleInfo.getAttributeTypeList()) {
+                menuItems.push(sortByAttribute(this.trackView, attribute))
+            }
+        }
+
         const lut =
             {
                 "SQUISHED": "Squish",
@@ -298,8 +312,9 @@ class SegTrack extends TrackBase {
 
                 // Use for diagnostic rendering
                 // context.fillStyle = randomRGB(180, 240)
-                // context.fillStyle = randomGrey(200, 255)
                 context.fillStyle = color
+
+                // console.log(`${ this.type } render. y(${ y }) height(${ h })`)
                 context.fillRect(x, y, w, h)
                 drawCount++
             }
@@ -458,7 +473,7 @@ class SegTrack extends TrackBase {
         const genomicLocation = clickState.genomicLocation
 
         // Define a region 5 "pixels" wide in genomic coordinates
-        const sortDirection = this.config.sort ?
+        const direction = this.config.sort ?
             (this.config.sort.direction === "ASC" ? "DESC" : "ASC") :      // Toggle from previous sort
             "DESC"
         const bpWidth = referenceFrame.toBP(2.5)
@@ -477,7 +492,7 @@ class SegTrack extends TrackBase {
 
 
                     const sort = {
-                        direction: sortDirection,
+                        direction,
                         chr: clickState.viewport.referenceFrame.chr,
                         start: genomicLocation - bpWidth,
                         end: genomicLocation + bpWidth
@@ -511,9 +526,42 @@ class SegTrack extends TrackBase {
     }
 }
 
+
+function sortBySampleName(trackView) {
+
+    const object = $('<div>')
+    object.text('Sort by sample names')
+
+    const click = () => {
+        trackView.track.sampleKeys.sort((a, b) => trackView.sampleNameViewport.sortDirection * a.localeCompare(b))
+        trackView.repaintViews()
+        trackView.sampleNameViewport.sortDirection *= -1
+    }
+
+    return { object, click }
+
+}
+
+function sortByAttribute(trackView, attribute) {
+
+    const object = $('<div>')
+    object.html(`&nbsp;&nbsp;${ attribute.split(emptySpaceReplacement).join(' ') }`)
+
+    const click = () => {
+        trackView.track.sampleKeys = trackView.browser.sampleInfo.getSortedSampleKeysByAttribute(trackView.track.sampleKeys, attribute, trackView.sampleInfoViewport.sortDirection)
+        trackView.repaintViews()
+        trackView.sampleInfoViewport.sortDirection *= -1
+    }
+
+    return { object, click }
+
+}
+
+
 // Default copy number scales
 const POS_COLOR_SCALE = {low: 0.1, lowR: 255, lowG: 255, lowB: 255, high: 1.5, highR: 255, highG: 0, highB: 0}
 const NEG_COLOR_SCALE = {low: -1.5, lowR: 0, lowG: 0, lowB: 255, high: -0.1, highR: 255, highG: 255, highB: 255}
+
 
 // Mut and MAF file default color table
 const MUT_COLORS = {

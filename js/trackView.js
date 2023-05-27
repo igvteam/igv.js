@@ -29,7 +29,8 @@ import {doAutoscale} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import {FeatureUtils, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js'
 import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
-import SampleNameViewport from './sampleNameViewport.js'
+import SampleInfoViewport from "./sample/sampleInfoViewport.js";
+import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import MenuUtils from "./ui/menuUtils.js"
 
@@ -76,8 +77,11 @@ class TrackView {
             this.viewports.push(viewport)
         }
 
+        // Sample Info
+        this.sampleInfoViewport = new SampleInfoViewport(this, browser.columnContainer.querySelector('.igv-sample-info-column'), browser.getSampleInfoViewportWidth())
+
         // SampleName Viewport
-        this.sampleNameViewport = new SampleNameViewport(this, browser.columnContainer.querySelector('.igv-sample-name-column'), undefined, browser.sampleNameViewportWidth)
+        this.sampleNameViewport = new SampleNameViewport(this, browser.columnContainer.querySelector('.igv-sample-name-column'), undefined, browser.getSampleNameViewportWidth())
 
         // Track Scrollbar
         this.createTrackScrollbar(browser)
@@ -128,36 +132,6 @@ class TrackView {
             this.axisCanvas.style.height = `${height}px`
 
         }
-    }
-
-    removeDOMFromColumnContainer() {
-
-        // Axis
-        if (this.boundAxisClickHander) {
-            this.removeAxisEventListener(this.axis)
-        }
-        this.axis.remove()
-
-        // Track Viewports
-        for (let viewport of this.viewports) {
-            viewport.$viewport.remove()
-        }
-
-        // SampleName Viewport
-        this.sampleNameViewport.dispose()
-
-        // empty trackScrollbar Column
-        this.removeTrackScrollMouseHandlers()
-        this.outerScroll.remove()
-
-        // empty trackDrag Column
-        this.removeTrackDragMouseHandlers()
-        this.dragHandle.remove()
-
-        // empty trackGear Column
-        this.removeTrackGearMouseHandlers()
-        this.gearContainer.remove()
-
     }
 
     renderSVGContext(context, {deltaX, deltaY}) {
@@ -255,6 +229,8 @@ class TrackView {
             $viewport.height(newHeight)
         }
 
+        this.sampleInfoViewport.viewport.style.height = `${newHeight}px`
+
         this.sampleNameViewport.viewport.style.height = `${newHeight}px`
 
         // If the track does not manage its own content height set it equal to the viewport height here
@@ -304,6 +280,8 @@ class TrackView {
             viewport.setTop(contentTop)
         }
 
+        this.sampleInfoViewport.setTop(contentTop)
+
         this.sampleNameViewport.trackScrollDelta = delta
         this.sampleNameViewport.setTop(contentTop)
 
@@ -331,8 +309,16 @@ class TrackView {
             this.paintAxis()
         }
 
-        // Repaint sample names last
+        this.repaintSampleInfo()
+
         this.repaintSamples()
+    }
+
+    repaintSampleInfo() {
+        if (typeof this.track.getSamples === 'function') {
+            const samples = this.track.getSamples()
+            this.sampleInfoViewport.repaint(samples)
+        }
     }
 
     repaintSamples() {
@@ -450,7 +436,8 @@ class TrackView {
 
         this.adjustTrackHeight()
 
-        // Repaint sample names last
+        this.repaintSampleInfo()
+
         this.repaintSamples()
 
         this.updateRulerViewportLabels()
@@ -777,6 +764,39 @@ class TrackView {
 
     }
 
+    removeDOMFromColumnContainer() {
+
+        // Axis
+        if (this.boundAxisClickHander) {
+            this.removeAxisEventListener(this.axis)
+        }
+        this.axis.remove()
+
+        // Track Viewports
+        for (let viewport of this.viewports) {
+            viewport.$viewport.remove()
+        }
+
+        // Sample Info Viewport
+        this.sampleInfoViewport.dispose()
+
+        // SampleName Viewport
+        this.sampleNameViewport.dispose()
+
+        // empty trackScrollbar Column
+        this.removeTrackScrollMouseHandlers()
+        this.outerScroll.remove()
+
+        // empty trackDrag Column
+        this.removeTrackDragMouseHandlers()
+        this.dragHandle.remove()
+
+        // empty trackGear Column
+        this.removeTrackGearMouseHandlers()
+        this.gearContainer.remove()
+
+    }
+
     /**
      * Do any cleanup here
      */
@@ -788,6 +808,8 @@ class TrackView {
         for (let viewport of this.viewports) {
             viewport.dispose()
         }
+
+        this.sampleInfoViewport.dispose()
 
         this.sampleNameViewport.dispose()
 
