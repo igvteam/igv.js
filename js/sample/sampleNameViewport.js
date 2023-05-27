@@ -1,6 +1,11 @@
-import {DOMUtils} from '../node_modules/igv-ui/dist/igv-ui.js'
-import {appleCrayonRGB} from './util/colorPalletes.js'
+import {StringUtils} from '../../node_modules/igv-utils/src/index.js'
+import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {appleCrayonRGB} from '../util/colorPalletes.js'
+import {emptySpaceReplacement} from "./sampleInfo.js";
 
+
+const maxSampleNameViewportWidth = 200
+const fudgeTextMetricWidth = 4
 const maxFontSize = 10
 
 const fontConfigureTemplate =
@@ -36,6 +41,9 @@ class SampleNameViewport {
         this.trackScrollDelta = 0
 
         this.contentTop = 0
+        this.hitList = undefined
+
+        this.sortDirection = 1
 
         this.setWidth(width)
 
@@ -89,8 +97,17 @@ class SampleNameViewport {
 
     async repaint(samples) {
 
-        this.checkCanvas()
-        this.draw({context: this.ctx, samples})
+        if (true === this.browser.showSampleNames) {
+            this.checkCanvas()
+            this.draw({context: this.ctx, samples})
+
+            if (undefined === this.browser.sampleNameViewportWidth) {
+                const lengths = samples.names.map(name =>  this.ctx.measureText(name).width)
+                this.browser.sampleNameViewportWidth = Math.min(maxSampleNameViewportWidth, fudgeTextMetricWidth + Math.ceil(Math.max(...lengths)))
+                this.browser.layoutChange()
+            }
+
+        }
     }
 
     draw({context, samples}) {
@@ -109,6 +126,7 @@ class SampleNameViewport {
         const viewportHeight = this.viewport.getBoundingClientRect().height
         let y = (samples.yOffset || 0) + this.contentTop    // contentTop will always be a negative number (top relative to viewport)
 
+        this.hitList = {}
         for (let name of samples.names) {
             if (y > viewportHeight) {
                 break
@@ -118,9 +136,13 @@ class SampleNameViewport {
                 const yFont = getYFont(context, text, y, samples.height)
                 context.fillText(text, sampleNameXShim, yFont)
 
+                const key = `${Math.floor(sampleNameXShim)}#${Math.floor(y)}#${context.canvas.width}#${Math.ceil(samples.height)}`
+                this.hitList[ key ] = `${name}`
+
             }
             y += samples.height
         }
+
     }
 
     renderSVGContext(context, {deltaX, deltaY}) {
@@ -145,18 +167,11 @@ class SampleNameViewport {
     }
 
     addMouseHandlers() {
-        this.addViewportContextMenuHandler(this.viewport)
-    }
 
-    removeMouseHandlers() {
-        this.removeViewportContextMenuHandler(this.viewport)
-    }
+        this.boundClickHandler = clickHandler.bind(this)
+        this.viewport.addEventListener('contextmenu', this.boundClickHandler)
 
-    addViewportContextMenuHandler(viewport) {
-        this.boundContextMenuHandler = contextMenuHandler.bind(this)
-        viewport.addEventListener('contextmenu', this.boundContextMenuHandler)
-
-        function contextMenuHandler(event) {
+        function clickHandler(event) {
 
             event.preventDefault()
             event.stopPropagation()
@@ -167,9 +182,9 @@ class SampleNameViewport {
                     value: this.browser.sampleNameViewportWidth,
                     callback: newWidth => {
                         this.browser.sampleNameViewportWidth = parseInt(newWidth)
-                        for (let {sampleNameViewport} of this.browser.trackViews) {
-                            sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
-                        }
+                        // for (let {sampleNameViewport} of this.browser.trackViews) {
+                        //     sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
+                        // }
                         this.browser.layoutChange()
                     }
                 }
@@ -177,12 +192,38 @@ class SampleNameViewport {
             this.browser.inputDialog.present(config, event)
         }
 
+        this.boundMouseMoveHandler = mouseMove.bind(this)
+        this.viewport.addEventListener('mousemove', this.boundMouseMoveHandler)
+
+        function mouseMove(event) {
+            event.stopPropagation()
+
+            if (this.hitList) {
+
+                const entries = Object.entries(this.hitList)
+
+                const { x, y } = DOMUtils.translateMouseCoordinates(event, this.viewport)
+
+                this.viewport.setAttribute('title', '')
+
+                for (const [ bbox, value ] of entries) {
+                    const [xx, yy, width, height ] = bbox.split('#').map(str => parseInt(str, 10))
+                    if (x < xx || x > xx+width || y < yy || y > yy+height) {
+                        // do nothing
+                    } else {
+                        this.viewport.setAttribute('title', `${ value }`)
+                        break
+                    }
+                }
+            }
+        }
+
     }
 
-    removeViewportContextMenuHandler(viewport) {
-        viewport.removeEventListener('contextmenu', this.boundContextMenuHandler)
+    removeMouseHandlers() {
+        this.viewport.removeEventListener('contextmenu', this.boundClickHandler)
+        this.viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
-
     dispose() {
         this.removeMouseHandlers()
         this.viewport.remove()
@@ -190,6 +231,7 @@ class SampleNameViewport {
 }
 
 function getYFont(context, text, y, height) {
+    const shim = getSampleNameYShim(context, text, height)
     return y + height - getSampleNameYShim(context, text, height)
 }
 

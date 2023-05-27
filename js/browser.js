@@ -12,7 +12,7 @@ import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genome.js"
 import loadPlinkFile from "./sampleInformation.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
-import {buildOptions, createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
+import {createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import GtexUtils from "./gtex/gtexUtils.js"
 import {defaultSequenceTrackOrder} from './sequenceTrack.js'
@@ -46,8 +46,11 @@ import ROITable from './roi/ROITable.js'
 import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
 import ROITableControl from './ui/roiTableControl.js'
+import SampleInfo from "./sample/sampleInfo.js";
+import SampleInfoViewport from "./sample/sampleInfoViewport.js";
 import HicFile from "./hic/straw/hicFile.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
+
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -61,8 +64,6 @@ const igv_track_gear_menu_column_width = 28
 // $igv-column-shim-width: 1px;
 // $igv-column-shim-margin: 2px;
 const column_multi_locus_shim_width = 2 + 1 + 2
-
-const defaultSampleNameViewportWidth = 200
 
 class Browser {
 
@@ -98,7 +99,20 @@ class Browser {
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = {}
 
+        this.on('trackremoved', () => {
+            const found = this.findTracks('type', 'seg')
+            if (0 === found.length) {
+                this.sampleNameViewportWidth = undefined
+                this.showSampleNames = false
+                this.sampleNameControl.setState(this.showSampleNames)
+                this.sampleNameControl.hide()
+                this.layoutChange()
+            }
+        })
+
         this.addMouseHandlers()
+
+        this.sampleInfo = new SampleInfo(this)
 
         this.setControls(config)
     }
@@ -128,7 +142,12 @@ class Browser {
 
         this.showSampleNames = config.showSampleNames
         this.showSampleNameButton = config.showSampleNameButton
-        this.sampleNameViewportWidth = config.sampleNameViewportWidth || defaultSampleNameViewportWidth
+
+        this.sampleNameViewportWidth = undefined
+
+        if (config.sampleNameViewportWidth) {
+            this.sampleNameViewportWidth = config.sampleNameViewportWidth
+        }
 
         if (config.search) {
             this.searchConfig = {
@@ -266,7 +285,17 @@ class Browser {
     }
 
     getSampleNameViewportWidth() {
-        return false === this.showSampleNames ? 0 : this.sampleNameViewportWidth
+
+        if (undefined === this.sampleNameViewportWidth) {
+            return 0
+        } else {
+            return false === this.showSampleNames ? 0 : this.sampleNameViewportWidth
+        }
+
+    }
+
+    getSampleInfoViewportWidth() {
+        return SampleInfoViewport.getSampleInfoColumnWidth(this)
     }
 
     isMultiLocusMode() {
@@ -446,6 +475,9 @@ class Browser {
 
         // axis column
         createColumn(this.columnContainer, 'igv-axis-column')
+
+        // sample info column
+        createColumn(this.columnContainer, 'igv-sample-info-column')
 
         // SampleName column
         createColumn(this.columnContainer, 'igv-sample-name-column')
@@ -630,7 +662,7 @@ class Browser {
         }
 
         // discard all columns
-        const elements = this.columnContainer.querySelectorAll('.igv-axis-column, .igv-column-shim, .igv-column, .igv-sample-name-column, .igv-scrollbar-column, .igv-track-drag-column, .igv-gear-menu-column')
+        const elements = this.columnContainer.querySelectorAll('.igv-axis-column, .igv-column-shim, .igv-column, .igv-sample-info-column, .igv-sample-name-column, .igv-scrollbar-column, .igv-track-drag-column, .igv-gear-menu-column')
         elements.forEach(column => column.remove())
 
         this.trackViews = []
@@ -752,6 +784,18 @@ class Browser {
      * @returns {Promise<*>}  Promise for track objects
      */
     async loadTrackList(configList) {
+
+        const [ config ] = configList
+        if ('sequence' !== config.type && 'refgene' !== config.format) {
+
+            const extension = getFileExtension(config.url)
+
+            if ('txt' === extension) {
+                await this.sampleInfo.loadSampleInfoFile(this, config.url)
+                return undefined
+
+            }
+        }
 
         const promises = []
         for (let config of configList) {
@@ -1029,13 +1073,15 @@ class Browser {
         })
 
         // discard current track order
-        for (let {axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
+        for (let {axis, viewports, sampleInfoViewport, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
             axis.remove()
 
             for (let {$viewport} of viewports) {
                 $viewport.detach()
             }
+
+            sampleInfoViewport.viewport.remove()
 
             sampleNameViewport.viewport.remove()
 
@@ -1047,7 +1093,7 @@ class Browser {
         // Reattach the divs to the dom in the correct order
         const viewportColumns = this.columnContainer.querySelectorAll('.igv-column')
 
-        for (let {axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
+        for (let {axis, viewports, sampleInfoViewport, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
 
             this.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
@@ -1055,6 +1101,8 @@ class Browser {
                 const {$viewport} = viewports[i]
                 viewportColumns[i].appendChild($viewport.get(0))
             }
+
+            this.columnContainer.querySelector('.igv-sample-info-column').appendChild(sampleInfoViewport.viewport)
 
             this.columnContainer.querySelector('.igv-sample-name-column').appendChild(sampleNameViewport.viewport)
 
@@ -1296,19 +1344,11 @@ class Browser {
 
         let {width} = this.columnContainer.getBoundingClientRect()
 
-        const sampleNameViewportWidth = this.getSampleNameViewportWidth()
-
-        width -= igv_axis_column_width + sampleNameViewportWidth + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
+        width -= igv_axis_column_width + this.getSampleInfoViewportWidth() + this.getSampleNameViewportWidth() + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
 
         width -= column_multi_locus_shim_width * (columnCount - 1)
 
         return Math.floor(width / columnCount)
-    }
-
-    getCenterLineXOffset() {
-        let {width: columnContainerWidth} = this.columnContainer.getBoundingClientRect()
-        columnContainerWidth -= igv_axis_column_width + this.getSampleNameViewportWidth() + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
-        return Math.floor(columnContainerWidth / 2 + igv_axis_column_width)
     }
 
     minimumBases() {
@@ -1528,8 +1568,8 @@ class Browser {
             // discard ONLY viewport columns
             this.columnContainer.querySelectorAll('.igv-column-shim, .igv-column').forEach(el => el.remove())
 
-            // Insert viewport columns preceding the sample-name column
-            viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-name-column'), this.referenceFrameList.length)
+            // Insert viewport columns preceding the sample info column
+            viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-info-column'), this.referenceFrameList.length)
 
             this.centerLineList = this.createCenterLineList(this.columnContainer)
 
@@ -1633,7 +1673,8 @@ class Browser {
         if (this.showSampleNames !== undefined) {
             json['showSampleNames'] = this.showSampleNames
         }
-        if (this.sampleNameViewportWidth !== defaultSampleNameViewportWidth) {
+
+        if (this.sampleNameViewportWidth) {
             json['sampleNameViewportWidth'] = this.sampleNameViewportWidth
         }
 
@@ -1953,6 +1994,28 @@ class Browser {
             this.circularViewControl.setState(isVisible)
         }
     }
+}
+
+function getFileExtension(input) {
+    let fileName;
+
+    // Check if input is a File object or a URL string
+    if (input instanceof File) {
+        fileName = input.name;
+    } else if (typeof input === 'string') {
+        fileName = input;
+    } else {
+        throw new Error('Input must be a File object or a URL string');
+    }
+
+    // Extract the file extension
+    const fileExtension = fileName.split('.').pop();
+
+    // If the URL is from Dropbox, the extension may be followed by a query string
+    // Remove the query string, if present
+    const cleanFileExtension = fileExtension.split('?')[0];
+
+    return cleanFileExtension;
 }
 
 /**

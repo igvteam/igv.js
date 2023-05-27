@@ -1462,18 +1462,6 @@
   background-color: #545453;
 }
 
-.igv-column {
-  position: relative;
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: flex-start;
-  box-sizing: border-box;
-  height: 100%;
-}
-
 .igv-axis-column {
   position: relative;
   display: flex;
@@ -1488,6 +1476,30 @@
 .igv-axis-column > div {
   margin-top: 5px;
   width: 100%;
+}
+
+.igv-column {
+  position: relative;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.igv-sample-info-column {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  box-sizing: border-box;
+  height: 100%;
+  cursor: pointer;
 }
 
 .igv-sample-name-column {
