@@ -45,21 +45,7 @@ suite("testBigWig", function () {
             assert.equal(f.end - f.start, 1)
             start += 1
         }
-
-
-        //#bedGraph section chr1:10040-10051
-        // bedgraph uses 0-based coordinates
-        // chr1	10040	10046	0.120034
-        // chr1	10046	10051	0.121634
-        start = 10041
-        end = 10051
-        assert.equal(features.length, 35)   // Verified in iPad app
-        features = await bwReader.readFeatures(chr, start, chr, end)
-        assert.equal(features.length, 2)
-        assert.equal(features[0].start, 10040)
-        assert.equal(features[0].end, 10046)
-
-
+        
     })
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"

@@ -59,8 +59,6 @@ class BAMTrack extends TrackBase {
         showAllBases: false,
         showInsertions: true,
         showMismatches: true,
-        color: DEFAULT_ALIGNMENT_COLOR,
-        coverageColor: DEFAULT_COVERAGE_COLOR,
         height: 300,
         coverageTrackHeight: 50
     }
@@ -79,6 +77,10 @@ class BAMTrack extends TrackBase {
         super.init(config)
 
         this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
+
+        if(!this.showAlignments) {
+            this._height = this.coverageTrackHeight
+        }
 
         // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
         // are present for a given reference frame the last one will take precedence
@@ -556,15 +558,6 @@ class BAMTrack extends TrackBase {
         }
         const chords = makePairedAlignmentChords(inView)
         sendChords(chords, this, refFrame, 0.02)
-
-        // const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.02)
-        // const trackColor = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.02)
-        //
-        // // name the chord set to include track name and locus
-        // const encodedName = this.name.replaceAll(' ', '%20')
-        // const chordSetName = "all" === refFrame.chr ? encodedName :
-        //     `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end}`
-        // this.browser.circularView.addChords(chords, {name: chordSetName, color: chordSetColor, trackColor: trackColor})
     }
 
     addSplitChordsForViewport(viewport) {
@@ -581,15 +574,6 @@ class BAMTrack extends TrackBase {
 
         const chords = makeSupplementalAlignmentChords(inView)
         sendChords(chords, this, refFrame, 0.02)
-
-        // const chordSetColor = IGVColor.addAlpha("all" === refFrame.chr ? this.color : getChrColor(refFrame.chr), 0.02)
-        // const trackColor = IGVColor.addAlpha(this.color || 'rgb(0,0,255)', 0.02)
-        //
-        // // name the chord set to include track name and locus
-        // const encodedName = this.name.replaceAll(' ', '%20')
-        // const chordSetName = "all" === refFrame.chr ? encodedName :
-        //     `${encodedName} (${refFrame.chr}:${refFrame.start}-${refFrame.end}`
-        // this.browser.circularView.addChords(chords, {name: chordSetName, color: chordSetColor, trackColor: trackColor})
     }
 }
 
@@ -646,7 +630,7 @@ class CoverageTrack {
         let color
         if (this.parent.coverageColor) {
             color = this.parent.coverageColor
-        } else if (this.parent.color !== undefined && typeof this.parent.color !== "function") {
+        } else if (this.parent.color  && typeof this.parent.color !== "function") {
             color = IGVColor.darkenLighten(this.parent.color, -35)
         } else {
             color = DEFAULT_COVERAGE_COLOR
@@ -1487,8 +1471,9 @@ class AlignmentTrack {
             case "tag":
                 if (this.parent.color) {
                     return (typeof this.parent.color === "function") ? this.parent.color(alignment) : this.parent.color
+                } else {
+                    return DEFAULT_CONNECTOR_COLOR
                 }
-                return DEFAULT_CONNECTOR_COLOR
             default:
                 return this.getAlignmentColor(alignment)
 
@@ -1500,6 +1485,8 @@ class AlignmentTrack {
         let color = DEFAULT_ALIGNMENT_COLOR   // The default color if nothing else applies
         if (this.parent.color) {
             color = (typeof this.parent.color === "function") ? this.parent.color(alignment) : this.parent.color
+        } else {
+            color = DEFAULT_ALIGNMENT_COLOR
         }
         const option = this.colorBy
         switch (option) {

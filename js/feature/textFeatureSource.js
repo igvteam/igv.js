@@ -71,6 +71,7 @@ class TextFeatureSource {
             this.queryable = true
         } else if ("htsget" === config.sourceType) {
             this.reader = new HtsgetVariantReader(config, genome)
+            this.queryable = true
         } else if (config.sourceType === 'ucscservice') {
             this.reader = new UCSCServiceReader(config.source)
             this.queryable = true

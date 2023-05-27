@@ -1,4 +1,3 @@
-
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import {InputDialog, GenericColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {BGZip, FileUtils, igvxhr, StringUtils, URIUtils} from "../node_modules/igv-utils/src/index.js"
@@ -49,6 +48,9 @@ import TrackROISet from "./roi/trackROISet.js"
 import ROITableControl from './ui/roiTableControl.js'
 import SampleInfo from "./sample/sampleInfo.js";
 import SampleInfoViewport from "./sample/sampleInfoViewport.js";
+import HicFile from "./hic/straw/hicFile.js"
+import {translateSession} from "./hic/shoeboxUtils.js"
+
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -459,6 +461,11 @@ class Browser {
         // prepare to load a new session, discarding DOM and state
         this.cleanHouseForSession()
 
+        // Check for juicebox session
+        if(session.browsers) {
+            session = await translateSession(session)
+        }
+
         this.showSampleNames = session.showSampleNames || false
         this.sampleNameControl.setState(this.showSampleNames === true)
 
@@ -485,9 +492,9 @@ class Browser {
         createColumn(this.columnContainer, 'igv-gear-menu-column')
 
         const genomeOrReference = session.reference || session.genome
-        if(!genomeOrReference) {
+        if (!genomeOrReference) {
             console.warn("No genome or reference object specified")
-            return;
+            return
         }
         const genomeConfig = await GenomeUtils.expandReference(this.alert, genomeOrReference)
 
@@ -975,7 +982,6 @@ class Browser {
                 }
 
                 const format = TrackUtils.inferFileFormat(filename)
-
                 if ("tsv" === format) {
                     config.format = await TrackUtils.inferFileFormatFromHeader(config)
                 } else if (format) {
@@ -989,20 +995,30 @@ class Browser {
             }
         }
 
-
         let type = config.type ? config.type.toLowerCase() : undefined
 
         if (!type) {
-            type = TrackUtils.inferTrackType(config)
-            if ("bedtype" === type) {
-                // Bed files must be read to determine track type
-                const featureSource = FeatureSource(config, this.genome)
-                config._featureSource = featureSource    // This is a temp variable, bit of a hack
-                const trackType = await featureSource.trackType()
-                if (trackType) {
-                    type = trackType
+            if (config.format === "hic") {
+                const hicFile = new HicFile(config)
+                await hicFile.readHeaderAndFooter()
+                if (hicFile.chromosomeIndexMap.celltype) {
+                    type = "shoebox"
+                    config._hicFile = hicFile
                 } else {
-                    type = "annotation"
+                    throw Error("'.hic' files not supported")
+                }
+            } else {
+                type = TrackUtils.inferTrackType(config)
+                if ("bedtype" === type) {
+                    // Bed files must be read to determine track type
+                    const featureSource = FeatureSource(config, this.genome)
+                    config._featureSource = featureSource    // This is a temp variable, bit of a hack
+                    const trackType = await featureSource.trackType()
+                    if (trackType) {
+                        type = trackType
+                    } else {
+                        type = "annotation"
+                    }
                 }
             }
             // Record in config to make type persistent in session
@@ -1305,7 +1321,7 @@ class Browser {
 
     updateLocusSearchWidget() {
 
-        if(!this.referenceFrameList) return
+        if (!this.referenceFrameList) return
         const referenceFrameList = this.referenceFrameList
 
         // Update end position of reference frames based on pixel widths.  This is hacky, but its been done here
@@ -1351,7 +1367,7 @@ class Browser {
 
     async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
 
-        if(!this.referenceFrameList) return
+        if (!this.referenceFrameList) return
 
         const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
@@ -1371,7 +1387,7 @@ class Browser {
      */
     async addMultiLocusPanel(chr, start, end, referenceFrameLeft) {
 
-        if(!this.referenceFrameList) return
+        if (!this.referenceFrameList) return
 
         // account for reduced viewport width as a result of adding right mate pair panel
         const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length)
@@ -2011,7 +2027,7 @@ function getFileExtension(input) {
  */
 async function resize() {
 
-    if(!this.referenceFrameList) return
+    if (!this.referenceFrameList) return
 
     const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
