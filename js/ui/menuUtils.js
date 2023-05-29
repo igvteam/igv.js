@@ -26,6 +26,7 @@ const MenuUtils = {
             menuItems.push(unsetColorMenuItem({trackView, label: "Unset track color"}))
            if(trackView.track.config.type === 'wig' || trackView.track.config.type === 'annotation') {
                menuItems.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
+               menuItems.push(unsetAltColorMenuItem({trackView, label: "Unset alt color"}))
            }
         }
 
@@ -222,6 +223,20 @@ function unsetColorMenuItem({trackView, label}) {
         object: $e,
         click: () => {
             trackView.track.color = undefined
+            trackView.repaintViews()
+        }
+    }
+}
+
+function unsetAltColorMenuItem({trackView, label}) {
+
+    const $e = $('<div>')
+    $e.text(label)
+
+    return {
+        object: $e,
+        click: () => {
+            trackView.track.altColor = undefined
             trackView.repaintViews()
         }
     }
