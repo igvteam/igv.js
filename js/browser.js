@@ -785,17 +785,17 @@ class Browser {
      */
     async loadTrackList(configList) {
 
-        const [ config ] = configList
-        if ('sequence' !== config.type && 'refgene' !== config.format) {
-
-            const extension = getFileExtension(config.url)
-
-            if ('txt' === extension) {
-                await this.sampleInfo.loadSampleInfoFile(this, config.url)
-                return undefined
-
-            }
-        }
+        // const [ config ] = configList
+        // if ('sequence' !== config.type && 'refgene' !== config.format) {
+        //
+        //     const extension = getFileExtension(config.url)
+        //
+        //     if ('txt' === extension) {
+        //         await this.sampleInfo.loadSampleInfoFile(this, config.url)
+        //         return undefined
+        //
+        //     }
+        // }
 
         const promises = []
         for (let config of configList) {
