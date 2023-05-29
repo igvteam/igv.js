@@ -43,7 +43,7 @@ class BufferedReader {
      */
     async dataViewForRange(requestedRange, asUint8, retries = 0) {
         try {
-            console.log(`buffered reader ${requestedRange}`)
+
             const hasData = (this.data && (this.range.start <= requestedRange.start) &&
                 ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size)))
 
