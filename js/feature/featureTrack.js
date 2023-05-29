@@ -446,7 +446,10 @@ class FeatureTrack extends TrackBase {
             color = this.colorTable.getColor(value)
         } else if (feature.color) {
             color = feature.color   // Explicit color for feature
-        } else {
+        }
+
+        // If no explicit setting use the default
+        if (!color) {
             color = DEFAULT_COLOR   // Track default
         }
 
