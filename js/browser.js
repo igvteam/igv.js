@@ -1196,19 +1196,19 @@ class Browser {
      */
     removeAllTracks() {
 
-        const remainingTrackViews = []
+        const currentTrackViews = this.trackViews
+        this.trackViews = []
 
-        for (let trackView of this.trackViews) {
+        for (let trackView of currentTrackViews) {
 
             if (trackView.track.id !== 'ruler' && trackView.track.id !== 'ideogram') {
                 this.fireEvent('trackremoved', [trackView.track])
                 trackView.dispose()
             } else {
-                remainingTrackViews.push(trackView)
+                this.trackViews.push(trackView)
             }
         }
 
-        this.trackViews = remainingTrackViews
     }
 
     /**
