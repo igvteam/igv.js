@@ -46,8 +46,8 @@ import ROITable from './roi/ROITable.js'
 import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
 import ROITableControl from './ui/roiTableControl.js'
-import SampleInfo from "./sample/sampleInfo.js";
-import SampleInfoViewport from "./sample/sampleInfoViewport.js";
+import SampleInfo from "./sample/sampleInfo.js"
+import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import HicFile from "./hic/straw/hicFile.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
 
@@ -462,7 +462,7 @@ class Browser {
         this.cleanHouseForSession()
 
         // Check for juicebox session
-        if(session.browsers) {
+        if (session.browsers) {
             session = await translateSession(session)
         }
 
@@ -824,7 +824,7 @@ class Browser {
 
         const newTrack = this._loadTrack(config)
 
-        if (config.autoscaleGroup) {
+        if (newTrack && config.autoscaleGroup) {
             // Await newTrack load and update all views
             await newTrack
             this.updateViews()
@@ -995,10 +995,18 @@ class Browser {
             }
         }
 
+        if (config.type) {
+            TrackUtils.translateDeprecatedTypes(config)
+        }
+
         let type = config.type ? config.type.toLowerCase() : undefined
 
         if (!type) {
-            if (config.format === "hic") {
+
+            // If neither format nor type is known assume a sample information file.  We should do some validation here
+            if (!config.format) {
+                type = "sampleinfo"
+            } else if (config.format === "hic") {
                 const hicFile = new HicFile(config)
                 await hicFile.readHeaderAndFooter()
                 if (hicFile.chromosomeIndexMap.celltype) {
@@ -1008,7 +1016,7 @@ class Browser {
                     throw Error("'.hic' files not supported")
                 }
             } else {
-                type = TrackUtils.inferTrackType(config)
+                type = TrackUtils.inferTrackType(config.format)
                 if ("bedtype" === type) {
                     // Bed files must be read to determine track type
                     const featureSource = FeatureSource(config, this.genome)
@@ -1025,28 +1033,33 @@ class Browser {
             config.type = type
         }
 
-        // Set defaults if specified
-        if (this.trackDefaults && type) {
-            const settings = this.trackDefaults[type]
-            if (settings) {
-                for (let property in settings) {
-                    if (settings.hasOwnProperty(property) && config[property] === undefined) {
-                        config[property] = settings[property]
+        if ("sampleinfo" === type) {
+            await this.sampleInfo.loadSampleInfoFile(this, config.url)
+            return undefined
+        } else {
+            // Set defaults if specified
+            if (this.trackDefaults && type) {
+                const settings = this.trackDefaults[type]
+                if (settings) {
+                    for (let property in settings) {
+                        if (settings.hasOwnProperty(property) && config[property] === undefined) {
+                            config[property] = settings[property]
+                        }
                     }
                 }
             }
-        }
 
-        const track = getTrack(type, config, this)
-        if (undefined === track) {
-            this.alert.present(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
-        } else {
+            const track = getTrack(type, config, this)
+            if (undefined === track) {
+                this.alert.present(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
+            } else {
 
-            if (config.roi && config.roi.length > 0) {
-                track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
+                if (config.roi && config.roi.length > 0) {
+                    track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
+                }
+
+                return track
             }
-
-            return track
         }
     }
 
@@ -1073,7 +1086,15 @@ class Browser {
         })
 
         // discard current track order
-        for (let {axis, viewports, sampleInfoViewport, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
+        for (let {
+            axis,
+            viewports,
+            sampleInfoViewport,
+            sampleNameViewport,
+            outerScroll,
+            dragHandle,
+            gearContainer
+        } of this.trackViews) {
 
             axis.remove()
 
@@ -1093,7 +1114,15 @@ class Browser {
         // Reattach the divs to the dom in the correct order
         const viewportColumns = this.columnContainer.querySelectorAll('.igv-column')
 
-        for (let {axis, viewports, sampleInfoViewport, sampleNameViewport, outerScroll, dragHandle, gearContainer} of this.trackViews) {
+        for (let {
+            axis,
+            viewports,
+            sampleInfoViewport,
+            sampleNameViewport,
+            outerScroll,
+            dragHandle,
+            gearContainer
+        } of this.trackViews) {
 
             this.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
@@ -1997,25 +2026,25 @@ class Browser {
 }
 
 function getFileExtension(input) {
-    let fileName;
+    let fileName
 
     // Check if input is a File object or a URL string
     if (input instanceof File) {
-        fileName = input.name;
+        fileName = input.name
     } else if (typeof input === 'string') {
-        fileName = input;
+        fileName = input
     } else {
-        throw new Error('Input must be a File object or a URL string');
+        throw new Error('Input must be a File object or a URL string')
     }
 
     // Extract the file extension
-    const fileExtension = fileName.split('.').pop();
+    const fileExtension = fileName.split('.').pop()
 
     // If the URL is from Dropbox, the extension may be followed by a query string
     // Remove the query string, if present
-    const cleanFileExtension = fileExtension.split('?')[0];
+    const cleanFileExtension = fileExtension.split('?')[0]
 
-    return cleanFileExtension;
+    return cleanFileExtension
 }
 
 /**

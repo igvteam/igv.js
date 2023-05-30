@@ -62,7 +62,7 @@ class SampleInfo {
         let string
         try {
             string = await igvxhr.loadString(path)
-            await this.processSampleInfoFileAsString(browser, string)
+            return this.processSampleInfoFileAsString(browser, string)
         } catch (e) {
             console.error(e.message)
         }
