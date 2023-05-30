@@ -174,17 +174,10 @@ function inferIndexPath(url, extension) {
 }
 
 
-function inferTrackType(config) {
+function inferTrackType(format) {
 
-    translateDeprecatedTypes(config)
-
-    if (config.type) {
-        return config.type
-    }
-
-    if (config.format) {
-        const format = config.format.toLowerCase()
-        switch (format) {
+    if (format) {
+        switch (format.toLowerCase()) {
             case "bw":
             case "bigwig":
             case "wig":
@@ -268,9 +261,9 @@ async function inferFileFormatFromHeader(config) {
 
     if (config.url) {
         const firstBytes = await igvxhr.loadString(config.url, buildOptions(config, {range: {start: 0, size: 1000}}))
-        if(firstBytes) {
+        if (firstBytes) {
             const columnNames = firstBytes.split('\n')[0].split('\t')
-            if(isHiccups(columnNames)) {
+            if (isHiccups(columnNames)) {
                 return "hiccups"
             }
         }
@@ -285,4 +278,13 @@ function registerFileFormats(name, fields) {
 }
 
 
-export {knownFileExtensions, getFormat, inferFileFormat, inferFileFormatFromHeader, inferTrackType, inferIndexPath, registerFileFormats}
+export {
+    knownFileExtensions,
+    getFormat,
+    inferFileFormat,
+    inferFileFormatFromHeader,
+    inferTrackType,
+    inferIndexPath,
+    registerFileFormats,
+    translateDeprecatedTypes
+}
