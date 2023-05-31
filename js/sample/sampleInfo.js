@@ -77,7 +77,7 @@ class SampleInfo {
         const sections = string.split('#').filter(line => line.length > 0)
 
         // First section is always samples
-        updateSampleDictionary(sections[0], sections.length > 0)
+        updateSampleDictionary(sections[0], sections.length > 1)
 
         // Establish the range of values for each attribute
         attributeRangeLUT = createAttributeRangeLUT(sampleDictionary)
@@ -364,9 +364,7 @@ function updateSampleDictionary(sampleTableAsString, doSampleMapping) {
     const lines = sampleTableAsString.split(/[\r\n]/)
 
     // discard "sampleTable"
-    if (true === doSampleMapping) {
-        lines.shift()
-    }
+    lines.shift()
 
     // shift attribute labels
     const scratch = lines.shift().split('\t')
