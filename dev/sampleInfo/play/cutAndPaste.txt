@@ -1,0 +1,10 @@
+# must convert \r to \n for cut to work properly
+tr '\r' '\n' < b.txt >! b_nl.txt
+tr '\r' '\n' < a.txt >! a_nl.txt
+
+cut -f1  b_nl.txt > bb.txt
+cut -f2- a_nl.txt > aa.txt
+
+
+paste -d'\t' bb.txt aa.txt >! aa_bb.txt
+
