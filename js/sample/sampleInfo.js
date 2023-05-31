@@ -77,7 +77,7 @@ class SampleInfo {
         const sections = string.split('#').filter(line => line.length > 0)
 
         // First section is always samples
-        updateSampleDictionary(sections[0], sections.length > 1)
+        updateSampleDictionary(sections[0])
 
         // Establish the range of values for each attribute
         attributeRangeLUT = createAttributeRangeLUT(sampleDictionary)
@@ -87,6 +87,15 @@ class SampleInfo {
             createSampleMappingTables(sections, 'copynumber')
             createColorScheme(sections)
         }
+
+
+        // testing
+        const list = Object.values(sampleDictionary).map(obj => {
+            const values  = Object.values(obj)
+            return values[ 0 ]
+        })
+
+        const set = new Set(list)
 
         await SampleInfoViewport.update(browser)
 
@@ -214,21 +223,31 @@ function createColorScheme(sections) {
         colorSettings = colorSettings.split(/[\r\n]/).filter(line => line.length > 0)
         colorSettings.shift()
 
-        const mappings = colorSettings.map(setting => setting.split('\t').map((token, index, array) => {
+        const mappingfunction = (token, index, array) => {
 
+            let result
             switch (index) {
                 case 0:
-                    return token.split(' ').join(emptySpaceReplacement)
+                    result = token.split(' ').join(emptySpaceReplacement)
+                    break
                 case 1:
-                    return token.includes(':') ? token.split(':').map(str => parseFloat(str)) : token
+                    result = token.includes(':') ? token.split(':').map(str => parseFloat(str)) : token
+                    break
                 case 2:
-                    return `rgb(${ token })`
+                    result = `rgb(${ token })`
+                    break
                 case 3:
-                    return `rgb(${ token })`
+                    result = `rgb(${ token })`
             }
 
+            return result
+        }
 
-        }))
+        const mappings = colorSettings.map(setting => {
+            const list = setting.split('\t')
+            const result = list.map(mappingfunction)
+            return result
+        })
 
         const triplets = mappings
             .filter(mapping => 3 === mapping.length && !mapping.includes('*'))
@@ -359,7 +378,7 @@ function createAttributeRangeLUT(dictionary) {
     return lut
 }
 
-function updateSampleDictionary(sampleTableAsString, doSampleMapping) {
+function updateSampleDictionary(sampleTableAsString) {
 
     const lines = sampleTableAsString.split(/[\r\n]/)
 
