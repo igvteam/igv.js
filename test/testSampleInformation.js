@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import loadPlinkFile from "../js/sampleInformation.js"
+import loadPlinkFile from "../js/sample/sampleInformation.js"
 import {assert} from 'chai'
 
 suite("testRnaStruct", function () {
