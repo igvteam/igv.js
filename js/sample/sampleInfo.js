@@ -25,7 +25,7 @@ class SampleInfo {
 
         browser.on('trackorderchanged', list => {
 
-            console.log(`${ Date.now() } - SampleInfo(${ this.isInitialized() ? 'initialized' : 'uninitialized' }): trackorderchanged ${ list.join(' ')}`)
+            // console.log(`${ Date.now() } - SampleInfo(${ this.isInitialized() ? 'initialized' : 'uninitialized' }): trackorderchanged ${ list.join(' ')}`)
 
             if (this.isInitialized()) {
                 browser.layoutChange()
@@ -67,7 +67,7 @@ class SampleInfo {
             console.error(e.message)
         }
 
-        console.log('SampleInfo - file loaded.')
+        // console.log('SampleInfo - file loaded.')
 
     }
 
