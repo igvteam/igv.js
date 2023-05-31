@@ -189,16 +189,22 @@ TRIGS_p_TCGAaffxB5_sty_GenomeWideSNP_6_F01_223096	Mesenchymal	0.35072954	MALE	90
 TRIGS_p_TCGAaffxB5_sty_GenomeWideSNP_6_F02_223112	Classical	0.098998919	FEMALE	NA	70	No	337	DEAD	0	Methylated	100	15
 TRIGS_p_TCGAaffxB5_sty_GenomeWideSNP_6_F03_223128	Classical	-0.003905071	MALE	NA	15	No	596	DEAD	0		100	2.5
 TRIGS_p_TCGAaffxB5_sty_GenomeWideSNP_6_F04_223144	Proneural	0.236692004	FEMALE	70	NA	Rec	NA	DEAD	0	Methylated	100	0
-	Classical	0.204110492	FEMALE	NA	60	No	588	DEAD	0		100	30
-	Neural	0.176154931	MALE	NA	71	No	327	DEAD	0		90	17.5
-	Classical	-0.008367976	MALE	NA	17	No	146	DEAD	0		92.5	12.5
-	Mesenchymal	0.331197169	MALE	NA	61	No	635	DEAD	0		87.5	37.5
-	Proneural	0.397134204	FEMALE	NA	18	No	221	DEAD	0		90	10
-	Classical	-0.022735531	MALE	80	NA	Sec	NA	DEAD	0		90	12.5
-	Classical	0.236981427	FEMALE	NA	56	No	560	DEAD	0		92.5	7.5
-	Classical	0.212500104	MALE	NA	64	No	230	DEAD	0		80	7.5
-	Classical	-0.033414585	FEMALE	70	78	No	467	DEAD	0		100	25
-	Proneural	0.221935128	FEMALE	100	37	No	448	DEAD	0		100	27.5
-	Proneural	0.318631501	MALE	70	49	No	395	DEAD	0		100	6.5
-	Mesenchymal	0.268237642	MALE	90	60	No	1062	DEAD	0	Methylated	100	7.5
-	Mesenchymal	0.145715364	MALE	100	58	No	318	DEAD	0		100	7.5
+
+#colors
+*	Classical	80,180,80
+*	Neural	10,150,220
+*	Proneural	110,35,180
+*	Mesenchymal	50,75,120
+GENDER	MALE	0,0,155
+GENDER	FEMALE	70,150,70
+Secondary or Recurrent	NO	0,0,100
+Secondary or Recurrent	REC	200,0,0
+Secondary or Recurrent	Sec	230,150,25
+Secondary or Recurrent	NA	150,150,150
+sil_width	-0.1:0.5	0,0,255	255,0,0
+KarnScore	*	0,0,255
+AgeAtFirstDiagnosis	*	0,0,255
+Survival (days)	*	0,0,255
+MGMT_methylated	Methylated	200,0,0
+% Tumor Nuclei	80:100	0,0,255
+% Necrosis	*	0,0,255
