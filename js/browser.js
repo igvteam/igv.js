@@ -100,7 +100,7 @@ class Browser {
         this.eventHandlers = {}
 
         this.on('trackremoved', () => {
-            const found = this.findTracks('type', 'seg')
+            const found = this.findTracks(track => typeof track.getSamples === 'function')
             if (0 === found.length) {
                 this.sampleNameViewportWidth = undefined
                 this.showSampleNames = false
@@ -1739,6 +1739,9 @@ class Browser {
         json["roi"] = this.roiManager.toJSON()
 
         const trackJson = []
+
+        this.sampleInfo.toJSON(trackJson)
+
         const errors = []
         for (let {track} of this.trackViews) {
             try {
@@ -1771,7 +1774,6 @@ class Browser {
             }
             throw Error(message)
         }
-
 
         json["tracks"] = trackJson
 

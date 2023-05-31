@@ -127,7 +127,6 @@ $igv-zoom-in-notice-height: 16px;
 
 .igv-sample-info-column {
   @include igv-column-base;
-  cursor: pointer;
 }
 
 .igv-sample-name-column {

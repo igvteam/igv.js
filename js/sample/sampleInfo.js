@@ -1,5 +1,4 @@
-import {igvxhr} from '../../node_modules/igv-utils/src/index.js'
-import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr, FileUtils, IGVMath} from '../../node_modules/igv-utils/src/index.js'
 import SampleInfoViewport from "./sampleInfoViewport.js";
 import {
     appleCrayonRGB,
@@ -23,14 +22,12 @@ const colorForNA = appleCrayonRGB('magnesium')
 class SampleInfo {
     constructor(browser) {
 
+        this.sampleInfoFiles = []
+
         browser.on('trackorderchanged', list => {
-
-            // console.log(`${ Date.now() } - SampleInfo(${ this.isInitialized() ? 'initialized' : 'uninitialized' }): trackorderchanged ${ list.join(' ')}`)
-
             if (this.isInitialized()) {
                 browser.layoutChange()
             }
-
         })
 
     }
@@ -62,16 +59,20 @@ class SampleInfo {
         let string
         try {
             string = await igvxhr.loadString(path)
-            return this.processSampleInfoFileAsString(browser, string)
+            this.processSampleInfoFileAsString(browser, string)
         } catch (e) {
             console.error(e.message)
         }
 
-        // console.log('SampleInfo - file loaded.')
+        if (false === FileUtils.isFile(path)) {
+            this.sampleInfoFiles.push(path)
+        }
+
+        await SampleInfoViewport.update(browser)
 
     }
 
-    async processSampleInfoFileAsString(browser, string) {
+    processSampleInfoFileAsString(browser, string) {
 
         // split file into sections: samples, sample-mapping, etc.
         const sections = string.split('#').filter(line => line.length > 0)
@@ -87,17 +88,6 @@ class SampleInfo {
             createSampleMappingTables(sections, 'copynumber')
             createColorScheme(sections)
         }
-
-
-        // testing
-        const list = Object.values(sampleDictionary).map(obj => {
-            const values  = Object.values(obj)
-            return values[ 0 ]
-        })
-
-        const set = new Set(list)
-
-        await SampleInfoViewport.update(browser)
 
     }
 
@@ -182,6 +172,11 @@ class SampleInfo {
 
     }
 
+    toJSON(trackJson) {
+        for (const url of this.sampleInfoFiles) {
+            trackJson.push( { type: 'sampleinfo', url } )
+        }
+    }
 }
 
 function createSampleMappingTables(sections, sectionName) {

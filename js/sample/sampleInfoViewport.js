@@ -102,9 +102,7 @@ class SampleInfoViewport {
 
             const tileHeight = samples.height
 
-            if (Math.abs(tileHeight - 2*shim) < 1) {
-                shim = 0
-            }
+            shim = tileHeight - 2*shim <= 1 ? 0 : 1
 
             let y = this.contentTop
             this.hitList = {}
