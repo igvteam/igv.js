@@ -26,13 +26,6 @@ igv.css.map
 /dev/oauth/oauthConfigPrivate.js
 /encode/
 /test/testShoebox.js
-/dev/shoebox/celltypeAnnotation.bed?dl=0
 /deployShoebox.sh
 /examples/shoebox.html
-/dev/shoebox/shoebox.html
-/dev/shoebox/juicebox-model1.session
-/dev/shoebox/juicebox-model1.json
-/dev/shoebox/juicebox-model2.json
-/dev/shoebox/juiceboxSession.html
-/test/data/shoebox/juicebox-model1.json
-/dev/issues/globus_bigwig.html
+/dev/shoebox/*

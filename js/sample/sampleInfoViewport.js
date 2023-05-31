@@ -34,7 +34,7 @@ class SampleInfoViewport {
     }
 
     static getSampleInfoColumnWidth(browser) {
-        const found = browser.findTracks('type', 'seg')
+        const found = browser.findTracks(t => typeof t.getSamples === 'function')
         return (found.length > 0 && browser.sampleInfo.isInitialized()) ? browser.sampleInfo.getAttributeCount() * sampleInfoTileWidth : 0
     }
 
