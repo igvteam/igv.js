@@ -186,7 +186,7 @@ function createSampleMappingTables(sections, sectionName) {
             let copyNumber = found[ 0 ]
 
             // split into lines
-            copyNumber = copyNumber.split('\r').filter(line => line.length > 0)
+            copyNumber = copyNumber.split(/[\r\n]/).filter(line => line.length > 0)
             copyNumber.shift()
 
             for (const line of copyNumber) {
@@ -211,7 +211,7 @@ function createColorScheme(sections) {
 
         let colorSettings = found[ 0 ]
 
-        colorSettings = colorSettings.split('\r').filter(line => line.length > 0)
+        colorSettings = colorSettings.split(/[\r\n]/).filter(line => line.length > 0)
         colorSettings.shift()
 
         const mappings = colorSettings.map(setting => setting.split('\t').map((token, index, array) => {
@@ -361,7 +361,7 @@ function createAttributeRangeLUT(dictionary) {
 
 function updateSampleDictionary(sampleTableAsString, doSampleMapping) {
 
-    const lines = sampleTableAsString.split('\r')
+    const lines = sampleTableAsString.split(/[\r\n]/)
 
     // discard "sampleTable"
     if (true === doSampleMapping) {
