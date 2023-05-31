@@ -370,9 +370,7 @@ function updateSampleDictionary(sampleTableAsString, doSampleMapping) {
     const scratch = lines.shift().split('\t')
 
     // discard "Linking_id"
-    if (true === doSampleMapping) {
-        scratch.shift()
-    }
+    scratch.shift()
 
     attributes = scratch.map(label => label.split(' ').join(emptySpaceReplacement))
 

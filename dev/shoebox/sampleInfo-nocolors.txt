@@ -1,3 +1,4 @@
+#sampleTable
 sample	celltype
 1	NK
 2	NK
