@@ -32,13 +32,12 @@ class SampleInfo {
 
     }
 
-    isInitialized(){
+    initialize() {
+        sampleDictionary = undefined
+    }
 
-        if (undefined === sampleDictionary) {
-            return false
-        } else {
-            return true
-        }
+    isInitialized(){
+        return undefined !== sampleDictionary
     }
 
     getAttributeCount() {

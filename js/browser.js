@@ -409,7 +409,9 @@ class Browser {
      */
     async loadSession(options) {
 
-        // TODO: depricated
+        this.sampleInfo.initialize()
+
+        // TODO: deprecated
         this.roiSets = []
 
         let session
