@@ -106,7 +106,7 @@ class SampleInfoViewport {
 
             const tileHeight = samples.height
 
-            shim = tileHeight - 2*shim <= 1 ? 0 : 1
+            shim = tileHeight - 2 * shim <= 1 ? 0 : 1
 
             let y = this.contentTop
             this.hitList = {}
@@ -126,17 +126,17 @@ class SampleInfoViewport {
 
                         for (const attributeEntry of attributeEntries) {
 
-                            const [ attribute, value ] = attributeEntry
+                            const [attribute, value] = attributeEntry
 
                             context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
 
                             const x = sampleInfoTileXShim + attributeNamesMap.get(attribute) * sampleInfoTileWidth
-                            const yy = y+shim
-                            const hh = tileHeight-(2*shim)
+                            const yy = y + shim
+                            const hh = tileHeight - (2 * shim)
                             context.fillRect(x, yy, sampleInfoTileWidth, hh)
 
                             const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
-                            this.hitList[ key ] = `${attribute}#${value}`
+                            this.hitList[key] = `${attribute}#${value}`
 
                         } // for (attributeEntries)
 
@@ -168,17 +168,17 @@ class SampleInfoViewport {
 
                 const entries = Object.entries(this.hitList)
 
-                const { x, y } = DOMUtils.translateMouseCoordinates(event, this.viewport)
+                const {x, y} = DOMUtils.translateMouseCoordinates(event, this.viewport)
 
                 this.viewport.setAttribute('title', '')
 
-                for (const [ bbox, value ] of entries) {
-                    const [xx, yy, width, height ] = bbox.split('#').map(str => parseInt(str, 10))
-                    if (x < xx || x > xx+width || y < yy || y > yy+height) {
+                for (const [bbox, value] of entries) {
+                    const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                    if (x < xx || x > xx + width || y < yy || y > yy + height) {
                         // do nothing
                     } else {
-                        const [ a, b ] = value.split('#')
-                        this.viewport.setAttribute('title', `${ a.split(emptySpaceReplacement).join(' ') }: ${ '-' === b ? '' : b }`)
+                        const [a, b] = value.split('#')
+                        this.viewport.setAttribute('title', `${a.split(emptySpaceReplacement).join(' ')}: ${'-' === b ? '' : b}`)
                         break
                     }
                 }
@@ -189,6 +189,7 @@ class SampleInfoViewport {
     removeMouseHandlers() {
         this.viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
+
     show() {
         this.viewport.style.display = 'block'
     }

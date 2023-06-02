@@ -8,7 +8,7 @@ import {
     rgbStringHeatMapLerp, rgbStringLerp,
     rgbStringTokens
 } from "../util/colorPalletes.js";
-import { distinctColorsPalette } from './sampleInfoPaletteLibrary.js'
+import {distinctColorsPalette} from './sampleInfoPaletteLibrary.js'
 
 let attributeNames
 let attributeNamesMap
@@ -49,17 +49,18 @@ class SampleInfo {
         sampleDictionary = undefined
     }
 
-    isInitialized(){
+    isInitialized() {
         return undefined !== sampleDictionary
     }
 
     getAttributeNames() {
         return attributeNames
     }
+
     getAttributes(sampleName) {
 
-        const key = undefined === copyNumberDictionary ? sampleName : (copyNumberDictionary[ sampleName ] || sampleName)
-        return sampleDictionary[ key ]
+        const key = undefined === copyNumberDictionary ? sampleName : (copyNumberDictionary[sampleName] || sampleName)
+        return sampleDictionary[key]
     }
 
     async loadSampleInfoFile(browser, path) {
@@ -118,13 +119,13 @@ class SampleInfo {
 
             color = appleCrayonRGB('snow')
 
-        } else if (typeof value === "string" && colorDictionary[ value ]) {
+        } else if (typeof value === "string" && colorDictionary[value]) {
 
-            color = colorDictionary[ value ]()
+            color = colorDictionary[value]()
 
-        } else if (colorDictionary[ attribute ]) {
+        } else if (colorDictionary[attribute]) {
 
-            color = colorDictionary[ attribute ](value)
+            color = colorDictionary[attribute](value)
 
         } else if (typeof value === "string") {
 
@@ -136,12 +137,12 @@ class SampleInfo {
             //     console.log(`${ attribute } : ${ value }`)
             // }
 
-            const [ min, max ] = attributeRangeLUT[ attribute ]
+            const [min, max] = attributeRangeLUT[attribute]
 
             const lowerAlphaThreshold = 2e-1
             const alpha = Math.max((value - min) / (max - min), lowerAlphaThreshold)
 
-            const [ r, g, b ] = distinctColorsPalette[ Object.keys(attributeRangeLUT).indexOf(attribute) ]
+            const [r, g, b] = distinctColorsPalette[Object.keys(attributeRangeLUT).indexOf(attribute)]
             color = `rgba(${r},${g},${b},${alpha})`
 
         }
@@ -153,19 +154,19 @@ class SampleInfo {
     getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
 
         const numbers = sampleKeys.filter(key => {
-            const value = this.getAttributes(key)[ attribute ]
+            const value = this.getAttributes(key)[attribute]
             return typeof value === 'number'
         })
 
         const strings = sampleKeys.filter(key => {
-            const value = this.getAttributes(key)[ attribute ]
+            const value = this.getAttributes(key)[attribute]
             return typeof value === 'string'
         })
 
         const compare = (a, b) => {
 
-            const aa = this.getAttributes(a)[ attribute ]
-            const bb = this.getAttributes(b)[ attribute ]
+            const aa = this.getAttributes(a)[attribute]
+            const bb = this.getAttributes(b)[attribute]
 
             if (typeof aa === 'string' && typeof bb === 'string') {
                 return sortDirection * aa.localeCompare(bb)
@@ -180,13 +181,13 @@ class SampleInfo {
         numbers.sort(compare)
         strings.sort(compare)
 
-        return -1 === sortDirection ? [ ...numbers, ...strings ] : [ ...strings, ...numbers ]
+        return -1 === sortDirection ? [...numbers, ...strings] : [...strings, ...numbers]
 
     }
 
     toJSON(trackJson) {
         for (const url of this.sampleInfoFiles) {
-            trackJson.push( { type: 'sampleinfo', url } )
+            trackJson.push({type: 'sampleinfo', url})
         }
     }
 }
@@ -199,19 +200,19 @@ function createSampleMappingTables(sections, sectionName) {
         if (found.length > 0) {
 
             // Get the copy-number section. It is one long string
-            let copyNumber = found[ 0 ]
+            let copyNumber = found[0]
 
             // split into lines
             copyNumber = copyNumber.split(/[\r\n]/).filter(line => line.length > 0)
             copyNumber.shift()
 
             for (const line of copyNumber) {
-                const [ a, b ] = line.split('\t')
+                const [a, b] = line.split('\t')
 
                 if (undefined === copyNumberDictionary) {
                     copyNumberDictionary = {}
                 }
-                copyNumberDictionary[ a ] = b
+                copyNumberDictionary[a] = b
             }
 
         }
@@ -225,7 +226,7 @@ function createColorScheme(sections) {
 
     if (found.length > 0) {
 
-        let colorSettings = found[ 0 ]
+        let colorSettings = found[0]
 
         colorSettings = colorSettings.split(/[\r\n]/).filter(line => line.length > 0)
         colorSettings.shift()
@@ -241,10 +242,10 @@ function createColorScheme(sections) {
                     result = token.includes(':') ? token.split(':').map(str => parseFloat(str)) : token
                     break
                 case 2:
-                    result = `rgb(${ token })`
+                    result = `rgb(${token})`
                     break
                 case 3:
-                    result = `rgb(${ token })`
+                    result = `rgb(${token})`
             }
 
             return result
@@ -258,51 +259,51 @@ function createColorScheme(sections) {
 
         const triplets = mappings
             .filter(mapping => 3 === mapping.length && !mapping.includes('*'))
-            .filter(([ a, b, c ]) => !Array.isArray(b))
+            .filter(([a, b, c]) => !Array.isArray(b))
 
         const tmp = {}
         for (const triplet of triplets) {
-            const [ attribute, value, rgb ] = triplet
-            if (undefined === tmp[ attribute ]) {
-                tmp[ attribute ] = {}
+            const [attribute, value, rgb] = triplet
+            if (undefined === tmp[attribute]) {
+                tmp[attribute] = {}
             }
-            tmp[ attribute ][ value.toUpperCase() ] = rgb
+            tmp[attribute][value.toUpperCase()] = rgb
         }
 
         for (const [k, v] of Object.entries(tmp)) {
             const lut = Object.assign({}, v)
-            colorDictionary[ k ] = attributeValue => {
+            colorDictionary[k] = attributeValue => {
 
                 const key = attributeValue.toUpperCase()
-                const color = lut[ key ] || appleCrayonRGB('snow')
+                const color = lut[key] || appleCrayonRGB('snow')
                 return color
             }
         }
 
-        const clamped = mappings.filter(mapping => Array.isArray(mapping[ 1 ]))
+        const clamped = mappings.filter(mapping => Array.isArray(mapping[1]))
 
         for (const cl of clamped) {
-            const [ a, b ] = cl[ 1 ]
-            const attribute = cl[ 0 ]
+            const [a, b] = cl[1]
+            const attribute = cl[0]
 
             if (3 === cl.length) {
 
-                const [ _r, _g, _b ] = rgbStringTokens(cl[ 2 ])
+                const [_r, _g, _b] = rgbStringTokens(cl[2])
 
-                colorDictionary[ attribute ] = attributeValue => {
+                colorDictionary[attribute] = attributeValue => {
                     attributeValue = IGVMath.clamp(attributeValue, a, b)
-                    const interpolant = (attributeValue - a)/(b - a)
+                    const interpolant = (attributeValue - a) / (b - a)
                     return rgbaColor(_r, _g, _b, interpolant)
                 }
 
             } else if (4 === cl.length) {
 
-                const [ a, b ] = cl[ 1 ]
-                const [ attribute, ignore, rgbA, rgbB ] = cl
+                const [a, b] = cl[1]
+                const [attribute, ignore, rgbA, rgbB] = cl
 
-                colorDictionary[ attribute ] = attributeValue => {
+                colorDictionary[attribute] = attributeValue => {
                     attributeValue = IGVMath.clamp(attributeValue, a, b)
-                    const interpolant = (attributeValue - a)/(b - a)
+                    const interpolant = (attributeValue - a) / (b - a)
                     return rgbStringHeatMapLerp(rgbA, rgbB, interpolant)
                 }
             }
@@ -312,26 +313,26 @@ function createColorScheme(sections) {
 
         for (const wildCard of wildCards) {
 
-            if ('*' === wildCard[ 1 ]) {
-                const [ attribute, star, rgb ] = wildCard
+            if ('*' === wildCard[1]) {
+                const [attribute, star, rgb] = wildCard
 
-                colorDictionary[ attribute ] = attributeValue => {
+                colorDictionary[attribute] = attributeValue => {
 
                     if ('NA' === attributeValue) {
                         return colorForNA
                     } else {
-                        const [ min, max ] = attributeRangeLUT[ attribute ]
+                        const [min, max] = attributeRangeLUT[attribute]
                         const interpolant = (attributeValue - min) / (max - min)
 
-                        const [ r, g, b ] = rgbStringTokens(rgb)
+                        const [r, g, b] = rgbStringTokens(rgb)
                         return rgbaColor(r, g, b, interpolant)
                     }
 
                 }
 
-            } else if ('*' === wildCard[ 0 ]) {
-                const [ star, attributeValue, rgb ] = wildCard
-                colorDictionary[ attributeValue ] = () => rgb
+            } else if ('*' === wildCard[0]) {
+                const [star, attributeValue, rgb] = wildCard
+                colorDictionary[attributeValue] = () => rgb
             }
 
         }
@@ -342,18 +343,18 @@ function createColorScheme(sections) {
 
 function createAttributeRangeLUT(dictionary) {
 
-    const lut= {}
+    const lut = {}
     for (const value of Object.values(dictionary)) {
 
         for (const attribute of attributeNames) {
 
-            let item = value[ attribute ]
+            let item = value[attribute]
 
-            if (undefined === lut[ attribute ]) {
-                lut[ attribute ] = []
+            if (undefined === lut[attribute]) {
+                lut[attribute] = []
             }
 
-            lut[ attribute ].push(item)
+            lut[attribute].push(item)
 
         } // for (attributeNames)
 
@@ -365,19 +366,19 @@ function createAttributeRangeLUT(dictionary) {
 
     // remove duplicates
     for (const key of Object.keys(lut)) {
-        const multiples = lut[ key ]
-        const set = new Set( multiples )
-        const list = Array.from( set )
+        const multiples = lut[key]
+        const set = new Set(multiples)
+        const list = Array.from(set)
 
         if (true === list.some(isString) && true === list.some(isNumber)) {
-            lut[ key ] = list.filter(item => !isString(item))
+            lut[key] = list.filter(item => !isString(item))
         } else {
-            lut[ key ] = list
+            lut[key] = list
         }
 
-        if (!lut[ key ].some(isString)) {
-            const clone = lut[ key ].slice()
-            lut[ key ] = [ Math.min(...clone), Math.max(...clone) ]
+        if (!lut[key].some(isString)) {
+            const clone = lut[key].slice()
+            lut[key] = [Math.min(...clone), Math.max(...clone)]
         }
 
     }
@@ -413,24 +414,24 @@ function updateSampleDictionary(sampleTableAsString) {
             sampleDictionary = {}
         }
 
-        sampleDictionary[ _key_ ] = {}
+        sampleDictionary[_key_] = {}
 
         for (let i = 0; i < record.length; i++) {
             const obj = {}
 
-            if ("" === record[ i ]) {
-                obj[ attributeNames[ i ] ] = '-'
+            if ("" === record[i]) {
+                obj[attributeNames[i]] = '-'
             } else {
-                obj[ attributeNames[ i ] ] = record[ i ]
+                obj[attributeNames[i]] = record[i]
             }
 
-            Object.assign(sampleDictionary[ _key_ ], obj)
+            Object.assign(sampleDictionary[_key_], obj)
         }
 
     } // for (lines)
 
-    for (const [ key, record ] of Object.entries(sampleDictionary)) {
-        sampleDictionary[ key ] = toNumericalRepresentation(record)
+    for (const [key, record] of Object.entries(sampleDictionary)) {
+        sampleDictionary[key] = toNumericalRepresentation(record)
     }
 
 }
@@ -439,7 +440,7 @@ function toNumericalRepresentation(obj) {
 
     const result = Object.assign({}, obj)
 
-    for (const [ key, value ] of Object.entries(result)) {
+    for (const [key, value] of Object.entries(result)) {
         if (typeof value === 'string' && !isNaN(value)) {
             result[key] = Number(value)
         }
@@ -465,6 +466,6 @@ function stringToRGBString(str) {
 }
 
 // identify an array that is predominantly numerical and replace string with undefined
-export { sampleDictionary, emptySpaceReplacement, attributeNamesMap }
+export {sampleDictionary, emptySpaceReplacement, attributeNamesMap}
 
 export default SampleInfo

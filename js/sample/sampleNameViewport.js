@@ -102,7 +102,7 @@ class SampleNameViewport {
             this.draw({context: this.ctx, samples})
 
             if (undefined === this.browser.sampleNameViewportWidth) {
-                const lengths = samples.names.map(name =>  this.ctx.measureText(name).width)
+                const lengths = samples.names.map(name => this.ctx.measureText(name).width)
                 this.browser.sampleNameViewportWidth = Math.min(maxSampleNameViewportWidth, fudgeTextMetricWidth + Math.ceil(Math.max(...lengths)))
                 this.browser.layoutChange()
             }
@@ -137,7 +137,7 @@ class SampleNameViewport {
                 context.fillText(text, sampleNameXShim, yFont)
 
                 const key = `${Math.floor(sampleNameXShim)}#${Math.floor(y)}#${context.canvas.width}#${Math.ceil(samples.height)}`
-                this.hitList[ key ] = `${name}`
+                this.hitList[key] = `${name}`
 
             }
             y += samples.height
@@ -202,16 +202,16 @@ class SampleNameViewport {
 
                 const entries = Object.entries(this.hitList)
 
-                const { x, y } = DOMUtils.translateMouseCoordinates(event, this.viewport)
+                const {x, y} = DOMUtils.translateMouseCoordinates(event, this.viewport)
 
                 this.viewport.setAttribute('title', '')
 
-                for (const [ bbox, value ] of entries) {
-                    const [xx, yy, width, height ] = bbox.split('#').map(str => parseInt(str, 10))
-                    if (x < xx || x > xx+width || y < yy || y > yy+height) {
+                for (const [bbox, value] of entries) {
+                    const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                    if (x < xx || x > xx + width || y < yy || y > yy + height) {
                         // do nothing
                     } else {
-                        this.viewport.setAttribute('title', `${ value }`)
+                        this.viewport.setAttribute('title', `${value}`)
                         break
                     }
                 }
@@ -224,6 +224,7 @@ class SampleNameViewport {
         this.viewport.removeEventListener('contextmenu', this.boundClickHandler)
         this.viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
+
     dispose() {
         this.removeMouseHandlers()
         this.viewport.remove()
