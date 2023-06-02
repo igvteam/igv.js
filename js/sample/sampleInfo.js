@@ -10,7 +10,8 @@ import {
 } from "../util/colorPalletes.js";
 import { distinctColorsPalette } from './sampleInfoPaletteLibrary.js'
 
-let attributes
+let attributeNames
+let attributeNamesMap
 let attributeRangeLUT
 let sampleDictionary
 let copyNumberDictionary
@@ -24,9 +25,21 @@ class SampleInfo {
 
         this.sampleInfoFiles = []
 
-        browser.on('trackorderchanged', list => {
+        const found = browser.findTracks(t => typeof t.getSamples === 'function')
+        if (found.length > 0) {
+            browser.sampleInfoControl.setButtonVisibility(true)
+        }
+
+
+        browser.on('trackorderchanged', ignore => {
+
             if (this.isInitialized()) {
-                browser.layoutChange()
+
+                const found = browser.findTracks(track => typeof track.getSamples === 'function')
+
+                if (found.length > 0) {
+                    browser.layoutChange()
+                }
             }
         })
 
@@ -40,18 +53,13 @@ class SampleInfo {
         return undefined !== sampleDictionary
     }
 
-    getAttributeCount() {
-        return this.getAttributeTypeList().length
+    getAttributeNames() {
+        return attributeNames
     }
+    getAttributes(sampleName) {
 
-    getAttributeTypeList() {
-        return attributes
-    }
-
-    getAttributes(key) {
-
-        const sampleKey = undefined === copyNumberDictionary ? key : (copyNumberDictionary[ key ] || key)
-        return sampleDictionary[ sampleKey ]
+        const key = undefined === copyNumberDictionary ? sampleName : (copyNumberDictionary[ sampleName ] || sampleName)
+        return sampleDictionary[ key ]
     }
 
     async loadSampleInfoFile(browser, path) {
@@ -68,6 +76,11 @@ class SampleInfo {
         }
 
         await SampleInfoViewport.update(browser)
+
+        const found = browser.findTracks(t => typeof t.getSamples === 'function')
+        if (found.length > 0) {
+            browser.sampleInfoControl.setButtonVisibility(true)
+        }
 
     }
 
@@ -332,7 +345,7 @@ function createAttributeRangeLUT(dictionary) {
     const lut= {}
     for (const value of Object.values(dictionary)) {
 
-        for (const attribute of attributes) {
+        for (const attribute of attributeNames) {
 
             let item = value[ attribute ]
 
@@ -342,7 +355,7 @@ function createAttributeRangeLUT(dictionary) {
 
             lut[ attribute ].push(item)
 
-        } // for (attributes)
+        } // for (attributeNames)
 
     } // for (Object.values(sampleDictionary))
 
@@ -385,7 +398,9 @@ function updateSampleDictionary(sampleTableAsString) {
     // discard "Linking_id"
     scratch.shift()
 
-    attributes = scratch.map(label => label.split(' ').join(emptySpaceReplacement))
+    attributeNames = scratch.map(label => label.split(' ').join(emptySpaceReplacement))
+
+    attributeNamesMap = new Map(attributeNames.map((name, index) => [name, index]))
 
     const cooked = lines.filter(line => line.length > 0)
 
@@ -404,9 +419,9 @@ function updateSampleDictionary(sampleTableAsString) {
             const obj = {}
 
             if ("" === record[ i ]) {
-                obj[ attributes[ i ] ] = '-'
+                obj[ attributeNames[ i ] ] = '-'
             } else {
-                obj[ attributes[ i ] ] = record[ i ]
+                obj[ attributeNames[ i ] ] = record[ i ]
             }
 
             Object.assign(sampleDictionary[ _key_ ], obj)
@@ -450,6 +465,6 @@ function stringToRGBString(str) {
 }
 
 // identify an array that is predominantly numerical and replace string with undefined
-export { sampleDictionary, emptySpaceReplacement }
+export { sampleDictionary, emptySpaceReplacement, attributeNamesMap }
 
 export default SampleInfo

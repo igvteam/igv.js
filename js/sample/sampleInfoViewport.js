@@ -1,7 +1,8 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
-import {emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
+import {attributeNamesMap, emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
 
+const sampleInfoTileXShim = 2
 const sampleInfoTileWidth = 16
 
 class SampleInfoViewport {
@@ -35,7 +36,9 @@ class SampleInfoViewport {
 
     static getSampleInfoColumnWidth(browser) {
         const found = browser.findTracks(t => typeof t.getSamples === 'function')
-        return (found.length > 0 && browser.sampleInfo.isInitialized()) ? browser.sampleInfo.getAttributeCount() * sampleInfoTileWidth : 0
+        return (found.length > 0 && browser.sampleInfo.isInitialized() && true === browser.sampleInfoControl.showSampleInfo)
+            ? sampleInfoTileXShim + browser.sampleInfo.getAttributeNames().length * sampleInfoTileWidth
+            : 0
     }
 
     checkCanvas() {
@@ -94,7 +97,8 @@ class SampleInfoViewport {
         context.fillStyle = appleCrayonRGB('snow')
         context.fillRect(0, 0, context.canvas.width, context.canvas.height)
 
-        if (samples && samples.names.length > 0) {
+        if (sampleDictionary && samples && samples.names.length > 0) {
+            this.browser.sampleInfo.getAttributeNames();
 
             const viewportHeight = this.viewport.getBoundingClientRect().height
 
@@ -106,7 +110,7 @@ class SampleInfoViewport {
 
             let y = this.contentTop
             this.hitList = {}
-            for (const name of samples.names) {
+            for (const sampleName of samples.names) {
 
                 if (y > viewportHeight) {
                     break
@@ -114,35 +118,29 @@ class SampleInfoViewport {
 
                 if (y + tileHeight > 0) {
 
-                    if (sampleDictionary) {
+                    const attributes = this.browser.sampleInfo.getAttributes(sampleName)
 
-                        const attributes = this.browser.sampleInfo.getAttributes(name)
+                    if (attributes) {
 
-                        if (attributes) {
+                        const attributeEntries = Object.entries(attributes)
 
-                            const attributeEntries = Object.entries(attributes)
+                        for (const attributeEntry of attributeEntries) {
 
-                            let x = 0;
-                            for (const attributeEntry of attributeEntries) {
+                            const [ attribute, value ] = attributeEntry
 
-                                const [ attribute, value ] = attributeEntry
+                            context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
 
-                                context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
+                            const x = sampleInfoTileXShim + attributeNamesMap.get(attribute) * sampleInfoTileWidth
+                            const yy = y+shim
+                            const hh = tileHeight-(2*shim)
+                            context.fillRect(x, yy, sampleInfoTileWidth, hh)
 
-                                const yy = y+shim
-                                const hh = tileHeight-(2*shim)
-                                context.fillRect(x, yy, sampleInfoTileWidth, hh)
+                            const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
+                            this.hitList[ key ] = `${attribute}#${value}`
 
-                                const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
-                                this.hitList[ key ] = `${attribute}#${value}`
+                        } // for (attributeEntries)
 
-                                x += sampleInfoTileWidth
-
-                            } // for (attributeEntries)
-
-                        } // if (attributes)
-
-                    } // if (dictionary && dictionary[ name ])
+                    } // if (attributes)
 
                 } // if (y + tileHeight > 0)
 
