@@ -28,6 +28,7 @@ import CursorGuideButton from "./ui/cursorGuideButton.js"
 import CenterLineButton from './ui/centerLineButton.js'
 import TrackLabelControl from "./ui/trackLabelControl.js"
 import SampleNameControl from "./ui/sampleNameControl.js"
+import SampleInfoControl from "./sample/sampleInfoControl.js"
 import ZoomWidget from "./ui/zoomWidget.js"
 import DataRangeDialog from "./ui/dataRangeDialog.js"
 import HtsgetReader from "./htsget/htsgetReader.js"
@@ -100,12 +101,21 @@ class Browser {
         this.eventHandlers = {}
 
         this.on('trackremoved', () => {
-            const found = this.findTracks('type', 'seg')
+
+            const found = this.findTracks(track => typeof track.getSamples === 'function')
+
             if (0 === found.length) {
+
+                // sample info
+                this.sampleInfoControl.setButtonVisibility(false)
+
+                // sample names
                 this.sampleNameViewportWidth = undefined
                 this.showSampleNames = false
                 this.sampleNameControl.setState(this.showSampleNames)
                 this.sampleNameControl.hide()
+
+
                 this.layoutChange()
             }
         })
@@ -139,6 +149,8 @@ class Browser {
         this.isCenterLineVisible = config.showCenterGuide
 
         this.cursorGuideVisible = config.showCursorGuide
+
+        this.showSampleInfoButton = false
 
         this.showSampleNames = config.showSampleNames
         this.showSampleNameButton = config.showSampleNameButton
@@ -252,6 +264,8 @@ class Browser {
 
         // ROI Control
         this.roiTableControl = new ROITableControl($toggle_button_container.get(0), this)
+
+        this.sampleInfoControl = new SampleInfoControl($toggle_button_container.get(0), this)
 
         this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
 
@@ -409,7 +423,9 @@ class Browser {
      */
     async loadSession(options) {
 
-        // TODO: depricated
+        this.sampleInfo.initialize()
+
+        // TODO: deprecated
         this.roiSets = []
 
         let session
@@ -465,6 +481,8 @@ class Browser {
         if (session.browsers) {
             session = await translateSession(session)
         }
+
+        this.sampleInfoControl.setButtonVisibility(false)
 
         this.showSampleNames = session.showSampleNames || false
         this.sampleNameControl.setState(this.showSampleNames === true)
@@ -803,6 +821,7 @@ class Browser {
         }
 
         const loadedTracks = await Promise.all(promises)
+
         const groupAutoscaleViews = this.trackViews.filter(function (trackView) {
             return trackView.track.autoscaleGroup
         })
@@ -855,7 +874,7 @@ class Browser {
                 return
             }
 
-            // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
+            // Set order field of track here, otherwise track order might get shuffled during asynchronous load
             if (undefined === newTrack.order) {
                 newTrack.order = this.trackViews.length
             }
@@ -863,8 +882,6 @@ class Browser {
             const trackView = new TrackView(this, this.columnContainer, newTrack)
             this.trackViews.push(trackView)
             toggleTrackLabels(this.trackViews, this.trackLabelsVisible)
-            this.reorderTracks()
-            this.fireEvent('trackorderchanged', [this.getTrackOrder()])
 
             if (typeof newTrack.postInit === 'function') {
                 try {
@@ -885,10 +902,19 @@ class Browser {
             }
 
             if (typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
+
+                if (this.sampleInfo.isInitialized()) {
+                    this.sampleInfoControl.setButtonVisibility(true)
+                }
+
                 if (this.config.showSampleNameButton !== false) {
                     this.sampleNameControl.show()   // If not explicitly set
                 }
             }
+
+            // repositioned here to solve layout issue.
+            this.reorderTracks()
+            this.fireEvent('trackorderchanged', [this.getTrackOrder()])
 
             return newTrack
 
@@ -1739,6 +1765,9 @@ class Browser {
         json["roi"] = this.roiManager.toJSON()
 
         const trackJson = []
+
+        this.sampleInfo.toJSON(trackJson)
+
         const errors = []
         for (let {track} of this.trackViews) {
             try {
@@ -1771,7 +1800,6 @@ class Browser {
             }
             throw Error(message)
         }
-
 
         json["tracks"] = trackJson
 
