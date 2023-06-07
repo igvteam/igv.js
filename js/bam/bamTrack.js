@@ -24,8 +24,8 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js"
+import AlignmentRenderer from "./alignmentRenderer.js"
 import BamSource from "./bamSource.js"
-import PairedAlignment from "./pairedAlignment.js"
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
@@ -41,9 +41,8 @@ import {reverseComplementSequence} from "../util/sequenceUtils.js"
 
 const alignmentStartGap = 5
 const downsampleRowHeight = 5
-const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)"
+
 const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
-const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
 const MINIMUM_BLAT_LENGTH = 20
 
 class BAMTrack extends TrackBase {
@@ -78,7 +77,7 @@ class BAMTrack extends TrackBase {
 
         this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
 
-        if(!this.showAlignments) {
+        if (!this.showAlignments) {
             this._height = this.coverageTrackHeight
         }
 
@@ -630,7 +629,7 @@ class CoverageTrack {
         let color
         if (this.parent.coverageColor) {
             color = this.parent.coverageColor
-        } else if (this.parent.color  && typeof this.parent.color !== "function") {
+        } else if (this.parent.color && typeof this.parent.color !== "function") {
             color = IGVColor.darkenLighten(this.parent.color, -35)
         } else {
             color = DEFAULT_COVERAGE_COLOR
@@ -762,6 +761,7 @@ class AlignmentTrack {
 
         this.parent = parent
         this.browser = parent.browser
+        this.renderer = new AlignmentRenderer(this)
         this.featureSource = parent.featureSource
         this.top = 0 === config.coverageTrackHeight ? 0 : config.coverageTrackHeight + 5
         this.displayMode = config.displayMode || "EXPANDED"
@@ -799,6 +799,31 @@ class AlignmentTrack {
         this.hasSupplemental = false
     }
 
+    get color() {
+        return this.parent.color
+    }
+
+    get showSortClips() {
+        return this.parent.showSoftClips
+    }
+
+    get showAllBases() {
+        return this.parent.showAllBases
+    }
+
+    get nucleotideColors() {
+        return this.browser.nucleotideColors
+    }
+
+    get minTemplateLength () {
+        return this.parent.minTemplateLength
+
+    }
+
+    get maxTemplateLength() {
+        return this.parent.maxTemplateLength
+    }
+
     setTop(coverageTrack, showCoverage) {
         this.top = (0 === coverageTrack.height || false === showCoverage) ? 0 : (5 + coverageTrack.height)
     }
@@ -830,20 +855,9 @@ class AlignmentTrack {
         const bpStart = options.bpStart
         const pixelWidth = options.pixelWidth
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        const showSoftClips = this.parent.showSoftClips
-        const showAllBases = this.parent.showAllBases
-        const nucleotideColors = this.browser.nucleotideColors
-
-        //alignmentContainer.repack(bpPerPixel, showSoftClips);
-        const packedAlignmentRows = alignmentContainer.packedAlignmentRows
-
 
         ctx.save()
 
-        let referenceSequence = alignmentContainer.sequence
-        if (referenceSequence) {
-            referenceSequence = referenceSequence.toUpperCase()
-        }
         let alignmentRowYInset = 0
 
         let pixelTop = options.pixelTop
@@ -876,16 +890,33 @@ class AlignmentTrack {
             this.squishedRowHeight :
             this.alignmentRowHeight
 
-        if (packedAlignmentRows) {
+        if (alignmentContainer.packedAlignmentRows) {
 
-            const nRows = packedAlignmentRows.length
+            let refSequence = alignmentContainer.sequence
+            if (refSequence) {
+                refSequence = refSequence.toUpperCase()
+            }
+
+            this.renderer.updateContext(
+                {
+                    ctx,
+                    bpPerPixel,
+                    bpStart,
+                    bpEnd,
+                    pixelEnd: pixelWidth,
+                    refSequence,
+                    refSequenceStart: alignmentContainer.start
+                })
+
+            const nRows = alignmentContainer.packedAlignmentRows.length
 
             for (let rowIndex = 0; rowIndex < nRows; rowIndex++) {
 
-                const alignmentRow = packedAlignmentRows[rowIndex]
+                const alignmentRow = alignmentContainer.packedAlignmentRows[rowIndex]
                 const alignmentY = alignmentRowYInset + (alignmentRowHeight * rowIndex)
                 const alignmentHeight = alignmentRowHeight <= 4 ? alignmentRowHeight : alignmentRowHeight - 2
 
+                // Check that row is in view
                 if (alignmentY > pixelBottom) {
                     break
                 } else if (alignmentY + alignmentHeight < pixelTop) {
@@ -900,333 +931,27 @@ class AlignmentTrack {
                         this.hasSupplemental = this.hasSupplemental || alignment.hasTag('SA')
                     }
 
+                    // Check that alignment is in view
                     if ((alignment.start + alignment.lengthOnRef) < bpStart) continue
                     if (alignment.start > bpEnd) break
                     if (true === alignment.hidden) {
                         continue
                     }
 
-                    if (alignment instanceof PairedAlignment) {
-
-                        drawPairConnector.call(this, alignment, alignmentY, alignmentHeight)
-
-                        drawSingleAlignment.call(this, alignment.firstAlignment, alignmentY, alignmentHeight)
-
-                        if (alignment.secondAlignment) {
-                            drawSingleAlignment.call(this, alignment.secondAlignment, alignmentY, alignmentHeight)
-                        }
-
-                    } else {
-                        drawSingleAlignment.call(this, alignment, alignmentY, alignmentHeight)
-                    }
-
+                    // Draw alignment
+                    this.renderer.drawAlignment(alignment, alignmentY, alignmentHeight)
                 }
             }
         }
         ctx.restore()
 
-        // alignment is a PairedAlignment
-        function drawPairConnector(alignment, yRect, alignmentHeight) {
 
-            var connectorColor = this.getConnectorColor(alignment.firstAlignment),
-                xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
-                xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
-                yStrokedLine = yRect + alignmentHeight / 2
-
-            if ((alignment.connectingEnd) < bpStart || alignment.connectingStart > bpEnd) {
-                return
-            }
-            if (alignment.mq <= 0) {
-                connectorColor = IGVColor.addAlpha(connectorColor, 0.15)
-            }
-            IGVGraphics.setProperties(ctx, {fillStyle: connectorColor, strokeStyle: connectorColor})
-            IGVGraphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine)
-
-        }
-
-        function drawSingleAlignment(alignment, yRect, alignmentHeight) {
-
-
-            if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
-                return
-            }
-
-            const blocks = showSoftClips ? alignment.blocks : alignment.blocks.filter(b => 'S' !== b.type)
-
-            let alignmentColor = this.getAlignmentColor(alignment)
-            const outlineColor = alignmentColor
-            if (alignment.mq <= 0) {
-                alignmentColor = IGVColor.addAlpha(alignmentColor, 0.15)
-            }
-            IGVGraphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor})
-
-            // Save bases to draw into an array for later drawing, so they can be overlaid on insertion blocks,
-            // which is relevant if we have insertions with size label
-            const basesToDraw = []
-
-            for (let b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
-
-                const block = blocks[b]
-
-                // Somewhat complex test, neccessary to insure gaps are drawn.
-                // If this is not the last block, and the next block starts before the orign (off screen to left) then skip.
-                if ((b !== blocks.length - 1) && blocks[b + 1].start < bpStart) continue
-
-                // drawBlock returns bases to draw, which are drawn on top of insertion blocks (if they're wider than
-                // the space between two bases) like in Java IGV
-                basesToDraw.push(...drawBlock.call(this, block, b))
-
-                if ((block.start + block.len) > bpEnd) {
-                    // Do this after drawBlock to insure gaps are drawn
-                    break
-                }
-            }
-
-            if (alignment.gaps) {
-                const yStrokedLine = yRect + alignmentHeight / 2
-                for (let gap of alignment.gaps) {
-                    const sPixel = (gap.start - bpStart) / bpPerPixel
-                    const ePixel = ((gap.start + gap.len) - bpStart) / bpPerPixel
-                    const lineWidth = ePixel - sPixel
-                    const gapLenText = gap.len.toString()
-                    const gapTextWidth = gapLenText.length * 6
-                    const gapCenter = sPixel + (lineWidth / 2)
-
-                    const color = ("D" === gap.type) ? this.deletionColor : this.skippedColor
-
-                    IGVGraphics.strokeLine(ctx, sPixel, yStrokedLine, ePixel, yStrokedLine, {
-                        strokeStyle: color,
-                        lineWidth: 2,
-                    })
-
-                    // Add gap width as text like Java IGV if it fits nicely and is a multi-base gap
-                    if (this.showDeletionText && gap.len > 1 && lineWidth >= gapTextWidth + 8) {
-                        const textStart = gapCenter - (gapTextWidth / 2)
-                        IGVGraphics.fillRect(ctx, textStart - 1, yRect - 1, gapTextWidth + 2, 12, {fillStyle: "white"})
-                        IGVGraphics.fillText(ctx, gapLenText, textStart, yRect + 10, {
-                            'font': 'normal 10px monospace',
-                            'fillStyle': this.deletionTextColor,
-                        })
-                    }
-                }
-            }
-
-            if (alignment.insertions && this.parent.showInsertions) {
-                let lastXBlockStart = -1
-                for (let insertionBlock of alignment.insertions) {
-                    if (this.hideSmallIndels && insertionBlock.len <= this.indelSizeThreshold) {
-                        continue
-                    }
-                    if (insertionBlock.start < bpStart) {
-                        continue
-                    }
-                    if (insertionBlock.start > bpEnd) {
-                        break
-                    }
-
-                    const refOffset = insertionBlock.start - bpStart
-                    const insertLenText = insertionBlock.len.toString()
-
-                    const textPixelWidth = 2 + (insertLenText.length * 6)
-                    const basePixelWidth = (!this.showInsertionText || insertionBlock.len === 1)
-                        ? 2
-                        : Math.round(insertionBlock.len / bpPerPixel)
-                    const widthBlock = Math.max(Math.min(textPixelWidth, basePixelWidth), 2)
-
-                    const xBlockStart = (refOffset / bpPerPixel) - (widthBlock / 2)
-                    if ((xBlockStart - lastXBlockStart) > 2) {
-                        const props = {fillStyle: this.insertionColor}
-
-                        // Draw decorations like Java IGV to make an 'I' shape
-                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect, widthBlock + 4, 2, props)
-                        IGVGraphics.fillRect(ctx, xBlockStart, yRect + 2, widthBlock, alignmentHeight - 4, props)
-                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect + alignmentHeight - 2, widthBlock + 4, 2, props)
-
-                        // Show # of inserted bases as text if it's a multi-base insertion and the insertion block
-                        // is wide enough to hold text (its size is capped at the text label size, but can be smaller
-                        // if the browser is zoomed out and the insertion is small)
-                        if (this.showInsertionText && insertionBlock.len > 1 && basePixelWidth > textPixelWidth) {
-                            IGVGraphics.fillText(ctx, insertLenText, xBlockStart + 1, yRect + 10, {
-                                'font': 'normal 10px monospace',
-                                'fillStyle': this.insertionTextColor,
-                            })
-                        }
-                        lastXBlockStart = xBlockStart
-                    }
-                }
-            }
-
-            basesToDraw.forEach(({bbox, baseColor, readChar}) => {
-                renderBlockOrReadChar(ctx, bpPerPixel, bbox, baseColor, readChar)
-            })
-
-
-            function drawBlock(block, b) {
-                // Collect bases to draw for later rendering
-                const blockBasesToDraw = []
-
-                const offsetBP = block.start - alignmentContainer.start
-                const blockStartPixel = (block.start - bpStart) / bpPerPixel
-                const blockEndPixel = ((block.start + block.len) - bpStart) / bpPerPixel
-                const blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel)
-
-                //const arrowHeadWidthPixel = alignmentRowHeight / 2.0;
-                const nomPixelWidthOnRef = 100 / bpPerPixel
-                const arrowHeadWidthPixel = Math.min(alignmentRowHeight / 2.0, nomPixelWidthOnRef / 6)
-
-                const isSoftClip = 'S' === block.type
-
-                const strokeOutline =
-                    alignment.mq <= 0 ||
-                    this.highlightedAlignmentReadNamed === alignment.readName ||
-                    isSoftClip
-
-                let blockOutlineColor = outlineColor
-                if (this.highlightedAlignmentReadNamed === alignment.readName) blockOutlineColor = 'red'
-                else if (isSoftClip) blockOutlineColor = 'rgb(50,50,50)'
-
-                const lastBlockPositiveStrand = (true === alignment.strand && b === blocks.length - 1)
-                const lastBlockReverseStrand = (false === alignment.strand && b === 0)
-                const lastBlock = lastBlockPositiveStrand | lastBlockReverseStrand
-
-                if (lastBlock) {
-                    let xListPixel
-                    let yListPixel
-                    if (lastBlockPositiveStrand) {
-                        xListPixel = [
-                            blockStartPixel,
-                            blockEndPixel,
-                            blockEndPixel + arrowHeadWidthPixel,
-                            blockEndPixel,
-                            blockStartPixel,
-                            blockStartPixel]
-                        yListPixel = [
-                            yRect,
-                            yRect,
-                            yRect + (alignmentHeight / 2.0),
-                            yRect + alignmentHeight,
-                            yRect + alignmentHeight,
-                            yRect]
-
-                    }
-
-                    // Last block on - strand ?
-                    else if (lastBlockReverseStrand) {
-                        xListPixel = [
-                            blockEndPixel,
-                            blockStartPixel,
-                            blockStartPixel - arrowHeadWidthPixel,
-                            blockStartPixel,
-                            blockEndPixel,
-                            blockEndPixel]
-                        yListPixel = [
-                            yRect,
-                            yRect,
-                            yRect + (alignmentHeight / 2.0),
-                            yRect + alignmentHeight,
-                            yRect + alignmentHeight,
-                            yRect]
-
-                    }
-                    IGVGraphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor})
-
-                    if (strokeOutline) {
-                        IGVGraphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: blockOutlineColor})
-                    }
-                }
-
-                // Internal block
-                else {
-                    IGVGraphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor})
-
-                    if (strokeOutline) {
-                        ctx.save()
-                        ctx.strokeStyle = blockOutlineColor
-                        ctx.strokeRect(blockStartPixel, yRect, blockWidthPixel, alignmentHeight)
-                        ctx.restore()
-                    }
-                }
-
-
-                // Read base coloring
-
-                if (isSoftClip ||
-                    showAllBases ||
-                    this.parent.showMismatches && (referenceSequence && alignment.seq && alignment.seq !== "*")) {
-
-                    const seq = alignment.seq ? alignment.seq.toUpperCase() : undefined
-                    const qual = alignment.qual
-                    const seqOffset = block.seqOffset
-                    const widthPixel = Math.max(1, 1 / bpPerPixel)
-
-
-                    for (let i = 0, len = block.len; i < len; i++) {
-
-                        const xPixel = ((block.start + i) - bpStart) / bpPerPixel
-
-                        if (xPixel + widthPixel < 0) continue   // Off left edge
-                        if (xPixel > pixelWidth) break  // Off right edge
-
-                        let readChar = seq ? seq.charAt(seqOffset + i) : ''
-                        const refChar = offsetBP + i >= 0 ? referenceSequence.charAt(offsetBP + i) : ''
-
-                        if (readChar === "=") {
-                            readChar = refChar
-                        }
-                        if (readChar === "X" || refChar !== readChar || isSoftClip || showAllBases) {
-
-                            let baseColor
-                            if (!isSoftClip && qual !== undefined && qual.length > seqOffset + i) {
-                                const readQual = qual[seqOffset + i]
-                                baseColor = shadedBaseColor(readQual, nucleotideColors[readChar])
-                            } else {
-                                baseColor = nucleotideColors[readChar]
-                            }
-                            if (baseColor) {
-                                blockBasesToDraw.push({
-                                    bbox: {
-                                        x: xPixel,
-                                        y: yRect,
-                                        width: widthPixel,
-                                        height: alignmentHeight
-                                    },
-                                    baseColor,
-                                    readChar,
-                                })
-                            }
-                        }
-                    }
-                }
-
-                return blockBasesToDraw
-            }
-
-            function renderBlockOrReadChar(context, bpp, bbox, color, char) {
-                var threshold,
-                    center
-
-                threshold = 1.0 / 10.0
-                if (bpp <= threshold && bbox.height >= 8) {
-
-                    // render letter
-                    const fontHeight = Math.min(10, bbox.height)
-                    context.font = '' + fontHeight + 'px sans-serif'
-                    center = bbox.x + (bbox.width / 2.0)
-                    IGVGraphics.strokeText(context, char, center - (context.measureText(char).width / 2), fontHeight - 1 + bbox.y, {strokeStyle: color})
-                } else {
-
-                    // render colored block
-                    IGVGraphics.fillRect(context, bbox.x, bbox.y, bbox.width, bbox.height, {fillStyle: color})
-                }
-            }
-        }
-
-    };
+    }
 
     popupData(clickState) {
         const clickedObject = this.getClickedObject(clickState)
         return clickedObject ? clickedObject.popupData(clickState.genomicLocation) : undefined
-    };
+    }
 
     contextMenuItemList(clickState) {
 
@@ -1451,137 +1176,9 @@ class AlignmentTrack {
 
     };
 
-    /**
-     * Return the color for connectors in paired alignment view.   If explicitly set return that, otherwise return
-     * the alignment color, unless the color option can result in split colors (separte color for each mate).
-     *
-     * @param alignment
-     * @returns {string}
-     */
-    getConnectorColor(alignment) {
 
-        if (this.pairConnectorColor) {
-            return this.pairConnectorColor
-        }
-
-        switch (this.colorBy) {
-            case "strand":
-            case "firstOfPairStrand":
-            case "pairOrientation":
-            case "tag":
-                if (this.parent.color) {
-                    return (typeof this.parent.color === "function") ? this.parent.color(alignment) : this.parent.color
-                } else {
-                    return DEFAULT_CONNECTOR_COLOR
-                }
-            default:
-                return this.getAlignmentColor(alignment)
-
-        }
-    }
-
-    getAlignmentColor(alignment) {
-
-        let color = DEFAULT_ALIGNMENT_COLOR   // The default color if nothing else applies
-        if (this.parent.color) {
-            color = (typeof this.parent.color === "function") ? this.parent.color(alignment) : this.parent.color
-        } else {
-            color = DEFAULT_ALIGNMENT_COLOR
-        }
-        const option = this.colorBy
-        switch (option) {
-            case "strand":
-                color = alignment.strand ? this.posStrandColor : this.negStrandColor
-                break
-
-            case "firstOfPairStrand":
-
-                if (alignment instanceof PairedAlignment) {
-                    color = alignment.firstOfPairStrand() ? this.posStrandColor : this.negStrandColor
-                } else if (alignment.isPaired()) {
-
-                    if (alignment.isFirstOfPair()) {
-                        color = alignment.strand ? this.posStrandColor : this.negStrandColor
-                    } else if (alignment.isSecondOfPair()) {
-                        color = alignment.strand ? this.negStrandColor : this.posStrandColor
-                    } else {
-                        console.error("ERROR. Paired alignments are either first or second.")
-                    }
-                }
-                break
-
-            case "unexpectedPair":
-            case "pairOrientation":
-
-                if (this.pairOrientation && alignment.pairOrientation) {
-                    const oTypes = orientationTypes[this.pairOrientation]
-                    if (oTypes) {
-                        const pairColor = this.pairColors[oTypes[alignment.pairOrientation]]
-                        if (pairColor) {
-                            color = pairColor
-                            break
-                        }
-                    }
-                }
-                if ("pairOrientation" === option) {
-                    break
-                }
-
-            case "tlen":
-            case "fragmentLength":
-
-                if (alignment.mate && alignment.isMateMapped()) {
-                    if (alignment.mate.chr !== alignment.chr) {
-                        color = getChrColor(alignment.mate.chr)
-                    } else if (this.parent.minTemplateLength && Math.abs(alignment.fragmentLength) < this.parent.minTemplateLength) {
-                        color = this.smallTLENColor
-                    } else if (this.parent.maxTemplateLength && Math.abs(alignment.fragmentLength) > this.parent.maxTemplateLength) {
-                        color = this.largeTLENColor
-                    }
-                }
-                break
-
-            case "tag":
-                const tagValue = alignment.tags()[this.colorByTag]
-                if (tagValue !== undefined) {
-                    if (this.bamColorTag === this.colorByTag) {
-                        // UCSC style color option
-                        color = "rgb(" + tagValue + ")"
-                    } else {
-
-                        if (!this.tagColors) {
-                            this.tagColors = new PaletteColorTable("Set1")
-                        }
-                        color = this.tagColors.getColor(tagValue)
-                    }
-                }
-                break
-        }
-
-        return color
-
-    }
 }
 
-function shadedBaseColor(qual, baseColor) {
-
-    const minQ = 5   //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MIN),
-    const maxQ = 20  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX);
-
-    let alpha
-    if (qual < minQ) {
-        alpha = 0.1
-    } else {
-        alpha = Math.max(0.1, Math.min(1.0, 0.1 + 0.9 * (qual - minQ) / (maxQ - minQ)))
-    }
-    // Round alpha to nearest 0.1
-    alpha = Math.round(alpha * 10) / 10.0
-
-    if (alpha < 1) {
-        baseColor = IGVColor.addAlpha(baseColor, alpha)
-    }
-    return baseColor
-}
 
 const orientationTypes = {
 
