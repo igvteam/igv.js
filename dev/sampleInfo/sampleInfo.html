@@ -35,13 +35,13 @@
             // locus: [ 'myc', 'ace' ],
             // locus: 'ace',
             // locus: 'all',
-            // showSampleNames: true,
+            showSampleNames: true,
             // showCursorGuide: true,
             tracks:
                 [
                     {
                         name: 'GBM Copy Number',
-                        displayMode: "SQUISHED",
+                        // displayMode: "SQUISHED",
                         url: 'https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0'
                     },
                     {
@@ -104,7 +104,7 @@
 
     let browser
     (async () => {
-        browser = await igv.createBrowser(document.getElementById('myDiv'), shoebox_sample_name_bug)
+        browser = await igv.createBrowser(document.getElementById('myDiv'), config)
         console.log(`browser ${browser.guid} is good to go.`)
         document.getElementById('processFileInput').addEventListener('click', processFile)
         document.getElementById('processURLInput').addEventListener('click', processUrl)
@@ -113,17 +113,17 @@
 
     async function processFile() {
         const [file] = document.getElementById("fileInput").files
-        await browser.sampleInfo.loadSampleInfoFile(browser, file)
+        await browser.loadTrackList([{type: 'sampleinfo', url: file}])
     }
 
     async function processUrl() {
         const url = document.getElementById("urlInput").value
-        await browser.sampleInfo.loadSampleInfoFile(browser, url)
+        await browser.loadTrackList([{type: 'sampleinfo', url}])
     }
 
     async function processTrackUrl() {
         const url = document.getElementById("trackURLInput").value
-        await browser.loadTrack({url})
+        await browser.loadTrackList([{url}])
     }
 
 </script>
