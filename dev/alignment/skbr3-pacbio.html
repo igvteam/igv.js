@@ -11,21 +11,8 @@
 </head>
 <body>
 
-<p>
-<h2>Circular genome view with VCF tracks</h2>
 
-<ul>
-    <li>From track gear menu select <b>Show chords</b></li>
-    <li>Click on chord in circular view to see both ends in split screen</li>
-</ul>
-
-</p>
-
-<div id="igvDiv">
-    <div id="jbrowse_circular_genome_view"
-         style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
-
-</div>
+<div id="igvDiv"></div>
 
 <script type="module">
 
@@ -58,23 +45,16 @@
                     visibilityWindow: 10000,
                     hideSmallIndels: true,
                     indelSizeThreshold: 100,
-                    showSoftClips: true
+                    //showSoftClips: true
                 }
             ]
         }
 
     var igvDiv = document.getElementById("igvDiv");
 
-    let circularView;
     igv.createBrowser(igvDiv, options)
         .then(async function (browser) {
-
             console.log("Created IGV browser");
-            window.igvBrowser = browser;
-
-            const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
-            browser.createCircularView(circularViewContainer, true);
-
 
         })
 
