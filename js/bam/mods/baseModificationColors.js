@@ -1,5 +1,5 @@
 import {byteToUnsignedInt} from "./baseModificationUtils.js"
-import {IGVColor} from "../../../node_modules/igv-utils/src/igv-color.js"
+import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
 
 /**
  * C Modifications
@@ -69,10 +69,10 @@ function getModColor(modification, likelihood, colorOption) {
             const alpha = Math.min(255, Math.floor((l * l / 64 - 4 * l + 256)))    // quadratic
             if (l >= 128) {
                 const [r, g, b] = IGVColor.rgbComponents(baseColor)
-                modColorMap5MC.set(key, `rgba(${r},${g},${b},${alpha}`)
+                modColorMap5MC.set(key, `rgba(${r},${g},${b},${alpha/255}`)
             } else {
                 const [r, g, b] = IGVColor.rgbComponents(noModColor5MC)
-                modColorMap5MC.set(key, `rgba(${r},${g},${b},${alpha}`)
+                modColorMap5MC.set(key, `rgba(${r},${g},${b},${alpha/255}`)
             }
         }
 
@@ -88,7 +88,7 @@ function getModColor(modification, likelihood, colorOption) {
         }
         if (!modColorMap.has(key)) {
             const [r, g, b] = IGVColor.rgbComponents(baseColor)
-            modColorMap.set(key, `rgba(${r},${g},${b},${l}`)
+            modColorMap.set(key, `rgba(${r},${g},${b},${l/255}`)
         }
         return modColorMap.get(key)
     }
@@ -109,7 +109,7 @@ function getNoModColor(likelihood) {
     if (!modColorMap5MC.has(key)) {
         const alpha = Math.min(255, Math.floor(l * l / 64 - 4 * l + 256))    // quadratic
         const [r, g, b] = IGVColor.rgbComponents(baseColor)
-        modColorMap5MC.set(key, `rgba(${r},${g},${b},${alpha}`)
+        modColorMap5MC.set(key, `rgba(${r},${g},${b},${alpha/255}`)
 
     }
 

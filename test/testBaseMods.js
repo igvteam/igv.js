@@ -410,6 +410,7 @@ suite("test base mods", function () {
 
         const bmSet = modificationSets[0]
         const likelihoods = bmSet.likelihoods
+        assert.equal(likelihoods.size, ml.length)
         for (let pos of likelihoods.keys()) {
             assert.ok(expectedPositions.has(pos));
             assert.equal('G', sequence[pos])

@@ -102,7 +102,7 @@ function getBaseModificationSets(mm, ml, sequence, isNegativeStrand) {
                     const position = isNegativeStrand ? sequence.length - 1 - p : p
                     if (matchCount == skip) {
                         for (let modification of modifications) {
-                            const likelihood = ml == null ? 255 : ml[mlIdx++]
+                            const likelihood = !ml ? 255 : ml[mlIdx++]
                             likelihoodMap.get(modification).set(position, likelihood)
                         }
                         if (idx < tokens.length) {
@@ -141,7 +141,7 @@ function getBaseModificationSets(mm, ml, sequence, isNegativeStrand) {
  * @return
  */
 function isChEBI(str) {
-    if (str == null) {
+    if (!str) {
         return false
     }
     const length = str.length

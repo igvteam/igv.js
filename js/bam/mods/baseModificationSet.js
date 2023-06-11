@@ -22,11 +22,11 @@ class BaseModificationSet {
 
 
     containsPosition(pos) {
-        return likelihoods.has(pos)
+        return this.likelihoods.has(pos)
     }
 
     is5mC() {
-        return modification.equals("m") && ((this.base === 'C' && this.strand === '+') || (this.base === 'G' && this.strand === '-'))
+        return this.modification.equals("m") && ((this.base === 'C' && this.strand === '+') || (this.base === 'G' && this.strand === '-'))
     }
 }
 

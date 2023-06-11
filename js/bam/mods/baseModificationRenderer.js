@@ -10,6 +10,114 @@
 import {byteToUnsignedInt} from "./baseModificationUtils.js"
 import {getModColor, getNoModColor} from "./baseModificationColors.js"
 
+const colorOption = "BASE_MODIFICATION_5MC"
+
+class BaseModificationRenderer {
+
+    constructor(alignmentTrack) {
+        this.alignmentTrack = alignmentTrack
+    }
+
+    /**
+     * Update the context in which alignments are drawn.
+     *  ctx,
+     *  bpPerPixel,
+     *  bpStart,
+     *  bpEnd,
+     *  pixelEnd,
+     *  refSequence,
+     *  refSequenceStart
+     *
+     * @param context
+     */
+    updateContext(context) {
+        this.context = context
+    }
+
+    drawModifications(alignment, y, height) { //alignment, bpStart, locScale, rowRect, ctx, colorOption) {
+
+        switch (colorOption) {
+            case "BASE_MODIFICATION_5MC":
+                this.draw5mC(alignment, y, height, false)
+                break
+            case "BASE_MODIFICATION_C":
+                this.draw5mC(alignment, y, height, true)
+                break
+
+            //  default:
+            //      draw(alignment, bpStart, locScale, rowRect, g);
+        }
+
+    }
+
+    draw5mC(alignment, y, height, allMods) { //, bpStart, bpPerPixel, rowRect, ctx, allMods) {
+
+        const {ctx, pixelEnd, bpStart, bpEnd, bpPerPixel, refSequence, refSequenceStart} = this.context
+
+        const baseModificationSets = alignment.getBaseModificationSets()
+        if (baseModificationSets) {
+
+            for (let block of alignment.blocks) {
+
+                // Compute bounds
+                const pY = y
+                const dY = height
+                let dX = Math.max(1, (1.0 / bpPerPixel))
+
+                // Loop through sequence for this block
+                for (let i = block.seqOffset; i <  block.seqOffset + block.len; i++) {
+
+                    let pX = ((block.start + (i - block.seqOffset) - bpStart) / bpPerPixel)
+                    // Don't draw out of clipping rect
+                    if (pX > pixelEnd) {
+                        break
+                    } else if (pX + dX < 0) {
+                        continue
+                    }
+
+                    // Search all sets for modifications of this base, select modification with largest likelihood
+                    let lh = -1
+                    let modification = undefined
+
+                    // Compare likelihoods, including likelihood of no modification
+                    let noModificationLikelihood = 255
+                    for (let bmSet of baseModificationSets) {
+
+                        // This coloring mode is exclusively for "C" modifications, either 5mC or all C mods
+                        if (bmSet.getCanonicalBase() !== 'C') continue
+                        if (bmSet.modification === "m" || allMods) {
+
+                            if (bmSet.containsPosition(i)) {
+                                const l = byteToUnsignedInt(bmSet.likelihoods.get(i))
+                                noModificationLikelihood -= l
+                                if (!modification || l > lh) {
+                                    modification = bmSet.modification
+                                    lh = l
+                                }
+                            }
+                        }
+                    }
+
+
+                    if (modification) {
+                        const c = noModificationLikelihood > lh ?
+                            getNoModColor(noModificationLikelihood) :
+                            getModColor(modification, lh, "BASE_MODIFICATION_5MC")
+                        ctx.fillStyle = c
+
+                        // Expand narrow width to make more visible
+                        if (dX < 3) {
+                            dX = 3
+                            pX--
+                        }
+                        ctx.fillRect(pX, pY, dX, Math.max(1, dY - 2))
+                    }
+                }
+            }
+        }
+    }
+}
+
 function drawModifications(alignment, bpStart, locScale, rowRect, ctx, colorOption) {
 
     switch (colorOption) {
@@ -114,7 +222,7 @@ function drawModifications(alignment, bpStart, locScale, rowRect, ctx, colorOpti
 function draw5mC(alignment, bpStart, locScale, rowRect, ctx, allMods) {
 
     const baseModificationSets = alignment.getBaseModificationSets()
-    if (baseModificationSets != null) {
+    if (baseModificationSets) {
 
         /*
          start: scPos,
@@ -182,5 +290,5 @@ function draw5mC(alignment, bpStart, locScale, rowRect, ctx, allMods) {
     }
 }
 
-export {drawModifications}
+export default BaseModificationRenderer
 

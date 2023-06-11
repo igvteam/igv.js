@@ -3,18 +3,36 @@ import IGVGraphics from "../igv-canvas.js"
 import PairedAlignment from "./pairedAlignment.js"
 import {PaletteColorTable} from "../util/colorPalletes.js"
 import {getChrColor} from "./bamTrack.js"
+import BaseModificationRenderer from "./mods/baseModificationRenderer.js"
 
 const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)"
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
+const bisulfiteColorFw1 = "rgb(195, 195, 195)"
+const bisulfiteColorRev1 = "rgb(195, 210, 195)"
+
 
 class AlignmentRenderer {
 
     constructor(alignmentTrack) {
         this.alignmentTrack = alignmentTrack
+        this.baseModRenderer = new BaseModificationRenderer(alignmentTrack)
     }
 
+    /**
+     * Update the context in which alignments are drawn.
+     *  ctx,
+     *  bpPerPixel,
+     *  bpStart,
+     *  bpEnd,
+     *  pixelEnd,
+     *  refSequence,
+     *  refSequenceStart
+     *
+     * @param context
+     */
     updateContext(context) {
         this.context = context
+        this.baseModRenderer.updateContext(context)
     }
 
     drawAlignment(alignment, y, height) {
@@ -23,10 +41,10 @@ class AlignmentRenderer {
 
             this.drawPairConnector(alignment, y, height)
 
-            this.drawSingleAlignment(alignment, y, height,)
+            this.drawSingleAlignment(alignment.firstAlignment, y, height,)
 
             if (alignment.secondAlignment) {
-                this.drawSingleAlignment(alignment, y, height)
+                this.drawSingleAlignment(alignment.secondAlignment, y, height)
             }
 
         } else {
@@ -156,7 +174,6 @@ class AlignmentRenderer {
         for (let {bbox, baseColor, readChar} of basesToDraw) {
             const threshold = 1.0 / 10.0
             if (bpPerPixel <= threshold && bbox.height >= 8) {
-
                 // render letter
                 const fontHeight = Math.min(10, bbox.height)
                 ctx.font = '' + fontHeight + 'px sans-serif'
@@ -168,6 +185,8 @@ class AlignmentRenderer {
                 IGVGraphics.fillRect(ctx, bbox.x, bbox.y, bbox.width, bbox.height, {fillStyle: baseColor})
             }
         }
+
+        this.baseModRenderer.drawModifications(alignment, y, height)
 
         function drawBlock(block, b) {
             // Collect bases to draw for later rendering
@@ -251,7 +270,10 @@ class AlignmentRenderer {
                     if (readChar === "X" || refChar !== readChar || isSoftClip || showAllBases) {
 
                         let baseColor
-                        if (!isSoftClip && qual !== undefined && qual.length > seqOffset + i) {
+                        if("5mc" === this.alignmentTrack.colorBy || "5c" === this.alignmentTrack.colorBy) {
+                            baseColor = "gray"
+                        }
+                        else if (!isSoftClip && qual !== undefined && qual.length > seqOffset + i) {
                             const readQual = qual[seqOffset + i]
                             baseColor = shadedBaseColor(readQual, nucleotideColors[readChar])
                         } else {
@@ -279,7 +301,7 @@ class AlignmentRenderer {
     }
 
     drawPairConnector(alignment, yRect, alignmentHeight) {
-
+        const {ctx, pixelEnd, bpStart, bpEnd, bpPerPixel, refSequence, refSequenceStart} = this.context
         var connectorColor = this.getConnectorColor(alignment.firstAlignment),
             xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
             xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
@@ -335,6 +357,24 @@ class AlignmentRenderer {
         }
         const option = this.alignmentTrack.colorBy
         switch (option) {
+            // case BISULFITE:
+            // case BASE_MODIFICATION:
+            // case BASE_MODIFICATION_5MC:
+            // case BASE_MODIFICATION_C:
+            // case SMRT_SUBREAD_IPD:
+            // case SMRT_SUBREAD_PW:
+            // case SMRT_CCS_FWD_IPD:
+            // case SMRT_CCS_FWD_PW:
+            // case SMRT_CCS_REV_IPD:
+            // case SMRT_CCS_REV_PW:
+
+            case "5mc":
+            case "5c":
+                // Just a simple forward/reverse strand color scheme that won't clash with the methylation rectangles.
+                color = (true === alignment.strand) ? bisulfiteColorFw1 : bisulfiteColorRev1
+
+                break
+
             case "strand":
                 color = alignment.strand ? this.alignmentTrack.posStrandColor : this.alignmentTrack.negStrandColor
                 break

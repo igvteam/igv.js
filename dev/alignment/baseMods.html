@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>Base Modification - Megladon</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            reference: {
+                fastaURL: "https://s3.amazonaws.com/igv.org.test/data/mods/primrose_example/B73.v5.chr1_1mb.fasta",
+                indexURL: "https://s3.amazonaws.com/igv.org.test/data/mods/primrose_example/B73.v5.chr1_1mb.fasta.fai"
+            },
+            locus: "B73_chr1:301,617-301,656",
+            tracks: [
+                {
+                    type: 'alignment',
+                    format: 'bam',
+                    url:      'https://s3.amazonaws.com/igv.org.test/data/mods/primrose_example/B73.hifi.CpG.aln.MQ60.chr1_1mb.bam',
+                    indexURL: 'https://s3.amazonaws.com/igv.org.test/data/mods/primrose_example/B73.hifi.CpG.aln.MQ60.chr1_1mb.bam.bai',
+                    height: 700,
+                    name: 'Primrose',
+                    colorBy: '5mc'
+                }
+
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
