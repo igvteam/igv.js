@@ -186,7 +186,9 @@ class AlignmentRenderer {
             }
         }
 
-        this.baseModRenderer.drawModifications(alignment, y, height)
+        if("5mc" === this.alignmentTrack.colorBy) {
+            this.baseModRenderer.drawModifications(alignment, y, height)
+        }
 
         function drawBlock(block, b) {
             // Collect bases to draw for later rendering

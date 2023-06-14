@@ -330,18 +330,15 @@ class BamAlignment {
             const mm = this.tagDict["MM"] || this.tagDict["Mm"]
             const ml = this.tagDict["ML"] || this.tagDict["Ml"]
 
-            // Minimal tag validation
-            //if(mm instanceof String && (!ml  || ml instanceof byte [])) {
-
-            const sequence = this.seq
-
-            if (mm.length === 0) { // TODO -- more extensive validation?
-                this.baseModificationSets = EMPTY_SET
-            } else {
-                //getBaseModificationSets(mm, ml, sequence, isNegativeStrand)
-                this.baseModificationSets = getBaseModificationSets(mm, ml, this.seq, this.isNegativeStrand())
+            if (StringUtils.isString(mm) && (!ml || Array.isArray(ml))) { // minimal validation, 10X uses these reserved tags for something completely different
+                if (mm.length === 0) {
+                    this.baseModificationSets = EMPTY_SET
+                } else {
+                    //getBaseModificationSets(mm, ml, sequence, isNegativeStrand)
+                    this.baseModificationSets = getBaseModificationSets(mm, ml, this.seq, this.isNegativeStrand())
+                }
+                //}
             }
-            //}
         }
         return this.baseModificationSets
     }

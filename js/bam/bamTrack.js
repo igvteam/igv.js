@@ -1,27 +1,3 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import AlignmentRenderer from "./alignmentRenderer.js"
@@ -38,6 +14,7 @@ import {isSecureContext} from "../util/igvUtils.js"
 import PairedEndStats from "./pairedEndStats.js"
 import {createBlatTrack, maxSequenceSize} from "../blat/blatTrack.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"
+import {drawModifications} from "./mods/baseModificationCoverageRenderer.js"
 
 const alignmentStartGap = 5
 const downsampleRowHeight = 5
@@ -59,7 +36,8 @@ class BAMTrack extends TrackBase {
         showInsertions: true,
         showMismatches: true,
         height: 300,
-        coverageTrackHeight: 50
+        coverageTrackHeight: 50,
+        colorBy: undefined
     }
 
     constructor(config, browser) {
@@ -594,6 +572,8 @@ class CoverageTrack {
             }
         }
 
+
+
     }
 
     get height() {
@@ -666,22 +646,27 @@ class CoverageTrack {
                 if (bp < bpStart) continue
                 if (bp > bpEnd) break
 
-                const item = coverageMap.coverage[i]
-                if (!item) continue
+                const counts = coverageMap.coverage[i]
+                if (!counts) continue
 
-                const h = (item.total / this.dataRange.max) * this.height
+                const h = (counts.total / this.dataRange.max) * this.height
                 let y = this.height - h
                 const x = Math.floor((bp - bpStart) / bpPerPixel)
 
                 const refBase = sequence[i]
-                if (item.isMismatch(refBase)) {
+                if("5mc" === this.parent.colorBy) {
+                                //context, pX, pBottom, dX, barHeight, pos, alignmentContainer
+                    drawModifications(ctx, x, this.height, w, h, bp, alignmentContainer, this.parent.colorBy)
+
+                }
+                else if (counts.isMismatch(refBase)) {
                     IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[refBase]})
                     IGVGraphics.fillRect(ctx, x, y, w, h)
 
                     let accumulatedHeight = 0.0
                     for (let nucleotide of ["A", "C", "T", "G"]) {
 
-                        const count = item["pos" + nucleotide] + item["neg" + nucleotide]
+                        const count = counts["pos" + nucleotide] + counts["neg" + nucleotide]
 
                         // non-logoritmic
                         const hh = (count / this.dataRange.max) * this.height

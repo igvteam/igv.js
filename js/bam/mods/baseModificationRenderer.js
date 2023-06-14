@@ -102,7 +102,7 @@ class BaseModificationRenderer {
                     if (modification) {
                         const c = noModificationLikelihood > lh ?
                             getNoModColor(noModificationLikelihood) :
-                            getModColor(modification, lh, "BASE_MODIFICATION_5MC")
+                            getModColor(modification, lh, "5mc")
                         ctx.fillStyle = c
 
                         // Expand narrow width to make more visible
@@ -153,7 +153,7 @@ function drawModifications(alignment, bpStart, locScale, rowRect, ctx, colorOpti
 //     List<BaseModificationSet> baseModificationSets = alignment.getBaseModificationSets();
 //
 //     if (baseModificationSets != null) {
-//         for (AlignmentBlock block : alignment.getAlignmentBlocks()) {
+//         for (AlignmentBlock block : alignment.blocks) {
 //             // Compute bounds
 //             int pY = (int) rowRect.getY();
 //             int dY = (int) rowRect.getHeight();
@@ -275,7 +275,7 @@ function draw5mC(alignment, bpStart, locScale, rowRect, ctx, allMods) {
 
                     const c = noModificationLikelihood > lh ?
                         getNoModColor(noModificationLikelihood) :
-                        getModColor(modification, lh, "BASE_MODIFICATION_5MC")
+                        getModColor(modification, lh, "5mc")
                     ctx.fillStyle = c
 
                     // Expand narrow width to make more visible

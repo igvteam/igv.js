@@ -118,7 +118,7 @@ function getNoModColor(likelihood) {
 }
 
 function getBaseColor(modification, colorOption) {
-    if ((colorOption === "BASE_MODIFICATION_5MC" || colorOption === "BASE_MODIFICATION_C") && colors5MC.has(modification)) {
+    if ((colorOption === "5mc" || colorOption === "5c") && colors5MC.has(modification)) {
         return colors5MC.get(modification)
     } else if (colors.has(modification)) {
         return colors.get(modification)
@@ -127,4 +127,4 @@ function getBaseColor(modification, colorOption) {
     }
 }
 
-export {getModColor, getNoModColor}
+export {getModColor, getNoModColor, noModColor5MC}
