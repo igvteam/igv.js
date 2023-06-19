@@ -242,6 +242,62 @@ class TrackView {
 
     presentColorPicker(key) {
 
+        if (false === colorPickerExclusionTypes.has(this.track.type)) {
+
+            const trackColors = []
+            const color = this.track.color || this.track.defaultColor
+            if (StringUtils.isString(color)) {
+                trackColors.push(color)
+            }
+            if (this.track.altColor && StringUtils.isString(this.track.altColor)) {
+                trackColors.push(this.track.altColor)
+            }
+            let defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c))
+            let colorHandlers =
+                {
+                    color: color => {
+                        this.track.color = color
+                        this.repaintViews()
+                    },
+                    altColor: color => {
+                        this.track.altColor = color
+                        this.repaintViews()
+                    }
+
+                }
+
+            const selected = getMultiSelectedTrackViews(this.browser)
+
+            if (selected && new Set(selected).has(this)) {
+
+                // defaultColors =
+                //     {
+                //         color: colorString
+                //     }
+
+                colorHandlers =
+                    {
+                        color: rgbString => {
+                            for (let trackView of selected) {
+                                trackView.track.color = rgbString
+                                trackView.repaintViews()
+                            }
+                        }
+                    }
+
+                this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
+            } else {
+                this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
+            }
+
+            this.browser.genericColorPicker.setActiveColorHandler(key)
+            this.browser.genericColorPicker.show()
+        }
+
+    }
+
+    DEPRICATED_presentColorPicker(key) {
+
         if (false === colorPickerExclusionTypes.has(this.track.type) && true === canShowColorPicker(this.track)) {
 
             const color = this.track.color || this.track.defaultColor
