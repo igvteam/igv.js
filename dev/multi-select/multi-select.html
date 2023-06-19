@@ -22,6 +22,33 @@
 
     import igv from "../../js/index.js";
 
+    const config =
+        {
+            genome: "hg19",
+            locus: "chr1:155,138,124-155,153,715",
+            tracks:
+                [
+                    {
+                        type: "wig",
+                        format: "bigwig",
+                        url: 'https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig',
+                        color: "red",
+                    },
+                    {
+                        type: "wig",
+                        format: "bigwig",
+                        url: "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                        color: "green",
+                    },
+                    //     {
+                    //         type: "wig",
+                    //         format: "bigwig",
+                    //         url : "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                    //         color: "blue",
+                    //     }
+                ]
+        };
+
     const KitchenSinkConfig =
         {
             genome: "hg19",
@@ -214,7 +241,7 @@
                     {
                         type: "wig",
                         format: "bigwig",
-                        url : "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                        url: "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
                         color: "blue",
                     }
                 ]
@@ -261,12 +288,12 @@
         ]
     }
 
-    igv.createBrowser(document.getElementById("igvDiv"), KitchenSinkConfig)
+    igv.createBrowser(document.getElementById("igvDiv"), config)
         .then(function (browser) {
             console.log("Created IGV browser");
         })
 
-    function download  (filename, data) {
+    function download(filename, data) {
 
         const element = document.createElement('a');
         element.setAttribute('href', data);
