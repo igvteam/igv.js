@@ -30,10 +30,17 @@ class SampleInfoControl {
 
     constructor(parent, browser) {
 
-        this.button = DOMUtils.div({class: 'igv-navbar-button'})
+        this.button = DOMUtils.div({class: 'igv-navbar-icon-container'})
         parent.appendChild(this.button)
 
-        this.button.innerText = 'Sample Info'
+        const img = document.createElement('img')
+        img.setAttribute('src', '../../images/sample-info.svg')
+        img.setAttribute('width', '24')
+        img.setAttribute('height', '24')
+        img.setAttribute('class', 'igv-navbar-icon-svg')
+        img.setAttribute('title', 'sample info')
+
+        this.button.appendChild(img)
 
         this.setButtonVisibility(false)
 
@@ -61,6 +68,9 @@ class SampleInfoControl {
     }
 
     setButtonState(showSampleInfo) {
+
+        return
+
         true === showSampleInfo ? this.button.classList.add('igv-navbar-button-clicked') : this.button.classList.remove('igv-navbar-button-clicked')
     }
 

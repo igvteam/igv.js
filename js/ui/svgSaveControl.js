@@ -27,10 +27,19 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 
 const SVGSaveControl = function (parent, browser) {
-    const button = DOMUtils.div({class: 'igv-navbar-button'})
-    parent.append(button)
 
-    button.textContent = 'Save SVG'
+    const button = DOMUtils.div({class: 'igv-navbar-icon-container'})
+    parent.appendChild(button)
+
+    const img = document.createElement('img')
+    img.setAttribute('src', '../../images/svg-save.svg')
+    img.setAttribute('width', '24')
+    img.setAttribute('height', '24')
+    img.setAttribute('class', 'igv-navbar-icon-svg')
+    img.setAttribute('title', 'save as svg')
+
+    button.appendChild(img)
+
     button.addEventListener('click', () => browser.saveSVGtoFile({}))
 }
 

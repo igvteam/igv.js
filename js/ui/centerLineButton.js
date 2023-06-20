@@ -6,10 +6,17 @@ class CenterLineButton {
 
         this.browser = browser
 
-        this.button = DOMUtils.div({class: 'igv-navbar-button'})
+        this.button = DOMUtils.div({class: 'igv-navbar-icon-container'})
         parent.appendChild(this.button)
 
-        this.button.textContent = 'center line'
+        const img = document.createElement('img')
+        img.setAttribute('src', '../../images/centerline.svg')
+        img.setAttribute('width', '24')
+        img.setAttribute('height', '24')
+        img.setAttribute('class', 'igv-navbar-icon-svg')
+        img.setAttribute('title', 'center line')
+
+        this.button.appendChild(img)
 
         this.button.addEventListener('click', () => {
             browser.isCenterLineVisible = !browser.isCenterLineVisible
@@ -27,6 +34,9 @@ class CenterLineButton {
     }
 
     setButtonState(isCenterLineVisible) {
+
+        return
+
         if (true === isCenterLineVisible) {
             this.button.classList.add('igv-navbar-button-clicked')
         } else {

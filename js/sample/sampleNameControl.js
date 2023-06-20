@@ -24,16 +24,23 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {DOMUtils} from "../../node_modules/igv-ui/dist/igv-ui.js"
 
 class SampleNameControl {
 
     constructor(parent, browser) {
 
-        this.button = DOMUtils.div({class: 'igv-navbar-button'})
+        this.button = DOMUtils.div({class: 'igv-navbar-icon-container'})
         parent.appendChild(this.button)
 
-        this.button.innerText = 'Sample Names'
+        const img = document.createElement('img')
+        img.setAttribute('src', '../../images/sample-names.svg')
+        img.setAttribute('width', '24')
+        img.setAttribute('height', '24')
+        img.setAttribute('class', 'igv-navbar-icon-svg')
+        img.setAttribute('title', 'sample names')
+
+        this.button.appendChild(img)
 
         this.setState(browser.showSampleNames)
 
@@ -70,6 +77,9 @@ class SampleNameControl {
     }
 
     setState(showSampleNames) {
+
+        return
+
         if (true === showSampleNames) {
             this.button.classList.add('igv-navbar-button-clicked')
         } else {

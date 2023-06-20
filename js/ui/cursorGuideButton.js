@@ -32,10 +32,17 @@ class CursorGuideButton {
 
         this.browser = browser
 
-        this.button = DOMUtils.div({class: 'igv-navbar-button'})
+        this.button = DOMUtils.div({class: 'igv-navbar-icon-container'})
         parent.appendChild(this.button)
 
-        this.button.textContent = 'cursor guide'
+        const img = document.createElement('img')
+        img.setAttribute('src', '../../images/cursor.svg')
+        img.setAttribute('width', '24')
+        img.setAttribute('height', '24')
+        img.setAttribute('class', 'igv-navbar-icon-svg')
+        img.setAttribute('title', 'cursor guide')
+
+        this.button.appendChild(img)
 
         this.button.addEventListener('click', () => {
             browser.cursorGuideVisible = !browser.cursorGuideVisible
@@ -54,6 +61,9 @@ class CursorGuideButton {
     }
 
     setButtonState(cursorGuideVisible) {
+
+        return
+
         if (true === cursorGuideVisible) {
             this.button.classList.add('igv-navbar-button-clicked')
         } else {

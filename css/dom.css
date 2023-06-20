@@ -132,17 +132,9 @@
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   height: 100%;
-}
-.igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container div {
-  margin-left: 0;
-  margin-right: 4px;
-}
-.igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container div:last-child {
-  margin-left: 0;
-  margin-right: 0;
 }
 .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container-750 {
   display: none;
@@ -233,6 +225,22 @@
 }
 .igv-navbar .igv-navbar-right-container .igv-zoom-widget-hidden {
   display: none;
+}
+
+.igv-navbar-icon-container {
+  margin-left: 4px;
+  margin-right: 4px;
+  width: 24px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.igv-navbar-icon-svg {
+  opacity: 1;
+}
+
+.igv-navbar-icon-svg:hover {
+  opacity: 1;
 }
 
 .igv-navbar-button {

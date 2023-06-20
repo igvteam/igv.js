@@ -30,9 +30,17 @@ class TrackLabelControl {
 
     constructor(parent, browser) {
 
-        this.button = DOMUtils.div({class: 'igv-navbar-button'})
+        this.button = DOMUtils.div({class: 'igv-navbar-icon-container'})
         parent.appendChild(this.button)
-        this.button.textContent = 'track labels'
+
+        const img = document.createElement('img')
+        img.setAttribute('src', '../../images/text-labels.svg')
+        img.setAttribute('width', '24')
+        img.setAttribute('height', '24')
+        img.setAttribute('class', 'igv-navbar-icon-svg')
+        img.setAttribute('title', 'show track labels')
+
+        this.button.appendChild(img)
 
         this.button.addEventListener('click', () => {
             browser.trackLabelsVisible = !browser.trackLabelsVisible
@@ -56,6 +64,9 @@ class TrackLabelControl {
     }
 
     setState(trackLabelsVisible) {
+
+        return
+
         if (true === trackLabelsVisible) {
             this.button.classList.add('igv-navbar-button-clicked')
         } else {

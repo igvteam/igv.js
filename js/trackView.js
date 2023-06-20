@@ -154,7 +154,7 @@ class TrackView {
 
             input.addEventListener('change', event => {
 
-                for (let trackView of this.browser.trackViews) {
+                for (const trackView of this.browser.trackViews) {
 
                     if (false === multiTrackSelectExclusionTypes.has(trackView.track.type)) {
 
@@ -296,7 +296,7 @@ class TrackView {
 
     }
 
-    DEPRICATED_presentColorPicker(key) {
+    DEPRICATED_MULTI_SELECT_presentColorPicker(key) {
 
         if (false === colorPickerExclusionTypes.has(this.track.type) && true === canShowColorPicker(this.track)) {
 

@@ -27,7 +27,7 @@ import CursorGuide from "./ui/cursorGuide.js"
 import CursorGuideButton from "./ui/cursorGuideButton.js"
 import CenterLineButton from './ui/centerLineButton.js'
 import TrackLabelControl from "./ui/trackLabelControl.js"
-import SampleNameControl from "./ui/sampleNameControl.js"
+import SampleNameControl from "./sample/sampleNameControl.js"
 import SampleInfoControl from "./sample/sampleInfoControl.js"
 import ZoomWidget from "./ui/zoomWidget.js"
 import DataRangeDialog from "./ui/dataRangeDialog.js"
