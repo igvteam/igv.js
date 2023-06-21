@@ -26,21 +26,29 @@
 
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 
-const SVGSaveControl = function (parent, browser) {
+class SVGSaveControl {
+    constructor(parent, browser) {
 
-    const button = DOMUtils.div({class: 'igv-navbar-icon-container'})
-    parent.appendChild(button)
+        const button = DOMUtils.div({class: 'igv-navbar-icon-button'})
+        parent.appendChild(button)
+        button.id = 'igv-save-svg-button'
+        button.style.backgroundImage = "url('/images/svg-save.svg')"
 
-    const img = document.createElement('img')
-    img.setAttribute('src', '../../images/svg-save.svg')
-    img.setAttribute('width', '24')
-    img.setAttribute('height', '24')
-    img.setAttribute('class', 'igv-navbar-icon-svg')
-    img.setAttribute('title', 'save as svg')
+        button.addEventListener('mouseenter', () => {
+            button.style.backgroundImage =  "url('/images/svg-save-hover.svg')"
+        })
 
-    button.appendChild(img)
+        button.addEventListener('mouseleave', () => {
+            button.style.backgroundImage = "url('/images/svg-save.svg')"
+        })
 
-    button.addEventListener('click', () => browser.saveSVGtoFile({}))
+        button.addEventListener('click', () => browser.saveSVGtoFile({}))
+
+    }
+    setButtonState(button, doShowCursorGuide) {
+        button.style.backgroundImage = true === doShowCursorGuide ? "url('/images/svg-save-hover.svg')" : "url('/images/svg-save.svg')"
+    }
+
 }
 
 export default SVGSaveControl
