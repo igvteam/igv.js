@@ -146,9 +146,9 @@ class Browser {
         this.roiTableVisible = config.showROITable
         this.showROITableButton = config.showROITableButton
 
-        this.isCenterLineVisible = config.showCenterGuide
+        this.doShowCenterLine = config.showCenterGuide
 
-        this.cursorGuideVisible = config.showCursorGuide
+        this.doShowCursorGuide = config.showCursorGuide
 
         this.showSampleInfoButton = false
 
@@ -749,7 +749,13 @@ class Browser {
 
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible)
 
-        this.setCenterLineAndCenterLineButtonVisibility(!GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
+        if (this.doShowCenterLine && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
+            this.centerLineButton.boundMouseClickHandler()
+        }
+
+        if (this.doShowCursorGuide && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
+            this.cursorGuideButton.boundMouseClickHandler()
+        }
 
     }
 
@@ -762,9 +768,9 @@ class Browser {
     }
 
     // cursor guide
-    setCursorGuideVisibility(cursorGuideVisible) {
+    setCursorGuideVisibility(doShowCursorGuide) {
 
-        if (cursorGuideVisible) {
+        if (doShowCursorGuide) {
             this.cursorGuide.show()
         } else {
             this.cursorGuide.hide()
@@ -776,27 +782,15 @@ class Browser {
     }
 
     // center line
-    setCenterLineVisibility(isCenterLineVisible) {
+    setCenterLineVisibility(doShowCenterLine) {
         for (let centerLine of this.centerLineList) {
-            if (true === isCenterLineVisible) {
+            if (true === doShowCenterLine) {
                 centerLine.show()
                 centerLine.repaint()
             } else {
                 centerLine.hide()
             }
         }
-    }
-
-    setCenterLineAndCenterLineButtonVisibility(isCenterLineVisible) {
-
-        for (let centerLine of this.centerLineList) {
-            const isShown = isCenterLineVisible && centerLine.isVisible
-            isShown ? centerLine.show() : centerLine.container.style.display = 'none'
-        }
-
-        const isShown = isCenterLineVisible && this.centerLineButton.isVisible
-        isShown ? this.centerLineButton.show() : this.centerLineButton.button.style.display = 'none'
-
     }
 
     /**

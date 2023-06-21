@@ -1,4 +1,5 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import GenomeUtils from "../genome/genome.js"
 
 class CenterLineButton {
 
@@ -6,52 +7,56 @@ class CenterLineButton {
 
         this.browser = browser
 
-        this.button = DOMUtils.div({class: 'igv-navbar-icon-container'})
+        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
+        this.button.id = 'igv-centerline-button'
         parent.appendChild(this.button)
 
-        const img = document.createElement('img')
-        img.setAttribute('src', '../../images/centerline.svg')
-        img.setAttribute('width', '24')
-        img.setAttribute('height', '24')
-        img.setAttribute('class', 'igv-navbar-icon-svg')
-        img.setAttribute('title', 'center line')
-
-        this.button.appendChild(img)
-
-        this.button.addEventListener('click', () => {
-            browser.isCenterLineVisible = !browser.isCenterLineVisible
-            browser.setCenterLineVisibility(browser.isCenterLineVisible)
-            this.setButtonState(browser.isCenterLineVisible)
+        this.button.addEventListener('mouseenter', () => {
+            if (false === browser.doShowCenterLine) {
+                this.setButtonState(true)
+            }
         })
 
-        this.setButtonState(browser.isCenterLineVisible)
+        this.button.addEventListener('mouseleave', () => {
+            if (false === browser.doShowCenterLine) {
+                this.setButtonState(false)
+            }
+        })
+
+        const mouseClickHandler = () => {
+
+            if (false === browser.doShowCenterLine && GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr)) {
+                return
+            }
+
+            browser.doShowCenterLine = !browser.doShowCenterLine
+            browser.setCenterLineVisibility(browser.doShowCenterLine)
+            this.setButtonState(browser.doShowCenterLine)
+        }
+
+        this.boundMouseClickHandler = mouseClickHandler.bind(this)
+
+        this.button.addEventListener('click', this.boundMouseClickHandler)
 
         if (browser.config.showCenterGuideButton) {
             this.show()
         } else {
             this.hide()
         }
+
+        this.setButtonState(browser.doShowCenterLine)
+
     }
 
-    setButtonState(isCenterLineVisible) {
-
-        return
-
-        if (true === isCenterLineVisible) {
-            this.button.classList.add('igv-navbar-button-clicked')
-        } else {
-            this.button.classList.remove('igv-navbar-button-clicked')
-        }
+    setButtonState(doShowCenterLine) {
+        this.button.style.backgroundImage = true === doShowCenterLine ? "url('/images/centerline-hover.svg')" : "url('/images/centerline.svg')"
     }
 
     show() {
-        this.isVisible = true
         this.button.style.display = 'block'
-        this.setButtonState(this.browser.isCenterLineVisible)
     }
 
     hide() {
-        this.isVisible = false
         this.button.style.display = 'none'
     }
 }
