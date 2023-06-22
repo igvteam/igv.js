@@ -48,11 +48,15 @@ class TrackLabelControl {
             }
         })
 
-        this.button.addEventListener('click', () => {
+        const mouseClickHandler = () => {
             browser.doShowTrackLabels = !browser.doShowTrackLabels
             browser.setTrackLabelVisibility(browser.doShowTrackLabels)
             this.setState(browser.doShowTrackLabels)
-        })
+        }
+
+        this.boundMouseClickHandler = mouseClickHandler.bind(this)
+
+        this.button.addEventListener('click', this.boundMouseClickHandler)
 
         this.browser = browser
 
@@ -62,7 +66,7 @@ class TrackLabelControl {
             this.hide()
         }
 
-        this.setState(browser.doShowTrackLabels)
+        this.setState(browser.config.showTrackLabels)
 
     }
 

@@ -71,7 +71,7 @@ class CursorGuideButton {
             this.hide()
         }
 
-        this.setButtonState(browser.doShowCursorGuide)
+        this.setButtonState(browser.config.showCursorTrackingGuide)
 
     }
 

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>Navbar Button Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const config =
+        {
+
+            showCenterGuideButton: false,
+            showCursorTrackingGuideButton: false,
+            showTrackLabelButton: false,
+
+            showSVGButton: false,
+            locus: 'chr1:10000-10020',
+            genome: "hg38",
+            tracks:
+                [
+                    {
+                        name: 'Fixed step biwig',
+                        format: 'bigwig',
+                        url: '../../test/data/bb/fixedStep.bw'
+                    },
+                ]
+        };
+
+    igv.createBrowser(document.getElementById("myDiv"), config).then(function (browser) {
+    });
+
+
+</script>
+
+</body>
+
+</html>
+
