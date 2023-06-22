@@ -30,19 +30,23 @@ class SampleInfoControl {
 
     constructor(parent, browser) {
 
-        this.button = DOMUtils.div({class: 'igv-navbar-icon-container'})
+        this.browser = browser
+
+        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
+        this.button.id = 'igv-cursor-button'
         parent.appendChild(this.button)
 
-        const img = document.createElement('img')
-        img.setAttribute('src', '../../images/sample-info.svg')
-        img.setAttribute('width', '24')
-        img.setAttribute('height', '24')
-        img.setAttribute('class', 'igv-navbar-icon-svg')
-        img.setAttribute('title', 'sample info')
+        this.button.addEventListener('mouseenter', () => {
+            if (false === this.showSampleInfo) {
+                this.setButtonState(true)
+            }
+        })
 
-        this.button.appendChild(img)
-
-        this.setButtonVisibility(false)
+        this.button.addEventListener('mouseleave', () => {
+            if (false === this.showSampleInfo) {
+                this.setButtonState(false)
+            }
+        })
 
         this.button.addEventListener('click', () => {
 
@@ -53,25 +57,25 @@ class SampleInfoControl {
 
         })
 
+        this.setButtonState(this.showSampleInfo)
+
     }
 
     setButtonVisibility(isVisible) {
 
         this.showSampleInfo = isVisible
-        this.setButtonState(isVisible)
 
-        if (true === isVisible) {
+        this.setButtonState(this.showSampleInfo)
+
+        if (true === this.showSampleInfo) {
             this.show()
         } else {
             this.hide()
         }
     }
 
-    setButtonState(showSampleInfo) {
-
-        return
-
-        true === showSampleInfo ? this.button.classList.add('igv-navbar-button-clicked') : this.button.classList.remove('igv-navbar-button-clicked')
+    setButtonState(doShowSampleInfo) {
+        this.button.style.backgroundImage = true === doShowSampleInfo ? "url('/images/sample-info-hover.svg')" : "url('/images/sample-info.svg')"
     }
 
     hide() {

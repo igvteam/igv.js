@@ -45,10 +45,6 @@ class SVGSaveControl {
         button.addEventListener('click', () => browser.saveSVGtoFile({}))
 
     }
-    setButtonState(button, doShowCursorGuide) {
-        button.style.backgroundImage = true === doShowCursorGuide ? "url('/images/svg-save-hover.svg')" : "url('/images/svg-save.svg')"
-    }
-
 }
 
 export default SVGSaveControl

@@ -65,8 +65,9 @@ class TrackLabelControl {
         this.setState(browser.doShowTrackLabels)
 
     }
-    setState(doShowCursorGuide) {
-        this.button.style.backgroundImage = true === doShowCursorGuide ? "url('/images/text-labels-hover.svg')" : "url('/images/text-labels.svg')"
+
+    setState(doShowTrackLabels) {
+        this.button.style.backgroundImage = true === doShowTrackLabels ? "url('/images/text-labels-hover.svg')" : "url('/images/text-labels.svg')"
     }
 
     show() {
