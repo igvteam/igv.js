@@ -30,53 +30,47 @@ class TrackLabelControl {
 
     constructor(parent, browser) {
 
-        this.button = DOMUtils.div({class: 'igv-navbar-icon-container'})
+        this.browser = browser
+
+        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
+        this.button.id = 'igv-text-labels-button'
         parent.appendChild(this.button)
 
-        const img = document.createElement('img')
-        img.setAttribute('src', '../../images/text-labels.svg')
-        img.setAttribute('width', '24')
-        img.setAttribute('height', '24')
-        img.setAttribute('class', 'igv-navbar-icon-svg')
-        img.setAttribute('title', 'show track labels')
+        this.button.addEventListener('mouseenter', () => {
+            if (false === browser.doShowTrackLabels) {
+                this.setState(true)
+            }
+        })
 
-        this.button.appendChild(img)
+        this.button.addEventListener('mouseleave', () => {
+            if (false === browser.doShowTrackLabels) {
+                this.setState(false)
+            }
+        })
 
         this.button.addEventListener('click', () => {
-            browser.trackLabelsVisible = !browser.trackLabelsVisible
-            this.setState(browser.trackLabelsVisible)
-            browser.setTrackLabelVisibility(browser.trackLabelsVisible)
+            browser.doShowTrackLabels = !browser.doShowTrackLabels
+            browser.setTrackLabelVisibility(browser.doShowTrackLabels)
+            this.setState(browser.doShowTrackLabels)
         })
 
         this.browser = browser
 
-        this.setVisibility(browser.config.showTrackLabelButton)
-
-        this.setState(browser.trackLabelsVisible)
-    }
-
-    setVisibility(showTrackLabelButton) {
-        if (true === showTrackLabelButton) {
+        if (browser.config.showTrackLabelButton) {
             this.show()
         } else {
             this.hide()
         }
+
+        this.setState(browser.doShowTrackLabels)
+
     }
-
-    setState(trackLabelsVisible) {
-
-        return
-
-        if (true === trackLabelsVisible) {
-            this.button.classList.add('igv-navbar-button-clicked')
-        } else {
-            this.button.classList.remove('igv-navbar-button-clicked')
-        }
+    setState(doShowCursorGuide) {
+        this.button.style.backgroundImage = true === doShowCursorGuide ? "url('/images/text-labels-hover.svg')" : "url('/images/text-labels.svg')"
     }
 
     show() {
         this.button.style.display = 'block'
-        this.setState(this.browser.trackLabelsVisible)
     }
 
     hide() {

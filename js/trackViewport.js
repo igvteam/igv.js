@@ -39,7 +39,7 @@ class TrackViewport extends Viewport {
             this.$trackLabel = $('<div class="igv-track-label">')
             this.$viewport.append(this.$trackLabel)
             this.setTrackLabel(track.name)
-            if (false === this.browser.trackLabelsVisible) {
+            if (false === this.browser.doShowTrackLabels) {
                 this.$trackLabel.hide()
             }
         }
@@ -461,7 +461,7 @@ class TrackViewport extends Viewport {
             return
         }
 
-        if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
+        if (this.$trackLabel && true === this.browser.doShowTrackLabels) {
             const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0))
             this.renderTrackLabelSVG(context, deltaX + x, deltaY + y, width, height)
         }

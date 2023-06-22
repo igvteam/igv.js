@@ -141,7 +141,7 @@ class Browser {
             this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key]
         }
 
-        this.trackLabelsVisible = config.showTrackLabels
+        this.doShowTrackLabels = config.showTrackLabels
 
         this.roiTableVisible = config.showROITable
         this.showROITableButton = config.showROITableButton
@@ -747,7 +747,7 @@ class Browser {
 
         this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV)
 
-        toggleTrackLabels(this.trackViews, this.trackLabelsVisible)
+        toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
         if (this.doShowCenterLine && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
             this.centerLineButton.boundMouseClickHandler()
@@ -882,7 +882,7 @@ class Browser {
 
             const trackView = new TrackView(this, this.columnContainer, newTrack)
             this.trackViews.push(trackView)
-            toggleTrackLabels(this.trackViews, this.trackLabelsVisible)
+            toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
             if (typeof newTrack.postInit === 'function') {
                 try {

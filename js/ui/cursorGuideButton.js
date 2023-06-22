@@ -81,7 +81,6 @@ class CursorGuideButton {
 
     show() {
         this.button.style.display = 'block'
-        // this.setButtonState(this.browser.doShowCursorGuide)
     }
 
     hide() {
