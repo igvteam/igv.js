@@ -150,10 +150,7 @@ class Browser {
 
         this.doShowCursorGuide = config.showCursorGuide
 
-        this.showSampleInfoButton = false
-
         this.showSampleNames = config.showSampleNames
-        this.showSampleNameButton = config.showSampleNameButton
 
         this.sampleNameViewportWidth = undefined
 

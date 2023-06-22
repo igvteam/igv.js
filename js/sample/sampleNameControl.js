@@ -30,61 +30,47 @@ class SampleNameControl {
 
     constructor(parent, browser) {
 
-        this.button = DOMUtils.div({class: 'igv-navbar-icon-container'})
+        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
+        this.button.id = 'igv-cursor-button'
         parent.appendChild(this.button)
 
-        const img = document.createElement('img')
-        img.setAttribute('src', '../../images/sample-names.svg')
-        img.setAttribute('width', '24')
-        img.setAttribute('height', '24')
-        img.setAttribute('class', 'igv-navbar-icon-svg')
-        img.setAttribute('title', 'sample names')
+        this.button.addEventListener('mouseenter', () => {
+            if (false === browser.showSampleNames) {
+                this.setState(true)
+            }
+        })
 
-        this.button.appendChild(img)
-
-        this.setState(browser.showSampleNames)
-
-        this.setVisibility(browser.showSampleNameButton)
+        this.button.addEventListener('mouseleave', () => {
+            if (false === browser.showSampleNames) {
+                this.setState(false)
+            }
+        })
 
         this.button.addEventListener('click', () => {
 
             browser.showSampleNames = !browser.showSampleNames
 
-            this.setState(browser.showSampleNames)
-
             for (let {sampleNameViewport} of browser.trackViews) {
-                if (false === browser.showSampleNames) {
-                    sampleNameViewport.hide()
-                } else {
-                    sampleNameViewport.show()
-                }
+                false === browser.showSampleNames ? sampleNameViewport.hide() : sampleNameViewport.show()
             }
+
+            this.setState(browser.showSampleNames)
 
             browser.layoutChange()
 
-
         })
 
-    }
-
-    setVisibility(showSampleNameButton) {
-
-        if (true === showSampleNameButton) {
+        if (browser.config.showSampleNameButton) {
             this.show()
         } else {
             this.hide()
         }
+
+        this.setState(browser.showSampleNames)
+
     }
-
     setState(showSampleNames) {
-
-        return
-
-        if (true === showSampleNames) {
-            this.button.classList.add('igv-navbar-button-clicked')
-        } else {
-            this.button.classList.remove('igv-navbar-button-clicked')
-        }
+        this.button.style.backgroundImage = true === showSampleNames ? "url('/images/sample-names-hover.svg')" : "url('/images/sample-names.svg')"
     }
 
     hide() {
