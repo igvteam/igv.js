@@ -51,6 +51,7 @@ import SampleInfo from "./sample/sampleInfo.js"
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import HicFile from "./hic/straw/hicFile.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
+import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -249,6 +250,8 @@ class Browser {
         const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">')
         $navbarRightContainer.append($toggle_button_container)
         this.$toggle_button_container = $toggle_button_container
+
+        this.multiTrackSelectButton = new MultiTrackSelectButton(this, $toggle_button_container.get(0))
 
         this.cursorGuide = new CursorGuide(this.columnContainer, this)
 

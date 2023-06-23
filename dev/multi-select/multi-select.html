@@ -49,7 +49,7 @@
                 ]
         };
 
-    const KitchenSinkConfig =
+    const kitchenSinkConfig =
         {
             genome: "hg19",
             locus: "chr1:155,138,124-155,153,715",
@@ -288,7 +288,7 @@
         ]
     }
 
-    igv.createBrowser(document.getElementById("igvDiv"), config)
+    igv.createBrowser(document.getElementById("igvDiv"), kitchenSinkConfig)
         .then(function (browser) {
             console.log("Created IGV browser");
         })

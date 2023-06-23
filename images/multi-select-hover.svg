@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="625px" height="625px" viewBox="0 0 625 625" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>multi select hover</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="multi-select-hover">
+            <rect id="backdrop-copy" stroke="#3A3A3A" stroke-width="12" fill="#3A3A3A" x="6" y="6" width="613" height="613" rx="135"></rect>
+            <g id="Group-3" transform="translate(91.000000, 112.000000)" fill="#D8D8D8">
+                <rect id="Rectangle" x="117" y="6" width="329" height="70"></rect>
+                <circle id="Oval" stroke="#979797" cx="33" cy="33" r="32.5"></circle>
+                <circle id="Oval-Copy-3" stroke="#979797" cx="33" cy="155" r="32.5"></circle>
+                <circle id="Oval-Copy" stroke="#979797" cx="33" cy="263" r="32.5"></circle>
+                <circle id="Oval-Copy-2" stroke="#979797" cx="33" cy="379" r="32.5"></circle>
+                <rect id="Rectangle-Copy-17" x="117" y="118" width="329" height="70"></rect>
+                <rect id="Rectangle-Copy-18" x="117" y="230" width="329" height="70"></rect>
+                <rect id="Rectangle-Copy-19" x="117" y="342" width="329" height="70"></rect>
+            </g>
+        </g>
+    </g>
+</svg>

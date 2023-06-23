@@ -111,13 +111,13 @@ class TrackView {
         axis.style.height = `${track.height}px`
 
         if (typeof track.paintAxis === 'function') {
+
             if (track.dataRange) {
                 axis.addEventListener('click', () => {
                     browser.dataRangeDialog.configure(this)
                     browser.dataRangeDialog.present($(browser.columnContainer))
                 })
             }
-
 
             const {width, height} = axis.getBoundingClientRect()
             this.axisCanvas = document.createElement('canvas')
@@ -134,47 +134,11 @@ class TrackView {
             const input = document.createRange().createContextualFragment(html).firstChild
             trackSelectionContainer.appendChild(input)
 
-            input.addEventListener('change', event => {
-                setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
-            })
+            input.addEventListener('change', event => setDragHandleSelectionState(this, this.dragHandle, event.target.checked))
 
             const enableTrackSelectInput = document.querySelector("[name=enable-multi-track-select]")
             trackSelectionContainer.style.display = enableTrackSelectInput && enableTrackSelectInput.checked ? 'block' : 'none'
 
-            // trackSelectionContainer.style.display = true === browser.config.enabledMultiTrackSelect ? 'block' : 'none'
-
-        } else if ('ruler' === this.track.type) {
-
-            const container = DOMUtils.div()
-            axis.appendChild(container)
-
-            const html = `<input type="checkbox" name="enable-multi-track-select" title="toggle multi track selection">`
-            const input = document.createRange().createContextualFragment(html).firstChild
-            container.appendChild(input)
-
-            input.addEventListener('change', event => {
-
-                for (const trackView of this.browser.trackViews) {
-
-                    if (false === multiTrackSelectExclusionTypes.has(trackView.track.type)) {
-
-                        const container = trackView.axis.querySelector('div')
-
-                        if (true === input.checked) {
-                            container.style.display = 'block'
-                        } else {
-                            const trackSelectInput =  container.querySelector('[name=track-select]')
-                            trackSelectInput.checked = false
-                            setDragHandleSelectionState(trackView, trackView.dragHandle, false)
-                            container.style.display = 'none'
-                        }
-
-                    }
-
-                } // for (trackViews)
-            })
-
-            // container.style.display = true === browser.config.enabledMultiTrackSelect ? 'block' : 'none'
         }
 
         return axis
@@ -1109,5 +1073,5 @@ function getMultiSelectedTrackViews(browser) {
     return candidates
 }
 
-export {igv_axis_column_width, maxViewportContentHeight, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews}
+export {igv_axis_column_width, maxViewportContentHeight, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, setDragHandleSelectionState}
 export default TrackView
