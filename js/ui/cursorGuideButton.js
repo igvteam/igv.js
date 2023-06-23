@@ -34,7 +34,7 @@ class CursorGuideButton {
         this.browser = browser
 
         this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
-        this.button.id = 'igv-cursor-button'
+        this.button.setAttribute('title', 'Show Cursor Guide')
         parent.appendChild(this.button)
 
         this.button.addEventListener('mouseenter', () => {

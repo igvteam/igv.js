@@ -363,23 +363,6 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
   background-position: center;
 }
 
-.igv-navbar-icon-container {
-  margin-left: 4px;
-  margin-right: 4px;
-  width: 24px;
-  height:24px;
-  cursor: pointer;
-}
-
-.igv-navbar-icon-svg {
-  opacity: 1.0;
-}
-
-.igv-navbar-icon-svg:hover {
-  opacity: 1.0;
-}
-
-
 .igv-navbar-button {
 
   display: block;
@@ -412,11 +395,11 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
   border-radius: $igv-navbar-button-border-radius;
 }
 
+.igv-navbar-button:hover {
+  cursor: pointer;
+}
+
 .igv-navbar-button-clicked {
   color: white;
   background-color: $igv-navbar-toggle-dark-dark;
-}
-
-.igv-navbar-button:hover {
-  cursor: pointer;
 }

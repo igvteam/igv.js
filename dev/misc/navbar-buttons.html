@@ -20,21 +20,31 @@
     const config =
         {
 
-            showCenterGuideButton: false,
-            showCursorTrackingGuideButton: false,
-            showTrackLabelButton: false,
+            // showCenterGuideButton: false,
+            // showCursorTrackingGuideButton: false,
+            // showTrackLabelButton: false,
 
             showSVGButton: false,
+            // showSampleNames: true,
 
-            locus: 'chr1:10000-10020',
-            genome: "hg38",
+            genome: "hg19",
+            locus: "myc",
+            // locus: "all",
+
             tracks:
                 [
                     {
-                        name: 'Fixed step biwig',
-                        format: 'bigwig',
-                        url: '../../test/data/bb/fixedStep.bw'
+                        name: 'GBM Copy Number',
+                        url: 'https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0'
                     },
+                    {
+                        "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
+                        "name": "Big BigWig"
+                    },
+                    {
+                        type: 'sampleinfo',
+                        url: 'https://www.dropbox.com/s/zn8nkd7bhdlg84x/GBMSampleInfo.txt?dl=0'
+                    }
                 ]
         };
 

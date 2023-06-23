@@ -31,7 +31,7 @@ class SVGSaveControl {
 
         const button = DOMUtils.div({class: 'igv-navbar-icon-button'})
         parent.appendChild(button)
-        button.id = 'igv-save-svg-button'
+        button.setAttribute('title', 'Save SVG');
         button.style.backgroundImage = "url('/images/svg-save.svg')"
 
         button.addEventListener('mouseenter', () => {

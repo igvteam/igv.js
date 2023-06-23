@@ -34,7 +34,7 @@ class CenterLineButton {
         this.browser = browser
 
         this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
-        this.button.id = 'igv-centerline-button'
+        this.button.setAttribute('title', 'Show Center Line')
         parent.appendChild(this.button)
 
         this.button.addEventListener('mouseenter', () => {

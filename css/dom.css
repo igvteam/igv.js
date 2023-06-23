@@ -239,22 +239,6 @@
   background-position: center;
 }
 
-.igv-navbar-icon-container {
-  margin-left: 4px;
-  margin-right: 4px;
-  width: 24px;
-  height: 24px;
-  cursor: pointer;
-}
-
-.igv-navbar-icon-svg {
-  opacity: 1;
-}
-
-.igv-navbar-icon-svg:hover {
-  opacity: 1;
-}
-
 .igv-navbar-button {
   display: block;
   box-sizing: unset;
@@ -277,13 +261,13 @@
   border-radius: 6px;
 }
 
+.igv-navbar-button:hover {
+  cursor: pointer;
+}
+
 .igv-navbar-button-clicked {
   color: white;
   background-color: #737373;
-}
-
-.igv-navbar-button:hover {
-  cursor: pointer;
 }
 
 .igv-zoom-in-notice-container {

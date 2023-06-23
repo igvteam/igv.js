@@ -31,7 +31,7 @@ class SampleNameControl {
     constructor(parent, browser) {
 
         this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
-        this.button.id = 'igv-cursor-button'
+        this.button.setAttribute('title', 'Show Sample Name')
         parent.appendChild(this.button)
 
         this.button.addEventListener('mouseenter', () => {
