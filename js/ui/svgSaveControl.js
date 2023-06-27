@@ -24,25 +24,18 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import NavbarButton from "./navbarButton.js"
 
-class SVGSaveControl {
+class SVGSaveControl extends NavbarButton {
     constructor(parent, browser) {
 
-        const button = DOMUtils.div({class: 'igv-navbar-icon-button'})
-        parent.appendChild(button)
-        button.setAttribute('title', 'Save SVG');
-        button.style.backgroundImage = "url('/images/svg-save.svg')"
+        super(browser, parent, 'Save SVG', 'svg-save', false)
 
-        button.addEventListener('mouseenter', () => {
-            button.style.backgroundImage =  "url('/images/svg-save-hover.svg')"
-        })
+        this.button.addEventListener('mouseenter', () => this.setState(true))
 
-        button.addEventListener('mouseleave', () => {
-            button.style.backgroundImage = "url('/images/svg-save.svg')"
-        })
+        this.button.addEventListener('mouseleave', () => this.setState(false))
 
-        button.addEventListener('click', () => browser.saveSVGtoFile({}))
+        this.button.addEventListener('click', () => this.browser.saveSVGtoFile({}))
 
     }
 }

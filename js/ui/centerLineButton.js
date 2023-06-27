@@ -24,28 +24,24 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import NavbarButton from "./navbarButton.js"
 import GenomeUtils from "../genome/genome.js"
 
-class CenterLineButton {
+class CenterLineButton extends NavbarButton {
 
     constructor(browser, parent) {
 
-        this.browser = browser
-
-        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
-        this.button.setAttribute('title', 'Show Center Line')
-        parent.appendChild(this.button)
+        super(browser, parent, 'Show Center Line', 'centerline', browser.config.showCenterGuide)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowCenterLine) {
-                this.setButtonState(true)
+                this.setState(true)
             }
         })
 
         this.button.addEventListener('mouseleave', () => {
             if (false === browser.doShowCenterLine) {
-                this.setButtonState(false)
+                this.setState(false)
             }
         })
 
@@ -57,7 +53,7 @@ class CenterLineButton {
 
             browser.doShowCenterLine = !browser.doShowCenterLine
             browser.setCenterLineVisibility(browser.doShowCenterLine)
-            this.setButtonState(browser.doShowCenterLine)
+            this.setState(browser.doShowCenterLine)
         }
 
         this.boundMouseClickHandler = mouseClickHandler.bind(this)
@@ -70,21 +66,8 @@ class CenterLineButton {
             this.hide()
         }
 
-        this.setButtonState(browser.config.showCenterGuide)
-
     }
 
-    setButtonState(doShowCenterLine) {
-        this.button.style.backgroundImage = true === doShowCenterLine ? "url('/images/centerline-hover.svg')" : "url('/images/centerline.svg')"
-    }
-
-    show() {
-        this.button.style.display = 'block'
-    }
-
-    hide() {
-        this.button.style.display = 'none'
-    }
 }
 
 export default CenterLineButton

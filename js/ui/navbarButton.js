@@ -25,44 +25,33 @@
  */
 
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
-import NavbarButton from "./navbarButton.js"
 
-class TrackLabelControl extends NavbarButton {
+class NavbarButton {
 
-    constructor(parent, browser) {
+    constructor(browser, parent, title, image, initialButtonState) {
 
-        super(browser, parent, 'Show Track Labels', 'text-labels', browser.config.showTrackLabels)
+        this.browser = browser
 
-        this.button.addEventListener('mouseenter', () => {
-            if (false === browser.doShowTrackLabels) {
-                this.setState(true)
-            }
-        })
+        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
+        this.button.setAttribute('title', title)
+        parent.appendChild(this.button)
 
-        this.button.addEventListener('mouseleave', () => {
-            if (false === browser.doShowTrackLabels) {
-                this.setState(false)
-            }
-        })
+        this.image = image
 
-        const mouseClickHandler = () => {
-            browser.doShowTrackLabels = !browser.doShowTrackLabels
-            browser.setTrackLabelVisibility(browser.doShowTrackLabels)
-            this.setState(browser.doShowTrackLabels)
-        }
-
-        this.boundMouseClickHandler = mouseClickHandler.bind(this)
-
-        this.button.addEventListener('click', this.boundMouseClickHandler)
-
-        if (browser.config.showTrackLabelButton) {
-            this.show()
-        } else {
-            this.hide()
-        }
-
+        this.setState(initialButtonState)
     }
 
+    setState(doSomething) {
+        this.button.style.backgroundImage = true === doSomething ? `url('/images/${this.image}-hover.svg')` : `url('/images/${this.image}.svg')`
+    }
+
+    show() {
+        this.button.style.display = 'block'
+    }
+
+    hide() {
+        this.button.style.display = 'none'
+    }
 }
 
-export default TrackLabelControl
+export default NavbarButton

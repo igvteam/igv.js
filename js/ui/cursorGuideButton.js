@@ -24,28 +24,24 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import NavbarButton from "./navbarButton.js"
 import GenomeUtils from "../genome/genome.js"
 
-class CursorGuideButton {
+class CursorGuideButton extends NavbarButton {
 
     constructor(browser, parent) {
 
-        this.browser = browser
-
-        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
-        this.button.setAttribute('title', 'Show Cursor Guide')
-        parent.appendChild(this.button)
+        super(browser, parent, 'Show Cursor Guide', 'cursor', browser.config.showCursorTrackingGuide)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowCursorGuide) {
-                this.setButtonState(true)
+                this.setState(true)
             }
         })
 
         this.button.addEventListener('mouseleave', () => {
             if (false === browser.doShowCursorGuide) {
-                this.setButtonState(false)
+                this.setState(false)
             }
         })
 
@@ -57,7 +53,7 @@ class CursorGuideButton {
 
             browser.doShowCursorGuide = !browser.doShowCursorGuide
             browser.setCursorGuideVisibility(browser.doShowCursorGuide)
-            this.setButtonState(browser.doShowCursorGuide)
+            this.setState(browser.doShowCursorGuide)
 
         }
 
@@ -71,21 +67,8 @@ class CursorGuideButton {
             this.hide()
         }
 
-        this.setButtonState(browser.config.showCursorTrackingGuide)
-
     }
 
-    setButtonState(doShowCursorGuide) {
-        this.button.style.backgroundImage = true === doShowCursorGuide ? "url('/images/cursor-hover.svg')" : "url('/images/cursor.svg')"
-    }
-
-    show() {
-        this.button.style.display = 'block'
-    }
-
-    hide() {
-        this.button.style.display = 'none'
-    }
 }
 
 export default CursorGuideButton
