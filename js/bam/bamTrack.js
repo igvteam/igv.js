@@ -1247,6 +1247,7 @@ class AlignmentTrack {
             viewport.repaint()
         }
         list.push('<b>Sort by...</b>')
+        list.push({label: '&nbsp; start location', click: () => sortByOption("START")})
         list.push({label: '&nbsp; base', click: () => sortByOption("BASE")})
         list.push({label: '&nbsp; read strand', click: () => sortByOption("STRAND")})
         list.push({label: '&nbsp; insert size', click: () => sortByOption("INSERT_SIZE")})
