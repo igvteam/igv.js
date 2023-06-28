@@ -56,19 +56,14 @@ class SampleNameViewport {
 
     checkCanvas() {
 
-        const dpi = window.devicePixelRatio
-        const requiredHeight = this.viewport.clientHeight
-        const requiredWidth = this.browser.sampleNameViewportWidth
+        const width = this.browser.sampleNameViewportWidth || 0
+        this.ctx.canvas.width = width * window.devicePixelRatio
+        this.ctx.canvas.style.width = `${width}px`
 
-        if (this.canvas.width !== requiredWidth * dpi || this.canvas.height !== requiredHeight * dpi) {
-            const canvas = this.canvas
-            canvas.width = requiredWidth * dpi
-            canvas.height = requiredHeight * dpi
-            canvas.style.width = `${requiredWidth}px`
-            canvas.style.height = `${requiredHeight}px`
-            this.ctx = this.canvas.getContext("2d")
-            this.ctx.scale(dpi, dpi)
-        }
+        this.ctx.canvas.height = this.viewport.clientHeight * window.devicePixelRatio
+        this.ctx.canvas.style.height = `${this.viewport.clientHeight}px`
+
+        this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
 
     }
 
@@ -97,17 +92,20 @@ class SampleNameViewport {
 
     async repaint(samples) {
 
-        if (true === this.browser.showSampleNames) {
-            this.checkCanvas()
-            this.draw({context: this.ctx, samples})
+        if (samples.names.length > 0) {
+            if (true === this.browser.showSampleNames) {
+                this.checkCanvas()
+                this.draw({context: this.ctx, samples})
 
-            if (undefined === this.browser.sampleNameViewportWidth) {
-                const lengths = samples.names.map(name => this.ctx.measureText(name).width)
-                this.browser.sampleNameViewportWidth = Math.min(maxSampleNameViewportWidth, fudgeTextMetricWidth + Math.ceil(Math.max(...lengths)))
-                this.browser.layoutChange()
+                if (undefined === this.browser.sampleNameViewportWidth) {
+                    const lengths = samples.names.map(name => this.ctx.measureText(name).width)
+                    this.browser.sampleNameViewportWidth = Math.min(maxSampleNameViewportWidth, fudgeTextMetricWidth + Math.ceil(Math.max(...lengths)))
+                    this.browser.layoutChange()
+                }
+
             }
-
         }
+
     }
 
     draw({context, samples}) {

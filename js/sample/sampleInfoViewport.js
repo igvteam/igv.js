@@ -2,7 +2,7 @@ import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import {attributeNamesMap, emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
 
-const sampleInfoTileXShim = 2
+const sampleInfoTileXShim = 8
 const sampleInfoTileWidth = 16
 
 class SampleInfoViewport {

@@ -870,7 +870,10 @@ class Browser {
 
             const newTrack = await this.createTrack(config)
 
-            if (undefined === newTrack) {
+            if ('sampleinfo' === config.type) {
+                this.layoutChange()
+                return
+            } else if (undefined === newTrack) {
                 return
             }
 
