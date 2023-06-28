@@ -60,11 +60,7 @@ class CenterLineButton extends NavbarButton {
 
         this.button.addEventListener('click', this.boundMouseClickHandler)
 
-        if (browser.config.showCenterGuideButton) {
-            this.show()
-        } else {
-            this.hide()
-        }
+        this.setVisibility(browser.config.showCenterGuideButton)
 
     }
 

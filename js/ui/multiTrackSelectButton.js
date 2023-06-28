@@ -1,16 +1,12 @@
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import NavbarButton from "./navbarButton.js"
 import {multiTrackSelectExclusionTypes, setDragHandleSelectionState} from "../trackView.js"
 
 let ENABLE_MULTI_TRACK_SELECTION = false
 
-class MultiTrackSelectButton {
+class MultiTrackSelectButton extends NavbarButton {
     constructor(browser, parent) {
 
-        this.browser = browser
-
-        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
-        this.button.setAttribute('title', 'Enable Multi Track Selection')
-        parent.appendChild(this.button)
+        super(browser, parent, 'Enable Multi Track Selection', 'multi-select', ENABLE_MULTI_TRACK_SELECTION)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === ENABLE_MULTI_TRACK_SELECTION) {
@@ -54,30 +50,7 @@ class MultiTrackSelectButton {
 
         this.setVisibility(true)
 
-        this.setState(ENABLE_MULTI_TRACK_SELECTION)
-
     }
-
-    setState(doEnableMultiTrackSelect) {
-        this.button.style.backgroundImage = true === doEnableMultiTrackSelect ? "url('/images/multi-select-hover.svg')" : "url('/images/multi-select.svg')"
-    }
-
-    setVisibility(doShowMultiTrackSelectButton) {
-        if (true === doShowMultiTrackSelectButton) {
-            this.show()
-        } else {
-            this.hide()
-        }
-    }
-
-    show() {
-        this.button.style.display = 'block'
-    }
-
-    hide() {
-        this.button.style.display = 'none'
-    }
-
 }
 
 export default MultiTrackSelectButton

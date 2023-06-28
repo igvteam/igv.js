@@ -61,11 +61,7 @@ class CursorGuideButton extends NavbarButton {
 
         this.button.addEventListener('click', this.boundMouseClickHandler)
 
-        if (browser.config.showCursorTrackingGuideButton) {
-            this.show()
-        } else {
-            this.hide()
-        }
+        this.setVisibility(browser.config.showCursorTrackingGuideButton)
 
     }
 

@@ -55,11 +55,7 @@ class TrackLabelControl extends NavbarButton {
 
         this.button.addEventListener('click', this.boundMouseClickHandler)
 
-        if (browser.config.showTrackLabelButton) {
-            this.show()
-        } else {
-            this.hide()
-        }
+        this.setVisibility(browser.config.showTrackLabelButton)
 
     }
 

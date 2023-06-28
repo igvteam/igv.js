@@ -37,11 +37,7 @@ class SVGSaveControl extends NavbarButton {
 
         this.button.addEventListener('click', () => browser.saveSVGtoFile({}))
 
-        if (browser.config.showSVGButton) {
-            this.show()
-        } else {
-            this.hide()
-        }
+        this.setVisibility(browser.config.showSVGButton)
 
     }
 }

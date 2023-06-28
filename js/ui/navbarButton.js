@@ -52,6 +52,15 @@ class NavbarButton {
     hide() {
         this.button.style.display = 'none'
     }
+
+    setVisibility(isVisible) {
+        if (true === isVisible) {
+            this.show()
+        } else {
+            this.hide()
+        }
+    }
+
 }
 
 export default NavbarButton
