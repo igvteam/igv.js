@@ -31,7 +31,7 @@ class TrackLabelControl extends NavbarButton {
 
     constructor(parent, browser) {
 
-        super(browser, parent, 'Show Track Labels', 'text-labels', browser.config.showTrackLabels)
+        super(browser, parent, 'Show Track Labels', 'track-labels', browser.config.showTrackLabels)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowTrackLabels) {
