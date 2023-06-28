@@ -150,7 +150,6 @@ function setDefaults(config) {
         config.showCursorTrackingGuideButton = true
     }
 
-
     if (undefined === config.showCursorGuide) {
         config.showCursorGuide = config.showCursorTrackingGuide || false   // showCursorTrackingGuide is a synonym
     }

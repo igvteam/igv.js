@@ -24,40 +24,37 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from "../../node_modules/igv-ui/dist/igv-ui.js"
+import NavbarButton from "../ui/navbarButton.js"
 
-class SampleInfoControl {
+class SampleInfoControl extends NavbarButton {
 
     constructor(parent, browser) {
 
-        this.browser = browser
+        super(browser, parent, 'Show Sample Info', 'sample-info', false)
 
-        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
-        this.button.setAttribute('title', 'Show Sample Info')
-        parent.appendChild(this.button)
+        this.showSampleInfo = false
 
         this.button.addEventListener('mouseenter', () => {
             if (false === this.showSampleInfo) {
-                this.setButtonState(true)
+                this.setState(true)
             }
         })
 
         this.button.addEventListener('mouseleave', () => {
             if (false === this.showSampleInfo) {
-                this.setButtonState(false)
+                this.setState(false)
             }
         })
 
         this.button.addEventListener('click', () => {
 
             this.showSampleInfo = !this.showSampleInfo
-            this.setButtonState(this.showSampleInfo)
+
+            this.setState(this.showSampleInfo)
 
             browser.layoutChange()
 
         })
-
-        this.setButtonState(this.showSampleInfo)
 
     }
 
@@ -65,25 +62,13 @@ class SampleInfoControl {
 
         this.showSampleInfo = isVisible
 
-        this.setButtonState(this.showSampleInfo)
+        this.setState(this.showSampleInfo)
 
         if (true === this.showSampleInfo) {
             this.show()
         } else {
             this.hide()
         }
-    }
-
-    setButtonState(doShowSampleInfo) {
-        this.button.style.backgroundImage = true === doShowSampleInfo ? "url('/images/sample-info-hover.svg')" : "url('/images/sample-info.svg')"
-    }
-
-    hide() {
-        this.button.style.display = 'none'
-    }
-
-    show() {
-        this.button.style.display = 'block'
     }
 
 }

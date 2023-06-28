@@ -24,15 +24,13 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from "../../node_modules/igv-ui/dist/igv-ui.js"
+import NavbarButton from "../ui/navbarButton.js"
 
-class SampleNameControl {
+class SampleNameControl extends NavbarButton {
 
     constructor(parent, browser) {
 
-        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
-        this.button.setAttribute('title', 'Show Sample Name')
-        parent.appendChild(this.button)
+        super(browser, parent, 'Show Sample Names', 'sample-names', browser.config.showSampleNames)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.showSampleNames) {
@@ -60,25 +58,12 @@ class SampleNameControl {
 
         })
 
-        if (browser.config.showSampleNameButton) {
+        if (true === browser.config.showSampleNameButton) {
             this.show()
         } else {
             this.hide()
         }
 
-        this.setState(browser.showSampleNames)
-
-    }
-    setState(showSampleNames) {
-        this.button.style.backgroundImage = true === showSampleNames ? "url('/images/sample-names-hover.svg')" : "url('/images/sample-names.svg')"
-    }
-
-    hide() {
-        this.button.style.display = 'none'
-    }
-
-    show() {
-        this.button.style.display = 'block'
     }
 
 }
