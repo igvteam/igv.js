@@ -5,7 +5,8 @@
     <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
-    <script src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs" data-app-key="1h7gqkxv11tb4d2"></script>
+    <script src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs"
+            data-app-key="1h7gqkxv11tb4d2"></script>
 
 </head>
 
@@ -14,11 +15,11 @@
 <p><input id="fileInput" type="file"></p>
 <p><input id="processFileInput" type="button" value="Load Sample Info File"></p>
 
-<p><input  id="urlInput" type="text" placeholder="Enter Sample Info URL"></p>
-<p><input  id="processURLInput" type="button" value="Load Sample Info URL"></p>
+<p><input id="urlInput" type="text" placeholder="Enter Sample Info URL"></p>
+<p><input id="processURLInput" type="button" value="Load Sample Info URL"></p>
 
-<p><input  id="trackURLInput" type="text" placeholder="Enter Track URL"></p>
-<p><input  id="processTrackURLInput" type="button" value="Load Track URL"></p>
+<p><input id="trackURLInput" type="text" placeholder="Enter Track URL"></p>
+<p><input id="processTrackURLInput" type="button" value="Load Track URL"></p>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
@@ -34,48 +35,95 @@
             // locus: [ 'myc', 'ace' ],
             // locus: 'ace',
             // locus: 'all',
-            // showSampleNames: true,
+            showSampleNames: true,
             // showCursorGuide: true,
-            tracks: [
-                {
-                    name: 'GBM Copy Number',
-                    url: 'https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0'
-                },
-                // {
-                //   type: 'sampleinfo',
-                //   url: 'https://www.dropbox.com/s/lnjwa2rv7vkidoa/GBMSampleInfo_NoColorSpec.txt?dl=0'
-                // },
-                {
-                    type: 'sampleinfo',
-                    url: 'https://www.dropbox.com/s/zn8nkd7bhdlg84x/GBMSampleInfo.txt?dl=0'
-                }
+            tracks:
+                [
+                    {
+                        name: 'GBM Copy Number',
+                        // displayMode: "SQUISHED",
+                        url: 'https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0'
+                    },
+                    {
+                        type: 'sampleinfo',
+                        url: 'https://www.dropbox.com/s/zn8nkd7bhdlg84x/GBMSampleInfo.txt?dl=0'
+                    }
+                ]
+        };
 
+    const shoebox_sample_name_bug =
+        {
+            // "version": "2.16.0",
+            // "showSampleNames": true,
+            // "sampleNameViewportWidth": 6,
+            "reference": {
+                "id": "hg38",
+                "name": "Human (GRCh38/hg38)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa.fai",
+                "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/cytoBandIdeo.txt.gz",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/hg38_alias.tab",
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+            },
+            "locus": "chr20:56,411,666-56,424,888",
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sampleinfo",
+                    "url": "https://www.dropbox.com/s/oeg6y37mvyfjif3/sampleInfo.txt?dl=0"
+                },
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "url": "https://www.dropbox.com/s/qxpnqfvbiqs0eyz/model1.allChr.f.2.hg38.r10.hic?dl=0",
+                    "filename": "model1.allChr.f.2.hg38.r10.hic",
+                    "name": "model1.allChr.f.2.hg38.r10.hic",
+                    "format": "hic",
+                    "type": "shoebox",
+                    "height": 500,
+                    "visibilityWindow": 1000000,
+                    "order": 4,
+                    "maxWGCount": 9007199254740991,
+                    "displayMode": "EXPANDED"
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "removable": false,
+                    "order": 1000000,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
             ]
         };
 
     let browser
     (async () => {
         browser = await igv.createBrowser(document.getElementById('myDiv'), config)
-        console.log(`browser ${ browser.guid } is good to go.`)
+        console.log(`browser ${browser.guid} is good to go.`)
         document.getElementById('processFileInput').addEventListener('click', processFile)
         document.getElementById('processURLInput').addEventListener('click', processUrl)
         document.getElementById('processTrackURLInput').addEventListener('click', processTrackUrl)
     })()
 
     async function processFile() {
-        const [ file ] = document.getElementById("fileInput").files
-        await browser.sampleInfo.loadSampleInfoFile(browser, file)
+        const [file] = document.getElementById("fileInput").files
+        await browser.loadTrackList([{type: 'sampleinfo', url: file}])
     }
 
     async function processUrl() {
         const url = document.getElementById("urlInput").value
-        await browser.sampleInfo.loadSampleInfoFile(browser, url)
+        await browser.loadTrackList([{type: 'sampleinfo', url}])
     }
 
     async function processTrackUrl() {
         const url = document.getElementById("trackURLInput").value
-        // https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0
-        await browser.loadTrack({ url })
+        await browser.loadTrackList([{url}])
     }
 
 </script>
