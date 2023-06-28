@@ -152,6 +152,27 @@ class SampleInfoViewport {
 
     }
 
+    renderSVGContext(context, {deltaX, deltaY}) {
+
+        if (typeof this.trackView.track.getSamples === 'function') {
+
+            const samples = this.trackView.track.getSamples()
+
+            const yScrollDelta = 0   // This is not relevant, scrolling is handled in "draw"
+
+            const {width, height} = this.viewport.getBoundingClientRect()
+
+            const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
+            const id = `${str}_sample_names_guid_${DOMUtils.guid()}`
+
+            context.saveWithTranslationAndClipRect(id, deltaX, deltaY + yScrollDelta, width, height, -yScrollDelta)
+
+            this.draw({context, samples})
+
+            context.restore()
+        }
+    }
+
     addMouseHandlers() {
         this.addMouseMoveHandler()
     }

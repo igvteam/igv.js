@@ -381,9 +381,13 @@ class Browser {
         const context = new C2S(config)
 
         // tracks -> SVG
+        const delta = {deltaX: 0, deltaY: -y}
         for (let trackView of this.trackViews) {
-            trackView.renderSVGContext(context, {deltaX: 0, deltaY: -y})
+            trackView.renderSVGContext(context, delta)
         }
+
+        this.roiManager.renderSVGContext(context, delta)
+
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
         context.setHeight(height)
 
