@@ -67,10 +67,10 @@ class NavbarManager {
             candidates.$toggle_button_container = 'igv-navbar-toggle-button-container'
             candidates.zoomContainer = 'igv-zoom-widget-900'
         } else if (navbarWidth > 540) {
-            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container-750'
+            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container-hidden'
             candidates.zoomContainer = 'igv-zoom-widget-900'
         } else {
-            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container-750'
+            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container-hidden'
             candidates.zoomContainer = 'igv-zoom-widget-900'
             this.browser.windowSizePanel.hide()
         }

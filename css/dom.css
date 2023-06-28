@@ -136,7 +136,7 @@
   align-items: center;
   height: 100%;
 }
-.igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container-750 {
+.igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container-hidden {
   display: none;
 }
 .igv-navbar .igv-navbar-right-container .igv-zoom-widget {
