@@ -26,6 +26,7 @@
 import {GoogleAuth, igvxhr} from '../node_modules/igv-utils/src/index.js'
 import Browser from "./browser.js"
 import GenomeUtils from "./genome/genome.js"
+import {navbarDidResize} from "./navbarManager.js"
 
 let allBrowsers = []
 
@@ -78,7 +79,7 @@ async function createBrowser(parentDiv, config) {
         await browser.loadSessionObject(config)
     }
 
-    browser.navbarManager.navbarDidResize(browser.$navigation.width())
+    navbarDidResize(browser, browser.$navigation.width())
 
     return browser
 

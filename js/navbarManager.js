@@ -26,61 +26,53 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import GenomeUtils from "./genome/genome.js"
 
-class NavbarManager {
+function navbarDidResize(browser, width) {
 
-    constructor(browser) {
-        this.browser = browser
-    }
+    const responsiveClasses = getResponsiveClasses(browser, width)
 
-    navbarDidResize(width) {
-        this.updateNavbar(this.createResponsiveClassSchedule(width))
-    }
+    browser.$toggle_button_container.removeClass()
+    browser.$toggle_button_container.addClass(responsiveClasses.toggleButtonContainer)
 
-    updateNavbar(responsiveClassSchedule) {
+    $(browser.zoomWidget.zoomContainer).removeClass()
+    $(browser.zoomWidget.zoomContainer).addClass(responsiveClasses.zoomContainer)
 
-        this.browser.$toggle_button_container.removeClass()
-        this.browser.$toggle_button_container.addClass(responsiveClassSchedule.$toggle_button_container)
-
-        $(this.browser.zoomWidget.zoomContainer).removeClass()
-        $(this.browser.zoomWidget.zoomContainer).addClass(responsiveClassSchedule.zoomContainer)
-    }
-
-    createResponsiveClassSchedule(navbarWidth) {
-
-        let candidates = {}
-
-        const isWGV = this.browser.isMultiLocusWholeGenomeView() ||
-            (this.browser.referenceFrameList &&
-                GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr))
-
-
-        if (isWGV) {
-            this.browser.windowSizePanel.hide()
-        } else {
-            this.browser.windowSizePanel.show()
-        }
-
-        if (navbarWidth > 990) {
-            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container'
-            candidates.zoomContainer = 'igv-zoom-widget'
-        } else if (navbarWidth > 860) {
-            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container'
-            candidates.zoomContainer = 'igv-zoom-widget-900'
-        } else if (navbarWidth > 540) {
-            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container-hidden'
-            candidates.zoomContainer = 'igv-zoom-widget-900'
-        } else {
-            candidates.$toggle_button_container = 'igv-navbar-toggle-button-container-hidden'
-            candidates.zoomContainer = 'igv-zoom-widget-900'
-            this.browser.windowSizePanel.hide()
-        }
-
-        if (isWGV) {
-            candidates['zoomContainer'] = 'igv-zoom-widget-hidden'
-        }
-
-        return candidates
-    }
 }
 
-export default NavbarManager
+function getResponsiveClasses(browser, navbarWidth) {
+
+    const responsiveClasses = {}
+
+    const isWGV = browser.isMultiLocusWholeGenomeView() ||
+        (browser.referenceFrameList &&
+            GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr))
+
+
+    if (isWGV) {
+        browser.windowSizePanel.hide()
+    } else {
+        browser.windowSizePanel.show()
+    }
+
+    if (navbarWidth > 990) {
+        responsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container'
+        responsiveClasses.zoomContainer = 'igv-zoom-widget'
+    } else if (navbarWidth > 860) {
+        responsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container'
+        responsiveClasses.zoomContainer = 'igv-zoom-widget-900'
+    } else if (navbarWidth > 540) {
+        responsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container-hidden'
+        responsiveClasses.zoomContainer = 'igv-zoom-widget-900'
+    } else {
+        responsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container-hidden'
+        responsiveClasses.zoomContainer = 'igv-zoom-widget-900'
+        browser.windowSizePanel.hide()
+    }
+
+    if (isWGV) {
+        responsiveClasses.zoomContainer = 'igv-zoom-widget-hidden'
+    }
+
+    return responsiveClasses
+}
+
+export { navbarDidResize }

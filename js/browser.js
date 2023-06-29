@@ -20,7 +20,7 @@ import version from "./version.js"
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
-import NavbarManager from "./navbarManager.js"
+import {navbarDidResize} from "./navbarManager.js"
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js"
 import WindowSizePanel from "./windowSizePanel.js"
 import CursorGuide from "./ui/cursorGuide.js"
@@ -187,8 +187,6 @@ class Browser {
     }
 
     createStandardControls(config) {
-
-        this.navbarManager = new NavbarManager(this)
 
         const $navBar = $('<div>', {class: 'igv-navbar'})
         this.$navigation = $navBar
@@ -745,7 +743,7 @@ class Browser {
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
 
-        this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV)
+        navbarDidResize(this, this.$navigation.width(), isWGV)
 
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
@@ -1289,7 +1287,7 @@ class Browser {
 
         if (this.referenceFrameList) {
             const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr)
-            this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV)
+            navbarDidResize(this, this.$navigation.width(), isWGV)
         }
 
         resize.call(this)
