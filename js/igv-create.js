@@ -139,8 +139,8 @@ function setDefaults(config) {
         config.showTrackLabels = true
     }
 
-    if (undefined === config.showROITableButton) {
-        config.showROITableButton = false
+    if (undefined === config.doShowROITableButton) {
+        config.doShowROITableButton = false
     }
 
     if (undefined === config.showROITable) {

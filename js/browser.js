@@ -46,7 +46,7 @@ import ROIManager from './roi/ROIManager.js'
 import ROITable from './roi/ROITable.js'
 import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
-import ROITableControl from './ui/roiTableControl.js'
+import ROITableControl from './roi/roiTableControl.js'
 import SampleInfo from "./sample/sampleInfo.js"
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import HicFile from "./hic/straw/hicFile.js"
@@ -144,8 +144,8 @@ class Browser {
 
         this.doShowTrackLabels = config.showTrackLabels
 
-        this.roiTableVisible = config.showROITable
-        this.showROITableButton = config.showROITableButton
+        this.doShowROITable = config.showROITable
+        this.doShowROITableButton = config.doShowROITableButton
 
         this.doShowCenterLine = config.showCenterGuide
 
