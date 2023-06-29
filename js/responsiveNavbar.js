@@ -26,6 +26,8 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import GenomeUtils from "./genome/genome.js"
 
+const navbarResponsiveClasses = {}
+
 function navbarDidResize(browser, width) {
 
     const responsiveClasses = getResponsiveClasses(browser, width)
@@ -36,11 +38,11 @@ function navbarDidResize(browser, width) {
     $(browser.zoomWidget.zoomContainer).removeClass()
     $(browser.zoomWidget.zoomContainer).addClass(responsiveClasses.zoomContainer)
 
+    browser.fireEvent('navbar-resize', [ responsiveClasses.toggleButtonContainer ])
 }
 
 function getResponsiveClasses(browser, navbarWidth) {
 
-    const responsiveClasses = {}
 
     const isWGV = browser.isMultiLocusWholeGenomeView() ||
         (browser.referenceFrameList &&
@@ -54,25 +56,25 @@ function getResponsiveClasses(browser, navbarWidth) {
     }
 
     if (navbarWidth > 990) {
-        responsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container'
-        responsiveClasses.zoomContainer = 'igv-zoom-widget'
+        navbarResponsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container'
+        navbarResponsiveClasses.zoomContainer = 'igv-zoom-widget'
     } else if (navbarWidth > 860) {
-        responsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container'
-        responsiveClasses.zoomContainer = 'igv-zoom-widget-900'
+        navbarResponsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container'
+        navbarResponsiveClasses.zoomContainer = 'igv-zoom-widget-900'
     } else if (navbarWidth > 540) {
-        responsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container-hidden'
-        responsiveClasses.zoomContainer = 'igv-zoom-widget-900'
+        navbarResponsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container-hidden'
+        navbarResponsiveClasses.zoomContainer = 'igv-zoom-widget-900'
     } else {
-        responsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container-hidden'
-        responsiveClasses.zoomContainer = 'igv-zoom-widget-900'
+        navbarResponsiveClasses.toggleButtonContainer = 'igv-navbar-toggle-button-container-hidden'
+        navbarResponsiveClasses.zoomContainer = 'igv-zoom-widget-900'
         browser.windowSizePanel.hide()
     }
 
     if (isWGV) {
-        responsiveClasses.zoomContainer = 'igv-zoom-widget-hidden'
+        navbarResponsiveClasses.zoomContainer = 'igv-zoom-widget-hidden'
     }
 
-    return responsiveClasses
+    return navbarResponsiveClasses
 }
 
-export { navbarDidResize }
+export { navbarDidResize, navbarResponsiveClasses }

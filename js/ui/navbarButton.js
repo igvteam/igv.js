@@ -25,6 +25,7 @@
  */
 
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {navbarResponsiveClasses} from "../responsiveNavbar.js"
 
 class NavbarButton {
 
@@ -32,17 +33,39 @@ class NavbarButton {
 
         this.browser = browser
 
-        this.button = DOMUtils.div({class: 'igv-navbar-icon-button'})
+        this.button = DOMUtils.div({class: 'igv-navbar-text-button'})
         this.button.setAttribute('title', title)
         parent.appendChild(this.button)
 
         this.image = image
 
+        this.responsiveString = '-text'
+        // this.responsiveString = '-image'
+
         this.setState(initialButtonState)
+
+        browser.on('navbar-resize', toggleButtonContainer => {
+
+            const replacement = 'igv-navbar-toggle-button-container-hidden' === toggleButtonContainer ? '-image' : '-text'
+
+            if (replacement !== this.responsiveString) {
+                const str = this.button.style.backgroundImage
+                this.button.style.backgroundImage = str.replace(this.responsiveString, replacement)
+                this.responsiveString = replacement
+
+                if ('-text' === this.responsiveString) {
+                    this.button.classList.remove('igv-navbar-icon-button')
+                    this.button.classList.add('igv-navbar-text-button')
+                } else {
+                    this.button.classList.remove('igv-navbar-text-button')
+                    this.button.classList.add('igv-navbar-icon-button')
+                }
+            }
+        })
     }
 
     setState(doSomething) {
-        this.button.style.backgroundImage = true === doSomething ? `url('/images/${this.image}-hover.svg')` : `url('/images/${this.image}.svg')`
+        this.button.style.backgroundImage = true === doSomething ? `url('/images/${this.image}${this.responsiveString}-hover.svg')` : `url('/images/${this.image}${this.responsiveString}.svg')`
     }
 
     show() {

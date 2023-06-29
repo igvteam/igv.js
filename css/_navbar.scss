@@ -203,20 +203,18 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
 
       height: 100%;
 
-      //div {
-      //  margin-left: 0;
-      //  margin-right: 4px;
-      //}
-      //
-      //div:last-child {
-      //  margin-left: 0;
-      //  margin-right: 0;
-      //}
-
     }
 
     .igv-navbar-toggle-button-container-hidden {
-      display: none;
+
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: center;
+
+      height: 100%;
+
     }
 
     .igv-zoom-widget {
@@ -349,8 +347,23 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
 }
 
 .igv-navbar-icon-button {
-  //width: 80px;
-  //height: 18px;
+  width: 24px;
+  height: 24px;
+  margin-left: 4px;
+  margin-right: 4px;
+
+  cursor: pointer;
+
+  border: none;
+
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.igv-navbar-text-button {
+  width: 80px;
+  height: 18px;
   margin-left: 4px;
   margin-right: 4px;
 

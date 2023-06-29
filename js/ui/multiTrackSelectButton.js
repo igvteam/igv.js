@@ -6,7 +6,7 @@ let ENABLE_MULTI_TRACK_SELECTION = false
 class MultiTrackSelectButton extends NavbarButton {
     constructor(browser, parent) {
 
-        super(browser, parent, 'Enable Multi Track Selection', 'multi-select-text', ENABLE_MULTI_TRACK_SELECTION)
+        super(browser, parent, 'Enable Multi Track Selection', 'multi-select', ENABLE_MULTI_TRACK_SELECTION)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === ENABLE_MULTI_TRACK_SELECTION) {
