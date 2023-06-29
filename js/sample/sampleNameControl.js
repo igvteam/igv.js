@@ -30,7 +30,7 @@ class SampleNameControl extends NavbarButton {
 
     constructor(parent, browser) {
 
-        super(browser, parent, 'Show Sample Names', 'sample-names', browser.config.showSampleNames)
+        super(browser, parent, 'Show Sample Names', 'sample-names-text', browser.config.showSampleNames)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.showSampleNames) {

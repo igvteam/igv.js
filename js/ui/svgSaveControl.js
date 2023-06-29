@@ -29,7 +29,7 @@ import NavbarButton from "./navbarButton.js"
 class SVGSaveControl extends NavbarButton {
     constructor(parent, browser) {
 
-        super(browser, parent, 'Save SVG', 'svg-save', false)
+        super(browser, parent, 'Save SVG', 'svg-save-text', false)
 
         this.button.addEventListener('mouseenter', () => this.setState(true))
 

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="80px" height="18px" viewBox="0 0 80 18" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>sample info hover text</title>
+    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="sample-info-hover-text">
+            <rect id="Rectangle" stroke="#737373" fill="#737373" x="0.5" y="0.5" width="79" height="17" rx="6"></rect>
+            <text id="sample-info" font-family="Helvetica" font-size="12" font-weight="normal" letter-spacing="-0.172" fill="#FFFFFF">
+                <tspan x="9.42744531" y="13">Sample Info</tspan>
+            </text>
+        </g>
+    </g>
+</svg>

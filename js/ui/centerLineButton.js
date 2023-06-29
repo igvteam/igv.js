@@ -31,7 +31,7 @@ class CenterLineButton extends NavbarButton {
 
     constructor(browser, parent) {
 
-        super(browser, parent, 'Show Center Line', 'centerline', browser.config.showCenterGuide)
+        super(browser, parent, 'Show Center Line', 'centerline-text', browser.config.showCenterGuide)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowCenterLine) {

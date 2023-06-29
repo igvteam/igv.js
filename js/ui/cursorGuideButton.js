@@ -31,7 +31,7 @@ class CursorGuideButton extends NavbarButton {
 
     constructor(browser, parent) {
 
-        super(browser, parent, 'Show Cursor Guide', 'cursor', browser.config.showCursorTrackingGuide)
+        super(browser, parent, 'Show Cursor Guide', 'cursor-text', browser.config.showCursorTrackingGuide)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowCursorGuide) {
