@@ -44,9 +44,9 @@ class NavbarButton {
 
         this.setState(initialButtonState)
 
-        browser.on('navbar-resize', toggleButtonContainer => {
+        browser.on('navbar-resize', navbarButtonCSSClass => {
 
-            const replacement = 'igv-navbar-toggle-button-container-hidden' === toggleButtonContainer ? '-image' : '-text'
+            const replacement = 'igv-navbar-icon-button' === navbarButtonCSSClass ? '-image' : '-text'
 
             if (replacement !== this.responsiveString) {
                 const str = this.button.style.backgroundImage
@@ -55,10 +55,10 @@ class NavbarButton {
 
                 if ('-text' === this.responsiveString) {
                     this.button.classList.remove('igv-navbar-icon-button')
-                    this.button.classList.add('igv-navbar-text-button')
+                    this.button.classList.add(navbarButtonCSSClass)
                 } else {
                     this.button.classList.remove('igv-navbar-text-button')
-                    this.button.classList.add('igv-navbar-icon-button')
+                    this.button.classList.add(navbarButtonCSSClass)
                 }
             }
         })
