@@ -47,7 +47,7 @@ function getResponsiveClasses(browser, navbarWidth) {
 
     isWGV ? browser.windowSizePanel.hide() : browser.windowSizePanel.show()
 
-    console.log(`navbar width ${ StringUtils.numberFormatter(navbarWidth) }`)
+    // console.log(`navbar width ${ StringUtils.numberFormatter(navbarWidth) }`)
 
     navbarResponsiveClasses.navbarButton = navbarWidth > 1170 ? 'igv-navbar-text-button' : 'igv-navbar-icon-button'
 
@@ -56,7 +56,7 @@ function getResponsiveClasses(browser, navbarWidth) {
     } else {
         navbarResponsiveClasses.zoomContainer = navbarWidth > 860 ? 'igv-zoom-widget' : 'igv-zoom-widget-900'
     }
-    
+
     return navbarResponsiveClasses
 }
 
