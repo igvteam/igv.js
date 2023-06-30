@@ -5,7 +5,7 @@
         <g id="multi-select-text-hover">
             <rect id="Rectangle" stroke="#737373" fill="#737373" x="0.5" y="0.5" width="79" height="17" rx="6"></rect>
             <text id="multi-select" font-family="Helvetica" font-size="12" font-weight="normal" letter-spacing="-0.572" fill="#FFFFFF">
-                <tspan x="11.9212578" y="13">Multi Select</tspan>
+                <tspan x="7.20042188" y="13">Select Tracks</tspan>
             </text>
         </g>
     </g>

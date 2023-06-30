@@ -5,7 +5,7 @@
         <g id="cursor-text">
             <rect id="Rectangle" stroke="#737373" fill="#FFFFFF" x="0.5" y="0.5" width="79" height="17" rx="6"></rect>
             <text id="Cross-Hairs" font-family="Helvetica" font-size="12" font-weight="normal" letter-spacing="-0.172" fill="#737373">
-                <tspan x="10.1100625" y="13">Cross Hairs</tspan>
+                <tspan x="12.6871484" y="13">Crosshairs</tspan>
             </text>
         </g>
     </g>
