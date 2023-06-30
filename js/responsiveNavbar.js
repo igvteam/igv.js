@@ -51,19 +51,12 @@ function getResponsiveClasses(browser, navbarWidth) {
 
     navbarResponsiveClasses.navbarButton = navbarWidth > 1170 ? 'igv-navbar-text-button' : 'igv-navbar-icon-button'
 
-    if (navbarWidth > 860) {
-        navbarResponsiveClasses.zoomContainer = 'igv-zoom-widget'
-    } else if (navbarWidth > 540) {
-        navbarResponsiveClasses.zoomContainer = 'igv-zoom-widget-900'
-    } else {
-        navbarResponsiveClasses.zoomContainer = 'igv-zoom-widget-900'
-        browser.windowSizePanel.hide()
-    }
-
     if (isWGV) {
         navbarResponsiveClasses.zoomContainer = 'igv-zoom-widget-hidden'
+    } else {
+        navbarResponsiveClasses.zoomContainer = navbarWidth > 860 ? 'igv-zoom-widget' : 'igv-zoom-widget-900'
     }
-
+    
     return navbarResponsiveClasses
 }
 

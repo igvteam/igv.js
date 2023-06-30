@@ -163,15 +163,15 @@
   margin-right: unset;
 }
 .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:first-child {
-  height: 24px;
-  width: 24px;
+  height: 20px;
+  width: 20px;
   margin-left: unset;
-  margin-right: 8px;
+  margin-right: 4px;
 }
 .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:last-child {
-  height: 24px;
-  width: 24px;
-  margin-left: 8px;
+  height: 20px;
+  width: 20px;
+  margin-left: 4px;
   margin-right: unset;
 }
 .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:nth-child(even) {
@@ -204,15 +204,15 @@
   margin-right: unset;
 }
 .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:first-child {
-  height: 24px;
-  width: 24px;
+  height: 20px;
+  width: 20px;
   margin-left: unset;
-  margin-right: 8px;
+  margin-right: 4px;
 }
 .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:last-child {
-  height: 24px;
-  width: 24px;
-  margin-left: 8px;
+  height: 20px;
+  width: 20px;
+  margin-left: 4px;
   margin-right: unset;
 }
 .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:nth-child(even) {

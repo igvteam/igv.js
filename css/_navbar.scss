@@ -245,20 +245,18 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
 
       // zoom-out
       div:first-child {
-        height: 24px;
-        width: 24px;
+        height: 20px;
+        width: 20px;
         margin-left: unset;
-        margin-right: 8px;
-        //background-color: magenta;
+        margin-right: 4px;
       }
 
       // zoom-in
       div:last-child {
-        height: 24px;
-        width: 24px;
-        margin-left: 8px;
+        height: 20px;
+        width: 20px;
+        margin-left: 4px;
         margin-right: unset;
-        //background-color: lime;
       }
 
       div:nth-child(even) {
@@ -297,26 +295,26 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
       justify-content: flex-end;
       align-items: center;
 
-
+      // container: zoom-out | zoom-slider | zoom-in
       div {
         cursor: pointer;
         margin-left: unset;
         margin-right: unset;
       }
 
-      // "-" zoom button
+      // zoom-out
       div:first-child {
-        height: 24px;
-        width: 24px;
+        height: 20px;
+        width: 20px;
         margin-left: unset;
-        margin-right: 8px;
+        margin-right: 4px;
       }
 
-      // "+" zoom button
+      // zoom-in
       div:last-child {
-        height: 24px;
-        width: 24px;
-        margin-left: 8px;
+        height: 20px;
+        width: 20px;
+        margin-left: 4px;
         margin-right: unset;
       }
 
