@@ -160,7 +160,7 @@ class AlignmentContainer {
         const newRows = []
         const undefinedRow = []
         for (let row of this.packedAlignmentRows) {
-            const alignment = row.findAlignment(options.position)
+            const alignment = row.findAlignment(options.position, options.sortAsPairs)
             if (undefined !== alignment) {
                 newRows.push(row)
             } else {
