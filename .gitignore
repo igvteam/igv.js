@@ -29,3 +29,5 @@ igv.css.map
 /deployShoebox.sh
 /examples/shoebox.html
 /dev/shoebox/*
+/dev/issues/1654/
+/test_igv 2/
