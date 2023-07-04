@@ -1240,7 +1240,8 @@ class AlignmentTrack {
                 chr: viewport.referenceFrame.chr,
                 position: Math.floor(clickState.genomicLocation),
                 option: option,
-                direction: direction
+                direction: direction,
+                sortAsPairs: viewport.trackView.track.viewAsPairs
             }
             this.parent.sortObject = newSortObject
             viewport.cachedFeatures.sortRows(newSortObject)
