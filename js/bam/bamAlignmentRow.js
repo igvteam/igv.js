@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import { StringUtils } from "../../node_modules/igv-utils/src/index.js"
 
 const isString = StringUtils.isString
 const hashCode = StringUtils.hashCode
@@ -36,17 +36,17 @@ class BamAlignmentRow {
         this.score = undefined
     }
 
-    findAlignment(genomicLocation) {
+    findAlignment(genomicLocation, sortAsPairs = false) {
 
         const alignmentContains = (a, genomicLocation) => {
-            return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef
+            return genomicLocation >= a.start && genomicLocation < a.start + (sortAsPairs ? a.fragmentLength : a.lengthOnRef)
         }
 
         // find single alignment that overlaps sort location
         let centerAlignment
         for (let i = 0; i < this.alignments.length; i++) {
             const a = this.alignments[i]
-            if (genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef) {
+            if (genomicLocation >= a.start && genomicLocation < a.start + (sortAsPairs ? a.fragmentLength : a.lengthOnRef)) {
                 if (a.paired) {
                     if (a.firstAlignment && alignmentContains(a.firstAlignment, genomicLocation)) {
                         centerAlignment = a.firstAlignment
@@ -64,11 +64,11 @@ class BamAlignmentRow {
 
     }
 
-    getSortValue({position, option, tag}, alignmentContainer) {
+    getSortValue({ position, option, tag, sortAsPairs }, alignmentContainer) {
 
         if (!option) option = "BASE"
 
-        const alignment = this.findAlignment(position)
+        const alignment = this.findAlignment(position, sortAsPairs)
         if (undefined === alignment) {  // This condition should never occur
             return Number.MAX_VALUE
         }
