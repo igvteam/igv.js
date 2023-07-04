@@ -795,12 +795,22 @@ class AlignmentTrack {
         this.hideSmallIndels = config.hideSmallIndels
         this.indelSizeThreshold = config.indelSizeThreshold || 1
 
+        this.readsToHighlight = config.readsToHighlight || []
+        this.highlightedReadsOutlineColor = config.highlightedReadsOutlineColor || "#00ff00"
+
         this.hasPairs = false   // Until proven otherwise
         this.hasSupplemental = false
     }
 
     setTop(coverageTrack, showCoverage) {
         this.top = (0 === coverageTrack.height || false === showCoverage) ? 0 : (5 + coverageTrack.height)
+    }
+
+    setReadsToHighlight(readsToHighlight) {
+        if (!Array.isArray(readsToHighlight) ||!readsToHighlight.every(i => typeof i === "string")) {
+            throw new Error("AlignmentTrack.setReadsToHighlight() only accept array of strings")
+        }
+        this.readsToHighlight = readsToHighlight || []
     }
 
     /**
@@ -1079,11 +1089,13 @@ class AlignmentTrack {
                 const strokeOutline =
                     alignment.mq <= 0 ||
                     this.highlightedAlignmentReadNamed === alignment.readName ||
-                    isSoftClip
+                    isSoftClip ||
+                    this.readsToHighlight.includes(alignment.readName)
 
                 let blockOutlineColor = outlineColor
                 if (this.highlightedAlignmentReadNamed === alignment.readName) blockOutlineColor = 'red'
                 else if (isSoftClip) blockOutlineColor = 'rgb(50,50,50)'
+                else if (this.readsToHighlight.includes(alignment.readName)) blockOutlineColor = this.highlightedReadsOutlineColor
 
                 const lastBlockPositiveStrand = (true === alignment.strand && b === blocks.length - 1)
                 const lastBlockReverseStrand = (false === alignment.strand && b === 0)
