@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<svg width="625px" height="628.029703px" viewBox="0 0 625 628.029703" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-    <title>text labels hover</title>
+<svg width="625px" height="625px" viewBox="0 0 625 625" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>track labels hover</title>
     <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-        <g id="text-labels-hover">
-            <rect id="Rectangle-Copy-21" stroke="#3A3A3A" stroke-width="12" fill="#3A3A3A" x="6" y="9.02970297" width="613" height="613" rx="135"></rect>
-            <text id="T" font-family="HelveticaNeue-Bold, Helvetica Neue" font-size="546" font-weight="bold" fill="#FFFFFF">
-                <tspan x="145.697" y="532">T</tspan>
+        <g id="track-labels-hover">
+            <rect id="Rectangle-Copy-25" stroke="#3A3A3A" stroke-width="12" fill="#FFFFFF" x="6" y="6" width="613" height="613" rx="135"></rect>
+            <path d="M568,317 L458.15,468.935714 C452.516667,476.564286 445.8,482.815476 438,487.689286 C430.2,492.563095 421.533333,495 412,495 L139,495 C128.166667,495 118.958333,491.291667 111.375,483.875 C103.791667,476.458333 100,467.452381 100,456.857143 L100,177.142857 C100,166.547619 103.791667,157.541667 111.375,150.125 C118.958333,142.708333 128.166667,139 139,139 L412,139 C421.533333,139 430.2,141.436905 438,146.310714 C445.8,151.184524 452.516667,157.435714 458.15,165.064286 L568,317 Z" id="label-shape" stroke="#3A3A3A" stroke-width="12" fill="#3A3A3A" fill-rule="nonzero"></path>
+            <text id="T" font-family="HelveticaNeue-Bold, Helvetica Neue" font-size="342" font-weight="bold" fill="#FFFFFF">
+                <tspan x="194.519" y="449">T</tspan>
             </text>
         </g>
     </g>
