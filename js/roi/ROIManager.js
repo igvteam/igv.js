@@ -215,6 +215,23 @@ class ROIManager {
         return regionElement
     }
 
+    renderSVGContext(context, {deltaX, deltaY}) {
+
+        for (const regionElement of document.querySelectorAll('.igv-roi-region')) {
+
+            // body
+            const { x, y, width, height } = regionElement.getBoundingClientRect()
+            context.fillStyle = regionElement.style.backgroundColor
+            context.fillRect(x+deltaX, y+deltaY, width, height)
+
+            // header
+            const header = regionElement.querySelector('div')
+            const { x:xx, y:yy, width:ww, height:hh } = header.getBoundingClientRect()
+            context.fillStyle = header.style.backgroundColor
+            context.fillRect(xx+deltaX, yy+deltaY, ww, hh)
+        }
+    }
+
     async getUserDefinedROISet() {
         return this.roiSets.find(roiSet => true === roiSet.isUserDefined)
     }
