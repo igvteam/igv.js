@@ -179,13 +179,7 @@ class TrackView {
             const {width} = viewport.$viewport.get(0).getBoundingClientRect()
             delta.deltaX += width
         }
-
-        if (true === this.browser.sampleInfo.isInitialized() && true === this.browser.sampleInfoControl.showSampleInfo) {
-            this.sampleInfoViewport.renderSVGContext(context, delta)
-            const {width} = this.sampleInfoViewport.viewport.getBoundingClientRect()
-            delta.deltaX += width
-        }
-
+        
         if (true === this.browser.showSampleNames) {
             this.sampleNameViewport.renderSVGContext(context, delta)
         }
