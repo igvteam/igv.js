@@ -47,6 +47,11 @@ class BamReader {
         BamUtils.setReaderDefaults(this, config)
 
         this._blockLoader = new BGZBlockLoader(config)
+
+        if (!this.config.headers) {
+            this.config.headers = {}
+        }
+        this.config.headers["accept-encoding"] = "gzip;q=0,deflate;q=0"
     }
 
     async readAlignments(chr, bpStart, bpEnd) {
