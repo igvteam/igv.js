@@ -419,13 +419,11 @@ class Browser {
     }
 
     savePNGtoFile(filename) {
-
-        html2canvas(document.querySelector('.igv-column-container'), { allowTaint: true }).then(canvas => {
+        html2canvas(this.columnContainer, { allowTaint: true }).then(canvas => {
             const path = filename || 'igvjs.png'
             const data = canvas.toDataURL('image/png')
             FileUtils.download(path, data)
         })
-
     }
 
     /**

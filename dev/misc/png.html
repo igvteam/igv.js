@@ -94,7 +94,7 @@
             console.log(`${ browser.guid } is good to go`)
 
             document.querySelector('#igv-save-as-png-button').addEventListener('click', () => {
-                browser.savePNGtoFile('saveIGVJSToPNG.png')
+                browser.savePNGtoFile(`igvjs-screendump-${ browser.guid }.png`)
             })
 
         })
