@@ -43,6 +43,7 @@
   },
   "browserslist": "> 1%, not dead",
   "devDependencies": {
+    "html2canvas": "^1.4.1",
     "@rollup/plugin-strip": "^3.0.1",
     "@rollup/plugin-terser": "^0.4.0",
     "@xmldom/xmldom": "^0.7.9",
@@ -59,8 +60,5 @@
     "rollup-plugin-copy": "^3.3.0",
     "sass": "^1.45.1",
     "w3c-xmlhttprequest": "^3.0.0"
-  },
-  "dependencies": {
-    "html2canvas": "^1.4.1"
   }
 }
