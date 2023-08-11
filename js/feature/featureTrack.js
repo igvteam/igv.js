@@ -432,7 +432,9 @@ class FeatureTrack extends TrackBase {
      * @returns {string}
      */
 
-    getColorForFeature(feature) {
+    getColorForFeature(f) {
+
+        const feature = f._f || f    // f might be a "whole genome" wrapper
 
         let color
         if (this.altColor && "-" === feature.strand) {
