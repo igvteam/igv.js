@@ -35,8 +35,8 @@ function decodeInteract(tokens, header) {
 
     var feature = {
         chr: tokens[0],
-        start: tokens[1],
-        end: tokens[2],
+        start: Number.parseInt(tokens[1]),
+        end: Number.parseInt(tokens[2]),
 
         chr1: tokens[8],
         start1: Number.parseInt(tokens[9]),
