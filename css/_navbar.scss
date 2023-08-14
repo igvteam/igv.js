@@ -167,6 +167,13 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
             cursor: pointer;
             height: 16px;
             width: 16px;
+
+            display: flex;
+            flex-flow: row;
+            flex-wrap: nowrap;
+            justify-content: center;
+            align-items: center;
+
           }
 
         }
