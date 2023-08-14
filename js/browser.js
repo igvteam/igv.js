@@ -1,4 +1,5 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
+import html2canvas from '../node_modules/html2canvas/dist/html2canvas.esm.js'
 import {InputDialog, GenericColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {BGZip, FileUtils, igvxhr, StringUtils, URIUtils} from "../node_modules/igv-utils/src/index.js"
 import {DOMUtils, Icon} from "../node_modules/igv-ui/dist/igv-ui.js"
@@ -415,6 +416,14 @@ class Browser {
         const path = config.filename || 'igvjs.svg'
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
         FileUtils.download(path, data)
+    }
+
+    savePNGtoFile(filename) {
+        html2canvas(this.columnContainer, { allowTaint: true }).then(canvas => {
+            const path = filename || 'igvjs.png'
+            const data = canvas.toDataURL('image/png')
+            FileUtils.download(path, data)
+        })
     }
 
     /**
