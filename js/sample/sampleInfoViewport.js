@@ -1,7 +1,8 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {appleCrayonRGB} from '../util/colorPalletes.js'
-import {emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
+import {attributeNamesMap, emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
 
+const sampleInfoTileXShim = 8
 const sampleInfoTileWidth = 16
 
 class SampleInfoViewport {
@@ -35,7 +36,9 @@ class SampleInfoViewport {
 
     static getSampleInfoColumnWidth(browser) {
         const found = browser.findTracks(t => typeof t.getSamples === 'function')
-        return (found.length > 0 && browser.sampleInfo.isInitialized()) ? browser.sampleInfo.getAttributeCount() * sampleInfoTileWidth : 0
+        return (found.length > 0 && browser.sampleInfo.isInitialized() && true === browser.sampleInfoControl.showSampleInfo)
+            ? sampleInfoTileXShim + browser.sampleInfo.getAttributeNames().length * sampleInfoTileWidth
+            : 0
     }
 
     checkCanvas() {
@@ -94,7 +97,8 @@ class SampleInfoViewport {
         context.fillStyle = appleCrayonRGB('snow')
         context.fillRect(0, 0, context.canvas.width, context.canvas.height)
 
-        if (samples && samples.names.length > 0) {
+        if (sampleDictionary && samples && samples.names.length > 0) {
+            this.browser.sampleInfo.getAttributeNames();
 
             const viewportHeight = this.viewport.getBoundingClientRect().height
 
@@ -102,13 +106,11 @@ class SampleInfoViewport {
 
             const tileHeight = samples.height
 
-            if (Math.abs(tileHeight - 2*shim) < 1) {
-                shim = 0
-            }
+            shim = tileHeight - 2 * shim <= 1 ? 0 : 1
 
             let y = this.contentTop
             this.hitList = {}
-            for (const name of samples.names) {
+            for (const sampleName of samples.names) {
 
                 if (y > viewportHeight) {
                     break
@@ -116,35 +118,29 @@ class SampleInfoViewport {
 
                 if (y + tileHeight > 0) {
 
-                    if (sampleDictionary) {
+                    const attributes = this.browser.sampleInfo.getAttributes(sampleName)
 
-                        const attributes = this.browser.sampleInfo.getAttributes(name)
+                    if (attributes) {
 
-                        if (attributes) {
+                        const attributeEntries = Object.entries(attributes)
 
-                            const attributeEntries = Object.entries(attributes)
+                        for (const attributeEntry of attributeEntries) {
 
-                            let x = 0;
-                            for (const attributeEntry of attributeEntries) {
+                            const [attribute, value] = attributeEntry
 
-                                const [ attribute, value ] = attributeEntry
+                            context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
 
-                                context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
+                            const x = sampleInfoTileXShim + attributeNamesMap.get(attribute) * sampleInfoTileWidth
+                            const yy = y + shim
+                            const hh = tileHeight - (2 * shim)
+                            context.fillRect(x, yy, sampleInfoTileWidth, hh)
 
-                                const yy = y+shim
-                                const hh = tileHeight-(2*shim)
-                                context.fillRect(x, yy, sampleInfoTileWidth, hh)
+                            const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
+                            this.hitList[key] = `${attribute}#${value}`
 
-                                const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
-                                this.hitList[ key ] = `${attribute}#${value}`
+                        } // for (attributeEntries)
 
-                                x += sampleInfoTileWidth
-
-                            } // for (attributeEntries)
-
-                        } // if (attributes)
-
-                    } // if (dictionary && dictionary[ name ])
+                    } // if (attributes)
 
                 } // if (y + tileHeight > 0)
 
@@ -154,6 +150,27 @@ class SampleInfoViewport {
 
         }
 
+    }
+
+    renderSVGContext(context, {deltaX, deltaY}) {
+
+        if (typeof this.trackView.track.getSamples === 'function') {
+
+            const samples = this.trackView.track.getSamples()
+
+            const yScrollDelta = 0   // This is not relevant, scrolling is handled in "draw"
+
+            const {width, height} = this.viewport.getBoundingClientRect()
+
+            const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
+            const id = `${str}_sample_names_guid_${DOMUtils.guid()}`
+
+            context.saveWithTranslationAndClipRect(id, deltaX, deltaY + yScrollDelta, width, height, -yScrollDelta)
+
+            this.draw({context, samples})
+
+            context.restore()
+        }
     }
 
     addMouseHandlers() {
@@ -172,17 +189,17 @@ class SampleInfoViewport {
 
                 const entries = Object.entries(this.hitList)
 
-                const { x, y } = DOMUtils.translateMouseCoordinates(event, this.viewport)
+                const {x, y} = DOMUtils.translateMouseCoordinates(event, this.viewport)
 
                 this.viewport.setAttribute('title', '')
 
-                for (const [ bbox, value ] of entries) {
-                    const [xx, yy, width, height ] = bbox.split('#').map(str => parseInt(str, 10))
-                    if (x < xx || x > xx+width || y < yy || y > yy+height) {
+                for (const [bbox, value] of entries) {
+                    const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                    if (x < xx || x > xx + width || y < yy || y > yy + height) {
                         // do nothing
                     } else {
-                        const [ a, b ] = value.split('#')
-                        this.viewport.setAttribute('title', `${ a.split(emptySpaceReplacement).join(' ') }: ${ '-' === b ? '' : b }`)
+                        const [a, b] = value.split('#')
+                        this.viewport.setAttribute('title', `${a.split(emptySpaceReplacement).join(' ')}: ${'-' === b ? '' : b}`)
                         break
                     }
                 }
@@ -193,6 +210,7 @@ class SampleInfoViewport {
     removeMouseHandlers() {
         this.viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
+
     show() {
         this.viewport.style.display = 'block'
     }

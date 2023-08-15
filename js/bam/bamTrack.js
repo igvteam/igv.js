@@ -20,6 +20,8 @@ const alignmentStartGap = 5
 const downsampleRowHeight = 5
 
 const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
+const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
+const DEFAULT_HIGHLIGHT_COLOR = "#00ff00"
 const MINIMUM_BLAT_LENGTH = 20
 
 class BAMTrack extends TrackBase {
@@ -70,6 +72,11 @@ class BAMTrack extends TrackBase {
             }
         }
 
+    }
+
+    setHighlightedReads(highlightedReads) {
+        this.alignmentTrack.setHighlightedReads(highlightedReads)
+        this.updateViews();
     }
 
     set height(h) {
@@ -476,6 +483,9 @@ class BAMTrack extends TrackBase {
                 direction: this.sortObject.direction ? "ASC" : "DESC"
             }
         }
+        if (this.alignmentTrack.highlightedReads) {
+            config.highlightedReads = Array.from(this.alignmentTrack.highlightedReads)
+        }
 
         return config
     }
@@ -780,6 +790,13 @@ class AlignmentTrack {
         this.hideSmallIndels = config.hideSmallIndels
         this.indelSizeThreshold = config.indelSizeThreshold || 1
 
+        if (config.highlightedReads) {
+            this.setHighlightedReads(config.highlightedReads)
+        }
+        if(config.highlightColor) {
+            this.highlightColor = config.highlightColor
+        }
+
         this.hasPairs = false   // Until proven otherwise
         this.hasSupplemental = false
     }
@@ -811,6 +828,13 @@ class AlignmentTrack {
 
     setTop(coverageTrack, showCoverage) {
         this.top = (0 === coverageTrack.height || false === showCoverage) ? 0 : (5 + coverageTrack.height)
+    }
+
+    setHighlightedReads(highlightedReads) {
+        if (!Array.isArray(highlightedReads) || !highlightedReads.every(i => typeof i === "string")) {
+            throw new Error("AlignmentTrack.setHighlightedReads() only accept array of strings")
+        }
+        this.highlightedReads = new Set(highlightedReads)
     }
 
     /**
@@ -930,6 +954,197 @@ class AlignmentTrack {
         }
         ctx.restore()
 
+        // alignment is a PairedAlignment
+        function drawPairConnector(alignment, yRect, alignmentHeight) {
+
+            var connectorColor = this.getConnectorColor(alignment.firstAlignment),
+                xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
+                xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
+                yStrokedLine = yRect + alignmentHeight / 2
+
+            if ((alignment.connectingEnd) < bpStart || alignment.connectingStart > bpEnd) {
+                return
+            }
+            if (alignment.mq <= 0) {
+                connectorColor = IGVColor.addAlpha(connectorColor, 0.15)
+            }
+            IGVGraphics.setProperties(ctx, {fillStyle: connectorColor, strokeStyle: connectorColor})
+            IGVGraphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine)
+
+        }
+
+        function drawSingleAlignment(alignment, yRect, alignmentHeight) {
+
+
+            if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
+                return
+            }
+
+            const blocks = showSoftClips ? alignment.blocks : alignment.blocks.filter(b => 'S' !== b.type)
+
+            let alignmentColor = this.getAlignmentColor(alignment)
+            const outlineColor = alignmentColor
+            if (alignment.mq <= 0) {
+                alignmentColor = IGVColor.addAlpha(alignmentColor, 0.15)
+            }
+            IGVGraphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor})
+
+            // Save bases to draw into an array for later drawing, so they can be overlaid on insertion blocks,
+            // which is relevant if we have insertions with size label
+            const basesToDraw = []
+
+            for (let b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
+
+                const block = blocks[b]
+
+                // Somewhat complex test, neccessary to insure gaps are drawn.
+                // If this is not the last block, and the next block starts before the orign (off screen to left) then skip.
+                if ((b !== blocks.length - 1) && blocks[b + 1].start < bpStart) continue
+
+                // drawBlock returns bases to draw, which are drawn on top of insertion blocks (if they're wider than
+                // the space between two bases) like in Java IGV
+                basesToDraw.push(...drawBlock.call(this, block, b))
+
+                if ((block.start + block.len) > bpEnd) {
+                    // Do this after drawBlock to insure gaps are drawn
+                    break
+                }
+            }
+
+            if (alignment.gaps) {
+                const yStrokedLine = yRect + alignmentHeight / 2
+                for (let gap of alignment.gaps) {
+                    const sPixel = (gap.start - bpStart) / bpPerPixel
+                    const ePixel = ((gap.start + gap.len) - bpStart) / bpPerPixel
+                    const lineWidth = ePixel - sPixel
+                    const gapLenText = gap.len.toString()
+                    const gapTextWidth = gapLenText.length * 6
+                    const gapCenter = sPixel + (lineWidth / 2)
+
+                    const color = ("D" === gap.type) ? this.deletionColor : this.skippedColor
+
+                    IGVGraphics.strokeLine(ctx, sPixel, yStrokedLine, ePixel, yStrokedLine, {
+                        strokeStyle: color,
+                        lineWidth: 2,
+                    })
+
+                    // Add gap width as text like Java IGV if it fits nicely and is a multi-base gap
+                    if (this.showDeletionText && gap.len > 1 && lineWidth >= gapTextWidth + 8) {
+                        const textStart = gapCenter - (gapTextWidth / 2)
+                        IGVGraphics.fillRect(ctx, textStart - 1, yRect - 1, gapTextWidth + 2, 12, {fillStyle: "white"})
+                        IGVGraphics.fillText(ctx, gapLenText, textStart, yRect + 10, {
+                            'font': 'normal 10px monospace',
+                            'fillStyle': this.deletionTextColor,
+                        })
+                    }
+                }
+            }
+
+            if (alignment.insertions && this.parent.showInsertions) {
+                let lastXBlockStart = -1
+                for (let insertionBlock of alignment.insertions) {
+                    if (this.hideSmallIndels && insertionBlock.len <= this.indelSizeThreshold) {
+                        continue
+                    }
+                    if (insertionBlock.start < bpStart) {
+                        continue
+                    }
+                    if (insertionBlock.start > bpEnd) {
+                        break
+                    }
+
+                    const refOffset = insertionBlock.start - bpStart
+                    const insertLenText = insertionBlock.len.toString()
+
+                    const textPixelWidth = 2 + (insertLenText.length * 6)
+                    const basePixelWidth = (!this.showInsertionText || insertionBlock.len === 1)
+                        ? 2
+                        : Math.round(insertionBlock.len / bpPerPixel)
+                    const widthBlock = Math.max(Math.min(textPixelWidth, basePixelWidth), 2)
+
+                    const xBlockStart = (refOffset / bpPerPixel) - (widthBlock / 2)
+                    if ((xBlockStart - lastXBlockStart) > 2) {
+                        const props = {fillStyle: this.insertionColor}
+
+                        // Draw decorations like Java IGV to make an 'I' shape
+                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect, widthBlock + 4, 2, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart, yRect + 2, widthBlock, alignmentHeight - 4, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect + alignmentHeight - 2, widthBlock + 4, 2, props)
+
+                        // Show # of inserted bases as text if it's a multi-base insertion and the insertion block
+                        // is wide enough to hold text (its size is capped at the text label size, but can be smaller
+                        // if the browser is zoomed out and the insertion is small)
+                        if (this.showInsertionText && insertionBlock.len > 1 && basePixelWidth > textPixelWidth) {
+                            IGVGraphics.fillText(ctx, insertLenText, xBlockStart + 1, yRect + 10, {
+                                'font': 'normal 10px monospace',
+                                'fillStyle': this.insertionTextColor,
+                            })
+                        }
+                        lastXBlockStart = xBlockStart
+                    }
+                }
+            }
+
+            basesToDraw.forEach(({bbox, baseColor, readChar}) => {
+                renderBlockOrReadChar(ctx, bpPerPixel, bbox, baseColor, readChar)
+            })
+
+
+            function drawBlock(block, b) {
+                // Collect bases to draw for later rendering
+                const blockBasesToDraw = []
+
+                const offsetBP = block.start - alignmentContainer.start
+                const blockStartPixel = (block.start - bpStart) / bpPerPixel
+                const blockEndPixel = ((block.start + block.len) - bpStart) / bpPerPixel
+                const blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel)
+
+                //const arrowHeadWidthPixel = alignmentRowHeight / 2.0;
+                const nomPixelWidthOnRef = 100 / bpPerPixel
+                const arrowHeadWidthPixel = Math.min(alignmentRowHeight / 2.0, nomPixelWidthOnRef / 6)
+
+                const isSoftClip = 'S' === block.type
+
+                const strokeOutline =
+                    alignment.mq <= 0 ||
+                    this.selectedReadName === alignment.readName ||
+                    isSoftClip ||
+                    this.highlightedReads && this.highlightedReads.has(alignment.readName)
+
+                let blockOutlineColor = outlineColor
+                if (this.selectedReadName === alignment.readName) {
+                    blockOutlineColor = 'red'
+                } else if (isSoftClip) {
+                    blockOutlineColor = 'rgb(50,50,50)'
+                } else if (this.highlightedReads && this.highlightedReads.has(alignment.readName)) {
+                    blockOutlineColor = this.highlightColor || DEFAULT_HIGHLIGHT_COLOR
+                }
+
+                const lastBlockPositiveStrand = (true === alignment.strand && b === blocks.length - 1)
+                const lastBlockReverseStrand = (false === alignment.strand && b === 0)
+                const lastBlock = lastBlockPositiveStrand | lastBlockReverseStrand
+
+                if (lastBlock) {
+                    let xListPixel
+                    let yListPixel
+                    if (lastBlockPositiveStrand) {
+                        xListPixel = [
+                            blockStartPixel,
+                            blockEndPixel,
+                            blockEndPixel + arrowHeadWidthPixel,
+                            blockEndPixel,
+                            blockStartPixel,
+                            blockStartPixel]
+                        yListPixel = [
+                            yRect,
+                            yRect,
+                            yRect + (alignmentHeight / 2.0),
+                            yRect + alignmentHeight,
+                            yRect + alignmentHeight,
+                            yRect]
+
+                    }
+
 
     }
 
@@ -950,7 +1165,8 @@ class AlignmentTrack {
                 chr: viewport.referenceFrame.chr,
                 position: Math.floor(clickState.genomicLocation),
                 option: option,
-                direction: direction
+                direction: direction,
+                sortAsPairs: viewport.trackView.track.viewAsPairs
             }
             this.parent.sortObject = newSortObject
             viewport.cachedFeatures.sortRows(newSortObject)
@@ -959,6 +1175,7 @@ class AlignmentTrack {
         list.push('<b>Sort by...</b>')
         list.push({label: '&nbsp; base', click: () => sortByOption("BASE")})
         list.push({label: '&nbsp; read strand', click: () => sortByOption("STRAND")})
+        list.push({label: '&nbsp; start location', click: () => sortByOption("START")})
         list.push({label: '&nbsp; insert size', click: () => sortByOption("INSERT_SIZE")})
         list.push({label: '&nbsp; gap size', click: () => sortByOption("GAP_SIZE")})
         list.push({label: '&nbsp; chromosome of mate', click: () => sortByOption("MATE_CHR")})
@@ -1009,13 +1226,14 @@ class AlignmentTrack {
                         click: () => {
                             if (clickedAlignment.mate) {
                                 const referenceFrame = clickState.viewport.referenceFrame
-                                if (this.browser.genome.getChromosome(clickedAlignment.mate.chr)) {
-                                    this.highlightedAlignmentReadNamed = clickedAlignment.readName
+                                const chromosomeObject = this.browser.genome.getChromosome(clickedAlignment.mate.chr)
+                                if (chromosomeObject) {
+                                    this.selectedReadName = clickedAlignment.readName
                                     //this.browser.presentMultiLocusPanel(clickedAlignment, referenceFrame)
                                     const bpWidth = referenceFrame.end - referenceFrame.start
                                     const frameStart = clickedAlignment.mate.position - bpWidth / 2
                                     const frameEnd = clickedAlignment.mate.position + bpWidth / 2
-                                    this.browser.addMultiLocusPanel(clickedAlignment.mate.chr, frameStart, frameEnd, referenceFrame)
+                                    this.browser.addMultiLocusPanel(chromosomeObject.name, frameStart, frameEnd, referenceFrame)
                                 } else {
                                     this.browser.alert.present(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`)
                                 }

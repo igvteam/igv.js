@@ -114,6 +114,11 @@
   cursor: pointer;
   height: 16px;
   width: 16px;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
 }
 .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-windowsize-panel-container {
   margin-left: 4px;
@@ -1499,7 +1504,6 @@
   align-items: flex-start;
   box-sizing: border-box;
   height: 100%;
-  cursor: pointer;
 }
 
 .igv-sample-name-column {
