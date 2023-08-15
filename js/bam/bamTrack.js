@@ -44,6 +44,7 @@ const downsampleRowHeight = 5
 const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)"
 const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
+const DEFAULT_HIGHLIGHT_COLOR = "#00ff00"
 const MINIMUM_BLAT_LENGTH = 20
 
 class BAMTrack extends TrackBase {
@@ -93,6 +94,11 @@ class BAMTrack extends TrackBase {
             }
         }
 
+    }
+
+    setHighlightedReads(highlightedReads) {
+        this.alignmentTrack.setHighlightedReads(highlightedReads)
+        this.updateViews();
     }
 
     set height(h) {
@@ -499,6 +505,9 @@ class BAMTrack extends TrackBase {
                 direction: this.sortObject.direction ? "ASC" : "DESC"
             }
         }
+        if (this.alignmentTrack.highlightedReads) {
+            config.highlightedReads = Array.from(this.alignmentTrack.highlightedReads)
+        }
 
         return config
     }
@@ -795,8 +804,12 @@ class AlignmentTrack {
         this.hideSmallIndels = config.hideSmallIndels
         this.indelSizeThreshold = config.indelSizeThreshold || 1
 
-        this.readsToHighlight = config.readsToHighlight || []
-        this.highlightedReadsOutlineColor = config.highlightedReadsOutlineColor || "#00ff00"
+        if (config.highlightedReads) {
+            this.setHighlightedReads(config.highlightedReads)
+        }
+        if(config.highlightColor) {
+            this.highlightColor = config.highlightColor
+        }
 
         this.hasPairs = false   // Until proven otherwise
         this.hasSupplemental = false
@@ -806,11 +819,11 @@ class AlignmentTrack {
         this.top = (0 === coverageTrack.height || false === showCoverage) ? 0 : (5 + coverageTrack.height)
     }
 
-    setReadsToHighlight(readsToHighlight) {
-        if (!Array.isArray(readsToHighlight) ||!readsToHighlight.every(i => typeof i === "string")) {
-            throw new Error("AlignmentTrack.setReadsToHighlight() only accept array of strings")
+    setHighlightedReads(highlightedReads) {
+        if (!Array.isArray(highlightedReads) || !highlightedReads.every(i => typeof i === "string")) {
+            throw new Error("AlignmentTrack.setHighlightedReads() only accept array of strings")
         }
-        this.readsToHighlight = readsToHighlight || []
+        this.highlightedReads = new Set(highlightedReads)
     }
 
     /**
@@ -1088,14 +1101,18 @@ class AlignmentTrack {
 
                 const strokeOutline =
                     alignment.mq <= 0 ||
-                    this.highlightedAlignmentReadNamed === alignment.readName ||
+                    this.selectedReadName === alignment.readName ||
                     isSoftClip ||
-                    this.readsToHighlight.includes(alignment.readName)
+                    this.highlightedReads && this.highlightedReads.has(alignment.readName)
 
                 let blockOutlineColor = outlineColor
-                if (this.highlightedAlignmentReadNamed === alignment.readName) blockOutlineColor = 'red'
-                else if (isSoftClip) blockOutlineColor = 'rgb(50,50,50)'
-                else if (this.readsToHighlight.includes(alignment.readName)) blockOutlineColor = this.highlightedReadsOutlineColor
+                if (this.selectedReadName === alignment.readName) {
+                    blockOutlineColor = 'red'
+                } else if (isSoftClip) {
+                    blockOutlineColor = 'rgb(50,50,50)'
+                } else if (this.highlightedReads && this.highlightedReads.has(alignment.readName)) {
+                    blockOutlineColor = this.highlightColor || DEFAULT_HIGHLIGHT_COLOR
+                }
 
                 const lastBlockPositiveStrand = (true === alignment.strand && b === blocks.length - 1)
                 const lastBlockReverseStrand = (false === alignment.strand && b === 0)
@@ -1313,13 +1330,14 @@ class AlignmentTrack {
                         click: () => {
                             if (clickedAlignment.mate) {
                                 const referenceFrame = clickState.viewport.referenceFrame
-                                if (this.browser.genome.getChromosome(clickedAlignment.mate.chr)) {
-                                    this.highlightedAlignmentReadNamed = clickedAlignment.readName
+                                const chromosomeObject = this.browser.genome.getChromosome(clickedAlignment.mate.chr)
+                                if (chromosomeObject) {
+                                    this.selectedReadName = clickedAlignment.readName
                                     //this.browser.presentMultiLocusPanel(clickedAlignment, referenceFrame)
                                     const bpWidth = referenceFrame.end - referenceFrame.start
                                     const frameStart = clickedAlignment.mate.position - bpWidth / 2
                                     const frameEnd = clickedAlignment.mate.position + bpWidth / 2
-                                    this.browser.addMultiLocusPanel(clickedAlignment.mate.chr, frameStart, frameEnd, referenceFrame)
+                                    this.browser.addMultiLocusPanel(chromosomeObject.name, frameStart, frameEnd, referenceFrame)
                                 } else {
                                     this.browser.alert.present(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`)
                                 }

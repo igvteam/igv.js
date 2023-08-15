@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dev - alignment - bam</title>
+</head>
+
+<body>
+
+<button id="log-state">Log Session</button>
+<button id="highlight-reads">Highlight Reads</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config =
+        {
+            genome: "hg19",
+            locus:
+                [
+                    "chr1:155,153,822-155,155,105"
+                ],
+            tracks:
+                [
+                    {
+                        type: "alignment",
+                        url: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam",
+                        indexURL: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam.bai",
+                        name: "NA12878n",
+                        highlightColor: "#0000ff",
+                        //highlightedReads: ["SRR099953.99059361", "SRR099953.79101554"]
+                    }
+                ]
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+        .then(browser => {
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+
+            document.getElementById("highlight-reads").addEventListener("click", () => {
+                const bamTracks = browser.findTracks('type', 'alignment')
+                bamTracks[0].setHighlightedReads(["SRR099953.99059361", "SRR099953.79101554"])
+            })
+
+        })
+
+
+</script>
+
+</body>
+
+</html>

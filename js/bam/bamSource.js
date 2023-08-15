@@ -110,7 +110,7 @@ class BamSource {
         this.alignmentContainer = alignmentContainer
 
         if (hasAlignments) {
-            const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
+            const sequence = await genome.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
             if (sequence) {
                 alignmentContainer.coverageMap.refSeq = sequence    // TODO -- fix this
                 alignmentContainer.sequence = sequence           // TODO -- fix this
