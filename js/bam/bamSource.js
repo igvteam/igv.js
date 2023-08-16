@@ -63,7 +63,7 @@ class BamSource {
                 if (StringUtils.isString(this.config.url)) {
                     const inferIndexPath = TrackUtils.inferIndexPath(this.config.url, "bai")
                     if (inferIndexPath) {
-                        console.error(`Warning: no indexURL specified for ${this.config.url}.  Guessing ${this.baiPath}`)
+                        console.error(`Warning: no indexURL specified for ${this.config.url}.  Guessing ${inferIndexPath}`)
                         this.config.indexURL = inferIndexPath
                     } else {
                         console.error(`Warning: no indexURL specified for ${this.config.url}.`)
