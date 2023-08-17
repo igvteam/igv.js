@@ -26,7 +26,7 @@ function drawModifications(ctx,
 
         for (let key of sortedKeys) {
 
-            //if (filter != null && !filter.pass(key.modification, key.getCanonicalBase())) continue;
+            //if (filter && !filter.pass(key.modification, key.getCanonicalBase())) continue;
 
             if (key.modification.startsWith("NONE_") && colorOption !== "BASE_MODIFICATION_2COLOR")
                 continue

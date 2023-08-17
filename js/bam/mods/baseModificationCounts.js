@@ -115,7 +115,7 @@ class BaseModificationCounts {
         const scaledThreshold = threshold * 255
 
         const t = includeNoMods ? this.nomodLikelihoods.get(key) : this.maxLikelihoods.get(key)
-        if (t == null) {
+        if (!t) {
             return 0
         }
 
