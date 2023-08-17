@@ -38,6 +38,8 @@ import {isSecureContext} from "../util/igvUtils.js"
 import PairedEndStats from "./pairedEndStats.js"
 import {createBlatTrack, maxSequenceSize} from "../blat/blatTrack.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"
+import {drawModifications} from "./mods/baseModificationCoverageRenderer.js"
+import BaseModificationRenderer from "./mods/baseModificationRenderer.js"
 
 const alignmentStartGap = 5
 const downsampleRowHeight = 5
@@ -46,6 +48,8 @@ const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
 const DEFAULT_HIGHLIGHT_COLOR = "#00ff00"
 const MINIMUM_BLAT_LENGTH = 20
+const bisulfiteColorFw1 = "rgb(195, 195, 195)"
+const bisulfiteColorRev1 = "rgb(195, 210, 195)"
 
 class BAMTrack extends TrackBase {
 
@@ -61,7 +65,8 @@ class BAMTrack extends TrackBase {
         showInsertions: true,
         showMismatches: true,
         height: 300,
-        coverageTrackHeight: 50
+        coverageTrackHeight: 50,
+        colorBy: undefined
     }
 
     constructor(config, browser) {
@@ -79,7 +84,7 @@ class BAMTrack extends TrackBase {
 
         this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
 
-        if(!this.showAlignments) {
+        if (!this.showAlignments) {
             this._height = this.coverageTrackHeight
         }
 
@@ -98,7 +103,7 @@ class BAMTrack extends TrackBase {
 
     setHighlightedReads(highlightedReads) {
         this.alignmentTrack.setHighlightedReads(highlightedReads)
-        this.updateViews();
+        this.updateViews()
     }
 
     set height(h) {
@@ -639,7 +644,7 @@ class CoverageTrack {
         let color
         if (this.parent.coverageColor) {
             color = this.parent.coverageColor
-        } else if (this.parent.color  && typeof this.parent.color !== "function") {
+        } else if (this.parent.color && typeof this.parent.color !== "function") {
             color = IGVColor.darkenLighten(this.parent.color, -35)
         } else {
             color = DEFAULT_COVERAGE_COLOR
@@ -684,7 +689,13 @@ class CoverageTrack {
                 const x = Math.floor((bp - bpStart) / bpPerPixel)
 
                 const refBase = sequence[i]
-                if (item.isMismatch(refBase)) {
+
+                if ("BASE_MODIFICATION_2COLOR" === this.parent.colorBy) {
+                    //context, pX, pBottom, dX, barHeight, pos, alignmentContainer
+                    const threshold = 0.5   // TODD - parameter
+                    drawModifications(ctx, x, this.height, w, h, bp, alignmentContainer, this.parent.colorBy, threshold)
+
+                } else if (item.isMismatch(refBase)) {
                     IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[refBase]})
                     IGVGraphics.fillRect(ctx, x, y, w, h)
 
@@ -807,12 +818,25 @@ class AlignmentTrack {
         if (config.highlightedReads) {
             this.setHighlightedReads(config.highlightedReads)
         }
-        if(config.highlightColor) {
+        if (config.highlightColor) {
             this.highlightColor = config.highlightColor
         }
 
         this.hasPairs = false   // Until proven otherwise
         this.hasSupplemental = false
+
+    }
+
+    /**
+     * Lazy initialize a base modification renderer
+     *
+     * @returns {BaseModificationRenderer}
+     */
+    get baseModRenderer() {
+        if(!this._baseModRenderer) {
+            this._baseModRenderer = new BaseModificationRenderer(this)
+        }
+        return this._baseModRenderer
     }
 
     setTop(coverageTrack, showCoverage) {
@@ -967,7 +991,7 @@ class AlignmentTrack {
 
         }
 
-        function drawSingleAlignment(alignment, yRect, alignmentHeight) {
+        function drawSingleAlignment(alignment, y, alignmentHeight) {
 
 
             if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
@@ -1006,7 +1030,7 @@ class AlignmentTrack {
             }
 
             if (alignment.gaps) {
-                const yStrokedLine = yRect + alignmentHeight / 2
+                const yStrokedLine = y + alignmentHeight / 2
                 for (let gap of alignment.gaps) {
                     const sPixel = (gap.start - bpStart) / bpPerPixel
                     const ePixel = ((gap.start + gap.len) - bpStart) / bpPerPixel
@@ -1025,8 +1049,8 @@ class AlignmentTrack {
                     // Add gap width as text like Java IGV if it fits nicely and is a multi-base gap
                     if (this.showDeletionText && gap.len > 1 && lineWidth >= gapTextWidth + 8) {
                         const textStart = gapCenter - (gapTextWidth / 2)
-                        IGVGraphics.fillRect(ctx, textStart - 1, yRect - 1, gapTextWidth + 2, 12, {fillStyle: "white"})
-                        IGVGraphics.fillText(ctx, gapLenText, textStart, yRect + 10, {
+                        IGVGraphics.fillRect(ctx, textStart - 1, y - 1, gapTextWidth + 2, 12, {fillStyle: "white"})
+                        IGVGraphics.fillText(ctx, gapLenText, textStart, y + 10, {
                             'font': 'normal 10px monospace',
                             'fillStyle': this.deletionTextColor,
                         })
@@ -1061,15 +1085,15 @@ class AlignmentTrack {
                         const props = {fillStyle: this.insertionColor}
 
                         // Draw decorations like Java IGV to make an 'I' shape
-                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect, widthBlock + 4, 2, props)
-                        IGVGraphics.fillRect(ctx, xBlockStart, yRect + 2, widthBlock, alignmentHeight - 4, props)
-                        IGVGraphics.fillRect(ctx, xBlockStart - 2, yRect + alignmentHeight - 2, widthBlock + 4, 2, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart - 2, y, widthBlock + 4, 2, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart, y + 2, widthBlock, alignmentHeight - 4, props)
+                        IGVGraphics.fillRect(ctx, xBlockStart - 2, y + alignmentHeight - 2, widthBlock + 4, 2, props)
 
                         // Show # of inserted bases as text if it's a multi-base insertion and the insertion block
                         // is wide enough to hold text (its size is capped at the text label size, but can be smaller
                         // if the browser is zoomed out and the insertion is small)
                         if (this.showInsertionText && insertionBlock.len > 1 && basePixelWidth > textPixelWidth) {
-                            IGVGraphics.fillText(ctx, insertLenText, xBlockStart + 1, yRect + 10, {
+                            IGVGraphics.fillText(ctx, insertLenText, xBlockStart + 1, y + 10, {
                                 'font': 'normal 10px monospace',
                                 'fillStyle': this.insertionTextColor,
                             })
@@ -1079,9 +1103,37 @@ class AlignmentTrack {
                 }
             }
 
-            basesToDraw.forEach(({bbox, baseColor, readChar}) => {
-                renderBlockOrReadChar(ctx, bpPerPixel, bbox, baseColor, readChar)
-            })
+            for (let {bbox, baseColor, readChar} of basesToDraw) {
+                const threshold = 1.0 / 10.0
+                if (bpPerPixel <= threshold && bbox.height >= 8) {
+                    // render letter
+                    const fontHeight = Math.min(10, bbox.height)
+                    ctx.font = '' + fontHeight + 'px sans-serif'
+                    const center = bbox.x + (bbox.width / 2.0)
+                    IGVGraphics.strokeText(ctx, readChar, center - (ctx.measureText(readChar).width / 2), fontHeight - 1 + bbox.y, {strokeStyle: baseColor})
+                } else {
+
+                    // render colored block
+                    IGVGraphics.fillRect(ctx, bbox.x, bbox.y, bbox.width, bbox.height, {fillStyle: baseColor})
+                }
+            }
+
+            if("BASE_MODIFICATION_2COLOR" === this.colorBy) {
+                let refSequence = alignmentContainer.sequence
+                if (refSequence) {
+                    refSequence = refSequence.toUpperCase()
+                }
+                const context = (
+                    {
+                        ctx,
+                        bpPerPixel,
+                        bpStart,
+                        bpEnd,
+                        pixelEnd: pixelWidth
+                    })
+                this.baseModRenderer.drawModifications(alignment, y, alignmentHeight, context)
+            }
+
 
 
             function drawBlock(block, b) {
@@ -1130,12 +1182,12 @@ class AlignmentTrack {
                             blockStartPixel,
                             blockStartPixel]
                         yListPixel = [
-                            yRect,
-                            yRect,
-                            yRect + (alignmentHeight / 2.0),
-                            yRect + alignmentHeight,
-                            yRect + alignmentHeight,
-                            yRect]
+                            y,
+                            y,
+                            y + (alignmentHeight / 2.0),
+                            y + alignmentHeight,
+                            y + alignmentHeight,
+                            y]
 
                     }
 
@@ -1149,12 +1201,12 @@ class AlignmentTrack {
                             blockEndPixel,
                             blockEndPixel]
                         yListPixel = [
-                            yRect,
-                            yRect,
-                            yRect + (alignmentHeight / 2.0),
-                            yRect + alignmentHeight,
-                            yRect + alignmentHeight,
-                            yRect]
+                            y,
+                            y,
+                            y + (alignmentHeight / 2.0),
+                            y + alignmentHeight,
+                            y + alignmentHeight,
+                            y]
 
                     }
                     IGVGraphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor})
@@ -1166,12 +1218,12 @@ class AlignmentTrack {
 
                 // Internal block
                 else {
-                    IGVGraphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor})
+                    IGVGraphics.fillRect(ctx, blockStartPixel, y, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor})
 
                     if (strokeOutline) {
                         ctx.save()
                         ctx.strokeStyle = blockOutlineColor
-                        ctx.strokeRect(blockStartPixel, yRect, blockWidthPixel, alignmentHeight)
+                        ctx.strokeRect(blockStartPixel, y, blockWidthPixel, alignmentHeight)
                         ctx.restore()
                     }
                 }
@@ -1215,7 +1267,7 @@ class AlignmentTrack {
                                 blockBasesToDraw.push({
                                     bbox: {
                                         x: xPixel,
-                                        y: yRect,
+                                        y: y,
                                         width: widthPixel,
                                         height: alignmentHeight
                                     },
@@ -1592,6 +1644,39 @@ class AlignmentTrack {
 
         return color
 
+    }
+
+    get color() {
+        return this.parent.color
+    }
+
+    get showSortClips() {
+        return this.parent.showSoftClips
+    }
+
+    get showAllBases() {
+        return this.parent.showAllBases
+    }
+
+    get nucleotideColors() {
+        return this.browser.nucleotideColors
+    }
+
+    get minTemplateLength() {
+        return this.parent.minTemplateLength
+
+    }
+
+    get maxTemplateLength() {
+        return this.parent.maxTemplateLength
+    }
+
+    get colorBy() {
+        return this.parent.colorBy
+    }
+
+    set colorBy(option) {
+        this.parent.colorBy = option
     }
 }
 
