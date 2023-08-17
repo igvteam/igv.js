@@ -61,7 +61,7 @@ function getBaseModificationSets(mm, ml, sequence, isNegativeStrand) {
         } else {
 
             const modificationString = tokens[0].endsWith(".") || tokens[0].endsWith("?") ?
-                tokens[0].substring(2, tokens[0].length() - 1) :
+                tokens[0].substring(2, tokens[0].length - 1) :
                 tokens[0].substring(2)
 
             // Parse modifications, this is rather complex, commensurate with the spec.  Unless a chebi code, modifications
@@ -88,8 +88,6 @@ function getBaseModificationSets(mm, ml, sequence, isNegativeStrand) {
                 likelihoodMap.set(m, new Map())
             }
 
-
-            const nPositions = tokens.length - 1
             let idx = 1  // position array index,  positions start at index 1
             let skip = Number.parseInt(tokens[idx++])
             let p = 0
@@ -99,7 +97,7 @@ function getBaseModificationSets(mm, ml, sequence, isNegativeStrand) {
 
                 if (base === 'N' || sequence[p] === base) {
                     const position = isNegativeStrand ? sequence.length - 1 - p : p
-                    if (matchCount == skip) {
+                    if (matchCount == skip && idx < tokens.length) {
                         for (let modification of modifications) {
                             const likelihood = !ml ? 255 : ml[mlIdx++]
                             likelihoodMap.get(modification).set(position, likelihood)
@@ -108,18 +106,22 @@ function getBaseModificationSets(mm, ml, sequence, isNegativeStrand) {
                             skip = Number.parseInt(tokens[idx++])
                             matchCount = 0
                         } else {
-                            break
+                            if (!skippedBasesCalled) {
+                                // If skipped bases are not called unmodified we are done.  If they are we need
+                                // to scan the entire sequence
+                                break;
+                            }
                         }
                     } else {
                         if (skippedBasesCalled) {
                             // Skipped bases are assumed be called "modification present with 0% probability",
                             // i.e modification has been called to be not present (as opposed to unknown)
                             for (let modification of modifications) {
-                                likelihoodMap.get(modification).put(position, 0)
+                                likelihoodMap.get(modification).set(position, 0)
                             }
                         }
-                        matchCount++
                     }
+                    matchCount++
                 }
                 p++
             }
