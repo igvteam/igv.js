@@ -24,10 +24,18 @@
  * THE SOFTWARE.
  */
 
+
 /**
  * Created by jrobinso on 4/5/18.
  */
 
+/**
+ * Expected properties
+ *   start: genomic position
+ *   seqOffset: index offset to read sequence for this block's sequence
+ *   len: length of block
+ *   type: from CIGAR string (S, I, M, ...)
+ */
 
 class AlignmentBlock {
     constructor(b) {

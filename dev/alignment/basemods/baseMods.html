@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>Base Modification</h1>
+
+<label for="session-select">Select Session</label>
+<select id="session-select">
+    <Option value="6mA_pacbio.json">PacBio 6mA</Option>
+    <Option value="5hmC.json">5hmC</Option>
+    <Option value="skipped_bases.json">Skipped base options</Option>
+    <Option value="issue_1185.json">Issue 1185</Option>
+</select>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../../js/index.js"
+
+    var options =
+        {
+            "genome": "hg38",
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+
+            const sessionSelect = document.getElementById("session-select")
+            load()
+            sessionSelect.addEventListener("change", () => {
+                load()
+            })
+
+            async function load() {
+                const sessionList = sessionSelect.selectedOptions
+                if (sessionList.length > 0) {
+                    await browser.loadSession({url: sessionList[0].value})
+                }
+
+            }
+        })
+
+
+</script>
+
+</body>
+
+</html>

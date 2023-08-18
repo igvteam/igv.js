@@ -1,0 +1,15 @@
+{
+  "genome": "hg38",
+  "locus": "chr11:119094729-119094804",
+  "tracks": [
+    {
+      "type": "alignment",
+      "format": "bam",
+      "url":      "https://www.dropbox.com/s/q32hk7tvsejryjt/HG002_chr11_119076212_119102218_2.bam?dl=0",
+      "indexURL": "https://www.dropbox.com/s/ax1ljny7ja5fdcu/HG002_chr11_119076212_119102218_2.bam.bai?dl=0",
+      "height": 400,
+      "name": "PacBio - 5hmC 2 Color",
+      "colorBy": "basemod2"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "genome": "hg38",
+  "locus": "chr6:43,151,340-43,151,379",
+  "tracks": [
+    {
+      "type": "alignment",
+      "format": "bam",
+      "url":      "https://www.dropbox.com/scl/fi/yv69wt7blj83d82qb08fj/HG002-SRF.m84011_220902_175841_s1.GRCh38.dmode.bam?rlkey=7jua6ovqocqkyiai412e6af4e&dl=0",
+      "indexURL": "https://www.dropbox.com/scl/fi/szhemifm4drrw5iacker5/HG002-SRF.m84011_220902_175841_s1.GRCh38.dmode.bam.bai?rlkey=s36ia8nno7kqgo2n7b4vhx3oi&dl=0",
+      "height": 500,
+      "name": "Skipped bases '.'",
+      "colorBy": "basemod2"
+    },
+    {
+      "type": "alignment",
+      "format": "bam",
+      "url":      "https://www.dropbox.com/scl/fi/0efiiqpzho54qx7rl2qwv/HG002-SRF.m84011_220902_175841_s1.GRCh38.bam?rlkey=xbkl1sqbkmbzxnvn723ffeyrm&dl=0",
+      "indexURL": "https://www.dropbox.com/scl/fi/9bumsh2ziy413x2iolc0s/HG002-SRF.m84011_220902_175841_s1.GRCh38.bam.bai?rlkey=i8tqhquv5uxhrnj8w50zk6hi8&dl=0",
+      "height": 500,
+      "name": "Skipped bases '?'",
+      "colorBy": "basemod2"
+    }
+  ]
+}
