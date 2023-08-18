@@ -66,7 +66,7 @@ function getModColor(modification, likelihood, colorOption) {
             Math.max(20, Math.min(255, 6.127e-3 * l * l))
 
         const [r, g, b] = IGVColor.rgbComponents(baseColor)
-        modColorMap.set(key, `rgba(${r},${g},${b},${alpha / 255}`)
+        modColorMap.set(key, `rgba(${r},${g},${b},${alpha / 255})`)
     }
     return modColorMap.get(key)
 
