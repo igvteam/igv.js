@@ -26,13 +26,14 @@
 import PairedAlignment from "./pairedAlignment.js"
 import {canBePaired, packAlignmentRows, pairAlignments, unpairAlignments} from "./alignmentUtils.js"
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
+import BaseModificationCounts from "./mods/baseModificationCounts.js"
 
 
 class AlignmentContainer {
 
     //            this.config.samplingWindowSize, this.config.samplingDepth,
     //             this.config.pairsSupported, this.config.alleleFreqThreshold)
-    constructor(chr, start, end, {samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold}) {
+    constructor(chr, start, end, {samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold, colorBy}) {
 
         this.chr = chr
         this.start = Math.floor(start)
@@ -60,6 +61,10 @@ class AlignmentContainer {
             return alignment.isMapped() && !alignment.isFailsVendorQualityCheck()
         }
 
+        // Enable basemods
+        if(colorBy && colorBy.startsWith("basemod")) {
+            this.baseModCounts = new BaseModificationCounts()
+        }
     }
 
     push(alignment) {
@@ -79,6 +84,10 @@ class AlignmentContainer {
 
         this.currentBucket.addAlignment(alignment)
 
+        if(this.baseModCounts) {
+            this.baseModCounts.incrementCounts(alignment)
+        }
+
     }
 
     forEach(callback) {
@@ -97,6 +106,10 @@ class AlignmentContainer {
 
         this.pairsCache = undefined
         this.downsampledReads = undefined
+
+        if(this.baseModCounts) {
+            this.baseModCounts.computeSimplex()
+        }
     }
 
     contains(chr, start, end) {
@@ -369,6 +382,69 @@ class CoverageMap {
 
             }
         }
+    }
+
+    getPosCount(pos, base) {
+
+        const offset = pos - this.bpStart
+        if(offset < 0 || offset >= this.coverage.length) return 0
+        const c = this.coverage[offset]
+
+        switch(base) {
+            case 'A':
+            case 'a':
+                return c.posA
+            case 'C':
+            case 'c':
+                return c.posC
+            case 'T':
+            case 't':
+                return c.posT
+            case 'G':
+            case 'g':
+                return c.posG
+            case 'N':
+            case 'n':
+                return c.posN
+            default:
+                return 0
+        }
+    }
+
+    getNegCount(pos, base) {
+        const offset = pos - this.bpStart
+        if(offset < 0 || offset >= this.coverage.length) return 0
+        const c = this.coverage[offset]
+
+        switch(base) {
+            case 'A':
+            case 'a':
+                return c.negA
+            case 'C':
+            case 'c':
+                return c.negC
+            case 'T':
+            case 't':
+                return c.negT
+            case 'G':
+            case 'g':
+                return c.negG
+            case 'N':
+            case 'n':
+                return c.negN
+            default:
+                return 0
+        }
+
+    }
+
+    getCount(pos, base) {
+        return this.getPosCount(pos, base) + this.getNegCount(pos, base)
+    }
+
+    getTotalCount(pos) {
+        const offset = pos - this.bpStart
+        return (offset >=0 && offset < this.coverage.length) ? this.coverage[offset].total : 0
     }
 }
 
