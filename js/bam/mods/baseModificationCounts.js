@@ -9,6 +9,8 @@ class BaseModificationCounts {
      */
     allModifications = new Set()  //LinkedHashSet<Key>
 
+    simplexModifications = new Set()
+
     /**
      * Maxixum likelihood (i.e. maximum of all modifications present) for each position and base moodification key*
      */
@@ -44,6 +46,8 @@ class BaseModificationCounts {
                 //                 len: c.len,
                 //                 type: 'S'
                 //          */
+
+                if(block.type === 'S') continue // Soft clip
 
                 for (let blockIdx = 0; blockIdx < block.len; blockIdx++) {
 
@@ -165,7 +169,7 @@ class BaseModificationCounts {
                 //    continue;
             }
             if (t.has(position)) {
-                let includeNoMods = colorOption === "BASE_MODIFICATION_2COLOR"
+                let includeNoMods = colorOption === "basemod2"
                 const count = this.getCount(position, key, lastThreshold, includeNoMods)
                 if (count > 0) {
                     const likelihoodSum = getLikelihoodSum(position, key, lastThreshold, includeNoMods)
@@ -176,6 +180,19 @@ class BaseModificationCounts {
             }
         }
         return buffer
+    }
+
+    // Search modification keys for "simplex" data,  e.g. C+m without corresponding G-m, indicating only 1 strand of molecule was read or recorded
+    computeSimplex() {
+        const minusStranMods = new Set(Array.from(this.allModifications)
+            .filter(key => key.strand === "-")
+            .map(key => key.modification))
+        for (let key of this.allModifications) {
+            if (key.strand === "+" && !minusStranMods.has(key.modification)) {
+                this.simplexModifications.add(key.modification)
+                this.simplexModifications.add("NONE_" + key.getCanonicalBase())  // Mix of simplex & duplex keys for same base not supported.
+            }
+        }
     }
 }
 

@@ -25,11 +25,9 @@ class BaseModificationRenderer {
         this.context = context
     }
 
-    drawModifications(alignment, y, height, context) { //alignment, bpStart, locScale, rowRect, ctx, colorOption) {
+    drawModifications(alignment, y, height, context, colorOption) { //alignment, bpStart, locScale, rowRect, ctx, colorOption) {
 
         const threshold = 0.5   // TODO - parameter
-        const colorOption = 'BASE_MODIFICATION_2COLOR'  // TODO - parameter
-
 
         const {ctx, pixelEnd, bpStart, bpPerPixel} = context
 
@@ -37,6 +35,8 @@ class BaseModificationRenderer {
         if (baseModificationSets) {
 
             for (let block of alignment.blocks) {
+
+                if(block.type === 'S') continue;   // Soft clip
 
                 // Compute bounds
                 const pY = y
@@ -78,7 +78,7 @@ class BaseModificationRenderer {
                         const scaledThreshold = threshold * 255
 
                         let c
-                        if (noModLh > maxLh && colorOption === "BASE_MODIFICATION_2COLOR" && noModLh >= scaledThreshold) {
+                        if (noModLh > maxLh && colorOption === "basemod2" && noModLh >= scaledThreshold) {
                             c = getModColor("NONE_" + canonicalBase, noModLh, colorOption);
                         } else if (maxLh >= scaledThreshold) {
                             c = getModColor(modification, maxLh, colorOption);

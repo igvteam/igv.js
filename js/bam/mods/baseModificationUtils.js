@@ -97,7 +97,7 @@ function getBaseModificationSets(mm, ml, sequence, isNegativeStrand) {
 
                 if (base === 'N' || sequence[p] === base) {
                     const position = isNegativeStrand ? sequence.length - 1 - p : p
-                    if (matchCount == skip && idx < tokens.length) {
+                    if (matchCount === skip) {
                         for (let modification of modifications) {
                             const likelihood = !ml ? 255 : ml[mlIdx++]
                             likelihoodMap.get(modification).set(position, likelihood)
@@ -106,9 +106,11 @@ function getBaseModificationSets(mm, ml, sequence, isNegativeStrand) {
                             skip = Number.parseInt(tokens[idx++])
                             matchCount = 0
                         } else {
-                            if (!skippedBasesCalled) {
-                                // If skipped bases are not called unmodified we are done.  If they are we need
-                                // to scan the entire sequence
+                            if (skippedBasesCalled) {
+                                // MM tag is exhausted, but continue scanning for skipped bases
+                                skip = -1;
+                            } else {
+                                // If skipped bases are not called unmodified we are done.
                                 break;
                             }
                         }
@@ -120,8 +122,8 @@ function getBaseModificationSets(mm, ml, sequence, isNegativeStrand) {
                                 likelihoodMap.get(modification).set(position, 0)
                             }
                         }
+                        matchCount++
                     }
-                    matchCount++
                 }
                 p++
             }

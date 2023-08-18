@@ -33,7 +33,7 @@ class AlignmentContainer {
 
     //            this.config.samplingWindowSize, this.config.samplingDepth,
     //             this.config.pairsSupported, this.config.alleleFreqThreshold)
-    constructor(chr, start, end, {samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold}) {
+    constructor(chr, start, end, {samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold, colorBy}) {
 
         this.chr = chr
         this.start = Math.floor(start)
@@ -61,9 +61,10 @@ class AlignmentContainer {
             return alignment.isMapped() && !alignment.isFailsVendorQualityCheck()
         }
 
-        // IF basemods enabled
-        this.baseModCounts = new BaseModificationCounts()
-
+        // Enable basemods
+        if(colorBy && colorBy.startsWith("basemod")) {
+            this.baseModCounts = new BaseModificationCounts()
+        }
     }
 
     push(alignment) {
@@ -105,6 +106,10 @@ class AlignmentContainer {
 
         this.pairsCache = undefined
         this.downsampledReads = undefined
+
+        if(this.baseModCounts) {
+            this.baseModCounts.computeSimplex()
+        }
     }
 
     contains(chr, start, end) {

@@ -690,7 +690,7 @@ class CoverageTrack {
 
                 const refBase = sequence[i]
 
-                if ("BASE_MODIFICATION_2COLOR" === this.parent.colorBy) {
+                if ("basemod2" === this.parent.colorBy || "basemod" === this.parent.colorBy) {
                     //context, pX, pBottom, dX, barHeight, pos, alignmentContainer
                     const threshold = 0.5   // TODD - parameter
                     drawModifications(ctx, x, this.height, w, h, bp, alignmentContainer, this.parent.colorBy, threshold)
@@ -1118,11 +1118,7 @@ class AlignmentTrack {
                 }
             }
 
-            if("BASE_MODIFICATION_2COLOR" === this.colorBy) {
-                let refSequence = alignmentContainer.sequence
-                if (refSequence) {
-                    refSequence = refSequence.toUpperCase()
-                }
+            if("basemod2" === this.colorBy || "basemod" === this.parent.colorBy) {
                 const context = (
                     {
                         ctx,
@@ -1131,7 +1127,7 @@ class AlignmentTrack {
                         bpEnd,
                         pixelEnd: pixelWidth
                     })
-                this.baseModRenderer.drawModifications(alignment, y, alignmentHeight, context)
+                this.baseModRenderer.drawModifications(alignment, y, alignmentHeight, context, this.parent.colorBy)
             }
 
 

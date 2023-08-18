@@ -61,7 +61,7 @@ function getModColor(modification, likelihood, colorOption) {
         l = 0
     }
     if (!modColorMap.has(key)) {
-        const alpha = colorOption === "BASE_MODIFICATION_2COLOR" ?
+        const alpha = colorOption === "basemod2" ?
             Math.max(20, Math.min(255, 20 + (l * l / 50 - 4 * l + 200))) :
             Math.max(20, Math.min(255, 6.127e-3 * l * l))
 

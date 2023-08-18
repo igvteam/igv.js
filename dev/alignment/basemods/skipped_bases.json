@@ -9,7 +9,7 @@
       "indexURL": "https://www.dropbox.com/scl/fi/szhemifm4drrw5iacker5/HG002-SRF.m84011_220902_175841_s1.GRCh38.dmode.bam.bai?rlkey=s36ia8nno7kqgo2n7b4vhx3oi&dl=0",
       "height": 500,
       "name": "Skipped bases '.'",
-      "colorBy": "BASE_MODIFICATION_2COLOR"
+      "colorBy": "basemod2"
     },
     {
       "type": "alignment",
@@ -18,7 +18,7 @@
       "indexURL": "https://www.dropbox.com/scl/fi/9bumsh2ziy413x2iolc0s/HG002-SRF.m84011_220902_175841_s1.GRCh38.bam.bai?rlkey=i8tqhquv5uxhrnj8w50zk6hi8&dl=0",
       "height": 500,
       "name": "Skipped bases '?'",
-      "colorBy": "BASE_MODIFICATION_2COLOR"
+      "colorBy": "basemod2"
     }
   ]
 }
