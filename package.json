@@ -12,7 +12,7 @@
   "scripts": {
     "prepack": "npm run build",
     "prepare": "npm run build",
-    "build": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config",
+    "build": "node --experimental-worker scripts/updateVersion.cjs && node --experimental-worker scripts/generateEmbedCss.cjs && npx --node-arg --experimental-worker  rollup --config",
     "build_iife": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config rollup.config.iife.js",
     "updateCSS": "node scripts/generateEmbedCss.cjs",
     "test": "mocha -ui tdd"
