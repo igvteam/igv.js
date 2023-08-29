@@ -66,13 +66,13 @@ const GenomeUtils = {
             // Get default genomes
             if (config.loadDefaultGenomes !== false) {
                 try {
-                    const url = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`  // prevent caching
+                    const url = DEFAULT_GENOMES_URL
                     const jsonArray = await igvxhr.loadJson(url, {timeout: 5000})
                     processJson(jsonArray)
                 } catch (e) {
                     console.error(e)
                     try {
-                        const url = BACKUP_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`  // prevent caching
+                        const url = BACKUP_GENOMES_URL
                         const jsonArray = await igvxhr.loadJson(url, {})
                         processJson(jsonArray)
                     } catch (e) {
