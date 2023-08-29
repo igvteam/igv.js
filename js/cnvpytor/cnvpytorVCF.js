@@ -161,13 +161,13 @@ class CNVpytorVCF {
         const results = []
         for (const [chr, wig] of Object.entries(wigFeatures)) {
 
-            wig.forEach(sample => {
+            for(let sample of wig){
                 var new_sample = { ...sample }
                 if (scaling_factor != 1) {
                     new_sample.value = sample[feature_column] / scaling_factor * 2
                 }
                 results.push(new_sample)
-            })
+            }
         }
 
         return results
@@ -269,13 +269,13 @@ class CNVpytorVCF {
         const results = []
 
         for (const [chr, wig] of Object.entries(wigFeatures)) {
-            wig.forEach(sample => {
+            for(let sample of wig) {
                 var new_sample = { ...sample }
                 if (sample.value != 0.5) {
                     new_sample.value = 1 - sample.value
                     results.push(new_sample)
                 }
-            })
+            }
         }
         return results
     }
@@ -379,8 +379,8 @@ class CNVpytorVCF {
         const baf2 = []
         for (const [chr, wig] of Object.entries(wigFeatures)) {
 
-            wig.forEach(sample => {
-                delete sample.likelihood_score;
+            for(let sample of wig) {
+                //delete sample.likelihood_score;
                 var baf1_value = { ...sample }
                 var baf2_value = { ...sample }
                 
@@ -392,7 +392,7 @@ class CNVpytorVCF {
                 baf1_value.value = -2 * value
                 baf1.push(baf1_value)
                     
-            })
+            }
         }
         
 
@@ -429,8 +429,7 @@ class CNVpytorVCF {
 
                         if (wigFeatures[chr][j].hets.length != 0){
                         
-                            
-                            wigFeatures[chr][j].hets.forEach((hets, hets_idx) => {
+                            for(let hets of wigFeatures[chr][j].hets)  {
                                 if(avgbin[chr][k].likelihood_score.length == 0){
                                     avgbin[chr][k].likelihood_score = g_utils.linspace(0, 1, 100).map((value, index) => {
                                         return beta(hets.ref, hets.alt, value);
@@ -449,7 +448,7 @@ class CNVpytorVCF {
                                     });
                        
                                 }
-                            });
+                            }
                             
                             // avgbin[chr][k].likelihood_score *= wigFeatures[chr][j].likelihood_score
                         }
@@ -466,7 +465,8 @@ class CNVpytorVCF {
 }
 
 function beta(a, b, p, phased = true) {
-    return p ** a * (1 - p) ** b + p ** b * (1 - p) ** a;
+     //p ** a * (1 - p) ** b + p ** b * (1 - p) ** a;
+     return Math.pow(p, a) * Math.pow(1-p, b) + Math.pow(p, b) * Math.pow(1-p, a)
 }
 
 
