@@ -139,7 +139,7 @@ class CNVpytorVCF {
 
         // Apply partition method
         var partition = new read_depth_caller.Partition(wigFeatures, globamMean, globalStd);
-        var partition_array = partition.meanShiftCaller()
+        var partition_array = partition.meanShiftCaller(this.binSize)
         var caller_array = partition.cnv_calling()
 
         // Assign the partition values to each bin
