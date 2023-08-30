@@ -32,6 +32,7 @@ import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
 
 const isString = StringUtils.isString
 
@@ -702,6 +703,35 @@ class VariantTrack extends TrackBase {
             this.colorTables.set(key, tbl)
         }
         return this.colorTables.get(key)
+    }
+
+    // This do-nothing method is neccessary to allow conversion to a CNVPytor track, which needs dom elements for an axis
+    paintAxis() {
+    }
+
+    async convertToPytor() {
+
+        this.trackView.startSpinner()
+        // The timeout is neccessary to give the spinner time to start.
+        setTimeout(async () => {
+            try {
+                const newConfig = Object.assign({}, this.config)
+                newConfig.color = undefined
+                newConfig.allVariants = this.featureSource.getAllFeatures()
+                Object.setPrototypeOf(this, CNVPytorTrack.prototype)
+                await this.init(newConfig)
+                await this.postInit()
+
+                this.trackView.clearCachedFeatures()
+                this.trackView.setTrackHeight(250, true)
+                this.trackView.checkContentHeight()
+                this.trackView.updateViews()
+                this.trackView.track.autoHeight = false
+            } finally {
+                this.trackView.stopSpinner()
+            }
+        }, 100)
+
     }
 }
 

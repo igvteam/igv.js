@@ -46,9 +46,14 @@ class CNVPytorTrack extends TrackBase {
 
     constructor(config, browser) {
         super(config, browser)
+    }
+
+    async init(config) {
+
+        super.init(config)
         this.featureType = 'numeric'
         this.paintAxis = paintAxis
-        
+
         if (!config.max) {
             this.defaultScale = true
             this.autoscale = false
@@ -56,17 +61,13 @@ class CNVPytorTrack extends TrackBase {
 
         // Invoke height setter last to allocated to coverage and alignment tracks
         this.height = (config.height !== undefined ? config.height : DEFAULT_TRACK_HEIGHT)
-    }
-
-    async init(config) {
-
         this.type = "cnvpytor"
         this.graphType = config.graphType || "points"
         this.bin_size = config.bin_size || 100000
         this.signal_name = config.signal_name || "rd_snp"
         this.cnv_caller = config.cnv_caller || '2D'
         this.colors = config.colors || ['gray', 'black', 'green', 'blue']
-        super.init(config)
+
 
     }
 
@@ -93,14 +94,14 @@ class CNVPytorTrack extends TrackBase {
     }
 
     get_signal_colors() {
-        
+
         let signal_colors = [
-            { singal_name: 'RD_Raw', color: this.colors[0] },
-            { singal_name: 'RD_Raw_gc_coor', color: this.colors[1] },
-            { singal_name: 'ReadDepth', color: this.colors[2] },
-            { singal_name: '2D', color: this.colors[2] },
-            { singal_name: 'BAF1', color: this.colors[3] },
-            { singal_name: 'BAF2', color: this.colors[3] },
+            {singal_name: 'RD_Raw', color: this.colors[0]},
+            {singal_name: 'RD_Raw_gc_coor', color: this.colors[1]},
+            {singal_name: 'ReadDepth', color: this.colors[2]},
+            {singal_name: '2D', color: this.colors[2]},
+            {singal_name: 'BAF1', color: this.colors[3]},
+            {singal_name: 'BAF2', color: this.colors[3]},
         ]
         return signal_colors
     }
@@ -108,26 +109,36 @@ class CNVPytorTrack extends TrackBase {
     async postInit() {
 
         if (this.config.format == 'vcf') {
-            this.featureSource = FeatureSource(this.config, this.browser.genome)
-            this.header = await this.getHeader()
 
+            let allVariants
+            if (this.config.allVariants) {
+                allVariants = this.config.allVariants
+                delete this.config.allVariants    // Transient variable -- don't store in session
+            } else {
+                this.featureSource = FeatureSource(this.config, this.browser.genome)
+                this.header = await this.getHeader()
+                allVariants = this.featureSource.reader.features.reduce(function (r, a) {
+                    r[a.chr] = r[a.chr] || []
+                    r[a.chr].push(a)
+                    return r
+                }, Object.create(null))
+            }
 
-            var allVariants = this.featureSource.reader.features.reduce(function (r, a) {
-                r[a.chr] = r[a.chr] || []
-                r[a.chr].push(a)
-                return r
-            }, Object.create(null))
+            // downsample
+            if(this.config.maxVariantCount) {
+                allVariants = downscaleVariants(allVariants, this.config.maxVariantCount)
+            }
 
             const cnvpytor_obj = new CNVpytorVCF(allVariants, this.bin_size)
-            
-            let wigFeatures;
-            let bafFeatures;
+
+            let wigFeatures
+            let bafFeatures
             this.wigFeatures_obj = {}
             this.wigFeatures_obj[this.bin_size] = {}
 
-            let dataWigs;
-            if(this.config.cnv_caller == '2D'){
-                
+            let dataWigs
+            if (this.config.cnv_caller == '2D') {
+
                 dataWigs = await cnvpytor_obj.read_rd_baf('2D')
 
                 wigFeatures = dataWigs[0]
@@ -135,25 +146,25 @@ class CNVPytorTrack extends TrackBase {
                 this.wigFeatures_obj[this.bin_size]['2D'] = wigFeatures[2]
 
                 this.available_callers = ['2D']
-            }else{
+            } else {
                 dataWigs = await cnvpytor_obj.read_rd_baf()
                 wigFeatures = dataWigs[0]
                 bafFeatures = dataWigs[1]
                 this.wigFeatures_obj[this.bin_size]['ReadDepth'] = wigFeatures[2]
                 this.available_callers = ['ReadDepth']
             }
-            
+
             this.wigFeatures_obj[this.bin_size]['RD_Raw'] = wigFeatures[0]
             this.wigFeatures_obj[this.bin_size]['RD_Raw_gc_coor'] = wigFeatures[1]
             this.wigFeatures_obj[this.bin_size]['BAF1'] = bafFeatures[0]
             this.wigFeatures_obj[this.bin_size]['BAF2'] = bafFeatures[1]
-            
+
             this.available_bins = [this.bin_size]
-            
+
             this.set_available_callers()
 
         } else {
-            this.cnvpytor_obj =   new HDF5IndexedReader(this.config.url, this.bin_size)
+            this.cnvpytor_obj = new HDF5IndexedReader(this.config.url, this.bin_size)
             this.wigFeatures_obj = await this.cnvpytor_obj.get_rd_signal(this.bin_size)
             this.available_bins = this.cnvpytor_obj.available_bins
             this.available_callers = this.cnvpytor_obj.callers
@@ -343,7 +354,7 @@ class CNVPytorTrack extends TrackBase {
                 tconf.isMergedTrack = true
                 tconf.features = wig
                 tconf.name = signal_name
-                tconf.color = this.signal_colors.filter(x => x.singal_name === signal_name).map(x => x.color) 
+                tconf.color = this.signal_colors.filter(x => x.singal_name === signal_name).map(x => x.color)
                 const t = await this.browser.createTrack(tconf)
                 if (t) {
                     t.autoscale = false     // Scaling done from merged track
@@ -379,7 +390,7 @@ class CNVPytorTrack extends TrackBase {
 
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
 
-        if(this.tracks) {
+        if (this.tracks) {
             const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
             return Promise.all(promises)
         } else {
@@ -412,7 +423,7 @@ class CNVPytorTrack extends TrackBase {
 
         // const mergedFeatures = options.features    // Array of feature arrays, 1 for each track
         const mergedFeatures = options.features
-        if(!mergedFeatures) return
+        if (!mergedFeatures) return
 
         if (this.defaultScale) {
             if (this.signal_name == 'rd_snp') {
@@ -437,7 +448,7 @@ class CNVPytorTrack extends TrackBase {
             this.dataRange = autoscale(options.referenceFrame.chr, mergedFeatures)
         }
 
-        if(this.tracks) {
+        if (this.tracks) {
             for (let i = 0, len = this.tracks.length; i < len; i++) {
                 const trackOptions = Object.assign({}, options)
                 trackOptions.features = mergedFeatures[i]
@@ -457,8 +468,8 @@ class CNVPytorTrack extends TrackBase {
             ? this.computeYPixelValueInLogScale(yValue, scaleFactor)
             : this.computeYPixelValue(yValue, scaleFactor)
 
-         // Draw guidelines
-         if (this.config.hasOwnProperty('guideLines')) {
+        // Draw guidelines
+        if (this.config.hasOwnProperty('guideLines')) {
             for (let line of this.config.guideLines) {
                 if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
                     let y = yScale(line.y)
@@ -506,6 +517,28 @@ function autoscale(chr, featureArrays) {
         }
     }
     return {min: min, max: max}
+}
+
+function downscaleVariants(allVariants, targetCount) {
+
+    const totalCount = Object.values(allVariants).reduce((accumulator, currentValue) => accumulator + currentValue.length, 0);
+    const prob = targetCount / totalCount
+    if(prob < 1) {
+        const downsampledVariants = {}
+        for(let key of Object.keys(allVariants)) {
+            const tmp = []
+            for(let v of allVariants[key]) {
+                if(Math.random() < prob || tmp.length < 10) {  // Keep at least 10 for each chromosome
+                    tmp.push(v)
+                }
+            }
+            downsampledVariants[key] = tmp
+        }
+       return downsampledVariants
+    } else {
+        return allVariants
+    }
+
 }
 
 export default CNVPytorTrack
