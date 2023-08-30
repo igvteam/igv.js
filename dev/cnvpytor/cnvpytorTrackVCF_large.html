@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>igv</title>
+
+</head>
+
+<body>
+
+<h2>CNVpytor Track</h2>
+
+<button id="log-state">Log Session Json</button>
+<button id="pytor">Change to Pytor</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr16",
+            tracks: [
+                // {
+                //     type: "cnvpytor",
+                //     name: "HepG2 VCF",
+                //     url: "https://igv-genepattern-org.s3.amazonaws.com/test/pytor/HepG2.sample.vcf.gz"
+                //
+                // },
+                {
+                    type: "variant",
+                    name: "HepG2 VCF",
+                    //url: "https://storage.googleapis.com/cnvpytor_data/HepG2.vcf.gz",
+                    url: "https://igv-genepattern-org.s3.amazonaws.com/test/pytor/HepG2.sample.vcf.gz"
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(browser => {
+            const track = browser.findTracks("type", "variant")[0];
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+            document.getElementById("pytor").addEventListener("click", () => {
+               track.convertToPytor()
+            })
+        })
+
+
+</script>
+
+</body>
+
+</html>
