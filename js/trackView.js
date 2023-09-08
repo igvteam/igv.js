@@ -585,7 +585,21 @@ class TrackView {
 
             this.trackGearPopup = new MenuPopup(this.gear)
 
-            this.addTrackGearMouseHandlers()
+            this.boundTrackGearClickHandler = trackGearClickHandler.bind(this)
+            this.gear.addEventListener('click', this.boundTrackGearClickHandler)
+
+            function trackGearClickHandler(event) {
+                event.preventDefault()
+                event.stopPropagation()
+                if ('none' === this.trackGearPopup.popover.style.display) {
+                    this.trackGearPopup.presentMenuList(MenuUtils.trackMenuItemList(this))
+                } else {
+                    this.trackGearPopup.hide()
+                }
+
+
+            }
+
         }
 
     }
@@ -739,24 +753,6 @@ class TrackView {
             document.removeEventListener('mouseup', this.boundDocumentTrackDragMouseUpHandler)
             this.dragHandle.removeEventListener('mouseup', this.boundTrackDragMouseEnterHandler)
             this.dragHandle.removeEventListener('mouseout', this.boundTrackDragMouseOutHandler)
-        }
-
-    }
-
-    addTrackGearMouseHandlers() {
-        if (true === this.track.ignoreTrackMenu) {
-            // do nothing
-        } else {
-
-            this.boundTrackGearClickHandler = trackGearClickHandler.bind(this)
-            this.gear.addEventListener('click', this.boundTrackGearClickHandler)
-
-            function trackGearClickHandler(event) {
-                event.preventDefault()
-                event.stopPropagation()
-                this.trackGearPopup.presentMenuList(MenuUtils.trackMenuItemList(this))
-            }
-
         }
 
     }
