@@ -881,6 +881,13 @@ class Browser {
 
         try {
 
+            // Load a hidden track -- used to populate searchable database without creating a track
+            if(config.hidden) {
+                const featureSource = FeatureSource(config, this.genome)
+                await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
+                return
+            }
+
             const newTrack = await this.createTrack(config)
 
             if ('sampleinfo' === config.type) {
