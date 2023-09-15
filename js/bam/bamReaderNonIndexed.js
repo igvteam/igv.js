@@ -78,7 +78,7 @@ class BamReaderNonIndexed {
     parseAlignments(data) {
         const alignments = []
         this.header = BamUtils.decodeBamHeader(data)
-        BamUtils.decodeBamRecords(data, this.header.size, alignments, this.header.chrNames)
+        BamUtils.  decodeBamRecords(data, this.header.size, alignments, this.header.chrNames)
         this.alignmentCache = new FeatureCache(alignments, this.genome)
     }
 

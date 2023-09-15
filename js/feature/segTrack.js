@@ -126,7 +126,7 @@ class SegTrack extends TrackBase {
                         label: 'Color Scale Threshold',
                         value: this.sbColorScale.threshold,
                         callback: () => {
-                            const t = Number(this.browser.inputDialog.input.value, 10)
+                            const t = Number(this.browser.inputDialog.value, 10)
                             if(t) {
                                 this.sbColorScale.setThreshold(t)
                                 this.trackView.repaintViews()

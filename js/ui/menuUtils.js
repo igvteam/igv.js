@@ -169,7 +169,7 @@ function visibilityWindowMenuItem(trackView) {
 
         const callback = () => {
 
-            let value = trackView.browser.inputDialog.input.value
+            let value = trackView.browser.inputDialog.value
             value = '' === value || undefined === value ? -1 : value.trim()
 
             trackView.track.visibilityWindow = Number.parseInt(value)
@@ -247,7 +247,7 @@ function trackRenameMenuItem(trackView) {
     const click = e => {
 
         const callback = function () {
-            let value = trackView.browser.inputDialog.input.value
+            let value = trackView.browser.inputDialog.value
             value = ('' === value || undefined === value) ? 'untitled' : value.trim()
             trackView.track.name = value
         }
@@ -276,7 +276,7 @@ function trackHeightMenuItem(trackView) {
 
         const callback = () => {
 
-            const number = Number(trackView.browser.inputDialog.input.value, 10)
+            const number = Number(trackView.browser.inputDialog.value, 10)
 
             if (undefined !== number) {
 
