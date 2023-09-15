@@ -54,7 +54,7 @@ class ROIMenu {
 
             const callback = () => {
 
-                const value = this.browser.inputDialog.input.value || ''
+                const value = this.browser.inputDialog.value || ''
                 feature.name = value.trim()
 
                 this.container.style.display = 'none'
