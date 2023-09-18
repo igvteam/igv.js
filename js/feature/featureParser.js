@@ -202,7 +202,8 @@ class FeatureParser {
             fixBedPE(allFeatures)
         }
 
-        if ("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) {
+        if (("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) &&
+            this.config.assembleGFF !== false) {
             return  (new GFFHelper(this.config)).combineFeatures(allFeatures)
         } else {
             return allFeatures
