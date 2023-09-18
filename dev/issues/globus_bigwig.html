@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=../https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>git 870</title>
+
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    let browser;
+    const options =
+        {
+            "version": "2.15.5",
+            "showSampleNames": false,
+            "reference": {
+                "fastaURL": "https://g-6f7c6d.f5dc97.75bc.dn.glob.us/Apar_genome.fasta",
+                "indexURL": "https://g-6f7c6d.f5dc97.75bc.dn.glob.us/Apar_genome.fasta.fai"
+            },
+            "locus": "chr4:1-14,613,473",
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "url": "https://g-6f7c6d.f5dc97.75bc.dn.glob.us/amoebidium3RNA.Broad.hisat2.fwd.bw",
+                    "name": "Broad_mRNAseq_fwd",
+                    "derivedName": true,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "#891100",
+                    "flipAxis": false,
+                    "logScale": false,
+                    "autoscaleGroup": 1,
+                    "order": 33,
+                    "autoscale": false,
+                    "min": 0,
+                    "max": 59.1083984375
+                },
+                {
+                    "url": "https://g-6f7c6d.f5dc97.75bc.dn.glob.us/amoebidium3RNA.Broad.hisat2.rvs.bw",
+                    "name": "Broad_mRNAseq_rev",
+                    "derivedName": true,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "#891100",
+                    "flipAxis": false,
+                    "logScale": false,
+                    "autoscaleGroup": 1,
+                    "order": 34,
+                    "autoscale": false,
+                    "min": 0,
+                    "max": 59.1083984375
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (b) {
+            browser = b;
+        })
+
+
+</script>
+
+</body>
+
+</html>

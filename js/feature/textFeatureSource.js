@@ -223,11 +223,6 @@ class TextFeatureSource {
 
         if (features) {
 
-            if (this.config.assembleGFF !== false &&
-                ("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format)) {
-                features = (new GFFHelper(this.config)).combineFeatures(features, genomicInterval)
-            }
-
             // Assign overlapping features to rows
             if (this.config.format !== "wig" && this.config.type !== "junctions") {
                 const maxRows = this.config.maxRows || Number.MAX_SAFE_INTEGER
