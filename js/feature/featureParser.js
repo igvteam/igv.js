@@ -43,6 +43,8 @@ import {decodeGtexGWAS} from "./decode/gtexGWAS.js"
 import {decodeCustom} from "./decode/custom.js"
 import {decodeGcnv} from "../gcnv/gcnvDecoder.js"
 import DecodeError from "./decode/decodeError.js"
+import GFFHelper from "./gff/gffHelper.js"
+import GenomicInterval from "../genome/genomicInterval.js"
 
 /**
  *  Parser for column style (tab delimited, etc) text file formats (bed, gff, vcf, etc).
@@ -200,7 +202,11 @@ class FeatureParser {
             fixBedPE(allFeatures)
         }
 
-        return allFeatures
+        if ("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) {
+            return  (new GFFHelper(this.config)).combineFeatures(allFeatures)
+        } else {
+            return allFeatures
+        }
 
     }
 
