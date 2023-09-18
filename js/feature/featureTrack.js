@@ -174,7 +174,7 @@ class FeatureTrack extends TrackBase {
             for (let feature of featureList) {
                 if (feature.start > bpStart && feature.end < bpEnd) {
                     const row = this.displayMode === "COLLAPSED" ? 0 : feature.row || 0
-                    if (rowFeatureCount[row] === undefined) {
+                    if (!rowFeatureCount[row]) {
                         rowFeatureCount[row] = 1
                     } else {
                         rowFeatureCount[row]++
@@ -183,7 +183,7 @@ class FeatureTrack extends TrackBase {
                     options.rowLastLabelX[row] = -Number.MAX_SAFE_INTEGER
                 }
             }
-            const maxFeatureCount = Math.max(1, Math.max(...rowFeatureCount))
+            const maxFeatureCount = Math.max(1, Math.max(...(rowFeatureCount.filter(c => !isNaN(c)))))
             const pixelsPerFeature = pixelWidth / maxFeatureCount
 
             let lastPxEnd = []
