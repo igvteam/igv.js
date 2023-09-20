@@ -42,6 +42,10 @@ suite("testFasta", function () {
             seqString = sequence.toUpperCase()
         assert.equal(seqString, expectedSeqString)
 
+
+        const noSSequence = await fasta.getSequence("noSuchChr", 0, 10)
+        assert.equal(null, noSSequence);
+
     })
 
 
