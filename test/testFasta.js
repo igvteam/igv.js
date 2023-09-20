@@ -38,13 +38,13 @@ suite("testFasta", function () {
         // Note -- coordinates are UCSC style
         // chr22:29565177-29565216
         const sequence = await fasta.getSequence("chr22", 29565176, 29565216)
-        const expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA",
-            seqString = sequence.toUpperCase()
+        const expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA"
+        const seqString = sequence.toUpperCase()
         assert.equal(seqString, expectedSeqString)
 
 
         const noSSequence = await fasta.getSequence("noSuchChr", 0, 10)
-        assert.equal(null, noSSequence);
+        assert.equal(null, noSSequence)
 
     })
 

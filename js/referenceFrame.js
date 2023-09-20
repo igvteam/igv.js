@@ -195,9 +195,10 @@ class ReferenceFrame {
         if ('all' === this.chr) {
             return 'all'
         } else {
+            const chrDisplayName = this.genome.getChromosomeDisplayName(this.chr)
             const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1)
             const ee = StringUtils.numberFormatter(Math.round(this.end))
-            return `${this.chr}:${ss}-${ee}`
+            return `${chrDisplayName}:${ss}-${ee}`
         }
     }
 

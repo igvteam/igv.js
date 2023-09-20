@@ -6,6 +6,7 @@
 
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
+import ChromSizes from "./chromSizes.js"
 
 const twoBit = ['T', 'C', 'A', 'G']
 const byteTo4Bases = []
@@ -24,148 +25,48 @@ class TwobitSequence {
     littleEndian
     index = new Map()
     metaIndex = new Map()
+    #chromosomeNames   // For compatibility with fasta representations
 
-    constructor(url) {
-        this.url = url
+    constructor(config) {
+        this.url = config.twobitURL || config.fastaURL
+        this.chromeSizes = config.chromeSizes
     }
 
     async init() {
         await this._readIndex()
-    }
-
-    async _readIndex() {
-        const loadRange = {start: 0, size: 64}
-        let arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: loadRange})
-        let dataView = new DataView(arrayBuffer)
-
-        let ptr = 0
-        const magicLE = dataView.getUint32(ptr, true)
-        const magicBE = dataView.getUint32(ptr, false)
-        ptr += 4
-
-        const magic = 0x1A412743
-        if (magicLE === magic) {
-            this.littleEndian = true
-        } else if (magicBE === magic) {
-            this.littleEndian = false
-        } else {
-            throw Error(`Bad magic number ${magic}`)
-        }
-
-        this.version = dataView.getUint32(ptr, this.littleEndian)
-        ptr += 4
-
-        this.sequenceCount = dataView.getUint32(ptr, this.littleEndian)
-        ptr += 4
-
-        this.reserved = dataView.getUint32(ptr, this.littleEndian)
-        ptr += 4
-
-        // Loop through sequences loading name and file offset.  We don't know the precise size in bytes in advance.
-        let estSize
-        let binaryBuffer
-
-        for (let i = 0; i < this.sequenceCount; i++) {
-            if (!binaryBuffer || binaryBuffer.available() < 1) {
-                estSize = (this.sequenceCount - i) * 20
-                binaryBuffer = await this.loadBinaryBuffer(ptr, estSize)
-            }
-            const len = binaryBuffer.getByte()
-            ptr += 1
-
-            if (binaryBuffer.available() < len + 5) {
-                estSize = (this.sequenceCount - i) * 20
-                binaryBuffer = await this.loadBinaryBuffer(ptr, estSize)
-            }
-            const name = binaryBuffer.getString(len)
-            const offset = binaryBuffer.getUInt()
-            ptr += len + 4
-            this.index.set(name, offset)
+        if(this.chromeSizes) {
+            this.chromeSizes = new ChromSizes(this.chromeSizes)
+            await this.chromeSizes.init()
         }
     }
 
-    /**
-     * Read the sequence metadata for the given seq name *
-     *
-     * @param seqName
-     * @returns {Promise<void>}
-     */
-    async _readSequenceMetadata(seqName) {
+    async _getSequenceMetaData(seqName) {
+        if (!this.metaIndex.has(seqName)) {
+            await this._readSequenceMetadata(seqName)
+        }
+        return this.metaIndex.get(seqName)
+    }
 
-        let offset = this.index.get(seqName)
-        if (!offset) {
-            return
-        }
+    async getChromosome(seqName) {
+        // const record = this._getSequenceMetaData(seqName)
+        // return record ?
+        //     {name: seqName, bpLength: record.dnaSize} :
+        //     undefined
+        return this.chromeSizes ? this.chromeSizes.chromosomes[seqName] : undefined
+    }
 
-        // Read size of dna data & # of "N" blocks
-        let size = 8
-        let binaryBuffer = await this.loadBinaryBuffer(offset, size)
-        const dnaSize = binaryBuffer.getUInt()
-        const nBlockCount = binaryBuffer.getUInt()
-        offset += size
-
-        // Read "N" blocks and # of mask blocks
-        size = nBlockCount * (4 + 4) + 4
-        binaryBuffer = await this.loadBinaryBuffer(offset, size)
-        const nBlockStarts = []
-        for (let i = 0; i < nBlockCount; i++) {
-            nBlockStarts.push(binaryBuffer.getUInt())
-        }
-        const nBlockSizes = []
-        for (let i = 0; i < nBlockCount; i++) {
-            nBlockSizes.push(binaryBuffer.getUInt())
-        }
-        const maskBlockCount = binaryBuffer.getUInt()
-        offset += size
-
-        // Read "mask" blocks
-        size = maskBlockCount * (4 + 4) + 4
-        binaryBuffer = await this.loadBinaryBuffer(offset, size)
-        const maskBlockStarts = []
-        for (let i = 0; i < maskBlockCount; i++) {
-            maskBlockStarts.push(binaryBuffer.getUInt())
-        }
-        const maskBlockSizes = []
-        for (let i = 0; i < maskBlockCount; i++) {
-            maskBlockSizes.push(binaryBuffer.getUInt())
-        }
-
-        //Transform "N" and "mask" block data into something more useful
-        const nBlocks = []
-        for (let i = 0; i < nBlockCount; i++) {
-            nBlocks.push(new Block(nBlockStarts[i], nBlockSizes[i]))
-        }
-        const maskBlocks = []
-        for (let i = 0; i < maskBlockCount; i++) {
-            maskBlocks.push(new Block(maskBlockStarts[i], maskBlockSizes[i]))
-        }
-
-        const reserved = binaryBuffer.getUInt()
-        if (reserved != 0) {
-            throw Error("Bad 2-bit file")
-        }
-        offset += size
-        const packedPos = offset
-
-        const meta = {
-            dnaSize,
-            nBlocks,
-            maskBlocks,
-            packedPos
-        }
-        this.metaIndex.set(seqName, meta)
+    get chromosomes()  {
+        return this.chromeSizes ? this.chromeSizes.chromosomes : undefined
 
     }
 
-    async getSequence(seqName, regionStart, regionEnd) {
+    async readSequence(seqName, regionStart, regionEnd) {
 
         if (this.index.size === 0) {
             await this.init()
         }
-        if (!this.metaIndex.has(seqName)) {
-            await this._readSequenceMetadata(seqName)
-        }
-        const record = this.metaIndex.get(seqName)
+
+        const record = await this._getSequenceMetaData(seqName)
         if (!record) {
             return null
         }
@@ -241,6 +142,130 @@ class TwobitSequence {
         return sequenceBases
     }
 
+    async _readIndex() {
+        const loadRange = {start: 0, size: 64}
+        let arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: loadRange})
+        let dataView = new DataView(arrayBuffer)
+
+        let ptr = 0
+        const magicLE = dataView.getUint32(ptr, true)
+        const magicBE = dataView.getUint32(ptr, false)
+        ptr += 4
+
+        const magic = 0x1A412743
+        if (magicLE === magic) {
+            this.littleEndian = true
+        } else if (magicBE === magic) {
+            this.littleEndian = false
+        } else {
+            throw Error(`Bad magic number ${magic}`)
+        }
+
+        this.version = dataView.getUint32(ptr, this.littleEndian)
+        ptr += 4
+
+        this.sequenceCount = dataView.getUint32(ptr, this.littleEndian)
+        ptr += 4
+
+        this.reserved = dataView.getUint32(ptr, this.littleEndian)
+        ptr += 4
+
+        // Loop through sequences loading name and file offset.  We don't know the precise size in bytes in advance.
+        let estSize
+        let binaryBuffer
+
+        for (let i = 0; i < this.sequenceCount; i++) {
+            if (!binaryBuffer || binaryBuffer.available() < 1) {
+                estSize = (this.sequenceCount - i) * 20
+                binaryBuffer = await this._loadBinaryBuffer(ptr, estSize)
+            }
+            const len = binaryBuffer.getByte()
+            ptr += 1
+
+            if (binaryBuffer.available() < len + 5) {
+                estSize = (this.sequenceCount - i) * 20
+                binaryBuffer = await this._loadBinaryBuffer(ptr, estSize)
+            }
+            const name = binaryBuffer.getString(len)
+            const offset = binaryBuffer.getUInt()
+            ptr += len + 4
+            this.index.set(name, offset)
+        }
+    }
+
+    /**
+     * Read the sequence metadata for the given seq name *
+     *
+     * @param seqName
+     * @returns {Promise<void>}
+     */
+    async _readSequenceMetadata(seqName) {
+
+        let offset = this.index.get(seqName)
+        if (!offset) {
+            return
+        }
+
+        // Read size of dna data & # of "N" blocks
+        let size = 8
+        let binaryBuffer = await this._loadBinaryBuffer(offset, size)
+        const dnaSize = binaryBuffer.getUInt()
+        const nBlockCount = binaryBuffer.getUInt()
+        offset += size
+
+        // Read "N" blocks and # of mask blocks
+        size = nBlockCount * (4 + 4) + 4
+        binaryBuffer = await this._loadBinaryBuffer(offset, size)
+        const nBlockStarts = []
+        for (let i = 0; i < nBlockCount; i++) {
+            nBlockStarts.push(binaryBuffer.getUInt())
+        }
+        const nBlockSizes = []
+        for (let i = 0; i < nBlockCount; i++) {
+            nBlockSizes.push(binaryBuffer.getUInt())
+        }
+        const maskBlockCount = binaryBuffer.getUInt()
+        offset += size
+
+        // Read "mask" blocks
+        size = maskBlockCount * (4 + 4) + 4
+        binaryBuffer = await this._loadBinaryBuffer(offset, size)
+        const maskBlockStarts = []
+        for (let i = 0; i < maskBlockCount; i++) {
+            maskBlockStarts.push(binaryBuffer.getUInt())
+        }
+        const maskBlockSizes = []
+        for (let i = 0; i < maskBlockCount; i++) {
+            maskBlockSizes.push(binaryBuffer.getUInt())
+        }
+
+        //Transform "N" and "mask" block data into something more useful
+        const nBlocks = []
+        for (let i = 0; i < nBlockCount; i++) {
+            nBlocks.push(new Block(nBlockStarts[i], nBlockSizes[i]))
+        }
+        const maskBlocks = []
+        for (let i = 0; i < maskBlockCount; i++) {
+            maskBlocks.push(new Block(maskBlockStarts[i], maskBlockSizes[i]))
+        }
+
+        const reserved = binaryBuffer.getUInt()
+        if (reserved != 0) {
+            throw Error("Bad 2-bit file")
+        }
+        offset += size
+        const packedPos = offset
+
+        const meta = {
+            dnaSize,
+            nBlocks,
+            maskBlocks,
+            packedPos
+        }
+        this.metaIndex.set(seqName, meta)
+
+    }
+
     /**
      * Return blocks overlapping the genome region [start, end]
      *
@@ -268,12 +293,14 @@ class TwobitSequence {
     }
 
 
-    get sequenceNames() {
-        this.index.keys()
+    get chromosomeNames() {
+        if(!this.#chromosomeNames) {
+            this.#chromosomeNames = Array.from(this.index.keys())
+        }
+        return this.#chromosomeNames
     }
 
-
-    async loadBinaryBuffer(start, size) {
+    async _loadBinaryBuffer(start, size) {
         const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start, size}})
         return new BinaryParser(new DataView(arrayBuffer), this.littleEndian)
     }

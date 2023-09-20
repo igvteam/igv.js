@@ -34,11 +34,11 @@ const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'inde
 
 class ChromSizes {
 
+    #chromosomeNames
+    chromosomes = new Map()
 
     constructor(url) {
         this.url = url
-        this.chromosomeNames = []
-        this.chromosomes = {}
     }
 
 
@@ -46,9 +46,14 @@ class ChromSizes {
         return this.loadAll()
     }
 
-    async getSequence(chr, start, end) {
+    get chromosomeNames() {
+        if(!this.#chromosomeNames) {
+            this.#chromosomeNames = Array.from(this.chromosomes.keys())
+        }
+    }
 
-        return undefined // TODO -- return array of "N"s?
+    async getSequence(chr, start, end) {
+        return null // TODO -- return array of "N"s?
     }
 
     async loadAll() {
@@ -64,19 +69,14 @@ class ChromSizes {
             data = await igvxhr.load(this.url, {})
         }
 
-
-        this.chromosomeNames = []
-        this.chromosomes = {}
-
         const lines = splitLines(data)
         let order = 0
         for (let nextLine of lines) {
             const tokens = nextLine.split('\t')
-            this.chromosomeNames.push(tokens[0])
+
             const chrLength = Number.parseInt(tokens[1])
             const chromosome = new Chromosome(tokens[0], order++, chrLength)
-            this.chromosomes[tokens[0]] = chromosome
-
+            this.chromosomes.set(tokens[0], chromosome)
         }
     }
 
