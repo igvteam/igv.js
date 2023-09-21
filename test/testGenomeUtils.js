@@ -126,7 +126,7 @@ suite("testGenomeUtils", function () {
             id: "GCF_016699485.2",
             format: "2bit",
             twobitURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.2bit",
-            chromAliasBb: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.chromAlias.bb"
+            aliasBbURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.chromAlias.bb"
         }
 
 

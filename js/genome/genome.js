@@ -24,7 +24,7 @@
  */
 
 import {loadFasta} from "./fasta.js"
-import Cytoband from "./cytoband.js"
+import {loadCytobands, loadCytobandsBB} from "./cytoband.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {isNumber} from "../util/igvUtils.js"
@@ -40,13 +40,13 @@ const GenomeUtils = {
 
     loadGenome: async function (options) {
 
-        const cytobandUrl = options.cytobandURL
         const sequence = await loadFasta(options)
 
         let aliases
         let chromosomes
-        if (options.chromAliasBb) {  // Order is important, try this first
-            const abb = await loadAliasesBB(options.chromAliasBb, options)
+        let cytobands
+        if (options.aliasBbURL) {  // Order is important, try this first
+            const abb = await loadAliasesBB(options.aliasBbURL, options)
             aliases = abb.aliases
             chromosomes = abb.chromosomes
         } else {
@@ -55,12 +55,18 @@ const GenomeUtils = {
                 aliases = await loadAliases(options.aliasURL, options)
             }
         }
-        const genome = new Genome(options, sequence, aliases, chromosomes)
 
-        // Delay loading cytbands untils after genome initialization to use chromosome aliases (1  vs chr1, etc).
-        if (cytobandUrl) {
-            genome.cytobands = await loadCytobands(cytobandUrl, options, genome)
+        if (options.cytobandBbURL) {
+            const cc = await loadCytobandsBB(options.cytobandBbURL, options)
+            cytobands = cc.cytobands
+            if (!chromosomes) {
+                chromosomes = cc.chromosomes
+            }
+        } else if (options.cytobandURL) {
+            cytobands = await loadCytobands(options.cytobandURL, options)
         }
+
+        const genome = new Genome(options, sequence, aliases, chromosomes, cytobands)
 
         return genome
     },
@@ -156,7 +162,7 @@ class Genome {
 
     featureDB = new Map()   // Hash of name -> feature, used for search function.
 
-    constructor(config, sequence, aliases, chromosomes) {
+    constructor(config, sequence, aliases, chromosomes, cytobands) {
 
         this.config = config
         this.id = config.id || generateGenomeID(config)
@@ -182,6 +188,14 @@ class Genome {
             if (!o.has(c)) this.chromosomeNames.push(c)
         }
 
+        // Build the alias table and correct cytoband sequence names
+        this.chrAliasTable = createAliasTable(this.chromosomes, aliases)
+        this.cytobands = {}
+        for (let c of Object.keys(cytobands)) {
+            const chrName = this.getChromosomeName(c)
+            this.cytobands[chrName] = cytobands[c]
+        }
+
         // Optionally create the psuedo chromosome "all" to support whole genome view
         this.wholeGenomeView = config.wholeGenomeView !== false
         if (this.wholeGenomeView && this.chromosomes.size > 1) {
@@ -190,7 +204,6 @@ class Genome {
             this.chromosomeNames.unshift("all")
         }
 
-        this.chrAliasTable = createAliasTable(this.chromosomes, aliases)
 
     }
 
@@ -235,7 +248,8 @@ class Genome {
     }
 
     getCytobands(chr) {
-        return this.cytobands ? this.cytobands[chr] : null
+        const chrName = this.getChromosomeName(chr)
+        return this.cytobands ? this.cytobands[chrName] : null
     }
 
     getLongestChromosome() {
@@ -440,54 +454,6 @@ function createAliasTable(chromosomes, aliases) {
     return chrAliasTable
 }
 
-async function loadCytobands(cytobandUrl, config, genome) {
-
-    let data
-    if (isDataURL(cytobandUrl)) {
-        const plain = BGZip.decodeDataURI(cytobandUrl)
-        data = ""
-        const len = plain.length
-        for (let i = 0; i < len; i++) {
-            data += String.fromCharCode(plain[i])
-        }
-    } else {
-        data = await igvxhr.loadString(cytobandUrl, buildOptions(config))
-    }
-
-    // var bands = [],
-    //     lastChr,
-    //     n = 0,
-    //     c = 1,
-    //
-    //     len = lines.length,
-    const cytobands = {}
-    let lastChr
-    let bands = []
-    const lines = splitLines(data)
-    for (let line of lines) {
-        var tokens = line.split("\t")
-        var chr = genome.getChromosomeName(tokens[0])
-        if (!lastChr) lastChr = chr
-
-        if (chr !== lastChr) {
-            cytobands[lastChr] = bands
-            bands = []
-            lastChr = chr
-        }
-
-        if (tokens.length === 5) {
-            //10	0	3000000	p15.3	gneg
-            var start = parseInt(tokens[1])
-            var end = parseInt(tokens[2])
-            var name = tokens[3]
-            var stain = tokens[4]
-            bands.push(new Cytoband(start, end, name, stain))
-        }
-    }
-
-    return cytobands
-}
-
 /**
  * Load a tab-delimited alias file
  * @param aliasURL
@@ -545,6 +511,7 @@ async function loadAliasesBB(url, config) {
 
     return {chromosomes, aliases}
 }
+
 
 /**
  * Trim small sequences (chromosomes) and return the list of trimmed chromosome names.

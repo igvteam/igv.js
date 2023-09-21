@@ -150,7 +150,7 @@ table chromatinInteract
     })
 
     /**
-     * Test parsing a chromAliasBb file from the T2T hub
+     * Test parsing a aliasBbURL file from the T2T hub
      */
     test("test chromAlias", async function () {
 
@@ -182,14 +182,6 @@ table chromatinInteract
         const bbReader = new BWReader({url: url, format: "bigbed"})
         const features = await bbReader.readWGFeatures()
 
-       // Sort features (not needed for test)
-        features.sort((a, b) => {
-            if (a.chr === b.chr) {
-                return a.start - b.start
-            } else {
-                return a.chr.localeCompare(b.chr)
-            }
-        })
 
         // Collect distinct chromosomes
         const uniqueChromosomes = new Set()
