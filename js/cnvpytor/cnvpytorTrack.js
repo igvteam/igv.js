@@ -111,14 +111,7 @@ class CNVPytorTrack extends TrackBase {
             this.featureSource = FeatureSource(this.config, this.browser.genome)
             this.header = await this.getHeader()
 
-
-            var allVariants = this.featureSource.reader.features.reduce(function (r, a) {
-                r[a.chr] = r[a.chr] || []
-                r[a.chr].push(a)
-                return r
-            }, Object.create(null))
-
-            const cnvpytor_obj = new CNVpytorVCF(allVariants, this.bin_size)
+            const cnvpytor_obj = new CNVpytorVCF(this.featureSource.reader.features, this.bin_size)
             
             let wigFeatures;
             let bafFeatures;
@@ -129,7 +122,7 @@ class CNVPytorTrack extends TrackBase {
             if(this.config.cnv_caller == '2D'){
                 
                 dataWigs = await cnvpytor_obj.read_rd_baf('2D')
-
+                
                 wigFeatures = dataWigs[0]
                 bafFeatures = dataWigs[1]
                 this.wigFeatures_obj[this.bin_size]['2D'] = wigFeatures[2]

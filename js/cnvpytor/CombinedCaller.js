@@ -6,9 +6,6 @@ class CombinedCaller{
     constructor(wigFeatures, binSize) {
         this.wigFeatures = wigFeatures
         this.binSize = binSize
-        // let fit_obj = this.get_fit()
-        // this.globalMean = fit_obj.globalMean
-        // this.globalStd = fit_obj.globalStd
     }
     get_fit(){
         var fit_info = new g_utils.GetFit(this.wigFeatures)
