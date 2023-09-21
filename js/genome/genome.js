@@ -190,10 +190,13 @@ class Genome {
 
         // Build the alias table and correct cytoband sequence names
         this.chrAliasTable = createAliasTable(this.chromosomes, aliases)
-        this.cytobands = {}
-        for (let c of Object.keys(cytobands)) {
-            const chrName = this.getChromosomeName(c)
-            this.cytobands[chrName] = cytobands[c]
+
+        if(cytobands) {
+            this.cytobands = {}
+            for (let c of Object.keys(cytobands)) {
+                const chrName = this.getChromosomeName(c)
+                this.cytobands[chrName] = cytobands[c]
+            }
         }
 
         // Optionally create the psuedo chromosome "all" to support whole genome view
