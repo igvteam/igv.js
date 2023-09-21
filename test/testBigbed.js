@@ -151,33 +151,39 @@ table chromatinInteract
 
     test("test chromAlias", async function () {
 
-        const url = "test/GCA_011100615.1.chromAlias.bb"
+        const url = "test/data/bb/GCA_009914755.4.chromAlias.bb"  //T2T
 
         const bbReader = new BWReader({url: url, format: "bigbed"})
-
-        const header = await bbReader.loadHeader()
-
         const features = await bbReader.readWGFeatures()
+        assert.equal(25, features.length)
 
-        features.sort((a, b) => b.end - a.end)
-
-        const keys = Object.keys(features[0]).filter(k => !(k === "start" || k ==="end"))
-
-        assert.ok(header)
-
+        const f = features[0]
+        assert.equal("chrM", f["ucsc"])
     })
 
-    test("test chromAlias", async function () {
+    test("test cytoband", async function () {
 
-        const url = "https://hgdownload.gi.ucsc.edu/hubs/GCA/011/100/615/GCA_011100615.1/bbi/GCA_011100615.1_Macaca_fascicularis_6.0.cytoBand.bb"
-
+        const url = "test/data/bb/cytoBandMapped.bb"
         const bbReader = new BWReader({url: url, format: "bigbed"})
-
-        const header = await bbReader.loadHeader()
-
         const features = await bbReader.readWGFeatures()
 
-        assert.ok(header)
+       // Sort features (not needed for test)
+        features.sort((a, b) => {
+            if (a.chr === b.chr) {
+                return a.start - b.start
+            } else {
+                return a.chr.localeCompare(b.chr)
+            }
+        })
+
+        // Collect distinct chromosomes
+        const uniqueChromosomes = new Set()
+        for(let f of features) {
+            uniqueChromosomes.add(f.chr)
+        }
+
+        assert.equal(24, uniqueChromosomes.size)
+
 
     })
 
