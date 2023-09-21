@@ -149,6 +149,9 @@ table chromatinInteract
 
     })
 
+    /**
+     * Test parsing a chromAliasBb file from the T2T hub
+     */
     test("test chromAlias", async function () {
 
         const url = "test/data/bb/GCA_009914755.4.chromAlias.bb"  //T2T
@@ -161,6 +164,18 @@ table chromatinInteract
         assert.equal("chrM", f["ucsc"])
     })
 
+
+    /**
+     * test parsing a cytoband BB file from the T2T hub
+     * Example feature
+     * {
+     *   "chr": "chr1",
+     *   "start": 0,
+     *   "end": 1735965,
+     *   "name": "p36.33",
+     *   "gieStain": "gneg"
+     * }
+     */
     test("test cytoband", async function () {
 
         const url = "test/data/bb/cytoBandMapped.bb"
