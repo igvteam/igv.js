@@ -144,6 +144,7 @@ class RulerTrack {
 
         IGVGraphics.strokeLine(ctx, x + w, y, x + w, y + h, {strokeStyle: IGVColor.greyScale(191)})
 
+        name = this.browser.genome.getChromosomeDisplayName(name)
         const shortName = (name.startsWith("chr")) ? name.substring(3) : name
 
         if (w > ctx.measureText(shortName).width) {

@@ -12,7 +12,7 @@ class Chromosome {
     }
 
     getAltName(key) {
-        return this.altNames.has(key) ? this.altNames.get(key) : this.name
+        return this.altNames && this.altNames.has(key) ? this.altNames.get(key) : this.name
     }
 }
 

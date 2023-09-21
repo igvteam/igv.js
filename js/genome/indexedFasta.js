@@ -99,7 +99,7 @@ class FastaSequence {
                     }
 
                     this.index[chr] = indexEntry
-                    this.chromosomes.set(chr, Chromosome(chr, order++, size))
+                    this.chromosomes.set(chr, new Chromosome(chr, order++, size))
                 }
             }
             return this.index

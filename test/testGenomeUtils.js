@@ -118,4 +118,22 @@ suite("testGenomeUtils", function () {
 
     })
 
+    test("2bit genome", async function() {
+
+        this.timeout(400000)
+
+        const reference = {
+            id: "GCF_016699485.2",
+            format: "2bit",
+            twobitURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.2bit",
+            chromAliasBb: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.chromAlias.bb"
+        }
+
+
+        const genome = await GenomeUtils.loadGenome(reference)
+
+        assert.ok(genome)
+
+    })
+
 })

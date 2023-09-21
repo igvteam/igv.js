@@ -73,10 +73,11 @@ class ChromSizes {
         let order = 0
         for (let nextLine of lines) {
             const tokens = nextLine.split('\t')
-
-            const chrLength = Number.parseInt(tokens[1])
-            const chromosome = new Chromosome(tokens[0], order++, chrLength)
-            this.chromosomes.set(tokens[0], chromosome)
+            if(tokens.length > 1) {
+                const chrLength = Number.parseInt(tokens[1])
+                const chromosome = new Chromosome(tokens[0], order++, chrLength)
+                this.chromosomes.set(tokens[0], chromosome)
+            }
         }
     }
 

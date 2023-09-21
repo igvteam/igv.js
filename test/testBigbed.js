@@ -148,48 +148,38 @@ table chromatinInteract
         assert.equal(features.length, 3)
 
     })
+
+    test("test chromAlias", async function () {
+
+        const url = "test/GCA_011100615.1.chromAlias.bb"
+
+        const bbReader = new BWReader({url: url, format: "bigbed"})
+
+        const header = await bbReader.loadHeader()
+
+        const features = await bbReader.readWGFeatures()
+
+        features.sort((a, b) => b.end - a.end)
+
+        const keys = Object.keys(features[0]).filter(k => !(k === "start" || k ==="end"))
+
+        assert.ok(header)
+
+    })
+
+    test("test chromAlias", async function () {
+
+        const url = "https://hgdownload.gi.ucsc.edu/hubs/GCA/011/100/615/GCA_011100615.1/bbi/GCA_011100615.1_Macaca_fascicularis_6.0.cytoBand.bb"
+
+        const bbReader = new BWReader({url: url, format: "bigbed"})
+
+        const header = await bbReader.loadHeader()
+
+        const features = await bbReader.readWGFeatures()
+
+        assert.ok(header)
+
+    })
+
 })
 
-async function testBed9_2(url) {
-    const chr = "chr7"
-    const start = 0
-    const end = Number.MAX_SAFE_INTEGER
-    const bwSource = new BWSource({url: url})
-
-    const trackType = await bwSource.trackType()
-    assert.equal(trackType, "annotation")
-
-    const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1})
-    assert.ok(features)
-    assert.equal(features.length, 3339)   // Verified in iPad app
-
-    //chr7	773975	792642	uc003sjb.2	0	+	776710	791816	0,255,0	HEATR2	Q86Y56-3
-    const f = features[20]
-    assert.equal(f.start, 773975)
-    assert.equal(f.geneSymbol, 'HEATR2')
-    assert.equal(f.spID, 'Q86Y56-3')
-    return true
-}
-
-async function testInteract(url) {
-
-    const chr = "chr3"
-    const start = 63702628
-    const end = 63880091
-    const bwSource = new BWSource({url: url})
-
-    const trackType = await bwSource.trackType()
-    assert.equal(trackType, "interact")
-
-    const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1})
-    assert.ok(features)
-    assert.equal(features.length, 18)
-
-    //chr3	63741418	63978511	.	350	6	.	0	chr3	63741418	63743120	.	.	chr3	63976338	63978511	.	.
-    const secondFeature = features[1]
-    assert.equal(secondFeature.start1, 63741418)
-    assert.equal(secondFeature.end1, 63743120)
-    assert.equal(secondFeature.start2, 63976338)
-    assert.equal(secondFeature.end2, 63978511)
-
-}
