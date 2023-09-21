@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import GenomeUtils from "../js/genome/genome.js"
+import GenomeUtils from "../js/genome/genomeUtils.js"
 import {assert} from 'chai'
 
 suite("testGenomeUtils", function () {

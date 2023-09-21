@@ -25,7 +25,7 @@
 
 import IGVGraphics from "./igv-canvas.js"
 import {IGVColor, StringUtils} from "../node_modules/igv-utils/src/index.js"
-import GenomeUtils from "./genome/genome.js"
+import GenomeUtils from "./genome/genomeUtils.js"
 
 const numberFormatter = StringUtils.numberFormatter
 

@@ -1,7 +1,6 @@
 import "./utils/mockObjects.js"
-import GenomeUtils from "../js/genome/genome.js"
+import GenomeUtils from "../js/genome/genomeUtils.js"
 import {assert} from 'chai'
-import BWReader from "../js/bigwig/bwReader.js"
 import {loadCytobandsBB} from "../js/genome/cytoband.js"
 
 suite("testGenome", function () {
