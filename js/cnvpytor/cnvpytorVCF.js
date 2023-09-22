@@ -16,147 +16,82 @@ class CNVpytorVCF {
 
     }
 
-    async computeDepthFeatures() {
+    async read_rd_baf(caller='ReadDepth'){
+        /* Read rd and BAF information from the vcf file and call accoring to the caller*/
 
-        const chromosomes = Object.keys(this.allVariants)
-        const wigFeatures = []
-
-        for (let chr of chromosomes) {
-            const variants = this.allVariants[chr]
-            if (variants.length === 0) continue
-
-            const firstSnp = variants[0]
-
-            let sum = 0
-            let count = 0
-            let binStart = firstSnp.start = firstSnp.start % this.binSize   // Place start at integer multiple of binSize
-            let binEnd = binStart + this.binSize
-            let featureBin = 0
-
-            for (let snp of variants) {
-                const position = snp.start + 1    // Convert from 0-base to 1-base coords
-                featureBin = Math.max(Math.floor((snp.start - 1) / this.binSize), 0)
-                if (position > binEnd) {
-
-                    if (count > 0) {
-                        wigFeatures.push({ chr, start: binStart, end: binEnd, value: sum, bin: featureBin, count: count })
-                    }
-
-                    // Start new bin
-                    sum = 0
-                    //count = 0
-                    binStart = snp.start - snp.start % this.binSize
-                    binEnd = binStart + this.binSize
-                }
-
-                const dpValue = snp.calls[9].info["DP"]
-                // const dpValue = snp.getInfo("DP")
-
-                if (dpValue) {
-                    sum += Number.parseInt(dpValue)
-                    count++
-                }
-            }
-
-            // final bin
-            if (count > 0) {
-                wigFeatures.push({ chr, start: binStart, end: binEnd, value: sum, bin: featureBin, count: count })
-            }
-        }
-
-        return wigFeatures
-    }
-
-    // for for read depth calculation
-    async computeReadDepth() {
-        const chromosomes = Object.keys(this.allVariants)
+        // Step1: Parse data from the vcf file; for a fixed rowBinSize
         var wigFeatures = {}
-
-        for (let chr of chromosomes) {
-            const variants = this.allVariants[chr]
+        for (let i = this.allVariants.length-1; i >= 0; i--){
             var featureBin;
-            if (variants.length === 0) continue
-            for (let snp of variants) {
-                featureBin = Math.max(Math.floor(snp.start / this.rowBinSize), 0)
-                if (!wigFeatures[chr]) { wigFeatures[chr] = [] }
-                if (!wigFeatures[chr][featureBin]) {
+            // assign and free space for the all_variants
+            let snp = this.allVariants[i]
+            this.allVariants.splice(i, 1);
 
-                    wigFeatures[chr][featureBin] = {
-                        chr,
-                        start: featureBin * this.rowBinSize,
-                        end: (featureBin + 1) * this.rowBinSize,
-                        value: 0,
-                        sum_score: 0,
-                        count: 0,
-                    };
-                }
-                const dpValue = snp.calls[9].info["DP"]
-                if (dpValue) {
-                    // sum += Number.parseInt(dpValue)
-                    wigFeatures[chr][featureBin].sum_score += Number.parseInt(dpValue)
-                    wigFeatures[chr][featureBin].count++
-                }
-
+            let chr = snp.chr
+            featureBin = Math.max(Math.floor(snp.start / this.rowBinSize), 0)
+            if (!wigFeatures[chr]) { wigFeatures[chr] = [] }
+            if (!wigFeatures[chr][featureBin]) {
+                wigFeatures[chr][featureBin] = {
+                    'chr': chr,
+                    start: featureBin * this.rowBinSize,
+                    end: (featureBin + 1) * this.rowBinSize,
+                    dp_sum_score: 0,
+                    dp_count: 0,
+                    hets_count:0,
+                    hets: [],
+                    //likelihood_score: [],
+                };
             }
-            // for last bin
-            //let last_bin = wigFeatures[chr][featureBin]
-            //last_bin.value = parseInt(last_bin.sum_score / last_bin.count) * 100
+
+            const calls = snp.calls[9]
+            const dpValue = calls.info["DP"]
+            if (dpValue) {
+                
+                wigFeatures[chr][featureBin].dp_sum_score += Number.parseInt(dpValue)
+                wigFeatures[chr][featureBin].dp_count++
+            }
+            
+            let ad_score = calls.info["AD"].split(',')
+            let genotype = calls.genotype
+            if ((genotype[0] == 0 && genotype[1] == 1) || (genotype[0] == 1 && genotype[1] == 0)) {
+                //apply the beta function
+                wigFeatures[chr][featureBin].hets_count++;
+                let ad_a = parseInt(ad_score[0]), ad_b = parseInt(ad_score[1])
+                wigFeatures[chr][featureBin].hets.push({ref:ad_a, alt:ad_b})
+            }
+            
+
         }
 
-        // adjust the bin values to actual bin size
-        var avgbin = {}
-        for (let chr of chromosomes) {
-            if (!avgbin[chr]) { avgbin[chr] = [] }
-            for (let k = 0; k < wigFeatures[chr].length / this.binFactor; k++) {
-                const featureBin = k
-                if (!avgbin[chr][k]) {
-                    avgbin[chr][k] = {
-                        chr,
-                        binScore: 0,
-                        start: featureBin * this.binSize,
-                        end: (featureBin + 1) * this.binSize,
-                    }
-                }
+        // get the chromosome names
+        this.chromosomes = Object.keys(wigFeatures)
 
-                for (var j = k * 10; j < 10 * k + 10; j++) {
-                    if (wigFeatures[chr][j]) {
-                        var tmp_score = parseInt(wigFeatures[chr][j].sum_score / wigFeatures[chr][j].count) * 100;
-                        avgbin[chr][k].binScore += tmp_score;
-                    }
-                }
-            }
+        // Step2: Update the binsize according to user provided bin size
+        var avgbin = this.adjust_bin_size(wigFeatures)
+
+        // Step3: Run the CNV caller
+        var finalFeatureSet
+        if(caller == 'ReadDepth'){
+            let caller_obj = new MeanShiftCaller(avgbin,  this.binSize)  
+            finalFeatureSet = caller_obj.ReadDepth_caller()
+
+            // finalFeatureSet = this.readDepthMeanshift(avgbin)
+            var baf = this.formatDataStructure_BAF(avgbin, 'max_likelihood')
+        }else if(caller=='2D'){
+            
+            let caller_obj = new combined_caller.CombinedCaller(avgbin,  this.binSize)        
+            let processed_bins = await caller_obj.call_2d()
+            
+            finalFeatureSet = [processed_bins.binScore, [], processed_bins.segment_score]
+    
+            var baf = caller_obj.formatDataStructure_BAF('max_likelihood')
         }
+        
 
-        var finalFeatureSet = this.readDepthMeanshift(avgbin)
-        return finalFeatureSet
-
+        return [finalFeatureSet, baf]
     }
-    readDepthMeanshift(wigFeatures) {
 
-        // Get global mean and standrad deviation
-        var fit_info = new g_utils.GetFit(wigFeatures)
-        var [globamMean, globalStd] = fit_info.fit_data();
-
-        // Apply partition method
-        var partition = new read_depth_caller.Partition(wigFeatures, globamMean, globalStd);
-        var partition_array = partition.meanShiftCaller(this.binSize)
-        var caller_array = partition.cnv_calling()
-
-        // Assign the partition values to each bin
-        Object.entries(wigFeatures).forEach(([chr, chr_rd]) => {
-            chr_rd.forEach((bin, index) => {
-                bin.partition_level = parseInt(partition_array[chr][index])
-                bin.partition_call = parseInt(caller_array[0][chr][index])
-            });
-        })
-
-        var rawbinScore = this.formatDataStructure(wigFeatures, 'binScore', globamMean)
-        var partition_levels = this.formatDataStructure(wigFeatures, 'partition_level', globamMean)
-        var partition_call = this.formatDataStructure(wigFeatures, 'partition_call', globamMean)
-
-        return [rawbinScore, partition_levels, partition_call, caller_array[1]]
-
-    }
+    
     formatDataStructure(wigFeatures, feature_column, scaling_factor = 1) {
         const results = []
         for (const [chr, wig] of Object.entries(wigFeatures)) {
@@ -173,97 +108,7 @@ class CNVpytorVCF {
         return results
     }
 
-    async computeBAF_v2() {
-
-        const chromosomes = Object.keys(this.allVariants)
-        const wigFeatures = {}
-        const baf1 = [], baf2 = []
-
-        for (let chr of chromosomes) {
-            const variants = this.allVariants[chr]
-            if (variants.length === 0) continue
-            var featureBin;
-            for (let snp of variants) {
-                featureBin = Math.max(Math.floor(snp.start / this.binSize), 0)
-
-                if (!wigFeatures[chr]) {
-                    wigFeatures[chr] = []
-                }
-                if (!wigFeatures[chr][featureBin]) {
-                    if (featureBin > 0) {
-                        // calculating the BAF likelihood for previous bin
-                        let previous_featureBin = featureBin - 1
-                        if (wigFeatures[chr][previous_featureBin]) {
-
-                            const updated_bin = this.get_max_min_score(wigFeatures[chr][previous_featureBin])
-
-                            if (updated_bin.value != 0.5) {
-                                let baf_wig = Object.assign({}, updated_bin);
-                                baf_wig.value = -2 * (1 - updated_bin.value)
-                                baf2.push(baf_wig)
-                            }
-                            updated_bin.value = - 2 * updated_bin.value
-                            wigFeatures[chr][previous_featureBin] = updated_bin
-
-                            baf1.push(wigFeatures[chr][previous_featureBin])
-
-                        }
-                    }
-                    wigFeatures[chr][featureBin] = {
-                        chr,
-                        start: featureBin * this.binSize,
-                        end: (featureBin + 1) * this.binSize,
-                        value: 0,
-                        count: 0,
-                        likelihood_score: [],
-                        min_score: 0,
-                    };
-                }
-                const calls = snp.calls[9]
-                let genotype = calls.genotype
-                let ad_score = calls.info["AD"].split(',')
-                let ad_a = ad_score[0], ad_b = ad_score[1]
-
-                if ((genotype[0] == 0 && genotype[1] == 1) || (genotype[0] == 1 && genotype[1] == 0)) {
-                    //apply the beta function
-                    if (wigFeatures[chr][featureBin].likelihood_score.length == 0) {
-                        wigFeatures[chr][featureBin].likelihood_score = g_utils.linspace(0, 1, 100).map((value, index) => {
-                            return beta(ad_a, ad_b, value);
-                        });
-                    } else {
-                        var sum = 0;
-
-                        wigFeatures[chr][featureBin].likelihood_score = g_utils.linspace(0, 1, 100).map((value, index) => {
-                            var likelihood_value = wigFeatures[chr][featureBin].likelihood_score[index] * beta(ad_a, ad_b, value);
-                            sum = sum + likelihood_value;
-                            return likelihood_value;
-                        });
-
-                        wigFeatures[chr][featureBin].likelihood_score = g_utils.linspace(0, 1, 100).map((value, index) => {
-                            return wigFeatures[chr][featureBin].likelihood_score[index] / sum;
-                        });
-                    }
-                    wigFeatures[chr][featureBin].count++;
-                }
-            }
-
-            // last feature bin
-            const updated_bin = this.get_max_min_score(wigFeatures[chr][featureBin])
-
-            if (updated_bin.value != 0.5) {
-                let baf_wig = Object.assign({}, updated_bin);
-                baf_wig.value = -2 * (1 - updated_bin.value)
-                baf2.push(baf_wig)
-            }
-            updated_bin.value = -2 * updated_bin.value
-            wigFeatures[chr][featureBin] = updated_bin
-            baf1.push(wigFeatures[chr][featureBin])
-        }
-
-        return [baf1, baf2]
-
-    }
-
+    
 
     format_BAF_likelihood(wigFeatures) {
         const results = []
@@ -308,73 +153,10 @@ class CNVpytorVCF {
         return bins
     }
 
-    async read_rd_baf(caller='ReadDepth'){
-        
-        const chromosomes = Object.keys(this.allVariants)
-        var wigFeatures = {}
-
-        for (let chr of chromosomes) {
-            const variants = this.allVariants[chr]
-            var featureBin;
-            if (variants.length === 0) continue
-            for (let snp of variants) {
-                featureBin = Math.max(Math.floor(snp.start / this.rowBinSize), 0)
-                if (!wigFeatures[chr]) { wigFeatures[chr] = [] }
-                if (!wigFeatures[chr][featureBin]) {
-
-                    wigFeatures[chr][featureBin] = {
-                        chr,
-                        start: featureBin * this.rowBinSize,
-                        end: (featureBin + 1) * this.rowBinSize,
-                        // value: 0,
-                        dp_sum_score: 0,
-                        dp_count: 0,
-                        hets_count:0,
-                        hets: [],
-                        //likelihood_score: [],
-                    };
-                }
-                const calls = snp.calls[9]
-                const dpValue = calls.info["DP"]
-                if (dpValue) {
-                    
-                    wigFeatures[chr][featureBin].dp_sum_score += Number.parseInt(dpValue)
-                    wigFeatures[chr][featureBin].dp_count++
-                }
-                
-                let ad_score = calls.info["AD"].split(',')
-                let genotype = calls.genotype
-                if ((genotype[0] == 0 && genotype[1] == 1) || (genotype[0] == 1 && genotype[1] == 0)) {
-                    //apply the beta function
-                    wigFeatures[chr][featureBin].hets_count++;
-                    let ad_a = parseInt(ad_score[0]), ad_b = parseInt(ad_score[1])
-                    wigFeatures[chr][featureBin].hets.push({ref:ad_a, alt:ad_b})
-                }
-           
-            }
-        
-        }
-    
-        var avgbin = this.adjust_bin_size(wigFeatures)
-        var finalFeatureSet
-        if(caller == 'ReadDepth'){
-            finalFeatureSet = this.readDepthMeanshift(avgbin)
-            var baf = this.formatDataStructure_BAF(avgbin, 'max_likelihood')
-        }else if(caller=='2D'){
-            
-            let caller_obj = new combined_caller.CombinedCaller(avgbin,  this.binSize)        
-            let processed_bins = await caller_obj.call_2d()
-            
-            finalFeatureSet = [processed_bins.binScore, [], processed_bins.segment_score]
-    
-            var baf = caller_obj.formatDataStructure_BAF('max_likelihood')
-        }
-        
-
-        return [finalFeatureSet, baf]
-    }
+   
 
     formatDataStructure_BAF(wigFeatures, feature_column, scaling_factor = 2) {
+        /* Rescale the BAF level from 0:1 to -2:0*/
         const baf1 = []
         const baf2 = []
         for (const [chr, wig] of Object.entries(wigFeatures)) {
@@ -400,10 +182,9 @@ class CNVpytorVCF {
     }
     
     adjust_bin_size(wigFeatures){
-        const chromosomes = Object.keys(this.allVariants)
-        // adjust the bin values to actual bin size
+        /* adjust the bin values to actual bin size */
         var avgbin = {}
-        for (let chr of chromosomes) {
+        for (let chr of this.chromosomes) {
             if (!avgbin[chr]) { avgbin[chr] = [] }
             for (let k = 0; k < wigFeatures[chr].length / this.binFactor; k++) {
                 const featureBin = k
@@ -469,6 +250,55 @@ function beta(a, b, p, phased = true) {
      return Math.pow(p, a) * Math.pow(1-p, b) + Math.pow(p, b) * Math.pow(1-p, a)
 }
 
+class MeanShiftCaller{
+    constructor(wigFeatures, binSize) {
+        this.wigFeatures = wigFeatures
+        this.binSize = binSize
+    }
+
+    ReadDepth_caller(){
+         // Get global mean and standrad deviation
+         var fit_info = new g_utils.GetFit(this.wigFeatures)
+         var [globamMean, globalStd] = fit_info.fit_data();
+ 
+         // Apply partition method
+         var partition = new read_depth_caller.Partition(this.wigFeatures, globamMean, globalStd);
+         var partition_array = partition.meanShiftCaller(this.binSize)
+         var caller_array = partition.cnv_calling()
+ 
+         // Assign the partition values to each bin
+         Object.entries(this.wigFeatures).forEach(([chr, chr_rd]) => {
+             chr_rd.forEach((bin, index) => {
+                 bin.partition_level = parseInt(partition_array[chr][index])
+                 bin.partition_call = parseInt(caller_array[0][chr][index])
+             });
+         })
+ 
+         var rawbinScore = this.formatDataStructure('binScore', globamMean)
+         var partition_levels = this.formatDataStructure('partition_level', globamMean)
+         var partition_call = this.formatDataStructure('partition_call', globamMean)
+ 
+         return [rawbinScore, partition_levels, partition_call, caller_array[1]]
+    }
+
+    formatDataStructure(feature_column, scaling_factor = 1) {
+        const results = []
+        for (const [chr, wig] of Object.entries(this.wigFeatures)) {
+
+            for(let sample of wig){
+                var new_sample = { ...sample }
+                if (scaling_factor != 1) {
+                    new_sample.value = sample[feature_column] / scaling_factor * 2
+                }
+                results.push(new_sample)
+            }
+        }
+
+        return results
+    }
+
+
+}
 
 
 export { CNVpytorVCF }

@@ -1,7 +1,35 @@
 import {openH5File} from "../../node_modules/hdf5-indexed-reader/dist/hdf5-indexed-reader.esm.js"
 
+
+class SignalNames{
+    /**
+     * 
+     * @param {string} chrom - chromosome name
+     * @param {integer} bin_size - bin size
+     */
+    constructor(chrom, bin_size){
+        this.chrom = chrom
+        this.signal_bin_size = bin_size
+
+        let rd_flag = ""
+        this.signals = {
+            'raw_RD': `his_rd_p_${this.chrom}_${this.signal_bin_size}${rd_flag}`,
+            'gc_RD': `his_rd_p_${this.chrom}_${this.signal_bin_size}_GC`,
+            'gc_partition' : `his_rd_p_${this.chrom}_${this.signal_bin_size}_partition_GC_merge`,
+            'baf': `snp_likelihood_${this.chrom}_${this.signal_bin_size}_mask`,
+            'Mosaic_segments' : `his_rd_p_${this.chrom}_${this.signal_bin_size}_partition_GC_mosaic_segments_2d`,
+            'Mosaic_calls': `his_rd_p_${this.chrom}_${this.signal_bin_size}_partition_GC_mosaic_call_2d`
+        }
+    }
+}
+
+
 class HDF5Reader {
-    
+    /**
+     * 
+     * @param {string} h5_file - path for the pytor file
+     * @param {integer} bin_size - bin size
+     */
     constructor(h5_file, bin_size=100000){
 
         this.h5_file = h5_file;
@@ -24,22 +52,26 @@ class HDF5Reader {
     async get_keys(){
         /* returns a list of keys of the pytor file*/
         let h5_obj = await this.fetch();
-
         return h5_obj.keys
     }
 
     async get_rd_signal(bin_size=this.bin_size){
 
         let h5_obj = await this.fetch();
-        let h5_obj_keys = h5_obj.keys;
+        // let h5_obj_keys = h5_obj.keys;
+        this.h5_obj = h5_obj
+        this.pytor_keys = h5_obj.keys
+        // console.log("keys", this.pytor_keys )
 
-        // console.log(h5_obj_keys)
-        let signal_bin = new ParseSignals(h5_obj_keys);
+        // get available bin sizes
+        let signal_bin = new ParseSignals(this.pytor_keys);
         let rd_bins = signal_bin.get_rd_bins()
         let snp_bins = signal_bin.get_snp_bins()
+
+        // merge the bins get from two type of signals
         this.available_bins = [...new Set(rd_bins, snp_bins)]
 
-        // let bin_size = this.bin_size
+        // check if the user provided bin is available, else set the last bin_size
         if(! this.available_bins.includes(bin_size)){
             bin_size = this.available_bins.at(-1);    
         }
@@ -48,12 +80,10 @@ class HDF5Reader {
         const type = await chr_ds.dtype
         const t0 = Date.now()
         let rd_chromosomes = await chr_ds.value
-        //console.log(`get_rd_signal rd_chromosomes  ${Date.now() - t0}`)
-        //rd_chromosomes = fixString(rd_chromosomes)
         let rd_flag = ""
 
         // get rd stat
-        let rd_stat = await this.rd_stat(h5_obj, h5_obj_keys, bin_size)
+        let rd_stat = await this.rd_stat(bin_size)
         
         var wigFeatures = []
         var wigFeatures_gc = []
@@ -63,28 +93,34 @@ class HDF5Reader {
         var wigFeatures_baf2 = []
 
         for (let chrom of rd_chromosomes) {
+            let signal_name_obj = new SignalNames(chrom, bin_size)
+
             // for normal rd signal
-            var signal_rd = `his_rd_p_${chrom}_${bin_size}${rd_flag}`
-            let chr_wig = await this.get_chr_signal(h5_obj, h5_obj_keys, chrom, bin_size, signal_rd, rd_stat)
+            // var signal_rd = `his_rd_p_${chrom}_${bin_size}${rd_flag}`
+            var signal_rd = signal_name_obj.signals['raw_RD']
+            let chr_wig = await this.get_chr_signal( chrom, bin_size, signal_rd, rd_stat)
             wigFeatures = wigFeatures.concat(chr_wig)
             
             // rd gc corrected
-            var signal_rd_gc = `his_rd_p_${chrom}_${bin_size}_GC`
-            let chr_wig_gc = await this.get_chr_signal(h5_obj, h5_obj_keys, chrom, bin_size, signal_rd_gc, rd_stat)
+            // var signal_rd_gc = `his_rd_p_${chrom}_${bin_size}_GC`
+            var signal_rd_gc = signal_name_obj.signals['gc_RD']
+            let chr_wig_gc = await this.get_chr_signal(chrom, bin_size, signal_rd_gc, rd_stat)
             wigFeatures_gc = wigFeatures_gc.concat(chr_wig_gc)
 
             // rd call MeanShift
             
-            let signal_rd_call = `his_rd_p_${chrom}_${bin_size}_partition_GC_merge`
-            let chr_wig_rd_call_meanshift = await this.get_chr_signal(h5_obj, h5_obj_keys, chrom, bin_size, signal_rd_call, rd_stat)
+            // let signal_rd_call = `his_rd_p_${chrom}_${bin_size}_partition_GC_merge`
+            let signal_rd_call = signal_name_obj.signals['gc_partition']
+            let chr_wig_rd_call_meanshift = await this.get_chr_signal(chrom, bin_size, signal_rd_call, rd_stat)
             wigFeatures_rd_call_meanshift = wigFeatures_rd_call_meanshift.concat(chr_wig_rd_call_meanshift)
             
-            let chr_wig_rd_call = await this.rd_call_combined(h5_obj, h5_obj_keys, chrom, bin_size, rd_stat)
+            let chr_wig_rd_call = await this.rd_call_combined(chrom, bin_size, rd_stat, signal_name_obj)
             wigFeatures_rd_call_combined = wigFeatures_rd_call_combined.concat(chr_wig_rd_call)
 
             // baf likelihood
-            let signal_baf_1 = `snp_likelihood_${chrom}_${bin_size}_mask`
-            let chr_wig_bafs = await this.get_baf_signals(h5_obj, h5_obj_keys, chrom, bin_size, signal_baf_1)
+            // let signal_baf_1 = `snp_likelihood_${chrom}_${bin_size}_mask`
+            let signal_baf_1 = signal_name_obj.signals['baf']
+            let chr_wig_bafs = await this.get_baf_signals(chrom, bin_size, signal_baf_1)
 
             // let signal_baf_1 = `snp_i1_${chrom}_${bin_size}_mask`
             // let chr_wig_bafs = await this.get_baf_signals_v2(h5_obj, h5_obj_keys, chrom, bin_size, signal_baf_1)
@@ -129,13 +165,14 @@ class HDF5Reader {
         return segments
     }
 
-   async  rd_call_combined(h5_obj, h5_obj_keys, chrom, bin_size, rd_stat){
+    async  rd_call_combined(chrom, bin_size, rd_stat, signal_name_obj){
         let chr_wig = [];
         
         let segments
-        let mosaic_call_segments = `his_rd_p_${chrom}_${bin_size}_partition_GC_mosaic_segments_2d`
-        if (h5_obj_keys.includes(mosaic_call_segments)){
-            const chrom_dataset = await h5_obj.get(mosaic_call_segments)
+        // let mosaic_call_segments = `his_rd_p_${chrom}_${bin_size}_partition_GC_mosaic_segments_2d`
+        let mosaic_call_segments = signal_name_obj.signals['Mosaic_segments']
+        if (this.pytor_keys.includes(mosaic_call_segments)){
+            const chrom_dataset = await this.h5_obj.get(mosaic_call_segments)
             const t0 = Date.now()
             let chrom_data = await chrom_dataset.value
             //console.log(`rd_call_combined ${mosaic_call_segments}  ${Date.now() - t0}`)
@@ -143,9 +180,10 @@ class HDF5Reader {
             
         }
 
-        let mosaic_calls = `his_rd_p_${chrom}_${bin_size}_partition_GC_mosaic_call_2d`
-        if (h5_obj_keys.includes(mosaic_calls)){
-            const segments_call_dataset = await h5_obj.get(mosaic_calls)
+        // let mosaic_calls = `his_rd_p_${chrom}_${bin_size}_partition_GC_mosaic_call_2d`
+        let mosaic_calls = signal_name_obj.signals['Mosaic_calls']
+        if (this.pytor_keys.includes(mosaic_calls)){
+            const segments_call_dataset = await this.h5_obj.get(mosaic_calls)
             let segments_call = await segments_call_dataset.to_array() //create_nested_array(value, shape)
             segments.forEach((ind_segment, segment_idx) => {
                 ind_segment.forEach((bin_value, bin_idx) =>{
@@ -157,22 +195,19 @@ class HDF5Reader {
         return chr_wig
         
     }
-
-   async rd_stat(h5_obj, h5_obj_keys, bin_size){
-        /* 
-        returns a list for rd statistics information 
-        paramter
-        ---------
-        h5_obj: cnvpytor read object
-        h5_obj_keys: a list of available signal names
-        bin_size: bin size
-        
-        */
-        
+    
+    /**
+     * returns a list for rd statistics information 
+     * @param {integer} bin_size - bin_size 
+     * @returns - array - read depth statistics array
+     */
+    async rd_stat(bin_size){
+    
         let rd_stat_signal =  `rd_stat_${bin_size}_auto`
         let rd_stat;
-        if (h5_obj_keys.includes(rd_stat_signal)){
-            const rd_stat_dataset = await h5_obj.get(rd_stat_signal)
+        
+        if (this.pytor_keys.includes(rd_stat_signal)){
+            const rd_stat_dataset = await this.h5_obj.get(rd_stat_signal)
             const t0 = Date.now()
             rd_stat = await rd_stat_dataset.value
             //console.log(`rd_stat_signal ${rd_stat_signal}  ${Date.now() - t0}`)
@@ -181,13 +216,13 @@ class HDF5Reader {
     }
 
     
-    async get_chr_signal(h5_obj, h5_obj_keys, chrom, bin_size, signal_name, rd_stat){
+    async get_chr_signal(chrom, bin_size, signal_name, rd_stat){
         /* return a list of dictionary for a chromosome */
         let chr_wig = [];
         
-        if (h5_obj_keys.includes(signal_name)){
-            const chrom_dataset = await h5_obj.get(signal_name)
-            const t0 = Date.now()
+        if (this.pytor_keys.includes(signal_name)){
+            const chrom_dataset = await this.h5_obj.get(signal_name)
+            
             let chrom_data = await chrom_dataset.value
             //console.log(`chr_signal ${signal_name}  ${Date.now() - t0}`)
             chrom_data.forEach((bin_value, bin_idx) => {
@@ -197,12 +232,12 @@ class HDF5Reader {
         return chr_wig
     }
 
-    async get_baf_signals(h5_obj, h5_obj_keys, chrom, bin_size, signal_name){
+    async get_baf_signals(chrom, bin_size, signal_name){
         /* return two list of dictionary*/
         let chr_wig_1 = [];
         let chr_wig_2 = [];
-        if (h5_obj_keys.includes(signal_name)){
-            let chrom_dataset = await h5_obj.get(signal_name)
+        if (this.pytor_keys.includes(signal_name)){
+            let chrom_dataset = await this.h5_obj.get(signal_name)
             let chrom_data = await chrom_dataset.to_array() //create_nested_array(value, shape)
             chrom_data.forEach((bin_value, bin_idx) => {
                 let max_value =  Math.max(...bin_value);
@@ -217,13 +252,13 @@ class HDF5Reader {
         return [chr_wig_1, chr_wig_2]
     }
 
-    async get_baf_signals_v2(h5_obj, h5_obj_keys, chrom, bin_size, signal_name){
+    async get_baf_signals_v2(chrom, bin_size, signal_name){
         
         /* return two list of dictionary*/
         let chr_wig_1 = [];
         let chr_wig_2 = [];
-        if (h5_obj_keys.includes(signal_name)){
-            let chrom_dataset = await h5_obj.get(signal_name)
+        if (this.pytor_keys.includes(signal_name)){
+            let chrom_dataset = await this.h5_obj.get(signal_name)
             let chrom_data = await chrom_dataset.to_array() //create_nested_array(value, shape)
             chrom_data.forEach((lh, bin_idx) => {
                 if (!isNaN(lh)){
@@ -242,19 +277,20 @@ class HDF5Reader {
 
 class ParseSignals{
 
+    /**
+     * Parse a signal names
+     * 
+     * @param {*} signals - List of keys in pytor files 
+     */
     constructor(signals){
-        /*
-        Parse a signal names
-
-        parameter
-        ---------
-        signals: List of keys in pytor files
-        */
         this.signals = signals
     }
 
+    /**
+     * 
+     * @returns - return list of rd bins
+     */
     get_rd_bins(){
-        /* return list of rd bins */
         let rd_keys = [];
         this.signals.forEach( val => {
             let match = val.match(/^his_rd_p_(.*)_(\d+)$/);
@@ -265,8 +301,12 @@ class ParseSignals{
         return rd_bins
     }
 
+    /**
+     * 
+     * @returns - return list of snp bins
+     */
     get_snp_bins(){
-        /* return list of snp bins */
+        
         let slected_signals = [];
         this.signals.forEach( val => {
             let match = val.match(/^snp_likelihood_(.*)_(\d+)_mask$/);
@@ -316,8 +356,6 @@ function create_nested_array(value, shape) {
     }
     return output;
 }
-
-
 
 
 
