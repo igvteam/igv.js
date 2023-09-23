@@ -56,20 +56,14 @@ ChromosomeSelectWidget.prototype.hide = function () {
 
 ChromosomeSelectWidget.prototype.update = function (genome) {
 
-    const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice()
-    // console.log(`${ this.showAllChromosomes ? 'Do' : 'Do not'} show all chromosomes. List ${ list }`)
-
-    if (genome.showWholeGenomeView()) {
-        list.unshift('all')
-        list.unshift('')
-    }
+    const list = this.showAllChromosomes ? genome.chromosomeNames : genome.wgChromosomeNames
 
     this.select.innerHTML = ''
 
     for (let name of list) {
         const option = document.createElement('option')
         option.setAttribute('value', name)
-        option.innerText = name
+        option.innerText = genome.getChromosomeDisplayName(name)
         this.select.appendChild(option)
     }
 

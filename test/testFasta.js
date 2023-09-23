@@ -38,13 +38,13 @@ suite("testFasta", function () {
         // Note -- coordinates are UCSC style
         // chr22:29565177-29565216
         const sequence = await fasta.getSequence("chr22", 29565176, 29565216)
-        const expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA",
-            seqString = sequence.toUpperCase()
+        const expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA"
+        const seqString = sequence.toUpperCase()
         assert.equal(seqString, expectedSeqString)
 
 
         const noSSequence = await fasta.getSequence("noSuchChr", 0, 10)
-        assert.equal(null, noSSequence);
+        assert.equal(null, noSSequence)
 
     })
 
@@ -97,7 +97,7 @@ suite("testFasta", function () {
         assert.equal(seq, expected)
 
         // No length token
-        const chr1 = fasta.chromosomes["chr1"]
+        const chr1 = fasta.chromosomes.get("chr1")
         assert.equal(chr1.bpLength, 1000025)
 
     })
@@ -145,7 +145,7 @@ suite("testFasta", function () {
         seq = await fasta.getSequence("chr1", 1999995, 2000005)
         assert.equal(seq, expected)
 
-        const chr1 = fasta.chromosomes["chr1"]
+        const chr1 = fasta.chromosomes.get("chr1")
         assert.equal(chr1.bpLength, 249250621)
 
 

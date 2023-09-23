@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+<button id="load-hub">Load hub</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+    //import Hub from "../../js/ucsc/ucscHub.js"
+
+    const hubOptions = {
+        url: "https://hgdownload.soe.ucsc.edu/hubs/GCA/011/100/615/GCA_011100615.1/hub.txt",
+        includeTracks: "all"
+    }
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), {genome: "hg19"})
+
+    document.getElementById("load-hub").addEventListener("click",async  () => {
+        await browser.loadTrackHub(hubOptions)
+        //
+        // const hub = await Hub.loadHub(hubOptions.url)
+        // const trackGroups = hub.getAllTracks()
+        //
+        // // flatten structure
+        // const allTracks = []
+        // for(let g of trackGroups.values()) {
+        //     allTracks.push(...g)
+        // }
+        // browser.loadTrackList(allTracks)
+    })
+
+
+</script>
+
+</body>
+
+</html>

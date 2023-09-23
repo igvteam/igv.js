@@ -34,14 +34,15 @@ const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'inde
 
 class NonIndexedFasta {
 
+    #chromosomeNames
+    chromosomes = new Map()
+    sequences = new Map()
 
     constructor(reference) {
 
         this.fastaURL = reference.fastaURL
         this.withCredentials = reference.withCredentials
-        this.chromosomeNames = []
-        this.chromosomes = {}
-        this.sequences = new Map()
+
 
         // Build a track-like config object from the referenceObject
         const config = {}
@@ -58,7 +59,18 @@ class NonIndexedFasta {
         return this.loadAll()
     }
 
+    get chromosomeNames() {
+        if(!this.#chromosomeNames) {
+            this.#chromosomeNames = Array.from(this.chromosomes.keys())
+        }
+    }
+
     async getSequence(chr, start, end) {
+
+        if(this.sequences.size === 0) {
+            await this.loadAll()
+
+        }
 
         if (!this.sequences.has(chr)) {
             return undefined
@@ -164,12 +176,11 @@ class NonIndexedFasta {
         function pushChromosome(current, order) {
             const length = current.length || (current.offset + current.seq.length)
             if (!chrNameSet.has(current.chr)) {
-                this.chromosomeNames.push(current.chr)
                 this.sequences.set(current.chr, [])
-                this.chromosomes[current.chr] = new Chromosome(current.chr, order, length)
+                this.chromosomes.set(current.chr, new Chromosome(current.chr, order, length))
                 chrNameSet.add(current.chr)
             } else {
-                const c = this.chromosomes[current.chr]
+                const c = this.chromosomes.get(current.chr)
                 c.bpLength = Math.max(c.bpLength, length)
             }
             this.sequences.get(current.chr).push(new SequenceSlice(current.offset, current.seq))

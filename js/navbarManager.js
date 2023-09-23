@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import GenomeUtils from "./genome/genome.js"
+import GenomeUtils from "./genome/genomeUtils.js"
 
 class NavbarManager {
 
