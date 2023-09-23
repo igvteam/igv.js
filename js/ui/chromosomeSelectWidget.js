@@ -60,11 +60,17 @@ ChromosomeSelectWidget.prototype.update = function (genome) {
 
     this.select.innerHTML = ''
 
-    for (let name of list) {
-        const option = document.createElement('option')
-        option.setAttribute('value', name)
-        option.innerText = genome.getChromosomeDisplayName(name)
-        this.select.appendChild(option)
+    if(list.length < 1000) {
+
+        for (let name of list) {
+            const option = document.createElement('option')
+            option.setAttribute('value', name)
+            option.innerText = genome.getChromosomeDisplayName(name)
+            this.select.appendChild(option)
+        }
+    } else {
+        this.select.style.display = "NONE"
+
     }
 
 }

@@ -717,7 +717,7 @@ class Browser {
 
         // If the genome is defined directly from a fasta file or data url the "id" will be the full url.  Don't display
         // this.
-        let genomeLabel = (genome.id && genome.id.length < 10 ? genome.id : '')
+        let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : '')
         this.$current_genome.text(genomeLabel)
         this.$current_genome.attr('title', genome.id || '')
         this.chromosomeSelectWidget.update(genome)

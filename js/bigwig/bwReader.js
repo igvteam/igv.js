@@ -49,7 +49,9 @@ class BWReader {
         this.genome = genome
         this.rpTreeCache = {}
         this.config = config
-        this.loader = isDataURL(this.path) ? new DataBuffer(this.path) : igvxhr
+        this.bufferSize = BUFFER_SIZE
+        this.loader = isDataURL(this.path) ? new DataBuffer(this.path) :
+            config.wholeFile ? new WholeFileBuffer(this.path) :  igvxhr
     }
 
     async readWGFeatures(bpPerPixel, windowFunction) {
@@ -316,7 +318,7 @@ class RPTree {
 
     async load() {
         const rootNodeOffset = this.fileOffset + RPTREE_HEADER_SIZE
-        const bufferedReader = isDataURL(this.path) ?
+        const bufferedReader = isDataURL(this.path) || this.config.wholeFile ?
             this.loader :
             new BufferedReader(this.config, BUFFER_SIZE)
         this.rootNode = await this.readNode(rootNodeOffset, bufferedReader)
@@ -381,7 +383,7 @@ class RPTree {
 
             let leafItems = [],
                 processing = new Set(),
-                bufferedReader = isDataURL(self.path) ?
+                bufferedReader = isDataURL(self.path) || self.config.wholeFile ?
                     self.loader :
                     new BufferedReader(self.config, BUFFER_SIZE)
 
@@ -746,6 +748,50 @@ class DataBuffer {
             new Uint8Array(this.data, requestedRange.start, len) :
             new DataView(this.data, requestedRange.start, len)
     }
+}
+
+class WholeFileBuffer {
+
+    data
+    constructor(path) {
+        this.path = path
+    }
+
+    async loadFile() {
+       this.data = await igvxhr.loadArrayBuffer(this.path)
+    }
+
+    /**
+     * igvxhr interface
+     * @param ignore
+     * @param options
+     * @returns {any}
+     */
+    async loadArrayBuffer(ignore, options) {
+        if(!this.data) {
+            await this.loadFile()
+        }
+        const range = options.range
+        return range ? this.data.slice(range.start, range.start + range.size) : this.data
+    }
+
+    /**
+     * BufferedReader interface
+     *
+     * @param requestedRange - byte rangeas {start, size}
+     * @param fulfill - function to receive result
+     * @param asUint8 - optional flag to return result as an UInt8Array
+     */
+    async dataViewForRange(requestedRange, asUint8) {
+        if(!this.data) {
+            await this.loadFile()
+        }
+        const len = Math.min(this.data.byteLength - requestedRange.start, requestedRange.size)
+        return asUint8 ?
+            new Uint8Array(this.data, requestedRange.start, len) :
+            new DataView(this.data, requestedRange.start, len)
+    }
+
 }
 
 export default BWReader
