@@ -10,7 +10,7 @@ import C2S from "./canvas2svg.js"
 import {getTrack} from "./trackFactory.js"
 import ROISet from "./roi/ROISet.js"
 import XMLSession from "./session/igvXmlSession.js"
-import GenomeUtils from "./genome/genome.js"
+import GenomeUtils from "./genome/genomeUtils.js"
 import loadPlinkFile from "./sample/sampleInformation.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
 import {createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
@@ -52,6 +52,7 @@ import SampleInfo from "./sample/sampleInfo.js"
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import HicFile from "./hic/straw/hicFile.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
+import Hub from "./ucsc/ucscHub.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -419,7 +420,7 @@ class Browser {
     }
 
     savePNGtoFile(filename) {
-        html2canvas(this.columnContainer, { allowTaint: true }).then(canvas => {
+        html2canvas(this.columnContainer, {allowTaint: true}).then(canvas => {
             const path = filename || 'igvjs.png'
             const data = canvas.toDataURL('image/png')
             FileUtils.download(path, data)
@@ -454,7 +455,7 @@ class Browser {
 
             const urlOrFile = options.url || options.file
 
-            if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
+            if (options.url && StringUtils.isString(options.url) && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
                 const json = Browser.uncompressSession(options.url)
                 return JSON.parse(json)
 
@@ -470,10 +471,18 @@ class Browser {
                     const string = await igvxhr.loadString(urlOrFile)
                     return new XMLSession(string, knownGenomes)
 
+                } else if (filename.endsWith("hub.txt")) {
+                    const hub = await Hub.loadHub(options.url, options)
+                    const genomeConfig = hub.getGenomeConfig(options.includeTracks)
+                    const initialLocus = hub.getDefaultPosition()
+                    return {
+                        locus: initialLocus,
+                        reference: genomeConfig
+                    }
                 } else if (filename.endsWith(".json")) {
                     return igvxhr.loadJson(urlOrFile)
                 } else {
-                    return undefined
+                    throw Error("Unrecognized session file format:" + filename)
                 }
             }
         }
@@ -723,7 +732,14 @@ class Browser {
      */
     async loadGenome(idOrConfig) {
 
-        const genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
+        let genomeConfig
+        if (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
+            const hub = await Hub.loadHub(idOrConfig.url, idOrConfig)
+            genomeConfig = hub.getGenomeConfig("all")
+        } else {
+            genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
+        }
+
         await this.loadReference(genomeConfig, undefined)
 
         const tracks = genomeConfig.tracks || []
@@ -739,6 +755,28 @@ class Browser {
         await this.updateViews()
 
         return this.genome
+    }
+
+    /**
+     * Load a UCSC single-file genome assembly hub.
+     * @param options
+     * @returns {Promise<void>}
+     */
+    async loadTrackHub(options) {
+
+        const hub = await Hub.loadHub(options.url, options)
+        const genomeConfig = hub.getGenomeConfig()
+        const initialLocus = hub.getDefaultPosition()
+        if (initialLocus) {
+            const session = {
+                locus: initialLocus,
+                reference: genomeConfig
+            }
+            return this.loadSessionObject(session)
+
+        } else {
+            return this.loadGenome(genomeConfig)
+        }
     }
 
     /**
@@ -816,17 +854,13 @@ class Browser {
      */
     async loadTrackList(configList) {
 
-        // const [ config ] = configList
-        // if ('sequence' !== config.type && 'refgene' !== config.format) {
-        //
-        //     const extension = getFileExtension(config.url)
-        //
-        //     if ('txt' === extension) {
-        //         await this.sampleInfo.loadSampleInfoFile(this, config.url)
-        //         return undefined
-        //
-        //     }
-        // }
+        // Impose an order if not specified
+        let order = 0
+        for (let c of configList) {
+            if (c.order === undefined) {
+                c.order = order++
+            }
+        }
 
         const promises = []
         for (let config of configList) {
@@ -882,7 +916,7 @@ class Browser {
         try {
 
             // Load a hidden track -- used to populate searchable database without creating a track
-            if(config.hidden) {
+            if (config.hidden) {
                 const featureSource = FeatureSource(config, this.genome)
                 await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
                 return

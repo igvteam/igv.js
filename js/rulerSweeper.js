@@ -26,7 +26,7 @@
 
 import {DOMUtils} from "../node_modules/igv-ui/dist/igv-ui.js"
 import {validateGenomicExtent} from "./util/igvUtils.js"
-import GenomeUtils from './genome/genome.js'
+import GenomeUtils from './genome/genomeUtils.js'
 import { ROI_USER_DEFINED_COLOR } from "./roi/ROISet.js"
 
 const RULER_SWEEPER_COLOR = 'rgba(68, 134, 247, 0.25)'

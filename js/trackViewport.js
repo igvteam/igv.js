@@ -8,7 +8,7 @@ import Viewport from "./viewport.js"
 import {FileUtils} from "../node_modules/igv-utils/src/index.js"
 import {DOMUtils} from "../node_modules/igv-ui/dist/igv-ui.js"
 import C2S from "./canvas2svg.js"
-import GenomeUtils from "./genome/genome.js"
+import GenomeUtils from "./genome/genomeUtils.js"
 import {bppFeatureFetchThreshold} from "./sequenceTrack.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
