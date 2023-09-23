@@ -2,6 +2,13 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {isNumber} from "../util/igvUtils.js"
 import Chromosome from "./chromosome.js"
 
+/**
+ * The Genome class represents an assembly and consists of the following elements
+ *   sequence - Object representing the DNA sequence
+ *   chromosomes - Objects with chromosome meta data including name, length, and alternate names (aliases)
+ *   aliases - table of chromosome name aliases (optional)
+ *   cytobands - cytoband data for drawing an ideogram (optional)
+ */
 
 class Genome {
 

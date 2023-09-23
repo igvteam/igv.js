@@ -23,9 +23,9 @@ suite("testTwobit", function () {
         seq = await twobit.readSequence("chr1", 85, 124)
         assert.equal(expectedSeq, seq)
 
-        // masked region chr1:120,565,606-120,565,644
-        expectedSeq = "ccaaatccagcccccacctgtttgtgcaaatacagtttt"
-        seq = await twobit.readSequence("chr1", 120565605, 120565644)
+        // partially masked region chr1:120,565,295-120,565,335
+        expectedSeq = "TATGAACTTTTGTTCGTTGGTgctcagtcctagaccctttt"
+        seq = await twobit.readSequence("chr1", 120565294, 120565335)
         assert.equal(expectedSeq, seq)
 
         // Unrecongized sequence name
@@ -43,7 +43,7 @@ suite("testTwobit", function () {
         const twobit = new TwobitSequence({fastaURL: url})
         await twobit.init()
 
-        await twobit._readSequenceMetadata("chr1")
+        await twobit._getSequenceMetaData("chr1")
 
         const meta = twobit.metaIndex.get("chr1")
         assert.equal(248956422, meta.dnaSize)
@@ -61,7 +61,7 @@ suite("testTwobit", function () {
             nBlocksSize += block.size
             lastBlockEnd = block.start
         }
-
     })
+
 
 })

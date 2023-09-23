@@ -6,7 +6,6 @@
 
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
-import ChromSizes from "./chromSizes.js"
 
 const twoBit = ['T', 'C', 'A', 'G']
 const byteTo4Bases = []
@@ -25,39 +24,17 @@ class TwobitSequence {
     littleEndian
     index = new Map()
     metaIndex = new Map()
-    #chromosomeNames   // For compatibility with fasta representations
 
     constructor(config) {
         this.url = config.twobitURL || config.fastaURL
-        this.chromeSizes = config.chromeSizes
     }
 
     async init() {
         await this._readIndex()
-        if(this.chromeSizes) {
-            this.chromeSizes = new ChromSizes(this.chromeSizes)
-            await this.chromeSizes.init()
-        }
     }
 
-    async _getSequenceMetaData(seqName) {
-        if (!this.metaIndex.has(seqName)) {
-            await this._readSequenceMetadata(seqName)
-        }
-        return this.metaIndex.get(seqName)
-    }
-
-    async getChromosome(seqName) {
-        // const record = this._getSequenceMetaData(seqName)
-        // return record ?
-        //     {name: seqName, bpLength: record.dnaSize} :
-        //     undefined
-        return this.chromeSizes ? this.chromeSizes.chromosomes[seqName] : undefined
-    }
-
-    get chromosomes()  {
-        return this.chromeSizes ? this.chromeSizes.chromosomes : undefined
-
+    get chromosomeNames() {
+        return Array.from(this.index.keys())
     }
 
     async readSequence(seqName, regionStart, regionEnd) {
@@ -92,53 +69,42 @@ class TwobitSequence {
 
         const baseBytesOffset = Math.floor(regionStart / 4)
         const start = record.packedPos + baseBytesOffset
-        const size = Math.floor((regionEnd - regionStart) / 4) + 1
-
+        const size = Math.floor(regionEnd/4) - baseBytesOffset + 1
 
         const baseBytesArrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start, size}})
         const baseBytes = new Uint8Array(baseBytesArrayBuffer)
 
         let sequenceBases = ''
-        for (
-            let genomicPosition = regionStart;
-            genomicPosition < regionEnd;
-            genomicPosition += 1
-        ) {
-            // check whether we are currently masked
-            while (maskBlocks.length && maskBlocks[0].end <= genomicPosition) {
-                maskBlocks.shift()
-            }
-            const baseIsMasked =
-                maskBlocks[0] &&
-                maskBlocks[0].start <= genomicPosition &&
-                maskBlocks[0].end > genomicPosition
+        for (let genomicPosition = regionStart; genomicPosition < regionEnd; genomicPosition += 1) {
 
-            // // process the N block if we have one
-            if (
-                nBlocks[0] &&
-                genomicPosition >= nBlocks[0].start &&
-                genomicPosition < nBlocks[0].end
-            ) {
-                const currentNBlock = nBlocks.shift()
-                for (
-                    ;
-                    genomicPosition < currentNBlock.end && genomicPosition < regionEnd;
-                    genomicPosition += 1
-                ) {
-                    if (genomicPosition >= regionEnd) break
-                    sequenceBases += baseIsMasked ? 'n' : 'N'
+            // function checks if  we are currently masked
+            const baseIsMasked = () => {
+                while (maskBlocks.length && maskBlocks[0].end <= genomicPosition) {
+                    maskBlocks.shift()
                 }
-                genomicPosition -= 1
+                return maskBlocks[0] && maskBlocks[0].start <= genomicPosition && maskBlocks[0].end > genomicPosition
+            }
+
+            // process the N block if we have one
+            if (nBlocks[0] && genomicPosition >= nBlocks[0].start && genomicPosition < nBlocks[0].end) {
+                const currentNBlock = nBlocks.shift()
+                while (genomicPosition < currentNBlock.end && genomicPosition < regionEnd) {
+                    sequenceBases += baseIsMasked() ? 'n' : 'N'
+                    genomicPosition++
+                }
             } else {
                 const bytePosition = Math.floor(genomicPosition / 4) - baseBytesOffset
                 const subPosition = genomicPosition % 4
                 const byte = baseBytes[bytePosition]
-                sequenceBases += baseIsMasked
-                    ? maskedByteTo4Bases[byte][subPosition]
-                    : byteTo4Bases[byte][subPosition]
+                try {
+                    sequenceBases += baseIsMasked()
+                        ? maskedByteTo4Bases[byte][subPosition]
+                        : byteTo4Bases[byte][subPosition]
+                } catch (e) {
+                    console.error(e)
+                }
             }
         }
-
         return sequenceBases
     }
 
@@ -194,76 +160,103 @@ class TwobitSequence {
     }
 
     /**
-     * Read the sequence metadata for the given seq name *
+     * NOTE: this can be very slow for large # of sequences as each requires a seek.  Its provided in case a 2bit
+     * file is used without a corresponding chromSizes, chromAliases, or cytobad file.  In other words last resort *
+     * @returns {Promise<*>}
+     */
+    async getChromosomes() {
+        if (!this.chromosomes) {
+            await this.init()
+            const seqNames = Array.from(this.index.keys())
+            this.chromosomes = []
+            for (let name of seqNames) {
+                const metadata = await this._getSequenceMetaData(name)
+                this.chromosomes.push({name, bpLength: metadata.dnaSize})
+            }
+        }
+        return this.chromosomes
+    }
+
+    /**
+     * Fetch the sequence metadata for the given seq name *
      *
      * @param seqName
      * @returns {Promise<void>}
      */
-    async _readSequenceMetadata(seqName) {
+    async _getSequenceMetaData(seqName) {
 
-        let offset = this.index.get(seqName)
-        if (!offset) {
-            return
-        }
+        if (!this.metaIndex.has(seqName)) {
 
-        // Read size of dna data & # of "N" blocks
-        let size = 8
-        let binaryBuffer = await this._loadBinaryBuffer(offset, size)
-        const dnaSize = binaryBuffer.getUInt()
-        const nBlockCount = binaryBuffer.getUInt()
-        offset += size
+            if (!this.index) {
+                throw Error("TwobitSequence object must be initialized before accessing sequence")
+            }
 
-        // Read "N" blocks and # of mask blocks
-        size = nBlockCount * (4 + 4) + 4
-        binaryBuffer = await this._loadBinaryBuffer(offset, size)
-        const nBlockStarts = []
-        for (let i = 0; i < nBlockCount; i++) {
-            nBlockStarts.push(binaryBuffer.getUInt())
-        }
-        const nBlockSizes = []
-        for (let i = 0; i < nBlockCount; i++) {
-            nBlockSizes.push(binaryBuffer.getUInt())
-        }
-        const maskBlockCount = binaryBuffer.getUInt()
-        offset += size
+            let offset = this.index.get(seqName)
+            if (!offset) {
+                return
+            }
 
-        // Read "mask" blocks
-        size = maskBlockCount * (4 + 4) + 4
-        binaryBuffer = await this._loadBinaryBuffer(offset, size)
-        const maskBlockStarts = []
-        for (let i = 0; i < maskBlockCount; i++) {
-            maskBlockStarts.push(binaryBuffer.getUInt())
-        }
-        const maskBlockSizes = []
-        for (let i = 0; i < maskBlockCount; i++) {
-            maskBlockSizes.push(binaryBuffer.getUInt())
-        }
+            // Read size of dna data & # of "N" blocks
+            let size = 8
+            let binaryBuffer = await this._loadBinaryBuffer(offset, size)
+            const dnaSize = binaryBuffer.getUInt()
+            const nBlockCount = binaryBuffer.getUInt()
+            offset += size
 
-        //Transform "N" and "mask" block data into something more useful
-        const nBlocks = []
-        for (let i = 0; i < nBlockCount; i++) {
-            nBlocks.push(new Block(nBlockStarts[i], nBlockSizes[i]))
-        }
-        const maskBlocks = []
-        for (let i = 0; i < maskBlockCount; i++) {
-            maskBlocks.push(new Block(maskBlockStarts[i], maskBlockSizes[i]))
-        }
+            // Read "N" blocks and # of mask blocks
+            size = nBlockCount * (4 + 4) + 4
+            binaryBuffer = await this._loadBinaryBuffer(offset, size)
+            const nBlockStarts = []
+            for (let i = 0; i < nBlockCount; i++) {
+                nBlockStarts.push(binaryBuffer.getUInt())
+            }
+            const nBlockSizes = []
+            for (let i = 0; i < nBlockCount; i++) {
+                nBlockSizes.push(binaryBuffer.getUInt())
+            }
+            const maskBlockCount = binaryBuffer.getUInt()
+            offset += size
 
-        const reserved = binaryBuffer.getUInt()
-        if (reserved != 0) {
-            throw Error("Bad 2-bit file")
-        }
-        offset += size
-        const packedPos = offset
+            // Read "mask" blocks
+            size = maskBlockCount * (4 + 4) + 4
+            binaryBuffer = await this._loadBinaryBuffer(offset, size)
+            const maskBlockStarts = []
+            for (let i = 0; i < maskBlockCount; i++) {
+                maskBlockStarts.push(binaryBuffer.getUInt())
+            }
+            const maskBlockSizes = []
+            for (let i = 0; i < maskBlockCount; i++) {
+                maskBlockSizes.push(binaryBuffer.getUInt())
+            }
 
-        const meta = {
-            dnaSize,
-            nBlocks,
-            maskBlocks,
-            packedPos
-        }
-        this.metaIndex.set(seqName, meta)
+            //Transform "N" and "mask" block data into something more useful
+            const nBlocks = []
+            for (let i = 0; i < nBlockCount; i++) {
+                nBlocks.push(new Block(nBlockStarts[i], nBlockSizes[i]))
+            }
+            const maskBlocks = []
+            for (let i = 0; i < maskBlockCount; i++) {
+                maskBlocks.push(new Block(maskBlockStarts[i], maskBlockSizes[i]))
+            }
 
+            const reserved = binaryBuffer.getUInt()
+            if (reserved != 0) {
+                throw Error("Bad 2-bit file")
+            }
+            offset += size
+            const packedPos = offset
+
+            const meta = {
+                dnaSize,
+                nBlocks,
+                maskBlocks,
+                packedPos
+            }
+            this.metaIndex.set(seqName, meta)
+
+
+        }
+        return this.metaIndex.get(seqName)
     }
 
     /**
@@ -292,20 +285,10 @@ class TwobitSequence {
         return overlappingBlocks
     }
 
-
-    get chromosomeNames() {
-        if(!this.#chromosomeNames) {
-            this.#chromosomeNames = Array.from(this.index.keys())
-        }
-        return this.#chromosomeNames
-    }
-
     async _loadBinaryBuffer(start, size) {
         const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start, size}})
         return new BinaryParser(new DataView(arrayBuffer), this.littleEndian)
     }
-
-
 }
 
 class Block {
