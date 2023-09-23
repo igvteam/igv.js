@@ -1,217 +1,69 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {isNumber} from "../util/igvUtils.js"
+import Chromosome from "./chromosome.js"
+
+/**
+ * The Genome class represents an assembly and consists of the following elements
+ *   sequence - Object representing the DNA sequence
+ *   chromosomes - Objects with chromosome meta data including name, length, and alternate names (aliases)
+ *   aliases - table of chromosome name aliases (optional)
+ *   cytobands - cytoband data for drawing an ideogram (optional)
  */
-
-import {loadFasta} from "./fasta.js"
-import Cytoband from "./cytoband.js"
-import {buildOptions, isDataURL} from "../util/igvUtils.js"
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import version from "../version.js"
-
-const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json"
-const BACKUP_GENOMES_URL = "https://s3.amazonaws.com/igv.org.genomes/genomes.json"
-
-const splitLines = StringUtils.splitLines
-
-const GenomeUtils = {
-
-    loadGenome: async function (options) {
-
-        const cytobandUrl = options.cytobandURL
-        const aliasURL = options.aliasURL
-        const sequence = await loadFasta(options)
-
-        let aliases
-        if (aliasURL) {
-            aliases = await loadAliases(aliasURL, sequence.config)
-        }
-
-        const genome = new Genome(options, sequence, aliases)
-
-        // Delay loading cytbands untils after genome initialization to use chromosome aliases (1 vs chr1, etc).
-        if (cytobandUrl) {
-            genome.cytobands = await loadCytobands(cytobandUrl, sequence.config, genome)
-        }
-
-        return genome
-    },
-
-    initializeGenomes: async function (config) {
-
-        if (!GenomeUtils.KNOWN_GENOMES) {
-
-            const table = {}
-
-            // Get default genomes
-            if (config.loadDefaultGenomes !== false) {
-                try {
-                    const url = DEFAULT_GENOMES_URL
-                    const jsonArray = await igvxhr.loadJson(url, {timeout: 5000})
-                    processJson(jsonArray)
-                } catch (e) {
-                    console.error(e)
-                    try {
-                        const url = BACKUP_GENOMES_URL
-                        const jsonArray = await igvxhr.loadJson(url, {})
-                        processJson(jsonArray)
-                    } catch (e) {
-                        console.error(e)
-                        console.warn("Errors loading default genome definitions.")
-                    }
-                }
-            }
-
-            // Add user-defined genomes
-            const genomeList = config.genomeList || config.genomes
-            if (genomeList) {
-                if (typeof genomeList === 'string') {
-                    const jsonArray = await igvxhr.loadJson(genomeList, {})
-                    processJson(jsonArray)
-                } else {
-                    processJson(genomeList)
-                }
-            }
-
-            GenomeUtils.KNOWN_GENOMES = table
-
-            function processJson(jsonArray) {
-                jsonArray.forEach(function (json) {
-                    table[json.id] = json
-                })
-                return table
-            }
-        }
-    },
-
-    isWholeGenomeView: function (chr) {
-        return 'all' === chr.toLowerCase()
-    },
-
-    // Expand a genome id to a reference object, if needed
-    expandReference: function (alert, idOrConfig) {
-
-        // idOrConfig might be json
-        if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
-            try {
-                idOrConfig = JSON.parse(idOrConfig)
-            } catch (e) {
-                // Apparently its not json,  could be an ID starting with "{".  Unusual but legal.
-            }
-        }
-
-        let genomeID
-        if (StringUtils.isString(idOrConfig)) {
-            genomeID = idOrConfig
-        } else if (idOrConfig.genome) {
-            genomeID = idOrConfig.genome
-        } else if (idOrConfig.id !== undefined && idOrConfig.fastaURL === undefined) {
-            // Backward compatibility
-            genomeID = idOrConfig.id
-        }
-
-        if (genomeID) {
-            const knownGenomes = GenomeUtils.KNOWN_GENOMES
-            const reference = knownGenomes[genomeID]
-            if (!reference) {
-                alert.present(new Error(`Unknown genome id: ${genomeID}`), undefined)
-            }
-            return reference
-        } else {
-            return idOrConfig
-        }
-    }
-}
-
 
 class Genome {
 
-    constructor(config, sequence, aliases) {
+    featureDB = new Map()   // Hash of name -> feature, used for search function.
+
+    constructor(config, sequence, aliases, chromosomes, cytobands) {
 
         this.config = config
         this.id = config.id || generateGenomeID(config)
         this.sequence = sequence
-        this.chromosomeNames = sequence.chromosomeNames
-        this.chromosomes = sequence.chromosomes  // An object (functions as a dictionary)
-        this.featureDB = new Map()   // Hash of name -> feature, used for search function.
+        this.nameSet = config.nameSet
+        this.chromosomes = chromosomes
 
-        this.wholeGenomeView = config.wholeGenomeView === undefined || config.wholeGenomeView
-        if (this.wholeGenomeView && Object.keys(sequence.chromosomes).length > 1) {
-            constructWG(this, config)
+        // Set chromosome order for WG view and chromosome pulldown
+        if (config.chromosomeOrder) {
+            if (Array.isArray(config.chromosomeOrder)) {
+                this.wgChromosomeNames = config.chromosomeOrder
+            } else {
+                this.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
+            }
         } else {
-            this.wgChromosomeNames = sequence.chromosomeNames
+            this.wgChromosomeNames = trimChromosomes(chromosomes)
         }
 
-        /**
-         * Return the official chromosome name for the (possibly) alias.  Deals with
-         * 1 <-> chr1,  chrM <-> MT,  IV <-> chr4, etc.
-         * @param str
-         */
-        var chrAliasTable = {},
-            self = this
-
-
-        // The standard mappings
-        chrAliasTable["all"] = "all"
-        this.chromosomeNames.forEach(function (name) {
-            var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name
-            chrAliasTable[alias.toLowerCase()] = name
-            if (name === "chrM") chrAliasTable["mt"] = "chrM"
-            if (name === "MT") chrAliasTable["chrm"] = "MT"
-            chrAliasTable[name.toLowerCase()] = name
-        })
-
-        // Custom mappings
-        if (aliases) {
-            aliases.forEach(function (array) {
-                // Find the official chr name
-                var defName, i
-
-                for (i = 0; i < array.length; i++) {
-                    if (self.chromosomes[array[i]]) {
-                        defName = array[i]
-                        break
-                    }
-                }
-
-                if (defName) {
-                    array.forEach(function (alias) {
-                        if (alias !== defName) {
-                            chrAliasTable[alias.toLowerCase()] = defName
-                            chrAliasTable[alias] = defName      // Should not be needed
-                        }
-                    })
-                }
-
-            })
+        // Build the ordered list of chromosome names
+        const o = new Set(this.wgChromosomeNames)
+        this.chromosomeNames = Array.from(this.wgChromosomeNames)
+        for (let c of this.chromosomes.keys()) {
+            if (!o.has(c)) this.chromosomeNames.push(c)
         }
 
-        this.chrAliasTable = chrAliasTable
+        // Build the alias table and correct cytoband sequence names
+        this.chrAliasTable = createAliasTable(this.chromosomes, aliases)
+
+        if (cytobands) {
+            this.cytobands = {}
+            for (let c of Object.keys(cytobands)) {
+                const chrName = this.getChromosomeName(c)
+                this.cytobands[chrName] = cytobands[c]
+            }
+        }
+
+        // Optionally create the psuedo chromosome "all" to support whole genome view
+        this.wholeGenomeView = config.wholeGenomeView !== false
+        if (this.wholeGenomeView && this.chromosomes.size > 1) {
+            const l = this.wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
+            this.chromosomes.set("all", new Chromosome("all", 0, l))
+            this.chromosomeNames.unshift("all")
+        }
+
 
     }
 
     showWholeGenomeView() {
-        return this.config.wholeGenomeView !== false
+        return this.wholeGenomeView
     }
 
     toJSON() {
@@ -223,7 +75,7 @@ class Genome {
     }
 
     getHomeChromosomeName() {
-        if (this.showWholeGenomeView() && this.chromosomes.hasOwnProperty("all")) {
+        if (this.showWholeGenomeView() && this.chromosomes.has("all")) {
             return "all"
         } else {
             return this.chromosomeNames[0]
@@ -236,13 +88,23 @@ class Genome {
         return chr ? chr : str
     }
 
+    getChromosomeDisplayName(str) {
+        const canonicalName = this.getChromosomeName(str)
+        if (this.nameSet) {
+            return this.chromosomes.has(canonicalName) ? this.chromosomes.get(canonicalName).getAltName("ucsc") : canonicalName
+        } else {
+            return canonicalName
+        }
+    }
+
     getChromosome(chr) {
         chr = this.getChromosomeName(chr)
-        return this.chromosomes[chr]
+        return this.chromosomes.get(chr)
     }
 
     getCytobands(chr) {
-        return this.cytobands ? this.cytobands[chr] : null
+        const chrName = this.getChromosomeName(chr)
+        return this.cytobands ? this.cytobands[chrName] : null
     }
 
     getLongestChromosome() {
@@ -340,14 +202,12 @@ class Genome {
      */
     getGenomeLength() {
 
-        let self = this
-
         if (!this.bpLength) {
             let bpLength = 0
-            self.wgChromosomeNames.forEach(function (cname) {
-                let c = self.chromosomes[cname]
+            for (let cname of this.wgChromosomeNames) {
+                let c = this.chromosomes.get(cname)
                 bpLength += c.bpLength
-            })
+            }
             this.bpLength = bpLength
         }
         return this.bpLength
@@ -391,117 +251,93 @@ class Genome {
             }
         }
     }
+
+    constructWG(config) {
+
+        // Compute psuedo-chromosome "all"
+        const l = this.wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
+        this.chromosomes.set("all", new Chromosome("all", 0, l))
+    }
 }
 
-async function loadCytobands(cytobandUrl, config, genome) {
+function createAliasTable(chromosomes, aliases) {
 
-    let data
-    if (isDataURL(cytobandUrl)) {
-        const plain = BGZip.decodeDataURI(cytobandUrl)
-        data = ""
-        const len = plain.length
-        for (let i = 0; i < len; i++) {
-            data += String.fromCharCode(plain[i])
+    /**
+     * Return the official chromosome name for the (possibly) alias.  Deals with
+     * 1 <-> chr1,  chrM <-> MT,  IV <-> chr4, etc.
+     * @param str
+     */
+    const chrAliasTable = {}
+
+    // The standard mappings
+    chrAliasTable["all"] = "all"
+    chromosomes.forEach(function (c) {
+        const name = c.name
+        if (name.startsWith("chr")) {
+            chrAliasTable[name.substring(3)] = name
+        } else if (isNumber(name)) {
+            chrAliasTable["chr" + name] = name
         }
-    } else {
-        data = await igvxhr.loadString(cytobandUrl, buildOptions(config))
+        if (name === "chrM") chrAliasTable["mt"] = "chrM"
+        if (name === "MT") chrAliasTable["chrm"] = "MT"
+        chrAliasTable[name.toLowerCase()] = name
+    })
+
+    // Custom mappings
+    if (aliases) {
+        for (let array of aliases) {
+
+            // Find the official chr name
+            let defName
+            for (let i = 0; i < array.length; i++) {
+                if (chromosomes.get(array[i])) {
+                    defName = array[i]
+                    break
+                }
+            }
+
+            if (defName) {
+                for (let alias of array) {
+                    if (alias !== defName) {
+                        chrAliasTable[alias.toLowerCase()] = defName
+                        chrAliasTable[alias] = defName      // Should not be needed
+                    }
+                }
+            }
+        }
     }
-
-    // var bands = [],
-    //     lastChr,
-    //     n = 0,
-    //     c = 1,
-    //
-    //     len = lines.length,
-    const cytobands = {}
-    let lastChr
-    let bands = []
-    const lines = splitLines(data)
-    for (let line of lines) {
-        var tokens = line.split("\t")
-        var chr = genome.getChromosomeName(tokens[0])
-        if (!lastChr) lastChr = chr
-
-        if (chr !== lastChr) {
-            cytobands[lastChr] = bands
-            bands = []
-            lastChr = chr
-        }
-
-        if (tokens.length === 5) {
-            //10	0	3000000	p15.3	gneg
-            var start = parseInt(tokens[1])
-            var end = parseInt(tokens[2])
-            var name = tokens[3]
-            var stain = tokens[4]
-            bands.push(new Cytoband(start, end, name, stain))
-        }
-    }
-
-    return cytobands
+    return chrAliasTable
 }
 
-function loadAliases(aliasURL, config) {
+/**
+ * Trim small sequences (chromosomes) and return the list of trimmed chromosome names.
+ * The results are used to construct the whole genome view and optionally chromosome pulldown
+ * *
+ * @param config - the "reference" configuration object
+ * @returns {string|*|*[]|string[]}
+ */
+function trimChromosomes(chromosomes) {
 
-    return igvxhr.loadString(aliasURL, buildOptions(config))
+    // Trim small chromosomes.
+    const lengths = Array.from(chromosomes.values()).map(c => c.bpLength)
+    const max = lengths.reduce((acc, val) => acc > val ? acc : val)  // Dont' use spread operator here, lengths can be large
+    const threshold = max / 50
+    const wgChromosomes = Array.from(chromosomes.values()).filter(chr => chr.bpLength > threshold)
 
-        .then(function (data) {
-
-            var lines = splitLines(data),
-                aliases = []
-
-            lines.forEach(function (line) {
-                if (!line.startsWith("#") && line.length > 0) aliases.push(line.split("\t"))
-            })
-
-            return aliases
-        })
+    // Sort chromosomes.  First segregate numeric and alpha names, sort numeric, leave alpha as is
+    const numericChromosomes = wgChromosomes.filter(chr => isDigit(chr.name.replace('chr', '')))
+    const alphaChromosomes = wgChromosomes.filter(chr => !isDigit(chr.name.replace('chr', '')))
+    numericChromosomes.sort((a, b) => Number.parseInt(a.name.replace('chr', '')) - Number.parseInt(b.name.replace('chr', '')))
+    const wgChromosomeNames = numericChromosomes.map(chr => chr.name)
+    for (let chr of alphaChromosomes) {
+        wgChromosomeNames.push(chr.name)
+    }
+    return wgChromosomeNames
 
 }
 
-function constructWG(genome, config) {
-
-    let wgChromosomes
-    if (config.chromosomeOrder) {
-        if (Array.isArray(config.chromosomeOrder)) {
-            genome.wgChromosomeNames = config.chromosomeOrder
-        } else {
-            genome.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
-        }
-        wgChromosomes = genome.wgChromosomeNames.map(nm => genome.chromosomes[nm]).filter(chr => chr !== undefined)
-
-    } else {
-
-        // Trim small chromosomes.
-        const lengths = Object.keys(genome.chromosomes).map(key => genome.chromosomes[key].bpLength)
-        const median = lengths.reduce((a, b) => Math.max(a, b))
-        const threshold = median / 50
-        wgChromosomes = Object.values(genome.chromosomes).filter(chr => chr.bpLength > threshold)
-
-        // Sort chromosomes.  First segregate numeric and alpha names, sort numeric, leave alpha as is
-        const numericChromosomes = wgChromosomes.filter(chr => isDigit(chr.name.replace('chr', '')))
-        const alphaChromosomes = wgChromosomes.filter(chr => !isDigit(chr.name.replace('chr', '')))
-        numericChromosomes.sort((a, b) => Number.parseInt(a.name.replace('chr', '')) - Number.parseInt(b.name.replace('chr', '')))
-
-        const wgChromosomeNames = numericChromosomes.map(chr => chr.name)
-        for (let chr of alphaChromosomes) {
-            wgChromosomeNames.push(chr.name)
-        }
-        genome.wgChromosomeNames = wgChromosomeNames
-    }
-
-
-    // Compute psuedo-chromosome "all"
-    const l = wgChromosomes.reduce((accumulator, currentValue) => accumulator += currentValue.bpLength, 0)
-    genome.chromosomes["all"] = {
-        name: "all",
-        bpLength: l
-    }
-
-    function isDigit(val) {
-        return /^\d+$/.test(val)
-    }
-
+function isDigit(val) {
+    return /^\d+$/.test(val)
 }
 
 function generateGenomeID(config) {
@@ -516,4 +352,4 @@ function generateGenomeID(config) {
     }
 }
 
-export default GenomeUtils
+export default Genome

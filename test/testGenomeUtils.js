@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import GenomeUtils from "../js/genome/genome.js"
+import GenomeUtils from "../js/genome/genomeUtils.js"
 import {assert} from 'chai'
 
 suite("testGenomeUtils", function () {
@@ -115,6 +115,24 @@ suite("testGenomeUtils", function () {
         await GenomeUtils.initializeGenomes(config)
         assert.ok(GenomeUtils.KNOWN_GENOMES["_sacCer3"])
         assert.isUndefined(GenomeUtils.KNOWN_GENOMES["sacCer3"])
+
+    })
+
+    test("2bit genome", async function() {
+
+        this.timeout(400000)
+
+        const reference = {
+            id: "GCF_016699485.2",
+            format: "2bit",
+            twobitURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.2bit",
+            aliasBbURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.chromAlias.bb"
+        }
+
+
+        const genome = await GenomeUtils.loadGenome(reference)
+
+        assert.ok(genome)
 
     })
 
