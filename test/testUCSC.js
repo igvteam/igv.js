@@ -14,7 +14,7 @@ suite("ucsc utilities", function () {
         const hub = await Hub.loadHub("https://hgdownload.soe.ucsc.edu/hubs/GCA/011/100/615/GCA_011100615.1/hub.txt")
         assert.ok(hub.hub)
         assert.ok(hub.genome)
-        assert.equal(34, hub.tracks.length)
+        assert.equal(34, hub.trackStanzas.length)
 
         const genomeConfig = hub.getGenomeConfig()
         assert.ok(genomeConfig)
