@@ -165,7 +165,7 @@ async function loadAliases(aliasURL, config) {
  */
 async function loadAliasesBB(url, config) {
 
-    const bbReader = new BWReader({url: url, format: "bigbed"})
+    const bbReader = new BWReader({url: url, format: "bigbed", wholeFile: true})
     const features = await bbReader.readWGFeatures()
     if (features.length === 0) return
 

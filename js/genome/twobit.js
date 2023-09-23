@@ -69,7 +69,7 @@ class TwobitSequence {
 
         const baseBytesOffset = Math.floor(regionStart / 4)
         const start = record.packedPos + baseBytesOffset
-        const size = Math.floor(regionEnd/4) - baseBytesOffset + 1
+        const size = Math.floor(regionEnd / 4) - baseBytesOffset + 1
 
         const baseBytesArrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: {start, size}})
         const baseBytes = new Uint8Array(baseBytesArrayBuffer)
@@ -140,22 +140,26 @@ class TwobitSequence {
         let estSize
         let binaryBuffer
 
+        let estNameLength = 20
         for (let i = 0; i < this.sequenceCount; i++) {
+
             if (!binaryBuffer || binaryBuffer.available() < 1) {
-                estSize = (this.sequenceCount - i) * 20
+                estSize = (this.sequenceCount - i) * estNameLength
                 binaryBuffer = await this._loadBinaryBuffer(ptr, estSize)
             }
             const len = binaryBuffer.getByte()
             ptr += 1
 
             if (binaryBuffer.available() < len + 5) {
-                estSize = (this.sequenceCount - i) * 20
+                estSize = (this.sequenceCount - i) * estNameLength + 100
                 binaryBuffer = await this._loadBinaryBuffer(ptr, estSize)
             }
             const name = binaryBuffer.getString(len)
             const offset = binaryBuffer.getUInt()
             ptr += len + 4
             this.index.set(name, offset)
+
+            estNameLength = Math.floor(estNameLength * (i/(i+1)) + name.length / (i + 1))
         }
     }
 
