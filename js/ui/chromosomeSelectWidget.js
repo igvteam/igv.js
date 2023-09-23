@@ -60,16 +60,34 @@ ChromosomeSelectWidget.prototype.update = function (genome) {
 
     this.select.innerHTML = ''
 
-    if(list.length < 1000) {
-
+    if (list.length < 2000) {
         for (let name of list) {
             const option = document.createElement('option')
             option.setAttribute('value', name)
             option.innerText = genome.getChromosomeDisplayName(name)
             this.select.appendChild(option)
+            // if(this.selectDisplayCSS) {
+            //     this.select.style.display = this.selectDisplayCSS
+            //     this.container.style.display = this.containerDisplayCSS
+            //     document.getElementsByClassName("igv-search-container")[0].style.width = his.searchContainerWidthCSS
+            //}
         }
     } else {
-        this.select.style.display = "NONE"
+        // > 2,000 entries, pulldown is useless
+        // Record styles so we can restore them if another genome is loaded
+        // this.selectDisplayCSS = getComputedStyle(this.select).getPropertyValue("display")
+        // this.containerDisplayCSS = getComputedStyle(this.container).getPropertyValue("display")
+        // this.searchContainerWidthCSS = getComputedStyle(document.getElementsByClassName("igv-search-container")[0]).getPropertyValue("width")
+        //
+        // this.select.style.display = "none"
+        // this.container.style.display = "none"
+        // document.getElementsByClassName("igv-search-container")[0].style.width = "300px"
+
+        const name = 'all'
+        const option = document.createElement('option')
+        option.setAttribute('value', name)
+        option.innerText = genome.getChromosomeDisplayName(name)
+        this.select.appendChild(option)
 
     }
 
