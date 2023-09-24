@@ -1,5 +1,3 @@
-import {buildOptions} from "../util/igvUtils.js"
-import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 /*
  https://genomewiki.ucsc.edu/index.php/Assembly_Hubs
@@ -10,17 +8,31 @@ import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 class Hub {
 
-    static async loadHub(url, options) {
+    static async loadHub(options) {
 
-        options = options || {}
-        const stanzas = await parseHub(url, options)
-        return new Hub(url, stanzas)
+        if (!options.url) {
+            throw Error("Expected url")
+        }
+
+        const stanzas = await loadStanzas(options)
+
+        let groups
+        if ("genome" === stanzas[1].type) {
+            const genome = stanzas[1]
+            if (genome.hasProperty("groups")) {
+                const idx = options.url.lastIndexOf("/")
+                const baseURL = options.url.substring(0, idx + 1)
+                const groupsTxtURL = baseURL + genome.getProperty("groups")
+                groups = await loadStanzas({url: groupsTxtURL})
+            }
+        }
+        return new Hub(options.url, stanzas, groups)
     }
 
     static supportedTypes = new Set(["bigBed", "bigWig", "bigGenePred"])
-    static filterTracks = new Set(["cytoBandIdeo", "assembly", "gap", "allGaps"])
+    static filterTracks = new Set(["cytoBandIdeo"])
 
-    constructor(url, stanzas) {
+    constructor(url, stanzas, groups) {
 
         const idx = url.lastIndexOf("/")
         this.baseURL = url.substring(0, idx + 1)
@@ -54,6 +66,16 @@ class Hub {
                 console.warn(`Unexpected stanza type: ${stanzas[i].type}`)
             }
         }
+
+        if (groups) {
+            this.groupPriorityMap = new Map()
+            for (let g of groups) {
+                if (g.hasProperty("priority")) {
+                    this.groupPriorityMap.set(g.getProperty("name"), Number.parseInt(g.getProperty("priority")) * 10)
+                }
+            }
+            this.groupPriorities = new Map()
+        }
     }
 
     getDefaultPosition() {
@@ -78,7 +100,7 @@ class Hub {
 
         // Tracks.  To prevent loading tracks set `includeTracks` to false
         if (includeTracks) {
-            config.tracks = this.getTracksConfigs(includeTracks)
+            config.tracks = this.#getTracksConfigs(includeTracks)
         }
 
         return config
@@ -87,7 +109,7 @@ class Hub {
     /**
      * Return collection of igv track config object, organized by "group*
      */
-    getTracksConfigs(group) {
+    #getTracksConfigs(group) {
         return this.trackStanzas.filter(t => {
             return t.getProperty("visibility") !== "hide" &&
                 Hub.supportedTypes.has(t.format) &&
@@ -96,7 +118,7 @@ class Hub {
                 ("all" === group || group === t.getProperty("group"))
 
         })
-            .map(t => this.getTrack(t))
+            .map(t => this.#getTrackConfig(t))
     }
 
     /** example
@@ -118,7 +140,7 @@ class Hub {
      * html html/GCA_011100615.1_Macaca_fascicularis_6.0.gc5Base
      * @param t
      */
-    getTrack(t) {
+    #getTrackConfig(t) {
 
         const format = t.format
 
@@ -129,10 +151,13 @@ class Hub {
             "displayMode": t.displayMode,
         }
 
-        const description = t.getProperty("html")
-        if (description) {
+        if (t.hasProperty("longLabel") && t.hasProperty("html")) {
+            if (config.description) config.description += "<br/>"
             config.description = `<a target="_blank" href="${this.baseURL + t.getProperty("html")}">${t.getProperty("longLabel")}</a>`
+        } else if (t.hasOwnProperty("longLabel")) {
+            config.description = t.getProperty("longLabel")
         }
+
         if (t.hasProperty("autoScale")) {
             config.autoscale = t.getProperty("autoScale").toLowerCase() === "on"
         }
@@ -153,24 +178,35 @@ class Hub {
             config.altColor = c.indexOf(",") > 0 ? `rgb(${c})` : c
         }
         if (t.hasProperty("viewLimits")) {
-            const tokens = t.getProperty("maxHeightPixels").split(":")
-            config.max = Number.parseInt(tokens[0])
+            const tokens = t.getProperty("viewLimits").split(":")
+            config.min = Number.parseInt(tokens[0])
             if (tokens.length > 1) {
-                config.min = Number.parseInt(tokens[1])
+                config.max = Number.parseInt(tokens[1])
             }
         }
         if (t.hasProperty("itemRgb")) {
             // TODO -- this not supported yet
         }
-        if ("hide" === t.getProperty("hide")) {
+        if ("hide" === t.getProperty("visibility")) {
             // TODO -- this not supported yet
             config.visible = false
         }
+        if (t.hasProperty("url")) {
+            config.infoURL = t.getProperty("url")
+        }
 
+        if (t.hasProperty("group")) {
+            config.group = t.getProperty("group")
+            if (this.groupPriorityMap && this.groupPriorityMap.has(config.group)) {
+                const nextPriority = this.groupPriorityMap.get(config.group) + 1
+                config.order = nextPriority
+                this.groupPriorityMap.set(config.group, nextPriority)
+            }
+        }
 
         return config
-
     }
+
 }
 
 function firstWord(str) {
@@ -248,10 +284,11 @@ class Stanza {
  * @param url
  * @returns {Promise<*[]>}
  */
-async function parseHub(url, options) {
+async function loadStanzas(options) {
 
-    const data = await igvxhr.loadString(url, options)
-    const lines = StringUtils.splitLines(data)
+    const response = await fetch(options.url);
+    const data = await response.text();
+    const lines =  data.split(/\n|\r\n|\r/g);
 
     const nodes = []
     let currentNode
@@ -305,5 +342,5 @@ function indentLevel(str) {
 }
 
 
-export {parseHub}
+export {loadStanzas}
 export default Hub
