@@ -472,7 +472,7 @@ class Browser {
                     return new XMLSession(string, knownGenomes)
 
                 } else if (filename.endsWith("hub.txt")) {
-                    const hub = await Hub.loadHub(options.url, options)
+                    const hub = await Hub.loadHub(options)
                     const genomeConfig = hub.getGenomeConfig(options.includeTracks)
                     const initialLocus = hub.getDefaultPosition()
                     return {
@@ -670,9 +670,10 @@ class Browser {
 
         this.updateNavbarDOMWithGenome(genome)
 
-        if (genomeChange) {
+        // TODO -- I don't understand the genomeChange test.  We always want to trigger a fresh start on loading a session or genome
+        //if (genomeChange) {
             this.removeAllTracks()
-        }
+        //}
 
         let locus = getInitialLocus(initialLocus, genome)
         const locusFound = await this.search(locus, true)
@@ -714,12 +715,10 @@ class Browser {
     }
 
     updateNavbarDOMWithGenome(genome) {
-
-        // If the genome is defined directly from a fasta file or data url the "id" will be the full url.  Don't display
-        // this.
-        let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : '')
+        let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0,8)}...${genome.id.substring(genome.id.length-8)}`)
         this.$current_genome.text(genomeLabel)
-        this.$current_genome.attr('title', genome.id || '')
+        this.$current_genome.attr('title', `${genome.name} (${genome.id || ''})`)
+        // TODO -- hover text with more description and optionally html link
         this.chromosomeSelectWidget.update(genome)
     }
 
@@ -734,8 +733,8 @@ class Browser {
 
         let genomeConfig
         if (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
-            const hub = await Hub.loadHub(idOrConfig.url, idOrConfig)
-            genomeConfig = hub.getGenomeConfig("all")
+            const hub = await Hub.loadHub(idOrConfig)
+            genomeConfig = hub.getGenomeConfig("genes")
         } else {
             genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
         }
@@ -764,7 +763,7 @@ class Browser {
      */
     async loadTrackHub(options) {
 
-        const hub = await Hub.loadHub(options.url, options)
+        const hub = await Hub.loadHub(options)
         const genomeConfig = hub.getGenomeConfig()
         const initialLocus = hub.getDefaultPosition()
         if (initialLocus) {

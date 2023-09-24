@@ -18,6 +18,7 @@ class Genome {
 
         this.config = config
         this.id = config.id || generateGenomeID(config)
+        this.name = config.name
         this.sequence = sequence
         this.nameSet = config.nameSet
         this.chromosomes = chromosomes
@@ -60,6 +61,10 @@ class Genome {
         }
 
 
+    }
+
+    get description() {
+        return this.config.description || ""
     }
 
     showWholeGenomeView() {
