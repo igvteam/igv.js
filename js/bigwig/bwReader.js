@@ -51,7 +51,7 @@ class BWReader {
         this.config = config
         this.bufferSize = BUFFER_SIZE
         this.loader = isDataURL(this.path) ? new DataBuffer(this.path) :
-            config.wholeFile ? new WholeFileBuffer(this.path) :  igvxhr
+            config.wholeFile ? new WholeFileBuffer(this.path) : igvxhr
     }
 
     async readWGFeatures(bpPerPixel, windowFunction) {
@@ -63,7 +63,7 @@ class BWReader {
         return this.readFeatures(chr1, 0, chr2, Number.MAX_VALUE, bpPerPixel, windowFunction)
     }
 
-    async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction) {
+    async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction = "mean") {
 
         await this.loadHeader()
         const chrIdx1 = this.chromTree.chromToID[chr1]
@@ -79,9 +79,11 @@ class BWReader {
             const zoomLevelHeaders = await this.getZoomHeaders()
             let zoomLevelHeader = bpPerPixel ? zoomLevelForScale(bpPerPixel, zoomLevelHeaders) : undefined
             if (zoomLevelHeader) {
+                console.log("Zoom")
                 treeOffset = zoomLevelHeader.indexOffset
                 decodeFunction = decodeZoomData
             } else {
+                console.log("Raw")
                 treeOffset = this.header.fullIndexOffset
                 decodeFunction = decodeWigData
             }
@@ -132,7 +134,11 @@ class BWReader {
                 return a.start - b.start
             })
 
-            return allFeatures
+            if (this.type === "bigwig" && ("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
+                return summarizeWigData(allFeatures, bpPerPixel, windowFunction)
+            } else {
+                return allFeatures
+            }
         }
     }
 
@@ -617,7 +623,7 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
 
     if (chromId >= chrIdx1 && chromId <= chrIdx2) {
 
-        let idx = 0;
+        let idx = 0
         while (itemCount-- > 0) {
             let value
             switch (type) {
@@ -646,7 +652,6 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
                 const chr = chrDict[chromId]
                 featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value})
             }
-
         }
     }
 }
@@ -718,6 +723,80 @@ function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, ch
     }
 }
 
+function summarizeWigData(features, bpPerPixel, windowFunction = "mean") {
+    console.log("Features size: " + features.length + "    bpPerPixel: " + bpPerPixel)
+    if (bpPerPixel < 2) {
+        return features
+    }
+
+    // Assumed features are sorted by position.  Wig features cannot overlap.  Note, UCSC "reductionLevel" == bpPerPixel
+    const chr = features[0].chr
+    const start = features[0].start
+    const sumData = []
+    const validCount = []
+
+    const binSize = Math.floor(bpPerPixel)
+
+    const firstBin = Math.floor(start / binSize)
+    const summaryFeatures = []
+
+    for (let f of features) {
+
+        const startBin = Math.floor(f.start / binSize)
+        const endBin = Math.floor(f.end / binSize)
+
+       // if (endBin - startBin <= 1) {
+
+            let startWeight, endWeight
+            if(endBin == startBin) {
+             startWeight = endWeight = (f.end - f.start) / binSize
+            } else {
+                startWeight = (1 - (f.start - startBin * binSize)) / binSize
+                endWeight = (f.end - endBin * binSize) / binSize
+            }
+            //const startWeight = 1
+            //const endWeight = 1
+
+            for (let b = startBin - firstBin; b <= endBin - firstBin; b++) {
+
+                const weight = (b === startBin) ? startWeight : (b === endBin) ? endWeight : 1
+                validCount[b] = (validCount[b] === undefined) ? weight : validCount[b] + weight
+                const weightedValue = weight * f.value
+
+                if (sumData[b] === undefined) {
+                    sumData[b] = "mean" === windowFunction ? weightedValue : f.value
+                } else {
+                    switch (windowFunction) {
+                        case "min":
+                            sumData[b] = Math.min(sumData[b], f.value)
+                            break
+                        case "max":
+                            sumData[b] = Math.max(sumData[b], f.value)
+                            break
+                        case "mean":
+                            sumData[b] = sumData[b] + weightedValue
+                    }
+                }
+            }
+       // } else {
+        //    summaryFeatures.push(f)
+       // }
+    }
+
+    for (let b = 0; b < sumData.length; b++) {
+        let value = ("mean" === windowFunction) ? sumData[b] / validCount[b] : sumData[b]
+        if (value > 0) {
+            summaryFeatures.push({chr, start: (firstBin + b) * binSize, end: (firstBin + b) * binSize, value})
+        }
+    }
+
+    summaryFeatures.sort((a,b) => a.start - b.start)
+    console.log("Summary features size = " + summaryFeatures.length)
+    return summaryFeatures
+
+
+}
+
 class DataBuffer {
 
     constructor(dataURI) {
@@ -753,12 +832,13 @@ class DataBuffer {
 class WholeFileBuffer {
 
     data
+
     constructor(path) {
         this.path = path
     }
 
     async loadFile() {
-       this.data = await igvxhr.loadArrayBuffer(this.path)
+        this.data = await igvxhr.loadArrayBuffer(this.path)
     }
 
     /**
@@ -768,7 +848,7 @@ class WholeFileBuffer {
      * @returns {any}
      */
     async loadArrayBuffer(ignore, options) {
-        if(!this.data) {
+        if (!this.data) {
             await this.loadFile()
         }
         const range = options.range
@@ -783,7 +863,7 @@ class WholeFileBuffer {
      * @param asUint8 - optional flag to return result as an UInt8Array
      */
     async dataViewForRange(requestedRange, asUint8) {
-        if(!this.data) {
+        if (!this.data) {
             await this.loadFile()
         }
         const len = Math.min(this.data.byteLength - requestedRange.start, requestedRange.size)
