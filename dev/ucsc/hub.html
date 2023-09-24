@@ -6,22 +6,38 @@
 
 <body>
 
-<button id="load-hub">Load hub</button>
+<label>
+    Enter full URL to hub.txt file
+    <input id="hub-input" type="text" style="width: 600px" value="https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt">
+</label>
+
+<button id="load-genome">Load hub as genome</button>
+<button id="load-session">Load hub as session</button>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
     import igv from "../../js/index.js"
+    import Hub from "../../js/ucsc/ucscHub.js"
 
     const hubOptions = {
-        url: "https://hgdownload.soe.ucsc.edu/hubs/GCA/024/610/745/GCA_024610745.1/hub.txt",
-        includeTracks: "genes"
+        url: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt",
+        includeTracks: "all"
     }
 
-    const browser = await igv.createBrowser(document.getElementById('igvDiv'), {genome: "hg19"})
+    const hub = await Hub.loadHub(hubOptions)
+    const igvConfig = {
+        locus: hub.getDefaultPosition(),
+        reference: hub.getGenomeConfig()
+    }
 
-    document.getElementById("load-hub").addEventListener("click", () => browser.loadTrackHub(hubOptions))
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+
+    document.getElementById("load-genome").addEventListener("click", () =>
+        browser.loadGenome({url: document.getElementById("hub-input").value}))
+    document.getElementById("load-session").addEventListener("click", () =>
+        browser.loadSession({url: document.getElementById("hub-input").value}))
 
 
 </script>
