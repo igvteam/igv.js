@@ -25,7 +25,7 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import {StringUtils} from "../node_modules/igv-utils/src/index.js"
-import GenomeUtils from "./genome/genome.js"
+import GenomeUtils from "./genome/genomeUtils.js"
 import NavbarButton from "./ui/navbarButton.js"
 
 const navbarResponsiveClasses = {}
