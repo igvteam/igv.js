@@ -29,7 +29,7 @@ import {BGZip, igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import getDecoder from "./bbDecoders.js"
 import {parseAutoSQL} from "../util/ucscUtils.js"
-import summarizeWig from "./summarizeWig.js"
+import summarizeWigData from "./summarizeWigData.js"
 
 let BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
 let BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
@@ -80,11 +80,9 @@ class BWReader {
             const zoomLevelHeaders = await this.getZoomHeaders()
             let zoomLevelHeader = bpPerPixel ? zoomLevelForScale(bpPerPixel, zoomLevelHeaders) : undefined
             if (zoomLevelHeader) {
-                console.log("Zoom")
                 treeOffset = zoomLevelHeader.indexOffset
                 decodeFunction = decodeZoomData
             } else {
-                console.log("Raw")
                 treeOffset = this.header.fullIndexOffset
                 decodeFunction = decodeWigData
             }
@@ -135,7 +133,10 @@ class BWReader {
                 return a.start - b.start
             })
 
-            if (this.type === "bigwig" && ("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
+            // If we are reading "raw" wig data optionally summarize it with window function.
+            // Zoom level data is already summarized
+            if (decodeFunction === decodeWigData &&
+                ("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
                 return summarizeWigData(allFeatures, bpPerPixel, windowFunction)
             } else {
                 return allFeatures

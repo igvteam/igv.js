@@ -1,28 +1,3 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 import FeatureSource from './featureSource.js'
 import TDFSource from "../tdf/tdfSource.js"
 import TrackBase from "../trackBase.js"
@@ -31,8 +6,10 @@ import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import MenuUtils from "../ui/menuUtils.js"
+import summarizeWigData from "../bigwig/summarizeWigData.js"
 
 const DEFAULT_COLOR = 'rgb(150, 150, 150)'
+
 
 class WigTrack extends TrackBase {
 
@@ -44,7 +21,9 @@ class WigTrack extends TrackBase {
         graphType: 'bar',
         autoscale: true,
         normalize: undefined,
-        scaleFactor: undefined
+        scaleFactor: undefined,
+        overflowColor: `rgb(255,32,255)`,
+        baselineColor: 'lightGray'
     }
 
     constructor(config, browser) {
@@ -113,7 +92,14 @@ class WigTrack extends TrackBase {
                 f.value *= scaleFactor
             }
         }
-        return features
+        // If we are reading "raw" wig data optionally summarize it with window function.
+        // Bigwig data is already summarized
+        if (!this.resolutionAware &&
+            ("mean" === this.windowFunction || "min" === this.windowFunction || "max" === this.windowFunction)) {
+            return summarizeWigData(features, bpPerPixel, this.windowFunction)
+        } else {
+            return features
+        }
     }
 
     menuItemList() {
@@ -175,10 +161,10 @@ class WigTrack extends TrackBase {
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
         const posColor = this.color || DEFAULT_COLOR
 
-        let baselineColor
-        if (typeof posColor === "string" && posColor.startsWith("rgb(")) {
-            baselineColor = IGVColor.addAlpha(posColor, 0.1)
-        }
+        // let baselineColor
+        // if (typeof posColor === "string" && posColor.startsWith("rgb(")) {
+        //     baselineColor = IGVColor.addAlpha(posColor, 0.2)
+        // }
         let lastNegValue = 1
         const scaleFactor = this.getScaleFactor(this.dataRange.min, this.dataRange.max, options.pixelHeight, this.logScale)
         const yScale = (yValue) => this.logScale
@@ -211,12 +197,7 @@ class WigTrack extends TrackBase {
 
                     const color = this.getColorForFeature(f)
 
-                    if (this.graphType === "points") {
-                        const pointSize = this.config.pointSize || 3
-                        const px = x + width / 2
-                        IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color})
-
-                    } else if (this.graphType === "line") {
+                    if (this.graphType === "line") {
                         if (lastY != undefined) {
                             IGVGraphics.strokeLine(ctx, lastPixelEnd, lastY, x, y, {
                                 "fillStyle": color,
@@ -224,9 +205,26 @@ class WigTrack extends TrackBase {
                             })
                         }
                         IGVGraphics.strokeLine(ctx, x, y, x + width, y, {"fillStyle": color, "strokeStyle": color})
-                    } else {
-                        const height = y - y0
+                    } else if (this.graphType === "points") {
+                        const pointSize = this.config.pointSize || 3
+                        const px = x + width / 2
+                        IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color})
+
+                        if(f.value > this.dataRange.max) {
+                            IGVGraphics.fillCircle(ctx, px, pointSize/2, pointSize / 2, 3, {fillStyle: this.overflowColor})
+                        } else if(f.value < this.dataRange.min) {
+                            IGVGraphics.fillCircle(ctx, px, pixelHeight-pointSize/2, pointSize / 2, 3, {fillStyle: this.overflowColor})
+                        }
+
+                    } else  {
+                        const height = Math.min(pixelHeight, y - y0)
                         IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
+
+                        if(f.value > this.dataRange.max) {
+                            IGVGraphics.fillRect(ctx, x, 0, width, 3, {fillStyle: this.overflowColor})
+                        } else if(f.value < this.dataRange.min) {
+                            IGVGraphics.fillRect(ctx, x, pixelHeight-3, width, 3, {fillStyle: this.overflowColor})
+                        }
 
                     }
                     lastPixelEnd = x + width
@@ -236,7 +234,7 @@ class WigTrack extends TrackBase {
                 // If the track includes negative values draw a baseline
                 if (this.dataRange.min < 0) {
                     const basepx = (this.dataRange.max / (this.dataRange.max - this.dataRange.min)) * options.pixelHeight
-                    IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor})
+                    IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: this.baselineColor})
                 }
             }
         }
