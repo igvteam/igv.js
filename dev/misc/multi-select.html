@@ -172,10 +172,113 @@
                     "height": 70
                 }
             ]
-        }
+        };
 
-    igv.createBrowser(document.getElementById("myDiv"), config).then(function (browser) {
-    })
+    const overly_tracks_config =
+        {
+            "version": "2.16.0",
+            "showSampleNames": false,
+            "reference": {
+                "id": "hg19",
+                "name": "Human (GRCh37/hg19)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+            },
+            "locus": "chr8:128,746,680-128,756,197",
+            "gtexSelections": {
+                "chr8:128,746,680-128,756,197": {
+                    "gene": "MYC",
+                    "snp": null
+                }
+            },
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "name": "Homo sapiens A549 SIN3A ",
+                    "url": "https://www.encodeproject.org/files/ENCFF582HJY/@@download/ENCFF582HJY.bigWig",
+                    "color": "#ff2987",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549",
+                        "AssayType": "ChIP-seq",
+                        "Target": "SIN3A ",
+                        "BioRep": "3",
+                        "TechRep": "3_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Michael Snyder, Stanford",
+                        "Accession": "ENCFF582HJY",
+                        "Experiment": "ENCSR513XQX"
+                    },
+                    "order": 1,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128
+                },
+                {
+                    "name": "Homo sapiens A549 treated with 0.02% ethanol for 1 hour YY1 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF085ITE/@@download/ENCFF085ITE.bigWig",
+                    "color": "#83f902",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549 treated with 0.02% ethanol for 1 hour",
+                        "AssayType": "ChIP-seq",
+                        "Target": "YY1 ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Richard Myers, HAIB",
+                        "Accession": "ENCFF085ITE",
+                        "Experiment": "ENCSR000BPM"
+                    },
+                    "order": 1,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128
+                },
+                {
+                    "name": "Homo sapiens angular gyrus tissue male adult (81 years) H3K36me3 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF202ZTM/@@download/ENCFF202ZTM.bigWig",
+                    "color": "#008cff",
+                    "metadata": {
+                        "Biosample": "Homo sapiens angular gyrus tissue male adult (81 years)",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K36me3 ",
+                        "BioRep": "1",
+                        "TechRep": "1_3",
+                        "OutputType": "signal p-value",
+                        "Format": "bigWig",
+                        "Lab": "Bradley Bernstein, Broad",
+                        "Accession": "ENCFF202ZTM",
+                        "Experiment": "ENCSR340DBD"
+                    },
+                    "order": 1,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "id": "hg19_genes",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "removable": false,
+                    "order": 1000000,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
+            ]
+        };
+
+    igv.createBrowser(document.getElementById("myDiv"), overly_tracks_config).then(function (browser) {})
 
 
 </script>
