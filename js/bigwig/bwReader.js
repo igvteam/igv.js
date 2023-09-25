@@ -136,6 +136,7 @@ class BWReader {
             // If we are reading "raw" wig data optionally summarize it with window function.
             // Zoom level data is already summarized
             if (decodeFunction === decodeWigData &&
+                bpPerPixel &&
                 ("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
                 return summarizeWigData(allFeatures, bpPerPixel, windowFunction)
             } else {
