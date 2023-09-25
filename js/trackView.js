@@ -34,6 +34,7 @@ import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import MenuUtils, { canShowColorPicker } from "./ui/menuUtils.js"
 import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState } from './ui/multiTrackSelectButton.js'
+import {hexToRGB} from "./util/colorPalletes.js"
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
@@ -215,12 +216,12 @@ class TrackView {
             let defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c))
             let colorHandlers =
                 {
-                    color: color => {
-                        this.track.color = color
+                    color: hex => {
+                        this.track.color = hexToRGB(hex)
                         this.repaintViews()
                     },
-                    altColor: color => {
-                        this.track.altColor = color
+                    altColor: hex => {
+                        this.track.altColor = hexToRGB(hex)
                         this.repaintViews()
                     }
 
