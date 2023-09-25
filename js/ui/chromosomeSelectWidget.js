@@ -56,7 +56,9 @@ ChromosomeSelectWidget.prototype.hide = function () {
 
 ChromosomeSelectWidget.prototype.update = function (genome) {
 
-    const list = (this.showAllChromosomes && genome.chromosomeNames.length < 1000) ?
+    console.log(genome.chromosomeNames.length)
+
+    const list = (this.showAllChromosomes && genome.chromosomeNames.length < 10000) ?
         genome.chromosomeNames : genome.wgChromosomeNames
 
     this.select.innerHTML = ''
@@ -69,7 +71,7 @@ ChromosomeSelectWidget.prototype.update = function (genome) {
         this.select.appendChild(option)
     }
 
-    if (list.length < 1000) {
+    if (list.length < 10000) {
         for (let name of list) {
             const option = document.createElement('option')
             option.setAttribute('value', name)
