@@ -3,6 +3,7 @@ import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
 import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from '../trackView.js'
 import wigTrack from "../feature/wigTrack.js"
+import {hexToRGB} from "../util/colorPalletes.js"
 
 /**
  * Configure item list for track "gear" menu.
@@ -171,24 +172,8 @@ function trackOverlayMenuItem() {
             const wigConfigs = wigTracks.map((track) => Object.assign(track.config, { color:wigTrack.color }))
 
             for (const wigTrack of wigTracks) {
-                wigTrack.config.color = wigTrack.color
+                wigTrack.config.color = wigTrack.color.startsWith('#') ? hexToRGB(wigTrack.color) : wigTrack.color
             }
-
-            // const trackConfigs = wigTracks.map(track => {
-            //
-            //     const config = Object.assign({}, track.config)
-            //
-            //     if (track.dataRange) {
-            //         config.min = track.dataRange.min
-            //         config.max = track.dataRange.max
-            //     }
-            //
-            //     return config
-            // })
-            //
-            // const reducedTrackConfigs = trackConfigs.map(({ type, format, url, color }) => {
-            //     return { type, format, url, color }
-            // })
 
             const config =
                 {
@@ -428,7 +413,6 @@ function didSelectSingleTrackType(types) {
     const unique = [ ...new Set(types) ]
     return 1 === unique.length
 }
-
 
 export { canShowColorPicker }
 

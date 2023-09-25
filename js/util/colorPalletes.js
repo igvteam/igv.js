@@ -1,5 +1,27 @@
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 
+function hexToRGB(hex) {
+    // Ensure the hex value is in the proper format
+    hex = hex.replace(/^#/, '');
+
+    // If it's a shorthand hex color (like #f06), double each character
+    if (hex.length === 3) {
+        hex = hex.split('').map(char => char + char).join('');
+    }
+
+    if (hex.length !== 6) {
+        throw new Error('Invalid HEX color.');
+    }
+
+    // Parse the r, g, b values
+    let bigint = parseInt(hex, 16);
+    let r = (bigint >> 16) & 255;
+    let g = (bigint >> 8) & 255;
+    let b = bigint & 255;
+
+    return `rgb(${r}, ${g}, ${b})`;
+}
+
 const appleCrayonPalette =
     {
         licorice: "#000000",
@@ -518,5 +540,6 @@ export {
     rgbaStringTokens,
     rgbStringTokens,
     rgbStringLerp,
-    rgbStringHeatMapLerp
+    rgbStringHeatMapLerp,
+    hexToRGB
 }
