@@ -56,11 +56,20 @@ ChromosomeSelectWidget.prototype.hide = function () {
 
 ChromosomeSelectWidget.prototype.update = function (genome) {
 
-    const list = this.showAllChromosomes ? genome.chromosomeNames : genome.wgChromosomeNames
+    const list = (this.showAllChromosomes && genome.chromosomeNames.length < 1000) ?
+        genome.chromosomeNames : genome.wgChromosomeNames
 
     this.select.innerHTML = ''
 
-    if (list.length < 2000) {
+    if(genome.showWholeGenomeView()) {
+        const name = 'all'
+        const option = document.createElement('option')
+        option.setAttribute('value', name)
+        option.innerText = genome.getChromosomeDisplayName(name)
+        this.select.appendChild(option)
+    }
+
+    if (list.length < 1000) {
         for (let name of list) {
             const option = document.createElement('option')
             option.setAttribute('value', name)
@@ -82,13 +91,6 @@ ChromosomeSelectWidget.prototype.update = function (genome) {
         // this.select.style.display = "none"
         // this.container.style.display = "none"
         // document.getElementsByClassName("igv-search-container")[0].style.width = "300px"
-
-        const name = 'all'
-        const option = document.createElement('option')
-        option.setAttribute('value', name)
-        option.innerText = genome.getChromosomeDisplayName(name)
-        this.select.appendChild(option)
-
     }
 
 }
