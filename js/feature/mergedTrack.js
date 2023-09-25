@@ -139,6 +139,9 @@ class MergedTrack extends TrackBase {
         for (let i = 0, len = this.tracks.length; i < len; i++) {
             const trackOptions = Object.assign({}, options)
             trackOptions.features = mergedFeatures.featureArrays[i]
+
+            trackOptions.alpha = 0.5
+
             this.tracks[i].dataRange = this.dataRange
             this.tracks[i].flipAxis = this.flipAxis
             this.tracks[i].logScale = this.logScale

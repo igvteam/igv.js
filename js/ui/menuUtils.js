@@ -170,10 +170,10 @@ function trackOverlayMenuItem() {
             const wigTracks = trackViews.filter(({ track }) => 'wig' === track.type).map(({ track }) => track)
             const wigConfigs = wigTracks.map((track) => Object.assign(track.config, { color:wigTrack.color }))
 
-            // for (const wigTrack of wigTracks) {
-            //     wigTrack.config.color = wigTrack.color
-            // }
-            //
+            for (const wigTrack of wigTracks) {
+                wigTrack.config.color = wigTrack.color
+            }
+
             // const trackConfigs = wigTracks.map(track => {
             //
             //     const config = Object.assign({}, track.config)
