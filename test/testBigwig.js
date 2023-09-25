@@ -33,8 +33,10 @@ suite("testBigWig", function () {
         const bwReader = new BWReader({url: url})
 
         let start = 10006
-        let end = 10040
-        let features = await bwReader.readFeatures(chr, start, chr, end)
+        const end = 10040
+        const bpPerPixel = 5
+        const windowFunction = "none"
+        const features = await bwReader.readFeatures(chr, start, chr, end, bpPerPixel, windowFunction)
         assert.equal(features.length, 35)
 
         //fixedStep chrom=chr1 start=10006 step=1 span=1

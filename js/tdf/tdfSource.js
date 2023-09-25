@@ -26,6 +26,7 @@
 
 import TDFReader from "./tdfReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
+import summarizeWigData from "../bigwig/summarizeWigData.js"
 
 class TDFSource {
 
@@ -64,6 +65,10 @@ class TDFSource {
         } else {
             return this._getFeatures(chr, start, end, bpPerPixel)
         }
+    }
+
+    async hasZoomDataFor(bpPerPixel) {
+
     }
 
     async _getFeatures(chr, start, end, bpPerPixel) {
@@ -119,7 +124,13 @@ class TDFSource {
             return a.start - b.start
         })
 
-        return features
+        // If we are reading "raw" wig data optionally summarize it with window function.
+        // Bigwig data is already summarized
+        if ("raw" === wf) {
+            return summarizeWigData(features, bpPerPixel, this.windowFunction)
+        } else {
+            return features
+        }
     }
 
     get supportsWholeGenome() {
@@ -196,7 +207,7 @@ var log2 = Math.log(2)
 
 function zoomLevelForScale(chr, bpPerPixel, genome) {
 
-    // Convert bpPerPixel to IGV "zoom" level.   This is a bit convoluted,  IGV computes zoom levels assuming
+    // Convert bpPerPixel to IGV "zoom" level.   This is a bit convoluted,  TDF is computed zoom levels assuming
     // display in a 700 pixel window.  The fully zoomed out view of a chromosome is zoom level "0".
     // Zoom level 1 is magnified 2X,  and so forth
 
