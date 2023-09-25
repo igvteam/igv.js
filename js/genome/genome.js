@@ -23,7 +23,9 @@ class Genome {
         this.nameSet = config.nameSet
         this.chromosomes = chromosomes
 
-        // Set chromosome order for WG view and chromosome pulldown
+        this.chromosomeNames = Array.from(this.chromosomes.keys())
+
+        // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
         if (config.chromosomeOrder) {
             if (Array.isArray(config.chromosomeOrder)) {
                 this.wgChromosomeNames = config.chromosomeOrder
@@ -31,14 +33,7 @@ class Genome {
                 this.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
             }
         } else {
-            this.wgChromosomeNames = trimChromosomes(chromosomes)
-        }
-
-        // Build the ordered list of chromosome names
-        const o = new Set(this.wgChromosomeNames)
-        this.chromosomeNames = Array.from(this.wgChromosomeNames)
-        for (let c of this.chromosomes.keys()) {
-            if (!o.has(c)) this.chromosomeNames.push(c)
+            this.wgChromosomeNames = trimSmallChromosomes(chromosomes)
         }
 
         // Build the alias table and correct cytoband sequence names
@@ -53,11 +48,11 @@ class Genome {
         }
 
         // Optionally create the psuedo chromosome "all" to support whole genome view
-        this.wholeGenomeView = config.wholeGenomeView !== false
-        if (this.wholeGenomeView && this.chromosomes.size > 1) {
+        this.wholeGenomeView = config.wholeGenomeView !== false && this.wgChromosomeNames && this.chromosomeNames.length > 1
+        if (this.wholeGenomeView) {
             const l = this.wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
             this.chromosomes.set("all", new Chromosome("all", 0, l))
-            this.chromosomeNames.unshift("all")
+            //this.chromosomeNames.unshift("all")
         }
 
 
@@ -321,24 +316,43 @@ function createAliasTable(chromosomes, aliases) {
  * @param config - the "reference" configuration object
  * @returns {string|*|*[]|string[]}
  */
-function trimChromosomes(chromosomes) {
+function trimSmallChromosomes(chromosomes) {
 
-    // Trim small chromosomes.
-    const lengths = Array.from(chromosomes.values()).map(c => c.bpLength)
-    const max = lengths.reduce((acc, val) => acc > val ? acc : val)  // Dont' use spread operator here, lengths can be large
-    const threshold = max / 50
-    const wgChromosomes = Array.from(chromosomes.values()).filter(chr => chr.bpLength > threshold)
+    // // Trim small chromosomes.
+    // const lengths = Array.from(chromosomes.values()).map(c => c.bpLength)
+    // const max = lengths.reduce((acc, val) => acc > val ? acc : val)  // Dont' use spread operator here, lengths can be large
+    // const threshold = max / 50
+    // const wgChromosomes = Array.from(chromosomes.values()).filter(chr => chr.bpLength > threshold)
+    //
+    // // Sort chromosomes.  First segregate numeric and alpha names, sort numeric, leave alpha as is
+    // const numericChromosomes = wgChromosomes.filter(chr => isDigit(chr.name.replace('chr', '')))
+    // const alphaChromosomes = wgChromosomes.filter(chr => !isDigit(chr.name.replace('chr', '')))
+    // numericChromosomes.sort((a, b) => Number.parseInt(a.name.replace('chr', '')) - Number.parseInt(b.name.replace('chr', '')))
+    // const wgChromosomeNames = numericChromosomes.map(chr => chr.name)
+    // for (let chr of alphaChromosomes) {
+    //     wgChromosomeNames.push(chr.name)
+    // }
+    // return wgChromosomeNames
 
-    // Sort chromosomes.  First segregate numeric and alpha names, sort numeric, leave alpha as is
-    const numericChromosomes = wgChromosomes.filter(chr => isDigit(chr.name.replace('chr', '')))
-    const alphaChromosomes = wgChromosomes.filter(chr => !isDigit(chr.name.replace('chr', '')))
-    numericChromosomes.sort((a, b) => Number.parseInt(a.name.replace('chr', '')) - Number.parseInt(b.name.replace('chr', '')))
-    const wgChromosomeNames = numericChromosomes.map(chr => chr.name)
-    for (let chr of alphaChromosomes) {
-        wgChromosomeNames.push(chr.name)
+
+    const wgChromosomeNames = []
+    let runningAverage
+    let i = 0
+    for (let c of chromosomes.values()) {
+        if (!runningAverage) {
+            runningAverage = c.bpLength
+            wgChromosomeNames.push(c.name)
+        } else {
+            if (c.bpLength < runningAverage / 100) {
+                continue
+            }
+            runningAverage = ((i - 1) * runningAverage + c.bpLength) / i
+            wgChromosomeNames.push(c.name)
+        }
+        i++
+
     }
     return wgChromosomeNames
-
 }
 
 function isDigit(val) {

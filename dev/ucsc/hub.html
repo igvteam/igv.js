@@ -21,15 +21,32 @@
     import igv from "../../js/index.js"
     import Hub from "../../js/ucsc/ucscHub.js"
 
+    // Many chromosomes  https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt
+    // 24 chromosomes  https://hgdownload.soe.ucsc.edu/hubs/GCF/013/103/735/GCF_013103735.1/hub.txt
+
     const hubOptions = {
-        url: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt",
+        url: "https://hgdownload.soe.ucsc.edu/hubs/GCF/013/103/735/GCF_013103735.1/hub.txt",
         includeTracks: "all"
     }
 
+
     const hub = await Hub.loadHub(hubOptions)
+    const ref = hub.getGenomeConfig()
+    ref.tracks.push({
+        name: "plain wig",
+        type: "wig",
+        format: "wig",
+        min: 30,
+        max: 70,
+        autoscale: false,
+        color: "rgb(0,0,0)",
+        height: 36,
+        url: "GCF_000186305.1_Python_molurus_bivittatus-5.0.2.wig"
+    })
+
     const igvConfig = {
         locus: hub.getDefaultPosition(),
-        reference: hub.getGenomeConfig()
+        reference: ref
     }
 
     const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
