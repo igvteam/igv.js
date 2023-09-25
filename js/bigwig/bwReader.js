@@ -29,6 +29,7 @@ import {BGZip, igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import getDecoder from "./bbDecoders.js"
 import {parseAutoSQL} from "../util/ucscUtils.js"
+import summarizeWigData from "./summarizeWigData.js"
 
 let BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
 let BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
@@ -51,7 +52,7 @@ class BWReader {
         this.config = config
         this.bufferSize = BUFFER_SIZE
         this.loader = isDataURL(this.path) ? new DataBuffer(this.path) :
-            config.wholeFile ? new WholeFileBuffer(this.path) :  igvxhr
+            config.wholeFile ? new WholeFileBuffer(this.path) : igvxhr
     }
 
     async readWGFeatures(bpPerPixel, windowFunction) {
@@ -63,7 +64,7 @@ class BWReader {
         return this.readFeatures(chr1, 0, chr2, Number.MAX_VALUE, bpPerPixel, windowFunction)
     }
 
-    async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction) {
+    async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction = "mean") {
 
         await this.loadHeader()
         const chrIdx1 = this.chromTree.chromToID[chr1]
@@ -132,7 +133,15 @@ class BWReader {
                 return a.start - b.start
             })
 
-            return allFeatures
+            // If we are reading "raw" wig data optionally summarize it with window function.
+            // Zoom level data is already summarized
+            if (decodeFunction === decodeWigData &&
+                bpPerPixel &&
+                ("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
+                return summarizeWigData(allFeatures, bpPerPixel, windowFunction)
+            } else {
+                return allFeatures
+            }
         }
     }
 
@@ -617,7 +626,7 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
 
     if (chromId >= chrIdx1 && chromId <= chrIdx2) {
 
-        let idx = 0;
+        let idx = 0
         while (itemCount-- > 0) {
             let value
             switch (type) {
@@ -646,7 +655,6 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
                 const chr = chrDict[chromId]
                 featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value})
             }
-
         }
     }
 }
@@ -753,12 +761,13 @@ class DataBuffer {
 class WholeFileBuffer {
 
     data
+
     constructor(path) {
         this.path = path
     }
 
     async loadFile() {
-       this.data = await igvxhr.loadArrayBuffer(this.path)
+        this.data = await igvxhr.loadArrayBuffer(this.path)
     }
 
     /**
@@ -768,7 +777,7 @@ class WholeFileBuffer {
      * @returns {any}
      */
     async loadArrayBuffer(ignore, options) {
-        if(!this.data) {
+        if (!this.data) {
             await this.loadFile()
         }
         const range = options.range
@@ -783,7 +792,7 @@ class WholeFileBuffer {
      * @param asUint8 - optional flag to return result as an UInt8Array
      */
     async dataViewForRange(requestedRange, asUint8) {
-        if(!this.data) {
+        if (!this.data) {
             await this.loadFile()
         }
         const len = Math.min(this.data.byteLength - requestedRange.start, requestedRange.size)

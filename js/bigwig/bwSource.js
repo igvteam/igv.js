@@ -68,14 +68,14 @@ class BWSource {
 
     async getWGValues(windowFunction) {
 
-        const nominalScreenWidth = 1000      // This doesn't need to be precise
+        const numberOfBins = 1000      // This doesn't need to be precise
         const genome = this.genome
 
         if (this.wgValues[windowFunction]) {
             return this.wgValues[windowFunction]
         } else {
 
-            const bpPerPixel = genome.getGenomeLength() / nominalScreenWidth
+            const bpPerPixel = genome.getGenomeLength() / numberOfBins
             const features = await this.reader.readWGFeatures(bpPerPixel, windowFunction)
             let wgValues = []
             for (let f of features) {
