@@ -1,9 +1,7 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import {createCheckbox} from "../igv-icons.js"
 import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from '../trackView.js'
 import wigTrack from "../feature/wigTrack.js"
-import {hexToRGB} from "../util/colorPalletes.js"
 
 /**
  * Configure item list for track "gear" menu.
@@ -133,7 +131,7 @@ function isVisibilityWindowType(track) {
 function groupAutoScaleMenuItem() {
 
     const object = $('<div>')
-    object.text('Group Autoscale')
+    object.text('Group autoscale')
 
     function click(e) {
 
@@ -155,7 +153,7 @@ function groupAutoScaleMenuItem() {
 function trackOverlayMenuItem() {
 
     const object = $('<div>')
-    object.text('Overlay Tracks')
+    object.text('Overlay tracks')
 
     function click(e) {
 
@@ -167,7 +165,7 @@ function trackOverlayMenuItem() {
             const wigConfigs = wigTracks.map((track) => Object.assign(track.config, { color:wigTrack.color }))
 
             for (const wigTrack of wigTracks) {
-                wigTrack.config.color = wigTrack.color.startsWith('#') ? hexToRGB(wigTrack.color) : wigTrack.color
+                wigTrack.config.color = wigTrack.color
             }
 
             const config =
