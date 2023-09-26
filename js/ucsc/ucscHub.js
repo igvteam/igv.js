@@ -52,7 +52,7 @@ class Hub {
 
         // The second stanza should be a genome
         if ("genome" === stanzas[1].type) {
-            this.genome = stanzas[1]
+            this.genomeStanza = stanzas[1]
         } else {
             throw Error(`Unexpected hub file -- expected "genome" stanza but found "${stanzas[1].type}"`)
         }
@@ -79,17 +79,50 @@ class Hub {
     }
 
     getDefaultPosition() {
-        return this.genome.getProperty("defaultPos")
+        return this.genomeStanza.getProperty("defaultPos")
     }
+    /*  Example genome stanza
+genome GCF_000186305.1
+taxId 176946
+groups groups.txt
+description Burmese python
+twoBitPath GCF_000186305.1.2bit
+twoBitBptUrl GCF_000186305.1.2bit.bpt
+chromSizes GCF_000186305.1.chrom.sizes.txt
+chromAliasBb GCF_000186305.1.chromAlias.bb
+organism Python_molurus_bivittatus-5.0.2 Sep. 2013
+defaultPos NW_006532014.1:484194-494194
+scientificName Python bivittatus
+htmlPath html/GCF_000186305.1_Python_molurus_bivittatus-5.0.2.description.html
+blat dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
+transBlat dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
+isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
+ */
 
     getGenomeConfig(includeTracks = "all") {
         // TODO -- add blat?  htmlPath?
         const config = {
-            id: this.genome.getProperty("genome"),
-            name: this.genome.getProperty("organism"),
-            twobitURL: this.baseURL + this.genome.getProperty("twoBitPath"),
-            aliasBbURL: this.baseURL + this.genome.getProperty("chromAliasBb"),
-            nameSet: "ucsc"
+            id: this.genomeStanza.getProperty("genome"),
+            name: this.genomeStanza.getProperty("scientificName") || this.genomeStanza.getProperty("organism") || this.genomeStanza.getProperty("description"),
+            twobitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
+            aliasBbURL: this.baseURL + this.genomeStanza.getProperty("chromAliasBb"),
+            nameSet: "ucsc",
+            blat: this.genomeStanza.getProperty("blat")
+        }
+
+        config.description = config.id
+        if (this.genomeStanza.hasProperty("description")) {
+            config.description += `\n${this.genomeStanza.getProperty("description")}`
+        }
+        if (this.genomeStanza.hasProperty("organism")) {
+            config.description += `\n${this.genomeStanza.getProperty("organism")}`
+        }
+        if (this.genomeStanza.hasProperty("scientificName")) {
+            config.description += `\n${this.genomeStanza.getProperty("scientificName")}`
+        }
+
+        if (this.genomeStanza.hasProperty("htmlPath")) {
+            config.infoURL = this.baseURL + this.genomeStanza.getProperty("htmlPath")
         }
 
         // Search for cytoband
@@ -98,7 +131,7 @@ class Hub {
             config.cytobandBbURL = this.baseURL + cytoStanza[0].getProperty("bigDataUrl")
         }
 
-        // Tracks.  To prevent loading tracks set `includeTracks` to false
+        // Tracks.  To prevent loading tracks set `includeTracks`to false
         if (includeTracks) {
             config.tracks = this.#getTracksConfigs(includeTracks)
         }
@@ -153,7 +186,8 @@ class Hub {
 
         if (t.hasProperty("longLabel") && t.hasProperty("html")) {
             if (config.description) config.description += "<br/>"
-            config.description = `<a target="_blank" href="${this.baseURL + t.getProperty("html")}">${t.getProperty("longLabel")}</a>`
+            config.description =
+                `<a target="_blank" href="${this.baseURL + t.getProperty("html")}">${t.getProperty("longLabel")}</a>`
         } else if (t.hasOwnProperty("longLabel")) {
             config.description = t.getProperty("longLabel")
         }
@@ -171,11 +205,13 @@ class Hub {
         // TODO -- windowingFunction
         if (t.hasProperty("color")) {
             const c = t.getProperty("color")
-            config.color = c.indexOf(",") > 0 ? `rgb(${c})` : c
+            config.color = c.indexOf(",") > 0 ? `
+            rgb(${c})` : c
         }
         if (t.hasProperty("altColor")) {
             const c = t.getProperty("altColor")
-            config.altColor = c.indexOf(",") > 0 ? `rgb(${c})` : c
+            config.altColor = c.indexOf(",") > 0 ? `
+            rgb(${c})` : c
         }
         if (t.hasProperty("viewLimits")) {
             const tokens = t.getProperty("viewLimits").split(":")
@@ -286,9 +322,9 @@ class Stanza {
  */
 async function loadStanzas(options) {
 
-    const response = await fetch(options.url);
-    const data = await response.text();
-    const lines =  data.split(/\n|\r\n|\r/g);
+    const response = await fetch(options.url)
+    const data = await response.text()
+    const lines = data.split(/\n|\r\n|\r/g)
 
     const nodes = []
     let currentNode
