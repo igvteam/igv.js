@@ -6,9 +6,20 @@
 
 <body>
 
+<select id="select">
+    <option value = ""></option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt">Many chromosomes ~ same size
+    </option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCA/022/747/635/GCA_022747635.1/hub.txt">Many chromosomes - gradually decreasing
+        chromosomes
+    </option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCF/013/103/735/GCF_013103735.1/hub.txt">24 large chromosomes
+    </option>
+</select>
+
 <label>
     Enter full URL to hub.txt file
-    <input id="hub-input" type="text" style="width: 600px" value="https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt">
+    <input id="hub-input" type="text" style="width: 600px">
 </label>
 
 <button id="load-genome">Load hub as genome</button>
@@ -21,28 +32,15 @@
     import igv from "../../js/index.js"
     import Hub from "../../js/ucsc/ucscHub.js"
 
-    // Many chromosomes  https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt
-    // 24 chromosomes  https://hgdownload.soe.ucsc.edu/hubs/GCF/013/103/735/GCF_013103735.1/hub.txt
 
     const hubOptions = {
-        url: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt",
+        url: "https://hgdownload.soe.ucsc.edu/hubs/GCA/022/747/635/GCA_022747635.1/hub.txt",
         includeTracks: "all"
     }
 
 
     const hub = await Hub.loadHub(hubOptions)
     const ref = hub.getGenomeConfig()
-    ref.tracks.push({
-        name: "plain wig",
-        type: "wig",
-        format: "wig",
-        min: 30,
-        max: 70,
-        autoscale: false,
-        color: "rgb(0,0,0)",
-        height: 36,
-        url: "GCF_000186305.1_Python_molurus_bivittatus-5.0.2.wig"
-    })
 
     const igvConfig = {
         locus: hub.getDefaultPosition(),
@@ -51,6 +49,8 @@
 
     const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
 
+    const selector = document.getElementById("select")
+    selector.addEventListener("change", () => document.getElementById("hub-input").value = selector.value)
     document.getElementById("load-genome").addEventListener("click", () =>
         browser.loadGenome({url: document.getElementById("hub-input").value}))
     document.getElementById("load-session").addEventListener("click", () =>

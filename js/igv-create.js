@@ -69,7 +69,7 @@ async function createBrowser(parentDiv, config) {
     allBrowsers.push(browser)
 
     // Load initial session
-    const sessionURL = config.sessionURL || config.session
+    const sessionURL = config.sessionURL || config.session || config.hubURL
     if (sessionURL) {
         await browser.loadSession({
             url: sessionURL
@@ -250,7 +250,6 @@ function extractQuery(config) {
     }
 
     if (files) {
-
         if (!config.tracks)
             config.tracks = []
         for (let i = 0; i < files.length; i++) {

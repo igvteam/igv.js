@@ -717,8 +717,7 @@ class Browser {
     updateNavbarDOMWithGenome(genome) {
         let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0,8)}...${genome.id.substring(genome.id.length-8)}`)
         this.$current_genome.text(genomeLabel)
-        this.$current_genome.attr('title', `${genome.name} (${genome.id || ''})`)
-        // TODO -- hover text with more description and optionally html link
+        this.$current_genome.attr('title', genome.description)
         this.chromosomeSelectWidget.update(genome)
     }
 
