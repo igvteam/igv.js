@@ -43,7 +43,6 @@ class HtsgetVariantReader extends HtsgetReader {
             if (isgzipped(data)) {
                 data = ungzip(data)
             }
-
             const dataWrapper = getDataWrapper(data)
             this.header = await this.parser.parseHeader(dataWrapper, this.genome)
             this.chrAliasTable = this.header.chrAliasTable
