@@ -133,7 +133,7 @@ function isVisibilityWindowType(track) {
 function groupAutoScaleMenuItem() {
 
     const object = $('<div>')
-    object.text('AutoScale Group')
+    object.text('Group Autoscale')
 
     function click(e) {
 
@@ -142,15 +142,10 @@ function groupAutoScaleMenuItem() {
         const autoScaleGroupID = `auto-scale-group-${DOMUtils.guid()}`
 
         for (const trackView of trackViews) {
-
-            if (undefined === trackView.track.autoscaleGroup) {
-                trackView.track.autoscaleGroup = autoScaleGroupID
-            }
-
+            trackView.track.autoscaleGroup = autoScaleGroupID
         }
 
-        this.browser.updateViews(true)
-
+        this.browser.updateViews()
     }
 
     return { object, click }
