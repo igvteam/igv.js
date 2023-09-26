@@ -25,6 +25,11 @@ class Genome {
 
         this.chromosomeNames = Array.from(this.chromosomes.keys())
 
+        const firstChromosome = chromosomes.values().next().value
+        if(firstChromosome.altNames) {
+            this.altNameSets = Array.from(firstChromosome.altNames.keys())
+        }
+
         // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
         if (config.chromosomeOrder) {
             if (Array.isArray(config.chromosomeOrder)) {
@@ -59,13 +64,23 @@ class Genome {
     }
 
     get description() {
-        return this.config.description || ""
+        return this.config.description || `${this.id}\n${this.name}`
+    }
+
+    get infoURL() {
+        return this.config.infoURL
     }
 
     showWholeGenomeView() {
         return this.wholeGenomeView
     }
 
+    /**
+     * Return a json like object representing the current state.  The tracks collection is nullified
+     * as tracks are transferred to the browser object on loading.
+     *
+     * @returns {any}
+     */
     toJSON() {
         return Object.assign({}, this.config, {tracks: undefined})
     }
@@ -318,26 +333,9 @@ function createAliasTable(chromosomes, aliases) {
  */
 function trimSmallChromosomes(chromosomes) {
 
-    // // Trim small chromosomes.
-    // const lengths = Array.from(chromosomes.values()).map(c => c.bpLength)
-    // const max = lengths.reduce((acc, val) => acc > val ? acc : val)  // Dont' use spread operator here, lengths can be large
-    // const threshold = max / 50
-    // const wgChromosomes = Array.from(chromosomes.values()).filter(chr => chr.bpLength > threshold)
-    //
-    // // Sort chromosomes.  First segregate numeric and alpha names, sort numeric, leave alpha as is
-    // const numericChromosomes = wgChromosomes.filter(chr => isDigit(chr.name.replace('chr', '')))
-    // const alphaChromosomes = wgChromosomes.filter(chr => !isDigit(chr.name.replace('chr', '')))
-    // numericChromosomes.sort((a, b) => Number.parseInt(a.name.replace('chr', '')) - Number.parseInt(b.name.replace('chr', '')))
-    // const wgChromosomeNames = numericChromosomes.map(chr => chr.name)
-    // for (let chr of alphaChromosomes) {
-    //     wgChromosomeNames.push(chr.name)
-    // }
-    // return wgChromosomeNames
-
-
     const wgChromosomeNames = []
     let runningAverage
-    let i = 0
+    let i = 1
     for (let c of chromosomes.values()) {
         if (!runningAverage) {
             runningAverage = c.bpLength
@@ -346,11 +344,10 @@ function trimSmallChromosomes(chromosomes) {
             if (c.bpLength < runningAverage / 100) {
                 continue
             }
-            runningAverage = ((i - 1) * runningAverage + c.bpLength) / i
+            runningAverage = ((i-1) * runningAverage + c.bpLength) / i
             wgChromosomeNames.push(c.name)
         }
         i++
-
     }
     return wgChromosomeNames
 }
