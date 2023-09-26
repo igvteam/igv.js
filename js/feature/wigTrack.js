@@ -5,9 +5,7 @@ import BWSource from "../bigwig/bwSource.js"
 import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import MenuUtils from "../ui/menuUtils.js"
 import summarizeWigData from "../bigwig/summarizeWigData.js"
-import {rgbStringTokens} from "../util/colorPalletes.js"
 
 const DEFAULT_COLOR = 'rgb(150, 150, 150)'
 
@@ -199,8 +197,7 @@ class WigTrack extends TrackBase {
                     let color = this.getColorForFeature(f)
 
                     if (options.alpha) {
-                        const [ r, g, b ] = rgbStringTokens(color)
-                        color = `rgba(${r},${g},${b},${options.alpha})`
+                        color = IGVColor.addAlpha(color, options.alpha)
                     }
 
                     if (this.graphType === "line") {
