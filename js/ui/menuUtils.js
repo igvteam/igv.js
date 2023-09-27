@@ -162,10 +162,15 @@ function trackOverlayMenuItem() {
         if (trackViews) {
 
             const wigTracks = trackViews.filter(({ track }) => 'wig' === track.type).map(({ track }) => track)
-            const wigConfigs = wigTracks.map((track) => Object.assign(track.config, { color:wigTrack.color }))
+
+            const wigConfigs = wigTracks.map(( track ) => {
+                const config = Object.assign({}, track.config)
+                config.color = track.color
+                return config
+            })
 
             for (const wigTrack of wigTracks) {
-                wigTrack.config.color = wigTrack.color
+                this.browser.removeTrack(wigTrack)
             }
 
             const config =
@@ -177,13 +182,7 @@ function trackOverlayMenuItem() {
                     order: Math.min(...wigTracks.map(({ order }) => order)),
                     tracks: wigConfigs
                 }
-
-
-            for (const wigTrack of wigTracks) {
-                this.browser.removeTrack(wigTrack)
-            }
-
-
+            
             this.browser.loadTrack(config)
 
         }
