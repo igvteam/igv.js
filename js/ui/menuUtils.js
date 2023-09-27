@@ -180,7 +180,7 @@ function trackOverlayMenuItem() {
 
 
             for (const wigTrack of wigTracks) {
-                this.browser._removeTrack(wigTrack)
+                this.browser.removeTrack(wigTrack)
             }
 
 
