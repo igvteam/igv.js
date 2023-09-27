@@ -205,13 +205,11 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         // TODO -- windowingFunction
         if (t.hasProperty("color")) {
             const c = t.getProperty("color")
-            config.color = c.indexOf(",") > 0 ? `
-            rgb(${c})` : c
+            config.color = c.indexOf(",") > 0 ? `rgb(${c})` : c
         }
         if (t.hasProperty("altColor")) {
             const c = t.getProperty("altColor")
-            config.altColor = c.indexOf(",") > 0 ? `
-            rgb(${c})` : c
+            config.altColor = c.indexOf(",") > 0 ? `rgb(${c})` : c
         }
         if (t.hasProperty("viewLimits")) {
             const tokens = t.getProperty("viewLimits").split(":")
