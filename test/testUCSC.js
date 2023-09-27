@@ -1,7 +1,8 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import Hub from "../js/ucsc/ucscHub.js"
-import GenomeUtils from "../js/genome/genomeUtils.js"
+import Trix from "../js/ucsc/trix.js"
+import BWReader from "../js/bigwig/bwReader.js"
 
 
 suite("ucsc utilities", function () {
@@ -31,6 +32,31 @@ suite("ucsc utilities", function () {
 
     })
 
+    test("trix", async function () {
+
+        this.timeout(200000)
+        const ixFile = "https://hgdownload.soe.ucsc.edu/hubs/GCF/019/356/215/GCF_019356215.1/ixIxx/GCF_019356215.1_ASM1935621v1.ncbiGene.ix"
+        const ixxFile = "https://hgdownload.soe.ucsc.edu/hubs/GCF/019/356/215/GCF_019356215.1/ixIxx/GCF_019356215.1_ASM1935621v1.ncbiGene.ixx"
+
+        const trix = new Trix(ixxFile, ixFile, 10)
+
+        const results = await trix.search("adeG")
+
+        console.log(results)
+
+    })
+
+    /**
+     * Test parsing a aliasBbURL file from the T2T hub
+     */
+    test("test chromAlias", async function () {
+
+        const url = "https://hgdownload.soe.ucsc.edu/hubs/GCF/019/356/215/GCF_019356215.1/bbi/GCF_019356215.1_ASM1935621v1.ncbiGene.bb"
+
+        const bbReader = new BWReader({url: url, format: "bigbed"})
+        const header = await bbReader.loadHeader()
+        assert.ok(header)
+    })
 
 })
 
