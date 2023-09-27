@@ -36,6 +36,7 @@ let BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
 let BIGBED_MAGIC_LTH = 0x8789F2EB // BigBed Magic Low to High
 let BIGBED_MAGIC_HTL = 0xEBF28987 // BigBed Magic High to Low
 let BBFILE_HEADER_SIZE = 64
+const BBFILE_EXTENDED_HEADER_HEADER_SIZE = 66
 let RPTREE_HEADER_SIZE = 48
 let RPTREE_NODE_LEAF_ITEM_SIZE = 32   // leaf item size
 let RPTREE_NODE_CHILD_ITEM_SIZE = 24  // child item size
@@ -226,6 +227,7 @@ class BWReader {
                 this.zoomLevelHeaders[zoomNumber] = zlh
             }
 
+
             // Autosql
             if (header.autoSqlOffset > 0) {
                 binaryParser.position = header.autoSqlOffset - startOffset
@@ -255,13 +257,76 @@ class BWReader {
             header.dataCount = binaryParser.getInt()
             ///////////
 
+            //extension
+            if (header.extensionOffset > 0) {
+                //console.log(`Extension offset: ${header.extensionOffset}     ${this.path}`)
+                // await this.loadExtendedHeader(header.extensionOffset)
+            }
+
             this.setDefaultVisibilityWindow(header)
 
             this.header = header
             return this.header
-
         }
     }
+
+    async loadExtendedHeader(offset) {
+
+        let data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+            range: {
+                start: offset,
+                size: BBFILE_EXTENDED_HEADER_HEADER_SIZE
+            }
+        }))
+        let binaryParser = new BinaryParser(new DataView(data))
+        const extensionSize = binaryParser.getShort()
+        const extraIndexCount = binaryParser.getShort()
+        const extraIndexListOffset = binaryParser.getLong()
+
+        let sz = extraIndexCount * (2 + 2 + 8 + 4 + 10 * (2 + 2))
+        data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+            range: {
+                start: extraIndexListOffset,
+                size: sz
+            }
+        }))
+        binaryParser = new BinaryParser(new DataView(data))
+
+        const type = []
+        const fieldCount = []
+        const reserved = []
+        const indexOffset = []
+        for (let i = 0; i < extraIndexCount; i++) {
+
+            type.push(binaryParser.getShort())
+
+            const fc = binaryParser.getShort()
+            fieldCount.push(fc)
+
+            indexOffset.push(binaryParser.getLong())
+            reserved.push(binaryParser.getInt())
+
+            for (let j = 0; j < fc; j++) {
+                const fieldId = binaryParser.getShort()
+                reserved.push(binaryParser.getShort())
+            }
+        }
+
+        for (let i = 0; i < extraIndexCount; i++) {
+            // TODOWe really don't know size of index
+            sz = 1000000
+            data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+                range: {
+                    start: indexOffset[i],
+                    size: sz
+                }
+            }))
+            binaryParser = new BinaryParser(new DataView(data))
+            const tree = new BPTree(binaryParser, indexOffset[i], false)
+            console.log()
+        }
+    }
+
 
     async loadRPTree(offset) {
 
@@ -479,8 +544,6 @@ class BPTree {
         let valSize = binaryParser.getInt()
         let itemCount = binaryParser.getLong()
         let reserved = binaryParser.getLong()
-        let chromToId = {}
-        let idToChrom = []
 
         this.header = {
             magic: magic,
@@ -490,58 +553,61 @@ class BPTree {
             itemCount: itemCount,
             reserved: reserved
         }
-        this.chromToID = chromToId
-        this.idToChrom = idToChrom
+        this.chromToID = {}
+        this.idToChrom = []
 
-        // Recursively walk tree to populate dictionary
-        readTreeNode(binaryParser, -1)
+        const readTreeNode = (binaryParser, offset, chromToID, idToChrom) => {
 
+            if (offset >= 0) binaryParser.position = offset
 
-        function readTreeNode(byteBuffer, offset) {
+            const type = binaryParser.getByte()
+            const reserved = binaryParser.getByte()
+            const count = binaryParser.getUShort()
 
-            if (offset >= 0) byteBuffer.position = offset
+            const isLeaf = type === 1
+            if (isLeaf) {
 
-            let type = byteBuffer.getByte(),
-                reserved = byteBuffer.getByte(),
-                count = byteBuffer.getUShort(),
-                i,
-                key,
-                chromId,
-                chromSize,
-                childOffset,
-                bufferOffset,
-                currOffset
+                for (let i = 0; i < count; i++) {
 
+                    let key = binaryParser.getFixedLengthTrimmedString(keySize)
 
-            if (type === 1) {
+                    let chromId
+                    if(genome !== false) {
+                        chromId =  binaryParser.getInt()
+                        const chromSize = binaryParser.getInt()
+                    } else {
+                        const v1 = binaryParser.getInt()
+                        const v2 = binaryParser.getInt()
+                        const v3 = binaryParser.getInt()
+                        const v4 = binaryParser.getInt()
+                    }
 
-                for (i = 0; i < count; i++) {
-
-                    key = byteBuffer.getFixedLengthTrimmedString(keySize)
-                    chromId = byteBuffer.getInt()
-                    chromSize = byteBuffer.getInt()
 
                     if (genome) key = genome.getChromosomeName(key)  // Translate to canonical chr name
-                    chromToId[key] = chromId
+                    chromToID[key] = chromId
                     idToChrom[chromId] = key
 
                 }
             } else { // non-leaf
 
-                for (i = 0; i < count; i++) {
+                for (let i = 0; i < count; i++) {
 
-                    key = byteBuffer.getFixedLengthTrimmedString(keySize)
-                    childOffset = byteBuffer.getLong()
-                    bufferOffset = childOffset - startOffset
-                    currOffset = byteBuffer.position
-                    readTreeNode(byteBuffer, bufferOffset)
-                    byteBuffer.position = currOffset
+                    const key = binaryParser.getFixedLengthTrimmedString(keySize)
+                    const childOffset = binaryParser.getLong()
+                    const bufferOffset = childOffset - startOffset
+                    const currOffset = binaryParser.position
+                    readTreeNode(binaryParser, bufferOffset, chromToID, idToChrom)
+                    binaryParser.position = currOffset
                 }
             }
-
         }
+
+        // Recursively walk tree to populate dictionary
+        readTreeNode(binaryParser, -1, this.chromToID, this.idToChrom)
+
     }
 }
+
 
 /**
  * Return true if {chrIdx1:startBase-chrIdx2:endBase} overlaps item's interval
