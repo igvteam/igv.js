@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import BPTree from "./bpTree.js"
+import ChromTree from "./chromTree.js"
 import RPTree from "./rpTree.js"
 import BinaryParser from "../binary.js"
 import {BGZip, igvxhr} from "../../node_modules/igv-utils/src/index.js"
@@ -31,6 +31,9 @@ import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import getDecoder from "./bbDecoders.js"
 import {parseAutoSQL} from "../util/ucscUtils.js"
 import summarizeWigData from "./summarizeWigData.js"
+import Trix from "./trix.js"
+import BPTree from "./bpTree.js"
+import {isString} from "igv-utils/src/stringUtils.js"
 
 const BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
 const BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
@@ -53,22 +56,29 @@ class BWReader {
             new DataBuffer(this.path) :
             config.wholeFile ? new WholeFileBuffer(this.path) :
                 igvxhr
+
+        if (config.searchTrix) {
+            this._trix = new Trix(`${config.searchTrix}x`, config.searchTrix)
+        }
+
+        //config.bbSearchIndex
+
     }
 
     async readWGFeatures(bpPerPixel, windowFunction) {
         await this.loadHeader()
         const chrIdx1 = 0
-        const chrIdx2 = this.chromTree.valueToKey.length - 1
-        const chr1 = this.chromTree.valueToKey[chrIdx1]
-        const chr2 = this.chromTree.valueToKey[chrIdx2]
+        const chrIdx2 = this.chromTree.idToName.length - 1
+        const chr1 = this.chromTree.idToName[chrIdx1]
+        const chr2 = this.chromTree.idToName[chrIdx2]
         return this.readFeatures(chr1, 0, chr2, Number.MAX_VALUE, bpPerPixel, windowFunction)
     }
 
     async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction = "mean") {
 
         await this.loadHeader()
-        const chrIdx1 = this.chromTree.keyToValue[chr1]
-        const chrIdx2 = this.chromTree.keyToValue[chr2]
+        const chrIdx1 = this.chromTree.nameToId[chr1]
+        const chrIdx2 = this.chromTree.nameToId[chr2]
         if (chrIdx1 === undefined || chrIdx2 === undefined) {
             return []
         }
@@ -126,7 +136,7 @@ class BWReader {
                 } else {
                     plain = uint8Array
                 }
-                decodeFunction.call(this, new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, allFeatures, this.chromTree.valueToKey, windowFunction)
+                decodeFunction.call(this, new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, allFeatures, this.chromTree.idToName, windowFunction)
             }
 
             allFeatures.sort(function (a, b) {
@@ -143,6 +153,82 @@ class BWReader {
                 return allFeatures
             }
         }
+    }
+
+    /**
+     * Search the extended BP tree for the search term, and return any matching features.  This only works
+     * for BB sources with an "extended" BP tree for searching
+     * @param term
+     * @returns {Promise<void>}
+     */
+    async search(term) {
+        if (!this.header) {
+            await this.loadHeader()
+        }
+        if (!this.header.extraIndexCount) {
+            return undefined
+        }
+
+        const region = await this._searchForRegions(term)   // Either 1 or no (undefined) reginos returned for now
+        if (region) {
+            const features = await this._loadFeaturesForRange(region.offset, region.length)
+            if(features) {
+                for(let f of features) {
+                    // We could use the searchIndex parameter to pick an attribute (column),  but we don't know
+                    // the names of all the columns and if they match IGV names
+                    // TODO -- align all feature attribute names with UCSC, an use specific column
+                    for(let key of Object.keys(f)) {
+                        const v = f[key]
+                        if (isString(v) && v.toLowerCase() === term.toLowerCase()) {
+                            return f
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    async _searchForRegions(term) {
+        const searchTrees = await this.#getSearchTrees()
+        if (searchTrees) {
+            // First try search term as entered.  For now take the first one, we don't support multiple results
+            for (let bpTree of searchTrees) {
+                const result = await bpTree.search(term)
+                if (result) {
+                    return result
+                }
+            }
+
+            // If no term use a trix index if we have one to map entered term to indexed value in bb file
+            if (this._trix) {
+                term = term.toLowerCase()
+                const trixResults = await this._trix.search(term)
+                if (trixResults && trixResults.has(term)) {   // <= exact matches only for now
+                    const term2 = trixResults.get(term)[0]
+                    for (let bpTree of searchTrees) {
+                        const result = await bpTree.search(term2)
+                        if (result) {
+                            return result
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    async #getSearchTrees() {
+
+        if (this._searchTrees === undefined &&
+            this.header.extraIndexOffsets &&
+            this.header.extraIndexOffsets.length > 0) {
+            this._searchTrees = []
+            for (let offset of this.header.extraIndexOffsets) {
+                const bpTree = await BPTree.loadBpTree(this.path, offset)
+                this._searchTrees.push(bpTree)
+            }
+        }
+        return this._searchTrees
+
     }
 
     async getZoomHeaders() {
@@ -245,7 +331,7 @@ class BWReader {
             // Chrom data index
             if (header.chromTreeOffset > 0) {
                 binaryParser.position = header.chromTreeOffset - startOffset
-                this.chromTree = await BPTree.parseTree(binaryParser, startOffset, this.genome)
+                this.chromTree = await ChromTree.parseTree(binaryParser, startOffset, this.genome)
             } else {
                 // TODO -- this is an error, not expected
                 throw "BigWig chromosome tree offset <= 0"
@@ -255,13 +341,11 @@ class BWReader {
             binaryParser.position = header.fullDataOffset - startOffset
             header.dataCount = binaryParser.getInt()
 
-            ///////////
             this.header = header
 
 
             //extension
             if (header.extensionOffset > 0) {
-                //console.log(`Extension offset: ${header.extensionOffset}     ${this.path}`)
                 await this.loadExtendedHeader(header.extensionOffset)
             }
 
@@ -273,7 +357,7 @@ class BWReader {
     }
 
     async loadExtendedHeader(offset) {
-console.log('ext')
+
         let data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
             range: {
                 start: offset,
@@ -314,28 +398,8 @@ console.log('ext')
             }
         }
         this.header.extraIndexCount = extraIndexCount
-        this.header.indexOffset = indexOffset
+        this.header.extraIndexOffsets = indexOffset
     }
-
-    async readExtraIndexes () {
-        // Read the extra index.
-        const indexes = []
-        for (let i = 0; i < this.header.extraIndexCount; i++) {
-            // TODO  We really don't know size of index
-            console.log(`offset = ${this.header.indexOffset[i]}`)
-            const sz = 10000000
-            const data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
-                range: {
-                    start: this.header.indexOffset[i],
-                    size: sz
-                }
-            }))
-            const binaryParser = new BinaryParser(new DataView(data))
-            indexes.push(BPTree.parseTree(binaryParser, this.header.indexOffset[i], false))
-        }
-        return indexes
-    }
-
 
     async loadRPTree(offset) {
 
@@ -374,6 +438,32 @@ console.log('ext')
             this.visibilityWindow = header.dataCount < 1000 ? -1 : 1000 * (genomeSize / header.dataCount)
 
         }
+    }
+
+    /**
+     * Directly load features given a file offset and size.  Added to support search index.
+     * @param offset
+     * @param size
+     * @private
+     */
+    async _loadFeaturesForRange(offset, size) {
+
+        const arrayBuffer = await this.loader.loadArrayBuffer(this.config.url, buildOptions(this.config, {
+            range: {
+                start: offset,
+                size: size
+            }
+        }))
+
+        const uint8Array = new Uint8Array(arrayBuffer)
+        const plain = (this.header.uncompressBuffSize > 0) ? BGZip.inflate(uint8Array) : uint8Array
+        const decodeFunction = getBedDataDecoder.call(this)
+        const features = []
+        decodeFunction.call(this, new DataView(plain.buffer), 0, 0, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER,
+            features, this.chromTree.idToName)
+
+        return features
+
     }
 }
 

@@ -81,16 +81,16 @@ export default class RPTree {
 
         let self = this
 
-        return new Promise(function (fulfill, reject) {
+        return new Promise( (fulfill, reject) => {
 
             let leafItems = [],
                 processing = new Set(),
-                bufferedReader = isDataURL(self.path) || self.config.wholeFile ?
-                    self.loader :
-                    new BufferedReader(self.config, BUFFER_SIZE)
+                bufferedReader = isDataURL(this.path) || this.config.wholeFile ?
+                    this.loader :
+                    new BufferedReader(this.config, BUFFER_SIZE)
 
             processing.add(0)  // Zero represents the root node
-            findLeafItems(self.rootNode, 0)
+            findLeafItems(this.rootNode, 0)
 
             function findLeafItems(node, nodeId) {
 
