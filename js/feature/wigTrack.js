@@ -1,4 +1,4 @@
-import FeatureSource from './featureSource.js'
+ import FeatureSource from './featureSource.js'
 import TDFSource from "../tdf/tdfSource.js"
 import TrackBase from "../trackBase.js"
 import BWSource from "../bigwig/bwSource.js"
@@ -17,7 +17,7 @@ class WigTrack extends TrackBase {
         height: 50,
         flipAxis: false,
         logScale: false,
-        windowFunction: 'mean',
+        windowFunction: 'none',
         graphType: 'bar',
         autoscale: true,
         normalize: undefined,
@@ -94,12 +94,13 @@ class WigTrack extends TrackBase {
         }
         // If we are reading "raw" wig data optionally summarize it with window function.
         // Bigwig data is already summarized
-        if (!this.resolutionAware &&
-            ("mean" === this.windowFunction || "min" === this.windowFunction || "max" === this.windowFunction)) {
-            return summarizeWigData(features, bpPerPixel, this.windowFunction)
-        } else {
-            return features
-        }
+        // if (!this.resolutionAware &&
+        //     ("mean" === this.windowFunction || "min" === this.windowFunction || "max" === this.windowFunction)) {
+        //     return summarizeWigData(features, bpPerPixel, this.windowFunction)
+        // } else {
+        //     return features
+        // }
+        return features
     }
 
     menuItemList() {
