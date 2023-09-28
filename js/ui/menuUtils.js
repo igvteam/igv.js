@@ -178,6 +178,7 @@ function trackOverlayMenuItem() {
                     name: 'Overlay - autoscaled',
                     type: 'merged',
                     autoscale: true,
+                    alpha: 0.5,
                     height: Math.max(...wigTracks.map(({ height }) => height)),
                     order: Math.min(...wigTracks.map(({ order }) => order)),
                     tracks: wigConfigs

@@ -69,6 +69,7 @@ class MergedTrack extends TrackBase {
             }
         }
 
+        this.alpha = this.config.alpha || 0.5
         this.flipAxis = this.config.flipAxis ? this.config.flipAxis : false
         this.logScale = this.config.logScale ? this.config.logScale : false
         this.autoscale = this.config.autoscale || this.config.max === undefined
@@ -139,7 +140,7 @@ class MergedTrack extends TrackBase {
             const trackOptions = Object.assign({}, options)
             trackOptions.features = mergedFeatures.featureArrays[i]
 
-            trackOptions.alpha = 0.5
+            trackOptions.alpha = this.alpha
 
             this.tracks[i].dataRange = this.dataRange
             this.tracks[i].flipAxis = this.flipAxis

@@ -195,11 +195,7 @@ class WigTrack extends TrackBase {
                     const rectEnd = Math.ceil((f.end - bpStart) / bpPerPixel)
                     const width = Math.max(1, rectEnd - x)
 
-                    let color = this.getColorForFeature(f)
-
-                    if (options.alpha) {
-                        color = IGVColor.addAlpha(color, options.alpha)
-                    }
+                    const color = options.alpha ? IGVColor.addAlpha(this.getColorForFeature(f), options.alpha) :  this.getColorForFeature(f)
 
                     if (this.graphType === "line") {
                         if (lastY !== undefined) {
