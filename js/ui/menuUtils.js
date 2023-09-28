@@ -1,7 +1,6 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from '../trackView.js'
-import wigTrack from "../feature/wigTrack.js"
 
 /**
  * Configure item list for track "gear" menu.
@@ -250,6 +249,35 @@ function visibilityWindowMenuItem() {
 }
 
 function trackRemovalMenuItem() {
+
+    const object = $('<div>')
+    object.text('Remove track')
+
+    function dialogHandler() {
+
+        if (isMultiSelectedTrackView(this.trackView)) {
+
+            const browser = this.browser
+
+            const alertCallback = () => {
+                const trackViews = getMultiSelectedTrackViews(browser)
+                for (const { track } of trackViews) {
+                    browser.removeTrack(track)
+                }
+            }
+
+            browser.alert.present('Delete Tracks?', alertCallback)
+
+        } else {
+            this.trackView.browser.removeTrack(this)
+        }
+
+    }
+
+    return { object, dialog:dialogHandler }
+}
+
+function _trackRemovalMenuItem() {
 
     const object = $('<div>')
     object.text('Remove track')
