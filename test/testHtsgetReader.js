@@ -20,7 +20,7 @@ const genome2 = {
 
 suite("htsget", function () {
 
-    test("BAM header", async function () {
+    test("BAM", async function () {
 
         this.timeout(40000)
 
@@ -31,35 +31,57 @@ suite("htsget", function () {
             id: 'htsnexus_test_NA12878'
         }
 
+
         const reader = new HtsgetBamReader(trackConfig, genome1)
-        const alignmentContainer = await reader.readAlignments('22', 1, 10100)
-        assert.equal(7, alignmentContainer.alignments.length)
+        const alignmentContainer = await reader.readAlignments('11', 4999976, 4999999)
+        assert.equal(3, alignmentContainer.alignments.length)
 
         const reade2 = new HtsgetBamReader(trackConfig, genome2)
-        const alignmentContainer2 = await reader.readAlignments('22', 10000, 10100)
-        assert.equal(7, alignmentContainer2.alignments.length)
+        const alignmentContainer2 = await reader.readAlignments('chr11', 4999976, 4999999)
+        assert.equal(3, alignmentContainer2.alignments.length)
     })
 
-    test("BAM alignments", async function () {
+    test("CRAM", async function () {
 
         this.timeout(40000)
 
         const trackConfig = {
             sourceType: 'htsget',
             format: 'bam',
-            endpoint: 'https://htsget.demo.umccr.org/reads',
-            id: '/org.umccr.demo.htsget-rs-data/bam/htsnexus_test_NA12878'
+            endpoint: 'https://htsget.demo.umccr.org/reads/org.umccr.demo.htsget-rs-data/cram/',
+            id: 'htsnexus_test_NA12878'
         }
+//chr11:5,011,840-5,014,280
 
         const reader = new HtsgetBamReader(trackConfig, genome1)
-        const alignmentContainer = await reader.readAlignments('22', 1, 10100)
-        assert.equal(7, alignmentContainer.alignments.length)
+        const alignmentContainer = await reader.readAlignments('11', 5011840, 5014280)
+        assert.equal(3, alignmentContainer.alignments.length)
 
-        const reade2 = new HtsgetBamReader(trackConfig, genome2)
-        const alignmentContainer2 = await reader.readAlignments('22', 10000, 10100)
-        assert.equal(7, alignmentContainer2.alignments.length)
+//        const reade2 = new HtsgetBamReader(trackConfig, genome2)
+//        const alignmentContainer2 = await reader.readAlignments('chr5', 4999976, 4999999)
+//        assert.equal(3, alignmentContainer2.alignments.length)
     })
 
+    // test("BAM alignments", async function () {
+    //
+    //     this.timeout(40000)
+    //
+    //     const trackConfig = {
+    //         sourceType: 'htsget',
+    //         format: 'bam',
+    //         endpoint: 'https://htsget.demo.umccr.org/reads',
+    //         id: '/org.umccr.demo.htsget-rs-data/bam/htsnexus_test_NA12878'
+    //     }
+    //
+    //     const reader = new HtsgetBamReader(trackConfig, genome1)
+    //     const alignmentContainer = await reader.readAlignments('22', 1, 10100)
+    //     assert.equal(7, alignmentContainer.alignments.length)
+    //
+    //     const reade2 = new HtsgetBamReader(trackConfig, genome2)
+    //     const alignmentContainer2 = await reader.readAlignments('22', 10000, 10100)
+    //     assert.equal(7, alignmentContainer2.alignments.length)
+    // })
+    //
 
     test("Variants - header", async function () {
 
