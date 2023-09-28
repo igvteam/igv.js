@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="Roman Valls Guimera" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>htsget igv.js</title>
+
+    <!-- IGV JS -->
+    <script src="../../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+<h1>htsget igv.js example</h1>
+
+<p>
+    See <a href="https://samtools.github.io/hts-specs/htsget.html" target="_blank">hts-specs </a>
+</p>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="text/javascript">
+
+    var div = document.getElementById("igv-div");
+    var options = {
+        genome: "hg38",
+        locus: "chrM:8,253-8,317",
+        tracks: [
+            {
+                type: 'alignment',
+                name: 'Alignments - From https://github.com/brainstorm/tiny-test-data/tree/master/wgs',
+                sourceType: 'htsget',
+                format: 'cram',
+                url: 'https://htsget.demo.umccr.org/reads/org.umccr.demo.htsget-rs-data/cram/mt.sorted_cram?format=CRAM'
+            }
+        ],
+    };
+
+    igv.createBrowser(div, options)
+
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+</script>
+
+</body>
+
+</html>

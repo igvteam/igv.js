@@ -32,8 +32,8 @@ class HtsgetReader {
     constructor(config, genome) {
         this.config = config
         this.genome = genome
-        this.format = config.format ? config.format.toUpperCase() : "BAM"    // Backward compatibility
-        if (!(this.format === "BAM" || this.format === "VCF")) {
+        this.format = config.format.toUpperCase()
+        if (!(this.format === "BAM" || this.format === "VCF" || this.format === "CRAM")) {
             throw  Error(`htsget format ${config.format} is not supported`)
         }
     }
@@ -82,7 +82,7 @@ class HtsgetReader {
             const ticket = await igvxhr.loadJson(headerURL, buildOptions(config))
             if (ticket.htsget) {
                 const format = ticket.htsget.format
-                if (!(format === "BAM" || format === "VCF")) {
+                if (!(format === "BAM" || format === "VCF" || format === "CRAM")) {
                     throw  Error(`htsget format ${format} is not supported`)
                 }
                 config.format = format.toLowerCase()
