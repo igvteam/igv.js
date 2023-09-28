@@ -248,7 +248,8 @@ function visibilityWindowMenuItem() {
 
 }
 
-function trackRemovalMenuItem() {
+// TODO: Implement dialog-presenting track removal for multi-select
+function IN_PROGRESS_PRESENTS_DIALOG_trackRemovalMenuItem() {
 
     const object = $('<div>')
     object.text('Remove track')
@@ -277,7 +278,7 @@ function trackRemovalMenuItem() {
     return { object, dialog:dialogHandler }
 }
 
-function _trackRemovalMenuItem() {
+function trackRemovalMenuItem() {
 
     const object = $('<div>')
     object.text('Remove track')
