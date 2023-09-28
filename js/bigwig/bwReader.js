@@ -32,14 +32,13 @@ import getDecoder from "./bbDecoders.js"
 import {parseAutoSQL} from "../util/ucscUtils.js"
 import summarizeWigData from "./summarizeWigData.js"
 
-let BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
-let BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
-let BIGBED_MAGIC_LTH = 0x8789F2EB // BigBed Magic Low to High
-let BIGBED_MAGIC_HTL = 0xEBF28987 // BigBed Magic High to Low
-let BBFILE_HEADER_SIZE = 64
-const BBFILE_EXTENDED_HEADER_HEADER_SIZE = 66
-let BUFFER_SIZE = 512000     //  buffer
-
+const BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
+const BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
+const BIGBED_MAGIC_LTH = 0x8789F2EB // BigBed Magic Low to High
+const BIGBED_MAGIC_HTL = 0xEBF28987 // BigBed Magic High to Low
+const BBFILE_HEADER_SIZE = 64
+const BBFILE_EXTENDED_HEADER_HEADER_SIZE = 64
+const BUFFER_SIZE = 512000     //  buffer
 
 class BWReader {
 
@@ -50,8 +49,10 @@ class BWReader {
         this.rpTreeCache = {}
         this.config = config
         this.bufferSize = BUFFER_SIZE
-        this.loader = isDataURL(this.path) ? new DataBuffer(this.path) :
-            config.wholeFile ? new WholeFileBuffer(this.path) : igvxhr
+        this.loader = isDataURL(this.path) ?
+            new DataBuffer(this.path) :
+            config.wholeFile ? new WholeFileBuffer(this.path) :
+                igvxhr
     }
 
     async readWGFeatures(bpPerPixel, windowFunction) {
@@ -207,10 +208,11 @@ class BWReader {
                 extensionOffset: binaryParser.getLong()
             }
 
-            ///////////
-
             const startOffset = BBFILE_HEADER_SIZE
-            let range = {start: startOffset, size: (header.fullDataOffset - startOffset + 5)}
+            let range = {
+                start: startOffset,
+                size: (header.fullDataOffset - startOffset + 5)
+            }
             data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: range}))
 
             const nZooms = header.nZoomLevels
@@ -224,7 +226,6 @@ class BWReader {
                 this.firstZoomDataOffset = Math.min(zlh.dataOffset, this.firstZoomDataOffset)
                 this.zoomLevelHeaders[zoomNumber] = zlh
             }
-
 
             // Autosql
             if (header.autoSqlOffset > 0) {
@@ -244,7 +245,7 @@ class BWReader {
             // Chrom data index
             if (header.chromTreeOffset > 0) {
                 binaryParser.position = header.chromTreeOffset - startOffset
-                this.chromTree = new BPTree(binaryParser, startOffset, this.genome)
+                this.chromTree = await BPTree.parseTree(binaryParser, startOffset, this.genome)
             } else {
                 // TODO -- this is an error, not expected
                 throw "BigWig chromosome tree offset <= 0"
@@ -253,7 +254,10 @@ class BWReader {
             //Finally total data count
             binaryParser.position = header.fullDataOffset - startOffset
             header.dataCount = binaryParser.getInt()
+
             ///////////
+            this.header = header
+
 
             //extension
             if (header.extensionOffset > 0) {
@@ -263,13 +267,13 @@ class BWReader {
 
             this.setDefaultVisibilityWindow(header)
 
-            this.header = header
+
             return this.header
         }
     }
 
     async loadExtendedHeader(offset) {
-
+console.log('ext')
         let data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
             range: {
                 start: offset,
@@ -309,20 +313,27 @@ class BWReader {
                 reserved.push(binaryParser.getShort())
             }
         }
+        this.header.extraIndexCount = extraIndexCount
+        this.header.indexOffset = indexOffset
+    }
 
-        for (let i = 0; i < extraIndexCount; i++) {
-            // TODOWe really don't know size of index
-            sz = 1000000
-            data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+    async readExtraIndexes () {
+        // Read the extra index.
+        const indexes = []
+        for (let i = 0; i < this.header.extraIndexCount; i++) {
+            // TODO  We really don't know size of index
+            console.log(`offset = ${this.header.indexOffset[i]}`)
+            const sz = 10000000
+            const data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
                 range: {
-                    start: indexOffset[i],
+                    start: this.header.indexOffset[i],
                     size: sz
                 }
             }))
-            binaryParser = new BinaryParser(new DataView(data))
-            const tree = new BPTree(binaryParser, indexOffset[i], false)
-            console.log()
+            const binaryParser = new BinaryParser(new DataView(data))
+            indexes.push(BPTree.parseTree(binaryParser, this.header.indexOffset[i], false))
         }
+        return indexes
     }
 
 

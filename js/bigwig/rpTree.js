@@ -5,6 +5,7 @@ import BinaryParser from "../binary.js"
 let RPTREE_HEADER_SIZE = 48
 let RPTREE_NODE_LEAF_ITEM_SIZE = 32   // leaf item size
 let RPTREE_NODE_CHILD_ITEM_SIZE = 24  // child item size
+let BUFFER_SIZE = 512000     //  buffer
 
 export default class RPTree {
 
