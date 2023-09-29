@@ -24,10 +24,64 @@ suite("htsget", function () {
      * Minimal tests of htsget -- just verifies that something parsable as a BAM record is returned.
      */
 
-    /**
-     * Full URL
-     */
-    // test("Full URL", async function () {
+    test("bam", async function() {
+
+        this.timeout(10000)
+
+        const trackConfig = {
+            sourceType: 'htsget',
+            format: 'bam',
+            url: 'https://htsget.demo.umccr.org/reads/org.umccr.demo.htsget-rs-data/bam/htsnexus_test_NA12878'
+        }
+
+        // Test reading some alignments
+        const reader = new HtsgetBamReader(trackConfig, genome1)
+        let alignmentContainer = await reader.readAlignments('11', 5020134, 5020614)
+        assert.equal(929, alignmentContainer.alignments.length)
+
+        // Repeat with chromosome alias
+        alignmentContainer = await reader.readAlignments('11', 5020134, 5020614)
+        assert.equal(929, alignmentContainer.alignments.length)
+
+    })
+
+    test("bam endpoint + id (deprecated)", async function() {
+
+        this.timeout(10000)
+
+        const trackConfig = {
+            sourceType: 'htsget',
+            format: 'bam',
+            endpoint: 'https://htsget.demo.umccr.org/reads/org.umccr.demo.htsget-rs-data/bam/',
+            id: 'htsnexus_test_NA12878'
+        }
+
+        // Test reading some alignments
+        const reader = new HtsgetBamReader(trackConfig, genome1)
+        let alignmentContainer = await reader.readAlignments('11', 5020134, 5020614)
+        assert.equal(929, alignmentContainer.alignments.length)
+
+    })
+
+    test("bam -- missing format", async function() {
+
+        this.timeout(10000)
+
+        const trackConfig = {
+            sourceType: 'htsget',
+            url: 'https://htsget.demo.umccr.org/reads/org.umccr.demo.htsget-rs-data/bam/htsnexus_test_NA12878'
+        }
+
+        // Test reading some alignments
+        const reader = new HtsgetBamReader(trackConfig, genome1)
+        let alignmentContainer = await reader.readAlignments('11', 5020134, 5020614)
+        assert.equal(929, alignmentContainer.alignments.length)
+
+    })
+
+
+    // test("BAM alignments", async function () {
+
     //
     //     this.timeout(40000)
     //
