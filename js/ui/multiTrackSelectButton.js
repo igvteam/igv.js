@@ -1,5 +1,6 @@
 import NavbarButton from "./navbarButton.js"
-import {multiTrackSelectExclusionTypes, setDragHandleSelectionState} from "../trackView.js"
+import {setDragHandleSelectionState} from "../trackView.js"
+import {multiTrackSelectExclusionTypes} from './menuUtils.js'
 import {multiSelectImage, multiSelectImageHover} from "./navbarIcons/multiSelect.js"
 
 let ENABLE_MULTI_TRACK_SELECTION = false

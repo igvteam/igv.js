@@ -25,7 +25,7 @@
 
 import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
-import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "./trackView.js"
+import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "./ui/menuUtils.js"
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "./igv-icons.js"
 

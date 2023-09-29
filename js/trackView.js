@@ -32,14 +32,13 @@ import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
 import SampleInfoViewport from "./sample/sampleInfoViewport.js";
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import MenuUtils, { canShowColorPicker } from "./ui/menuUtils.js"
+import {getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
 import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState } from './ui/multiTrackSelectButton.js'
 import {hexToRGB} from "./util/colorPalletes.js"
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
 const colorPickerExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
-const multiTrackSelectExclusionTypes = scrollbarExclusionTypes
 
 class TrackView {
 
@@ -962,21 +961,5 @@ function maxViewportContentHeight(viewports) {
     return Math.max(...heights)
 }
 
-function getMultiSelectedTrackViews(browser) {
-
-    const candidates = browser.trackViews.filter(({ track }) => { return false === multiTrackSelectExclusionTypes.has(track.type) })
-
-    let selected = candidates.filter(({ namespace, dragHandle }) => { return namespace === dragHandle.dataset.selected })
-
-    selected = 0 === selected.length ? undefined : selected
-
-    return selected
-}
-
-function isMultiSelectedTrackView(trackView) {
-    const selected = getMultiSelectedTrackViews(trackView.browser)
-    return selected && selected.length > 1 && new Set(selected).has(trackView)
-}
-
-export {igv_axis_column_width, maxViewportContentHeight, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView, setDragHandleSelectionState}
+export {igv_axis_column_width, maxViewportContentHeight, setDragHandleSelectionState}
 export default TrackView
