@@ -82,7 +82,7 @@ suite("htsget", function () {
         assert.equal(929, alignmentContainer.alignments.length)
 
     })
-    
+
 
     test("Variants", async function () {
 
