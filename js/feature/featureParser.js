@@ -277,7 +277,7 @@ class FeatureParser {
                 break
             case "bedmethyl":
                 this.decode = decodeBedmethyl
-                this.delimiter = this.config.delimiter || "\t"
+                this.delimiter = this.config.delimiter || /\s+/
                 break
             case "bedpe":
             case "hiccups":

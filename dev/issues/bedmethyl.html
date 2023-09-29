@@ -21,35 +21,20 @@
     import igv from "../../js"
 
     const config = {
-        "version": "2.16.0",
-        "showSampleNames": false,
-        "reference": {
-            "fastaURL": "https://www.dropbox.com/scl/fi/d6tmg71x03hjrqqu16qyg/106_sub.fna?rlkey=jf0bmfmlsndvhuzjdon5lbcat&dl=0",
-            "indexURL": "https://www.dropbox.com/scl/fi/292wig8fjtl3ygigkyab8/106_sub.fna.fai?rlkey=48qhmaovig1g4a7ike3dkwa5u&dl=0"
-        },
-        "locus": "all",
-        "roi": [],
+        "genome": "hg38",
+        "locus": "chr20:22,613,882-22,616,334",
         "tracks": [
+
             {
-                "type": "sequence",
-                "order": -9007199254740991
+                "url": "../../test/data/bedmethyl/sample.bedmethyl",
+                "name": "Tab delimiters",
+                "format": "bedmethyl",
+                "type": "annotation"
             },
             {
-                "url": "https://www.dropbox.com/scl/fi/b0lsnqidyvkv933uqucst/106_sub.bed?rlkey=byhtabbatva6cm2q4i14m4u5s&dl=0",
-                "filename": "106_sub.bed",
-                "name": "106_sub.bed",
-                "format": "bed",
-                "type": "annotation",
-                "height": 70,
-                "order": 3
-            },
-            {
-                "url": "https://www.dropbox.com/scl/fi/1vl9f86duplnklrkvhdqn/m_positive.bedgraph?rlkey=rdwjhr9fnu8fv1al3f9f1rjdb&dl=0",
-                "filename": "m_positive.bedgraph",
-                "name": "m_positive.bedgraph",
-                "format": "bedgraph",
-                "type": "wig",
-                "order": 4
+                "url": "../../test/data/bedmethyl/sample.mixed_delimiters.bedmethyl",
+                "name": "Mixed delimiters",
+                "format": "bedmethyl"
             }
         ]
     }
