@@ -44,6 +44,7 @@ const knownFileExtensions = new Set([
     "seg",
     "aed",
     "bed",
+    "bedMethyl",
     "vcf",
     "bb",
     "bigbed",

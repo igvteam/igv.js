@@ -11,8 +11,7 @@ import DecodeError from "./decodeError.js"
  * @param ignore
  * @returns decoded feature, or null if this is not a valid record
  */
-function decodeBed(tokens, header) {
-
+function decodeBed(tokens, header, maxColumnCount = Number.MAX_SAFE_INTEGER) {
 
     if (tokens.length < 3) return undefined
 
@@ -26,8 +25,9 @@ function decodeBed(tokens, header) {
     }
     const feature = new UCSCBedFeature({chr: chr, start: start, end: end, score: 1000})
 
+    let columnCount = 3
     try {
-        if (tokens.length > 3) {
+        if (tokens.length > 3 && columnCount++ < maxColumnCount) {
 
             // Potentially parse name field as GFF column 9 style streng.
             if (tokens[3].indexOf(';') > 0 && tokens[3].indexOf('=') > 0) {
@@ -45,40 +45,40 @@ function decodeBed(tokens, header) {
             }
         }
 
-        if (tokens.length > 4) {
+        if (tokens.length > 4 && columnCount++ < maxColumnCount) {
             feature.score = tokens[4] === '.' ? 0 : Number(tokens[4])
             if (isNaN(feature.score)) {
                 return feature
             }
         }
 
-        if (tokens.length > 5) {
+        if (tokens.length > 5 && columnCount++ < maxColumnCount) {
             feature.strand = tokens[5]
             if (!(feature.strand === '.' || feature.strand === '+' || feature.strand === '-')) {
                 return feature
             }
         }
 
-        if (tokens.length > 6) {
+        if (tokens.length > 6 && columnCount++ < maxColumnCount) {
             feature.cdStart = parseInt(tokens[6])
             if (isNaN(feature.cdStart)) {
                 return feature
             }
         }
 
-        if (tokens.length > 7) {
+        if (tokens.length > 7 && columnCount++ < maxColumnCount) {
             feature.cdEnd = parseInt(tokens[7])
             if (isNaN(feature.cdEnd)) {
                 return feature
             }
         }
 
-        if (tokens.length > 8) {
+        if (tokens.length > 8 && columnCount++ < maxColumnCount) {
             if (tokens[8] !== "." && tokens[8] !== "0")
                 feature.color = IGVColor.createColorString(tokens[8])
         }
 
-        if (tokens.length > 11) {
+        if (tokens.length > 11 && columnCount++ < maxColumnCount) {
             const exonCount = parseInt(tokens[9])
             // Some basic validation
             if (exonCount > 1000) {
@@ -122,6 +122,30 @@ function decodeBed(tokens, header) {
 
     return feature
 }
+
+/**
+ * Decode a bedMethyl file.
+ * Reference: https://www.encodeproject.org/data-standards/wgbs/
+ * @param tokens
+ * @param header
+ */
+function decodeBedmethyl(tokens, header) {
+
+    // Bedmethyl is a 9+9 format
+    const feature = decodeBed(tokens, header, 9)
+    if (feature) {
+        const extraColumnHeadings = ["Coverage", "% Showing Methylation", "N-mod", "N-canonical", "N-other mod",
+            "N-delete", "N-fail", "N-dff", "N-nocall"]
+        for (let i = 9; i < tokens.length; i++) {
+            const heading = extraColumnHeadings[i - 9]
+            feature[heading] = tokens[i]
+        }
+    }
+
+
+    return feature
+}
+
 
 /**
  * Decode a UCSC repeat masker record.
@@ -596,6 +620,6 @@ class PSLFeature {
 
 export {
     decodeBed, decodeBedGraph, decodeGenePred, decodeGenePredExt, decodePeak, decodeReflat, decodeRepeatMasker,
-    decodeSNP, decodeWig, decodePSL
+    decodeSNP, decodeWig, decodePSL, decodeBedmethyl
 }
 

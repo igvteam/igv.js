@@ -35,7 +35,8 @@ import {
     decodeReflat,
     decodeRepeatMasker,
     decodeSNP,
-    decodeWig
+    decodeWig,
+    decodeBedmethyl
 } from "./decode/ucsc.js"
 import {decodeGFF3, decodeGTF} from "./gff/gff.js"
 import {decodeFusionJuncSpan} from "./decode/fusionJuncSpan.js"
@@ -272,6 +273,10 @@ class FeatureParser {
                 break
             case "bed":
                 this.decode = decodeBed
+                this.delimiter = this.config.delimiter || /\s+/
+                break
+            case "bedmethyl":
+                this.decode = decodeBedmethyl
                 this.delimiter = this.config.delimiter || /\s+/
                 break
             case "bedpe":
