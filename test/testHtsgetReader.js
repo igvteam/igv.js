@@ -2,6 +2,7 @@ import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import HtsgetBamReader from "../js/htsget/htsgetBamReader.js"
 import HtsgetVariantReader from "../js/htsget/htsgetVariantReader.js"
+import Browser from "../js/browser.js"
 
 
 // Mock genome with "1,2,3..." name convention
@@ -72,73 +73,16 @@ suite("htsget", function () {
             url: 'https://htsget.demo.umccr.org/reads/org.umccr.demo.htsget-rs-data/bam/htsnexus_test_NA12878'
         }
 
+        // Format is infered in the "createTrack function
+        await Browser.prototype.createTrack.call(this, trackConfig)
+
         // Test reading some alignments
         const reader = new HtsgetBamReader(trackConfig, genome1)
         let alignmentContainer = await reader.readAlignments('11', 5020134, 5020614)
         assert.equal(929, alignmentContainer.alignments.length)
 
     })
-
-
-    // test("BAM alignments", async function () {
-
-    //
-    //     this.timeout(40000)
-    //
-    //     const trackConfig = {
-    //         sourceType: 'htsget',
-    //         format: 'bam',
-    //         url: 'https://htsget.ga4gh.org/reads/giab.NA12878.NIST7086.1'
-    //     }
-    //
-    //     const reader = new HtsgetBamReader(trackConfig, genome1)
-    //     const alignmentContainer = await reader.readAlignments('1', 10000, 10100)
-    //     assert.equal(7, alignmentContainer.alignments.length)
-    // })
-    //
-    // /**
-    //  * Endpoint form
-    //  */
-    // test("Endpoint + ID", async function () {
-    //
-    //     this.timeout(40000)
-    //
-    //     const trackConfig = {
-    //         sourceType: 'htsget',
-    //         format: 'bam',
-    //         endpoint: 'https://htsget.ga4gh.org/reads/',
-    //         id: 'giab.NA12878.NIST7086.1'
-    //     }
-    //
-    //     const reader = new HtsgetBamReader(trackConfig, genome1)
-    //     const alignmentContainer = await reader.readAlignments('1', 10000, 10100)
-    //     assert.equal(7, alignmentContainer.alignments.length)
-    //
-    //     const reade2 = new HtsgetBamReader(trackConfig, genome2)
-    //     const alignmentContainer2 = await reader.readAlignments('chr1', 10000, 10100)
-    //     assert.equal(7, alignmentContainer2.alignments.length)
-    // })
-    //
-    //
-    // /**
-    //  * Test deprecated config form for backward compatibility
-    //  */
-    // test("Deprecated config form (url + endpoint + id", async function () {
-    //
-    //     this.timeout(40000)
-    //
-    //     const trackConfig = {
-    //         sourceType: 'htsget',
-    //         url: 'https://htsget.ga4gh.org',
-    //         endpoint: '/reads/',
-    //         id: 'giab.NA12878.NIST7086.1'
-    //     }
-    //
-    //     const reader = new HtsgetBamReader(trackConfig, genome1)
-    //     const alignmentContainer = await reader.readAlignments('1', 10000, 10100)
-    //     assert.equal(7, alignmentContainer.alignments.length)
-    // })
-
+    
 
     test("Variants", async function () {
 
