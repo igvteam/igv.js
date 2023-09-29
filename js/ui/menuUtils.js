@@ -1,15 +1,11 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from '../trackView.js'
-
-/**
- * Configure item list for track "gear" menu.
- * @param trackView
- */
 
 const colorPickerTrackTypeSet = new Set([ 'bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact' ])
 
 const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp', 'shoebox'])
+
+const multiTrackSelectExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
 
 class MenuUtils {
     constructor(browser) {
@@ -436,6 +432,22 @@ function didSelectSingleTrackType(types) {
     return 1 === unique.length
 }
 
-export { canShowColorPicker }
+function getMultiSelectedTrackViews(browser) {
+
+    const candidates = browser.trackViews.filter(({ track }) => { return false === multiTrackSelectExclusionTypes.has(track.type) })
+
+    let selected = candidates.filter(({ namespace, dragHandle }) => { return namespace === dragHandle.dataset.selected })
+
+    selected = 0 === selected.length ? undefined : selected
+
+    return selected
+}
+
+function isMultiSelectedTrackView(trackView) {
+    const selected = getMultiSelectedTrackViews(trackView.browser)
+    return selected && selected.length > 1 && new Set(selected).has(trackView)
+}
+
+export { canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView }
 
 export default MenuUtils

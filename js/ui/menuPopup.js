@@ -3,7 +3,7 @@ import {DOMUtils, makeDraggable, UIUtils} from "../../node_modules/igv-ui/dist/i
 import {GenericColorPicker} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {createCheckbox} from "../igv-icons.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "../trackView.js"
+import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "./menuUtils.js"
 
 class MenuPopup {
     constructor(parent) {
