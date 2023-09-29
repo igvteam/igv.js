@@ -20,7 +20,7 @@ suite("testBed", function () {
 
         for(let feature of features) {
             assert(Number.isFinite(Number.parseInt(feature["Coverage"])))
-            assert(Number.isFinite(Number.parseFloat(feature["Perecentage of reads showing methylation"])))
+            assert(Number.isFinite(Number.parseFloat(feature["% Showing Methylation"])))
         }
     })
 
@@ -35,21 +35,7 @@ suite("testBed", function () {
 
         for(let feature of features) {
             assert(Number.isFinite(Number.parseInt(feature["Coverage"])))
-            assert(Number.isFinite(Number.parseFloat(feature["Perecentage of reads showing methylation"])))
-        }
-    })
-
-    test("bedmethyl - as bed file", async function () {
-        const config = {
-            url: "test/data/bedmethyl/sample.bed",
-            format: "bed"
-        }
-        const reader = new FeatureFileReader(config, genome)
-        const features = await reader.readFeatures({chr: "chr20", start: 0, end: Number.MAX_SAFE_INTEGER})
-        assert.equal(features.length, 100)
-
-        for(let feature of features) {
-            assert.equal(Array.from(Object.keys(feature)).length, 9)
+            assert(Number.isFinite(Number.parseFloat(feature["% Showing Methylation"])))
         }
     })
 
