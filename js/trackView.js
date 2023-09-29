@@ -135,6 +135,11 @@ class TrackView {
             })
 
             setMultiTrackSelectionState(this, axis, ENABLE_MULTI_TRACK_SELECTION)
+
+            if (this.dragHandle && false === ENABLE_MULTI_TRACK_SELECTION) {
+                setDragHandleSelectionState(this, this.dragHandle, false)
+            }
+
         }
 
         return axis

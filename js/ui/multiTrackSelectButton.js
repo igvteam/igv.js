@@ -1,5 +1,4 @@
 import NavbarButton from "./navbarButton.js"
-import {setDragHandleSelectionState} from "../trackView.js"
 import {multiTrackSelectExclusionTypes} from './menuUtils.js'
 import {multiSelectImage, multiSelectImageHover} from "./navbarIcons/multiSelect.js"
 
@@ -61,12 +60,6 @@ function setMultiTrackSelectionState(trackView, axis, selectionStatus) {
 
         // axis.style.backgroundColor = 'rgb(255,255,255)'
         container.style.display = 'none'
-
-        if (trackView.dragHandle) {
-            setDragHandleSelectionState(trackView, trackView.dragHandle, false)
-        }
-
-
     }
 
 
