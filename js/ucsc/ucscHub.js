@@ -6,6 +6,8 @@
  https://genome.ucsc.edu/goldenpath/help/trackDb/trackDbHub.html
  */
 
+import { igvxhr} from "../../node_modules/igv-utils/src/index.js"
+
 class Hub {
 
     static async loadHub(options) {
@@ -326,8 +328,7 @@ class Stanza {
  */
 async function loadStanzas(options) {
 
-    const response = await fetch(options.url)
-    const data = await response.text()
+    const data = await igvxhr.loadString(options.url)
     const lines = data.split(/\n|\r\n|\r/g)
 
     const nodes = []
