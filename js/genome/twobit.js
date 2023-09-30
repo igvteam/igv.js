@@ -78,31 +78,30 @@ class TwobitSequence {
         for (let genomicPosition = regionStart; genomicPosition < regionEnd; genomicPosition += 1) {
 
             // function checks if  we are currently masked
-            const baseIsMasked = () => {
-                while (maskBlocks.length && maskBlocks[0].end <= genomicPosition) {
-                    maskBlocks.shift()
-                }
-                return maskBlocks[0] && maskBlocks[0].start <= genomicPosition && maskBlocks[0].end > genomicPosition
-            }
 
-            // process the N block if we have one
+            while (maskBlocks.length && maskBlocks[0].end <= genomicPosition) {
+                maskBlocks.shift()
+            }
+            const baseIsMasked = maskBlocks[0] && maskBlocks[0].start <= genomicPosition && maskBlocks[0].end > genomicPosition
+
+
+            // process the N block if we have one.  Masked "N" ("n")  is not supported
             if (nBlocks[0] && genomicPosition >= nBlocks[0].start && genomicPosition < nBlocks[0].end) {
                 const currentNBlock = nBlocks.shift()
                 while (genomicPosition < currentNBlock.end && genomicPosition < regionEnd) {
-                    sequenceBases += baseIsMasked() ? 'n' : 'N'
+                    sequenceBases += 'N'
                     genomicPosition++
                 }
+                genomicPosition--
             } else {
                 const bytePosition = Math.floor(genomicPosition / 4) - baseBytesOffset
                 const subPosition = genomicPosition % 4
                 const byte = baseBytes[bytePosition]
-                try {
-                    sequenceBases += baseIsMasked()
-                        ? maskedByteTo4Bases[byte][subPosition]
-                        : byteTo4Bases[byte][subPosition]
-                } catch (e) {
-                    console.error(e)
-                }
+
+                sequenceBases += baseIsMasked
+                    ? maskedByteTo4Bases[byte][subPosition]
+                    : byteTo4Bases[byte][subPosition]
+
             }
         }
         return sequenceBases
@@ -159,7 +158,7 @@ class TwobitSequence {
             ptr += len + 4
             this.index.set(name, offset)
 
-            estNameLength = Math.floor(estNameLength * (i/(i+1)) + name.length / (i + 1))
+            estNameLength = Math.floor(estNameLength * (i / (i + 1)) + name.length / (i + 1))
         }
     }
 
