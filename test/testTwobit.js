@@ -5,6 +5,19 @@ import TwobitSequence from "../js/genome/twobit.js"
 
 suite("testTwobit", function () {
 
+    test("twobit", async function () {
+
+        const expectedSequence = "NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNACTCTATCTATCTATCTATCTATCTTTTT" +
+            "CCCCCCGGGGGGagagagagactc tagcatcctcctacctcacNNacCNctTGGACNCcCaGGGatttcNNNcccNNCCNCgN"
+
+        const url = "test/data/twobit/foo.2bit"
+        const twobit = new TwobitSequence({fastaURL: url})
+        const start = 5
+        const end = 100
+        const seqString = await twobit.readSequence("chr1", start, end)
+       // assert.equal(seqString.length, end - start)
+        assert.equal(seqString, expectedSequence.substring(start, end))
+    })
 
     test("twobit sequence", async function () {
 
