@@ -6,8 +6,6 @@
  https://genome.ucsc.edu/goldenpath/help/trackDb/trackDbHub.html
  */
 
-import fetch from 'node-fetch';
-
 class Hub {
 
     static async loadHub(options) {
