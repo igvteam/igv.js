@@ -12,7 +12,7 @@
 <h1>Searchable GFF</h1>
 <p>
     Illustrates searching for a feature in a GFF track from a column 9 field.  Search for
-<pre>MYC+proto-oncogene,+bHLH+transcription+factor,+transcript+variant+1</pre>
+<pre>ENST00000524013</pre>
 </p>
 <p>
     Track configuration:
@@ -23,7 +23,7 @@
       format: "gff",
       indexed: false,
       searchable: true,
-      searchableFields: ["product"]
+      searchableFields: ["transcript_id"]
     }
 </pre>
 </p>
@@ -40,12 +40,12 @@
             tracks:
                 [
                     {
-                        name: "NCBI gff",
-                        url: "../../test/data/gff/NCBI_hg38_MYC.gff",
-                        format: "gff",
-                        indexed: false,
-                        searchable: true,
-                        searchableFields: ["product"]
+                        "name": "MYC-205",
+                        "url": "../../test/data/gff/Ensembl_MYC-205.gff3",
+                        "format": "gff3",
+                        "indexed": false,
+                        "searchable": true,
+                        searchableFields: ["transcript_id"]
                     }
                 ]
         };
