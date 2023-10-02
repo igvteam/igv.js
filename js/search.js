@@ -46,14 +46,18 @@ async function search(browser, string) {
         let locusObject = parseLocusString(browser, locus)
 
         if (!locusObject) {
-            const feature = browser.genome.featureDB.get(locus.toUpperCase())
-            if (feature) {
-                locusObject = {
-                    chr: feature.chr,
-                    start: feature.start,
-                    end: feature.end,
-                    gene: feature.name,
-                    locusSearchString: string
+            const searchableTracks = browser.tracks.filter(t => t.searchable)
+            for(let track of searchableTracks) {
+                const feature = await track.search(locus)
+                if(feature) {
+                    locusObject = {
+                        chr: feature.chr,
+                        start: feature.start,
+                        end: feature.end,
+                        gene: feature.name,
+                        locusSearchString: string
+                    }
+                    break;  // We don't support multiple feature hits yets
                 }
             }
         }

@@ -228,11 +228,11 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         if (t.hasProperty("url")) {
             config.infoURL = t.getProperty("url")
         }
-        if(t.hasOwnProperty("searchIndex")) {
-            config.bbSearchIndex =  t.getProperty("searchIndex")
+        if(t.hasProperty("searchIndex")) {
+            config.searchIndex =  t.getProperty("searchIndex")
         }
-        if(t.hasOwnProperty("searchTrix")) {
-            config.bbSearchTrix =  this.baseURL + t.getProperty("searchTrix")
+        if(t.hasProperty("searchTrix")) {
+            config.searchTrix =  this.baseURL + t.getProperty("searchTrix")
         }
 
         if (t.hasProperty("group")) {

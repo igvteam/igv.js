@@ -35,7 +35,6 @@ class FeatureTrack extends TrackBase {
     init(config) {
         super.init(config)
 
-
         // Obscure option, not common or supoorted, included for backward compatibility
         this.labelDisplayMode = config.labelDisplayMode
 
@@ -106,6 +105,30 @@ class FeatureTrack extends TrackBase {
 
     }
 
+    /**
+     * Return true if this track can be searched for genome location by feature property.
+     * This track is searchable if its featureSource is searchable.
+     * @returns {boolean}
+     */
+    get searchable() {
+        return this.featureSource.searchable
+    }
+
+    async search(locus) {
+        if(this.featureSource && this.featureSource.searchable) {
+            return this.featureSource.search(locus)
+        } else {
+            return undefined
+        }
+    }
+
+
+    /**
+     * Return boolean indicating if this track supports the whole genome view.  Generally this is non-indexed feature
+     * tracks.
+     *
+     * @returns {*|boolean}
+     */
     get supportsWholeGenome() {
         if (this.config.supportsWholeGenome !== undefined) {
             return this.config.supportsWholeGenome

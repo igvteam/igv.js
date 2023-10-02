@@ -51,7 +51,6 @@ suite("ucsc utilities", function () {
         const config = {
             url: "test/data/bb/GCF_000009045.1_ASM904v1.ncbiGene.bb",
             format: "bigbed",
-            searchIndex: "name",
             searchTrix: "test/data/bb/ixIxx/GCF_000009045.1_ASM904v1.ncbiGene.ix"
         }
 
@@ -69,7 +68,5 @@ suite("ucsc utilities", function () {
         assert.equal(f2.name2.toLowerCase(), name2.toLowerCase())
 
     })
-
-
 })
 

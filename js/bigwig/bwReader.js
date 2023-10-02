@@ -26,14 +26,14 @@
 import ChromTree from "./chromTree.js"
 import RPTree from "./rpTree.js"
 import BinaryParser from "../binary.js"
-import {BGZip, igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import getDecoder from "./bbDecoders.js"
 import {parseAutoSQL} from "../util/ucscUtils.js"
 import summarizeWigData from "./summarizeWigData.js"
 import Trix from "./trix.js"
 import BPTree from "./bpTree.js"
-import {isString} from "igv-utils/src/stringUtils.js"
+
 
 const BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
 const BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
@@ -60,8 +60,6 @@ class BWReader {
         if (config.searchTrix) {
             this._trix = new Trix(`${config.searchTrix}x`, config.searchTrix)
         }
-
-        //config.bbSearchIndex
 
     }
 
@@ -155,6 +153,15 @@ class BWReader {
         }
     }
 
+
+    /**
+     * Potentially searchable if a bigbed source.  Bigwig files are not searchable.
+     * @returns {boolean}
+     */
+    get searchable() {
+        return "bigbed" === this.type
+    }
+
     /**
      * Search the extended BP tree for the search term, and return any matching features.  This only works
      * for BB sources with an "extended" BP tree for searching
@@ -165,24 +172,31 @@ class BWReader {
         if (!this.header) {
             await this.loadHeader()
         }
-        if (!this.header.extraIndexCount) {
+        if (!(this.header && this.header.extraIndexCount)) {
             return undefined
         }
 
         const region = await this._searchForRegions(term)   // Either 1 or no (undefined) reginos returned for now
         if (region) {
             const features = await this._loadFeaturesForRange(region.offset, region.length)
-            if(features) {
-                for(let f of features) {
+            if (features) {
+                // Collect all matching features and return the largest
+                const matching = features.filter(f => {
                     // We could use the searchIndex parameter to pick an attribute (column),  but we don't know
                     // the names of all the columns and if they match IGV names
                     // TODO -- align all feature attribute names with UCSC, an use specific column
-                    for(let key of Object.keys(f)) {
+                    for (let key of Object.keys(f)) {
                         const v = f[key]
-                        if (isString(v) && v.toLowerCase() === term.toLowerCase()) {
-                            return f
+                        if (StringUtils.isString(v) && v.toLowerCase() === term.toLowerCase()) {
+                            return true
                         }
                     }
+                    return false
+                })
+                if (matching.length > 0) {
+                    return matching.reduce((l, f) => (l.end - l.start) > (f.end - f.start) ? l : f, features[0])
+                } else {
+                    return undefined
                 }
             }
         }

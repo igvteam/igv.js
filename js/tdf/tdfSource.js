@@ -30,6 +30,7 @@ import summarizeWigData from "../bigwig/summarizeWigData.js"
 
 class TDFSource {
 
+    searchable = false
     constructor(config, genome) {
         this.genome = genome
         this.windowFunction = config.windowFunction || "mean"
