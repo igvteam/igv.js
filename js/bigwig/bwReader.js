@@ -382,6 +382,7 @@ class BWReader {
         const extensionSize = binaryParser.getShort()
         const extraIndexCount = binaryParser.getShort()
         const extraIndexListOffset = binaryParser.getLong()
+        if(extraIndexCount === 0) return
 
         let sz = extraIndexCount * (2 + 2 + 8 + 4 + 10 * (2 + 2))
         data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {

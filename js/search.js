@@ -83,13 +83,12 @@ async function search(browser, string) {
 
     // If nothing is found, consider possibility that loci name itself has spaces
     if (list.length === 0) {
-        const locusObject = await searchLocus(string)
+        const locusObject = await searchLocus(string.replaceAll(' ', '+'))
         if (locusObject) {
             locusObject.locusSearchString = string
             list.push(locusObject)
         }
     }
-
 
     return 0 === list.length ? undefined : list
 }
