@@ -99,6 +99,14 @@ class BWSource {
     async trackType() {
         return this.reader.getTrackType()
     }
+
+    get searchable() {
+        return this.reader.searchable
+    }
+
+    async search(term) {
+        return this.reader.search(term)
+    }
 }
 
 export default BWSource
