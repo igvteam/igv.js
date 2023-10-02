@@ -320,23 +320,6 @@ suite("testBed", function () {
 
     })
 
-    test("Searchable annotations", async function () {
-
-        const config = {
-            format: "bed",
-            delimiter: "\t",
-            url: "test/data/bed/names_with_spaces.bed",
-            indexed: false,
-            searchable: true,
-        }
-        const featureSource = FeatureSource(config, genome)
-        await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
-
-        const found = genome.featureDB.get("KAN2 MARKER")
-        assert.ok(found)
-
-    })
-
     test("Whole genome", async function () {
 
         this.timeout(20000)

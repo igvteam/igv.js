@@ -93,9 +93,8 @@ class TextFeatureSource {
             }
         }
 
-        // Set  searchable unless explicitly turned off, or track uses in indexed or otherwise queryable
-        // feature source.  queryable => features loaded on demand (by query)
-        this.searchable = config.searchable === true || config.searchableFields || (config.searchable !== false && !this.queryable)
+        // Flag indicating if features loaded by this source can be searched for by name or attribute
+        this.searchable = config.searchable === true || config.searchableFields !== undefined
 
     }
 
@@ -156,7 +155,7 @@ class TextFeatureSource {
         //   * view is "whole genome" but no features are loaded
         //   * cache is disabled
         //   * cache does not contain requested range
-       // const containsRange = this.featureCache.containsRange(new GenomicInterval(queryChr, start, end))
+        // const containsRange = this.featureCache.containsRange(new GenomicInterval(queryChr, start, end))
         if ((isWholeGenome && !this.wgFeatures && this.supportsWholeGenome()) ||
             this.config.disableCache ||
             !this.featureCache ||
@@ -234,10 +233,38 @@ class TextFeatureSource {
 
             // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
             if (this.searchable) {
-                this.genome.addFeaturesToDB(features, this.config)
+                this.addFeaturesToDB(features, this.config)
             }
         } else {
             this.featureCache = new FeatureCache([], genomicInterval)     // Empty cache
+        }
+    }
+
+    addFeaturesToDB(featureList, config) {
+        if (!this.featureMap) {
+            this.featureMap = new Map()
+        }
+        const searchableFields = config.searchableFields || ["name"]
+        for (let feature of featureList) {
+            for (let field of searchableFields) {
+                let key
+                if(typeof feature.getAttributeValue === 'function') {
+                    key = feature.getAttributeValue(field)
+                }
+                if(!key) {
+                    key = feature[field]
+                }
+                if (key) {
+                    key = key.replaceAll(' ', '+')
+                    this.featureMap.set(key.toUpperCase(), feature)
+                }
+            }
+        }
+    }
+
+     search(term) {
+        if(this.featureMap) {
+            return this.featureMap.get(term.toUpperCase())
         }
     }
 }
