@@ -1567,7 +1567,7 @@
   height: fit-content;
   background-color: transparent;
   display: grid;
-  place-items: center;
+  place-items: flex-start center;
 }
 .igv-axis-column > div > div > input {
   display: block;
