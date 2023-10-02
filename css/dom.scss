@@ -130,7 +130,9 @@ $igv-zoom-in-notice-height: 16px;
       height: fit-content;
       background-color: transparent;
       display: grid;
-      place-items: flex-start center;
+      align-items: start;
+      justify-items: center;
+      //place-items: flex-start center;
       >input {
         display: block;
         margin: unset;
