@@ -27,12 +27,13 @@
 import NavbarButton from "./navbarButton.js"
 import GenomeUtils from "../genome/genome.js"
 import {centerlineImage, centerlineImageHover} from "./navbarIcons/centerline.js"
+import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 
 class CenterLineButton extends NavbarButton {
 
     constructor(browser, parent) {
 
-        super(browser, parent, 'Center Line', centerlineImage, centerlineImageHover, browser.config.showCenterGuide)
+        super(browser, parent, 'Center Line', buttonLabel, centerlineImage, centerlineImageHover, browser.config.showCenterGuide)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowCenterLine) {

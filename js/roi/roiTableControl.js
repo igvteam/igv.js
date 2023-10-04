@@ -26,12 +26,13 @@
 
 import NavbarButton from "../ui/navbarButton.js"
 import {roiImage, roiImageHover} from "../ui/navbarIcons/roi.js"
+import { buttonLabel } from "../ui/navbarIcons/buttonLabel.js"
 
 class ROITableControl extends NavbarButton {
 
     constructor(parent, browser)  {
 
-        super(browser, parent, 'ROI', roiImage, roiImageHover, browser.doShowROITable)
+        super(browser, parent, 'ROI', buttonLabel, roiImage, roiImageHover, browser.doShowROITable)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowROITable) {

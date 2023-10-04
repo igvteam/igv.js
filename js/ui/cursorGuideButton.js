@@ -27,12 +27,13 @@
 import NavbarButton from "./navbarButton.js"
 import GenomeUtils from "../genome/genome.js"
 import {cursorImage, cursorImageHover} from "./navbarIcons/cursor.js"
+import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 
 class CursorGuideButton extends NavbarButton {
 
     constructor(browser, parent) {
 
-        super(browser, parent, 'Crosshairs', cursorImage, cursorImageHover, browser.doShowCursorGuide)
+        super(browser, parent, 'Crosshairs', buttonLabel, cursorImage, cursorImageHover, browser.doShowCursorGuide)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowCursorGuide) {

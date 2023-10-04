@@ -26,12 +26,13 @@
 
 import NavbarButton from "./navbarButton.js"
 import {trackLabelsImage, trackLabelsImageHover} from "./navbarIcons/trackLabels.js"
+import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 
 class TrackLabelControl extends NavbarButton {
 
     constructor(parent, browser) {
 
-        super(browser, parent, 'Track Labels', trackLabelsImage, trackLabelsImageHover, browser.config.showTrackLabels)
+        super(browser, parent, 'Track Labels', buttonLabel, trackLabelsImage, trackLabelsImageHover, browser.config.showTrackLabels)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowTrackLabels) {

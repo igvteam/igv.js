@@ -1,13 +1,14 @@
 import NavbarButton from "./navbarButton.js"
 import {multiTrackSelectExclusionTypes} from './menuUtils.js'
 import {multiSelectImage, multiSelectImageHover} from "./navbarIcons/multiSelect.js"
+import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 
 let ENABLE_MULTI_TRACK_SELECTION = false
 
 class MultiTrackSelectButton extends NavbarButton {
     constructor(browser, parent) {
 
-        super(browser, parent, 'Select Tracks', multiSelectImage, multiSelectImageHover, ENABLE_MULTI_TRACK_SELECTION)
+        super(browser, parent, 'Select Tracks', buttonLabel, multiSelectImage, multiSelectImageHover, ENABLE_MULTI_TRACK_SELECTION)
 
         this.button.addEventListener('mouseenter', event => {
             if (false === ENABLE_MULTI_TRACK_SELECTION) {

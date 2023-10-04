@@ -25,11 +25,10 @@
  */
 
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
-import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 
 class NavbarButton {
 
-    constructor(browser, parent, title, imageSVG, imageHoverSVG, initialButtonState) {
+    constructor(browser, parent, title, buttonLabel, imageSVG, imageHoverSVG, initialButtonState) {
 
         this.browser = browser
 
@@ -37,6 +36,8 @@ class NavbarButton {
         parent.appendChild(this.button)
 
         this.title = title
+
+        this.buttonLabel = buttonLabel
 
         this.imageDictionary =
             {
@@ -77,7 +78,7 @@ class NavbarButton {
         this.button.classList.add('igv-navbar-text-button')
 
         const tempDiv = document.createElement('div')
-        tempDiv.innerHTML = buttonLabel
+        tempDiv.innerHTML = this.buttonLabel
         const svgRoot = tempDiv.firstChild
         this.button.appendChild(svgRoot)
 

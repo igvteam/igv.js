@@ -26,12 +26,13 @@
 
 import NavbarButton from "../ui/navbarButton.js"
 import {sampleNameImage, sampleNameImageHover} from "../ui/navbarIcons/sampleNames.js"
+import { sampleNameButtonLabel } from "../ui/navbarIcons/buttonLabel.js"
 
 class SampleNameControl extends NavbarButton {
 
     constructor(parent, browser) {
 
-        super(browser, parent, 'Sample Names', sampleNameImage, sampleNameImageHover, browser.config.showSampleNames)
+        super(browser, parent, 'Sample Names', sampleNameButtonLabel, sampleNameImage, sampleNameImageHover, browser.config.showSampleNames)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.showSampleNames) {

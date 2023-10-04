@@ -48,10 +48,12 @@ const svgTextURL = `url("data:image/svg+xml,${ encodeURIComponent(svgText) }")`
 const pngHoverTextURL = `url("data:image/svg+xml,${ encodeURIComponent(pngTextHover) }")`
 const svgHoverTextURL = `url("data:image/svg+xml,${ encodeURIComponent(svgTextHover) }")`
 
+import { buttonLabel } from "./navbarIcons/buttonLabel.js"
+
 class SaveImageControl extends NavbarButton {
     constructor(parent, browser) {
 
-        super(browser, parent, 'Save Image', imageSaveImageSVG, imageSaveImageHoverSVG, false)
+        super(browser, parent, 'Save Image', buttonLabel, imageSaveImageSVG, imageSaveImageHoverSVG, false)
 
         this.button.addEventListener('mouseenter', () => this.setState(true))
 

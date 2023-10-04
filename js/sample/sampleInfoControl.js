@@ -26,12 +26,13 @@
 
 import NavbarButton from "../ui/navbarButton.js"
 import {sampleInfoImage, sampleInfoImageHover} from "../ui/navbarIcons/sampleInfo.js"
+import { buttonLabel } from "../ui/navbarIcons/buttonLabel.js"
 
 class SampleInfoControl extends NavbarButton {
 
     constructor(parent, browser) {
 
-        super(browser, parent, 'Sample Info', sampleInfoImage, sampleInfoImageHover, false)
+        super(browser, parent, 'Sample Info', buttonLabel, sampleInfoImage, sampleInfoImageHover, false)
 
         this.showSampleInfo = false
 
