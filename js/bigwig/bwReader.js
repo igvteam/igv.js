@@ -379,8 +379,8 @@ class BWReader {
             }
         }))
         let binaryParser = new BinaryParser(new DataView(data))
-        const extensionSize = binaryParser.getShort()
-        const extraIndexCount = binaryParser.getShort()
+        const extensionSize = binaryParser.getUShort()
+        const extraIndexCount = binaryParser.getUShort()
         const extraIndexListOffset = binaryParser.getLong()
         if(extraIndexCount === 0) return
 
@@ -399,17 +399,17 @@ class BWReader {
         const indexOffset = []
         for (let i = 0; i < extraIndexCount; i++) {
 
-            type.push(binaryParser.getShort())
+            type.push(binaryParser.getUShort())
 
-            const fc = binaryParser.getShort()
+            const fc = binaryParser.getUShort()
             fieldCount.push(fc)
 
             indexOffset.push(binaryParser.getLong())
             reserved.push(binaryParser.getInt())
 
             for (let j = 0; j < fc; j++) {
-                const fieldId = binaryParser.getShort()
-                reserved.push(binaryParser.getShort())
+                const fieldId = binaryParser.getUShort()
+                reserved.push(binaryParser.getUShort())
             }
         }
         this.header.extraIndexCount = extraIndexCount
