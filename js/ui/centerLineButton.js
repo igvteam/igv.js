@@ -25,7 +25,7 @@
  */
 
 import NavbarButton from "./navbarButton.js"
-import GenomeUtils from "../genome/genome.js"
+import GenomeUtils from "../genome/genomeUtils.js"
 import {centerlineImage, centerlineImageHover} from "./navbarIcons/centerline.js"
 import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 
