@@ -406,6 +406,9 @@ $igv-save-png-image-x-origin:  3*$igv-navbar-icon-button-size/4;
   background-position: center;
 
   >div:first-child {
+
+    z-index: 512;
+
     position: absolute;
     top: $igv-save-image-y-origin;
     left: $igv-save-svg-image-x-origin;
@@ -420,6 +423,9 @@ $igv-save-png-image-x-origin:  3*$igv-navbar-icon-button-size/4;
   }
 
   >div:last-child {
+
+    z-index: 512;
+
     position: absolute;
     top: $igv-save-image-y-origin;
     left: $igv-save-png-image-x-origin;
@@ -450,7 +456,10 @@ $igv-save-png-image-x-origin:  3*$igv-navbar-icon-button-size/4;
   justify-content: center;
   align-items: center;
 
-  >:nth-child(2) {
+  >div:nth-child(2) {
+
+    z-index: 512;
+
     position: absolute;
     top: $igv-save-image-y-origin;
     left: 0;
@@ -464,7 +473,10 @@ $igv-save-png-image-x-origin:  3*$igv-navbar-icon-button-size/4;
     background-position: center;
   }
 
-  >:nth-child(3) {
+  >div:nth-child(3) {
+
+    z-index: 512;
+
     position: absolute;
     top: $igv-save-image-y-origin;
     left: 42px;

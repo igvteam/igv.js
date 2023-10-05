@@ -276,6 +276,7 @@
   background-position: center;
 }
 .igv-navbar-icon-button > div:first-child {
+  z-index: 512;
   position: absolute;
   top: 36px;
   left: -18px;
@@ -287,6 +288,7 @@
   background-position: center;
 }
 .igv-navbar-icon-button > div:last-child {
+  z-index: 512;
   position: absolute;
   top: 36px;
   left: 18px;
@@ -308,7 +310,8 @@
   justify-content: center;
   align-items: center;
 }
-.igv-navbar-text-button > :nth-child(2) {
+.igv-navbar-text-button > div:nth-child(2) {
+  z-index: 512;
   position: absolute;
   top: 36px;
   left: 0;
@@ -319,7 +322,8 @@
   background-repeat: no-repeat;
   background-position: center;
 }
-.igv-navbar-text-button > :nth-child(3) {
+.igv-navbar-text-button > div:nth-child(3) {
+  z-index: 512;
   position: absolute;
   top: 36px;
   left: 42px;

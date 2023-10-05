@@ -168,12 +168,14 @@ function trackOverlayMenuItem() {
                 this.browser.removeTrack(wigTrack)
             }
 
+            const fudge = 0.75
+
             const config =
                 {
                     name: 'Overlay - autoscaled',
                     type: 'merged',
                     autoscale: true,
-                    alpha: 0.5,
+                    alpha: fudge * (1.0/wigTracks.length),
                     height: Math.max(...wigTracks.map(({ height }) => height)),
                     order: Math.min(...wigTracks.map(({ order }) => order)),
                     tracks: wigConfigs
