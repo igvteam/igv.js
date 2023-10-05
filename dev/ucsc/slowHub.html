@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+<select id="select">
+    <option value = ""></option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt">Many chromosomes ~ same size
+    </option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCA/022/747/635/GCA_022747635.1/hub.txt">Many chromosomes - gradually decreasing
+        chromosomes
+    </option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCF/013/103/735/GCF_013103735.1/hub.txt">24 large chromosomes
+    </option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/hub.txt">T2T</option>
+</select>
+
+<label>
+    Enter full URL to hub.txt file
+    <input id="hub-input" type="text" style="width: 600px">
+</label>
+
+<button id="load-genome">Load hub as genome</button>
+<button id="load-session">Load hub as session</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+    import Hub from "../../js/ucsc/ucscHub.js"
+
+
+    const hubOptions = {
+        url: "https://hgdownload.soe.ucsc.edu/hubs/GCA/004/027/145/GCA_004027145.1/hub.txt",
+        includeTracks: "all"
+    }
+
+
+    const hub = await Hub.loadHub(hubOptions)
+    const ref = hub.getGenomeConfig()
+
+    const igvConfig = {
+        locus: hub.getDefaultPosition(),
+        reference: ref
+    }
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+
+    const selector = document.getElementById("select")
+    selector.addEventListener("change", () => document.getElementById("hub-input").value = selector.value)
+    document.getElementById("load-genome").addEventListener("click", () =>
+        browser.loadGenome({url: document.getElementById("hub-input").value}))
+    document.getElementById("load-session").addEventListener("click", () =>
+        browser.loadSession({url: document.getElementById("hub-input").value}))
+
+
+</script>
+
+</body>
+
+</html>

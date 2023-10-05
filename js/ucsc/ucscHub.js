@@ -113,6 +113,10 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         }
 
         config.description = config.id
+
+        if (this.genomeStanza.hasProperty("chromSizes")) {
+            config.chromSizes = this.baseURL + this.genomeStanza.getProperty("chromSizes")
+        }
         if (this.genomeStanza.hasProperty("description")) {
             config.description += `\n${this.genomeStanza.getProperty("description")}`
         }
