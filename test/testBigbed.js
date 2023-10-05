@@ -54,8 +54,7 @@ suite("testBigBed", function () {
         const url = "test/data/bb/interactExample3.inter.bb"
 
         const chr = "chr3"
-        const start = 63702628
-        const end = 63880091
+
         const bwSource = new BWSource({url: url})
 
         const trackType = await bwSource.trackType()
