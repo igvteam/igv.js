@@ -70,6 +70,10 @@ async function createBrowser(parentDiv, config) {
     allBrowsers.push(browser)
 
     // Load initial session
+
+    console.log(`${ Date.now() } BEGIN Load Session`)
+    browser.startSpinner()
+
     const sessionURL = config.sessionURL || config.session || config.hubURL
     if (sessionURL) {
         await browser.loadSession({
@@ -78,6 +82,9 @@ async function createBrowser(parentDiv, config) {
     } else {
         await browser.loadSessionObject(config)
     }
+
+    browser.stopSpinner()
+    console.log(`${ Date.now() } DONE Load Session`)
 
     navbarDidResize(browser, browser.$navigation.width())
 

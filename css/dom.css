@@ -1508,6 +1508,7 @@
   user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
+  min-height: 160px;
 }
 
 .igv-viewport {
