@@ -64,7 +64,7 @@ function getResponsiveClasses(browser, navbarWidth) {
 
     const currentClass = NavbarButton.currentNavbarButtonClass(browser)
 
-    console.log(`Current class ${ currentClass } Delta: ${ StringUtils.numberFormatter(Math.floor(delta))}`)
+    // console.log(`Current class ${ currentClass } Delta: ${ StringUtils.numberFormatter(Math.floor(delta))}`)
 
     if ('igv-navbar-text-button' === currentClass && delta < responsiveThreshold) {
         navbarResponsiveClasses.navbarButton = 'igv-navbar-icon-button'
