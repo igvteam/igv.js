@@ -492,6 +492,11 @@ $igv-save-png-image-x-origin:  3*$igv-navbar-icon-button-size/4;
 
 }
 
+#igv-text-button-label {
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
 .igv-navbar-text-button-svg-inactive {
   rect {
     stroke: #737373;

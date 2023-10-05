@@ -335,6 +335,11 @@
   background-position: center;
 }
 
+#igv-text-button-label {
+  text-anchor: middle;
+  dominant-baseline: middle;
+}
+
 .igv-navbar-text-button-svg-inactive rect {
   stroke: #737373;
   fill: white;
