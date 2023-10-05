@@ -33,7 +33,7 @@ import SampleInfoViewport from "./sample/sampleInfoViewport.js";
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import {getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
-import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState } from './ui/multiTrackSelectButton.js'
+import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState } from './ui/multiTrackSelectButton.js'
 import {hexToRGB} from "./util/colorPalletes.js"
 
 const igv_axis_column_width = 50
@@ -135,10 +135,6 @@ class TrackView {
             })
 
             setMultiTrackSelectionState(this, axis, ENABLE_MULTI_TRACK_SELECTION)
-
-            if (this.dragHandle && false === ENABLE_MULTI_TRACK_SELECTION) {
-                setDragHandleSelectionState(this, this.dragHandle, false)
-            }
 
         }
 
@@ -923,22 +919,6 @@ class TrackView {
 
     maxViewportContentHeight() {
         return Math.max(this.viewports.map(viewport => viewport.getContentHeight()))
-    }
-
-}
-
-function setDragHandleSelectionState(trackView, dragHandle, isSelected) {
-
-    if (isSelected) {
-        dragHandle.dataset.selected = trackView.namespace
-        dragHandle.classList.remove('igv-track-drag-handle-color')
-        dragHandle.classList.remove('igv-track-drag-handle-hover-color')
-        dragHandle.classList.add('igv-track-drag-handle-selected-color')
-    } else {
-        dragHandle.dataset.selected = 'no'
-        dragHandle.classList.remove('igv-track-drag-handle-hover-color')
-        dragHandle.classList.remove('igv-track-drag-handle-selected-color')
-        dragHandle.classList.add('igv-track-drag-handle-color')
     }
 
 }

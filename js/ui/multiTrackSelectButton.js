@@ -47,24 +47,42 @@ class MultiTrackSelectButton extends NavbarButton {
     }
 }
 
-function setMultiTrackSelectionState(trackView, axis, selectionStatus) {
+function setMultiTrackSelectionState(trackView, axis, doEnableMultiSelection) {
 
     const container = axis.querySelector('div')
 
-    if (true === selectionStatus) {
-        // axis.style.backgroundColor = `rgba(0,0,0, ${1/16})`
+    if (true === doEnableMultiSelection) {
         container.style.display = 'grid'
     } else {
 
         const trackSelectInput =  container.querySelector('[name=track-select]')
         trackSelectInput.checked = false
 
-        // axis.style.backgroundColor = 'rgb(255,255,255)'
+        if (trackView.dragHandle) {
+            setDragHandleSelectionState(trackView, trackView.dragHandle, trackSelectInput.checked)
+        }
+
         container.style.display = 'none'
     }
 
 
 }
 
-export { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState }
+function setDragHandleSelectionState(trackView, dragHandle, isSelected) {
+
+    if (isSelected) {
+        dragHandle.dataset.selected = trackView.namespace
+        dragHandle.classList.remove('igv-track-drag-handle-color')
+        dragHandle.classList.remove('igv-track-drag-handle-hover-color')
+        dragHandle.classList.add('igv-track-drag-handle-selected-color')
+    } else {
+        dragHandle.dataset.selected = 'no'
+        dragHandle.classList.remove('igv-track-drag-handle-hover-color')
+        dragHandle.classList.remove('igv-track-drag-handle-selected-color')
+        dragHandle.classList.add('igv-track-drag-handle-color')
+    }
+
+}
+
+export { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState }
 export default MultiTrackSelectButton
