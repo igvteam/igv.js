@@ -44,9 +44,11 @@ class WigTrack extends TrackBase {
         } else if ("bigwig" === format) {
             this.featureSource = new BWSource(config, this.browser.genome)
             this.resolutionAware = true
+            this.windowFunction = config.windowFunction || 'mean'
         } else if ("tdf" === format) {
             this.featureSource = new TDFSource(config, this.browser.genome)
             this.resolutionAware = true
+            this.windowFunction = config.windowFunction || 'mean'
         } else {
             this.featureSource = FeatureSource(config, this.browser.genome)
             this.resolutionAware = false
