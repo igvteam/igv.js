@@ -373,7 +373,32 @@
             ]
         };
 
-    igv.createBrowser(document.getElementById("myDiv"), overlay_throws_error_config).then(function (browser) {})
+    const group_autoscale_config = {
+        genome: "hg19",
+        locus: "myc",
+        tracks: [
+
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+                "name": "Encode bigwig",
+                color: 'rgb(255,0,0)',
+                height: 256,
+                "metadata" : {
+                    "Foo": "bar",
+                    "Bar": 999.999
+                }
+            },
+            {
+                "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
+                color: 'rgb(0,0,255)',
+                "name": "Big BigWig",
+                height: 256
+            },
+
+        ]
+    };
+
+    igv.createBrowser(document.getElementById("myDiv"), group_autoscale_config).then(function (browser) {})
 
 
 </script>
