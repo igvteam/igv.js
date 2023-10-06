@@ -25,7 +25,7 @@ $igv-roi-table-font-face: 'Open Sans', sans-serif;
 $igv-roi-table-background-color: #eee;
 
 // menu container
-.igv-roi-menu-next-gen {
+.igv-roi-menu {
 
   position: absolute;
   z-index: 512;
@@ -104,9 +104,9 @@ $igv-roi-table-background-color: #eee;
 
     text-align: start;
     vertical-align: middle;
-    //cursor: pointer;
 
     > div {
+
       height: $dimension;
       padding-left: 4px;
 
@@ -116,6 +116,7 @@ $igv-roi-table-background-color: #eee;
     }
 
     > div:not(:first-child):hover {
+      cursor: pointer;
       background-color: rgba(127, 127, 127, 0.1);
     }
 
@@ -211,7 +212,7 @@ $igv-roi-table-background-color: #eee;
       text-align: center;
       white-space: nowrap;
       text-overflow: ellipsis;
-      
+
       overflow: hidden;
 
       margin-left: 4px;
@@ -489,56 +490,6 @@ $igv-roi-table-background-color: #eee;
     pointer-events: auto;
 
   }
-}
-
-.igv-roi-menu {
-  position: absolute;
-  z-index: 1024;
-
-  width: (6 * $dimension);
-
-  border-color: $igv-roi-border-color;
-  border-radius: $igv-roi-table-border-radius;
-  border-style: solid;
-  border-width: thin;
-
-  font-family: $igv-roi-table-font-face;
-
-  background-color: white;
-
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: stretch;
-
-  > div:not(:last-child) {
-    border-bottom-color: rgba(128, 128, 128, 0.50);
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-  }
-
-  > div:first-child {
-
-    border-top-left-radius: $igv-roi-table-border-radius;
-    border-top-right-radius: $igv-roi-table-border-radius;
-    border-top-color: transparent;
-    border-top-style: solid;
-    border-top-width: 0;
-
-  }
-
-  > div:last-child {
-
-    border-bottom-left-radius: $igv-roi-table-border-radius;
-    border-bottom-right-radius: $igv-roi-table-border-radius;
-    border-bottom-color: transparent;
-    border-bottom-style: solid;
-    border-bottom-width: 0;
-
-  }
-
-
 }
 
 .igv-roi-menu-row {

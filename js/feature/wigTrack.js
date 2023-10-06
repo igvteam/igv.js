@@ -5,7 +5,6 @@ import BWSource from "../bigwig/bwSource.js"
 import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import MenuUtils from "../ui/menuUtils.js"
 import summarizeWigData from "../bigwig/summarizeWigData.js"
 
 const DEFAULT_COLOR = 'rgb(150, 150, 150)'
@@ -104,20 +103,20 @@ class WigTrack extends TrackBase {
     }
 
     menuItemList() {
-        let items = []
+        const items = []
 
         if (this.flipAxis !== undefined) {
             items.push('<hr>')
-            items.push({
-                label: "Flip y-axis",
-                click: () => {
-                    this.flipAxis = !this.flipAxis
-                    this.trackView.repaintViews()
-                }
-            })
+
+            function click() {
+                this.flipAxis = !this.flipAxis
+                this.trackView.repaintViews()
+            }
+
+            items.push({ label: 'Flip y-axis', click })
         }
 
-        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+        items.push(...this.numericDataMenuItems())
 
         return items
     }
@@ -196,10 +195,10 @@ class WigTrack extends TrackBase {
                     const rectEnd = Math.ceil((f.end - bpStart) / bpPerPixel)
                     const width = Math.max(1, rectEnd - x)
 
-                    const color = this.getColorForFeature(f)
+                    const color = options.alpha ? IGVColor.addAlpha(this.getColorForFeature(f), options.alpha) :  this.getColorForFeature(f)
 
                     if (this.graphType === "line") {
-                        if (lastY != undefined) {
+                        if (lastY !== undefined) {
                             IGVGraphics.strokeLine(ctx, lastPixelEnd, lastY, x, y, {
                                 "fillStyle": color,
                                 "strokeStyle": color
@@ -329,6 +328,5 @@ class WigTrack extends TrackBase {
     }
 
 }
-
 
 export default WigTrack
