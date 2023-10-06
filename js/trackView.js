@@ -131,7 +131,13 @@ class TrackView {
             input.addEventListener('change', event => {
                 event.preventDefault()
                 event.stopPropagation()
+
                 setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
+
+                if (this.track.autoscaleGroup && false === event.target.checked) {
+                    this.track.autoscaleGroup = undefined
+                }
+
             })
 
             setMultiTrackSelectionState(this, axis, ENABLE_MULTI_TRACK_SELECTION)
