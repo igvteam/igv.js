@@ -26,6 +26,7 @@
 import {GoogleAuth, igvxhr} from '../node_modules/igv-utils/src/index.js'
 import Browser from "./browser.js"
 import GenomeUtils from "./genome/genomeUtils.js"
+import {navbarDidResize} from "./responsiveNavbar.js"
 
 let allBrowsers = []
 
@@ -68,6 +69,7 @@ async function createBrowser(parentDiv, config) {
     const browser = new Browser(config, parentDiv)
     allBrowsers.push(browser)
 
+
     // Lod initial sessio
     browser.startSpinner()
 
@@ -81,9 +83,7 @@ async function createBrowser(parentDiv, config) {
     }
 
     browser.stopSpinner()
-
     navbarDidResize(browser, browser.$navigation.width())
-
 
     return browser
 
@@ -143,8 +143,8 @@ function setDefaults(config) {
         config.showTrackLabels = true
     }
 
-    if (undefined === config.showROITableButton) {
-        config.showROITableButton = false
+    if (undefined === config.doShowROITableButton) {
+        config.doShowROITableButton = false
     }
 
     if (undefined === config.showROITable) {
@@ -154,7 +154,6 @@ function setDefaults(config) {
     if (undefined === config.showCursorTrackingGuideButton) {
         config.showCursorTrackingGuideButton = true
     }
-
 
     if (undefined === config.showCursorGuide) {
         config.showCursorGuide = config.showCursorTrackingGuide || false   // showCursorTrackingGuide is a synonym

@@ -268,11 +268,10 @@ class BAMTrack extends TrackBase {
 
     menuItemList() {
 
-
         // Start with overage track items
         let menuItems = []
 
-        menuItems = menuItems.concat(MenuUtils.numericDataMenuItems(this.trackView))
+        menuItems = menuItems.concat(this.numericDataMenuItems())
 
         // Color by items
         menuItems.push('<hr/>')
@@ -305,30 +304,36 @@ class BAMTrack extends TrackBase {
         }
 
         menuItems.push('<hr/>')
+
+        function showCoverageHandler() {
+            this.showCoverage = !this.showCoverage
+            adjustTrackHeight()
+            this.trackView.checkContentHeight()
+            this.trackView.repaintViews()
+        }
+
         menuItems.push({
             object: $(createCheckbox("Show Coverage", this.showCoverage)),
-            click: () => {
-                this.showCoverage = !this.showCoverage
-                adjustTrackHeight()
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-            }
+            click: showCoverageHandler
         })
+
+        function showAlignmentHandler() {
+            this.showAlignments = !this.showAlignments
+            adjustTrackHeight()
+            this.trackView.checkContentHeight()
+            this.trackView.repaintViews()
+        }
+
         menuItems.push({
             object: $(createCheckbox("Show Alignments", this.showAlignments)),
-            click: () => {
-                this.showAlignments = !this.showAlignments
-                adjustTrackHeight()
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-            }
+            click: showAlignmentHandler
         })
 
         // Show all bases
         menuItems.push('<hr/>')
         menuItems.push({
             object: $(createCheckbox("Show all bases", this.showAllBases)),
-            click: () => {
+            click: function showAllBasesHandler(){
                 this.showAllBases = !this.showAllBases
                 this.config.showAllBases = this.showAllBases
                 this.trackView.repaintViews()
@@ -339,7 +344,7 @@ class BAMTrack extends TrackBase {
         menuItems.push('<hr/>')
         menuItems.push({
             object: $(createCheckbox("Show mismatches", this.showMismatches)),
-            click: () => {
+            click: function showMismatchesHandler() {
                 this.showMismatches = !this.showMismatches
                 this.config.showMismatches = this.showMismatches
                 this.trackView.repaintViews()
@@ -349,10 +354,9 @@ class BAMTrack extends TrackBase {
         // Insertions
         menuItems.push({
             object: $(createCheckbox("Show insertions", this.showInsertions)),
-            click: () => {
+            click: function showInsertionsHandler() {
                 this.showInsertions = !this.showInsertions
                 this.config.showInsertions = this.showInsertions
-                const alignmentContainers = this.getCachedAlignmentContainers()
                 this.trackView.repaintViews()
             }
         })
@@ -360,7 +364,7 @@ class BAMTrack extends TrackBase {
         // Soft clips
         menuItems.push({
             object: $(createCheckbox("Show soft clips", this.showSoftClips)),
-            click: () => {
+            click: function showSoftClipsHandler() {
                 this.showSoftClips = !this.showSoftClips
                 this.config.showSoftClips = this.showSoftClips
                 this.featureSource.setShowSoftClips(this.showSoftClips)
@@ -377,7 +381,7 @@ class BAMTrack extends TrackBase {
             menuItems.push('<hr/>')
             menuItems.push({
                 object: $(createCheckbox("View as pairs", this.viewAsPairs)),
-                click: () => {
+                click: function viewAsPairsHandler() {
                     this.viewAsPairs = !this.viewAsPairs
                     this.config.viewAsPairs = this.viewAsPairs
                     this.featureSource.setViewAsPairs(this.viewAsPairs)
@@ -397,7 +401,7 @@ class BAMTrack extends TrackBase {
             if (this.alignmentTrack.hasPairs) {
                 menuItems.push({
                     label: 'Add discordant pairs to circular view',
-                    click: () => {
+                    click: function discordantPairsHandler() {
                         for (let viewport of this.trackView.viewports) {
                             this.addPairedChordsForViewport(viewport)
                         }
@@ -407,7 +411,7 @@ class BAMTrack extends TrackBase {
             if (this.alignmentTrack.hasSupplemental) {
                 menuItems.push({
                     label: 'Add split reads to circular view',
-                    click: () => {
+                    click: function splitReadsHandler() {
                         for (let viewport of this.trackView.viewports) {
                             this.addSplitChordsForViewport(viewport)
                         }
@@ -425,7 +429,7 @@ class BAMTrack extends TrackBase {
 
         menuItems.push({
             object: $(createCheckbox("expand", this.alignmentTrack.displayMode === "EXPANDED")),
-            click: () => {
+            click: function expandHandler() {
                 this.alignmentTrack.displayMode = "EXPANDED"
                 this.config.displayMode = "EXPANDED"
                 this.trackView.checkContentHeight()
@@ -435,7 +439,7 @@ class BAMTrack extends TrackBase {
 
         menuItems.push({
             object: $(createCheckbox("squish", this.alignmentTrack.displayMode === "SQUISHED")),
-            click: () => {
+            click: function squishHandler() {
                 this.alignmentTrack.displayMode = "SQUISHED"
                 this.config.displayMode = "SQUISHED"
                 this.trackView.checkContentHeight()
@@ -454,20 +458,27 @@ class BAMTrack extends TrackBase {
      * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
      */
     colorByCB(menuItem, showCheck) {
-        const $e = $(createCheckbox(menuItem.label, showCheck))
-        const clickHandler = (ev) => {
 
-            if (menuItem.key !== 'tag') {
+        const $e = $(createCheckbox(menuItem.label, showCheck))
+
+        if (menuItem.key !== 'tag') {
+
+            function clickHandler() {
                 if (menuItem.key === this.alignmentTrack.colorBy) {
                     this.alignmentTrack.colorBy = 'none'
                     this.config.colorBy = 'none'
-                    this.trackView.repaintViews()
                 } else {
                     this.alignmentTrack.colorBy = menuItem.key
                     this.config.colorBy = menuItem.key
-                    this.trackView.repaintViews()
                 }
-            } else {
+                this.trackView.repaintViews()
+            }
+
+            return {name: undefined, object: $e, click: clickHandler, init: undefined}
+        } else {
+
+            function dialogPresentationHandler(ev) {
+
                 this.browser.inputDialog.present({
                     label: 'Tag Name',
                     value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
@@ -485,12 +496,12 @@ class BAMTrack extends TrackBase {
                         this.trackView.repaintViews()
                     }
                 }, ev)
-
             }
+
+            return {name: undefined, object: $e, dialog: dialogPresentationHandler, init: undefined}
 
         }
 
-        return {name: undefined, object: $e, click: clickHandler, init: undefined}
     }
 
     /**
