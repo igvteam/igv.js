@@ -55,12 +55,16 @@ function setMultiTrackSelectionState(trackView, axis, doEnableMultiSelection) {
         container.style.display = 'grid'
     } else {
 
-        const trackSelectInput =  container.querySelector('[name=track-select]')
-        trackSelectInput.checked = false
-
         if (trackView.dragHandle) {
             setDragHandleSelectionState(trackView, trackView.dragHandle, trackSelectInput.checked)
         }
+
+        if (trackView.track.autoscaleGroup) {
+            trackView.track.autoscaleGroup = undefined
+        }
+
+        const trackSelectInput =  container.querySelector('[name=track-select]')
+        trackSelectInput.checked = false
 
         container.style.display = 'none'
     }
