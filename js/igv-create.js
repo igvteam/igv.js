@@ -69,9 +69,8 @@ async function createBrowser(parentDiv, config) {
     const browser = new Browser(config, parentDiv)
     allBrowsers.push(browser)
 
-    // Load initial session
 
-    console.log(`${ Date.now() } BEGIN Load Session`)
+    // Lod initial sessio
     browser.startSpinner()
 
     const sessionURL = config.sessionURL || config.session || config.hubURL
@@ -84,8 +83,6 @@ async function createBrowser(parentDiv, config) {
     }
 
     browser.stopSpinner()
-    console.log(`${ Date.now() } DONE Load Session`)
-
     navbarDidResize(browser, browser.$navigation.width())
 
     return browser
