@@ -1,7 +1,6 @@
 import Genome from "./genome.js"
 import {loadFasta} from "./fasta.js"
 import {loadCytobands, loadCytobandsBB} from "./cytoband.js"
-import {loadChromSizes} from "./chromSizes.js"
 import {buildOptions} from "../util/igvUtils.js"
 import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import BWReader from "../bigwig/bwReader.js"
@@ -19,43 +18,28 @@ const GenomeUtils = {
         let aliases
         let chromosomes
         let cytobands
-
-
-        if (options.chromSizes) { // Order is important, try this first
-            chromosomes = await loadChromSizes(options.chromSizes)
+        if (options.aliasBbURL) {  // Order is important, try this first
+            const abb = await loadAliasesBB(options.aliasBbURL, options)
+            aliases = abb.aliases
+            chromosomes = abb.chromosomes
         } else {
             chromosomes = sequence.chromosomes
+            if (options.aliasURL) {
+                aliases = await loadAliases(options.aliasURL, options)
+            }
         }
 
-
-        if (options.cytobandURL) {
+        if (options.cytobandBbURL) {
+            const cc = await loadCytobandsBB(options.cytobandBbURL, options)
+            cytobands = cc.cytobands
+            if (!chromosomes) {
+                chromosomes = cc.chromosomes
+            }
+        } else if (options.cytobandURL) {
             cytobands = await loadCytobands(options.cytobandURL, options)
         }
 
-        if (options.aliasURL) {
-            aliases = await loadAliases(options.aliasURL, options)
-        }
-
-
         const genome = new Genome(options, sequence, aliases, chromosomes, cytobands)
-
-        if (options.cytobandBbURL) {
-
-            loadCytobandsBB(options.cytobandBbURL, options).then((cc) => {
-                if (!chromosomes) {
-                    genome.updateChromosomes(cc.chromosomes)
-                }
-                genome.cytobands = cc.cytobands
-            })
-        }
-        if (options.aliasBbURL) {
-            loadAliasesBB(options.aliasBbURL, options)
-                .then(abb => {
-                    genome.updateChromosomes(abb.chromosomes)
-                    genome.updateAliases(abb.aliases)
-                })
-        }
-
 
         return genome
     },
