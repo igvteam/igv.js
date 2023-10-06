@@ -25,6 +25,9 @@
 
 import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "./ui/menuUtils.js"
+import $ from "./vendor/jquery-3.3.1.slim.js"
+import {createCheckbox} from "./igv-icons.js"
 
 const DEFAULT_COLOR = 'rgb(150,150,150)'
 
@@ -367,8 +370,7 @@ class TrackBase {
 
     /**
      * Default popup text function -- just extracts string and number properties in random order.
-     * @param feature
-     * @returns {Array}
+     * @param feature     * @returns {Array}
      */
     extractPopupData(feature, genomeId) {
 
@@ -501,6 +503,51 @@ class TrackBase {
      */
     getColorForFeature(f) {
         return (typeof this.color === "function") ? this.color(feature) : this.color
+    }
+
+    numericDataMenuItems() {
+
+        const menuItems = []
+
+        menuItems.push('<hr/>')
+
+        // Data range
+        let object = $('<div>')
+        object.text('Set data range')
+
+        function dialogPresentationHandler() {
+
+            if (isMultiSelectedTrackView(this.trackView)) {
+                this.browser.dataRangeDialog.configure(getMultiSelectedTrackViews(this.trackView.browser))
+            } else {
+                this.browser.dataRangeDialog.configure(this.trackView)
+            }
+            this.browser.dataRangeDialog.present($(this.browser.columnContainer))
+        }
+        menuItems.push({ object, dialog:dialogPresentationHandler })
+
+        if (this.logScale !== undefined) {
+
+            object = $(createCheckbox("Log scale", this.logScale))
+
+            function logScaleHandler() {
+                this.logScale = !this.logScale
+                this.trackView.repaintViews()
+            }
+
+            menuItems.push({ object, click:logScaleHandler })
+        }
+
+        object = $(createCheckbox("Autoscale", this.autoscale))
+
+        function autoScaleHandler() {
+            this.autoscale = !this.autoscale
+            this.trackView.updateViews()
+        }
+
+        menuItems.push({ object, click:autoScaleHandler })
+
+        return menuItems
     }
 
     /**

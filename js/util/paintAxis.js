@@ -22,7 +22,8 @@ function paintAxis(ctx, pixelWidth, pixelHeight) {
 
     let flipAxis = (undefined === this.flipAxis) ? false : this.flipAxis
 
-    IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+    // IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+    IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgba(255, 255, 255, 0)"})
 
     reference = 0.95 * pixelWidth
     x1 = reference - 8

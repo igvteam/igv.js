@@ -48,7 +48,7 @@ class CNVPytorTrack extends TrackBase {
         super(config, browser)
         this.featureType = 'numeric'
         this.paintAxis = paintAxis
-        
+
         if (!config.max) {
             this.defaultScale = true
             this.autoscale = false
@@ -93,7 +93,7 @@ class CNVPytorTrack extends TrackBase {
     }
 
     get_signal_colors() {
-        
+
         let signal_colors = [
             { singal_name: 'RD_Raw', color: this.colors[0] },
             { singal_name: 'RD_Raw_gc_coor', color: this.colors[1] },
@@ -112,7 +112,6 @@ class CNVPytorTrack extends TrackBase {
             this.header = await this.getHeader()
 
             const cnvpytor_obj = new CNVpytorVCF(this.featureSource.reader.features, this.bin_size)
-            
             let wigFeatures;
             let bafFeatures;
             this.wigFeatures_obj = {}
@@ -120,9 +119,9 @@ class CNVPytorTrack extends TrackBase {
 
             let dataWigs;
             if(this.config.cnv_caller == '2D'){
-                
+
                 dataWigs = await cnvpytor_obj.read_rd_baf('2D')
-                
+
                 wigFeatures = dataWigs[0]
                 bafFeatures = dataWigs[1]
                 this.wigFeatures_obj[this.bin_size]['2D'] = wigFeatures[2]
@@ -135,14 +134,14 @@ class CNVPytorTrack extends TrackBase {
                 this.wigFeatures_obj[this.bin_size]['ReadDepth'] = wigFeatures[2]
                 this.available_callers = ['ReadDepth']
             }
-            
+
             this.wigFeatures_obj[this.bin_size]['RD_Raw'] = wigFeatures[0]
             this.wigFeatures_obj[this.bin_size]['RD_Raw_gc_coor'] = wigFeatures[1]
             this.wigFeatures_obj[this.bin_size]['BAF1'] = bafFeatures[0]
             this.wigFeatures_obj[this.bin_size]['BAF2'] = bafFeatures[1]
-            
+
             this.available_bins = [this.bin_size]
-            
+
             this.set_available_callers()
 
         } else {
@@ -252,14 +251,14 @@ class CNVPytorTrack extends TrackBase {
         if (this.flipAxis !== undefined) {
             items.push({
                 label: "Flip y-axis",
-                click: () => {
+                click: function flipYAxisHandler() {
                     this.flipAxis = !this.flipAxis
                     this.trackView.repaintViews()
                 }
             })
         }
 
-        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+        items = items.concat(this.numericDataMenuItems())
 
         items.push('<hr/>')
         items.push("Bin Sizes")
@@ -267,7 +266,7 @@ class CNVPytorTrack extends TrackBase {
             const checkBox = createCheckbox(rd_bin, rd_bin === this.bin_size)
             items.push({
                 object: $(checkBox),
-                click: async () => {
+                click: async function binSizesHandler() {
                     this.bin_size = rd_bin
 
                     await this.recreate_tracks(rd_bin)
@@ -285,7 +284,7 @@ class CNVPytorTrack extends TrackBase {
             const checkBox = createCheckbox(signal_dct[signal_name], signal_name === this.signal_name)
             items.push({
                 object: $(checkBox),
-                click: async () => {
+                click: async function signalTypeHandler() {
                     this.signal_name = signal_name
                     await this.recreate_tracks(this.bin_size)
                     this.clearCachedFeatures()
@@ -303,7 +302,7 @@ class CNVPytorTrack extends TrackBase {
             const checkBox = createCheckbox(cnv_caller, cnv_caller === this.cnv_caller)
             items.push({
                 object: $(checkBox),
-                click: async () => {
+                click: async function cnvCallerHandler() {
                     this.cnv_caller = cnv_caller
                     await this.recreate_tracks(this.bin_size)
                     this.clearCachedFeatures()
@@ -336,7 +335,7 @@ class CNVPytorTrack extends TrackBase {
                 tconf.isMergedTrack = true
                 tconf.features = wig
                 tconf.name = signal_name
-                tconf.color = this.signal_colors.filter(x => x.singal_name === signal_name).map(x => x.color) 
+                tconf.color = this.signal_colors.filter(x => x.singal_name === signal_name).map(x => x.color)
                 const t = await this.browser.createTrack(tconf)
                 if (t) {
                     t.autoscale = false     // Scaling done from merged track

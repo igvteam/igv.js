@@ -63,10 +63,12 @@ class BlatTrack extends FeatureTrack {
         const menuItems = super.menuItemList()
 
         menuItems.push('<hr/>')
-        menuItems.push({
-            label: 'Open table view',
-            click: () => this.openTableView()
-        })
+
+        function click() {
+            this.openTableView()
+        }
+        menuItems.push({ label: 'Open table view', click })
+
         return menuItems
     }
 

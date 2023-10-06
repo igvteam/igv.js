@@ -26,7 +26,6 @@
 
 import TrackBase from "../trackBase.js"
 import paintAxis from "../util/paintAxis.js"
-import MenuUtils from "../ui/menuUtils.js"
 import {FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
 
 
@@ -70,6 +69,7 @@ class MergedTrack extends TrackBase {
             }
         }
 
+        this.alpha = this.config.alpha || 0.5
         this.flipAxis = this.config.flipAxis ? this.config.flipAxis : false
         this.logScale = this.config.logScale ? this.config.logScale : false
         this.autoscale = this.config.autoscale || this.config.max === undefined
@@ -106,18 +106,18 @@ class MergedTrack extends TrackBase {
     }
 
     menuItemList() {
-        let items = []
+        const items = []
         if (this.flipAxis !== undefined) {
             items.push({
                 label: "Flip y-axis",
-                click: () => {
+                click: function flipYAxisHandler(){
                     this.flipAxis = !this.flipAxis
                     this.trackView.repaintViews()
                 }
             })
         }
 
-        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+        items.push(...this.numericDataMenuItems())
 
         return items
     }
@@ -139,6 +139,9 @@ class MergedTrack extends TrackBase {
         for (let i = 0, len = this.tracks.length; i < len; i++) {
             const trackOptions = Object.assign({}, options)
             trackOptions.features = mergedFeatures.featureArrays[i]
+
+            trackOptions.alpha = this.alpha
+
             this.tracks[i].dataRange = this.dataRange
             this.tracks[i].flipAxis = this.flipAxis
             this.tracks[i].logScale = this.logScale

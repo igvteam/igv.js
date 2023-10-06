@@ -35,10 +35,28 @@ class SampleInfoViewport {
     }
 
     static getSampleInfoColumnWidth(browser) {
-        const found = browser.findTracks(t => typeof t.getSamples === 'function')
-        return (found.length > 0 && browser.sampleInfo.isInitialized() && true === browser.sampleInfoControl.showSampleInfo)
-            ? sampleInfoTileXShim + browser.sampleInfo.getAttributeNames().length * sampleInfoTileWidth
-            : 0
+
+        if (undefined === browser.sampleInfo.getAttributeNames()) {
+            return 0
+        } else {
+
+            const found = browser.findTracks(t => typeof t.getSamples === 'function')
+            const isFound = found.length > 0
+
+            const isInitialized = browser.sampleInfo.isInitialized()
+
+            const doShowSampleInfo = browser.sampleInfoControl.showSampleInfo
+
+            const status = isFound && isInitialized && doShowSampleInfo
+
+            if (false === status) {
+                return 0
+            } else {
+                const sampleInfoAttributeCount = browser.sampleInfo.getAttributeNames().length
+                return sampleInfoAttributeCount * sampleInfoTileWidth + sampleInfoTileXShim
+            }
+
+        }
     }
 
     checkCanvas() {

@@ -24,14 +24,40 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import NavbarButton from "../ui/navbarButton.js"
+import {roiImage, roiImageHover} from "../ui/navbarIcons/roi.js"
+import { buttonLabel } from "../ui/navbarIcons/buttonLabel.js"
 
-const SVGSaveControl = function (parent, browser) {
-    const button = DOMUtils.div({class: 'igv-navbar-button'})
-    parent.append(button)
+class ROITableControl extends NavbarButton {
 
-    button.textContent = 'Save SVG'
-    button.addEventListener('click', () => browser.saveSVGtoFile({}))
+    constructor(parent, browser)  {
+
+        super(browser, parent, 'ROI', buttonLabel, roiImage, roiImageHover, browser.doShowROITable)
+
+        this.button.addEventListener('mouseenter', () => {
+            if (false === browser.doShowROITable) {
+                this.setState(true)
+            }
+        })
+
+        this.button.addEventListener('mouseleave', () => {
+            if (false === browser.doShowROITable) {
+                this.setState(false)
+            }
+        })
+
+        this.button.addEventListener('click', () => this.buttonHandler(!browser.doShowROITable))
+
+        this.setVisibility(browser.doShowROITableButton)
+
+    }
+
+    buttonHandler(status) {
+        this.browser.doShowROITable = status
+        this.setState(this.browser.doShowROITable)
+        this.browser.setROITableVisibility(this.browser.doShowROITable)
+    }
 }
 
-export default SVGSaveControl
+
+export default ROITableControl

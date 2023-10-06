@@ -106,7 +106,17 @@ class SegTrack extends TrackBase {
             menuItems.push('<hr/>')
             menuItems.push("Sort by attribute:")
             for (const attribute of this.browser.sampleInfo.getAttributeNames()) {
-                menuItems.push(sortByAttribute(this.trackView, attribute))
+
+                const object = $('<div>')
+                object.html(`&nbsp;&nbsp;${ attribute.split(emptySpaceReplacement).join(' ') }`)
+
+                function attributeSort() {
+                    this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, this.trackView.sampleInfoViewport.sortDirection)
+                    this.trackView.repaintViews()
+                    this.trackView.sampleInfoViewport.sortDirection *= -1
+                }
+
+                menuItems.push({ object, click:attributeSort })
             }
         }
 
@@ -119,23 +129,22 @@ class SegTrack extends TrackBase {
 
         if (this.type === 'shoebox' && this.sbColorScale) {
             menuItems.push('<hr/>')
-            menuItems.push({
-                object: $('<div>Set color scale threshold</div>'),
-                click: e => {
-                    this.browser.inputDialog.present({
-                        label: 'Color Scale Threshold',
-                        value: this.sbColorScale.threshold,
-                        callback: () => {
-                            const t = Number(this.browser.inputDialog.value, 10)
-                            if(t) {
-                                this.sbColorScale.setThreshold(t)
-                                this.trackView.repaintViews()
-                            }
-                        }
-                    }, e)
-                }
 
-            })
+            function dialogPresentationHandler(e) {
+                this.browser.inputDialog.present({
+                    label: 'Color Scale Threshold',
+                    value: this.sbColorScale.threshold,
+                    callback: () => {
+                        const t = Number(this.browser.inputDialog.value, 10)
+                        if(t) {
+                            this.sbColorScale.setThreshold(t)
+                            this.trackView.repaintViews()
+                        }
+                    }
+                }, e)
+            }
+
+            menuItems.push({ object: $('<div>Set color scale threshold</div>'), dialog: dialogPresentationHandler })
         }
 
         menuItems.push('<hr/>')
@@ -146,7 +155,7 @@ class SegTrack extends TrackBase {
             menuItems.push(
                 {
                     object: $(checkBox),
-                    click: () => {
+                    click: function displayModeHandler() {
                         this.displayMode = displayMode
                         this.config.displayMode = displayMode
                         this.trackView.checkContentHeight()
@@ -532,31 +541,15 @@ function sortBySampleName(trackView) {
     const object = $('<div>')
     object.text('Sort by sample names')
 
-    const click = () => {
+    function sampleNameSort () {
         trackView.track.sampleKeys.sort((a, b) => trackView.sampleNameViewport.sortDirection * a.localeCompare(b))
         trackView.repaintViews()
         trackView.sampleNameViewport.sortDirection *= -1
     }
 
-    return { object, click }
+    return { object, click:sampleNameSort }
 
 }
-
-function sortByAttribute(trackView, attribute) {
-
-    const object = $('<div>')
-    object.html(`&nbsp;&nbsp;${ attribute.split(emptySpaceReplacement).join(' ') }`)
-
-    const click = () => {
-        trackView.track.sampleKeys = trackView.browser.sampleInfo.getSortedSampleKeysByAttribute(trackView.track.sampleKeys, attribute, trackView.sampleInfoViewport.sortDirection)
-        trackView.repaintViews()
-        trackView.sampleInfoViewport.sortDirection *= -1
-    }
-
-    return { object, click }
-
-}
-
 
 // Default copy number scales
 const POS_COLOR_SCALE = {low: 0.1, lowR: 255, lowG: 255, lowB: 255, high: 1.5, highR: 255, highG: 0, highB: 0}

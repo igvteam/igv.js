@@ -483,7 +483,7 @@ class InteractionTrack extends TrackBase {
                 items.push(
                     {
                         object: $(createCheckbox(lut[arcType], arcType === this.arcType)),
-                        click: () => {
+                        click: function arcTypeHandler() {
                             this.arcType = arcType
                             this.trackView.repaintViews()
                         }
@@ -494,14 +494,14 @@ class InteractionTrack extends TrackBase {
 
         items.push({
             name: "Toggle arc direction",
-            click: () => {
+            click: function toggleArcDirectionHandler() {
                 this.arcOrientation = !this.arcOrientation
                 this.trackView.repaintViews()
             }
         })
         items.push({
             name: this.showBlocks ? "Hide Blocks" : "Show Blocks",
-            click: () => {
+            click: function blockVisibiltyHandler() {
                 this.showBlocks = !this.showBlocks
                 this.trackView.repaintViews()
             }
@@ -509,15 +509,14 @@ class InteractionTrack extends TrackBase {
 
 
         if (this.arcType === "proportional" || this.arcType === "inView" || this.arcType === "partialInView") {
-            // MenuUtils.numericDataMenuItems(this.trackView).forEach(item => items.push(item))
-            items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+            items = items.concat(this.numericDataMenuItems())
         }
 
         if (this.browser.circularView) {
             items.push('<hr/>')
             items.push({
                 label: 'Add interactions to circular view',
-                click: () => {
+                click: function addInteractionsHandler() {
                     for (let viewport of this.trackView.viewports) {
                         this.addChordsForViewport(viewport.referenceFrame)
                     }

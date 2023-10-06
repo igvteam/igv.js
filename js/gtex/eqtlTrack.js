@@ -235,7 +235,7 @@ class EqtlTrack extends TrackBase {
     }
 
     menuItemList() {
-        return MenuUtils.numericDataMenuItems(this.trackView)
+        return this.numericDataMenuItems()
     }
 
     doAutoscale(featureList) {
