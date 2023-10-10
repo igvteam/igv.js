@@ -55,17 +55,18 @@ function setMultiTrackSelectionState(trackView, axis, doEnableMultiSelection) {
         container.style.display = 'grid'
     } else {
 
-        const trackSelectInput =  container.querySelector('[name=track-select]')
-
-        if (trackView.dragHandle) {
-            setDragHandleSelectionState(trackView, trackView.dragHandle, trackSelectInput.checked)
-        }
+        trackView.track.isMultiSelection = false
 
         if (trackView.track.autoscaleGroup) {
             trackView.track.autoscaleGroup = undefined
         }
 
+        const trackSelectInput =  container.querySelector('[name=track-select]')
         trackSelectInput.checked = false
+
+        if (trackView.dragHandle) {
+            setDragHandleSelectionState(trackView, trackView.dragHandle, false)
+        }
 
         container.style.display = 'none'
     }
@@ -76,12 +77,10 @@ function setMultiTrackSelectionState(trackView, axis, doEnableMultiSelection) {
 function setDragHandleSelectionState(trackView, dragHandle, isSelected) {
 
     if (isSelected) {
-        dragHandle.dataset.selected = trackView.namespace
         dragHandle.classList.remove('igv-track-drag-handle-color')
         dragHandle.classList.remove('igv-track-drag-handle-hover-color')
         dragHandle.classList.add('igv-track-drag-handle-selected-color')
     } else {
-        dragHandle.dataset.selected = 'no'
         dragHandle.classList.remove('igv-track-drag-handle-hover-color')
         dragHandle.classList.remove('igv-track-drag-handle-selected-color')
         dragHandle.classList.add('igv-track-drag-handle-color')

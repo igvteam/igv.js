@@ -108,6 +108,8 @@ class TrackBase {
         this.minHeight = config.minHeight || Math.min(25, this.height)
         this.maxHeight = config.maxHeight || Math.max(1000, this.height)
 
+        this.isMultiSelection = config.isMultiSelection || false
+
         if (config.onclick) {
             this.onclick = config.onclick
             config.onclick = undefined   // functions cannot be saved in sessions, clear it here.

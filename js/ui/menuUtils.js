@@ -438,7 +438,7 @@ function getMultiSelectedTrackViews(browser) {
 
     const candidates = browser.trackViews.filter(({ track }) => { return false === multiTrackSelectExclusionTypes.has(track.type) })
 
-    let selected = candidates.filter(({ namespace, dragHandle }) => { return namespace === dragHandle.dataset.selected })
+    let selected = candidates.filter(trackView => true === trackView.track.isMultiSelection)
 
     selected = 0 === selected.length ? undefined : selected
 
