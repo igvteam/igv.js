@@ -26,7 +26,7 @@ class TwobitSequence {
     metaIndex = new Map()
 
     constructor(config) {
-        this.url = config.twobitURL || config.fastaURL
+        this.url = config.twoBitUrl || config.fastaURL
     }
 
     async init() {

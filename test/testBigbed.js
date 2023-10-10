@@ -150,7 +150,7 @@ table chromatinInteract
     })
 
     /**
-     * Test parsing a aliasBbURL file from the T2T hub
+     * Test parsing a aliasBbUrl file from the T2T hub
      */
     test("test chromAlias", async function () {
 

@@ -74,6 +74,9 @@ class BWReader {
 
     async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction = "mean") {
 
+        if(!bpStart) bpStart = 0
+        if(!bpEnd) bpEnd = Number.MAX_SAFE_INTEGER
+
         await this.loadHeader()
         const chrIdx1 = this.chromTree.nameToId[chr1]
         const chrIdx2 = this.chromTree.nameToId[chr2]

@@ -1,6 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import TwobitSequence from "../js/genome/twobit.js"
+import BPTree from "../js/bigwig/bpTree.js"
 
 
 suite("testTwobit", function () {
@@ -75,6 +76,20 @@ suite("testTwobit", function () {
             lastBlockEnd = block.start
         }
     })
+
+
+    test("twobit .bpt index", async function () {
+
+        const url = "test/data/twobit/GCA_004363605.1.2bit.bpt"
+        const bpTree = await BPTree.loadBpTree(url, 0);
+        assert.ok(bpTree)
+
+        const result = await bpTree.search("RJWJ011179649.1");
+        assert.ok(result)
+
+    })
+
+
 
 
 })

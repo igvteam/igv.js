@@ -37,8 +37,8 @@ export default class BPTree {
 
         const {keySize, valSize} = this.header
 
-        if (valSize !== 16) {
-            throw Error(`Unexpected valSize: ${valSize}`)
+        if (!(valSize === 16 || valSize === 8)) {
+            throw Error(`Unexpected valSize ${valSize}`)
         }
 
         const readTreeNode = async (offset) => {
@@ -55,10 +55,20 @@ export default class BPTree {
                 for (let i = 0; i < count; i++) {
                     const key = binaryParser.getFixedLengthString(keySize)
                     const offset = binaryParser.getLong()
-                    const length = binaryParser.getInt()
-                    const reserved = binaryParser.getInt()
-                    const value = {offset, length}
-                    if (term === key) return value
+
+                    let length;
+                    if(valSize === 16) {
+                        length = binaryParser.getInt()
+                        binaryParser.getInt()
+                    }
+
+                    if (term === key) {
+                        if (valSize === 16) {
+                            return {offset, length}
+                        } else {
+                            return {offset}
+                        }
+                    }
                 }
             } else {
                 // Non leaf node

@@ -2,6 +2,8 @@ import "./utils/mockObjects.js"
 import GenomeUtils from "../js/genome/genomeUtils.js"
 import {assert} from 'chai'
 import {loadCytobandsBB} from "../js/genome/cytoband.js"
+import CytobandFileBB from "../js/genome/cytobandFileBB.js"
+
 
 suite("testGenome", function () {
 
@@ -37,12 +39,11 @@ suite("testGenome", function () {
     test("test cytoband bigbed", async function () {
 
         const url = "test/data/bb/cytoBandMapped.bb"
-        const {cytobands, chromosomes} = await loadCytobandsBB(url, {})
+        const src = new CytobandFileBB(url)
 
-        assert.equal(23, Object.keys(cytobands).length)
-        assert.equal(23, chromosomes.size)
-        const chr1 = chromosomes.get("chr1")
-        assert.equal(248387328, chr1.bpLength)
+        const cytobands = await src.getCytobands("chr1")
+        const last = cytobands[cytobands.length-1];
+        assert.equal(248387328, last.end)
 
     })
 })

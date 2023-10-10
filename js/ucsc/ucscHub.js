@@ -106,14 +106,19 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         const config = {
             id: this.genomeStanza.getProperty("genome"),
             name: this.genomeStanza.getProperty("scientificName") || this.genomeStanza.getProperty("organism") || this.genomeStanza.getProperty("description"),
-            twobitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
-            aliasBbURL: this.baseURL + this.genomeStanza.getProperty("chromAliasBb"),
+            twoBitUrl: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
+            aliasBbUrl: this.baseURL + this.genomeStanza.getProperty("chromAliasBb"),
             nameSet: "ucsc",
             blat: this.genomeStanza.getProperty("blat")
         }
 
         config.description = config.id
 
+
+
+        if (this.genomeStanza.hasProperty("twoBitBptUrl")) {
+            config.twoBitBptUrl = this.baseURL + this.genomeStanza.getProperty("twoBitBptUrl")
+        }
         if (this.genomeStanza.hasProperty("chromSizes")) {
             config.chromSizes = this.baseURL + this.genomeStanza.getProperty("chromSizes")
         }
@@ -132,6 +137,15 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         }
 
         // Search for cytoband
+        /*track cytoBandIdeo
+shortLabel Chromosome Band (Ideogram)
+longLabel Ideogram for Orientation
+group map
+visibility dense
+type bigBed 4 +
+bigDataUrl bbi/GCA_004027145.1_DauMad_v1_BIUU.cytoBand.bb/*
+
+         */
         const cytoStanza = this.trackStanzas.filter(t => "cytoBandIdeo" === t.name && t.getProperty("bigDataUrl"))
         if (cytoStanza.length > 0) {
             config.cytobandBbURL = this.baseURL + cytoStanza[0].getProperty("bigDataUrl")
