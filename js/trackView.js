@@ -49,7 +49,7 @@ class TrackView {
         this.browser = browser
         this.track = track
         track.trackView = this
-
+        
         this.addDOMToColumnContainer(browser, columnContainer, browser.referenceFrameList)
 
     }
@@ -132,11 +132,13 @@ class TrackView {
                 event.preventDefault()
                 event.stopPropagation()
 
-                setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
+                this.track.isMultiSelection = event.target.checked
 
                 if (this.track.autoscaleGroup && false === event.target.checked) {
                     this.track.autoscaleGroup = undefined
                 }
+
+                setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
 
             })
 
@@ -631,7 +633,6 @@ class TrackView {
         } else {
             this.dragHandle = DOMUtils.div({ class: 'igv-track-drag-handle' })
             this.dragHandle.classList.add('igv-track-drag-handle-color')
-            this.dragHandle.dataset.selected = 'no'
         }
 
         browser.columnContainer.querySelector('.igv-track-drag-column').appendChild(this.dragHandle)
@@ -736,7 +737,7 @@ class TrackView {
                 event.preventDefault()
 
                 currentDragHandle = event.target
-                if ('no' === currentDragHandle.dataset.selected) {
+                if (false === this.track.isMultiSelection) {
                     currentDragHandle.classList.remove('igv-track-drag-handle-color')
                     currentDragHandle.classList.add('igv-track-drag-handle-hover-color')
                 }
@@ -755,7 +756,7 @@ class TrackView {
 
                 if (currentDragHandle && event.target !== currentDragHandle) {
 
-                    if ('no' === currentDragHandle.dataset.selected) {
+                    if (false === this.track.isMultiSelection) {
                         currentDragHandle.classList.remove('igv-track-drag-handle-hover-color')
                         currentDragHandle.classList.add('igv-track-drag-handle-color')
                     }
@@ -773,7 +774,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if ('no' === event.target.dataset.selected) {
+                    if (false === this.track.isMultiSelection) {
                         event.target.classList.remove('igv-track-drag-handle-color')
                         event.target.classList.add('igv-track-drag-handle-hover-color')
                     }
@@ -788,7 +789,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if ('no' === event.target.dataset.selected) {
+                    if (false === this.track.isMultiSelection) {
                         event.target.classList.remove('igv-track-drag-handle-hover-color')
                         event.target.classList.add('igv-track-drag-handle-color')
                     }
@@ -802,7 +803,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if ('no' === event.target.dataset.selected) {
+                    if (false === this.track.isMultiSelection) {
                         event.target.classList.remove('igv-track-drag-handle-hover-color')
                         event.target.classList.add('igv-track-drag-handle-color')
                     }
