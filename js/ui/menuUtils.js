@@ -1,11 +1,17 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
+import {colorPalettes} from "../util/colorPalletes.js"
 
 const colorPickerTrackTypeSet = new Set([ 'bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact' ])
 
 const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp', 'shoebox'])
 
 const multiTrackSelectExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
+
+const autoScaleGroupColorHash =
+    {
+
+    };
 
 class MenuUtils {
     constructor(browser) {
@@ -133,6 +139,10 @@ function groupAutoScaleMenuItem() {
         const trackViews = getMultiSelectedTrackViews(this.browser)
 
         const autoScaleGroupID = `auto-scale-group-${DOMUtils.guid()}`
+
+        const colorPalette = colorPalettes['Set1']
+        const randomIndex = Math.floor(Math.random() * colorPalette.length)
+        autoScaleGroupColorHash[ autoScaleGroupID ] = colorPalette[randomIndex]
 
         for (const trackView of trackViews) {
             trackView.track.autoscaleGroup = autoScaleGroupID
@@ -450,6 +460,6 @@ function isMultiSelectedTrackView(trackView) {
     return selected && selected.length > 1 && new Set(selected).has(trackView)
 }
 
-export { canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView }
+export { autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView }
 
 export default MenuUtils

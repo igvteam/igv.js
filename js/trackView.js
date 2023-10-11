@@ -32,7 +32,7 @@ import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
 import SampleInfoViewport from "./sample/sampleInfoViewport.js";
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import {getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
+import {autoScaleGroupColorHash, getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
 import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState } from './ui/multiTrackSelectButton.js'
 import {hexToRGB} from "./util/colorPalletes.js"
 
@@ -49,7 +49,7 @@ class TrackView {
         this.browser = browser
         this.track = track
         track.trackView = this
-        
+
         this.addDOMToColumnContainer(browser, columnContainer, browser.referenceFrameList)
 
     }
@@ -920,7 +920,12 @@ class TrackView {
             const axisCanvasContext = this.axisCanvas.getContext('2d')
             axisCanvasContext.scale(dpi, dpi)
 
-            this.track.paintAxis(axisCanvasContext, width, height)
+            if (this.track.autoscaleGroup) {
+                const rgba = IGVColor.addAlpha(autoScaleGroupColorHash[ this.track.autoscaleGroup ], 0.25)
+                this.track.paintAxis(axisCanvasContext, width, height, rgba)
+            } else {
+                this.track.paintAxis(axisCanvasContext, width, height, undefined)
+            }
         }
     }
 
