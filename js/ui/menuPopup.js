@@ -112,10 +112,13 @@ class MenuPopup {
 
                         if (isMultiSelectedTrackView(trackView)) {
 
-                            if (true === item.doTrackOverlay) {
+                            trackView.browser.multiSelectedTrackViews = getMultiSelectedTrackViews(trackView.browser)
+                            
+                            if (true === item.doAllMultiSelectedTracks) {
                                 item.click.call(trackView.track, e)
                             } else {
-                                for (const { track } of getMultiSelectedTrackViews(trackView.browser)) {
+                                
+                                for (const { track } of trackView.browser.multiSelectedTrackViews) {
                                     item.click.call(track, e)
                                 }
                             }

@@ -136,22 +136,20 @@ function groupAutoScaleMenuItem() {
 
     function click(e) {
 
-        const trackViews = getMultiSelectedTrackViews(this.browser)
-
-        const autoScaleGroupID = `auto-scale-group-${DOMUtils.guid()}`
-
-        const colorPalette = colorPalettes['Set1']
+        const colorPalette = colorPalettes['Dark2']
         const randomIndex = Math.floor(Math.random() * colorPalette.length)
+
+        const autoScaleGroupID = `auto-scale-group-${ DOMUtils.guid() }`
         autoScaleGroupColorHash[ autoScaleGroupID ] = colorPalette[randomIndex]
 
-        for (const trackView of trackViews) {
-            trackView.track.autoscaleGroup = autoScaleGroupID
+        for (const { track } of this.browser.multiSelectedTrackViews) {
+            track.autoscaleGroup = autoScaleGroupID
         }
 
         this.browser.updateViews()
     }
 
-    return { object, click }
+    return { object, doAllMultiSelectedTracks:true, click }
 
 }
 
@@ -197,7 +195,7 @@ function trackOverlayMenuItem() {
 
     }
 
-    return { object, doTrackOverlay:true, click }
+    return { object, doAllMultiSelectedTracks:true, click }
 
 }
 

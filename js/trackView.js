@@ -34,7 +34,7 @@ import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import {autoScaleGroupColorHash, getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
 import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState } from './ui/multiTrackSelectButton.js'
-import {hexToRGB} from "./util/colorPalletes.js"
+import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
@@ -134,9 +134,9 @@ class TrackView {
 
                 this.track.isMultiSelection = event.target.checked
 
-                if (this.track.autoscaleGroup && false === event.target.checked) {
-                    this.track.autoscaleGroup = undefined
-                }
+                // if (this.track.autoscaleGroup && false === event.target.checked) {
+                //     this.track.autoscaleGroup = undefined
+                // }
 
                 setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
 
@@ -921,7 +921,13 @@ class TrackView {
             axisCanvasContext.scale(dpi, dpi)
 
             if (this.track.autoscaleGroup) {
-                const rgba = IGVColor.addAlpha(autoScaleGroupColorHash[ this.track.autoscaleGroup ], 0.25)
+
+                if (undefined === autoScaleGroupColorHash[ this.track.autoscaleGroup ]) {
+                    const colorPalette = colorPalettes['Dark2']
+                    const randomIndex = Math.floor(Math.random() * colorPalettes['Dark2'].length)
+                    autoScaleGroupColorHash[ this.track.autoscaleGroup ] = colorPalette[ randomIndex ]
+                }
+                const rgba = IGVColor.addAlpha(autoScaleGroupColorHash[ this.track.autoscaleGroup ], 0.75)
                 this.track.paintAxis(axisCanvasContext, width, height, rgba)
             } else {
                 this.track.paintAxis(axisCanvasContext, width, height, undefined)
