@@ -210,6 +210,10 @@ class TrackBase {
             state.max = this.dataRange.max
         }
 
+        if (this.autoscaleGroup) {
+            state.autoscaleGroup = this.autoscaleGroup
+        }
+
         return state
     }
 
