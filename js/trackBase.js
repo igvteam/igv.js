@@ -543,6 +543,7 @@ class TrackBase {
         object = $(createCheckbox("Autoscale", this.autoscale))
 
         function autoScaleHandler() {
+            this.autoscaleGroup = undefined
             this.autoscale = !this.autoscale
             this.trackView.updateViews()
         }

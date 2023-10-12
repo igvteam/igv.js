@@ -206,6 +206,7 @@ class TrackView {
             this.track.dataRange.max = max
         }
         this.track.autoscale = false
+        this.track.autoscaleGroup = undefined
         this.repaintViews()
     }
 
