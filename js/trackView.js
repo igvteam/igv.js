@@ -134,10 +134,6 @@ class TrackView {
 
                 this.track.isMultiSelection = event.target.checked
 
-                // if (this.track.autoscaleGroup && false === event.target.checked) {
-                //     this.track.autoscaleGroup = undefined
-                // }
-
                 setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
 
             })
@@ -199,15 +195,29 @@ class TrackView {
     }
 
     setDataRange(min, max) {
+
         if (min !== undefined) {
             this.track.dataRange.min = min
         }
         if (max !== undefined) {
             this.track.dataRange.max = max
         }
+
+        // this.track.dataRange = Object.assign({}, { min, max })
+
+
         this.track.autoscale = false
         this.track.autoscaleGroup = undefined
+
+        const list = this.browser.trackViews.filter(({ track }) => track.autoscaleGroup)
+        if (1 === list.length) {
+            list[ 0 ].track.autoscale = false
+            list[ 0 ].track.autoscaleGroup = undefined
+            list[ 0 ].repaintViews()
+        }
+
         this.repaintViews()
+
     }
 
     presentColorPicker(key) {

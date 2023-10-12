@@ -352,7 +352,6 @@ class TrackBase {
      * the genomic location.   Overriden by most subclasses.
      *
      * @param clickState
-     * @param features
      * @returns {[]|*[]}
      */
     clickedFeatures(clickState) {

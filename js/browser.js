@@ -1423,7 +1423,7 @@ class Browser {
 
                     const p = []
                     for (let trackView of groupTrackViews) {
-                        trackView.track.dataRange = dataRange
+                        trackView.track.dataRange = Object.assign({}, dataRange)
                         trackView.track.autoscale = false
                         p.push(trackView.updateViews())
                     }
