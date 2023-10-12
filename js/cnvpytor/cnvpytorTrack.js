@@ -117,7 +117,8 @@ class CNVPytorTrack extends TrackBase {
             this.wigFeatures_obj[this.bin_size] = {}
 
             let dataWigs;
-            if(this.config.cnv_caller == '2D'){
+
+            if(this.cnv_caller == '2D'){
                 
                 dataWigs = await cnvpytor_obj.read_rd_baf('2D')
                 
@@ -408,17 +409,17 @@ class CNVPytorTrack extends TrackBase {
         if (this.defaultScale) {
             if (this.signal_name == 'rd_snp') {
                 this.dataRange = {
-                    min: this.config.min || this.dataRange.min || -2,
-                    max: this.config.max || this.dataRange.max || 6
+                    min: this.config.min || this.dataRange.min || -1,
+                    max: this.config.max || this.dataRange.max || 5
                 }
             } else if (this.signal_name == 'rd') {
                 this.dataRange = {
                     min: this.config.min || this.dataRange.min || 0,
-                    max: this.config.max || this.dataRange.max || 6
+                    max: this.config.max || this.dataRange.max || 5
                 }
             } else if (this.signal_name == 'snp') {
                 this.dataRange = {
-                    min: this.config.min || this.dataRange.min || -2,
+                    min: this.config.min || this.dataRange.min || -1,
                     max: this.config.max || this.dataRange.max || 0
                 }
             }
