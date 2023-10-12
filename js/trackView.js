@@ -203,9 +203,6 @@ class TrackView {
             this.track.dataRange.max = max
         }
 
-        // this.track.dataRange = Object.assign({}, { min, max })
-
-
         this.track.autoscale = false
         this.track.autoscaleGroup = undefined
 
