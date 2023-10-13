@@ -48,18 +48,23 @@ suite("testTwobit", function () {
         assert.equal(expectedSeq, seq)
     })
 
+    test ("twobit metadata", async function() {
+        const url = "test/data/genomes/GCF_000002655.1.2bit"
+        const twobit = new TwobitSequence({twoBitUrl: url})
+        await twobit.init()
+        const sequenceRecord = await twobit.getSequenceRecord("NC_007196.1")
+        assert.deepEqual(sequenceRecord.dnaSize, 4079167)
+    })
 
     test("twobit blocks", async function () {
 
         this.timeout(200000)
 
         const url = "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit"
-        const twobit = new TwobitSequence({fastaURL: url})
+        const twobit = new TwobitSequence({twoBitUrl: url})
         await twobit.init()
 
-        await twobit._getSequenceMetaData("chr1")
-
-        const meta = twobit.metaIndex.get("chr1")
+        const meta = await twobit.getSequenceRecord("chr1")
         assert.equal(248956422, meta.dnaSize)
 
         let lastBlockEnd = -1

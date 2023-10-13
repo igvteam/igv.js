@@ -59,6 +59,10 @@ class NonIndexedFasta {
         return this.loadAll()
     }
 
+    getSequenceRecord(chr) {
+        return this.chromosomes.get(chr)
+    }
+
     get chromosomeNames() {
         if(!this.#chromosomeNames) {
             this.#chromosomeNames = Array.from(this.chromosomes.keys())

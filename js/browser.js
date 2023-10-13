@@ -555,7 +555,7 @@ class Browser {
             console.warn("No genome or reference object specified")
             return
         }
-        const genomeConfig = await GenomeUtils.expandReference(this.alert, genomeOrReference)
+        const genomeConfig = genomeOrReference //await GenomeUtils.expandReference(this.alert, genomeOrReference)
 
 
         await this.loadReference(genomeConfig, session.locus)
@@ -737,7 +737,9 @@ class Browser {
         let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0,8)}...${genome.id.substring(genome.id.length-8)}`)
         this.$current_genome.text(genomeLabel)
         this.$current_genome.attr('title', genome.description)
-        this.chromosomeSelectWidget.update(genome)
+        if(false !== this.config.showChromosomeWidget) {
+            this.chromosomeSelectWidget.update(genome)
+        }
     }
 
     /**
@@ -754,7 +756,7 @@ class Browser {
             const hub = await Hub.loadHub(idOrConfig)
             genomeConfig = hub.getGenomeConfig("genes")
         } else {
-            genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
+            genomeConfig = idOrConfig //await GenomeUtils.expandReference(this.alert, idOrConfig)
         }
 
         await this.loadReference(genomeConfig, undefined)

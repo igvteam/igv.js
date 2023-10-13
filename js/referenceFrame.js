@@ -34,8 +34,8 @@ class ReferenceFrame {
 
     constructor(genome, chr, start, end, bpPerPixel) {
         this.genome = genome
-        this.chr = chr
 
+        this.chr = this.genome.getChromosomeName(chr)
         this.start = start
 
         // TODO WARNING THIS IS NOT UPDATED !!!

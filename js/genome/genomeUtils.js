@@ -18,28 +18,30 @@ const GenomeUtils = {
         let aliases
         let chromosomes
         let cytobands
-        if (options.aliasBbURL) {  // Order is important, try this first
-            const abb = await loadAliasesBB(options.aliasBbURL, options)
-            aliases = abb.aliases
-            chromosomes = abb.chromosomes
-        } else {
-            chromosomes = sequence.chromosomes
-            if (options.aliasURL) {
-                aliases = await loadAliases(options.aliasURL, options)
-            }
-        }
+        // if (options.aliasBbURL) {  // Order is important, try this first
+        //     const abb = await loadAliasesBB(options.aliasBbURL, options)
+        //     aliases = abb.aliases
+        //     chromosomes = abb.chromosomes
+        // } else {
+        //     chromosomes = sequence.chromosomes
+        //     if (options.aliasURL) {
+        //         aliases = await loadAliases(options.aliasURL, options)
+        //     }
+        // }
 
-        if (options.cytobandBbURL) {
-            const cc = await loadCytobandsBB(options.cytobandBbURL, options)
-            cytobands = cc.cytobands
-            if (!chromosomes) {
-                chromosomes = cc.chromosomes
-            }
-        } else if (options.cytobandURL) {
-            cytobands = await loadCytobands(options.cytobandURL, options)
-        }
+        // if (options.cytobandBbURL) {
+        //     const cc = await loadCytobandsBB(options.cytobandBbURL, options)
+        //     cytobands = cc.cytobands
+        //     if (!chromosomes) {
+        //         chromosomes = cc.chromosomes
+        //     }
+        // } else if (options.cytobandURL) {
+        //     cytobands = await loadCytobands(options.cytobandURL, options)
+        // }
 
         const genome = new Genome(options, sequence, aliases, chromosomes, cytobands)
+
+        await genome.init()
 
         return genome
     },

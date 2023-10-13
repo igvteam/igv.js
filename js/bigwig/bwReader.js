@@ -78,6 +78,11 @@ class BWReader {
         if(!bpEnd) bpEnd = Number.MAX_SAFE_INTEGER
 
         await this.loadHeader()
+
+        // TODO -- generalize this, bigwig chromosome names not neccessarily canonical
+        chr1 = this.genome.getChromosomeName(chr1)
+        chr2 = this.genome.getChromosomeName(chr2);
+
         const chrIdx1 = this.chromTree.nameToId[chr1]
         const chrIdx2 = this.chromTree.nameToId[chr2]
         if (chrIdx1 === undefined || chrIdx2 === undefined) {

@@ -56,6 +56,9 @@ class FastaSequence {
         this.config = config
     }
 
+    getSequenceRecord(chr) {
+        return this.chromosomes.get(chr)
+    }
 
     async init() {
         return this.getIndex()

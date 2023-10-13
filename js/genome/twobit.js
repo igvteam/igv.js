@@ -43,7 +43,7 @@ class TwobitSequence {
             await this.init()
         }
 
-        const record = await this._getSequenceMetaData(seqName)
+        const record = await this.getSequenceRecord(seqName)
         if (!record) {
             return null
         }
@@ -186,7 +186,7 @@ class TwobitSequence {
      * @param seqName
      * @returns {Promise<void>}
      */
-    async _getSequenceMetaData(seqName) {
+    async getSequenceRecord(seqName) {
 
         if (!this.metaIndex.has(seqName)) {
 
@@ -253,7 +253,8 @@ class TwobitSequence {
                 dnaSize,
                 nBlocks,
                 maskBlocks,
-                packedPos
+                packedPos,
+                bpLength: dnaSize
             }
             this.metaIndex.set(seqName, meta)
 

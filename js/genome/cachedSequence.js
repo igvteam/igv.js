@@ -10,6 +10,10 @@ class CachedSequence {
         this.sequenceReader = sequenceReader
     }
 
+    async getSequenceRecord(chr) {
+        return this.sequenceReader.getSequenceRecord(chr)
+    }
+
     async getSequence(chr, start, end) {
 
         const hasCachedSquence = this.interval && this.interval.contains(chr, start, end)
