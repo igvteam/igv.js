@@ -210,10 +210,9 @@ class TrackView {
         if (1 === list.length) {
             list[ 0 ].track.autoscale = false
             list[ 0 ].track.autoscaleGroup = undefined
-            list[ 0 ].repaintViews()
         }
 
-        this.repaintViews()
+        this.browser.updateViews()
 
     }
 

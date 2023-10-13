@@ -548,7 +548,7 @@ class TrackBase {
         function autoScaleHandler() {
             this.autoscaleGroup = undefined
             this.autoscale = !this.autoscale
-            this.trackView.updateViews()
+            this.browser.updateViews()
         }
 
         menuItems.push({ object, click:autoScaleHandler })
