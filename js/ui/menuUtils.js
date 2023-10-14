@@ -169,6 +169,8 @@ function trackOverlayMenuItem() {
             const wigConfigs = wigTracks.map(( track ) => {
                 const config = Object.assign({}, track.config)
                 config.color = track.color
+                config.autoscale = track.autoscale
+                config.autoscaleGroup = track.autoscaleGroup
                 return config
             })
 
