@@ -129,16 +129,15 @@ class Genome {
 
     getChromosomeName(chr) {
         return this.chromAlias ? this.chromAlias.getChromosomeName(chr) :  chr
-        // const chr = str ? this.chrAliasTable[str.toLowerCase()] : str
-        // return chr ? chr : str
     }
 
     getChromosomeDisplayName(str) {
          const canonicalName = this.getChromosomeName(str)
-         if (this.nameSet) {
-             return this.chromosomes.has(canonicalName) ? this.chromosomes.get(canonicalName).getAltName(this.nameSet) : canonicalName
+         if (this.nameSet && this.chromAlias) {
+             const alias = this.chromAlias.getChromosomeAlias(canonicalName, this.nameSet)
+             return alias || str
          } else {
-             return canonicalName
+             return str
          }
     }
 
@@ -151,10 +150,10 @@ class Genome {
 
     async loadChromosome(chr) {
 
+        // If a chrom alias object exists get the canonical name for the (possible) chr alias
         if(this.chromAlias) {
             const chromAliases = await this.chromAlias.search(chr)
             chr = chromAliases.chr
-            console.log(chromAliases)
         }
 
         if (!this.chromosomes.has(chr)) {
@@ -168,21 +167,6 @@ class Genome {
     getCytobands(chr) {
         const chrName = this.getChromosomeName(chr)
         return this.cytobands ? this.cytobands[chrName] : null
-    }
-
-    getLongestChromosome() {
-
-        var longestChr,
-            chromosomes = this.chromosomes
-        for (let key in chromosomes) {
-            if (chromosomes.hasOwnProperty(key)) {
-                var chr = chromosomes[key]
-                if (longestChr === undefined || chr.bpLength > longestChr.bpLength) {
-                    longestChr = chr
-                }
-            }
-            return longestChr
-        }
     }
 
     getChromosomes() {

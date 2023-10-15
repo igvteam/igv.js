@@ -25,6 +25,12 @@ class ChromAliasBB {
         return this.chrAliasTable.has(alias) ? this.chrAliasTable.get(alias).chr : alias
     }
 
+    getChromosomeAlias(chr, nameSet)
+    {
+        const aliasRecord =  this.chrAliasTable.get(chr)
+        return aliasRecord ? aliasRecord[nameSet] : undefined
+    }
+
     async search(alias) {
         if (!this.chrAliasTable.has(alias)) {
             const aliasRecord = await this.reader.search(alias)
