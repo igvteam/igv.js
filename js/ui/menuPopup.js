@@ -131,7 +131,7 @@ class MenuPopup {
                         item.dialog.call(trackView.track, e)
                     }
 
-                    // this.popover.style.display = 'none'
+                    this.popover.style.display = 'none'
                 }
 
                 $e.on('click', handleClick)

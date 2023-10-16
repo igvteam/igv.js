@@ -135,23 +135,14 @@ function isVisibilityWindowType(track) {
 
 function overlayTrackAlphaAdjustmentMenuItem() {
 
-    const object = $('<div>')
-    object.text('Adjust Alpha')
-
+    const container = DOMUtils.div()
+    container.innerText = 'Adjust Alpha'
+    
     function click(e) {
-
-        const configs = this.config.tracks.map(overlayConfig => {
-            const config = { ...overlayConfig }
-            config.isMergedTrack = undefined
-            config.order = this.order
-            return config
-        })
-
-        console.log(`The Overlay track has ${ configs.length } layers`)
-
+        console.log(`The Overlay track has ${ this.config.tracks.length } layers`)
     }
 
-    return { object, click }
+    return { object: $(container), click }
 }
 
 function trackSeparationMenuItem() {
