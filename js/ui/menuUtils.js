@@ -72,6 +72,8 @@ class MenuUtils {
         if ('merged' === trackView.track.type) {
             list.push('<hr/>')
             list.push(trackSeparationMenuItem())
+            list.push('<hr/>')
+            list.push(overlayTrackAlphaAdjustmentMenuItem())
         }
 
         return list
@@ -129,6 +131,52 @@ function isVisibilityWindowType(track) {
     const hasVizWindow = track.config && track.config.visibilityWindow !== undefined
     return hasVizWindow || vizWindowTypes.has(track.type)
 }
+
+
+function overlayTrackAlphaAdjustmentMenuItem() {
+
+    const object = $('<div>')
+    object.text('Adjust Alpha')
+
+    function click(e) {
+
+        const configs = this.config.tracks.map(overlayConfig => {
+            const config = { ...overlayConfig }
+            config.isMergedTrack = undefined
+            config.order = this.order
+            return config
+        })
+
+        console.log(`The Overlay track has ${ configs.length } layers`)
+
+    }
+
+    return { object, click }
+}
+
+function trackSeparationMenuItem() {
+
+    const object = $('<div>')
+    object.text('Separate tracks')
+
+    function click(e) {
+
+        const configs = this.config.tracks.map(overlayConfig => {
+            const config = { ...overlayConfig }
+            config.isMergedTrack = undefined
+            config.order = this.order
+            return config
+        })
+
+        const _browser = this.browser
+
+        _browser.removeTrack(this)
+        _browser.loadTrackList(configs)
+    }
+
+    return { object, click }
+}
+
 function groupAutoScaleMenuItem() {
 
     const object = $('<div>')
@@ -199,29 +247,6 @@ function trackOverlayMenuItem() {
 
     return { object, doAllMultiSelectedTracks:true, click }
 
-}
-
-function trackSeparationMenuItem() {
-
-    const object = $('<div>')
-    object.text('Separate tracks')
-
-    function click(e) {
-
-        const configs = this.config.tracks.map(overlayConfig => {
-            const config = { ...overlayConfig }
-            config.isMergedTrack = undefined
-            config.order = this.order
-            return config
-        })
-
-        const _browser = this.browser
-
-        _browser.removeTrack(this)
-        _browser.loadTrackList(configs)
-    }
-
-    return { object, click }
 }
 
 function visibilityWindowMenuItem() {
