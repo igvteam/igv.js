@@ -72,7 +72,6 @@ class MenuUtils {
         if ('merged' === trackView.track.type) {
             list.push('<hr/>')
             list.push(trackSeparationMenuItem())
-            list.push('<hr/>')
             list.push(overlayTrackAlphaAdjustmentMenuItem())
         }
 
@@ -135,10 +134,9 @@ function isVisibilityWindowType(track) {
 function overlayTrackAlphaAdjustmentMenuItem() {
 
     const container = DOMUtils.div()
-    container.innerText = 'Adjust Alpha'
+    container.innerText = 'Set transparency'
 
     function dialogPresentationHandler (e) {
-
         const callback = value => {
             this.alpha = parseFloat(value)
             this.updateViews()
@@ -146,8 +144,8 @@ function overlayTrackAlphaAdjustmentMenuItem() {
 
         const config =
             {
-                label: 'Adjust Alpha',
-                value: 0.5,
+                label: 'Transparency',
+                value: this.alpha,
                 callback
             }
 
