@@ -132,17 +132,29 @@ function isVisibilityWindowType(track) {
     return hasVizWindow || vizWindowTypes.has(track.type)
 }
 
-
 function overlayTrackAlphaAdjustmentMenuItem() {
 
     const container = DOMUtils.div()
     container.innerText = 'Adjust Alpha'
-    
-    function click(e) {
-        console.log(`The Overlay track has ${ this.config.tracks.length } layers`)
+
+    function dialogPresentationHandler (e) {
+
+        const callback = value => {
+            this.alpha = parseFloat(value)
+            this.updateViews()
+        }
+
+        const config =
+            {
+                label: 'Adjust Alpha',
+                value: 0.5,
+                callback
+            }
+
+        this.browser.inputDialog.present(config, e)
     }
 
-    return { object: $(container), click }
+    return { object: $(container), dialog:dialogPresentationHandler }
 }
 
 function trackSeparationMenuItem() {
