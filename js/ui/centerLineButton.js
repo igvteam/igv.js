@@ -1,49 +1,71 @@
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016 University of California San Diego
+ * Author: Jim Robinson
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 
-class CenterLineButton {
+import NavbarButton from "./navbarButton.js"
+import GenomeUtils from "../genome/genomeUtils.js"
+import {centerlineImage, centerlineImageHover} from "./navbarIcons/centerline.js"
+import { buttonLabel } from "./navbarIcons/buttonLabel.js"
+
+class CenterLineButton extends NavbarButton {
 
     constructor(browser, parent) {
 
-        this.browser = browser
+        super(browser, parent, 'Center Line', buttonLabel, centerlineImage, centerlineImageHover, browser.config.showCenterGuide)
 
-        this.button = DOMUtils.div({class: 'igv-navbar-button'})
-        parent.appendChild(this.button)
-
-        this.button.textContent = 'center line'
-
-        this.button.addEventListener('click', () => {
-            browser.isCenterLineVisible = !browser.isCenterLineVisible
-            browser.setCenterLineVisibility(browser.isCenterLineVisible)
-            this.setButtonState(browser.isCenterLineVisible)
+        this.button.addEventListener('mouseenter', () => {
+            if (false === browser.doShowCenterLine) {
+                this.setState(true)
+            }
         })
 
-        this.setButtonState(browser.isCenterLineVisible)
+        this.button.addEventListener('mouseleave', () => {
+            if (false === browser.doShowCenterLine) {
+                this.setState(false)
+            }
+        })
 
-        if (browser.config.showCenterGuideButton) {
-            this.show()
-        } else {
-            this.hide()
+        const mouseClickHandler = () => {
+
+            if (false === browser.doShowCenterLine && GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr)) {
+                return
+            }
+
+            browser.doShowCenterLine = !browser.doShowCenterLine
+            browser.setCenterLineVisibility(browser.doShowCenterLine)
+            this.setState(browser.doShowCenterLine)
         }
+
+        this.boundMouseClickHandler = mouseClickHandler.bind(this)
+
+        this.button.addEventListener('click', this.boundMouseClickHandler)
+
+        this.setVisibility(browser.config.showCenterGuideButton)
+
     }
 
-    setButtonState(isCenterLineVisible) {
-        if (true === isCenterLineVisible) {
-            this.button.classList.add('igv-navbar-button-clicked')
-        } else {
-            this.button.classList.remove('igv-navbar-button-clicked')
-        }
-    }
-
-    show() {
-        this.isVisible = true
-        this.button.style.display = 'block'
-        this.setButtonState(this.browser.isCenterLineVisible)
-    }
-
-    hide() {
-        this.isVisible = false
-        this.button.style.display = 'none'
-    }
 }
 
 export default CenterLineButton

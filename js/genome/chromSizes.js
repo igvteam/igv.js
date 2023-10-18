@@ -32,6 +32,9 @@ const splitLines = StringUtils.splitLines
 
 const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'indexed'])
 
+/**
+ * Represents a reference object created from a ChromSizes file.  This is unusual, primarily for testing.
+ */
 class ChromSizes {
 
     #chromosomeNames
@@ -40,7 +43,6 @@ class ChromSizes {
     constructor(url) {
         this.url = url
     }
-
 
     async init() {
         return this.loadAll()
@@ -83,5 +85,33 @@ class ChromSizes {
 
 }
 
+async function loadChromSizes(url) {
+
+    const chromosomeSizes = new Map();
+
+    let data
+    if (isDataURL(url)) {
+        let bytes = BGZip.decodeDataURI(url)
+        data = ""
+        for (let b of bytes) {
+            data += String.fromCharCode(b)
+        }
+    } else {
+        data = await igvxhr.load(url, {})
+    }
+
+    const lines = splitLines(data)
+    let order = 0
+    for (let nextLine of lines) {
+        const tokens = nextLine.split('\t')
+        if(tokens.length > 1) {
+            const chrLength = Number.parseInt(tokens[1])
+            chromosomeSizes.set(tokens[0], new Chromosome(tokens[0], order++, chrLength))
+        }
+    }
+    return chromosomeSizes
+}
+
 
 export default ChromSizes
+export {loadChromSizes}

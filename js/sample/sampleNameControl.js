@@ -24,58 +24,50 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import NavbarButton from "../ui/navbarButton.js"
+import {sampleNameImage, sampleNameImageHover} from "../ui/navbarIcons/sampleNames.js"
+import { sampleNameButtonLabel } from "../ui/navbarIcons/buttonLabel.js"
 
-class ROITableControl {
+class SampleNameControl extends NavbarButton {
 
     constructor(parent, browser) {
-        this.browser = browser
-        this.button = DOMUtils.div({class: 'igv-navbar-button'})
-        parent.appendChild(this.button)
-        this.button.textContent = 'ROI Table'
 
-        this.button.addEventListener('click', () => {
-            this.buttonHandler(!browser.roiTableVisible)
+        super(browser, parent, 'Sample Names', sampleNameButtonLabel, sampleNameImage, sampleNameImageHover, browser.config.showSampleNames)
+
+        this.button.addEventListener('mouseenter', () => {
+            if (false === browser.showSampleNames) {
+                this.setState(true)
+            }
         })
 
-        this.browser = browser
+        this.button.addEventListener('mouseleave', () => {
+            if (false === browser.showSampleNames) {
+                this.setState(false)
+            }
+        })
 
-        this.setVisibility(browser.showROITableButton)
+        this.button.addEventListener('click', () => {
 
-        this.setState(browser.roiTableVisible)
-    }
+            browser.showSampleNames = !browser.showSampleNames
 
-    buttonHandler(status) {
-        this.browser.roiTableVisible = status
-        this.setState(this.browser.roiTableVisible)
-        this.browser.setROITableVisibility(this.browser.roiTableVisible)
-    }
+            for (const {sampleNameViewport} of browser.trackViews) {
+                false === browser.showSampleNames ? sampleNameViewport.hide() : sampleNameViewport.show()
+            }
 
-    setVisibility(doShowROITablelButton) {
-        if (true === doShowROITablelButton) {
+            this.setState(browser.showSampleNames)
+
+            browser.layoutChange()
+
+        })
+
+        if (true === browser.config.showSampleNameButton) {
             this.show()
         } else {
             this.hide()
         }
+
     }
 
-    setState(roiTableVisible) {
-        if (true === roiTableVisible) {
-            this.button.classList.add('igv-navbar-button-clicked')
-        } else {
-            this.button.classList.remove('igv-navbar-button-clicked')
-        }
-    }
-
-    show() {
-        this.button.style.display = 'block'
-        this.setState(this.browser.roiTableVisible)
-    }
-
-    hide() {
-        this.button.style.display = 'none'
-    }
 }
 
-
-export default ROITableControl
+export default SampleNameControl

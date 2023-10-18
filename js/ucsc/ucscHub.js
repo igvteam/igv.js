@@ -6,6 +6,8 @@
  https://genome.ucsc.edu/goldenpath/help/trackDb/trackDbHub.html
  */
 
+import { igvxhr} from "../../node_modules/igv-utils/src/index.js"
+
 class Hub {
 
     static async loadHub(options) {
@@ -111,6 +113,10 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         }
 
         config.description = config.id
+
+        if (this.genomeStanza.hasProperty("chromSizes")) {
+            config.chromSizes = this.baseURL + this.genomeStanza.getProperty("chromSizes")
+        }
         if (this.genomeStanza.hasProperty("description")) {
             config.description += `\n${this.genomeStanza.getProperty("description")}`
         }
@@ -326,8 +332,7 @@ class Stanza {
  */
 async function loadStanzas(options) {
 
-    const response = await fetch(options.url)
-    const data = await response.text()
+    const data = await igvxhr.loadString(options.url)
     const lines = data.split(/\n|\r\n|\r/g)
 
     const nodes = []

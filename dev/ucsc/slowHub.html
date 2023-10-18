@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+    import Hub from "../../js/ucsc/ucscHub.js"
+
+
+    const hubOptions = {
+        url: "https://hgdownload.soe.ucsc.edu/hubs/GCA/004/027/145/GCA_004027145.1/hub.txt",
+        includeTracks: "all"
+    }
+
+
+    const hub = await Hub.loadHub(hubOptions)
+    const ref = hub.getGenomeConfig()
+
+    const igvConfig = {
+        locus: hub.getDefaultPosition(),
+        reference: ref
+    }
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+
+    const selector = document.getElementById("select")
+    selector.addEventListener("change", () => document.getElementById("hub-input").value = selector.value)
+    document.getElementById("load-genome").addEventListener("click", () =>
+        browser.loadGenome({url: document.getElementById("hub-input").value}))
+    document.getElementById("load-session").addEventListener("click", () =>
+        browser.loadSession({url: document.getElementById("hub-input").value}))
+
+
+</script>
+
+</body>
+
+</html>

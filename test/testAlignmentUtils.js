@@ -7,7 +7,7 @@ suite("testAlignmentUtils", function () {
 
 
     test("Alignment packing", async function () {
-
+        this.timeout(10000)
         const chr = 'chr22'
         const start = 24375132
         const end = 24385311

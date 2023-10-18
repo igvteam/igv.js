@@ -40,7 +40,11 @@ class Genome {
         }
 
         // Build the alias table and correct cytoband sequence names
-        this.chrAliasTable = createAliasTable(this.chromosomes, aliases)
+        if(aliases) {
+            this.chrAliasTable = createAliasTable(this.chromosomes, aliases)
+        } else {
+            this.chrAliasTable = {}
+        }
 
         if (cytobands) {
             this.cytobands = {}
@@ -57,9 +61,19 @@ class Genome {
             this.chromosomes.set("all", new Chromosome("all", 0, l))
             //this.chromosomeNames.unshift("all")
         }
-
-
     }
+
+    updateChromosomes(chromosomes) {
+        for(let key of chromosomes.keys()) {
+            this.chromosomes.set(key, chromosomes.get(key))
+        }
+    }
+
+    updateAliases(aliases) {
+        this.chrAliasTable = createAliasTable(this.chromosomes, aliases);
+    }
+
+
 
     get description() {
         return this.config.description || `${this.id}\n${this.name}`
