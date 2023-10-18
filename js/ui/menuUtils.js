@@ -137,8 +137,8 @@ function overlayTrackAlphaAdjustmentMenuItem() {
     container.innerText = 'Set transparency'
 
     function dialogPresentationHandler (e) {
-        const callback = value => {
-            this.alpha = parseFloat(value)
+        const callback = alpha => {
+            this.alpha = Math.max(0.001, alpha)
             this.updateViews()
         }
 
@@ -146,10 +146,13 @@ function overlayTrackAlphaAdjustmentMenuItem() {
             {
                 label: 'Transparency',
                 value: this.alpha,
+                min: 0.0,
+                max: 1.0,
+                scaleFactor: 1000,
                 callback
             }
 
-        this.browser.inputDialog.present(config, e)
+        this.browser.sliderDialog.present(config, e)
     }
 
     return { object: $(container), dialog:dialogPresentationHandler }

@@ -177,7 +177,7 @@
 
         };
 
-    const MergedTracksConfig =
+    const overyTrackConfig =
         {
             genome: "hg19",
             locus: "chr1:155,138,124-155,153,715",
@@ -185,7 +185,7 @@
                 [
                     {
                         name: "Merged - configuration",
-                        height: 50,
+                        height: 256,
                         type: "merged",
                         tracks: [
                             {
@@ -291,7 +291,7 @@
         ]
     }
 
-    igv.createBrowser(document.getElementById("igvDiv"), BigWigConfig)
+    igv.createBrowser(document.getElementById("igvDiv"), overyTrackConfig)
         .then(function (browser) {
             console.log("Created IGV browser");
         })

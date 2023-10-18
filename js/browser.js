@@ -1,8 +1,7 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import html2canvas from '../node_modules/html2canvas/dist/html2canvas.esm.js'
-import {InputDialog, GenericColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {BGZip, FileUtils, igvxhr, StringUtils, URIUtils} from "../node_modules/igv-utils/src/index.js"
-import {DOMUtils, Icon} from "../node_modules/igv-ui/dist/igv-ui.js"
+import {DOMUtils, Icon, SliderDialog, InputDialog, GenericColorPicker} from "../node_modules/igv-ui/dist/igv-ui.js"
 import Alert from './ui/alert.js'
 import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width} from "./trackView.js"
@@ -305,6 +304,9 @@ class Browser {
         if (false === config.showNavigation) {
             this.$navigation.hide()
         }
+
+        this.sliderDialog = new SliderDialog(this.root)
+        this.sliderDialog.container.id = `igv-slider-dialog-${DOMUtils.guid()}`
 
         this.inputDialog = new InputDialog(this.root)
         this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
