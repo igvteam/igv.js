@@ -10,7 +10,7 @@ taxId 330879
 groups groups.txt
 description ascomycetes A.fumigatus Af293
 twoBitPath GCF_000002655.1.2bit
-twoBitBptUrl GCF_000002655.1.2bit.bpt
+twoBitBptURL GCF_000002655.1.2bit.bpt
 chromSizes GCF_000002655.1.chrom.sizes.txt
 chromAliasBb GCF_000002655.1.chromAlias.bb
 chromAuthority ucsc

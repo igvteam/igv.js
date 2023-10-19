@@ -1,6 +1,5 @@
 import Genome from "./genome.js"
 import {loadFasta} from "./fasta.js"
-import {loadCytobands, loadCytobandsBB} from "./cytoband.js"
 import {buildOptions} from "../util/igvUtils.js"
 import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import BWReader from "../bigwig/bwReader.js"

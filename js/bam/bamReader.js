@@ -1,29 +1,3 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2016-2017 The Regents of the University of California
- * Author: Jim Robinson
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 import {loadIndex} from "./indexFactory.js"
 import AlignmentContainer from "./alignmentContainer.js"
 import BamUtils from "./bamUtils.js"
@@ -39,6 +13,8 @@ import BGZBlockLoader from "./bgzBlockLoader.js"
  */
 class BamReader {
 
+    chrAliasTable =  new Map()
+
     constructor(config, genome) {
         this.config = config
         this.genome = genome
@@ -52,7 +28,22 @@ class BamReader {
     async readAlignments(chr, bpStart, bpEnd) {
 
         const chrToIndex = await this.getChrIndex()
-        const queryChr = this.chrAliasTable.hasOwnProperty(chr) ? this.chrAliasTable[chr] : chr
+
+        if(!this.chrAliasTable.has(chr)) {
+            const chromosome = this.genome.getChromosome(chr)
+            if(chromosome) {
+                const aliases = chromosome.altNames
+                for(let a of aliases) {
+                    if(this.chrNames.has(a)) {
+                        this.chrAliasTable.set(chr, a)
+                    }
+                }
+            }
+            if(!this.chrAliasTable.has(chr)) this.chrAliasTable.set(chr, chr)
+        }
+
+        const queryChr = this.chrAliasTable.get(chr) || chr
+
         const chrId = chrToIndex[queryChr]
         const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
 
@@ -116,7 +107,7 @@ class BamReader {
             const header = await this.getHeader()
             this.chrToIndex = header.chrToIndex
             this.indexToChr = header.chrNames
-            this.chrAliasTable = header.chrAliasTable
+            this.chrNames = new Set(header.chrNames)
             return this.chrToIndex
 
         }

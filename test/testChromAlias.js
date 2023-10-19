@@ -41,8 +41,27 @@ suite("chromAlias", function () {
         const ucscName = "chr2"
         const f2 = await bbReader.search(ucscName)
         assert.equal(ucscName, f2.ucsc)
-
-
     })
 
+    test("test chromalias bb remote", async function () {
+        this.timeout(200000)
+        const config = {
+            url: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/GCA_009914755.4.chromAlias.bb",
+            format: "bigbed"
+        }
+
+        const bbReader = new BWReader(config)
+
+        const features = await bbReader.readFeatures("chr1")
+
+        // There are 5 extra indexes, 1 for each alias
+        const ncbiName = "3"
+        const f1 = await bbReader.search(ncbiName)
+        assert.equal(ncbiName, f1.ncbi)
+
+        const ucscName = "chr2"
+        const f2 = await bbReader.search(ucscName)
+        assert.equal(ucscName, f2.ucsc)
+    })
+    //                chromAliasBbURL: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/GCA_009914755.4.chromAlias.bb",
 })

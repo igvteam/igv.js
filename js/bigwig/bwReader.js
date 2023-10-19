@@ -45,11 +45,13 @@ const BUFFER_SIZE = 512000     //  buffer
 
 class BWReader {
 
+    chrAliasTable = new Map()
+    rpTreeCache = new Map()
+
     constructor(config, genome) {
         this.path = config.url
         this.format = config.format || "bigwig"
         this.genome = genome
-        this.rpTreeCache = {}
         this.config = config
         this.bufferSize = BUFFER_SIZE
         this.loader = isDataURL(this.path) ?
@@ -74,17 +76,42 @@ class BWReader {
 
     async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction = "mean") {
 
-        if(!bpStart) bpStart = 0
-        if(!bpEnd) bpEnd = Number.MAX_SAFE_INTEGER
+        if (!bpStart) bpStart = 0
+        if (!bpEnd) bpEnd = Number.MAX_SAFE_INTEGER
 
         await this.loadHeader()
 
-        // TODO -- generalize this, bigwig chromosome names not neccessarily canonical
-        chr1 = this.genome.getChromosomeName(chr1)
-        chr2 = this.genome.getChromosomeName(chr2);
+        let chrIdx1 = await this.#getIdForChr(chr1) // this.chromTree.nameToId.get(chr1)
+        let chrIdx2 = await this.#getIdForChr(chr2)  // this.chromTree.nameToId.get(chr2)
 
-        const chrIdx1 = this.chromTree.nameToId[chr1]
-        const chrIdx2 = this.chromTree.nameToId[chr2]
+        // // Try alias
+        // if (chrIdx1 === undefined) {
+        //     const aliasRecord = await this.genome.getAliasRecord(chr1)
+        //     if (aliasRecord) {
+        //         const aliases = Object.keys(aliasRecord)
+        //             .filter(k => k !== "start" && k !== "end")
+        //             .map(k => aliasRecord[k])
+        //             .filter(a => this.chromTree.nameToId.has(a))
+        //         if (aliases.length > 0) {
+        //             chrIdx1 = this.chromTree.nameToId.get(aliases[0])
+        //             this.chrAliasTable.set(chr1, aliases[0])
+        //         }
+        //     }
+        // }
+        // if (chrIdx2 === undefined) {
+        //     const aliasRecord = await this.genome.getAliasRecord(chr2)
+        //     if (aliasRecord) {
+        //         const aliases = Object.keys(aliasRecord)
+        //             .filter(k => k !== "start" && k !== "end")
+        //             .map(k => aliasRecord[k])
+        //             .filter(a => this.chromTree.nameToId.has(a))
+        //         if (aliases.length > 0) {
+        //             chrIdx2 = this.chromTree.nameToId.get(aliases[0])
+        //             this.chrAliasTable.set(chr2, aliases[0])
+        //         }
+        //     }
+        // }
+
         if (chrIdx1 === undefined || chrIdx2 === undefined) {
             return []
         }
@@ -159,6 +186,37 @@ class BWReader {
                 return allFeatures
             }
         }
+    }
+
+    /**
+     * Return the ID for the given chromosome name.  If there is no direct match, search for a chromosome alias.
+     *
+     * @param chr
+     * @returns {Promise<*>}
+     */
+    async #getIdForChr(chr) {
+
+        if (this.chrAliasTable.has(chr)) {
+            chr = this.chrAliasTable.get(chr)
+        }
+
+        let chrIdx = this.chromTree.nameToId.get(chr)
+
+        // Try alias
+        if (chrIdx === undefined) {
+            const aliasRecord = await this.genome.getAliasRecord(chr)
+            if (aliasRecord) {
+                const aliases = Object.keys(aliasRecord)
+                    .filter(k => k !== "start" && k !== "end")
+                    .map(k => aliasRecord[k])
+                    .filter(a => this.chromTree.nameToId.has(a))
+                if (aliases.length > 0) {
+                    chrIdx = this.chromTree.nameToId.get(aliases[0])
+                    this.chrAliasTable.set(chr, aliases[0])
+                }
+            }
+        }
+        return chrIdx
     }
 
 
@@ -354,6 +412,7 @@ class BWReader {
             if (header.chromTreeOffset > 0) {
                 binaryParser.position = header.chromTreeOffset - startOffset
                 this.chromTree = await ChromTree.parseTree(binaryParser, startOffset, this.genome)
+                this.chrNames = new Set(this.chromTree.idToName)
             } else {
                 // TODO -- this is an error, not expected
                 throw "BigWig chromosome tree offset <= 0"
@@ -390,7 +449,7 @@ class BWReader {
         const extensionSize = binaryParser.getUShort()
         const extraIndexCount = binaryParser.getUShort()
         const extraIndexListOffset = binaryParser.getLong()
-        if(extraIndexCount === 0) return
+        if (extraIndexCount === 0) return
 
         let sz = extraIndexCount * (2 + 2 + 8 + 4 + 10 * (2 + 2))
         data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
@@ -417,6 +476,10 @@ class BWReader {
 
             for (let j = 0; j < fc; j++) {
                 const fieldId = binaryParser.getUShort()
+
+                //const field = this.autoSql.fields[fieldId]
+                //console.log(field)
+
                 reserved.push(binaryParser.getUShort())
             }
         }
@@ -426,13 +489,13 @@ class BWReader {
 
     async loadRPTree(offset) {
 
-        let rpTree = this.rpTreeCache[offset]
+        let rpTree = this.rpTreeCache.get(offset)
         if (rpTree) {
             return rpTree
         } else {
             rpTree = new RPTree(offset, this.config, this.littleEndian, this.loader)
             await rpTree.load()
-            this.rpTreeCache[offset] = rpTree
+            this.rpTreeCache.set(offset, rpTree)
             return rpTree
         }
     }
@@ -455,10 +518,11 @@ class BWReader {
         if (this.type === "bigwig") {
             this.visibilityWindow = -1
         } else {
-            // bigbed
-            let genomeSize = this.genome ? this.genome.getGenomeLength() : 3088286401
+            this.visibilityWindow = -1
+            // bigbed -- todo, we can't know genome length.
+            //let genomeSize = this.genome ? this.genome.getGenomeLength() : 3088286401
             // Estimate window size to return ~ 1,000 features, assuming even distribution across the genome
-            this.visibilityWindow = header.dataCount < 1000 ? -1 : 1000 * (genomeSize / header.dataCount)
+            //this.visibilityWindow = header.dataCount < 1000 ? -1 : 1000 * (genomeSize / header.dataCount)
 
         }
     }

@@ -15,22 +15,39 @@ class ChromAliasBB {
 
     chrAliasTable = new Map()
 
-    constructor(url, config) {
+    constructor(url, config, genome) {
         config = config || {}
         config.url = url
-        this.reader = new BWReader(config)
+        this.reader = new BWReader(config, genome)
     }
 
+    /**
+     * Return the canonical chromosome name for the alias.  If none found return the alias
+     *
+     * @param alias
+     * @returns {*}
+     */
     getChromosomeName(alias) {
         return this.chrAliasTable.has(alias) ? this.chrAliasTable.get(alias).chr : alias
     }
 
+    /**
+     * Return an alternate chromosome name (alias).  If not exists, return chr
+     * @param chr
+     * @param nameSet -- The name set, e.g. "ucsc"
+     * @returns {*|undefined}
+     */
     getChromosomeAlias(chr, nameSet)
     {
         const aliasRecord =  this.chrAliasTable.get(chr)
-        return aliasRecord ? aliasRecord[nameSet] : undefined
+        return aliasRecord ? aliasRecord[nameSet] || chr : chr
     }
 
+    /**
+     * Search for chromosome alias bed record.
+     * @param alias
+     * @returns {Promise<any>}
+     */
     async search(alias) {
         if (!this.chrAliasTable.has(alias)) {
             const aliasRecord = await this.reader.search(alias)

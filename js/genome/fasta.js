@@ -10,7 +10,7 @@ async function loadFasta(reference) {
     let fasta
     if ("chromsizes" === reference.format) {
         fasta = new ChromSizes(reference.fastaURL)
-    } else if ("2bit" === reference.format || reference.twoBitUrl) {
+    } else if ("2bit" === reference.format || reference.twoBitURL) {
         fasta = new CachedSequence(new Twobit(reference))
     } else if (isDataURL(reference.fastaURL) || reference.indexed === false) {
         fasta = new NonIndexedFasta(reference)

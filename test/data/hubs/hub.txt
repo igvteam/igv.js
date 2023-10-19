@@ -10,7 +10,7 @@ taxId 176946
 groups groups.txt
 description Burmese python
 twoBitPath GCF_000186305.1.2bit
-twoBitBptUrl GCF_000186305.1.2bit.bpt
+twoBitBptURL GCF_000186305.1.2bit.bpt
 chromSizes GCF_000186305.1.chrom.sizes.txt
 chromAliasBb GCF_000186305.1.chromAlias.bb
 organism Python_molurus_bivittatus-5.0.2 Sep. 2013

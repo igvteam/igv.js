@@ -3,6 +3,8 @@ import {isNumber} from "../util/igvUtils.js"
 import Chromosome from "./chromosome.js"
 import {loadFasta} from "./fasta.js"
 import ChromAliasBB from "./chromAliasBB.js"
+import CytobandFileBB from "./cytobandFileBB.js"
+import ChromAliasFile from "./chromAliasFile.js"
 
 /**
  * The Genome class represents an assembly and consists of the following elements
@@ -13,6 +15,8 @@ import ChromAliasBB from "./chromAliasBB.js"
  */
 
 class Genome {
+
+    aliasRecordCache = new Map()
 
     constructor(config, sequence, aliases, chromosomes, cytobands) {
         this.config = config
@@ -30,10 +34,15 @@ class Genome {
 
         this.chromosomes = new Map()
 
-        if(config.chromAliasBBUrl) {
-            this.chromAlias = new ChromAliasBB(config.chromAliasBBUrl, config)
+        if (config.chromAliasBbURL) {
+            this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
+        } else if (config.aliasURL) {
+            this.chromAlias = new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
         }
 
+        if (config.cytobandBbURL) {
+            this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
+        }
         //this.chromosomes = chromosomes || new Map()
 
         // if (this.chromosomes && this.chromosomes.size > 0) {
@@ -81,17 +90,6 @@ class Genome {
         // }
     }
 
-    updateChromosomes(chromosomes) {
-        for (let key of chromosomes.keys()) {
-            this.chromosomes.set(key, chromosomes.get(key))
-        }
-    }
-
-    updateAliases(aliases) {
-        this.chrAliasTable = createAliasTable(this.chromosomes, aliases)
-    }
-
-
     get description() {
         return this.config.description || `${this.id}\n${this.name}`
     }
@@ -128,21 +126,21 @@ class Genome {
     }
 
     getChromosomeName(chr) {
-        return this.chromAlias ? this.chromAlias.getChromosomeName(chr) :  chr
+        return this.chromAlias ? this.chromAlias.getChromosomeName(chr) : chr
     }
 
     getChromosomeDisplayName(str) {
-         const canonicalName = this.getChromosomeName(str)
-         if (this.nameSet && this.chromAlias) {
-             const alias = this.chromAlias.getChromosomeAlias(canonicalName, this.nameSet)
-             return alias || str
-         } else {
-             return str
-         }
+        const canonicalName = this.getChromosomeName(str)
+        if (this.nameSet && this.chromAlias) {
+            const alias = this.chromAlias.getChromosomeAlias(canonicalName, this.nameSet)
+            return alias || str
+        } else {
+            return str
+        }
     }
 
     getChromosome(chr) {
-        if(this.chromAlias) {
+        if (this.chromAlias) {
             chr = this.chromAlias.getChromosomeName(chr)
         }
         return this.chromosomes.get(chr)
@@ -150,23 +148,54 @@ class Genome {
 
     async loadChromosome(chr) {
 
-        // If a chrom alias object exists get the canonical name for the (possible) chr alias
-        if(this.chromAlias) {
-            const chromAliases = await this.chromAlias.search(chr)
-            chr = chromAliases.chr
-        }
-
         if (!this.chromosomes.has(chr)) {
             const sequenceRecord = await this.sequence.getSequenceRecord(chr)
-            const chromosome = new Chromosome(chr, 0, sequenceRecord.dnaSize, undefined)
-            this.chromosomes.set(chr, chromosome)
+            if (sequenceRecord) {
+                const chromosome = new Chromosome(chr, 0, sequenceRecord.dnaSize, undefined)
+                this.chromosomes.set(chr, chromosome)
+            } else if (this.chromAlias) {
+                const chromAliasRecord = await this.chromAlias.search(chr)
+                if (chromAliasRecord) {
+                    chr = chromAliasRecord.chr
+
+                    // bb chr alias objects will have size
+                    if (chromAliasRecord.hasOwnProperty("end")) {
+                        const aliases = Object.keys(chromAliasRecord)
+                            .filter(k => k !== "start" && k !== "end")
+                            .map(k => chromAliasRecord[k])
+                        this.chromosomes.set(chr, new Chromosome(chr, 0, chromAliasRecord.end, aliases))
+                        for (let a of aliases) this.aliasRecordCache.set(a, chromAliasRecord)
+                    }
+                }
+            }
+
+            // TODO -- what if no match?  Need to put something to prevet constant searching
         }
         return this.chromosomes.get(chr)
     }
 
+    async getAliasRecord(chr) {
+        if (!this.aliasRecordCache.has(chr)) {
+            if (this.chromAlias) {
+                const chromAliasRecord = await this.chromAlias.search(chr)
+                const aliases = Object.keys(chromAliasRecord)
+                    .filter(k => k !== "start" && k !== "end")
+                    .map(k => chromAliasRecord[k])
+                for (let a of aliases) this.aliasRecordCache.set(a, chromAliasRecord)
+            } else {
+                //prevent this being tried again
+                this.aliasRecordCache.set(chr, undefined)
+            }
+        }
+        return this.aliasRecordCache.get(chr)
+    }
+
+
     getCytobands(chr) {
-        const chrName = this.getChromosomeName(chr)
-        return this.cytobands ? this.cytobands[chrName] : null
+        if (this.cytobandSource) {
+            const chrName = this.getChromosomeName(chr)
+            return this.cytobandSource.getCytobands(chrName)
+        }
     }
 
     getChromosomes() {

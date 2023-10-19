@@ -495,6 +495,7 @@ class Browser {
                     const genomeConfig = hub.getGenomeConfig(options.includeTracks)
                     const initialLocus = hub.getDefaultPosition()
                     return {
+                        showChromosomeWidget: false,
                         locus: initialLocus,
                         reference: genomeConfig
                     }

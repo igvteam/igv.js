@@ -6,6 +6,7 @@
 
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
+import BPTree from "../bigwig/bpTree.js"
 
 const twoBit = ['T', 'C', 'A', 'G']
 const byteTo4Bases = []
@@ -22,24 +23,34 @@ const maskedByteTo4Bases = byteTo4Bases.map(bases => bases.toLowerCase())
 class TwobitSequence {
 
     littleEndian
-    index = new Map()
     metaIndex = new Map()
+    bpt
 
     constructor(config) {
-        this.url = config.twoBitUrl || config.fastaURL
-    }
+        this.url = config.twoBitURL || config.fastaURL
+        if(config.twoBitBptURL) {
+            this.bptURL = config.twoBitBptURL
+        }
+     }
 
     async init() {
-        await this._readIndex()
+        if(this.bptURL) {
+            this.index = await BPTree.loadBpTree(this.bptURL, 0)
+        } else {
+            const idx = await this._readIndex()
+            this.index = {
+                search: async (name) => {offset: idx.get(name)}
+            }
+        }
     }
 
-    get chromosomeNames() {
-        return Array.from(this.index.keys())
+    get hasChromosomes() {
+        return false
     }
 
     async readSequence(seqName, regionStart, regionEnd) {
 
-        if (this.index.size === 0) {
+        if (!this.index) {
             await this.init()
         }
 
@@ -108,6 +119,9 @@ class TwobitSequence {
     }
 
     async _readIndex() {
+
+        const index = new Map()
+
         const loadRange = {start: 0, size: 64}
         let arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: loadRange})
         let dataView = new DataView(arrayBuffer)
@@ -156,29 +170,13 @@ class TwobitSequence {
             const name = binaryBuffer.getString(len)
             const offset = binaryBuffer.getUInt()
             ptr += len + 4
-            this.index.set(name, offset)
+            index.set(name, offset)
 
             estNameLength = Math.floor(estNameLength * (i / (i + 1)) + name.length / (i + 1))
         }
+        return index
     }
 
-    /**
-     * NOTE: this can be very slow for large # of sequences as each requires a seek.  Its provided in case a 2bit
-     * file is used without a corresponding chromSizes, chromAliases, or cytobad file.  In other words last resort *
-     * @returns {Promise<*>}
-     */
-    async getChromosomes() {
-        if (!this.chromosomes) {
-            await this.init()
-            const seqNames = Array.from(this.index.keys())
-            this.chromosomes = []
-            for (let name of seqNames) {
-                const metadata = await this._getSequenceMetaData(name)
-                this.chromosomes.push({name, bpLength: metadata.dnaSize})
-            }
-        }
-        return this.chromosomes
-    }
 
     /**
      * Fetch the sequence metadata for the given seq name *
@@ -194,10 +192,11 @@ class TwobitSequence {
                 throw Error("TwobitSequence object must be initialized before accessing sequence")
             }
 
-            let offset = this.index.get(seqName)
-            if (!offset) {
+            let result = await this.index.search(seqName)
+            if (!result) {
                 return
             }
+            let offset = result.offset
 
             // Read size of dna data & # of "N" blocks
             let size = 8

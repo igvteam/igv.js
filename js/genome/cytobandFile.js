@@ -16,6 +16,17 @@ class CytobandFile {
         return this.cytobands[chr]
     }
 
+    /**
+     * Load a UCSC bigbed cytoband file. Features are in bed+4 format.
+     * {
+     *   "chr": "chr1",
+     *   "start": 0,
+     *   "end": 1735965,
+     *   "name": "p36.33",
+     *   "gieStain": "gneg"
+     * }
+     * @returns {Promise<*[]>}
+     */
     async #loadCytobands() {
 
         let data

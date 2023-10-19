@@ -25,9 +25,9 @@ suite("ucsc utilities", function () {
         assert.ok(genomeConfig)
         assert.equal("GCF_000186305.1", genomeConfig.id)
         assert.equal("Python bivittatus", genomeConfig.name)
-        assert.ok(genomeConfig.twoBitBptUrl)
-        assert.ok(genomeConfig.twoBitUrl)
-        assert.ok(genomeConfig.aliasBbUrl)
+        assert.ok(genomeConfig.twoBitBptURL)
+        assert.ok(genomeConfig.twoBitURL)
+        assert.ok(genomeConfig.aliasBbURL)
         assert.ok(genomeConfig.cytobandBbURL)
     })
 

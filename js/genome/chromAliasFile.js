@@ -14,11 +14,12 @@ import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 class ChromAliasFile {
 
-    chrAliasTable
+    aliasToChrMap
 
-    constructor(aliasURL, config) {
+    constructor(aliasURL, config, chromosomes) {
         this.aliasURL = aliasURL
         this.config = config
+        this.chromosomes = chromosomes
     }
 
     /**
@@ -31,9 +32,17 @@ class ChromAliasFile {
         this.createAliasTable(chromosomes)
     }
 
-    async getCanonicalName(alias) {
-        return this.chrAliasTable[alias.toLowerCase()]
+    /**
+     * Return the canonical chromosome name for the alias.  If none found return the alias
+     *
+     * @param alias
+     * @returns {*}
+     */
+    getChromosomeName(alias) {
+        return this.aliasToChrMap.has(alias) ? this.aliasToChrMap.get(alias).chr : alias
     }
+
+
 
     async loadAliases() {
 
