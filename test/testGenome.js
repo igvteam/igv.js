@@ -1,7 +1,6 @@
 import "./utils/mockObjects.js"
 import GenomeUtils from "../js/genome/genomeUtils.js"
 import {assert} from 'chai'
-import {loadCytobandsBB} from "../js/genome/cytoband.js"
 import CytobandFileBB from "../js/genome/cytobandFileBB.js"
 
 

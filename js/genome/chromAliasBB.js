@@ -13,7 +13,7 @@ import BWReader from "../bigwig/bwReader.js"
 
 class ChromAliasBB {
 
-    chrAliasTable = new Map()
+    aliasRecordCache = new Map()
 
     constructor(url, config, genome) {
         config = config || {}
@@ -28,7 +28,7 @@ class ChromAliasBB {
      * @returns {*}
      */
     getChromosomeName(alias) {
-        return this.chrAliasTable.has(alias) ? this.chrAliasTable.get(alias).chr : alias
+        return this.aliasRecordCache.has(alias) ? this.aliasRecordCache.get(alias).chr : alias
     }
 
     /**
@@ -39,27 +39,27 @@ class ChromAliasBB {
      */
     getChromosomeAlias(chr, nameSet)
     {
-        const aliasRecord =  this.chrAliasTable.get(chr)
+        const aliasRecord =  this.aliasRecordCache.get(chr)
         return aliasRecord ? aliasRecord[nameSet] || chr : chr
     }
 
     /**
-     * Search for chromosome alias bed record.
+     * Search for chromosome alias bed record.  If found, catch results in the alias -> chr map
      * @param alias
      * @returns {Promise<any>}
      */
     async search(alias) {
-        if (!this.chrAliasTable.has(alias)) {
+        if (!this.aliasRecordCache.has(alias)) {
             const aliasRecord = await this.reader.search(alias)
             if (aliasRecord) {
                 for (let key of Object.keys(aliasRecord)) {
                     if ("start" !== key && "end" !== key) {
-                        this.chrAliasTable.set(aliasRecord[key], aliasRecord)
+                        this.aliasRecordCache.set(aliasRecord[key], aliasRecord)
                     }
                 }
             }
         }
-        return this.chrAliasTable.get(alias)
+        return this.aliasRecordCache.get(alias)
     }
 
 }

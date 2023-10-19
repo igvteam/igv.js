@@ -39,7 +39,9 @@ class TwobitSequence {
         } else {
             const idx = await this._readIndex()
             this.index = {
-                search: async (name) => {offset: idx.get(name)}
+                search: async (name) =>  {
+                    return idx.has(name) ? {offset: idx.get(name)} : undefined
+                }
             }
         }
     }

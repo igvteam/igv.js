@@ -49,7 +49,7 @@ suite("testTwobit", function () {
     })
 
     test("twobit metadata", async function () {
-        const url = "test/data/genomes/GCF_000002655.1.2bit"
+        const url = "test/data/twobit/GCF_000002655.1.2bit"
         const twobit = new TwobitSequence({twoBitURL: url})
         await twobit.init()
         const sequenceRecord = await twobit.getSequenceRecord("NC_007196.1")

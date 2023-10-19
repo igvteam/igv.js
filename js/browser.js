@@ -82,8 +82,6 @@ class Browser {
         this.root = DOMUtils.div({class: 'igv-container'})
         parentDiv.appendChild(this.root)
 
-
-
         // spinner
         this.spinner = DOMUtils.div({class: 'igv-loading-spinner-container'})
         this.root.appendChild(this.spinner)
@@ -553,7 +551,7 @@ class Browser {
             console.warn("No genome or reference object specified")
             return
         }
-        const genomeConfig = genomeOrReference //await GenomeUtils.expandReference(this.alert, genomeOrReference)
+        const genomeConfig = await GenomeUtils.expandReference(this.alert, genomeOrReference)
 
 
         await this.loadReference(genomeConfig, session.locus)

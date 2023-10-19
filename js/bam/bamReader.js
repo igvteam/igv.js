@@ -26,6 +26,7 @@ class BamReader {
     }
 
     async readAlignments(chr, bpStart, bpEnd) {
+
         const chrId = await this.#getChrIdx(chr)
         const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
 
@@ -54,27 +55,38 @@ class BamReader {
     }
 
     async #getChrIdx(chr) {
-        const chrToIndex = await this.getChrIndex()
 
-        if (!this.chrAliasTable.has(chr)) {
-            const chromosome = this.genome.getChromosome(chr)
-            if (chromosome) {
-                const aliases = chromosome.altNames
-                for (let a of aliases) {
-                    if (this.chrNames.has(a)) {
-                        this.chrAliasTable.set(chr, a)
-                    }
-                }
-            }
-            if (!this.chrAliasTable.has(chr)) this.chrAliasTable.set(chr, chr)
+        await this.getHeader()
+
+        if (this.chrAliasTable.has(chr)) {
+            chr = this.chrAliasTable.get(chr)
         }
 
-        const queryChr = this.chrAliasTable.get(chr) || chr
+        let chrIdx = this.header.chrToIndex[chr]
 
-        const chrId = chrToIndex[queryChr]
-        return chrId
+        // Try alias
+        if (chrIdx === undefined) {
+            const aliasRecord = await this.genome.getAliasRecord(chr)
+            let alias
+            if (aliasRecord) {
+                const aliases = Object.keys(aliasRecord)
+                    .filter(k => k !== "start" && k !== "end")
+                    .map(k => aliasRecord[k])
+                    .filter(a => this.header.chrToIndex[a])
+                if (aliases.length > 0) {
+                    alias = aliases[0]
+                    chrIdx = this.header.chrToIndex[aliases[0]]
+                }
+            }
+            this.chrAliasTable.set(chr, alias)  // alias may be undefined => no alias exists. Setting prevents repeated attempts
+        }
+        return chrIdx
     }
 
+    /**
+     *
+     * @returns {Promise<{magicNumer: number, size: number, chrNames: Array, chrToIndex: ({}|*), chrAliasTable: ({}|*)}>}
+     */
     async getHeader() {
         if (!this.header) {
             const genome = this.genome
@@ -97,9 +109,8 @@ class BamReader {
     }
 
     async getIndex() {
-        const genome = this.genome
         if (!this.index) {
-            this.index = await loadIndex(this.baiPath, this.config, genome)
+            this.index = await loadIndex(this.baiPath, this.config, this.genome)
         }
         return this.index
     }

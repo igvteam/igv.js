@@ -14,22 +14,12 @@ import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 class ChromAliasFile {
 
-    aliasToChrMap
+    aliasRecordCache = new Map()
 
     constructor(aliasURL, config, chromosomes) {
         this.aliasURL = aliasURL
         this.config = config
         this.chromosomes = chromosomes
-    }
-
-    /**
-     * Initialize the alias table for the canonical chromosome names
-     *
-     * @param chromosomes - collection of canonical chromosome names (i.e names as used in the fasta or twobit file)
-     * @returns {Promise<void>}
-     */
-    async init(chromosomes) {
-        this.createAliasTable(chromosomes)
     }
 
     /**
@@ -39,28 +29,38 @@ class ChromAliasFile {
      * @returns {*}
      */
     getChromosomeName(alias) {
-        return this.aliasToChrMap.has(alias) ? this.aliasToChrMap.get(alias).chr : alias
+        return this.aliasRecordCache.has(alias) ? this.aliasRecordCache.get(alias).chr : alias
     }
 
 
-
     async loadAliases() {
-
         const data = await igvxhr.loadString(this.aliasURL, buildOptions(this.config))
         const lines = StringUtils.splitLines(data)
         const firstLine = lines[0]
         if (firstLine.startsWith("#")) {
-            this.headings = line.split("\t").map(h => h.trim())
+            this.headings = firstLine.split("\t").map(h => h.trim())
             this.altNameSets = this.headings.slice(1)
         }
 
-        const aliases = []
         for (let line of lines) {
             if (!line.startsWith("#") && line.length > 0) {
-                aliases.push(line.split("\t"))
+                const tokens = line.split("\t")
+                const aliasRecord = {chr: tokens[0]}        // TODO -- in IGV alias file format we don't know this
+                for (let i = 0; i < tokens.length; i++) {
+                    const key = this.headings ? this.headings[i] : i
+                    aliasRecord[key] = tokens[i]
+                    this.aliasRecordCache.set(tokens[i], aliasRecord)
+                }
             }
         }
-        this. aliases = aliases
+    }
+
+    async search(alias) {
+        if(this.aliasRecordCache.size === 0) {
+            await this.loadAliases()
+        }
+        return this.aliasRecordCache.get(alias)
+
     }
 }
 
