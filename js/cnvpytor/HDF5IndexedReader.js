@@ -232,7 +232,7 @@ class HDF5Reader {
         return chr_wig
     }
 
-    async get_baf_signals(chrom, bin_size, signal_name){
+    async get_baf_signals(chrom, bin_size, signal_name, scaling_factor = -1){
         /* return two list of dictionary*/
         let chr_wig_1 = [];
         let chr_wig_2 = [];
@@ -243,16 +243,16 @@ class HDF5Reader {
                 let max_value =  Math.max(...bin_value);
                 const res = bin_value.indexOf(max_value);
                 let lh = Math.max(res / 200, 1 - res / 200);
-                chr_wig_1.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: -2 * lh})
+                chr_wig_1.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: scaling_factor * lh})
                 if(lh != 0.5){
-                    chr_wig_2.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: -2 *(1-lh)})
+                    chr_wig_2.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: scaling_factor *(1-lh)})
                 }
             });
         }
         return [chr_wig_1, chr_wig_2]
     }
 
-    async get_baf_signals_v2(chrom, bin_size, signal_name){
+    async get_baf_signals_v2(chrom, bin_size, signal_name, scaling_factor = -1){
         
         /* return two list of dictionary*/
         let chr_wig_1 = [];
@@ -262,9 +262,9 @@ class HDF5Reader {
             let chrom_data = await chrom_dataset.to_array() //create_nested_array(value, shape)
             chrom_data.forEach((lh, bin_idx) => {
                 if (!isNaN(lh)){
-                    chr_wig_1.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: -2 * ( 0.5 - lh )})
+                    chr_wig_1.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: scaling_factor * ( 0.5 - lh )})
                     if(lh != 0.5){
-                        chr_wig_2.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: -2 * ( 0.5 + lh )})
+                        chr_wig_2.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: scaling_factor * ( 0.5 + lh )})
                     }
                 }
             });
