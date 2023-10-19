@@ -235,9 +235,6 @@ class Browser {
 
         // chromosome select widget
         this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0))
-        if (undefined === config.showChromosomeWidget) {
-            config.showChromosomeWidget = true   // Default to true
-        }
         if (true === config.showChromosomeWidget) {
             this.chromosomeSelectWidget.show()
         } else {
@@ -738,7 +735,7 @@ class Browser {
         let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0,8)}...${genome.id.substring(genome.id.length-8)}`)
         this.$current_genome.text(genomeLabel)
         this.$current_genome.attr('title', genome.description)
-        if(false !== this.config.showChromosomeWidget) {
+        if(this.config.showChromosomeWidget) {
             this.chromosomeSelectWidget.update(genome)
         }
     }

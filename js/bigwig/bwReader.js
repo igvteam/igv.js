@@ -81,36 +81,8 @@ class BWReader {
 
         await this.loadHeader()
 
-        let chrIdx1 = await this.#getIdForChr(chr1) // this.chromTree.nameToId.get(chr1)
-        let chrIdx2 = await this.#getIdForChr(chr2)  // this.chromTree.nameToId.get(chr2)
-
-        // // Try alias
-        // if (chrIdx1 === undefined) {
-        //     const aliasRecord = await this.genome.getAliasRecord(chr1)
-        //     if (aliasRecord) {
-        //         const aliases = Object.keys(aliasRecord)
-        //             .filter(k => k !== "start" && k !== "end")
-        //             .map(k => aliasRecord[k])
-        //             .filter(a => this.chromTree.nameToId.has(a))
-        //         if (aliases.length > 0) {
-        //             chrIdx1 = this.chromTree.nameToId.get(aliases[0])
-        //             this.chrAliasTable.set(chr1, aliases[0])
-        //         }
-        //     }
-        // }
-        // if (chrIdx2 === undefined) {
-        //     const aliasRecord = await this.genome.getAliasRecord(chr2)
-        //     if (aliasRecord) {
-        //         const aliases = Object.keys(aliasRecord)
-        //             .filter(k => k !== "start" && k !== "end")
-        //             .map(k => aliasRecord[k])
-        //             .filter(a => this.chromTree.nameToId.has(a))
-        //         if (aliases.length > 0) {
-        //             chrIdx2 = this.chromTree.nameToId.get(aliases[0])
-        //             this.chrAliasTable.set(chr2, aliases[0])
-        //         }
-        //     }
-        // }
+        let chrIdx1 = await this.#getIdForChr(chr1)
+        let chrIdx2 = await this.#getIdForChr(chr2)
 
         if (chrIdx1 === undefined || chrIdx2 === undefined) {
             return []
@@ -205,16 +177,18 @@ class BWReader {
         // Try alias
         if (chrIdx === undefined) {
             const aliasRecord = await this.genome.getAliasRecord(chr)
+            let alias
             if (aliasRecord) {
                 const aliases = Object.keys(aliasRecord)
                     .filter(k => k !== "start" && k !== "end")
                     .map(k => aliasRecord[k])
                     .filter(a => this.chromTree.nameToId.has(a))
                 if (aliases.length > 0) {
+                    alias = aliases[0]
                     chrIdx = this.chromTree.nameToId.get(aliases[0])
-                    this.chrAliasTable.set(chr, aliases[0])
                 }
             }
+            this.chrAliasTable.set(chr, alias)  // alias may be undefined => no alias exists. Setting prevents repeated attempts
         }
         return chrIdx
     }

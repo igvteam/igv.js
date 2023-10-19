@@ -26,25 +26,7 @@ class BamReader {
     }
 
     async readAlignments(chr, bpStart, bpEnd) {
-
-        const chrToIndex = await this.getChrIndex()
-
-        if(!this.chrAliasTable.has(chr)) {
-            const chromosome = this.genome.getChromosome(chr)
-            if(chromosome) {
-                const aliases = chromosome.altNames
-                for(let a of aliases) {
-                    if(this.chrNames.has(a)) {
-                        this.chrAliasTable.set(chr, a)
-                    }
-                }
-            }
-            if(!this.chrAliasTable.has(chr)) this.chrAliasTable.set(chr, chr)
-        }
-
-        const queryChr = this.chrAliasTable.get(chr) || chr
-
-        const chrId = chrToIndex[queryChr]
+        const chrId = await this.#getChrIdx(chr)
         const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
 
         if (chrId === undefined) {
@@ -69,6 +51,28 @@ class BamReader {
             alignmentContainer.finish()
             return alignmentContainer
         }
+    }
+
+    async #getChrIdx(chr) {
+        const chrToIndex = await this.getChrIndex()
+
+        if (!this.chrAliasTable.has(chr)) {
+            const chromosome = this.genome.getChromosome(chr)
+            if (chromosome) {
+                const aliases = chromosome.altNames
+                for (let a of aliases) {
+                    if (this.chrNames.has(a)) {
+                        this.chrAliasTable.set(chr, a)
+                    }
+                }
+            }
+            if (!this.chrAliasTable.has(chr)) this.chrAliasTable.set(chr, chr)
+        }
+
+        const queryChr = this.chrAliasTable.get(chr) || chr
+
+        const chrId = chrToIndex[queryChr]
+        return chrId
     }
 
     async getHeader() {

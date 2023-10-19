@@ -31,8 +31,10 @@ class Hub {
     }
 
     static supportedTypes = new Set(["bigBed", "bigWig", "bigGenePred"])
-    static filterTracks = new Set(["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
-        "cpgIslandExtUnmasked", "windowMasker"])
+    static filterTracks = new Set(["cytoBandIdeo"])
+
+    //["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
+    //         "cpgIslandExtUnmasked", "windowMasker"])
 
     constructor(url, stanzas, groups) {
 
