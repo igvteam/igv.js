@@ -14,7 +14,7 @@ suite("ucsc utilities", function () {
 
         this.timeout(200000)
 
-        const hub = await Hub.loadHub({url: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt"})
+        const hub = await Hub.loadHub({url: "test/data/hubs/hub.txt"})
         assert.ok(hub.hub)
         assert.ok(hub.genomeStanza)
         assert.equal(22, hub.trackStanzas.length)
@@ -25,11 +25,10 @@ suite("ucsc utilities", function () {
         assert.ok(genomeConfig)
         assert.equal("GCF_000186305.1", genomeConfig.id)
         assert.equal("Python bivittatus", genomeConfig.name)
-        assert.ok(genomeConfig.twobitURL)
-        assert.ok(genomeConfig.aliasBbURL)
+        assert.ok(genomeConfig.twoBitBptURL)
+        assert.ok(genomeConfig.twoBitURL)
+        assert.ok(genomeConfig.chromAliasBbURL)
         assert.ok(genomeConfig.cytobandBbURL)
-
-
     })
 
     test("trix", async function () {
@@ -68,5 +67,9 @@ suite("ucsc utilities", function () {
         assert.equal(f2.name2.toLowerCase(), name2.toLowerCase())
 
     })
+
+
+
+
 })
 

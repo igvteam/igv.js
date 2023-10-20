@@ -81,8 +81,6 @@ class Browser {
         this.root = DOMUtils.div({class: 'igv-container'})
         parentDiv.appendChild(this.root)
 
-
-
         // spinner
         this.spinner = DOMUtils.div({class: 'igv-loading-spinner-container'})
         this.root.appendChild(this.spinner)
@@ -234,9 +232,6 @@ class Browser {
 
         // chromosome select widget
         this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0))
-        if (undefined === config.showChromosomeWidget) {
-            config.showChromosomeWidget = true   // Default to true
-        }
         if (true === config.showChromosomeWidget) {
             this.chromosomeSelectWidget.show()
         } else {
@@ -497,6 +492,7 @@ class Browser {
                     const genomeConfig = hub.getGenomeConfig(options.includeTracks)
                     const initialLocus = hub.getDefaultPosition()
                     return {
+                        showChromosomeWidget: false,
                         locus: initialLocus,
                         reference: genomeConfig
                     }
@@ -739,7 +735,9 @@ class Browser {
         let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0,8)}...${genome.id.substring(genome.id.length-8)}`)
         this.$current_genome.text(genomeLabel)
         this.$current_genome.attr('title', genome.description)
-        this.chromosomeSelectWidget.update(genome)
+        if(this.config.showChromosomeWidget) {
+            this.chromosomeSelectWidget.update(genome)
+        }
     }
 
     /**
@@ -756,7 +754,7 @@ class Browser {
             const hub = await Hub.loadHub(idOrConfig)
             genomeConfig = hub.getGenomeConfig("genes")
         } else {
-            genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
+            genomeConfig = idOrConfig //await GenomeUtils.expandReference(this.alert, idOrConfig)
         }
 
         await this.loadReference(genomeConfig, undefined)

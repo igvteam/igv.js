@@ -51,7 +51,7 @@ suite("testSearch", function () {
         // Chr name alias
         const s2 = "1:100-200"
         const locus2 = parseLocusString(browser, s2)
-        assert.equal(locus2.chr, "chr1")
+        assert.equal(locus2.chr, "1")
         assert.equal(locus2.start, 99)
         assert.equal(locus2.end, 200)
 
@@ -123,8 +123,9 @@ suite("testSearch", function () {
 
         const mockBrowser = {
             genome: {
+                loadChromosome: async (chr) => chr,
                 getChromosomeName: (chr) => chr,
-                getChromosome: (chr) => undefined
+                getChromosome: (chr) => {return {name: chr, bpLenght: 0}}
             },
             tracks: [{
                 featureSource: featureSource,

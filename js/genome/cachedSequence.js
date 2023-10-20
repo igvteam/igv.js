@@ -10,6 +10,16 @@ class CachedSequence {
         this.sequenceReader = sequenceReader
     }
 
+    get hasChromosomes() {
+        return this.sequenceReader.hasChromosomes
+    }
+    get chromosomes() {
+        return this.sequenceReader.chromosomes
+    }
+    async getSequenceRecord(chr) {
+        return this.sequenceReader.getSequenceRecord(chr)
+    }
+
     async getSequence(chr, start, end) {
 
         const hasCachedSquence = this.interval && this.interval.contains(chr, start, end)
@@ -40,14 +50,9 @@ class CachedSequence {
         return this.sequenceReader.init()
     }
 
-    get chromosomes() {
-        return this.sequenceReader.chromosomes
-    }
-
     get chromosomeNames() {
         return this.sequenceReader.chromosomeNames
     }
-
 }
 
 export default CachedSequence

@@ -39,6 +39,10 @@ function createGenome() {
                 chr.startsWith("chr") ? chr : "chr" + chr
         },
 
+        loadChromosome: async function (chr) {
+            return this.getChromosomechr
+        },
+
         getChromosome: function (chr) {
 
             const name = this.getChromosomeName(chr)

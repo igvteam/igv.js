@@ -1,6 +1,10 @@
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {isNumber} from "../util/igvUtils.js"
 import Chromosome from "./chromosome.js"
+import {loadFasta} from "./fasta.js"
+import ChromAliasBB from "./chromAliasBB.js"
+import CytobandFileBB from "./cytobandFileBB.js"
+import ChromAliasFile from "./chromAliasFile.js"
 
 /**
  * The Genome class represents an assembly and consists of the following elements
@@ -12,68 +16,79 @@ import Chromosome from "./chromosome.js"
 
 class Genome {
 
-    constructor(config, sequence, aliases, chromosomes, cytobands) {
+    aliasRecordCache = new Map()
 
+    constructor(config, sequence, aliases, chromosomes, cytobands) {
         this.config = config
         this.id = config.id || generateGenomeID(config)
         this.name = config.name
-        this.sequence = sequence
         this.nameSet = config.nameSet
-        this.chromosomes = chromosomes
 
-        this.chromosomeNames = Array.from(this.chromosomes.keys())
+    }
 
-        const firstChromosome = chromosomes.values().next().value
-        if(firstChromosome.altNames) {
-            this.altNameSets = Array.from(firstChromosome.altNames.keys())
+    async init() {
+
+        const config = this.config
+
+        this.sequence = await loadFasta(config)
+
+        this.chromosomes = new Map()
+
+        if (config.chromAliasBbURL) {
+            this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
+        } else if (config.aliasURL) {
+            this.chromAlias = new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
         }
 
-        // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
-        if (config.chromosomeOrder) {
-            if (Array.isArray(config.chromosomeOrder)) {
-                this.wgChromosomeNames = config.chromosomeOrder
-            } else {
-                this.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
-            }
-        } else {
-            this.wgChromosomeNames = trimSmallChromosomes(chromosomes)
+        if (config.cytobandBbURL) {
+            this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
         }
+        //this.chromosomes = chromosomes || new Map()
+
+        // if (this.chromosomes && this.chromosomes.size > 0) {
+        //     this.chromosomeNames = Array.from(this.chromosomes.keys())
+        //     const firstChromosome = chromosomes.values().next().value
+        //     if (firstChromosome.altNames) {
+        //         this.altNameSets = Array.from(firstChromosome.altNames.keys())
+        //     }
+        // }
+        //
+        // if (false !== config.wholeGenomeView) {
+        //     // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
+        //     if (config.chromosomeOrder) {
+        //         if (Array.isArray(config.chromosomeOrder)) {
+        //             this.wgChromosomeNames = config.chromosomeOrder
+        //         } else {
+        //             this.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
+        //         }
+        //     } else {
+        //         this.wgChromosomeNames = trimSmallChromosomes(chromosomes)
+        //     }
+        // }
 
         // Build the alias table and correct cytoband sequence names
-        if(aliases) {
-            this.chrAliasTable = createAliasTable(this.chromosomes, aliases)
-        } else {
-            this.chrAliasTable = {}
-        }
+        // if (aliases) {
+        //     this.chrAliasTable = createAliasTable(this.chromosomes, aliases)
+        // } else {
+        //     this.chrAliasTable = {}
+        // }
 
-        if (cytobands) {
-            this.cytobands = {}
-            for (let c of Object.keys(cytobands)) {
-                const chrName = this.getChromosomeName(c)
-                this.cytobands[chrName] = cytobands[c]
-            }
-        }
+        // if (cytobands) {
+        //     this.cytobands = {}
+        //     for (let c of Object.keys(cytobands)) {
+        //         const chrName = this.getChromosomeName(c)
+        //         this.cytobands[chrName] = cytobands[c]
+        //     }
+        // }
 
         // Optionally create the psuedo chromosome "all" to support whole genome view
-        this.wholeGenomeView = config.wholeGenomeView !== false && this.wgChromosomeNames && this.chromosomeNames.length > 1
-        if (this.wholeGenomeView) {
-            const l = this.wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
-            this.chromosomes.set("all", new Chromosome("all", 0, l))
-            //this.chromosomeNames.unshift("all")
-        }
+        // this.wholeGenomeView = config.wholeGenomeView !== false && this.wgChromosomeNames && this.chromosomeNames.length > 1
+        // if (this.wholeGenomeView) {
+        //     const l = this.wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
+        //     this.chromosomes.set("all", new Chromosome("all", 0, l))
+        //     //this.chromosomeNames.unshift("all")
+        // }
     }
-
-    updateChromosomes(chromosomes) {
-        for(let key of chromosomes.keys()) {
-            this.chromosomes.set(key, chromosomes.get(key))
-        }
-    }
-
-    updateAliases(aliases) {
-        this.chrAliasTable = createAliasTable(this.chromosomes, aliases);
-    }
-
-
 
     get description() {
         return this.config.description || `${this.id}\n${this.name}`
@@ -110,42 +125,76 @@ class Genome {
         }
     }
 
-    getChromosomeName(str) {
-        const chr = str ? this.chrAliasTable[str.toLowerCase()] : str
-        return chr ? chr : str
+    getChromosomeName(chr) {
+        return this.chromAlias ? this.chromAlias.getChromosomeName(chr) : chr
     }
 
     getChromosomeDisplayName(str) {
         const canonicalName = this.getChromosomeName(str)
-        if (this.nameSet) {
-            return this.chromosomes.has(canonicalName) ? this.chromosomes.get(canonicalName).getAltName("ucsc") : canonicalName
+        if (this.nameSet && this.chromAlias) {
+            const alias = this.chromAlias.getChromosomeAlias(canonicalName, this.nameSet)
+            return alias || str
         } else {
-            return canonicalName
+            return str
         }
     }
 
     getChromosome(chr) {
-        chr = this.getChromosomeName(chr)
+        if (this.chromAlias) {
+            chr = this.chromAlias.getChromosomeName(chr)
+        }
         return this.chromosomes.get(chr)
     }
 
-    getCytobands(chr) {
-        const chrName = this.getChromosomeName(chr)
-        return this.cytobands ? this.cytobands[chrName] : null
-    }
+    async loadChromosome(chr) {
 
-    getLongestChromosome() {
+        if (!this.chromosomes.has(chr)) {
+            const sequenceRecord = await this.sequence.getSequenceRecord(chr)
+            if (sequenceRecord) {
+                const chromosome = new Chromosome(chr, 0, sequenceRecord.dnaSize, undefined)
+                this.chromosomes.set(chr, chromosome)
+            } else if (this.chromAlias) {
+                const chromAliasRecord = await this.chromAlias.search(chr)
+                if (chromAliasRecord) {
+                    chr = chromAliasRecord.chr
 
-        var longestChr,
-            chromosomes = this.chromosomes
-        for (let key in chromosomes) {
-            if (chromosomes.hasOwnProperty(key)) {
-                var chr = chromosomes[key]
-                if (longestChr === undefined || chr.bpLength > longestChr.bpLength) {
-                    longestChr = chr
+                    // bb chr alias objects will have size
+                    if (chromAliasRecord.hasOwnProperty("end")) {
+                        const aliases = Object.keys(chromAliasRecord)
+                            .filter(k => k !== "start" && k !== "end")
+                            .map(k => chromAliasRecord[k])
+                        this.chromosomes.set(chr, new Chromosome(chr, 0, chromAliasRecord.end, aliases))
+                        for (let a of aliases) this.aliasRecordCache.set(a, chromAliasRecord)
+                    }
                 }
             }
-            return longestChr
+
+            // TODO -- what if no match?  Need to put something to prevet constant searching
+        }
+        return this.chromosomes.get(chr)
+    }
+
+    async getAliasRecord(chr) {
+        if (!this.aliasRecordCache.has(chr)) {
+            if (this.chromAlias) {
+                const chromAliasRecord = await this.chromAlias.search(chr)
+                const aliases = Object.keys(chromAliasRecord)
+                    .filter(k => k !== "start" && k !== "end")
+                    .map(k => chromAliasRecord[k])
+                for (let a of aliases) this.aliasRecordCache.set(a, chromAliasRecord)
+            } else {
+                //prevent this being tried again
+                this.aliasRecordCache.set(chr, undefined)
+            }
+        }
+        return this.aliasRecordCache.get(chr)
+    }
+
+
+    getCytobands(chr) {
+        if (this.cytobandSource) {
+            const chrName = this.getChromosomeName(chr)
+            return this.cytobandSource.getCytobands(chrName)
         }
     }
 
@@ -322,7 +371,7 @@ function trimSmallChromosomes(chromosomes) {
             if (c.bpLength < runningAverage / 100) {
                 continue
             }
-            runningAverage = ((i-1) * runningAverage + c.bpLength) / i
+            runningAverage = ((i - 1) * runningAverage + c.bpLength) / i
             wgChromosomeNames.push(c.name)
         }
         i++

@@ -1,4 +1,3 @@
-
 /*
  https://genomewiki.ucsc.edu/index.php/Assembly_Hubs
  https://genome.ucsc.edu/goldenpath/help/hgTrackHubHelp.html
@@ -6,7 +5,7 @@
  https://genome.ucsc.edu/goldenpath/help/trackDb/trackDbHub.html
  */
 
-import { igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
 class Hub {
 
@@ -33,6 +32,9 @@ class Hub {
 
     static supportedTypes = new Set(["bigBed", "bigWig", "bigGenePred"])
     static filterTracks = new Set(["cytoBandIdeo"])
+
+    //["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
+    //         "cpgIslandExtUnmasked", "windowMasker"])
 
     constructor(url, stanzas, groups) {
 
@@ -83,13 +85,14 @@ class Hub {
     getDefaultPosition() {
         return this.genomeStanza.getProperty("defaultPos")
     }
+
     /*  Example genome stanza
 genome GCF_000186305.1
 taxId 176946
 groups groups.txt
 description Burmese python
 twoBitPath GCF_000186305.1.2bit
-twoBitBptUrl GCF_000186305.1.2bit.bpt
+twoBitBptURL GCF_000186305.1.2bit.bpt
 chromSizes GCF_000186305.1.chrom.sizes.txt
 chromAliasBb GCF_000186305.1.chromAlias.bb
 organism Python_molurus_bivittatus-5.0.2 Sep. 2013
@@ -106,14 +109,25 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         const config = {
             id: this.genomeStanza.getProperty("genome"),
             name: this.genomeStanza.getProperty("scientificName") || this.genomeStanza.getProperty("organism") || this.genomeStanza.getProperty("description"),
-            twobitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
-            aliasBbURL: this.baseURL + this.genomeStanza.getProperty("chromAliasBb"),
+            twoBitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
             nameSet: "ucsc",
-            blat: this.genomeStanza.getProperty("blat")
+            wholeGenomeView: false
         }
 
         config.description = config.id
 
+        if (this.genomeStanza.hasProperty("blat")) {
+            config.blat = this.baseURL + this.genomeStanza.getProperty("blat")
+        }
+        if (this.genomeStanza.hasProperty("chromAliasBb")) {
+            config.chromAliasBbURL = this.baseURL + this.genomeStanza.getProperty("chromAliasBb")
+        }
+        if (this.genomeStanza.hasProperty("twoBitBptURL")) {
+            config.twoBitBptURL = this.baseURL + this.genomeStanza.getProperty("twoBitBptURL")
+        }
+        if (this.genomeStanza.hasProperty("twoBitBptUrl")) {
+            config.twoBitBptURL = this.baseURL + this.genomeStanza.getProperty("twoBitBptUrl")
+        }
         if (this.genomeStanza.hasProperty("chromSizes")) {
             config.chromSizes = this.baseURL + this.genomeStanza.getProperty("chromSizes")
         }
@@ -132,6 +146,15 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         }
 
         // Search for cytoband
+        /*
+        track cytoBandIdeo
+        shortLabel Chromosome Band (Ideogram)
+        longLabel Ideogram for Orientation
+        group map
+        visibility dense
+        type bigBed 4 +
+        bigDataUrl bbi/GCA_004027145.1_DauMad_v1_BIUU.cytoBand.bb
+         */
         const cytoStanza = this.trackStanzas.filter(t => "cytoBandIdeo" === t.name && t.getProperty("bigDataUrl"))
         if (cytoStanza.length > 0) {
             config.cytobandBbURL = this.baseURL + cytoStanza[0].getProperty("bigDataUrl")
@@ -184,6 +207,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         const format = t.format
 
         const config = {
+            "id": t.getProperty("track"),
             "name": t.getProperty("shortLabel"),
             "format": format,
             "url": this.baseURL + t.getProperty("bigDataUrl"),
@@ -234,11 +258,11 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         if (t.hasProperty("url")) {
             config.infoURL = t.getProperty("url")
         }
-        if(t.hasProperty("searchIndex")) {
-            config.searchIndex =  t.getProperty("searchIndex")
+        if (t.hasProperty("searchIndex")) {
+            config.searchIndex = t.getProperty("searchIndex")
         }
-        if(t.hasProperty("searchTrix")) {
-            config.searchTrix =  this.baseURL + t.getProperty("searchTrix")
+        if (t.hasProperty("searchTrix")) {
+            config.searchTrix = this.baseURL + t.getProperty("searchTrix")
         }
 
         if (t.hasProperty("group")) {

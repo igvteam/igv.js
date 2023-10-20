@@ -45,6 +45,20 @@ async function search(browser, string) {
     const searchLocus = async (locus) => {
         let locusObject = parseLocusString(browser, locus)
 
+        // Force load of chromosome
+        if(locusObject.chr) {
+            await browser.genome.loadChromosome(locusObject.chr)
+        }
+
+        if(locusObject && locusObject.chr && !locusObject.end) {
+            let chromosome = browser.genome.getChromosome(locusObject.chr)
+            if(!chromosome) {
+                // TODO error?
+                throw Error("No chromosome named: " + chromosome)
+            }
+            locusObject.end = chromosome.bpLength
+        }
+
         if (!locusObject) {
             const searchableTracks = browser.tracks.filter(t => t.searchable)
             for(let track of searchableTracks) {
@@ -64,6 +78,7 @@ async function search(browser, string) {
 
         if (!locusObject && (browser.config && false !== browser.config.search)) {
             try {
+                // TODO -- webservice needs aliaas check
                 locusObject = await searchWebService(browser, locus, searchConfig)
             } catch (error) {
                 console.error(error)
@@ -100,7 +115,7 @@ function parseLocusString(browser, locus) {
     if (tabTokens.length >= 3) {
         // Possibly a tab-delimited locus
         try {
-            const chr = browser.genome.getChromosomeName(tabTokens[0])
+            const chr = tabTokens[0]//  browser.genome.getChromosomeName(tabTokens[0])
             const start = parseInt(tabTokens[1].replace(/,/g, ''), 10) - 1
             const end = parseInt(tabTokens[2].replace(/,/g, ''), 10)
             if (!isNaN(start) && !isNaN(end)) {
@@ -114,18 +129,14 @@ function parseLocusString(browser, locus) {
 
     const a = locus.split(':')
     const chr = a[0]
-    if ('all' === chr && browser.genome.getChromosome(chr)) {
-        return {chr, start: 0, end: browser.genome.getChromosome(chr).bpLength}
+    if ('all' === chr) { // && browser.genome.getChromosome(chr)) {
+        return {chr, start: 0}
 
-    } else if (undefined === browser.genome.getChromosome(chr)) {
-        return undefined
-
-    } else {
-        const queryChr = browser.genome.getChromosomeName(chr)
-        const extent = {
-            chr: queryChr,
-            start: 0,
-            end: browser.genome.getChromosome(chr).bpLength
+    }  else {
+        //const queryChr = chr // browser.genome.getChromosomeName(chr)
+        const extent = {chr,
+            start: 0
+          //  end: browser.genome.getChromosome(chr).bpLength
         }
 
         if (a.length > 1) {
