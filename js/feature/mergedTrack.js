@@ -40,6 +40,8 @@ class MergedTrack extends TrackBase {
         this.featureType = 'numeric'
         this.paintAxis = paintAxis
         this.graphType = config.graphType
+
+        this._alpha = this.config.alpha || 0.5
     }
 
     init(config) {
@@ -48,7 +50,6 @@ class MergedTrack extends TrackBase {
         }
         super.init(config)
     }
-
 
     async postInit() {
 
@@ -69,7 +70,6 @@ class MergedTrack extends TrackBase {
             }
         }
 
-        this.alpha = this.config.alpha || 0.5
         this.flipAxis = this.config.flipAxis ? this.config.flipAxis : false
         this.logScale = this.config.logScale ? this.config.logScale : false
         this.autoscale = this.config.autoscale || this.config.max === undefined
@@ -89,6 +89,14 @@ class MergedTrack extends TrackBase {
         this.resolutionAware = this.tracks.some(t => t.resolutionAware)
 
         return Promise.all(p)
+    }
+
+    set alpha(alpha) {
+        this._alpha = alpha
+    }
+
+    get alpha() {
+        return this._alpha
     }
 
     get height() {

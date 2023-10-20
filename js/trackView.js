@@ -32,9 +32,9 @@ import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
 import SampleInfoViewport from "./sample/sampleInfoViewport.js";
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import {getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
+import {autoScaleGroupColorHash, getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
 import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState } from './ui/multiTrackSelectButton.js'
-import {hexToRGB} from "./util/colorPalletes.js"
+import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
@@ -49,7 +49,7 @@ class TrackView {
         this.browser = browser
         this.track = track
         track.trackView = this
-        
+
         this.addDOMToColumnContainer(browser, columnContainer, browser.referenceFrameList)
 
     }
@@ -134,10 +134,6 @@ class TrackView {
 
                 this.track.isMultiSelection = event.target.checked
 
-                if (this.track.autoscaleGroup && false === event.target.checked) {
-                    this.track.autoscaleGroup = undefined
-                }
-
                 setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
 
             })
@@ -199,14 +195,26 @@ class TrackView {
     }
 
     setDataRange(min, max) {
+
         if (min !== undefined) {
             this.track.dataRange.min = min
         }
         if (max !== undefined) {
             this.track.dataRange.max = max
         }
+
         this.track.autoscale = false
+        this.track.autoscaleGroup = undefined
+
+        const list = this.browser.trackViews.filter(({ track }) => track.autoscaleGroup)
+        if (1 === list.length) {
+            list[ 0 ].track.autoscale = false
+            list[ 0 ].track.autoscaleGroup = undefined
+            list[ 0 ].repaintViews()
+        }
+
         this.repaintViews()
+
     }
 
     presentColorPicker(key) {
@@ -920,7 +928,18 @@ class TrackView {
             const axisCanvasContext = this.axisCanvas.getContext('2d')
             axisCanvasContext.scale(dpi, dpi)
 
-            this.track.paintAxis(axisCanvasContext, width, height)
+            if (this.track.autoscaleGroup) {
+
+                if (undefined === autoScaleGroupColorHash[ this.track.autoscaleGroup ]) {
+                    const colorPalette = colorPalettes['Dark2']
+                    const randomIndex = Math.floor(Math.random() * colorPalettes['Dark2'].length)
+                    autoScaleGroupColorHash[ this.track.autoscaleGroup ] = colorPalette[ randomIndex ]
+                }
+                const rgba = IGVColor.addAlpha(autoScaleGroupColorHash[ this.track.autoscaleGroup ], 0.75)
+                this.track.paintAxis(axisCanvasContext, width, height, rgba)
+            } else {
+                this.track.paintAxis(axisCanvasContext, width, height, undefined)
+            }
         }
     }
 

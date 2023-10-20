@@ -1,11 +1,17 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
+import {colorPalettes} from "../util/colorPalletes.js"
 
 const colorPickerTrackTypeSet = new Set([ 'bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact' ])
 
 const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp', 'shoebox'])
 
 const multiTrackSelectExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
+
+const autoScaleGroupColorHash =
+    {
+
+    };
 
 class MenuUtils {
     constructor(browser) {
@@ -66,6 +72,7 @@ class MenuUtils {
         if ('merged' === trackView.track.type) {
             list.push('<hr/>')
             list.push(trackSeparationMenuItem())
+            list.push(overlayTrackAlphaAdjustmentMenuItem())
         }
 
         return list
@@ -123,6 +130,57 @@ function isVisibilityWindowType(track) {
     const hasVizWindow = track.config && track.config.visibilityWindow !== undefined
     return hasVizWindow || vizWindowTypes.has(track.type)
 }
+
+function overlayTrackAlphaAdjustmentMenuItem() {
+
+    const container = DOMUtils.div()
+    container.innerText = 'Set transparency'
+
+    function dialogPresentationHandler (e) {
+        const callback = alpha => {
+            this.alpha = Math.max(0.001, alpha)
+            this.updateViews()
+        }
+
+        const config =
+            {
+                label: 'Transparency',
+                value: this.alpha,
+                min: 0.0,
+                max: 1.0,
+                scaleFactor: 1000,
+                callback
+            }
+
+        this.browser.sliderDialog.present(config, e)
+    }
+
+    return { object: $(container), dialog:dialogPresentationHandler }
+}
+
+function trackSeparationMenuItem() {
+
+    const object = $('<div>')
+    object.text('Separate tracks')
+
+    function click(e) {
+
+        const configs = this.config.tracks.map(overlayConfig => {
+            const config = { ...overlayConfig }
+            config.isMergedTrack = undefined
+            config.order = this.order
+            return config
+        })
+
+        const _browser = this.browser
+
+        _browser.removeTrack(this)
+        _browser.loadTrackList(configs)
+    }
+
+    return { object, click }
+}
+
 function groupAutoScaleMenuItem() {
 
     const object = $('<div>')
@@ -130,18 +188,20 @@ function groupAutoScaleMenuItem() {
 
     function click(e) {
 
-        const trackViews = getMultiSelectedTrackViews(this.browser)
+        const colorPalette = colorPalettes['Dark2']
+        const randomIndex = Math.floor(Math.random() * colorPalette.length)
 
-        const autoScaleGroupID = `auto-scale-group-${DOMUtils.guid()}`
+        const autoScaleGroupID = `auto-scale-group-${ DOMUtils.guid() }`
+        autoScaleGroupColorHash[ autoScaleGroupID ] = colorPalette[randomIndex]
 
-        for (const trackView of trackViews) {
-            trackView.track.autoscaleGroup = autoScaleGroupID
+        for (const { track } of this.browser.multiSelectedTrackViews) {
+            track.autoscaleGroup = autoScaleGroupID
         }
 
         this.browser.updateViews()
     }
 
-    return { object, click }
+    return { object, doAllMultiSelectedTracks:true, click }
 
 }
 
@@ -161,6 +221,8 @@ function trackOverlayMenuItem() {
             const wigConfigs = wigTracks.map(( track ) => {
                 const config = Object.assign({}, track.config)
                 config.color = track.color
+                config.autoscale = track.autoscale
+                config.autoscaleGroup = track.autoscaleGroup
                 return config
             })
 
@@ -187,31 +249,8 @@ function trackOverlayMenuItem() {
 
     }
 
-    return { object, doTrackOverlay:true, click }
+    return { object, doAllMultiSelectedTracks:true, click }
 
-}
-
-function trackSeparationMenuItem() {
-
-    const object = $('<div>')
-    object.text('Separate tracks')
-
-    function click(e) {
-
-        const configs = this.config.tracks.map(overlayConfig => {
-            const config = { ...overlayConfig }
-            config.isMergedTrack = undefined
-            config.order = this.order
-            return config
-        })
-
-        const _browser = this.browser
-
-        _browser.removeTrack(this)
-        _browser.loadTrackList(configs)
-    }
-
-    return { object, click }
 }
 
 function visibilityWindowMenuItem() {
@@ -450,6 +489,6 @@ function isMultiSelectedTrackView(trackView) {
     return selected && selected.length > 1 && new Set(selected).has(trackView)
 }
 
-export { canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView }
+export { autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView }
 
 export default MenuUtils

@@ -210,6 +210,10 @@ class TrackBase {
             state.max = this.dataRange.max
         }
 
+        if (this.autoscaleGroup) {
+            state.autoscaleGroup = this.autoscaleGroup
+        }
+
         return state
     }
 
@@ -348,7 +352,6 @@ class TrackBase {
      * the genomic location.   Overriden by most subclasses.
      *
      * @param clickState
-     * @param features
      * @returns {[]|*[]}
      */
     clickedFeatures(clickState) {
@@ -543,8 +546,9 @@ class TrackBase {
         object = $(createCheckbox("Autoscale", this.autoscale))
 
         function autoScaleHandler() {
+            this.autoscaleGroup = undefined
             this.autoscale = !this.autoscale
-            this.trackView.updateViews()
+            this.browser.updateViews()
         }
 
         menuItems.push({ object, click:autoScaleHandler })
