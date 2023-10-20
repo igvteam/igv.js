@@ -100,7 +100,7 @@ class SegTrack extends TrackBase {
         const menuItems = []
 
         menuItems.push('<hr/>')
-        menuItems.push(sortBySampleName(this.trackView))
+        menuItems.push(sortBySampleName())
 
         if (sampleDictionary) {
             menuItems.push('<hr/>')
@@ -536,15 +536,15 @@ class SegTrack extends TrackBase {
 }
 
 
-function sortBySampleName(trackView) {
+function sortBySampleName() {
 
     const object = $('<div>')
     object.text('Sort by sample names')
 
     function sampleNameSort () {
-        trackView.track.sampleKeys.sort((a, b) => trackView.sampleNameViewport.sortDirection * a.localeCompare(b))
-        trackView.repaintViews()
-        trackView.sampleNameViewport.sortDirection *= -1
+        this.sampleKeys.sort((a, b) => this.trackView.sampleNameViewport.sortDirection * a.localeCompare(b))
+        this.trackView.repaintViews()
+        this.trackView.sampleNameViewport.sortDirection *= -1
     }
 
     return { object, click:sampleNameSort }

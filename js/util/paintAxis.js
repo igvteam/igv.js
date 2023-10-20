@@ -1,59 +1,47 @@
 import IGVGraphics from "../igv-canvas.js"
 
-function paintAxis(ctx, pixelWidth, pixelHeight) {
-
-    var x1,
-        x2,
-        y1,
-        y2,
-        a,
-        b,
-        reference,
-        shim,
-        font = {
-            'font': 'normal 10px Arial',
-            'textAlign': 'right',
-            'strokeStyle': "black"
-        }
+const shim = .01
+const diagnosticColor = "rgb(251,128,114)"
+const colorStripWidth = 4
+const axesXOffset = colorStripWidth + 1
+function paintAxis(ctx, width, height, colorOrUndefined) {
 
     if (undefined === this.dataRange || undefined === this.dataRange.max || undefined === this.dataRange.min) {
         return
     }
 
-    let flipAxis = (undefined === this.flipAxis) ? false : this.flipAxis
+    IGVGraphics.fillRect(ctx, 0, 0, width, height, { fillStyle: 'white' })
+    if (colorOrUndefined) {
+        IGVGraphics.fillRect(ctx, width - colorStripWidth - 2, 0, colorStripWidth, height, { fillStyle: colorOrUndefined })
+    }
 
-    // IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
-    IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgba(255, 255, 255, 0)"})
+    const flipAxis = (undefined === this.flipAxis) ? false : this.flipAxis
 
-    reference = 0.95 * pixelWidth
-    x1 = reference - 8
-    x2 = reference
+    const xTickStart = 0.95 * width - 8 - axesXOffset
+    const xTickEnd   = 0.95 * width - axesXOffset
 
-    //shim = 0.5 * 0.125;
-    shim = .01
-    y1 = y2 = shim * pixelHeight
-
-    a = {x: x2, y: y1}
-
-    // tick
-    IGVGraphics.strokeLine(ctx, x1, y1, x2, y2, font)
-    IGVGraphics.fillText(ctx, prettyPrint(flipAxis ? this.dataRange.min : this.dataRange.max), x1 + 4, y1 + 12, font)
-
-    //shim = 0.25 * 0.125;
-    y1 = y2 = (1.0 - shim) * pixelHeight
-
-    b = {x: x2, y: y1}
+    const properties =
+        {
+            font: 'normal 10px Arial',
+            textAlign: 'right',
+            fillStyle: 'black',
+            strokeStyle: 'black',
+        }
 
     // tick
-    IGVGraphics.strokeLine(ctx, x1, y1, x2, y2, font)
-    IGVGraphics.fillText(ctx, prettyPrint(flipAxis ? this.dataRange.max : this.dataRange.min), x1 + 4, y1 - 4, font)
+    IGVGraphics.strokeLine(ctx, xTickStart, shim * height, xTickEnd, shim * height, properties)
+    IGVGraphics.fillText(ctx, prettyPrint(flipAxis ? this.dataRange.min : this.dataRange.max), xTickStart + 4, shim * height + 12, properties)
 
-    IGVGraphics.strokeLine(ctx, a.x, a.y, b.x, b.y, font)
+    const y = (1.0 - shim) * height
+
+    // tick
+    IGVGraphics.strokeLine(ctx, xTickStart, y, xTickEnd, y, properties)
+    IGVGraphics.fillText(ctx, prettyPrint(flipAxis ? this.dataRange.max : this.dataRange.min), xTickStart + 4, y - 4, properties)
+
+    // vertical axis
+    IGVGraphics.strokeLine(ctx, xTickEnd, shim * height, xTickEnd, y, properties)
 
     function prettyPrint(number) {
-        // if number >= 100, show whole number
-        // if >= 1 show 1 significant digits
-        // if <  1 show 2 significant digits
 
         if (number === 0) {
             return "0"
