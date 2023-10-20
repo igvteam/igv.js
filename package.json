@@ -53,7 +53,7 @@
     "circular-view": "github:igvteam/circular-view#v0.2.4",
     "eslint": "^6.4.0",
     "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v0.5.2",
-    "igv-ui": "github:igvteam/igv-ui#dat_slider_dialog",
+    "igv-ui": "github:igvteam/igv-ui#v1.5.3",
     "igv-utils": "github:igvteam/igv-utils#v1.4.8",
     "mocha": "^10.2.0",
     "rollup": "^2.66.0",
