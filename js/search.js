@@ -46,37 +46,36 @@ async function search(browser, string) {
         let locusObject = parseLocusString(browser, locus)
 
         // Force load of chromosome
-        if(locusObject.chr) {
+        if (locusObject.chr) {
             await browser.genome.loadChromosome(locusObject.chr)
         }
 
-        if(locusObject && locusObject.chr && !locusObject.end) {
+        if (locusObject && locusObject.chr && !locusObject.end) {
             let chromosome = browser.genome.getChromosome(locusObject.chr)
-            if(!chromosome) {
-                // TODO error?
-                throw Error("No chromosome named: " + chromosome)
+            if (chromosome) {
+                locusObject.end = chromosome.bpLength
+                return locusObject
             }
-            locusObject.end = chromosome.bpLength
         }
 
-        if (!locusObject) {
-            const searchableTracks = browser.tracks.filter(t => t.searchable)
-            for(let track of searchableTracks) {
-                const feature = await track.search(locus)
-                if(feature) {
-                    locusObject = {
-                        chr: feature.chr,
-                        start: feature.start,
-                        end: feature.end,
-                        gene: feature.name,
-                        locusSearchString: string
-                    }
-                    break;  // We don't support multiple feature hits yets
+
+        const searchableTracks = browser.tracks.filter(t => t.searchable)
+        for (let track of searchableTracks) {
+            const feature = await track.search(locus)
+            if (feature) {
+                locusObject = {
+                    chr: feature.chr,
+                    start: feature.start,
+                    end: feature.end,
+                    gene: feature.name,
+                    locusSearchString: string
                 }
+                return locusObject
             }
         }
 
-        if (!locusObject && (browser.config && false !== browser.config.search)) {
+
+        if ((browser.config && false !== browser.config.search)) {
             try {
                 // TODO -- webservice needs aliaas check
                 locusObject = await searchWebService(browser, locus, searchConfig)
@@ -132,11 +131,12 @@ function parseLocusString(browser, locus) {
     if ('all' === chr) { // && browser.genome.getChromosome(chr)) {
         return {chr, start: 0}
 
-    }  else {
+    } else {
         //const queryChr = chr // browser.genome.getChromosomeName(chr)
-        const extent = {chr,
+        const extent = {
+            chr,
             start: 0
-          //  end: browser.genome.getChromosome(chr).bpLength
+            //  end: browser.genome.getChromosome(chr).bpLength
         }
 
         if (a.length > 1) {

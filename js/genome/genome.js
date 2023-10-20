@@ -120,7 +120,7 @@ class Genome {
         if (this.showWholeGenomeView() && this.chromosomes.has("all")) {
             return "all"
         } else {
-            return this.chromosomeNames[0]
+            return this.sequence.getFirstChromosomeName()
 
         }
     }

@@ -42,6 +42,11 @@ class NonIndexedFasta {
         if(!this.#chromosomeNames) {
             this.#chromosomeNames = Array.from(this.chromosomes.keys())
         }
+        return this.#chromosomeNames
+    }
+
+    getFirstChromosomeName() {
+        return this.chromosomeNames[0]
     }
 
     async getSequence(chr, start, end) {

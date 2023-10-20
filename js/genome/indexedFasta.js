@@ -72,6 +72,11 @@ class FastaSequence {
         if(!this.#chromosomeNames) {
             this.#chromosomeNames = Array.from(this.chromosomes.keys())
         }
+        return this.#chromosomeNames
+    }
+
+    getFirstChromosomeName() {
+        return this.chromosomeNames[0]
     }
 
     async getIndex() {

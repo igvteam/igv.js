@@ -232,7 +232,7 @@ class Browser {
 
         // chromosome select widget
         this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0))
-        if (true === config.showChromosomeWidget) {
+        if (config.showChromosomeWidget) {
             this.chromosomeSelectWidget.show()
         } else {
             this.chromosomeSelectWidget.hide()

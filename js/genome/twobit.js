@@ -180,6 +180,7 @@ class TwobitSequence {
     }
 
 
+
     /**
      * Fetch the sequence metadata for the given seq name *
      *

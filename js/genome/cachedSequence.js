@@ -53,6 +53,10 @@ class CachedSequence {
     get chromosomeNames() {
         return this.sequenceReader.chromosomeNames
     }
+
+    getFirstChromosomeName() {
+        return typeof this.sequenceReader.getFirstChromosomeName === 'function' ? this.sequenceReader.getFirstChromosomeName() : undefined
+    }
 }
 
 export default CachedSequence
