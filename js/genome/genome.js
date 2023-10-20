@@ -151,26 +151,32 @@ class Genome {
         if (!this.chromosomes.has(chr)) {
             const sequenceRecord = await this.sequence.getSequenceRecord(chr)
             if (sequenceRecord) {
-                const chromosome = new Chromosome(chr, 0, sequenceRecord.dnaSize, undefined)
+                const chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
                 this.chromosomes.set(chr, chromosome)
-            } else if (this.chromAlias) {
+            } else if (this.chromAlias) {   // Try alias
+
                 const chromAliasRecord = await this.chromAlias.search(chr)
                 if (chromAliasRecord) {
                     chr = chromAliasRecord.chr
-
-                    // bb chr alias objects will have size
-                    if (chromAliasRecord.hasOwnProperty("end")) {
-                        const aliases = Object.keys(chromAliasRecord)
-                            .filter(k => k !== "start" && k !== "end")
-                            .map(k => chromAliasRecord[k])
-                        this.chromosomes.set(chr, new Chromosome(chr, 0, chromAliasRecord.end, aliases))
-                        for (let a of aliases) this.aliasRecordCache.set(a, chromAliasRecord)
+                    const sequenceRecord = await this.sequence.getSequenceRecord(chr)
+                    if (sequenceRecord) {
+                        const chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
+                        this.chromosomes.set(chr, chromosome)
                     }
+
+                    //     // bb chr alias objects will have size
+                    //     if (chromAliasRecord.hasOwnProperty("end")) {
+                    //         const aliases = Object.keys(chromAliasRecord)
+                    //             .filter(k => k !== "start" && k !== "end")
+                    //             .map(k => chromAliasRecord[k])
+                    //         this.chromosomes.set(chr, new Chromosome(chr, 0, chromAliasRecord.end, aliases))
+                    //         for (let a of aliases) this.aliasRecordCache.set(a, chromAliasRecord)
+                    //     }
+                    // }
                 }
             }
-
-            // TODO -- what if no match?  Need to put something to prevet constant searching
         }
+
         return this.chromosomes.get(chr)
     }
 

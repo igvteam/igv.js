@@ -4,17 +4,20 @@ import {Cytoband} from "./cytoband.js"
 
 class CytobandFile {
 
+    cytobands = new Map()
+
     constructor(url, config) {
         this.url = url;
         this.config = config;
     }
 
     async getCytobands(chr) {
-        if(!this.cytobands) {
+        if(this.cytobands.size === 0) {
             await this.#loadCytobands()
         }
-        return this.cytobands[chr]
+        return this.cytobands.get(chr)
     }
+
 
     /**
      * Load a UCSC bigbed cytoband file. Features are in bed+4 format.
@@ -41,7 +44,6 @@ class CytobandFile {
             data = await igvxhr.loadString(this.url, buildOptions(this.config))
         }
 
-        const cytobands = {}
         let lastChr
         let bands = []
         const lines = StringUtils.splitLines(data)
@@ -52,7 +54,7 @@ class CytobandFile {
             if (!lastChr) lastChr = chrName
 
             if (chrName !== lastChr) {
-                cytobands[lastChr] = bands
+                this.cytobands.set(lastChr, bands)
                 bands = []
                 lastChr = chrName
             }
@@ -67,7 +69,6 @@ class CytobandFile {
             }
         }
 
-        this.cytobands = cytobands
     }
 
 }

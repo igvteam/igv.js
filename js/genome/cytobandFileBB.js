@@ -3,8 +3,6 @@ import BWSource from "../bigwig/bwSource.js"
 
 class CytobandFileBB {
 
-    chrAliasTable =  new Map()
-
     cytobandMap = new Map()
 
     constructor(url, config, genome) {

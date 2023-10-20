@@ -43,27 +43,27 @@ suite("testSearch", function () {
 
     test("locus strings", function () {
         const s1 = "chr1:100-200"
-        const locus1 = parseLocusString(browser, s1)
+        const locus1 = parseLocusString(s1)
         assert.equal(locus1.chr, "chr1")
         assert.equal(locus1.start, 99)
         assert.equal(locus1.end, 200)
 
         // Chr name alias
         const s2 = "1:100-200"
-        const locus2 = parseLocusString(browser, s2)
+        const locus2 = parseLocusString(s2)
         assert.equal(locus2.chr, "1")
         assert.equal(locus2.start, 99)
         assert.equal(locus2.end, 200)
 
         // Single base
         const s3 = "1:100"
-        const locus3 = parseLocusString(browser, s3)
-        assert.equal(locus3.chr, "chr1")
+        const locus3 = parseLocusString(s3)
+        assert.equal(locus3.chr, "1")
         assert.equal(locus3.start, 79)
         assert.equal(locus3.end, 120)
 
         const s4 = "egfr"
-        const locus4 = parseLocusString(browser, s4)
+        const locus4 = parseLocusString(s4)
         assert.equal(locus4, undefined)
     })
 

@@ -178,7 +178,8 @@ class TrackViewport extends Viewport {
         const chr = referenceFrame.chr
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
-        const chrLength = this.browser.genome.getChromosome(chr).bpLength
+        const chromosome = this.browser.genome.getChromosome(chr)
+        const chrLength = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER
         const pixelWidth = this.$viewport.width()// * 3;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel
         const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth))
