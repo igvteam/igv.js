@@ -57,9 +57,9 @@ function setMultiTrackSelectionState(trackView, axis, doEnableMultiSelection) {
 
         trackView.track.isMultiSelection = false
 
-        if (trackView.track.autoscaleGroup) {
-            trackView.track.autoscaleGroup = undefined
-        }
+        // if (trackView.track.autoscaleGroup) {
+        //     trackView.track.autoscaleGroup = undefined
+        // }
 
         const trackSelectInput =  container.querySelector('[name=track-select]')
         trackSelectInput.checked = false
