@@ -32,9 +32,9 @@ import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
 import SampleInfoViewport from "./sample/sampleInfoViewport.js";
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import {getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
+import {autoScaleGroupColorHash, getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
 import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState } from './ui/multiTrackSelectButton.js'
-import {hexToRGB} from "./util/colorPalletes.js"
+import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
@@ -131,7 +131,11 @@ class TrackView {
             input.addEventListener('change', event => {
                 event.preventDefault()
                 event.stopPropagation()
+
+                this.track.isMultiSelection = event.target.checked
+
                 setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
+
             })
 
             setMultiTrackSelectionState(this, axis, ENABLE_MULTI_TRACK_SELECTION)
@@ -191,14 +195,26 @@ class TrackView {
     }
 
     setDataRange(min, max) {
+
         if (min !== undefined) {
             this.track.dataRange.min = min
         }
         if (max !== undefined) {
             this.track.dataRange.max = max
         }
+
         this.track.autoscale = false
+        this.track.autoscaleGroup = undefined
+
+        const list = this.browser.trackViews.filter(({ track }) => track.autoscaleGroup)
+        if (1 === list.length) {
+            list[ 0 ].track.autoscale = false
+            list[ 0 ].track.autoscaleGroup = undefined
+            list[ 0 ].repaintViews()
+        }
+
         this.repaintViews()
+
     }
 
     presentColorPicker(key) {
@@ -625,7 +641,6 @@ class TrackView {
         } else {
             this.dragHandle = DOMUtils.div({ class: 'igv-track-drag-handle' })
             this.dragHandle.classList.add('igv-track-drag-handle-color')
-            this.dragHandle.dataset.selected = 'no'
         }
 
         browser.columnContainer.querySelector('.igv-track-drag-column').appendChild(this.dragHandle)
@@ -730,7 +745,7 @@ class TrackView {
                 event.preventDefault()
 
                 currentDragHandle = event.target
-                if ('no' === currentDragHandle.dataset.selected) {
+                if (false === this.track.isMultiSelection) {
                     currentDragHandle.classList.remove('igv-track-drag-handle-color')
                     currentDragHandle.classList.add('igv-track-drag-handle-hover-color')
                 }
@@ -749,7 +764,7 @@ class TrackView {
 
                 if (currentDragHandle && event.target !== currentDragHandle) {
 
-                    if ('no' === currentDragHandle.dataset.selected) {
+                    if (false === this.track.isMultiSelection) {
                         currentDragHandle.classList.remove('igv-track-drag-handle-hover-color')
                         currentDragHandle.classList.add('igv-track-drag-handle-color')
                     }
@@ -767,7 +782,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if ('no' === event.target.dataset.selected) {
+                    if (false === this.track.isMultiSelection) {
                         event.target.classList.remove('igv-track-drag-handle-color')
                         event.target.classList.add('igv-track-drag-handle-hover-color')
                     }
@@ -782,7 +797,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if ('no' === event.target.dataset.selected) {
+                    if (false === this.track.isMultiSelection) {
                         event.target.classList.remove('igv-track-drag-handle-hover-color')
                         event.target.classList.add('igv-track-drag-handle-color')
                     }
@@ -796,7 +811,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if ('no' === event.target.dataset.selected) {
+                    if (false === this.track.isMultiSelection) {
                         event.target.classList.remove('igv-track-drag-handle-hover-color')
                         event.target.classList.add('igv-track-drag-handle-color')
                     }
@@ -913,7 +928,18 @@ class TrackView {
             const axisCanvasContext = this.axisCanvas.getContext('2d')
             axisCanvasContext.scale(dpi, dpi)
 
-            this.track.paintAxis(axisCanvasContext, width, height)
+            if (this.track.autoscaleGroup) {
+
+                if (undefined === autoScaleGroupColorHash[ this.track.autoscaleGroup ]) {
+                    const colorPalette = colorPalettes['Dark2']
+                    const randomIndex = Math.floor(Math.random() * colorPalettes['Dark2'].length)
+                    autoScaleGroupColorHash[ this.track.autoscaleGroup ] = colorPalette[ randomIndex ]
+                }
+                const rgba = IGVColor.addAlpha(autoScaleGroupColorHash[ this.track.autoscaleGroup ], 0.75)
+                this.track.paintAxis(axisCanvasContext, width, height, rgba)
+            } else {
+                this.track.paintAxis(axisCanvasContext, width, height, undefined)
+            }
         }
     }
 

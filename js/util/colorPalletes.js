@@ -523,6 +523,7 @@ function rgbStringHeatMapLerp(_a, _b, interpolant) {
 }
 
 export {
+    colorPalettes,
     appleCrayonRGB,
     appleCrayonRGBA,
     appleCrayonPalette,

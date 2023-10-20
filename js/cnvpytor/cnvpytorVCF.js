@@ -78,16 +78,13 @@ class CNVpytorVCF {
             // finalFeatureSet = this.readDepthMeanshift(avgbin)
             var baf = this.formatDataStructure_BAF(avgbin, 'max_likelihood')
         }else if(caller=='2D'){
-            
             let caller_obj = new combined_caller.CombinedCaller(avgbin,  this.binSize)        
             let processed_bins = await caller_obj.call_2d()
             
             finalFeatureSet = [processed_bins.binScore, [], processed_bins.segment_score]
-    
-            var baf = caller_obj.formatDataStructure_BAF('max_likelihood')
+            var baf = caller_obj.formatDataStructure_BAF('max_likelihood', -1)
         }
         
-
         return [finalFeatureSet, baf]
     }
 
@@ -107,8 +104,6 @@ class CNVpytorVCF {
 
         return results
     }
-
-    
 
     format_BAF_likelihood(wigFeatures) {
         const results = []
@@ -155,8 +150,8 @@ class CNVpytorVCF {
 
    
 
-    formatDataStructure_BAF(wigFeatures, feature_column, scaling_factor = 2) {
-        /* Rescale the BAF level from 0:1 to -2:0*/
+    formatDataStructure_BAF(wigFeatures, feature_column, scaling_factor=-1) {
+        /* Rescale the BAF level from 0:1 to scaling_factpr:0*/
         const baf1 = []
         const baf2 = []
         for (const [chr, wig] of Object.entries(wigFeatures)) {
@@ -168,10 +163,10 @@ class CNVpytorVCF {
                 
                 let value = sample[feature_column]
                 if (value != 0.5){
-                    baf2_value.value = -2 * (1 - value)
+                    baf2_value.value = scaling_factor * (1 - value)
                     baf2.push(baf2_value)
                 }
-                baf1_value.value = -2 * value
+                baf1_value.value = scaling_factor * value
                 baf1.push(baf1_value)
                     
             }

@@ -108,6 +108,8 @@ class TrackBase {
         this.minHeight = config.minHeight || Math.min(25, this.height)
         this.maxHeight = config.maxHeight || Math.max(1000, this.height)
 
+        this.isMultiSelection = config.isMultiSelection || false
+
         if (config.onclick) {
             this.onclick = config.onclick
             config.onclick = undefined   // functions cannot be saved in sessions, clear it here.
@@ -206,6 +208,10 @@ class TrackBase {
         if (!this.autoscale && this.dataRange) {
             state.min = this.dataRange.min
             state.max = this.dataRange.max
+        }
+
+        if (this.autoscaleGroup) {
+            state.autoscaleGroup = this.autoscaleGroup
         }
 
         return state
@@ -346,7 +352,6 @@ class TrackBase {
      * the genomic location.   Overriden by most subclasses.
      *
      * @param clickState
-     * @param features
      * @returns {[]|*[]}
      */
     clickedFeatures(clickState) {
@@ -541,8 +546,9 @@ class TrackBase {
         object = $(createCheckbox("Autoscale", this.autoscale))
 
         function autoScaleHandler() {
+            this.autoscaleGroup = undefined
             this.autoscale = !this.autoscale
-            this.trackView.updateViews()
+            this.browser.updateViews()
         }
 
         menuItems.push({ object, click:autoScaleHandler })

@@ -1,8 +1,7 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import html2canvas from '../node_modules/html2canvas/dist/html2canvas.esm.js'
-import {InputDialog, GenericColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {BGZip, FileUtils, igvxhr, StringUtils, URIUtils} from "../node_modules/igv-utils/src/index.js"
-import {DOMUtils, Icon} from "../node_modules/igv-ui/dist/igv-ui.js"
+import {DOMUtils, Icon, SliderDialog, InputDialog, GenericColorPicker} from "../node_modules/igv-ui/dist/igv-ui.js"
 import Alert from './ui/alert.js'
 import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width} from "./trackView.js"
@@ -300,6 +299,9 @@ class Browser {
         if (false === config.showNavigation) {
             this.$navigation.hide()
         }
+
+        this.sliderDialog = new SliderDialog(this.root)
+        this.sliderDialog.container.id = `igv-slider-dialog-${DOMUtils.guid()}`
 
         this.inputDialog = new InputDialog(this.root)
         this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
@@ -1382,58 +1384,50 @@ class Browser {
             }
         } else {
             // Group autoscale
-            const groupAutoscaleTracks = {}
-            const otherTracks = []
-            for (let trackView of trackViews) {
-                const group = trackView.track.autoscaleGroup
-                if (group) {
-                    var l = groupAutoscaleTracks[group]
-                    if (!l) {
-                        l = []
-                        groupAutoscaleTracks[group] = l
+            const groupAutoscaleTrackViews = {}
+            const otherTrackViews = []
+
+            // Isolate group autoscale trackViews
+            for (const trackView of trackViews) {
+                if (trackView.track.autoscaleGroup) {
+                    const autoscaleGroup = trackView.track.autoscaleGroup
+                    if (!groupAutoscaleTrackViews[autoscaleGroup]) {
+                        groupAutoscaleTrackViews[autoscaleGroup] = []
                     }
-                    l.push(trackView)
+                    groupAutoscaleTrackViews[autoscaleGroup].push(trackView)
                 } else {
-                    otherTracks.push(trackView)
+                    otherTrackViews.push(trackView)
                 }
             }
 
-            if (Object.entries(groupAutoscaleTracks).length > 0) {
+            // An autoscaleGroup of only one (1) trackView has the lone trackView removed from group autoscale mode
+            const singleTonKeys = Object.keys(groupAutoscaleTrackViews).filter(key => 1 === groupAutoscaleTrackViews[ key ].length)
 
-                const keys = Object.keys(groupAutoscaleTracks)
-                for (let group of keys) {
-
-                    const groupTrackViews = groupAutoscaleTracks[group]
-                    const promises = []
-
-                    for (let trackView of groupTrackViews) {
-                        promises.push(trackView.getInViewFeatures())
+            if (singleTonKeys.length > 0) {
+                // Look for any single trackView groupAutoscale groups and move the single trackView to otherTrackViews list
+                for (const key of singleTonKeys) {
+                    for (const trackView of groupAutoscaleTrackViews[ key ]) {
+                        trackView.track.autoscaleGroup = undefined
                     }
+                    otherTrackViews.push(...groupAutoscaleTrackViews[ key ])
+                    delete groupAutoscaleTrackViews[ key ]
+                }
+            }
 
-                    const featureArray = await Promise.all(promises)
-
-                    var allFeatures = [], dataRange
-
-                    for (let features of featureArray) {
-                        allFeatures = allFeatures.concat(features)
-                    }
-                    dataRange = doAutoscale(allFeatures)
-
-                    const p = []
-                    for (let trackView of groupTrackViews) {
-                        trackView.track.dataRange = dataRange
+            // Calculate group autoscale dataRange
+            if (Object.entries(groupAutoscaleTrackViews).length > 0) {
+                for (const [ group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
+                    const featureArray = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
+                    const dataRange = doAutoscale(featureArray.flat())
+                    for (const trackView of trackViews) {
+                        trackView.track.dataRange = Object.assign({}, dataRange)
                         trackView.track.autoscale = false
-                        p.push(trackView.updateViews())
                     }
-                    await Promise.all(p)
+                    await Promise.all(trackViews.map(trackView => trackView.updateViews()))
                 }
-
             }
 
-            await Promise.all(otherTracks.map(tv => tv.updateViews()))
-            // for (let trackView of otherTracks) {
-            //     await trackView.updateViews(force);
-            // }
+            await Promise.all(otherTrackViews.map(tv => tv.updateViews()))
         }
 
     }
