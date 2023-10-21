@@ -170,6 +170,9 @@ class BWReader {
 
         if (this.chrAliasTable.has(chr)) {
             chr = this.chrAliasTable.get(chr)
+            if (chr === undefined) {
+                return undefined
+            }
         }
 
         let chrIdx = this.chromTree.nameToId.get(chr)
@@ -245,26 +248,21 @@ class BWReader {
     async _searchForRegions(term) {
         const searchTrees = await this.#getSearchTrees()
         if (searchTrees) {
-            // First try search term as entered.  For now take the first one, we don't support multiple results
-            for (let bpTree of searchTrees) {
-                const result = await bpTree.search(term)
-                if (result) {
-                    return result
-                }
-            }
 
-            // If no term use a trix index if we have one to map entered term to indexed value in bb file
+            // Use a trix index if we have one to map entered term to indexed value in bb file
             if (this._trix) {
                 term = term.toLowerCase()
                 const trixResults = await this._trix.search(term)
                 if (trixResults && trixResults.has(term)) {   // <= exact matches only for now
-                    const term2 = trixResults.get(term)[0]
-                    for (let bpTree of searchTrees) {
-                        const result = await bpTree.search(term2)
-                        if (result) {
-                            return result
-                        }
-                    }
+                    term = trixResults.get(term)[0]
+                }
+            }
+
+            // For now take the first match, we don't support multiple results
+            for (let bpTree of searchTrees) {
+                const result = await bpTree.search(term)
+                if (result) {
+                    return result
                 }
             }
         }

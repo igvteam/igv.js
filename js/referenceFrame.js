@@ -45,6 +45,10 @@ class ReferenceFrame {
         this.id = DOMUtils.guid()
     }
 
+    get locusSearchString() {
+        return `${this.chr}:${this.start+1}-${this.end}`
+    }
+
     /**
      * Extend this frame to accomodate the given locus.  Used th CircularView methods to merge 2 frames.
      * @param locus
@@ -229,7 +233,6 @@ function createReferenceFrameList(loci, genome, browserFlanking, minimumBases, v
             locus.end,
             (locus.end - locus.start) / viewportWidth)
 
-        referenceFrame.locusSearchString = locus.locusSearchString
 
         // GTEX hack
         if (locus.gene || locus.snp) {
@@ -249,7 +252,6 @@ function adjustReferenceFrame(scaleFactor, referenceFrame, viewportWidth, alignm
 
     referenceFrame.start = alignmentCC - (referenceFrame.bpPerPixel * (viewportWidth / 2))
     referenceFrame.end = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
-    referenceFrame.locusSearchString = referenceFrame.getLocusString()
 }
 
 function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {

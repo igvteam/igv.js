@@ -20,7 +20,7 @@ suite("ucsc utilities", function () {
         assert.equal(22, hub.trackStanzas.length)
 
         const genomeConfig = hub.getGenomeConfig()
-        //const genome = await GenomeUtils.loadGenome(genomeConfig)
+        //const genome = await Genome.loadGenome(genomeConfig)
 
         assert.ok(genomeConfig)
         assert.equal("GCF_000186305.1", genomeConfig.id)

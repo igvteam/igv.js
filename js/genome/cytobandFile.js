@@ -1,5 +1,5 @@
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
-import {BGZip, igvxhr, StringUtils} from "igv-utils"
+import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {Cytoband} from "./cytoband.js"
 
 class CytobandFile {

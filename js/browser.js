@@ -54,6 +54,7 @@ import {translateSession} from "./hic/shoeboxUtils.js"
 import Hub from "./ucsc/ucscHub.js"
 import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import MenuUtils from "./ui/menuUtils.js"
+import Genome from "./genome/genome.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -232,7 +233,7 @@ class Browser {
 
         // chromosome select widget
         this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0))
-        if (config.showChromosomeWidget) {
+        if (config.showChromosomeWidget !== false) {
             this.chromosomeSelectWidget.show()
         } else {
             this.chromosomeSelectWidget.hide()
@@ -553,7 +554,9 @@ class Browser {
             console.warn("No genome or reference object specified")
             return
         }
-        const genomeConfig = await GenomeUtils.expandReference(this.alert, genomeOrReference)
+        const genomeConfig = StringUtils.isString(genomeOrReference) ?
+            await GenomeUtils.expandReference(this.alert, genomeOrReference) :
+            genomeOrReference
 
 
         await this.loadReference(genomeConfig, session.locus)
@@ -679,7 +682,7 @@ class Browser {
      */
     async loadReference(genomeConfig, initialLocus) {
 
-        const genome = await GenomeUtils.loadGenome(genomeConfig)
+        const genome = await Genome.loadGenome(genomeConfig)
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
@@ -735,7 +738,7 @@ class Browser {
         let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0,8)}...${genome.id.substring(genome.id.length-8)}`)
         this.$current_genome.text(genomeLabel)
         this.$current_genome.attr('title', genome.description)
-        if(this.config.showChromosomeWidget) {
+        if(this.config.showChromosomeWidget !== false) {
             this.chromosomeSelectWidget.update(genome)
         }
     }
@@ -1452,8 +1455,11 @@ class Browser {
 
         this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
 
+
+
         const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
-        //const loc = this.referenceFrameList.length === 1 ?   this.referenceFrameList[0].getLocusString() : '';
+
+
         this.$searchInput.val(loc)
 
         this.fireEvent('locuschange', [this.referenceFrameList])
@@ -2280,16 +2286,5 @@ function toggleTrackLabels(trackViews, isVisible) {
     }
 }
 
-async function searchWebService(browser, locus, searchConfig) {
-
-    let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase())
-    if (path.indexOf("$GENOME$") > -1) {
-        path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"))
-    }
-    const result = await igvxhr.loadString(path)
-    return {result: result, locusSearchString: locus}
-}
-
-export {searchWebService}
 export default Browser
 

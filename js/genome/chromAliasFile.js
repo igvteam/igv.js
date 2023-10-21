@@ -16,10 +16,10 @@ class ChromAliasFile {
 
     aliasRecordCache = new Map()
 
-    constructor(aliasURL, config, chromosomes) {
+    constructor(aliasURL, config, genome) {
         this.aliasURL = aliasURL
         this.config = config
-        this.chromosomes = chromosomes
+        this.genome = genome
     }
 
     /**
@@ -34,6 +34,7 @@ class ChromAliasFile {
 
 
     async loadAliases() {
+
         const data = await igvxhr.loadString(this.aliasURL, buildOptions(this.config))
         const lines = StringUtils.splitLines(data)
         const firstLine = lines[0]
@@ -42,10 +43,19 @@ class ChromAliasFile {
             this.altNameSets = this.headings.slice(1)
         }
 
+        const chromosomeNameSet = this.genome.chromosomes ?
+            new Set(this.genome.chromosomes.keys()) : new Set()
+
         for (let line of lines) {
             if (!line.startsWith("#") && line.length > 0) {
                 const tokens = line.split("\t")
-                const aliasRecord = {chr: tokens[0]}        // TODO -- in IGV alias file format we don't know this
+
+                let chr = tokens.find(t => chromosomeNameSet.has(t))
+                if(!chr) {
+                    chr = tokens[0]
+                }
+
+                const aliasRecord = {chr}
                 for (let i = 0; i < tokens.length; i++) {
                     const key = this.headings ? this.headings[i] : i
                     aliasRecord[key] = tokens[i]

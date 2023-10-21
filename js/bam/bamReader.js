@@ -13,7 +13,7 @@ import BGZBlockLoader from "./bgzBlockLoader.js"
  */
 class BamReader {
 
-    chrAliasTable =  new Map()
+    chrAliasTable = new Map()
 
     constructor(config, genome) {
         this.config = config
@@ -60,6 +60,9 @@ class BamReader {
 
         if (this.chrAliasTable.has(chr)) {
             chr = this.chrAliasTable.get(chr)
+            if (chr === undefined) {
+                return undefined
+            }
         }
 
         let chrIdx = this.header.chrToIndex[chr]

@@ -130,7 +130,7 @@ suite("testGenomeUtils", function () {
         }
 
 
-        const genome = await GenomeUtils.loadGenome(reference)
+        const genome = await Genome.loadGenome(reference)
 
         assert.ok(genome)
 
