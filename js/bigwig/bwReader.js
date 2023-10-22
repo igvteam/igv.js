@@ -251,10 +251,10 @@ class BWReader {
 
             // Use a trix index if we have one to map entered term to indexed value in bb file
             if (this._trix) {
-                term = term.toLowerCase()
-                const trixResults = await this._trix.search(term)
-                if (trixResults && trixResults.has(term)) {   // <= exact matches only for now
-                    term = trixResults.get(term)[0]
+                const termLower = term.toLowerCase()
+                const trixResults = await this._trix.search(termLower)
+                if (trixResults && trixResults.has(termLower)) {   // <= exact matches only for now
+                    term = trixResults.get(termLower)[0]
                 }
             }
 

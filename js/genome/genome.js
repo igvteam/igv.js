@@ -64,7 +64,7 @@ class Genome {
             this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
         }
 
-        if (false !== config.wholeGenomeView) {
+        if (false !== config.wholeGenomeView && this.chromosomes.size > 0) {
             // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
             if (config.chromosomeOrder) {
                 if (Array.isArray(config.chromosomeOrder)) {
@@ -73,7 +73,7 @@ class Genome {
                     this.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
                 }
             } else {
-                this.wgChromosomeNames = trimSmallChromosomes(chromosomes)
+                this.wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
             }
         }
 

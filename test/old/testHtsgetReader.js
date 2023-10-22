@@ -1,8 +1,8 @@
-import "./utils/mockObjects.js"
+import "../utils/mockObjects.js"
 import {assert} from 'chai'
-import HtsgetBamReader from "../js/htsget/htsgetBamReader.js"
-import HtsgetVariantReader from "../js/htsget/htsgetVariantReader.js"
-import Browser from "../js/browser.js"
+import HtsgetBamReader from "../../js/htsget/htsgetBamReader.js"
+import HtsgetVariantReader from "../../js/htsget/htsgetVariantReader.js"
+import Browser from "../../js/browser.js"
 
 
 // Mock genome with "1,2,3..." name convention

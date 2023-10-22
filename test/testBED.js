@@ -5,7 +5,7 @@ import {assert} from 'chai'
 import {createGenome} from "./utils/Genome.js"
 
 const genome = createGenome()
-import GenomeUtils from "../js/genome/genomeUtils.js"
+import Genome from "../js/genome/genome.js"
 
 suite("testBed", function () {
 

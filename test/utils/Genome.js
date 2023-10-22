@@ -40,7 +40,7 @@ function createGenome() {
         },
 
         loadChromosome: async function (chr) {
-            return this.getChromosomechr
+            return this.getChromosome(chr)
         },
 
         getChromosome: function (chr) {
@@ -50,43 +50,21 @@ function createGenome() {
             return bpLength ? {name, bpLength} : undefined
         },
 
+        getAliasRecord : async function(chr) {
+            const chromosome = this.getChromosome(chr)
+
+            return {
+                chr: chromosome.name,
+                start: 0,
+                end: chromosome.bpLength,
+                ncbi: chromosome.name.substring(3)
+            }
+
+        },
+
+
         wgChromosomeNames: Object.keys(sizes),
 
-        featureDB: new Map(),
-
-        addFeaturesToDB: function (featureList, config) {
-
-            const insertFeature = (name, feature) => {
-                const current = this.featureDB.get(name)
-                if (current) {
-                    feature = (feature.end - feature.start) > (current.end - current.start) ? feature : current
-
-                }
-                this.featureDB.set(name, feature)
-            }
-
-            for (let feature of featureList) {
-                if (feature.name) {
-                    insertFeature(feature.name.toUpperCase(), feature)
-                }
-                if (feature.gene && feature.gene.name) {
-                    insertFeature(feature.gene.name.toUpperCase(), feature)
-                }
-
-                if (config.searchableFields) {
-                    for (let f of config.searchableFields) {
-                        const value = feature.getAttributeValue(f)
-                        if (value) {
-                            if (value.indexOf(" ") > 0) {
-                                insertFeature(value.replaceAll(" ", "+").toUpperCase(), feature)
-                            } else {
-                                insertFeature(value.toUpperCase(), feature)
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
     }
 }

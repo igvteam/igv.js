@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import GenomeUtils from "../js/genome/genomeUtils.js"
+import Genome from "../js/genome/genome.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/Genome.js"
 
