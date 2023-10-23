@@ -55,6 +55,7 @@ import Hub from "./ucsc/ucscHub.js"
 import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
+import {setDefaults} from "./igv-create.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -454,6 +455,9 @@ class Browser {
      */
     async loadSession(options) {
 
+        // UCSC hub hack
+        const chromosomeSelectWidget = this.chromosomeSelectWidget
+
         this.sampleInfo.initialize()
 
         // TODO: deprecated
@@ -490,13 +494,17 @@ class Browser {
 
                 } else if (filename.endsWith("hub.txt")) {
                     const hub = await Hub.loadHub(options)
+                    if(chromosomeSelectWidget) {
+                        chromosomeSelectWidget.hide()
+                    }
                     const genomeConfig = hub.getGenomeConfig(options.includeTracks)
                     const initialLocus = hub.getDefaultPosition()
-                    return {
+                    const config = {
                         showChromosomeWidget: false,
                         locus: initialLocus,
                         reference: genomeConfig
                     }
+                    return setDefaults(config)
                 } else if (filename.endsWith(".json")) {
                     return igvxhr.loadJson(urlOrFile)
                 } else {
@@ -516,6 +524,7 @@ class Browser {
 
         // prepare to load a new session, discarding DOM and state
         this.cleanHouseForSession()
+        this.config = session
 
         // Check for juicebox session
         if (session.browsers) {

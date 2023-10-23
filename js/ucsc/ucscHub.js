@@ -31,10 +31,8 @@ class Hub {
     }
 
     static supportedTypes = new Set(["bigBed", "bigWig", "bigGenePred"])
-    static filterTracks = new Set(["cytoBandIdeo"])
-
-    //["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
-    //         "cpgIslandExtUnmasked", "windowMasker"])
+    static filterTracks = new Set(["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
+        "cpgIslandExtUnmasked", "windowMasker"])
 
     constructor(url, stanzas, groups) {
 
@@ -128,9 +126,10 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         if (this.genomeStanza.hasProperty("twoBitBptUrl")) {
             config.twoBitBptURL = this.baseURL + this.genomeStanza.getProperty("twoBitBptUrl")
         }
-        if (this.genomeStanza.hasProperty("chromSizes")) {
-            config.chromSizes = this.baseURL + this.genomeStanza.getProperty("chromSizes")
-        }
+        // chromSizes can take a very long time to load, and is not useful with the default WGV = off
+        // if (this.genomeStanza.hasProperty("chromSizes")) {
+        //     config.chromSizes = this.baseURL + this.genomeStanza.getProperty("chromSizes")
+        // }
         if (this.genomeStanza.hasProperty("description")) {
             config.description += `\n${this.genomeStanza.getProperty("description")}`
         }
@@ -370,7 +369,7 @@ async function loadStanzas(options) {
             startNewNode = true
         } else {
             const key = line.substring(indent, i)
-            if(key.startsWith("#")) continue
+            if (key.startsWith("#")) continue
             const value = line.substring(i + 1)
             if (startNewNode) {
                 // Start a new node -- indent is currently ignored as igv.js does not support sub-tracks,

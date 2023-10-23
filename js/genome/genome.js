@@ -143,19 +143,21 @@ class Genome {
 
     async loadChromosome(chr) {
 
-        if (this.chromAlias) {   // Try alias
-            const chromAliasRecord = await this.chromAlias.search(chr)
-            if (chromAliasRecord) {
-                chr = chromAliasRecord.chr
-            }
-        }
-
         if (!this.chromosomes.has(chr)) {
             const sequenceRecord = await this.sequence.getSequenceRecord(chr)
             if (sequenceRecord) {
                 const chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
                 this.chromosomes.set(chr, chromosome)
             } else {
+                // Try alias
+                if (this.chromAlias) {
+                    const chromAliasRecord = await this.chromAlias.search(chr)
+                    if (chromAliasRecord) {
+                        const chromosome = new Chromosome(chromAliasRecord.chr, 0, sequenceRecord.bpLength)
+                        this.chromosomes.set(chr, chromosome)
+                    }
+                }
+
                 this.chromosomes.set(chr, undefined)  // Prevents future attempts
             }
         }

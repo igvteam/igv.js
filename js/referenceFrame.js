@@ -129,9 +129,9 @@ class ReferenceFrame {
         const centerBP = undefined === centerBPOrUndefined ? (this.start + this.toBP(viewportWidth / 2.0)) : centerBPOrUndefined
 
         // save initial start and bpp
-        const {start, bpPerPixel} = this.start
-
-        const {bpLength} = this.getChromosome()
+        const initialStart = this.start
+        const initialBpPerPixel = this.bpPerPixel
+        const bpLength = this.getChromosome().bpLength
         const bppThreshold = scaleFactor < 1.0 ? browser.minimumBases() / viewportWidth : bpLength / viewportWidth
 
         // update bpp
@@ -148,7 +148,7 @@ class ReferenceFrame {
 
         this.end = this.start + widthBP
 
-        const viewChanged = start !== this.start || bpPerPixel !== this.bpPerPixel
+        const viewChanged = initialStart !== this.start || initialBpPerPixel !== this.bpPerPixel
         if (viewChanged) {
             await browser.updateViews(true)
         }
