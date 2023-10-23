@@ -14,60 +14,69 @@
 
     const config =
         {
-            locus: "myc",
+            //locus: "myc",
+            locus:"CP068269.2:35,726,976-35,734,192",
+            showChromosomeWidget: false,
             reference: {
-                "id": "chm13v2.0",
-                "name": "Human (T2T CHM13-v2.0)",
-                "fastaURL": "https://s3.amazonaws.com/igv.org.genomes/chm13v2.0/chm13v2.0.fa",
-                "indexURL": "https://s3.amazonaws.com/igv.org.genomes/chm13v2.0/chm13v2.0.fa.fai",
-                "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/chm13v2.0/CHM13_v2.0.cytoBandMapped.bed",
-                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/chm13v2.0/GCA_009914755.4.chromAlias.txt",
-                twobitURL: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/GCA_009914755.4.2bit",
+                wholeGenomeView: false,
+                id: "chm13v2.0",
+                name: "Human (T2T CHM13-v2.0)",
+                twoBitURL: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/GCA_009914755.4.2bit",
                 cytobandBbURL: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_T2T-CHM13v2.0.cytoBandMapped/cytoBandMapped.bb",
-                aliasBbURL: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/GCA_009914755.4.chromAlias.bb",
+                chromAliasBbURL: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/GCA_009914755.4.chromAlias.bb",
                 nameSet: "ucsc",
-                "tracks": [
+                tracks: [
+                    // {
+                    //     "id": "catLiftOffGenesV1",
+                    //     "name": "CAT/Liftoff Genes",
+                    //     "format": "bigbed",
+                    //     "description": " <a target = \"_blank\" href = \"https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/html/GCA_009914755.4_T2T-CHM13v2.0.catLiftOffGenesV1.html\">CAT + Liftoff Gene Annotations</a>",
+                    //     "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_T2T-CHM13v2.0.catLiftOffGenesV1/catLiftOffGenesV1.bb",
+                    //     "displayMode": "EXPANDED",
+                    //     "height": 200,
+                    //     "visibilityWindow": -1,
+                    //     "supportsWholeGenome": false
+                    // },
+                    //
+                    // // Include a hg38 bigwig track -- test chromosome aliasing
+                    // {
+                    //     "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+                    //     "name": "Encode bigwig",
+                    // },
+
+                    // plain wig track
                     {
-                        "id": "catLiftOffGenesV1",
-                        "name": "CAT/Liftoff Genes",
-                        "format": "bigbed",
-                        "description": " <a target = \"_blank\" href = \"https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/html/GCA_009914755.4_T2T-CHM13v2.0.catLiftOffGenesV1.html\">CAT + Liftoff Gene Annotations</a>",
-                        "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_T2T-CHM13v2.0.catLiftOffGenesV1/catLiftOffGenesV1.bb",
-                        "displayMode": "EXPANDED",
-                        "height": 200,
-                        "visibilityWindow": -1,
-                        "supportsWholeGenome": false,
-                        "order": 1000000
+                        url: "../../test/data/hubs/ENCFF754TJH.wig",
+                        name: "Encode wig"
                     },
+
+                    // plain bed track
                     {
-                        "id": "augustus",
-                        "name": "Augustus",
-                        "format": "bigbed",
-                        "description": " <a target = \"_blank\" href = \"https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/html/GCA_009914755.4_T2T-CHM13v2.0.augustus\">Augustus Gene Predictions</a>",
-                        "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_T2T-CHM13v2.0.augustus.bb",
-                        "displayMode": "EXPANDED",
-                        "color": "180,0,0",
-                        "height": 200,
-                        "visibilityWindow": -1,
-                        "supportsWholeGenome": false,
-                        "order": 1000001
+                        url: "../../test/data/hubs/catLiftOff.bed",
+                        name: "plain bed"
                     },
+
+                    // indexed bed track
                     {
-                        "name": "Genes",
-                        "format": "bed",
-                        "url": "https://s3.amazonaws.com/igv.org.genomes/chm13v2.0/chm13v2.0_geneLocations.short.bed.gz",
-                        "hidden" : true,
-                        "searchable": true
+                        url: "../../test/data/hubs/catLiftOff.bed.gz",
+                        indexUrl: "../../test/data/hubs/catLiftOff.bed.gz.tbi",
+                        name: "indexed bed"
+                    },
+
+                    //bam
+                    {
+                        type: "alignment",
+                        url: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam",
+                        indexURL: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam.bai",
+                        name: "NA12878n"
                     }
                 ]
             }
 
         }
 
-    igv.createBrowser(document.getElementById('igvDiv'), config)
-        .then(browser => {
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), config)
 
-        })
 
 
 </script>

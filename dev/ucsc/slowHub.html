@@ -22,21 +22,16 @@
 
 
     const hub = await Hub.loadHub(hubOptions)
-    const ref = hub.getGenomeConfig()
 
     const igvConfig = {
+        showChromosomeWidget: false,
         locus: hub.getDefaultPosition(),
-        reference: ref
+        reference: hub.getGenomeConfig()
     }
 
-    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+    //igvConfig.reference.chromAliasBbURL = undefined   // TODO <- chromAliasBB is slowish
 
-    const selector = document.getElementById("select")
-    selector.addEventListener("change", () => document.getElementById("hub-input").value = selector.value)
-    document.getElementById("load-genome").addEventListener("click", () =>
-        browser.loadGenome({url: document.getElementById("hub-input").value}))
-    document.getElementById("load-session").addEventListener("click", () =>
-        browser.loadSession({url: document.getElementById("hub-input").value}))
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
 
 
 </script>

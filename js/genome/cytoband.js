@@ -22,18 +22,18 @@ class Cytoband {
     }
 }
 
-async function loadCytobands(cytobandUrl, config) {
+async function loadCytobands(cytobandURL, config) {
 
     let data
-    if (isDataURL(cytobandUrl)) {
-        const plain = BGZip.decodeDataURI(cytobandUrl)
+    if (isDataURL(cytobandURL)) {
+        const plain = BGZip.decodeDataURI(cytobandURL)
         data = ""
         const len = plain.length
         for (let i = 0; i < len; i++) {
             data += String.fromCharCode(plain[i])
         }
     } else {
-        data = await igvxhr.loadString(cytobandUrl, buildOptions(config))
+        data = await igvxhr.loadString(cytobandURL, buildOptions(config))
     }
 
     const cytobands = {}
@@ -118,4 +118,4 @@ async function loadCytobandsBB(url, config) {
     return {chromosomes, cytobands}
 }
 
-export {Cytoband, loadCytobands, loadCytobandsBB}
+export {Cytoband}
