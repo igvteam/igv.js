@@ -54,6 +54,8 @@ import {translateSession} from "./hic/shoeboxUtils.js"
 import Hub from "./ucsc/ucscHub.js"
 import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import MenuUtils from "./ui/menuUtils.js"
+import Genome from "./genome/genome.js"
+import {setDefaults} from "./igv-create.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -80,8 +82,6 @@ class Browser {
 
         this.root = DOMUtils.div({class: 'igv-container'})
         parentDiv.appendChild(this.root)
-
-
 
         // spinner
         this.spinner = DOMUtils.div({class: 'igv-loading-spinner-container'})
@@ -234,10 +234,7 @@ class Browser {
 
         // chromosome select widget
         this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0))
-        if (undefined === config.showChromosomeWidget) {
-            config.showChromosomeWidget = true   // Default to true
-        }
-        if (true === config.showChromosomeWidget) {
+        if (config.showChromosomeWidget !== false) {
             this.chromosomeSelectWidget.show()
         } else {
             this.chromosomeSelectWidget.hide()
@@ -458,6 +455,9 @@ class Browser {
      */
     async loadSession(options) {
 
+        // UCSC hub hack
+        const chromosomeSelectWidget = this.chromosomeSelectWidget
+
         this.sampleInfo.initialize()
 
         // TODO: deprecated
@@ -494,12 +494,17 @@ class Browser {
 
                 } else if (filename.endsWith("hub.txt")) {
                     const hub = await Hub.loadHub(options)
+                    if(chromosomeSelectWidget) {
+                        chromosomeSelectWidget.hide()
+                    }
                     const genomeConfig = hub.getGenomeConfig(options.includeTracks)
                     const initialLocus = hub.getDefaultPosition()
-                    return {
+                    const config = {
+                        showChromosomeWidget: false,
                         locus: initialLocus,
                         reference: genomeConfig
                     }
+                    return setDefaults(config)
                 } else if (filename.endsWith(".json")) {
                     return igvxhr.loadJson(urlOrFile)
                 } else {
@@ -519,6 +524,7 @@ class Browser {
 
         // prepare to load a new session, discarding DOM and state
         this.cleanHouseForSession()
+        this.config = session
 
         // Check for juicebox session
         if (session.browsers) {
@@ -557,7 +563,9 @@ class Browser {
             console.warn("No genome or reference object specified")
             return
         }
-        const genomeConfig = await GenomeUtils.expandReference(this.alert, genomeOrReference)
+        const genomeConfig = StringUtils.isString(genomeOrReference) ?
+            await GenomeUtils.expandReference(this.alert, genomeOrReference) :
+            genomeOrReference
 
 
         await this.loadReference(genomeConfig, session.locus)
@@ -683,7 +691,7 @@ class Browser {
      */
     async loadReference(genomeConfig, initialLocus) {
 
-        const genome = await GenomeUtils.loadGenome(genomeConfig)
+        const genome = await Genome.loadGenome(genomeConfig)
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
@@ -739,7 +747,9 @@ class Browser {
         let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0,8)}...${genome.id.substring(genome.id.length-8)}`)
         this.$current_genome.text(genomeLabel)
         this.$current_genome.attr('title', genome.description)
-        this.chromosomeSelectWidget.update(genome)
+        if(this.config.showChromosomeWidget !== false) {
+            this.chromosomeSelectWidget.update(genome)
+        }
     }
 
     /**
@@ -756,7 +766,7 @@ class Browser {
             const hub = await Hub.loadHub(idOrConfig)
             genomeConfig = hub.getGenomeConfig("genes")
         } else {
-            genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
+            genomeConfig = idOrConfig //await GenomeUtils.expandReference(this.alert, idOrConfig)
         }
 
         await this.loadReference(genomeConfig, undefined)
@@ -1454,8 +1464,11 @@ class Browser {
 
         this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
 
+
+
         const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
-        //const loc = this.referenceFrameList.length === 1 ?   this.referenceFrameList[0].getLocusString() : '';
+
+
         this.$searchInput.val(loc)
 
         this.fireEvent('locuschange', [this.referenceFrameList])
@@ -2282,16 +2295,5 @@ function toggleTrackLabels(trackViews, isVisible) {
     }
 }
 
-async function searchWebService(browser, locus, searchConfig) {
-
-    let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase())
-    if (path.indexOf("$GENOME$") > -1) {
-        path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"))
-    }
-    const result = await igvxhr.loadString(path)
-    return {result: result, locusSearchString: locus}
-}
-
-export {searchWebService}
 export default Browser
 

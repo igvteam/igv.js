@@ -27,7 +27,7 @@ export default class ChromTree {
             const reserved = binaryParser.getLong()
 
             const header = {magic, blockSize, keySize, valSize, itemCount, reserved}
-            const nameToId = {}
+            const nameToId = new Map()
             const idToName = []
             const readTreeNode = (offset) => {
 
@@ -45,7 +45,7 @@ export default class ChromTree {
                             value = binaryParser.getInt()
                             const chromSize = binaryParser.getInt()
                             if (genome) key = genome.getChromosomeName(key)  // Translate to canonical chr name
-                            nameToId[key] = value
+                            nameToId.set(key, value)
                             idToName[value] = key
 
                         } else {

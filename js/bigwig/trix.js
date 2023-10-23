@@ -8,6 +8,7 @@
 
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
+
 // this is the number of hex characters to use for the address in ixixx, see
 // https://github.com/GMOD/ixixx-js/blob/master/src/index.ts#L182
 const ADDRESS_SIZE = 10
@@ -16,7 +17,7 @@ export default class Trix {
 
     ixFile  // URL to the ix file
     ixxFile  // URL to the ixx file
-    ixBuffer  // Buffer for the ix file contents -- we read it once, they aren't very large
+    bufferCache = new Map()
 
     constructor(ixxFile, ixFile) {
         this.ixFile = ixFile
@@ -50,6 +51,7 @@ export default class Trix {
             const match = word.startsWith(searchWord)
             if (match) {
                 matches.push(line)
+                console.log("match " + line)
             }
             // we are done scanning if we are lexicographically greater than the search string
             if (word.slice(0, searchWord.length) > searchWord) {
@@ -65,6 +67,7 @@ export default class Trix {
                 const [term, ...parts] = m.split(' ')
                 results.set(term, parts.map(p => p.split(',')[0]))
             }
+            console.log(results)
             return results
         }
     }
@@ -94,10 +97,6 @@ export default class Trix {
 
     async _getBuffer(searchWord, opts) {
 
-        if (!this.ixBuffer) {
-            this.ixBuffer = await igvxhr.loadString(this.ixFile)
-        }
-
         let start = 0
         let end = 65536
         const indexes = await this.getIndex(opts)
@@ -116,6 +115,13 @@ export default class Trix {
             return undefined
         }
 
-        return this.ixBuffer.slice(start, start + len)
+        if(this.bufferCache.has(start)) {
+            return this.bufferCache.get(start)
+        } else {
+            const buffer = igvxhr.loadString(this.ixFile, {range: {start, size: len}})
+            this.bufferCache.set(start, buffer)
+            return buffer
+        }
+
     }
 }

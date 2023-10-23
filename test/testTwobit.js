@@ -1,6 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import TwobitSequence from "../js/genome/twobit.js"
+import BPTree from "../js/bigwig/bpTree.js"
 
 
 suite("testTwobit", function () {
@@ -15,7 +16,7 @@ suite("testTwobit", function () {
         const start = 5
         const end = 100
         const seqString = await twobit.readSequence("chr1", start, end)
-       // assert.equal(seqString.length, end - start)
+        // assert.equal(seqString.length, end - start)
         assert.equal(seqString, expectedSequence.substring(start, end))
     })
 
@@ -47,18 +48,23 @@ suite("testTwobit", function () {
         assert.equal(expectedSeq, seq)
     })
 
+    test("twobit metadata", async function () {
+        const url = "test/data/twobit/GCF_000002655.1.2bit"
+        const twobit = new TwobitSequence({twoBitURL: url})
+        await twobit.init()
+        const sequenceRecord = await twobit.getSequenceRecord("NC_007196.1")
+        assert.deepEqual(sequenceRecord.dnaSize, 4079167)
+    })
 
     test("twobit blocks", async function () {
 
         this.timeout(200000)
 
         const url = "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit"
-        const twobit = new TwobitSequence({fastaURL: url})
+        const twobit = new TwobitSequence({twoBitURL: url})
         await twobit.init()
 
-        await twobit._getSequenceMetaData("chr1")
-
-        const meta = twobit.metaIndex.get("chr1")
+        const meta = await twobit.getSequenceRecord("chr1")
         assert.equal(248956422, meta.dnaSize)
 
         let lastBlockEnd = -1
@@ -74,6 +80,35 @@ suite("testTwobit", function () {
             nBlocksSize += block.size
             lastBlockEnd = block.start
         }
+    })
+
+    test("twobit .bpt index", async function () {
+
+        const url = "test/data/twobit/GCA_004363605.1.2bit.bpt"
+        const bpTree = await BPTree.loadBpTree(url, 0)
+        assert.ok(bpTree)
+
+        const result = await bpTree.search("RJWJ011179649.1")
+        assert.ok(result)
+
+
+    })
+
+    test("twobit w bpt", async function () {
+
+        const expectedSequence = "GCAGGTATCCAAAGCCAGAGGCCTGGTGCTACACGACTGG"
+
+        const url = "test/data/twobit/GCF_000002655.1.2bit"
+        const bptUrl = "test/data/twobit/GCF_000002655.1.2bit.bpt"
+        const twobit = new TwobitSequence({twoBitURL: url, twoBitBptURL: bptUrl})
+        const chr = "NC_007194.1"
+        const start = 1644639
+        const end = 1644679
+        const seqString = await twobit.readSequence(chr, start, end)
+        assert.equal(seqString, expectedSequence)
+
+
+
     })
 
 

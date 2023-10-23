@@ -199,6 +199,8 @@ function setDefaults(config) {
         config.tracks = []
     }
 
+    return config
+
 }
 
 
@@ -282,4 +284,4 @@ async function createTrack(config, browser) {
     return await Browser.prototype.createTrack.call(browser, config)
 }
 
-export {createTrack, createBrowser, removeBrowser, removeAllBrowsers, getAllBrowsers, visibilityChange}
+export {createTrack, createBrowser, removeBrowser, removeAllBrowsers, getAllBrowsers, visibilityChange, setDefaults}
