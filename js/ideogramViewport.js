@@ -105,7 +105,7 @@ class IdeogramViewport extends TrackViewport {
         this.draw({referenceFrame: this.referenceFrame})
     }
 
-    draw({referenceFrame}) {
+    async draw({referenceFrame}) {
 
         IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, this.$viewport.width(), this.$viewport.height())
 

@@ -1,6 +1,12 @@
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import {isNumber} from "../util/igvUtils.js"
 import Chromosome from "./chromosome.js"
+import {loadFasta} from "./fasta.js"
+import ChromAliasBB from "./chromAliasBB.js"
+import ChromAliasFile from "./chromAliasFile.js"
+import CytobandFileBB from "./cytobandFileBB.js"
+import CytobandFile from "./cytobandFile.js"
+
+import {loadChromSizes} from "./chromSizes.js"
 
 /**
  * The Genome class represents an assembly and consists of the following elements
@@ -12,65 +18,71 @@ import Chromosome from "./chromosome.js"
 
 class Genome {
 
-    constructor(config, sequence, aliases, chromosomes, cytobands) {
+    static async loadGenome(options) {
 
+        const genome = new Genome(options)
+        await genome.init()
+        return genome
+    }
+
+    constructor(config) {
         this.config = config
         this.id = config.id || generateGenomeID(config)
         this.name = config.name
-        this.sequence = sequence
         this.nameSet = config.nameSet
-        this.chromosomes = chromosomes
 
-        this.chromosomeNames = Array.from(this.chromosomes.keys())
+    }
 
-        const firstChromosome = chromosomes.values().next().value
-        if(firstChromosome.altNames) {
-            this.altNameSets = Array.from(firstChromosome.altNames.keys())
+    async init() {
+
+        const config = this.config
+
+        this.sequence = await loadFasta(config)
+
+        if (config.chromSizes) {
+            // a chromSizes file is neccessary for 2bit sequences for whole-genome view or chromosome pulldown
+            this.chromosomes = await loadChromSizes(config.chromSizes)
+        } else {
+            this.chromosomes = this.sequence.chromosomes || new Map() // This might be undefined, depending on sequence type
         }
 
-        // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
-        if (config.chromosomeOrder) {
-            if (Array.isArray(config.chromosomeOrder)) {
-                this.wgChromosomeNames = config.chromosomeOrder
+        // For backward compatibility
+        if(this.chromosomes.size > 0) {
+            this.chromosomeNames = Array.from(this.chromosomes.keys())
+        }
+
+
+        if (config.chromAliasBbURL) {
+            this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
+        } else if (config.aliasURL) {
+            this.chromAlias = new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
+        }
+
+        if (config.cytobandBbURL) {
+            this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
+        } else if(config.cytobandURL) {
+            this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
+        }
+
+        if (false !== config.wholeGenomeView && this.chromosomes.size > 0) {
+            // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
+            if (config.chromosomeOrder) {
+                if (Array.isArray(config.chromosomeOrder)) {
+                    this.wgChromosomeNames = config.chromosomeOrder
+                } else {
+                    this.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
+                }
             } else {
-                this.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
-            }
-        } else {
-            this.wgChromosomeNames = trimSmallChromosomes(chromosomes)
-        }
-
-        // Build the alias table and correct cytoband sequence names
-        if(aliases) {
-            this.chrAliasTable = createAliasTable(this.chromosomes, aliases)
-        } else {
-            this.chrAliasTable = {}
-        }
-
-        if (cytobands) {
-            this.cytobands = {}
-            for (let c of Object.keys(cytobands)) {
-                const chrName = this.getChromosomeName(c)
-                this.cytobands[chrName] = cytobands[c]
+                this.wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
             }
         }
 
         // Optionally create the psuedo chromosome "all" to support whole genome view
-        this.wholeGenomeView = config.wholeGenomeView !== false && this.wgChromosomeNames && this.chromosomeNames.length > 1
+        this.wholeGenomeView = config.wholeGenomeView !== false && this.wgChromosomeNames && this.chromosomes.size > 1
         if (this.wholeGenomeView) {
             const l = this.wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
             this.chromosomes.set("all", new Chromosome("all", 0, l))
-            //this.chromosomeNames.unshift("all")
         }
-    }
-
-    updateChromosomes(chromosomes) {
-        for(let key of chromosomes.keys()) {
-            this.chromosomes.set(key, chromosomes.get(key))
-        }
-    }
-
-    updateAliases(aliases) {
-        this.chrAliasTable = createAliasTable(this.chromosomes, aliases);
     }
 
 
@@ -105,47 +117,65 @@ class Genome {
         if (this.showWholeGenomeView() && this.chromosomes.has("all")) {
             return "all"
         } else {
-            return this.chromosomeNames[0]
+            return this.sequence.getFirstChromosomeName()
 
         }
     }
 
-    getChromosomeName(str) {
-        const chr = str ? this.chrAliasTable[str.toLowerCase()] : str
-        return chr ? chr : str
+    getChromosomeName(chr) {
+        return this.chromAlias ? this.chromAlias.getChromosomeName(chr) : chr
     }
 
     getChromosomeDisplayName(str) {
-        const canonicalName = this.getChromosomeName(str)
-        if (this.nameSet) {
-            return this.chromosomes.has(canonicalName) ? this.chromosomes.get(canonicalName).getAltName("ucsc") : canonicalName
+        if (this.nameSet && this.chromAlias) {
+            return this.chromAlias.getChromosomeAlias(str, this.nameSet) || str
         } else {
-            return canonicalName
+            return str
         }
     }
 
     getChromosome(chr) {
-        chr = this.getChromosomeName(chr)
+        if (this.chromAlias) {
+            chr = this.chromAlias.getChromosomeName(chr)
+        }
         return this.chromosomes.get(chr)
     }
 
-    getCytobands(chr) {
-        const chrName = this.getChromosomeName(chr)
-        return this.cytobands ? this.cytobands[chrName] : null
+    async loadChromosome(chr) {
+
+        if (!this.chromosomes.has(chr)) {
+            const sequenceRecord = await this.sequence.getSequenceRecord(chr)
+            if (sequenceRecord) {
+                const chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
+                this.chromosomes.set(chr, chromosome)
+            } else {
+                // Try alias
+                if (this.chromAlias) {
+                    const chromAliasRecord = await this.chromAlias.search(chr)
+                    if (chromAliasRecord) {
+                        const chromosome = new Chromosome(chromAliasRecord.chr, 0, sequenceRecord.bpLength)
+                        this.chromosomes.set(chr, chromosome)
+                    }
+                }
+
+                this.chromosomes.set(chr, undefined)  // Prevents future attempts
+            }
+        }
+
+        return this.chromosomes.get(chr)
     }
 
-    getLongestChromosome() {
+    async getAliasRecord(chr) {
+        if (this.chromAlias) {
+            return this.chromAlias.search(chr)
+        }
+    }
 
-        var longestChr,
-            chromosomes = this.chromosomes
-        for (let key in chromosomes) {
-            if (chromosomes.hasOwnProperty(key)) {
-                var chr = chromosomes[key]
-                if (longestChr === undefined || chr.bpLength > longestChr.bpLength) {
-                    longestChr = chr
-                }
-            }
-            return longestChr
+
+    getCytobands(chr) {
+        if (this.cytobandSource) {
+            const chrName = this.getChromosomeName(chr)
+            return this.cytobandSource.getCytobands(chrName)
         }
     }
 
@@ -253,55 +283,6 @@ class Genome {
     }
 }
 
-function createAliasTable(chromosomes, aliases) {
-
-    /**
-     * Return the official chromosome name for the (possibly) alias.  Deals with
-     * 1 <-> chr1,  chrM <-> MT,  IV <-> chr4, etc.
-     * @param str
-     */
-    const chrAliasTable = {}
-
-    // The standard mappings
-    chrAliasTable["all"] = "all"
-    chromosomes.forEach(function (c) {
-        const name = c.name
-        if (name.startsWith("chr")) {
-            chrAliasTable[name.substring(3)] = name
-        } else if (isNumber(name)) {
-            chrAliasTable["chr" + name] = name
-        }
-        if (name === "chrM") chrAliasTable["mt"] = "chrM"
-        if (name === "MT") chrAliasTable["chrm"] = "MT"
-        chrAliasTable[name.toLowerCase()] = name
-    })
-
-    // Custom mappings
-    if (aliases) {
-        for (let array of aliases) {
-
-            // Find the official chr name
-            let defName
-            for (let i = 0; i < array.length; i++) {
-                if (chromosomes.get(array[i])) {
-                    defName = array[i]
-                    break
-                }
-            }
-
-            if (defName) {
-                for (let alias of array) {
-                    if (alias !== defName) {
-                        chrAliasTable[alias.toLowerCase()] = defName
-                        chrAliasTable[alias] = defName      // Should not be needed
-                    }
-                }
-            }
-        }
-    }
-    return chrAliasTable
-}
-
 /**
  * Trim small sequences (chromosomes) and return the list of trimmed chromosome names.
  * The results are used to construct the whole genome view and optionally chromosome pulldown
@@ -322,7 +303,7 @@ function trimSmallChromosomes(chromosomes) {
             if (c.bpLength < runningAverage / 100) {
                 continue
             }
-            runningAverage = ((i-1) * runningAverage + c.bpLength) / i
+            runningAverage = ((i - 1) * runningAverage + c.bpLength) / i
             wgChromosomeNames.push(c.name)
         }
         i++

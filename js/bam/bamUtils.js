@@ -51,23 +51,11 @@ const MAXIMUM_SAMPLING_DEPTH = 10000
 
 const BamUtils = {
 
-    readHeader: function (url, options, genome) {
+    readHeader: async function (url, options, genome) {
 
-        return igvxhr.loadArrayBuffer(url, options)
-
-            .then(function (compressedBuffer) {
-
-                var header, unc, uncba
-
-                unc = BGZip.unbgzf(compressedBuffer)
-                uncba = unc
-
-                header = BamUtils.decodeBamHeader(uncba, genome)
-
-                return header
-
-            })
-
+        const compressedBuffer = await igvxhr.loadArrayBuffer(url, options)
+        const uncba = BGZip.unbgzf(compressedBuffer)
+        return BamUtils.decodeBamHeader(uncba, genome)
     },
 
     /**
@@ -97,7 +85,6 @@ const BamUtils = {
 
         chrToIndex = {}
         chrNames = []
-        chrAliasTable = {}
 
         for (i = 0; i < nRef; ++i) {
             var lName = readInt(ba, p)
@@ -111,11 +98,6 @@ const BamUtils = {
             chrToIndex[name] = i
             chrNames[i] = name
 
-            if (genome) {
-                alias = genome.getChromosomeName(name)
-                chrAliasTable[alias] = name
-            }
-
             p = p + 8 + lName
         }
 
@@ -123,8 +105,7 @@ const BamUtils = {
             magicNumber: magic,
             size: p,
             chrNames: chrNames,
-            chrToIndex: chrToIndex,
-            chrAliasTable: chrAliasTable
+            chrToIndex: chrToIndex
         }
 
     },

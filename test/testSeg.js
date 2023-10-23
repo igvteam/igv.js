@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
-import GenomeUtils from "../js/genome/genomeUtils.js"
+import Genome from "../js/genome/genome.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/Genome.js"
 
@@ -41,7 +41,7 @@ suite("testSeg", function () {
             cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
         }
 
-        const genome = await GenomeUtils.loadGenome(reference)
+        const genome = await Genome.loadGenome(reference)
         const url = "https://www.dropbox.com/s/h1rotg4xgn1bq8a/segmented_data_080520.seg.gz?dl=0"
         const featureSource = FeatureSource({
             format: 'seg',

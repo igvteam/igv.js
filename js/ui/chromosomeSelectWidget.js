@@ -65,11 +65,7 @@ class ChromosomeSelectWidget {
 
         // Add the "all" selector if whole genome view is supported
         if (genome.showWholeGenomeView()) {
-            const name = 'all'
-            const option = document.createElement('option')
-            option.setAttribute('value', name)
-            option.innerText = genome.getChromosomeDisplayName(name)
-            this.select.appendChild(option)
+            list.unshift("all")
         }
 
         if (list.length < 1000) {

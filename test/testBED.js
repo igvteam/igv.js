@@ -5,7 +5,7 @@ import {assert} from 'chai'
 import {createGenome} from "./utils/Genome.js"
 
 const genome = createGenome()
-import GenomeUtils from "../js/genome/genomeUtils.js"
+import Genome from "../js/genome/genome.js"
 
 suite("testBed", function () {
 
@@ -325,7 +325,7 @@ suite("testBed", function () {
         this.timeout(20000)
 
         // Need an actual genome object for this test, not a mock object
-        const genome = await GenomeUtils.loadGenome({
+        const genome = await Genome.loadGenome({
             id: "hg38",
             name: "Human (GRCh38/hg38)",
             fastaURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",

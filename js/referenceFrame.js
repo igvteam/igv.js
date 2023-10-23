@@ -34,8 +34,8 @@ class ReferenceFrame {
 
     constructor(genome, chr, start, end, bpPerPixel) {
         this.genome = genome
-        this.chr = chr
 
+        this.chr =  chr // this.genome.getChromosomeName(chr)
         this.start = start
 
         // TODO WARNING THIS IS NOT UPDATED !!!
@@ -43,6 +43,10 @@ class ReferenceFrame {
 
         this.bpPerPixel = bpPerPixel
         this.id = DOMUtils.guid()
+    }
+
+    get locusSearchString() {
+        return `${this.chr}:${this.start+1}-${this.end}`
     }
 
     /**
@@ -125,9 +129,9 @@ class ReferenceFrame {
         const centerBP = undefined === centerBPOrUndefined ? (this.start + this.toBP(viewportWidth / 2.0)) : centerBPOrUndefined
 
         // save initial start and bpp
-        const {start, bpPerPixel} = this.start
-
-        const {bpLength} = this.getChromosome()
+        const initialStart = this.start
+        const initialBpPerPixel = this.bpPerPixel
+        const bpLength = this.getChromosome().bpLength
         const bppThreshold = scaleFactor < 1.0 ? browser.minimumBases() / viewportWidth : bpLength / viewportWidth
 
         // update bpp
@@ -144,7 +148,7 @@ class ReferenceFrame {
 
         this.end = this.start + widthBP
 
-        const viewChanged = start !== this.start || bpPerPixel !== this.bpPerPixel
+        const viewChanged = initialStart !== this.start || initialBpPerPixel !== this.bpPerPixel
         if (viewChanged) {
             await browser.updateViews(true)
         }
@@ -229,7 +233,6 @@ function createReferenceFrameList(loci, genome, browserFlanking, minimumBases, v
             locus.end,
             (locus.end - locus.start) / viewportWidth)
 
-        referenceFrame.locusSearchString = locus.locusSearchString
 
         // GTEX hack
         if (locus.gene || locus.snp) {
@@ -249,7 +252,6 @@ function adjustReferenceFrame(scaleFactor, referenceFrame, viewportWidth, alignm
 
     referenceFrame.start = alignmentCC - (referenceFrame.bpPerPixel * (viewportWidth / 2))
     referenceFrame.end = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
-    referenceFrame.locusSearchString = referenceFrame.getLocusString()
 }
 
 function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {

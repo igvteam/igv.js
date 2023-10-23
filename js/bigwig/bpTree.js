@@ -10,6 +10,8 @@ import BinaryParser from "../binary.js"
  */
 export default class BPTree {
 
+    nodeCache = new Map()
+
     static async loadBpTree(path, startOffset) {
         const bpTree = new BPTree(path, startOffset)
         return bpTree.init()
@@ -37,52 +39,89 @@ export default class BPTree {
 
         const {keySize, valSize} = this.header
 
-        if (valSize !== 16) {
-            throw Error(`Unexpected valSize: ${valSize}`)
+        if (!(valSize === 16 || valSize === 8)) {
+            throw Error(`Unexpected valSize ${valSize}`)
         }
 
         const readTreeNode = async (offset) => {
 
-            let binaryParser = await this.#getParserFor(offset, 4)
-            const type = binaryParser.getByte()
-            const reserved = binaryParser.getByte()
-            const count = binaryParser.getUShort()
+            if (this.nodeCache.has(offset)) {
+                return this.nodeCache.get(offset)
+            } else {
 
-            if (type === 1) {
+                let binaryParser = await this.#getParserFor(offset, 4)
+                const type = binaryParser.getByte()
+                const reserved = binaryParser.getByte()
+                const count = binaryParser.getUShort()
+                const items = []
+
+                if (type === 1) {
+                    // Leaf node
+                    const size = count * (keySize + valSize)
+                    binaryParser = await this.#getParserFor(offset + 4, size)
+                    for (let i = 0; i < count; i++) {
+                        const key = binaryParser.getFixedLengthString(keySize)
+                        const offset = binaryParser.getLong()
+
+                        let value
+                        if (valSize === 16) {
+                            const length = binaryParser.getInt()
+                            binaryParser.getInt()
+                            value = {offset, length}
+                        } else {
+                            value = {offset}
+                        }
+                        items.push({key, value})
+                    }
+                } else {
+                    // Non leaf node
+                    const size = count * (keySize + 8)
+                    binaryParser = await this.#getParserFor(offset + 4, size)
+
+                    for (let i = 0; i < count; i++) {
+                        const key = binaryParser.getFixedLengthString(keySize)
+                        const offset = binaryParser.getLong()
+                        items.push({key, offset})
+                    }
+                }
+
+                const node = {type, count, items}
+                this.nodeCache.set(offset, node)
+                return node
+            }
+        }
+
+        const walkTreeNode = async (offset) => {
+
+            const node = await readTreeNode(offset)
+
+            if (node.type === 1) {
                 // Leaf node
-                const size = count * (keySize + valSize)
-                binaryParser = await this.#getParserFor(offset + 4, size)
-                for (let i = 0; i < count; i++) {
-                    const key = binaryParser.getFixedLengthString(keySize)
-                    const offset = binaryParser.getLong()
-                    const length = binaryParser.getInt()
-                    const reserved = binaryParser.getInt()
-                    const value = {offset, length}
-                    if (term === key) return value
+                for (let item of node.items) {
+                    if (term === item.key) {
+                        return item.value
+                    }
                 }
             } else {
                 // Non leaf node
-                const size = count * (keySize + 8)
-                binaryParser = await this.#getParserFor(offset + 4, size)
 
                 // Read and discard the first key.
-                const firstKey = binaryParser.getFixedLengthString(keySize)
-                let childOffset = binaryParser.getLong()
+                let childOffset = node.items[0].offset
 
-                for (let i = 1; i < count; i++) {
-                    const key = binaryParser.getFixedLengthString(keySize)
+                for (let i = 1; i < node.items.length; i++) {
+                    const key = node.items[i].key
                     if (term.localeCompare(key) < 0) {
                         break
                     }
-                    childOffset = binaryParser.getLong()
+                    childOffset = node.items[i].offset
                 }
 
-                return readTreeNode(childOffset)
+                return walkTreeNode(childOffset)
             }
         }
 
         // Kick things off
-        return readTreeNode(this.header.nodeOffset)
+        return walkTreeNode(this.header.nodeOffset)
     }
 
     async #getParserFor(start, size) {
