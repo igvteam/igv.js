@@ -35,12 +35,10 @@
 
 
     const hubOptions = {
-        url: "https://hgdownload.soe.ucsc.edu/hubs/GCA/018/471/515/GCA_018471515.1/hub.txt",
-        includeTracks: "all"
+        includeTracks: true
     }
 
-
-    const hub = await Hub.loadHub(hubOptions)
+    const hub = await Hub.loadHub("https://hgdownload.soe.ucsc.edu/hubs/GCA/018/471/515/GCA_018471515.1/hub.txt", hubOptions)
     const ref = hub.getGenomeConfig()
 
     const igvConfig = {

@@ -9,32 +9,27 @@ import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
 class Hub {
 
-    static async loadHub(options) {
-
-        if (!options.url) {
-            throw Error("Expected url")
-        }
-
-        const stanzas = await loadStanzas(options)
-
-        let groups
-        if ("genome" === stanzas[1].type) {
-            const genome = stanzas[1]
-            if (genome.hasProperty("groups")) {
-                const idx = options.url.lastIndexOf("/")
-                const baseURL = options.url.substring(0, idx + 1)
-                const groupsTxtURL = baseURL + genome.getProperty("groups")
-                groups = await loadStanzas({url: groupsTxtURL})
-            }
-        }
-        return new Hub(options.url, stanzas, groups)
-    }
-
     static supportedTypes = new Set(["bigBed", "bigWig", "bigGenePred"])
     static filterTracks = new Set(["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
         "cpgIslandExtUnmasked", "windowMasker"])
 
-    constructor(url, stanzas, groups) {
+    static async loadHub(url, options) {
+
+        const stanzas = await loadStanzas(url, options)
+        let groups
+        if ("genome" === stanzas[1].type) {
+            const genome = stanzas[1]
+            if (genome.hasProperty("groups")) {
+                const idx = url.lastIndexOf("/")
+                const baseURL = url.substring(0, idx + 1)
+                const groupsTxtURL = baseURL + genome.getProperty("groups")
+                groups = await loadStanzas(groupsTxtURL)
+            }
+        }
+        return new Hub(url, stanzas, groups)
+    }
+
+    constructor(url, stanzas, groupStanzas) {
 
         const idx = url.lastIndexOf("/")
         this.baseURL = url.substring(0, idx + 1)
@@ -69,19 +64,58 @@ class Hub {
             }
         }
 
-        if (groups) {
+        if (groupStanzas) {
+            this.groupStanzas = groupStanzas
             this.groupPriorityMap = new Map()
-            for (let g of groups) {
+            for (let g of groupStanzas) {
                 if (g.hasProperty("priority")) {
                     this.groupPriorityMap.set(g.getProperty("name"), Number.parseInt(g.getProperty("priority")) * 10)
                 }
             }
-            this.groupPriorities = new Map()
         }
     }
 
     getDefaultPosition() {
         return this.genomeStanza.getProperty("defaultPos")
+    }
+
+    getTrackConfigurations() {
+
+        // Organize track configs by group
+        const trackConfigMap = new Map()
+        for (let c of this.#getTracksConfigs()) {
+            const name = c.group || "other"
+            if (trackConfigMap.has(name)) {
+                trackConfigMap.get(name).push(c)
+            } else {
+                trackConfigMap.set(name, [c])
+            }
+        }
+
+        // Build group structure
+        const t = []
+        if (this.groupStanzas) {
+            for (let g of this.groupStanzas) {
+                const groupName = g.getProperty("name")
+                if(trackConfigMap.has(groupName)) {
+                    t.push(
+                        {
+                            label: g.getProperty("label"),
+                            tracks: trackConfigMap.get(g.getProperty("name"))
+                        }
+                    )
+                }
+            }
+        }
+
+        if(trackConfigMap.has("other")) {
+            t.push({
+                label: "other",
+                tracks: trackConfigMap.get("other")
+            })
+        }
+
+        return t
     }
 
     /*  Example genome stanza
@@ -123,6 +157,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         if (this.genomeStanza.hasProperty("twoBitBptURL")) {
             config.twoBitBptURL = this.baseURL + this.genomeStanza.getProperty("twoBitBptURL")
         }
+
         if (this.genomeStanza.hasProperty("twoBitBptUrl")) {
             config.twoBitBptURL = this.baseURL + this.genomeStanza.getProperty("twoBitBptUrl")
         }
@@ -161,7 +196,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
 
         // Tracks.  To prevent loading tracks set `includeTracks`to false
         if (includeTracks) {
-            config.tracks = this.#getTracksConfigs(includeTracks)
+            config.tracks = this.#getTracksConfigs(Hub.filterTracks)
         }
 
         return config
@@ -170,14 +205,12 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
     /**
      * Return collection of igv track config object, organized by "group*
      */
-    #getTracksConfigs(group) {
+    #getTracksConfigs(filter) {
         return this.trackStanzas.filter(t => {
             return t.getProperty("visibility") !== "hide" &&
                 Hub.supportedTypes.has(t.format) &&
-                !Hub.filterTracks.has(t.name) &&
-                t.hasProperty("bigDataUrl") &&
-                ("all" === group || group === t.getProperty("group"))
-
+                (!filter || !Hub.filterTracks.has(t.name) &&
+                    t.hasProperty("bigDataUrl"))
         })
             .map(t => this.#getTrackConfig(t))
     }
@@ -353,9 +386,9 @@ class Stanza {
  * @param url
  * @returns {Promise<*[]>}
  */
-async function loadStanzas(options) {
+async function loadStanzas(url, options) {
 
-    const data = await igvxhr.loadString(options.url)
+    const data = await igvxhr.loadString(url)
     const lines = data.split(/\n|\r\n|\r/g)
 
     const nodes = []

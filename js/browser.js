@@ -493,7 +493,9 @@ class Browser {
                     return new XMLSession(string, knownGenomes)
 
                 } else if (filename.endsWith("hub.txt")) {
-                    const hub = await Hub.loadHub(options)
+
+                    const hub = await Hub.loadHub(urlOrFile, options)
+
                     if(chromosomeSelectWidget) {
                         chromosomeSelectWidget.hide()
                     }
@@ -763,7 +765,7 @@ class Browser {
 
         let genomeConfig
         if (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
-            const hub = await Hub.loadHub(idOrConfig)
+            const hub = await Hub.loadHub(idOrConfig.url, idOrConfig)
             genomeConfig = hub.getGenomeConfig("genes")
         } else {
             genomeConfig = idOrConfig //await GenomeUtils.expandReference(this.alert, idOrConfig)
@@ -793,7 +795,7 @@ class Browser {
      */
     async loadTrackHub(options) {
 
-        const hub = await Hub.loadHub(options)
+        const hub = await Hub.loadHub(options.url, options)
         const genomeConfig = hub.getGenomeConfig()
         const initialLocus = hub.getDefaultPosition()
         if (initialLocus) {
