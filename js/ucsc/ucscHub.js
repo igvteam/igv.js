@@ -29,7 +29,6 @@ class Hub {
         return new Hub(url, stanzas, groups)
     }
 
-
     constructor(url, stanzas, groupStanzas) {
 
         const idx = url.lastIndexOf("/")
@@ -158,6 +157,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         if (this.genomeStanza.hasProperty("twoBitBptURL")) {
             config.twoBitBptURL = this.baseURL + this.genomeStanza.getProperty("twoBitBptURL")
         }
+
         if (this.genomeStanza.hasProperty("twoBitBptUrl")) {
             config.twoBitBptURL = this.baseURL + this.genomeStanza.getProperty("twoBitBptUrl")
         }

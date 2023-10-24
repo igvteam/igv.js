@@ -6,7 +6,6 @@ import BWReader from "../js/bigwig/bwReader.js"
 
 suite("ucsc utilities", function () {
 
-
     test("trix", async function () {
 
         this.timeout(200000)

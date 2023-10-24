@@ -493,7 +493,9 @@ class Browser {
                     return new XMLSession(string, knownGenomes)
 
                 } else if (filename.endsWith("hub.txt")) {
+
                     const hub = await Hub.loadHub(urlOrFile, options)
+
                     if(chromosomeSelectWidget) {
                         chromosomeSelectWidget.hide()
                     }
