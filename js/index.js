@@ -11,6 +11,7 @@ import {registerFileFormats} from "./util/trackUtils.js"
 import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import {registerTrackClass, registerTrackCreatorFunction} from "./trackFactory.js"
 import TrackBase from "./trackBase.js"
+import Hub from "./ucsc/ucscHub.js"
 
 const setApiKey = igvxhr.setApiKey
 
@@ -45,6 +46,7 @@ export default {
     TrackBase,
     registerTrackClass,
     registerTrackCreatorFunction,
-    registerFileFormats
+    registerFileFormats,
+    Hub
 }
 
