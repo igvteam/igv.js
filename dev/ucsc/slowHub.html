@@ -31,6 +31,7 @@
     //igvConfig.reference.chromAliasBbURL = undefined   // TODO <- chromAliasBB is slowish
 
     const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+      console.log(browser.getTrackURLs())
 
 
 </script>
