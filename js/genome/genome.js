@@ -47,7 +47,7 @@ class Genome {
         }
 
         // For backward compatibility
-        if(this.chromosomes.size > 0) {
+        if (this.chromosomes.size > 0) {
             this.chromosomeNames = Array.from(this.chromosomes.keys())
         }
 
@@ -59,7 +59,7 @@ class Genome {
 
         if (config.cytobandBbURL) {
             this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
-        } else if(config.cytobandURL) {
+        } else if (config.cytobandURL) {
             this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
         }
 
@@ -83,7 +83,6 @@ class Genome {
             this.chromosomes.set("all", new Chromosome("all", 0, l))
         }
     }
-
 
 
     get description() {
@@ -143,23 +142,21 @@ class Genome {
     async loadChromosome(chr) {
 
         if (!this.chromosomes.has(chr)) {
+            let chromosome
             let sequenceRecord = await this.sequence.getSequenceRecord(chr)
             if (sequenceRecord) {
-                const chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
-                this.chromosomes.set(chr, chromosome)
+                chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
             } else {
                 // Try alias
                 if (this.chromAlias) {
                     const chromAliasRecord = await this.chromAlias.search(chr)
                     if (chromAliasRecord) {
                         sequenceRecord = await this.sequence.getSequenceRecord(chromAliasRecord.chr)
-                        const chromosome = new Chromosome(chromAliasRecord.chr, 0, sequenceRecord.bpLength)
-                        this.chromosomes.set(chr, chromosome)
+                        chromosome = new Chromosome(chromAliasRecord.chr, 0, sequenceRecord.bpLength)
                     }
                 }
-
-                this.chromosomes.set(chr, undefined)  // Prevents future attempts
             }
+            this.chromosomes.set(chr, chromosome)  // <= chromosome might be undefined, setting it prevents future attempts
         }
 
         return this.chromosomes.get(chr)
