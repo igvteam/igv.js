@@ -455,9 +455,6 @@ class Browser {
      */
     async loadSession(options) {
 
-        // UCSC hub hack
-        const chromosomeSelectWidget = this.chromosomeSelectWidget
-
         this.sampleInfo.initialize()
 
         // TODO: deprecated
@@ -466,6 +463,14 @@ class Browser {
         let session
         if (options.url || options.file) {
             session = await loadSessionFile(options)
+
+            // Hack to accomodate ucsc Hubs.  Refactor this -- hide based on genome characteristics, not session
+            if (this.config.showChromosomeWidget === false || session.showChromosomeWidget === false) {
+                this.chromosomeSelectWidget.hide()
+            } else {
+                this.chromosomeSelectWidget.show()
+            }
+
         } else {
             session = options
         }
@@ -487,7 +492,6 @@ class Browser {
                 }
 
                 if (filename.endsWith(".xml")) {
-
                     const knownGenomes = GenomeUtils.KNOWN_GENOMES
                     const string = await igvxhr.loadString(urlOrFile)
                     return new XMLSession(string, knownGenomes)
@@ -495,16 +499,13 @@ class Browser {
                 } else if (filename.endsWith("hub.txt")) {
 
                     const hub = await Hub.loadHub(urlOrFile, options)
-
-                    if(chromosomeSelectWidget) {
-                        chromosomeSelectWidget.hide()
-                    }
                     const genomeConfig = hub.getGenomeConfig(options.includeTracks)
                     const initialLocus = hub.getDefaultPosition()
                     const config = {
                         showChromosomeWidget: false,
                         locus: initialLocus,
-                        reference: genomeConfig
+                        reference: genomeConfig,
+                        _isHub: true
                     }
                     return setDefaults(config)
                 } else if (filename.endsWith(".json")) {
@@ -703,7 +704,7 @@ class Browser {
 
         // TODO -- I don't understand the genomeChange test.  We always want to trigger a fresh start on loading a session or genome
         //if (genomeChange) {
-            this.removeAllTracks()
+        this.removeAllTracks()
         //}
 
         let locus = getInitialLocus(initialLocus, genome)
@@ -746,10 +747,10 @@ class Browser {
     }
 
     updateNavbarDOMWithGenome(genome) {
-        let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0,8)}...${genome.id.substring(genome.id.length-8)}`)
+        let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0, 8)}...${genome.id.substring(genome.id.length - 8)}`)
         this.$current_genome.text(genomeLabel)
         this.$current_genome.attr('title', genome.description)
-        if(this.config.showChromosomeWidget !== false) {
+        if (this.config.showChromosomeWidget !== false) {
             this.chromosomeSelectWidget.update(genome)
         }
     }
@@ -782,6 +783,14 @@ class Browser {
         }
 
         await this.loadTrackList(tracks)
+
+        // Hack to accomodate ucsc Hubs.  Refactor this -- hide based on genome characteristics, not session
+        if (this.config.showChromosomeWidget === false) {
+            this.chromosomeSelectWidget.hide()
+        } else {
+            this.chromosomeSelectWidget.show()
+        }
+
 
         await this.updateViews()
 
@@ -1415,22 +1424,22 @@ class Browser {
             }
 
             // An autoscaleGroup of only one (1) trackView has the lone trackView removed from group autoscale mode
-            const singleTonKeys = Object.keys(groupAutoscaleTrackViews).filter(key => 1 === groupAutoscaleTrackViews[ key ].length)
+            const singleTonKeys = Object.keys(groupAutoscaleTrackViews).filter(key => 1 === groupAutoscaleTrackViews[key].length)
 
             if (singleTonKeys.length > 0) {
                 // Look for any single trackView groupAutoscale groups and move the single trackView to otherTrackViews list
                 for (const key of singleTonKeys) {
-                    for (const trackView of groupAutoscaleTrackViews[ key ]) {
+                    for (const trackView of groupAutoscaleTrackViews[key]) {
                         trackView.track.autoscaleGroup = undefined
                     }
-                    otherTrackViews.push(...groupAutoscaleTrackViews[ key ])
-                    delete groupAutoscaleTrackViews[ key ]
+                    otherTrackViews.push(...groupAutoscaleTrackViews[key])
+                    delete groupAutoscaleTrackViews[key]
                 }
             }
 
             // Calculate group autoscale dataRange
             if (Object.entries(groupAutoscaleTrackViews).length > 0) {
-                for (const [ group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
+                for (const [group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
                     const featureArray = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
                     const dataRange = doAutoscale(featureArray.flat())
                     for (const trackView of trackViews) {
@@ -1465,7 +1474,6 @@ class Browser {
         }
 
         this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
-
 
 
         const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')

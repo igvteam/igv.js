@@ -51,7 +51,6 @@ class Genome {
             this.chromosomeNames = Array.from(this.chromosomes.keys())
         }
 
-
         if (config.chromAliasBbURL) {
             this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
         } else if (config.aliasURL) {
@@ -144,7 +143,7 @@ class Genome {
     async loadChromosome(chr) {
 
         if (!this.chromosomes.has(chr)) {
-            const sequenceRecord = await this.sequence.getSequenceRecord(chr)
+            let sequenceRecord = await this.sequence.getSequenceRecord(chr)
             if (sequenceRecord) {
                 const chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
                 this.chromosomes.set(chr, chromosome)
@@ -153,6 +152,7 @@ class Genome {
                 if (this.chromAlias) {
                     const chromAliasRecord = await this.chromAlias.search(chr)
                     if (chromAliasRecord) {
+                        sequenceRecord = await this.sequence.getSequenceRecord(chromAliasRecord.chr)
                         const chromosome = new Chromosome(chromAliasRecord.chr, 0, sequenceRecord.bpLength)
                         this.chromosomes.set(chr, chromosome)
                     }
