@@ -38,21 +38,29 @@
         includeTracks: true
     }
 
-    const hub = await Hub.loadHub("https://hgdownload.soe.ucsc.edu/hubs/GCA/018/471/515/GCA_018471515.1/hub.txt", hubOptions)
+    const hub = await Hub.loadHub("https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/hub.txt", hubOptions)
     const ref = hub.getGenomeConfig()
 
     const igvConfig = {
-        locus: hub.getDefaultPosition(),
-        showChromosomeWidget: false,
         reference: ref
     }
+
+    // for(let tc of hub.getTrackConfigurations()) {
+    //     for(let t of tc.tracks) {
+    //         if(t.url.endsWith("undefined")) console.log(`${tc.label}  ${t.name}  ${t.url}`)
+    //     }
+    // }
 
     const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
 
     const selector = document.getElementById("select")
     selector.addEventListener("change", () => document.getElementById("hub-input").value = selector.value)
+
+    document.getElementById("hub-input").value = "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/hub.txt"
+
     document.getElementById("load-genome").addEventListener("click", () =>
         browser.loadGenome({url: document.getElementById("hub-input").value}))
+
     document.getElementById("load-session").addEventListener("click", () =>
         browser.loadSession({url: document.getElementById("hub-input").value}))
 
