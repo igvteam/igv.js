@@ -448,15 +448,10 @@ class Browser {
     /**
      * Initialize a session from an object, json, or by loading from a file.
      *
-     * TODO Really should be split into at least 2 functions, load from file and load from object/json
-     *
      * @param options
      * @returns {*}
      */
     async loadSession(options) {
-
-        // UCSC hub hack
-        const chromosomeSelectWidget = this.chromosomeSelectWidget
 
         this.sampleInfo.initialize()
 
@@ -487,7 +482,6 @@ class Browser {
                 }
 
                 if (filename.endsWith(".xml")) {
-
                     const knownGenomes = GenomeUtils.KNOWN_GENOMES
                     const string = await igvxhr.loadString(urlOrFile)
                     return new XMLSession(string, knownGenomes)
@@ -495,15 +489,8 @@ class Browser {
                 } else if (filename.endsWith("hub.txt")) {
 
                     const hub = await Hub.loadHub(urlOrFile, options)
-
-                    if(chromosomeSelectWidget) {
-                        chromosomeSelectWidget.hide()
-                    }
-                    const genomeConfig = hub.getGenomeConfig(options.includeTracks)
-                    const initialLocus = hub.getDefaultPosition()
+                    const genomeConfig = hub.getGenomeConfig()
                     const config = {
-                        showChromosomeWidget: false,
-                        locus: initialLocus,
                         reference: genomeConfig
                     }
                     return setDefaults(config)
@@ -515,7 +502,6 @@ class Browser {
             }
         }
     }
-
 
     /**
      * Note:  public API function
@@ -668,64 +654,6 @@ class Browser {
 
     }
 
-    createCenterLineList(columnContainer) {
-
-        const centerLines = columnContainer.querySelectorAll('.igv-center-line')
-        for (let i = 0; i < centerLines.length; i++) {
-            centerLines[i].remove()
-        }
-
-        const centerLineList = []
-        const viewportColumns = columnContainer.querySelectorAll('.igv-column')
-        for (let i = 0; i < viewportColumns.length; i++) {
-            centerLineList.push(new ViewportCenterLine(this, this.referenceFrameList[i], viewportColumns[i]))
-        }
-
-        return centerLineList
-    }
-
-    /**
-     * Load a reference genome object.  This includes the fasta, and optional cytoband, but no tracks.  This method
-     * is used by loadGenome and loadSession.
-     *
-     * @param genomeConfig
-     * @param initialLocus
-     */
-    async loadReference(genomeConfig, initialLocus) {
-
-        const genome = await Genome.loadGenome(genomeConfig)
-
-        const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
-
-        this.genome = genome
-
-        this.updateNavbarDOMWithGenome(genome)
-
-        // TODO -- I don't understand the genomeChange test.  We always want to trigger a fresh start on loading a session or genome
-        //if (genomeChange) {
-            this.removeAllTracks()
-        //}
-
-        let locus = getInitialLocus(initialLocus, genome)
-        const locusFound = await this.search(locus, true)
-        if (!locusFound) {
-            console.log("Initial locus not found: " + locus)
-            locus = genome.getHomeChromosomeName()
-            const locusFound = await this.search(locus, true)
-            if (!locusFound) {
-                throw new Error("Cannot set initial locus")
-            }
-        }
-
-        if (genomeChange && this.circularView) {
-            this.circularView.setAssembly({
-                name: this.genome.id,
-                id: this.genome.id,
-                chromosomes: makeCircViewChromosomes(this.genome)
-            })
-        }
-    }
-
     cleanHouseForSession() {
 
         for (let trackView of this.trackViews) {
@@ -745,12 +673,61 @@ class Browser {
 
     }
 
+    /**
+     * Load a reference genome object.  This includes the fasta, and optional cytoband, but no tracks.  This method
+     * is used by loadGenome and loadSession.
+     *
+     * @param genomeConfig
+     * @param initialLocus
+     */
+    async loadReference(genomeConfig, initialLocus) {
+
+        const genome = await Genome.loadGenome(genomeConfig)
+
+        const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
+
+        this.genome = genome
+
+        this.updateNavbarDOMWithGenome(genome)
+
+        this.removeAllTracks()
+
+        let locus = initialLocus || genome.initialLocus
+        if (Array.isArray(locus)) {
+            locus = locus.join(' ')
+        }
+
+        const locusFound = await this.search(locus, true)
+        if (!locusFound) {
+            throw new Error(`Cannot set initial locus ${locus}`)
+        }
+
+        if (genomeChange && this.circularView) {
+            this.circularView.setAssembly({
+                name: this.genome.id,
+                id: this.genome.id,
+                chromosomes: makeCircViewChromosomes(this.genome)
+            })
+        }
+    }
+
+
     updateNavbarDOMWithGenome(genome) {
-        let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0,8)}...${genome.id.substring(genome.id.length-8)}`)
+        let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0, 8)}...${genome.id.substring(genome.id.length - 8)}`)
         this.$current_genome.text(genomeLabel)
         this.$current_genome.attr('title', genome.description)
-        if(this.config.showChromosomeWidget !== false) {
+
+        // chromosome select widget -- Show this IFF its not explicitly hidden AND the genome has pre-loaded chromosomes
+        const showChromosomeWidget =
+            this.config.showChromosomeWidget !== false &&
+            genome.getChromosomes().size > 1 &&
+            (genome.wgChromosomeNames || genome.getChromosomes().size < 1000)
+
+        if (showChromosomeWidget) {
             this.chromosomeSelectWidget.update(genome)
+            this.chromosomeSelectWidget.show()
+        } else {
+            this.chromosomeSelectWidget.hide()
         }
     }
 
@@ -771,7 +748,7 @@ class Browser {
             genomeConfig = idOrConfig //await GenomeUtils.expandReference(this.alert, idOrConfig)
         }
 
-        await this.loadReference(genomeConfig, undefined)
+        await this.loadReference(genomeConfig)
 
         const tracks = genomeConfig.tracks || []
 
@@ -794,20 +771,9 @@ class Browser {
      * @returns {Promise<void>}
      */
     async loadTrackHub(options) {
-
         const hub = await Hub.loadHub(options.url, options)
-        const genomeConfig = hub.getGenomeConfig()
-        const initialLocus = hub.getDefaultPosition()
-        if (initialLocus) {
-            const session = {
-                locus: initialLocus,
-                reference: genomeConfig
-            }
-            return this.loadSessionObject(session)
-
-        } else {
-            return this.loadGenome(genomeConfig)
-        }
+        const genomeConfig = setDefaults(hub.getGenomeConfig())
+        return this.loadGenome(genomeConfig)
     }
 
     /**
@@ -1424,22 +1390,22 @@ class Browser {
             }
 
             // An autoscaleGroup of only one (1) trackView has the lone trackView removed from group autoscale mode
-            const singleTonKeys = Object.keys(groupAutoscaleTrackViews).filter(key => 1 === groupAutoscaleTrackViews[ key ].length)
+            const singleTonKeys = Object.keys(groupAutoscaleTrackViews).filter(key => 1 === groupAutoscaleTrackViews[key].length)
 
             if (singleTonKeys.length > 0) {
                 // Look for any single trackView groupAutoscale groups and move the single trackView to otherTrackViews list
                 for (const key of singleTonKeys) {
-                    for (const trackView of groupAutoscaleTrackViews[ key ]) {
+                    for (const trackView of groupAutoscaleTrackViews[key]) {
                         trackView.track.autoscaleGroup = undefined
                     }
-                    otherTrackViews.push(...groupAutoscaleTrackViews[ key ])
-                    delete groupAutoscaleTrackViews[ key ]
+                    otherTrackViews.push(...groupAutoscaleTrackViews[key])
+                    delete groupAutoscaleTrackViews[key]
                 }
             }
 
             // Calculate group autoscale dataRange
             if (Object.entries(groupAutoscaleTrackViews).length > 0) {
-                for (const [ group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
+                for (const [group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
                     const featureArray = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
                     const dataRange = doAutoscale(featureArray.flat())
                     for (const trackView of trackViews) {
@@ -1473,12 +1439,11 @@ class Browser {
             referenceFrame.end = referenceFrame.start + referenceFrame.bpPerPixel * width
         }
 
-        this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
-
-
+        if (this.chromosomeSelectWidget) {
+            this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
+        }
 
         const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
-
 
         this.$searchInput.val(loc)
 
@@ -1569,6 +1534,22 @@ class Browser {
 
         resize.call(this)
         await this.updateViews(true)
+    }
+
+    createCenterLineList(columnContainer) {
+
+        const centerLines = columnContainer.querySelectorAll('.igv-center-line')
+        for (let i = 0; i < centerLines.length; i++) {
+            centerLines[i].remove()
+        }
+
+        const centerLineList = []
+        const viewportColumns = columnContainer.querySelectorAll('.igv-column')
+        for (let i = 0; i < viewportColumns.length; i++) {
+            centerLineList.push(new ViewportCenterLine(this, this.referenceFrameList[i], viewportColumns[i]))
+        }
+
+        return centerLineList
     }
 
     async removeMultiLocusPanel(referenceFrame) {
@@ -2268,14 +2249,6 @@ function mouseUpOrLeave(e) {
     this.endTrackDrag()
 }
 
-
-function getInitialLocus(locus, genome) {
-    if (locus) {
-        return Array.isArray(locus) ? locus.join(' ') : locus
-    } else {
-        return genome.getHomeChromosomeName()
-    }
-}
 
 function logo() {
 

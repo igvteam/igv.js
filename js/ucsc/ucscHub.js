@@ -9,23 +9,35 @@ import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
 class Hub {
 
-    static supportedTypes = new Set(["bigBed", "bigWig", "bigGenePred"])
+    static supportedTypes = new Set(["bigBed", "bigWig", "bigGenePred", "vcfTabix"])
     static filterTracks = new Set(["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
         "cpgIslandExtUnmasked", "windowMasker"])
 
     static async loadHub(url, options) {
 
+        const idx = url.lastIndexOf("/")
+        const baseURL = url.substring(0, idx + 1)
         const stanzas = await loadStanzas(url, options)
         let groups
         if ("genome" === stanzas[1].type) {
             const genome = stanzas[1]
             if (genome.hasProperty("groups")) {
-                const idx = url.lastIndexOf("/")
-                const baseURL = url.substring(0, idx + 1)
                 const groupsTxtURL = baseURL + genome.getProperty("groups")
                 groups = await loadStanzas(groupsTxtURL)
             }
         }
+
+        // load includes.  Nested includes are not supported
+        for (let s of stanzas.slice()) {
+            if ("include" === s.type) {
+                const includeStanzas = await loadStanzas(baseURL + s.getProperty("include"))
+                for (s of includeStanzas) {
+                    s.setProperty("visibility", "hide")
+                    stanzas.push(s)
+                }
+            }
+        }
+
         return new Hub(url, stanzas, groups)
     }
 
@@ -59,8 +71,6 @@ class Hub {
         for (let i = 2; i < stanzas.length; i++) {
             if ("track" === stanzas[i].type) {
                 this.trackStanzas.push(stanzas[i])
-            } else {
-                console.warn(`Unexpected stanza type: ${stanzas[i].type}`)
             }
         }
 
@@ -84,38 +94,26 @@ class Hub {
         // Organize track configs by group
         const trackConfigMap = new Map()
         for (let c of this.#getTracksConfigs()) {
-            const name = c.group || "other"
-            if (trackConfigMap.has(name)) {
-                trackConfigMap.get(name).push(c)
+            const groupName = c.group || "other"
+            if (trackConfigMap.has(groupName)) {
+                trackConfigMap.get(groupName).push(c)
             } else {
-                trackConfigMap.set(name, [c])
+                trackConfigMap.set(groupName, [c])
             }
         }
 
         // Build group structure
-        const t = []
-        if (this.groupStanzas) {
-            for (let g of this.groupStanzas) {
-                const groupName = g.getProperty("name")
-                if(trackConfigMap.has(groupName)) {
-                    t.push(
-                        {
-                            label: g.getProperty("label"),
-                            tracks: trackConfigMap.get(g.getProperty("name"))
-                        }
-                    )
-                }
+        const groupStanazMap = this.groupStanzas ?
+            new Map(this.groupStanzas.map(groupStanza => [groupStanza.getProperty("name"), groupStanza])) :
+            new Map()
+
+        return Array.from(trackConfigMap.keys()).map(groupName => {
+            return {
+                label: groupStanazMap.has(groupName) ? groupStanazMap.get(groupName).getProperty("label") : groupName,
+                tracks: trackConfigMap.get(groupName)
             }
-        }
+        })
 
-        if(trackConfigMap.has("other")) {
-            t.push({
-                label: "other",
-                tracks: trackConfigMap.get("other")
-            })
-        }
-
-        return t
     }
 
     /*  Example genome stanza
@@ -136,7 +134,7 @@ transBlat dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
 isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
  */
 
-    getGenomeConfig(includeTracks = "all") {
+    getGenomeConfig(includeTrackGroups = "all") {
         // TODO -- add blat?  htmlPath?
         const config = {
             id: this.genomeStanza.getProperty("genome"),
@@ -144,6 +142,10 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
             twoBitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
             nameSet: "ucsc",
             wholeGenomeView: false
+        }
+
+        if (this.genomeStanza.hasProperty("defaultPos")) {
+            config.locus = this.genomeStanza.getProperty("defaultPos")
         }
 
         config.description = config.id
@@ -165,6 +167,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         // if (this.genomeStanza.hasProperty("chromSizes")) {
         //     config.chromSizes = this.baseURL + this.genomeStanza.getProperty("chromSizes")
         // }
+
         if (this.genomeStanza.hasProperty("description")) {
             config.description += `\n${this.genomeStanza.getProperty("description")}`
         }
@@ -189,14 +192,17 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         type bigBed 4 +
         bigDataUrl bbi/GCA_004027145.1_DauMad_v1_BIUU.cytoBand.bb
          */
-        const cytoStanza = this.trackStanzas.filter(t => "cytoBandIdeo" === t.name && t.getProperty("bigDataUrl"))
+        const cytoStanza = this.trackStanzas.filter(t => "cytoBandIdeo" === t.name && t.hasProperty("bigDataUrl"))
         if (cytoStanza.length > 0) {
             config.cytobandBbURL = this.baseURL + cytoStanza[0].getProperty("bigDataUrl")
         }
 
-        // Tracks.  To prevent loading tracks set `includeTracks`to false
-        if (includeTracks) {
-            config.tracks = this.#getTracksConfigs(Hub.filterTracks)
+        // Tracks.  To prevent loading tracks set `includeTrackGroups`to false or "none"
+        if (includeTrackGroups && "none" !== includeTrackGroups) {
+            const filter = (t) => !Hub.filterTracks.has(t.name) &&
+                "hide" !== t.getProperty("visibility") &&
+                ("all" === includeTrackGroups || t.getProperty("group") === includeTrackGroups)
+            config.tracks = this.#getTracksConfigs(filter)
         }
 
         return config
@@ -207,10 +213,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
      */
     #getTracksConfigs(filter) {
         return this.trackStanzas.filter(t => {
-            return t.getProperty("visibility") !== "hide" &&
-                Hub.supportedTypes.has(t.format) &&
-                (!filter || !Hub.filterTracks.has(t.name) &&
-                    t.hasProperty("bigDataUrl"))
+            return Hub.supportedTypes.has(t.format) && t.hasProperty("bigDataUrl") && (!filter || filter(t))
         })
             .map(t => this.#getTrackConfig(t))
     }
@@ -244,6 +247,10 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
             "format": format,
             "url": this.baseURL + t.getProperty("bigDataUrl"),
             "displayMode": t.displayMode,
+        }
+
+        if ("vcfTabix" === format) {
+            config.indexURL = config.url + ".tbi"
         }
 
         if (t.hasProperty("longLabel") && t.hasProperty("html")) {
