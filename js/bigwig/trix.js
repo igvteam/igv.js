@@ -51,7 +51,6 @@ export default class Trix {
             const match = word.startsWith(searchWord)
             if (match) {
                 matches.push(line)
-                console.log("match " + line)
             }
             // we are done scanning if we are lexicographically greater than the search string
             if (word.slice(0, searchWord.length) > searchWord) {

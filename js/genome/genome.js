@@ -47,10 +47,9 @@ class Genome {
         }
 
         // For backward compatibility
-        if(this.chromosomes.size > 0) {
+        if (this.chromosomes.size > 0) {
             this.chromosomeNames = Array.from(this.chromosomes.keys())
         }
-
 
         if (config.chromAliasBbURL) {
             this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
@@ -60,7 +59,7 @@ class Genome {
 
         if (config.cytobandBbURL) {
             this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
-        } else if(config.cytobandURL) {
+        } else if (config.cytobandURL) {
             this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
         }
 
@@ -86,7 +85,6 @@ class Genome {
     }
 
 
-
     get description() {
         return this.config.description || `${this.id}\n${this.name}`
     }
@@ -109,8 +107,8 @@ class Genome {
         return Object.assign({}, this.config, {tracks: undefined})
     }
 
-    getInitialLocus() {
-
+    get initialLocus() {
+        return this.config.locus ? this.config.locus : this.getHomeChromosomeName()
     }
 
     getHomeChromosomeName() {
@@ -143,23 +141,20 @@ class Genome {
 
     async loadChromosome(chr) {
 
-        if (!this.chromosomes.has(chr)) {
-            const sequenceRecord = await this.sequence.getSequenceRecord(chr)
-            if (sequenceRecord) {
-                const chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
-                this.chromosomes.set(chr, chromosome)
-            } else {
-                // Try alias
-                if (this.chromAlias) {
-                    const chromAliasRecord = await this.chromAlias.search(chr)
-                    if (chromAliasRecord) {
-                        const chromosome = new Chromosome(chromAliasRecord.chr, 0, sequenceRecord.bpLength)
-                        this.chromosomes.set(chr, chromosome)
-                    }
-                }
+        let chromAliasRecord
+        if (this.chromAlias) {
+            chromAliasRecord = await this.chromAlias.search(chr)
+            chr = chromAliasRecord.chr
+        }
 
-                this.chromosomes.set(chr, undefined)  // Prevents future attempts
+        if (!this.chromosomes.has(chr)) {
+            let chromosome
+            const  sequenceRecord = await this.sequence.getSequenceRecord(chr)
+            if (sequenceRecord) {
+                chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
             }
+
+            this.chromosomes.set(chr, chromosome)  // <= chromosome might be undefined, setting it prevents future attempts
         }
 
         return this.chromosomes.get(chr)

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config =
+        {
+            //locus: "myc",
+            locus:"CP068269.2:35,726,976-35,734,192",
+            showChromosomeWidget: false,
+            reference: {
+                wholeGenomeView: false,
+                id: "chm13v2.0",
+                name: "Human (T2T CHM13-v2.0)",
+                twoBitURL: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/GCA_009914755.4.2bit",
+                twoBitBptURL: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/GCA_009914755.4.2bit.bpt",
+                cytobandBbURL: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_T2T-CHM13v2.0.cytoBandMapped/cytoBandMapped.bb",
+                chromAliasBbURL: "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/GCA_009914755.4.chromAlias.bb",
+                nameSet: "ucsc",
+                tracks: [
+                    {
+                        "id": "catLiftOffGenesV1",
+                        "name": "CAT/Liftoff Genes",
+                        "format": "bigbed",
+                        "description": " <a target = \"_blank\" href = \"https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/html/GCA_009914755.4_T2T-CHM13v2.0.catLiftOffGenesV1.html\">CAT + Liftoff Gene Annotations</a>",
+                        "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_T2T-CHM13v2.0.catLiftOffGenesV1/catLiftOffGenesV1.bb",
+                        "displayMode": "EXPANDED",
+                        "height": 200,
+                        "visibilityWindow": -1,
+                        "supportsWholeGenome": false
+                    },
+
+                    // Include a hg38 bigwig track -- test chromosome aliasing
+                    {
+                        "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+                        "name": "Encode bigwig",
+                    },
+
+                ]
+            }
+
+        }
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), config)
+
+
+
+</script>
+
+</body>
+
+</html>
