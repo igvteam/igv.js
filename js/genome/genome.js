@@ -107,8 +107,8 @@ class Genome {
         return Object.assign({}, this.config, {tracks: undefined})
     }
 
-    getInitialLocus() {
-
+    get initialLocus() {
+        return this.config.locus ? this.config.locus : this.getHomeChromosomeName()
     }
 
     getHomeChromosomeName() {
@@ -141,21 +141,19 @@ class Genome {
 
     async loadChromosome(chr) {
 
+        let chromAliasRecord
+        if (this.chromAlias) {
+            chromAliasRecord = await this.chromAlias.search(chr)
+            chr = chromAliasRecord.chr
+        }
+
         if (!this.chromosomes.has(chr)) {
             let chromosome
-            let sequenceRecord = await this.sequence.getSequenceRecord(chr)
+            const  sequenceRecord = await this.sequence.getSequenceRecord(chr)
             if (sequenceRecord) {
                 chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
-            } else {
-                // Try alias
-                if (this.chromAlias) {
-                    const chromAliasRecord = await this.chromAlias.search(chr)
-                    if (chromAliasRecord) {
-                        sequenceRecord = await this.sequence.getSequenceRecord(chromAliasRecord.chr)
-                        chromosome = new Chromosome(chromAliasRecord.chr, 0, sequenceRecord.bpLength)
-                    }
-                }
             }
+
             this.chromosomes.set(chr, chromosome)  // <= chromosome might be undefined, setting it prevents future attempts
         }
 
