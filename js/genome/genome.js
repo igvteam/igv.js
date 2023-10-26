@@ -144,7 +144,9 @@ class Genome {
         let chromAliasRecord
         if (this.chromAlias) {
             chromAliasRecord = await this.chromAlias.search(chr)
-            chr = chromAliasRecord.chr
+            if(chromAliasRecord) {
+                chr = chromAliasRecord.chr
+            }
         }
 
         if (!this.chromosomes.has(chr)) {
