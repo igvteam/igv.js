@@ -12,6 +12,7 @@ import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import {registerTrackClass, registerTrackCreatorFunction} from "./trackFactory.js"
 import TrackBase from "./trackBase.js"
 import Hub from "./ucsc/ucscHub.js"
+import Browser from "./browser.js"
 
 const setApiKey = igvxhr.setApiKey
 
@@ -47,6 +48,7 @@ export default {
     registerTrackClass,
     registerTrackCreatorFunction,
     registerFileFormats,
-    Hub
+    Hub,
+    uncompressSession: Browser.uncompressSession
 }
 

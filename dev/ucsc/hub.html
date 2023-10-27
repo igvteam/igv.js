@@ -58,8 +58,11 @@
 
     document.getElementById("hub-input").value = "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/hub.txt"
 
-    document.getElementById("load-genome").addEventListener("click", () =>
-        browser.loadGenome({url: document.getElementById("hub-input").value}))
+    document.getElementById("load-genome").addEventListener("click", async () => {
+        await browser.loadGenome({url: document.getElementById("hub-input").value})
+        console.log(browser.genome.getTrackConfigurations())
+    })
+
 
     document.getElementById("load-session").addEventListener("click", () =>
         browser.loadSession({url: document.getElementById("hub-input").value}))

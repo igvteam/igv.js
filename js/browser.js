@@ -682,7 +682,7 @@ class Browser {
      */
     async loadReference(genomeConfig, initialLocus) {
 
-        const genome = await Genome.loadGenome(genomeConfig)
+        const genome = await Genome.createGenome(genomeConfig)
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
