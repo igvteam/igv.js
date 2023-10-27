@@ -702,6 +702,10 @@ class Browser {
             throw new Error(`Cannot set initial locus ${locus}`)
         }
 
+        if(genomeChange) {
+            this.fireEvent('genomechange', [genome])
+        }
+
         if (genomeChange && this.circularView) {
             this.circularView.setAssembly({
                 name: this.genome.id,
