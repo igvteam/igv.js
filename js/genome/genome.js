@@ -279,7 +279,7 @@ class Genome {
         this.chromosomes.set("all", new Chromosome("all", 0, l))
     }
 
-    getTrackConfigurations() {
+    get trackConfigurations() {
         return this.config.trackConfigurations
     }
 }
