@@ -460,45 +460,50 @@ class Browser {
 
         let session
         if (options.url || options.file) {
-            session = await loadSessionFile(options)
+            session = await Browser.loadSessionFile(options)
         } else {
             session = options
         }
         return this.loadSessionObject(session)
+    }
 
+    /**
+     * Load and parse a session uri or file, and return a session object.  Handles data uris as well as urls.
+     *
+     * @param options
+     * @returns {Promise<*|XMLSession>}
+     */
+    static async loadSessionFile(options) {
 
-        async function loadSessionFile(options) {
+        const urlOrFile = options.url || options.file
 
-            const urlOrFile = options.url || options.file
+        if (options.url && StringUtils.isString(options.url) && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
+            const json = Browser.uncompressSession(options.url)
+            return JSON.parse(json)
 
-            if (options.url && StringUtils.isString(options.url) && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
-                const json = Browser.uncompressSession(options.url)
-                return JSON.parse(json)
+        } else {
+            let filename = options.filename
+            if (!filename) {
+                filename = (options.url ? await getFilename(options.url) : options.file.name)
+            }
 
+            if (filename.endsWith(".xml")) {
+                const knownGenomes = GenomeUtils.KNOWN_GENOMES
+                const string = await igvxhr.loadString(urlOrFile)
+                return new XMLSession(string, knownGenomes)
+
+            } else if (filename.endsWith("hub.txt")) {
+
+                const hub = await Hub.loadHub(urlOrFile, options)
+                const genomeConfig = hub.getGenomeConfig()
+                const config = {
+                    reference: genomeConfig
+                }
+                return setDefaults(config)
+            } else if (filename.endsWith(".json")) {
+                return igvxhr.loadJson(urlOrFile)
             } else {
-                let filename = options.filename
-                if (!filename) {
-                    filename = (options.url ? await getFilename(options.url) : options.file.name)
-                }
-
-                if (filename.endsWith(".xml")) {
-                    const knownGenomes = GenomeUtils.KNOWN_GENOMES
-                    const string = await igvxhr.loadString(urlOrFile)
-                    return new XMLSession(string, knownGenomes)
-
-                } else if (filename.endsWith("hub.txt")) {
-
-                    const hub = await Hub.loadHub(urlOrFile, options)
-                    const genomeConfig = hub.getGenomeConfig()
-                    const config = {
-                        reference: genomeConfig
-                    }
-                    return setDefaults(config)
-                } else if (filename.endsWith(".json")) {
-                    return igvxhr.loadJson(urlOrFile)
-                } else {
-                    throw Error("Unrecognized session file format:" + filename)
-                }
+                throw Error("Unrecognized session file format:" + filename)
             }
         }
     }
@@ -714,7 +719,6 @@ class Browser {
             })
         }
     }
-
 
     updateNavbarDOMWithGenome(genome) {
         let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0, 8)}...${genome.id.substring(genome.id.length - 8)}`)
