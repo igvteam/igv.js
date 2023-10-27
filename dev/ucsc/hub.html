@@ -47,7 +47,7 @@
     const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
 
     browser.on('genomechange', (genome) => {
-        console.log(genome.getTrackConfigurations())
+        console.log(genome.trackConfigurations)
     })
 
     const selector = document.getElementById("select")
@@ -57,7 +57,6 @@
 
     document.getElementById("load-genome").addEventListener("click", async () => {
         await browser.loadGenome({url: document.getElementById("hub-input").value})
-        console.log(browser.genome.getTrackConfigurations())
     })
 
 
