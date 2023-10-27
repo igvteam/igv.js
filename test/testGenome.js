@@ -17,7 +17,7 @@ suite("testGenome", function () {
             wholeGenomeView: true
         }
 
-        const genome = await Genome.loadGenome(reference)
+        const genome = await Genome.createGenome(reference)
         assert.ok(genome)
         assert.equal(86, genome.chromosomeNames.length)
         assert.equal(genome.getCumulativeOffset("2"), 249250621)
@@ -35,7 +35,7 @@ suite("testGenome", function () {
             chromSizes: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.chrom.sizes.txt"
         }
 
-        const genome = await Genome.loadGenome(reference)
+        const genome = await Genome.createGenome(reference)
         assert.ok(genome.chromosomes.size > 0)
         assert.ok(genome.chromosomeNames.length > 0)
 

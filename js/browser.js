@@ -682,7 +682,7 @@ class Browser {
      */
     async loadReference(genomeConfig, initialLocus) {
 
-        const genome = await Genome.loadGenome(genomeConfig)
+        const genome = await Genome.createGenome(genomeConfig)
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
@@ -700,6 +700,10 @@ class Browser {
         const locusFound = await this.search(locus, true)
         if (!locusFound) {
             throw new Error(`Cannot set initial locus ${locus}`)
+        }
+
+        if(genomeChange) {
+            this.fireEvent('genomechange', [genome])
         }
 
         if (genomeChange && this.circularView) {

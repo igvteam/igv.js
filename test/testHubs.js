@@ -10,7 +10,7 @@ import {isString} from "../node_modules/igv-utils/src/stringUtils.js"
 suite("hub.txt", function () {
 
 
-    test("genome", async function () {
+    test("genome config", async function () {
 
         const hub = await Hub.loadHub("test/data/hubs/hub.txt")
         assert.ok(hub.hub)
@@ -27,20 +27,9 @@ suite("hub.txt", function () {
         assert.ok(genomeConfig.twoBitURL)
         assert.ok(genomeConfig.chromAliasBbURL)
         assert.ok(genomeConfig.cytobandBbURL)
+        assert.ok(genomeConfig.trackConfigurations.length > 0)
     })
 
-    test("track configs", async function () {
-
-        const hub = await Hub.loadHub("test/data/hubs/hub.txt")
-        assert.ok(hub.hub)
-        assert.ok(hub.genomeStanza)
-        assert.equal(22, hub.trackStanzas.length)
-
-        const trackConfigs = hub.getTrackConfigurations()
-
-        assert.ok(trackConfigs.length > 0)
-
-    })
 
 
 })

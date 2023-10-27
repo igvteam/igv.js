@@ -18,7 +18,7 @@ import {loadChromSizes} from "./chromSizes.js"
 
 class Genome {
 
-    static async loadGenome(options) {
+    static async createGenome(options) {
 
         const genome = new Genome(options)
         await genome.init()
@@ -30,8 +30,8 @@ class Genome {
         this.id = config.id || generateGenomeID(config)
         this.name = config.name
         this.nameSet = config.nameSet
-
     }
+
 
     async init() {
 
@@ -277,6 +277,10 @@ class Genome {
         // Compute psuedo-chromosome "all"
         const l = this.wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
         this.chromosomes.set("all", new Chromosome("all", 0, l))
+    }
+
+    getTrackConfigurations() {
+        return this.config.trackConfigurations
     }
 }
 

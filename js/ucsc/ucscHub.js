@@ -89,33 +89,6 @@ class Hub {
         return this.genomeStanza.getProperty("defaultPos")
     }
 
-    getTrackConfigurations() {
-
-        // Organize track configs by group
-        const trackConfigMap = new Map()
-        for (let c of this.#getTracksConfigs()) {
-            const groupName = c.group || "other"
-            if (trackConfigMap.has(groupName)) {
-                trackConfigMap.get(groupName).push(c)
-            } else {
-                trackConfigMap.set(groupName, [c])
-            }
-        }
-
-        // Build group structure
-        const groupStanazMap = this.groupStanzas ?
-            new Map(this.groupStanzas.map(groupStanza => [groupStanza.getProperty("name"), groupStanza])) :
-            new Map()
-
-        return Array.from(trackConfigMap.keys()).map(groupName => {
-            return {
-                label: groupStanazMap.has(groupName) ? groupStanazMap.get(groupName).getProperty("label") : groupName,
-                tracks: trackConfigMap.get(groupName)
-            }
-        })
-
-    }
-
     /*  Example genome stanza
 genome GCF_000186305.1
 taxId 176946
@@ -205,11 +178,40 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
             config.tracks = this.#getTracksConfigs(filter)
         }
 
+        config.trackConfigurations = this.#getGroupedTrackConfigurations()
+
         return config
     }
 
+    #getGroupedTrackConfigurations() {
+
+        // Organize track configs by group
+        const trackConfigMap = new Map()
+        for (let c of this.#getTracksConfigs()) {
+            const groupName = c.group || "other"
+            if (trackConfigMap.has(groupName)) {
+                trackConfigMap.get(groupName).push(c)
+            } else {
+                trackConfigMap.set(groupName, [c])
+            }
+        }
+
+        // Build group structure
+        const groupStanazMap = this.groupStanzas ?
+            new Map(this.groupStanzas.map(groupStanza => [groupStanza.getProperty("name"), groupStanza])) :
+            new Map()
+
+        return Array.from(trackConfigMap.keys()).map(groupName => {
+            return {
+                label: groupStanazMap.has(groupName) ? groupStanazMap.get(groupName).getProperty("label") : groupName,
+                tracks: trackConfigMap.get(groupName)
+            }
+        })
+
+    }
+
     /**
-     * Return collection of igv track config object, organized by "group*
+     * Return an array of igv track config objects that satisfy the filter
      */
     #getTracksConfigs(filter) {
         return this.trackStanzas.filter(t => {
