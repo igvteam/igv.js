@@ -104,7 +104,7 @@ function removeAllBrowsers() {
 }
 
 function getAllBrowsers() {
-    return allBrowsers;
+    return allBrowsers
 }
 
 /**
@@ -239,18 +239,26 @@ function extractQuery(config) {
                 } else if ('name' === key) {
                     // IGV desktop style index parameter
                     names = value.split(',')
-                } else if ('genome' === key && ((value.startsWith("https://") || value.startsWith("http://")) && !value.endsWith(".json"))) {
-                    // IGV desktop compatibility -- assuming url to fasta
-                    config['reference'] = {
-                        fastaURL: value,
-                        indexURL: value + ".fai"
+                } else if ('genome' === key) {
+                    if ((value.startsWith("https://") || value.startsWith("http://")) && !value.endsWith(".json")) {
+                        // IGV desktop compatibility -- assuming url to fasta
+                        config['reference'] = {
+                            fastaURL: value,
+                            indexURL: value + ".fai"
+                        }
+                    } else {
+                        config[key] = value
+                        config['reference'] = undefined
                     }
                 } else {
+                    if ('reference' === key) {
+                        config['genome'] = undefined   // Can specify either reference or genome, not both
+                    }
                     config[key] = value
                 }
                 i = j + 1
             } else {
-                i++;
+                i++
             }
         }
     }
