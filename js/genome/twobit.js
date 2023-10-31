@@ -24,7 +24,6 @@ class TwobitSequence {
 
     littleEndian
     metaIndex = new Map()
-    bpt
 
     constructor(config) {
         this.url = config.twoBitURL || config.fastaURL

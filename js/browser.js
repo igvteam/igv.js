@@ -707,16 +707,22 @@ class Browser {
             throw new Error(`Cannot set initial locus ${locus}`)
         }
 
-        if(genomeChange) {
-            this.fireEvent('genomechange', [genome])
-        }
+        if (genomeChange) {
+            let trackConfigurations
+            if (genomeConfig.hubURL) {
+                // TODO -- refactor this so "hub" is not loaded twice
+                const hub = await Hub.loadHub(genomeConfig.hubURL)
+                trackConfigurations = hub.getGroupedTrackConfigurations()
+            }
+            this.fireEvent('genomechange', [{genome, trackConfigurations}])
 
-        if (genomeChange && this.circularView) {
-            this.circularView.setAssembly({
-                name: this.genome.id,
-                id: this.genome.id,
-                chromosomes: makeCircViewChromosomes(this.genome)
-            })
+            if (this.circularView) {
+                this.circularView.setAssembly({
+                    name: this.genome.id,
+                    id: this.genome.id,
+                    chromosomes: makeCircViewChromosomes(this.genome)
+                })
+            }
         }
     }
 
@@ -1317,7 +1323,7 @@ class Browser {
     getTrackURLs() {
         return new Set(this.tracks
             .filter(track => track.config && StringUtils.isString(track.config.url))
-                .map(track => track.config.url))
+            .map(track => track.config.url))
     }
 
 
