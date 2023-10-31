@@ -27,7 +27,12 @@ suite("hub.txt", function () {
         assert.ok(genomeConfig.twoBitURL)
         assert.ok(genomeConfig.chromAliasBbURL)
         assert.ok(genomeConfig.cytobandBbURL)
-        assert.ok(genomeConfig.trackConfigurations.length > 0)
+    })
+
+    test("track configs", async function() {
+        const hub = await Hub.loadHub("test/data/hubs/hub.txt")
+        const groupedTrackConfigurations  = hub.getGroupedTrackConfigurations();
+        assert.equal(5, groupedTrackConfigurations.length);
     })
 
 
