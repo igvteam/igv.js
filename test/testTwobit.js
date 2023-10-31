@@ -88,6 +88,10 @@ suite("testTwobit", function () {
         const bpTree = await BPTree.loadBpTree(url, 0)
         assert.ok(bpTree)
 
+        assert.equal(256, bpTree.header.blockSize);
+        assert.equal(15, bpTree.header.keySize);
+        assert.equal(8, bpTree.header.valSize);
+
         const result = await bpTree.search("RJWJ011179649.1")
         assert.ok(result)
 

@@ -84,7 +84,6 @@ class Genome {
         }
     }
 
-
     get description() {
         return this.config.description || `${this.id}\n${this.name}`
     }
@@ -279,9 +278,6 @@ class Genome {
         this.chromosomes.set("all", new Chromosome("all", 0, l))
     }
 
-    get trackConfigurations() {
-        return this.config.trackConfigurations
-    }
 }
 
 /**
