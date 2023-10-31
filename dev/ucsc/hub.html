@@ -7,10 +7,12 @@
 <body>
 
 <select id="select">
-    <option value = ""></option>
-    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt">Many chromosomes ~ same size
+    <option value=""></option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt">Many chromosomes ~ same
+        size
     </option>
-    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCA/022/747/635/GCA_022747635.1/hub.txt">Many chromosomes - gradually decreasing
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCA/022/747/635/GCA_022747635.1/hub.txt">Many chromosomes -
+        gradually decreasing
         chromosomes
     </option>
     <option value="https://hgdownload.soe.ucsc.edu/hubs/GCF/013/103/735/GCF_013103735.1/hub.txt">24 large chromosomes
@@ -25,6 +27,9 @@
 
 <button id="load-genome">Load hub as genome</button>
 <button id="load-session">Load hub as session</button>
+
+<br>
+<button id="dump-session">Dump session</button>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -46,8 +51,8 @@
 
     const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
 
-    browser.on('genomechange', (genome) => {
-        console.log(genome.trackConfigurations)
+    browser.on('genomechange', (args) => {
+        console.log(args)
     })
 
     const selector = document.getElementById("select")
@@ -59,10 +64,12 @@
         await browser.loadGenome({url: document.getElementById("hub-input").value})
     })
 
-
     document.getElementById("load-session").addEventListener("click", () =>
         browser.loadSession({url: document.getElementById("hub-input").value}))
 
+    document.getElementById("dump-session").addEventListener("click", () => {
+        console.log(browser.toJSON())
+    })
 
 </script>
 

@@ -37,7 +37,7 @@ export default class Trix {
         const searchWord = searchWords[0].toLowerCase()
         const str = await this._getBuffer(searchWord, opts)
         if (!str) {
-            return []
+            return undefined
         }
 
         const lines = str
@@ -54,7 +54,7 @@ export default class Trix {
             }
             // we are done scanning if we are lexicographically greater than the search string
             if (word.slice(0, searchWord.length) > searchWord) {
-                //break
+                break
             }
         }
 
@@ -66,7 +66,6 @@ export default class Trix {
                 const [term, ...parts] = m.split(' ')
                 results.set(term, parts.map(p => p.split(',')[0]))
             }
-            console.log(results)
             return results
         }
     }
@@ -117,7 +116,7 @@ export default class Trix {
         if(this.bufferCache.has(start)) {
             return this.bufferCache.get(start)
         } else {
-            const buffer = igvxhr.loadString(this.ixFile, {range: {start, size: len}})
+            const buffer = await igvxhr.loadString(this.ixFile, {range: {start, size: len}})
             this.bufferCache.set(start, buffer)
             return buffer
         }

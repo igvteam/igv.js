@@ -11,7 +11,7 @@ suite("ucsc utilities", function () {
         this.timeout(200000)
         const ixFile = "test/data/bb/ixIxx/GCF_000009045.1_ASM904v1.ncbiGene.ix"
         const ixxFile = "test/data/bb/ixIxx/GCF_000009045.1_ASM904v1.ncbiGene.ixx"
-        const trix = new Trix(ixxFile, ixFile, 10)
+        const trix = new Trix(ixxFile, ixFile)
         const results = await trix.search("ykoX")
         assert.ok(results)
         const exactMatches = results.get('ykox')

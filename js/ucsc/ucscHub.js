@@ -27,21 +27,24 @@ class Hub {
             }
         }
 
+        // TODO -- categorize extra "user" supplied and other tracks in some distinctive way before including them
         // load includes.  Nested includes are not supported
-        for (let s of stanzas.slice()) {
-            if ("include" === s.type) {
-                const includeStanzas = await loadStanzas(baseURL + s.getProperty("include"))
-                for (s of includeStanzas) {
-                    s.setProperty("visibility", "hide")
-                    stanzas.push(s)
-                }
-            }
-        }
+        // for (let s of stanzas.slice()) {
+        //     if ("include" === s.type) {
+        //         const includeStanzas = await loadStanzas(baseURL + s.getProperty("include"))
+        //         for (s of includeStanzas) {
+        //             s.setProperty("visibility", "hide")
+        //             stanzas.push(s)
+        //         }
+        //     }
+        // }
 
         return new Hub(url, stanzas, groups)
     }
 
     constructor(url, stanzas, groupStanzas) {
+
+        this.url = url;
 
         const idx = url.lastIndexOf("/")
         this.baseURL = url.substring(0, idx + 1)
@@ -110,11 +113,12 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
     getGenomeConfig(includeTrackGroups = "all") {
         // TODO -- add blat?  htmlPath?
         const config = {
+            hubURL: this.url,
             id: this.genomeStanza.getProperty("genome"),
             name: this.genomeStanza.getProperty("scientificName") || this.genomeStanza.getProperty("organism") || this.genomeStanza.getProperty("description"),
             twoBitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
             nameSet: "ucsc",
-            wholeGenomeView: false
+            wholeGenomeView: false,
         }
 
         if (this.genomeStanza.hasProperty("defaultPos")) {
@@ -178,12 +182,10 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
             config.tracks = this.#getTracksConfigs(filter)
         }
 
-        config.trackConfigurations = this.#getGroupedTrackConfigurations()
-
         return config
     }
 
-    #getGroupedTrackConfigurations() {
+    getGroupedTrackConfigurations() {
 
         // Organize track configs by group
         const trackConfigMap = new Map()
@@ -259,7 +261,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
             if (config.description) config.description += "<br/>"
             config.description =
                 `<a target="_blank" href="${this.baseURL + t.getProperty("html")}">${t.getProperty("longLabel")}</a>`
-        } else if (t.hasOwnProperty("longLabel")) {
+        } else if (t.hasProperty("longLabel")) {
             config.description = t.getProperty("longLabel")
         }
 
