@@ -69,7 +69,6 @@ async function createBrowser(parentDiv, config) {
     const browser = new Browser(config, parentDiv)
     allBrowsers.push(browser)
 
-
     // Lod initial sessio
     browser.startSpinner()
 
