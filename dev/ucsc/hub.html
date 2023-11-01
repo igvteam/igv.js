@@ -46,14 +46,19 @@
     const hub = await Hub.loadHub("https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/hub.txt", hubOptions)
 
     const igvConfig = {
-        reference: hub.getGenomeConfig()
+        reference: hub.getGenomeConfig(),
+        listeners: {
+            'genomechange': ({genome, trackConfigurations}) => {
+                console.log('genomechange')
+                console.log(genome)
+                console.log(trackConfigurations)
+            }
+        }
     }
+
 
     const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
 
-    browser.on('genomechange', (args) => {
-        console.log(args)
-    })
 
     const selector = document.getElementById("select")
     selector.addEventListener("change", () => document.getElementById("hub-input").value = selector.value)

@@ -115,6 +115,12 @@ class Browser {
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = {}
 
+        if(config.listeners) {
+            for(let evt of Object.keys(config.listeners)) {
+                this.on(evt, config.listeners[evt])
+            }
+        }
+
         this.on('trackremoved', () => {
 
             const found = this.findTracks(track => typeof track.getSamples === 'function')
