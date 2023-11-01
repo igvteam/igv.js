@@ -347,6 +347,9 @@
 .igv-navbar-text-button-svg-inactive text {
   fill: #737373;
 }
+.igv-navbar-text-button-svg-inactive tspan {
+  dominant-baseline: middle;
+}
 
 .igv-navbar-text-button-svg-hover rect {
   stroke: #737373;
@@ -354,6 +357,9 @@
 }
 .igv-navbar-text-button-svg-hover text {
   fill: white;
+}
+.igv-navbar-text-button-svg-hover tspan {
+  dominant-baseline: middle;
 }
 
 #igv-save-svg-group rect {

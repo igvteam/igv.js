@@ -505,6 +505,9 @@ $igv-save-png-image-x-origin:  3*$igv-navbar-icon-button-size/4;
   text {
     fill: #737373;
   }
+  tspan {
+    dominant-baseline: middle;
+  }
 }
 
 .igv-navbar-text-button-svg-hover {
@@ -515,7 +518,9 @@ $igv-save-png-image-x-origin:  3*$igv-navbar-icon-button-size/4;
   text {
     fill: white;
   }
-
+  tspan {
+    dominant-baseline: middle;
+  }
 }
 
 #igv-save-svg-group {
