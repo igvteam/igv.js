@@ -949,7 +949,7 @@ class TrackView {
     }
 
     maxViewportContentHeight() {
-        return Math.max(this.viewports.map(viewport => viewport.getContentHeight()))
+        return Math.max(...this.viewports.map(viewport => viewport.getContentHeight()))
     }
 
 }
