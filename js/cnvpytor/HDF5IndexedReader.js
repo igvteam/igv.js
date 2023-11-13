@@ -17,6 +17,7 @@ class SignalNames{
             'gc_RD': `his_rd_p_${this.chrom}_${this.signal_bin_size}_GC`,
             'gc_partition' : `his_rd_p_${this.chrom}_${this.signal_bin_size}_partition_GC_merge`,
             'baf': `snp_likelihood_${this.chrom}_${this.signal_bin_size}_mask`,
+            'baf_i1': `snp_i1_${this.chrom}_${this.signal_bin_size}_mask`,
             'Mosaic_segments' : `his_rd_p_${this.chrom}_${this.signal_bin_size}_partition_GC_mosaic_segments_2d`,
             'Mosaic_calls': `his_rd_p_${this.chrom}_${this.signal_bin_size}_partition_GC_mosaic_call_2d`
         }
@@ -49,8 +50,11 @@ class HDF5Reader {
         return this.h5_obj
     }
 
+    /**
+     * 
+     * @returns - a list of keys of the pytor file
+     */
     async get_keys(){
-        /* returns a list of keys of the pytor file*/
         let h5_obj = await this.fetch();
         return h5_obj.keys
     }
@@ -58,10 +62,9 @@ class HDF5Reader {
     async get_rd_signal(bin_size=this.bin_size){
 
         let h5_obj = await this.fetch();
-        // let h5_obj_keys = h5_obj.keys;
+        
         this.h5_obj = h5_obj
         this.pytor_keys = h5_obj.keys
-        // console.log("keys", this.pytor_keys )
 
         // get available bin sizes
         let signal_bin = new ParseSignals(this.pytor_keys);
@@ -119,15 +122,17 @@ class HDF5Reader {
 
             // baf likelihood
             // let signal_baf_1 = `snp_likelihood_${chrom}_${bin_size}_mask`
-            let signal_baf_1 = signal_name_obj.signals['baf']
-            let chr_wig_bafs = await this.get_baf_signals(chrom, bin_size, signal_baf_1)
-
+            // let signal_baf_1 = signal_name_obj.signals['baf']
+            // let chr_wig_bafs = await this.get_baf_signals(chrom, bin_size, signal_baf_1)
+            
             // let signal_baf_1 = `snp_i1_${chrom}_${bin_size}_mask`
-            // let chr_wig_bafs = await this.get_baf_signals_v2(h5_obj, h5_obj_keys, chrom, bin_size, signal_baf_1)
+            let signal_baf_1 = signal_name_obj.signals['baf_i1']
+            let chr_wig_bafs = await this.get_baf_signals_v2(chrom, bin_size, signal_baf_1)
+
 
             wigFeatures_baf1 = wigFeatures_baf1.concat(chr_wig_bafs[0])
             wigFeatures_baf2 = wigFeatures_baf2.concat(chr_wig_bafs[1])
-            // this.rd_call_combined(h5_obj, h5_obj_keys, chrom, bin_size, rd_stat)
+            
         }
         this.callers = []
         if (wigFeatures_rd_call_combined.length != 0){
@@ -175,7 +180,6 @@ class HDF5Reader {
             const chrom_dataset = await this.h5_obj.get(mosaic_call_segments)
             const t0 = Date.now()
             let chrom_data = await chrom_dataset.value
-            //console.log(`rd_call_combined ${mosaic_call_segments}  ${Date.now() - t0}`)
             segments = this.decode_segments(chrom_data)
             
         }
