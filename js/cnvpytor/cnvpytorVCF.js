@@ -7,18 +7,27 @@ function getMean(data) {
     return (data.reduce(function (a, b) { return a + b; }) / data.length);
 }
 
+
 class CNVpytorVCF {
+    /**
+     * Create a class instance.
+     * 
+     * @param {Array} allVariants - An array containing all variants
+     * @param {number} binSize - The bin size for processing variants.
+     */
     constructor(allVariants, binSize) {
         this.allVariants = allVariants
         this.rowBinSize = 10000
         this.binSize = binSize
-        this.binFactor = binSize / this.rowBinSize
+        this.binFactor = parseInt(binSize / this.rowBinSize)
 
     }
 
+    /**
+     * Read rd and BAF information from the vcf file and call accoring to the caller
+     */
     async read_rd_baf(caller='ReadDepth'){
-        /* Read rd and BAF information from the vcf file and call accoring to the caller*/
-
+        
         // Step1: Parse data from the vcf file; for a fixed rowBinSize
         var wigFeatures = {}
         for (let i = this.allVariants.length-1; i >= 0; i--){
@@ -39,7 +48,6 @@ class CNVpytorVCF {
                     dp_count: 0,
                     hets_count:0,
                     hets: [],
-                    //likelihood_score: [],
                 };
             }
 
@@ -60,7 +68,6 @@ class CNVpytorVCF {
                 wigFeatures[chr][featureBin].hets.push({ref:ad_a, alt:ad_b})
             }
             
-
         }
 
         // get the chromosome names
@@ -137,18 +144,12 @@ class CNVpytorVCF {
 
     async getAllbins() {
         const bins = await this.computeDepthFeatures()
-
-        //console.log('getAllbins', bins["value"])
-
         const fitter = new g_utils.GetFit(bins)
-
         const distParams = fitter.fit_data()
-        //  dconsole.log('rd list', distParams)
+        
 
         return bins
     }
-
-   
 
     formatDataStructure_BAF(wigFeatures, feature_column, scaling_factor=-1) {
         /* Rescale the BAF level from 0:1 to scaling_factpr:0*/
@@ -176,8 +177,14 @@ class CNVpytorVCF {
         return [baf1, baf2]
     }
     
+    
+    /**
+     * Adjust the bin values to actual bin size
+     * @param {*} wigFeatures - wig features after processing the varaints
+     * @returns 
+     */
     adjust_bin_size(wigFeatures){
-        /* adjust the bin values to actual bin size */
+        
         var avgbin = {}
         for (let chr of this.chromosomes) {
             if (!avgbin[chr]) { avgbin[chr] = [] }
@@ -192,14 +199,15 @@ class CNVpytorVCF {
                         hets_count: 0,
                         binScore: 0,
                         likelihood_score: [],
+                        dp_sum_score: 0
                     }
                 }
 
-                for (var j = k * 10; j < 10 * k + 10; j++) {
+                for (var j = k * this.binFactor; j < this.binFactor * k + this.binFactor; j++) {
                    
                     if (wigFeatures[chr][j]) {
-                        var tmp_score = parseInt(wigFeatures[chr][j].dp_sum_score / wigFeatures[chr][j].dp_count) * 100;
-                        avgbin[chr][k].binScore += tmp_score;
+
+                        avgbin[chr][k].dp_sum_score += wigFeatures[chr][j].dp_sum_score;
                         avgbin[chr][k].dp_count += wigFeatures[chr][j].dp_count
                         avgbin[chr][k].hets_count += wigFeatures[chr][j].hets_count
 
@@ -230,7 +238,7 @@ class CNVpytorVCF {
                         }
                     }
                 }
-
+                avgbin[chr][k].binScore = parseInt(avgbin[chr][k].dp_sum_score / avgbin[chr][k].dp_count) * 100;
                 const updated_bin = this.get_max_min_score(avgbin[chr][k])
                 avgbin[chr][k].max_likelihood = updated_bin.value
             }
@@ -240,9 +248,8 @@ class CNVpytorVCF {
 
 }
 
-function beta(a, b, p, phased = true) {
-     //p ** a * (1 - p) ** b + p ** b * (1 - p) ** a;
-     return Math.pow(p, a) * Math.pow(1-p, b) + Math.pow(p, b) * Math.pow(1-p, a)
+function beta(a, b, p, phased = true) { 
+    return Math.pow(p, a) * Math.pow(1-p, b) + Math.pow(p, b) * Math.pow(1-p, a)
 }
 
 class MeanShiftCaller{
