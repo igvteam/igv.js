@@ -58,7 +58,8 @@ class ROISet {
 
         }
 
-        this.isVisible = config.isVisible || true
+        this.isVisible = undefined === config.isVisible ? true : config.isVisible
+
     }
 
     async getFeatures(chr, start, end) {
