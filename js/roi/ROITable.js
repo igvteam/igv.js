@@ -78,7 +78,7 @@ class ROITable extends RegionTableBase {
         function toggleROIButtonHandler(event) {
             event.preventDefault()
             event.stopPropagation()
-            this.toggleROIs()
+            this.browser.roiManager.toggleROIs()
         }
 
         this.boundToggleDisplayButtonHandler = toggleROIButtonHandler.bind(this)
@@ -87,16 +87,17 @@ class ROITable extends RegionTableBase {
 
     }
 
-    toggleROIs() {
+    setROIVisibility(isVisible) {
+
         const elements = this.browser.columnContainer.querySelectorAll('.igv-roi-region')
         for (const el of elements) {
-            el.style.display = 'none' === el.style.display ? 'flex' : 'none'
+            el.style.display = false === isVisible ? 'none' : 'flex'
         }
 
-        const status = elements[ 0 ].style.display
-        this.toggleROIButton.textContent = 'none' === status ? 'Show all ROIs' : 'Hide all ROIs'
+        this.toggleROIButton.textContent = false === isVisible ? 'Show all ROIs' : 'Hide all ROIs'
 
     }
+
     dispose() {
 
         document.removeEventListener('click', this.boundGotoButtonHandler)
