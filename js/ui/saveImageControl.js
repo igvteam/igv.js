@@ -24,30 +24,11 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import NavbarButton from "./navbarButton.js"
+import { Dropdown } from '../../node_modules/igv-ui/dist/igv-ui.js'
 
 // Icon Button SVG
 import { imageSaveImageSVG, imageSaveImageHoverSVG } from './navbarIcons/saveImage.js'
-
-// Icon Button child SVG for PNG and SVG
-import { pngImage, pngHoverImage, svgImage, svgHoverImage } from './navbarIcons/saveImage.js'
-
-// Text Button child SVG for PNG and SVG
-import { pngText, pngTextHover, svgText, svgTextHover } from './navbarIcons/saveImage.js'
-
-const pngImageURL = `url("data:image/svg+xml,${ encodeURIComponent(pngImage) }")`
-const svgImageURL = `url("data:image/svg+xml,${ encodeURIComponent(svgImage) }")`
-
-const pngHoverImageURL = `url("data:image/svg+xml,${ encodeURIComponent(pngHoverImage) }")`
-const svgHoverImageURL = `url("data:image/svg+xml,${ encodeURIComponent(svgHoverImage) }")`
-
-const pngTextURL = `url("data:image/svg+xml,${ encodeURIComponent(pngText) }")`
-const svgTextURL = `url("data:image/svg+xml,${ encodeURIComponent(svgText) }")`
-
-const pngHoverTextURL = `url("data:image/svg+xml,${ encodeURIComponent(pngTextHover) }")`
-const svgHoverTextURL = `url("data:image/svg+xml,${ encodeURIComponent(svgTextHover) }")`
-
 import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 
 class SaveImageControl extends NavbarButton {
@@ -68,59 +49,42 @@ class SaveImageControl extends NavbarButton {
             this.setState(false)
         })
 
-        this.button.addEventListener('click', () => {
-            for (const el of this.button.querySelectorAll('div')) {
-                el.style.display = 'none' === el.style.display ? 'block' : 'none'
+        this.dropdown = new Dropdown(this.button.parentNode, { top:20, left:64 })
+
+        const items =
+            [
+                {
+                    label: "Save as SVG",
+                    click: e => {
+                        this.browser.saveSVGtoFile({})
+                        this.dropdown.dismiss()
+                    }
+                },
+                {
+                    label: "Save as PNG",
+                    click: e => {
+                        this.browser.savePNGtoFile(undefined)
+                        this.dropdown.dismiss()
+                    }
+                },
+            ]
+
+        this.dropdown.configure(items)
+
+        this.button.addEventListener('click', e => {
+
+            if (e.target === this.button) {
+                this.dropdown.present(e)
+            } else if (e.target.closest('svg')) {
+                const parentDiv = e.target.closest('div')
+                if (parentDiv === this.button) {
+                    this.dropdown.present(e)
+                }
             }
+
         })
 
         this.setVisibility(browser.config.showSVGButton)
-
-    }
-
-    configureTextButton(title) {
-        super.configureTextButton(title)
-        this.configureSVG(svgTextURL, svgHoverTextURL, pngTextURL, pngHoverTextURL)
-    }
-
-    configureIconButton() {
-        this.button.classList.add('igv-navbar-icon-button')
-        this.configureSVG(svgImageURL, svgHoverImageURL, pngImageURL, pngHoverImageURL)
-    }
-
-    configureSVG(svgURL, svgHoverURL, pngURL, pngHoverURL) {
-
-        // save svg image
-        const svgElement = DOMUtils.div()
-        this.button.appendChild(svgElement)
-        svgElement.style.backgroundImage = svgURL
-
-        svgElement.addEventListener('click', () => {
-            this.browser.saveSVGtoFile({})
-            this.setState(false)
-        })
-
-        svgElement.addEventListener('mouseenter', () => svgElement.style.backgroundImage = svgHoverURL)
-
-        svgElement.addEventListener('mouseleave', () => svgElement.style.backgroundImage = svgURL)
-
-        svgElement.style.display = 'none'
-
-        // save png image
-        const pngElement = DOMUtils.div()
-        this.button.appendChild(pngElement)
-        pngElement.style.backgroundImage = pngURL
-
-        pngElement.addEventListener('click', e => {
-            this.browser.savePNGtoFile(undefined)
-            this.setState(false)
-        })
-
-        pngElement.addEventListener('mouseenter', () => pngElement.style.backgroundImage = pngHoverURL)
-
-        pngElement.addEventListener('mouseleave', () => pngElement.style.backgroundImage = pngURL)
-
-        pngElement.style.display = 'none'
 
     }
 

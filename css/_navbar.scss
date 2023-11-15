@@ -203,6 +203,7 @@ $igv-save-png-image-x-origin:  3*$igv-navbar-icon-button-size/4;
     align-items: center;
 
     .igv-navbar-toggle-button-container {
+      position: relative;
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;

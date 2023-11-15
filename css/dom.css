@@ -132,6 +132,7 @@
   align-items: center;
 }
 .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container {
+  position: relative;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
