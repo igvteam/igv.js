@@ -49,7 +49,7 @@ class SaveImageControl extends NavbarButton {
             this.setState(false)
         })
 
-        this.dropdown = new Dropdown(this.button.parentNode, { top:20, left:64 })
+        this.dropdown = new Dropdown(this.button.parentNode, { top:24, left:-33 })
 
         const items =
             [
@@ -73,13 +73,18 @@ class SaveImageControl extends NavbarButton {
 
         this.button.addEventListener('click', e => {
 
+            let takeAction
             if (e.target === this.button) {
-                this.dropdown.present(e)
+                takeAction = true
             } else if (e.target.closest('svg')) {
                 const parentDiv = e.target.closest('div')
                 if (parentDiv === this.button) {
-                    this.dropdown.present(e)
+                    takeAction = true
                 }
+            }
+
+            if (true === takeAction) {
+                 'none' === this.dropdown.popover.style.display ? this.dropdown.present(e) : this.dropdown.dismiss()
             }
 
         })
