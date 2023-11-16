@@ -59,9 +59,49 @@ class ROITable extends RegionTableBase {
         }
     }
 
+    set footerDOM(gotoButtonHandler) {
+
+        super.footerDOM = gotoButtonHandler
+
+        this.gotoButton.textContent = 'Go to selected region(s)'
+
+        // Hide/Show Button
+        const toggleROIButton = DOMUtils.div({ class: 'igv-roi-table-button' })
+        const dom = this._footerDOM
+        dom.appendChild(toggleROIButton)
+
+        toggleROIButton.id = 'igv-roi-hide-show-button'
+        toggleROIButton.textContent = 'Hide all ROIs'
+
+        this.toggleROIButton = toggleROIButton
+
+        function toggleROIButtonHandler(event) {
+            event.preventDefault()
+            event.stopPropagation()
+            this.browser.roiManager.toggleROIs()
+        }
+
+        this.boundToggleDisplayButtonHandler = toggleROIButtonHandler.bind(this)
+
+        this.toggleROIButton.addEventListener('click', this.boundToggleDisplayButtonHandler)
+
+    }
+
+    setROIVisibility(isVisible) {
+
+        const elements = this.browser.columnContainer.querySelectorAll('.igv-roi-region')
+        for (const el of elements) {
+            el.style.display = false === isVisible ? 'none' : 'flex'
+        }
+
+        this.toggleROIButton.textContent = false === isVisible ? 'Show all ROIs' : 'Hide all ROIs'
+
+    }
+
     dispose() {
 
         document.removeEventListener('click', this.boundGotoButtonHandler)
+        document.removeEventListener('click', this.boundToggleDisplayButtonHandler)
 
         this.browser.roiTableControl.buttonHandler(false)
         super.dispose()

@@ -36,6 +36,11 @@ class ROIManager {
         const records = await this.getTableRecords()
         this.roiTable.renderTable(records)
 
+        if (this.roiSets.length > 0) {
+            const isVisible = this.roiSets[ 0 ].isVisible
+            this.roiTable.setROIVisibility(isVisible)
+        }
+
     }
 
     async loadROI(config, genome) {
@@ -120,6 +125,16 @@ class ROIManager {
     setROITableButtonVisibility(isVisible) {
         this.browser.doShowROITableButton = isVisible
         this.browser.roiTableControl.setVisibility(this.browser.doShowROITableButton)
+    }
+
+    toggleROIs() {
+
+        const isVisible = !(this.roiSets[ 0 ].isVisible)
+        this.roiTable.setROIVisibility(isVisible)
+
+        for (const roiSet of this.roiSets) {
+            roiSet.isVisible = isVisible
+        }
     }
 
     async renderAllROISets() {
