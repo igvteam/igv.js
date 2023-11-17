@@ -49,7 +49,7 @@ class SaveImageControl extends NavbarButton {
             this.setState(false)
         })
 
-        this.dropdown = new Dropdown(this.button.parentNode, { top:24, left:-33 })
+        this.dropdown = new Dropdown(this.button.parentNode, { top:24, left:-88 })
 
         const items =
             [
