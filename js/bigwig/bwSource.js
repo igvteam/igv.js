@@ -28,12 +28,14 @@ import pack from "../feature/featurePacker.js"
 
 class BWSource {
 
+    queryable = true
+    wgValues = {}
+    windowFunctions = ["mean", "min", "max"]
+
     constructor(config, genome) {
         this.reader = new BWReader(config, genome)
         this.genome = genome
         this.format = config.format || "bigwig"
-        this.wgValues = {}
-        this.queryable = true
     }
 
     async getFeatures({chr, start, end, bpPerPixel, windowFunction}) {

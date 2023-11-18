@@ -30,7 +30,6 @@ import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import getDecoder from "./bbDecoders.js"
 import {parseAutoSQL} from "../util/ucscUtils.js"
-import summarizeWigData from "./summarizeWigData.js"
 import Trix from "./trix.js"
 import BPTree from "./bpTree.js"
 
@@ -131,7 +130,7 @@ class BWReader {
             }))
 
             // Parse data and return features
-            const allFeatures = []
+            const features = []
             for (let item of leafItems) {
                 const uint8Array = new Uint8Array(arrayBuffer, item.dataOffset - start, item.dataSize)
                 let plain
@@ -141,22 +140,14 @@ class BWReader {
                 } else {
                     plain = uint8Array
                 }
-                decodeFunction.call(this, new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, allFeatures, this.chromTree.idToName, windowFunction)
+                decodeFunction.call(this, new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, features, this.chromTree.idToName, windowFunction)
             }
 
-            allFeatures.sort(function (a, b) {
+            features.sort(function (a, b) {
                 return a.start - b.start
             })
 
-            // If we are reading "raw" wig data optionally summarize it with window function.
-            // Zoom level data is already summarized
-            if (decodeFunction === decodeWigData &&
-                bpPerPixel &&
-                ("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
-                return summarizeWigData(allFeatures, bpPerPixel, windowFunction)
-            } else {
-                return allFeatures
-            }
+            return features
         }
     }
 
