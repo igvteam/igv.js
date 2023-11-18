@@ -151,6 +151,9 @@ class TextFeatureSource {
         const queryChr = genome ? genome.getChromosomeName(chr) : chr
         const isWholeGenome = ("all" === queryChr.toLowerCase())
 
+        start = start || 0
+        end = end || Number.MAX_SAFE_INTEGER
+
         // Various conditions that can require a feature load
         //   * view is "whole genome" but no features are loaded
         //   * cache is disabled

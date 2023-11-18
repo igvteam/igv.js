@@ -203,8 +203,9 @@ class TrackViewport extends Viewport {
                     }
                 }
 
-                const mr = track && (track.resolutionAware || "wig" === track.type)   // wig tracks are potentially multiresolution (e.g. bigwig)
-                this.featureCache = new FeatureCache(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures, mr)
+                const mr = track && (track.resolutionAware)   //
+                const windowFunction = this.windowFunction
+                this.featureCache = new FeatureCache(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures, mr, windowFunction)
                 this.loading = false
                 this.hideMessage()
                 this.stopSpinner()
@@ -221,6 +222,14 @@ class TrackViewport extends Viewport {
             this.loading = false
             this.stopSpinner()
         }
+    }
+
+    get track() {
+        return this.trackView.track
+    }
+
+    get windowFunction() {
+        return this.track ? this.track.windowFunction : undefined
     }
 
     /**
@@ -298,6 +307,7 @@ class TrackViewport extends Viewport {
                 bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel,
+                windowFunction: this.windowFunction,
                 referenceFrame: this.referenceFrame,
                 selection: this.selection,
                 viewport: this,
@@ -536,7 +546,7 @@ class TrackViewport extends Viewport {
     }
 
     async getFeatures(track, chr, start, end, bpPerPixel) {
-        if (this.featureCache && this.featureCache.containsRange(chr, start, end, bpPerPixel)) {
+        if (this.featureCache && this.featureCache.containsRange(chr, start, end, bpPerPixel, this.windowFunction)) {
             return this.featureCache.features
         } else if (typeof track.getFeatures === "function") {
             const features = await track.getFeatures(chr, start, end, bpPerPixel, this)
@@ -556,14 +566,15 @@ class TrackViewport extends Viewport {
             this.referenceFrame.start < data.bpStart ||
             this.referenceFrame.end > data.bpEnd ||
             this.referenceFrame.chr !== data.referenceFrame.chr ||
-            this.referenceFrame.bpPerPixel != data.bpPerPixel
+            this.referenceFrame.bpPerPixel != data.bpPerPixel ||
+            this.windowFunction != data.windowFunction
     }
 
     needsReload() {
         if (!this.featureCache) return true
         const {chr, bpPerPixel} = this.referenceFrame
         const {bpStart, bpEnd} = this.repaintDimensions()
-        return (!this.featureCache.containsRange(chr, bpStart, bpEnd, bpPerPixel))
+        return (!this.featureCache.containsRange(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction))
     }
 
     createZoomInNotice($parent) {
@@ -871,7 +882,7 @@ function formatPopoverText(nameValues) {
 
 class FeatureCache {
 
-    constructor(chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures, multiresolution) {
+    constructor(chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures, multiresolution, windowFunction) {
         this.chr = chr
         this.bpStart = tileStart
         this.bpEnd = tileEnd
@@ -879,9 +890,12 @@ class FeatureCache {
         this.features = features
         this.roiFeatures = roiFeatures
         this.multiresolution = multiresolution
+        this.windowFunction = windowFunction
     }
 
-    containsRange(chr, start, end, bpPerPixel) {
+    containsRange(chr, start, end, bpPerPixel, windowFunction) {
+
+        if(windowFunction && windowFunction !== this.windowFunction) return false
 
         // For multi-resolution tracks allow for a 2X change in bpPerPixel
         const r = this.multiresolution ? this.bpPerPixel / bpPerPixel : 1
