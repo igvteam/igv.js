@@ -52,6 +52,7 @@ class TextFeatureSource {
         this.genome = genome
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType)
         this.maxWGCount = config.maxWGCount || DEFAULT_MAX_WG_COUNT
+        this.windowFunctions = ["mean", "min", "max", "none"]
 
         const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "biginteract", "biggenepred", "bignarrowpeak", "tdf"])
 
