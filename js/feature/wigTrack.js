@@ -71,7 +71,7 @@ class WigTrack extends TrackBase {
 
     async getFeatures(chr, start, end, bpPerPixel) {
 
-        const windowFunction = "points" === this.graphType ? "none" : this.windowFunction
+        const windowFunction = this.windowFunction
 
         const features = await this.featureSource.getFeatures({
             chr,
@@ -119,7 +119,7 @@ class WigTrack extends TrackBase {
 
         items.push(...this.numericDataMenuItems())
 
-        if("points" !== this.graphType) {
+        if(this.featureSource.windowFunctions) {
             items.push(...this.wigSummarizationItems())
         }
 
@@ -128,14 +128,10 @@ class WigTrack extends TrackBase {
 
     wigSummarizationItems() {
 
+        const windowFunctions = this.featureSource.windowFunctions
+
         const menuItems = []
         menuItems.push('<hr/>')
-
-        const windowFunctions = this.featureSource.windowFunctions ?
-            this.featureSource.windowFunctions.slice() :
-            ["mean", "min", "max"]
-        windowFunctions.push("none")
-
         menuItems.push("<div>Windowing function</div>")
         for (const wf of windowFunctions) {
             const object = $(createCheckbox(wf, this.windowFunction === wf))
