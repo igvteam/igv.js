@@ -150,7 +150,7 @@ class MenuPopup {
 
     }
 
-    presentTrackContextMenu(e, menuList) {
+    presentTrackContextMenu(e, menuItems) {
 
         this.popoverContent.innerHTML = ''
 
