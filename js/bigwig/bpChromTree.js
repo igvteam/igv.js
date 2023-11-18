@@ -8,35 +8,35 @@ import BinaryParser from "../binary.js"
  * Nodes are loaded on demand during search, avoiding the need to read the entire tree into
  * memory.  Tree nodes can be scattered across the file, making loading the entire tree unfeasible in reasonable time.
  */
-export default class BPTree {
+export default class BPChromTree {
 
     static magic = 2026540177
     littleEndian = true
     nodeCache = new Map()
 
     static async loadBpTree(path, startOffset) {
-        const bpTree = new BPTree(path, startOffset)
+        const bpTree = new BPChromTree(path, startOffset)
         return bpTree.init()
     }
 
     constructor(path, startOffset) {
         this.path = path
         this.startOffset = startOffset
+        this.littleEndian = littleEndian
     }
 
     async init() {
         const binaryParser = await this.#getParserFor(this.startOffset, 32)
         let magic = binaryParser.getInt()
-        if(magic !== BPTree.magic) {
+        if(magic !== BPChromTree.magic) {
             binaryParser.setPosition(0)
             this.littleEndian = !this.littleEndian
             binaryParser.littleEndian = this.littleEndian
             magic = binaryParser.getInt()
-            if(magic !== BPTree.magic) {
+            if(magic !== BPChromTree.magic) {
                 throw Error(`Bad magic number ${magic}`)
             }
         }
-
         const blockSize = binaryParser.getInt()
         const keySize = binaryParser.getInt()
         const valSize = binaryParser.getInt()
@@ -55,7 +55,7 @@ export default class BPTree {
 
         const {keySize, valSize} = this.header
 
-        if (!(valSize === 16 || valSize === 8)) {
+        if (valSize !== 8) {
             throw Error(`Unexpected valSize ${valSize}`)
         }
 
@@ -72,22 +72,14 @@ export default class BPTree {
                 const items = []
 
                 if (type === 1) {
-                    // Leaf node
+                    // Leaf node -- we walk through all items, rather return on match,  because nodes are cached
                     const size = count * (keySize + valSize)
                     binaryParser = await this.#getParserFor(offset + 4, size)
                     for (let i = 0; i < count; i++) {
                         const key = binaryParser.getFixedLengthString(keySize)
-                        const offset = binaryParser.getLong()
-
-                        let value
-                        if (valSize === 16) {
-                            const length = binaryParser.getInt()
-                            binaryParser.getInt()
-                            value = {offset, length}
-                        } else {
-                            value = {offset}
-                        }
-                        items.push({key, value})
+                        const chromId = binaryParser.getUInt();
+                        const chromSize = binaryParser.getUInt();
+                        items.push({key, chromId, chromSize})
                     }
                 } else {
                     // Non leaf node
@@ -115,12 +107,11 @@ export default class BPTree {
                 // Leaf node
                 for (let item of node.items) {
                     if (term === item.key) {
-                        return item.value
+                        return item
                     }
                 }
             } else {
                 // Non leaf node
-
                 // Read and discard the first key.
                 let childOffset = node.items[0].offset
 

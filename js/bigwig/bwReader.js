@@ -54,9 +54,7 @@ class BWReader {
         this.config = config
         this.bufferSize = BUFFER_SIZE
         this.loader = isDataURL(this.path) ?
-            new DataBuffer(this.path) :
-            config.wholeFile ? new WholeFileBuffer(this.path) :
-                igvxhr
+            new DataBuffer(this.path) : igvxhr
 
         if (config.searchTrix) {
             this._trix = new Trix(`${config.searchTrix}x`, config.searchTrix)
@@ -140,7 +138,7 @@ class BWReader {
                 } else {
                     plain = uint8Array
                 }
-                decodeFunction.call(this, new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, features, this.chromTree.idToName, windowFunction)
+                decodeFunction.call(this, new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, features, this.chromTree.idToName, windowFunction, this.littleEndian)
             }
 
             features.sort(function (a, b) {
@@ -300,7 +298,7 @@ class BWReader {
             // Assume low-to-high unless proven otherwise
             this.littleEndian = true
 
-            let binaryParser = new BinaryParser(new DataView(data))
+            let binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
             let magic = binaryParser.getUInt()
             if (magic === BIGWIG_MAGIC_LTH) {
                 this.type = "bigwig"
@@ -345,7 +343,7 @@ class BWReader {
             data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: range}))
 
             const nZooms = header.nZoomLevels
-            binaryParser = new BinaryParser(new DataView(data))
+            binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
 
             this.zoomLevelHeaders = []
             this.firstZoomDataOffset = Number.MAX_SAFE_INTEGER
@@ -372,6 +370,7 @@ class BWReader {
             }
 
             // Chrom data index
+            // TODO -- replace this with BPChromTree
             if (header.chromTreeOffset > 0) {
                 binaryParser.position = header.chromTreeOffset - startOffset
                 this.chromTree = await ChromTree.parseTree(binaryParser, startOffset, this.genome)
@@ -382,8 +381,8 @@ class BWReader {
             }
 
             //Finally total data count
-            binaryParser.position = header.fullDataOffset - startOffset
-            header.dataCount = binaryParser.getInt()
+           // binaryParser.position = header.fullDataOffset - startOffset
+           // header.dataCount = binaryParser.getInt()
 
             this.header = header
 
@@ -408,7 +407,7 @@ class BWReader {
                 size: BBFILE_EXTENDED_HEADER_HEADER_SIZE
             }
         }))
-        let binaryParser = new BinaryParser(new DataView(data))
+        let binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
         const extensionSize = binaryParser.getUShort()
         const extraIndexCount = binaryParser.getUShort()
         const extraIndexListOffset = binaryParser.getLong()
@@ -421,7 +420,7 @@ class BWReader {
                 size: sz
             }
         }))
-        binaryParser = new BinaryParser(new DataView(data))
+        binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
 
         const type = []
         const fieldCount = []
@@ -456,8 +455,8 @@ class BWReader {
         if (rpTree) {
             return rpTree
         } else {
-            rpTree = new RPTree(offset, this.config, this.littleEndian, this.loader)
-            await rpTree.load()
+            rpTree = new RPTree(this.path, offset)
+            await rpTree.init()
             this.rpTreeCache.set(offset, rpTree)
             return rpTree
         }
@@ -482,10 +481,7 @@ class BWReader {
             this.visibilityWindow = -1
         } else {
             this.visibilityWindow = -1
-            // bigbed -- todo, we can't know genome length.
-            //let genomeSize = this.genome ? this.genome.getGenomeLength() : 3088286401
-            // Estimate window size to return ~ 1,000 features, assuming even distribution across the genome
-            //this.visibilityWindow = header.dataCount < 1000 ? -1 : 1000 * (genomeSize / header.dataCount)
+            // bigbed -- todo
 
         }
     }
@@ -579,9 +575,9 @@ function zoomLevelForScale(bpPerPixel, zoomLevelHeaders) {
 }
 
 
-function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict) {
+function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict, windowFunction, littleEndian) {
 
-    const binaryParser = new BinaryParser(data)
+    const binaryParser = new BinaryParser(data, littleEndian)
     const chromId = binaryParser.getInt()
     const blockStart = binaryParser.getInt()
     let chromStart = blockStart
@@ -631,8 +627,8 @@ function getBedDataDecoder() {
 
     const minSize = 3 * 4 + 1   // Minimum # of bytes required for a bed record
     const decoder = getDecoder(this.header.definedFieldCount, this.header.fieldCount, this.autoSql, this.format)
-    return function (data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict) {
-        const binaryParser = new BinaryParser(data)
+    return function (data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict, windowFunction, littleEndian) {
+        const binaryParser = new BinaryParser(data, littleEndian)
         while (binaryParser.remLength() >= minSize) {
 
             const chromId = binaryParser.getInt()
@@ -654,9 +650,9 @@ function getBedDataDecoder() {
 }
 
 
-function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict, windowFunction) {
+function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict, windowFunction, littleEndian) {
 
-    const binaryParser = new BinaryParser(data)
+    const binaryParser = new BinaryParser(data, littleEndian)
     const minSize = 8 * 4  // Minimum # of bytes required for a zoom record
 
 
