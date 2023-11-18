@@ -1,47 +1,106 @@
-import {isDataURL} from "../util/igvUtils.js"
-import BufferedReader from "./bufferedReader.js"
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
 
-let RPTREE_HEADER_SIZE = 48
-let RPTREE_NODE_LEAF_ITEM_SIZE = 32   // leaf item size
-let RPTREE_NODE_CHILD_ITEM_SIZE = 24  // child item size
-let BUFFER_SIZE = 512000     //  buffer
+const RPTREE_HEADER_SIZE = 48
+const RPTREE_NODE_LEAF_ITEM_SIZE = 32   // leaf item size
+const RPTREE_NODE_CHILD_ITEM_SIZE = 24  // child item size
 
 export default class RPTree {
 
-    constructor(fileOffset, config, littleEndian, loader) {
+    static magic = 610839776
+    littleEndian = true
+    nodeCache = new Map()
 
-        this.config = config
-        this.loader = loader
-        this.fileOffset = fileOffset // File offset to beginning of tree
-        this.path = config.url
-        this.littleEndian = littleEndian
+    constructor(path, startOffset) {
+
+        this.path = path
+        this.startOffset = startOffset
     }
 
-    async load() {
-        const rootNodeOffset = this.fileOffset + RPTREE_HEADER_SIZE
-        const bufferedReader = isDataURL(this.path) || this.config.wholeFile ?
-            this.loader :
-            new BufferedReader(this.config, BUFFER_SIZE)
-        this.rootNode = await this.readNode(rootNodeOffset, bufferedReader)
+
+    async init() {
+        const binaryParser = await this.#getParserFor(this.startOffset, RPTREE_HEADER_SIZE)
+        let magic = binaryParser.getInt()
+        console.log(magic)
+        if(magic !== RPTree.magic) {
+            binaryParser.setPosition(0)
+            this.littleEndian = !this.littleEndian
+            binaryParser.littleEndian = this.littleEndian
+            magic = binaryParser.getInt()
+            if(magic !== RPTree.magic) {
+                throw Error(`Bad magic number ${magic}`)
+            }
+        }
+
+        const blockSize = binaryParser.getUInt()
+        const itemCount = binaryParser.getLong()
+        const startChromIx = binaryParser.getUInt()
+        const startBase = binaryParser.getUInt()
+        const endChromIx = binaryParser.getUInt()
+        const endBase = binaryParser.getUInt()
+        const endFileOffset = binaryParser.getLong()
+        const itemsPerSlot = binaryParser.getUInt()
+        const reserved = binaryParser.getUInt()
+        const rootNodeOffset = this.startOffset + RPTREE_HEADER_SIZE
+        this.header = {
+            magic,
+            blockSize,
+            itemCount,
+            startChromIx,
+            startBase,
+            endChromIx,
+            endBase,
+            endFileOffset,
+            itemsPerSlot,
+            reserved,
+            rootNodeOffset
+        }
         return this
     }
 
-    async readNode(filePosition, bufferedReader) {
+    async #getParserFor(start, size) {
+        const data = await igvxhr.loadArrayBuffer(this.path, {range: {start, size}})
+        return new BinaryParser(new DataView(data), this.littleEndian)
+    }
 
-        let dataView = await bufferedReader.dataViewForRange({start: filePosition, size: 4}, false)
-        let binaryParser = new BinaryParser(dataView, this.littleEndian)
+
+    async findLeafItemsOverlapping(chrIdx1, startBase, chrIdx2, endBase) {
+
+        const leafItems = []
+        const walkTreeNode = async (offset) => {
+            const node = await this.readNode(offset)
+            for (let item of node.items) {
+                if (overlaps(item, chrIdx1, startBase, chrIdx2, endBase)) {
+                    if (node.type === 1) {   // Leaf node
+                        leafItems.push(item)
+                    } else { // Non leaf node
+                         await walkTreeNode(item.childOffset)
+                    }
+                }
+            }
+        }
+
+        await walkTreeNode(this.header.rootNodeOffset)
+        return leafItems
+    }
+
+
+    async readNode(offset) {
+
+        const nodeKey = offset
+        if (this.nodeCache.has(nodeKey)) {
+            return this.nodeCache
+        }
+
+        let binaryParser = await this.#getParserFor(offset, 4)
         const type = binaryParser.getByte()
         const isLeaf = (type === 1)
         const reserved = binaryParser.getByte()
         const count = binaryParser.getUShort()
-        filePosition += 4
-
         let bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE)
-        let range2 = {start: filePosition, size: bytesRequired}
-        dataView = await bufferedReader.dataViewForRange(range2, false)
-        const items = new Array(count)
-        binaryParser = new BinaryParser(dataView)
+        binaryParser = await this.#getParserFor(offset + 4, bytesRequired)
+
+        const items = []
 
         if (isLeaf) {
             for (let i = 0; i < count; i++) {
@@ -54,10 +113,8 @@ export default class RPTree {
                     dataOffset: binaryParser.getLong(),
                     dataSize: binaryParser.getLong()
                 }
-                items[i] = item
-
+                items.push(item)
             }
-            return new RPTreeNode(items)
         } else { // non-leaf
             for (let i = 0; i < count; i++) {
 
@@ -71,95 +128,12 @@ export default class RPTree {
                 }
                 items[i] = item
             }
-
-            return new RPTreeNode(items)
         }
-
+        const node = {type, items}
+        this.nodeCache.set(nodeKey, node)
+        return node
     }
 
-    async findLeafItemsOverlapping(chrIdx1, startBase, chrIdx2, endBase) {
-
-        let self = this
-
-        return new Promise( (fulfill, reject) => {
-
-            let leafItems = [],
-                processing = new Set(),
-                bufferedReader = isDataURL(this.path) || this.config.wholeFile ?
-                    this.loader :
-                    new BufferedReader(this.config, BUFFER_SIZE)
-
-            processing.add(0)  // Zero represents the root node
-            findLeafItems(this.rootNode, 0)
-
-            function findLeafItems(node, nodeId) {
-
-                if (overlaps(node, chrIdx1, startBase, chrIdx2, endBase)) {
-
-                    let items = node.items
-
-                    items.forEach(function (item) {
-
-                        if (overlaps(item, chrIdx1, startBase, chrIdx2, endBase)) {
-
-                            if (item.isLeaf) {
-                                leafItems.push(item)
-                            } else {
-                                if (item.childNode) {
-                                    findLeafItems(item.childNode)
-                                } else {
-                                    processing.add(item.childOffset)  // Represent node to-be-loaded by its file position
-
-                                    self.readNode(item.childOffset, bufferedReader)
-                                        .then(function (node) {
-                                            item.childNode = node
-                                            findLeafItems(node, item.childOffset)
-                                        })
-                                        .catch(reject)
-                                }
-                            }
-                        }
-                    })
-
-                }
-
-                if (nodeId !== undefined) processing.delete(nodeId)
-
-                // Wait until all nodes are processed
-                if (processing.size === 0) {
-                    fulfill(leafItems)
-                }
-            }
-        })
-    }
-}
-
-class RPTreeNode {
-
-    constructor(items) {
-
-        this.items = items
-
-        let minChromId = Number.MAX_SAFE_INTEGER,
-            maxChromId = 0,
-            minStartBase = Number.MAX_SAFE_INTEGER,
-            maxEndBase = 0,
-            i,
-            item
-
-        for (i = 0; i < items.length; i++) {
-            item = items[i]
-            minChromId = Math.min(minChromId, item.startChrom)
-            maxChromId = Math.max(maxChromId, item.endChrom)
-            minStartBase = Math.min(minStartBase, item.startBase)
-            maxEndBase = Math.max(maxEndBase, item.endBase)
-        }
-
-        this.startChrom = minChromId
-        this.endChrom = maxChromId
-        this.startBase = minStartBase
-        this.endBase = maxEndBase
-    }
 }
 
 /**
