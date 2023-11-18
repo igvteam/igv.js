@@ -34,6 +34,10 @@ class BinaryParser {
         this.length = dataView.byteLength
     }
 
+    setPosition(position) {
+        this.position = position
+    }
+
     available() {
         return this.length - this.position
     }
