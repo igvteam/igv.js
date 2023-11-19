@@ -11,10 +11,11 @@
  */
 export default class ChromTree {
 
-    constructor(header, nameToID, valueToKey) {
+    constructor(header, nameToID, valueToKey, sumLengths) {
         this.header = header
         this.nameToId = nameToID
         this.idToName = valueToKey
+        this.sumLengths = sumLengths
     }
 
     static parseTree(binaryParser, startOffset, genome = false) {
@@ -29,6 +30,7 @@ export default class ChromTree {
             const header = {magic, blockSize, keySize, valSize, itemCount, reserved}
             const nameToId = new Map()
             const idToName = []
+            let sumLengths = 0
             const readTreeNode = (offset) => {
 
                 if (offset >= 0) binaryParser.position = offset
@@ -44,6 +46,7 @@ export default class ChromTree {
                         if (valSize === 8) {
                             value = binaryParser.getInt()
                             const chromSize = binaryParser.getInt()
+                            sumLengths += chromSize
                             if (genome) key = genome.getChromosomeName(key)  // Translate to canonical chr name
                             nameToId.set(key, value)
                             idToName[value] = key
@@ -69,7 +72,7 @@ export default class ChromTree {
             // Recursively walk tree to populate dictionary
             readTreeNode(binaryParser, -1)
 
-            return new ChromTree(header, nameToId, idToName)
+            return new ChromTree(header, nameToId, idToName, sumLengths)
         }
     }
 

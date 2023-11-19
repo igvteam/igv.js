@@ -21,13 +21,12 @@ export default class RPTree {
     async init() {
         const binaryParser = await this.#getParserFor(this.startOffset, RPTREE_HEADER_SIZE)
         let magic = binaryParser.getInt()
-        console.log(magic)
-        if(magic !== RPTree.magic) {
+        if (magic !== RPTree.magic) {
             binaryParser.setPosition(0)
             this.littleEndian = !this.littleEndian
             binaryParser.littleEndian = this.littleEndian
             magic = binaryParser.getInt()
-            if(magic !== RPTree.magic) {
+            if (magic !== RPTree.magic) {
                 throw Error(`Bad magic number ${magic}`)
             }
         }
@@ -74,7 +73,7 @@ export default class RPTree {
                     if (node.type === 1) {   // Leaf node
                         leafItems.push(item)
                     } else { // Non leaf node
-                         await walkTreeNode(item.childOffset)
+                        await walkTreeNode(item.childOffset)
                     }
                 }
             }
@@ -89,7 +88,7 @@ export default class RPTree {
 
         const nodeKey = offset
         if (this.nodeCache.has(nodeKey)) {
-            return this.nodeCache
+            return this.nodeCache.get(nodeKey)
         }
 
         let binaryParser = await this.#getParserFor(offset, 4)
@@ -101,34 +100,22 @@ export default class RPTree {
         binaryParser = await this.#getParserFor(offset + 4, bytesRequired)
 
         const items = []
-
-        if (isLeaf) {
-            for (let i = 0; i < count; i++) {
-                let item = {
-                    isLeaf: true,
-                    startChrom: binaryParser.getInt(),
-                    startBase: binaryParser.getInt(),
-                    endChrom: binaryParser.getInt(),
-                    endBase: binaryParser.getInt(),
-                    dataOffset: binaryParser.getLong(),
-                    dataSize: binaryParser.getLong()
-                }
-                items.push(item)
+        for (let i = 0; i < count; i++) {
+            let item = {
+                isLeaf: isLeaf,
+                startChrom: binaryParser.getInt(),
+                startBase: binaryParser.getInt(),
+                endChrom: binaryParser.getInt(),
+                endBase: binaryParser.getInt(),
+                childOffset: binaryParser.getLong()
             }
-        } else { // non-leaf
-            for (let i = 0; i < count; i++) {
-
-                let item = {
-                    isLeaf: false,
-                    startChrom: binaryParser.getInt(),
-                    startBase: binaryParser.getInt(),
-                    endChrom: binaryParser.getInt(),
-                    endBase: binaryParser.getInt(),
-                    childOffset: binaryParser.getLong()
-                }
-                items[i] = item
+            if (isLeaf) {
+                item.dataSize =  binaryParser.getLong()
+                item.dataOffset = item.childOffset
             }
+            items.push(item)
         }
+
         const node = {type, items}
         this.nodeCache.set(nodeKey, node)
         return node
