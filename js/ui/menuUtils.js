@@ -126,9 +126,10 @@ function didMultiSelect(trackView) {
     return selected && selected.length > 1 && new Set(selected).has(trackView)
 }
 
-function isVisibilityWindowType(track) {
-    const hasVizWindow = track.config && track.config.visibilityWindow !== undefined
-    return hasVizWindow || vizWindowTypes.has(track.type)
+function isVisibilityWindowType(trackView) {
+    const track = trackView.track
+    const hasVizWindow = track && track.config && track.config.visibilityWindow !== undefined
+    return hasVizWindow || (track && vizWindowTypes.has(track.type))
 }
 
 function overlayTrackAlphaAdjustmentMenuItem() {
