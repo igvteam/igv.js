@@ -65,7 +65,7 @@ class BWSource {
     }
 
     async defaultVisibilityWindow() {
-        return this.reader.defaultVisibilityWindow
+        return Math.floor(10000 / this.reader.featureDensity)
     }
 
     async getWGValues(windowFunction) {

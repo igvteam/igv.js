@@ -338,7 +338,7 @@ class BWReader {
             const startOffset = BBFILE_HEADER_SIZE
             let range = {
                 start: startOffset,
-                size: (header.fullDataOffset - startOffset + 5)
+                size: (header.fullDataOffset - startOffset + 4)
             }
             data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: range}))
 
@@ -381,8 +381,10 @@ class BWReader {
             }
 
             //Finally total data count
-           // binaryParser.position = header.fullDataOffset - startOffset
-           // header.dataCount = binaryParser.getInt()
+            binaryParser.position = header.fullDataOffset - startOffset
+            header.dataCount = binaryParser.getInt()
+
+            this.featureDensity = header.dataCount / this.chromTree.sumLengths
 
             this.header = header
 
