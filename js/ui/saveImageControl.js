@@ -93,6 +93,11 @@ class SaveImageControl extends NavbarButton {
 
     }
 
+    navbarResizeHandler(navbarButtonCSSClass) {
+        this.dropdown.dismiss()
+        super.navbarResizeHandler(navbarButtonCSSClass)
+    }
+
 }
 
 export default SaveImageControl
