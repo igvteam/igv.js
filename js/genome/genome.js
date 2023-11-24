@@ -1,12 +1,13 @@
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import Chromosome from "./chromosome.js"
-import {loadFasta} from "./fasta.js"
+import {loadSequence} from "./fasta.js"
 import ChromAliasBB from "./chromAliasBB.js"
 import ChromAliasFile from "./chromAliasFile.js"
 import CytobandFileBB from "./cytobandFileBB.js"
 import CytobandFile from "./cytobandFile.js"
 
 import {loadChromSizes} from "./chromSizes.js"
+import ChromAliasDefaults from "./chromAliasDefaults.js"
 
 /**
  * The Genome class represents an assembly and consists of the following elements
@@ -17,6 +18,8 @@ import {loadChromSizes} from "./chromSizes.js"
  */
 
 class Genome {
+
+    #wgChromosomeNames
 
     static async createGenome(options) {
 
@@ -37,16 +40,16 @@ class Genome {
 
         const config = this.config
 
-        this.sequence = await loadFasta(config)
+        this.sequence = await loadSequence(config)
 
         if (config.chromSizes) {
             // a chromSizes file is neccessary for 2bit sequences for whole-genome view or chromosome pulldown
             this.chromosomes = await loadChromSizes(config.chromSizes)
         } else {
+            // if the sequence defines chromosomes use them (fasta does, 2bit does not)
             this.chromosomes = this.sequence.chromosomes || new Map() // This might be undefined, depending on sequence type
         }
 
-        // For backward compatibility
         if (this.chromosomes.size > 0) {
             this.chromosomeNames = Array.from(this.chromosomes.keys())
         }
@@ -55,6 +58,8 @@ class Genome {
             this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
         } else if (config.aliasURL) {
             this.chromAlias = new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
+        } else {
+            this.chromAlias = new ChromAliasDefaults(this.id, this.chromosomeNames);
         }
 
         if (config.cytobandBbURL) {
@@ -67,19 +72,19 @@ class Genome {
             // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
             if (config.chromosomeOrder) {
                 if (Array.isArray(config.chromosomeOrder)) {
-                    this.wgChromosomeNames = config.chromosomeOrder
+                    this.#wgChromosomeNames = config.chromosomeOrder
                 } else {
-                    this.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
+                    this.#wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
                 }
             } else {
-                this.wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
+                this.#wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
             }
         }
 
         // Optionally create the psuedo chromosome "all" to support whole genome view
-        this.wholeGenomeView = config.wholeGenomeView !== false && this.wgChromosomeNames && this.chromosomes.size > 1
+        this.wholeGenomeView = config.wholeGenomeView !== false && this.#wgChromosomeNames && this.chromosomes.size > 1
         if (this.wholeGenomeView) {
-            const l = this.wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
+            const l = this.#wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
             this.chromosomes.set("all", new Chromosome("all", 0, l))
         }
     }
@@ -114,8 +119,7 @@ class Genome {
         if (this.showWholeGenomeView() && this.chromosomes.has("all")) {
             return "all"
         } else {
-            return this.sequence.getFirstChromosomeName()
-
+            return this.chromosomeNames[0]
         }
     }
 
@@ -160,13 +164,11 @@ class Genome {
 
         return this.chromosomes.get(chr)
     }
-
     async getAliasRecord(chr) {
         if (this.chromAlias) {
             return this.chromAlias.search(chr)
         }
     }
-
 
     getCytobands(chr) {
         if (this.cytobandSource) {
@@ -177,6 +179,10 @@ class Genome {
 
     getChromosomes() {
         return this.chromosomes
+    }
+
+    get wgChromosomeNames() {
+        return this.#wgChromosomeNames.slice()
     }
 
     /**
@@ -202,7 +208,7 @@ class Genome {
 
         let lastChr = undefined
         let lastCoord = 0
-        for (let name of this.wgChromosomeNames) {
+        for (let name of this.#wgChromosomeNames) {
 
             const cumulativeOffset = this.cumulativeOffsets[name]
             if (cumulativeOffset > genomeCoordinate) {
@@ -214,7 +220,7 @@ class Genome {
         }
 
         // If we get here off the end
-        return {chr: this.wgChromosomeNames[this.wgChromosomeNames.length - 1], position: 0}
+        return {chr: this.#wgChromosomeNames[this.#wgChromosomeNames.length - 1], position: 0}
 
     };
 
@@ -234,15 +240,11 @@ class Genome {
 
         function computeCumulativeOffsets() {
 
-            let self = this
             let acc = {}
             let offset = 0
-            for (let name of self.wgChromosomeNames) {
-
+            for (let name of this.#wgChromosomeNames) {
                 acc[name] = Math.floor(offset)
-
-                const chromosome = self.getChromosome(name)
-
+                const chromosome = this.getChromosome(name)
                 offset += chromosome.bpLength
             }
 
@@ -257,7 +259,7 @@ class Genome {
 
         if (!this.bpLength) {
             let bpLength = 0
-            for (let cname of this.wgChromosomeNames) {
+            for (let cname of this.#wgChromosomeNames) {
                 let c = this.chromosomes.get(cname)
                 bpLength += c.bpLength
             }
@@ -269,13 +271,6 @@ class Genome {
     async getSequence(chr, start, end) {
         chr = this.getChromosomeName(chr)
         return this.sequence.getSequence(chr, start, end)
-    }
-
-    constructWG(config) {
-
-        // Compute psuedo-chromosome "all"
-        const l = this.wgChromosomeNames.reduce((accumulator, currentValue) => accumulator += this.chromosomes.get(currentValue).bpLength, 0)
-        this.chromosomes.set("all", new Chromosome("all", 0, l))
     }
 
 }

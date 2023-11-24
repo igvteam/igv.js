@@ -5,7 +5,7 @@ import ChromSizes from "./chromSizes.js"
 import Twobit from "./twobit.js"
 import CachedSequence from "./cachedSequence.js"
 
-async function loadFasta(reference) {
+async function loadSequence(reference) {
 
     let fasta
     if ("chromsizes" === reference.format) {
@@ -21,4 +21,4 @@ async function loadFasta(reference) {
     return fasta
 }
 
-export {loadFasta}
+export {loadSequence}

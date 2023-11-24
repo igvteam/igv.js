@@ -32,6 +32,18 @@ class ChromAliasFile {
         return this.aliasRecordCache.has(alias) ? this.aliasRecordCache.get(alias).chr : alias
     }
 
+    /**
+     * Return an alternate chromosome name (alias).  If not exists, return chr
+     * @param chr
+     * @param nameSet -- The name set, e.g. "ucsc"
+     * @returns {*|undefined}
+     */
+    getChromosomeAlias(chr, nameSet)
+    {
+        const aliasRecord =  this.aliasRecordCache.get(chr)
+        return aliasRecord ? aliasRecord[nameSet] || chr : chr
+    }
+
 
     async loadAliases() {
 
@@ -39,17 +51,18 @@ class ChromAliasFile {
         const lines = StringUtils.splitLines(data)
         const firstLine = lines[0]
         if (firstLine.startsWith("#")) {
-            this.headings = firstLine.split("\t").map(h => h.trim())
+            this.headings = firstLine.substring(1).split("\t").map(h => h.trim())
             this.altNameSets = this.headings.slice(1)
         }
 
-        const chromosomeNameSet = this.genome.chromosomes ?
-            new Set(this.genome.chromosomes.keys()) : new Set()
+        const chromosomeNameSet = this.genome.chromosomeNames ?
+            new Set(this.genome.chromosomeNames) : new Set()
 
         for (let line of lines) {
             if (!line.startsWith("#") && line.length > 0) {
                 const tokens = line.split("\t")
 
+                // Find the canonical chromosome
                 let chr = tokens.find(t => chromosomeNameSet.has(t))
                 if(!chr) {
                     chr = tokens[0]

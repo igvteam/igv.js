@@ -2,6 +2,8 @@ import "./utils/mockObjects.js"
 import ChromAliasFile from "../js/genome/chromAliasFile.js"
 import BWReader from "../js/bigwig/bwReader.js"
 import {assert} from "chai"
+import ChromAliasDefaults from "../js/genome/chromAliasDefaults.js"
+import ChromAliasBB from "../js/genome/chromAliasBB.js"
 
 
 suite("chromAlias", function () {
@@ -9,7 +11,10 @@ suite("chromAlias", function () {
     const genome = {
         chromosomes: new Map([
             ["NC_007194.1", {name: "NC_007194.1", bpLength: 1}],
-        ])
+        ]),
+        getChromosomeName: function (ignore) {
+            return "NC_007194.1"
+        }
     }
 
     /**
@@ -35,6 +40,22 @@ suite("chromAlias", function () {
         assert.equal(chromAliasRecord.genbank, "CM000169.1")
         assert.equal(chromAliasRecord.ncbi, "1")
         assert.equal(chromAliasRecord.ucsc, "chr1")
+
+        assert.equal(chromAlias.getChromosomeAlias("NC_007194.1", "genbank"), "CM000169.1")
+    })
+
+    test("test chromAlias.bb", async function () {
+
+        const url = "test/data/genomes/GCF_000002655.1.chromAlias.bb"
+
+        const chromAlias = new ChromAliasBB(url, {}, genome)
+        const chromAliasRecord = await chromAlias.search("1")
+        assert.equal(chromAliasRecord.chr, "NC_007194.1")
+        assert.equal(chromAliasRecord.genbank, "CM000169.1")
+        assert.equal(chromAliasRecord.ncbi, "1")
+        assert.equal(chromAliasRecord.ucsc, "chr1")
+
+        assert.equal(chromAlias.getChromosomeAlias("NC_007194.1", "genbank"), "CM000169.1")
     })
 
     test("test chromalias bb extra index search", async function () {
@@ -54,5 +75,43 @@ suite("chromAlias", function () {
         const ucscName = "chr2"
         const f2 = await bbReader.search(ucscName)
         assert.equal(ucscName, f2.ucsc)
+    })
+
+
+    test("test defaults", async function () {
+
+        const genomeID = "hg*"
+
+        // NCBI convention
+        let chrNames = []
+        for (let i = 1; i < 25; i++) {
+            chrNames.push(i.toString())
+        }
+        chrNames.push("MT")
+
+        let chromAlias = new ChromAliasDefaults(genomeID, chrNames)
+        let chromAliasRecord = await chromAlias.search("chr1")
+        assert.equal(chromAliasRecord.chr, "1")
+        assert.equal(chromAlias.getChromosomeName("chrX"), "23")
+        assert.equal(chromAlias.getChromosomeName("chrM"), "MT")
+
+        // UCSC convention
+        chrNames = []
+        for (let i = 1; i < 23; i++) {
+            chrNames.push("chr" + i)
+            chrNames.push("chrX")
+            chrNames.push("chrY")
+            chrNames.push("chrM")
+        }
+
+        chromAlias = new ChromAliasDefaults(genomeID, chrNames)
+        chromAliasRecord = await chromAlias.search("1")
+        assert.equal(chromAliasRecord.chr, "chr1")
+        assert.equal(chromAlias.getChromosomeName("23"), "chrX")
+        assert.equal(chromAlias.getChromosomeName("MT"), "chrM")
+
+        // Defaults don't support name sets,
+        assert.equal(chromAlias.getChromosomeAlias("NC_007194.1", "genbank"), "NC_007194.1")
+
     })
 })
