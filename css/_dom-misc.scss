@@ -3,23 +3,20 @@ $igv-multi-locus-ruler-label-height: 12px;
 
 .igv-zoom-in-notice-container {
 
-  z-index: 1024;
+  //z-index: 1024;
+  z-index: 256;
 
   position: absolute;
-  //top: 50%;
   top: 8px;
   left: 50%;
 
   transform: translate(-50%, 0%);
-  //transform: translate(-50%, -50%);
 
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
   justify-content: center;
   align-items: center;
-
-  //background-color: $igv_apple_crayon_honeydew;
   background-color: white;
 
   >div {
