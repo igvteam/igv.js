@@ -9,15 +9,13 @@
 
 <body>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+<div id="igv-container" style="position: relative; padding-top: 50px;padding-bottom: 20px; height: auto">
 
 </div>
 
 <script type="module">
 
     import igv from "../../js/index.js";
-    // import igv from "../../dist/igv.esm.js";
-
     const config =
         {
 
@@ -129,10 +127,13 @@
                     "order": 1000000
                 }
             ]
-        }
+        };
 
-    igv.createBrowser(document.getElementById("myDiv"), config).then(function (browser) {
-    });
+    const parent = document.getElementById("igv-container")
+
+    igv.createBrowser(parent, config).then(browser => {
+        console.log(`browser ${ browser.guid } is good to go`)
+    })
 
 
 </script>

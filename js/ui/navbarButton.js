@@ -52,15 +52,20 @@ class NavbarButton {
         this.setState(initialButtonState)
 
         browser.on('navbar-resize', navbarButtonCSSClass => {
-            const key = 'igv-navbar-icon-button' === navbarButtonCSSClass ? 'image' : 'text'
-            if (key !== this.responsiveKey) {
-                this.responsiveKey = key
-                this.configureButton(title)
-                this.setState(undefined)
-            }
+            this.navbarResizeHandler(navbarButtonCSSClass)
         })
 
     }
+
+    navbarResizeHandler(navbarButtonCSSClass) {
+        const key = 'igv-navbar-icon-button' === navbarButtonCSSClass ? 'image' : 'text'
+        if (key !== this.responsiveKey) {
+            this.responsiveKey = key
+            this.configureButton(this.title)
+            this.setState(undefined)
+        }
+    }
+
     configureButton(title) {
 
         this.groupElement = undefined
