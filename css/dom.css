@@ -396,7 +396,7 @@
 }
 
 .igv-zoom-in-notice-container {
-  z-index: 1024;
+  z-index: 256;
   position: absolute;
   top: 8px;
   left: 50%;
