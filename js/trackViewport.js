@@ -702,10 +702,6 @@ class TrackViewport extends Viewport {
                     return
                 }
 
-                // Close any currently open popups
-                $('.igv-popover').hide()
-
-
                 if (this.browser.dragObject || this.browser.isScrolling) {
                     return
                 }
@@ -766,8 +762,10 @@ class TrackViewport extends Viewport {
 
                                 const content = this.getPopupContent(event)
                                 if (content) {
-                                    if (this.popover) this.popover.dispose()
-                                    this.popover = new Popover(this.browser.columnContainer)
+                                    if (undefined === this.popover) {
+                                        this.popover = new Popover(this.browser.columnContainer)
+                                    }
+
                                     this.popover.presentContentWithEvent(event, content)
                                 }
                                 window.clearTimeout(popupTimerID)
@@ -799,10 +797,9 @@ class TrackViewport extends Viewport {
             }
 
             if (str) {
-                if (this.popover) {
-                    this.popover.dispose()
+                if (undefined === this.popover) {
+                    this.popover = new Popover(this.browser.columnContainer, (track.name || ''))
                 }
-                this.popover = new Popover(this.browser.columnContainer, (track.name || ''))
                 this.popover.presentContentWithEvent(event, str)
             }
         })
