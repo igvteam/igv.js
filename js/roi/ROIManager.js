@@ -220,7 +220,7 @@ class ROIManager {
                 if (this.popover) {
                     this.popover.dispose()
                 }
-                this.popover = new Popover(columnContainer, roiSet.name)
+                this.popover = new Popover(columnContainer, true, roiSet.name)
                 this.popover.presentContentWithEvent(event, name)
             })
         } else {

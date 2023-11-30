@@ -763,7 +763,7 @@ class TrackViewport extends Viewport {
                                 const content = this.getPopupContent(event)
                                 if (content) {
                                     if (undefined === this.popover) {
-                                        this.popover = new Popover(this.browser.columnContainer)
+                                        this.popover = new Popover(this.browser.columnContainer, true, undefined)
                                     }
 
                                     this.popover.presentContentWithEvent(event, content)
@@ -798,7 +798,7 @@ class TrackViewport extends Viewport {
 
             if (str) {
                 if (undefined === this.popover) {
-                    this.popover = new Popover(this.browser.columnContainer, (track.name || ''))
+                    this.popover = new Popover(this.browser.columnContainer, true, (track.name || ''))
                 }
                 this.popover.presentContentWithEvent(event, str)
             }
