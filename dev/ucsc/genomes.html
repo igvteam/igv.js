@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+<select id="select">
+    <option value=""></option>
+    <option value="gorGor4">gorGor4</option>
+    <option value="gorGor6">gorGor6</option>
+</select>
+<button id="load-genome">Load  genome</button>
+<br>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+    import Hub from "../../js/ucsc/ucscHub.js"
+
+
+    const igvConfig = {
+        genome: "gorGor4",
+        listeners: {
+            'genomechange': ({genome, trackConfigurations}) => {
+                console.log('genomechange')
+                console.log(genome)
+                console.log(trackConfigurations)
+            }
+        }
+    }
+
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+
+    document.getElementById("load-genome").addEventListener("click", async () => {
+        await browser.loadGenome(document.getElementById("select").value)
+    })
+
+
+</script>
+
+</body>
+
+</html>

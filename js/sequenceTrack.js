@@ -26,7 +26,7 @@
 import IGVGraphics from "./igv-canvas.js"
 import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
-import {loadFasta} from "./genome/fasta.js"
+import {loadSequence} from "./genome/fasta.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js";
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
@@ -441,7 +441,7 @@ class WrappedFasta {
     }
 
     async init() {
-        this.fasta = await loadFasta(this.config)
+        this.fasta = await loadSequence(this.config)
         this.chrNameMap = new Map()
         for(let name of this.fasta.chromosomeNames) {
             this.chrNameMap.set(this.genome.getChromosomeName(name), name)
