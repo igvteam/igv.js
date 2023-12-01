@@ -100,7 +100,8 @@ export default class Trix {
         const indexes = await this.getIndex(opts)
         for (let i = 0; i < indexes.length; i++) {
             const [key, value] = indexes[i]
-            const trimmedKey = key.slice(0, searchWord.length)
+            const trimmedEnd = Math.min(key.length, searchWord.length)
+            const trimmedKey = key.slice(0, trimmedEnd)
             if (trimmedKey < searchWord) {
                 start = value
                 end = value + 65536

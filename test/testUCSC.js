@@ -14,10 +14,14 @@ suite("ucsc utilities", function () {
         const trix = new Trix(ixxFile, ixFile)
         const results = await trix.search("ykoX")
         assert.ok(results)
+
         const exactMatches = results.get('ykox')
         assert.ok(exactMatches)
         assert.ok(exactMatches[0].startsWith('NP_389226.1'))
         console.log(results)
+
+        const nomatches = await trix.search("zzzz");
+        assert.isUndefined(nomatches);
     })
 
     test("test gene bb extra index search", async function () {

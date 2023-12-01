@@ -32,7 +32,7 @@ suite("testGenome", function () {
             id: "GCF_016699485.2",
             format: "2bit",
             twoBitURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.2bit",
-            chromSizes: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.chrom.sizes.txt"
+            chromSizesURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.chrom.sizes.txt"
         }
 
         const genome = await Genome.createGenome(reference)

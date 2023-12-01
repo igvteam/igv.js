@@ -56,16 +56,13 @@ class BWSource {
         return this.reader.loadHeader()
     }
 
-    getDefaultRange() {
-        if (this.reader.totalSummary !== undefined) {
-            return this.reader.totalSummary.defaultRange
-        } else {
-            return undefined
-        }
-    }
-
     async defaultVisibilityWindow() {
-        return Math.floor(10000 / this.reader.featureDensity)
+        if (this.reader.type === "bigwig") {
+            return -1
+        } else {
+            return this.reader.featureDensity ?  Math.floor(10000 / this.reader.featureDensity) : -1
+        }
+
     }
 
     async getWGValues(windowFunction) {

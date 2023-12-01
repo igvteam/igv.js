@@ -345,6 +345,7 @@ class BWReader {
             const nZooms = header.nZoomLevels
             binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
 
+            // Load zoom headers, store in order of decreasing reduction level (increasing resolution)
             this.zoomLevelHeaders = []
             this.firstZoomDataOffset = Number.MAX_SAFE_INTEGER
             for (let i = 1; i <= nZooms; i++) {
@@ -393,11 +394,7 @@ class BWReader {
             if (header.extensionOffset > 0) {
                 await this.loadExtendedHeader(header.extensionOffset)
             }
-
-            this.setDefaultVisibilityWindow(header)
-
-
-            return this.header
+          return this.header
         }
     }
 
@@ -475,16 +472,6 @@ class BWReader {
             return "wig"
         } else {
             return this.autoSql && this.autoSql.table === "chromatinInteract" ? "interact" : "annotation"
-        }
-    }
-
-    setDefaultVisibilityWindow(header) {
-        if (this.type === "bigwig") {
-            this.visibilityWindow = -1
-        } else {
-            this.visibilityWindow = -1
-            // bigbed -- todo
-
         }
     }
 
@@ -660,7 +647,6 @@ function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, ch
 
     while (binaryParser.remLength() >= minSize) {
         const chromId = binaryParser.getInt()
-        const chr = chrDict[chromId]
         const chromStart = binaryParser.getInt()
         const chromEnd = binaryParser.getInt()
         const validCount = binaryParser.getInt()
@@ -685,6 +671,7 @@ function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, ch
 
 
         if (Number.isFinite(value)) {
+            const chr = chrDict[chromId]
             featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value})
 
 

@@ -17,7 +17,7 @@
     </option>
     <option value="https://hgdownload.soe.ucsc.edu/hubs/GCF/013/103/735/GCF_013103735.1/hub.txt">24 large chromosomes
     </option>
-    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/hub.txt">T2T</option>
+    <option value="">T2T</option>
 </select>
 
 <label>
@@ -43,7 +43,7 @@
         includeTracks: true
     }
 
-    const hub = await Hub.loadHub("https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/hub.txt", hubOptions)
+    const hub = await Hub.loadHub("", hubOptions)
 
     const igvConfig = {
         reference: hub.getGenomeConfig(),

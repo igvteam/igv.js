@@ -5,7 +5,14 @@ import ChromSizes from "./chromSizes.js"
 import Twobit from "./twobit.js"
 import CachedSequence from "./cachedSequence.js"
 
-async function loadFasta(reference) {
+/**
+ * Create a sequence object.  The referenced object can include multiple sequence references, in particular
+ * fasta and 2bit URLs.  This is for backward compatibility, the 2bit URL has preference.
+ *
+ * @param reference
+ * @returns {Promise<CachedSequence|ChromSizes|NonIndexedFasta>}
+ */
+async function loadSequence(reference) {
 
     let fasta
     if ("chromsizes" === reference.format) {
@@ -21,4 +28,4 @@ async function loadFasta(reference) {
     return fasta
 }
 
-export {loadFasta}
+export {loadSequence}

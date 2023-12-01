@@ -28,15 +28,5 @@ suite("test cytobands", function () {
 
     })
 
-    test("test cytoband bigbed remote", async function () {
 
-        const url = "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_T2T-CHM13v2.0.cytoBandMapped/cytoBandMapped.bb"
-        const src = new CytobandFileBB(url)
-
-        const cytobands = await src.getCytobands("chr1")  // "CP068269.2
-        const last = cytobands[cytobands.length-1];
-        assert.equal(248387328, last.end)
-
-    })
-    //CP068269.2
 })

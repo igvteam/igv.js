@@ -1,15 +1,13 @@
+import BWReader from "../bigwig/bwReader.js"
+
 /**
- * Represenets a UCSC bigbed alias file
+ * Chromosome alias source backed by a UCSC bigbed file
  *
  *
  * @param aliasURL
  * @param config
  * @returns {Promise<*[]>}
  */
-import {isNumber, buildOptions} from "../util/igvUtils.js"
-import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import BWSource from "../bigwig/bwSource.js"
-import BWReader from "../bigwig/bwReader.js"
 
 class ChromAliasBB {
 
@@ -22,7 +20,9 @@ class ChromAliasBB {
     }
 
     /**
-     * Return the canonical chromosome name for the alias.  If none found return the alias
+     * Return the canonical chromosome name for the alias.  If none found return the alias.
+     *
+     * Note this will only work if a "search" for ths chromosome has been performed previously.
      *
      * @param alias
      * @returns {*}
@@ -33,6 +33,9 @@ class ChromAliasBB {
 
     /**
      * Return an alternate chromosome name (alias).  If not exists, return chr
+     *
+     * Note this will only work if a "search" for ths chromosome has been performed previously.
+     *
      * @param chr
      * @param nameSet -- The name set, e.g. "ucsc"
      * @returns {*|undefined}
@@ -44,7 +47,7 @@ class ChromAliasBB {
     }
 
     /**
-     * Search for chromosome alias bed record.  If found, catch results in the alias -> chr map
+     * Search for chromosome alias bed record.  If found, cache results in the alias -> chr map
      * @param alias
      * @returns {Promise<any>}
      */
