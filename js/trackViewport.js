@@ -781,7 +781,7 @@ class TrackViewport extends Viewport {
                                         this.popoverList = []
                                     }
 
-                                    popover = new Popover(this.browser.columnContainer, true, undefined, () => {
+                                    popover = new Popover(this.$viewport.get(0).parentElement, true, undefined, () => {
                                         popover.dispose()
                                         const index = this.popoverList.indexOf(popover)
                                         this.popoverList[ index ] = undefined
