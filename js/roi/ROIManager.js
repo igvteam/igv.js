@@ -1,6 +1,6 @@
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import ROISet, {screenCoordinates} from './ROISet.js'
-import {Popover} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {Popover} from '../../node_modules/igv-ui/src/index.js'
 
 class ROIManager {
 
@@ -220,7 +220,7 @@ class ROIManager {
                 if (this.popover) {
                     this.popover.dispose()
                 }
-                this.popover = new Popover(columnContainer, true, roiSet.name)
+                this.popover = new Popover(columnContainer, true, roiSet.name, undefined)
                 this.popover.presentContentWithEvent(event, name)
             })
         } else {
