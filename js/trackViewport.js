@@ -3,7 +3,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import {Popover} from '../node_modules/igv-ui/dist/igv-ui.js'
+import {Popover} from '../node_modules/igv-ui/src/index.js'
 import Viewport from "./viewport.js"
 import {FileUtils} from "../node_modules/igv-utils/src/index.js"
 import {DOMUtils} from "../node_modules/igv-ui/dist/igv-ui.js"
@@ -47,9 +47,15 @@ class TrackViewport extends Viewport {
         this.stopSpinner()
         this.addMouseHandlers()
 
+        this.popoverList = undefined
+
         this.browser.on('trackorderchanged', ignore => {
-            if (this.popover) {
-                this.popover.dismiss()
+
+            if (this.popoverList) {
+                for (let i = 0; i < this.popoverList.length; i++ ) {
+                    this.popoverList[ i ].dispose()
+                }
+                this.popoverList = undefined
             }
         })
     }
@@ -768,11 +774,21 @@ class TrackViewport extends Viewport {
 
                                 const content = this.getPopupContent(event)
                                 if (content) {
-                                    if (undefined === this.popover) {
-                                        this.popover = new Popover(this.browser.columnContainer, true, undefined)
+
+                                    let popover
+
+                                    if (undefined === this.popoverList) {
+                                        this.popoverList = []
                                     }
 
-                                    this.popover.presentContentWithEvent(event, content)
+                                    popover = new Popover(this.browser.columnContainer, true, undefined, () => {
+                                        popover.dispose()
+                                        const index = this.popoverList.indexOf(popover)
+                                        this.popoverList[ index ] = undefined
+                                    })
+
+                                    this.popoverList.push(popover)
+                                    popover.presentContentWithEvent(event, content)
                                 }
                                 window.clearTimeout(popupTimerID)
                                 popupTimerID = undefined
