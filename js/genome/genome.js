@@ -42,12 +42,12 @@ class Genome {
 
         this.sequence = await loadSequence(config)
 
-        if (config.chromSizes) {
+        if (config.chromSizesURL) {
             // a chromSizes file is neccessary for 2bit sequences for whole-genome view or chromosome pulldown
-            this.chromosomes = await loadChromSizes(config.chromSizes)
+            this.chromosomes = await loadChromSizes(config.chromSizesURL)
         } else {
             // if the sequence defines chromosomes use them (fasta does, 2bit does not)
-            this.chromosomes = this.sequence.chromosomes || new Map() // This might be undefined, depending on sequence type
+            this.chromosomes = this.sequence.chromosomes || new Map()
         }
 
         if (this.chromosomes.size > 0) {
@@ -144,9 +144,8 @@ class Genome {
 
     async loadChromosome(chr) {
 
-        let chromAliasRecord
         if (this.chromAlias) {
-            chromAliasRecord = await this.chromAlias.search(chr)
+           const chromAliasRecord = await this.chromAlias.search(chr)
             if(chromAliasRecord) {
                 chr = chromAliasRecord.chr
             }
