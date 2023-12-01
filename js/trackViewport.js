@@ -46,6 +46,12 @@ class TrackViewport extends Viewport {
 
         this.stopSpinner()
         this.addMouseHandlers()
+
+        this.browser.on('trackorderchanged', ignore => {
+            if (this.popover) {
+                this.popover.dismiss()
+            }
+        })
     }
 
     setContentHeight(contentHeight) {
