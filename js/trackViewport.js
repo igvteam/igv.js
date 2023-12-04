@@ -3,7 +3,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import {Popover} from '../node_modules/igv-ui/src/index.js'
+import {Popover} from '../node_modules/igv-ui/dist/igv-ui.js'
 import Viewport from "./viewport.js"
 import {FileUtils} from "../node_modules/igv-utils/src/index.js"
 import {DOMUtils} from "../node_modules/igv-ui/dist/igv-ui.js"
@@ -820,7 +820,7 @@ class TrackViewport extends Viewport {
 
             if (str) {
                 if (undefined === this.popover) {
-                    this.popover = new Popover(this.browser.columnContainer, true, (track.name || ''))
+                    this.popover = new Popover(this.browser.columnContainer, true, (track.name || ''), undefined)
                 }
                 this.popover.presentContentWithEvent(event, str)
             }
