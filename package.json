@@ -43,7 +43,6 @@
   },
   "browserslist": "> 1%, not dead",
   "devDependencies": {
-    "html2canvas": "^1.4.1",
     "@rollup/plugin-strip": "^3.0.1",
     "@rollup/plugin-terser": "^0.4.0",
     "@xmldom/xmldom": "^0.7.9",
@@ -53,6 +52,7 @@
     "circular-view": "github:igvteam/circular-view#v0.2.4",
     "eslint": "^6.4.0",
     "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v0.5.5",
+    "html2canvas": "^1.4.1",
     "igv-ui": "github:igvteam/igv-ui#dat_popover_edits",
     "igv-utils": "github:igvteam/igv-utils#v1.4.8",
     "mocha": "^10.2.0",
