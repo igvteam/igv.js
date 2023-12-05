@@ -49,15 +49,15 @@ class TrackViewport extends Viewport {
 
         this.popoverList = undefined
 
-        this.browser.on('trackorderchanged', ignore => {
-
-            if (this.popoverList) {
-                for (let i = 0; i < this.popoverList.length; i++ ) {
-                    this.popoverList[ i ].dispose()
-                }
-                this.popoverList = undefined
-            }
-        })
+        // this.browser.on('trackorderchanged', ignore => {
+        //
+        //     if (this.popoverList) {
+        //         for (let i = 0; i < this.popoverList.length; i++ ) {
+        //             this.popoverList[ i ].dispose()
+        //         }
+        //         this.popoverList = undefined
+        //     }
+        // })
     }
 
     setContentHeight(contentHeight) {
