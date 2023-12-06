@@ -17,7 +17,6 @@ let mouseDownCoords
 let lastClickTime = 0
 let lastHoverUpdateTime = 0
 let popupTimerID
-let popover
 
 class TrackViewport extends Viewport {
 
@@ -756,27 +755,34 @@ class TrackViewport extends Viewport {
                 } else {
                     // single-click
 
-                    if (event.shiftKey && typeof this.trackView.track.shiftClick === "function") {
+                    /*if (event.shiftKey && typeof this.trackView.track.shiftClick === "function") {
 
                         this.trackView.track.shiftClick(xBP, event)
 
-                    } else if (typeof this.trackView.track.popupData === "function") {
+                    } else */
+
+                    if (typeof this.trackView.track.popupData === "function") {
 
                         popupTimerID = setTimeout(() => {
 
                                 const content = this.getPopupContent(event)
                                 if (content) {
 
-                                    if (popover) {
-                                        popover.dispose()
+                                    if (undefined === this.popoverList) {
+                                        this.popoverList = []
+                                    }
+
+                                    if (false === event.shiftKey) {
+                                        for (let i = 0; i < this.popoverList.length; i++ ) {
+                                            this.popoverList[ i ].dispose()
+                                        }
+                                        this.popoverList = []
                                     }
 
                                     // Use column element as parent to popover
-                                    popover = new Popover(this.$viewport.get(0).parentElement, true, undefined, () => {
-                                        popover.dispose()
-                                    })
+                                    this.popoverList.push(new Popover(this.$viewport.get(0).parentElement, true, undefined, undefined))
+                                    this.popoverList[ this.popoverList.length - 1 ].presentContentWithEvent(event, content)
 
-                                    popover.presentContentWithEvent(event, content)
                                 }
                                 window.clearTimeout(popupTimerID)
                                 popupTimerID = undefined
