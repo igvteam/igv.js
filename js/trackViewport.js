@@ -17,6 +17,7 @@ let mouseDownCoords
 let lastClickTime = 0
 let lastHoverUpdateTime = 0
 let popupTimerID
+let popover
 
 class TrackViewport extends Viewport {
 
@@ -709,8 +710,8 @@ class TrackViewport extends Viewport {
                     return
                 }
 
-                // Treat as a mouse click, its either a single or double click.
-                // Handle here and stop propogation / default
+                // Treat as a mouse click, it's either a single or double click.
+                // Handle here and stop propagation / default
                 event.preventDefault()
 
                 const mouseX = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0)).x
@@ -766,19 +767,15 @@ class TrackViewport extends Viewport {
                                 const content = this.getPopupContent(event)
                                 if (content) {
 
-                                    let popover
-
-                                    if (undefined === this.popoverList) {
-                                        this.popoverList = []
+                                    if (popover) {
+                                        popover.dispose()
                                     }
 
+                                    // Use column element as parent to popover
                                     popover = new Popover(this.$viewport.get(0).parentElement, true, undefined, () => {
                                         popover.dispose()
-                                        const index = this.popoverList.indexOf(popover)
-                                        this.popoverList[ index ] = undefined
                                     })
 
-                                    this.popoverList.push(popover)
                                     popover.presentContentWithEvent(event, content)
                                 }
                                 window.clearTimeout(popupTimerID)
