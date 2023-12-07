@@ -35,9 +35,25 @@
     import igv from "../../js/index.js";
     import {FileUtils} from "../../node_modules/igv-utils/src/index.js";
 
+
+    const config =
+        {
+
+            genome: "hg19",
+            locus: "myc",
+
+            tracks:
+                [
+                    {
+                        "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
+                        "name": "Big BigWig"
+                    },
+                ]
+        };
+
     const fileWidget = document.getElementById("fileWidget")
 
-    igv.createBrowser(document.getElementById("myDiv"), { genome:'hg19' })
+    igv.createBrowser(document.getElementById("myDiv"), config)
         .then(function (browser) {
 
             fileWidget.disabled = false;
