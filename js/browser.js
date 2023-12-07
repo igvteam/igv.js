@@ -1833,6 +1833,12 @@ class Browser {
      */
     toJSON() {
 
+        for (let {track} of this.trackViews) {
+            if (track.config && track.config.url instanceof File) {
+                throw new Error(`Sessions cannot include local file references ${ track.config.url.name }`)
+            }
+        }
+
         const json = {
             "version": version()
         }
