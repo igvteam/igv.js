@@ -869,6 +869,22 @@ class TrackViewport extends Viewport {
         return content
     }
 
+    dispose() {
+
+        if (this.popover) {
+            this.popover.dispose()
+        }
+
+        if (this.popoverList) {
+            for (let i = 0; i < this.popoverList.length; i++ ) {
+                this.popoverList[ i ].dispose()
+            }
+
+            this.popoverList = undefined
+        }
+
+        super.dispose()
+    }
 
 }
 
