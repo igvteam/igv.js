@@ -1835,7 +1835,7 @@ class Browser {
 
         for (let {track} of this.trackViews) {
             if (track.config && track.config.url instanceof File) {
-                throw new Error(`Sessions cannot include local file references ${ track.config.url.name }`)
+                throw new Error(`Cannot include local file references ${ track.config.url.name }`)
             }
         }
 
