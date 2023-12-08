@@ -49,6 +49,20 @@ class TrackViewport extends Viewport {
 
         this.popoverList = undefined
 
+        this.browser.on('willpresentpopover', trackViewport => {
+
+            if (trackViewport !== this && this.popoverList) {
+                
+                for (let i = 0; i < this.popoverList.length; i++ ) {
+                    this.popoverList[ i ].dispose()
+                }
+
+                this.popoverList = undefined
+            }
+
+        })
+
+
     }
 
     setContentHeight(contentHeight) {
@@ -767,6 +781,8 @@ class TrackViewport extends Viewport {
 
                                 const content = this.getPopupContent(event)
                                 if (content) {
+
+                                    this.browser.fireEvent('willpresentpopover', [this])
 
                                     if (undefined === this.popoverList) {
                                         this.popoverList = []
