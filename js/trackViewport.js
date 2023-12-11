@@ -17,6 +17,7 @@ let mouseDownCoords
 let lastClickTime = 0
 let lastHoverUpdateTime = 0
 let popupTimerID
+let globalPopoverList
 
 class TrackViewport extends Viewport {
 
@@ -47,20 +48,18 @@ class TrackViewport extends Viewport {
         this.stopSpinner()
         this.addMouseHandlers()
 
-        this.popoverList = undefined
-
-        this.browser.on('willpresentpopover', trackViewport => {
-
-            if (trackViewport !== this && this.popoverList) {
-                
-                for (let i = 0; i < this.popoverList.length; i++ ) {
-                    this.popoverList[ i ].dispose()
-                }
-
-                this.popoverList = undefined
-            }
-
-        })
+        // this.browser.on('willpresentpopover', trackViewport => {
+        //
+        //     if (trackViewport !== this && globalPopoverList) {
+        //
+        //         for (let i = 0; i < globalPopoverList.length; i++ ) {
+        //             globalPopoverList[ i ].dispose()
+        //         }
+        //
+        //         globalPopoverList = undefined
+        //     }
+        //
+        // })
 
 
     }
@@ -782,22 +781,22 @@ class TrackViewport extends Viewport {
                                 const content = this.getPopupContent(event)
                                 if (content) {
 
-                                    this.browser.fireEvent('willpresentpopover', [this])
+                                    // this.browser.fireEvent('willpresentpopover', [this])
 
-                                    if (undefined === this.popoverList) {
-                                        this.popoverList = []
+                                    if (undefined === globalPopoverList) {
+                                        globalPopoverList = []
                                     }
 
                                     if (false === event.shiftKey) {
-                                        for (let i = 0; i < this.popoverList.length; i++ ) {
-                                            this.popoverList[ i ].dispose()
+                                        for (let i = 0; i < globalPopoverList.length; i++ ) {
+                                            globalPopoverList[ i ].dispose()
                                         }
-                                        this.popoverList = []
+                                        globalPopoverList = []
                                     }
 
                                     // Use column element as parent to popover
-                                    this.popoverList.push(new Popover(this.$viewport.get(0).parentElement, true, undefined, undefined))
-                                    this.popoverList[ this.popoverList.length - 1 ].presentContentWithEvent(event, content)
+                                    globalPopoverList.push(new Popover(this.$viewport.get(0).parentElement, true, undefined, undefined))
+                                    globalPopoverList[ globalPopoverList.length - 1 ].presentContentWithEvent(event, content)
 
                                 }
                                 window.clearTimeout(popupTimerID)
@@ -891,12 +890,12 @@ class TrackViewport extends Viewport {
             this.popover.dispose()
         }
 
-        if (this.popoverList) {
-            for (let i = 0; i < this.popoverList.length; i++ ) {
-                this.popoverList[ i ].dispose()
+        if (globalPopoverList) {
+            for (let i = 0; i < globalPopoverList.length; i++ ) {
+                globalPopoverList[ i ].dispose()
             }
 
-            this.popoverList = undefined
+            globalPopoverList = undefined
         }
 
         super.dispose()
