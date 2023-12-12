@@ -17,7 +17,9 @@ let mouseDownCoords
 let lastClickTime = 0
 let lastHoverUpdateTime = 0
 let popupTimerID
-let globalPopoverList
+let globalPopoverList = []
+
+let popover
 
 class TrackViewport extends Viewport {
 
@@ -47,20 +49,6 @@ class TrackViewport extends Viewport {
 
         this.stopSpinner()
         this.addMouseHandlers()
-
-        // this.browser.on('willpresentpopover', trackViewport => {
-        //
-        //     if (trackViewport !== this && globalPopoverList) {
-        //
-        //         for (let i = 0; i < globalPopoverList.length; i++ ) {
-        //             globalPopoverList[ i ].dispose()
-        //         }
-        //
-        //         globalPopoverList = undefined
-        //     }
-        //
-        // })
-
 
     }
 
@@ -781,22 +769,36 @@ class TrackViewport extends Viewport {
                                 const content = this.getPopupContent(event)
                                 if (content) {
 
-                                    // this.browser.fireEvent('willpresentpopover', [this])
-
-                                    if (undefined === globalPopoverList) {
-                                        globalPopoverList = []
-                                    }
-
                                     if (false === event.shiftKey) {
-                                        for (let i = 0; i < globalPopoverList.length; i++ ) {
-                                            globalPopoverList[ i ].dispose()
-                                        }
-                                        globalPopoverList = []
-                                    }
 
-                                    // Use column element as parent to popover
-                                    globalPopoverList.push(new Popover(this.$viewport.get(0).parentElement, true, undefined, undefined))
-                                    globalPopoverList[ globalPopoverList.length - 1 ].presentContentWithEvent(event, content)
+                                        if (popover) {
+                                            popover.dispose()
+                                        }
+
+                                        if (globalPopoverList.length > 0) {
+                                            for (const gp of globalPopoverList) {
+                                                gp.dispose()
+                                            }
+                                            globalPopoverList = []
+                                        }
+
+                                        popover = new Popover(this.$viewport.get(0).parentElement, true, undefined, () => {
+                                            popover.dispose()
+                                        })
+
+                                        popover.presentContentWithEvent(event, content)
+                                    } else {
+
+                                        let po = new Popover(this.$viewport.get(0).parentElement, true, undefined, () => {
+                                            const index = globalPopoverList.indexOf(po)
+                                            globalPopoverList.splice(index, 1)
+                                            po.dispose()
+                                        })
+
+                                        globalPopoverList.push( po )
+
+                                        po.presentContentWithEvent(event, content)
+                                    }
 
                                 }
                                 window.clearTimeout(popupTimerID)
@@ -890,13 +892,13 @@ class TrackViewport extends Viewport {
             this.popover.dispose()
         }
 
-        if (globalPopoverList) {
-            for (let i = 0; i < globalPopoverList.length; i++ ) {
-                globalPopoverList[ i ].dispose()
-            }
-
-            globalPopoverList = undefined
-        }
+        // if (globalPopoverList) {
+        //     for (let i = 0; i < globalPopoverList.length; i++ ) {
+        //         globalPopoverList[ i ].dispose()
+        //     }
+        //
+        //     globalPopoverList = undefined
+        // }
 
         super.dispose()
     }
