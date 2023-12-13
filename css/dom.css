@@ -1517,10 +1517,19 @@
   justify-content: flex-start;
   align-items: flex-start;
   padding-top: 4px;
+  container: initial;
+  padding-bottom: initial;
+  padding-left: initial;
+  padding-bottom: initial;
+  text-align: initial;
+  margin: initial;
   user-select: none;
   -webkit-user-select: none;
   -ms-user-select: none;
   min-height: 160px;
+}
+.igv-container button {
+  color: initial;
 }
 
 .igv-viewport {
