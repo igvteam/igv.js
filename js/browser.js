@@ -56,6 +56,7 @@ import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
+import { trackViewportPopoverList } from './trackViewport.js'
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -138,6 +139,16 @@ class Browser {
 
 
                 this.layoutChange()
+            }
+        })
+
+        this.on('willremovecolumn', column => {
+            if (trackViewportPopoverList.length > 0) {
+                const len = trackViewportPopoverList.length
+                for (let i = 0; i < len; i++) {
+                    trackViewportPopoverList[ i ].dispose()
+                }
+                trackViewportPopoverList.length = 0
             }
         })
 
@@ -1579,6 +1590,9 @@ class Browser {
         // find the $column corresponding to this referenceFrame and remove it
         const index = this.referenceFrameList.indexOf(referenceFrame)
         const {$viewport} = this.trackViews[0].viewports[index]
+
+        this.fireEvent('willremovecolumn', [ $viewport.parent().get(0) ]);
+
         viewportColumnManager.removeColumnAtIndex(index, $viewport.parent().get(0))
 
         for (let {viewports} of this.trackViews) {
