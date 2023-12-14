@@ -17,7 +17,7 @@ let mouseDownCoords
 let lastClickTime = 0
 let lastHoverUpdateTime = 0
 let popupTimerID
-let globalPopoverList = []
+let trackViewportPopoverList = []
 
 let popover
 
@@ -775,11 +775,11 @@ class TrackViewport extends Viewport {
                                             popover.dispose()
                                         }
 
-                                        if (globalPopoverList.length > 0) {
-                                            for (const gp of globalPopoverList) {
+                                        if (trackViewportPopoverList.length > 0) {
+                                            for (const gp of trackViewportPopoverList) {
                                                 gp.dispose()
                                             }
-                                            globalPopoverList = []
+                                            trackViewportPopoverList.length = 0
                                         }
 
                                         popover = new Popover(this.$viewport.get(0).parentElement, true, undefined, () => {
@@ -790,12 +790,12 @@ class TrackViewport extends Viewport {
                                     } else {
 
                                         let po = new Popover(this.$viewport.get(0).parentElement, true, undefined, () => {
-                                            const index = globalPopoverList.indexOf(po)
-                                            globalPopoverList.splice(index, 1)
+                                            const index = trackViewportPopoverList.indexOf(po)
+                                            trackViewportPopoverList.splice(index, 1)
                                             po.dispose()
                                         })
 
-                                        globalPopoverList.push( po )
+                                        trackViewportPopoverList.push( po )
 
                                         po.presentContentWithEvent(event, content)
                                     }
@@ -892,12 +892,12 @@ class TrackViewport extends Viewport {
             this.popover.dispose()
         }
 
-        // if (globalPopoverList) {
-        //     for (let i = 0; i < globalPopoverList.length; i++ ) {
-        //         globalPopoverList[ i ].dispose()
+        // if (trackViewportPopoverList) {
+        //     for (let i = 0; i < trackViewportPopoverList.length; i++ ) {
+        //         trackViewportPopoverList[ i ].dispose()
         //     }
         //
-        //     globalPopoverList = undefined
+        //     trackViewportPopoverList = undefined
         // }
 
         super.dispose()
@@ -967,4 +967,5 @@ function mergeArrays(a, b) {
 
 }
 
+export { trackViewportPopoverList }
 export default TrackViewport
