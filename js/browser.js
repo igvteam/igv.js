@@ -412,7 +412,9 @@ class Browser {
             trackView.renderSVGContext(context, delta)
         }
 
-        this.roiManager.renderSVGContext(context, delta, x)
+        // ROI -> SVG
+        delta.deltaX = x
+        this.roiManager.renderSVGContext(context, delta)
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
         context.setHeight(height)
