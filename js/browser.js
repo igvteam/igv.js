@@ -142,7 +142,7 @@ class Browser {
             }
         })
 
-        this.on('willremovecolumn', column => {
+        this.on('didchangecolumnlayout', () => {
             if (trackViewportPopoverList.length > 0) {
                 const len = trackViewportPopoverList.length
                 for (let i = 0; i < len; i++) {
@@ -1547,6 +1547,7 @@ class Browser {
         // TODO -- this is really ugly
         const {$viewport} = this.trackViews[0].viewports[indexLeft]
         const viewportColumn = viewportColumnManager.insertAfter($viewport.get(0).parentElement)
+        this.fireEvent('didchangecolumnlayout')
 
         if (indexRight === this.referenceFrameList.length) {
             this.referenceFrameList.push(newReferenceFrame)
@@ -1591,9 +1592,8 @@ class Browser {
         const index = this.referenceFrameList.indexOf(referenceFrame)
         const {$viewport} = this.trackViews[0].viewports[index]
 
-        this.fireEvent('willremovecolumn', [ $viewport.parent().get(0) ]);
-
         viewportColumnManager.removeColumnAtIndex(index, $viewport.parent().get(0))
+        this.fireEvent('didchangecolumnlayout')
 
         for (let {viewports} of this.trackViews) {
             viewports[index].dispose()
@@ -1732,6 +1732,7 @@ class Browser {
 
             // Insert viewport columns preceding the sample info column
             viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-info-column'), this.referenceFrameList.length)
+            this.fireEvent('didchangecolumnlayout')
 
             this.centerLineList = this.createCenterLineList(this.columnContainer)
 
