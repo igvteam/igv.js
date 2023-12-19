@@ -1895,18 +1895,17 @@ class Browser {
                         delete config.browser
                     }
 
-                    config.order = track.order //order++;
+                    config.order = track.order
 
-                    if (config.url instanceof File) {
-
-                        config.url = config.url.name
-                        console.warn(`Session contains local track file ${ config.url }`)
+                    if (config.filename) {
+                        console.warn(`Session contains local track file ${ config.filename }`)
                     }
                     trackJson.push(config)
                 }
             } catch (e) {
-                console.error(`Track: ${track.name}: ${e}`)
-                errors.push(`Track: ${track.name}: ${e}`)
+                const str = `Track: ${track.name}: ${e}`
+                console.error(str)
+                errors.push(str)
             }
         }
 
