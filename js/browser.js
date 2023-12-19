@@ -1832,12 +1832,6 @@ class Browser {
      */
     toJSON() {
 
-        for (let {track} of this.trackViews) {
-            if (track.config && track.config.url instanceof File) {
-                throw new Error(`Cannot include local file references ${ track.config.url.name }`)
-            }
-        }
-
         const json = {
             "version": version()
         }
@@ -1886,13 +1880,13 @@ class Browser {
         this.sampleInfo.toJSON(trackJson)
 
         const errors = []
-        for (let {track} of this.trackViews) {
+        for (const {track} of this.trackViews) {
             try {
                 let config
                 if (typeof track.getState === "function") {
                     config = track.getState()
-                } else {
-                    config = track.config
+                } else if (track.config) {
+                    config = Object.assign({}, track.config)
                 }
 
                 if (config) {
@@ -1900,7 +1894,14 @@ class Browser {
                     if (config.browser) {
                         delete config.browser
                     }
+
                     config.order = track.order //order++;
+
+                    if (config.url instanceof File) {
+
+                        config.url = config.url.name
+                        console.warn(`Session contains local track file ${ config.url }`)
+                    }
                     trackJson.push(config)
                 }
             } catch (e) {
