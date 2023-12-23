@@ -115,8 +115,8 @@ class Browser {
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = {}
 
-        if(config.listeners) {
-            for(let evt of Object.keys(config.listeners)) {
+        if (config.listeners) {
+            for (let evt of Object.keys(config.listeners)) {
                 this.on(evt, config.listeners[evt])
             }
         }
@@ -485,10 +485,10 @@ class Browser {
 
         const urlOrFile = options.url || options.file
 
+        let config
         if (options.url && StringUtils.isString(options.url) && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
             const json = Browser.uncompressSession(options.url)
-            return JSON.parse(json)
-
+            config = JSON.parse(json)
         } else {
             let filename = options.filename
             if (!filename) {
@@ -498,22 +498,23 @@ class Browser {
             if (filename.endsWith(".xml")) {
                 const knownGenomes = GenomeUtils.KNOWN_GENOMES
                 const string = await igvxhr.loadString(urlOrFile)
-                return new XMLSession(string, knownGenomes)
+                config = new XMLSession(string, knownGenomes)
 
             } else if (filename.endsWith("hub.txt")) {
 
                 const hub = await Hub.loadHub(urlOrFile, options)
                 const genomeConfig = hub.getGenomeConfig()
-                const config = {
+                config = {
                     reference: genomeConfig
                 }
-                return setDefaults(config)
             } else if (filename.endsWith(".json")) {
-                return igvxhr.loadJson(urlOrFile)
+                config = await igvxhr.loadJson(urlOrFile)
             } else {
                 throw Error("Unrecognized session file format:" + filename)
             }
         }
+        return setDefaults(config)
+
     }
 
     /**
