@@ -1898,9 +1898,6 @@ class Browser {
 
                     config.order = track.order
 
-                    if (config.filename) {
-                        console.warn(`Session contains local track file ${ config.filename }`)
-                    }
                     trackJson.push(config)
                 }
             } catch (e) {

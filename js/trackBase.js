@@ -171,14 +171,27 @@ class TrackBase {
      */
     getState() {
 
-        const jsonable = (v) => !(v === undefined || typeof v === 'function' || v instanceof File || v instanceof Promise)
+        const isJSONable = item => !(item === undefined || typeof item === 'function' || item instanceof Promise)
 
         // Create copy of config, minus transient properties (convention is name starts with '_').  Also, all
         // function properties are transient as they cannot be saved in json
         const state = {}
-        for (let key of Object.keys(this.config)) {
-            if (!key.startsWith("_") && jsonable(this.config[key])) {
-                state[key] = this.config[key]
+
+        const jsonableConfigKeys = Object.keys(this.config).filter(key => isJSONable(this.config[key]))
+
+        for (const key of jsonableConfigKeys) {
+
+            if (!key.startsWith("_")) {
+
+                if('url' === key && this.config[key] instanceof File) {
+                    state['file'] = this.config[key].name
+                    console.log(`Session contains local track file ${ state['file'] }`)
+                } else if('indexURL' === key && this.config[key] instanceof File) {
+                    state['indexFile'] = this.config[key].name
+                    console.log(`Session contains local track index file ${ state['indexFile'] }`)
+                } else {
+                    state[key] = this.config[key]
+                }
             }
         }
 
@@ -192,7 +205,7 @@ class TrackBase {
         }
 
         // If user has changed other properties from defaults update state.
-        const defs = TrackBase.defaults
+        const defs = Object.assign({}, TrackBase.defaults)
         if (this.constructor.defaults) {
             for (let key of Object.keys(this.constructor.defaults)) {
                 defs[key] = this.constructor.defaults[key]
