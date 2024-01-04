@@ -660,15 +660,22 @@ class Browser {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
+        const localTrackFileNames = trackConfigurations.filter((config) => undefined !== config.file).map(({filename}) => filename)
+        if (localTrackFileNames.length > 0) {
+            alert(`Session contains local files that cannot be loaded automatically:\n${ localTrackFileNames.join('\n')}`)
+        }
+
+        const nonLocalTrackConfigurations = trackConfigurations.filter((config) => undefined === config.file)
+
         // Maintain track order unless explicitly set
         let trackOrder = 1
-        for (let t of trackConfigurations) {
+        for (let t of nonLocalTrackConfigurations) {
             if (undefined === t.order) {
                 t.order = trackOrder++
             }
         }
 
-        await this.loadTrackList(trackConfigurations)
+        await this.loadTrackList(nonLocalTrackConfigurations)
 
         // The ruler and ideogram tracks are not explicitly loaded, but needs updated nonetheless.
         for (let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler' || tv.track.type === 'ideogram')) {
