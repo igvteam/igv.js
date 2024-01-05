@@ -480,6 +480,9 @@ class Browser {
         let session
         if (options.url || options.file) {
             session = await Browser.loadSessionFile(options)
+            if (options.parentApp) {
+                session.parentApp = options.parentApp
+            }
         } else {
             session = options
         }
