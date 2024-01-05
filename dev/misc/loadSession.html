@@ -42,7 +42,7 @@
 
     async function processFile() {
         const [sessionFile] = document.getElementById("fileInput").files
-        const trackConfigurations = await browser.loadSession({file: sessionFile})
+        const trackConfigurations = await browser.loadSession({ file: sessionFile})
         const str = trackConfigurations.map(config => JSON.stringify(config, null, 2)).join('\n')
         console.log(str)
     }
