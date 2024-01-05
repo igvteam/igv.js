@@ -661,7 +661,7 @@ class Browser {
         }
 
         const localTrackFileNames = trackConfigurations.filter((config) => undefined !== config.file).map(({filename}) => filename)
-        if (localTrackFileNames.length > 0) {
+        if (undefined === session.parentApp && localTrackFileNames.length > 0) {
             alert(`Session contains local files that cannot be loaded automatically:\n${ localTrackFileNames.join('\n')}`)
         }
 
@@ -683,6 +683,8 @@ class Browser {
         }
 
         this.updateUIWithReferenceFrameList()
+
+        return trackConfigurations
 
     }
 
