@@ -17,6 +17,9 @@ let mouseDownCoords
 let lastClickTime = 0
 let lastHoverUpdateTime = 0
 let popupTimerID
+let trackViewportPopoverList = []
+
+let popover
 
 class TrackViewport extends Viewport {
 
@@ -46,6 +49,7 @@ class TrackViewport extends Viewport {
 
         this.stopSpinner()
         this.addMouseHandlers()
+
     }
 
     setContentHeight(contentHeight) {
@@ -702,16 +706,12 @@ class TrackViewport extends Viewport {
                     return
                 }
 
-                // Close any currently open popups
-                $('.igv-popover').hide()
-
-
                 if (this.browser.dragObject || this.browser.isScrolling) {
                     return
                 }
 
-                // Treat as a mouse click, its either a single or double click.
-                // Handle here and stop propogation / default
+                // Treat as a mouse click, it's either a single or double click.
+                // Handle here and stop propagation / default
                 event.preventDefault()
 
                 const mouseX = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0)).x
@@ -756,19 +756,50 @@ class TrackViewport extends Viewport {
                 } else {
                     // single-click
 
-                    if (event.shiftKey && typeof this.trackView.track.shiftClick === "function") {
+                    /*if (event.shiftKey && typeof this.trackView.track.shiftClick === "function") {
 
                         this.trackView.track.shiftClick(xBP, event)
 
-                    } else if (typeof this.trackView.track.popupData === "function") {
+                    } else */
+
+                    if (typeof this.trackView.track.popupData === "function") {
 
                         popupTimerID = setTimeout(() => {
 
                                 const content = this.getPopupContent(event)
                                 if (content) {
-                                    if (this.popover) this.popover.dispose()
-                                    this.popover = new Popover(this.browser.columnContainer)
-                                    this.popover.presentContentWithEvent(event, content)
+
+                                    if (false === event.shiftKey) {
+
+                                        if (popover) {
+                                            popover.dispose()
+                                        }
+
+                                        if (trackViewportPopoverList.length > 0) {
+                                            for (const gp of trackViewportPopoverList) {
+                                                gp.dispose()
+                                            }
+                                            trackViewportPopoverList.length = 0
+                                        }
+
+                                        popover = new Popover(this.$viewport.get(0).parentElement, true, undefined, () => {
+                                            popover.dispose()
+                                        })
+
+                                        popover.presentContentWithEvent(event, content)
+                                    } else {
+
+                                        let po = new Popover(this.$viewport.get(0).parentElement, true, undefined, () => {
+                                            const index = trackViewportPopoverList.indexOf(po)
+                                            trackViewportPopoverList.splice(index, 1)
+                                            po.dispose()
+                                        })
+
+                                        trackViewportPopoverList.push( po )
+
+                                        po.presentContentWithEvent(event, content)
+                                    }
+
                                 }
                                 window.clearTimeout(popupTimerID)
                                 popupTimerID = undefined
@@ -799,10 +830,9 @@ class TrackViewport extends Viewport {
             }
 
             if (str) {
-                if (this.popover) {
-                    this.popover.dispose()
+                if (undefined === this.popover) {
+                    this.popover = new Popover(this.browser.columnContainer, true, (track.name || ''), undefined)
                 }
-                this.popover = new Popover(this.browser.columnContainer, (track.name || ''))
                 this.popover.presentContentWithEvent(event, str)
             }
         })
@@ -856,6 +886,22 @@ class TrackViewport extends Viewport {
         return content
     }
 
+    dispose() {
+
+        if (this.popover) {
+            this.popover.dispose()
+        }
+
+        // if (trackViewportPopoverList) {
+        //     for (let i = 0; i < trackViewportPopoverList.length; i++ ) {
+        //         trackViewportPopoverList[ i ].dispose()
+        //     }
+        //
+        //     trackViewportPopoverList = undefined
+        // }
+
+        super.dispose()
+    }
 
 }
 
@@ -921,4 +967,5 @@ function mergeArrays(a, b) {
 
 }
 
+export { trackViewportPopoverList }
 export default TrackViewport
