@@ -2,10 +2,10 @@ import "./utils/mockObjects.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai'
-import {createGenome} from "./utils/Genome.js"
+import {createGenome} from "./utils/MockGenome.js"
+import Genome from "../js/genome/genome.js"
 
 const genome = createGenome()
-import Genome from "../js/genome/genome.js"
 
 suite("testBed", function () {
 
@@ -311,10 +311,10 @@ suite("testBed", function () {
 
         const config = {
             format: "bed",
-            url: "test/data/bed/basic_feature_3_columns.bed",
+            url: "test/data/bed/basic_feature_3_columns.alias.bed",
         }
         const featureSource = FeatureSource(config, genome)
-        const features = await featureSource.getFeatures({chr: "1", start: 67658429, end: 67659549})
+        const features = await featureSource.getFeatures({chr: "chr1", start: 67658429, end: 67659549})
         assert.ok(features)
         assert.equal(features.length, 4)
 

@@ -43,9 +43,9 @@ import BGZBlockLoader from "../bam/bgzBlockLoader.js"
  */
 class FeatureFileReader {
 
-    constructor(config, genome) {
+    sequenceNames
 
-        var uriParts
+    constructor(config, genome) {
 
         this.config = config || {}
         this.genome = genome
@@ -59,7 +59,7 @@ class FeatureFileReader {
             this.indexed = false  // by definition
             this.dataURI = config.url
         } else {
-            uriParts = URIUtils.parseUri(this.config.url)
+            const uriParts = URIUtils.parseUri(this.config.url)
             this.filename = config.filename || uriParts.file
         }
 
@@ -77,7 +77,7 @@ class FeatureFileReader {
             if (index && index.lastBlockPosition) {
                 let gl = 0
                 const s = 10000
-                for (let c of index.chromosomeNames) {
+                for (let c of index.sequenceNames) {
                     const chromosome = this.genome.getChromosome(c)
                     if (chromosome) {
                         gl += chromosome.bpLength
@@ -95,6 +95,11 @@ class FeatureFileReader {
      * @param end
      */
     async readFeatures(chr, start, end) {
+
+        // insure that header has been loaded
+        if(!this.dataURI && !this.header) {
+            await this.readHeader()
+        }
 
         const index = await this.getIndex()
         if (index) {
@@ -123,6 +128,7 @@ class FeatureFileReader {
                     // Note - it should be impossible to get here
                     throw new Error("Unable to load index: " + this.config.indexURL)
                 }
+                this.sequenceNames = new Set(index.sequenceNames)
 
                 let dataWrapper
                 if (index.tabix) {
@@ -155,6 +161,11 @@ class FeatureFileReader {
                 // Reset data wrapper and parse features
                 dataWrapper = getDataWrapper(data)
                 this.features = await this.parser.parseFeatures(dataWrapper)   // cache features
+
+                // Extract chromosome names
+                this.sequenceNames = new Set();
+                for(let f of this.features) this.sequenceNames.add(f.chr);
+
                 return this.header
             }
         }
@@ -203,21 +214,16 @@ class FeatureFileReader {
 
     async loadFeaturesWithIndex(chr, start, end) {
 
-        // insure that header has been loaded -- tabix _blockLoader is initialized as side effect
-        if(!this.dataURI && !this.header) {
-            await this.readHeader()
-        }
-
         //console.log("Using index"
         const config = this.config
         const parser = this.parser
         const tabix = this.index.tabix
+
         const refId = tabix ? this.index.sequenceIndexMap[chr] : chr
         if (refId === undefined) {
             return []
         }
 
-        const genome = this.genome
         const chunks = this.index.chunksForRange(refId, start, end)
         if (!chunks || chunks.length === 0) {
             return []
@@ -250,8 +256,7 @@ class FeatureFileReader {
                 for (let i = 0; i < slicedFeatures.length; i++) {
                     const f = slicedFeatures[i]
 
-                    const canonicalChromosome = genome ? genome.getChromosomeName(f.chr) : f.chr
-                    if (canonicalChromosome !== chr) {
+                    if (f.chr !== chr) {
                         if (allFeatures.length === 0) {
                             continue  //adjacent chr to the left
                         } else {
@@ -298,7 +303,7 @@ class FeatureFileReader {
      */
     async loadIndex() {
         const indexURL = this.config.indexURL
-        return loadIndex(indexURL, this.config, this.genome)
+        return loadIndex(indexURL, this.config)
     }
 
     async loadFeaturesFromDataURI() {

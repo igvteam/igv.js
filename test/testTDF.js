@@ -3,7 +3,7 @@ import TDFReader from "../js/tdf/tdfReader.js"
 import TDFSource from "../js/tdf/tdfSource.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai'
-import {createGenome} from "./utils/Genome.js"
+import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 

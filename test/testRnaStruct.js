@@ -1,22 +1,15 @@
 import "./utils/mockObjects.js"
 import RnaStructTrack from "../js/rna/rnaStruct.js"
 import {assert} from 'chai'
+import {createGenome} from "./utils/MockGenome.js"
 
+// Mock genome object
+const genome = createGenome("ncbi")
 suite("testRnaStruct", function () {
 
 // mock brower object
     const browser = {
-        // Simulate a genome with 1,2,3,... naming convention
-        genome: {
-            getChromosomeName: function (chr) {
-                return chr.replace("chr", "")
-            },
-            getChromosome: function (chrName) {
-                return {bpLength: Number.MAX_SAFE_INTEGER}
-            },
-            addFeaturesToDB: function () {
-            }
-        },
+        genome,
         constants: {}
     }
 

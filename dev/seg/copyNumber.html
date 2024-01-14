@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>igv.js</title>
+
+</head>
+
+<body>
+
+<h1>Segmented Copy Number</h1>
+
+<div style="padding-top: 10px;padding-bottom: 10px;">
+
+    Segmented copy number ("seg" format) with
+    <ul>
+        <li>Explicit sample list - TCGA-06-0168-01A-02D-0236-01, TCGA-02-0115-01A-01D-0193-01,
+            TCGA-02-2485-01A-01D-0784-01, TCGA-06-0151-01A-01D-0236-01
+        </li>
+        <li>No index</li>
+        <li>Index with no visibiliy window (loads by whole chromosome)</li>
+        <li>Index with visibility window of 100 MB</li>
+    </ul>
+
+    <p>This demo tests chromosome aliasing for non-indexed and indexed files.  Chromosome names in seg file are 1,2,3,...</p>
+
+</div>
+
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const version = igv.version()
+    console.log("Using IGV version: " + version)
+
+    const igvDiv = document.getElementById("igv-div")
+    const options =
+        {
+           // genome: "hg19",
+            reference: {
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab"
+            },
+            showSampleNames: true,
+            tracks: [
+                {
+                    name: "Explicit Samples",
+                    type: "seg",
+                    format: "seg",
+                    samples: [
+                        "TCGA-06-0168-01A-02D-0236-01",
+                        "TCGA-02-0115-01A-01D-0193-01",
+                        "TCGA-02-2485-01A-01D-0784-01",
+                        "TCGA-06-0151-01A-01D-0236-01"],
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    height: 100
+                },
+                {
+                    name: "Segmented Copy Number",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                },
+                {
+                    name: "Indexed",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
+                },
+                {
+                    name: "Indexed with visibility window",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
+                    visibilityWindow: "100000000"
+                },
+             ]
+        }
+
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+        })
+
+
+</script>
+
+</body>
+
+</html>

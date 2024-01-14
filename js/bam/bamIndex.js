@@ -7,15 +7,15 @@ const BAI_MAGIC = 21578050
 const TABIX_MAGIC = 21578324
 
 
-async function parseBamIndex(arrayBuffer, genome) {
+async function parseBamIndex(arrayBuffer) {
     const index = new BamIndex()
-    await index.parse(arrayBuffer, false, genome)
+    await index.parse(arrayBuffer, false)
     return index
 }
 
-async function parseTabixIndex(arrayBuffer, genome) {
+async function parseTabixIndex(arrayBuffer) {
     const index = new BamIndex()
-    await index.parse(arrayBuffer, true, genome)
+    await index.parse(arrayBuffer, true)
     return index
 }
 
@@ -25,7 +25,7 @@ class BamIndex {
 
     }
 
-    async parse(arrayBuffer, tabix, genome) {
+    async parse(arrayBuffer, tabix) {
 
         const indices = []
         let blockMin = Number.MAX_SAFE_INTEGER
@@ -50,10 +50,6 @@ class BamIndex {
 
                 for (let i = 0; i < nref; i++) {
                     let seq_name = parser.getString()
-                    // Translate to "official" chr name.
-                    if (genome) {
-                        seq_name = genome.getChromosomeName(seq_name)
-                    }
                     sequenceIndexMap[seq_name] = i
                     seqNames[i] = seq_name
                 }
@@ -124,7 +120,7 @@ class BamIndex {
 
     }
 
-    get chromosomeNames() {
+    get sequenceNames() {
         return Object.keys(this.sequenceIndexMap)
     }
 
