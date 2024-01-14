@@ -1,28 +1,3 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014-2015 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
 import FeatureFileReader from "./featureFileReader.js"
 import CustomServiceReader from "./customServiceReader.js"
@@ -35,6 +10,7 @@ import CivicReader from "../civic/civicReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
 import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 import {computeWGFeatures, packFeatures} from "./featureUtils.js"
+import ChromAliasManager from "./chromAliasManager.js"
 
 const DEFAULT_MAX_WG_COUNT = 10000
 
@@ -148,9 +124,7 @@ class TextFeatureSource {
      */
     async getFeatures({chr, start, end, bpPerPixel, visibilityWindow}) {
 
-        const genome = this.genome
-        const queryChr = genome ? genome.getChromosomeName(chr) : chr
-        const isWholeGenome = ("all" === queryChr.toLowerCase())
+        const isWholeGenome = ("all" === chr.toLowerCase())
 
         start = start || 0
         end = end || Number.MAX_SAFE_INTEGER
@@ -163,8 +137,8 @@ class TextFeatureSource {
         if ((isWholeGenome && !this.wgFeatures && this.supportsWholeGenome()) ||
             this.config.disableCache ||
             !this.featureCache ||
-            !this.featureCache.containsRange(new GenomicInterval(queryChr, start, end))) {
-            await this.loadFeatures(queryChr, start, end, visibilityWindow)
+            !this.featureCache.containsRange(new GenomicInterval(chr, start, end))) {
+            await this.loadFeatures(chr, start, end, visibilityWindow)
         }
 
         if (isWholeGenome) {
@@ -177,7 +151,7 @@ class TextFeatureSource {
             }
             return this.wgFeatures
         } else {
-            return this.featureCache.queryFeatures(queryChr, start, end)
+            return this.featureCache.queryFeatures(chr, start, end)
         }
     }
 
@@ -195,11 +169,22 @@ class TextFeatureSource {
     }
 
 
-    async loadFeatures(queryChr, start, end, visibilityWindow) {
+    async loadFeatures(chr, start, end, visibilityWindow) {
+
+        await this.getHeader();
 
         const reader = this.reader
         let intervalStart = start
         let intervalEnd = end
+
+        // chr aliasing
+        let queryChr = chr
+        if (!this.chrAliasManager && this.reader && this.reader.sequenceNames) {
+            this.chrAliasManager = new ChromAliasManager(this.reader.sequenceNames, this.genome);
+        }
+        if(this.chrAliasManager) {
+            queryChr = await this.chrAliasManager.getAliasName(chr);
+        }
 
         // Use visibility window to potentially expand query interval.
         // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
@@ -221,7 +206,7 @@ class TextFeatureSource {
         }
 
         const genomicInterval = this.queryable ?
-            new GenomicInterval(queryChr, intervalStart, intervalEnd) :
+            new GenomicInterval(chr, intervalStart, intervalEnd) :
             undefined
 
         if (features) {
@@ -252,10 +237,10 @@ class TextFeatureSource {
         for (let feature of featureList) {
             for (let field of searchableFields) {
                 let key
-                if(typeof feature.getAttributeValue === 'function') {
+                if (typeof feature.getAttributeValue === 'function') {
                     key = feature.getAttributeValue(field)
                 }
-                if(!key) {
+                if (!key) {
                     key = feature[field]
                 }
                 if (key) {
@@ -266,8 +251,8 @@ class TextFeatureSource {
         }
     }
 
-     search(term) {
-        if(this.featureMap) {
+    search(term) {
+        if (this.featureMap) {
             return this.featureMap.get(term.toUpperCase())
         }
     }

@@ -4,7 +4,7 @@ import FeatureFileReader from "../js/feature/featureFileReader.js"
 import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import {assert} from 'chai'
 import getDataWrapper from "../js/feature/dataWrapper.js"
-import {createGenome} from "./utils/Genome.js"
+import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 import Browser from "../js/browser.js"
@@ -215,7 +215,7 @@ suite("testVariant", function () {
         const track = await Browser.prototype.createTrack.call(browser, config)
         assert.equal(track.type, "variant")
 
-        const chr = "2"
+        const chr = "chr2"
         const start = 321681
         const end = 321682
         const features = await track.getFeatures(chr, start, end)

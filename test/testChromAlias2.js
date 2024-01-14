@@ -4,30 +4,74 @@ import Genome from "../js/genome/genome.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 
-const genome = createGenome()
+/**
+ * Test chromosome aliasing for various file formats, indexed and not indexed
+  */
 
-suite("testSeg", function () {
 
-    const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
+async function loadGenome() {
+
+    const reference = {
+        id: "hg19",
+        "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
+        "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
+        "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
+        "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+    }
+
+    return Genome.createGenome(reference);
+}
+
+suite("testSeg",  function () {
+
+    test("SEG indexed query", async function () {
+
+        this.timeout(100000)
+
+        const genome = await loadGenome()
+
+        await genome.loadChromosome("chr1")
+
+        const url = "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
+        const featureSource = FeatureSource(
+            {format: 'seg', url: url, indexURL: url + ".tbi"},
+            genome)
+        const chr = "chr1"
+        const start = 0
+        const end = Number.MAX_SAFE_INTEGER
+
+        const features = await featureSource.getFeatures({chr, start, end})
+        assert.ok(features)
+        assert.equal(features.length, 8243)
+        // Test 1 feature, insure its on chr1
+        const c = genome.getChromosomeName(features[0].chr)
+        assert.equal(chr, c)
+
+    })
+
 
     test("SEG query", async function () {
 
         this.timeout(100000)
 
-        const url = "https://www.dropbox.com/s/h1rotg4xgn1bq8a/segmented_data_080520.seg.gz?dl=0"
+        const genome = await loadGenome()
+
+        const url = "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
         const featureSource = FeatureSource(
             {format: 'seg', url: url, indexed: false},
             genome)
         const chr = "chr1"
         const start = 0
-        const end = 747751863
+        const end = Number.MAX_SAFE_INTEGER
 
         const features = await featureSource.getFeatures({chr, start, end})
         assert.ok(features)
-        assert.equal(features.length, 1438)
+        assert.equal(features.length, 8243)
         // Test 1 feature, insure its on chr1
         const c = genome.getChromosomeName(features[0].chr)
         assert.equal(chr, c)
+
+
     })
 
 
