@@ -27,20 +27,20 @@ import BinaryParser from "../binary.js"
 
 const SEQUENCE_DICTIONARY_FLAG = 0x8000  // if we have a sequence dictionary in our header
 
-async function parseTribbleIndex(arrayBuffer, genome) {
+async function parseTribbleIndex(arrayBuffer) {
 
     const index = new TribbleIndex()
-    index.parse(arrayBuffer, genome)
+    index.parse(arrayBuffer)
     return index
 }
 
 class TribbleIndex {
 
     constructor() {
-
+        this.tribble = true
     }
 
-    async parse(arrayBuffer, genome) {
+    async parse(arrayBuffer) {
 
         let blockMax = 0
         this.chrIndex = {}
@@ -54,8 +54,6 @@ class TribbleIndex {
             // todo -- support interval tree index, we're assuming its a linear index
 
             let chr = parser.getString()
-            if (genome) chr = genome.getChromosomeName(chr) // Translate to canonical name
-
             const binWidth = parser.getInt()
             const nBins = parser.getInt()
             const longestFeature = parser.getInt()
@@ -107,7 +105,7 @@ class TribbleIndex {
         }
     }
 
-    get chromosomeNames() {
+    get sequenceNames() {
         return Object.keys(this.chrIndex)
     }
 
@@ -115,13 +113,12 @@ class TribbleIndex {
     /**
      * Fetch blocks for a particular genomic range.
      *
-     * @param queryChr the sequence dictionary index of the chromosome
+     * @param queryChr
      * @param min  genomic start position
      * @param max  genomic end position
      */
     chunksForRange(queryChr, min, max) { //function (refId, min, max) {
 
-        const self = this
         const chrIdx = this.chrIndex[queryChr]
 
         if (chrIdx) {

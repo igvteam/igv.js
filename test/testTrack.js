@@ -6,7 +6,7 @@ import VariantTrack from "../js/variant/variantTrack.js"
 import InteractionTrack from "../js/feature/interactionTrack.js"
 import BlatTrack from "../js/blat/blatTrack.js"
 import FeatureTrack from "../js/feature/featureTrack.js"
-import {createGenome} from "./utils/Genome.js"
+import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 

@@ -65,25 +65,25 @@ class BamReader {
             }
         }
 
-        let chrIdx = this.header.chrToIndex[chr]
+        let refId = this.header.chrToIndex[chr]
 
         // Try alias
-        if (chrIdx === undefined) {
+        if (refId === undefined) {
             const aliasRecord = await this.genome.getAliasRecord(chr)
             let alias
             if (aliasRecord) {
                 const aliases = Object.keys(aliasRecord)
                     .filter(k => k !== "start" && k !== "end")
                     .map(k => aliasRecord[k])
-                    .filter(a => this.header.chrToIndex[a])
+                    .filter(a => undefined !== this.header.chrToIndex[a])
                 if (aliases.length > 0) {
                     alias = aliases[0]
-                    chrIdx = this.header.chrToIndex[aliases[0]]
+                    refId = this.header.chrToIndex[aliases[0]]
                 }
             }
             this.chrAliasTable.set(chr, alias)  // alias may be undefined => no alias exists. Setting prevents repeated attempts
         }
-        return chrIdx
+        return refId
     }
 
     /**
@@ -113,7 +113,7 @@ class BamReader {
 
     async getIndex() {
         if (!this.index) {
-            this.index = await loadIndex(this.baiPath, this.config, this.genome)
+            this.index = await loadIndex(this.baiPath, this.config)
         }
         return this.index
     }

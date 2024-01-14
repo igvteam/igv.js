@@ -6,20 +6,20 @@ import {optimizeChunks} from "./indexUtils.js"
 const CSI1_MAGIC = 21582659 // CSI\1
 const CSI2_MAGIC = 38359875 // CSI\2
 
-async function parseCsiIndex(arrayBuffer, genome) {
+async function parseCsiIndex(arrayBuffer) {
 
     const idx = new CSIIndex()
-    idx.parse(arrayBuffer, genome)
+    idx.parse(arrayBuffer)
     return idx
 }
 
 class CSIIndex {
 
-    constructor(tabix) {
-        this.tabix = true   // Means whatever is indexed is BGZipped
+    constructor() {
+        this.tabix = true  // => i.e. not a tribble index.   This is important, if obtuse
     }
 
-    parse(arrayBuffer, genome) {
+    parse(arrayBuffer) {
         const parser = new BinaryParser(new DataView(arrayBuffer))
 
         const magic = parser.getInt()
@@ -56,10 +56,6 @@ class CSIIndex {
             let i = 0
             while (parser.position < nameEndPos) {
                 let seq_name = parser.getString()
-                // Translate to "official" chr name.
-                if (genome) {
-                    seq_name = genome.getChromosomeName(seq_name)
-                }
                 this.sequenceIndexMap[seq_name] = i
                 seqNames[i] = seq_name
                 i++
@@ -116,14 +112,14 @@ class CSIIndex {
         this.lastBlockPosition = bmax
     }
 
-    get chromosomeNames() {
+    get sequenceNames() {
         return Object.keys(this.sequenceIndexMap)
     }
 
     /**
      * Fetch blocks for a particular genomic range.  This method is public so it can be unit-tested.
      *
-     * @param refId  the sequence dictionary index of the chromosome
+     * @param refId  the sequence dictionary id of the chromosome
      * @param min  genomic start position
      * @param max  genomic end position
      * @param return an array of {minv: {filePointer, offset}, {maxv: {filePointer, offset}}
