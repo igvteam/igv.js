@@ -85,7 +85,7 @@ class CramReader {
             this.header = {
                 indexToChr: indexToChr,
                 chrToIndex: chrToIndex,
-                chrNames: new Set(Object.keys(chrToIndex)),
+                chrNames: Object.keys(chrToIndex),
                 readGroups: readGroups
 
             }
