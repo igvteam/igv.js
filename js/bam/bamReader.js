@@ -27,7 +27,7 @@ class BamReader {
 
     async readAlignments(chr, bpStart, bpEnd) {
 
-        const chrId = await this.#getChrIdx(chr)
+        const chrId = await this.#getRefId(chr)
         const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
 
         if (chrId === undefined) {
@@ -54,7 +54,7 @@ class BamReader {
         }
     }
 
-    async #getChrIdx(chr) {
+    async #getRefId(chr) {
 
         await this.getHeader()
 

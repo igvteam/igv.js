@@ -29,12 +29,12 @@ class CramReader {
         this.genome = genome
 
         this.cramFile = new gmodCRAM.CramFile({
-            filehandle: new FileHandler(config.url, config),
+            filehandle: config.fileHandle ? config.fileHandle : new FileHandler(config.url, config),
             seqFetch: config.seqFetch || seqFetch.bind(this),
             checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
         })
 
-        const indexFileHandle = new FileHandler(config.indexURL, config)
+        const indexFileHandle = config.indexFileHandle ? config.indexFileHandle : new FileHandler(config.indexURL, config)
         this.indexedCramFile = new gmodCRAM.IndexedCramFile({
             cram: this.cramFile,
             index: new gmodCRAM.CraiIndex({
@@ -85,7 +85,7 @@ class CramReader {
             this.header = {
                 indexToChr: indexToChr,
                 chrToIndex: chrToIndex,
-                chrNames: new Set(header.chrToIndex),
+                chrNames: new Set(Object.keys(chrToIndex)),
                 readGroups: readGroups
 
             }
@@ -94,23 +94,45 @@ class CramReader {
         return this.header
     }
 
-    async readAlignments(chr, bpStart, bpEnd) {
+    async #getRefId(chr) {
 
-        if (!this.chrAliasTable.has(chr)) {
-            const chromosome = this.genome.getChromosome(chr)
-            if (chromosome) {
-                const aliases = chromosome.altNames
-                for (let a of aliases) {
-                    if (this.chrNames.has(a)) {
-                        this.chrAliasTable.set(chr, a)
-                    }
-                }
+        await this.getHeader()
+
+        if (this.chrAliasTable.has(chr)) {
+            chr = this.chrAliasTable.get(chr)
+            if (chr === undefined) {
+                return undefined
             }
         }
 
+        let refId = this.header.chrToIndex[chr]
+
+        // Try alias
+        if (refId === undefined) {
+            const aliasRecord = await this.genome.getAliasRecord(chr)
+            let alias
+            if (aliasRecord) {
+                const aliases = Object.keys(aliasRecord)
+                    .filter(k => k !== "start" && k !== "end")
+                    .map(k => aliasRecord[k])
+                    .filter(a => undefined !== this.header.chrToIndex[a])
+                if (aliases.length > 0) {
+                    alias = aliases[0]
+                    refId = this.header.chrToIndex[aliases[0]]
+                }
+            }
+            this.chrAliasTable.set(chr, alias)  // alias may be undefined => no alias exists. Setting prevents repeated attempts
+        }
+        return refId
+    }
+
+
+    async readAlignments(chr, bpStart, bpEnd) {
+
         const header = await this.getHeader()
-        const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr
-        const chrIdx = header.chrToIndex[queryChr]
+
+        const chrIdx = await this.#getRefId(chr)
+
         const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
 
         if (chrIdx === undefined) {
