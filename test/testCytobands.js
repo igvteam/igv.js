@@ -1,6 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import CytobandFileBB from "../js/genome/cytobandFileBB.js"
+import {createGenome} from "./utils/MockGenome.js"
 
 
 suite("test cytobands", function () {
@@ -28,5 +29,16 @@ suite("test cytobands", function () {
 
     })
 
+    test("test cytoband bigbed - aliasing", async function () {
+
+        const genome = createGenome("ncbi")
+        const url = "test/data/bb/cytoBandMapped.bb"
+        const src = new CytobandFileBB(url, {}, genome)
+
+        const cytobands = await src.getCytobands("1")
+        const last = cytobands[cytobands.length-1];
+        assert.equal(248387328, last.end)
+
+    })
 
 })

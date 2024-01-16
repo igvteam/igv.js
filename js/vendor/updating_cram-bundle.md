@@ -17,17 +17,13 @@ export.  The modification below will convert the bundle to an ES6 module, requir
 (4) Add an export default statment to the beginning of the file
 
 ```js
- export default (() => {
-    var e = {368....
+ export default (() => {var e = {368....
 ```
 
 (5) replace ```window.gmodCram=n``` at the end of the file with ```return n```
 
 ```js
-var n = r(5590);
-return n
-})
-();
+var n = r(5590);return n})();
 ```
 
 
