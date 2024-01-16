@@ -144,7 +144,7 @@ class TextFeatureSource {
         if (isWholeGenome) {
             if (!this.wgFeatures) {
                 if (this.supportsWholeGenome()) {
-                    this.wgFeatures = computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.maxWGCount)
+                    this.wgFeatures = await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.maxWGCount)
                 } else {
                     this.wgFeatures = []
                 }

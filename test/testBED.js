@@ -173,6 +173,26 @@ suite("testBed", function () {
         assert.equal(128, features.length)   // feature count. Determined by grepping file
     })
 
+
+    test("BED query - aliasing", async function () {
+
+        const genome = createGenome("ncbi")
+        var chr = "1",
+            start = 67655271,
+            end = 67684468,
+            featureSource = FeatureSource({
+                    format: 'bed',
+                    indexed: false,
+                    url: 'test/data/bed/basic_feature_3_columns.bed'
+                }, genome)
+
+        // Must get file header first
+        await featureSource.getHeader()
+        const features = await featureSource.getFeatures({chr, start, end})
+        assert.ok(features)
+        assert.equal(128, features.length)   // feature count. Determined by grepping file
+    })
+
     test("BED track line", async function () {
 
         const featureSource = FeatureSource({

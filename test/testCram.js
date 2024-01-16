@@ -35,9 +35,7 @@ suite("testCRAM", function () {
 
         const alignmentContainer = await cramReader.readAlignments("chr1", start, end)
         validate(assert, alignmentContainer)
-
     })
-
 
     function validate(assert, alignmentContainer) {
         assert.ok(alignmentContainer)

@@ -167,7 +167,7 @@ class BWReader {
         let chrIdx = this.chromTree.nameToId.get(chr)
 
         // Try alias
-        if (chrIdx === undefined) {
+        if (chrIdx === undefined && this.genome) {
             const aliasRecord = await this.genome.getAliasRecord(chr)
             let alias
             if (aliasRecord) {
