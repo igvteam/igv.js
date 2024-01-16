@@ -4,6 +4,7 @@ import {parseAutoSQL} from "../js/util/ucscUtils.js"
 import {assert} from 'chai'
 import {fileToDataURL} from "./utils/URLUtils.js"
 import BWReader from "../js/bigwig/bwReader.js"
+import {createGenome} from "./utils/MockGenome.js"
 
 suite("testBigBed", function () {
 
@@ -27,6 +28,30 @@ suite("testBigBed", function () {
         assert.equal(f.geneSymbol, 'HEATR2')
         assert.equal(f.spID, 'Q86Y56-3')
     })
+
+    test("test aliasing", async function () {
+
+        const genome = createGenome("ncbi")
+        const url = "test/data/bb/myBigBed2.bb"
+        const chr = "7"
+        const start = 0
+        const end = Number.MAX_SAFE_INTEGER
+        const bwSource = new BWSource({url}, genome)
+
+        const trackType = await bwSource.trackType()
+        assert.equal(trackType, "annotation")
+
+        const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1})
+        assert.ok(features)
+        assert.equal(features.length, 3339)   // Verified in iPad app
+
+        //chr7	773975	792642	uc003sjb.2	0	+	776710	791816	0,255,0	HEATR2	Q86Y56-3
+        const f = features[20]
+        assert.equal(f.start, 773975)
+        assert.equal(f.geneSymbol, 'HEATR2')
+        assert.equal(f.spID, 'Q86Y56-3')
+    })
+
 
     test("bed9+2 features - dataURL", async function () {
         const url = await fileToDataURL("test/data/bb/myBigBed2.bb")

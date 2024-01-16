@@ -3,6 +3,7 @@ import BWSource from "../js/bigwig/bwSource.js"
 import BWReader from "../js/bigwig/bwReader.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai'
+import {createGenome} from "./utils/MockGenome.js"
 
 suite("testBigWig", function () {
 
@@ -47,7 +48,32 @@ suite("testBigWig", function () {
             assert.equal(f.end - f.start, 1)
             start += 1
         }
-        
+    })
+
+    test("bigwig - aliasing", async function () {
+
+        this.timeout(10000)
+
+        const genome = createGenome("ncbi")
+        const url = "test/data/bb/fixedStep.bw"
+        const chr = "1"
+        const bwReader = new BWReader({url: url}, genome)
+
+        let start = 10006
+        const end = 10040
+        const bpPerPixel = 5
+        const windowFunction = "none"
+        const features = await bwReader.readFeatures(chr, start, chr, end, bpPerPixel, windowFunction)
+        assert.equal(features.length, 35)
+
+        //fixedStep chrom=chr1 start=10006 step=1 span=1
+        // Wig fixed and variable step use 1-based coordinates
+        start--
+        for (let f of features) {
+            assert.equal(start, f.start)
+            assert.equal(f.end - f.start, 1)
+            start += 1
+        }
     })
 
 

@@ -5,12 +5,33 @@ import BamReaderNonIndexed from "../js/bam/bamReaderNonIndexed.js"
 import {createGenome} from "./utils/MockGenome.js"
 
 
-const genome = createGenome()
 
 suite("testBAM", function () {
 
     test("BAM alignments - CSI index", async function () {
 
+        const genome = createGenome("ucsc")
+        const start = 155140000
+        const end = 155160000
+
+        const bamReader = new BamReader({
+                type: 'bam',
+                url: 'test/data/bam/na12889.bam',
+                indexURL: 'test/data/bam/na12889.bam.csi'
+            },
+            genome)
+
+        let alignmentContainer = await bamReader.readAlignments("chr1", start, end)
+        validate(assert, alignmentContainer)
+
+        alignmentContainer = await bamReader.readAlignments("1", start, end)
+        validate(assert, alignmentContainer)
+
+    })
+
+    test("BAM alignments - CSI index", async function () {
+
+        const genome = createGenome("ncbi")
         const start = 155140000
         const end = 155160000
 
@@ -38,13 +59,9 @@ suite("testBAM", function () {
                 type: 'bam',
                 url: 'test/data/bam/na12889.bam',
                 indexed: false
-            },
-            genome)
+            })
 
         let alignmentContainer = await bamReader.readAlignments("chr1", start, end)
-        validate(assert, alignmentContainer)
-
-        alignmentContainer = await bamReader.readAlignments("1", start, end)
         validate(assert, alignmentContainer)
     })
 

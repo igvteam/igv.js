@@ -11,9 +11,8 @@ const DEFAULT_MAX_WG_COUNT = 10000
  * @param maxWGCount - optional, maximum # of whole genome features to computer
  * @returns {*[]}
  */
-function computeWGFeatures(allFeatures, genome, maxWGCount) {
+async function computeWGFeatures(allFeatures, genome, maxWGCount) {
 
-    const max = maxWGCount || DEFAULT_MAX_WG_COUNT
 
     const makeWGFeature = (f) => {
         const wg = Object.assign({}, f)
@@ -46,6 +45,7 @@ function computeWGFeatures(allFeatures, genome, maxWGCount) {
         const features = allFeatures[c]
 
         if (features) {
+            const max = maxWGCount || DEFAULT_MAX_WG_COUNT
             for (let f of features) {
                 let queryChr = genome.getChromosomeName(f.chr)
                 if (wgChromosomeNames.has(queryChr)) {

@@ -154,7 +154,7 @@ class DynamicFeatureSource {
         }
     }
 
-    getFeatures({chr, start, end}) {
+    async getFeatures({chr, start, end}) {
         if (chr.toLowerCase() === 'all') {
             return computeWGFeatures(this.featureMap, this.genome)
         } else {

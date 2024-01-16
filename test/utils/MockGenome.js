@@ -62,6 +62,48 @@ class MockGenome {
         return this.chromAlias.getChromosomeName(chr)
     }
 
+
+    /**
+     * Return the genome coordinate in kb for the give chromosome and position.
+     * NOTE: This might return undefined if the chr is filtered from whole genome view.
+     */
+    getGenomeCoordinate(chr, bp) {
+
+        var offset = this.getCumulativeOffset(chr)
+        if (offset === undefined) return undefined
+
+        return offset + bp
+    }
+
+
+    /**
+     * Return the offset in genome coordinates (kb) of the start of the given chromosome
+     * NOTE:  This might return undefined if the chromosome is filtered from whole genome view.
+     */
+    getCumulativeOffset(chr) {
+
+        if (this.cumulativeOffsets === undefined) {
+            this.cumulativeOffsets = computeCumulativeOffsets.call(this)
+        }
+
+        const queryChr = this.getChromosomeName(chr)
+        return this.cumulativeOffsets[queryChr]
+
+        function computeCumulativeOffsets() {
+
+            let acc = {}
+            let offset = 0
+            for (let name of this.wgChromosomeNames) {
+                acc[name] = Math.floor(offset)
+                const chromosome = this.getChromosome(name)
+                offset += chromosome.bpLength
+            }
+
+            return acc
+        }
+    }
+
+
 }
 
 /**
