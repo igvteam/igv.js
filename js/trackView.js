@@ -667,7 +667,7 @@ class TrackView {
             this.gearContainer.appendChild(this.gear)
             this.gear.appendChild(Icon.createIcon('cog'))
 
-            this.trackGearPopup = new MenuPopup(this.gear)
+            this.trackGearPopup = new MenuPopup(this.gear, undefined)
 
             this.boundTrackGearClickHandler = trackGearClickHandler.bind(this)
             this.gear.addEventListener('click', this.boundTrackGearClickHandler)

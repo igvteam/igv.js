@@ -98,7 +98,7 @@ class Browser {
         this.columnContainer = DOMUtils.div({class: 'igv-column-container'})
         this.root.appendChild(this.columnContainer)
 
-        this.menuPopup = new MenuPopup(this.columnContainer)
+        this.menuPopup = new MenuPopup(this.columnContainer, { minX:0, minY:0 })
 
         this.menuUtils = new MenuUtils(this)
 

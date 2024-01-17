@@ -6,7 +6,7 @@ import $ from "../vendor/jquery-3.3.1.slim.js"
 import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "./menuUtils.js"
 
 class MenuPopup {
-    constructor(parent) {
+    constructor(parent, constraint) {
         this.popover = DOMUtils.div({class: 'igv-menu-popup'})
 
         parent.appendChild(this.popover)
@@ -19,7 +19,7 @@ class MenuPopup {
         this.popoverContent = DOMUtils.div()
         this.popover.appendChild(this.popoverContent)
 
-        makeDraggable(this.popover, header)
+        makeDraggable(this.popover, header, constraint)
 
         // absorb click to prevent it leaking through to parent DOM element
         header.addEventListener('click', e => {
