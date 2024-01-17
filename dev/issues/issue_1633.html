@@ -1,0 +1,48 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>issue 1633</title>
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    var options =
+        {
+            genome: "hg38",
+            locus: "X:73,819,307-73,856,333",
+            tracks: [
+                {
+                    type: 'annotation',
+                    format: 'gff3',
+                    url: 'https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/Homo_sapiens.GRCh38.109.chr.sorted.gff3.gz',
+                    indexURL: "https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/Homo_sapiens.GRCh38.109.chr.sorted.gff3.gz.tbi",
+                    autoHeight: true
+                },
+                // {
+                //     type: 'annotation',
+                //     format: 'gff3',
+                //     url: 'https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/homo_sapiens.GRCh38.sorted.gff3.gz',
+                //     indexURL: "https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/homo_sapiens.GRCh38.sorted.gff3.gz.tbi",
+                //     height: 600
+                // }
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+        })
+
+</script>
+
+</body>
+
+</html>

@@ -1,6 +1,5 @@
 import GtexUtils from "../../gtex/gtexUtils.js"
 import IGVGraphics from "../../igv-canvas.js"
-import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
 
 /**
  * @param feature
@@ -43,10 +42,10 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
 
         // Set ctx color to a known valid color.  If getColorForFeature returns an invalid color string it is ignored, and
         // this default will be used.
-        ctx.fillStyle = this.defaultColor
-        ctx.strokeStyle = this.defaultColor
+        ctx.fillStyle = this.color
+        ctx.strokeStyle = this.color
 
-        const color = getColorForFeature.call(this, feature)
+        const color = this.getColorForFeature(feature)
         ctx.fillStyle = color
         ctx.strokeStyle = color
 
@@ -63,7 +62,7 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
             py = this.margin
         }
 
-        const pixelWidth = options.pixelWidth
+        const pixelWidth = options.pixelWidth   // typical 3*viewportWidth
 
         const cy = py + h / 2
         const h2 = h / 2
@@ -169,8 +168,8 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
 /**
  * @param ctx       the canvas 2d context
  * @param feature
- * @param featureX  feature start x-coordinate
- * @param featureX1 feature end x-coordinate
+ * @param featureX  feature start in pixel coordinates
+ * @param featureX1 feature end in pixel coordinates
  * @param featureY  feature y-coordinate
  * @param windowX   visible window start x-coordinate
  * @param windowX1  visible window end x-coordinate
@@ -191,7 +190,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         let pixelXOffset = options.pixelXOffset || 0
         const t1 = Math.max(featureX, -pixelXOffset)
         const t2 = Math.min(featureX1, -pixelXOffset + options.viewportWidth)
-        const centerX = (t1 + t2) / 2
+        let centerX = (t1 + t2) / 2
 
         let transform
         if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
@@ -199,7 +198,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         }
         const labelY = getFeatureLabelY(featureY, transform)
 
-        let color = getColorForFeature.call(this, feature)
+        let color = this.getColorForFeature(feature)
         let geneColor
         let gtexSelection = false
         if (referenceFrame.selection && GtexUtils.gtexLoaded) {
@@ -217,10 +216,20 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         const textBox = ctx.measureText(name)
         const xleft = centerX - textBox.width / 2
         const xright = centerX + textBox.width / 2
-        if (options.labelAllFeatures || xleft > options.rowLastLabelX[feature.row] || gtexSelection) {
+        const lastLabelX = options.rowLastLabelX[feature.row] || -Number.MAX_SAFE_INTEGER
+        if (options.labelAllFeatures || xleft > lastLabelX || gtexSelection) {
             options.rowLastLabelX[feature.row] = xright
-            IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
+
+            if ('y' === options.axis) {
+                ctx.save()
+                IGVGraphics.labelTransformWithContext(ctx, centerX)
+                IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
+                ctx.restore()
+            } else {
+                IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
+            }
         }
+
     } finally {
         ctx.restore()
     }
@@ -231,47 +240,3 @@ function getFeatureLabelY(featureY, transform) {
 }
 
 
-/**
- * Return color for feature.  Called in the context of a FeatureTrack instance.
- * @param feature
- * @returns {string}
- */
-
-function getColorForFeature(feature) {
-
-    let color
-    if (this.altColor && "-" === feature.strand) {
-        color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor
-    } else if (this.color) {
-        color = (typeof this.color === "function") ? this.color(feature) : this.color  // Explicit setting via menu, or possibly track line if !config.color
-    } else if (this.colorBy) {
-        const value = feature.getAttributeValue ?
-            feature.getAttributeValue(this.colorBy) :
-            feature[this.colorBy]
-        color = this.colorTable.getColor(value)
-    } else if (feature.color) {
-        color = feature.color   // Explicit color for feature
-    } else {
-        color = this.defaultColor   // Track default
-    }
-
-    if (feature.alpha && feature.alpha !== 1) {
-        color = IGVColor.addAlpha(color, feature.alpha)
-    } else if (this.useScore && feature.score && !Number.isNaN(feature.score)) {
-        // UCSC useScore option, for scores between 0-1000.  See https://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK
-        const min = this.config.min ? this.config.min : 0 //getViewLimitMin(track);
-        const max = this.config.max ? this.config.max : 1000 //getViewLimitMax(track);
-        const alpha = getAlpha(min, max, feature.score)
-        feature.alpha = alpha    // Avoid computing again
-        color = IGVColor.addAlpha(color, alpha)
-    }
-
-
-    function getAlpha(min, max, score) {
-        const binWidth = (max - min) / 9
-        const binNumber = Math.floor((score - min) / binWidth)
-        return Math.min(1.0, 0.2 + (binNumber * 0.8) / 9)
-    }
-
-    return color
-}

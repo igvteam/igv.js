@@ -3,17 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>Circular View</title>
-    <!-- The commented scripts below are the minified production versions of the
-      other scripts -->
-    <!-- <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin="anonymous"></script>
-     <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin="anonymous"></script>
-     <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.development.js"
-                 crossorigin="anonymous"></script>-->
+    <script src="https://unpkg.com/react@16.14.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.14.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view@1.6.9/dist/react-circular-genome-view.umd.production.min.js"></script>
 
-        <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
-        <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
-        <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.production.min.js"
-                crossorigin></script>
 
     <style>
         button[data-testid='circular_track_select'] {
@@ -37,16 +30,15 @@
     <button id="svgButton">Save SVG</button>
 </p>
 
-
+<button id="button-open">Open</button>
 <div id="igvDiv">
-    <div id="jbrowse_circular_genome_view"
-         style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
+    <div id="jbrowse_circular_genome_view" style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
 
 </div>
 <script type="module">
 
     import igv from "../../js"
-    import {makeDraggable} from '../../node_modules/igv-utils/src/index.js'
+    import {makeDraggable} from '../../node_modules/igv-ui/dist/igv-ui.js'
 
     const options =
         {
@@ -104,10 +96,13 @@
 
 
             const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
-            browser.createCircularView(circularViewContainer, true)
+            const circView = browser.createCircularView(circularViewContainer, false)
             makeDraggable(circularViewContainer, browser.circularView.toolbar)
+
+
             browser.circularView.setSize(640)
 
+            document.getElementById("button-open").addEventListener("click", () => circView.show())
 
             document.getElementById("sessionButton").addEventListener("click", () => {
                 try {

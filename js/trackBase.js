@@ -25,10 +25,19 @@
 
 import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "./ui/menuUtils.js"
+import $ from "./vendor/jquery-3.3.1.slim.js"
+import {createCheckbox} from "./igv-icons.js"
+
+const DEFAULT_COLOR = 'rgb(150,150,150)'
 
 const fixColor = (colorString) => {
-    return (colorString.indexOf(",") > 0 && !colorString.startsWith("rgb")) ?
-        `rgb(${colorString})` : colorString
+    if (StringUtils.isString(colorString)) {
+        return (colorString.indexOf(",") > 0 && !(colorString.startsWith("rgb(") || colorString.startsWith("rgba("))) ?
+            `rgb(${colorString})` : colorString
+    } else {
+        return colorString
+    }
 }
 
 /**
@@ -39,6 +48,15 @@ const fixColor = (colorString) => {
  * @constructor
  */
 class TrackBase {
+
+    static defaults = {
+        height: 50,
+        autoHeight: false,
+        visibilityWindow: undefined,   // Identifies property that should be copied from config
+        color: undefined,  // Identifies property that should be copied from config
+        altColor: undefined,  // Identifies property that should be copied from config
+        supportHiDPI: true
+    }
 
     constructor(config, browser) {
         this.browser = browser
@@ -52,15 +70,26 @@ class TrackBase {
      * @param config
      */
     init(config) {
+
+        this.config = config
+
         if (config.displayMode) {
             config.displayMode = config.displayMode.toUpperCase()
         }
 
-        this.config = config
-        this.url = config.url
-        this.type = config.type
-
-        this.supportHiDPI = config.supportHiDPI === undefined ? true : config.supportHiDPI
+        // Set default properties
+        const defaults = Object.assign({}, TrackBase.defaults)
+        if(this.constructor.defaults) {
+            for(let key of Object.keys(this.constructor.defaults)) {
+                defaults[key] = this.constructor.defaults[key]
+            }
+        }
+        for(let key of Object.keys(defaults)) {
+            this[key] = config.hasOwnProperty(key) ? config[key] : defaults[key]
+            if(key === 'color' || key === 'altColor') {
+                this[key] = fixColor(this[key])
+            }
+        }
 
         if (config.name || config.label) {
             this.name = config.name || config.label
@@ -70,28 +99,16 @@ class TrackBase {
             this.name = FileUtils.getFilename(config.url)
         }
 
+        this.url = config.url
+        if(this.config.type) this.type = this.config.type
         this.id = this.config.id === undefined ? this.name : this.config.id
-
         this.order = config.order
-
-        if(config.color) this.color = fixColor(config.color)
-        if(config.altColor) this.altColor = fixColor(config.altColor)
-        if ("civic-ws" === config.sourceType) {    // Ugly proxy for specialized track type
-            this.defaultColor = "rgb(155,20,20)"
-        } else {
-            this.defaultColor = "rgb(0,0,150)"
-        }
-
         this.autoscaleGroup = config.autoscaleGroup
-
         this.removable = config.removable === undefined ? true : config.removable      // Defaults to true
-
-        this.height = config.height || 100
-        this.autoHeight = config.autoHeight
         this.minHeight = config.minHeight || Math.min(25, this.height)
         this.maxHeight = config.maxHeight || Math.max(1000, this.height)
 
-        this.visibilityWindow = config.visibilityWindow
+        this.isMultiSelection = config.isMultiSelection || false
 
         if (config.onclick) {
             this.onclick = config.onclick
@@ -105,6 +122,14 @@ class TrackBase {
             } else {
                 this.description = () => config.description
             }
+        }
+
+        // Support for mouse hover text.  This can be expensive, off by default.
+        // this.hoverText = function(clickState) => return tool tip text
+        if (config.hoverTextFields) {
+            this.hoverText = hoverText.bind(this)
+        } else if (typeof this.config.hoverText === 'function') {
+            this.hoverText = this.config.hoverText
         }
     }
 
@@ -128,18 +153,31 @@ class TrackBase {
         this.init(config)
     }
 
+    clearCachedFeatures() {
+        if (this.trackView) {
+            this.trackView.clearCachedFeatures()
+        }
+    }
+
+    updateViews() {
+        if (this.trackView) {
+            this.trackView.updateViews()
+        }
+    }
+
     /**
-     * Default implementation -- update config with current values.
-     * to create session object for bookmarking, sharing.  Updates the track "config" object to reflect the
-     * current state.  Only simple properties (string, number, boolean) are updated.
+     * Used to create session object for bookmarking, sharing.  Only simple property values (string, number, boolean)
+     * are saved.
      */
     getState() {
+
+        const jsonable = (v) => !(v === undefined || typeof v === 'function' || v instanceof File || v instanceof Promise)
 
         // Create copy of config, minus transient properties (convention is name starts with '_').  Also, all
         // function properties are transient as they cannot be saved in json
         const state = {}
         for (let key of Object.keys(this.config)) {
-            if (!key.startsWith("_") && typeof this.config[key] !== "function" && this.config[key] !== undefined) {
+            if (!key.startsWith("_") && jsonable(this.config[key])) {
                 state[key] = this.config[key]
             }
         }
@@ -153,8 +191,18 @@ class TrackBase {
             }
         }
 
-        if (this.color) state.color = this.color
-        if (this.altColor) state.altColor = this.altColor
+        // If user has changed other properties from defaults update state.
+        const defs = TrackBase.defaults
+        if (this.constructor.defaults) {
+            for (let key of Object.keys(this.constructor.defaults)) {
+                defs[key] = this.constructor.defaults[key]
+            }
+        }
+        for (let key of Object.keys(defs)) {
+            if (undefined !== this[key] && defs[key] !== this[key]) {
+                state[key] = this[key]
+            }
+        }
 
         // Flatten dataRange if present
         if (!this.autoscale && this.dataRange) {
@@ -162,27 +210,15 @@ class TrackBase {
             state.max = this.dataRange.max
         }
 
-
-        // Check for non-json-if-yable properties.  Perhaps we should test what can be saved.
-        for (let key of Object.keys(state)) {
-            const value = state[key]
-            if (typeof value === 'function') {
-                throw Error(`Property '${key}' of track '${this.name} is a function. Functions cannot be saved in sessions.`)
-            }
-            if (value instanceof File) {   // Test specifically for File.  Other types of File-like objects might be savable
-                const str = `Track ${this.name} is a local file. Sessions cannot be saved with local file references.`
-                throw Error(str)
-            }
-            if (value instanceof Promise) {
-                throw Error(`Property '${key}' of track '${this.name} is a Promise. Promises cannot be saved in sessions.`)
-            }
+        if (this.autoscaleGroup) {
+            state.autoscaleGroup = this.autoscaleGroup
         }
 
         return state
     }
 
     get supportsWholeGenome() {
-        return false
+        return this.config.supportsWholeGenome === true
     }
 
     /**
@@ -206,6 +242,8 @@ class TrackBase {
      * @param properties
      */
     setTrackProperties(properties) {
+
+        if (this.disposed) return   // This track was removed during async load
 
         const tracklineConfg = {}
         let tokens
@@ -262,6 +300,8 @@ class TrackBase {
                         }
                         tracklineConfg.autoscale = false
                         tracklineConfg.dataRange = {min, max}
+                        this.viewLimitMin = min
+                        this.viewLimitMax = max
                     }
                 case "name":
                     tracklineConfg[key] = properties[key]
@@ -308,20 +348,19 @@ class TrackBase {
     }
 
     /**
-     * Return the features clicked over.  Default implementation assumes a single row of features and only considers
+     * Return the features clicked over.  Default implementation assumes an array of features and only considers
      * the genomic location.   Overriden by most subclasses.
      *
      * @param clickState
-     * @param features
      * @returns {[]|*[]}
      */
-    clickedFeatures(clickState, features) {
+    clickedFeatures(clickState) {
 
         // We use the cached features rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (!features) features = clickState.viewport.cachedFeatures
+        const features = clickState.viewport.cachedFeatures
 
-        if (!features || features.length === 0) {
+        if (!features || !Array.isArray(features) || features.length === 0) {
             return []
         }
 
@@ -336,8 +375,7 @@ class TrackBase {
 
     /**
      * Default popup text function -- just extracts string and number properties in random order.
-     * @param feature
-     * @returns {Array}
+     * @param feature     * @returns {Array}
      */
     extractPopupData(feature, genomeId) {
 
@@ -419,6 +457,7 @@ class TrackBase {
 
     }
 
+
     /**
      * Default track description -- displayed on click of track label.  This can be overriden in the track
      * configuration, or in subclasses.
@@ -462,6 +501,75 @@ class TrackBase {
         return str
     }
 
+    /**
+     * Return color for a specific feature of this track.  This default implementation is overriden by subclasses*
+     * @param f
+     * @returns {*|string|string}
+     */
+    getColorForFeature(f) {
+        return (typeof this.color === "function") ? this.color(feature) : this.color
+    }
+
+    numericDataMenuItems() {
+
+        const menuItems = []
+
+        menuItems.push('<hr/>')
+
+        // Data range
+        let object = $('<div>')
+        object.text('Set data range')
+
+        function dialogPresentationHandler() {
+
+            if (isMultiSelectedTrackView(this.trackView)) {
+                this.browser.dataRangeDialog.configure(getMultiSelectedTrackViews(this.trackView.browser))
+            } else {
+                this.browser.dataRangeDialog.configure(this.trackView)
+            }
+            this.browser.dataRangeDialog.present($(this.browser.columnContainer))
+        }
+        menuItems.push({ object, dialog:dialogPresentationHandler })
+
+        if (this.logScale !== undefined) {
+
+            object = $(createCheckbox("Log scale", this.logScale))
+
+            function logScaleHandler() {
+                this.logScale = !this.logScale
+                this.trackView.repaintViews()
+            }
+
+            menuItems.push({ object, click:logScaleHandler })
+        }
+
+        object = $(createCheckbox("Autoscale", this.autoscale))
+
+        function autoScaleHandler() {
+            this.autoscaleGroup = undefined
+            this.autoscale = !this.autoscale
+            this.browser.updateViews()
+        }
+
+        menuItems.push({ object, click:autoScaleHandler })
+
+        return menuItems
+    }
+
+    /**
+     * Track has been permanently removed.  Release resources and other cleanup
+     */
+    dispose() {
+
+        this.disposed = true
+
+        // This should not be neccessary, but in case there is some unknown reference holding onto this track object,
+        // for example in client code, release any resources here.
+        for (let key of Object.keys(this)) {
+            this[key] = undefined
+        }
+    }
+
     static getCravatLink(chr, position, ref, alt, genomeID) {
 
         if ("hg38" === genomeID || "GRCh38" === genomeID) {
@@ -476,6 +584,38 @@ class TrackBase {
     }
 }
 
+function hoverText(clickState) {
+
+    if (!this.hoverTextFields) return
+
+    const features = this.clickedFeatures(clickState)
+
+    if (features && features.length > 0) {
+        let str = ""
+        for (let i = 0; i < features.length; i++) {
+            if (i === 10) {
+                str += "; ..."
+                break
+            }
+            if (!features[i]) continue
+
+            const f = features[i]._f || features[i]
+            if (str.length > 0) str += "\n"
+
+            str = ""
+            for (let field of this.hoverTextFields) {
+                if (str.length > 0) str += "\n"
+                if (f.hasOwnProperty(field)) {
+                    str += f[field]
+                } else if (typeof f.getAttribute === "function") {
+                    str += f.getAttribute(field)
+                }
+            }
+
+        }
+        return str
+    }
+}
 
 /**
  * Map UCSC track line "type" setting to file format.  In igv.js "type" refers to the track type, not the input file format

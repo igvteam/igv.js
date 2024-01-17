@@ -1,0 +1,18 @@
+{
+  "reference": {
+    "fastaURL": "https://www.dropbox.com/scl/fi/0xclihkrr5s90mt2gyqf0/CGI_ladder_3.6kb_ref.fa?rlkey=m8s7tx7a5pde7tqumb7vkknnv&dl=0",
+    "indexURL": "https://www.dropbox.com/scl/fi/9bo0ynmbxxcykejfr1me9/CGI_ladder_3.6kb_ref.fa.fai?rlkey=yp7vrucojazpusomm6r17wpdl&dl=0"
+  },
+  "locus": "oligo_1471_adapters:1-156",
+  "tracks": [
+    {
+      "type": "alignment",
+      "format": "bam",
+      "url":      "https://www.dropbox.com/scl/fi/2se4cumu6lj6hq36d4lvh/run5_5mC_pod5_model_sort.bam?rlkey=x3rowbgt5dxl1hemwb7c9c3a3&dl=0",
+      "indexURL": "https://www.dropbox.com/scl/fi/7tab2ps7m7rrgbr0eeska/run5_5mC_pod5_model_sort.bam.bai?rlkey=388pdh02ffyu9ca6rb7slwbrr&dl=0",
+      "height": 700,
+      "name": "Issue 1185",
+      "colorBy": "basemod2"
+    }
+  ]
+}

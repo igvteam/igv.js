@@ -1,126 +1,181 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 
-import MenuUtils from "./menuUtils.js"
-import {DOMUtils, makeDraggable, UIUtils} from "../../node_modules/igv-utils/src/index.js"
-import GenericColorPicker from './genericColorPicker.js'
+import {DOMUtils, makeDraggable, UIUtils} from "../../node_modules/igv-ui/dist/igv-ui.js"
+import {GenericColorPicker} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import {createCheckbox} from "../igv-icons.js"
+import $ from "../vendor/jquery-3.3.1.slim.js"
+import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "./menuUtils.js"
 
-const MenuPopup = function (parent) {
+class MenuPopup {
+    constructor(parent) {
+        this.popover = DOMUtils.div({class: 'igv-menu-popup'})
 
-    this.popover = DOMUtils.div({class: 'igv-menu-popup'})
-    parent.appendChild(this.popover)
+        parent.appendChild(this.popover)
 
-    const header = DOMUtils.div({class: 'igv-menu-popup-header'})
-    this.popover.appendChild(header)
+        const header = DOMUtils.div({class: 'igv-menu-popup-header'})
+        this.popover.appendChild(header)
 
-    UIUtils.attachDialogCloseHandlerWithParent(header, () => this.hide())
+        UIUtils.attachDialogCloseHandlerWithParent(header, () => this.popover.style.display = 'none')
 
-    this.popoverContent = DOMUtils.div()
-    this.popover.appendChild(this.popoverContent)
+        this.popoverContent = DOMUtils.div()
+        this.popover.appendChild(this.popoverContent)
 
-    makeDraggable(this.popover, header)
+        makeDraggable(this.popover, header)
 
-    header.addEventListener('click', e => {
-        e.stopPropagation()
-        e.preventDefault()
         // absorb click to prevent it leaking through to parent DOM element
-    })
+        header.addEventListener('click', e => {
+            e.stopPropagation()
+            e.preventDefault()
+        })
 
-    this.hide()
+        this.popover.style.display = 'none'
 
-}
+    }
 
-MenuPopup.prototype.hide = function () {
-    this.popover.style.display = 'none'
-}
+    presentMenuList(trackView, menuList) {
 
-MenuPopup.prototype.presentMenuList = function (menuList) {
+        hideAllMenuPopups()
 
-    hideAllMenuPopups()
+        if (menuList.length > 0) {
 
-    if (menuList.length > 0) {
+            this.popoverContent.innerHTML = ''
+
+            const parsedList = this.parseMenuList(trackView, menuList)
+
+            for (let item of parsedList) {
+
+                if (item.init) {
+                    item.init()
+                }
+
+                let $e = item.object
+                if (0 === parsedList.indexOf(item)) {
+                    $e.removeClass('igv-track-menu-border-top')
+                }
+
+                if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-menu-popup-check-container')) {
+                    // do nothing
+                } else if ($e.is('div')) {
+                    $e.addClass('igv-menu-popup-shim')
+                }
+
+                this.popoverContent.appendChild($e.get(0))
+
+            }
+
+            // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
+            //       yield a width of zero (0).
+            this.popover.style.display = 'flex'
+
+            const {width} = this.popover.getBoundingClientRect()
+
+            this.popover.style.left = `${-width}px`
+            this.popover.style.top = `${0}px`
+
+        }
+    }
+
+    parseMenuList(trackView, menuList) {
+
+        return menuList.map((item, i) => {
+
+            let $e
+
+            // name and object fields checked for backward compatibility
+            if (item.name) {
+                $e = $('<div>')
+                $e.text(item.name)
+            } else if (item.object) {
+                $e = item.object
+            } else if (typeof item.label === 'string') {
+                $e = $('<div>')
+                $e.html(item.label)
+            } else if (typeof item === 'string') {
+
+                if (item.startsWith("<")) {
+                    $e = $(item)
+                } else {
+                    $e = $("<div>" + item + "</div>")
+                }
+            }
+
+            if (0 === i) {
+                $e.addClass('igv-track-menu-border-top')
+            }
+
+            if (item.click || item.dialog) {
+
+                const handleClick = e => {
+                    e.preventDefault()
+                    e.stopPropagation()
+
+                    if (item.click) {
+
+                        if (isMultiSelectedTrackView(trackView)) {
+
+                            trackView.browser.multiSelectedTrackViews = getMultiSelectedTrackViews(trackView.browser)
+
+                            if (true === item.doAllMultiSelectedTracks) {
+                                item.click.call(trackView.track, e)
+                            } else {
+                                for (const { track } of trackView.browser.multiSelectedTrackViews) {
+                                    item.click.call(track, e)
+                                }
+                            }
+
+                        } else {
+                            trackView.browser.multiSelectedTrackViews = undefined
+                            item.click.call(trackView.track, e)
+                        }
+
+                    } else if (item.dialog) {
+                        item.dialog.call(trackView.track, e)
+                    }
+
+                    this.popover.style.display = 'none'
+                }
+
+                $e.on('click', handleClick)
+
+                $e.on('touchend', e => handleClick(e))
+
+                $e.on('mouseup', function (e) {
+                    e.preventDefault()
+                    e.stopPropagation()
+                })
+
+            }
+
+            return {object: $e, init: (item.init || undefined)}
+        })
+
+    }
+
+    presentTrackContextMenu(e, menuItems) {
 
         this.popoverContent.innerHTML = ''
 
-        menuList = MenuUtils.trackMenuItemListHelper(menuList, this)
-
-        for (let item of menuList) {
-
-            if (item.init) {
-                item.init()
-            }
-
-            let $e = item.object
-            if (0 === menuList.indexOf(item)) {
-                $e.removeClass('igv-track-menu-border-top')
-            }
-
-            if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-menu-popup-check-container')) {
-                // do nothing
-            } else if ($e.is('div')) {
-                $e.addClass('igv-menu-popup-shim')
-            }
-
-            this.popoverContent.appendChild($e.get(0))
-
+        const menuElements = createMenuElements(menuItems, this.popover)
+        for (let {el} of menuElements) {
+            this.popoverContent.appendChild(el)
         }
 
-        // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
-        //       yield a width of zero (0).
-        this.popover.style.display = 'flex'
-
-        const {width} = this.popover.getBoundingClientRect()
-
-        this.popover.style.left = `${-width}px`
-        this.popover.style.top = `${0}px`
+        present(e, this.popover)
 
     }
-}
 
-MenuPopup.prototype.presentTrackContextMenu = function (e, menuItems) {
-
-    this.popoverContent.innerHTML = ''
-
-    const menuElements = createMenuElements(menuItems, this.popover)
-    for (let {el} of menuElements) {
-        this.popoverContent.appendChild(el)
+    hide() {
+        this.popover.style.display = 'none'
     }
 
-    present(e, this.popover)
+    dispose() {
 
-}
+        this.popoverContent.innerHTML = ''
+        this.popover.innerHTML = ''
 
-MenuPopup.prototype.dispose = function () {
-
-    this.popoverContent.innerHTML = ''
-    this.popover.innerHTML = ''
-
-    Object.keys(this).forEach(function (key) {
-        this[key] = undefined
-    })
+        Object.keys(this).forEach(function (key) {
+            this[key] = undefined
+        })
+    }
 }
 
 function createMenuElements(itemList, popover) {
@@ -145,8 +200,8 @@ function createMenuElements(itemList, popover) {
                 el = createCheckbox("Show all bases", item.value)
             } else if ("color" === item.type) {
 
-                const colorPicker = new GenericColorPicker({parent: popover.parentElement, width: 364})
-                colorPicker.configure(undefined, {color: color => item.click(color)})
+                const colorPicker = new GenericColorPicker(popover.parentElement)
+                colorPicker.configure({color: 'grey'})
 
                 el = DOMUtils.div({class: 'context-menu'})
                 if (typeof item.label === 'string') {

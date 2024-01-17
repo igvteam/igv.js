@@ -23,7 +23,8 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils, FileUtils, GoogleAuth, GoogleDrive, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {FileUtils, GoogleAuth, GoogleDrive, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {DOMUtils} from "../../node_modules/igv-ui/dist/igv-ui.js"
 
 const extend = function (parent, child) {
 
@@ -75,16 +76,16 @@ function buildOptions(config, options) {
 const doAutoscale = function (features) {
     var min, max
 
-    if (features.length > 0) {
+    if (features && features.length > 0) {
         min = Number.MAX_VALUE
         max = -Number.MAX_VALUE
 
-        features.forEach(function (f) {
+        for(let f of features) {
             if (!Number.isNaN(f.value)) {
                 min = Math.min(min, f.value)
                 max = Math.max(max, f.value)
             }
-        })
+        }
 
         // Insure we have a zero baseline
         if (max > 0) min = Math.min(0, min)
@@ -98,10 +99,10 @@ const doAutoscale = function (features) {
     return {min: min, max: max}
 }
 
-const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
+const validateGenomicExtent = function (chromosomeLengthBP, genomicExtent, minimumBP) {
 
-    let ss = extent.start
-    let ee = extent.end
+    let ss = genomicExtent.start
+    let ee = genomicExtent.end
 
     if (undefined === ee) {
 
@@ -132,8 +133,8 @@ const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
         }
     }
 
-    extent.start = Math.ceil(ss)
-    extent.end = Math.floor(ee)
+    genomicExtent.start = Math.ceil(ss)
+    genomicExtent.end = Math.floor(ee)
 }
 
 /*!
@@ -220,7 +221,21 @@ function isSecureContext() {
     return window.location.protocol === "https:" || window.location.hostname === "localhost"
 }
 
+// reference: https://pretagteam.com/question/find-element-height-including-margin
+function getElementAbsoluteHeight(element) {
+
+    // Get the DOM Node if you pass in a string
+    element = (typeof element === 'string') ? document.querySelector(element) : element
+
+    const styles = window.getComputedStyle(element)
+    const margin = parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom'])
+    const height = element.offsetHeight
+
+    return Math.ceil(margin + height);
+}
+
 export {
-    createColumn, extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber,
-    getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext
+    createColumn, extend, isSimpleType, buildOptions, validateGenomicExtent, doAutoscale, isNumber,
+    getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext,
+    getElementAbsoluteHeight
 }

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config =
+        {
+            locus: "CM021939.1:74535435-74545435",  // From genomes.txt
+            reference: {
+                id: "GCF_016699485.2",
+                format: "2bit",
+                twoBitURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.2bit",
+                aliasBbURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.chromAlias.bb",
+                nameSet: "ucsc",
+                wholeGenomeView: false
+            }
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+        .then(browser => {
+
+        })
+
+
+</script>
+
+</body>
+
+</html>

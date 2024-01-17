@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>igv.js</title>
+<body>
+
+<h1>VCF with VT field</h1>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script type="module">
+
+    import igv from "../../js";
+
+    const options =
+        {
+            locus: "chr20:14370",
+            genome: "hg19",
+            tracks: [
+                {
+                    "url": "../../test/data/vcf/adjacent_snps.vcf",
+                    "indexed": false,
+                    "name": "adjacent snps",
+                }
+            ]
+        };
+
+    const igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+
+        .then(function (browser) {
+        });
+
+
+</script>
+
+</body>
+
+</html>

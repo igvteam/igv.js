@@ -1,4 +1,3 @@
-
 $igv-axis-column-width: 50px;
 
 $igv-scrollbar-outer-width: 14px;
@@ -35,8 +34,10 @@ $igv-zoom-in-notice-height: 16px;
 @import "igv-menu-popup";
 @import "igv-user-feedback";
 @import "spinner";
+@import "roi";
 
 @mixin igv-column-base {
+  position: relative;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
@@ -62,13 +63,14 @@ $igv-zoom-in-notice-height: 16px;
   -webkit-user-select: none;
   -ms-user-select: none;
 
+  min-height: 160px;
 }
 
 .igv-viewport {
   position: relative;
 
   margin-top: $igv-column-item-margin-top;
-
+  line-height: 1;
   overflow-x: hidden;
   overflow-y: hidden;
 
@@ -78,7 +80,7 @@ $igv-zoom-in-notice-height: 16px;
   position: relative;
   width: 100%;
 
-  >canvas {
+  > canvas {
     position: relative;
     display: block;
   }
@@ -105,21 +107,50 @@ $igv-zoom-in-notice-height: 16px;
   background-color: $igv-apple_crayon_iron;
 }
 
-.igv-column {
-  position: relative;
-  @include igv-column-base;
-}
-
 .igv-axis-column {
 
   @include igv-column-base;
 
   width: $igv-axis-column-width;
 
-  >div {
+  > div {
+    position: relative;
+
     margin-top: $igv-column-item-margin-top;
     width: 100%;
+
+    //background-color: rgba(101, 211, 19, 1);
+
+    > div {
+      z-index: 512;
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: fit-content;
+      height: fit-content;
+      background-color: transparent;
+      display: grid;
+      align-items: start;
+      justify-items: center;
+      //place-items: flex-start center;
+      > input {
+        display: block;
+        margin: unset;
+        cursor: pointer;
+      }
+    }
+
   }
+}
+
+.igv-column {
+  position: relative;
+  @include igv-column-base;
+
+}
+
+.igv-sample-info-column {
+  @include igv-column-base;
 }
 
 .igv-sample-name-column {
@@ -132,18 +163,18 @@ $igv-zoom-in-notice-height: 16px;
 
   width: $igv-scrollbar-outer-width;
 
-  >div {
+  > div {
 
     position: relative;
 
     margin-top: $igv-column-item-margin-top;
     width: $igv-scrollbar-outer-width;
 
-    >div {
+    > div {
 
       cursor: pointer;
 
-      position:absolute;
+      position: absolute;
       top: 0;
       left: $igv-scrollbar-inner-left;
 
@@ -165,7 +196,7 @@ $igv-zoom-in-notice-height: 16px;
       //background-color: transparent;
     }
 
-    >div:hover {
+    > div:hover {
       background-color: #c4c4c4;
     }
 
@@ -182,7 +213,7 @@ $igv-zoom-in-notice-height: 16px;
   background-color: white;
 
   // track drag/reorder handle
-  >.igv-track-drag-handle {
+  > .igv-track-drag-handle {
     z-index: 512;
     position: relative;
     cursor: pointer;
@@ -194,16 +225,21 @@ $igv-zoom-in-notice-height: 16px;
     border-width: 0;
     border-top-right-radius: 6px;
     border-bottom-right-radius: 6px;
+  }
 
+  .igv-track-drag-handle-color {
     background-color: #c4c4c4;
   }
 
-  .igv-track-drag-handle-hover {
+  .igv-track-drag-handle-hover-color {
     background-color: #787878;
-    //background-color: magenta;
   }
 
-  >.igv-track-drag-shim {
+  .igv-track-drag-handle-selected-color {
+    background-color: #0963fa;
+  }
+
+  > .igv-track-drag-shim {
     position: relative;
 
     margin-top: $igv-column-item-margin-top;
@@ -222,7 +258,7 @@ $igv-zoom-in-notice-height: 16px;
   width: $igv-track-gear-menu-column-width;
 
   // gear gutter
-  >div {
+  > div {
 
     display: flex;
     flex-direction: column;
@@ -235,7 +271,7 @@ $igv-zoom-in-notice-height: 16px;
     background: white;
 
     // gear container
-    >div {
+    > div {
       position: relative;
 
       margin-top: 4px;
@@ -244,7 +280,7 @@ $igv-zoom-in-notice-height: 16px;
       color: $igv-trackgear-grey-color;
     }
 
-    >div:hover {
+    > div:hover {
       cursor: pointer;
       color: #444;
     }

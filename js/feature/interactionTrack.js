@@ -29,7 +29,6 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import MenuUtils from "../ui/menuUtils.js"
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
@@ -50,7 +49,20 @@ function getArcType(config) {
     }
 }
 
+const DEFAULT_ARC_COLOR = "rgb(180,25,137)"
+
 class InteractionTrack extends TrackBase {
+
+    static defaults = {
+        height: 250,
+        theta: Math.PI / 4,
+        arcOrientation: true,
+        showBlocks: true,
+        blockHeight: 3,
+        thickness: 1,
+        alpha: 0.02,
+        logScale: true,
+    }
 
     constructor(config, browser) {
         super(config, browser)
@@ -59,16 +71,10 @@ class InteractionTrack extends TrackBase {
     init(config) {
 
         super.init(config)
-        this.theta = config.theta || Math.PI / 4
+
         this.sinTheta = Math.sin(this.theta)
         this.cosTheta = Math.cos(this.theta)
-        this.height = config.height || 250
         this.arcType = getArcType(config)   // nested | proportional | inView | partialInView
-        this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation) // true for up, false for down
-        this.showBlocks = config.showBlocks === undefined ? true : config.showBlocks
-        this.blockHeight = config.blockHeight || 3
-        this.thickness = config.thickness || 1
-        this.color = config.color || "rgb(180,25,137)"
         this.alpha = config.alpha || 0.02  // was: 0.15
         this.painter = {flipAxis: !this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
 
@@ -80,7 +86,6 @@ class InteractionTrack extends TrackBase {
             this.valueColumn = "score"
         }
 
-        this.logScale = config.logScale !== false   // i.e. defaul to true (undefined => true)
         if (config.max) {
             this.dataRange = {
                 min: config.min || 0,
@@ -92,14 +97,20 @@ class InteractionTrack extends TrackBase {
         }
 
         // Create the FeatureSource and override the default whole genome method
-        this.featureSource = FeatureSource(config, this.browser.genome)
-        this.featureSource.getWGFeatures = getWGFeatures
+        if (config.featureSource) {
+            this.featureSource = config.featureSource
+            delete config._featureSource
+        } else {
+            this.featureSource = FeatureSource(config, this.browser.genome)
+            this.featureSource.getWGFeatures = getWGFeatures
+        }
     }
 
     async postInit() {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
+            if (this.disposed) return;   // This track was removed during async load
         }
 
         // Set properties from track line
@@ -171,10 +182,16 @@ class InteractionTrack extends TrackBase {
                 // Reset transient property drawState.  An undefined value => feature has not been drawn.
                 feature.drawState = undefined
 
-                let color = feature.color || this.color
-                if (color && this.config.useScore) {
-                    color = getAlphaColor(color, scoreShade(feature.score))
+                let color
+                if (typeof this.color === 'function') {
+                    color = this.color(feature)
+                } else {
+                    color = this.color || feature.color || DEFAULT_ARC_COLOR
+                    if (color && this.config.useScore) {
+                        color = getAlphaColor(color, scoreShade(feature.score))
+                    }
                 }
+
                 ctx.lineWidth = feature.thickness || this.thickness || 1
 
                 if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
@@ -263,7 +280,7 @@ class InteractionTrack extends TrackBase {
             for (let feature of featureList) {
                 let pixelStart = (feature.start - bpStart) / xScale
                 let pixelEnd = (feature.end - bpStart) / xScale
-                if (pixelEnd >= 0 && pixelStart <= pixelWidth) {
+                if (pixelStart >= 0 && pixelEnd <= pixelWidth) {
                     max = Math.max(max, pixelEnd - pixelStart)
                 }
             }
@@ -449,18 +466,10 @@ class InteractionTrack extends TrackBase {
 
     menuItemList() {
 
-        let items = [
-
-            {
-                name: "Set track color",
-                click: () => {
-                    this.trackView.presentColorPicker()
-                }
-            },
-            '<hr/>'
-        ]
+        let items = []
 
         if (this.hasValue) {
+            items.push("<hr/>")
             const lut =
                 {
                     "nested": "Nested",
@@ -473,7 +482,7 @@ class InteractionTrack extends TrackBase {
                 items.push(
                     {
                         object: $(createCheckbox(lut[arcType], arcType === this.arcType)),
-                        click: () => {
+                        click: function arcTypeHandler() {
                             this.arcType = arcType
                             this.trackView.repaintViews()
                         }
@@ -484,14 +493,14 @@ class InteractionTrack extends TrackBase {
 
         items.push({
             name: "Toggle arc direction",
-            click: () => {
+            click: function toggleArcDirectionHandler() {
                 this.arcOrientation = !this.arcOrientation
                 this.trackView.repaintViews()
             }
         })
         items.push({
             name: this.showBlocks ? "Hide Blocks" : "Show Blocks",
-            click: () => {
+            click: function blockVisibiltyHandler() {
                 this.showBlocks = !this.showBlocks
                 this.trackView.repaintViews()
             }
@@ -499,15 +508,14 @@ class InteractionTrack extends TrackBase {
 
 
         if (this.arcType === "proportional" || this.arcType === "inView" || this.arcType === "partialInView") {
-            // MenuUtils.numericDataMenuItems(this.trackView).forEach(item => items.push(item))
-            items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+            items = items.concat(this.numericDataMenuItems())
         }
 
         if (this.browser.circularView) {
             items.push('<hr/>')
             items.push({
                 label: 'Add interactions to circular view',
-                click: () => {
+                click: function addInteractionsHandler() {
                     for (let viewport of this.trackView.viewports) {
                         this.addChordsForViewport(viewport.referenceFrame)
                     }
@@ -521,7 +529,7 @@ class InteractionTrack extends TrackBase {
     contextMenuItemList(clickState) {
 
         // Experimental JBrowse feature
-        if (this.browser.circularView ) {
+        if (this.browser.circularView) {
             const viewport = clickState.viewport
             const list = []
 
@@ -550,7 +558,7 @@ class InteractionTrack extends TrackBase {
 
         // inView features are simply features that have been drawn, i.e. have a drawState
         const inView = cachedFeatures.filter(f => f.drawState)
-        if(inView.length === 0) return;
+        if (inView.length === 0) return;
 
         const chords = makeBedPEChords(inView)
         sendChords(chords, this, refFrame, 0.5)
@@ -586,7 +594,7 @@ class InteractionTrack extends TrackBase {
 
     popupData(clickState, features) {
 
-        features = this.clickedFeatures(clickState)
+        if (features === undefined) features = this.clickedFeatures(clickState)
 
         const data = []
         for (let feature of features) {
@@ -608,11 +616,13 @@ class InteractionTrack extends TrackBase {
 
             if (f.extras && this.header && this.header.columnNames) {
                 const columnNames = this.header.columnNames
-                for (let i = 10; i < columnNames.length; i++) {
+                const stdColumns = this.header.hiccups ? 6 : 10
+                for (let i = stdColumns; i < columnNames.length; i++) {
+                    if (this.header.colorColumn === i) continue;
                     if (columnNames[i] === 'info') {
-                        extractInfoColumn(data, f.extras[i - 10])
+                        extractInfoColumn(data, f.extras[i - stdColumns])
                     } else {
-                        data.push({name: columnNames[i], value: f.extras[i - 10]})
+                        data.push({name: columnNames[i], value: f.extras[i - stdColumns]})
                     }
                 }
             }
@@ -626,11 +636,11 @@ class InteractionTrack extends TrackBase {
         return data
     }
 
-    clickedFeatures(clickState, features) {
+    clickedFeatures(clickState) {
 
         // We use the cached features rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        const featureList = features || clickState.viewport.cachedFeatures
+        const featureList = clickState.viewport.cachedFeatures
         const candidates = []
         if (featureList) {
             const proportional = (this.arcType === "proportional" || this.arcType === "inView" || this.arcType === "partialInView")
@@ -675,26 +685,6 @@ class InteractionTrack extends TrackBase {
             candidates.sort((a, b) => a.score - b.score)
         }
         return candidates.map((c) => c.feature)
-    }
-
-    /**
-     * Return the current state of the track.  Used to create sessions and bookmarks.
-     *
-     * @returns {*|{}}
-     */
-    getState() {
-
-        const config = super.getState()
-
-        // if (this.height !== undefined) config.height = this.height;
-        if (this.arcType !== undefined) config.arcType = this.arcType
-        if (this.arcOrientation !== undefined) config.arcOrientation = this.arcOrientation
-        if (this.showBlocks !== undefined) config.showBlocks = this.showBlocks
-        if (this.blockHeight !== undefined) config.blockHeight = this.blockHeight
-        if (this.thickness !== undefined) config.thickness = this.thickness
-        if (this.alpha !== undefined) config.alpha = this.alpha
-
-        return config
     }
 }
 
@@ -741,7 +731,7 @@ function estimateTheta(x) {
     let thetaLeft = idx === 0 ? 0 : theta[idx - 1]
     let thetaRight = idx < theta.length ? theta[idx] : Math.PI / 2
 
-    return thetaLeft + r * (thetaRight - thetaLeft)
+    return Math.min(Math.PI/2,  (thetaLeft + r * (thetaRight - thetaLeft)))
 
 }
 
@@ -810,7 +800,7 @@ function getWGFeatures(allFeatures) {
         if (chrFeatures) {
             for (let f of chrFeatures) {
                 if (!f.dup) {
-                    const bin = f.score ? Math.min(nBins - 1, Math.floor(Math.log(f.score) / binSize)) : 0
+                    const bin = f.score  ? Math.max(0, Math.min(nBins - 1, Math.floor(Math.log(f.score) / binSize))) : 0
                     if (binnedFeatures[bin].length < featuresPerBin) {
                         binnedFeatures[bin].push(makeWGFeature(f))
                     } else {

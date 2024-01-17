@@ -24,51 +24,49 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
+import NavbarButton from "./navbarButton.js"
+import GenomeUtils from "../genome/genomeUtils.js"
+import {cursorImage, cursorImageHover} from "./navbarIcons/cursor.js"
+import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 
-class CursorGuideButton {
+class CursorGuideButton extends NavbarButton {
 
     constructor(browser, parent) {
 
-        this.browser = browser
+        super(browser, parent, 'Crosshairs', buttonLabel, cursorImage, cursorImageHover, browser.doShowCursorGuide)
 
-        this.button = DOMUtils.div({class: 'igv-navbar-button'})
-        parent.appendChild(this.button)
-
-        this.button.textContent = 'cursor guide'
-
-        this.button.addEventListener('click', () => {
-            browser.cursorGuideVisible = !browser.cursorGuideVisible
-            browser.setCursorGuideVisibility(browser.cursorGuideVisible)
-            this.setButtonState(browser.cursorGuideVisible)
+        this.button.addEventListener('mouseenter', () => {
+            if (false === browser.doShowCursorGuide) {
+                this.setState(true)
+            }
         })
 
-        this.setButtonState(browser.cursorGuideVisible)
+        this.button.addEventListener('mouseleave', () => {
+            if (false === browser.doShowCursorGuide) {
+                this.setState(false)
+            }
+        })
 
-        if (browser.config.showCursorTrackingGuideButton) {
-            this.show()
-        } else {
-            this.hide()
+        const mouseClickHandler = () => {
+
+            if (false === browser.doShowCursorGuide && GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr)) {
+                return
+            }
+
+            browser.doShowCursorGuide = !browser.doShowCursorGuide
+            browser.setCursorGuideVisibility(browser.doShowCursorGuide)
+            this.setState(browser.doShowCursorGuide)
+
         }
 
+        this.boundMouseClickHandler = mouseClickHandler.bind(this)
+
+        this.button.addEventListener('click', this.boundMouseClickHandler)
+
+        this.setVisibility(browser.config.showCursorTrackingGuideButton)
+
     }
 
-    setButtonState(cursorGuideVisible) {
-        if (true === cursorGuideVisible) {
-            this.button.classList.add('igv-navbar-button-clicked')
-        } else {
-            this.button.classList.remove('igv-navbar-button-clicked')
-        }
-    }
-
-    show() {
-        this.button.style.display = 'block'
-        this.setButtonState(this.browser.cursorGuideVisible)
-    }
-
-    hide() {
-        this.button.style.display = 'none'
-    }
 }
 
 export default CursorGuideButton

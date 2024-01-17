@@ -25,7 +25,7 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
-import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
+import {DOMUtils} from "../node_modules/igv-ui/dist/igv-ui.js"
 import TrackViewport from "./trackViewport.js"
 
 class IdeogramViewport extends TrackViewport {
@@ -38,7 +38,8 @@ class IdeogramViewport extends TrackViewport {
 
         this.canvas = document.createElement('canvas')
         this.canvas.className = 'igv-ideogram-canvas'
-        this.$content.append($(this.canvas))
+        //this.$content.append($(this.canvas))
+        this.$viewport.append($(this.canvas))
         this.ideogram_ctx = this.canvas.getContext('2d')
 
         this.addMouseHandlers()
@@ -104,7 +105,7 @@ class IdeogramViewport extends TrackViewport {
         this.draw({referenceFrame: this.referenceFrame})
     }
 
-    draw({referenceFrame}) {
+    async draw({referenceFrame}) {
 
         IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, this.$viewport.width(), this.$viewport.height())
 

@@ -16,7 +16,7 @@ const TRIBBLE_MAGIC = 1480870228   //  byte[]{'T', 'I', 'D', 'X'};
  * @param tabix
  *
  */
-async function loadIndex(indexURL, config, genome) {
+async function loadIndex(indexURL, config) {
 
     let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, buildOptions(config))
     let dv = new DataView(arrayBuffer)
@@ -32,13 +32,13 @@ async function loadIndex(indexURL, config, genome) {
     const magic = dv.getInt32(0, true)
     switch (magic) {
         case BAI_MAGIC:
-            return parseBamIndex(arrayBuffer, genome)
+            return parseBamIndex(arrayBuffer)
         case TABIX_MAGIC:
-            return parseTabixIndex(arrayBuffer, genome)
+            return parseTabixIndex(arrayBuffer)
         case CSI1_MAGIC:
-            return parseCsiIndex(arrayBuffer, genome)
+            return parseCsiIndex(arrayBuffer)
         case TRIBBLE_MAGIC:
-            return parseTribbleIndex(arrayBuffer, genome)
+            return parseTribbleIndex(arrayBuffer)
         case CSI2_MAGIC:
             throw Error("CSI version 2 is not supported.")
         default:

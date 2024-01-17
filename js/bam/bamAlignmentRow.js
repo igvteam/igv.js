@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import { StringUtils } from "../../node_modules/igv-utils/src/index.js"
 
 const isString = StringUtils.isString
 const hashCode = StringUtils.hashCode
@@ -36,17 +36,17 @@ class BamAlignmentRow {
         this.score = undefined
     }
 
-    findAlignment(genomicLocation) {
+    findAlignment(genomicLocation, sortAsPairs = false) {
 
         const alignmentContains = (a, genomicLocation) => {
-            return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef
+            return genomicLocation >= a.start && genomicLocation < a.start + (sortAsPairs ? a.fragmentLength : a.lengthOnRef)
         }
 
         // find single alignment that overlaps sort location
         let centerAlignment
         for (let i = 0; i < this.alignments.length; i++) {
             const a = this.alignments[i]
-            if (genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef) {
+            if (genomicLocation >= a.start && genomicLocation < a.start + (sortAsPairs ? a.fragmentLength : a.lengthOnRef)) {
                 if (a.paired) {
                     if (a.firstAlignment && alignmentContains(a.firstAlignment, genomicLocation)) {
                         centerAlignment = a.firstAlignment
@@ -64,20 +64,15 @@ class BamAlignmentRow {
 
     }
 
-    updateScore(options, alignmentContainer) {
-        this.score = this.calculateScore(options, alignmentContainer)
-    }
-
-    calculateScore({position, option, direction, tag}, alignmentContainer) {
+    getSortValue({ position, option, tag, sortAsPairs }, alignmentContainer) {
 
         if (!option) option = "BASE"
 
-        const alignment = this.findAlignment(position)
-        if (undefined === alignment) {
-            return Number.MAX_VALUE * (direction ? 1 : -1)
+        const alignment = this.findAlignment(position, sortAsPairs)
+        if (undefined === alignment) {  // This condition should never occur
+            return Number.MAX_VALUE
         }
 
-        let mate
         switch (option) {
             case "NUCLEOTIDE":
             case "BASE": {
@@ -88,33 +83,20 @@ class BamAlignmentRow {
             case "START":
                 return alignment.start
             case "TAG": {
-
-                const tagValue = alignment.tags()[tag]
-                if (tagValue !== undefined) {
-                    return isString(tagValue) ? hashCode(tagValue) : tagValue
-                } else {
-                    return Number.MAX_VALUE
-                }
+                return alignment.tags()[tag]
             }
             case "READ_NAME":
-                return hashCode(alignment.readName)
+                return alignment.readName
             case "INSERT_SIZE":
                 return -Math.abs(alignment.fragmentLength)
             case "GAP_SIZE":
                 return -alignment.gapSizeAt(position)
             case "MATE_CHR":
-                mate = alignment.mate
-                if (!mate) {
-                    return Number.MAX_VALUE
-                } else {
-                    if (mate.chr === alignment.chr) {
-                        return Number.MAX_VALUE - 1
-                    } else {
-                        return hashCode(mate.chr)
-                    }
-                }
+                return alignment.mate
             case "MQ":
                 return alignment.mq === undefined ? Number.MAX_VALUE : -alignment.mq
+            case "ALIGNED_READ_LENGTH":
+                return -alignment.lengthOnRef
             default:
                 return Number.MAX_VALUE
         }
@@ -173,6 +155,8 @@ class BamAlignmentRow {
             return baseScore
         }
     }
+
+
 }
 
 export default BamAlignmentRow

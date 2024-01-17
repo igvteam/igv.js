@@ -4,16 +4,10 @@
     <meta charset="UTF-8">
     <title>Circular Genome View</title>
 
-    <!-- IGV JS -->
-    <script src="../dist/igv.min.js"></script>
-
     <!-- React (required for circular view)  -->
-    <script src="https://unpkg.com/react@16/umd/react.production.min.js" crossorigin></script>
-    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js" crossorigin></script>
-
-    <!-- JBrowe circular view -->
-    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view/dist/react-circular-genome-view.umd.production.min.js"
-            crossorigin></script>
+    <script src="https://unpkg.com/react@16.14.0/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.14.0/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@jbrowse/react-circular-genome-view@1.6.9/dist/react-circular-genome-view.umd.production.min.js"></script>
 
     <style>
         button[data-testid='circular_track_select'] {
@@ -25,11 +19,17 @@
 <body>
 
 <p>
-<h2>Circular genome view with alignment track</h2>
+<h2>Circular genome view</h2>
+
+<p>Example of Circular View interactions with an alignment and variant track. The alignments are illumina paired-end.
+    The variant track ("delly translocations") are SVs called by Delly.</p>
+
+Interactions:
 
 <ul>
-    <li>Right click alignments and select <b>Show discordant pairs</b></li>
-    <li>Click on chord in circular view to see both ends in split screen</li>
+    <li>Click the "gear" menu on the alignment track and select <b>Add discordant pairs to circular view</b>  </li>
+    <li>Click the "gear" menu on the variant track and select <b>Add SVs to circular view</b></li>
+    <li>Click on a chord in the circular view to see both ends in split screen</li>
 </ul>
 
 </p>
@@ -40,7 +40,9 @@
 </div>
 
 
-<script type="text/javascript">
+<script type="module">
+
+    import igv from "../dist/igv.esm.min.js"
 
 
     // Start igv.js and create regions

@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
+import {DOMUtils} from '../node_modules/igv-ui/dist/igv-ui.js'
 import {prettyBasePairNumber} from './util/igvUtils.js'
 
 class WindowSizePanel {

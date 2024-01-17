@@ -24,8 +24,6 @@
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
             crossorigin="anonymous"></script>
 
-    <!-- IGV JS -->
-    <script src="../dist/igv.min.js"></script>
 
 </head>
 
@@ -95,16 +93,16 @@
 <main role="main" class="container-fluid">
     <div style="padding-top: 64px">
         This example illustrates use of the igv.js API to dynamically add tracks from a dropdown
-            menu. Selecting 'CopyNumber' in the menu above results in the following call.
-            <p>
-                <pre>
+        menu. Selecting 'CopyNumber' in the menu above results in the following call.
+        <p>
+        <pre>
                 igv.browser.loadTrack({
                     url: 'https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz',
                     name: 'GBM Copy # (TCGA Broad GDAC)'})
                 </pre>
-            </p>
-            See the
-            <a href="https://github.com/igvteam/igv.js/wiki">developer wiki for more details.</a>
+        </p>
+        See the
+        <a href="https://github.com/igvteam/igv.js/wiki">developer wiki for more details.</a>
 
     </div>
 
@@ -113,25 +111,24 @@
 
 </main>
 
-<script type="text/javascript">
+<script type="module">
 
-    document.addEventListener("DOMContentLoaded", function () {
+    import igv from "../dist/igv.esm.min.js"
 
-        const options =
-            {
-                locus: "chr1:155,160,475-155,184,282",
-                genome: "hg19"
-            };
+    const options =
+        {
+            locus: "chr1:155,160,475-155,184,282",
+            genome: "hg19"
+        }
 
-        const igvDiv = document.getElementById('igvDiv');
+    const igvDiv = document.getElementById('igvDiv')
 
-        igv.createBrowser(igvDiv, options)
-            .then(function (browser) {
-                igv.browser = browser;
-                console.log("Created IGV browser");
-            })
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            igv.browser = browser
+            console.log("Created IGV browser")
+        })
 
-    });
 
 </script>
 

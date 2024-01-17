@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>bedgraph file</h1>
+
+<strong>Example of a tabix indexed bedgraph file.  Note: tabix indexing a bedgraph file is unusual, bigwig is a better solution.</strong>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg38",
+            tracks: [
+                {
+                    url: "https://s3.amazonaws.com/igv.org.test/data/bedgraph/ENCFF439GUL.bedgraph.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.test/data/bedgraph/ENCFF439GUL.bedgraph.gz.tbi",
+                    name: "RNA-Seq",
+                    type: "wig",
+                    format: "bedgraph",
+                    visibilityWindow: 10000000
+                },
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+        })
+
+
+</script>
+</body>
+</html>

@@ -26,7 +26,8 @@
 
 import TrackBase from "../trackBase.js"
 import paintAxis from "../util/paintAxis.js"
-import MenuUtils from "../ui/menuUtils.js"
+import {FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
+
 
 /**
  * Represents 2 or more wig tracks overlaid on a common viewport.
@@ -38,13 +39,15 @@ class MergedTrack extends TrackBase {
         this.type = "merged"
         this.featureType = 'numeric'
         this.paintAxis = paintAxis
+        this.graphType = config.graphType
+
+        this._alpha = this.config.alpha || 0.5
     }
 
     init(config) {
         if (!config.tracks) {
             throw Error("Error: no tracks defined for merged track" + config)
         }
-
         super.init(config)
     }
 
@@ -83,7 +86,17 @@ class MergedTrack extends TrackBase {
 
         this.height = this.config.height || 50
 
+        this.resolutionAware = this.tracks.some(t => t.resolutionAware)
+
         return Promise.all(p)
+    }
+
+    set alpha(alpha) {
+        this._alpha = alpha
+    }
+
+    get alpha() {
+        return this._alpha
     }
 
     get height() {
@@ -101,84 +114,130 @@ class MergedTrack extends TrackBase {
     }
 
     menuItemList() {
-        let items = []
+        const items = []
         if (this.flipAxis !== undefined) {
             items.push({
                 label: "Flip y-axis",
-                click: () => {
+                click: function flipYAxisHandler(){
                     this.flipAxis = !this.flipAxis
                     this.trackView.repaintViews()
                 }
             })
         }
 
-        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
+        items.push(...this.numericDataMenuItems())
 
         return items
     }
 
+    /**
+     * Returns a MergedFeatureCollection containing an array of features for the specified range, 1 for each track.
+     */
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
 
         const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
-        return Promise.all(promises)
+        const featureArrays = await Promise.all(promises)
+        return new MergedFeatureCollection(featureArrays)
     }
 
     draw(options) {
 
-        const mergedFeatures = options.features    // Array of feature arrays, 1 for each track
-
-        if (this.autoscale) {
-            this.dataRange = autoscale(options.referenceFrame.chr, mergedFeatures)
-        }
+        const mergedFeatures = options.features    // A MergedFeatureCollection
 
         for (let i = 0, len = this.tracks.length; i < len; i++) {
             const trackOptions = Object.assign({}, options)
-            trackOptions.features = mergedFeatures[i]
+            trackOptions.features = mergedFeatures.featureArrays[i]
+
+            trackOptions.alpha = this.alpha
+
             this.tracks[i].dataRange = this.dataRange
             this.tracks[i].flipAxis = this.flipAxis
             this.tracks[i].logScale = this.logScale
-            this.tracks[i].graphType = this.graphType
+            if (this.graphType) {
+                this.tracks[i].graphType = this.graphType
+            }
             this.tracks[i].draw(trackOptions)
         }
     }
 
-    popupData(clickState, features) {
+    popupData(clickState) {
 
-        const featuresArray = features || clickState.viewport.cachedFeatures
+        if (clickState.viewport && clickState.viewport.cachedFeatures) {
 
-        if (featuresArray && featuresArray.length === this.tracks.length) {
-            // Array of feature arrays, 1 for each track
-            const popupData = []
-            for (let i = 0; i < this.tracks.length; i++) {
-                if (i > 0) popupData.push('<hr/>')
-                popupData.push(`<div style=background-color:rgb(245,245,245);border-bottom-style:dashed;border-bottom-width:1px;padding-bottom:5px;padding-top:10px;font-weight:bold;font-size:larger >${this.tracks[i].name}</div>`)
-                const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i])
-                popupData.push(...trackPopupData)
+            const featuresArray = clickState.viewport.cachedFeatures.featureArrays
 
+            if (featuresArray && featuresArray.length === this.tracks.length) {
+                // Array of feature arrays, 1 for each track
+                const popupData = []
+                for (let i = 0; i < this.tracks.length; i++) {
+                    if (i > 0) popupData.push('<hr/>')
+                    popupData.push(`<div style=background-color:rgb(245,245,245);border-bottom-style:dashed;border-bottom-width:1px;padding-bottom:5px;padding-top:10px;font-weight:bold;font-size:larger >${this.tracks[i].name}</div>`)
+                    const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i])
+                    popupData.push(...trackPopupData)
+
+                }
+                return popupData
             }
-            return popupData
         }
+    }
+
+    clickedFeatures(clickState) {
+
+
+        // We use the cached features rather than method to avoid async load.  If the
+        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+        const mergedFeaturesCollection = clickState.viewport.cachedFeatures
+
+        if (!mergedFeaturesCollection) {
+            return []
+        }
+
+        const genomicLocation = clickState.genomicLocation
+        const clickedFeatures = []
+        for (let features of mergedFeaturesCollection.featureArrays) {
+            // When zoomed out we need some tolerance around genomicLocation
+            const tolerance = (clickState.referenceFrame.bpPerPixel > 0.2) ? 3 * clickState.referenceFrame.bpPerPixel : 0.2
+            const ss = genomicLocation - tolerance
+            const ee = genomicLocation + tolerance
+            const tmp = (FeatureUtils.findOverlapping(features, ss, ee))
+            for (let f of tmp) {
+                clickedFeatures.push(f)
+            }
+        }
+        return clickedFeatures
     }
 
 
     get supportsWholeGenome() {
-        return this.tracks.every(track => track.supportsWholeGenome())
+        return this.tracks.every(track => track.supportsWholeGenome)
     }
 }
 
-function autoscale(chr, featureArrays) {
 
-    let min = 0
-    let max = -Number.MAX_VALUE
-    for(let features of featureArrays) {
-        for(let f of features) {
-            if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
-                min = Math.min(min, f.value)
-                max = Math.max(max, f.value)
+class MergedFeatureCollection {
+
+    constructor(featureArrays) {
+        this.featureArrays = featureArrays
+    }
+
+    getMax(start, end) {
+        let max = -Number.MAX_VALUE
+        for (let a of this.featureArrays) {
+            for (let f of a) {
+                if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
+                    if (f.end < start) {
+                        continue
+                    }
+                    if (f.start > end) {
+                        break
+                    }
+                    max = Math.max(max, f.value)
+                }
             }
         }
+        return max
     }
-    return {min: min, max: max}
+
 }
 
 export default MergedTrack

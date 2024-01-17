@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const div = document.getElementById("myDiv");
+    const options = {
+        locus: 'chr1:10000-10020',
+        genome: "hg38",
+        tracks: [
+            {
+                name: 'Fixed step biwig',
+                format: 'bigwig',
+                url: '../../test/data/bb/fixedStep.bw'
+            },
+            {
+                name: 'Fixed step wig',
+                format: 'wig',
+                url: '../../test/data/bb/fixedStep.wig'
+            }
+        ]
+    };
+
+    igv.createBrowser(div, options).then(function (browser) {
+    });
+
+
+</script>
+
+</body>
+
+</html>
+

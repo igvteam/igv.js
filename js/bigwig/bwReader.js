@@ -23,49 +23,64 @@
  * THE SOFTWARE.
  */
 
-import BufferedReader from "./bufferedReader.js"
+import ChromTree from "./chromTree.js"
+import RPTree from "./rpTree.js"
 import BinaryParser from "../binary.js"
-import {BGZip, igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import getDecoder from "./bbDecoders.js"
 import {parseAutoSQL} from "../util/ucscUtils.js"
+import Trix from "./trix.js"
+import BPTree from "./bpTree.js"
 
-let BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
-let BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
-let BIGBED_MAGIC_LTH = 0x8789F2EB // BigBed Magic Low to High
-let BIGBED_MAGIC_HTL = 0xEBF28987 // BigBed Magic High to Low
-let BBFILE_HEADER_SIZE = 64
-let RPTREE_HEADER_SIZE = 48
-let RPTREE_NODE_LEAF_ITEM_SIZE = 32   // leaf item size
-let RPTREE_NODE_CHILD_ITEM_SIZE = 24  // child item size
-let BUFFER_SIZE = 512000     //  buffer
-let BPTREE_HEADER_SIZE = 32
+
+const BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
+const BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
+const BIGBED_MAGIC_LTH = 0x8789F2EB // BigBed Magic Low to High
+const BIGBED_MAGIC_HTL = 0xEBF28987 // BigBed Magic High to Low
+const BBFILE_HEADER_SIZE = 64
+const BBFILE_EXTENDED_HEADER_HEADER_SIZE = 64
+const BUFFER_SIZE = 512000     //  buffer
 
 class BWReader {
+
+    chrAliasTable = new Map()
+    rpTreeCache = new Map()
 
     constructor(config, genome) {
         this.path = config.url
         this.format = config.format || "bigwig"
         this.genome = genome
-        this.rpTreeCache = {}
         this.config = config
-        this.loader = isDataURL(this.path) ? new DataBuffer(this.path) : igvxhr
+        this.bufferSize = BUFFER_SIZE
+        this.loader = isDataURL(this.path) ?
+            new DataBuffer(this.path) : igvxhr
+
+        if (config.searchTrix) {
+            this._trix = new Trix(`${config.searchTrix}x`, config.searchTrix)
+        }
+
     }
 
     async readWGFeatures(bpPerPixel, windowFunction) {
         await this.loadHeader()
         const chrIdx1 = 0
-        const chrIdx2 = this.chromTree.idToChrom.length - 1
-        const chr1 = this.chromTree.idToChrom[chrIdx1]
-        const chr2 = this.chromTree.idToChrom[chrIdx2]
+        const chrIdx2 = this.chromTree.idToName.length - 1
+        const chr1 = this.chromTree.idToName[chrIdx1]
+        const chr2 = this.chromTree.idToName[chrIdx2]
         return this.readFeatures(chr1, 0, chr2, Number.MAX_VALUE, bpPerPixel, windowFunction)
     }
 
-    async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction) {
+    async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction = "mean") {
+
+        if (!bpStart) bpStart = 0
+        if (!bpEnd) bpEnd = Number.MAX_SAFE_INTEGER
 
         await this.loadHeader()
-        const chrIdx1 = this.chromTree.chromToID[chr1]
-        const chrIdx2 = this.chromTree.chromToID[chr2]
+
+        let chrIdx1 = await this.#getIdForChr(chr1)
+        let chrIdx2 = await this.#getIdForChr(chr2)
+
         if (chrIdx1 === undefined || chrIdx2 === undefined) {
             return []
         }
@@ -113,7 +128,7 @@ class BWReader {
             }))
 
             // Parse data and return features
-            const allFeatures = []
+            const features = []
             for (let item of leafItems) {
                 const uint8Array = new Uint8Array(arrayBuffer, item.dataOffset - start, item.dataSize)
                 let plain
@@ -123,15 +138,138 @@ class BWReader {
                 } else {
                     plain = uint8Array
                 }
-                decodeFunction.call(this, new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, allFeatures, this.chromTree.idToChrom, windowFunction)
+                decodeFunction.call(this, new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, features, this.chromTree.idToName, windowFunction, this.littleEndian)
             }
 
-            allFeatures.sort(function (a, b) {
+            features.sort(function (a, b) {
                 return a.start - b.start
             })
 
-            return allFeatures
+            return features
         }
+    }
+
+    /**
+     * Return the ID for the given chromosome name.  If there is no direct match, search for a chromosome alias.
+     *
+     * @param chr
+     * @returns {Promise<*>}
+     */
+    async #getIdForChr(chr) {
+
+        if (this.chrAliasTable.has(chr)) {
+            chr = this.chrAliasTable.get(chr)
+            if (chr === undefined) {
+                return undefined
+            }
+        }
+
+        let chrIdx = this.chromTree.nameToId.get(chr)
+
+        // Try alias
+        if (chrIdx === undefined && this.genome) {
+            const aliasRecord = await this.genome.getAliasRecord(chr)
+            let alias
+            if (aliasRecord) {
+                const aliases = Object.keys(aliasRecord)
+                    .filter(k => k !== "start" && k !== "end")
+                    .map(k => aliasRecord[k])
+                    .filter(a => this.chromTree.nameToId.has(a))
+                if (aliases.length > 0) {
+                    alias = aliases[0]
+                    chrIdx = this.chromTree.nameToId.get(aliases[0])
+                }
+            }
+            this.chrAliasTable.set(chr, alias)  // alias may be undefined => no alias exists. Setting prevents repeated attempts
+        }
+        return chrIdx
+    }
+
+
+    /**
+     * Potentially searchable if a bigbed source.  Bigwig files are not searchable.
+     * @returns {boolean}
+     */
+    get searchable() {
+        return "bigbed" === this.type
+    }
+
+    /**
+     * Search the extended BP tree for the search term, and return any matching features.  This only works
+     * for BB sources with an "extended" BP tree for searching
+     * @param term
+     * @returns {Promise<void>}
+     */
+    async search(term) {
+        if (!this.header) {
+            await this.loadHeader()
+        }
+        if (!(this.header && this.header.extraIndexCount)) {
+            return undefined
+        }
+
+        const region = await this._searchForRegions(term)   // Either 1 or no (undefined) reginos returned for now
+        if (region) {
+            const features = await this._loadFeaturesForRange(region.offset, region.length)
+            if (features) {
+                // Collect all matching features and return the largest
+                const matching = features.filter(f => {
+                    // We could use the searchIndex parameter to pick an attribute (column),  but we don't know
+                    // the names of all the columns and if they match IGV names
+                    // TODO -- align all feature attribute names with UCSC, an use specific column
+                    for (let key of Object.keys(f)) {
+                        const v = f[key]
+                        if (StringUtils.isString(v) && v.toLowerCase() === term.toLowerCase()) {
+                            return true
+                        }
+                    }
+                    return false
+                })
+                if (matching.length > 0) {
+                    return matching.reduce((l, f) => (l.end - l.start) > (f.end - f.start) ? l : f, features[0])
+                } else {
+                    return undefined
+                }
+            }
+        }
+    }
+
+    async _searchForRegions(term) {
+        const searchTrees = await this.#getSearchTrees()
+        if (searchTrees) {
+
+            // Use a trix index if we have one to map entered term to indexed value in bb file
+            if (this._trix) {
+                const termLower = term.toLowerCase()
+                const trixResults = await this._trix.search(termLower)
+                if (trixResults && trixResults.has(termLower)) {   // <= exact matches only for now
+                    term = trixResults.get(termLower)[0]
+                }
+            }
+
+            // For now take the first match, we don't support multiple results
+            for (let bpTree of searchTrees) {
+                const result = await bpTree.search(term)
+                if (result) {
+                    return result
+                }
+            }
+        }
+    }
+
+    async #getSearchTrees() {
+
+        if (this._searchTrees === undefined &&
+            this.header.extraIndexOffsets &&
+            this.header.extraIndexOffsets.length > 0) {
+            this._searchTrees = []
+            for (let offset of this.header.extraIndexOffsets) {
+                const bpTree = await BPTree.loadBpTree(this.path, offset)
+                this._searchTrees.push(bpTree)
+            }
+        }
+        return this._searchTrees
+
     }
 
     async getZoomHeaders() {
@@ -160,7 +298,7 @@ class BWReader {
             // Assume low-to-high unless proven otherwise
             this.littleEndian = true
 
-            let binaryParser = new BinaryParser(new DataView(data))
+            let binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
             let magic = binaryParser.getUInt()
             if (magic === BIGWIG_MAGIC_LTH) {
                 this.type = "bigwig"
@@ -197,15 +335,17 @@ class BWReader {
                 extensionOffset: binaryParser.getLong()
             }
 
-            ///////////
-
             const startOffset = BBFILE_HEADER_SIZE
-            let range = {start: startOffset, size: (header.fullDataOffset - startOffset + 5)}
+            let range = {
+                start: startOffset,
+                size: (header.fullDataOffset - startOffset + 4)
+            }
             data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: range}))
 
             const nZooms = header.nZoomLevels
-            binaryParser = new BinaryParser(new DataView(data))
+            binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
 
+            // Load zoom headers, store in order of decreasing reduction level (increasing resolution)
             this.zoomLevelHeaders = []
             this.firstZoomDataOffset = Number.MAX_SAFE_INTEGER
             for (let i = 1; i <= nZooms; i++) {
@@ -231,9 +371,11 @@ class BWReader {
             }
 
             // Chrom data index
+            // TODO -- replace this with BPChromTree
             if (header.chromTreeOffset > 0) {
                 binaryParser.position = header.chromTreeOffset - startOffset
-                this.chromTree = new BPTree(binaryParser, startOffset, this.genome)
+                this.chromTree = await ChromTree.parseTree(binaryParser, startOffset, this.genome)
+                this.chrNames = new Set(this.chromTree.idToName)
             } else {
                 // TODO -- this is an error, not expected
                 throw "BigWig chromosome tree offset <= 0"
@@ -242,25 +384,79 @@ class BWReader {
             //Finally total data count
             binaryParser.position = header.fullDataOffset - startOffset
             header.dataCount = binaryParser.getInt()
-            ///////////
 
-            this.setDefaultVisibilityWindow(header)
+            this.featureDensity = header.dataCount / this.chromTree.sumLengths
 
             this.header = header
-            return this.header
 
+
+            //extension
+            if (header.extensionOffset > 0) {
+                await this.loadExtendedHeader(header.extensionOffset)
+            }
+          return this.header
         }
+    }
+
+    async loadExtendedHeader(offset) {
+
+        let data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+            range: {
+                start: offset,
+                size: BBFILE_EXTENDED_HEADER_HEADER_SIZE
+            }
+        }))
+        let binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
+        const extensionSize = binaryParser.getUShort()
+        const extraIndexCount = binaryParser.getUShort()
+        const extraIndexListOffset = binaryParser.getLong()
+        if (extraIndexCount === 0) return
+
+        let sz = extraIndexCount * (2 + 2 + 8 + 4 + 10 * (2 + 2))
+        data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+            range: {
+                start: extraIndexListOffset,
+                size: sz
+            }
+        }))
+        binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
+
+        const type = []
+        const fieldCount = []
+        const reserved = []
+        const indexOffset = []
+        for (let i = 0; i < extraIndexCount; i++) {
+
+            type.push(binaryParser.getUShort())
+
+            const fc = binaryParser.getUShort()
+            fieldCount.push(fc)
+
+            indexOffset.push(binaryParser.getLong())
+            reserved.push(binaryParser.getInt())
+
+            for (let j = 0; j < fc; j++) {
+                const fieldId = binaryParser.getUShort()
+
+                //const field = this.autoSql.fields[fieldId]
+                //console.log(field)
+
+                reserved.push(binaryParser.getUShort())
+            }
+        }
+        this.header.extraIndexCount = extraIndexCount
+        this.header.extraIndexOffsets = indexOffset
     }
 
     async loadRPTree(offset) {
 
-        let rpTree = this.rpTreeCache[offset]
+        let rpTree = this.rpTreeCache.get(offset)
         if (rpTree) {
             return rpTree
         } else {
-            rpTree = new RPTree(offset, this.config, this.littleEndian, this.loader)
-            await rpTree.load()
-            this.rpTreeCache[offset] = rpTree
+            rpTree = new RPTree(this.path, offset)
+            await rpTree.init()
+            this.rpTreeCache.set(offset, rpTree)
             return rpTree
         }
     }
@@ -279,16 +475,30 @@ class BWReader {
         }
     }
 
-    setDefaultVisibilityWindow(header) {
-        if (this.type === "bigwig") {
-            this.visibilityWindow = -1
-        } else {
-            // bigbed
-            let genomeSize = this.genome ? this.genome.getGenomeLength() : 3088286401
-            // Estimate window size to return ~ 1,000 features, assuming even distribution across the genome
-            this.visibilityWindow = header.dataCount < 1000 ? -1 : 1000 * (genomeSize / header.dataCount)
+    /**
+     * Directly load features given a file offset and size.  Added to support search index.
+     * @param offset
+     * @param size
+     * @private
+     */
+    async _loadFeaturesForRange(offset, size) {
 
-        }
+        const arrayBuffer = await this.loader.loadArrayBuffer(this.config.url, buildOptions(this.config, {
+            range: {
+                start: offset,
+                size: size
+            }
+        }))
+
+        const uint8Array = new Uint8Array(arrayBuffer)
+        const plain = (this.header.uncompressBuffSize > 0) ? BGZip.inflate(uint8Array) : uint8Array
+        const decodeFunction = getBedDataDecoder.call(this)
+        const features = []
+        decodeFunction.call(this, new DataView(plain.buffer), 0, 0, Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER,
+            features, this.chromTree.idToName)
+
+        return features
+
     }
 }
 
@@ -301,252 +511,6 @@ class ZoomLevelHeader {
         this.dataOffset = byteBuffer.getLong()
         this.indexOffset = byteBuffer.getLong()
     }
-}
-
-class RPTree {
-
-    constructor(fileOffset, config, littleEndian, loader) {
-
-        this.config = config
-        this.loader = loader
-        this.fileOffset = fileOffset // File offset to beginning of tree
-        this.path = config.url
-        this.littleEndian = littleEndian
-    }
-
-    async load() {
-        const rootNodeOffset = this.fileOffset + RPTREE_HEADER_SIZE
-        const bufferedReader = isDataURL(this.path) ?
-            this.loader :
-            new BufferedReader(this.config, BUFFER_SIZE)
-        this.rootNode = await this.readNode(rootNodeOffset, bufferedReader)
-        return this
-    }
-
-    async readNode(filePosition, bufferedReader) {
-
-        let dataView = await bufferedReader.dataViewForRange({start: filePosition, size: 4}, false)
-        let binaryParser = new BinaryParser(dataView, this.littleEndian)
-        const type = binaryParser.getByte()
-        const isLeaf = (type === 1)
-        const reserved = binaryParser.getByte()
-        const count = binaryParser.getUShort()
-        filePosition += 4
-
-        let bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE)
-        let range2 = {start: filePosition, size: bytesRequired}
-        dataView = await bufferedReader.dataViewForRange(range2, false)
-        const items = new Array(count)
-        binaryParser = new BinaryParser(dataView)
-
-        if (isLeaf) {
-            for (let i = 0; i < count; i++) {
-                let item = {
-                    isLeaf: true,
-                    startChrom: binaryParser.getInt(),
-                    startBase: binaryParser.getInt(),
-                    endChrom: binaryParser.getInt(),
-                    endBase: binaryParser.getInt(),
-                    dataOffset: binaryParser.getLong(),
-                    dataSize: binaryParser.getLong()
-                }
-                items[i] = item
-
-            }
-            return new RPTreeNode(items)
-        } else { // non-leaf
-            for (let i = 0; i < count; i++) {
-
-                let item = {
-                    isLeaf: false,
-                    startChrom: binaryParser.getInt(),
-                    startBase: binaryParser.getInt(),
-                    endChrom: binaryParser.getInt(),
-                    endBase: binaryParser.getInt(),
-                    childOffset: binaryParser.getLong()
-                }
-                items[i] = item
-            }
-
-            return new RPTreeNode(items)
-        }
-
-    }
-
-    async findLeafItemsOverlapping(chrIdx1, startBase, chrIdx2, endBase) {
-
-        let self = this
-
-        return new Promise(function (fulfill, reject) {
-
-            let leafItems = [],
-                processing = new Set(),
-                bufferedReader = isDataURL(self.path) ?
-                    self.loader :
-                    new BufferedReader(self.config, BUFFER_SIZE)
-
-            processing.add(0)  // Zero represents the root node
-            findLeafItems(self.rootNode, 0)
-
-            function findLeafItems(node, nodeId) {
-
-                if (overlaps(node, chrIdx1, startBase, chrIdx2, endBase)) {
-
-                    let items = node.items
-
-                    items.forEach(function (item) {
-
-                        if (overlaps(item, chrIdx1, startBase, chrIdx2, endBase)) {
-
-                            if (item.isLeaf) {
-                                leafItems.push(item)
-                            } else {
-                                if (item.childNode) {
-                                    findLeafItems(item.childNode)
-                                } else {
-                                    processing.add(item.childOffset)  // Represent node to-be-loaded by its file position
-
-                                    self.readNode(item.childOffset, bufferedReader)
-                                        .then(function (node) {
-                                            item.childNode = node
-                                            findLeafItems(node, item.childOffset)
-                                        })
-                                        .catch(reject)
-                                }
-                            }
-                        }
-                    })
-
-                }
-
-                if (nodeId !== undefined) processing.delete(nodeId)
-
-                // Wait until all nodes are processed
-                if (processing.size === 0) {
-                    fulfill(leafItems)
-                }
-            }
-        })
-    }
-}
-
-class RPTreeNode {
-
-    constructor(items) {
-
-        this.items = items
-
-        let minChromId = Number.MAX_SAFE_INTEGER,
-            maxChromId = 0,
-            minStartBase = Number.MAX_SAFE_INTEGER,
-            maxEndBase = 0,
-            i,
-            item
-
-        for (i = 0; i < items.length; i++) {
-            item = items[i]
-            minChromId = Math.min(minChromId, item.startChrom)
-            maxChromId = Math.max(maxChromId, item.endChrom)
-            minStartBase = Math.min(minStartBase, item.startBase)
-            maxEndBase = Math.max(maxEndBase, item.endBase)
-        }
-
-        this.startChrom = minChromId
-        this.endChrom = maxChromId
-        this.startBase = minStartBase
-        this.endBase = maxEndBase
-    }
-}
-
-class BPTree {
-
-    constructor(binaryParser, startOffset, genome) {
-
-        let magic = binaryParser.getInt()
-        let blockSize = binaryParser.getInt()
-        let keySize = binaryParser.getInt()
-        let valSize = binaryParser.getInt()
-        let itemCount = binaryParser.getLong()
-        let reserved = binaryParser.getLong()
-        let chromToId = {}
-        let idToChrom = []
-
-        this.header = {
-            magic: magic,
-            blockSize: blockSize,
-            keySize: keySize,
-            valSize: valSize,
-            itemCount: itemCount,
-            reserved: reserved
-        }
-        this.chromToID = chromToId
-        this.idToChrom = idToChrom
-
-        // Recursively walk tree to populate dictionary
-        readTreeNode(binaryParser, -1)
-
-
-        function readTreeNode(byteBuffer, offset) {
-
-            if (offset >= 0) byteBuffer.position = offset
-
-            let type = byteBuffer.getByte(),
-                reserved = byteBuffer.getByte(),
-                count = byteBuffer.getUShort(),
-                i,
-                key,
-                chromId,
-                chromSize,
-                childOffset,
-                bufferOffset,
-                currOffset
-
-
-            if (type === 1) {
-
-                for (i = 0; i < count; i++) {
-
-                    key = byteBuffer.getFixedLengthTrimmedString(keySize)
-                    chromId = byteBuffer.getInt()
-                    chromSize = byteBuffer.getInt()
-
-                    if (genome) key = genome.getChromosomeName(key)  // Translate to canonical chr name
-                    chromToId[key] = chromId
-                    idToChrom[chromId] = key
-
-                }
-            } else { // non-leaf
-
-                for (i = 0; i < count; i++) {
-
-                    key = byteBuffer.getFixedLengthTrimmedString(keySize)
-                    childOffset = byteBuffer.getLong()
-                    bufferOffset = childOffset - startOffset
-                    currOffset = byteBuffer.position
-                    readTreeNode(byteBuffer, bufferOffset)
-                    byteBuffer.position = currOffset
-                }
-            }
-
-        }
-    }
-}
-
-/**
- * Return true if {chrIdx1:startBase-chrIdx2:endBase} overlaps item's interval
- * @returns {boolean}
- */
-function overlaps(item, chrIdx1, startBase, chrIdx2, endBase) {
-
-    if (!item) {
-        console.log("null item for " + chrIdx1 + " " + startBase + " " + endBase)
-        return false
-    }
-
-    return ((chrIdx2 > item.startChrom) || (chrIdx2 === item.startChrom && endBase >= item.startBase)) &&
-        ((chrIdx1 < item.endChrom) || (chrIdx1 === item.endChrom && startBase <= item.endBase))
-
-
 }
 
 class BWTotalSummary {
@@ -600,11 +564,12 @@ function zoomLevelForScale(bpPerPixel, zoomLevelHeaders) {
 }
 
 
-function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict) {
+function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict, windowFunction, littleEndian) {
 
-    const binaryParser = new BinaryParser(data)
+    const binaryParser = new BinaryParser(data, littleEndian)
     const chromId = binaryParser.getInt()
-    let chromStart = binaryParser.getInt()
+    const blockStart = binaryParser.getInt()
+    let chromStart = blockStart
     let chromEnd = binaryParser.getInt()
     const itemStep = binaryParser.getInt()
     const itemSpan = binaryParser.getInt()
@@ -614,6 +579,7 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
 
     if (chromId >= chrIdx1 && chromId <= chrIdx2) {
 
+        let idx = 0
         while (itemCount-- > 0) {
             let value
             switch (type) {
@@ -629,8 +595,9 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
                     break
                 case 3:  // Fixed step
                     value = binaryParser.getFloat()
+                    chromStart = blockStart + idx * itemStep
                     chromEnd = chromStart + itemSpan
-                    chromStart += itemStep
+                    idx++
                     break
             }
 
@@ -640,7 +607,6 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
             if (Number.isFinite(value)) {
                 const chr = chrDict[chromId]
                 featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value})
-
             }
         }
     }
@@ -650,8 +616,8 @@ function getBedDataDecoder() {
 
     const minSize = 3 * 4 + 1   // Minimum # of bytes required for a bed record
     const decoder = getDecoder(this.header.definedFieldCount, this.header.fieldCount, this.autoSql, this.format)
-    return function (data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict) {
-        const binaryParser = new BinaryParser(data)
+    return function (data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict, windowFunction, littleEndian) {
+        const binaryParser = new BinaryParser(data, littleEndian)
         while (binaryParser.remLength() >= minSize) {
 
             const chromId = binaryParser.getInt()
@@ -673,15 +639,14 @@ function getBedDataDecoder() {
 }
 
 
-function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict, windowFunction) {
+function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict, windowFunction, littleEndian) {
 
-    const binaryParser = new BinaryParser(data)
+    const binaryParser = new BinaryParser(data, littleEndian)
     const minSize = 8 * 4  // Minimum # of bytes required for a zoom record
 
 
     while (binaryParser.remLength() >= minSize) {
         const chromId = binaryParser.getInt()
-        const chr = chrDict[chromId]
         const chromStart = binaryParser.getInt()
         const chromEnd = binaryParser.getInt()
         const validCount = binaryParser.getInt()
@@ -706,6 +671,7 @@ function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, ch
 
 
         if (Number.isFinite(value)) {
+            const chr = chrDict[chromId]
             featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value})
 
 
@@ -743,6 +709,51 @@ class DataBuffer {
             new Uint8Array(this.data, requestedRange.start, len) :
             new DataView(this.data, requestedRange.start, len)
     }
+}
+
+class WholeFileBuffer {
+
+    data
+
+    constructor(path) {
+        this.path = path
+    }
+
+    async loadFile() {
+        this.data = await igvxhr.loadArrayBuffer(this.path)
+    }
+
+    /**
+     * igvxhr interface
+     * @param ignore
+     * @param options
+     * @returns {any}
+     */
+    async loadArrayBuffer(ignore, options) {
+        if (!this.data) {
+            await this.loadFile()
+        }
+        const range = options.range
+        return range ? this.data.slice(range.start, range.start + range.size) : this.data
+    }
+
+    /**
+     * BufferedReader interface
+     *
+     * @param requestedRange - byte rangeas {start, size}
+     * @param fulfill - function to receive result
+     * @param asUint8 - optional flag to return result as an UInt8Array
+     */
+    async dataViewForRange(requestedRange, asUint8) {
+        if (!this.data) {
+            await this.loadFile()
+        }
+        const len = Math.min(this.data.byteLength - requestedRange.start, requestedRange.size)
+        return asUint8 ?
+            new Uint8Array(this.data, requestedRange.start, len) :
+            new DataView(this.data, requestedRange.start, len)
+    }
+
 }
 
 export default BWReader

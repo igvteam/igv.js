@@ -24,55 +24,74 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
+import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 
-const ChromosomeSelectWidget = function (browser, parent) {
+class ChromosomeSelectWidget {
 
-    this.container = DOMUtils.div({class: 'igv-chromosome-select-widget-container'})
-    parent.appendChild(this.container)
+    constructor(browser, parent) {
 
-    this.select = document.createElement('select')
-    this.select.setAttribute('name', 'chromosome-select-widget')
-    this.container.appendChild(this.select)
+        this.container = DOMUtils.div({class: 'igv-chromosome-select-widget-container'})
+        parent.appendChild(this.container)
 
-    this.select.addEventListener('change', () => {
-        this.select.blur()
-        if (this.select.value !== '') {
-            browser.search(this.select.value)
+        this.select = document.createElement('select')
+        this.select.setAttribute('name', 'chromosome-select-widget')
+        this.container.appendChild(this.select)
+
+        this.select.addEventListener('change', () => {
+            this.select.blur()
+            if (this.select.value !== '') {
+                browser.search(this.select.value)
+            }
+        })
+
+        this.showAllChromosomes = browser.config.showAllChromosomes !== false   // i.e. default to true
+
+    }
+
+    show() {
+        this.container.style.display = 'flex'
+    }
+
+    hide() {
+        this.container.style.display = 'none'
+    }
+
+    update(genome) {
+
+        const list = (this.showAllChromosomes && genome.chromosomeNames.length < 1000) ?
+            genome.chromosomeNames : genome.wgChromosomeNames
+
+        this.select.innerHTML = ''
+
+        // Add the "all" selector if whole genome view is supported
+        if (genome.showWholeGenomeView()) {
+            list.unshift("all")
         }
-    })
 
-    this.showAllChromosomes = browser.config.showAllChromosomes !== false   // i.e. default to true
-
-}
-
-ChromosomeSelectWidget.prototype.show = function () {
-    this.container.style.display = 'flex'
-}
-
-ChromosomeSelectWidget.prototype.hide = function () {
-    this.container.style.display = 'none'
-}
-
-ChromosomeSelectWidget.prototype.update = function (genome) {
-
-    const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice()
-    // console.log(`${ this.showAllChromosomes ? 'Do' : 'Do not'} show all chromosomes. List ${ list }`)
-
-    if (genome.showWholeGenomeView()) {
-        list.unshift('all')
-        list.unshift('')
+        if (list.length < 1000) {
+            for (let name of list) {
+                const option = document.createElement('option')
+                option.setAttribute('value', name)
+                option.innerText = genome.getChromosomeDisplayName(name)
+                this.select.appendChild(option)
+                // if(this.selectDisplayCSS) {
+                //     this.select.style.display = this.selectDisplayCSS
+                //     this.container.style.display = this.containerDisplayCSS
+                //     document.getElementsByClassName("igv-search-container")[0].style.width = his.searchContainerWidthCSS
+                //}
+            }
+        } else {
+            // > 2,000 entries, pulldown is useless
+            // Record styles so we can restore them if another genome is loaded
+            // this.selectDisplayCSS = getComputedStyle(this.select).getPropertyValue("display")
+            // this.containerDisplayCSS = getComputedStyle(this.container).getPropertyValue("display")
+            // this.searchContainerWidthCSS = getComputedStyle(document.getElementsByClassName("igv-search-container")[0]).getPropertyValue("width")
+            //
+            // this.select.style.display = "none"
+            // this.container.style.display = "none"
+            // document.getElementsByClassName("igv-search-container")[0].style.width = "300px"
+        }
     }
-
-    this.select.innerHTML = ''
-
-    for (let name of list) {
-        const option = document.createElement('option')
-        option.setAttribute('value', name)
-        option.innerText = name
-        this.select.appendChild(option)
-    }
-
 }
 
 export default ChromosomeSelectWidget

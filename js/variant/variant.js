@@ -48,7 +48,7 @@ function createVCFVariant(tokens) {
         }
     }
     variant.init()
-    return variant;
+    return variant
 }
 
 
@@ -218,9 +218,7 @@ class Variant {
         }
     }
 
-
     popupData(genomicLocation, genomeId) {
-
 
         const posString = `${StringUtils.numberFormatter(this.pos)}`
         const locString = this.start === this.end ?
@@ -230,7 +228,7 @@ class Variant {
             {name: "Chr", value: this.chr},
             {name: "Pos", value: posString},
             {name: "Loc", value: locString},
-            {name: "Names", value: this.names ? this.names : ""},
+            {name: "ID", value: this.names ? this.names : ""},
             {name: "Ref", value: this.referenceBases},
             {name: "Alt", value: this.alternateBases.replace("<", "&lt;")},
             {name: "Qual", value: this.quality},
@@ -265,8 +263,11 @@ class Variant {
         }
 
         return fields
+    }
 
-    };
+    getInfo(tag) {
+        return this.info ? this.info[tag] : undefined;
+    }
 
     isRefBlock() {
         return "NONVARIANT" === this.type

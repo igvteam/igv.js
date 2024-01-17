@@ -19,7 +19,7 @@ for details.
 <script type="module">
 
     //import igv from "https://cdn.jsdelivr.net/npm/igv@2.8.0/dist/igv.esm.min.js";
-    import igv from "../dist/igv.esm.js";
+    import igv from "../dist/igv.esm.js"
 
     (async function () {
 
@@ -39,13 +39,13 @@ for details.
                 ]
             }
 
-        const igvDiv = document.getElementById("igvDiv");
+        const igvDiv = document.getElementById("igvDiv")
 
         igv.createBrowser(igvDiv, options)
             .then(function (browser) {
-                console.log("Created IGV browser");
+                console.log("Created IGV browser")
             })
-    })();
+    })()
 
 </script>
 

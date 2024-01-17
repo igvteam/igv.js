@@ -1,30 +1,4 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import {Alert,} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import FeatureSource from './featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
@@ -36,9 +10,23 @@ import {renderFusionJuncSpan} from "./render/renderFusionJunction.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {isSecureContext} from "../util/igvUtils.js"
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
+
+const DEFAULT_COLOR = 'rgb(0, 0, 150)'
 
 
 class FeatureTrack extends TrackBase {
+
+    static defaults = {
+        type: "annotation",
+        maxRows: 1000, // protects against pathological feature packing cases (# of rows of overlapping feaures)
+        displayMode: "EXPANDED", // COLLAPSED | EXPANDED | SQUISHED
+        margin: 10,
+        featureHeight: 14,
+        autoHeight: false,
+        useScore: false
+    }
+
 
     constructor(config, browser) {
         super(config, browser)
@@ -47,12 +35,7 @@ class FeatureTrack extends TrackBase {
     init(config) {
         super.init(config)
 
-        this.type = config.type || "annotation"
-
-        // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
-        this.maxRows = config.maxRows === undefined ? 1000 : config.maxRows
-
-        this.displayMode = config.displayMode || "EXPANDED"    // COLLAPSED | EXPANDED | SQUISHED
+        // Obscure option, not common or supoorted, included for backward compatibility
         this.labelDisplayMode = config.labelDisplayMode
 
         if (config._featureSource) {
@@ -63,12 +46,6 @@ class FeatureTrack extends TrackBase {
                 config.featureSource :
                 FeatureSource(config, this.browser.genome)
         }
-
-        // Set default heights
-        this.autoHeight = config.autoHeight
-        this.margin = config.margin === undefined ? 10 : config.margin
-
-        this.featureHeight = config.featureHeight || 14
 
         if ("FusionJuncSpan" === config.type) {
             this.render = config.render || renderFusionJuncSpan
@@ -106,15 +83,13 @@ class FeatureTrack extends TrackBase {
                 }
             }
         }
-
-        //UCSC useScore option
-        this.useScore = config.useScore
     }
 
     async postInit() {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
+            if (this.disposed) return   // This track was removed during async load
         }
 
         // Set properties from track line
@@ -130,8 +105,40 @@ class FeatureTrack extends TrackBase {
 
     }
 
+    /**
+     * Return true if this track can be searched for genome location by feature property.
+     * This track is searchable if its featureSource is searchable.
+     * @returns {boolean}
+     */
+    get searchable() {
+        return this.featureSource.searchable
+    }
+
+    async search(locus) {
+        if(this.featureSource && this.featureSource.searchable) {
+            return this.featureSource.search(locus)
+        } else {
+            return undefined
+        }
+    }
+
+
+    /**
+     * Return boolean indicating if this track supports the whole genome view.  Generally this is non-indexed feature
+     * tracks.
+     *
+     * @returns {*|boolean}
+     */
     get supportsWholeGenome() {
-        return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
+        if (this.config.supportsWholeGenome !== undefined) {
+            return this.config.supportsWholeGenome
+        } else if (this.featureSource && typeof this.featureSource.supportsWholeGenome === 'function') {
+            return this.featureSource.supportsWholeGenome()
+        } else {
+            if (this.visibilityWindow === undefined && (this.config.indexed === false || !this.config.indexURL)) {
+                return true
+            }
+        }
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
@@ -188,9 +195,9 @@ class FeatureTrack extends TrackBase {
             options.rowLastX = []
             options.rowLastLabelX = []
             for (let feature of featureList) {
-                if(feature.start > bpStart && feature.end < bpEnd) {
+                if (feature.start > bpStart && feature.end < bpEnd) {
                     const row = this.displayMode === "COLLAPSED" ? 0 : feature.row || 0
-                    if (rowFeatureCount[row] === undefined) {
+                    if (!rowFeatureCount[row]) {
                         rowFeatureCount[row] = 1
                     } else {
                         rowFeatureCount[row]++
@@ -199,7 +206,8 @@ class FeatureTrack extends TrackBase {
                     options.rowLastLabelX[row] = -Number.MAX_SAFE_INTEGER
                 }
             }
-            const pixelsPerFeature = pixelWidth / Math.max(...rowFeatureCount)
+            const maxFeatureCount = Math.max(1, Math.max(...(rowFeatureCount.filter(c => !isNaN(c)))))
+            const pixelsPerFeature = pixelWidth / maxFeatureCount
 
             let lastPxEnd = []
             for (let feature of featureList) {
@@ -229,10 +237,10 @@ class FeatureTrack extends TrackBase {
 
     };
 
-    clickedFeatures(clickState, features) {
+    clickedFeatures(clickState) {
 
         const y = clickState.y - this.margin
-        const allFeatures = super.clickedFeatures(clickState, features)
+        const allFeatures = super.clickedFeatures(clickState)
 
         let row
         switch (this.displayMode) {
@@ -256,9 +264,8 @@ class FeatureTrack extends TrackBase {
      */
     popupData(clickState, features) {
 
-        features = this.clickedFeatures(clickState, features)
+        if (features === undefined) features = this.clickedFeatures(clickState)
         const genomicLocation = clickState.genomicLocation
-
         const data = []
         for (let feature of features) {
 
@@ -326,36 +333,40 @@ class FeatureTrack extends TrackBase {
 
         if (this.render === renderSnp) {
             menuItems.push('<hr/>')
-            for (let colorScheme of ["function", "class"]) {
-                menuItems.push({
-                    object: $(createCheckbox('Color by ' + colorScheme, colorScheme === this.colorBy)),
-                    click: () => {
-                        this.colorBy = colorScheme
-                        this.trackView.repaintViews()
-                    }
-                })
+
+            for (const colorScheme of ["function", "class"]) {
+
+                const object = $(createCheckbox(`Color by ${ colorScheme }`, colorScheme === this.colorBy))
+
+                function colorSchemeHandler() {
+                    this.colorBy = colorScheme
+                    this.trackView.repaintViews()
+                }
+                menuItems.push({ object, click:colorSchemeHandler })
             }
         }
 
         menuItems.push('<hr/>')
-        for (let displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
-            const lut =
-                {
-                    "COLLAPSED": "Collapse",
-                    "SQUISHED": "Squish",
-                    "EXPANDED": "Expand"
-                }
 
-            menuItems.push(
-                {
-                    object: $(createCheckbox(lut[displayMode], displayMode === this.displayMode)),
-                    click: () => {
-                        this.displayMode = displayMode
-                        this.config.displayMode = displayMode
-                        this.trackView.checkContentHeight()
-                        this.trackView.repaintViews()
-                    }
-                })
+        const lut =
+            {
+                "COLLAPSED": "Collapse",
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand"
+            };
+
+        for (const displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
+
+            const object = $(createCheckbox(lut[displayMode], displayMode === this.displayMode))
+
+            function displayModeHandler() {
+                this.displayMode = displayMode
+                this.config.displayMode = displayMode
+                this.trackView.checkContentHeight()
+                this.trackView.repaintViews()
+            }
+
+            menuItems.push({ object, click:displayModeHandler })
         }
 
         return menuItems
@@ -366,6 +377,11 @@ class FeatureTrack extends TrackBase {
     contextMenuItemList(clickState) {
 
         const features = this.clickedFeatures(clickState)
+
+        if (undefined === features || 0 === features.length) {
+            return undefined
+        }
+
         if (features.length > 1) {
             features.sort((a, b) => (b.end - b.start) - (a.end - a.start))
         }
@@ -376,11 +392,12 @@ class FeatureTrack extends TrackBase {
                 label: 'View feature sequence',
                 click: async () => {
                     let seq = await this.browser.genome.getSequence(f.chr, f.start, f.end)
-                    if (f.strand === '-') {
+                    if (!seq) {
+                        seq = "Unknown sequence"
+                    } else if (f.strand === '-') {
                         seq = reverseComplementSequence(seq)
                     }
-                    if (!seq) seq = "Unknown sequence"
-                    Alert.presentAlert(seq)
+                    this.browser.alert.present(seq)
 
                 }
             }]
@@ -391,14 +408,16 @@ class FeatureTrack extends TrackBase {
                         label: 'Copy feature sequence',
                         click: async () => {
                             let seq = await this.browser.genome.getSequence(f.chr, f.start, f.end)
-                            if (f.strand === '-') {
+                            if (!seq) {
+                                seq = "Unknown sequence"
+                            } else if (f.strand === '-') {
                                 seq = reverseComplementSequence(seq)
                             }
                             try {
                                 await navigator.clipboard.writeText(seq)
                             } catch (e) {
                                 console.error(e)
-                                Alert.presentAlert(`error copying sequence to clipboard ${e}`)
+                                this.browser.alert.present(`error copying sequence to clipboard ${e}`)
                             }
                         }
                     }
@@ -407,9 +426,7 @@ class FeatureTrack extends TrackBase {
             list.push('<hr/>')
             return list
         } else {
-
             return undefined
-
         }
     }
 
@@ -437,6 +454,57 @@ class FeatureTrack extends TrackBase {
     };
 
     /**
+     * Return color for feature.
+     * @param feature
+     * @returns {string}
+     */
+
+    getColorForFeature(f) {
+
+        const feature = f._f || f    // f might be a "whole genome" wrapper
+
+        let color
+        if (this.altColor && "-" === feature.strand) {
+            color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor
+        } else if (this.color) {
+            color = (typeof this.color === "function") ? this.color(feature) : this.color  // Explicit setting via menu, or possibly track line if !config.color
+        } else if (this.colorBy) {
+            const value = feature.getAttributeValue ?
+                feature.getAttributeValue(this.colorBy) :
+                feature[this.colorBy]
+            color = this.colorTable.getColor(value)
+        } else if (feature.color) {
+            color = feature.color   // Explicit color for feature
+        }
+
+        // If no explicit setting use the default
+        if (!color) {
+            color = DEFAULT_COLOR   // Track default
+        }
+
+        if (feature.alpha && feature.alpha !== 1) {
+            color = IGVColor.addAlpha(color, feature.alpha)
+        } else if (this.useScore && feature.score && !Number.isNaN(feature.score)) {
+            // UCSC useScore option, for scores between 0-1000.  See https://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK
+            const min = this.config.min ? this.config.min : this.viewLimitMin ? this.viewLimitMin : 0
+            const max = this.config.max ? this.config.max : this.viewLimitMax ? this.viewLimitMax : 1000
+            const alpha = getAlpha(min, max, feature.score)
+            feature.alpha = alpha    // Avoid computing again
+            color = IGVColor.addAlpha(color, alpha)
+        }
+
+
+        function getAlpha(min, max, score) {
+            const binWidth = (max - min) / 9
+            const binNumber = Math.floor((score - min) / binWidth)
+            return Math.min(1.0, 0.2 + (binNumber * 0.8) / 9)
+        }
+
+        return color
+    }
+
+
+    /**
      * Called when the track is removed.  Do any needed cleanup here
      */
     dispose() {
@@ -457,7 +525,7 @@ function monitorTrackDrag(track) {
 
     function onDragEnd() {
         if (track.trackView && track.displayMode !== "SQUISHED") {
-            track.trackView.repaintViews()      // TODO -- refine this to the viewport that was dragged after DOM refactor
+            track.trackView.updateViews()      // TODO -- refine this to the viewport that was dragged after DOM refactor
         }
     }
 

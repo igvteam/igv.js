@@ -185,6 +185,8 @@ class VcfParser {
                         }
                     }
 
+                    // If this is a structural variant create a complement of this variant for the other end
+                    // The test for "SV" is not comprehensive, there is not yet a standard for this
                     if (variant.info && variant.info.CHR2 && variant.info.END) {
                         allFeatures.push(svComplement(variant))
                     }

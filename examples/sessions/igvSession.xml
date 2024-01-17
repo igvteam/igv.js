@@ -3,16 +3,16 @@
          path="/Users/jrobinso/Dropbox/projects/igv.js/examples/sessions/igvSession.xml" version="8">
     <Resources>
         <Resource name="GM12878 H3K4me3 ChipSeq Signal"
-                  path="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig"/>
+                  path="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig"/>
         <Resource name="GM12878 H3K27me3 ChipSeq Signal"
-                  path="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSigV2.bigWig"/>
+                  path="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSigV2.bigWig"/>
         <Resource name="GM12878 H3K36me3 ChipSeq Signal"
-                  path="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig"/>
+                  path="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig"/>
     </Resources>
     <Panel height="439" name="DataPanel" width="1133">
         <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" color="200,0,0"
                displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10"
-               id="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSigV2.bigWig"
+               id="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSigV2.bigWig"
                name="GM12878 H3K27me3 ChipSeq Signal" normalize="false" renderer="BAR_CHART" sortable="true"
                visible="true" windowFunction="mean">
             <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="55.947006" minimum="0.0"
@@ -20,7 +20,7 @@
         </Track>
         <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" color="0,0,150"
                displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10"
-               id="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig"
+               id="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig"
                name="GM12878 H3K36me3 ChipSeq Signal" normalize="false" renderer="BAR_CHART" sortable="true"
                visible="true" windowFunction="mean">
             <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="41.115314" minimum="0.0"
@@ -28,7 +28,7 @@
         </Track>
         <Track altColor="0,0,178" autoScale="false" clazz="org.broad.igv.track.DataSourceTrack" color="0,150,0"
                displayMode="COLLAPSED" featureVisibilityWindow="-1" fontSize="10"
-               id="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig"
+               id="https://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig"
                name="GM12878 H3K4me3 ChipSeq Signal" normalize="false" renderer="BAR_CHART" sortable="true"
                visible="true" windowFunction="mean">
             <DataRange baseline="0.0" drawBaseline="true" flipAxis="false" maximum="53.69198" minimum="0.0"

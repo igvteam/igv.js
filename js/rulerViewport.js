@@ -1,8 +1,9 @@
 import TrackViewport from "./trackViewport.js"
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import RulerSweeper from "./rulerSweeper.js"
-import GenomeUtils from "./genome/genome.js"
-import {DOMUtils, Icon, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import GenomeUtils from "./genome/genomeUtils.js"
+import {IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {DOMUtils, Icon} from "../node_modules/igv-ui/dist/igv-ui.js"
 import {getChrColor} from "./bam/bamTrack.js"
 
 let timer
@@ -15,9 +16,11 @@ class RulerViewport extends TrackViewport {
         super(trackView, $viewportColumn, referenceFrame, width)
     }
 
-    initializationHelper() {
+    get contentDiv() {
+        return this.$viewport.get(0)
+    }
 
-        this.rulerSweeper = new RulerSweeper(this)
+    initializationHelper() {
 
         this.$multiLocusCloseButton = $('<div>', {class: 'igv-multi-locus-close-button'})
         this.$viewport.append(this.$multiLocusCloseButton)
@@ -30,15 +33,30 @@ class RulerViewport extends TrackViewport {
         this.$rulerLabel = $('<div>', {class: 'igv-multi-locus-ruler-label'})
         this.$viewport.append(this.$rulerLabel)
 
-        this.$rulerLabel.click(async () => {
+        const labelToggleHandler = e => {
 
+            e.stopPropagation()
+
+            const el = e.target
+            const [ a, b ] = this.$rulerLabel.get(0).querySelectorAll('div')
+
+            if (el.isEqualNode(a)) {
+                a.style.display = 'none'
+                b.style.display = 'block'
+            } else {
+                b.style.display = 'none'
+                a.style.display = 'block'
+            }
+
+        }
+
+        let div
+        div = document.createElement('div')
+        this.$rulerLabel.append($(div))
+
+        this.$rulerLabel.get(0).addEventListener('click', async event => {
+            event.stopPropagation()
             await this.browser.gotoMultilocusPanel(this.referenceFrame)
-
-            // const removals = this.browser.referenceFrameList.filter(r => this.referenceFrame !== r)
-            // for (let referenceFrame of removals) {
-            //     await this.browser.removeMultiLocusPanel(referenceFrame)
-            // }
-
         })
 
         this.$tooltip = $('<div>', {class: 'igv-ruler-tooltip'})
@@ -49,6 +67,8 @@ class RulerViewport extends TrackViewport {
         this.$tooltipContent = $('<div>')
         this.$tooltip.append(this.$tooltipContent)
 
+        this.rulerSweeper = new RulerSweeper(this, this.$viewport.get(0).parentElement, this.browser, this.referenceFrame)
+
         this.attachMouseHandlers(GenomeUtils.isWholeGenomeView(this.referenceFrame.chr))
 
         this.$tooltip.hide()
@@ -58,59 +78,27 @@ class RulerViewport extends TrackViewport {
 
     presentLocusLabel(viewportWidth) {
 
-        const createRulerLabelString = () => {
-            const html = `<div>${this.referenceFrame.getMultiLocusLabel(viewportWidth)}</div>`
-            return document.createRange().createContextualFragment(html).firstChild
+        this.$multiLocusCloseButton.show()
+
+        this.$rulerLabel.show()
+        this.$rulerLabel.get(0).style.backgroundColor = getChrColor(this.referenceFrame.chr)
+
+        const textDiv = this.$rulerLabel.get(0).querySelector('div')
+
+        const { width } = this.$rulerLabel.get(0).getBoundingClientRect()
+
+        textDiv.innerHTML = `${ this.referenceFrame.getMultiLocusLabel(viewportWidth) }`
+        const { width:textDivWidth } = textDiv.getBoundingClientRect()
+
+        if (textDivWidth/width > 0.5) {
+            textDiv.innerHTML = `${ this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth) }`
         }
 
-        this.$rulerLabel.get(0).innerHTML = ''
-        this.$rulerLabel.get(0).style.backgroundColor = getChrColor(this.referenceFrame.chr)
-        this.$rulerLabel.get(0).appendChild(createRulerLabelString())
-        this.$rulerLabel.show()
+        //console.log(`${ Date.now() } textDiv ${ StringUtils.numberFormatter(Math.floor(textDivWidth)) }`)
 
-        this.$multiLocusCloseButton.show()
     }
 
     // Use in conjuction with .igv-multi-locus-ruler-label-square-dot css class (_dom-misc.scss)
-    presentLocusLabel_Square_Dot(viewportWidth) {
-
-        const createRulerLabelSquare = () => {
-            const html = `<div>
-                                <?xml version="1.0" encoding="UTF-8"?>
-                                <svg width="14px" height="14px" viewBox="0 0 93 93" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                                    <g>
-                                        <rect id="Rectangle" fill="${getChrColor(this.referenceFrame.chr)}" x="0" y="0" width="93" height="93"></rect>
-                                    </g>
-                                </svg>
-                            </div>`
-            return document.createRange().createContextualFragment(html).firstChild
-        }
-
-        const createRulerLabelDot = () => {
-            const html = `<div>
-                                <?xml version="1.0" encoding="UTF-8"?>
-                                <svg width="14px" height="14px" viewBox="0 0 89 89" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
-                                    <g>
-                                        <circle id="Oval" fill="${getChrColor(this.referenceFrame.chr)}" cx="44.5" cy="44.5" r="44.5"></circle>
-                                    </g>
-                                </svg>
-                            </div>`
-            return document.createRange().createContextualFragment(html).firstChild
-        }
-
-        const createRulerLabelString = () => {
-            const html = `<div>${this.referenceFrame.getMultiLocusLabel(viewportWidth)}</div>`
-            return document.createRange().createContextualFragment(html).firstChild
-        }
-
-        this.$rulerLabel.get(0).innerHTML = ''
-        this.$rulerLabel.get(0).appendChild(createRulerLabelDot())
-        this.$rulerLabel.get(0).appendChild(createRulerLabelString())
-        this.$rulerLabel.show()
-
-        this.$multiLocusCloseButton.show()
-    }
-
     dismissLocusLabel() {
         this.$rulerLabel.hide()
         this.$multiLocusCloseButton.hide()
@@ -121,8 +109,6 @@ class RulerViewport extends TrackViewport {
         this.namespace = `.ruler_track_viewport_${this.browser.referenceFrameList.indexOf(this.referenceFrame)}`
 
         this.$viewport.off(this.namespace)
-
-        // console.log(`Ruler track ${ true === isWholeGenomeView ? 'is' : 'is not' } whole genome.`)
 
         if (true === isWholeGenomeView) {
 
@@ -161,7 +147,7 @@ class RulerViewport extends TrackViewport {
 
     mouseMove(event) {
 
-        if (true === this.browser.cursorGuideVisible) {
+        if (true === this.browser.doShowCursorGuide) {
 
             if (undefined === currentViewport) {
                 currentViewport = this
