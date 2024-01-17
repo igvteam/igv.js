@@ -667,7 +667,12 @@ class TrackView {
             this.gearContainer.appendChild(this.gear)
             this.gear.appendChild(Icon.createIcon('cog'))
 
-            this.trackGearPopup = new MenuPopup(this.gear, undefined)
+            const constraint = (top, dy) => {
+                const delta = this.gearContainer.getBoundingClientRect().top - browser.columnContainer.getBoundingClientRect().top
+                return Math.max(-delta, top+dy)
+            }
+
+            this.trackGearPopup = new MenuPopup(this.gear, constraint)
 
             this.boundTrackGearClickHandler = trackGearClickHandler.bind(this)
             this.gear.addEventListener('click', this.boundTrackGearClickHandler)
