@@ -667,9 +667,9 @@ class TrackView {
             this.gearContainer.appendChild(this.gear)
             this.gear.appendChild(Icon.createIcon('cog'))
 
-            const constraint = (top, dy) => {
+            const constraint = (menuTop, dragIncrement) => {
                 const delta = this.gearContainer.getBoundingClientRect().top - browser.columnContainer.getBoundingClientRect().top
-                return Math.max(-delta, top+dy)
+                return Math.max(-delta, menuTop + dragIncrement)
             }
 
             this.trackGearPopup = new MenuPopup(this.gear, constraint)
