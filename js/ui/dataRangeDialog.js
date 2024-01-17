@@ -65,7 +65,7 @@ class DataRangeDialog {
         })
 
         //this.$container.draggable({ handle:$header.get(0) });
-        makeDraggable(this.$container.get(0), $header.get(0))
+        makeDraggable(this.$container.get(0), $header.get(0), { minX:0, minY:0 })
 
         this.$container.hide()
     }
