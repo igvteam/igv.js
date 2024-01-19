@@ -147,10 +147,8 @@ class CSIIndex {
                     }
                 }
             }
-
-            const lowestOffset = ba.loffset[overlappingBins[0]]
-
-            return optimizeChunks(chunks, lowestOffset)
+            
+            return optimizeChunks(chunks)
         }
 
     }
