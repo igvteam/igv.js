@@ -57,6 +57,7 @@ import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
 import { trackViewportPopoverList } from './trackViewport.js'
+import TrackBase from "./trackBase.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -1894,11 +1895,12 @@ class Browser {
         const errors = []
         for (const {track} of this.trackViews) {
             try {
+
                 let config
                 if (typeof track.getState === "function") {
-                    config = track.getState()
+                    config = TrackBase.localFileInspection(track.getState())
                 } else if (track.config) {
-                    config = Object.assign({}, track.config)
+                    config = TrackBase.localFileInspection(track.config)
                 }
 
                 if (config) {
@@ -1928,6 +1930,19 @@ class Browser {
         }
 
         json["tracks"] = trackJson
+
+        const localFileConfigs = []
+        for (const json of trackJson) {
+            for (const key of Object.keys(json)) {
+                if ('file' === key || 'indexFile' === key) {
+                    localFileConfigs.push(json[ key ])
+                }
+            }
+        }
+
+        if (localFileConfigs.length > 0) {
+            alert(`Session contains local files\n${ localFileConfigs.join('\n') }`)
+        }
 
         return json        // This is an object, not a json string
 

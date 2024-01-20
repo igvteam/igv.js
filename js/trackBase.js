@@ -182,16 +182,7 @@ class TrackBase {
         for (const key of jsonableConfigKeys) {
 
             if (!key.startsWith("_")) {
-
-                if('url' === key && this.config[key] instanceof File) {
-                    state['file'] = this.config[key].name
-                    console.log(`Session contains local track file ${ state['file'] }`)
-                } else if('indexURL' === key && this.config[key] instanceof File) {
-                    state['indexFile'] = this.config[key].name
-                    console.log(`Session contains local track index file ${ state['indexFile'] }`)
-                } else {
-                    state[key] = this.config[key]
-                }
+                state[key] = this.config[key]
             }
         }
 
@@ -594,6 +585,24 @@ class TrackBase {
         } else {
             return undefined
         }
+    }
+
+    static localFileInspection(config) {
+
+        const cooked = Object.assign({}, config)
+        const lut =
+            {
+                url: 'file',
+                indexURL: 'indexFile'
+            }
+
+        for (const key of ['url', 'indexURL']) {
+            if (cooked[key] && cooked[key] instanceof File) {
+                cooked[ lut[ key ] ] = cooked[key].name
+            }
+        }
+
+        return cooked
     }
 }
 
