@@ -1932,17 +1932,17 @@ class Browser {
 
         json["tracks"] = trackJson
 
-        const localFileConfigs = []
+        const localFileDetections = []
         for (const json of trackJson) {
             for (const key of Object.keys(json)) {
                 if ('file' === key || 'indexFile' === key) {
-                    localFileConfigs.push(json[ key ])
+                    localFileDetections.push(json[ key ])
                 }
             }
         }
 
-        if (localFileConfigs.length > 0) {
-            alert(`Session contains local files\n${ localFileConfigs.join('\n') }`)
+        if (localFileDetections.length > 0) {
+            alert(`Session contains local files\n${ localFileDetections.join('\n') }`)
         }
 
         return json        // This is an object, not a json string
