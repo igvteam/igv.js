@@ -305,7 +305,8 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
     })
 
     /*
-        ["09", "\t"],
+    GFF encoded values:
+    ["09", "\t"],
     ["%0A", "\n"],
     ["%0D", "\r"],
     ["%25", "%"],
@@ -320,12 +321,24 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
         // others (here %20 = space) should be left as-is
         const encoded = "aaa%09b%0Acd%0De%25fgh%3Bijk%3Dlm%26nop%2C%20"
         const expected = "aaa\tb\ncd\re%fgh;ijk=lm&nop,%20"
-        const expected_relaxed = "aaa\tb\ncd\re%fgh;ijk=lm&nop, "
 
         const decoded = decodeGFFAttribute(encoded)
         assert.equal(expected, decoded)
-        const decoded_relaxed = decodeGFFAttribute(encoded, true)
-        assert.equal(expected_relaxed, decoded_relaxed)
+
+    })
+
+    test("GFF quotes", function () {
+
+        // Quotes are stripped from GFF2 / GTF attributes, kept for GFF3.  GFF type is determined from the delimiter
+        const gff3AttributeString = 'key="value";key2=value'
+        let decoded = parseAttributeString(gff3AttributeString, "=")
+        assert.equal(decoded.length, 2)
+        assert.equal(`"value"`, decoded[0][1])
+
+        const gff2AttributeString = 'key "value";key2 value'
+        decoded = parseAttributeString(gff2AttributeString, " ")
+        assert.equal(decoded.length, 2)
+        assert.equal(`value`, decoded[0][1])
 
     })
 })
