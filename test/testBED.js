@@ -379,7 +379,7 @@ suite("testBed", function () {
         assert.equal(features[1].name, 'terminator')
         assert.equal(features[2].name, 'M13 origin')
         assert.equal(features[3].name, 'M13 origin')
-        assert.equal("Baz", features[3].getAttributeValue("Key 2"))
+        assert.equal("Baz", features[3].getAttributeValue("Key2"))
     })
 
 })
