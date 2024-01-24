@@ -31,7 +31,7 @@ function decodeBed(tokens, header, maxColumnCount = Number.MAX_SAFE_INTEGER) {
 
             // Potentially parse name field as GFF column 9 style streng.
             if (tokens[3].indexOf(';') > 0 && tokens[3].indexOf('=') > 0) {
-                const attributeKVs = parseAttributeString(tokens[3], '=', true)
+                const attributeKVs = parseAttributeString(tokens[3], '=')
                 feature.attributes = {}
                 for (let kv of attributeKVs) {
                     feature.attributes[kv[0]] = kv[1]
