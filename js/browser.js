@@ -664,7 +664,13 @@ class Browser {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
-        const localTrackFileNames = trackConfigurations.filter((config) => undefined !== config.file).map(({filename}) => filename)
+        const localTrackFileNames = trackConfigurations.filter((config) => undefined !== config.file).map(({file}) => file)
+
+        const localIndexFileNames = trackConfigurations.filter((config) => undefined !== config.indexFile).map(({indexFile}) => indexFile)
+        if (localIndexFileNames.length > 0) {
+            localTrackFileNames.push(...localIndexFileNames)
+        }
+
         if (/*undefined === session.parentApp &&*/ localTrackFileNames.length > 0) {
             alert(`Session contains local files that cannot be loaded automatically:\n${ localTrackFileNames.join('\n')}`)
         }
