@@ -147,10 +147,33 @@ class CSIIndex {
                     }
                 }
             }
-            
-            return optimizeChunks(chunks)
-        }
 
+            // Find from the lowest bin level
+            let bin = overlappingBins[this.depth][0]
+            do {
+                const target = ba.binIndex[bin]
+                if (target) {
+                    break
+                }
+                const firstBin = (this.getParentBin(bin) << 3) + 1
+                if (bin > firstBin) {
+                    bin--
+                } else {
+                    bin = this.getParentBin(bin)
+                }
+            } while (bin != 0)
+            
+            const lowestOffset = ba.loffset[bin]
+            
+            return optimizeChunks(chunks, lowestOffset)
+        }
+    }
+
+    getParentBin(bin) {
+        if (bin == 0) {
+            return 0;
+        }
+        return (bin - 1) >> 3;
     }
 
     // reg2bins implementation adapted from GMOD/tabix-js  https://github.com/GMOD/tabix-js/blob/master/src/csi.ts
