@@ -1,5 +1,9 @@
 import GtexUtils from "../../gtex/gtexUtils.js"
 import IGVGraphics from "../../igv-canvas.js"
+import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
+import {randomRGB} from "../../util/colorPalletes.js"
+
+const aminoAcidSequenceRenderThreshold = 2
 
 /**
  * @param feature
@@ -7,7 +11,7 @@ import IGVGraphics from "../../igv-canvas.js"
  * @param xScale  scale in base-pairs per pixel
  * @returns {{px: number, px1: number, pw: number, h: number, py: number}}
  */
-export function calculateFeatureCoordinates(feature, bpStart, xScale) {
+function calculateFeatureCoordinates(feature, bpStart, xScale) {
     let px = (feature.start - bpStart) / xScale
     let px1 = (feature.end - bpStart) / xScale
     //px = Math.round((feature.start - bpStart) / xScale),
@@ -35,7 +39,7 @@ export function calculateFeatureCoordinates(feature, bpStart, xScale) {
  * @param ctx  the canvas 2d context
  * @param options  genomic state
  */
-export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
+function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
     try {
         ctx.save()
@@ -78,8 +82,11 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
             const xLeft = Math.max(0, coord.px)
             const xRight = Math.min(pixelWidth, coord.px1)
             const width = xRight - xLeft
-            ctx.fillRect(xLeft, py, width, h)
 
+            // DUGLA HACK
+            ctx.fillStyle = 'red'
+            ctx.fillRect(xLeft, py, width, h)
+            ctx.fillStyle = color
             // Arrows
             // Do not draw if strand is not +/-
             if (direction !== 0) {
@@ -96,8 +103,6 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
         } else {
             // multi-exon transcript
             IGVGraphics.strokeLine(ctx, coord.px + 1, cy, coord.px1 - 1, cy) // center line for introns
-
-
             const xLeft = Math.max(0, coord.px) + step / 2
             const xRight = Math.min(pixelWidth, coord.px1)
             for (let x = xLeft; x < xRight; x += step) {
@@ -105,9 +110,8 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
                 IGVGraphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy)
                 IGVGraphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy)
             }
-            for (let e = 0; e < exonCount; e++) {
+            for (const exon of feature.exons) {
                 // draw the exons
-                const exon = feature.exons[e]
                 let ePx = Math.round((exon.start - bpStart) / xScale)
                 let ePx1 = Math.round((exon.end - bpStart) / xScale)
                 let ePw = Math.max(1, ePx1 - ePx)
@@ -121,24 +125,44 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
                 }
 
                 if (exon.utr) {
+                    // DUGLA HACK
+                    ctx.fillStyle = 'grey'
                     ctx.fillRect(ePx, py2, ePw, h2) // Entire exon is UTR
+                    ctx.fillStyle = color
                 } else {
                     if (exon.cdStart) {
                         ePxU = Math.round((exon.cdStart - bpStart) / xScale)
+
+                        // DUGLA HACK
+                        ctx.fillStyle = 'pink'
                         ctx.fillRect(ePx, py2, ePxU - ePx, h2) // start is UTR
+                        ctx.fillStyle = color
+
                         ePw -= (ePxU - ePx)
                         ePx = ePxU
 
                     }
                     if (exon.cdEnd) {
                         ePxU = Math.round((exon.cdEnd - bpStart) / xScale)
+
+                        // DUGLA HACK
+                        ctx.fillStyle = 'yellow'
                         ctx.fillRect(ePxU, py2, ePx1 - ePxU, h2) // start is UTR
+                        ctx.fillStyle = color
+
                         ePw -= (ePx1 - ePxU)
                         ePx1 = ePxU
                     }
 
                     ePw = Math.max(ePw, 1)
+
                     ctx.fillRect(ePx, py, ePw, h)
+
+                    const width = Math.max(1, Math.ceil(1 / options.bpPerPixel))
+                    if (width >= aminoAcidSequenceRenderThreshold) {
+                        renderAminoAcidSequence(ctx, exon, bpStart, options.bpPerPixel, py, h, width)
+                        ctx.fillStyle = color
+                    }
 
                     // Arrows
                     if (ePw > step + 5 && direction !== 0) {
@@ -165,14 +189,27 @@ export function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, option
     }
 }
 
+function renderAminoAcidSequence(ctx, exon, bpStart, bpPerPixel, y, height, width) {
+
+    const ss = exon.cdStart || exon.start
+    const ee = exon.cdEnd || exon.end
+    for (let bp = ss; bp < ee; bp += 3) {
+        const bpDelta = bp - bpStart
+        const pixelX = Math.floor(bpDelta / bpPerPixel)
+        // ctx.fillStyle = randomRGB(180, 250)
+        ctx.fillStyle = 0 === bp % 2 ? '#0c0c78' : '#5c5ca4'
+        ctx.fillRect(pixelX, y, 3 * width, height)
+    }
+
+
+}
+
 /**
  * @param ctx       the canvas 2d context
  * @param feature
  * @param featureX  feature start in pixel coordinates
  * @param featureX1 feature end in pixel coordinates
  * @param featureY  feature y-coordinate
- * @param windowX   visible window start x-coordinate
- * @param windowX1  visible window end x-coordinate
  * @param referenceFrame  genomic state
  * @param options  options
  */
@@ -238,5 +275,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
 function getFeatureLabelY(featureY, transform) {
     return transform ? featureY + 20 : featureY + 25
 }
+
+export { aminoAcidSequenceRenderThreshold, calculateFeatureCoordinates, renderFeature }
 
 
