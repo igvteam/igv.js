@@ -8,6 +8,11 @@ class GFFFeature {
 
     constructor(properties) {
         Object.assign(this, properties)
+
+        if (properties.phase && "." !== properties.phase) {
+            this.readingFrame = (3 - parseInt(this.phase)) % 3
+        }
+
     }
 
     popupData(genomicLocation) {
@@ -27,6 +32,7 @@ class GFFFeature {
         if (this.score !== undefined) {
             pd.push({name: 'Score', value: this.score})
         }
+        pd.push({name: 'Phase', value: this.phase})
 
         if (this.attributeString) {
             const atts = parseAttributeString(this.attributeString, this.delim)
