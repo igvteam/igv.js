@@ -257,7 +257,11 @@ function decodeGenePredExt(tokens, header) {
         id: tokens[0 + shift]
     }
 
-    const exons = decodeExons(parseInt(tokens[7 + shift]), tokens[8 + shift], tokens[9 + shift])
+    const exons = decodeExons(
+        parseInt(tokens[7 + shift]),
+        tokens[8 + shift],
+        tokens[9 + shift],
+        tokens[14 + shift])
     findUTRs(exons, cdStart, cdEnd)
 
     feature.exons = exons
@@ -351,16 +355,21 @@ function decodePSL(tokens, header) {
 }
 
 
-function decodeExons(exonCountToken, exonStartsToken, exonEndsToken) {
+function decodeExons(exonCount, startsString, endsString, frameOffsetsString) {
 
-    const exonCount = parseInt(exonCountToken)
-    const exonStarts = exonStartsToken.replace(/,$/, '').split(',')
-    const exonEnds = exonEndsToken.replace(/,$/, '').split(',')
+    const exonStarts = startsString.replace(/,$/, '').split(',')
+    const exonEnds = endsString.replace(/,$/, '').split(',')
+    const frameOffsets = frameOffsetsString ? frameOffsetsString.replace(/,$/, '').split(',') : undefined
     const exons = []
     for (let i = 0; i < exonCount; i++) {
         const start = parseInt(exonStarts[i])
         const end = parseInt(exonEnds[i])
-        exons.push({start: start, end: end})
+        const exon = {start, end}
+        if(frameOffsets) {
+            const fo = parseInt(frameOffsets[i])
+            if(fo != -1) exon.readingFrame = fo;
+        }
+        exons.push(exon)
     }
     return exons
 
