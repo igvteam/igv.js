@@ -4,7 +4,7 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"
-import {aminoAcidSequenceRenderThreshold, renderFeature} from "./render/renderFeature.js"
+import {renderFeature} from "./render/renderFeature.js"
 import {renderSnp} from "./render/renderSnp.js"
 import {renderFusionJuncSpan} from "./render/renderFusionJunction.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
@@ -190,18 +190,6 @@ class FeatureTrack extends TrackBase {
         }
 
         if (featureList) {
-
-            const pixelWidth = Math.max(1, Math.ceil(1 / options.bpPerPixel))
-
-            // if (pixelWidth >= aminoAcidSequenceRenderThreshold) {
-            //     const [ sequenceTrack ] = this.browser.findTracks(track => 'sequence' === track.id)
-            //     const { chr, start, end, bpPerPixel } = options.referenceFrame
-            //     const result = await sequenceTrack.getFeatures(chr, start, end, bpPerPixel)
-            //     if (result) {
-            //         options.sequence = result.sequence
-            //     }
-            //
-            // }
 
             const rowFeatureCount = []
             options.rowLastX = []

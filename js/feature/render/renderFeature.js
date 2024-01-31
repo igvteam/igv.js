@@ -1,7 +1,7 @@
 import GtexUtils from "../../gtex/gtexUtils.js"
 import IGVGraphics from "../../igv-canvas.js"
+import {randomRGB, randomRGBConstantAlpha} from "../../util/colorPalletes.js"
 import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
-import {randomRGB} from "../../util/colorPalletes.js"
 
 const aminoAcidSequenceRenderThreshold = 2
 
@@ -49,7 +49,9 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         ctx.fillStyle = this.color
         ctx.strokeStyle = this.color
 
-        const color = this.getColorForFeature(feature)
+        // const color = this.getColorForFeature(feature)
+        const color = '+' === feature.strand ? '#008cff' : '#ff2101'
+
         ctx.fillStyle = color
         ctx.strokeStyle = color
 
@@ -84,9 +86,9 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
             const width = xRight - xLeft
 
             // DUGLA HACK
-            ctx.fillStyle = 'red'
+            // ctx.fillStyle = '#cefa6e'
             ctx.fillRect(xLeft, py, width, h)
-            ctx.fillStyle = color
+            // ctx.fillStyle = color
             // Arrows
             // Do not draw if strand is not +/-
             if (direction !== 0) {
@@ -101,6 +103,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                 ctx.strokeStyle = color
             }
         } else {
+
             // multi-exon transcript
             IGVGraphics.strokeLine(ctx, coord.px + 1, cy, coord.px1 - 1, cy) // center line for introns
             const xLeft = Math.max(0, coord.px) + step / 2
@@ -110,7 +113,11 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                 IGVGraphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy)
                 IGVGraphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy)
             }
+
+            // console.log(`${ feature.name } exons ${ feature.exons.length }`)
+
             for (const exon of feature.exons) {
+
                 // draw the exons
                 let ePx = Math.round((exon.start - bpStart) / xScale)
                 let ePx1 = Math.round((exon.end - bpStart) / xScale)
@@ -126,17 +133,17 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
                 if (exon.utr) {
                     // DUGLA HACK
-                    ctx.fillStyle = 'grey'
+                    // ctx.fillStyle = '#6e6e6e'
                     ctx.fillRect(ePx, py2, ePw, h2) // Entire exon is UTR
-                    ctx.fillStyle = color
+                    // ctx.fillStyle = color
                 } else {
                     if (exon.cdStart) {
                         ePxU = Math.round((exon.cdStart - bpStart) / xScale)
 
                         // DUGLA HACK
-                        ctx.fillStyle = 'pink'
+                        // ctx.fillStyle = '#d278ff'
                         ctx.fillRect(ePx, py2, ePxU - ePx, h2) // start is UTR
-                        ctx.fillStyle = color
+                        // ctx.fillStyle = color
 
                         ePw -= (ePxU - ePx)
                         ePx = ePxU
@@ -146,9 +153,9 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                         ePxU = Math.round((exon.cdEnd - bpStart) / xScale)
 
                         // DUGLA HACK
-                        ctx.fillStyle = 'yellow'
+                        // ctx.fillStyle = '#d278ff'
                         ctx.fillRect(ePxU, py2, ePx1 - ePxU, h2) // start is UTR
-                        ctx.fillStyle = color
+                        // ctx.fillStyle = color
 
                         ePw -= (ePx1 - ePxU)
                         ePx1 = ePxU
@@ -156,12 +163,17 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
                     ePw = Math.max(ePw, 1)
 
+                    // DUGLA HACK
+                    // ctx.fillStyle = '#cefa6e'
                     ctx.fillRect(ePx, py, ePw, h)
+                    // ctx.fillStyle = color
 
-                    const width = Math.max(1, Math.ceil(1 / options.bpPerPixel))
-                    if (width >= aminoAcidSequenceRenderThreshold) {
-                        renderAminoAcidSequence(ctx, exon, bpStart, options.bpPerPixel, py, h, width)
-                        ctx.fillStyle = color
+                    if (exon.readingFrame !== undefined) {
+                        // console.log(`reading frame ${ exon.readingFrame } strand ${ feature.strand }`)
+                        const width = Math.max(1, Math.ceil(1 / options.bpPerPixel))
+                        if (width >= aminoAcidSequenceRenderThreshold) {
+                            renderAminoAcidSequence(ctx, exon, bpStart, options.bpPerPixel, py, h, color, feature.strand)
+                        }
                     }
 
                     // Arrows
@@ -189,19 +201,59 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     }
 }
 
-function renderAminoAcidSequence(ctx, exon, bpStart, bpPerPixel, y, height, width) {
+function renderAminoAcidSequence(ctx, exon, bpStart, bpPerPixel, y, height, featureColor, strand) {
 
     const ss = exon.cdStart || exon.start
-    const ee = exon.cdEnd || exon.end
-    for (let bp = ss; bp < ee; bp += 3) {
-        const bpDelta = bp - bpStart
-        const pixelX = Math.floor(bpDelta / bpPerPixel)
-        // ctx.fillStyle = randomRGB(180, 250)
-        ctx.fillStyle = 0 === bp % 2 ? '#0c0c78' : '#5c5ca4'
-        ctx.fillRect(pixelX, y, 3 * width, height)
+    const ee = exon.cdEnd   || exon.end
+
+    console.log(`Begin Amino Acid Sequence readingFrame ${ exon.readingFrame } strand ${ strand }`)
+
+    let bpTripletStart
+    let bpTripletEnd
+    let bpDelta
+
+    if ('+' === strand) {
+        for (bpTripletStart = ss; bpTripletStart < ee; bpTripletStart += 3) {
+
+            bpTripletEnd = Math.min(ee, bpTripletStart + 3)
+
+            bpDelta = bpTripletEnd - bpTripletStart
+            console.log(`strand(+) loop - bpDelta ${ bpDelta }`)
+
+            const x = Math.round((bpTripletStart - bpStart) / bpPerPixel)
+            const xx = Math.round((bpTripletEnd - bpStart) / bpPerPixel)
+
+            const width = xx - x
+
+            ctx.fillStyle = 0 === bpTripletStart % 2 ? '#68fdff' : '#002eff'
+            ctx.fillRect(x, y, width, height/2)
+        }
+
+    } else {
+        for (bpTripletEnd = ee; bpTripletEnd > ss; bpTripletEnd -= 3) {
+
+            bpTripletStart = Math.max(ss, bpTripletEnd - 3)
+
+            bpDelta = bpTripletEnd - bpTripletStart
+            console.log(`strand(-) loop - bpDelta ${ bpDelta }`)
+
+            const x = Math.round((bpTripletStart - bpStart) / bpPerPixel)
+            const xx = Math.round((bpTripletEnd - bpStart) / bpPerPixel)
+
+            const width = xx - x
+
+            ctx.fillStyle = 0 === bpTripletEnd % 2 ? '#83f902' : '#028401'
+            ctx.fillRect(x, y, width, height/2)
+
+        }
     }
 
 
+    const remainder = (ee - ss) % 3
+    console.log(`  End Amino Acid Sequence - Concluding bpDelta ${ bpDelta } remainder ${ remainder }`)
+
+    // reset current fillStyle
+    ctx.fillStyle = featureColor
 }
 
 /**
