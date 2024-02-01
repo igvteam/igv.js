@@ -257,7 +257,8 @@ class WigTrack extends TrackBase {
 
                 // If the track includes negative values draw a baseline
                 if (this.dataRange.min < 0) {
-                    const basepx = (this.dataRange.max / (this.dataRange.max - this.dataRange.min)) * options.pixelHeight
+                    const ratio = this.dataRange.max / (this.dataRange.max - this.dataRange.min)
+                    const basepx = this.flipAxis ? (1 - ratio) * options.pixelHeight : ratio * options.pixelHeight
                     IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: this.baselineColor})
                 }
             }
