@@ -472,11 +472,19 @@ class TrackView {
                 const start = referenceFrame.start
                 const end = start + referenceFrame.toBP(visibleViewport.getWidth())
                 if (visibleViewport.featureCache && visibleViewport.featureCache.features) {
-                    // If the "features" object has a getMax function use it.  Currently only alignmentContainer implements this, for coverage.
+                    // If the "features" object has a getMax function use it.  Currently alignmentContainer 
+                    // implements this for coverage and Merged track for its wig tracks.
                     if (typeof visibleViewport.featureCache.features.getMax === 'function') {
                         const max = visibleViewport.featureCache.features.getMax(start, end)
                         allFeatures.push({value: max})
-                    } else {
+                    }
+                    // If the "features" object has a getMin function use it.  Currently Merged track implements 
+                    // this for its wig tracks.
+                    if (typeof visibleViewport.featureCache.features.getMin === 'function') {
+                        const min = visibleViewport.featureCache.features.getMin(start, end)
+                        allFeatures.push({value: min})
+                    } 
+                    if(typeof visibleViewport.featureCache.features.getMax !== 'function' && typeof visibleViewport.featureCache.features.getMin !== 'function') {
                         const viewFeatures = FeatureUtils.findOverlapping(visibleViewport.featureCache.features, start, end)
                         for (let f of viewFeatures) {
                             allFeatures.push(f)
