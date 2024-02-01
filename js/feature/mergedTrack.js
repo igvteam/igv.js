@@ -238,6 +238,25 @@ class MergedFeatureCollection {
         return max
     }
 
+    // Covers cases in which a track has negative values.
+    getMin(start, end) {
+        let min = 0
+        for (let a of this.featureArrays) {
+            for (let f of a) {
+                if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
+                    if (f.end < start) {
+                        continue
+                    }
+                    if (f.start > end) {
+                        break
+                    }
+                    min = Math.min(min, f.value)
+                }
+            }
+        }
+        return min
+    }
+
 }
 
 export default MergedTrack
