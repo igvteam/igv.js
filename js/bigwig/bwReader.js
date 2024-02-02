@@ -264,7 +264,7 @@ class BWReader {
             this.header.extraIndexOffsets.length > 0) {
             this._searchTrees = []
             for (let offset of this.header.extraIndexOffsets) {
-                const bpTree = await BPTree.loadBpTree(this.path, offset)
+                const bpTree = await BPTree.loadBpTree(this.path, this.config, offset)
                 this._searchTrees.push(bpTree)
             }
         }
@@ -454,7 +454,7 @@ class BWReader {
         if (rpTree) {
             return rpTree
         } else {
-            rpTree = new RPTree(this.path, offset)
+            rpTree = new RPTree(this.path, this.config, offset)
             await rpTree.init()
             this.rpTreeCache.set(offset, rpTree)
             return rpTree
