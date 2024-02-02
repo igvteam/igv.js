@@ -13,9 +13,11 @@ class CachedSequence {
     get hasChromosomes() {
         return this.sequenceReader.hasChromosomes
     }
+
     get chromosomes() {
         return this.sequenceReader.chromosomes
     }
+
     async getSequenceRecord(chr) {
         return this.sequenceReader.getSequenceRecord(chr)
     }
@@ -44,6 +46,18 @@ class CachedSequence {
         const n = end - start
         const seq = this.interval.features ? this.interval.features.substr(offset, n) : null
         return seq
+    }
+
+    async getSequenceSync(chr, start, end) {
+        const hasCachedSquence = this.interval && this.interval.contains(chr, start, end)
+        if (hasCachedSquence) {
+            const offset = start - this.interval.start
+            const n = end - start
+            const seq = this.interval.features ? this.interval.features.substr(offset, n) : null
+            return seq
+        } else {
+            return undefined
+        }
     }
 
     async init() {
