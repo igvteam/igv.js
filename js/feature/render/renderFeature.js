@@ -203,54 +203,59 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
 function renderAminoAcidSequence(ctx, exon, bpStart, bpPerPixel, y, height, featureColor, strand) {
 
-    const ss = exon.cdStart || exon.start
-    const ee = exon.cdEnd   || exon.end
+    console.log(`Reading Frame ${ exon.readingFrame } strand ${ strand }`)
+    // console.log(`Begin Amino Acid Sequence readingFrame ${ exon.readingFrame } strand ${ strand }`)
 
-    console.log(`Begin Amino Acid Sequence readingFrame ${ exon.readingFrame } strand ${ strand }`)
+    let ss = exon.cdStart || exon.start
+    let ee = exon.cdEnd   || exon.end
 
     let bpTripletStart
     let bpTripletEnd
     let bpDelta
 
-    if ('+' === strand) {
-        for (bpTripletStart = ss; bpTripletStart < ee; bpTripletStart += 3) {
+    const doPaint = (strand, ss, ee) => {
 
-            bpTripletEnd = Math.min(ee, bpTripletStart + 3)
+        bpDelta = ee - ss
 
-            bpDelta = bpTripletEnd - bpTripletStart
-            console.log(`strand(+) loop - bpDelta ${ bpDelta }`)
+        const xs = Math.round((ss - bpStart) / bpPerPixel)
+        const xe = Math.round((ee - bpStart) / bpPerPixel)
 
-            const x = Math.round((bpTripletStart - bpStart) / bpPerPixel)
-            const xx = Math.round((bpTripletEnd - bpStart) / bpPerPixel)
+        const width = xe - xs
 
-            const width = xx - x
-
-            ctx.fillStyle = 0 === bpTripletStart % 2 ? '#68fdff' : '#002eff'
-            ctx.fillRect(x, y, width, height/2)
+        if ('+' === strand) {
+            ctx.fillStyle = 0 === ss % 2 ? '#8931ff' : '#fffa03'
+        } else {
+            ctx.fillStyle = 0 === ee % 2 ? '#83f902' : '#028401'
         }
 
-    } else {
-        for (bpTripletEnd = ee; bpTripletEnd > ss; bpTripletEnd -= 3) {
+        ctx.fillRect(xs, y, width, height)
 
-            bpTripletStart = Math.max(ss, bpTripletEnd - 3)
+    }
 
-            bpDelta = bpTripletEnd - bpTripletStart
-            console.log(`strand(-) loop - bpDelta ${ bpDelta }`)
-
-            const x = Math.round((bpTripletStart - bpStart) / bpPerPixel)
-            const xx = Math.round((bpTripletEnd - bpStart) / bpPerPixel)
-
-            const width = xx - x
-
-            ctx.fillStyle = 0 === bpTripletEnd % 2 ? '#83f902' : '#028401'
-            ctx.fillRect(x, y, width, height/2)
-
+    if (exon.readingFrame > 0) {
+        if ('+' === strand) {
+            ss += exon.readingFrame
+            doPaint(strand, ss - exon.readingFrame, ss)
+        } else {
+            ee -= exon.readingFrame
+            doPaint(strand, ee, ee + exon.readingFrame)
         }
     }
 
+    if ('+' === strand) {
+        for (bpTripletStart = ss; bpTripletStart < ee; bpTripletStart += 3) {
+            bpTripletEnd = Math.min(ee, bpTripletStart + 3)
+            doPaint(strand, bpTripletStart, bpTripletEnd)
+        }
+    } else {
+        for (bpTripletEnd = ee; bpTripletEnd > ss; bpTripletEnd -= 3) {
+            bpTripletStart = Math.max(ss, bpTripletEnd - 3)
+            doPaint(strand, bpTripletStart, bpTripletEnd)
+        }
+    }
 
     const remainder = (ee - ss) % 3
-    console.log(`  End Amino Acid Sequence - Concluding bpDelta ${ bpDelta } remainder ${ remainder }`)
+    // console.log(`End Amino Acid Sequence - Concluding bpDelta ${ bpDelta } remainder ${ remainder }`)
 
     // reset current fillStyle
     ctx.fillStyle = featureColor
