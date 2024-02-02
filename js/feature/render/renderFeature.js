@@ -169,7 +169,6 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                     // ctx.fillStyle = color
 
                     if (exon.readingFrame !== undefined) {
-                        // console.log(`reading frame ${ exon.readingFrame } strand ${ feature.strand }`)
                         const width = Math.max(1, Math.ceil(1 / options.bpPerPixel))
                         if (width >= aminoAcidSequenceRenderThreshold) {
                             renderAminoAcidSequence(ctx, exon, bpStart, options.bpPerPixel, py, h, color, feature.strand)
@@ -203,7 +202,10 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
 function renderAminoAcidSequence(ctx, exon, bpStart, bpPerPixel, y, height, featureColor, strand) {
 
-    console.log(`Reading Frame ${ exon.readingFrame } strand ${ strand }`)
+
+    const phase = (3 - exon.readingFrame) % 3
+
+    console.log(`strand ${ strand } readingFrame ${ exon.readingFrame } phase ${ phase }`)
     // console.log(`Begin Amino Acid Sequence readingFrame ${ exon.readingFrame } strand ${ strand }`)
 
     let ss = exon.cdStart || exon.start
@@ -211,21 +213,25 @@ function renderAminoAcidSequence(ctx, exon, bpStart, bpPerPixel, y, height, feat
 
     let bpTripletStart
     let bpTripletEnd
-    let bpDelta
 
-    const doPaint = (strand, ss, ee) => {
-
-        bpDelta = ee - ss
+    const doPaint = (strand, ss, ee, diagnosticColor) => {
 
         const xs = Math.round((ss - bpStart) / bpPerPixel)
         const xe = Math.round((ee - bpStart) / bpPerPixel)
 
         const width = xe - xs
 
-        if ('+' === strand) {
-            ctx.fillStyle = 0 === ss % 2 ? '#8931ff' : '#fffa03'
+        // console.log(`doPaint dBP ${ ee - ss } dPixel ${ width }`)
+
+        if (diagnosticColor) {
+            ctx.fillStyle = diagnosticColor
         } else {
-            ctx.fillStyle = 0 === ee % 2 ? '#83f902' : '#028401'
+            if ('+' === strand) {
+                ctx.fillStyle = 0 === ss % 2 ? '#8931ff' : '#fffa03'
+            } else {
+                ctx.fillStyle = 0 === ee % 2 ? '#83f902' : '#028401'
+            }
+
         }
 
         ctx.fillRect(xs, y, width, height)
@@ -233,29 +239,27 @@ function renderAminoAcidSequence(ctx, exon, bpStart, bpPerPixel, y, height, feat
     }
 
     if (exon.readingFrame > 0) {
+
         if ('+' === strand) {
-            ss += exon.readingFrame
-            doPaint(strand, ss - exon.readingFrame, ss)
+            ss += phase
+            doPaint(strand, ss - phase, ss, '#ff7fd3')
         } else {
-            ee -= exon.readingFrame
-            doPaint(strand, ee, ee + exon.readingFrame)
+            ee -= phase
+            doPaint(strand, ee, ee + phase, '#ff7fd3')
         }
     }
 
     if ('+' === strand) {
         for (bpTripletStart = ss; bpTripletStart < ee; bpTripletStart += 3) {
             bpTripletEnd = Math.min(ee, bpTripletStart + 3)
-            doPaint(strand, bpTripletStart, bpTripletEnd)
+            doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
         }
     } else {
         for (bpTripletEnd = ee; bpTripletEnd > ss; bpTripletEnd -= 3) {
             bpTripletStart = Math.max(ss, bpTripletEnd - 3)
-            doPaint(strand, bpTripletStart, bpTripletEnd)
+            doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
         }
     }
-
-    const remainder = (ee - ss) % 3
-    // console.log(`End Amino Acid Sequence - Concluding bpDelta ${ bpDelta } remainder ${ remainder }`)
 
     // reset current fillStyle
     ctx.fillStyle = featureColor
