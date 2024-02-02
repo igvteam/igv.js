@@ -51,10 +51,13 @@ class NonIndexedFasta {
 
     async getSequence(chr, start, end) {
 
-        if(this.sequences.size === 0) {
+        if (this.sequences.size === 0) {
             await this.loadAll()
-
         }
+        return this.getSequenceSync(chr, start, end)
+    }
+
+    getSequenceSync(char, start, end) {
 
         if (!this.sequences.has(chr)) {
             return undefined
