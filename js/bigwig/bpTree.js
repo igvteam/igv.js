@@ -14,13 +14,14 @@ export default class BPTree {
     littleEndian = true
     nodeCache = new Map()
 
-    static async loadBpTree(path, startOffset) {
-        const bpTree = new BPTree(path, startOffset)
+    static async loadBpTree(path, config, startOffset) {
+        const bpTree = new BPTree(path, config, startOffset)
         return bpTree.init()
     }
 
-    constructor(path, startOffset) {
+    constructor(path, config, startOffset) {
         this.path = path
+        this.config = config
         this.startOffset = startOffset
     }
 
@@ -141,7 +142,7 @@ export default class BPTree {
     }
 
     async #getParserFor(start, size) {
-        const data = await igvxhr.loadArrayBuffer(this.path, {range: {start, size}})
+        const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
         return new BinaryParser(new DataView(data), this.littleEndian)
     }
 

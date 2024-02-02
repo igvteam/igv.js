@@ -85,7 +85,7 @@ suite("testTwobit", function () {
     test("twobit .bpt index", async function () {
 
         const url = "test/data/twobit/GCA_004363605.1.2bit.bpt"
-        const bpTree = await BPTree.loadBpTree(url, 0)
+        const bpTree = await BPTree.loadBpTree(url, {}, 0)
         assert.ok(bpTree)
 
         assert.equal(256, bpTree.header.blockSize);
