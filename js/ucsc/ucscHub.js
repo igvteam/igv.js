@@ -190,6 +190,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         // Organize track configs by group
         const trackConfigMap = new Map()
         for (let c of this.#getTracksConfigs()) {
+            if(c.name === "cytoBandIdeo") continue;
             const groupName = c.group || "other"
             if (trackConfigMap.has(groupName)) {
                 trackConfigMap.get(groupName).push(c)
