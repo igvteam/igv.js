@@ -1,5 +1,6 @@
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import BinaryParser from "../binary.js"
+import {buildOptions} from "../util/igvUtils.js"
 
 const RPTREE_HEADER_SIZE = 48
 const RPTREE_NODE_LEAF_ITEM_SIZE = 32   // leaf item size
@@ -11,9 +12,10 @@ export default class RPTree {
     littleEndian = true
     nodeCache = new Map()
 
-    constructor(path, startOffset) {
+    constructor(path, config, startOffset) {
 
         this.path = path
+        this.config = config
         this.startOffset = startOffset
     }
 
@@ -58,7 +60,7 @@ export default class RPTree {
     }
 
     async #getParserFor(start, size) {
-        const data = await igvxhr.loadArrayBuffer(this.path, {range: {start, size}})
+        const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
         return new BinaryParser(new DataView(data), this.littleEndian)
     }
 

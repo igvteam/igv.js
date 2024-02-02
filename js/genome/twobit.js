@@ -27,6 +27,7 @@ class TwobitSequence {
 
     constructor(config) {
         this.url = config.twoBitURL || config.fastaURL
+        this.config = config
         if(config.twoBitBptURL) {
             this.bptURL = config.twoBitBptURL
         }
@@ -34,7 +35,7 @@ class TwobitSequence {
 
     async init() {
         if(this.bptURL) {
-            this.index = await BPTree.loadBpTree(this.bptURL, 0)
+            this.index = await BPTree.loadBpTree(this.bptURL, this.config, 0)
         } else {
             const idx = await this._readIndex()
             this.index = {

@@ -19,8 +19,9 @@ export default class BPChromTree {
         return bpTree.init()
     }
 
-    constructor(path, startOffset) {
+    constructor(path, config, startOffset) {
         this.path = path
+        this.config = config
         this.startOffset = startOffset
         this.littleEndian = littleEndian
     }
@@ -132,7 +133,7 @@ export default class BPChromTree {
     }
 
     async #getParserFor(start, size) {
-        const data = await igvxhr.loadArrayBuffer(this.path, {range: {start, size}})
+        const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
         return new BinaryParser(new DataView(data), this.littleEndian)
     }
 
