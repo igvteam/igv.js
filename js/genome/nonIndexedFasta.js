@@ -57,7 +57,7 @@ class NonIndexedFasta {
         return this.getSequenceSync(chr, start, end)
     }
 
-    getSequenceSync(char, start, end) {
+    getSequenceSync(chr, start, end) {
 
         if (!this.sequences.has(chr)) {
             return undefined
