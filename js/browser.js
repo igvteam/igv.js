@@ -576,10 +576,17 @@ class Browser {
             console.warn("No genome or reference object specified")
             return
         }
-        const genomeConfig = StringUtils.isString(genomeOrReference) ?
-            await GenomeUtils.expandReference(this.alert, genomeOrReference) :
-            genomeOrReference
 
+        let genomeConfig
+        if(genomeOrReference.hubURL) {
+            const hub = await Hub.loadHub(genomeOrReference.hubURL)
+            genomeConfig = hub.getGenomeConfig("genes")
+            session.locus = genomeConfig.locus
+        } else {
+             genomeConfig = StringUtils.isString(genomeOrReference) ?
+                await GenomeUtils.expandReference(this.alert, genomeOrReference) :
+                genomeOrReference
+        }
 
         await this.loadReference(genomeConfig, session.locus)
 
