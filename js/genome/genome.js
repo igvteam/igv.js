@@ -181,7 +181,7 @@ class Genome {
     }
 
     get wgChromosomeNames() {
-        return this.#wgChromosomeNames.slice()
+        return this.#wgChromosomeNames ?  this.#wgChromosomeNames.slice() : undefined
     }
 
     /**
