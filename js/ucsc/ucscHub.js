@@ -13,11 +13,11 @@ class Hub {
     static filterTracks = new Set(["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
         "cpgIslandExtUnmasked", "windowMasker"])
 
-    static async loadHub(url, options) {
+    static async loadHub(url) {
 
         const idx = url.lastIndexOf("/")
         const baseURL = url.substring(0, idx + 1)
-        const stanzas = await loadStanzas(url, options)
+        const stanzas = await loadStanzas(url)
         let groups
         if ("genome" === stanzas[1].type) {
             const genome = stanzas[1]
@@ -398,7 +398,7 @@ class Stanza {
  * @param url
  * @returns {Promise<*[]>}
  */
-async function loadStanzas(url, options) {
+async function loadStanzas(url) {
 
     const data = await igvxhr.loadString(url)
     const lines = data.split(/\n|\r\n|\r/g)
