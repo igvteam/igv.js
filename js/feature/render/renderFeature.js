@@ -85,12 +85,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
             const xRight = Math.min(pixelWidth, coord.px1)
             const width = xRight - xLeft
 
-            // DUGLA HACK
-            // ctx.fillStyle = '#cefa6e'
             ctx.fillRect(xLeft, py, width, h)
-            // ctx.fillStyle = color
-            // Arrows
-            // Do not draw if strand is not +/-
+
             if (direction !== 0) {
                 ctx.fillStyle = "white"
                 ctx.strokeStyle = "white"
@@ -114,9 +110,9 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                 IGVGraphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy)
             }
 
-            // console.log(`${ feature.name } exons ${ feature.exons.length }`)
+            for (let i = 0; i < feature.exons.length; i++) {
 
-            for (const exon of feature.exons) {
+                const exon = feature.exons[ i ]
 
                 // draw the exons
                 let ePx = Math.round((exon.start - bpStart) / xScale)
@@ -171,7 +167,10 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                     if (exon.readingFrame !== undefined) {
                         const width = Math.max(1, Math.ceil(1 / options.bpPerPixel))
                         if (width >= aminoAcidSequenceRenderThreshold) {
-                            renderAminoAcidSequence(ctx, exon, bpStart, options.bpPerPixel, py, h, color, feature.strand)
+
+                            const leftExon = 0 === i ? undefined : feature.exons[ i - 1]
+                            const riteExon = feature.exons.length - 1 === i ? undefined : feature.exons[ i + 1]
+                            renderAminoAcidSequence(ctx, feature.strand, leftExon, exon, riteExon, bpStart, options.bpPerPixel, py, h, color)
                         }
                     }
 
@@ -200,8 +199,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     }
 }
 
-function renderAminoAcidSequence(ctx, exon, bpStart, bpPerPixel, y, height, featureColor, strand) {
-
+function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height, featureColor) {
 
     const phase = (3 - exon.readingFrame) % 3
 
