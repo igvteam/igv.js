@@ -227,9 +227,9 @@ function renderAminoAcidSequence(ctx, exon, bpStart, bpPerPixel, y, height, feat
             ctx.fillStyle = diagnosticColor
         } else {
             if ('+' === strand) {
-                ctx.fillStyle = 0 === ss % 2 ? '#8931ff' : '#fffa03'
+                ctx.fillStyle = 0 === ss % 2 ? '#008cff' : 'rgba(135,206,235,0.36)'
             } else {
-                ctx.fillStyle = 0 === ee % 2 ? '#83f902' : '#028401'
+                ctx.fillStyle = 0 === ee % 2 ? '#ff726e' : 'rgba(255,0,0,0.22)'
             }
 
         }
@@ -242,10 +242,10 @@ function renderAminoAcidSequence(ctx, exon, bpStart, bpPerPixel, y, height, feat
 
         if ('+' === strand) {
             ss += phase
-            doPaint(strand, ss - phase, ss, '#ff7fd3')
+            doPaint(strand, ss - phase, ss, '#83f902')
         } else {
             ee -= phase
-            doPaint(strand, ee, ee + phase, '#ff7fd3')
+            doPaint(strand, ee, ee + phase, '#83f902')
         }
     }
 
