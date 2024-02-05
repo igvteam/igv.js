@@ -56,7 +56,7 @@ import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
-import { trackViewportPopoverList } from './trackViewport.js'
+import {trackViewportPopoverList} from './trackViewport.js'
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -146,7 +146,7 @@ class Browser {
             if (trackViewportPopoverList.length > 0) {
                 const len = trackViewportPopoverList.length
                 for (let i = 0; i < len; i++) {
-                    trackViewportPopoverList[ i ].dispose()
+                    trackViewportPopoverList[i].dispose()
                 }
                 trackViewportPopoverList.length = 0
             }
@@ -577,18 +577,11 @@ class Browser {
             return
         }
 
-        let genomeConfig
-        if(genomeOrReference.hubURL) {
-            const hub = await Hub.loadHub(genomeOrReference.hubURL)
-            genomeConfig = hub.getGenomeConfig("genes")
-            session.locus = genomeConfig.locus
-        } else {
-             genomeConfig = StringUtils.isString(genomeOrReference) ?
-                await GenomeUtils.expandReference(this.alert, genomeOrReference) :
-                genomeOrReference
-        }
+        const genomeConfig = StringUtils.isString(genomeOrReference) ?
+            await GenomeUtils.expandReference(this.alert, genomeOrReference) :
+            genomeOrReference
 
-        await this.loadReference(genomeConfig, session.locus)
+        await this.loadReference(genomeConfig, genomeConfig.locus || session.locus)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
