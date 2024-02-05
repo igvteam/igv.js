@@ -455,7 +455,7 @@ class WrappedFasta {
 
 }
 
-export {defaultSequenceTrackOrder, bppFeatureFetchThreshold}
+export {defaultSequenceTrackOrder, bppFeatureFetchThreshold, translationDict }
 
 export default SequenceTrack
 

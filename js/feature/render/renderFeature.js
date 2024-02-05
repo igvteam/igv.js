@@ -168,9 +168,10 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                         const width = Math.max(1, Math.ceil(1 / options.bpPerPixel))
                         if (width >= aminoAcidSequenceRenderThreshold) {
 
-                            const leftExon = 0 === i ? undefined : feature.exons[ i - 1]
-                            const riteExon = feature.exons.length - 1 === i ? undefined : feature.exons[ i + 1]
-                            renderAminoAcidSequence(ctx, feature.strand, leftExon, exon, riteExon, bpStart, options.bpPerPixel, py, h, color)
+                            const leftExon = i > 0                        && feature.exons[i - 1].readingFrame !== undefined ? feature.exons[i - 1] : undefined
+                            const riteExon = i < feature.exons.length - 1 && feature.exons[i + 1].readingFrame !== undefined ? feature.exons[i + 1] : undefined
+
+                            renderAminoAcidSequence.call(this, ctx, feature.chr, feature.strand, leftExon, exon, riteExon, bpStart, options.bpPerPixel, py, h, color)
                         }
                     }
 
@@ -199,7 +200,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     }
 }
 
-function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height, featureColor) {
+function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height, featureColor) {
 
     const phase = (3 - exon.readingFrame) % 3
 
@@ -212,27 +213,38 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
     let bpTripletStart
     let bpTripletEnd
 
-    const doPaint = (strand, ss, ee, diagnosticColor) => {
+    const doPaint = (strand, start, end, diagnosticColor) => {
 
-        const xs = Math.round((ss - bpStart) / bpPerPixel)
-        const xe = Math.round((ee - bpStart) / bpPerPixel)
+        const xs = Math.round((start - bpStart) / bpPerPixel)
+        const xe = Math.round((end - bpStart) / bpPerPixel)
 
         const width = xe - xs
-
-        // console.log(`doPaint dBP ${ ee - ss } dPixel ${ width }`)
 
         if (diagnosticColor) {
             ctx.fillStyle = diagnosticColor
         } else {
             if ('+' === strand) {
-                ctx.fillStyle = 0 === ss % 2 ? '#008cff' : 'rgba(135,206,235,0.36)'
+                ctx.fillStyle = 0 === start % 2 ? '#008cff' : 'rgba(135,206,235,0.36)'
             } else {
-                ctx.fillStyle = 0 === ee % 2 ? '#ff726e' : 'rgba(255,0,0,0.22)'
+                ctx.fillStyle = 0 === end % 2 ? '#ff726e' : 'rgba(255,0,0,0.22)'
             }
 
         }
 
         ctx.fillRect(xs, y, width, height)
+
+        const sequence = this.browser.genome.getSequenceSync(chr, start, end)
+        // console.log(`width ${ end - start } sequence ${ sequence }`)
+
+        if (sequence) {
+            const baseLetterWindow = Math.floor(width/sequence.length)
+            for (let i = 0; i < sequence.length; i++) {
+                const baseLetter = sequence[ i ]
+                const letterWidth = ctx.measureText(baseLetter).width
+                IGVGraphics.strokeText(ctx, baseLetter, xs + (i * baseLetterWindow) + (baseLetterWindow - letterWidth)/2, height, { strokeStyle: '#000' })
+            }
+
+        }
 
     }
 

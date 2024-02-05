@@ -48,7 +48,7 @@ class CachedSequence {
         return seq
     }
 
-    async getSequenceSync(chr, start, end) {
+    getSequenceSync(chr, start, end) {
         const hasCachedSquence = this.interval && this.interval.contains(chr, start, end)
         if (hasCachedSquence) {
             const offset = start - this.interval.start
