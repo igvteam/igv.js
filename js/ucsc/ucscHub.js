@@ -44,7 +44,7 @@ class Hub {
 
     constructor(url, stanzas, groupStanzas) {
 
-        this.url = url;
+        this.url = url
 
         const idx = url.lastIndexOf("/")
         this.baseURL = url.substring(0, idx + 1)
@@ -122,7 +122,12 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         }
 
         if (this.genomeStanza.hasProperty("defaultPos")) {
-            config.locus = this.genomeStanza.getProperty("defaultPos")
+            const hubLocus = this.genomeStanza.getProperty("defaultPos")
+            // Strip out coordinates => whole chromosome view
+            if (hubLocus) {
+                const idx = hubLocus.lastIndexOf(":")
+                config.locus = idx > 0 ? hubLocus.substring(0, idx) : hubLocus
+            }
         }
 
         config.description = config.id
@@ -190,7 +195,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         // Organize track configs by group
         const trackConfigMap = new Map()
         for (let c of this.#getTracksConfigs()) {
-            if(c.name === "cytoBandIdeo") continue;
+            if (c.name === "cytoBandIdeo") continue
             const groupName = c.group || "other"
             if (trackConfigMap.has(groupName)) {
                 trackConfigMap.get(groupName).push(c)
