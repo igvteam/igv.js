@@ -2,6 +2,7 @@ import GtexUtils from "../../gtex/gtexUtils.js"
 import IGVGraphics from "../../igv-canvas.js"
 import {randomRGB, randomRGBConstantAlpha} from "../../util/colorPalletes.js"
 import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
+import {constructTriplet} from "../decode/exonUtils.js"
 
 const aminoAcidSequenceRenderThreshold = 2
 
@@ -200,12 +201,13 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     }
 }
 
-function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height, featureColor) {
+function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height) {
+
+    ctx.save()
 
     const phase = (3 - exon.readingFrame) % 3
 
-    console.log(`strand ${ strand } readingFrame ${ exon.readingFrame } phase ${ phase }`)
-    // console.log(`Begin Amino Acid Sequence readingFrame ${ exon.readingFrame } strand ${ strand }`)
+    // console.log(`strand ${ strand } readingFrame ${ exon.readingFrame } phase ${ phase }`)
 
     let ss = exon.cdStart || exon.start
     let ee = exon.cdEnd   || exon.end
@@ -234,45 +236,52 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         ctx.fillRect(xs, y, width, height)
 
         const sequence = this.browser.genome.getSequenceSync(chr, start, end)
-        // console.log(`width ${ end - start } sequence ${ sequence }`)
 
         if (sequence) {
+            ctx.save()
             const baseLetterWindow = Math.floor(width/sequence.length)
             for (let i = 0; i < sequence.length; i++) {
                 const baseLetter = sequence[ i ]
                 const letterWidth = ctx.measureText(baseLetter).width
-                IGVGraphics.strokeText(ctx, baseLetter, xs + (i * baseLetterWindow) + (baseLetterWindow - letterWidth)/2, height, { strokeStyle: '#000' })
+                IGVGraphics.fillText(ctx, baseLetter, xs + (i * baseLetterWindow) + (baseLetterWindow - letterWidth)/2, height, { fillStyle: '#000' })
             }
-
+            ctx.restore()
         }
 
-    }
-
-    if (exon.readingFrame > 0) {
-
-        if ('+' === strand) {
-            ss += phase
-            doPaint(strand, ss - phase, ss, '#83f902')
-        } else {
-            ee -= phase
-            doPaint(strand, ee, ee + phase, '#83f902')
-        }
     }
 
     if ('+' === strand) {
+
+        if (phase > 0) {
+            ss += phase
+            doPaint(strand, ss - phase, ss, '#83f902')
+        }
+
         for (bpTripletStart = ss; bpTripletStart < ee; bpTripletStart += 3) {
             bpTripletEnd = Math.min(ee, bpTripletStart + 3)
             doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
         }
+
+        if (phase > 0) {
+            const triplet = constructTriplet.call(this, chr, strand, phase, leftExon, exon, riteExon)
+        }
+        // console.log(`strand(${ strand }) phase(${ phase }) Last triplet width ${ bpTripletEnd - (bpTripletStart - 3) }`)
     } else {
+        if (phase > 0) {
+            ee -= phase
+            doPaint(strand, ee, ee + phase, '#83f902')
+        }
         for (bpTripletEnd = ee; bpTripletEnd > ss; bpTripletEnd -= 3) {
             bpTripletStart = Math.max(ss, bpTripletEnd - 3)
             doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
         }
+        if (phase > 0) {
+            const triplet = constructTriplet.call(this, chr, strand, phase, leftExon, exon, riteExon)
+        }
+        // console.log(`strand(${ strand }) phase(${ phase }) Last triplet width ${ (bpTripletEnd + 3) - bpTripletStart }`)
     }
 
-    // reset current fillStyle
-    ctx.fillStyle = featureColor
+    ctx.restore()
 }
 
 /**
@@ -346,6 +355,8 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
 function getFeatureLabelY(featureY, transform) {
     return transform ? featureY + 20 : featureY + 25
 }
+
+// exon
 
 export { aminoAcidSequenceRenderThreshold, calculateFeatureCoordinates, renderFeature }
 
