@@ -263,7 +263,14 @@ class MergedFeatureCollection {
                 }
             }
         }
-        return max
+        // We can assume if max has not changed from -Number.MAX_VALUE that there
+        // are no values we can use to determine max value and we set it to 100.
+        if (max === -Number.MAX_VALUE) {
+            return 100
+        }
+        else {
+            return max
+        }
     }
 
     // Covers cases in which a track has negative values.
