@@ -2,7 +2,8 @@ import GtexUtils from "../../gtex/gtexUtils.js"
 import IGVGraphics from "../../igv-canvas.js"
 import {randomRGB, randomRGBConstantAlpha} from "../../util/colorPalletes.js"
 import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
-import {constructTriplet, getEonStart, getExonEnd, getExonPhase} from "../exonUtils.js"
+import {getAminoAcidLetterWithExonGap, getEonStart, getExonEnd, getExonPhase} from "../exonUtils.js"
+import {translationDict} from "../../sequenceTrack.js"
 
 const aminoAcidSequenceRenderThreshold = 2
 
@@ -205,7 +206,32 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
     ctx.save()
 
-    const doPaint = (strand, start, end, diagnosticColor) => {
+    const renderNucleotideLetters = (sequence, width, xs, y) => {
+        const baseLetterWindow = Math.floor(width/sequence.length)
+        for (let i = 0; i < sequence.length; i++) {
+            const baseLetter = sequence[ i ]
+            const letterWidth = ctx.measureText(baseLetter).width
+            IGVGraphics.fillText(ctx, baseLetter, xs + (i * baseLetterWindow) + (baseLetterWindow - letterWidth)/2, y, { fillStyle: '#000' })
+        }
+    }
+
+    let toggle = 0
+    const rendeAminoAcidLetter = (strand, sequence, width, xs, y, aminoAcidLetter) => {
+
+        if (aminoAcidLetter) {
+            const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width
+            IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#00f' })
+        } else if (3 === sequence.length) {
+            const key = '+' === strand ? sequence : sequence.split('').reverse().join('')
+            const aminoAcidLetter = translationDict[key]
+            const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width
+            IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#00f' })
+        } else {
+            renderNucleotideLetters(sequence, width, xs, y)
+        }
+    }
+
+    const doPaint = (strand, start, end, diagnosticColor, aminoAcidLetter) => {
 
         const xs = Math.round((start - bpStart) / bpPerPixel)
         const xe = Math.round((end - bpStart) / bpPerPixel)
@@ -216,28 +242,33 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
             ctx.fillStyle = diagnosticColor
         } else {
             if ('+' === strand) {
-                ctx.fillStyle = 0 === start % 2 ? '#008cff' : 'rgba(135,206,235,0.36)'
+                ctx.fillStyle = 0 === toggle ? '#008cff' : 'rgba(135,206,235,0.36)'
             } else {
-                ctx.fillStyle = 0 === end % 2 ? '#ff726e' : 'rgba(255,0,0,0.22)'
+                ctx.fillStyle = 0 === toggle ? '#ff726e' : 'rgba(255,0,0,0.22)'
             }
-
         }
+
+        toggle = 1 - toggle
 
         ctx.fillRect(xs, y, width, height)
 
-        const sequence = this.browser.genome.getSequenceSync(chr, start, end)
-
-        if (sequence) {
+        if (aminoAcidLetter) {
             ctx.save()
-            const baseLetterWindow = Math.floor(width/sequence.length)
-            for (let i = 0; i < sequence.length; i++) {
-                const baseLetter = sequence[ i ]
-                const letterWidth = ctx.measureText(baseLetter).width
-                IGVGraphics.fillText(ctx, baseLetter, xs + (i * baseLetterWindow) + (baseLetterWindow - letterWidth)/2, height, { fillStyle: '#000' })
-            }
+            rendeAminoAcidLetter(strand, undefined, width, xs, y + height, aminoAcidLetter)
             ctx.restore()
+        } else {
+            const sequence = this.browser.genome.getSequenceSync(chr, start, end)
+
+            if (sequence && 3 === sequence.length) {
+                ctx.save()
+                rendeAminoAcidLetter(strand, sequence, width, xs, y + height, aminoAcidLetter)
+                ctx.restore()
+            }
+
         }
 
+        const widthBP = end - start
+        return widthBP > 0 && widthBP < 3 ? { start, end } : undefined
     }
 
     const phase = getExonPhase(exon)
@@ -247,38 +278,60 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
     let bpTripletStart
     let bpTripletEnd
 
+    let remainder
     if ('+' === strand) {
 
         if (phase > 0) {
             ss += phase
-            doPaint(strand, ss - phase, ss, '#83f902')
         }
 
         for (bpTripletStart = ss; bpTripletStart < ee; bpTripletStart += 3) {
             bpTripletEnd = Math.min(ee, bpTripletStart + 3)
-            doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
+            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, undefined)
         }
 
-        // if (phase > 0) {
-        //     const triplet = constructTriplet.call(this, chr, strand, phase, leftExon, exon, riteExon)
-        // }
+        if (phase > 0) {
+            const result = getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ss - phase, ss, remainder, leftExon, exon, riteExon)
 
-        // console.log(`strand(${ strand }) phase(${ phase }) Last triplet width ${ bpTripletEnd - (bpTripletStart - 3) }`)
+            if (result) {
+                const { left, rite } = result
+                doPaint(strand, ss - phase, ss, '#83f902', left.aminoAcidLetter)
+
+                if (rite) {
+                    doPaint(strand, remainder.start, remainder.end, undefined, rite.aminoAcidLetter)
+                }
+
+            }
+
+        }
+
     } else {
+
         if (phase > 0) {
             ee -= phase
-            doPaint(strand, ee, ee + phase, '#83f902')
         }
+
         for (bpTripletEnd = ee; bpTripletEnd > ss; bpTripletEnd -= 3) {
             bpTripletStart = Math.max(ss, bpTripletEnd - 3)
-            doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
+            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, undefined)
         }
 
-        // if (phase > 0) {
-        //     const triplet = constructTriplet.call(this, chr, strand, phase, leftExon, exon, riteExon)
-        // }
+        if (phase > 0) {
+            const result = getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ee, ee + phase, remainder, leftExon, exon, riteExon)
 
-        // console.log(`strand(${ strand }) phase(${ phase }) Last triplet width ${ (bpTripletEnd + 3) - bpTripletStart }`)
+            if (result) {
+                const { left, rite } = result
+                doPaint(strand, ee, ee + phase, '#83f902', rite.aminoAcidLetter)
+
+                if (left) {
+                    doPaint(strand, remainder.start, remainder.end, undefined, left.aminoAcidLetter)
+                }
+
+
+            }
+
+        }
+
     }
 
     ctx.restore()
