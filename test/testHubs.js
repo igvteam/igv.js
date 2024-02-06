@@ -22,7 +22,7 @@ suite("hub.txt", function () {
 
         assert.ok(genomeConfig)
         assert.equal("GCF_000186305.1", genomeConfig.id)
-        assert.equal("Python bivittatus", genomeConfig.name)
+        assert.equal("Python bivittatus (GCF_000186305.1)", genomeConfig.name)
         assert.ok(genomeConfig.twoBitBptURL)
         assert.ok(genomeConfig.twoBitURL)
         assert.ok(genomeConfig.chromAliasBbURL)
