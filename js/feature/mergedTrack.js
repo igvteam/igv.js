@@ -132,12 +132,20 @@ class MergedTrack extends TrackBase {
 
     /**
      * Returns a MergedFeatureCollection containing an array of features for the specified range, 1 for each track.
+     * In addition it contains track names in the same order.
      */
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
-
+        
         const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
         const featureArrays = await Promise.all(promises)
-        return new MergedFeatureCollection(featureArrays)
+        
+        if (featureArrays.every((arr) => arr.length === 0)){
+            return new MergedFeatureCollection([], [])
+        }
+        else {
+            const trackNames = this.tracks.map((t) => t.name)
+            return new MergedFeatureCollection(featureArrays, trackNames)
+        }
     }
 
     draw(options) {
@@ -162,20 +170,36 @@ class MergedTrack extends TrackBase {
 
     popupData(clickState) {
 
-        if (clickState.viewport && clickState.viewport.cachedFeatures) {
+        const clickedFeaturesArray = this.clickedFeatures(clickState)
 
-            const featuresArray = clickState.viewport.cachedFeatures.featureArrays
-
-            if (featuresArray && featuresArray.length === this.tracks.length) {
-                // Array of feature arrays, 1 for each track
-                const popupData = []
-                for (let i = 0; i < this.tracks.length; i++) {
-                    if (i > 0) popupData.push('<hr/>')
-                    popupData.push(`<div style=background-color:rgb(245,245,245);border-bottom-style:dashed;border-bottom-width:1px;padding-bottom:5px;padding-top:10px;font-weight:bold;font-size:larger >${this.tracks[i].name}</div>`)
-                    const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i])
+        if (clickedFeaturesArray && clickedFeaturesArray.length === this.tracks.length) {
+            // Array of feature arrays, 1 for each track
+            const popupData = []
+            // Flag used to check if there is at least one track with data
+            let noData = true
+            for (let i = 0; i < clickedFeaturesArray.length; i++) {
+                
+                
+                if (i > 0) popupData.push('<hr/>')
+                popupData.push(`<div style=background-color:rgb(245,245,245);border-bottom-style:dashed;border-bottom-width:1px;padding-bottom:5px;padding-top:10px;font-weight:bold;font-size:larger >${clickedFeaturesArray[i].trackName}</div>`)
+                if (clickedFeaturesArray[i].features.length > 0) {
+                    noData = false
+                    
+                    const trackPopupData = this.tracks[i].popupData(clickState, clickedFeaturesArray[i].features)
                     popupData.push(...trackPopupData)
-
                 }
+                else {
+                    // Notify user if there is no data or all values are 0 for a specific track
+                    popupData.push("Missing or 0 value(s)")
+                }
+            }
+
+            // We don't want to display popup if no track has data. 
+            // If at least one does, we want to display the popup.
+            if (noData === true) {
+                return []
+            }
+            else {
                 return popupData
             }
         }
@@ -188,22 +212,25 @@ class MergedTrack extends TrackBase {
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         const mergedFeaturesCollection = clickState.viewport.cachedFeatures
 
-        if (!mergedFeaturesCollection) {
+        if (!mergedFeaturesCollection || !mergedFeaturesCollection.featureArrays || !Array.isArray(mergedFeaturesCollection.featureArrays) || mergedFeaturesCollection.featureArrays.length === 0) {
             return []
         }
 
         const genomicLocation = clickState.genomicLocation
         const clickedFeatures = []
-        for (let features of mergedFeaturesCollection.featureArrays) {
-            // When zoomed out we need some tolerance around genomicLocation
-            const tolerance = (clickState.referenceFrame.bpPerPixel > 0.2) ? 3 * clickState.referenceFrame.bpPerPixel : 0.2
-            const ss = genomicLocation - tolerance
-            const ee = genomicLocation + tolerance
-            const tmp = (FeatureUtils.findOverlapping(features, ss, ee))
-            for (let f of tmp) {
-                clickedFeatures.push(f)
-            }
+        
+        // When zoomed out we need some tolerance around genomicLocation
+        const tolerance = (clickState.referenceFrame.bpPerPixel > 0.2) ? 3 * clickState.referenceFrame.bpPerPixel : 0.2
+        const ss = genomicLocation - tolerance
+        const ee = genomicLocation + tolerance
+        for (let i = 0; i < mergedFeaturesCollection.featureArrays.length; i++){
+            const tmp = (FeatureUtils.findOverlapping(mergedFeaturesCollection.featureArrays[i], ss, ee))
+            clickedFeatures.push({
+                trackName: mergedFeaturesCollection.trackNames[i],
+                features: tmp
+            })
         }
+
         return clickedFeatures
     }
 
@@ -216,8 +243,9 @@ class MergedTrack extends TrackBase {
 
 class MergedFeatureCollection {
 
-    constructor(featureArrays) {
+    constructor(featureArrays, trackNames) {
         this.featureArrays = featureArrays
+        this.trackNames = trackNames
     }
 
     getMax(start, end) {
@@ -235,7 +263,14 @@ class MergedFeatureCollection {
                 }
             }
         }
-        return max
+        // We can assume if max has not changed from -Number.MAX_VALUE that there
+        // are no values we can use to determine max value and we set it to 100.
+        if (max === -Number.MAX_VALUE) {
+            return 100
+        }
+        else {
+            return max
+        }
     }
 
     // Covers cases in which a track has negative values.
