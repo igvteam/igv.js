@@ -707,6 +707,8 @@ class Browser {
      */
     async loadReference(genomeConfig, initialLocus) {
 
+        this.removeAllTracks()   // Do this first, before new genome is set
+
         const genome = await Genome.createGenome(genomeConfig)
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
@@ -715,7 +717,6 @@ class Browser {
 
         this.updateNavbarDOMWithGenome(genome)
 
-        this.removeAllTracks()
 
         let locus = initialLocus || genome.initialLocus
         if (Array.isArray(locus)) {
