@@ -112,10 +112,15 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
 
     getGenomeConfig(includeTrackGroups = "all") {
         // TODO -- add blat?  htmlPath?
+
+        const id = this.genomeStanza.getProperty("genome")
+        const gsName = this.genomeStanza.getProperty("scientificName") || this.genomeStanza.getProperty("organism") || this.genomeStanza.getProperty("description");
+        const name = gsName + (gsName ? ` (${id})` : ` ${id}`);
+
         const config = {
             hubURL: this.url,
-            id: this.genomeStanza.getProperty("genome"),
-            name: this.genomeStanza.getProperty("scientificName") || this.genomeStanza.getProperty("organism") || this.genomeStanza.getProperty("description"),
+            id: id,
+            name: name,
             twoBitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
             nameSet: "ucsc",
             wholeGenomeView: false,
