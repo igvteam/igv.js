@@ -2,7 +2,7 @@ import GtexUtils from "../../gtex/gtexUtils.js"
 import IGVGraphics from "../../igv-canvas.js"
 import {randomRGB, randomRGBConstantAlpha} from "../../util/colorPalletes.js"
 import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
-import {constructTriplet} from "../decode/exonUtils.js"
+import {constructTriplet, getEonStart, getExonEnd, getExonPhase} from "../exonUtils.js"
 
 const aminoAcidSequenceRenderThreshold = 2
 
@@ -205,16 +205,6 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
     ctx.save()
 
-    const phase = (3 - exon.readingFrame) % 3
-
-    // console.log(`strand ${ strand } readingFrame ${ exon.readingFrame } phase ${ phase }`)
-
-    let ss = exon.cdStart || exon.start
-    let ee = exon.cdEnd   || exon.end
-
-    let bpTripletStart
-    let bpTripletEnd
-
     const doPaint = (strand, start, end, diagnosticColor) => {
 
         const xs = Math.round((start - bpStart) / bpPerPixel)
@@ -250,6 +240,13 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
     }
 
+    const phase = getExonPhase(exon)
+    let ss = getEonStart(exon)
+    let ee = getExonEnd(exon)
+
+    let bpTripletStart
+    let bpTripletEnd
+
     if ('+' === strand) {
 
         if (phase > 0) {
@@ -262,9 +259,10 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
             doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
         }
 
-        if (phase > 0) {
-            const triplet = constructTriplet.call(this, chr, strand, phase, leftExon, exon, riteExon)
-        }
+        // if (phase > 0) {
+        //     const triplet = constructTriplet.call(this, chr, strand, phase, leftExon, exon, riteExon)
+        // }
+
         // console.log(`strand(${ strand }) phase(${ phase }) Last triplet width ${ bpTripletEnd - (bpTripletStart - 3) }`)
     } else {
         if (phase > 0) {
@@ -275,9 +273,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
             bpTripletStart = Math.max(ss, bpTripletEnd - 3)
             doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
         }
-        if (phase > 0) {
-            const triplet = constructTriplet.call(this, chr, strand, phase, leftExon, exon, riteExon)
-        }
+
+        // if (phase > 0) {
+        //     const triplet = constructTriplet.call(this, chr, strand, phase, leftExon, exon, riteExon)
+        // }
+
         // console.log(`strand(${ strand }) phase(${ phase }) Last triplet width ${ (bpTripletEnd + 3) - bpTripletStart }`)
     }
 
