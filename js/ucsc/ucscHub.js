@@ -143,6 +143,9 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         if (this.genomeStanza.hasProperty("chromAliasBb")) {
             config.chromAliasBbURL = this.baseURL + this.genomeStanza.getProperty("chromAliasBb")
         }
+        if (this.genomeStanza.hasProperty("chromAlias")) {
+            config.aliasURL = this.baseURL + this.genomeStanza.getProperty("chromAlias")
+        }
         if (this.genomeStanza.hasProperty("twoBitBptURL")) {
             config.twoBitBptURL = this.baseURL + this.genomeStanza.getProperty("twoBitBptURL")
         }
