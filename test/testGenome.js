@@ -30,10 +30,10 @@ suite("testGenome", function () {
         this.timeout(400000)
 
         const reference = {
-            id: "GCF_016699485.2",
+            id: "GCF_000364345.1",
             format: "2bit",
-            twoBitURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.2bit",
-            chromSizesURL: "https://hgdownload.gi.ucsc.edu/hubs//GCA/011/100/615/GCA_011100615.1/GCA_011100615.1.chrom.sizes.txt"
+            twoBitURL: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/364/345/GCF_000364345.1/GCF_000364345.1.2bit",
+            chromSizesURL: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/364/345/GCF_000364345.1/GCF_000364345.1.chrom.sizes.txt"
         }
 
         const genome = await Genome.createGenome(reference)
