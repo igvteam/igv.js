@@ -1,4 +1,6 @@
 import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {convertToHubURL} from "../ucsc/ucscUtils.js"
+import Hub from "../ucsc/ucscHub.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json"
 const BACKUP_GENOMES_URL = "https://s3.amazonaws.com/igv.org.genomes/genomes.json"
@@ -57,7 +59,7 @@ const GenomeUtils = {
     },
 
     // Expand a genome id to a reference object, if needed
-    expandReference: function (alert, idOrConfig) {
+    expandReference: async function (alert, idOrConfig) {
 
         // idOrConfig might be json
         if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
@@ -74,15 +76,27 @@ const GenomeUtils = {
         } else if (idOrConfig.genome) {
             genomeID = idOrConfig.genome
         } else if (idOrConfig.id !== undefined && !(idOrConfig.fastaURL || idOrConfig.twobitURL)) {
-            // Backward compatibility
+            // Backward compatibilityz
             genomeID = idOrConfig.id
         }
 
         if (genomeID) {
             const knownGenomes = GenomeUtils.KNOWN_GENOMES
-            const reference = knownGenomes[genomeID]
+            let reference = knownGenomes[genomeID]
             if (!reference) {
-                alert.present(new Error(`Unknown genome id: ${genomeID}`), undefined)
+                if ((genomeID.startsWith("GCA_") || genomeID.startsWith("GCF_")) && genomeID.length >= 13) {
+                    try {
+                        const hubURL = convertToHubURL(genomeID)
+                        const hub = await Hub.loadHub(hubURL)
+                        reference = hub.getGenomeConfig("genes")
+                    } catch (e) {
+                        console.error(e)
+                    }
+                }
+
+                if(!reference) {
+                    alert.present(new Error(`Unknown genome id: ${genomeID}`), undefined)
+                }
             }
             return reference
         } else {

@@ -56,7 +56,7 @@ import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
-import { trackViewportPopoverList } from './trackViewport.js'
+import {trackViewportPopoverList} from './trackViewport.js'
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -146,7 +146,7 @@ class Browser {
             if (trackViewportPopoverList.length > 0) {
                 const len = trackViewportPopoverList.length
                 for (let i = 0; i < len; i++) {
-                    trackViewportPopoverList[ i ].dispose()
+                    trackViewportPopoverList[i].dispose()
                 }
                 trackViewportPopoverList.length = 0
             }
@@ -576,12 +576,12 @@ class Browser {
             console.warn("No genome or reference object specified")
             return
         }
+
         const genomeConfig = StringUtils.isString(genomeOrReference) ?
             await GenomeUtils.expandReference(this.alert, genomeOrReference) :
             genomeOrReference
 
-
-        await this.loadReference(genomeConfig, session.locus)
+        await this.loadReference(genomeConfig, genomeConfig.locus || session.locus)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
@@ -707,6 +707,8 @@ class Browser {
      */
     async loadReference(genomeConfig, initialLocus) {
 
+        this.removeAllTracks()   // Do this first, before new genome is set
+
         const genome = await Genome.createGenome(genomeConfig)
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
@@ -715,7 +717,6 @@ class Browser {
 
         this.updateNavbarDOMWithGenome(genome)
 
-        this.removeAllTracks()
 
         let locus = initialLocus || genome.initialLocus
         if (Array.isArray(locus)) {

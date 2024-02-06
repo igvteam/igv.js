@@ -13,11 +13,11 @@ class Hub {
     static filterTracks = new Set(["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
         "cpgIslandExtUnmasked", "windowMasker"])
 
-    static async loadHub(url, options) {
+    static async loadHub(url) {
 
         const idx = url.lastIndexOf("/")
         const baseURL = url.substring(0, idx + 1)
-        const stanzas = await loadStanzas(url, options)
+        const stanzas = await loadStanzas(url)
         let groups
         if ("genome" === stanzas[1].type) {
             const genome = stanzas[1]
@@ -44,7 +44,7 @@ class Hub {
 
     constructor(url, stanzas, groupStanzas) {
 
-        this.url = url;
+        this.url = url
 
         const idx = url.lastIndexOf("/")
         this.baseURL = url.substring(0, idx + 1)
@@ -112,17 +112,27 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
 
     getGenomeConfig(includeTrackGroups = "all") {
         // TODO -- add blat?  htmlPath?
+
+        const id = this.genomeStanza.getProperty("genome")
+        const gsName = this.genomeStanza.getProperty("scientificName") || this.genomeStanza.getProperty("organism") || this.genomeStanza.getProperty("description");
+        const name = gsName + (gsName ? ` (${id})` : ` ${id}`);
+
         const config = {
             hubURL: this.url,
-            id: this.genomeStanza.getProperty("genome"),
-            name: this.genomeStanza.getProperty("scientificName") || this.genomeStanza.getProperty("organism") || this.genomeStanza.getProperty("description"),
+            id: id,
+            name: name,
             twoBitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
             nameSet: "ucsc",
             wholeGenomeView: false,
         }
 
         if (this.genomeStanza.hasProperty("defaultPos")) {
-            config.locus = this.genomeStanza.getProperty("defaultPos")
+            const hubLocus = this.genomeStanza.getProperty("defaultPos")
+            // Strip out coordinates => whole chromosome view
+            if (hubLocus) {
+                const idx = hubLocus.lastIndexOf(":")
+                config.locus = idx > 0 ? hubLocus.substring(0, idx) : hubLocus
+            }
         }
 
         config.description = config.id
@@ -190,6 +200,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         // Organize track configs by group
         const trackConfigMap = new Map()
         for (let c of this.#getTracksConfigs()) {
+            if (c.name === "cytoBandIdeo") continue
             const groupName = c.group || "other"
             if (trackConfigMap.has(groupName)) {
                 trackConfigMap.get(groupName).push(c)
@@ -397,7 +408,7 @@ class Stanza {
  * @param url
  * @returns {Promise<*[]>}
  */
-async function loadStanzas(url, options) {
+async function loadStanzas(url) {
 
     const data = await igvxhr.loadString(url)
     const lines = data.split(/\n|\r\n|\r/g)

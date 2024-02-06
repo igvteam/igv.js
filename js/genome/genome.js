@@ -181,7 +181,7 @@ class Genome {
     }
 
     get wgChromosomeNames() {
-        return this.#wgChromosomeNames.slice()
+        return this.#wgChromosomeNames ?  this.#wgChromosomeNames.slice() : undefined
     }
 
     /**
@@ -272,6 +272,21 @@ class Genome {
         return this.sequence.getSequence(chr, start, end)
     }
 
+    /**
+     * Return loaded sequence (i.e. cached or otherwise loaded) spanning the given region.  If no sequence has been
+     * loaded returns undefined.
+     *
+     * @param chr
+     * @param start
+     * @param end
+     */
+    getSequenceSync(chr, start, end) {
+        if(typeof this.sequence.getSequenceSync === 'function') {
+            return this.sequence.getSequenceSync(chr, start, end)
+        } else {
+            return undefined
+        }
+    }
 }
 
 /**
