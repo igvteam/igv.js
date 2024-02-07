@@ -143,6 +143,10 @@ class FeatureTrack extends TrackBase {
 
     async getFeatures(chr, start, end, bpPerPixel) {
         const visibilityWindow = this.visibilityWindow
+
+        // Fill the sequence cache. To allow synchronous calls to getSequenceSync further down stream
+        const dev_null = await this.browser.genome.getSequence(chr, start, end)
+
         return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
     };
 
