@@ -82,17 +82,17 @@ function getAminoAcidLetterWithExonGap(chr, strand, phase, phaseExtentStart, pha
         }
 
         if (remainder) {
-            stringA = this.browser.genome.getSequenceSync(chr, remainder.start, remainder.end)
+            stringB = this.browser.genome.getSequenceSync(chr, remainder.start, remainder.end)
 
-            if (undefined === stringA) {
+            if (undefined === stringB) {
                 return undefined
             }
 
             const leftPhase = getExonPhase(leftExon)
             const leftEnd = getExonEnd(leftExon)
-            stringB = this.browser.genome.getSequenceSync(chr, leftEnd - leftPhase, leftEnd)
+            stringA = this.browser.genome.getSequenceSync(chr, leftEnd - leftPhase, leftEnd)
 
-            if (undefined === stringB) {
+            if (undefined === stringA) {
                 return undefined
             }
 

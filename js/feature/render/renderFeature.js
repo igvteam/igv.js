@@ -292,13 +292,9 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
         if (phase > 0 || remainder) {
 
-            let result
-
-            if (phase > 0) {
-                result = getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ss - phase, ss, remainder, leftExon, exon, riteExon)
-            } else {
-                result = getAminoAcidLetterWithExonGap.call(this, chr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
-            }
+            const result = phase > 0
+                ? getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ss - phase, ss,           remainder, leftExon, exon, riteExon)
+                : getAminoAcidLetterWithExonGap.call(this, chr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
 
             if (result) {
                 const { left, rite } = result
@@ -328,13 +324,9 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
         if (phase > 0 || remainder) {
 
-            let result
-
-            if (phase > 0) {
-                result = getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ee, ee + phase, remainder, leftExon, exon, riteExon)
-            } else {
-                result = getAminoAcidLetterWithExonGap.call(this, chr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
-            }
+            const result = phase > 0
+                ? getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ee, ee + phase,           remainder, leftExon, exon, riteExon)
+                : getAminoAcidLetterWithExonGap.call(this, chr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
 
             if (result) {
                 const { left, rite } = result
