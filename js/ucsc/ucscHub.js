@@ -51,11 +51,11 @@ class Hub {
 
         // The first stanza must be type = hub
         if ("hub" === stanzas[0].type) {
-            this.hub = stanzas[0]
+            this.hubStanza = stanzas[0]
         } else {
             throw Error("Unexpected hub.txt file -- does the first line start with 'hub'?")
         }
-        if ("on" !== this.hub.getProperty("useOneFile")) {
+        if ("on" !== this.hubStanza.getProperty("useOneFile")) {
             throw Error("Only 'useOneFile' hubs are currently supported")
         }
         if (stanzas.length < 2) {
@@ -114,8 +114,12 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         // TODO -- add blat?  htmlPath?
 
         const id = this.genomeStanza.getProperty("genome")
-        const gsName = this.genomeStanza.getProperty("scientificName") || this.genomeStanza.getProperty("organism") || this.genomeStanza.getProperty("description");
-        const name = gsName + (gsName ? ` (${id})` : ` ${id}`);
+        const gsName =
+            this.hubStanza.getProperty("shortLabel") ||
+            this.genomeStanza.getProperty("scientificName") ||
+            this.genomeStanza.getProperty("organism") ||
+            this.genomeStanza.getProperty("description")
+        const name = gsName + (gsName ? ` (${id})` : ` ${id}`)
 
         const config = {
             hubURL: this.url,
@@ -134,8 +138,6 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
                 config.locus = idx > 0 ? hubLocus.substring(0, idx) : hubLocus
             }
         }
-
-        config.description = config.id
 
         if (this.genomeStanza.hasProperty("blat")) {
             config.blat = this.baseURL + this.genomeStanza.getProperty("blat")
@@ -158,18 +160,24 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         //     config.chromSizes = this.baseURL + this.genomeStanza.getProperty("chromSizes")
         // }
 
-        if (this.genomeStanza.hasProperty("description")) {
-            config.description += `\n${this.genomeStanza.getProperty("description")}`
-        }
-        if (this.genomeStanza.hasProperty("organism")) {
-            config.description += `\n${this.genomeStanza.getProperty("organism")}`
-        }
-        if (this.genomeStanza.hasProperty("scientificName")) {
-            config.description += `\n${this.genomeStanza.getProperty("scientificName")}`
-        }
 
-        if (this.genomeStanza.hasProperty("htmlPath")) {
-            config.infoURL = this.baseURL + this.genomeStanza.getProperty("htmlPath")
+        if (this.hubStanza.hasProperty("longLabel")) {
+            config.description = this.hubStanza.getProperty("longLabel").replace("/", "\n")
+        } else {
+            config.description = config.id
+            if (this.genomeStanza.hasProperty("description")) {
+                config.description += `\n${this.genomeStanza.getProperty("description")}`
+            }
+            if (this.genomeStanza.hasProperty("organism")) {
+                config.description += `\n${this.genomeStanza.getProperty("organism")}`
+            }
+            if (this.genomeStanza.hasProperty("scientificName")) {
+                config.description += `\n${this.genomeStanza.getProperty("scientificName")}`
+            }
+
+            if (this.genomeStanza.hasProperty("htmlPath")) {
+                config.infoURL = this.baseURL + this.genomeStanza.getProperty("htmlPath")
+            }
         }
 
         // Search for cytoband

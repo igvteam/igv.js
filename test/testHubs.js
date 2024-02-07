@@ -13,7 +13,7 @@ suite("hub.txt", function () {
     test("genome config", async function () {
 
         const hub = await Hub.loadHub("test/data/hubs/hub.txt")
-        assert.ok(hub.hub)
+        assert.ok(hub.hubStanza)
         assert.ok(hub.genomeStanza)
         assert.equal(22, hub.trackStanzas.length)
 
