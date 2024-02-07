@@ -4,6 +4,7 @@ import {randomRGB, randomRGBConstantAlpha} from "../../util/colorPalletes.js"
 import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
 import {getAminoAcidLetterWithExonGap, getEonStart, getExonEnd, getExonPhase} from "../exonUtils.js"
 import {translationDict} from "../../sequenceTrack.js"
+import {complementSequence} from "../../util/sequenceUtils.js"
 
 const aminoAcidSequenceRenderThreshold = 2
 
@@ -222,7 +223,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
             const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width
             IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#00f' })
         } else if (3 === sequence.length) {
-            const key = '+' === strand ? sequence : sequence.split('').reverse().join('')
+            const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
             const aminoAcidLetter = translationDict[key]
             const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width
             IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#00f' })
