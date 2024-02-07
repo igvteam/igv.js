@@ -20,23 +20,26 @@ function getAminoAcidLetterWithExonGap(chr, strand, phase, phaseExtentStart, pha
     let stringB = ''
     let triplet = ''
 
-    const aminoAcidLetters = { left: '', rite: '' }
+    const aminoAcidLetters = { left: undefined, rite: undefined }
     if ('+' === strand) {
-        stringB = this.browser.genome.getSequenceSync(chr, phaseExtentStart, phaseExtentEnd);
 
-        if (undefined === stringB) {
-            return undefined
+        if (phase) {
+            stringB = this.browser.genome.getSequenceSync(chr, phaseExtentStart, phaseExtentEnd);
+
+            if (undefined === stringB) {
+                return undefined
+            }
+
+            [ ss, ee ] = [ getExonEnd(leftExon) - (3 - phase), getExonEnd(leftExon)];
+            stringA = this.browser.genome.getSequenceSync(chr, ss, ee);
+
+            if (undefined === stringA) {
+                return undefined
+            }
+
+            triplet = stringA + stringB
+            aminoAcidLetters.left = { triplet, aminoAcidLetter: translationDict[ triplet ]}
         }
-
-        [ ss, ee ] = [ getExonEnd(leftExon) - (3 - phase), getExonEnd(leftExon)];
-        stringA = this.browser.genome.getSequenceSync(chr, ss, ee);
-
-        if (undefined === stringA) {
-            return undefined
-        }
-
-        triplet = stringA + stringB
-        aminoAcidLetters.left = { triplet, aminoAcidLetter: translationDict[ triplet ]}
 
         if (remainder) {
             stringA = this.browser.genome.getSequenceSync(chr, remainder.start, remainder.end)
@@ -55,28 +58,28 @@ function getAminoAcidLetterWithExonGap(chr, strand, phase, phaseExtentStart, pha
 
             triplet = stringA + stringB
             aminoAcidLetters.rite = { triplet, aminoAcidLetter: translationDict[ triplet ] }
-        } else {
-            aminoAcidLetters.rite = undefined
         }
-
 
     } else {
-        stringA = this.browser.genome.getSequenceSync(chr, phaseExtentStart, phaseExtentEnd);
 
-        if (undefined === stringA) {
-            return undefined
+        if (phase) {
+            stringA = this.browser.genome.getSequenceSync(chr, phaseExtentStart, phaseExtentEnd);
+
+            if (undefined === stringA) {
+                return undefined
+            }
+
+            [ ss, ee ] = [ getEonStart(riteExon), getEonStart(riteExon) + (3 - phase)];
+            stringB = this.browser.genome.getSequenceSync(chr, ss, ee);
+
+            if (undefined === stringB) {
+                return undefined
+            }
+
+            triplet = stringA + stringB;
+            triplet = triplet.split('').reverse().join('')
+            aminoAcidLetters.rite = { triplet, aminoAcidLetter: translationDict[ triplet ] }
         }
-
-        [ ss, ee ] = [ getEonStart(riteExon), getEonStart(riteExon) + (3 - phase)];
-        stringB = this.browser.genome.getSequenceSync(chr, ss, ee);
-
-        if (undefined === stringB) {
-            return undefined
-        }
-
-        triplet = stringA + stringB;
-        triplet = triplet.split('').reverse().join('')
-        aminoAcidLetters.rite = { triplet, aminoAcidLetter: translationDict[ triplet ] }
 
         if (remainder) {
             stringA = this.browser.genome.getSequenceSync(chr, remainder.start, remainder.end)
@@ -96,13 +99,12 @@ function getAminoAcidLetterWithExonGap(chr, strand, phase, phaseExtentStart, pha
             triplet = stringA + stringB
             triplet = triplet.split('').reverse().join('')
             aminoAcidLetters.left = { triplet, aminoAcidLetter: translationDict[ triplet ] }
-
         }
     }
 
-    const left = `left( triplet: ${ aminoAcidLetters.left.triplet }, letter ${ aminoAcidLetters.left.aminoAcidLetter } )`
-    const rite = aminoAcidLetters.rite ? `rite( triplet: ${ aminoAcidLetters.rite.triplet }, letter ${ aminoAcidLetters.rite.aminoAcidLetter })` : 'rite( NO REMAINDER)'
-    console.log(`amino-acids: ${ left } ${ rite }`)
+    // const left = `left( triplet: ${ aminoAcidLetters.left.triplet }, letter ${ aminoAcidLetters.left.aminoAcidLetter } )`
+    // const rite = aminoAcidLetters.rite ? `rite( triplet: ${ aminoAcidLetters.rite.triplet }, letter ${ aminoAcidLetters.rite.aminoAcidLetter })` : 'rite( NO REMAINDER)'
+    // console.log(`amino-acids: ${ left } ${ rite }`)
     return aminoAcidLetters
 }
 

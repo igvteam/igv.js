@@ -290,12 +290,22 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
             remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, undefined)
         }
 
-        if (phase > 0) {
-            const result = getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ss - phase, ss, remainder, leftExon, exon, riteExon)
+        if (phase > 0 || remainder) {
+
+            let result
+
+            if (phase > 0) {
+                result = getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ss - phase, ss, remainder, leftExon, exon, riteExon)
+            } else {
+                result = getAminoAcidLetterWithExonGap.call(this, chr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
+            }
 
             if (result) {
                 const { left, rite } = result
-                doPaint(strand, ss - phase, ss, '#83f902', left.aminoAcidLetter)
+
+                if (left) {
+                    doPaint(strand, ss - phase, ss, '#83f902', left.aminoAcidLetter)
+                }
 
                 if (rite) {
                     doPaint(strand, remainder.start, remainder.end, undefined, rite.aminoAcidLetter)
@@ -316,17 +326,26 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
             remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, undefined)
         }
 
-        if (phase > 0) {
-            const result = getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ee, ee + phase, remainder, leftExon, exon, riteExon)
+        if (phase > 0 || remainder) {
+
+            let result
+
+            if (phase > 0) {
+                result = getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ee, ee + phase, remainder, leftExon, exon, riteExon)
+            } else {
+                result = getAminoAcidLetterWithExonGap.call(this, chr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
+            }
 
             if (result) {
                 const { left, rite } = result
-                doPaint(strand, ee, ee + phase, '#83f902', rite.aminoAcidLetter)
+
+                if (rite) {
+                    doPaint(strand, ee, ee + phase, '#83f902', rite.aminoAcidLetter)
+                }
 
                 if (left) {
                     doPaint(strand, remainder.start, remainder.end, undefined, left.aminoAcidLetter)
                 }
-
 
             }
 
