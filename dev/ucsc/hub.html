@@ -43,7 +43,7 @@
         includeTracks: true
     }
 
-    const hub = await Hub.loadHub("", hubOptions)
+    const hub = await Hub.loadHub("https://hgdownload.soe.ucsc.edu/hubs/GCF/002/006/095/GCF_002006095.1/hub.txt", hubOptions)
 
     const igvConfig = {
         reference: hub.getGenomeConfig(),
