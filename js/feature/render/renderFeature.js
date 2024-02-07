@@ -6,7 +6,7 @@ import {getAminoAcidLetterWithExonGap, getEonStart, getExonEnd, getExonPhase} fr
 import {translationDict} from "../../sequenceTrack.js"
 import {complementSequence} from "../../util/sequenceUtils.js"
 
-const aminoAcidSequenceRenderThreshold = 2
+const aminoAcidSequenceRenderThreshold = 0.25
 
 /**
  * @param feature
@@ -52,8 +52,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         ctx.fillStyle = this.color
         ctx.strokeStyle = this.color
 
-        // const color = this.getColorForFeature(feature)
-        const color = '+' === feature.strand ? '#008cff' : '#ff2101'
+        const color = this.getColorForFeature(feature)
+        // const color = '+' === feature.strand ? '#008cff' : '#ff2101'
 
         ctx.fillStyle = color
         ctx.strokeStyle = color
@@ -168,8 +168,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                     // ctx.fillStyle = color
 
                     if (exon.readingFrame !== undefined) {
-                        const width = Math.max(1, Math.ceil(1 / options.bpPerPixel))
-                        if (width >= aminoAcidSequenceRenderThreshold) {
+
+                        if (options.bpPerPixel < aminoAcidSequenceRenderThreshold) {
 
                             const leftExon = i > 0                        && feature.exons[i - 1].readingFrame !== undefined ? feature.exons[i - 1] : undefined
                             const riteExon = i < feature.exons.length - 1 && feature.exons[i + 1].readingFrame !== undefined ? feature.exons[i + 1] : undefined
@@ -179,7 +179,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                     }
 
                     // Arrows
-                    if (ePw > step + 5 && direction !== 0) {
+                    if (ePw > step + 5 && direction !== 0 && options.bpPerPixel > aminoAcidSequenceRenderThreshold) {
                         ctx.fillStyle = "white"
                         ctx.strokeStyle = "white"
                         for (let x = ePx + step / 2; x < ePx1; x += step) {
@@ -205,6 +205,14 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
 function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height) {
 
+    const aaColors =
+        [
+            'rgb(92, 92, 164)',
+            'rgb(12, 12, 120)'
+        ]
+
+    let aminoAcidBackdropColorToggle = 0
+
     ctx.save()
 
     const renderNucleotideLetters = (sequence, width, xs, y) => {
@@ -216,17 +224,16 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         }
     }
 
-    let toggle = 0
     const rendeAminoAcidLetter = (strand, sequence, width, xs, y, aminoAcidLetter) => {
 
         if (aminoAcidLetter) {
             const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width
-            IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#00f' })
+            IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#ffffff' })
         } else if (3 === sequence.length) {
             const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
             const aminoAcidLetter = translationDict[key]
             const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width
-            IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#00f' })
+            IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#ffffff' })
         } else {
             renderNucleotideLetters(sequence, width, xs, y)
         }
@@ -242,16 +249,17 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         if (diagnosticColor) {
             ctx.fillStyle = diagnosticColor
         } else {
-            if ('+' === strand) {
-                ctx.fillStyle = 0 === toggle ? '#008cff' : 'rgba(135,206,235,0.36)'
-            } else {
-                ctx.fillStyle = 0 === toggle ? '#ff726e' : 'rgba(255,0,0,0.22)'
-            }
+            // if ('+' === strand) {
+            //     ctx.fillStyle = 0 === aminoAcidBackdropColorToggle ? '#028401' : '#cefa6e'
+            // } else {
+            //     ctx.fillStyle = 0 === aminoAcidBackdropColorToggle ? '#028401' : '#cefa6e'
+            // }
+            ctx.fillStyle = aaColors[ aminoAcidBackdropColorToggle ]
         }
 
-        toggle = 1 - toggle
-
         ctx.fillRect(xs, y, width, height)
+
+        aminoAcidBackdropColorToggle = 1 - aminoAcidBackdropColorToggle
 
         if (aminoAcidLetter) {
             ctx.save()
@@ -301,7 +309,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
                 const { left, rite } = result
 
                 if (left) {
-                    doPaint(strand, ss - phase, ss, '#83f902', left.aminoAcidLetter)
+                    doPaint(strand, ss - phase, ss, undefined, left.aminoAcidLetter)
                 }
 
                 if (rite) {
@@ -333,7 +341,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
                 const { left, rite } = result
 
                 if (rite) {
-                    doPaint(strand, ee, ee + phase, '#83f902', rite.aminoAcidLetter)
+                    doPaint(strand, ee, ee + phase, undefined, rite.aminoAcidLetter)
                 }
 
                 if (left) {
@@ -423,6 +431,6 @@ function getFeatureLabelY(featureY, transform) {
 
 // exon
 
-export { aminoAcidSequenceRenderThreshold, calculateFeatureCoordinates, renderFeature }
+export { calculateFeatureCoordinates, renderFeature }
 
 
