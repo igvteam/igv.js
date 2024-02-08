@@ -52,8 +52,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         ctx.fillStyle = this.color
         ctx.strokeStyle = this.color
 
-        // const color = this.getColorForFeature(feature)
-        const color = '+' === feature.strand ? 'rgba(135,206,235,0.5)' : 'rgba(255,20,147,0.5)'
+        const color = this.getColorForFeature(feature)
+        // const color = '+' === feature.strand ? 'rgba(135,206,235,0.5)' : 'rgba(255,20,147,0.5)'
 
         ctx.fillStyle = color
         ctx.strokeStyle = color
@@ -207,7 +207,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
     const aaColors =
         [
-            'rgb(92, 92, 164)',
+            'rgb(124,124,204)',
             'rgb(12, 12, 120)'
         ]
 
