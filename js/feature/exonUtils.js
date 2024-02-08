@@ -101,12 +101,11 @@ function getAminoAcidLetterWithExonGap(chr, strand, phase, phaseExtentStart, pha
             triplet = complementSequence(triplet.split('').reverse().join(''))
             aminoAcidLetters.left = { triplet, aminoAcidLetter: translationDict[ triplet ] }
         }
-
-        const left = aminoAcidLetters.left ? `left( triplet: ${ aminoAcidLetters.left.triplet }, letter ${ aminoAcidLetters.left.aminoAcidLetter })` : 'left( NO REMAINDER)'
-        const rite = aminoAcidLetters.rite ? `rite( triplet: ${ aminoAcidLetters.rite.triplet }, letter ${ aminoAcidLetters.rite.aminoAcidLetter })` : 'rite( NO REMAINDER)'
-        console.log(`amino-acids: ${ left } ${ rite }`)
-
     }
+
+    // const left = aminoAcidLetters.left ? `left( triplet: ${ aminoAcidLetters.left.triplet }, letter ${ aminoAcidLetters.left.aminoAcidLetter })` : 'left( NO REMAINDER)'
+    // const rite = aminoAcidLetters.rite ? `rite( triplet: ${ aminoAcidLetters.rite.triplet }, letter ${ aminoAcidLetters.rite.aminoAcidLetter })` : 'rite( NO REMAINDER)'
+    // console.log(`amino-acids: ${ left } ${ rite }`)
 
     return aminoAcidLetters
 }

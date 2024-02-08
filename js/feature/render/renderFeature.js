@@ -52,8 +52,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         ctx.fillStyle = this.color
         ctx.strokeStyle = this.color
 
-        const color = this.getColorForFeature(feature)
-        // const color = '+' === feature.strand ? 'rgba(101,211,19,0.5)' : 'rgba(255,2,137,0.47)'
+        // const color = this.getColorForFeature(feature)
+        const color = '+' === feature.strand ? 'rgba(135,206,235,0.5)' : 'rgba(255,20,147,0.5)'
 
         ctx.fillStyle = color
         ctx.strokeStyle = color
@@ -218,45 +218,42 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
     ctx.save()
 
-    const renderNucleotideLetters = (sequence, width, xs, y) => {
-        const baseLetterWindow = Math.floor(width/sequence.length)
-        for (let i = 0; i < sequence.length; i++) {
-            const baseLetter = sequence[ i ]
-            const letterWidth = ctx.measureText(baseLetter).width
-            IGVGraphics.fillText(ctx, baseLetter, xs + (i * baseLetterWindow) + (baseLetterWindow - letterWidth)/2, y, { fillStyle: '#000' })
+    const renderAminoAcidLetter = (strand, width, xs, y, aminoAcidLetter) => {
+
+        if ('STOP' === aminoAcidLetter) {
+            aminoAcidLetter = '*'
         }
+
+        const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width
+        IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#ffffff' })
     }
 
-    const rendeAminoAcidLetter = (strand, sequence, width, xs, y, aminoAcidLetter) => {
-
-        if (aminoAcidLetter) {
-            const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width
-            IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#ffffff' })
-        } else if (3 === sequence.length) {
-            const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
-            const aminoAcidLetter = translationDict[key]
-            const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width
-            IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#ffffff' })
-        } else {
-            renderNucleotideLetters(sequence, width, xs, y)
-        }
-    }
-
-    const doPaint = (strand, start, end, diagnosticColor, aminoAcidLetter) => {
+    const doPaint = (strand, start, end, aminoAcidLetter) => {
 
         const xs = Math.round((start - bpStart) / bpPerPixel)
         const xe = Math.round((end - bpStart) / bpPerPixel)
 
         const width = xe - xs
 
-        if (diagnosticColor) {
-            ctx.fillStyle = diagnosticColor
+        let aaLetter
+        if (undefined === aminoAcidLetter) {
+
+            const sequence = this.browser.genome.getSequenceSync(chr, start, end)
+
+            if (sequence && 3 === sequence.length) {
+                const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
+                aaLetter = translationDict[key]
+            }
+
         } else {
-            // if ('+' === strand) {
-            //     ctx.fillStyle = 0 === aminoAcidBackdropColorToggle ? '#028401' : '#cefa6e'
-            // } else {
-            //     ctx.fillStyle = 0 === aminoAcidBackdropColorToggle ? '#028401' : '#cefa6e'
-            // }
+            aaLetter = aminoAcidLetter
+        }
+
+        if ('M' === aaLetter) {
+            ctx.fillStyle = '#83f902'
+        } else if ('STOP' === aaLetter) {
+            ctx.fillStyle = '#ff2101'
+        } else {
             ctx.fillStyle = aaColors[ aminoAcidBackdropColorToggle ]
         }
 
@@ -266,20 +263,10 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
         aminoAcidBackdropColorToggle = 1 - aminoAcidBackdropColorToggle
 
-
-        if (aminoAcidLetter) {
+        if (aaLetter) {
             ctx.save()
-            rendeAminoAcidLetter(strand, undefined, width, xs, y + height, aminoAcidLetter)
+            renderAminoAcidLetter(strand, width, xs, y + height, aaLetter)
             ctx.restore()
-        } else {
-            const sequence = this.browser.genome.getSequenceSync(chr, start, end)
-
-            if (sequence && 3 === sequence.length) {
-                ctx.save()
-                rendeAminoAcidLetter(strand, sequence, width, xs, y + height, aminoAcidLetter)
-                ctx.restore()
-            }
-
         }
 
         const widthBP = end - start
@@ -302,7 +289,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
         for (bpTripletStart = ss; bpTripletStart < ee; bpTripletStart += 3) {
             bpTripletEnd = Math.min(ee, bpTripletStart + 3)
-            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, undefined)
+            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
         }
 
         if (phase > 0 || remainder) {
@@ -315,11 +302,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
                 const { left, rite } = result
 
                 if (left) {
-                    doPaint(strand, ss - phase, ss, aaColors[ 1 - firstIndex], left.aminoAcidLetter)
+                    doPaint(strand, ss - phase, ss, left.aminoAcidLetter)
                 }
 
                 if (rite) {
-                    doPaint(strand, remainder.start, remainder.end, aaColors[ 1 - lastIndex], rite.aminoAcidLetter)
+                    doPaint(strand, remainder.start, remainder.end, rite.aminoAcidLetter)
                 }
 
             }
@@ -334,7 +321,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
         for (bpTripletEnd = ee; bpTripletEnd > ss; bpTripletEnd -= 3) {
             bpTripletStart = Math.max(ss, bpTripletEnd - 3)
-            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, undefined)
+            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
         }
 
         if (phase > 0 || remainder) {
@@ -347,11 +334,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
                 const { left, rite } = result
 
                 if (rite) {
-                    doPaint(strand, ee, ee + phase, aaColors[ 1 - firstIndex], rite.aminoAcidLetter)
+                    doPaint(strand, ee, ee + phase, rite.aminoAcidLetter)
                 }
 
                 if (left) {
-                    doPaint(strand, remainder.start, remainder.end, aaColors[ 1 - lastIndex], left.aminoAcidLetter)
+                    doPaint(strand, remainder.start, remainder.end, left.aminoAcidLetter)
                 }
 
             }
