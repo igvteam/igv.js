@@ -207,7 +207,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#ffffff' })
     }
 
-    const doPaint = (strand, start, end, aminoAcidLetter, colorToggle) => {
+    const doPaint = (strand, start, end, aminoAcidLetter, colorToggle, index) => {
 
         const xs = Math.round((start - bpStart) / bpPerPixel)
         const xe = Math.round((end - bpStart) / bpPerPixel)
@@ -228,7 +228,9 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
             aaLetter = aminoAcidLetter
         }
 
-        if ('M' === aaLetter) {
+        if ('M' === aminoAcidLetter) {
+            ctx.fillStyle = '#83f902'
+        } else if ('M' === aaLetter && 0 === index) {
             ctx.fillStyle = '#83f902'
         } else if ('STOP' === aaLetter) {
             ctx.fillStyle = '#ff2101'
@@ -256,20 +258,21 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
     let bpTripletEnd
 
     let remainder
-    let aminoAcidBackdropColorToggle = 1
+    let aminoAcidBackdropColorCounter = 1
     let colorToggle
+    let index
     if ('+' === strand) {
 
         if (phase > 0) {
             ss += phase
         }
 
-        aminoAcidBackdropColorToggle = 1
-        for (bpTripletStart = ss; bpTripletStart < ee; bpTripletStart += 3) {
-            colorToggle = aminoAcidBackdropColorToggle % 2
+        aminoAcidBackdropColorCounter = 1
+        for (index = 0, bpTripletStart = ss; bpTripletStart < ee; index++, bpTripletStart += 3) {
+            colorToggle = aminoAcidBackdropColorCounter % 2
             bpTripletEnd = Math.min(ee, bpTripletStart + 3)
-            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, aminoAcidBackdropColorToggle % 2)
-            ++aminoAcidBackdropColorToggle
+            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, aminoAcidBackdropColorCounter % 2, index)
+            ++aminoAcidBackdropColorCounter
         }
 
         if (phase > 0 || remainder) {
@@ -282,11 +285,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
                 const { left, rite } = result
 
                 if (left) {
-                    doPaint(strand, ss - phase, ss, left.aminoAcidLetter, 0)
+                    doPaint(strand, ss - phase, ss, left.aminoAcidLetter, 0, undefined)
                 }
 
                 if (rite) {
-                    doPaint(strand, remainder.start, remainder.end, rite.aminoAcidLetter, colorToggle)
+                    doPaint(strand, remainder.start, remainder.end, rite.aminoAcidLetter, colorToggle, undefined)
                 }
 
             }
@@ -299,12 +302,13 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
             ee -= phase
         }
 
-        aminoAcidBackdropColorToggle = 1
-        for (bpTripletEnd = ee; bpTripletEnd > ss; bpTripletEnd -= 3) {
-            colorToggle = aminoAcidBackdropColorToggle % 2
+        aminoAcidBackdropColorCounter = 1
+        index = 0
+        for (index = 0, bpTripletEnd = ee; bpTripletEnd > ss; index++, bpTripletEnd -= 3) {
+            colorToggle = aminoAcidBackdropColorCounter % 2
             bpTripletStart = Math.max(ss, bpTripletEnd - 3)
-            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, aminoAcidBackdropColorToggle % 2)
-            ++aminoAcidBackdropColorToggle
+            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, aminoAcidBackdropColorCounter % 2, index)
+            ++aminoAcidBackdropColorCounter
         }
 
         if (phase > 0 || remainder) {
@@ -317,11 +321,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
                 const { left, rite } = result
 
                 if (rite) {
-                    doPaint(strand, ee, ee + phase, rite.aminoAcidLetter, 0)
+                    doPaint(strand, ee, ee + phase, rite.aminoAcidLetter, 0, undefined)
                 }
 
                 if (left) {
-                    doPaint(strand, remainder.start, remainder.end, left.aminoAcidLetter, colorToggle)
+                    doPaint(strand, remainder.start, remainder.end, left.aminoAcidLetter, colorToggle, undefined)
                 }
 
             }
