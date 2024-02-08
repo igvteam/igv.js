@@ -53,7 +53,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         ctx.strokeStyle = this.color
 
         const color = this.getColorForFeature(feature)
-        // const color = '+' === feature.strand ? '#008cff' : '#ff2101'
+        // const color = '+' === feature.strand ? 'rgba(101,211,19,0.5)' : 'rgba(255,2,137,0.47)'
 
         ctx.fillStyle = color
         ctx.strokeStyle = color
@@ -213,6 +213,9 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
     let aminoAcidBackdropColorToggle = 0
 
+    let firstIndex = aminoAcidBackdropColorToggle
+    let lastIndex
+
     ctx.save()
 
     const renderNucleotideLetters = (sequence, width, xs, y) => {
@@ -259,7 +262,10 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
 
         ctx.fillRect(xs, y, width, height)
 
+        lastIndex = aminoAcidBackdropColorToggle
+
         aminoAcidBackdropColorToggle = 1 - aminoAcidBackdropColorToggle
+
 
         if (aminoAcidLetter) {
             ctx.save()
@@ -309,11 +315,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
                 const { left, rite } = result
 
                 if (left) {
-                    doPaint(strand, ss - phase, ss, undefined, left.aminoAcidLetter)
+                    doPaint(strand, ss - phase, ss, aaColors[ 1 - firstIndex], left.aminoAcidLetter)
                 }
 
                 if (rite) {
-                    doPaint(strand, remainder.start, remainder.end, undefined, rite.aminoAcidLetter)
+                    doPaint(strand, remainder.start, remainder.end, aaColors[ 1 - lastIndex], rite.aminoAcidLetter)
                 }
 
             }
@@ -341,11 +347,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
                 const { left, rite } = result
 
                 if (rite) {
-                    doPaint(strand, ee, ee + phase, undefined, rite.aminoAcidLetter)
+                    doPaint(strand, ee, ee + phase, aaColors[ 1 - firstIndex], rite.aminoAcidLetter)
                 }
 
                 if (left) {
-                    doPaint(strand, remainder.start, remainder.end, undefined, left.aminoAcidLetter)
+                    doPaint(strand, remainder.start, remainder.end, aaColors[ 1 - lastIndex], left.aminoAcidLetter)
                 }
 
             }
