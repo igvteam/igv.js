@@ -131,41 +131,24 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                 }
 
                 if (exon.utr) {
-                    // DUGLA HACK
-                    // ctx.fillStyle = '#6e6e6e'
                     ctx.fillRect(ePx, py2, ePw, h2) // Entire exon is UTR
-                    // ctx.fillStyle = color
                 } else {
                     if (exon.cdStart) {
                         ePxU = Math.round((exon.cdStart - bpStart) / xScale)
-
-                        // DUGLA HACK
-                        // ctx.fillStyle = '#d278ff'
                         ctx.fillRect(ePx, py2, ePxU - ePx, h2) // start is UTR
-                        // ctx.fillStyle = color
-
                         ePw -= (ePxU - ePx)
                         ePx = ePxU
-
                     }
                     if (exon.cdEnd) {
                         ePxU = Math.round((exon.cdEnd - bpStart) / xScale)
-
-                        // DUGLA HACK
-                        // ctx.fillStyle = '#d278ff'
                         ctx.fillRect(ePxU, py2, ePx1 - ePxU, h2) // start is UTR
-                        // ctx.fillStyle = color
-
                         ePw -= (ePx1 - ePxU)
                         ePx1 = ePxU
                     }
 
                     ePw = Math.max(ePw, 1)
 
-                    // DUGLA HACK
-                    // ctx.fillStyle = '#cefa6e'
                     ctx.fillRect(ePx, py, ePw, h)
-                    // ctx.fillStyle = color
 
                     if (exon.readingFrame !== undefined) {
 
@@ -211,10 +194,6 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
             'rgb(12, 12, 120)'
         ]
 
-    let aminoAcidBackdropColorToggle = 0
-
-    let firstIndex = aminoAcidBackdropColorToggle
-    let lastIndex
 
     ctx.save()
 
@@ -228,7 +207,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#ffffff' })
     }
 
-    const doPaint = (strand, start, end, aminoAcidLetter) => {
+    const doPaint = (strand, start, end, aminoAcidLetter, colorToggle) => {
 
         const xs = Math.round((start - bpStart) / bpPerPixel)
         const xe = Math.round((end - bpStart) / bpPerPixel)
@@ -254,14 +233,10 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         } else if ('STOP' === aaLetter) {
             ctx.fillStyle = '#ff2101'
         } else {
-            ctx.fillStyle = aaColors[ aminoAcidBackdropColorToggle ]
+            ctx.fillStyle = aaColors[ colorToggle ]
         }
 
         ctx.fillRect(xs, y, width, height)
-
-        lastIndex = aminoAcidBackdropColorToggle
-
-        aminoAcidBackdropColorToggle = 1 - aminoAcidBackdropColorToggle
 
         if (aaLetter) {
             ctx.save()
@@ -281,15 +256,20 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
     let bpTripletEnd
 
     let remainder
+    let aminoAcidBackdropColorToggle = 1
+    let colorToggle
     if ('+' === strand) {
 
         if (phase > 0) {
             ss += phase
         }
 
+        aminoAcidBackdropColorToggle = 1
         for (bpTripletStart = ss; bpTripletStart < ee; bpTripletStart += 3) {
+            colorToggle = aminoAcidBackdropColorToggle % 2
             bpTripletEnd = Math.min(ee, bpTripletStart + 3)
-            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
+            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, aminoAcidBackdropColorToggle % 2)
+            ++aminoAcidBackdropColorToggle
         }
 
         if (phase > 0 || remainder) {
@@ -302,11 +282,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
                 const { left, rite } = result
 
                 if (left) {
-                    doPaint(strand, ss - phase, ss, left.aminoAcidLetter)
+                    doPaint(strand, ss - phase, ss, left.aminoAcidLetter, 0)
                 }
 
                 if (rite) {
-                    doPaint(strand, remainder.start, remainder.end, rite.aminoAcidLetter)
+                    doPaint(strand, remainder.start, remainder.end, rite.aminoAcidLetter, colorToggle)
                 }
 
             }
@@ -319,9 +299,12 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
             ee -= phase
         }
 
+        aminoAcidBackdropColorToggle = 1
         for (bpTripletEnd = ee; bpTripletEnd > ss; bpTripletEnd -= 3) {
+            colorToggle = aminoAcidBackdropColorToggle % 2
             bpTripletStart = Math.max(ss, bpTripletEnd - 3)
-            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined)
+            remainder = doPaint(strand, bpTripletStart, bpTripletEnd, undefined, aminoAcidBackdropColorToggle % 2)
+            ++aminoAcidBackdropColorToggle
         }
 
         if (phase > 0 || remainder) {
@@ -334,11 +317,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
                 const { left, rite } = result
 
                 if (rite) {
-                    doPaint(strand, ee, ee + phase, rite.aminoAcidLetter)
+                    doPaint(strand, ee, ee + phase, rite.aminoAcidLetter, 0)
                 }
 
                 if (left) {
-                    doPaint(strand, remainder.start, remainder.end, left.aminoAcidLetter)
+                    doPaint(strand, remainder.start, remainder.end, left.aminoAcidLetter, colorToggle)
                 }
 
             }
@@ -424,6 +407,6 @@ function getFeatureLabelY(featureY, transform) {
 
 // exon
 
-export { calculateFeatureCoordinates, renderFeature }
+export { aminoAcidSequenceRenderThreshold, calculateFeatureCoordinates, renderFeature }
 
 

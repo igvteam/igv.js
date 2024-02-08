@@ -19,30 +19,21 @@
         {
             showCursorTrackingGuide: true,
             showTrackLabels: false,
-            genome: "hg18",
+            genome: "hg19",
 
             // locus: "all",
 
-            locus: "egfr",
             // locus: "myc",
 
-            // locus: "asap1",
+            // 'M' is green in igvjs but not in desktop
+            // locus: 'chr12:25,362,721-25,362,774',
 
-            // + strand and - strand, side by side
-            // locus :
-            // [
-            //     'chr8:132,912,784-133,034,086',
-            //     'chr8:133,073,149-133,127,032'
-            // ],
+            // background color toggle bug
+            // locus: 'chr8:128,751,250-128,751,289',
 
-            // readingFrame 0 - Concluding bpDelta 3
-            // locus: "chr8:128,748,717-128,748,928",
+            // undefined amino acid at left (phase) end of exon
+            locus: 'chr7:55,209,974-55,210,137',
 
-            // readingFrame 0 - Concluding bpDelta 1
-            // locus: "chr8:128,751,135-128,751,399",
-
-            // readingFrame 1 - Concluding bpDelta 2
-            // locus: "chr8:128,753,002-128,753,303",
             tracks:
                 [
                 ]
