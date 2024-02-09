@@ -671,8 +671,8 @@ class Browser {
             localTrackFileNames.push(...localIndexFileNames)
         }
 
-        if (/*undefined === session.parentApp &&*/ localTrackFileNames.length > 0) {
-            alert(`Local files cannot be loaded automatically.\nThis session contains the following local file(s):\n${ localTrackFileNames.join('\n')}`)
+        if (localTrackFileNames.length > 0) {
+            alert(`Local files cannot be loaded automatically.\nThis session contains the following local file(s):\n${ localTrackFileNames.map(str => `    ${ str}`).join('\n')}`)
         }
 
         const nonLocalTrackConfigurations = trackConfigurations.filter((config) => undefined === config.file)
@@ -1948,11 +1948,10 @@ class Browser {
         }
 
         if (localFileDetections.length > 0) {
-            alert(`Local files cannot be loaded automatically when a saved session is restored. This session will be saved with the following local file(s):\n${ localFileDetections.join('\n') }`)
+            alert(`This session will be saved with the following local file(s):\n${ localFileDetections.map(str => `    ${ str}`).join('\n') }\nLocal files cannot be loaded automatically when a saved session is restored.`)
         }
 
-        return json        // This is an object, not a json string
-
+        return json
     }
 
     compressedSession() {
