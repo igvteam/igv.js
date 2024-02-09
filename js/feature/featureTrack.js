@@ -9,7 +9,7 @@ import {renderSnp} from "./render/renderSnp.js"
 import {renderFusionJuncSpan} from "./render/renderFusionJunction.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
-import {isSecureContext} from "../util/igvUtils.js"
+import {isSecureContext, setBasePairExtent} from "../util/igvUtils.js"
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 const DEFAULT_COLOR = 'rgb(0, 0, 150)'
@@ -146,7 +146,9 @@ class FeatureTrack extends TrackBase {
 
         if (bpPerPixel < aminoAcidSequenceRenderThreshold) {
             // Fill the sequence cache. To allow synchronous calls to getSequenceSync further down stream
-            const dev_null = await this.browser.genome.getSequence(chr, start, end)
+            const extent = setBasePairExtent(start, end, 1e6)
+            console.log(`BP Extent ${ StringUtils.numberFormatter(extent.end - extent.start)} `)
+            const dev_null = await this.browser.genome.getSequence(chr, extent.start, extent.end)
         }
 
         return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})

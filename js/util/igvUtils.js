@@ -234,8 +234,19 @@ function getElementAbsoluteHeight(element) {
     return Math.ceil(margin + height);
 }
 
+function setBasePairExtent(start, end, extent) {
+    if (extent > (end - start)) {
+        const center = (end + start) / 2
+        const ss = Math.floor(center - extent/2)
+        const ee = Math.ceil(center + extent/2)
+        return { start:ss, end:ee }
+    } else {
+        return { start, end }
+    }
+}
+
 export {
     createColumn, extend, isSimpleType, buildOptions, validateGenomicExtent, doAutoscale, isNumber,
     getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext,
-    getElementAbsoluteHeight
+    getElementAbsoluteHeight, setBasePairExtent
 }

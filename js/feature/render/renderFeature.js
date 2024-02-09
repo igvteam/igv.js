@@ -1,7 +1,5 @@
 import GtexUtils from "../../gtex/gtexUtils.js"
 import IGVGraphics from "../../igv-canvas.js"
-import {randomRGB, randomRGBConstantAlpha} from "../../util/colorPalletes.js"
-import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
 import {getAminoAcidLetterWithExonGap, getEonStart, getExonEnd, getExonPhase} from "../exonUtils.js"
 import {translationDict} from "../../sequenceTrack.js"
 import {complementSequence} from "../../util/sequenceUtils.js"
