@@ -69,6 +69,7 @@ class NavbarButton {
     configureButton(title) {
 
         this.groupElement = undefined
+        this.button.title = title
         this.button.innerHTML = ''
         this.button.style.backgroundImage = 'none'
         this.button.classList.remove('igv-navbar-icon-button')
