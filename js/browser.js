@@ -838,6 +838,26 @@ class Browser {
             this.cursorGuideButton.boundMouseClickHandler()
         }
 
+        this.setCenterLineAndCenterLineButtonVisibility(GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
+
+    }
+
+    setCenterLineAndCenterLineButtonVisibility(isWholeGenomeView) {
+
+        if (isWholeGenomeView) {
+            this.centerLineButton.setVisibility(!isWholeGenomeView)
+        } else {
+            this.centerLineButton.setVisibility(this.config.showCenterGuideButton)
+        }
+
+        for (let centerLine of this.centerLineList) {
+            if (isWholeGenomeView) {
+                this.setCenterLineVisibility(!isWholeGenomeView)
+            } else {
+                this.setCenterLineVisibility(this.doShowCenterLine)
+            }
+        }
+
     }
 
     setTrackLabelVisibility(isVisible) {

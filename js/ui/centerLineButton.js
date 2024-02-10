@@ -49,10 +49,6 @@ class CenterLineButton extends NavbarButton {
 
         const mouseClickHandler = () => {
 
-            // if (false === browser.doShowCenterLine && GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr)) {
-            //     return
-            // }
-
             browser.doShowCenterLine = !browser.doShowCenterLine
             browser.setCenterLineVisibility(browser.doShowCenterLine)
             this.setState(browser.doShowCenterLine)
