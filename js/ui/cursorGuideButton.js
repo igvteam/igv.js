@@ -49,9 +49,9 @@ class CursorGuideButton extends NavbarButton {
 
         const mouseClickHandler = () => {
 
-            if (false === browser.doShowCursorGuide && GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr)) {
-                return
-            }
+            // if (false === browser.doShowCursorGuide && GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr)) {
+            //     return
+            // }
 
             browser.doShowCursorGuide = !browser.doShowCursorGuide
             browser.setCursorGuideVisibility(browser.doShowCursorGuide)
