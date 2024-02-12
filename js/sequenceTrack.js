@@ -24,7 +24,7 @@
  */
 
 import IGVGraphics from "./igv-canvas.js"
-import {isSecureContext} from "./util/igvUtils.js"
+import {expandRegion, isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
 import {loadSequence} from "./genome/fasta.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js";
@@ -279,7 +279,8 @@ class SequenceTrack {
             return null
         } else {
             const sequenceSource = await this.getSequenceSource()
-            const sequence = await sequenceSource.getSequence(chr, start, end)
+            const extent = expandRegion(start, end, 1e5)
+            const sequence = await sequenceSource.getSequence(chr, extent.start, extent.end)
             return {
                 bpStart: start,
                 sequence: sequence

@@ -186,6 +186,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
 function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height) {
 
+    const seqChr = this.browser.genome.getChromosomeName(chr)
+
     const aaColors =
         [
             'rgb(124,124,204)',
@@ -215,7 +217,6 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         let aaLetter
         if (undefined === aminoAcidLetter) {
 
-            const seqChr = this.browser.genome.getChromosomeName(chr)
             const sequence = this.browser.genome.getSequenceSync(seqChr, start, end)
 
             if (sequence && 3 === sequence.length) {
@@ -277,8 +278,8 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         if (phase > 0 || remainder) {
 
             const result = phase > 0
-                ? getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ss - phase, ss, remainder, leftExon, exon, riteExon)
-                : getAminoAcidLetterWithExonGap.call(this, chr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
+                ? getAminoAcidLetterWithExonGap.call(this, seqChr, strand, phase, ss - phase, ss, remainder, leftExon, exon, riteExon)
+                : getAminoAcidLetterWithExonGap.call(this, seqChr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
 
             if (result) {
                 const {left, rite} = result
@@ -313,8 +314,8 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         if (phase > 0 || remainder) {
 
             const result = phase > 0
-                ? getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ee, ee + phase, remainder, leftExon, exon, riteExon)
-                : getAminoAcidLetterWithExonGap.call(this, chr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
+                ? getAminoAcidLetterWithExonGap.call(this, seqChr, strand, phase, ee, ee + phase, remainder, leftExon, exon, riteExon)
+                : getAminoAcidLetterWithExonGap.call(this, seqChr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
 
             if (result) {
                 const {left, rite} = result

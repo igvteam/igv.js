@@ -21,15 +21,16 @@ class Genome {
 
     #wgChromosomeNames
 
-    static async createGenome(options) {
+    static async createGenome(options, browser) {
 
-        const genome = new Genome(options)
+        const genome = new Genome(options, browser)
         await genome.init()
         return genome
     }
 
-    constructor(config) {
+    constructor(config, browser) {
         this.config = config
+        this.browser = browser
         this.id = config.id || generateGenomeID(config)
         this.name = config.name
         this.nameSet = config.nameSet
@@ -40,7 +41,7 @@ class Genome {
 
         const config = this.config
 
-        this.sequence = await loadSequence(config)
+        this.sequence = await loadSequence(config, this.browser)
 
         if (config.chromSizesURL) {
             // a chromSizes file is neccessary for 2bit sequences for whole-genome view or chromosome pulldown
@@ -124,7 +125,7 @@ class Genome {
     }
 
     getChromosomeName(chr) {
-        return this.chromAlias ? this.chromAlias.getChromosomeName(chr) : chr
+        return this.chromAlias ? this.chromAlias.getChromosomeName(chr, this.chromosomes.keys()) : chr
     }
 
     getChromosomeDisplayName(str) {

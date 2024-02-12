@@ -709,7 +709,7 @@ class Browser {
 
         this.removeAllTracks()   // Do this first, before new genome is set
 
-        const genome = await Genome.createGenome(genomeConfig)
+        const genome = await Genome.createGenome(genomeConfig, this)
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 

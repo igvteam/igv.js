@@ -234,7 +234,15 @@ function getElementAbsoluteHeight(element) {
     return Math.ceil(margin + height);
 }
 
-function setBasePairExtent(start, end, extent) {
+/**
+ * Expand the region represented by (start,end) to span the extent.
+ *
+ * @param start
+ * @param end
+ * @param extent
+ * @returns {{start, end}|{start: number, end: number}}
+ */
+function expandRegion(start, end, extent) {
     if (extent > (end - start)) {
         const center = (end + start) / 2
         const ss = Math.floor(center - extent/2)
@@ -248,5 +256,5 @@ function setBasePairExtent(start, end, extent) {
 export {
     createColumn, extend, isSimpleType, buildOptions, validateGenomicExtent, doAutoscale, isNumber,
     getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext,
-    getElementAbsoluteHeight, setBasePairExtent
+    getElementAbsoluteHeight, expandRegion
 }
