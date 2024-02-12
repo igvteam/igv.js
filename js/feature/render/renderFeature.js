@@ -113,7 +113,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
             for (let i = 0; i < feature.exons.length; i++) {
 
-                const exon = feature.exons[ i ]
+                const exon = feature.exons[i]
 
                 // draw the exons
                 let ePx = Math.round((exon.start - bpStart) / xScale)
@@ -152,7 +152,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
                         if (options.bpPerPixel < aminoAcidSequenceRenderThreshold) {
 
-                            const leftExon = i > 0                        && feature.exons[i - 1].readingFrame !== undefined ? feature.exons[i - 1] : undefined
+                            const leftExon = i > 0 && feature.exons[i - 1].readingFrame !== undefined ? feature.exons[i - 1] : undefined
                             const riteExon = i < feature.exons.length - 1 && feature.exons[i + 1].readingFrame !== undefined ? feature.exons[i + 1] : undefined
 
                             renderAminoAcidSequence.call(this, ctx, feature.chr, feature.strand, leftExon, exon, riteExon, bpStart, options.bpPerPixel, py, h, color)
@@ -202,7 +202,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         }
 
         const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width
-        IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth)/2, y - 4, { fillStyle: '#ffffff' })
+        IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth) / 2, y - 4, {fillStyle: '#ffffff'})
     }
 
     const doPaint = (strand, start, end, aminoAcidLetter, colorToggle, index) => {
@@ -215,7 +215,8 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         let aaLetter
         if (undefined === aminoAcidLetter) {
 
-            const sequence = this.browser.genome.getSequenceSync(chr, start, end)
+            const seqChr = this.browser.genome.getChromosomeName(chr)
+            const sequence = this.browser.genome.getSequenceSync(seqChr, start, end)
 
             if (sequence && 3 === sequence.length) {
                 const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
@@ -233,7 +234,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         } else if ('STOP' === aaLetter) {
             ctx.fillStyle = '#ff2101'
         } else {
-            ctx.fillStyle = aaColors[ colorToggle ]
+            ctx.fillStyle = aaColors[colorToggle]
         }
 
         ctx.fillRect(xs, y, width, height)
@@ -245,7 +246,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         }
 
         const widthBP = end - start
-        return widthBP > 0 && widthBP < 3 ? { start, end } : undefined
+        return widthBP > 0 && widthBP < 3 ? {start, end} : undefined
     }
 
     const phase = getExonPhase(exon)
@@ -276,11 +277,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         if (phase > 0 || remainder) {
 
             const result = phase > 0
-                ? getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ss - phase, ss,           remainder, leftExon, exon, riteExon)
+                ? getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ss - phase, ss, remainder, leftExon, exon, riteExon)
                 : getAminoAcidLetterWithExonGap.call(this, chr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
 
             if (result) {
-                const { left, rite } = result
+                const {left, rite} = result
 
                 if (left) {
                     doPaint(strand, ss - phase, ss, left.aminoAcidLetter, 0, undefined)
@@ -312,11 +313,11 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         if (phase > 0 || remainder) {
 
             const result = phase > 0
-                ? getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ee, ee + phase,           remainder, leftExon, exon, riteExon)
+                ? getAminoAcidLetterWithExonGap.call(this, chr, strand, phase, ee, ee + phase, remainder, leftExon, exon, riteExon)
                 : getAminoAcidLetterWithExonGap.call(this, chr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
 
             if (result) {
-                const { left, rite } = result
+                const {left, rite} = result
 
                 if (rite) {
                     doPaint(strand, ee, ee + phase, rite.aminoAcidLetter, 0, undefined)
@@ -409,6 +410,6 @@ function getFeatureLabelY(featureY, transform) {
 
 // exon
 
-export { aminoAcidSequenceRenderThreshold, calculateFeatureCoordinates, renderFeature }
+export {aminoAcidSequenceRenderThreshold, calculateFeatureCoordinates, renderFeature}
 
 
