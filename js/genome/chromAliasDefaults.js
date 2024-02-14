@@ -10,8 +10,10 @@ class ChromAliasDefaults {
     aliasRecordCache = new Map()
 
     constructor(id, chromosomeNames) {
-        this.init(id, chromosomeNames)
+        this.genomeID = id
+        this.update(id, chromosomeNames)
     }
+
 
     /**
      * Return the canonical chromosome name for the alias.  If none found return the alias
@@ -19,7 +21,10 @@ class ChromAliasDefaults {
      * @param alias
      * @returns {*}
      */
-    getChromosomeName(alias) {
+    getChromosomeName(alias, chromosomeNames) {
+        if(chromosomeNames) {
+            this.update(this.genomeID, chromosomeNames)
+        }
         return this.aliasRecordCache.has(alias) ? this.aliasRecordCache.get(alias).chr : alias
     }
 
@@ -35,11 +40,15 @@ class ChromAliasDefaults {
         return aliasRecord ? aliasRecord[nameSet] || chr : chr
     }
 
-    init(id, chromosomeNames) {
+    update(id, chromosomeNames) {
 
         if (chromosomeNames) {
             const aliasRecords = []
             for (let name of chromosomeNames) {
+
+                if(this.aliasRecordCache.has(name)) {
+                    continue;
+                }
 
                 let skipRest = false
                 const record = {chr: name}

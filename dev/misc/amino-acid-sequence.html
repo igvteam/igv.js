@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Dev - Amino Acid Sequence</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</head>
+
+<body>
+<div id="igv-container" style="width: auto; margin-left: 10px; border: 1px solid black;">
+</div>
+
+<script type="module">
+
+    import igv from '../../js/index.js'
+
+    const config =
+        {
+            showCursorTrackingGuide: true,
+            showTrackLabels: false,
+            genome: "hg19",
+
+            locus: "all",
+
+            // locus: "myc",
+
+            // 'M' is green in igvjs but not in desktop
+            // locus: 'chr12:25,362,710-25,362,855',
+
+            // background color toggle bug
+            // locus: 'chr8:128,751,250-128,751,289',
+
+            // undefined amino acid at left (phase) end of exon
+            // locus: 'chr7:55,087,036-55,087,075',
+
+            // undefined amino acid at right (remainder) end of exon
+            // locus: 'chr7:55,209,974-55,210,137',
+
+            tracks:
+                [
+                ]
+        }
+
+    igv.createBrowser(document.getElementById('igv-container'), config)
+
+</script>
+
+</body>
+</html>

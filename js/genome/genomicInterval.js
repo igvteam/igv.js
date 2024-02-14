@@ -1,20 +1,27 @@
-const GenomicInterval = function (chr, start, end, features) {
-    this.chr = chr
-    this.start = start
-    this.end = end
-    this.features = features
-}
+class GenomicInterval {
 
-GenomicInterval.prototype.contains = function (chr, start, end) {
-    return this.chr === chr &&
-        this.start <= start &&
-        this.end >= end
-}
+    constructor(chr, start, end, features) {
+        this.chr = chr
+        this.start = start
+        this.end = end
+        this.features = features
+    }
 
-GenomicInterval.prototype.containsRange = function (range) {
-    return this.chr === range.chr &&
-        this.start <= range.start &&
-        this.end >= range.end
+    contains(chr, start, end) {
+        return this.chr === chr &&
+            this.start <= start &&
+            this.end >= end
+    }
+
+    containsRange(range) {
+        return this.chr === range.chr &&
+            this.start <= range.start &&
+            this.end >= range.end
+    }
+
+    get locusString() {
+        return `${this.chr}:${this.start + 1}-${this.end}`
+    }
 }
 
 export default GenomicInterval

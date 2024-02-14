@@ -209,6 +209,11 @@ class ReferenceFrame {
     description(blurb) {
         console.log(` ${blurb || ''} referenceFrame - ${this.chr} bpp ${this.bpPerPixel.toFixed(3)} start ${StringUtils.numberFormatter(Math.round(this.start))} end ${StringUtils.numberFormatter(Math.round(this.end))} `)
     }
+
+    overlaps(interval) {
+        return this.chr === interval.chr && this.end >= interval.start && interval.end >= this.start
+    }
+
 }
 
 function createReferenceFrameList(loci, genome, browserFlanking, minimumBases, viewportWidth, isSoftclipped) {

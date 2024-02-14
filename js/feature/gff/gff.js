@@ -17,7 +17,7 @@ function decode(tokens, header) {
         end: parseInt(tokens[4]),
         score: "." === tokens[5] ? undefined : Number(tokens[5]),
         strand: tokens[6],
-        phase: "." === tokens[7] ? 0 : parseInt(tokens[7]),
+        phase: "." === tokens[7] ? "." : parseInt(tokens[7]),
         attributeString: tokens[8],
         delim: delim
     })

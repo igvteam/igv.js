@@ -7,13 +7,15 @@ const filterPopupProperties = new Set(["id", "parent", "name"])
 class GFFFeature {
 
     constructor(properties) {
+
         Object.assign(this, properties)
 
-        if (properties.phase && "." !== properties.phase) {
-            this.readingFrame = (3 - parseInt(this.phase)) % 3
+        if (properties.phase !== undefined && "." !== properties.phase) {
+            this.readingFrame = (3 - parseInt(properties.phase)) % 3
         }
 
     }
+
 
     popupData(genomicLocation) {
 
@@ -165,6 +167,8 @@ class GFFTranscript extends GFFFeature {
         if (exon) {
             exon.cdStart = exon.cdStart ? Math.min(cds.start, exon.cdStart) : cds.start
             exon.cdEnd = exon.cdEnd ? Math.max(cds.end, exon.cdEnd) : cds.end
+            exon.readingFrame = cds.readingFrame
+            // TODO -- merge attributes?
         } else {
             // cds.cdStart = cds.start
             // cds.cdEnd = cds.end
