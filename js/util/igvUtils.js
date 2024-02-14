@@ -234,8 +234,27 @@ function getElementAbsoluteHeight(element) {
     return Math.ceil(margin + height);
 }
 
+/**
+ * Expand the region represented by (start,end) to span the extent.
+ *
+ * @param start
+ * @param end
+ * @param extent
+ * @returns {{start, end}|{start: number, end: number}}
+ */
+function expandRegion(start, end, extent) {
+    if (extent > (end - start)) {
+        const center = (end + start) / 2
+        const ss = Math.floor(center - extent/2)
+        const ee = Math.ceil(center + extent/2)
+        return { start:ss, end:ee }
+    } else {
+        return { start, end }
+    }
+}
+
 export {
     createColumn, extend, isSimpleType, buildOptions, validateGenomicExtent, doAutoscale, isNumber,
     getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext,
-    getElementAbsoluteHeight
+    getElementAbsoluteHeight, expandRegion
 }

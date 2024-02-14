@@ -57,6 +57,7 @@ import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
 import {trackViewportPopoverList} from './trackViewport.js'
+import {bppSequenceThreshold} from "./sequenceTrack.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -709,7 +710,7 @@ class Browser {
 
         this.removeAllTracks()   // Do this first, before new genome is set
 
-        const genome = await Genome.createGenome(genomeConfig)
+        const genome = await Genome.createGenome(genomeConfig, this)
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
@@ -1418,6 +1419,12 @@ class Browser {
         const trackViews = this.trackViews
 
         this.updateLocusSearchWidget()
+
+        for(let frame of this.referenceFrameList) {
+            if(frame.bpPerPixel <= bppSequenceThreshold) {
+                await this.genome.getSequence(frame.chr, frame.start, frame.start + 1)
+            }
+        }
 
         for (let centerGuide of this.centerLineList) {
             centerGuide.repaint()

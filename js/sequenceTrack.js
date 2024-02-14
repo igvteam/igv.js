@@ -24,7 +24,7 @@
  */
 
 import IGVGraphics from "./igv-canvas.js"
-import {isSecureContext} from "./util/igvUtils.js"
+import {expandRegion, isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
 import {loadSequence} from "./genome/fasta.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js";
@@ -113,9 +113,10 @@ const FRAME_HEIGHT = 25
 const FRAME_BORDER = 5
 const BP_PER_PIXEL_THRESHOLD = 1 / 10
 
-const bppFeatureFetchThreshold = 10
+const bppSequenceThreshold = 10
 
 class SequenceTrack {
+
 
     constructor(config, browser) {
 
@@ -275,10 +276,11 @@ class SequenceTrack {
         start = Math.floor(start)
         end = Math.floor(end)
 
-        if (bpPerPixel && bpPerPixel > bppFeatureFetchThreshold) {
+        if (bpPerPixel && bpPerPixel > bppSequenceThreshold) {
             return null
         } else {
             const sequenceSource = await this.getSequenceSource()
+            //const extent = expandRegion(start, end, 1e5)
             const sequence = await sequenceSource.getSequence(chr, start, end)
             return {
                 bpStart: start,
@@ -455,7 +457,7 @@ class WrappedFasta {
 
 }
 
-export {defaultSequenceTrackOrder, bppFeatureFetchThreshold}
+export {defaultSequenceTrackOrder, bppSequenceThreshold, translationDict }
 
 export default SequenceTrack
 
