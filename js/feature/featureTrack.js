@@ -145,12 +145,6 @@ class FeatureTrack extends TrackBase {
 
         const visibilityWindow = this.visibilityWindow
 
-        if (bpPerPixel < aminoAcidSequenceRenderThreshold) {
-            // Fill the sequence cache. To allow synchronous calls to getSequenceSync further down stream
-            const extent = expandRegion(start, end, 1e5)
-            await this.browser.genome.getSequence(chr, extent.start, extent.end)
-        }
-
         return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
     }
 
@@ -182,27 +176,43 @@ class FeatureTrack extends TrackBase {
         }
     };
 
+    /**
+     *                 context: ctx,
+     *                 pixelXOffset,
+     *                 pixelWidth,
+     *                 pixelHeight,
+     *                 pixelTop,
+     *                 bpStart,
+     *                 bpEnd: bpEnd,
+     *                 bpPerPixel,
+     *                 windowFunction: this.windowFunction,
+     *                 referenceFrame: this.referenceFrame,
+     *                 selection: this.selection,
+     *                 viewport: this,
+     *                 viewportWidth: this.$viewport.width()
+     * @param options
+     */
     draw(options) {
 
-        const featureList = options.features
-        const ctx = options.context
-        const bpPerPixel = options.bpPerPixel
-        const bpStart = options.bpStart
-        const pixelWidth = options.pixelWidth
-        const pixelHeight = options.pixelHeight
-        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
+        const {features, context, bpPerPixel, bpStart, bpEnd, pixelWidth, pixelHeight, referenceFrame} = options
+
+        // If drawing amino acids fetch cached sequence interval.  It is not needed if track does not support AA, but
+        // costs nothing since only a reference to a cached object is fetched.
+        if (bpPerPixel < aminoAcidSequenceRenderThreshold) {
+            options.sequenceInterval = this.browser.genome.getSequenceInterval(referenceFrame.chr, bpStart, bpEnd)
+        }
 
 
         if (!this.config.isMergedTrack) {
-            IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+            IGVGraphics.fillRect(context, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
         }
 
-        if (featureList) {
+        if (features) {
 
             const rowFeatureCount = []
             options.rowLastX = []
             options.rowLastLabelX = []
-            for (let feature of featureList) {
+            for (let feature of features) {
                 if (feature.start > bpStart && feature.end < bpEnd) {
                     const row = this.displayMode === "COLLAPSED" ? 0 : feature.row || 0
                     if (!rowFeatureCount[row]) {
@@ -218,7 +228,7 @@ class FeatureTrack extends TrackBase {
             const pixelsPerFeature = pixelWidth / maxFeatureCount
 
             let lastPxEnd = []
-            for (let feature of featureList) {
+            for (let feature of features) {
                 if (feature.end < bpStart) continue
                 if (feature.start > bpEnd) break
                 const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row
@@ -227,14 +237,14 @@ class FeatureTrack extends TrackBase {
                 const last = lastPxEnd[row]
                 if (!last || pxEnd > last) {
 
-                    this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options)
+                    this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, context, options)
 
                     // Ensure a visible gap between features
                     const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
                     if (last && pxStart - last <= 0) {
-                        ctx.globalAlpha = 0.5
-                        IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
-                        ctx.globalAlpha = 1.0
+                        context.globalAlpha = 0.5
+                        IGVGraphics.strokeLine(context, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
+                        context.globalAlpha = 1.0
                     }
                     lastPxEnd[row] = pxEnd
                 }

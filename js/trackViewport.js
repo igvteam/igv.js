@@ -9,7 +9,7 @@ import {FileUtils} from "../node_modules/igv-utils/src/index.js"
 import {DOMUtils} from "../node_modules/igv-ui/dist/igv-ui.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genomeUtils.js"
-import {bppFeatureFetchThreshold} from "./sequenceTrack.js"
+import {bppSequenceThreshold} from "./sequenceTrack.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
@@ -96,7 +96,7 @@ class TrackViewport extends Viewport {
             }
         }
 
-        if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > bppFeatureFetchThreshold) {
+        if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > bppSequenceThreshold) {
             $(this.canvas).remove()
             this.canvas = undefined
             //this.featureCache = undefined
@@ -246,8 +246,8 @@ class TrackViewport extends Viewport {
         const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
         const pixelWidth = isWGV ? this.$viewport.width() : 3 * this.$viewport.width()
         const bpPerPixel = this.referenceFrame.bpPerPixel
-        const bpStart = this.referenceFrame.start - (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
-        const bpEnd = this.referenceFrame.end + (isWGV ? 0 : pixelWidth / 3 * bpPerPixel)
+        const bpStart = this.referenceFrame.start - (isWGV ? 0 : this.$viewport.width() * bpPerPixel)
+        const bpEnd = this.referenceFrame.end + (isWGV ? 0 : this.$viewport.width() * bpPerPixel) + 1
         return {
             bpStart, bpEnd, pixelWidth
         }

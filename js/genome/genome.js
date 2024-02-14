@@ -281,9 +281,9 @@ class Genome {
      * @param start
      * @param end
      */
-    getSequenceSync(chr, start, end) {
-        if(typeof this.sequence.getSequenceSync === 'function') {
-            return this.sequence.getSequenceSync(chr, start, end)
+    getSequenceInterval(chr, start, end) {
+        if(typeof this.sequence.getSequenceInterval === 'function') {
+            return this.sequence.getSequenceInterval(chr, start, end)
         } else {
             return undefined
         }

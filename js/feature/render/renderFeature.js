@@ -1,6 +1,6 @@
 import GtexUtils from "../../gtex/gtexUtils.js"
 import IGVGraphics from "../../igv-canvas.js"
-import {getAminoAcidLetterWithExonGap, getEonStart, getExonEnd, getExonPhase} from "../exonUtils.js"
+import {getEonStart, getExonEnd, getExonPhase} from "../exonUtils.js"
 import {translationDict} from "../../sequenceTrack.js"
 import {complementSequence} from "../../util/sequenceUtils.js"
 
@@ -150,12 +150,13 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
                     if (exon.readingFrame !== undefined) {
 
-                        if (options.bpPerPixel < aminoAcidSequenceRenderThreshold) {
+                        if (options.bpPerPixel < aminoAcidSequenceRenderThreshold &&
+                            options.sequenceInterval) {
 
                             const leftExon = i > 0 && feature.exons[i - 1].readingFrame !== undefined ? feature.exons[i - 1] : undefined
                             const riteExon = i < feature.exons.length - 1 && feature.exons[i + 1].readingFrame !== undefined ? feature.exons[i + 1] : undefined
 
-                            renderAminoAcidSequence.call(this, ctx, feature.chr, feature.strand, leftExon, exon, riteExon, bpStart, options.bpPerPixel, py, h, color)
+                            renderAminoAcidSequence.call(this, ctx, feature.strand, leftExon, exon, riteExon, bpStart, options.bpPerPixel, py, h, options.sequenceInterval)
                         }
                     }
 
@@ -184,9 +185,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     }
 }
 
-function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height) {
-
-    const seqChr = this.browser.genome.getChromosomeName(chr)
+function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height, sequenceInterval) {
 
     const aaColors =
         [
@@ -217,7 +216,7 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         let aaLetter
         if (undefined === aminoAcidLetter) {
 
-            const sequence = this.browser.genome.getSequenceSync(seqChr, start, end)
+            const sequence = sequenceInterval.getSequence(start, end)
 
             if (sequence && 3 === sequence.length) {
                 const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
@@ -278,8 +277,8 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         if (phase > 0 || remainder) {
 
             const result = phase > 0
-                ? getAminoAcidLetterWithExonGap.call(this, seqChr, strand, phase, ss - phase, ss, remainder, leftExon, exon, riteExon)
-                : getAminoAcidLetterWithExonGap.call(this, seqChr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
+                ? getAminoAcidLetterWithExonGap.call(this, strand, phase, ss - phase, ss, remainder, leftExon, exon, riteExon, sequenceInterval)
+                : getAminoAcidLetterWithExonGap.call(this, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon, sequenceInterval)
 
             if (result) {
                 const {left, rite} = result
@@ -314,8 +313,8 @@ function renderAminoAcidSequence(ctx, chr, strand, leftExon, exon, riteExon, bpS
         if (phase > 0 || remainder) {
 
             const result = phase > 0
-                ? getAminoAcidLetterWithExonGap.call(this, seqChr, strand, phase, ee, ee + phase, remainder, leftExon, exon, riteExon)
-                : getAminoAcidLetterWithExonGap.call(this, seqChr, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon)
+                ? getAminoAcidLetterWithExonGap.call(this, strand, phase, ee, ee + phase, remainder, leftExon, exon, riteExon, sequenceInterval)
+                : getAminoAcidLetterWithExonGap.call(this, strand, undefined, undefined, undefined, remainder, leftExon, exon, riteExon, sequenceInterval)
 
             if (result) {
                 const {left, rite} = result
@@ -408,6 +407,100 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
 function getFeatureLabelY(featureY, transform) {
     return transform ? featureY + 20 : featureY + 25
 }
+
+function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExtentEnd, remainder, leftExon, exon, riteExon, sequenceInterval) {
+
+    let ss
+    let ee
+    let stringA = ''
+    let stringB = ''
+    let triplet = ''
+
+    const aminoAcidLetters = {left: undefined, rite: undefined}
+    if ('+' === strand) {
+
+        if (phase) {
+            stringB = sequenceInterval.getSequence( phaseExtentStart, phaseExtentEnd)
+
+            if (!stringB) {
+                return undefined
+            }
+
+            [ss, ee] = [getExonEnd(leftExon) - (3 - phase), getExonEnd(leftExon)]
+            stringA = sequenceInterval.getSequence( ss, ee)
+
+            if (!stringA) {
+                return undefined
+            }
+
+            triplet = stringA + stringB
+            aminoAcidLetters.left = {triplet, aminoAcidLetter: translationDict[triplet]}
+        }
+
+        if (remainder) {
+            stringA = sequenceInterval.getSequence( remainder.start, remainder.end)
+
+            if (!stringA) {
+                return undefined
+            }
+
+            const ritePhase = getExonPhase(riteExon)
+            const riteStart = getEonStart(riteExon)
+            stringB = sequenceInterval.getSequence( riteStart, riteStart + ritePhase)
+
+            if (!stringB) {
+                return undefined
+            }
+
+            triplet = stringA + stringB
+            aminoAcidLetters.rite = {triplet, aminoAcidLetter: translationDict[triplet]}
+        }
+
+    } else {
+
+        if (phase) {
+            stringA = sequenceInterval.getSequence( phaseExtentStart, phaseExtentEnd)
+
+            if (undefined === stringA) {
+                return undefined
+            }
+
+            [ss, ee] = [getEonStart(riteExon), getEonStart(riteExon) + (3 - phase)]
+            stringB = sequenceInterval.getSequence( ss, ee)
+
+            if (undefined === stringB) {
+                return undefined
+            }
+
+            triplet = stringA + stringB
+            triplet = complementSequence(triplet.split('').reverse().join(''))
+            aminoAcidLetters.rite = {triplet, aminoAcidLetter: translationDict[triplet]}
+        }
+
+        if (remainder) {
+            stringB = sequenceInterval.getSequence( remainder.start, remainder.end)
+
+            if (undefined === stringB) {
+                return undefined
+            }
+
+            const leftPhase = getExonPhase(leftExon)
+            const leftEnd = getExonEnd(leftExon)
+            stringA = sequenceInterval.getSequence( leftEnd - leftPhase, leftEnd)
+
+            if (undefined === stringA) {
+                return undefined
+            }
+
+            triplet = stringA + stringB
+            triplet = complementSequence(triplet.split('').reverse().join(''))
+            aminoAcidLetters.left = {triplet, aminoAcidLetter: translationDict[triplet]}
+        }
+    }
+
+    return aminoAcidLetters
+}
+
 
 // exon
 
