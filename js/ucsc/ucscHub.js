@@ -434,9 +434,9 @@ async function loadStanzas(url) {
             // Break - start a new node
             startNewNode = true
         } else {
-            const key = line.substring(indent, i)
+            const key = line.substring(indent, i).trim()
             if (key.startsWith("#")) continue
-            const value = line.substring(i + 1)
+            const value = line.substring(i + 1).trim()
             if (startNewNode) {
                 // Start a new node -- indent is currently ignored as igv.js does not support sub-tracks,
                 // so track stanzas are flattened
