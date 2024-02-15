@@ -779,7 +779,7 @@ class Browser {
         let genomeConfig
         if (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
             const hub = await Hub.loadHub(idOrConfig.url, idOrConfig)
-            genomeConfig = hub.getGenomeConfig("genes")
+            genomeConfig = hub.getGenomeConfig()
         } else if (StringUtils.isString(idOrConfig)) {
             genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
         } else {
@@ -1420,8 +1420,8 @@ class Browser {
 
         this.updateLocusSearchWidget()
 
-        for(let frame of this.referenceFrameList) {
-            if(frame.bpPerPixel <= bppSequenceThreshold) {
+        for (let frame of this.referenceFrameList) {
+            if (frame.bpPerPixel <= bppSequenceThreshold) {
                 await this.genome.getSequence(frame.chr, frame.start, frame.start + 1)
             }
         }
