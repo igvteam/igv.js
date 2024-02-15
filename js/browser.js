@@ -779,7 +779,7 @@ class Browser {
         let genomeConfig
         if (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
             const hub = await Hub.loadHub(idOrConfig.url, idOrConfig)
-            genomeConfig = hub.getGenomeConfig()
+            genomeConfig = hub.getGenomeConfig("genes")
         } else if (StringUtils.isString(idOrConfig)) {
             genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
         } else {
