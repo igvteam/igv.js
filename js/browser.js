@@ -56,7 +56,7 @@ import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
-import { trackViewportPopoverList } from './trackViewport.js'
+import {trackViewportPopoverList} from './trackViewport.js'
 import TrackBase from "./trackBase.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
 
@@ -674,7 +674,7 @@ class Browser {
         }
 
         if (localTrackFileNames.length > 0) {
-            alert(`Local files cannot be loaded automatically.\nThis session contains the following local file(s):\n${ localTrackFileNames.map(str => `    ${ str}`).join('\n')}`)
+            alert(`Local files cannot be loaded automatically.\nThis session contains the following local file(s):\n${localTrackFileNames.map(str => `    ${str}`).join('\n')}`)
         }
 
         const nonLocalTrackConfigurations = trackConfigurations.filter((config) => undefined === config.file)
@@ -797,10 +797,12 @@ class Browser {
     async loadGenome(idOrConfig) {
 
         let genomeConfig
-        if (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
+        if (idOrConfig.url &&
+            StringUtils.isString(idOrConfig.url) &&
+            idOrConfig.url.endsWith("/hub.txt")) {
             const hub = await Hub.loadHub(idOrConfig.url, idOrConfig)
             genomeConfig = hub.getGenomeConfig()
-        } else if (StringUtils.isString(idOrConfig)) {
+        } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.hubURL)) {
             genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
         } else {
             genomeConfig = idOrConfig
@@ -1970,13 +1972,13 @@ class Browser {
         for (const json of trackJson) {
             for (const key of Object.keys(json)) {
                 if ('file' === key || 'indexFile' === key) {
-                    localFileDetections.push(json[ key ])
+                    localFileDetections.push(json[key])
                 }
             }
         }
 
         if (localFileDetections.length > 0) {
-            alert(`This session will be saved with the following local file(s):\n${ localFileDetections.map(str => `    ${ str}`).join('\n') }\nLocal files cannot be loaded automatically when a saved session is restored.`)
+            alert(`This session will be saved with the following local file(s):\n${localFileDetections.map(str => `    ${str}`).join('\n')}\nLocal files cannot be loaded automatically when a saved session is restored.`)
         }
 
         return json
