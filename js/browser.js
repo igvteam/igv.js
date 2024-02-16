@@ -56,8 +56,10 @@ import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
-import {trackViewportPopoverList} from './trackViewport.js'
+import { trackViewportPopoverList } from './trackViewport.js'
+import TrackBase from "./trackBase.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
+
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -481,6 +483,9 @@ class Browser {
         let session
         if (options.url || options.file) {
             session = await Browser.loadSessionFile(options)
+            // if (options.parentApp``) {
+            //     session.parentApp = options.parentApp
+            // }
         } else {
             session = options
         }
@@ -661,15 +666,28 @@ class Browser {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
+        const localTrackFileNames = trackConfigurations.filter((config) => undefined !== config.file).map(({file}) => file)
+
+        const localIndexFileNames = trackConfigurations.filter((config) => undefined !== config.indexFile).map(({indexFile}) => indexFile)
+        if (localIndexFileNames.length > 0) {
+            localTrackFileNames.push(...localIndexFileNames)
+        }
+
+        if (localTrackFileNames.length > 0) {
+            alert(`Local files cannot be loaded automatically.\nThis session contains the following local file(s):\n${ localTrackFileNames.map(str => `    ${ str}`).join('\n')}`)
+        }
+
+        const nonLocalTrackConfigurations = trackConfigurations.filter((config) => undefined === config.file)
+
         // Maintain track order unless explicitly set
         let trackOrder = 1
-        for (let t of trackConfigurations) {
+        for (let t of nonLocalTrackConfigurations) {
             if (undefined === t.order) {
                 t.order = trackOrder++
             }
         }
 
-        await this.loadTrackList(trackConfigurations)
+        await this.loadTrackList(nonLocalTrackConfigurations)
 
         // The ruler and ideogram tracks are not explicitly loaded, but needs updated nonetheless.
         for (let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler' || tv.track.type === 'ideogram')) {
@@ -677,6 +695,8 @@ class Browser {
         }
 
         this.updateUIWithReferenceFrameList()
+
+        return trackConfigurations
 
     }
 
@@ -779,7 +799,7 @@ class Browser {
         let genomeConfig
         if (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
             const hub = await Hub.loadHub(idOrConfig.url, idOrConfig)
-            genomeConfig = hub.getGenomeConfig("genes")
+            genomeConfig = hub.getGenomeConfig()
         } else if (StringUtils.isString(idOrConfig)) {
             genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
         } else {
@@ -1908,13 +1928,14 @@ class Browser {
         this.sampleInfo.toJSON(trackJson)
 
         const errors = []
-        for (let {track} of this.trackViews) {
+        for (const {track} of this.trackViews) {
             try {
+
                 let config
                 if (typeof track.getState === "function") {
-                    config = track.getState()
-                } else {
-                    config = track.config
+                    config = TrackBase.localFileInspection(track.getState())
+                } else if (track.config) {
+                    config = TrackBase.localFileInspection(track.config)
                 }
 
                 if (config) {
@@ -1922,12 +1943,15 @@ class Browser {
                     if (config.browser) {
                         delete config.browser
                     }
-                    config.order = track.order //order++;
+
+                    config.order = track.order
+
                     trackJson.push(config)
                 }
             } catch (e) {
-                console.error(`Track: ${track.name}: ${e}`)
-                errors.push(`Track: ${track.name}: ${e}`)
+                const str = `Track: ${track.name}: ${e}`
+                console.error(str)
+                errors.push(str)
             }
         }
 
@@ -1942,8 +1966,20 @@ class Browser {
 
         json["tracks"] = trackJson
 
-        return json        // This is an object, not a json string
+        const localFileDetections = []
+        for (const json of trackJson) {
+            for (const key of Object.keys(json)) {
+                if ('file' === key || 'indexFile' === key) {
+                    localFileDetections.push(json[ key ])
+                }
+            }
+        }
 
+        if (localFileDetections.length > 0) {
+            alert(`This session will be saved with the following local file(s):\n${ localFileDetections.map(str => `    ${ str}`).join('\n') }\nLocal files cannot be loaded automatically when a saved session is restored.`)
+        }
+
+        return json
     }
 
     compressedSession() {
