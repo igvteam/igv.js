@@ -58,6 +58,8 @@ import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
 import { trackViewportPopoverList } from './trackViewport.js'
 import TrackBase from "./trackBase.js"
+import {bppSequenceThreshold} from "./sequenceTrack.js"
+
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -728,7 +730,7 @@ class Browser {
 
         this.removeAllTracks()   // Do this first, before new genome is set
 
-        const genome = await Genome.createGenome(genomeConfig)
+        const genome = await Genome.createGenome(genomeConfig, this)
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
@@ -797,7 +799,7 @@ class Browser {
         let genomeConfig
         if (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
             const hub = await Hub.loadHub(idOrConfig.url, idOrConfig)
-            genomeConfig = hub.getGenomeConfig("genes")
+            genomeConfig = hub.getGenomeConfig()
         } else if (StringUtils.isString(idOrConfig)) {
             genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
         } else {
@@ -855,6 +857,26 @@ class Browser {
 
         if (this.doShowCursorGuide && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
             this.cursorGuideButton.boundMouseClickHandler()
+        }
+
+        this.setCenterLineAndCenterLineButtonVisibility(GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
+
+    }
+
+    setCenterLineAndCenterLineButtonVisibility(isWholeGenomeView) {
+
+        if (isWholeGenomeView) {
+            this.centerLineButton.setVisibility(!isWholeGenomeView)
+        } else {
+            this.centerLineButton.setVisibility(this.config.showCenterGuideButton)
+        }
+
+        for (let centerLine of this.centerLineList) {
+            if (isWholeGenomeView) {
+                this.setCenterLineVisibility(!isWholeGenomeView)
+            } else {
+                this.setCenterLineVisibility(this.doShowCenterLine)
+            }
         }
 
     }
@@ -1417,6 +1439,12 @@ class Browser {
         const trackViews = this.trackViews
 
         this.updateLocusSearchWidget()
+
+        for (let frame of this.referenceFrameList) {
+            if (frame.bpPerPixel <= bppSequenceThreshold) {
+                await this.genome.getSequence(frame.chr, frame.start, frame.start + 1)
+            }
+        }
 
         for (let centerGuide of this.centerLineList) {
             centerGuide.repaint()

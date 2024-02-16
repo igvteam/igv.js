@@ -23,19 +23,13 @@ class MultiTrackSelectButton extends NavbarButton {
         })
 
         const mouseClickHandler = () => {
-
             ENABLE_MULTI_TRACK_SELECTION = !ENABLE_MULTI_TRACK_SELECTION
-
             for (const trackView of this.browser.trackViews) {
-
                 if (false === multiTrackSelectExclusionTypes.has(trackView.track.type)) {
-
                     setMultiTrackSelectionState(trackView, trackView.axis, ENABLE_MULTI_TRACK_SELECTION)
-
-                } // if (false === multiTrackSelectExclusionTypes.has(trackView.track.type))
-
-            } // for (trackViews)
-
+                }
+            }
+            this.setState(ENABLE_MULTI_TRACK_SELECTION)
         }
 
         this.boundMouseClickHandler = mouseClickHandler.bind(this)

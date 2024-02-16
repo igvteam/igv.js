@@ -1,7 +1,7 @@
-
 import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import Chromosome from "./chromosome.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
+import SequenceInterval from "./sequenceInterval.js"
 
 const splitLines = StringUtils.splitLines
 
@@ -39,7 +39,7 @@ class NonIndexedFasta {
     }
 
     get chromosomeNames() {
-        if(!this.#chromosomeNames) {
+        if (!this.#chromosomeNames) {
             this.#chromosomeNames = Array.from(this.chromosomes.keys())
         }
         return this.#chromosomeNames
@@ -54,10 +54,6 @@ class NonIndexedFasta {
         if (this.sequences.size === 0) {
             await this.loadAll()
         }
-        return this.getSequenceSync(chr, start, end)
-    }
-
-    getSequenceSync(chr, start, end) {
 
         if (!this.sequences.has(chr)) {
             return undefined
@@ -116,7 +112,7 @@ class NonIndexedFasta {
                 // skip
             } else if (nextLine.startsWith(">")) {
                 // Start the next sequence
-                if(current && current.seq) {
+                if (current && current.seq) {
                     pushChromosome.call(this, current, order++)
                 }
 
@@ -173,7 +169,34 @@ class NonIndexedFasta {
             this.sequences.get(current.chr).push(new SequenceSlice(current.offset, current.seq))
         }
     }
+
+    /**
+     * Return the first cached interval containing the specified region, or undefined if no interval is found.
+     *
+     * @param chr
+     * @param start
+     * @param end
+     * @returns a SequenceInterval or undefined
+     */
+    getSequenceInterval(chr, start, end) {
+
+        const slices = this.sequences.get(chr)
+        if (!slices) return undefined
+
+        for (let sequenceSlice of slices) {
+            const seq = sequenceSlice.sequence
+            const seqStart = sequenceSlice.offset
+            const seqEnd = seqStart + seq.length
+
+            if (seqStart <= start && seqEnd >= end) {
+                return new SequenceInterval(chr, seqStart, seqEnd, seq)
+            }
+        }
+        return undefined
+
+    }
 }
+
 
 class SequenceSlice {
 

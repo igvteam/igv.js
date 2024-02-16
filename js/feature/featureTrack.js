@@ -4,12 +4,12 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"
-import {renderFeature} from "./render/renderFeature.js"
+import {aminoAcidSequenceRenderThreshold, renderFeature} from "./render/renderFeature.js"
 import {renderSnp} from "./render/renderSnp.js"
 import {renderFusionJuncSpan} from "./render/renderFusionJunction.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
-import {isSecureContext} from "../util/igvUtils.js"
+import {isSecureContext, expandRegion} from "../util/igvUtils.js"
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 const DEFAULT_COLOR = 'rgb(0, 0, 150)'
@@ -115,7 +115,7 @@ class FeatureTrack extends TrackBase {
     }
 
     async search(locus) {
-        if(this.featureSource && this.featureSource.searchable) {
+        if (this.featureSource && this.featureSource.searchable) {
             return this.featureSource.search(locus)
         } else {
             return undefined
@@ -142,9 +142,11 @@ class FeatureTrack extends TrackBase {
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
+
         const visibilityWindow = this.visibilityWindow
+
         return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
-    };
+    }
 
 
     /**
@@ -174,27 +176,43 @@ class FeatureTrack extends TrackBase {
         }
     };
 
+    /**
+     *                 context: ctx,
+     *                 pixelXOffset,
+     *                 pixelWidth,
+     *                 pixelHeight,
+     *                 pixelTop,
+     *                 bpStart,
+     *                 bpEnd: bpEnd,
+     *                 bpPerPixel,
+     *                 windowFunction: this.windowFunction,
+     *                 referenceFrame: this.referenceFrame,
+     *                 selection: this.selection,
+     *                 viewport: this,
+     *                 viewportWidth: this.$viewport.width()
+     * @param options
+     */
     draw(options) {
 
-        const featureList = options.features
-        const ctx = options.context
-        const bpPerPixel = options.bpPerPixel
-        const bpStart = options.bpStart
-        const pixelWidth = options.pixelWidth
-        const pixelHeight = options.pixelHeight
-        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
+        const {features, context, bpPerPixel, bpStart, bpEnd, pixelWidth, pixelHeight, referenceFrame} = options
+
+        // If drawing amino acids fetch cached sequence interval.  It is not needed if track does not support AA, but
+        // costs nothing since only a reference to a cached object is fetched.
+        if (bpPerPixel < aminoAcidSequenceRenderThreshold) {
+            options.sequenceInterval = this.browser.genome.getSequenceInterval(referenceFrame.chr, bpStart, bpEnd)
+        }
 
 
         if (!this.config.isMergedTrack) {
-            IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+            IGVGraphics.fillRect(context, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
         }
 
-        if (featureList) {
+        if (features) {
 
             const rowFeatureCount = []
             options.rowLastX = []
             options.rowLastLabelX = []
-            for (let feature of featureList) {
+            for (let feature of features) {
                 if (feature.start > bpStart && feature.end < bpEnd) {
                     const row = this.displayMode === "COLLAPSED" ? 0 : feature.row || 0
                     if (!rowFeatureCount[row]) {
@@ -210,7 +228,7 @@ class FeatureTrack extends TrackBase {
             const pixelsPerFeature = pixelWidth / maxFeatureCount
 
             let lastPxEnd = []
-            for (let feature of featureList) {
+            for (let feature of features) {
                 if (feature.end < bpStart) continue
                 if (feature.start > bpEnd) break
                 const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row
@@ -218,14 +236,15 @@ class FeatureTrack extends TrackBase {
                 const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel)
                 const last = lastPxEnd[row]
                 if (!last || pxEnd > last) {
-                    this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options)
+
+                    this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, context, options)
 
                     // Ensure a visible gap between features
                     const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
                     if (last && pxStart - last <= 0) {
-                        ctx.globalAlpha = 0.5
-                        IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
-                        ctx.globalAlpha = 1.0
+                        context.globalAlpha = 0.5
+                        IGVGraphics.strokeLine(context, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
+                        context.globalAlpha = 1.0
                     }
                     lastPxEnd[row] = pxEnd
                 }
@@ -336,13 +355,14 @@ class FeatureTrack extends TrackBase {
 
             for (const colorScheme of ["function", "class"]) {
 
-                const object = $(createCheckbox(`Color by ${ colorScheme }`, colorScheme === this.colorBy))
+                const object = $(createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy))
 
                 function colorSchemeHandler() {
                     this.colorBy = colorScheme
                     this.trackView.repaintViews()
                 }
-                menuItems.push({ object, click:colorSchemeHandler })
+
+                menuItems.push({object, click: colorSchemeHandler})
             }
         }
 
@@ -353,7 +373,7 @@ class FeatureTrack extends TrackBase {
                 "COLLAPSED": "Collapse",
                 "SQUISHED": "Squish",
                 "EXPANDED": "Expand"
-            };
+            }
 
         for (const displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
 
@@ -366,7 +386,7 @@ class FeatureTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
 
-            menuItems.push({ object, click:displayModeHandler })
+            menuItems.push({object, click: displayModeHandler})
         }
 
         return menuItems
