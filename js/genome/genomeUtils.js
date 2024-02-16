@@ -61,7 +61,7 @@ const GenomeUtils = {
     // Expand a genome id to a reference object, if needed
     expandReference: async function (alert, idOrConfig) {
 
-        // idOrConfig might be json
+        // idOrConfig might be a json string?  I'm actually not sure how this arises.
         if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
             try {
                 idOrConfig = JSON.parse(idOrConfig)
