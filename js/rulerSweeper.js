@@ -28,8 +28,11 @@ import {DOMUtils} from "../node_modules/igv-ui/dist/igv-ui.js"
 import {validateGenomicExtent} from "./util/igvUtils.js"
 import GenomeUtils from './genome/genomeUtils.js'
 import { ROI_USER_DEFINED_COLOR } from "./roi/ROISet.js"
+import {appleCrayonRGBA} from './util/colorPalletes.js'
+import {isSecureContext} from "./util/igvUtils.js"
 
 const RULER_SWEEPER_COLOR = 'rgba(68, 134, 247, 0.25)'
+const COPY_REGION_COLOR = appleCrayonRGBA('bubblegum', 2 / 16)
 
 class RulerSweeper {
 
@@ -97,7 +100,7 @@ class RulerSweeper {
 
 
             this.rulerSweeper.style.display = 'block'
-            this.rulerSweeper.style.backgroundColor = true === event.shiftKey ? ROI_USER_DEFINED_COLOR : RULER_SWEEPER_COLOR
+            this.rulerSweeper.style.backgroundColor = true === event.shiftKey ? ROI_USER_DEFINED_COLOR : isSecureContext() && true === event.altKey ? COPY_REGION_COLOR : RULER_SWEEPER_COLOR
 
             this.rulerSweeper.style.left = `${left}px`
             this.rulerSweeper.style.width = `${width}px`
@@ -154,10 +157,34 @@ class RulerSweeper {
 
 
                     const shiftKeyPressed = event.shiftKey
+                    const altKeyPressed = event.altKey
 
                     if (true === shiftKeyPressed) {
                         this.browser.roiManager.updateUserDefinedROISet(Object.assign({chr: this.referenceFrame.chr}, genomicExtent))
-                    } else {
+                    } else if (isSecureContext() && true === altKeyPressed) {
+                        // We set a limit of 10kb for copying so we avoid the browser hanging
+                        if ( genomicExtent.end - genomicExtent.start > 10000){
+                            this.browser.alert.present('Sequence selected for copying is longer than the limit of 10kb')
+                        } else {
+                            this.browser.genome.sequence.getSequence(this.referenceFrame.chr, genomicExtent.start, genomicExtent.end)
+                                .then(seq => {
+                                    if (!seq) {
+                                        seq = "Unknown sequence"
+                                    } else if (this.reversed) {
+                                        seq = reverseComplementSequence(seq)
+                                    }
+                                    navigator.clipboard.writeText(seq)
+                                        .then(
+                                            this.browser.alert.present('Sequence Copied to Clipboard.')
+                                        )
+                                        .catch(e => {
+                                            console.error(e)
+                                            this.browser.alert.present(`error copying sequence to clipboard ${e}`)
+                                        })
+                                })
+                        }
+                    }
+                    else {
 
                         validateGenomicExtent(this.browser.genome.getChromosome(this.referenceFrame.chr).bpLength, genomicExtent, this.browser.minimumBases())
                         updateReferenceFrame(this.referenceFrame, genomicExtent, this.rulerViewport.contentDiv.clientWidth)
