@@ -21,10 +21,7 @@ class ChromAliasDefaults {
      * @param alias
      * @returns {*}
      */
-    getChromosomeName(alias, chromosomeNames) {
-        if(chromosomeNames) {
-            this.update(this.genomeID, chromosomeNames)
-        }
+    getChromosomeName(alias) {
         return this.aliasRecordCache.has(alias) ? this.aliasRecordCache.get(alias).chr : alias
     }
 

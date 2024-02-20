@@ -22,10 +22,6 @@ class ChromSizes {
         return this.loadAll()
     }
 
-    get hasChromosomes() {
-        return true
-    }
-
     getSequenceRecord(chr) {
         return this.chromosomes.get(chr)
     }
