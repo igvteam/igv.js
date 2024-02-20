@@ -59,7 +59,7 @@ class Genome {
             this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
         } else if (config.aliasURL) {
             this.chromAlias = new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
-        } else {
+        } else if (this.chromosomeNames) {
             this.chromAlias = new ChromAliasDefaults(this.id, this.chromosomeNames);
         }
 

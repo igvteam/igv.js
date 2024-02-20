@@ -19,39 +19,46 @@
 
     var options =
         {
-            genome: "hg38",
-            locus: "chr8:127,736,541-127,736,692 chr1:155,186,114-155,186,153",
+            //genome: "hg38",
+            reference: {
+                "id": "hg38",
+                "name": "Human (GRCh38/hg38)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa.fai",
+                //"twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+            },
+                locus: "chr8:127,736,541-127,736,692 chr1:155,186,114-155,186,153",
             tracks:
                 [
-                    // {
-                    //     "name": "Gencode v28 Basic",
-                    //     "type": "annotation",
-                    //     "format": "gtf",
-                    //     "displayMode": "EXPANDED",
-                    //     "height": 300,
-                    //     "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz",
-                    //     "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz.tbi",
-                    //     "visibilityWindow": 1000000
-                    // },
-                    // {
-                    //     "name": "Ensembl v90",
-                    //     "format": "gff3",
-                    //     "displayMode": "expanded",
-                    //     "height": 300,
-                    //     "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
-                    //     "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
-                    //     "visibilityWindow": 1000000
-                    // },
-                    // {
-                    //     "name": "Ensembl v90",
-                    //     "format": "gff3",
-                    //     "displayMode": "expanded",
-                    //     "height": 500,
-                    //     "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
-                    //     "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
-                    //     "visibilityWindow": 1000000,
-                    //     assembleGFF: false
-                    // }
+                    {
+                        "name": "Gencode v28 Basic",
+                        "type": "annotation",
+                        "format": "gtf",
+                        "displayMode": "EXPANDED",
+                        "height": 300,
+                        "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz",
+                        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz.tbi",
+                        "visibilityWindow": 1000000
+                    },
+                    {
+                        "name": "Ensembl v90",
+                        "format": "gff3",
+                        "displayMode": "expanded",
+                        "height": 300,
+                        "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                        "visibilityWindow": 1000000
+                    },
+                    {
+                        "name": "Ensembl v90",
+                        "format": "gff3",
+                        "displayMode": "expanded",
+                        "height": 500,
+                        "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                        "visibilityWindow": 1000000,
+                        assembleGFF: false
+                    }
                 ]
         };
 

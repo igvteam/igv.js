@@ -16,10 +16,6 @@ class CachedSequence {
         this.browser = browser
     }
 
-    get hasChromosomes() {
-        return this.sequenceReader.hasChromosomes
-    }
-
     get chromosomes() {
         return this.sequenceReader.chromosomes
     }
