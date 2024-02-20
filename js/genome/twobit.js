@@ -46,10 +46,6 @@ class TwobitSequence {
         }
     }
 
-    get hasChromosomes() {
-        return false
-    }
-
     async readSequence(seqName, regionStart, regionEnd) {
 
         if (!this.index) {
@@ -178,8 +174,6 @@ class TwobitSequence {
         }
         return index
     }
-
-
 
     /**
      * Fetch the sequence metadata for the given seq name *
