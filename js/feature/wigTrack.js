@@ -23,7 +23,8 @@ class WigTrack extends TrackBase {
         normalize: undefined,
         scaleFactor: undefined,
         overflowColor: `rgb(255, 32, 255)`,
-        baselineColor: 'lightGray'
+        baselineColor: 'lightGray',
+        summarize: true
     }
 
     constructor(config, browser) {
@@ -96,7 +97,7 @@ class WigTrack extends TrackBase {
 
         // Summarize features to current resolution.  This needs to be done here, rather than in the "draw" function,
         // for group autoscale to work.
-        if (("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
+        if ("all" !== chr && this.summarize && ("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
             return summarizeData(features, start, bpPerPixel, windowFunction)
         } else {
             return features
