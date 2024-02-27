@@ -40,6 +40,7 @@ class BWSource {
 
     async getFeatures({chr, start, end, bpPerPixel, windowFunction}) {
 
+        await  this.reader.loadHeader()
         const isBigWig = this.reader.type === "bigwig"
 
         const features = (chr.toLowerCase() === "all") ?
@@ -84,8 +85,10 @@ class BWSource {
                 wgFeature.chr = "all"
                 wgFeature.start = offset + f.start
                 wgFeature.end = offset + f.end
+                wgFeature._f = f
                 wgValues.push(wgFeature)
             }
+            wgValues.sort((a, b) => a.start - b.start)
             this.wgValues[windowFunction] = wgValues
             return wgValues
         }
