@@ -21,7 +21,7 @@ class MockGenome {
         for (let i = 0; i < 25; i++) {
             let name
             if (i < 22) {
-                name = ucsc ? `chr${i+1}` : `${i+1}`
+                name = ucsc ? `chr${i + 1}` : `${i + 1}`
             } else {
                 switch (i) {
                     case 22:
@@ -75,6 +75,9 @@ class MockGenome {
         return offset + bp
     }
 
+    getGenomeLength() {
+        return [...this.chromosomes.values()].reduce((acc, c) => acc + c.bpLength, 0)
+    }
 
     /**
      * Return the offset in genome coordinates (kb) of the start of the given chromosome
@@ -83,14 +86,6 @@ class MockGenome {
     getCumulativeOffset(chr) {
 
         if (this.cumulativeOffsets === undefined) {
-            this.cumulativeOffsets = computeCumulativeOffsets.call(this)
-        }
-
-        const queryChr = this.getChromosomeName(chr)
-        return this.cumulativeOffsets[queryChr]
-
-        function computeCumulativeOffsets() {
-
             let acc = {}
             let offset = 0
             for (let name of this.wgChromosomeNames) {
@@ -98,9 +93,13 @@ class MockGenome {
                 const chromosome = this.getChromosome(name)
                 offset += chromosome.bpLength
             }
-
-            return acc
+            this.cumulativeOffsets = acc
         }
+
+        const queryChr = this.getChromosomeName(chr)
+        return this.cumulativeOffsets[queryChr]
+
+
     }
 
 
