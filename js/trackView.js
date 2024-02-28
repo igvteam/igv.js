@@ -140,6 +140,15 @@ class TrackView {
 
                 setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
 
+                const selected = getMultiSelectedTrackViews(this.browser)
+                if (selected && selected.length > 1) {
+                    // console.log(`Present Overlay Track button`)
+                    this.browser.overlayTrackButton.setVisibility(true)
+                } else {
+                    // console.log(`Dismiss Overlay Track button`)
+                    this.browser.overlayTrackButton.setVisibility(false)
+                }
+
             })
 
             setMultiTrackSelectionState(this, axis, ENABLE_MULTI_TRACK_SELECTION)

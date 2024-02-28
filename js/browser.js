@@ -53,6 +53,7 @@ import HicFile from "./hic/straw/hicFile.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
 import Hub from "./ucsc/ucscHub.js"
 import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
+import OverlayTrackButton from "./ui/overlayTrackButton.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
@@ -287,6 +288,9 @@ class Browser {
         const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">')
         $navbarRightContainer.append($toggle_button_container)
         this.$toggle_button_container = $toggle_button_container
+
+        this.overlayTrackButton = new OverlayTrackButton(this, $toggle_button_container.get(0))
+        this.overlayTrackButton.setVisibility(false)
 
         this.multiTrackSelectButton = new MultiTrackSelectButton(this, $toggle_button_container.get(0))
 
