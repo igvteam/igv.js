@@ -1,4 +1,4 @@
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import { DOMUtils, Panel, Dialog } from '../../node_modules/igv-ui/dist/igv-ui.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {colorPalettes} from "../util/colorPalletes.js"
 
@@ -16,6 +16,24 @@ const autoScaleGroupColorHash =
 class MenuUtils {
     constructor(browser) {
         this.browser = browser
+        this.initialize()
+    }
+
+    initialize() {
+
+        const panel = new Panel()
+        panel.add('...')
+
+        const config =
+            {
+                parent: this.browser.root,
+                content: panel
+            }
+
+        this.dialog = new Dialog(config)
+        this.browser.root.appendChild(this.dialog.elem)
+        DOMUtils.hide(this.dialog.elem)
+
     }
 
     trackMenuItemList(trackView) {
@@ -284,36 +302,6 @@ function visibilityWindowMenuItem() {
 
     return {object, click}
 
-}
-
-// TODO: Implement dialog-presenting track removal for multi-select
-function IN_PROGRESS_PRESENTS_DIALOG_trackRemovalMenuItem() {
-
-    const object = $('<div>')
-    object.text('Remove track')
-
-    function dialogHandler() {
-
-        if (isMultiSelectedTrackView(this.trackView)) {
-
-            const browser = this.browser
-
-            const alertCallback = () => {
-                const trackViews = getMultiSelectedTrackViews(browser)
-                for (const { track } of trackViews) {
-                    browser.removeTrack(track)
-                }
-            }
-
-            browser.alert.present('Delete Tracks?', alertCallback)
-
-        } else {
-            this.trackView.browser.removeTrack(this)
-        }
-
-    }
-
-    return { object, dialog:dialogHandler }
 }
 
 function trackRemovalMenuItem() {
