@@ -33,7 +33,6 @@ class MenuUtils {
         this.dialog = new Dialog(config)
         this.browser.root.appendChild(this.dialog.elem)
         DOMUtils.hide(this.dialog.elem)
-
     }
 
     trackMenuItemList(trackView) {
@@ -224,54 +223,52 @@ function groupAutoScaleMenuItem() {
 
 }
 
+function trackOverlayClickHandler(e) {
+
+    const trackViews = getMultiSelectedTrackViews(this.browser)
+
+    if (trackViews) {
+
+        const wigTracks = trackViews.filter(({ track }) => 'wig' === track.type).map(({ track }) => track)
+
+        const wigConfigs = wigTracks.map(( track ) => {
+            const config = Object.assign({}, track.config)
+            config.color = track.color
+            config.autoscale = track.autoscale
+            config.autoscaleGroup = track.autoscaleGroup
+            return config
+        })
+
+        for (const wigTrack of wigTracks) {
+            this.browser.removeTrack(wigTrack)
+        }
+
+        const fudge = 0.75
+
+        const config =
+            {
+                name: 'Overlay',
+                type: 'merged',
+                autoscale: true,
+                alpha: fudge * (1.0/wigTracks.length),
+                height: Math.max(...wigTracks.map(({ height }) => height)),
+                order: Math.min(...wigTracks.map(({ order }) => order)),
+                tracks: wigConfigs
+            }
+
+        this.browser.loadTrack(config)
+
+    }
+
+}
+
 function trackOverlayMenuItem() {
 
     const object = $('<div>')
     object.text('Overlay tracks')
 
-    function click(e) {
-
-        const trackViews = getMultiSelectedTrackViews(this.browser)
-
-        if (trackViews) {
-
-            const wigTracks = trackViews.filter(({ track }) => 'wig' === track.type).map(({ track }) => track)
-
-            const wigConfigs = wigTracks.map(( track ) => {
-                const config = Object.assign({}, track.config)
-                config.color = track.color
-                config.autoscale = track.autoscale
-                config.autoscaleGroup = track.autoscaleGroup
-                return config
-            })
-
-            for (const wigTrack of wigTracks) {
-                this.browser.removeTrack(wigTrack)
-            }
-
-            const fudge = 0.75
-
-            const config =
-                {
-                    autoscale: false,
-                    name: 'Overlay',
-                    type: 'merged',
-                    alpha: fudge * (1.0/wigTracks.length),
-                    height: Math.max(...wigTracks.map(({ height }) => height)),
-                    order: Math.min(...wigTracks.map(({ order }) => order)),
-                    tracks: wigConfigs
-                }
-
-            this.browser.loadTrack(config)
-
-        }
-
-    }
-
-    return { object, doAllMultiSelectedTracks:true, click }
-
+    return { object, doAllMultiSelectedTracks:true, click: trackOverlayClickHandler }
 }
-
 function visibilityWindowMenuItem() {
 
     const object = $('<div>')
@@ -478,6 +475,6 @@ function isMultiSelectedTrackView(trackView) {
     return selected && selected.length > 1 && new Set(selected).has(trackView)
 }
 
-export { autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView }
+export { trackOverlayClickHandler, autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView }
 
 export default MenuUtils
