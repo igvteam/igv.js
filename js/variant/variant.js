@@ -273,6 +273,10 @@ class Variant {
         return "NONVARIANT" === this.type
     }
 
+    isFiltered() {
+        return !("." === this.filter || "PASS" === this.filter)
+    }
+
 }
 
 const knownAltBases = new Set(["A", "C", "T", "G"].map(c => c.charCodeAt(0)))
