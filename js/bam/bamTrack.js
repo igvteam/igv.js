@@ -354,7 +354,7 @@ class BAMTrack extends TrackBase {
         menuItems.push('<hr/>')
         menuItems.push({
             object: $(createCheckbox("Show all bases", this.showAllBases)),
-            click: function showAllBasesHandler(){
+            click: function showAllBasesHandler() {
                 this.showAllBases = !this.showAllBases
                 this.config.showAllBases = this.showAllBases
                 this.trackView.repaintViews()
@@ -892,7 +892,7 @@ class AlignmentTrack {
      * @returns {BaseModificationRenderer}
      */
     get baseModRenderer() {
-        if(!this._baseModRenderer) {
+        if (!this._baseModRenderer) {
             this._baseModRenderer = new BaseModificationRenderer(this)
         }
         return this._baseModRenderer
@@ -1181,7 +1181,7 @@ class AlignmentTrack {
                 }
             }
 
-            if("basemod2" === this.colorBy || "basemod" === this.parent.colorBy) {
+            if ("basemod2" === this.colorBy || "basemod" === this.parent.colorBy) {
                 const context = (
                     {
                         ctx,
@@ -1192,7 +1192,6 @@ class AlignmentTrack {
                     })
                 this.baseModRenderer.drawModifications(alignment, y, alignmentHeight, context, this.parent.colorBy)
             }
-
 
 
             function drawBlock(block, b) {
@@ -1315,26 +1314,24 @@ class AlignmentTrack {
                         }
                         if (readChar === "X" || refChar !== readChar || isSoftClip || showAllBases) {
 
-                            let baseColor
+                            let baseColor = nucleotideColors[readChar] || "rgb(0,0,0)"
                             if (!isSoftClip && qual !== undefined && qual.length > seqOffset + i) {
                                 const readQual = qual[seqOffset + i]
-                                baseColor = shadedBaseColor(readQual, nucleotideColors[readChar])
-                            } else {
-                                baseColor = nucleotideColors[readChar]
+                                baseColor = shadedBaseColor(readQual, baseColor)
                             }
-                            if (baseColor) {
-                                blockBasesToDraw.push({
-                                    bbox: {
-                                        x: xPixel,
-                                        y: y,
-                                        width: widthPixel,
-                                        height: alignmentHeight
-                                    },
-                                    baseColor,
-                                    readChar,
-                                })
-                            }
+
+                            blockBasesToDraw.push({
+                                bbox: {
+                                    x: xPixel,
+                                    y: y,
+                                    width: widthPixel,
+                                    height: alignmentHeight
+                                },
+                                baseColor,
+                                readChar,
+                            })
                         }
+
                     }
                 }
 
