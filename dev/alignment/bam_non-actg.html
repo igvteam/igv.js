@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dev - alignment - bam</title>
+</head>
+
+<body>
+
+<button id="log-state">Log Session</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config =
+        {
+            "genome": "hg38",
+            "locus": "chr1:246,850,946-246,851,108",
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "alignment",
+                    "url": "../../test/data/bam/non_actg.bam",
+                    "indexURL": "../../test/data/bam/non_actg.bam.bai",
+                    "name": "Ambiguity codes",
+                    "format": "bam"
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+        .then(browser => {
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+        })
+
+
+</script>
+
+</body>
+
+</html>

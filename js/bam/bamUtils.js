@@ -35,8 +35,8 @@ import BamFilter from "./bamFilter.js"
  *
  * https://github.com/dasmoth/dalliance/blob/master/js/bam.js
  */
-
-const SEQ_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N']
+//=ACMGRSVTWYHKDBN
+const SEQ_DECODER = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N']
 const CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?']
 const READ_STRAND_FLAG = 0x10
 const MATE_STRAND_FLAG = 0x20
