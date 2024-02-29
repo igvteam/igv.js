@@ -310,7 +310,7 @@ function trackRemovalMenuItem() {
         this.trackView.browser._removeTrack(this)
     }
 
-    return { object, click:trackRemovalHandler }
+    return { object, click:trackRemovalHandler, menuItemType: 'removeTrack' }
 
 }
 

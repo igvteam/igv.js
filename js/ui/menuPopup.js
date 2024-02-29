@@ -118,7 +118,7 @@ class MenuPopup {
                                 item.click.call(trackView.track, e)
                             } else {
 
-                                if ('trackRemovalHandler' === item.click.name) {
+                                if ('removeTrack' === item.menuItemType) {
 
                                     const count = trackView.browser.multiSelectedTrackViews.length
 
