@@ -31,7 +31,7 @@ import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
-import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 const isString = StringUtils.isString
 
@@ -337,6 +337,11 @@ class VariantTrack extends TrackBase {
         } else {
             variantColor = this.color
         }
+
+        if(v.isFiltered()) {
+            variantColor = IGVColor.addAlpha(variantColor, 0.2)
+        }
+
         return variantColor
     }
 

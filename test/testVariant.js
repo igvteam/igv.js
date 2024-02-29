@@ -42,6 +42,7 @@ suite("testVariant", function () {
         assert.equal(variants.length, 5)
         for (let v of variants) {
             assert.equal(v.type, "MIXED")
+            assert.ok(!v.isFiltered())
         }
     })
 
@@ -123,6 +124,7 @@ suite("testVariant", function () {
         assert.equal(del.pos, 69091)
         assert.equal(del.start, 69090)
         assert.equal(del.end, 70008)
+        assert.ok(del.isFiltered())
     })
 
 
@@ -144,6 +146,7 @@ suite("testVariant", function () {
         assert.equal(tra.pos, 564466)
         assert.equal(tra.start, 564465)
         assert.equal(tra.end, 564466)
+        assert.ok(!tra.isFiltered())
     })
 
     test("tribble indexed - large header", async function () {
