@@ -1,7 +1,7 @@
 import NavbarButton from "./navbarButton.js"
 import { overlayTrackImage, overlayTrackImageHover } from "./navbarIcons/overlayTrack.js"
 import { buttonLabel } from "./navbarIcons/buttonLabel.js"
-import {trackOverlayClickHandler} from "./menuUtils.js"
+import {isMultiSelectedTrackView, trackOverlayClickHandler} from "./menuUtils.js"
 
 class OverlayTrackButton extends NavbarButton {
     constructor(browser, parent) {
