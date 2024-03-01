@@ -120,8 +120,6 @@ class MenuPopup {
 
                                 if ('removeTrack' === item.menuItemType) {
 
-                                    const count = trackView.browser.multiSelectedTrackViews.length
-
                                     const callback = () => {
 
                                         trackView.browser.overlayTrackButton.setVisibility(false)
@@ -130,6 +128,8 @@ class MenuPopup {
                                             item.click.call(track, e)
                                         }
                                     }
+
+                                    const count = trackView.browser.multiSelectedTrackViews.length
 
                                     const config =
                                         {
