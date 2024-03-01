@@ -304,7 +304,7 @@ function visibilityWindowMenuItem() {
 function trackRemovalMenuItem(trackView) {
 
     const str = isMultiSelectedTrackView(trackView) ? 'Remove tracks' : 'Remove track'
-    
+
     const object = $('<div>')
     object.text(str)
 
@@ -477,6 +477,6 @@ function isMultiSelectedTrackView(trackView) {
     return selected && selected.length > 1 && new Set(selected).has(trackView)
 }
 
-export { trackOverlayClickHandler, autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView }
+export { trackOverlayClickHandler, autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView, didSelectSingleTrackType }
 
 export default MenuUtils

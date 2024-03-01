@@ -32,12 +32,13 @@ import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import {autoScaleGroupColorHash, getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
 import {
-    ENABLE_MULTI_TRACK_SELECTION,
-    setMultiTrackSelectionState,
-    setDragHandleSelectionState
-} from './ui/multiTrackSelectButton.js'
+    autoScaleGroupColorHash,
+    didSelectSingleTrackType,
+    getMultiSelectedTrackViews,
+    multiTrackSelectExclusionTypes
+} from "./ui/menuUtils.js"
+import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState } from './ui/multiTrackSelectButton.js'
 import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
 
 const igv_axis_column_width = 50
@@ -142,8 +143,15 @@ class TrackView {
 
                 const selected = getMultiSelectedTrackViews(this.browser)
                 if (selected && selected.length > 1) {
-                    // console.log(`Present Overlay Track button`)
-                    this.browser.overlayTrackButton.setVisibility(true)
+
+                    const isSingleTrackType = didSelectSingleTrackType(selected.map(({ track }) => track.type))
+
+                    const { track } = selected[ 0 ]
+
+                    if (isSingleTrackType && 'wig' === track.type) {
+                        this.browser.overlayTrackButton.setVisibility(true)
+                    }
+
                 } else {
                     // console.log(`Dismiss Overlay Track button`)
                     this.browser.overlayTrackButton.setVisibility(false)
