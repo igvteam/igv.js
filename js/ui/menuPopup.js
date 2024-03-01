@@ -124,6 +124,8 @@ class MenuPopup {
 
                                     const callback = () => {
 
+                                        trackView.browser.overlayTrackButton.setVisibility(false)
+
                                         for (const { track } of trackView.browser.multiSelectedTrackViews) {
                                             item.click.call(track, e)
                                         }
