@@ -54,7 +54,7 @@ class MenuUtils {
 
         if (trackView.track.removable !== false) {
             list.push('<hr/>')
-            list.push(trackRemovalMenuItem())
+            list.push(trackRemovalMenuItem(trackView))
         }
 
         return list
@@ -301,10 +301,12 @@ function visibilityWindowMenuItem() {
 
 }
 
-function trackRemovalMenuItem() {
+function trackRemovalMenuItem(trackView) {
 
+    const str = isMultiSelectedTrackView(trackView) ? 'Remove tracks' : 'Remove track'
+    
     const object = $('<div>')
-    object.text('Remove track')
+    object.text(str)
 
     function trackRemovalHandler(e) {
         this.trackView.browser._removeTrack(this)
