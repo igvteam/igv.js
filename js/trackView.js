@@ -128,6 +128,7 @@ class TrackView {
             const html = `<input type="checkbox" name="track-select">`
             const input = document.createRange().createContextualFragment(html).firstChild
             trackSelectionContainer.appendChild(input)
+            input.checked = this.track.isMultiSelection || false
 
             input.addEventListener('change', event => {
                 event.preventDefault()
