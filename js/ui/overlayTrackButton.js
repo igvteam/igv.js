@@ -1,7 +1,7 @@
 import NavbarButton from "./navbarButton.js"
 import { overlayTrackImage, overlayTrackImageHover } from "./navbarIcons/overlayTrack.js"
 import { buttonLabel } from "./navbarIcons/buttonLabel.js"
-import {getMultiSelectedTrackViews} from "./menuUtils.js"
+import {didSelectSingleTrackType, getMultiSelectedTrackViews} from "./menuUtils.js"
 
 
 class OverlayTrackButton extends NavbarButton {
@@ -65,4 +65,22 @@ function trackOverlayClickHandler(e) {
 
 }
 
+function isOverlayTrackCriteriaMet(browser) {
+
+    const selected = getMultiSelectedTrackViews(browser)
+
+    if (selected && selected.length > 1) {
+
+        const isSingleTrackType = didSelectSingleTrackType(selected.map(({ track }) => track.type))
+        const { track } = selected[ 0 ]
+
+        return isSingleTrackType && 'wig' === track.type
+
+    } else {
+        return false
+    }
+
+}
+
+export { isOverlayTrackCriteriaMet }
 export default OverlayTrackButton

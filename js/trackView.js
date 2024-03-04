@@ -32,14 +32,10 @@ import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import {
-    autoScaleGroupColorHash,
-    didSelectSingleTrackType,
-    getMultiSelectedTrackViews,
-    multiTrackSelectExclusionTypes
-} from "./ui/menuUtils.js"
+import { autoScaleGroupColorHash, getMultiSelectedTrackViews, multiTrackSelectExclusionTypes } from "./ui/menuUtils.js"
 import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState } from './ui/multiTrackSelectButton.js'
 import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
+import {isOverlayTrackCriteriaMet} from "./ui/overlayTrackButton.js"
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
@@ -136,22 +132,9 @@ class TrackView {
             input.addEventListener('change', event => {
                 event.preventDefault()
                 event.stopPropagation()
-
                 this.track.isMultiSelection = event.target.checked
-
                 setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
-
-                const selected = getMultiSelectedTrackViews(this.browser)
-                if (selected && selected.length > 1) {
-
-                    const isSingleTrackType = didSelectSingleTrackType(selected.map(({ track }) => track.type))
-                    const { track } = selected[ 0 ]
-                    this.browser.overlayTrackButton.setVisibility( (isSingleTrackType && 'wig' === track.type) )
-
-                } else {
-                    this.browser.overlayTrackButton.setVisibility(false)
-                }
-
+                this.browser.overlayTrackButton.setVisibility( isOverlayTrackCriteriaMet(this.browser) )
             })
 
             setMultiTrackSelectionState(this, axis, ENABLE_MULTI_TRACK_SELECTION)
