@@ -145,15 +145,10 @@ class TrackView {
                 if (selected && selected.length > 1) {
 
                     const isSingleTrackType = didSelectSingleTrackType(selected.map(({ track }) => track.type))
-
                     const { track } = selected[ 0 ]
-
-                    if (isSingleTrackType && 'wig' === track.type) {
-                        this.browser.overlayTrackButton.setVisibility(true)
-                    }
+                    this.browser.overlayTrackButton.setVisibility( (isSingleTrackType && 'wig' === track.type) )
 
                 } else {
-                    // console.log(`Dismiss Overlay Track button`)
                     this.browser.overlayTrackButton.setVisibility(false)
                 }
 
