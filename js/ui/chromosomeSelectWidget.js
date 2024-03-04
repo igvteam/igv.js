@@ -58,8 +58,17 @@ class ChromosomeSelectWidget {
 
     update(genome) {
 
-        const list = (this.showAllChromosomes && genome.chromosomeNames.length < 1000) ?
-            genome.chromosomeNames : genome.wgChromosomeNames
+        // Start with explicit chromosome name list
+        const list = genome.wgChromosomeNames || []
+
+        if(this.showAllChromosomes && genome.chromosomeNames.length < 1000) {
+            const exclude = new Set(list)
+            for(let nm of genome.chromosomeNames) {
+                if(!exclude.has(nm)) {
+                    list.push(nm)
+                }
+            }
+        }
 
         this.select.innerHTML = ''
 
