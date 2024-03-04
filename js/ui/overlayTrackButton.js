@@ -1,7 +1,8 @@
 import NavbarButton from "./navbarButton.js"
 import { overlayTrackImage, overlayTrackImageHover } from "./navbarIcons/overlayTrack.js"
 import { buttonLabel } from "./navbarIcons/buttonLabel.js"
-import {isMultiSelectedTrackView, trackOverlayClickHandler} from "./menuUtils.js"
+import {getMultiSelectedTrackViews} from "./menuUtils.js"
+
 
 class OverlayTrackButton extends NavbarButton {
     constructor(browser, parent) {
@@ -23,6 +24,45 @@ class OverlayTrackButton extends NavbarButton {
         this.setVisibility(true)
 
     }
+}
+
+function trackOverlayClickHandler(e) {
+
+    const trackViews = getMultiSelectedTrackViews(this.browser)
+
+    if (trackViews) {
+
+        const wigTracks = trackViews.filter(({ track }) => 'wig' === track.type).map(({ track }) => track)
+
+        const wigConfigs = wigTracks.map(( track ) => {
+            const config = Object.assign({}, track.config)
+            config.color = track.color
+            config.autoscale = track.autoscale
+            config.autoscaleGroup = track.autoscaleGroup
+            return config
+        })
+
+        for (const wigTrack of wigTracks) {
+            this.browser.removeTrack(wigTrack)
+        }
+
+        const fudge = 0.75
+
+        const config =
+            {
+                name: 'Overlay',
+                type: 'merged',
+                autoscale: true,
+                alpha: fudge * (1.0/wigTracks.length),
+                height: Math.max(...wigTracks.map(({ height }) => height)),
+                order: Math.min(...wigTracks.map(({ order }) => order)),
+                tracks: wigConfigs
+            }
+
+        this.browser.loadTrack(config)
+
+    }
+
 }
 
 export default OverlayTrackButton

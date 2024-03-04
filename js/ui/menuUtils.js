@@ -110,9 +110,6 @@ class MenuUtils {
 
                 list.push('<hr/>')
                 list.push(groupAutoScaleMenuItem())
-
-                list.push('<hr/>')
-                list.push(trackOverlayMenuItem())
             }
 
         } else {
@@ -269,6 +266,7 @@ function trackOverlayMenuItem() {
 
     return { object, doAllMultiSelectedTracks:true, click: trackOverlayClickHandler }
 }
+
 function visibilityWindowMenuItem() {
 
     const object = $('<div>')
@@ -477,6 +475,6 @@ function isMultiSelectedTrackView(trackView) {
     return selected && selected.length > 1 && new Set(selected).has(trackView)
 }
 
-export { trackOverlayClickHandler, autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView, didSelectSingleTrackType }
+export { autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView, didSelectSingleTrackType }
 
 export default MenuUtils
