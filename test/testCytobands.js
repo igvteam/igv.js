@@ -2,9 +2,28 @@ import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import CytobandFileBB from "../js/genome/cytobandFileBB.js"
 import {createGenome} from "./utils/MockGenome.js"
+import CytobandFile from "../js/genome/cytobandFile.js"
 
 
 suite("test cytobands", function () {
+
+    test("test cytoband text", async function () {
+
+        const genome = createGenome("ncbi")
+        const url = "test/data/cyto/cytoBand.txt.gz"
+        const src = new CytobandFile(url, {}, genome)
+
+        const cytobands = await src.getCytobands("chrX")
+        const last = cytobands[cytobands.length-1];
+        assert.equal(22422827, last.end)
+
+        const chromosomes = await src.getChromosomes()
+        assert.equal(6, chromosomes.length)
+        const lastChr = chromosomes[chromosomes.length - 1]
+        assert.equal("chrX", lastChr.name)
+        assert.equal(lastChr.bpLength, 22422827)
+
+    })
 
 
     /**
