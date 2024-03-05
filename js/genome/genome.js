@@ -76,7 +76,7 @@ class Genome {
             if(!this.chromosomeNames) {
                 this.chromosomeNames = await this.cytobandSource.getChromosomeNames()
             }
-            if(this.chromosomes.size() === 0) {
+            if(this.chromosomes.size === 0) {
                 const c = await this.cytobandSource.getChromosomes()
                 for(let chromosome of c) {
                     this.chromosomes.set(c.name, c)
