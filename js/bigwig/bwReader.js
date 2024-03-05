@@ -371,7 +371,6 @@ class BWReader {
             }
 
             // Chrom data index
-            // TODO -- replace this with BPChromTree
             if (header.chromTreeOffset > 0) {
                 binaryParser.position = header.chromTreeOffset - startOffset
                 this.chromTree = await ChromTree.parseTree(binaryParser, startOffset, this.genome)

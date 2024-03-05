@@ -1,6 +1,7 @@
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {Cytoband} from "./cytoband.js"
+import Chromosome from "./chromosome.js"
 
 class CytobandFile {
 
@@ -61,14 +62,40 @@ class CytobandFile {
 
             if (tokens.length === 5) {
                 //10	0	3000000	p15.3	gneg
-                var start = parseInt(tokens[1])
-                var end = parseInt(tokens[2])
-                var name = tokens[3]
-                var stain = tokens[4]
+                const start = parseInt(tokens[1])
+                const end = parseInt(tokens[2])
+                const name = tokens[3]
+                const stain = tokens[4]
                 bands.push(new Cytoband(start, end, name, stain))
             }
         }
 
+    }
+
+    /**
+     * Infer genome chromosome names from cytoband data.  This should only be used as a last resort
+     */
+    async getChromosomeNames() {
+        if(this.cytobands.size === 0) {
+            await this.#loadCytobands()
+        }
+        return Array.from(this.cytobands.keys())
+    }
+
+    /**
+     * Infer chromosome objects from cytoband data.  This should only be used as last resort.
+     */
+    async getChromosomes() {
+        if(this.cytobands.size === 0) {
+            await this.#loadCytobands()
+        }
+
+        const chromosomes = []
+        let order = 0;
+        for(let [chrName, cytoList] of this.cytobands.entries()) {
+            chromosomes.push(new Chromosome(chrName, order++, cytoList[cytoList.length - 1].end))
+        }
+        return chromosomes
     }
 
 }

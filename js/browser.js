@@ -776,8 +776,8 @@ class Browser {
         // chromosome select widget -- Show this IFF its not explicitly hidden AND the genome has pre-loaded chromosomes
         const showChromosomeWidget =
             this.config.showChromosomeWidget !== false &&
-            genome.getChromosomes().size > 1 &&
-            (genome.wgChromosomeNames || genome.getChromosomes().size < 1000)
+            genome.chromosomeNames &&
+            genome.chromosomeNames.length > 1
 
         if (showChromosomeWidget) {
             this.chromosomeSelectWidget.update(genome)

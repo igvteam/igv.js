@@ -26,6 +26,8 @@
 
 import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
 
+const maximumSequenceCountExceeded = "Maximum sequence count exceeded"
+
 class ChromosomeSelectWidget {
 
     constructor(browser, parent) {
@@ -39,7 +41,7 @@ class ChromosomeSelectWidget {
 
         this.select.addEventListener('change', () => {
             this.select.blur()
-            if (this.select.value !== '') {
+            if (this.select.value !== '' && maximumSequenceCountExceeded !== this.select.value) {
                 browser.search(this.select.value)
             }
         })
@@ -61,10 +63,15 @@ class ChromosomeSelectWidget {
         // Start with explicit chromosome name list
         const list = genome.wgChromosomeNames || []
 
-        if(this.showAllChromosomes && genome.chromosomeNames.length < 1000) {
+        if (this.showAllChromosomes && genome.chromosomeNames.length > 1) {
             const exclude = new Set(list)
-            for(let nm of genome.chromosomeNames) {
-                if(!exclude.has(nm)) {
+            let count = 0
+            for (let nm of genome.chromosomeNames) {
+                if (++count === 1000) {
+                    list.push(maximumSequenceCountExceeded)
+                    break
+                }
+                if (!exclude.has(nm)) {
                     list.push(nm)
                 }
             }
@@ -77,29 +84,18 @@ class ChromosomeSelectWidget {
             list.unshift("all")
         }
 
-        if (list.length < 1000) {
-            for (let name of list) {
-                const option = document.createElement('option')
-                option.setAttribute('value', name)
-                option.innerText = genome.getChromosomeDisplayName(name)
-                this.select.appendChild(option)
-                // if(this.selectDisplayCSS) {
-                //     this.select.style.display = this.selectDisplayCSS
-                //     this.container.style.display = this.containerDisplayCSS
-                //     document.getElementsByClassName("igv-search-container")[0].style.width = his.searchContainerWidthCSS
-                //}
-            }
-        } else {
-            // > 2,000 entries, pulldown is useless
-            // Record styles so we can restore them if another genome is loaded
-            // this.selectDisplayCSS = getComputedStyle(this.select).getPropertyValue("display")
-            // this.containerDisplayCSS = getComputedStyle(this.container).getPropertyValue("display")
-            // this.searchContainerWidthCSS = getComputedStyle(document.getElementsByClassName("igv-search-container")[0]).getPropertyValue("width")
-            //
-            // this.select.style.display = "none"
-            // this.container.style.display = "none"
-            // document.getElementsByClassName("igv-search-container")[0].style.width = "300px"
+        for (let name of list) {
+            const option = document.createElement('option')
+            option.setAttribute('value', name)
+            option.innerText = genome.getChromosomeDisplayName(name)
+            this.select.appendChild(option)
+            // if(this.selectDisplayCSS) {
+            //     this.select.style.display = this.selectDisplayCSS
+            //     this.container.style.display = this.containerDisplayCSS
+            //     document.getElementsByClassName("igv-search-container")[0].style.width = his.searchContainerWidthCSS
+            //}
         }
+
     }
 }
 

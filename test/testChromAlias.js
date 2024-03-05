@@ -11,9 +11,16 @@ suite("chromAlias", function () {
     const genome = {
         chromosomes: new Map([
             ["NC_007194.1", {name: "NC_007194.1", bpLength: 1}],
+            ["NC_007195.1", {name: "NC_007195.1", bpLength: 1}],
+            ["NC_007196.1", {name: "NC_007196.1", bpLength: 1}],
+            ["NC_007197.1", {name: "NC_007197.1", bpLength: 1}],
+            ["NC_007198.1", {name: "NC_007198.1", bpLength: 1}],
+            ["NC_007199.1", {name: "NC_007199.1", bpLength: 1}],
+            ["NC_007200.1", {name: "NC_007200.1", bpLength: 1}],
+            ["NC_007201.1", {name: "NC_007201.1", bpLength: 1}]
         ]),
-        getChromosomeName: function (ignore) {
-            return "NC_007194.1"
+        getChromosomeName: function (name) {
+            return name
         }
     }
 
@@ -54,8 +61,10 @@ suite("chromAlias", function () {
         assert.equal(chromAliasRecord.genbank, "CM000169.1")
         assert.equal(chromAliasRecord.ncbi, "1")
         assert.equal(chromAliasRecord.ucsc, "chr1")
-
         assert.equal(chromAlias.getChromosomeAlias("NC_007194.1", "genbank"), "CM000169.1")
+
+        const chromosomeNames = await chromAlias.getChromosomeNames()
+        assert.equal(chromosomeNames.length, 8)
     })
 
     test("test chromalias bb extra index search", async function () {

@@ -44,7 +44,7 @@ class Genome {
         this.sequence = await loadSequence(config, this.browser)
 
         if (config.chromSizesURL) {
-            // a chromSizes file is neccessary for 2bit sequences for whole-genome view or chromosome pulldown
+            // a chromSizes file is neccessary for 2bit sequences for whole-genome view
             this.chromosomes = await loadChromSizes(config.chromSizesURL)
         } else {
             // if the sequence defines chromosomes use them (fasta does, 2bit does not)
@@ -57,6 +57,9 @@ class Genome {
 
         if (config.chromAliasBbURL) {
             this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
+            if(!this.chromosomeNames) {
+                this.chromosomeNames = await this.chromAlias.getChromosomeNames()
+            }
         } else if (config.aliasURL) {
             this.chromAlias = new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
         } else if (this.chromosomeNames) {
@@ -65,9 +68,22 @@ class Genome {
 
         if (config.cytobandBbURL) {
             this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
+            if(!this.chromosomeNames) {
+                this.chromosomeNames = await this.cytobandSource.getChromosomeNames()
+            }
         } else if (config.cytobandURL) {
             this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
+            if(!this.chromosomeNames) {
+                this.chromosomeNames = await this.cytobandSource.getChromosomeNames()
+            }
+            if(this.chromosomes.size() === 0) {
+                const c = await this.cytobandSource.getChromosomes()
+                for(let chromosome of c) {
+                    this.chromosomes.set(c.name, c)
+                }
+            }
         }
+
 
         if (false !== config.wholeGenomeView && this.chromosomes.size > 0) {
             // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
