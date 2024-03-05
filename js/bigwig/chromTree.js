@@ -66,7 +66,6 @@ export default class ChromTree {
                         binaryParser.position = currOffset
                     }
                 }
-
             }
 
             // Recursively walk tree to populate dictionary
