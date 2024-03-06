@@ -71,10 +71,15 @@ function isOverlayTrackCriteriaMet(browser) {
 
     if (selected && selected.length > 1) {
 
-        const isSingleTrackType = didSelectSingleTrackType(selected.map(({ track }) => track.type))
-        const { track } = selected[ 0 ]
+        const criteriaSet = new Set([ 'wig', 'merged' ])
 
-        return isSingleTrackType && 'wig' === track.type
+        const list = selected.filter(({ track }) => criteriaSet.has(track.type))
+
+        return list.length > 1
+
+        // const isSingleTrackType = didSelectSingleTrackType(selected.map(({ track }) => track.type))
+        // const { track } = selected[ 0 ]
+        // return isSingleTrackType && 'wig' === track.type
 
     } else {
         return false
