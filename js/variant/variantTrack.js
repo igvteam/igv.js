@@ -115,7 +115,7 @@ class VariantTrack extends TrackBase {
     }
 
     get supportsWholeGenome() {
-        return this.config.indexed === false || this.config.supportsWholeGenome === true
+        return !this.config.indexURL  || this.config.supportsWholeGenome === true
     }
 
     get color() {
