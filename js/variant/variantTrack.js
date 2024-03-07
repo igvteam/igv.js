@@ -32,6 +32,7 @@ import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js"
+import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
 
 const isString = StringUtils.isString
 
@@ -612,6 +613,17 @@ class VariantTrack extends TrackBase {
             })
         }
 
+        // Experimental CNVPytor support
+        if (this.canCovertToPytor()) {
+            menuItems.push('<hr>')
+            menuItems.push({
+                label: 'Convert to CNV Pytor track',
+                click: function cnvPytorHandler () {
+                    this.convertToPytor()
+                }
+            })
+        }
+
         return menuItems
     }
 
@@ -706,6 +718,62 @@ class VariantTrack extends TrackBase {
             this.colorTables.set(key, tbl)
         }
         return this.colorTables.get(key)
+    }
+
+    ///////////// CNVPytor converstion support follows ////////////////////////////////////////////////////////////
+
+    /**
+     * This do-nothing method is neccessary to allow conversion to a CNVPytor track, which needs dom elements for an
+     *     // axis.  The dom elements are created as a side effect of this function being defined
+     */
+    paintAxis() {
+    }
+
+    /**
+     * Check conditions for pytor track
+     * (1) 1 and only 1 genotype (callset)
+     * (2) DP info field
+     * (3) AD info field
+     * (4) Not indexed -- must read entire file
+     */
+    canCovertToPytor() {
+
+        if(this.config.indexURL) {
+            return false;
+        }
+        if(this.header) {
+            return Object.keys(this.header.callSets).length === 1 &&
+                this.header.FORMAT &&
+                this.header.FORMAT.AD &&
+                this.header.FORMAT.DP
+        } else {
+            // Cant know until header is read
+            return false
+        }
+    }
+
+    async convertToPytor() {
+
+        this.trackView.startSpinner()
+        // The timeout is neccessary to give the spinner time to start.
+        setTimeout(async () => {
+            try {
+                const newConfig = Object.assign({}, this.config)
+                Object.setPrototypeOf(this, CNVPytorTrack.prototype)
+
+                await this.init(newConfig)
+                await this.postInit()
+
+                this.trackView.clearCachedFeatures()
+                this.trackView.setTrackHeight(250, true)
+                this.trackView.checkContentHeight()
+                this.trackView.updateViews()
+                this.trackView.track.autoHeight = false
+            } finally {
+                this.trackView.stopSpinner()
+            }
+        }, 100)
+
     }
 }
 
