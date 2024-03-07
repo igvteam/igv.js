@@ -343,6 +343,43 @@ class BamAlignment {
         return this.baseModificationSets
     }
 
+    // TODO: add group by Base
+    // TODO: add groupAsPairs
+    getGroupValue({ option, tag, groupAsPairs }) {
+        switch (option) {
+            case "STRAND":
+                return this.strand ? '+' : '-'
+            case "FIRST_IN_PAIR_STRAND":
+                if (this.isPaired()){
+                    if (this.isFirstOfPair()) {
+                        return this.strand ? '+' : '-'
+                    } else if (this.isSecondOfPair()) {
+                        return this.strand ? '-' : '+'
+                    } else {
+                        return
+                    }
+                }
+                else{
+                    return 
+                }
+            case "START":
+                return this.start
+            case "INSERT_SIZE":
+                return this.fragmentLength
+            case "MATE_CHR":
+                return this.mate ? this.mate.chr : undefined
+            case "MQ":
+                return this.mq
+            case "ALIGNED_READ_LENGTH":
+                return this.lengthOnRef
+            case "TAG": {
+                return this.tags()[tag]
+            }
+            default:
+                return
+        }
+    }
+
 }
 
 const EMPTY_SET = new Set()
