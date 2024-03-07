@@ -1,28 +1,3 @@
-/*
-* The MIT License (MIT)
-*
-* Copyright (c) 2016-2017 The Regents of the University of California
-* Author: Arijit Panda
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-*/
 
 import TrackBase from "../trackBase.js"
 import MenuUtils from "../ui/menuUtils.js"
@@ -34,9 +9,6 @@ import {createCheckbox} from "../igv-icons.js"
 import IGVGraphics from "../igv-canvas.js"
 
 
-/**
- * Represents 2 or more wig tracks overlaid on a common viewport.
- */
 
 const DEFAULT_TRACK_HEIGHT = 250
 const DEFAULT_BAF_TRACK_HEIGHT = 100
@@ -45,18 +17,18 @@ class CNVPytorTrack extends TrackBase {
 
     constructor(config, browser) {
         super(config, browser)
-        this.featureType = 'numeric'
-
-        if (!config.max) {
-            this.defaultScale = true
-            this.autoscale = false
-        }
-
-        // Invoke height setter last to allocated to coverage and alignment tracks
-        this.height = (config.height !== undefined ? config.height : DEFAULT_TRACK_HEIGHT)
     }
 
-    async init(config) {
+     init(config) {
+
+         this.featureType = 'numeric'
+
+         if (!config.max) {
+             this.defaultScale = true
+             this.autoscale = false
+         }
+
+         this.height = (config.height !== undefined ? config.height : DEFAULT_TRACK_HEIGHT)
 
         this.type = "cnvpytor"
         this.graphType = config.graphType || "points"
@@ -106,10 +78,17 @@ class CNVPytorTrack extends TrackBase {
     async postInit() {
 
         if (this.config.format == 'vcf') {
-            this.featureSource = FeatureSource(this.config, this.browser.genome)
-            this.header = await this.getHeader()
 
-            const cnvpytor_obj = new CNVpytorVCF(this.featureSource.reader.features, this.bin_size)
+            let allVariants
+            if(this.featureSource) {
+                allVariants = Object.values(this.featureSource.getAllFeatures()).flat()
+            } else {
+                this.featureSource = this.featureSource || FeatureSource(this.config, this.browser.genome)
+                this.header = await this.getHeader()
+                allVariants = this.featureSource.reader.features
+            }
+
+            const cnvpytor_obj = new CNVpytorVCF(allVariants, this.bin_size)
             let wigFeatures;
             let bafFeatures;
             this.wigFeatures_obj = {}
