@@ -86,7 +86,7 @@ class BAMTrack extends TrackBase {
         if (!this.showAlignments) {
             this._height = this.coverageTrackHeight
         }
-
+        
         // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
         // are present for a given reference frame the last one will take precedence
         if (config.sort) {
@@ -95,6 +95,17 @@ class BAMTrack extends TrackBase {
                 this.assignSort(config.sort[0])
             } else {
                 this.assignSort(config.sort)
+            }
+        }
+        
+        // Group options from HTML
+        if (config.group){
+            this.groupObject = {
+                option: config.group.option,
+                showSoftClips: this.showSoftClips
+            }
+            if (config.group.option === 'TAG') {
+                this.groupObject.tag = config.group.tag
             }
         }
 
@@ -165,7 +176,6 @@ class BAMTrack extends TrackBase {
     }
 
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel, viewport) {
-
         const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
 
         if (alignmentContainer.paired && !this._pairedEndStats && !this.config.maxFragmentLength) {
@@ -175,9 +185,21 @@ class BAMTrack extends TrackBase {
             }
         }
         alignmentContainer.alignments = undefined  // Don't need to hold onto these anymore
-
+        
+        const group = this.groupObject
         const sort = this.sortObject
-        if (sort) {
+        if (group) {
+            // Cover both sorting and grouping
+            if (sort) {
+                if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
+                    alignmentContainer.groupAlignments(group, sort)
+                }
+            }
+            else {
+                alignmentContainer.groupAlignments(group)
+            }
+        }
+        else if (sort) {
             if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
                 alignmentContainer.sortRows(sort)
             }
@@ -368,8 +390,35 @@ class BAMTrack extends TrackBase {
                 this.config.showSoftClips = this.showSoftClips
                 this.featureSource.setShowSoftClips(this.showSoftClips)
                 const alignmentContainers = this.getCachedAlignmentContainers()
+                
+                
+                const sort = this.sortObject
+                
                 for (let ac of alignmentContainers) {
-                    ac.setShowSoftClips(this.showSoftClips)
+                    if (this.groupObject) {
+                        // Make sure we keep show soft clips option
+                        this.groupObject.showSoftClips = this.showSoftClips
+                        const group = this.groupObject
+                       
+                        // Cover both sorting and grouping
+                        if (sort) {
+                            if (sort.chr === ac.chr && sort.position >= ac.start && sort.position <= ac.end) {
+                                ac.groupAlignments(group, sort)
+                            }
+                        }
+                        else {
+                            ac.groupAlignments(group, false)
+                        }
+                    }
+                    else {
+                        ac.setShowSoftClips(this.showSoftClips)
+                        // Keep sort
+                        if (sort) {
+                            if (sort.chr === ac.chr && sort.position >= ac.start && sort.position <= ac.end) {
+                                ac.sortRows(sort)
+                            }
+                        }
+                    }
                 }
                 this.trackView.repaintViews()
             }
@@ -867,7 +916,6 @@ class AlignmentTrack {
      * @returns {number|*}
      */
     computePixelHeight(alignmentContainer) {
-
         if (alignmentContainer.packedAlignmentRows) {
             const h = alignmentContainer.hasDownsampledIntervals() ? downsampleRowHeight + alignmentStartGap : 0
             const alignmentRowHeight = this.displayMode === "SQUISHED" ?
@@ -880,7 +928,6 @@ class AlignmentTrack {
     }
 
     draw(options) {
-
         const alignmentContainer = options.features
         const ctx = options.context
         const bpPerPixel = options.bpPerPixel
@@ -904,6 +951,7 @@ class AlignmentTrack {
         let alignmentRowYInset = 0
 
         let pixelTop = options.pixelTop
+
         if (this.top) {
             ctx.translate(0, this.top)
         }
@@ -934,21 +982,27 @@ class AlignmentTrack {
             this.alignmentRowHeight
 
         if (packedAlignmentRows) {
-
             const nRows = packedAlignmentRows.length
-
+            const alignmentHeight = alignmentRowHeight <= 4 ? alignmentRowHeight : alignmentRowHeight - 2
+            if (typeof alignmentContainer.groupsHeight === 'object' && Object.keys(alignmentContainer.groupsHeight).length !== 0){
+                const heights = Object.values(alignmentContainer.groupsHeight)
+                for (let i = 0; i < heights.length - 1; i++) {
+                    // TODO: Add group name!!
+                    const lineY = alignmentRowYInset + (alignmentRowHeight * (heights[i] - 0.5))
+                    IGVGraphics.dashedLine(ctx, 0, lineY, options.pixelWidth, lineY)
+                }
+            }
             for (let rowIndex = 0; rowIndex < nRows; rowIndex++) {
 
                 const alignmentRow = packedAlignmentRows[rowIndex]
                 const alignmentY = alignmentRowYInset + (alignmentRowHeight * rowIndex)
-                const alignmentHeight = alignmentRowHeight <= 4 ? alignmentRowHeight : alignmentRowHeight - 2
 
                 if (alignmentY > pixelBottom) {
                     break
                 } else if (alignmentY + alignmentHeight < pixelTop) {
                     continue
                 }
-
+                
                 for (let alignment of alignmentRow.alignments) {
 
                     this.hasPairs = this.hasPairs || alignment.isPaired()
@@ -976,7 +1030,7 @@ class AlignmentTrack {
                     } else {
                         drawSingleAlignment.call(this, alignment, alignmentY, alignmentHeight)
                     }
-
+    
                 }
             }
         }
@@ -1002,7 +1056,6 @@ class AlignmentTrack {
         }
 
         function drawSingleAlignment(alignment, y, alignmentHeight) {
-
 
             if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
                 return
@@ -1328,12 +1381,75 @@ class AlignmentTrack {
                 position: Math.floor(clickState.genomicLocation),
                 option: option,
                 direction: direction,
-                sortAsPairs: viewport.trackView.track.viewAsPairs
+                sortAsPairs: viewport.trackView.track.viewAsPairs            
             }
             this.parent.sortObject = newSortObject
-            viewport.cachedFeatures.sortRows(newSortObject)
-            viewport.repaint()
+
+            // In case we have both grouping and sorting we let the groupAlignments function handle both
+            if (this.parent.groupObject) {
+                viewport.cachedFeatures.groupAlignments(this.parent.groupObject, newSortObject)
+                viewport.trackView.checkContentHeight()
+                viewport.trackView.repaintViews()
+            }
+            else {
+                viewport.cachedFeatures.sortRows(newSortObject)
+                viewport.repaint()
+            }
+            
         }
+
+        const groupByOption = (option, tag) => {
+            const cs = this.parent.groupObject
+            const newGroupObject = {
+                option: option,
+                groupAsPairs: viewport.trackView.track.viewAsPairs,
+                showSoftClips: this.showSoftClips
+            }
+            
+            if (option === "TAG"){
+                newGroupObject.tag = tag
+            }
+            
+            // We just group and ignore sorting that was possibly set
+            viewport.cachedFeatures.groupAlignments(newGroupObject, false)
+            
+            // If NONE reset grouping to empty state
+            if (option === "NONE"){
+                newGroupObject = {}
+            }
+            
+            this.parent.groupObject = newGroupObject
+
+            // We restart contentHeight as we add empty alignment rows for spacing
+            viewport.trackView.checkContentHeight()
+            viewport.trackView.repaintViews()
+        }
+
+        list.push('<b>Group by...</b>')
+        list.push({label: '&nbsp; none', click: () => groupByOption("NONE")})
+        list.push({label: '&nbsp; strand', click: () => groupByOption("STRAND")})
+        list.push({label: '&nbsp; first-in-pair strand', click: () => groupByOption("FIRST_IN_PAIR_STRAND")})
+        list.push({label: '&nbsp; start location', click: () => groupByOption("START")})
+        list.push({label: '&nbsp; insert size', click: () => groupByOption("INSERT_SIZE")})
+        list.push({label: '&nbsp; chromosome of mate', click: () => groupByOption("MATE_CHR")})
+        list.push({label: '&nbsp; mapping quality', click: () => groupByOption("MQ")})
+        list.push({label: '&nbsp; aligned read length', click: () => groupByOption("ALIGNED_READ_LENGTH")})
+        list.push({
+            label: '&nbsp; tag', click: () => {
+                const config =
+                    {
+                        label: 'Tag Name',
+                        value: this.groupByTag ? this.groupByTag : '',
+                        callback: (tag) => {
+                            if (tag) {
+                                groupByOption("TAG", tag)
+                            }
+                        }
+                    }
+                this.browser.inputDialog.present(config, clickState.event)
+            }
+        })
+        list.push('<hr/>')
         list.push('<b>Sort by...</b>')
         list.push({label: '&nbsp; base', click: () => sortByOption("BASE")})
         list.push({label: '&nbsp; read strand', click: () => sortByOption("STRAND")})
@@ -1656,7 +1772,7 @@ class AlignmentTrack {
         return this.parent.color
     }
 
-    get showSortClips() {
+    get showSoftClips() {
         return this.parent.showSoftClips
     }
 
