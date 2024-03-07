@@ -51,16 +51,24 @@ class CNVpytorVCF {
                 };
             }
 
-            const calls = snp.calls[9]
-            const dpValue = calls.info["DP"]
+            // JTR -- note, there is an implicit assumption there that there is 1 and only 1 genotype.  Previously
+            // this was hardcoded to id "9" => snp.calls[9].  By convention callset IDs == column number but this could change
+            //const call = snp.calls[9]
+            const calls = Object.values(snp.calls)
+            if(calls.length !== 1) {
+                throw Error(`Unexpected number of genotypes: ${calls.length}.  CNVPytor expects 1 and only 1 genotype`)
+            }
+            const call = calls[0]
+
+            const dpValue = call.info["DP"]
             if (dpValue) {
                 
                 wigFeatures[chr][featureBin].dp_sum_score += Number.parseInt(dpValue)
                 wigFeatures[chr][featureBin].dp_count++
             }
             
-            let ad_score = calls.info["AD"].split(',')
-            let genotype = calls.genotype
+            let ad_score = call.info["AD"].split(',')
+            let genotype = call.genotype
             if ((genotype[0] == 0 && genotype[1] == 1) || (genotype[0] == 1 && genotype[1] == 0)) {
                 //apply the beta function
                 wigFeatures[chr][featureBin].hets_count++;
