@@ -24,9 +24,10 @@
  * THE SOFTWARE.
  */
 import PairedAlignment from "./pairedAlignment.js"
-import {canBePaired, packAlignmentRows, pairAlignments, unpairAlignments} from "./alignmentUtils.js"
+import {canBePaired, packAlignmentRows, pairAlignments, unpairAlignments, sortAlignmentRows} from "./alignmentUtils.js"
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 import BaseModificationCounts from "./mods/baseModificationCounts.js"
+import BamAlignmentRow from "./bamAlignmentRow.js"
 
 
 class AlignmentContainer {
@@ -167,39 +168,62 @@ class AlignmentContainer {
     getMax(start, end) {
         return this.coverageMap.getMax(start, end)
     }
-
+    
     sortRows(options) {
-
-        const newRows = []
-        const undefinedRow = []
-        for (let row of this.packedAlignmentRows) {
-            const alignment = row.findAlignment(options.position, options.sortAsPairs)
-            if (undefined !== alignment) {
-                newRows.push(row)
-            } else {
-                undefinedRow.push(row)
-            }
-        }
-
-        newRows.sort((rowA, rowB) => {
-            const direction = options.direction
-            const rowAValue = rowA.getSortValue(options, this)
-            const rowBValue = rowB.getSortValue(options, this)
-
-            if (rowBValue === undefined && rowBValue !== undefined) return 1
-            else if (rowAValue !== undefined && rowBValue === undefined) return -1
-
-            const i = rowAValue > rowBValue ? 1 : (rowAValue < rowBValue ? -1 : 0)
-            return true === direction ? i : -i
-        })
-
-        for (let row of undefinedRow) {
-            newRows.push(row)
-        }
-
-        this.packedAlignmentRows = newRows
+        // sortAlignmentRows needed so we can reuse it in grouping
+        this.packedAlignmentRows = sortAlignmentRows(options, this.packedAlignmentRows, this)
     }
+    
+    groupAlignments(options, sortOptions) {
+        if (options.option === 'NONE'){
+            this.repack()
+            this.groupsHeight = {} // Delete groups heights  
+        }
+        else{
+            const alignmentGroups = {}
+            const newRows = []
+            const newGroupsHeight = {} 
+            
+            // Make sure we are mindful of soft clips
+            // as we are repacking reads
+            const showSoftClips = options.showSoftClips
 
+            for (let alignment of this.allAlignments()){
+                const groupValue = alignment.getGroupValue(options)
+                alignmentGroups[groupValue] = alignmentGroups[groupValue] || []
+                alignmentGroups[groupValue].push(alignment)
+            }
+            const orderedGroupNames = Object.keys(alignmentGroups).sort()
+            
+            let totalGroupsHeight = 0
+            orderedGroupNames.forEach(key => {
+                let packedGroupAlignments = []
+                
+                // Cover sort within groups
+                if (sortOptions){
+                    const tmpRows = packAlignmentRows(alignmentGroups[key], this.start, this.end, showSoftClips)
+                    packedGroupAlignments = sortAlignmentRows(sortOptions, tmpRows, this)
+                }
+                else{
+                    packedGroupAlignments = packAlignmentRows(alignmentGroups[key], this.start, this.end, showSoftClips)
+                }
+            
+                const packedGroupAlignmentsLength = packedGroupAlignments.length
+
+                // Make sure we have an empty AlignmentRow that would serve as a spacer between groups
+                if (packedGroupAlignments[packedGroupAlignmentsLength-1].alignments.length > 0) {
+                    packedGroupAlignments.push(new BamAlignmentRow())
+                }
+                
+                newRows.push(...packedGroupAlignments)
+                totalGroupsHeight += packedGroupAlignments.length
+                newGroupsHeight[key] = totalGroupsHeight
+            })
+
+            this.groupsHeight = newGroupsHeight
+            this.packedAlignmentRows = newRows
+        }
+    }
 }
 
 
