@@ -90,8 +90,11 @@ class ROITable extends RegionTableBase {
     setROIVisibility(isVisible) {
 
         const elements = this.browser.columnContainer.querySelectorAll('.igv-roi-region')
-        for (const el of elements) {
-            el.style.display = false === isVisible ? 'none' : 'flex'
+
+        for (let i = 0; i < elements.length; i++) {
+            const el = elements[ i ]
+            false === isVisible ? updateElementAlpha(el, 0.0) : el.style.backgroundColor = el.dataset.color
+
         }
 
         this.toggleROIButton.textContent = false === isVisible ? 'Show all ROIs' : 'Hide all ROIs'
@@ -153,4 +156,20 @@ class ROITable extends RegionTableBase {
     }
 
 }
+
+function updateElementAlpha(element, alpha) {
+
+    const rgba = window.getComputedStyle(element).backgroundColor;
+
+    const rgbaArray = rgba.match(/[\d.]+/g);
+
+    if (rgbaArray.length === 3) {
+        rgbaArray.push(1)
+    }
+
+    rgbaArray[3] = alpha;
+
+    element.style.backgroundColor = `rgba(${rgbaArray.join(', ')})`
+}
+
 export default ROITable

@@ -198,6 +198,7 @@ class ROIManager {
         regionElement.style.left = `${pixelX}px`
         regionElement.style.width = `${pixelWidth}px`
         regionElement.style.backgroundColor = roiSet.color
+        regionElement.dataset.color = roiSet.color
         regionElement.dataset.region = regionKey
 
         const header = DOMUtils.div()
