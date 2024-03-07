@@ -92,7 +92,7 @@ class BamAlignmentRow {
             case "GAP_SIZE":
                 return -alignment.gapSizeAt(position)
             case "MATE_CHR":
-                return alignment.mate
+                return alignment.mate ? alignment.mate.chr : Number.MAX_VALUE
             case "MQ":
                 return alignment.mq === undefined ? Number.MAX_VALUE : -alignment.mq
             case "ALIGNED_READ_LENGTH":
@@ -155,8 +155,6 @@ class BamAlignmentRow {
             return baseScore
         }
     }
-
-
 }
 
 export default BamAlignmentRow
