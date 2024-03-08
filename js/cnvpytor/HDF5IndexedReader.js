@@ -273,7 +273,7 @@ class HDF5Reader {
                 }
             });
         }
-        console.log(chrom, chr_wig_1, chr_wig_2)
+        //console.log(chrom, chr_wig_1, chr_wig_2)
         return [chr_wig_1, chr_wig_2]
 
     }
