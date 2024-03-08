@@ -617,7 +617,7 @@ class VariantTrack extends TrackBase {
         if (this.canCovertToPytor()) {
             menuItems.push('<hr>')
             menuItems.push({
-                label: 'Convert to CNV Pytor track',
+                label: 'Convert to CNVpytor track',
                 click: function cnvPytorHandler () {
                     this.convertToPytor()
                 }
@@ -754,6 +754,11 @@ class VariantTrack extends TrackBase {
 
     async convertToPytor() {
 
+        // Store state in case track is reverted
+        this.variantState = { ...this.config, ...this.getState() };
+        this.variantState.trackHeight = this.height
+
+
         this.trackView.startSpinner()
         // The timeout is neccessary to give the spinner time to start.
         setTimeout(async () => {
@@ -761,14 +766,16 @@ class VariantTrack extends TrackBase {
                 const newConfig = Object.assign({}, this.config)
                 Object.setPrototypeOf(this, CNVPytorTrack.prototype)
 
-                await this.init(newConfig)
+                this.init(newConfig)
                 await this.postInit()
 
                 this.trackView.clearCachedFeatures()
-                this.trackView.setTrackHeight(250, true)
+                this.trackView.setTrackHeight(this.config.height || CNVPytorTrack.DEFAULT_TRACK_HEIGHT)
                 this.trackView.checkContentHeight()
                 this.trackView.updateViews()
                 this.trackView.track.autoHeight = false
+
+
             } finally {
                 this.trackView.stopSpinner()
             }
