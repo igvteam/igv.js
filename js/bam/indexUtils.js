@@ -12,7 +12,7 @@ function optimizeChunks(chunks, lowest) {
         }
     })
 
-    if(chunks.length <= 1) {
+    if (chunks.length <= 1) {
         return chunks
     }
 
@@ -65,11 +65,10 @@ function optimizeChunks(chunks, lowest) {
  * @returns {boolean|boolean}
  */
 function canMerge(chunk1, chunk2) {
-    function canMerge(chunk1, chunk2) {
-        const gap = chunk2.minv.block - chunk1.maxv.block
-        const sizeEstimate = chunk2.maxv.block - chunk1.minv.block
-        return sizeEstimate < 5000000 && gap < 65000
-    }
+    const gap = chunk2.minv.block - chunk1.maxv.block
+    const sizeEstimate = chunk2.maxv.block - chunk1.minv.block
+    return sizeEstimate < 5000000 && gap < 65000
+    
 }
 
 export {optimizeChunks}
