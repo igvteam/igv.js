@@ -77,10 +77,6 @@ function isOverlayTrackCriteriaMet(browser) {
 
         return list.length > 1
 
-        // const isSingleTrackType = didSelectSingleTrackType(selected.map(({ track }) => track.type))
-        // const { track } = selected[ 0 ]
-        // return isSingleTrackType && 'wig' === track.type
-
     } else {
         return false
     }
