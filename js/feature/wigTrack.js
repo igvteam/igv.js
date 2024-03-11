@@ -19,7 +19,6 @@ class WigTrack extends TrackBase {
         logScale: false,
         windowFunction: 'mean',
         graphType: 'bar',
-        autoscale: true,
         normalize: undefined,
         scaleFactor: undefined,
         overflowColor: `rgb(255, 32, 255)`,
@@ -212,13 +211,13 @@ class WigTrack extends TrackBase {
                     if (f.end < bpStart) continue
                     if (f.start > bpEnd) break
 
-                    const x = Math.floor((f.start - bpStart) / bpPerPixel)
+                    const x = (f.start - bpStart) / bpPerPixel
                     if (isNaN(x)) continue
 
                     let y = yScale(f.value)
 
-                    const rectEnd = Math.ceil((f.end - bpStart) / bpPerPixel)
-                    const width = Math.max(1, rectEnd - x)
+                    const rectEnd = (f.end - bpStart) / bpPerPixel
+                    const width = rectEnd - x
 
                     const color = options.alpha ? IGVColor.addAlpha(this.getColorForFeature(f), options.alpha) : this.getColorForFeature(f)
 
@@ -242,6 +241,7 @@ class WigTrack extends TrackBase {
                         }
 
                     } else {
+
                         const height = Math.min(pixelHeight, y - y0)
                         IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
 
