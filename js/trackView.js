@@ -471,7 +471,12 @@ class TrackView {
         }
 
         // Autoscale
-        if (this.track.autoscale) {
+        let mergeAutocale
+        if ("merged" === this.track.type) {
+            // Merged tracks handle their own scaling
+            mergeAutocale = this.track.updateScales(visibleViewports)
+
+        } else if (this.track.autoscale) {
             let allFeatures = []
             for (let visibleViewport of visibleViewports) {
                 const referenceFrame = visibleViewport.referenceFrame
@@ -502,7 +507,7 @@ class TrackView {
                 }
             }
 
-            
+
             if (typeof this.track.doAutoscale === 'function') {
                 this.track.dataRange = this.track.doAutoscale(allFeatures)
             } else {
@@ -510,7 +515,7 @@ class TrackView {
             }
         }
 
-        const refreshView = (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler')
+        const refreshView = (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler' || mergeAutocale)
         for (let vp of visibleViewports) {
             if (viewportsToRepaint.includes(vp)) {
                 vp.repaint()

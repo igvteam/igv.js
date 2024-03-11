@@ -75,30 +75,16 @@ class MergedTrack extends TrackBase {
         this.flipAxis = this.config.flipAxis ? this.config.flipAxis : false
         this.logScale = this.config.logScale ? this.config.logScale : false
 
-        // this.autoscale = this.config.autoscale || this.config.max === undefined
-        // if (!this.autoscale) {
-        //     this.dataRange = {
-        //         min: this.config.min || 0,
-        //         max: this.config.max
-        //     }
-        // }
-        // for (let t of this.tracks) {
-        //     t.autoscale = false
-        //     t.dataRange = this.dataRange
-        // }
-
         // Explicit merged settings -- these will override any individual track settings
         if (this.config.autoscale) {
             this.autoscale = this.config.autoscale
-            this.autoscaleGroup = this.config.autoscale     // Autoscale all tracks as a group
         } else if (this.config.max !== undefined) {
             this.dataRange = {
                 min: this.config.min || 0,
                 max: this.config.max
             }
         } else {
-            this.autoscale = true;
-            this.autoscaleGroup = false
+            this.autoscale = !this.tracks.every(t => t.config.autoscale || t.config.max !== undefined)
         }
 
         this.height = this.config.height || 50
@@ -106,10 +92,6 @@ class MergedTrack extends TrackBase {
         this.resolutionAware = this.tracks.some(t => t.resolutionAware)
 
         return Promise.all(p)
-    }
-
-    doAutoscale(allFeatures) {
-        console.log(allFeatures)
     }
 
     set alpha(alpha) {
@@ -159,13 +141,7 @@ class MergedTrack extends TrackBase {
 
         const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
         const featureArrays = await Promise.all(promises)
-
-        if (featureArrays.every((arr) => arr.length === 0)) {
-            return new MergedFeatureCollection([], [])
-        } else {
-            const trackNames = this.tracks.map((t) => t.name)
-            return new MergedFeatureCollection(featureArrays, trackNames)
-        }
+        return new MergedFeatureCollection(featureArrays)
     }
 
     draw(options) {
@@ -256,39 +232,89 @@ class MergedTrack extends TrackBase {
         return clickedFeatures
     }
 
-
     get supportsWholeGenome() {
         return this.tracks.every(track => track.supportsWholeGenome)
+    }
+
+    updateScales(visibleViewports) {
+
+        let scaleChange;
+
+        if (this.autoscale) {
+            scaleChange = true
+            let allFeatures = []
+            for (let visibleViewport of visibleViewports) {
+                if (visibleViewport.featureCache && visibleViewport.featureCache.features) {
+                    const referenceFrame = visibleViewport.referenceFrame
+                    const start = referenceFrame.start
+                    const end = start + referenceFrame.toBP(visibleViewport.getWidth())
+                    const mergedFeatureCollection = visibleViewport.featureCache.features
+
+                    if (this.autoscale) {
+                        allFeatures.push({value: mergedFeatureCollection.getMax(start, end)})
+                        allFeatures.push({value: mergedFeatureCollection.getMin(start, end)})
+                    }
+                }
+                this.dataRange = doAutoscale(allFeatures)
+            }
+        } else {
+            // Individual track scaling
+            let idx=-1;
+            for (let track of this.tracks) {
+                ++idx;
+                if (track.autoscale) {
+                    scaleChange = true
+                    let allFeatures = []
+                    for (let visibleViewport of visibleViewports) {
+                        if (visibleViewport.featureCache && visibleViewport.featureCache.features) {
+                            const referenceFrame = visibleViewport.referenceFrame
+                            const start = referenceFrame.start
+                            const end = start + referenceFrame.toBP(visibleViewport.getWidth())
+                            const mergedFeatureCollection = visibleViewport.featureCache.features
+                            const featureList = mergedFeatureCollection.featureArrays[idx]
+                            if (featureList) {
+                                for (let f of featureList) {
+                                    if (f.end < start) continue
+                                    if (f.start > end) break
+                                    allFeatures.push(f)
+                                }
+                            }
+                        }
+                    }
+                    track.dataRange = doAutoscale(allFeatures)
+                }
+            }
+        }
+        return scaleChange;
     }
 }
 
 
 class MergedFeatureCollection {
 
-    constructor(featureArrays, trackNames) {
+    constructor(featureArrays) {
         this.featureArrays = featureArrays
-        this.trackNames = trackNames
     }
 
-    getMaxA(start, end) {
-        let max = -Number.MAX_VALUE;
+    getMax(start, end) {
+        let max = -Number.MAX_VALUE
 
         for (let a of this.featureArrays) {
             for (let f of a) {
                 if (typeof f.value === 'undefined' || Number.isNaN(f.value)) {
-                    continue;
+                    continue
                 }
                 if (f.end < start) {
-                    continue;
+                    continue
                 }
                 if (f.start > end) {
-                    break;
+                    break
                 }
-                max = Math.max(max, f.value);
+                max = Math.max(max, f.value)
             }
         }
 
-        return max !== -Number.MAX_VALUE ? max : 100;
+        return max !== -Number.MAX_VALUE ? max : 100
     }
 
     // Covers cases in which a track has negative values.

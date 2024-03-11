@@ -19,68 +19,49 @@
 <script type="module">
 
     import igv from "../../js"
-    const config  =
+
+    const config =
         {
             genome: "hg19",
             locus: "chr4:40,174,668-40,221,204",
             tracks: [
-                // {
-                //     name: "Merged - default",
-                //     type: "merged",
-                //     tracks: [
-                //         {
-                //             "type": "wig",
-                //             "format": "bigwig",
-                //             "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
-                //             "color": "red"
-                //         },
-                //         {
-                //             "type": "wig",
-                //             "format": "bigwig",
-                //             "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
-                //             "color": "green"
-                //         }
-                //     ]
-                // },
-                // {
-                //     name: "Merged - autoscaled",
-                //     type: "merged",
-                //     autoscale: true,
-                //     tracks: [
-                //         {
-                //             "type": "wig",
-                //             "format": "bigwig",
-                //             "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
-                //             "color": "red"
-                //         },
-                //         {
-                //             "type": "wig",
-                //             "format": "bigwig",
-                //             "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
-                //             "color": "green"
-                //         }
-                //     ]
-                // },
-                // {
-                //     name: "Merged - fixed scale",
-                //     type: "merged",
-                //     min: 0,
-                //     max: 100,
-                //     tracks: [
-                //         {
-                //             "type": "wig",
-                //             "format": "bigwig",
-                //             "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
-                //             "color": "red"
-                //         },
-                //         {
-                //             "type": "wig",
-                //             "format": "bigwig",
-                //             "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
-                //             "color": "green"
-                //         }
-                //     ]
-                // },
+                {
+                    name: "Merged - default",
+                    type: "merged",
+                    tracks: [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red"
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green"
+                        }
+                    ]
+                },
+                {
+                    name: "Merged - group autoscaled",
+                    type: "merged",
+                    autoscale: true,
+                    tracks: [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red"
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green"
+                        }
+                    ]
+                },
                 {
                     name: "Merged - individual  autoscale",
                     type: "merged",
@@ -102,6 +83,26 @@
                     ]
                 },
                 {
+                    name: "Merged - fixed scale",
+                    type: "merged",
+                    min: 0,
+                    max: 100,
+                    tracks: [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red"
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green"
+                        }
+                    ]
+                },
+                {
                     name: "Merged - individual  fixed scale",
                     type: "merged",
                     tracks: [
@@ -110,14 +111,14 @@
                             "format": "bigwig",
                             "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
                             "color": "red",
-                            "max": 100
+                            "max": 200
                         },
                         {
                             "type": "wig",
                             "format": "bigwig",
                             "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
                             "color": "green",
-                            "max": 25
+                            "max": 100
                         }
                     ]
                 },
