@@ -97,10 +97,6 @@ const IGVGraphics = {
 
     fillRect: function (ctx, x, y, w, h, properties) {
 
-        var c
-        x = Math.round(x)
-        y = Math.round(y)
-
         if (properties) {
             ctx.save()
             IGVGraphics.setProperties(ctx, properties)
@@ -311,14 +307,7 @@ const IGVGraphics = {
 }
 
 function doPath(ctx, x, y) {
-
-
     var i, len = x.length
-    for (i = 0; i < len; i++) {
-        x[i] = Math.round(x[i])
-        y[i] = Math.round(y[i])
-    }
-
     ctx.beginPath()
     ctx.moveTo(x[0], y[0])
     for (i = 1; i < len; i++) {
