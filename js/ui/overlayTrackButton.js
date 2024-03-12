@@ -2,6 +2,7 @@ import NavbarButton from "./navbarButton.js"
 import { overlayTrackImage, overlayTrackImageHover } from "./navbarIcons/overlayTrack.js"
 import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 import {didSelectSingleTrackType, getMultiSelectedTrackViews} from "./menuUtils.js"
+import MergedTrack from "../feature/mergedTrack.js"
 
 
 class OverlayTrackButton extends NavbarButton {
@@ -32,14 +33,6 @@ function trackOverlayClickHandler(e) {
 
         const tracks = getMultiSelectedTrackViews(this.browser).map(({ track }) => track)
 
-        const trackConfigurations = tracks.map(( track ) => {
-            const config = Object.assign({}, track.config)
-            config.color = track.color
-            config.autoscale = track.autoscale
-            config.autoscaleGroup = track.autoscaleGroup
-            return config
-        })
-
         for (const track of tracks) {
             this.browser.removeTrack(track)
         }
@@ -50,14 +43,15 @@ function trackOverlayClickHandler(e) {
             {
                 name: 'Overlay',
                 type: 'merged',
-                autoscale: true,
-                alpha: fudge * (1.0/tracks.length),
+                alpha: 0.5, //fudge * (1.0/tracks.length),
                 height: Math.max(...tracks.map(({ height }) => height)),
                 order: Math.min(...tracks.map(({ order }) => order)),
-                tracks: trackConfigurations
+                _tracks: tracks
             }
 
-        this.browser.loadTrack(config)
+        const mergedTrack = new MergedTrack(config, this.browser)
+
+        this.browser.addTrack(config, mergedTrack)
 
     }
 

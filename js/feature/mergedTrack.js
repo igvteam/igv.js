@@ -27,7 +27,10 @@
 import TrackBase from "../trackBase.js"
 import paintAxis from "../util/paintAxis.js"
 import {FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
+import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+
 import {doAutoscale} from "../util/igvUtils.js"
+import $ from "../vendor/jquery-3.3.1.slim.js"
 
 
 /**
@@ -48,7 +51,7 @@ class MergedTrack extends TrackBase {
     }
 
     init(config) {
-        if (!config.tracks) {
+        if (!(config.tracks || config._tracks)) {
             throw Error("Error: no tracks defined for merged track" + config)
         }
         super.init(config)
@@ -57,41 +60,46 @@ class MergedTrack extends TrackBase {
     async postInit() {
 
         this.tracks = []
-        const p = []
-        for (let tconf of this.config.tracks) {
-            tconf.isMergedTrack = true
-            const t = await this.browser.createTrack(tconf)
-            if (t) {
-                this.tracks.push(t)
+        if (this.config.tracks) {
+            // Configured merged track
+            for (let tconf of this.config.tracks) {
+                tconf.isMergedTrack = true
+                const t = await this.browser.createTrack(tconf)
+                if (t) {
+                    this.tracks.push(t)
+                } else {
+                    console.warn("Could not create track " + tconf)
+                }
+                if (typeof t.postInit === 'function') {
+                    await t.postInit()
+                }
+            }
+            // Explicit merged settings -- these will override any individual track settings
+            if (this.config.autoscale) {
+                this.autoscale = this.config.autoscale
+            } else if (this.config.max !== undefined) {
+                this.dataRange = {
+                    min: this.config.min || 0,
+                    max: this.config.max
+                }
             } else {
-                console.warn("Could not create track " + tconf)
+                this.autoscale = !this.tracks.every(t => t.config.autoscale || t.config.max !== undefined)
             }
-
-            if (typeof t.postInit === 'function') {
-                p.push(t.postInit())
-            }
+        } else {
+            // Dynamic merged track
+            this.tracks = this.config._tracks
+            this.autoscale = false
+            delete this.config._tracks
         }
 
         this.flipAxis = this.config.flipAxis ? this.config.flipAxis : false
         this.logScale = this.config.logScale ? this.config.logScale : false
 
-        // Explicit merged settings -- these will override any individual track settings
-        if (this.config.autoscale) {
-            this.autoscale = this.config.autoscale
-        } else if (this.config.max !== undefined) {
-            this.dataRange = {
-                min: this.config.min || 0,
-                max: this.config.max
-            }
-        } else {
-            this.autoscale = !this.tracks.every(t => t.config.autoscale || t.config.max !== undefined)
-        }
 
         this.height = this.config.height || 50
 
         this.resolutionAware = this.tracks.some(t => t.resolutionAware)
 
-        return Promise.all(p)
     }
 
     set alpha(alpha) {
@@ -129,6 +137,10 @@ class MergedTrack extends TrackBase {
         }
 
         items.push(...this.numericDataMenuItems())
+
+        items.push('<hr/>')
+        items.push(this.overlayTrackAlphaAdjustmentMenuItem())
+        items.push(this.trackSeparationMenuItem())
 
         return items
     }
@@ -238,7 +250,7 @@ class MergedTrack extends TrackBase {
 
     updateScales(visibleViewports) {
 
-        let scaleChange;
+        let scaleChange
 
         if (this.autoscale) {
             scaleChange = true
@@ -259,9 +271,9 @@ class MergedTrack extends TrackBase {
             }
         } else {
             // Individual track scaling
-            let idx=-1;
+            let idx = -1
             for (let track of this.tracks) {
-                ++idx;
+                ++idx
                 if (track.autoscale) {
                     scaleChange = true
                     let allFeatures = []
@@ -285,8 +297,64 @@ class MergedTrack extends TrackBase {
                 }
             }
         }
-        return scaleChange;
+        return scaleChange
     }
+
+    overlayTrackAlphaAdjustmentMenuItem() {
+
+        const container = DOMUtils.div()
+        container.innerText = 'Set transparency'
+
+        function dialogPresentationHandler(e) {
+            const callback = alpha => {
+                this.alpha = Math.max(0.001, alpha)
+                this.updateViews()
+            }
+
+            const config =
+                {
+                    label: 'Transparency',
+                    value: this.alpha,
+                    min: 0.0,
+                    max: 1.0,
+                    scaleFactor: 1000,
+                    callback
+                }
+
+            this.browser.sliderDialog.present(config, e)
+        }
+
+        return {object: $(container), dialog: dialogPresentationHandler}
+    }
+
+    trackSeparationMenuItem() {
+
+        const object = $('<div>')
+        object.text('Separate tracks')
+
+        function click(e) {
+
+            // Capture state which will be nulled when track is removed
+            const groupAutoscale = this.autoscale;
+            const name = this.name
+            const tracks = this.tracks
+            const browser = this.browser
+            const order = this.order
+
+            browser.removeTrack(this)
+            for (let track of tracks) {
+                track.order = order
+                if(groupAutoscale) {
+                    track.autoscaleGroup = name
+                }
+                browser.addTrack(track.config, track)
+            }
+            browser.updateViews()
+        }
+
+        return {object, click}
+    }
+
 }
 
 
@@ -335,7 +403,7 @@ class MergedFeatureCollection {
         }
         return min
     }
-
 }
+
 
 export default MergedTrack
