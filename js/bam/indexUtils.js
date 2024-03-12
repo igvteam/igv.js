@@ -12,7 +12,7 @@ function optimizeChunks(chunks, lowest) {
         }
     })
 
-    if (chunks.length <= 1) {
+    if(chunks.length <= 1) {
         return chunks
     }
 
