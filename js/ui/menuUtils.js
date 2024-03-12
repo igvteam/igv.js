@@ -86,12 +86,6 @@ class MenuUtils {
             list.push(visibilityWindowMenuItem())
         }
 
-        if ('merged' === trackView.track.type) {
-            list.push('<hr/>')
-            list.push(trackSeparationMenuItem())
-            list.push(overlayTrackAlphaAdjustmentMenuItem())
-        }
-
         return list
     }
 
@@ -146,56 +140,6 @@ function isVisibilityWindowType(trackView) {
     return hasVizWindow || (track && vizWindowTypes.has(track.type))
 }
 
-function overlayTrackAlphaAdjustmentMenuItem() {
-
-    const container = DOMUtils.div()
-    container.innerText = 'Set transparency'
-
-    function dialogPresentationHandler (e) {
-        const callback = alpha => {
-            this.alpha = Math.max(0.001, alpha)
-            this.updateViews()
-        }
-
-        const config =
-            {
-                label: 'Transparency',
-                value: this.alpha,
-                min: 0.0,
-                max: 1.0,
-                scaleFactor: 1000,
-                callback
-            }
-
-        this.browser.sliderDialog.present(config, e)
-    }
-
-    return { object: $(container), dialog:dialogPresentationHandler }
-}
-
-function trackSeparationMenuItem() {
-
-    const object = $('<div>')
-    object.text('Separate tracks')
-
-    function click(e) {
-
-        const configs = this.config.tracks.map(overlayConfig => {
-            const config = { ...overlayConfig }
-            config.isMergedTrack = undefined
-            config.order = this.order
-            return config
-        })
-
-        const _browser = this.browser
-
-        _browser.removeTrack(this)
-        _browser.loadTrackList(configs)
-    }
-
-    return { object, click }
-}
-
 function groupAutoScaleMenuItem() {
 
     const object = $('<div>')
@@ -220,52 +164,6 @@ function groupAutoScaleMenuItem() {
 
 }
 
-function trackOverlayClickHandler(e) {
-
-    const trackViews = getMultiSelectedTrackViews(this.browser)
-
-    if (trackViews) {
-
-        const wigTracks = trackViews.filter(({ track }) => 'wig' === track.type).map(({ track }) => track)
-
-        const wigConfigs = wigTracks.map(( track ) => {
-            const config = Object.assign({}, track.config)
-            config.color = track.color
-            config.autoscale = track.autoscale
-            config.autoscaleGroup = track.autoscaleGroup
-            return config
-        })
-
-        for (const wigTrack of wigTracks) {
-            this.browser.removeTrack(wigTrack)
-        }
-
-        const fudge = 0.75
-
-        const config =
-            {
-                name: 'Overlay',
-                type: 'merged',
-                autoscale: true,
-                alpha: fudge * (1.0/wigTracks.length),
-                height: Math.max(...wigTracks.map(({ height }) => height)),
-                order: Math.min(...wigTracks.map(({ order }) => order)),
-                tracks: wigConfigs
-            }
-
-        this.browser.loadTrack(config)
-
-    }
-
-}
-
-function trackOverlayMenuItem() {
-
-    const object = $('<div>')
-    object.text('Overlay tracks')
-
-    return { object, doAllMultiSelectedTracks:true, click: trackOverlayClickHandler }
-}
 
 function visibilityWindowMenuItem() {
 
