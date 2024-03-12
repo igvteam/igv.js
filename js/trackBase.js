@@ -144,15 +144,6 @@ class TrackBase {
         }
     }
 
-    /**
-     * Update track properties from the config object.
-     *
-     * @param config
-     */
-    updateConfig(config) {
-        this.init(config)
-    }
-
     clearCachedFeatures() {
         if (this.trackView) {
             this.trackView.clearCachedFeatures()
