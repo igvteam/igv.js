@@ -1,4 +1,4 @@
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import { DOMUtils, Panel, Dialog } from '../../node_modules/igv-ui/dist/igv-ui.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {colorPalettes} from "../util/colorPalletes.js"
 
@@ -16,6 +16,23 @@ const autoScaleGroupColorHash =
 class MenuUtils {
     constructor(browser) {
         this.browser = browser
+        this.initialize()
+    }
+
+    initialize() {
+
+        const panel = new Panel()
+        panel.add('...')
+
+        const config =
+            {
+                parent: this.browser.root,
+                content: panel
+            }
+
+        this.dialog = new Dialog(config)
+        this.browser.root.appendChild(this.dialog.elem)
+        DOMUtils.hide(this.dialog.elem)
     }
 
     trackMenuItemList(trackView) {
@@ -37,7 +54,7 @@ class MenuUtils {
 
         if (trackView.track.removable !== false) {
             list.push('<hr/>')
-            list.push(trackRemovalMenuItem())
+            list.push(trackRemovalMenuItem(trackView))
         }
 
         return list
@@ -93,9 +110,6 @@ class MenuUtils {
 
                 list.push('<hr/>')
                 list.push(groupAutoScaleMenuItem())
-
-                list.push('<hr/>')
-                list.push(trackOverlayMenuItem())
             }
 
         } else {
@@ -206,52 +220,51 @@ function groupAutoScaleMenuItem() {
 
 }
 
+function trackOverlayClickHandler(e) {
+
+    const trackViews = getMultiSelectedTrackViews(this.browser)
+
+    if (trackViews) {
+
+        const wigTracks = trackViews.filter(({ track }) => 'wig' === track.type).map(({ track }) => track)
+
+        const wigConfigs = wigTracks.map(( track ) => {
+            const config = Object.assign({}, track.config)
+            config.color = track.color
+            config.autoscale = track.autoscale
+            config.autoscaleGroup = track.autoscaleGroup
+            return config
+        })
+
+        for (const wigTrack of wigTracks) {
+            this.browser.removeTrack(wigTrack)
+        }
+
+        const fudge = 0.75
+
+        const config =
+            {
+                name: 'Overlay',
+                type: 'merged',
+                autoscale: true,
+                alpha: fudge * (1.0/wigTracks.length),
+                height: Math.max(...wigTracks.map(({ height }) => height)),
+                order: Math.min(...wigTracks.map(({ order }) => order)),
+                tracks: wigConfigs
+            }
+
+        this.browser.loadTrack(config)
+
+    }
+
+}
+
 function trackOverlayMenuItem() {
 
     const object = $('<div>')
     object.text('Overlay tracks')
 
-    function click(e) {
-
-        const trackViews = getMultiSelectedTrackViews(this.browser)
-
-        if (trackViews) {
-
-            const wigTracks = trackViews.filter(({ track }) => 'wig' === track.type).map(({ track }) => track)
-
-            const wigConfigs = wigTracks.map(( track ) => {
-                const config = Object.assign({}, track.config)
-                config.color = track.color
-                config.autoscale = track.autoscale
-                config.autoscaleGroup = track.autoscaleGroup
-                return config
-            })
-
-            for (const wigTrack of wigTracks) {
-                this.browser.removeTrack(wigTrack)
-            }
-
-            const fudge = 0.75
-
-            const config =
-                {
-                    autoscale: false,
-                    name: 'Overlay',
-                    type: 'merged',
-                    alpha: fudge * (1.0/wigTracks.length),
-                    height: Math.max(...wigTracks.map(({ height }) => height)),
-                    order: Math.min(...wigTracks.map(({ order }) => order)),
-                    tracks: wigConfigs
-                }
-
-            this.browser.loadTrack(config)
-
-        }
-
-    }
-
-    return { object, doAllMultiSelectedTracks:true, click }
-
+    return { object, doAllMultiSelectedTracks:true, click: trackOverlayClickHandler }
 }
 
 function visibilityWindowMenuItem() {
@@ -286,46 +299,18 @@ function visibilityWindowMenuItem() {
 
 }
 
-// TODO: Implement dialog-presenting track removal for multi-select
-function IN_PROGRESS_PRESENTS_DIALOG_trackRemovalMenuItem() {
+function trackRemovalMenuItem(trackView) {
+
+    const str = isMultiSelectedTrackView(trackView) ? 'Remove tracks' : 'Remove track'
 
     const object = $('<div>')
-    object.text('Remove track')
-
-    function dialogHandler() {
-
-        if (isMultiSelectedTrackView(this.trackView)) {
-
-            const browser = this.browser
-
-            const alertCallback = () => {
-                const trackViews = getMultiSelectedTrackViews(browser)
-                for (const { track } of trackViews) {
-                    browser.removeTrack(track)
-                }
-            }
-
-            browser.alert.present('Delete Tracks?', alertCallback)
-
-        } else {
-            this.trackView.browser.removeTrack(this)
-        }
-
-    }
-
-    return { object, dialog:dialogHandler }
-}
-
-function trackRemovalMenuItem() {
-
-    const object = $('<div>')
-    object.text('Remove track')
+    object.text(str)
 
     function trackRemovalHandler(e) {
         this.trackView.browser._removeTrack(this)
     }
 
-    return { object, click:trackRemovalHandler }
+    return { object, click:trackRemovalHandler, menuItemType: 'removeTrack' }
 
 }
 
@@ -490,6 +475,6 @@ function isMultiSelectedTrackView(trackView) {
     return selected && selected.length > 1 && new Set(selected).has(trackView)
 }
 
-export { autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView }
+export { autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView, didSelectSingleTrackType }
 
 export default MenuUtils

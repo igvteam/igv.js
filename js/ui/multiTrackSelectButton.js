@@ -30,6 +30,11 @@ class MultiTrackSelectButton extends NavbarButton {
                 }
             }
             this.setState(ENABLE_MULTI_TRACK_SELECTION)
+
+            // If ENABLE_MULTI_TRACK_SELECTION is false hide Overlay button
+            if (false === ENABLE_MULTI_TRACK_SELECTION) {
+                this.browser.overlayTrackButton.setVisibility(false)
+            }
         }
 
         this.boundMouseClickHandler = mouseClickHandler.bind(this)

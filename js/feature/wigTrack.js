@@ -117,11 +117,11 @@ class WigTrack extends TrackBase {
             items.push({label: 'Flip y-axis', click})
         }
 
-        items.push(...this.numericDataMenuItems())
-
         if(this.featureSource.windowFunctions) {
             items.push(...this.wigSummarizationItems())
         }
+
+        items.push(...this.numericDataMenuItems())
 
         return items
     }
