@@ -29,11 +29,15 @@ import {doAutoscale} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import {FeatureUtils, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js'
 import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
-import SampleInfoViewport from "./sample/sampleInfoViewport.js";
+import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import {autoScaleGroupColorHash, getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
-import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState } from './ui/multiTrackSelectButton.js'
+import {
+    ENABLE_MULTI_TRACK_SELECTION,
+    setMultiTrackSelectionState,
+    setDragHandleSelectionState
+} from './ui/multiTrackSelectButton.js'
 import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
 
 const igv_axis_column_width = 50
@@ -206,11 +210,11 @@ class TrackView {
         this.track.autoscale = false
         this.track.autoscaleGroup = undefined
 
-        const list = this.browser.trackViews.filter(({ track }) => track.autoscaleGroup)
+        const list = this.browser.trackViews.filter(({track}) => track.autoscaleGroup)
         if (1 === list.length) {
-            list[ 0 ].track.autoscale = false
-            list[ 0 ].track.autoscaleGroup = undefined
-            list[ 0 ].repaintViews()
+            list[0].track.autoscale = false
+            list[0].track.autoscaleGroup = undefined
+            list[0].repaintViews()
         }
 
         this.repaintViews()
@@ -267,6 +271,7 @@ class TrackView {
         }
 
     }
+
     setTrackHeight(newHeight, force) {
 
         if (!force) {
@@ -465,26 +470,35 @@ class TrackView {
             }
         }
 
-        if (this.track.autoscale) {
+        // Autoscale
+        let mergeAutocale
+        if ("merged" === this.track.type) {
+            // Merged tracks handle their own scaling
+            mergeAutocale = this.track.updateScales(visibleViewports)
+
+        } else if (this.track.autoscale) {
             let allFeatures = []
             for (let visibleViewport of visibleViewports) {
                 const referenceFrame = visibleViewport.referenceFrame
                 const start = referenceFrame.start
                 const end = start + referenceFrame.toBP(visibleViewport.getWidth())
+
                 if (visibleViewport.featureCache && visibleViewport.featureCache.features) {
-                    // If the "features" object has a getMax function use it.  Currently alignmentContainer 
+
+                    // If the "features" object has a getMax function use it.  Currently alignmentContainer
                     // implements this for coverage and Merged track for its wig tracks.
                     if (typeof visibleViewport.featureCache.features.getMax === 'function') {
                         const max = visibleViewport.featureCache.features.getMax(start, end)
                         allFeatures.push({value: max})
-                    }
-                    // If the "features" object has a getMin function use it.  Currently Merged track implements 
-                    // this for its wig tracks.
-                    if (typeof visibleViewport.featureCache.features.getMin === 'function') {
-                        const min = visibleViewport.featureCache.features.getMin(start, end)
-                        allFeatures.push({value: min})
-                    } 
-                    if(typeof visibleViewport.featureCache.features.getMax !== 'function' && typeof visibleViewport.featureCache.features.getMin !== 'function') {
+
+                        // If the "features" object also has a getMin function use it.  Currently Merged track implements
+                        // this for its wig tracks.
+                        if (typeof visibleViewport.featureCache.features.getMin === 'function') {
+                            const min = visibleViewport.featureCache.features.getMin(start, end)
+                            allFeatures.push({value: min})
+                        }
+
+                    } else {
                         const viewFeatures = FeatureUtils.findOverlapping(visibleViewport.featureCache.features, start, end)
                         for (let f of viewFeatures) {
                             allFeatures.push(f)
@@ -492,6 +506,8 @@ class TrackView {
                     }
                 }
             }
+
+
             if (typeof this.track.doAutoscale === 'function') {
                 this.track.dataRange = this.track.doAutoscale(allFeatures)
             } else {
@@ -499,7 +515,7 @@ class TrackView {
             }
         }
 
-        const refreshView = (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler')
+        const refreshView = (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler' || mergeAutocale)
         for (let vp of visibleViewports) {
             if (viewportsToRepaint.includes(vp)) {
                 vp.repaint()
@@ -600,8 +616,8 @@ class TrackView {
             const currentTop = this.viewports[0].getContentTop()
             const viewportHeight = this.viewports[0].$viewport.height()
             const minTop = Math.min(0, viewportHeight - contentHeight)
-            if(currentTop < minTop) {
-                 for (let viewport of this.viewports) {
+            if (currentTop < minTop) {
+                for (let viewport of this.viewports) {
                     viewport.setTop(minTop)
                 }
             }
@@ -650,14 +666,14 @@ class TrackView {
     createTrackDragHandle(browser) {
 
         if (true === multiTrackSelectExclusionTypes.has(this.track.type)) {
-            this.dragHandle = DOMUtils.div({ class: 'igv-track-drag-shim' })
+            this.dragHandle = DOMUtils.div({class: 'igv-track-drag-shim'})
         } else {
-            this.dragHandle = DOMUtils.div({ class: 'igv-track-drag-handle' })
+            this.dragHandle = DOMUtils.div({class: 'igv-track-drag-handle'})
             this.dragHandle.classList.add('igv-track-drag-handle-color')
         }
 
         browser.columnContainer.querySelector('.igv-track-drag-column').appendChild(this.dragHandle)
-        this.dragHandle.style.height = `${ this.track.height }px`
+        this.dragHandle.style.height = `${this.track.height}px`
         this.addTrackDragMouseHandlers(browser)
     }
 
@@ -943,12 +959,12 @@ class TrackView {
 
             if (this.track.autoscaleGroup) {
 
-                if (undefined === autoScaleGroupColorHash[ this.track.autoscaleGroup ]) {
+                if (undefined === autoScaleGroupColorHash[this.track.autoscaleGroup]) {
                     const colorPalette = colorPalettes['Dark2']
                     const randomIndex = Math.floor(Math.random() * colorPalettes['Dark2'].length)
-                    autoScaleGroupColorHash[ this.track.autoscaleGroup ] = colorPalette[ randomIndex ]
+                    autoScaleGroupColorHash[this.track.autoscaleGroup] = colorPalette[randomIndex]
                 }
-                const rgba = IGVColor.addAlpha(autoScaleGroupColorHash[ this.track.autoscaleGroup ], 0.75)
+                const rgba = IGVColor.addAlpha(autoScaleGroupColorHash[this.track.autoscaleGroup], 0.75)
                 this.track.paintAxis(axisCanvasContext, width, height, rgba)
             } else {
                 this.track.paintAxis(axisCanvasContext, width, height, undefined)

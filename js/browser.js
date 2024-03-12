@@ -1458,7 +1458,7 @@ class Browser {
                 await trackView.updateViews()
             }
         } else {
-            // Group autoscale
+            // Group autoscale is done here as it involves multiple tracks.  Individual track autoscale is done in TrackView
             const groupAutoscaleTrackViews = {}
             const otherTrackViews = []
 
