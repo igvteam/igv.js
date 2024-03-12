@@ -1006,49 +1006,8 @@ class Browser {
                 return
             }
 
-            // Set order field of track here, otherwise track order might get shuffled during asynchronous load
-            if (undefined === newTrack.order) {
-                newTrack.order = this.trackViews.length
-            }
 
-            const trackView = new TrackView(this, this.columnContainer, newTrack)
-            this.trackViews.push(trackView)
-            toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
-
-            if (typeof newTrack.postInit === 'function') {
-                try {
-                    trackView.startSpinner()
-                    await newTrack.postInit()
-                } finally {
-                    trackView.stopSpinner()
-                }
-            }
-
-            if (!newTrack.autoscaleGroup) {
-                // Group autoscale will get updated later (as a group)
-                if (config.sync) {
-                    await trackView.updateViews()
-                } else {
-                    trackView.updateViews()
-                }
-            }
-
-            if (typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
-
-                if (this.sampleInfo.isInitialized()) {
-                    this.sampleInfoControl.setButtonVisibility(true)
-                }
-
-                if (this.config.showSampleNameButton !== false) {
-                    this.sampleNameControl.show()   // If not explicitly set
-                }
-            }
-
-            // repositioned here to solve layout issue.
-            this.reorderTracks()
-            this.fireEvent('trackorderchanged', [this.getTrackOrder()])
-
-            return newTrack
+            return this.addTrack(config, newTrack)
 
         } catch (error) {
             const httpMessages =
@@ -1065,6 +1024,56 @@ class Browser {
             msg += (": " + config.url)
             this.alert.present(new Error(msg), undefined)
         }
+    }
+
+    async addTrack(config, newTrack) {
+
+
+        // Set order field of track here, otherwise track order might get shuffled during asynchronous load
+        if (undefined === newTrack.order) {
+            newTrack.order = this.trackViews.length
+        }
+
+        const trackView = new TrackView(this, this.columnContainer, newTrack)
+        this.trackViews.push(trackView)
+        toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
+
+        if (typeof newTrack.postInit === 'function') {
+            try {
+                trackView.startSpinner()
+                await newTrack.postInit()
+            } finally {
+                trackView.stopSpinner()
+            }
+        }
+
+        if (!newTrack.autoscaleGroup) {
+            // Group autoscale will get updated later (as a group)
+            if (config.sync) {
+                await trackView.updateViews()
+            } else {
+                trackView.updateViews()
+            }
+        }
+
+        if (typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
+
+            if (this.sampleInfo.isInitialized()) {
+                this.sampleInfoControl.setButtonVisibility(true)
+            }
+
+            if (this.config.showSampleNameButton !== false) {
+                this.sampleNameControl.show()   // If not explicitly set
+            }
+        }
+
+        // repositioned here to solve layout issue.
+        this.reorderTracks()
+        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+
+        return newTrack
+
+
     }
 
     /**
@@ -1476,20 +1485,6 @@ class Browser {
                     groupAutoscaleTrackViews[autoscaleGroup].push(trackView)
                 } else {
                     otherTrackViews.push(trackView)
-                }
-            }
-
-            // An autoscaleGroup of only one (1) trackView has the lone trackView removed from group autoscale mode
-            const singleTonKeys = Object.keys(groupAutoscaleTrackViews).filter(key => 1 === groupAutoscaleTrackViews[key].length)
-
-            if (singleTonKeys.length > 0) {
-                // Look for any single trackView groupAutoscale groups and move the single trackView to otherTrackViews list
-                for (const key of singleTonKeys) {
-                    for (const trackView of groupAutoscaleTrackViews[key]) {
-                        trackView.track.autoscaleGroup = undefined
-                    }
-                    otherTrackViews.push(...groupAutoscaleTrackViews[key])
-                    delete groupAutoscaleTrackViews[key]
                 }
             }
 
