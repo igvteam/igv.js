@@ -32,13 +32,10 @@ import {DOMUtils, Icon} from '../node_modules/igv-ui/dist/igv-ui.js'
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import {autoScaleGroupColorHash, getMultiSelectedTrackViews, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
-import {
-    ENABLE_MULTI_TRACK_SELECTION,
-    setMultiTrackSelectionState,
-    setDragHandleSelectionState
-} from './ui/multiTrackSelectButton.js'
+import { autoScaleGroupColorHash, getMultiSelectedTrackViews, multiTrackSelectExclusionTypes } from "./ui/menuUtils.js"
+import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState } from './ui/multiTrackSelectButton.js'
 import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
+import {isOverlayTrackCriteriaMet} from "./ui/overlayTrackButton.js"
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
@@ -131,15 +128,14 @@ class TrackView {
             const html = `<input type="checkbox" name="track-select">`
             const input = document.createRange().createContextualFragment(html).firstChild
             trackSelectionContainer.appendChild(input)
+            input.checked = this.track.isMultiSelection || false
 
             input.addEventListener('change', event => {
                 event.preventDefault()
                 event.stopPropagation()
-
                 this.track.isMultiSelection = event.target.checked
-
                 setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
-
+                this.browser.overlayTrackButton.setVisibility( isOverlayTrackCriteriaMet(this.browser) )
             })
 
             setMultiTrackSelectionState(this, axis, ENABLE_MULTI_TRACK_SELECTION)

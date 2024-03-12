@@ -117,8 +117,34 @@ class MenuPopup {
                             if (true === item.doAllMultiSelectedTracks) {
                                 item.click.call(trackView.track, e)
                             } else {
-                                for (const { track } of trackView.browser.multiSelectedTrackViews) {
-                                    item.click.call(track, e)
+
+                                if ('removeTrack' === item.menuItemType) {
+
+                                    const callback = () => {
+
+                                        trackView.browser.overlayTrackButton.setVisibility(false)
+
+                                        for (const { track } of trackView.browser.multiSelectedTrackViews) {
+                                            item.click.call(track, e)
+                                        }
+                                    }
+
+                                    const count = trackView.browser.multiSelectedTrackViews.length
+
+                                    const config =
+                                        {
+                                            html: `Are you sure you want to delete ${ count } tracks?`,
+                                            callback
+                                        }
+
+                                    trackView.browser.menuUtils.dialog.present(config, e)
+
+                                } else {
+
+                                    for (const { track } of trackView.browser.multiSelectedTrackViews) {
+                                        item.click.call(track, e)
+                                    }
+
                                 }
                             }
 
