@@ -171,9 +171,12 @@ class TrackViewport extends Viewport {
             }
         }
 
-        // Now offset backing canvas to align with the contentTop visual offset.
-        let offset = contentTop + this.canvas._data.pixelTop
-        this.canvas.style.top = `${offset}px`
+        // If data is loaded,  offset backing canvas to align with the contentTop visual offset.  If not data has
+        // been loaded canvas will be undefined
+        if(this.canvas && this.canvas._data) {
+            let offset = contentTop + this.canvas._data.pixelTop
+            this.canvas.style.top = `${offset}px`
+        }
     }
 
     async loadFeatures() {
