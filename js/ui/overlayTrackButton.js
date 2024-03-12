@@ -28,13 +28,11 @@ class OverlayTrackButton extends NavbarButton {
 
 function trackOverlayClickHandler(e) {
 
-    const trackViews = getMultiSelectedTrackViews(this.browser)
+    if (true === isOverlayTrackCriteriaMet(this.browser)) {
 
-    if (trackViews) {
+        const tracks = getMultiSelectedTrackViews(this.browser).map(({ track }) => track)
 
-        const wigTracks = trackViews.filter(({ track }) => 'wig' === track.type).map(({ track }) => track)
-
-        const wigConfigs = wigTracks.map(( track ) => {
+        const trackConfigurations = tracks.map(( track ) => {
             const config = Object.assign({}, track.config)
             config.color = track.color
             config.autoscale = track.autoscale
@@ -42,10 +40,10 @@ function trackOverlayClickHandler(e) {
             return config
         })
 
-        for (const wigTrack of wigTracks) {
-            this.browser.removeTrack(wigTrack)
+        for (const track of tracks) {
+            this.browser.removeTrack(track)
         }
-
+        
         const fudge = 0.75
 
         const config =
@@ -53,10 +51,10 @@ function trackOverlayClickHandler(e) {
                 name: 'Overlay',
                 type: 'merged',
                 autoscale: true,
-                alpha: fudge * (1.0/wigTracks.length),
-                height: Math.max(...wigTracks.map(({ height }) => height)),
-                order: Math.min(...wigTracks.map(({ order }) => order)),
-                tracks: wigConfigs
+                alpha: fudge * (1.0/tracks.length),
+                height: Math.max(...tracks.map(({ height }) => height)),
+                order: Math.min(...tracks.map(({ order }) => order)),
+                tracks: trackConfigurations
             }
 
         this.browser.loadTrack(config)
