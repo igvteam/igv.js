@@ -70,23 +70,23 @@ class DataRangeDialog {
         this.$container.hide()
     }
 
-    configure(trackViewOfTrackViewList) {
+    configure(trackViewOrTrackViewList) {
 
-        let min
-        let max
         let dataRange
-        if (Array.isArray(trackViewOfTrackViewList)) {
+        if (Array.isArray(trackViewOrTrackViewList)) {
             dataRange = { min: Number.MAX_SAFE_INTEGER, max:-Number.MAX_SAFE_INTEGER }
-            for (const trackView of trackViewOfTrackViewList) {
-                if (trackView.dataRange()) {
-                    dataRange.min = Math.min(trackView.dataRange().min, dataRange.min)
-                    dataRange.max = Math.max(trackView.dataRange().max, dataRange.max)
+            for (const trackView of trackViewOrTrackViewList) {
+                if (trackView.dataRange) {
+                    dataRange.min = Math.min(trackView.dataRange.min, dataRange.min)
+                    dataRange.max = Math.max(trackView.dataRange.max, dataRange.max)
                 }
             }
         } else {
-            dataRange = trackViewOfTrackViewList.dataRange()
+            dataRange = trackViewOrTrackViewList.dataRange
         }
 
+        let min
+        let max
         if (dataRange) {
             min = dataRange.min
             max = dataRange.max
@@ -101,20 +101,20 @@ class DataRangeDialog {
         this.$minimum_input.unbind()
         this.$minimum_input.on('keyup', (e) => {
             if (13 === e.keyCode) {
-                this.processResults(trackViewOfTrackViewList)
+                this.processResults(trackViewOrTrackViewList)
             }
         })
 
         this.$maximum_input.unbind()
         this.$maximum_input.on('keyup', (e) => {
             if (13 === e.keyCode) {
-                this.processResults(trackViewOfTrackViewList)
+                this.processResults(trackViewOrTrackViewList)
             }
         })
 
         this.$ok.unbind()
         this.$ok.on('click', (e) => {
-            this.processResults(trackViewOfTrackViewList)
+            this.processResults(trackViewOrTrackViewList)
         })
     }
 
@@ -126,9 +126,8 @@ class DataRangeDialog {
             this.browser.alert.present(new Error('Must input numeric values'), undefined)
         } else {
             const list = Array.isArray(trackViewOfTrackViewList) ? trackViewOfTrackViewList : [ trackViewOfTrackViewList ]
-
             for (const trackView of list) {
-                trackView.setDataRange(min, max)
+                trackView.dataRange = { min, max }
             }
 
         }
