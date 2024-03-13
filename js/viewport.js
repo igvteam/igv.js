@@ -119,7 +119,10 @@ class Viewport {
 
     }
 
-    async repaint() {
+    /**
+     * Force a repaint.  Implementations provided by subclasses.
+     */
+    repaint() {
     }
 
     draw(drawConfiguration, features, roiFeatures) {

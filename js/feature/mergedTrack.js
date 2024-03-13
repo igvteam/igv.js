@@ -39,7 +39,8 @@ import $ from "../vendor/jquery-3.3.1.slim.js"
 class MergedTrack extends TrackBase {
 
     static defaults = {
-        _alpha: 0.5
+        alpha: 0.5,
+        height: 50
     }
 
     constructor(config, browser) {
@@ -92,22 +93,34 @@ class MergedTrack extends TrackBase {
             delete this.config._tracks
         }
 
-        this.flipAxis = this.config.flipAxis ? this.config.flipAxis : false
-        this.logScale = this.config.logScale ? this.config.logScale : false
+        if (this.config.flipAxis !== undefined) {
+            for (let t of this.tracks) t.flipAxis = this.config.flipAxis
+        }
 
-
-        this.height = this.config.height || 50
+        if (this.config.logScale !== undefined) {
+            for (let t of this.tracks) t.logScale = this.config.logScale
+        }
 
         this.resolutionAware = this.tracks.some(t => t.resolutionAware)
 
     }
 
-    set alpha(alpha) {
-        this._alpha = alpha
+    set flipAxis(b) {
+        this.config.flipAxis = b
+        for (let t of this.tracks) t.flipAxis = b
     }
 
-    get alpha() {
-        return this._alpha
+    get flipAxis() {
+        return this.tracks.every(t => t.flipAxis)
+    }
+
+    set logScale(b) {
+        this.config.logScale = b
+        for (let t of this.tracks) t.logScale = b
+    }
+
+    get logScale() {
+        return this.tracks.every(t => t.logScale)
     }
 
     get height() {
@@ -115,6 +128,7 @@ class MergedTrack extends TrackBase {
     }
 
     set height(h) {
+        this.config.height = h
         this._height = h
         if (this.tracks) {
             for (let t of this.tracks) {
@@ -170,9 +184,6 @@ class MergedTrack extends TrackBase {
                 this.tracks[i].dataRange = this.dataRange
             }
 
-
-            this.tracks[i].flipAxis = this.flipAxis
-            this.tracks[i].logScale = this.logScale
             if (this.graphType) {
                 this.tracks[i].graphType = this.graphType
             }
@@ -248,6 +259,19 @@ class MergedTrack extends TrackBase {
         return this.tracks.every(track => track.supportsWholeGenome)
     }
 
+    /**
+     * Return json like object for creating a session
+     */
+    getState() {
+        const state = super.getState()
+        const trackStates = []
+        for (let t of this.tracks) {
+            trackStates.push(t.getState())
+        }
+        state.tracks = trackStates
+        return state
+    }
+
     updateScales(visibleViewports) {
 
         let scaleChange
@@ -308,7 +332,7 @@ class MergedTrack extends TrackBase {
         function dialogPresentationHandler(e) {
             const callback = alpha => {
                 this.alpha = Math.max(0.001, alpha)
-                this.updateViews()
+                this.repaintViews()
             }
 
             const config =
@@ -335,7 +359,7 @@ class MergedTrack extends TrackBase {
         function click(e) {
 
             // Capture state which will be nulled when track is removed
-            const groupAutoscale = this.autoscale;
+            const groupAutoscale = this.autoscale
             const name = this.name
             const tracks = this.tracks
             const browser = this.browser
@@ -344,7 +368,7 @@ class MergedTrack extends TrackBase {
             browser.removeTrack(this)
             for (let track of tracks) {
                 track.order = order
-                if(groupAutoscale) {
+                if (groupAutoscale) {
                     track.autoscaleGroup = name
                 }
                 browser.addTrack(track.config, track)
