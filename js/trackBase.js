@@ -156,6 +156,12 @@ class TrackBase {
         }
     }
 
+    repaintViews() {
+        if (this.trackView) {
+            this.trackView.repaintViews();
+        }
+    }
+
     /**
      * Used to create session object for bookmarking, sharing.  Only simple property values (string, number, boolean)
      * are saved.
