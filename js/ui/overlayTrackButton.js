@@ -32,13 +32,19 @@ function trackOverlayClickHandler(e) {
     if (true === isOverlayTrackCriteriaMet(this.browser)) {
 
         const tracks = getMultiSelectedTrackViews(this.browser).map(({ track }) => track)
-
         for (const track of tracks) {
             track.isMultiSelection = false
-            this.browser.removeTrack(track)
         }
-        
-        const fudge = 0.75
+
+        // Flatten any merged tracks.  Must do this before there removal
+        const flattenedTracks = []
+        for(let t of tracks) {
+            if("merged" === t.type) {
+                flattenedTracks.push(...t.tracks)
+            } else {
+                flattenedTracks.push(t)
+            }
+        }
 
         const config =
             {
@@ -47,10 +53,14 @@ function trackOverlayClickHandler(e) {
                 alpha: 0.5, //fudge * (1.0/tracks.length),
                 height: Math.max(...tracks.map(({ height }) => height)),
                 order: Math.min(...tracks.map(({ order }) => order)),
-                _tracks: tracks
+                _tracks: flattenedTracks
             }
 
         const mergedTrack = new MergedTrack(config, this.browser)
+
+        for (const track of tracks) {
+            this.browser.removeTrack(track)
+        }
 
         this.browser.addTrack(config, mergedTrack)
 
