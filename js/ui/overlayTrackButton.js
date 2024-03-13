@@ -34,6 +34,7 @@ function trackOverlayClickHandler(e) {
         const tracks = getMultiSelectedTrackViews(this.browser).map(({ track }) => track)
 
         for (const track of tracks) {
+            track.isMultiSelection = false
             this.browser.removeTrack(track)
         }
         
