@@ -138,6 +138,36 @@ class MergedTrack extends TrackBase {
         }
     }
 
+    get dataRange() {
+
+        if (undefined === this.tracks || 0 === this.tracks.length) {
+            return undefined
+        }
+
+        const list = this.tracks.filter(track => undefined !== track.dataRange)
+        if (list.length !== this.tracks.length) {
+            return undefined
+        }
+
+        const minSet = new Set(this.tracks.map(({dataRange}) => dataRange.min))
+        if (1 !== minSet.size) {
+            return undefined
+        }
+
+        const maxSet = new Set(this.tracks.map(({dataRange}) => dataRange.max))
+        if (1 !== maxSet.size) {
+            return undefined
+        }
+
+        return { min: [ ...minSet ][ 0 ],  max: [ ...maxSet ][ 0 ] }
+    }
+
+    set dataRange({ min, max }) {
+        for (const track of this.tracks) {
+            track.dataRange = { min, max }
+        }
+    }
+
     menuItemList() {
         const items = []
         if (this.flipAxis !== undefined) {
@@ -216,7 +246,7 @@ class MergedTrack extends TrackBase {
                 }
             }
 
-            // We don't want to display popup if no track has data. 
+            // We don't want to display popup if no track has data.
             // If at least one does, we want to display the popup.
             if (noData === true) {
                 return []
