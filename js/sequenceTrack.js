@@ -123,7 +123,7 @@ class SequenceTrack {
         this.config = config
         this.browser = browser
         this.type = "sequence"
-        this.removable = config.removable === undefined ? true : config.removable      // Defaults to true
+        this.removable = config.removable === true  // defaults to false
         this.name = config.name
         this.id = config.id
         this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot

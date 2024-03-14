@@ -667,7 +667,7 @@ class Browser {
         // Ensure that we always have a sequence track with no explicit URL (=> the reference genome sequence track)
         const pushSequenceTrack = trackConfigurations.filter(track => 'sequence' === track.type && !track.url && !track.fastaURL).length === 0
         if (pushSequenceTrack /*&& false !== this.config.showSequence*/) {
-            trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder})
+            trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder, removable: false})
         }
 
         const localTrackFileNames = trackConfigurations.filter((config) => undefined !== config.file).map(({file}) => file)
