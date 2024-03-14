@@ -1,73 +1,57 @@
 import getDataWrapper from "../feature/dataWrapper.js"
 
-const wsRegex = /(\s+)/
+const wsRegex = /\s+/
 
 class GenbankParser {
     constructor(config) {
 
         this.config = config
-        this.nameFields = new Set(["gene"])
-
     }
 
 
-    parseFeatures(data) {
+    parse(data) {
 
-        var line, accession, sequence, aliases
+        let accession, sequence, aliases
 
         if (!data) return null
 
         const dataWrapper = getDataWrapper(data)
 
         // Read locus
-        line = dataWrapper.nextLine()
-        let tokens = line.split(/\s+/);
+        let line = dataWrapper.nextLine()
+        const tokens = line.split(/\s+/)
         if (tokens[0].toUpperCase() !== "LOCUS") {
-            // throw exception
+            throw Error("Expected `LOCUS` line.  Found: " + line)
         }
-        let locusName = tokens[1].trim();
+        const locus = tokens[1].trim()
 
-
+        // Loop until FEATURES section
         do {
             line = dataWrapper.nextLine()
             if (line.startsWith("ACCESSION")) {
-                readAccession(line)
+                const tokens = line.split(wsRegex)
+                if (tokens.length < 2) {
+                    throw Error("Genbank file missing ACCESSION number.")
+                } else {
+                    accession = tokens[1].trim()
+                }
             } else if (line.startsWith("ALIASES")) {
-                readAliases(line)
+                // NOTE - this is an IGV extension
+                const tokens = line.split(wsRegex)
+                if (tokens.length > 1) {
+                    aliases = tokens[1].split(",")
+                }
+
             }
         }
         while (line && !line.startsWith("FEATURES"))
 
-        const chr = accession || locusName
-        readFeatures(chr, dataWrapper)
-        readOriginSequence(dataWrapper)
+        const chr = accession || locus
+        const features = parseFeatures(chr, dataWrapper)
 
+        //readOriginSequence(dataWrapper)
 
-
-        function readAccession(line) {
-
-            let tokens = line.split(wsRegex)
-            if (tokens.length < 2) {
-                console.log("Genbank file missing ACCESSION number.")
-            } else {
-                accession = tokens[1].trim()
-            }
-        }
-
-        /**
-         * Read the sequence aliases line  -- Note: this is an IGV extension
-         * ACCESSION   K03160
-         *
-         * @throws IOException
-         */
-        function readAliases(line) {
-            let tokens = line.split(wsRegex)
-            if (tokens.length < 2) {
-                //log.info("Genbank file missing ACCESSION number.");
-            } else {
-                aliases = tokens[1].split(",")
-            }
-        }
+        return {locus, accession, aliases, features}
 
 
         /**
@@ -81,6 +65,8 @@ class GenbankParser {
          * @param reader
          */
         function readOriginSequence(dataWrapper) {
+
+            // TODO -- first line is source (required), has total length => use to size sequence
 
             let line
 
@@ -126,20 +112,20 @@ class GenbankParser {
  * @param reader
  * @throws IOException
  */
-function readFeatures(chr, dataWrapper) {
+function parseFeatures(chr, dataWrapper) {
 
+
+    // TODO -- keys start at column 6,   locations and qualifiers at column 22.
 
     //Process features until "ORIGIN"
-    let features = []
-
-    let currentLocQualifier, nextLine,
-        errorCount = 0
+    const features = []
+    let currentLocQualifier
+    let nextLine
+    let errorCount = 0
+    let f
 
     do {
         nextLine = dataWrapper.nextLine()
-
-        // TODO -- first line is source (required), has total length => use to size sequence
-        // TODO -- keys start at column 6,   locations and qualifiers at column 22.
 
         if (nextLine === "") {
             continue  // Not sure this is legal in a gbk file
@@ -158,38 +144,34 @@ function readFeatures(chr, dataWrapper) {
         }
 
         if (nextLine.charAt(5) !== ' ') {
+
             let featureType = nextLine.substring(5, 21).trim()
-            let f = {
+            f = {
                 chr: chr,
                 type: featureType,
                 attributes: {}
             }
-
             currentLocQualifier = nextLine.substring(21)
 
-            if (!featureType.toLowerCase().equals("source")) {
+            if (!featureType.toLowerCase() === "source") {
                 features.add(f)
             }
 
         } else {
             let tmp = nextLine.substring(21).trim()
+            if (tmp.length > 0)
 
-            if (tmp.length() > 0)
-                if (tmp.charAt(0) === '/') {
+                if (tmp.charCodeAt(0) === 47) {   // 47 == '/'
 
-                    if (currentLocQualifier.charAt(0) === '/') {
+                    if (currentLocQualifier.charCodeAt(0) === 47) {
 
                         let tokens = currentLocQualifier.split("=", 2)
 
                         if (tokens.length > 1) {
-
                             let keyName = tokens[0].length() > 1 ? tokens[0].substring(1) : ""
-                            let value = StringUtils.stripQuotes(tokens[1])
-
+                            let value = stripQuotes(tokens[1])
                             f.attributes[keyName] = value
-                            if (nameFields.has(keyName)) {
-                                f.setName(value)
-                            }
+
                         } else {
                             // TODO -- don't know how to interpret, log?
                         }
@@ -197,37 +179,35 @@ function readFeatures(chr, dataWrapper) {
 
                         // location string TODO -- many forms of this to support
                         // Crude test for strand
-                        let strand = currentLocQualifier.contains("complement") ? "-" : "+"
-                        f.strand = strand
+                        // location string TODO -- many forms of this to support
+                        // Crude test for strand
+                        const strand = currentLocQualifier.includes("complement") ? "-" : "+";
+                        f.strand = strand;
 
-
-                        // join and complement functions irrelevant
                         let joinString = currentLocQualifier.replace("join", "")
-                        joinString = joinString.replace("order", "")
-                        joinString = joinString.replace("complement", "")
-                        joinString = joinString.replace("(", "")
-                        joinString = joinString.replace(")", "")
+                            .replace("order", "")
+                            .replace("complement", "")
+                            .replace("(", "")
+                            .replace(")", "");
 
-                        if (joinString.contains("..")) {
-
+                        if (joinString.includes("..")) {
                             joinString = joinString.replace("<", "")
-                            joinString = joinString.replace(">", "")
+                                .replace(">", "");
 
-                            let exons = createExons(joinString, strand)
-
-                            let firstExon = exons[0]
-                            f.start = firstExon.start
-
-                            let lastExon = exons.get[exons.length - 1]
-                            f.setEnd = lastExon.end
-
+                            const exons = createExons(joinString, strand);
+                            exons.sort((a, b) =>a.start - b.start);
+                            const firstExon = exons[0];
+                            f.start = firstExon.start;
+                            const lastExon = exons[exons.length - 1];
+                            f.end = lastExon.end;
                             if (exons.length > 1) {
-                                f.exons = exons
+                                f.exons = exons;
                             }
                         } else {
-                            // TODO Single locus for now,  other forms possible
-                            f.start = Number.parseInt(joinString) - 1
-                            f.end = start + 1
+                            // TODO Single locus for now, other forms possible
+                            //  const start = parseInt(joinString) - 1;const end = start + 1;
+                            f.start = start;
+                            f.end = end;
                         }
 
                     }
@@ -238,6 +218,8 @@ function readFeatures(chr, dataWrapper) {
         }
     }
     while (true)
+
+    return features
 }
 
 /**
@@ -285,6 +267,13 @@ function createExons(joinString, strand) {
     })
 
     return exons
+}
+
+function stripQuotes(value) {
+    if (value.startsWith('"') && value.endsWith('"')) {
+        value = value.substring(1, value.length - 2)
+    }
+    return value
 }
 
 export default GenbankParser

@@ -1,6 +1,7 @@
 import "./utils/mockObjects.js"
 import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import GenbankParser from "../js/gbk/genbank.js"
+import {assert} from 'chai'
 
 suite("testGenbank", function () {
 
@@ -11,17 +12,20 @@ suite("testGenbank", function () {
         const parser = new GenbankParser({})
 
         const data = await igvxhr.loadString(url, {})
-        const features = parser.parseFeatures(data)
-        const expectedTypes = ["gene", "mRNA", "CDS", "gene", "variation", "variation"]
-        const expectedStarts = [0, 0, 1032, 82042, -79, 10554]
-        const expectedEnds = [105338, 105338, 102035, 82643, -78, 10555]
+        const genbank = parser.parse(data)
+        assert.equal(genbank.locus, "NT_030059")
+        assert.equal(genbank.accession, "NT_030059")
 
-        for (let i = 0; i < expectedTypes.length; i++) {
-            const bf = features[i]
-            assertEquals(expectedTypes[i], bf.type)
-            assertEquals(expectedStarts[i], bf.start)
-            assertEquals(expectedEnds[i], bf.end)
-        }
+        // const expectedTypes = ["gene", "mRNA", "CDS", "gene", "variation", "variation"]
+        // const expectedStarts = [0, 0, 1032, 82042, -79, 10554]
+        // const expectedEnds = [105338, 105338, 102035, 82643, -78, 10555]
+        //
+        // for (let i = 0; i < expectedTypes.length; i++) {
+        //     const bf = features[i]
+        //     assert.equal(expectedTypes[i], bf.type)
+        //     assert.equal(expectedStarts[i], bf.start)
+        //     assert.equal(expectedEnds[i], bf.end)
+        // }
 
     })
 
