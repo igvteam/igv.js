@@ -35,7 +35,12 @@ class NavbarButton {
         this.button = DOMUtils.div({class: 'igv-navbar-text-button'})
         parent.appendChild(this.button)
 
-        this.title = title
+        if (Array.isArray(title)) {
+            this.textContent = title[ 0 ]
+            this.title = title[ 1 ]
+        } else {
+            this.textContent = this.title = title
+        }
 
         this.buttonLabel = buttonLabel
 
@@ -47,7 +52,7 @@ class NavbarButton {
 
         this.responsiveKey = 'text'
 
-        this.configureButton(title)
+        this.configureButton(this.textContent, this.title)
 
         this.setState(initialButtonState)
 
@@ -61,12 +66,12 @@ class NavbarButton {
         const key = 'igv-navbar-icon-button' === navbarButtonCSSClass ? 'image' : 'text'
         if (key !== this.responsiveKey) {
             this.responsiveKey = key
-            this.configureButton(this.title)
+            this.configureButton(this.textContent, this.title)
             this.setState(undefined)
         }
     }
 
-    configureButton(title) {
+    configureButton(textContent, title) {
 
         this.groupElement = undefined
         this.button.title = title
@@ -75,11 +80,11 @@ class NavbarButton {
         this.button.classList.remove('igv-navbar-icon-button')
         this.button.classList.remove('igv-navbar-text-button')
 
-        'text' === this.responsiveKey ? this.configureTextButton(title) : this.configureIconButton()
+        'text' === this.responsiveKey ? this.configureTextButton(textContent) : this.configureIconButton()
 
     }
 
-    configureTextButton(title) {
+    configureTextButton(textContent) {
 
         this.button.classList.add('igv-navbar-text-button')
 
@@ -91,7 +96,7 @@ class NavbarButton {
         this.groupElement = svgRoot.querySelector('#igv-navbar-button-group')
 
         const tspanElement = svgRoot.querySelector('#igv-navbar-button-label')
-        tspanElement.textContent = title
+        tspanElement.textContent = textContent
     }
 
     configureIconButton() {
