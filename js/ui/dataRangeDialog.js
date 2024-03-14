@@ -17,8 +17,8 @@ class DataRangeDialog {
         const $header = $("<div>", {class: 'igv-generic-dialog-header'})
         this.$container.append($header)
         UIUtils.attachDialogCloseHandlerWithParent($header[0], () => {
-            this.$minimum_input.val(undefined)
-            this.$maximum_input.val(undefined)
+            this.$minimum_input.val('')
+            this.$maximum_input.val('')
             this.$container.offset({left: 0, top: 0})
             this.$container.hide()
         })
@@ -58,8 +58,8 @@ class DataRangeDialog {
         this.$cancel.text('Cancel')
 
         this.$cancel.on('click', () => {
-            this.$minimum_input.val(undefined)
-            this.$maximum_input.val(undefined)
+            this.$minimum_input.val('')
+            this.$maximum_input.val('')
             this.$container.offset({left: 0, top: 0})
             this.$container.hide()
         })
@@ -85,18 +85,10 @@ class DataRangeDialog {
             dataRange = trackViewOrTrackViewList.dataRange
         }
 
-        let min
-        let max
         if (dataRange) {
-            min = dataRange.min
-            max = dataRange.max
-        } else {
-            min = 0
-            max = 100
+            this.$minimum_input.val(dataRange.min)
+            this.$maximum_input.val(dataRange.max)
         }
-
-        this.$minimum_input.val(min)
-        this.$maximum_input.val(max)
 
         this.$minimum_input.unbind()
         this.$minimum_input.on('keyup', (e) => {
@@ -120,22 +112,29 @@ class DataRangeDialog {
 
     processResults(trackViewOfTrackViewList) {
 
-        const min = Number(this.$minimum_input.val())
-        const max = Number(this.$maximum_input.val())
-        if (isNaN(min) || isNaN(max)) {
-            this.browser.alert.present(new Error('Must input numeric values'), undefined)
-        } else {
-            const list = Array.isArray(trackViewOfTrackViewList) ? trackViewOfTrackViewList : [ trackViewOfTrackViewList ]
-            for (const trackView of list) {
-                trackView.dataRange = { min, max }
+        if ('' !== this.$minimum_input.val() && '' !== this.$maximum_input.val()) {
+
+            const min = Number(this.$minimum_input.val())
+            const max = Number(this.$maximum_input.val())
+
+            if (isNaN(min) || isNaN(max)) {
+                this.browser.alert.present(new Error('Must input numeric values'), undefined)
+            } else {
+                const list = Array.isArray(trackViewOfTrackViewList) ? trackViewOfTrackViewList : [ trackViewOfTrackViewList ]
+                for (const trackView of list) {
+                    trackView.dataRange = { min, max }
+                }
+
             }
+
+            this.$minimum_input.val('')
+            this.$maximum_input.val('')
 
         }
 
-        this.$minimum_input.val(undefined)
-        this.$maximum_input.val(undefined)
         this.$container.offset({left: 0, top: 0})
         this.$container.hide()
+
     }
 
     present($parent) {
