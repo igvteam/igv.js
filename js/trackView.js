@@ -190,18 +190,13 @@ class TrackView {
         }
     }
 
-    dataRange() {
+    get dataRange() {
         return this.track.dataRange ? this.track.dataRange : undefined
     }
 
-    setDataRange(min, max) {
+    set dataRange({ min, max }) {
 
-        if (min !== undefined) {
-            this.track.dataRange.min = min
-        }
-        if (max !== undefined) {
-            this.track.dataRange.max = max
-        }
+        this.track.dataRange = { min, max }
 
         this.track.autoscale = false
         this.track.autoscaleGroup = undefined
