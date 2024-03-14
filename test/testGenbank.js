@@ -1,15 +1,12 @@
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
-import {setup} from "../util/setup.js"
-import GenbankParser from "../../js/gbk/genbank.js"
+import "./utils/mockObjects.js"
+import {igvxhr} from "../node_modules/igv-utils/src/index.js"
+import GenbankParser from "../js/gbk/genbank.js"
 
 suite("testGenbank", function () {
-
-    setup()
 
     test("pten genbank", async function () {
 
         const url = "test/data/gbk/pten_test.gbk"
-    )
 
         const parser = new GenbankParser({})
 
