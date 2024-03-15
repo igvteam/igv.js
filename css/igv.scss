@@ -22,6 +22,90 @@ $igv-column-shim-margin: 2px;
 $igv-zoom-in-notice-width: 128px;
 $igv-zoom-in-notice-height: 16px;
 
+$igv-default-font-face: 'Open Sans', sans-serif;
+
+$igv-navbar-font-size: 12px;
+$igv-navbar-height: 32px;
+$igv-navbar-toggle-light-color: #f3f3f3;
+$igv-navbar-toggle-dark-dark: #737373;
+$igv-navbar-button-height: 18px;
+$igv-navbar-button-width: 96px;
+$igv-navbar-button-font-size: 11px;
+$igv-navbar-button-border-radius: 6px;
+$igv-button-width: 75px;
+$igv-button-height: 28px;
+
+$igv-button-border-radius: 2px;
+
+$igv-button-ok-color: #5ea4e0;
+$igv-button-ok-hover-color: #3b5c7f;
+
+$igv-button-cancel-color: #c4c4c4;
+$igv-button-cancel-hover-color: #7f7f7f;
+
+$igv-border-color: #bfbfbf;
+
+$igv-ideogram-height: 16px;
+
+$igv-panel-border-width: 1px;
+$igv-panel-border-color: #292929;
+
+$igv-ruler-sweeper-color: rgba(68, 134, 247, 0.25);
+$igv-ruler-blue-color: rgb(0, 102, 255);
+
+$igv-light-grey-color: #bfbfbf;
+$igv-grey-color: #7F7F7F;
+$igv-dark-grey-color: #373737;
+
+$igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
+
+$igv-trackgear-grey-color: #7F7F7F;
+$igv-trackgear-popover-border-radius: 4px;
+$igv-trackgear-font-color: #4b4b4b;
+$igv-trackgear-default-font-face: 'Open Sans', sans-serif;
+
+
+@mixin generic-input {
+  input {
+    display: block;
+    height: 100%;
+    width: 100%;
+
+    padding-left: 4px;
+
+    font-family: $igv-default-font-face;
+    font-weight: 400;
+    color: $igv-dark-grey-color;
+    text-align: left;
+
+    outline: none;
+
+    border-style: solid;
+    border-width: thin;
+    border-color: $igv-grey-color;
+
+    background-color: white;
+  }
+}
+
+@import "igv-ui-dropdown";
+@import "igv-ui-popover";
+@import "igv-ui-alert-dialog";
+@import "igv-ui-colorpicker";
+@import "igv-ui-generic-dialog-container";
+@import "igv-ui-generic-container";
+@import "igv-ui-dialog";
+@import "igv-ui-panel";
+@import "igv-ui-textbox";
+@import "igv-ui-table";
+
+.igv-ui-center-fixed {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
 @import "color";
 @import "font";
 @import "navbar";

@@ -1,0 +1,21 @@
+
+.igv-ui-table {
+  background-color: white;
+}
+
+.igv-ui-table thead {
+  position: sticky;
+  top: 0;
+}
+
+.igv-ui-table th {
+  text-align: left;
+}
+
+.igv-ui-table td {
+  padding-right: 20px;
+}
+
+.igv-ui-table tr:hover {
+  background-color: lightblue;
+}

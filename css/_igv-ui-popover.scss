@@ -1,0 +1,108 @@
+
+$igv-ui-popover-border-width: 1px;
+$igv-ui-popover-header-height: 24px;
+$igv-ui-popover-content-height: calc(100% - #{$igv-ui-popover-header-height} - 2 * #{$igv-ui-popover-border-width});
+
+// popover
+.igv-ui-popover {
+
+    cursor: default;
+
+    position: absolute;
+    z-index: 2048;
+
+    border-color: $igv-trackgear-grey-color;
+    border-radius: $igv-trackgear-popover-border-radius;
+    border-style: solid;
+    border-width: $igv-ui-popover-border-width;
+
+    font-family: $igv-default-font-face;
+    font-size: small;
+
+    background-color: white;
+
+    // header (drag handle)
+    >div:first-child {
+
+        display: flex;
+        flex-direction: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+
+        width: 100%;
+        height: 24px;
+
+        cursor: move;
+
+        border-top-width: 0;
+        border-top-left-radius: $igv-trackgear-popover-border-radius;
+        border-top-right-radius: $igv-trackgear-popover-border-radius;
+
+        border-bottom-color: $igv-trackgear-grey-color;
+        border-bottom-style: solid;
+        border-bottom-width: thin;
+
+        background-color: #eee;
+
+        >div:first-child {
+            margin-left: 4px;
+            //height: 12px;
+            //width: auto;
+            //background-color: magenta;
+        }
+
+        // close button
+        >div:last-child {
+            margin-right: 4px;
+            height: 12px;
+            width: 12px;
+            color: $igv-trackgear-grey-color;
+        }
+
+        >div:last-child:hover {
+            cursor: pointer;
+            color: #444;
+        }
+    }
+
+    // content
+    >div:last-child {
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        max-height: 400px;
+        max-width: 800px;
+
+        background-color: white;
+
+        border-bottom-width: 0;
+        border-bottom-left-radius: $igv-trackgear-popover-border-radius;
+        border-bottom-right-radius: $igv-trackgear-popover-border-radius;
+
+
+        // row
+        >div {
+
+            user-select: all;
+
+            margin-left: 4px;
+            margin-right: 4px;
+
+            min-width: 220px;
+
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            >span {
+                font-weight: bolder;
+            }
+        }
+
+        hr {
+            width: 100%;
+        }
+    }
+}
