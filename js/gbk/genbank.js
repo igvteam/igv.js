@@ -1,279 +1,165 @@
-import getDataWrapper from "../feature/dataWrapper.js"
-
-const wsRegex = /\s+/
-
-class GenbankParser {
-    constructor(config) {
-
-        this.config = config
-    }
-
-
-    parse(data) {
-
-        let accession, sequence, aliases
-
-        if (!data) return null
-
-        const dataWrapper = getDataWrapper(data)
-
-        // Read locus
-        let line = dataWrapper.nextLine()
-        const tokens = line.split(/\s+/)
-        if (tokens[0].toUpperCase() !== "LOCUS") {
-            throw Error("Expected `LOCUS` line.  Found: " + line)
-        }
-        const locus = tokens[1].trim()
-
-        // Loop until FEATURES section
-        do {
-            line = dataWrapper.nextLine()
-            if (line.startsWith("ACCESSION")) {
-                const tokens = line.split(wsRegex)
-                if (tokens.length < 2) {
-                    throw Error("Genbank file missing ACCESSION number.")
-                } else {
-                    accession = tokens[1].trim()
-                }
-            } else if (line.startsWith("ALIASES")) {
-                // NOTE - this is an IGV extension
-                const tokens = line.split(wsRegex)
-                if (tokens.length > 1) {
-                    aliases = tokens[1].split(",")
-                }
-
-            }
-        }
-        while (line && !line.startsWith("FEATURES"))
-
-        const chr = accession || locus
-        const features = parseFeatures(chr, dataWrapper)
-
-        //readOriginSequence(dataWrapper)
-
-        return {locus, accession, aliases, features}
-
-
-        /**
-         * Read the origin section.   Example...
-         * <p/>
-         * ORIGIN
-         * 1 gatcctccat atacaacggt atctccacct caggtttaga tctcaacaac ggaaccattg
-         * 61 ccgacatgag acagttaggt atcgtcgaga gttacaagct aaaacgagca gtagtcagct
-         * 121 ctgcatctga agccgctgaa gttctactaa gggtggataa catcatccgt gcaagaccaa
-         *
-         * @param reader
-         */
-        function readOriginSequence(dataWrapper) {
-
-            // TODO -- first line is source (required), has total length => use to size sequence
-
-            let line
-
-            sequence = []
-            while (((line = dataWrapper.nextLine()) !== undefined) && !line.startsWith("//")) {
-                line = line.trim()
-                let tokens = line.split(wsRegex)
-                for (let i = 1; i < tokens.length; i++) {
-                    let str = tokens[i]
-                    for (let j = 0; j < str.length; j++) {
-                        sequence.push(str.charCodeAt(j))
-                    }
-                }
-            }
-        }
-
-
-    }
-}
-
+import SequenceInterval from "../genome/sequenceInterval.js"
+import Chromosome from "../genome/chromosome.js"
 
 /**
- * FEATURES             Location/Qualifiers
- * source          1..105338
- * /organism="Homo sapiens"
- * /mol_type="genomic DNA"
- * /db_xref="taxon:9606"
- * /chromosome="10"
- * gene            1..105338
- * /gene="PTEN"
- * /note="Derived by automated computational analysis using
- * gene prediction method: BestRefseq."
- * /db_xref="GeneID:5728"
- * /db_xref="HGNC:9588"
- * /db_xref="HPRD:03431"
- * /db_xref="MIM:601728"
- * <p/>
- * CDS             join(1033..1111,30588..30672,62076..62120,67609..67652,
- * 69576..69814,88681..88822,94416..94582,97457..97681,
- * 101850..102035)
- * /gene="PTEN"
+ * Represents a Genbank file, which combines both annotations (features) and sequence.
  *
- * @param reader
- * @throws IOException
+ * Implements the Genome interface
  */
-function parseFeatures(chr, dataWrapper) {
+class Genbank {
 
+    constructor({chr, locus, accession, aliases, features, sequence}) {
+        this.chr = chr
+        this.locus = locus
+        this.accession = accession
+        this.aliases = aliases
+        this.features = features
+        this.sequence = sequence
+        this.bpLength = sequence.length
+    }
 
-    // TODO -- keys start at column 6,   locations and qualifiers at column 22.
+    getSequenceRecord(chr) {
+        //chr, 0, sequenceRecord.bpLength
+        return {chr: this.chr, bpLength: this.bpLength}
+    }
 
-    //Process features until "ORIGIN"
-    const features = []
-    let currentLocQualifier
-    let nextLine
-    let errorCount = 0
-    let f
+    get chromosomeNames() {
+        return [this.chr]
+    }
 
-    do {
-        nextLine = dataWrapper.nextLine()
+    getFirstChromosomeName() {
+        return this.chr
+    }
 
-        if (nextLine === "") {
-            continue  // Not sure this is legal in a gbk file
-        }
+    get name() {
+        return this.locus
+    }
 
-        if (!nextLine || nextLine.startsWith("ORIGIN")) {
-            break
-        }
+    // Genome interface follows
+    get description() {
+        return this.locus
+    }
 
-        if (nextLine.length < 6) {
-            if (errorCount < 10) {
-                console("Unexpected line in genbank file (skipping): " + nextLine)
+    get infoURL() {
+        //return this.config.infoURL
+    }
+
+    showWholeGenomeView() {
+        return false
+    }
+
+    /**
+     * Return a json like object representing the current state.  The tracks collection is nullified
+     * as tracks are transferred to the browser object on loading.
+     *
+     * @returns {any}
+     */
+    toJSON() {
+
+    }
+
+    get initialLocus() {
+        return this.chr
+    }
+
+    getHomeChromosomeName() {
+        this.chr
+    }
+
+    getChromosomeName(chr) {
+        return chr
+    }
+
+    getChromosomeDisplayName(str) {
+        return this.chr
+    }
+
+    getChromosome(chr) {
+        if (chr === this.chr) {
+            return {
+                name: this.chr,
+                bpLength: this.bpLength
             }
-            errorCount++
-            continue
         }
+    }
 
-        if (nextLine.charAt(5) !== ' ') {
+    async loadChromosome(chr) {
 
-            let featureType = nextLine.substring(5, 21).trim()
-            f = {
-                chr: chr,
-                type: featureType,
-                attributes: {}
-            }
-            currentLocQualifier = nextLine.substring(21)
+        // No-op
+    }
 
-            if (!featureType.toLowerCase() === "source") {
-                features.add(f)
-            }
+    async getAliasRecord(chr) {
+        return undefined
+    }
 
+    getCytobands(chr) {
+        return []
+    }
+
+    getChromosomes() {
+        return [this.getChromosome(this.chr)]
+    }
+
+    get wgChromosomeNames() {
+        return undefined
+    }
+
+    /**
+     * Return the genome coordinate in kb for the give chromosome and position.
+     * NOTE: This might return undefined if the chr is filtered from whole genome view.
+     */
+    getGenomeCoordinate(chr, bp) {
+        if (chr === this.chr)
+            return bp
+    }
+
+    /**
+     * Return the chromosome and coordinate in bp for the given genome coordinate
+     */
+    getChromosomeCoordinate(genomeCoordinate) {
+        return {chr: this.chr, position: genomeCoordinate}
+    }
+
+
+    /**
+     * Return the offset in genome coordinates (kb) of the start of the given chromosome
+     * NOTE:  This might return undefined if the chromosome is filtered from whole genome view.
+     */
+    getCumulativeOffset(chr) {
+        return 0
+    }
+
+    /**
+     * Return the nominal genome length, this is the length of the main chromosomes (no scaffolds, etc).
+     */
+    getGenomeLength() {
+        return this.bpLength
+    }
+
+
+    async getSequence(chr, start, end) {
+        if (chr === this.chr) {
+            return this.sequence.substring(start, end)
         } else {
-            let tmp = nextLine.substring(21).trim()
-            if (tmp.length > 0)
-
-                if (tmp.charCodeAt(0) === 47) {   // 47 == '/'
-
-                    if (currentLocQualifier.charCodeAt(0) === 47) {
-
-                        let tokens = currentLocQualifier.split("=", 2)
-
-                        if (tokens.length > 1) {
-                            let keyName = tokens[0].length() > 1 ? tokens[0].substring(1) : ""
-                            let value = stripQuotes(tokens[1])
-                            f.attributes[keyName] = value
-
-                        } else {
-                            // TODO -- don't know how to interpret, log?
-                        }
-                    } else {
-
-                        // location string TODO -- many forms of this to support
-                        // Crude test for strand
-                        // location string TODO -- many forms of this to support
-                        // Crude test for strand
-                        const strand = currentLocQualifier.includes("complement") ? "-" : "+";
-                        f.strand = strand;
-
-                        let joinString = currentLocQualifier.replace("join", "")
-                            .replace("order", "")
-                            .replace("complement", "")
-                            .replace("(", "")
-                            .replace(")", "");
-
-                        if (joinString.includes("..")) {
-                            joinString = joinString.replace("<", "")
-                                .replace(">", "");
-
-                            const exons = createExons(joinString, strand);
-                            exons.sort((a, b) =>a.start - b.start);
-                            const firstExon = exons[0];
-                            f.start = firstExon.start;
-                            const lastExon = exons[exons.length - 1];
-                            f.end = lastExon.end;
-                            if (exons.length > 1) {
-                                f.exons = exons;
-                            }
-                        } else {
-                            // TODO Single locus for now, other forms possible
-                            //  const start = parseInt(joinString) - 1;const end = start + 1;
-                            f.start = start;
-                            f.end = end;
-                        }
-
-                    }
-                    currentLocQualifier = tmp
-                } else {
-                    currentLocQualifier = currentLocQualifier || tmp
-                }
+            return undefined
         }
     }
-    while (true)
 
-    return features
-}
-
-/**
- * Create a list of Exon objects from the Embl join string.  Apparently exons in embl
- * format are represented by a single CDS record.
- *
- * @param joinString
- */
-function createExons(joinString, strand) {
-
-    let lociArray = joinString.split(",")
-
-    let exons = []
-
-    let isNegative = joinString.contains("complement")
-
-    lociArray.forEach(function (loci) {
-
-        let tmp = loci.split("..")
-
-        let exonStart = 0    // - (isNegative ? 0 : 1);
-
-        try {
-            exonStart = Number.parseInt(tmp[0]) - 1
-
-            let exonEnd = exonStart + 1
-            if (tmp.length > 1) {
-                exonEnd = Number.parseInt(tmp[1])
-            }
-
-            exons.add({
-                chr: accession,
-                start: exonStart,
-                end: exonEnd,
-                strand: strand
-            })
-
-        } catch (e) {
-            console.error(e)
+    /**
+     * Return the first cached interval containing the specified region, or undefined if no interval is found.
+     *
+     * @param chr
+     * @param start
+     * @param end
+     * @returns a SequenceInterval or undefined
+     */
+    getSequenceInterval(chr, start, end) {
+        if (chr === this.chr) {
+            return new SequenceInterval(this.chr, 0, this.sequence.length, this.sequence)
+        } else {
+            return undefined
         }
-    })
-
-    exons.sort(function (a, b) {
-        return a.start - b.start
-    })
-
-    return exons
-}
-
-function stripQuotes(value) {
-    if (value.startsWith('"') && value.endsWith('"')) {
-        value = value.substring(1, value.length - 2)
     }
-    return value
 }
 
-export default GenbankParser
+export default Genbank

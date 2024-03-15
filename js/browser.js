@@ -801,12 +801,12 @@ class Browser {
     async loadGenome(idOrConfig) {
 
         let genomeConfig
-        if (idOrConfig.url &&
-            StringUtils.isString(idOrConfig.url) &&
-            idOrConfig.url.endsWith("/hub.txt")) {
-            const hub = await Hub.loadHub(idOrConfig.url, idOrConfig)
+        const isHubGenome = idOrConfig.hubURL || (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt"))
+        if (isHubGenome) {
+            const hub = await Hub.loadHub(idOrConfig.hubURL || idOrConfig.url, idOrConfig)
             genomeConfig = hub.getGenomeConfig()
-        } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.hubURL)) {
+        } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.gbkURL)) {
+            // Either an ID, a json string, or an object missing required properties.
             genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
         } else {
             genomeConfig = idOrConfig
