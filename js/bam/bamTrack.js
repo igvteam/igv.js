@@ -1415,10 +1415,13 @@ class AlignmentTrack {
             
             // If NONE reset grouping to empty state
             if (option === "NONE"){
-                newGroupObject = {}
+                this.parent.groupObject = {}
+            }
+            else{
+                this.parent.groupObject = newGroupObject
             }
             
-            this.parent.groupObject = newGroupObject
+            
 
             // We restart contentHeight as we add empty alignment rows for spacing
             viewport.trackView.checkContentHeight()
