@@ -1,5 +1,5 @@
 import {StringUtils} from '../../node_modules/igv-utils/src/index.js'
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import {emptySpaceReplacement} from "./sampleInfo.js";
 
