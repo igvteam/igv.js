@@ -1,6 +1,7 @@
-
-import {DOMUtils, makeDraggable, UIUtils} from "../../node_modules/igv-ui/dist/igv-ui.js"
-import {GenericColorPicker} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import makeDraggable from "./utils/draggable.js"
+import {attachDialogCloseHandlerWithParent} from "./utils/ui-utils.js"
+import * as DOMUtils from "./utils/dom-utils.js"
+import GenericColorPicker from "./components/genericColorPicker.js"
 import {createCheckbox} from "../igv-icons.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "./menuUtils.js"
@@ -14,7 +15,7 @@ class MenuPopup {
         const header = DOMUtils.div({class: 'igv-menu-popup-header'})
         this.popover.appendChild(header)
 
-        UIUtils.attachDialogCloseHandlerWithParent(header, () => this.popover.style.display = 'none')
+        attachDialogCloseHandlerWithParent(header, () => this.popover.style.display = 'none')
 
         this.popoverContent = DOMUtils.div()
         this.popover.appendChild(this.popoverContent)
