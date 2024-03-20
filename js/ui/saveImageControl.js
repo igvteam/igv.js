@@ -25,8 +25,7 @@
  */
 
 import NavbarButton from "./navbarButton.js"
-import { Dropdown } from '../../node_modules/igv-ui/dist/igv-ui.js'
-
+import Dropdown from "./dropdown.js"
 // Icon Button SVG
 import { imageSaveImageSVG, imageSaveImageHoverSVG } from './navbarIcons/saveImage.js'
 import { buttonLabel } from "./navbarIcons/buttonLabel.js"

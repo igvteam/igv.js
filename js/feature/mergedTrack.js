@@ -27,7 +27,7 @@
 import TrackBase from "../trackBase.js"
 import paintAxis from "../util/paintAxis.js"
 import {FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import * as DOMUtils from "../ui/utils/dom-utils.js"
 
 import {doAutoscale} from "../util/igvUtils.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"

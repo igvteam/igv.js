@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from "../node_modules/igv-ui/dist/igv-ui.js"
+import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {validateGenomicExtent} from "./util/igvUtils.js"
 import GenomeUtils from './genome/genomeUtils.js'
 import { ROI_USER_DEFINED_COLOR } from "./roi/ROISet.js"

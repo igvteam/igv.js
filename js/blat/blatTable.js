@@ -1,4 +1,4 @@
-import { DOMUtils } from '../../node_modules/igv-ui/dist/igv-ui.js'
+import * as DOMUtils from "../ui/utils/dom-utils.js"
 import { StringUtils } from '../../node_modules/igv-utils/src/index.js'
 
 import RegionTableBase from '../ui/regionTableBase.js'

@@ -1,6 +1,6 @@
-import {DOMUtils} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import * as DOMUtils from "../ui/utils/dom-utils.js"
 import ROISet, {screenCoordinates} from './ROISet.js'
-import {Popover} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import Popover from "../ui/popover.js"
 
 class ROIManager {
 

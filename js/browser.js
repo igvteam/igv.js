@@ -1,7 +1,11 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import html2canvas from '../node_modules/html2canvas/dist/html2canvas.esm.js'
 import {BGZip, FileUtils, igvxhr, StringUtils, URIUtils} from "../node_modules/igv-utils/src/index.js"
-import {DOMUtils, Icon, SliderDialog, InputDialog, GenericColorPicker} from "../node_modules/igv-ui/dist/igv-ui.js"
+import * as DOMUtils from "./ui/utils/dom-utils.js"
+import {createIcon} from "./ui/utils/icons.js"
+import SliderDialog from "./ui/components/sliderDialog.js"
+import InputDialog from "./ui/components/inputDialog.js"
+import GenericColorPicker from "./ui/components/genericColorPicker.js"
 import Alert from './ui/alert.js'
 import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width} from "./trackView.js"
@@ -276,7 +280,7 @@ class Browser {
         const searchIconContainer = DOMUtils.div({class: 'igv-search-icon-container'})
         $searchContainer.append($(searchIconContainer))
 
-        searchIconContainer.appendChild(Icon.createIcon("search"))
+        searchIconContainer.appendChild(createIcon("search"))
 
         searchIconContainer.addEventListener('click', () => this.doSearch(this.$searchInput.val()))
 

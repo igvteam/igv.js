@@ -1,0 +1,70 @@
+
+$igv-ui-popover-border-width: 1px;
+$igv-ui-popover-header-height: 24px;
+$igv-ui-popover-content-height: calc(100% - #{$igv-ui-popover-header-height} - 2 * #{$igv-ui-popover-border-width});
+
+// popover
+.igv-ui-dropdown {
+
+    cursor: default;
+
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    z-index: 2048;
+
+    border-color: $igv-trackgear-grey-color;
+    border-style: solid;
+    border-width: $igv-ui-popover-border-width;
+
+    font-family: $igv-default-font-face;
+    font-size: small;
+    font-weight: 400;
+
+    background-color: white;
+
+    // content
+    >div {
+
+        overflow-y: auto;
+        overflow-x: hidden;
+
+        //max-height: 400px;
+        //max-width: 800px;
+
+        background-color: white;
+
+        // row
+        >div {
+
+            //user-select: all;
+
+            padding: 4px;
+
+            width: 100%;
+            //min-width: 128px;
+
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+
+            border-bottom-color: $igv-trackgear-grey-color;
+            border-bottom-style: solid;
+            border-bottom-width: $igv-ui-popover-border-width;
+
+            background-color: white;
+        }
+
+        >div:last-child {
+            border-bottom-color: transparent;
+            border-bottom-width: 0;
+        }
+
+        >div:hover {
+            cursor: pointer;
+            background-color: rgba(0, 0, 0, 0.04);
+        }
+
+    }
+}

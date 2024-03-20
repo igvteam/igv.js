@@ -1,4 +1,6 @@
-import { DOMUtils, Panel, Dialog } from '../../node_modules/igv-ui/dist/igv-ui.js'
+import * as DOMUtils from "./utils/dom-utils.js"
+import Panel from "./components/panel.js"
+import Dialog from "./components/dialog.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {colorPalettes} from "../util/colorPalletes.js"
 

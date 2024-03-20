@@ -1,4 +1,5 @@
-import {DOMUtils, Icon} from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {createIcon} from "./utils/icons.js"
+import * as DOMUtils from "./utils/dom-utils.js"
 
 const sliderMin = 0
 let sliderMax = 23
@@ -14,7 +15,7 @@ const ZoomWidget = function (browser, parent) {
     // zoom out
     this.zoomOutButton = DOMUtils.div()
     this.zoomContainer.appendChild(this.zoomOutButton)
-    this.zoomOutButton.appendChild(Icon.createIcon('minus-circle'))
+    this.zoomOutButton.appendChild(createIcon('minus-circle'))
     this.zoomOutButton.addEventListener('click', () => {
         // browser.zoomWithScaleFactor(2.0)
         browser.zoomOut()
@@ -57,7 +58,7 @@ const ZoomWidget = function (browser, parent) {
     // zoom in
     this.zoomInButton = DOMUtils.div()
     this.zoomContainer.appendChild(this.zoomInButton)
-    this.zoomInButton.appendChild(Icon.createIcon('plus-circle'))
+    this.zoomInButton.appendChild(createIcon('plus-circle'))
     this.zoomInButton.addEventListener('click', () => {
         // browser.zoomWithScaleFactor(0.5)
         browser.zoomIn()

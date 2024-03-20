@@ -1,4 +1,6 @@
-import { DOMUtils, makeDraggable, Icon } from '../../node_modules/igv-ui/dist/igv-ui.js'
+import * as DOMUtils from "./utils/dom-utils.js"
+import {createIcon} from "./utils/icons.js"
+import makeDraggable from "./utils/draggable.js"
 
 class RegionTableBase {
     constructor(config) {
@@ -45,7 +47,7 @@ class RegionTableBase {
         // table dismiss button
         const dismiss = DOMUtils.div()
         dom.appendChild(dismiss)
-        dismiss.appendChild(Icon.createIcon('times'))
+        dismiss.appendChild(createIcon('times'))
 
         this.boundDismissHandler = mouseClickHandler.bind(this)
 

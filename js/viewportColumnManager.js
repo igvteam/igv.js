@@ -1,4 +1,4 @@
-import {DOMUtils} from '../node_modules/igv-ui/dist/igv-ui.js'
+import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {createColumn, insertElementAfter, insertElementBefore} from './util/igvUtils.js'
 
 const viewportColumnManager =
