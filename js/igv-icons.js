@@ -1,4 +1,5 @@
-import {DOMUtils, Icon} from "../node_modules/igv-ui/dist/igv-ui.js"
+import * as DOMUtils from "./ui/utils/dom-utils.js"
+import {createIcon} from "./ui/utils/icons.js"
 
 function createCheckbox(name, initialState) {
 
@@ -7,7 +8,7 @@ function createCheckbox(name, initialState) {
     const div = DOMUtils.div()
     container.appendChild(div)
 
-    const svg = Icon.createIcon('check', (true === initialState ? '#444' : 'transparent'))
+    const svg = createIcon('check', (true === initialState ? '#444' : 'transparent'))
     div.appendChild(svg)
 
     const label = DOMUtils.div()
