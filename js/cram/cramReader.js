@@ -46,11 +46,10 @@ class CramReader {
         BamUtils.setReaderDefaults(this, config)
 
         async function seqFetch(seqID, start, end) {
-            const sequence = this.genome.sequence
             const genome = this.genome
             const header = await this.getHeader()
             const chr = genome.getChromosomeName(header.indexToChr[seqID])
-            return sequence.getSequence(chr, start - 1, end)
+            return this.genome.getSequence(chr, start - 1, end)
         }
     }
 
