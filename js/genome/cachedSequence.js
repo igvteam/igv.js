@@ -29,7 +29,7 @@ class CachedSequence {
         let interval = this.#cachedIntervals.find(i => i.contains(chr, start, end))
         if (!interval) {
             interval =  await this.#queryForSequence(chr, start, end)
-            this.trimCache(interval)
+            this.#trimCache(interval)
             this.#cachedIntervals.push(interval)
         }
 
@@ -43,7 +43,7 @@ class CachedSequence {
         }
     }
 
-    trimCache(interval) {
+    #trimCache(interval) {
         // Filter out redundant (subsumed) cached intervals
         this.#cachedIntervals = this.#cachedIntervals.filter(i => !interval.contains(i))
         if (this.#cachedIntervals.length === this.#maxIntervals) {
