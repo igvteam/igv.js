@@ -119,5 +119,43 @@ function binarySearch(array, pred, min) {
     return hi
 }
 
+/**
+ * This function sorts alignments within an alignment row based on the provided options
+ * 
+ * @param {Object} options 
+ * @param {Array} packedAlignmentRows 
+ * @returns {Array}
+ * 
+ */
+function sortAlignmentRows(options, packedAlignmentRows, alignmentContainer) {
+    const newRows = []
+    const undefinedRow = []
+    for (let row of packedAlignmentRows) {
+        const alignment = row.findAlignment(options.position, options.sortAsPairs)
+        if (undefined !== alignment) {
+            newRows.push(row)
+        } else {
+            undefinedRow.push(row)
+        }
+    }
 
-export {canBePaired, pairAlignments, unpairAlignments, packAlignmentRows}
+    newRows.sort((rowA, rowB) => {
+        const direction = options.direction
+        const rowAValue = rowA.getSortValue(options, alignmentContainer)
+        const rowBValue = rowB.getSortValue(options, alignmentContainer)
+
+        if (rowBValue === undefined && rowBValue !== undefined) return 1
+        else if (rowAValue !== undefined && rowBValue === undefined) return -1
+
+        const i = rowAValue > rowBValue ? 1 : (rowAValue < rowBValue ? -1 : 0)
+        return true === direction ? i : -i
+    })
+
+    for (let row of undefinedRow) {
+        newRows.push(row)
+    }
+    
+    return newRows
+}
+
+export {canBePaired, pairAlignments, unpairAlignments, packAlignmentRows, sortAlignmentRows}
