@@ -190,7 +190,7 @@ class SequenceTrack {
                 {
                     label: this.reversed ? 'View visible sequence (reversed)...' : 'View visible sequence...',
                     click: async () => {
-                        let seq = await this.browser.genome.sequence.getSequence(chr, start, end)
+                        let seq = await this.browser.genome.getSequence(chr, start, end)
                         if (!seq) {
                             seq = "Unknown sequence"
                         } else if (this.reversed) {
@@ -204,7 +204,7 @@ class SequenceTrack {
                 items.push({
                     label: 'Copy visible sequence',
                     click: async () => {
-                        let seq = await this.browser.genome.sequence.getSequence(chr, start, end)
+                        let seq = await this.browser.genome.getSequence(chr, start, end)
                         if (!seq) {
                             seq = "Unknown sequence"
                         } else if (this.reversed) {
@@ -267,7 +267,7 @@ class SequenceTrack {
             }
             return this.fasta
         } else {
-            return this.browser.genome.sequence
+            return this.browser.genome
         }
     }
 

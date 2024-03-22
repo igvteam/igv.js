@@ -27,6 +27,8 @@ import TextFeatureSource from "./textFeatureSource.js"
 import BWSource from "../bigwig/bwSource.js"
 import TDFSource from "../tdf/tdfSource.js"
 import StaticFeatureSource from "./staticFeatureSource.js"
+import {loadGenbank} from "../gbk/genbankParser.js"
+import GenbankFeatureSource from "../gbk/genbankFeatureSource.js"
 
 const bbFormats = new Set(['bigwig', 'bw', 'bigbed', 'bb', 'biginteract', 'biggenepred', 'bignarrowpeak'])
 
@@ -40,6 +42,8 @@ function FeatureSource(config, genome) {
         return new BWSource(config, genome)
     } else if ("tdf" === format) {
         return new TDFSource(config, genome)
+    } else if ("gbk" === format) {
+        return new GenbankFeatureSource(config, genome)
     } else {
         return new TextFeatureSource(config, genome)
     }

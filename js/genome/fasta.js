@@ -21,7 +21,11 @@ async function loadSequence(reference, browser) {
         fasta = new CachedSequence(new Twobit(reference), browser)
     } else if (isDataURL(reference.fastaURL) || reference.indexed === false) {
         fasta = new NonIndexedFasta(reference)
-    } else {
+    } else if("gbk" === reference.format || reference.gbkURL) {
+
+    }
+
+    else {
         fasta = new CachedSequence(new FastaSequence(reference), browser)
     }
     await fasta.init()

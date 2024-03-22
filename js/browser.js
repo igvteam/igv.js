@@ -64,6 +64,7 @@ import {setDefaults} from "./igv-create.js"
 import {trackViewportPopoverList} from './trackViewport.js'
 import TrackBase from "./trackBase.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
+import {loadGenbank} from "./gbk/genbankParser.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -738,7 +739,12 @@ class Browser {
 
         this.removeAllTracks()   // Do this first, before new genome is set
 
-        const genome = await Genome.createGenome(genomeConfig, this)
+        let genome;
+        if(genomeConfig.gbkURL) {
+            genome = await loadGenbank(genomeConfig.gbkURL)
+        } else {
+            genome = await Genome.createGenome(genomeConfig, this)
+        }
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
@@ -805,12 +811,12 @@ class Browser {
     async loadGenome(idOrConfig) {
 
         let genomeConfig
-        if (idOrConfig.url &&
-            StringUtils.isString(idOrConfig.url) &&
-            idOrConfig.url.endsWith("/hub.txt")) {
-            const hub = await Hub.loadHub(idOrConfig.url, idOrConfig)
+        const isHubGenome = idOrConfig.hubURL || (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt"))
+        if (isHubGenome) {
+            const hub = await Hub.loadHub(idOrConfig.hubURL || idOrConfig.url, idOrConfig)
             genomeConfig = hub.getGenomeConfig()
-        } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.hubURL)) {
+        } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.gbkURL)) {
+            // Either an ID, a json string, or an object missing required properties.
             genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
         } else {
             genomeConfig = idOrConfig
@@ -818,7 +824,16 @@ class Browser {
 
         await this.loadReference(genomeConfig)
 
-        const tracks = genomeConfig.tracks || []
+        let tracks
+        if(genomeConfig.gbkURL) {
+            tracks = [ {
+                name: "Annotations",
+                format: "gbk",
+                url: genomeConfig.gbkURL
+            }]
+        } else {
+            tracks = genomeConfig.tracks || []
+        }
 
         // Insure that we always have a sequence track
         const pushSequenceTrack = tracks.filter(track => track.type === 'sequence').length === 0
