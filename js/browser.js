@@ -60,6 +60,7 @@ import {setDefaults} from "./igv-create.js"
 import {trackViewportPopoverList} from './trackViewport.js'
 import TrackBase from "./trackBase.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
+import {loadGenbank} from "./gbk/genbankParser.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -734,7 +735,12 @@ class Browser {
 
         this.removeAllTracks()   // Do this first, before new genome is set
 
-        const genome = await Genome.createGenome(genomeConfig, this)
+        let genome;
+        if(genomeConfig.gbkURL) {
+            genome = await loadGenbank(genomeConfig.gbkURL)
+        } else {
+            genome = await Genome.createGenome(genomeConfig, this)
+        }
 
         const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
@@ -814,7 +820,16 @@ class Browser {
 
         await this.loadReference(genomeConfig)
 
-        const tracks = genomeConfig.tracks || []
+        let tracks
+        if(genomeConfig.gbkURL) {
+            tracks = [ {
+                name: "Annotations",
+                format: "gbk",
+                url: genomeConfig.gbkURL
+            }]
+        } else {
+            tracks = genomeConfig.tracks || []
+        }
 
         // Insure that we always have a sequence track
         const pushSequenceTrack = tracks.filter(track => track.type === 'sequence').length === 0

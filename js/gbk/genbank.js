@@ -2,7 +2,8 @@ import SequenceInterval from "../genome/sequenceInterval.js"
 import Chromosome from "../genome/chromosome.js"
 
 /**
- * Represents a Genbank file, which combines both annotations (features) and sequence.
+ * Represents a Genbank file, which combines both annotations (features) and sequence.   The format combines both
+ * sequence and annotations.
  *
  * Implements the Genome interface
  */
@@ -18,6 +19,16 @@ class Genbank {
         this.bpLength = sequence.length
     }
 
+
+    toJSON() {
+        return {
+            gbkURL: this.url
+        }
+    }
+
+
+    // Genome interface follows
+
     getSequenceRecord(chr) {
         //chr, 0, sequenceRecord.bpLength
         return {chr: this.chr, bpLength: this.bpLength}
@@ -31,8 +42,15 @@ class Genbank {
         return this.chr
     }
 
+    get id() {
+        return this.accession
+    }
     get name() {
         return this.locus
+    }
+
+    get initialLocus() {
+        return this.chr
     }
 
     // Genome interface follows
@@ -46,16 +64,6 @@ class Genbank {
 
     showWholeGenomeView() {
         return false
-    }
-
-    /**
-     * Return a json like object representing the current state.  The tracks collection is nullified
-     * as tracks are transferred to the browser object on loading.
-     *
-     * @returns {any}
-     */
-    toJSON() {
-
     }
 
     get initialLocus() {
@@ -84,8 +92,7 @@ class Genbank {
     }
 
     async loadChromosome(chr) {
-
-        // No-op
+        return this.getChromosome(chr)
     }
 
     async getAliasRecord(chr) {

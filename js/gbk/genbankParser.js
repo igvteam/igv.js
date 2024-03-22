@@ -4,10 +4,19 @@ import Genbank from "./genbank.js"
 
 const wsRegex = /\s+/
 
+const genbankCache = new Map();
 
 async function loadGenbank(url) {
-    const data = await igvxhr.loadString(url, {})
-    return parseGenbank(data)
+    let genbank = genbankCache.get(url);
+
+    if (!genbank) {
+        const data = await igvxhr.loadString(url, {});
+        genbank = parseGenbank(data);
+        genbank.url = url
+        genbankCache.set(url, genbank);
+    }
+
+    return genbank;
 }
 
 
