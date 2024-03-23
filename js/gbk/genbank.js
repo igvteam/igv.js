@@ -59,19 +59,15 @@ class Genbank {
     }
 
     get infoURL() {
-        //return this.config.infoURL
+        return this.url
     }
 
     showWholeGenomeView() {
         return false
     }
 
-    get initialLocus() {
-        return this.chr
-    }
-
     getHomeChromosomeName() {
-        this.chr
+        return this.chr
     }
 
     getChromosomeName(chr) {
