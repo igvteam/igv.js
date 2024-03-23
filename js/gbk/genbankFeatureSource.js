@@ -5,6 +5,7 @@ class GenbankFeatureSource {
 
     constructor(config) {
         this.config = config
+        this.searchable = true
     }
 
     // Feature source interface
@@ -13,7 +14,8 @@ class GenbankFeatureSource {
             const gbk = await loadGenbank(this.config.url)
             this.featureSource = new StaticFeatureSource({
                 genome: this.config.genome,
-                features: gbk.features
+                features: gbk.features,
+                searchableFields: ['gene', 'db_xref', 'locus_tag', 'transcript_id']
             })
 
         }

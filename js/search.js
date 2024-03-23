@@ -79,8 +79,7 @@ async function search(browser, string) {
                 try {
                     locusObject = await searchWebService(browser, locus, searchConfig)
                 } catch (error) {
-                    console.error(error)
-                    throw Error("Search service currently unavailable.")
+                    console.log("Search service not available " + error)
                 }
             }
 
