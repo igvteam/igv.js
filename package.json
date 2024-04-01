@@ -52,7 +52,7 @@
     "circular-view": "github:igvteam/circular-view#v0.2.4",
     "dompurify": "^3.0.9",
     "eslint": "^6.4.0",
-    "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v0.5.5",
+    "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v0.5.6",
     "html2canvas": "^1.4.1",
     "igv-utils": "github:igvteam/igv-utils#v1.4.8",
     "mocha": "^10.2.0",
