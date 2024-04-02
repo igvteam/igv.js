@@ -10,7 +10,15 @@ import VariantTrack from "../variant/variantTrack.js"
 
 class CNVPytorTrack extends TrackBase {
 
-    static DEFAULT_TRACK_HEIGHT = 250
+
+    static defaults = {
+        height: 250,
+        graphType: "points",
+        bin_size: 100000,
+        signal_name: "rd_snp",
+        cnv_caller: '2D',
+        colors: ['gray', 'black', 'green', 'blue']
+    }
 
     constructor(config, browser) {
         super(config, browser)
@@ -19,20 +27,11 @@ class CNVPytorTrack extends TrackBase {
     init(config) {
 
         this.featureType = 'numeric'
-
+        this.type = "cnvpytor"
         if (!config.max) {
             this.defaultScale = true
             this.autoscale = false
         }
-
-        this.height = (config.height !== undefined ? config.height : CNVPytorTrack.DEFAULT_TRACK_HEIGHT)
-
-        this.type = "cnvpytor"
-        this.graphType = config.graphType || "points"
-        this.bin_size = config.bin_size || 100000
-        this.signal_name = config.signal_name || "rd_snp"
-        this.cnv_caller = config.cnv_caller || '2D'
-        this.colors = config.colors || ['gray', 'black', 'green', 'blue']
         super.init(config)
 
     }
