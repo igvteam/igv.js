@@ -810,6 +810,17 @@ class Browser {
      */
     async loadGenome(idOrConfig) {
 
+        // Translate the generic "url" field, used by clients such as igv-webapp
+        if(idOrConfig.url) {
+            if (StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
+                idOrConfig.hubURL = idOrConfig.url
+                delete idOrConfig.url
+            } else if("gbk" === getFileExtension(idOrConfig.url)) {
+                idOrConfig.gbkURL = idOrConfig.url
+                delete idOrConfig.url
+            }
+        }
+
         let genomeConfig
         const isHubGenome = idOrConfig.hubURL || (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt"))
         if (isHubGenome) {
@@ -825,7 +836,7 @@ class Browser {
         await this.loadReference(genomeConfig)
 
         let tracks
-        if(genomeConfig.gbkURL) {
+        if(genomeConfig.gbkURL || "gbk" === genomeConfig.format) {
             tracks = [ {
                 name: "Annotations",
                 format: "gbk",
