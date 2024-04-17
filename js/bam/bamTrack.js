@@ -486,7 +486,7 @@ class BAMTrack extends TrackBase {
                             this.alignmentTrack.colorBy = 'tag'
                             this.alignmentTrack.colorByTag = tag
                             if (!this.alignmentTrack.tagColors) {
-                                this.alignmentTrack.tagColors = new PaletteColorTable("Set1")
+                                this.alignmentTrack.tagColors = new PaletteColorTable("Pastel2")
                             }
                         } else {
                             this.alignmentTrack.colorBy = 'none'
@@ -1637,7 +1637,7 @@ class AlignmentTrack {
                     } else {
 
                         if (!this.tagColors) {
-                            this.tagColors = new PaletteColorTable("Set1")
+                            this.tagColors = new PaletteColorTable("Pastel2")
                         }
                         color = this.tagColors.getColor(tagValue)
                     }
