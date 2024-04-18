@@ -312,7 +312,7 @@ class TrackViewport extends Viewport {
                 pixelHeight,
                 pixelTop,
                 bpStart,
-                bpEnd: bpEnd,
+                bpEnd,
                 bpPerPixel,
                 windowFunction: this.windowFunction,
                 referenceFrame: this.referenceFrame,

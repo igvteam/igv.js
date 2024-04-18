@@ -402,12 +402,6 @@ const BamUtils = {
             console.log("Warning: attempt to set sampling depth > maximum value of " + MAXIMUM_SAMPLING_DEPTH)
             reader.samplingDepth = MAXIMUM_SAMPLING_DEPTH
         }
-
-        if (config.viewAsPairs) {
-            reader.pairsSupported = true
-        } else {
-            reader.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported
-        }
     },
 
     setPairOrientation: function (alignment) {

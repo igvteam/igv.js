@@ -27,6 +27,7 @@
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {createSupplementaryAlignments} from "./supplementaryAlignment.js"
 import {getBaseModificationSets} from "./mods/baseModificationUtils.js"
+import PairedAlignment from "./pairedAlignment.js"
 
 const READ_PAIRED_FLAG = 0x1
 const PROPER_PAIR_FLAG = 0x2
@@ -114,7 +115,7 @@ class BamAlignment {
     isNegativeStrand() {
         return (this.flags & READ_STRAND_FLAG) !== 0
     }
-
+    
     isMateNegativeStrand() {
         return (this.flags & MATE_STRAND_FLAG) !== 0
     }
@@ -135,6 +136,23 @@ class BamAlignment {
         }
         return this.tagDict
     }
+
+
+    /**
+     * @returns a boolean indicating strand of first in pair, true for forward, false for reverse, and undefined
+     * if this is not paired or is not first and mate is not mapped.
+     */
+    get firstOfPairStrand() {
+        if (this.isPaired()) {
+            if (this.isFirstOfPair()) {
+                return this.strand
+            } else if (this.isMateMapped()) {
+                return this.mate.strand
+            }
+        }
+        return undefined
+    }
+
 
     /**
      * Does alignment (or alignment extended by soft clips) contain the genomic location?

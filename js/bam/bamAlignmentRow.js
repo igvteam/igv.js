@@ -78,7 +78,7 @@ class BamAlignmentRow {
             case "BASE": {
                 return calculateBaseScore(alignment, alignmentContainer, position)
             }
-            case "STRAND":
+            case "strand":
                 return alignment.strand ? 1 : -1
             case "START":
                 return alignment.start
@@ -92,7 +92,7 @@ class BamAlignmentRow {
             case "GAP_SIZE":
                 return -alignment.gapSizeAt(position)
             case "MATE_CHR":
-                return alignment.mate
+                return alignment.mate ? alignment.mate.chr : Number.MAX_VALUE
             case "MQ":
                 return alignment.mq === undefined ? Number.MAX_VALUE : -alignment.mq
             case "ALIGNED_READ_LENGTH":
