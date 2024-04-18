@@ -148,7 +148,8 @@ function parseFeatures(chr, dataWrapper) {
             f = {
                 chr: chr,
                 type: featureType,
-                attributes: {}
+                attributes: {},
+                getAttributeValue: function(key) {return this.attributes[key]}
             }
             currentLocQualifier = nextLine.substring(21)
 

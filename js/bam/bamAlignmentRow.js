@@ -78,7 +78,7 @@ class BamAlignmentRow {
             case "BASE": {
                 return calculateBaseScore(alignment, alignmentContainer, position)
             }
-            case "STRAND":
+            case "strand":
                 return alignment.strand ? 1 : -1
             case "START":
                 return alignment.start
@@ -155,6 +155,8 @@ class BamAlignmentRow {
             return baseScore
         }
     }
+
+
 }
 
 export default BamAlignmentRow
