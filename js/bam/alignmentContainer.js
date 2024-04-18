@@ -583,7 +583,7 @@ function unpairAlignments(alignments) {
 function packAlignmentRows(alignments, showSoftClips, groupBy) {
 
     if (!alignments || alignments.length === 0) {
-        return []
+        return new Map()
     } else {
 
         // Separate alignments into groups
