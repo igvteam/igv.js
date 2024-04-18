@@ -52,11 +52,6 @@ const Ga4ghAlignmentReader = function (config, genome) {
 
     this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize
     this.samplingDepth = config.samplingDepth === undefined ? 1000 : config.samplingDepth
-    if (config.viewAsPairs) {
-        this.pairsSupported = true
-    } else {
-        this.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported
-    }
 }
 
 

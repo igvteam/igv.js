@@ -22,7 +22,8 @@ suite("test base-mod counts", function () {
         const alignmentContainer = await bamReader.readAlignments(chr, start, end)
 
         const counts = new BaseModificationCounts();
-        for(let alignment of alignmentContainer.alignments) {
+        const alignments = alignmentContainer.allAlignments()
+        for(let alignment of alignments) {
             counts.incrementCounts(alignment);
             readCount++;
         }

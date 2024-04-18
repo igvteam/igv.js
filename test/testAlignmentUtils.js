@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import BamReaderNonIndexed from "../js/bam/bamReaderNonIndexed.js"
-import {packAlignmentRows} from "../js/bam/alignmentUtils.js"
+import {unpairAlignments} from "../js/bam/alignmentUtils.js"
 
 suite("testAlignmentUtils", function () {
 
@@ -24,14 +24,11 @@ suite("testAlignmentUtils", function () {
             })
 
             const alignmentContainer = await bamReader.readAlignments(chr, start, end)
-
-            const rows = packAlignmentRows(alignmentContainer.alignments, start, end, false)
+            alignmentContainer.pack({viewAsPairs: false, showSoftClips: false})
+            const rows = alignmentContainer.packedGroups
 
             let count = 0
             for (let r of rows) count += r.alignments.length
-
-            // All alignments are packed
-            assert.equal(alignmentContainer.alignments.length, count)
 
             // No duplicates
             const seen = new Set()

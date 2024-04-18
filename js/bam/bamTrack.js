@@ -39,6 +39,7 @@ import {createBlatTrack, maxSequenceSize} from "../blat/blatTrack.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"
 import {drawModifications} from "./mods/baseModificationCoverageRenderer.js"
 import BaseModificationRenderer from "./mods/baseModificationRenderer.js"
+import orientationTypes from "./orientationTypes.js"
 
 const alignmentStartGap = 5
 const downsampleRowHeight = 5
@@ -50,6 +51,8 @@ const MINIMUM_BLAT_LENGTH = 20
 const bisulfiteColorFw1 = "rgb(195, 195, 195)"
 const bisulfiteColorRev1 = "rgb(195, 210, 195)"
 
+const pairCompatibleGroupOptions = new Set(["firstOfPairStrand"])
+
 class BAMTrack extends TrackBase {
 
     static defaults = {
@@ -58,14 +61,14 @@ class BAMTrack extends TrackBase {
         showCoverage: true,
         showAlignments: true,
         viewAsPairs: false,
-        pairsSupported: true,
         showSoftClips: false,
         showAllBases: false,
         showInsertions: true,
         showMismatches: true,
         height: 300,
         coverageTrackHeight: 50,
-        colorBy: undefined
+        colorBy: undefined,
+        groupBy: undefined
     }
 
     constructor(config, browser) {
@@ -97,7 +100,10 @@ class BAMTrack extends TrackBase {
                 this.assignSort(config.sort)
             }
         }
+    }
 
+    dispose() {
+        this.browser.off('trackdragend', this._dragEnd)
     }
 
     setHighlightedReads(highlightedReads) {
@@ -169,12 +175,14 @@ class BAMTrack extends TrackBase {
         const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
 
         if (alignmentContainer.paired && !this._pairedEndStats && !this.config.maxFragmentLength) {
-            const pairedEndStats = new PairedEndStats(alignmentContainer.alignments, this.config)
+            const pairedEndStats = new PairedEndStats(alignmentContainer.allAlignments(), this.config)
             if (pairedEndStats.totalCount > 99) {
                 this._pairedEndStats = pairedEndStats
             }
         }
-        alignmentContainer.alignments = undefined  // Don't need to hold onto these anymore
+
+        // Must pack before sorting
+        alignmentContainer.pack(this)
 
         const sort = this.sortObject
         if (sort) {
@@ -182,6 +190,7 @@ class BAMTrack extends TrackBase {
                 alignmentContainer.sortRows(sort)
             }
         }
+
 
         return alignmentContainer
     }
@@ -272,7 +281,7 @@ class BAMTrack extends TrackBase {
 
         menuItems = menuItems.concat(this.numericDataMenuItems())
 
-        // Color by items
+        // Color by items //////////////////////////////////////////////////
         menuItems.push('<hr/>')
         const $e = $('<div class="igv-track-menu-category">')
         $e.text('Color by:')
@@ -291,6 +300,31 @@ class BAMTrack extends TrackBase {
             const selected = (this.alignmentTrack.colorBy === item.key)
             menuItems.push(this.colorByCB(item, selected))
         }
+
+
+        // Group by items //////////////////////////////////////////////////
+        menuItems.push('<hr/>')
+        const $e2 = $('<div class="igv-track-menu-category">')
+        $e2.text('Group by:')
+        menuItems.push({name: undefined, object: $e2, click: undefined, init: undefined})
+
+        const groupByMenuItems = []
+        groupByMenuItems.push({key: 'none', label: 'none'})
+        groupByMenuItems.push({key: 'strand', label: 'strand'})
+        groupByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'})
+        groupByMenuItems.push({key: 'mateChr', label: 'chromosome of mate'})
+        groupByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'})
+        groupByMenuItems.push({key: 'chimeric', label: 'chimeric'})
+        groupByMenuItems.push({key: 'supplementary', label: 'supplementary flag'})
+        //groupByMenuItems.push({key: 'readOrder', label: 'read order'})
+        //groupByMenuItems.push({key: 'phase', label: 'phase'})
+        groupByMenuItems.push({key: 'tag', label: 'tag'})
+
+        for (let item of groupByMenuItems) {
+            const selected = this.groupBy === undefined && item.key === 'none' || this.groupBy === item.key
+            menuItems.push(this.groupByCB(item, selected))
+        }
+
 
         // Show coverage / alignment options
         const adjustTrackHeight = () => {
@@ -366,28 +400,32 @@ class BAMTrack extends TrackBase {
             click: function showSoftClipsHandler() {
                 this.showSoftClips = !this.showSoftClips
                 this.config.showSoftClips = this.showSoftClips
-                this.featureSource.setShowSoftClips(this.showSoftClips)
                 const alignmentContainers = this.getCachedAlignmentContainers()
                 for (let ac of alignmentContainers) {
-                    ac.setShowSoftClips(this.showSoftClips)
+                    ac.pack(this)
                 }
                 this.trackView.repaintViews()
             }
         })
 
         // View as pairs
-        if (this.pairsSupported && this.alignmentTrack.hasPairs) {
+        if (this.alignmentTrack.hasPairs) {
             menuItems.push('<hr/>')
             menuItems.push({
                 object: $(createCheckbox("View as pairs", this.viewAsPairs)),
                 click: function viewAsPairsHandler() {
-                    this.viewAsPairs = !this.viewAsPairs
+                    const b = !this.viewAsPairs
+                    if (b && this.groupBy && !pairCompatibleGroupOptions.has(this.groupBy)) {
+                        this.browser.alert.present(`'View as Pairs' is incompatible with 'Group By ${this.groupBy}'`)
+                        return
+                    }
+                    this.viewAsPairs = b
                     this.config.viewAsPairs = this.viewAsPairs
-                    this.featureSource.setViewAsPairs(this.viewAsPairs)
                     const alignmentContainers = this.getCachedAlignmentContainers()
                     for (let ac of alignmentContainers) {
-                        ac.setViewAsPairs(this.viewAsPairs)
+                        ac.pack(this)
                     }
+                    this.trackView.checkContentHeight()
                     this.trackView.repaintViews()
                 }
             })
@@ -500,8 +538,70 @@ class BAMTrack extends TrackBase {
             return {name: undefined, object: $e, dialog: dialogPresentationHandler, init: undefined}
 
         }
-
     }
+
+    /**
+     * Create a "group by" checkbox menu item, optionally initially checked
+     * TODO -- combine with colorByCB
+     * @param menuItem
+     * @param showCheck
+     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
+     */
+    groupByCB(menuItem, showCheck) {
+
+        const $e = $(createCheckbox(menuItem.label, showCheck))
+
+        if (menuItem.key !== 'tag') {
+
+            function clickHandler() {
+                if (menuItem.key === 'none') {
+                    this.groupBy = undefined
+                } else {
+                    this.groupBy = menuItem.key
+                }
+
+                const alignmentContainers = this.getCachedAlignmentContainers()
+                for (let ac of alignmentContainers) {
+                    ac.pack(this)
+                }
+                this.trackView.checkContentHeight()
+                this.trackView.repaintViews()
+            }
+
+            return {name: undefined, object: $e, click: clickHandler, init: undefined}
+        } else {
+
+            function dialogPresentationHandler(ev) {
+
+                let currentTag = ''
+                if (this.groupBy && this.groupBy.startsWith('tag:')) {
+                    currentTag = this.groupBy.substring(4)
+                }
+
+                this.browser.inputDialog.present({
+                    label: 'Tag Name',
+                    value: currentTag,
+                    callback: (tag) => {
+                        if (tag) {
+                            this.groupBy = 'tag:' + tag
+                        } else {
+                            this.alignmentTrack.groupBy = 'none'
+                        }
+                        const alignmentContainers = this.getCachedAlignmentContainers()
+                        for (let ac of alignmentContainers) {
+                            ac.pack(this)
+                        }
+                        this.trackView.checkContentHeight()
+                        this.trackView.repaintViews()
+                    }
+                }, ev)
+            }
+
+            return {name: undefined, object: $e, dialog: dialogPresentationHandler, init: undefined}
+
+        }
+    }
+
 
     /**
      * Return the current state of the track.  Used to create sessions and bookmarks.
@@ -868,12 +968,15 @@ class AlignmentTrack {
      */
     computePixelHeight(alignmentContainer) {
 
-        if (alignmentContainer.packedAlignmentRows) {
-            const h = alignmentContainer.hasDownsampledIntervals() ? downsampleRowHeight + alignmentStartGap : 0
+        if (alignmentContainer.packedGroups) {
+            let h = alignmentContainer.hasDownsampledIntervals() ? downsampleRowHeight + alignmentStartGap : 0
             const alignmentRowHeight = this.displayMode === "SQUISHED" ?
                 this.squishedRowHeight :
                 this.alignmentRowHeight
-            return h + (alignmentRowHeight * alignmentContainer.packedAlignmentRows.length) + 5
+            for (let group of alignmentContainer.packedGroups.values()) {
+                h += (alignmentRowHeight * group.length) + 10
+            }
+            return h + 5
         } else {
             return 0
         }
@@ -890,10 +993,6 @@ class AlignmentTrack {
         const showSoftClips = this.parent.showSoftClips
         const showAllBases = this.parent.showAllBases
         const nucleotideColors = this.browser.nucleotideColors
-
-        //alignmentContainer.repack(bpPerPixel, showSoftClips);
-        const packedAlignmentRows = alignmentContainer.packedAlignmentRows
-
 
         ctx.save()
 
@@ -933,50 +1032,89 @@ class AlignmentTrack {
             this.squishedRowHeight :
             this.alignmentRowHeight
 
-        if (packedAlignmentRows) {
+        const packedAlignmentGroups = alignmentContainer.packedGroups
 
-            const nRows = packedAlignmentRows.length
+        if (packedAlignmentGroups) {
 
-            for (let rowIndex = 0; rowIndex < nRows; rowIndex++) {
+            let alignmentY = alignmentRowYInset
+            for (let groupName of packedAlignmentGroups.keys()) {
 
-                const alignmentRow = packedAlignmentRows[rowIndex]
-                const alignmentY = alignmentRowYInset + (alignmentRowHeight * rowIndex)
-                const alignmentHeight = alignmentRowHeight <= 4 ? alignmentRowHeight : alignmentRowHeight - 2
+                const group = packedAlignmentGroups.get(groupName)
+                const packedAlignmentRows = group.rows
+                const nRows = packedAlignmentRows.length
+                group.pixelTop = alignmentY
 
-                if (alignmentY > pixelBottom) {
-                    break
-                } else if (alignmentY + alignmentHeight < pixelTop) {
-                    continue
-                }
+                for (let rowIndex = 0; rowIndex < nRows; rowIndex++) {
 
-                for (let alignment of alignmentRow.alignments) {
+                    const alignmentRow = packedAlignmentRows[rowIndex]
+                    const alignmentHeight = alignmentRowHeight <= 4 ? alignmentRowHeight : alignmentRowHeight - 2
 
-                    this.hasPairs = this.hasPairs || alignment.isPaired()
-                    if (this.browser.circularView) {
-                        // This is an expensive check, only do it if needed
-                        this.hasSupplemental = this.hasSupplemental || alignment.hasTag('SA')
-                    }
-
-                    if ((alignment.start + alignment.lengthOnRef) < bpStart) continue
-                    if (alignment.start > bpEnd) break
-                    if (true === alignment.hidden) {
+                    if (alignmentY > pixelBottom) {
+                        break
+                    } else if (alignmentY + alignmentHeight < pixelTop) {
+                        alignmentY += alignmentRowHeight
                         continue
                     }
 
-                    if (alignment instanceof PairedAlignment) {
+                    for (let alignment of alignmentRow.alignments) {
 
-                        drawPairConnector.call(this, alignment, alignmentY, alignmentHeight)
-
-                        drawSingleAlignment.call(this, alignment.firstAlignment, alignmentY, alignmentHeight)
-
-                        if (alignment.secondAlignment) {
-                            drawSingleAlignment.call(this, alignment.secondAlignment, alignmentY, alignmentHeight)
+                        this.hasPairs = this.hasPairs || alignment.isPaired()
+                        if (this.browser.circularView) {
+                            // This is an expensive check, only do it if needed
+                            this.hasSupplemental = this.hasSupplemental || alignment.hasTag('SA')
                         }
 
-                    } else {
-                        drawSingleAlignment.call(this, alignment, alignmentY, alignmentHeight)
-                    }
+                        if ((alignment.start + alignment.lengthOnRef) < bpStart) continue
+                        if (alignment.start > bpEnd) break
+                        if (true === alignment.hidden) {
+                            continue
+                        }
 
+                        if (alignment instanceof PairedAlignment) {
+
+                            drawPairConnector.call(this, alignment, alignmentY, alignmentHeight)
+
+                            drawSingleAlignment.call(this, alignment.firstAlignment, alignmentY, alignmentHeight)
+
+                            if (alignment.secondAlignment) {
+                                drawSingleAlignment.call(this, alignment.secondAlignment, alignmentY, alignmentHeight)
+                            }
+
+                        } else {
+                            drawSingleAlignment.call(this, alignment, alignmentY, alignmentHeight)
+                        }
+                    }
+                    alignmentY += alignmentRowHeight
+                }
+
+                group.pixelBottom = alignmentY
+
+                if (this.parent.groupBy) {
+
+                    ctx.save()
+                    ctx.font = '400 12px sans-serif'
+                    const textMetrics = ctx.measureText(groupName)
+                    const w = Math.max(textMetrics.width, 20)
+                    const x = -options.pixelXOffset + options.viewportWidth - w - 10
+                    const h = 12
+                    const baselineY = group.pixelTop + h - 1
+
+                    ctx.textAlign = "center"
+                    ctx.fillStyle = 'white'
+                    ctx.strokeStyle = 'black'
+                    ctx.beginPath()
+                    ctx.roundRect(x, baselineY - h + 2, w, h, 2)
+                    ctx.fill()
+                    ctx.stroke()
+
+                    ctx.fillStyle = 'black'
+                    ctx.fillText(groupName, x + w / 2, baselineY)
+
+                    IGVGraphics.dashedLine(ctx, 0, alignmentY, pixelWidth, alignmentY)
+
+                    ctx.restore()
+
+                    alignmentY += 10  // Group separator
                 }
             }
         }
@@ -1333,7 +1471,7 @@ class AlignmentTrack {
         }
         list.push('<b>Sort by...</b>')
         list.push({label: '&nbsp; base', click: () => sortByOption("BASE")})
-        list.push({label: '&nbsp; read strand', click: () => sortByOption("STRAND")})
+        list.push({label: '&nbsp; read strand', click: () => sortByOption("strand")})
         list.push({label: '&nbsp; start location', click: () => sortByOption("START")})
         list.push({label: '&nbsp; insert size', click: () => sortByOption("INSERT_SIZE")})
         list.push({label: '&nbsp; gap size', click: () => sortByOption("GAP_SIZE")})
@@ -1420,7 +1558,6 @@ class AlignmentTrack {
                         click: async () => {
                             const seq = clickedAlignment.seq //.map(b => String.fromCharCode(b)).join("");
                             try {
-                                //console.log(`seq: ${seq}`)
                                 await navigator.clipboard.writeText(seq)
                             } catch (e) {
                                 console.error(e)
@@ -1506,37 +1643,44 @@ class AlignmentTrack {
     getClickedObject(clickState) {
 
         const viewport = clickState.viewport
-        const y = clickState.y
-        const genomicLocation = clickState.genomicLocation
+        let features = viewport.cachedFeatures
+        if (!features) return
 
+        const y = clickState.y
+        const offsetY = y - this.top
+        const genomicLocation = clickState.genomicLocation
         const showSoftClips = this.parent.showSoftClips
 
-        let features = viewport.cachedFeatures
-        if (!features || features.length === 0) return
+        let minGroupY = Number.MAX_VALUE
+        for (let group of features.packedGroups.values()) {
+            minGroupY = Math.min(minGroupY, group.pixelTop)
+            if (offsetY > group.pixelTop && offsetY <= group.pixelBottom) {
 
-        let packedAlignmentRows = features.packedAlignmentRows
-        let downsampledIntervals = features.downsampledIntervals
-        const alignmentRowHeight = this.displayMode === "SQUISHED" ?
-            this.squishedRowHeight :
-            this.alignmentRowHeight
+                const alignmentRowHeight = this.displayMode === "SQUISHED" ?
+                    this.squishedRowHeight :
+                    this.alignmentRowHeight
 
-        let packedAlignmentsIndex = Math.floor((y - this.top - this.alignmentsYOffset) / alignmentRowHeight)
+                let packedAlignmentsIndex = Math.floor((offsetY - group.pixelTop) / alignmentRowHeight)
 
-        if (packedAlignmentsIndex < 0) {
-            for (let i = 0; i < downsampledIntervals.length; i++) {
-                if (downsampledIntervals[i].start <= genomicLocation && (downsampledIntervals[i].end >= genomicLocation)) {
-                    return downsampledIntervals[i]
+                if (packedAlignmentsIndex >= 0 && packedAlignmentsIndex < group.length) {
+                    const alignmentRow = group.rows[packedAlignmentsIndex]
+                    const clicked = alignmentRow.alignments.filter(alignment => alignment.containsLocation(genomicLocation, showSoftClips))
+                    if (clicked.length > 0) return clicked[0]
                 }
             }
-        } else if (packedAlignmentsIndex < packedAlignmentRows.length) {
-            const alignmentRow = packedAlignmentRows[packedAlignmentsIndex]
-            const clicked = alignmentRow.alignments.filter(alignment => alignment.containsLocation(genomicLocation, showSoftClips))
-            if (clicked.length > 0) return clicked[0]
         }
 
-        return undefined
+        // If we get here check downsampled intervals
+        if (offsetY < minGroupY && features.downsampledIntervals) {
+            for (const interval of features.downsampledIntervals) {
+                if (interval.start <= genomicLocation && interval.end >= genomicLocation) {
+                    return interval
+                }
+            }
+        }
 
-    };
+
+    }
 
     /**
      * Return the color for connectors in paired alignment view.   If explicitly set return that, otherwise return
@@ -1582,18 +1726,9 @@ class AlignmentTrack {
                 break
 
             case "firstOfPairStrand":
-
-                if (alignment instanceof PairedAlignment) {
-                    color = alignment.firstOfPairStrand() ? this.posStrandColor : this.negStrandColor
-                } else if (alignment.isPaired()) {
-
-                    if (alignment.isFirstOfPair()) {
-                        color = alignment.strand ? this.posStrandColor : this.negStrandColor
-                    } else if (alignment.isSecondOfPair()) {
-                        color = alignment.strand ? this.negStrandColor : this.posStrandColor
-                    } else {
-                        console.error("ERROR. Paired alignments are either first or second.")
-                    }
+                const s = alignment.firstOfPairStrand
+                if (s !== undefined) {
+                    color = s ? this.posStrandColor : this.negStrandColor
                 }
                 break
 
@@ -1701,42 +1836,6 @@ function shadedBaseColor(qual, baseColor) {
         baseColor = IGVColor.addAlpha(baseColor, alpha)
     }
     return baseColor
-}
-
-const orientationTypes = {
-
-    "fr": {
-        "F1R2": "LR",
-        "F2R1": "LR",
-        "F1F2": "LL",
-        "F2F1": "LL",
-        "R1R2": "RR",
-        "R2R1": "RR",
-        "R1F2": "RL",
-        "R2F1": "RL"
-    },
-
-    "rf": {
-        "R1F2": "LR",
-        "R2F1": "LR",
-        "R1R2": "LL",
-        "R2R1": "LL",
-        "F1F2": "RR",
-        "F2F1": "RR",
-        "F1R2": "RL",
-        "F2R1": "RL"
-    },
-
-    "ff": {
-        "F2F1": "LR",
-        "R1R2": "LR",
-        "F2R1": "LL",
-        "R1F2": "LL",
-        "R2F1": "RR",
-        "F1R2": "RR",
-        "R2R1": "RL",
-        "F1F2": "RL"
-    }
 }
 
 export function getChrColor(chr) {
