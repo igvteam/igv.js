@@ -1095,7 +1095,7 @@ class AlignmentTrack {
                     ctx.font = '400 12px sans-serif'
                     const textMetrics = ctx.measureText(groupName)
                     const w = Math.max(textMetrics.width, 20)
-                    const x = -options.pixelXOffset + options.viewportWidth - w - 10
+                    const x = -options.pixelShift +  options.viewportWidth - w - 10
                     const h = 12
                     const baselineY = group.pixelTop + h - 1
 

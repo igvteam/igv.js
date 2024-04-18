@@ -142,8 +142,8 @@ class TrackViewport extends Viewport {
             this.canvas._data &&
             this.canvas._data.referenceFrame.chr === this.referenceFrame.chr &&
             this.canvas._data.bpPerPixel === referenceFrame.bpPerPixel) {
-            const pixelOffset = Math.round((this.canvas._data.bpStart - referenceFrame.start) / referenceFrame.bpPerPixel)
-            this.canvas.style.left = pixelOffset + "px"
+            this.canvas._data.pixelShift = Math.round((this.canvas._data.bpStart - referenceFrame.start) / referenceFrame.bpPerPixel)
+            this.canvas.style.left = this.canvas._data.pixelShift + "px"
         }
     }
 
@@ -314,6 +314,7 @@ class TrackViewport extends Viewport {
                 bpStart,
                 bpEnd,
                 bpPerPixel,
+                pixelShift: pixelXOffset,              // Initial value, changes with track pan (drag)
                 windowFunction: this.windowFunction,
                 referenceFrame: this.referenceFrame,
                 selection: this.selection,
