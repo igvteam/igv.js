@@ -507,7 +507,7 @@ class TrackView {
             }
         }
 
-        const refreshView = (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler' || mergeAutocale)
+        const refreshView = (this.track.autoscale || this.track.autoscaleGroup || this.track.type === 'ruler' || mergeAutocale || this.track.groupBy)
         for (let vp of visibleViewports) {
             if (viewportsToRepaint.includes(vp)) {
                 vp.repaint()

@@ -67,8 +67,8 @@ class BAMTrack extends TrackBase {
         showMismatches: true,
         height: 300,
         coverageTrackHeight: 50,
-        colorBy: undefined,
-        groupBy: undefined
+        colorBy: "unexpectedPair",
+        groupBy: undefined,
     }
 
     constructor(config, browser) {
@@ -109,6 +109,10 @@ class BAMTrack extends TrackBase {
     setHighlightedReads(highlightedReads) {
         this.alignmentTrack.setHighlightedReads(highlightedReads)
         this.updateViews()
+    }
+
+    get expectedPairOrientation() {
+        return this.alignmentTrack.expectedPairOrientation
     }
 
     set height(h) {
@@ -297,7 +301,7 @@ class BAMTrack extends TrackBase {
         const tagLabel = 'tag' + (this.alignmentTrack.colorByTag ? ' (' + this.alignmentTrack.colorByTag + ')' : '')
         colorByMenuItems.push({key: 'tag', label: tagLabel})
         for (let item of colorByMenuItems) {
-            const selected = (this.alignmentTrack.colorBy === item.key)
+            const selected = (this.colorBy === item.key)
             menuItems.push(this.colorByCB(item, selected))
         }
 
@@ -316,7 +320,7 @@ class BAMTrack extends TrackBase {
         groupByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'})
         groupByMenuItems.push({key: 'chimeric', label: 'chimeric'})
         groupByMenuItems.push({key: 'supplementary', label: 'supplementary flag'})
-        //groupByMenuItems.push({key: 'readOrder', label: 'read order'})
+        groupByMenuItems.push({key: 'readOrder', label: 'read order'})
         //groupByMenuItems.push({key: 'phase', label: 'phase'})
         groupByMenuItems.push({key: 'tag', label: 'tag'})
 
@@ -487,7 +491,6 @@ class BAMTrack extends TrackBase {
         return menuItems
     }
 
-
     /**
      * Create a "color by" checkbox menu item, optionally initially checked
      * @param menuItem
@@ -502,10 +505,10 @@ class BAMTrack extends TrackBase {
 
             function clickHandler() {
                 if (menuItem.key === this.alignmentTrack.colorBy) {
-                    this.alignmentTrack.colorBy = 'none'
+                    this.colorBy = 'none'
                     this.config.colorBy = 'none'
                 } else {
-                    this.alignmentTrack.colorBy = menuItem.key
+                    this.colorBy = menuItem.key
                     this.config.colorBy = menuItem.key
                 }
                 this.trackView.repaintViews()
@@ -521,7 +524,7 @@ class BAMTrack extends TrackBase {
                     value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
                     callback: (tag) => {
                         if (tag) {
-                            this.alignmentTrack.colorBy = 'tag'
+                            this.colorBy = 'tag'
                             this.alignmentTrack.colorByTag = tag
                             if (!this.alignmentTrack.tagColors) {
                                 this.alignmentTrack.tagColors = new PaletteColorTable("Set1")
@@ -912,7 +915,7 @@ class AlignmentTrack {
         this.smallTLENColor = config.smallTLENColor || config.smallFragmentLengthColor || "rgb(0, 0, 150)"
         this.largeTLENColor = config.largeTLENColor || config.largeFragmentLengthColor || "rgb(200, 0, 0)"
 
-        this.pairOrientation = config.pairOrienation || 'fr'
+        this.expectedPairOrientation = config.expectedPairOrientation || config.pairOrienation || 'fr'
         this.pairColors = {}
         this.pairColors["RL"] = config.rlColor || "rgb(0, 150, 0)"
         this.pairColors["RR"] = config.rrColor || "rgb(20, 50, 200)"
@@ -1095,13 +1098,13 @@ class AlignmentTrack {
                     ctx.font = '400 12px sans-serif'
                     const textMetrics = ctx.measureText(groupName)
                     const w = Math.max(textMetrics.width, 20)
-                    const x = -options.pixelXOffset + options.viewportWidth - w - 10
+                    const x = -options.pixelShift +  options.viewportWidth - w - 10
                     const h = 12
-                    const baselineY = group.pixelTop + h - 1
+                    const baselineY = Math.min(group.pixelTop + h - 1 , group.pixelBottom)
 
                     ctx.textAlign = "center"
                     ctx.fillStyle = 'white'
-                    ctx.strokeStyle = 'black'
+                    ctx.strokeStyle = 'lightGray'
                     ctx.beginPath()
                     ctx.roundRect(x, baselineY - h + 2, w, h, 2)
                     ctx.fill()
@@ -1735,8 +1738,8 @@ class AlignmentTrack {
             case "unexpectedPair":
             case "pairOrientation":
 
-                if (this.pairOrientation && alignment.pairOrientation) {
-                    const oTypes = orientationTypes[this.pairOrientation]
+                if (alignment.pairOrientation) {
+                    const oTypes = orientationTypes[this.expectedPairOrientation]
                     if (oTypes) {
                         const pairColor = this.pairColors[oTypes[alignment.pairOrientation]]
                         if (pairColor) {
