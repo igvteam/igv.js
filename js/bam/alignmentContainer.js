@@ -27,6 +27,7 @@ import PairedAlignment from "./pairedAlignment.js"
 import BaseModificationCounts from "./mods/baseModificationCounts.js"
 import BamAlignmentRow from "./bamAlignmentRow.js"
 import orientationTypes from "./orientationTypes.js"
+import {isNumber} from "../util/igvUtils.js"
 
 const alignmentSpace = 2
 
@@ -79,7 +80,7 @@ class AlignmentContainer {
         this.currentBucket = new DownsampleBucket(this.start, this.start + this.samplingWindowSize, this)
     }
 
-    pack({viewAsPairs, showSoftClips, groupBy}) {
+    pack({viewAsPairs, showSoftClips, expectedPairOrientation, groupBy}) {
 
         let alignments = this.allAlignments()
         if (viewAsPairs) {
@@ -87,7 +88,7 @@ class AlignmentContainer {
         } else {
             alignments = unpairAlignments(alignments)
         }
-        this.packedGroups = packAlignmentRows(alignments, showSoftClips, groupBy)
+        this.packedGroups = packAlignmentRows(alignments, showSoftClips, expectedPairOrientation, groupBy)
         if (this.alignments) {
             delete this.alignments
         }
@@ -164,7 +165,7 @@ class AlignmentContainer {
         if (this.alignments) {
             return this.alignments
         } else {
-            return Array.from(this.packedGroups.values()).flatMap(group => group.rows.flatMap(row => row.alignments));
+            return Array.from(this.packedGroups.values()).flatMap(group => group.rows.flatMap(row => row.alignments))
         }
     }
 
@@ -532,6 +533,11 @@ class Group {
     pixelBottom = 0
     rows = []
 
+
+    constructor(name) {
+        this.name = this.name
+    }
+
     push(row) {
         this.rows.push(row)
     }
@@ -580,7 +586,7 @@ function unpairAlignments(alignments) {
         [alignment])
 }
 
-function packAlignmentRows(alignments, showSoftClips, groupBy) {
+function packAlignmentRows(alignments, showSoftClips, expectedPairOrientation, groupBy) {
 
     if (!alignments || alignments.length === 0) {
         return new Map()
@@ -595,7 +601,7 @@ function packAlignmentRows(alignments, showSoftClips, groupBy) {
                 groupBy = "tag"
             }
             for (let a of alignments) {
-                const group = getGroupValue(a, groupBy, tag) || ""
+                const group = getGroupValue(a, groupBy, tag, expectedPairOrientation) || ""
                 if (!groupedAlignments.has(group)) {
                     groupedAlignments.set(group, [])
                 }
@@ -606,7 +612,8 @@ function packAlignmentRows(alignments, showSoftClips, groupBy) {
         }
 
         const packed = new Map()
-        const orderedGroupNames = Array.from(groupedAlignments.keys()).sort()
+        const orderedGroupNames = Array.from(groupedAlignments.keys()).sort("pairOrientation" === groupBy ?
+            pairOrientationComparator(expectedPairOrientation) : groupNameComparator)
         for (let groupName of orderedGroupNames) {
 
             let alignments = groupedAlignments.get(groupName)
@@ -615,7 +622,7 @@ function packAlignmentRows(alignments, showSoftClips, groupBy) {
                 return showSoftClips ? a.scStart - b.scStart : a.start - b.start
             })
 
-            const group = new Group()
+            const group = new Group(groupName)
             packed.set(groupName, group)
             let alignmentRow
             let nextStart = 0
@@ -669,7 +676,7 @@ function binarySearch(array, pred, min) {
     return hi
 }
 
-function getGroupValue(al, groupBy, tag) {
+function getGroupValue(al, groupBy, tag, expectedPairOrientation) {
 
     switch (groupBy) {
         // case 'HAPLOTYPE':
@@ -680,17 +687,17 @@ function getGroupValue(al, groupBy, tag) {
             const strand = al.firstOfPairStrand
             return strand === undefined ? "" : strand ? '+' : '-'
         case 'mateChr':
-            return (al.mate && al.isMateMapped())  ? al.mate.chr : ""
+            return (al.mate && al.isMateMapped()) ? al.mate.chr : ""
         case 'pairOrientation':
-            return al.pairOrientation || ""
+            return orientationTypes[expectedPairOrientation][al.pairOrientation] || ""
         case 'chimeric':
             return al.tags()['SA'] ? "chimeric" : ""
         case 'supplementary':
             return al.isSupplementary ? "supplementary" : ""
         case 'readOrder':
-            if(al.isPaired() && al.isFirstOfPair()) {
+            if (al.isPaired() && al.isFirstOfPair()) {
                 return "first"
-            } else if(al.isPaired() && al.isSecondOfPair()) {
+            } else if (al.isPaired() && al.isSecondOfPair()) {
                 return "second"
             } else {
                 return ""
@@ -703,61 +710,35 @@ function getGroupValue(al, groupBy, tag) {
         default:
             return undefined
     }
-
-    /*
-
-    getGroupValue({option, tag}) {
-        switch (option) {
-
-            case "strand":
-                return this.isNegativeStrand() ? '-' : '+'
-            case "firstOfPairStrand":
-                return this.firstOfPairStrand ? '+' : '-'
-            // case 'SAMPLE':
-            //     return this.getSample();
-            // case 'LIBRARY':
-            //     return this.getLibrary();
-            case 'READ_GROUP':
-                return this.tags()["RG"]
+}
 
 
-            case "MATE_CHROMOSOME":
-                return this.mate ? this.mate.chr : undefined
-
-
-            case "START":
-                return this.start
-            case "INSERT_SIZE":
-                return this.fragmentLength
-            case "MQ":
-                return this.mq
-            case "ALIGNED_READ_LENGTH":
-                return this.lengthOnRef
-            case "TAG": {
-                return this.tags()[tag]
+function groupNameComparator(o1, o2) {
+    if (!o1 && !o2) {
+        return 0
+    } else if (!o1) {
+        return 1
+    } else if (!o2) {
+        return -1
+    } else {
+        // no nulls
+        if (o1 === o2) {
+            return 0
+        } else {
+            if (isNumber(o1) && typeof isNumber(o2)) {
+                return Number.parseFloat(o1) - Number.parseFloat(o2)
+            } else {
+                let s1 = o1.toString()
+                let s2 = o2.toString()
+                return s1.localeCompare(s2, undefined, {sensitivity: 'base'})
             }
-            case 'PHASE':
-                return this.tags()["HP"]
-            case 'READ_ORDER':
-                if (this.isPaired() && this.isFirstOfPair()) {
-                    return "FIRST"
-                } else if (this.isPaired() && this.isSecondOfPair()) {
-                    return "SECOND"
-                } else {
-                    return
-                }
-
-
-
-            // case 'LINKED':
-            //     return (al instanceof LinkedAlignment) ? "Linked" : "";
-
-
-            default:
-                return
         }
     }
-     */
+}
+
+function pairOrientationComparator(expectedPairOrientation) {
+    const orientationValues = ['LL', 'RR', 'RL', 'LR', '']
+    return (o1, o2) => orientationValues.indexOf(o1) - orientationValues.indexOf(o2);
 }
 
 
