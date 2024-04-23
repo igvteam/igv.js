@@ -175,39 +175,10 @@ class AlignmentContainer {
 
     sortRows(options) {
 
-        for (let key of this.packedGroups.keys()) {
-
-            const newRows = []
-            const undefinedRow = []
-            for (let row of this.packedGroups.get(key)) {
-                const alignment = row.findAlignment(options.position, options.sortAsPairs)
-                if (undefined !== alignment) {
-                    newRows.push(row)
-                } else {
-                    undefinedRow.push(row)
-                }
-            }
-
-            newRows.sort((rowA, rowB) => {
-                const direction = options.direction
-                const rowAValue = rowA.getSortValue(options, this)
-                const rowBValue = rowB.getSortValue(options, this)
-
-                if (rowBValue === undefined && rowBValue !== undefined) return 1
-                else if (rowAValue !== undefined && rowBValue === undefined) return -1
-
-                const i = rowAValue > rowBValue ? 1 : (rowAValue < rowBValue ? -1 : 0)
-                return true === direction ? i : -i
-            })
-
-            for (let row of undefinedRow) {
-                newRows.push(row)
-            }
-
-            this.packedGroups.set(key, newRows)
+        for (let group of this.packedGroups.values()) {
+            group.sortRows(options, this)
         }
     }
-
 }
 
 
@@ -546,6 +517,40 @@ class Group {
         return this.rows.length
     }
 
+    sortRows(options, alignmentContainer) {
+
+        const newRows = []
+        const undefinedRow = []
+        for (let row of this.rows) {
+            const alignment = row.findAlignment(options.position, options.sortAsPairs)
+            if (undefined !== alignment) {
+                newRows.push(row)
+            } else {
+                undefinedRow.push(row)
+            }
+        }
+
+
+        newRows.sort((rowA, rowB) => {
+            const direction = options.direction
+            const rowAValue = rowA.getSortValue(options, alignmentContainer)
+            const rowBValue = rowB.getSortValue(options, alignmentContainer)
+
+            if (rowBValue === undefined && rowBValue !== undefined) return 1
+            else if (rowAValue !== undefined && rowBValue === undefined) return -1
+
+            const i = rowAValue > rowBValue ? 1 : (rowAValue < rowBValue ? -1 : 0)
+            return true === direction ? i : -i
+        })
+
+        for (let row of undefinedRow) {
+            newRows.push(row)
+        }
+
+        this.rows = newRows
+
+    }
+
 }
 
 
@@ -738,7 +743,7 @@ function groupNameComparator(o1, o2) {
 
 function pairOrientationComparator(expectedPairOrientation) {
     const orientationValues = ['LL', 'RR', 'RL', 'LR', '']
-    return (o1, o2) => orientationValues.indexOf(o1) - orientationValues.indexOf(o2);
+    return (o1, o2) => orientationValues.indexOf(o1) - orientationValues.indexOf(o2)
 }
 
 
