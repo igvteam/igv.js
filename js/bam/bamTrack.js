@@ -506,6 +506,10 @@ class BAMTrack extends TrackBase {
         }
     }
 
+    get groupBy() {
+        return this.alignmentTrack.groupBy
+    }
+
     /**
      * Create a "group by" checkbox menu item, optionally initially checked
      * TODO -- combine with colorByCB
