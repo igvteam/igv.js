@@ -120,7 +120,7 @@ suite("test getState()", function () {
 
         // Change some properties and assert that they are recorded in "state"
         track.showCoverage = false
-        track.viewAsPairs = true
+        track.alignmentTrack.viewAsPairs = true
         const state = track.getState()
         assert.equal(state.showCoverage, false)
         assert.equal(state.viewAsPairs, true)

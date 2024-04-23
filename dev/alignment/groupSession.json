@@ -1,0 +1,42 @@
+{
+  "version": "2.16.0",
+  "showSampleNames": false,
+  "reference": {
+    "id": "hg19",
+    "name": "Human (GRCh37/hg19)",
+    "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
+    "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
+    "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
+    "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+    "chromosomeOrder": "chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY"
+  },
+  "locus": "chr1:155,159,012-155,164,131",
+  "roi": [],
+  "tracks": [
+    {
+      "type": "sequence",
+      "order": -9007199254740991
+    },
+    {
+      "type": "alignment",
+      "url": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam",
+      "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam.bai",
+      "name": "NA12878",
+      "format": "bam",
+      "order": 1,
+      "colorBy": "pairOrientation",
+      "groupBy": "mateChr"
+    },
+    {
+      "name": "Refseq Genes",
+      "format": "refgene",
+      "id": "hg19_genes",
+      "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz",
+      "indexed": false,
+      "order": 1000000,
+      "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+      "type": "annotation",
+      "height": 70
+    }
+  ]
+}
