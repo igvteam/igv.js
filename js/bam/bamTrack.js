@@ -504,12 +504,10 @@ class BAMTrack extends TrackBase {
         if (menuItem.key !== 'tag') {
 
             function clickHandler() {
-                if (menuItem.key === this.alignmentTrack.colorBy) {
+                if (menuItem.key === this.colorBy) {
                     this.colorBy = 'none'
-                    this.config.colorBy = 'none'
                 } else {
                     this.colorBy = menuItem.key
-                    this.config.colorBy = menuItem.key
                 }
                 this.trackView.repaintViews()
             }
@@ -525,13 +523,13 @@ class BAMTrack extends TrackBase {
                     callback: (tag) => {
                         if (tag) {
                             this.colorBy = 'tag'
-                            this.alignmentTrack.colorByTag = tag
+                            this.colorByTag = tag
                             if (!this.alignmentTrack.tagColors) {
                                 this.alignmentTrack.tagColors = new PaletteColorTable("Set1")
                             }
                         } else {
-                            this.alignmentTrack.colorBy = 'none'
-                            this.alignmentTrack.colorByTag = ''
+                            this.colorBy = 'none'
+                            this.colorByTag = undefined
                         }
                         this.trackView.repaintViews()
                     }
@@ -921,8 +919,6 @@ class AlignmentTrack {
         this.pairColors["RR"] = config.rrColor || "rgb(20, 50, 200)"
         this.pairColors["LL"] = config.llColor || "rgb(0, 150, 150)"
 
-        this.colorBy = config.colorBy || "unexpectedPair"
-        this.colorByTag = config.colorByTag ? config.colorByTag.toUpperCase() : undefined
         this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag
 
         this.hideSmallIndels = config.hideSmallIndels
