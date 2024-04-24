@@ -269,21 +269,21 @@ class PaletteColorTable {
     constructor(palette) {
         this.colors = colorPalettes[palette]
         if (!Array.isArray(this.colors)) this.colors = []
-        this.colorTable = {}
+        this.colorTable = new Map()
         this.nextIdx = 0
         this.colorGenerator = new RandomColorGenerator()
     }
 
     getColor(key) {
-        if (!this.colorTable.hasOwnProperty(key)) {
+        if (!this.colorTable.has(key)) {
             if (this.nextIdx < this.colors.length) {
-                this.colorTable[key] = this.colors[this.nextIdx]
+                this.colorTable.set(key, this.colors[this.nextIdx])
             } else {
-                this.colorTable[key] = this.colorGenerator.get()
+                this.colorTable.set(key, this.colorGenerator.get())
             }
             this.nextIdx++
         }
-        return this.colorTable[key]
+        return this.colorTable.get(key)
     }
 }
 

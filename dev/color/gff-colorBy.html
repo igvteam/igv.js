@@ -14,6 +14,7 @@
 
         <div>
             <button id="sessionButton">Save Session</button>
+            <button id="log-state">Log Session</button>
         </div>
 
         <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
@@ -133,6 +134,7 @@
 
             igv.createBrowser(igvDiv, options)
                 .then(function (browser) {
+                    document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
                     document.getElementById("sessionButton").addEventListener("click", () => {
                         try {
                             const json = browser.toJSON()
