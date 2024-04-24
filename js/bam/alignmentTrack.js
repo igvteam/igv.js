@@ -54,7 +54,7 @@ class AlignmentTrack extends TrackBase {
         highlightColor: undefined,
         minTLEN: undefined,
         maxTLEN: undefined,
-        tagColorPallete: "Set1"
+        tagColorPallete: "Pastel2"
     }
 
 
