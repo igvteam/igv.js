@@ -65,6 +65,7 @@ import {trackViewportPopoverList} from './trackViewport.js'
 import TrackBase from "./trackBase.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
 import {loadGenbank} from "./gbk/genbankParser.js"
+import igvCss from "./embedCss.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -91,7 +92,14 @@ class Browser {
         this.parent = parentDiv
 
         this.root = DOMUtils.div({class: 'igv-container'})
-        parentDiv.appendChild(this.root)
+
+
+        const shadow = parentDiv.attachShadow({mode: "open"})
+        shadow.appendChild(this.root)
+
+        const sheet = new CSSStyleSheet()
+        sheet.replaceSync(igvCss)
+        shadow.adoptedStyleSheets = [sheet]
 
         // spinner
         this.spinner = DOMUtils.div({class: 'igv-loading-spinner-container'})
@@ -739,8 +747,8 @@ class Browser {
 
         this.removeAllTracks()   // Do this first, before new genome is set
 
-        let genome;
-        if(genomeConfig.gbkURL) {
+        let genome
+        if (genomeConfig.gbkURL) {
             genome = await loadGenbank(genomeConfig.gbkURL)
         } else {
             genome = await Genome.createGenome(genomeConfig, this)
@@ -811,11 +819,11 @@ class Browser {
     async loadGenome(idOrConfig) {
 
         // Translate the generic "url" field, used by clients such as igv-webapp
-        if(idOrConfig.url) {
+        if (idOrConfig.url) {
             if (StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
                 idOrConfig.hubURL = idOrConfig.url
                 delete idOrConfig.url
-            } else if("gbk" === getFileExtension(idOrConfig.url)) {
+            } else if ("gbk" === getFileExtension(idOrConfig.url)) {
                 idOrConfig.gbkURL = idOrConfig.url
                 delete idOrConfig.url
             }
@@ -836,8 +844,8 @@ class Browser {
         await this.loadReference(genomeConfig)
 
         let tracks
-        if(genomeConfig.gbkURL || "gbk" === genomeConfig.format) {
-            tracks = [ {
+        if (genomeConfig.gbkURL || "gbk" === genomeConfig.format) {
+            tracks = [{
                 name: "Annotations",
                 format: "gbk",
                 url: genomeConfig.gbkURL
