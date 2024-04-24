@@ -16,8 +16,6 @@ import Browser from "./browser.js"
 
 const setApiKey = igvxhr.setApiKey
 
-embedCss()
-
 function setGoogleOauthToken(accessToken) {
     return igvxhr.setOauthToken(accessToken)
 }
