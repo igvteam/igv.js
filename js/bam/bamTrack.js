@@ -280,9 +280,11 @@ class BAMTrack extends TrackBase {
         const groupByMenuItems = []
         groupByMenuItems.push({key: 'none', label: 'none'})
         groupByMenuItems.push({key: 'strand', label: 'read strand'})
-        groupByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'})
-        groupByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'})
-        groupByMenuItems.push({key: 'mateChr', label: 'chromosome of mate'})
+        if (this.alignmentTrack.hasPairs) {
+            groupByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'})
+            groupByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'})
+            groupByMenuItems.push({key: 'mateChr', label: 'chromosome of mate'})
+        }
         groupByMenuItems.push({key: 'chimeric', label: 'chimeric'})
         groupByMenuItems.push({key: 'supplementary', label: 'supplementary flag'})
         groupByMenuItems.push({key: 'readOrder', label: 'read order'})
@@ -487,14 +489,12 @@ class BAMTrack extends TrackBase {
                     value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
                     callback: (tag) => {
                         if (tag) {
-                            this.alignmentTrack.colorBy = 'tag'
-                            this.colorByTag = tag
+                            this.alignmentTrack.colorBy = 'tag:' + tag
                             if (!this.alignmentTrack.tagColors) {
                                 this.alignmentTrack.tagColors = new PaletteColorTable("Set1")
                             }
                         } else {
-                            this.alignmentTrack.colorBy = 'none'
-                            this.colorByTag = undefined
+                            this.alignmentTrack.colorBy = undefined
                         }
                         this.trackView.repaintViews()
                     }
