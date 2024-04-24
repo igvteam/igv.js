@@ -6,7 +6,7 @@ import {isSecureContext} from "../util/igvUtils.js"
 import {createBlatTrack, maxSequenceSize} from "../blat/blatTrack.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"
 import orientationTypes from "./orientationTypes.js"
-import {PaletteColorTable} from "../util/colorPalletes.js"
+import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {getChrColor} from "./bamTrack.js"
 import TrackBase from "../trackBase.js"
 
@@ -53,13 +53,19 @@ class AlignmentTrack extends TrackBase {
         indelSizeThreshold: 1,
         highlightColor: undefined,
         minTLEN: undefined,
-        maxTLEN: undefined
+        maxTLEN: undefined,
+        tagColorPallete: "Set1"
     }
 
 
     constructor(config, parent) {
 
         super(config, parent.browser)
+
+        // Explicit color table for tags
+        if(config.tagColorTable) {
+            this.tagColors = new ColorTable(config.tagColorTable)
+        }
 
         // Backward compatibility overrides
         if (config.largeFragmentLengthColor) this.largeTLENColor = config.largeFragmentLengthColor
@@ -68,6 +74,7 @@ class AlignmentTrack extends TrackBase {
         if (config.largeFragmentLengthColor) this.largeTLENColor = config.largeFragmentLengthColor
         if (config.minFragmentLength) this.minTLEN = config.minFragmentLength
         if (config.maxFragmentLength) this.maxTLEN = config.maxFragmentLength
+        if (config.colorBy && config.colorByTag) this.colorBy = config.colorBy + ":" + config.colorByTag
 
 
         this.parent = parent
@@ -875,8 +882,13 @@ class AlignmentTrack extends TrackBase {
         } else {
             color = DEFAULT_ALIGNMENT_COLOR
         }
-        const option = this.colorBy
-        switch (option) {
+        let colorBy = this.colorBy
+        let tag
+        if (colorBy.startsWith("tag:")) {
+            tag = colorBy.substring(4)
+            colorBy = "tag"
+        }
+        switch (colorBy) {
             case "strand":
                 color = alignment.strand ? this.posStrandColor : this.negStrandColor
                 break
@@ -901,7 +913,7 @@ class AlignmentTrack extends TrackBase {
                         }
                     }
                 }
-                if ("pairOrientation" === option) {
+                if ("pairOrientation" === colorBy) {
                     break
                 }
 
@@ -920,15 +932,14 @@ class AlignmentTrack extends TrackBase {
                 break
 
             case "tag":
-                const tagValue = alignment.tags()[this.colorByTag]
+                const tagValue = alignment.tags()[tag]
                 if (tagValue !== undefined) {
                     if (this.bamColorTag === this.colorByTag) {
                         // UCSC style color option
                         color = "rgb(" + tagValue + ")"
                     } else {
-
                         if (!this.tagColors) {
-                            this.tagColors = new PaletteColorTable("Set1")
+                            this.tagColors = new PaletteColorTable(this.tagColorPallete)
                         }
                         color = this.tagColors.getColor(tagValue)
                     }
@@ -951,7 +962,7 @@ class AlignmentTrack extends TrackBase {
     }
 
     get maxTemplateLength() {
-        return (this.maxTLEN !== undefined) ? this.  maxTLEN :
+        return (this.maxTLEN !== undefined) ? this.maxTLEN :
             this.parent._pairedEndStats ? this.parent._pairedEndStats.maxTLEN : 1000
     }
 
