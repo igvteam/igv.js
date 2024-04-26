@@ -1,21 +1,21 @@
-// Represents a BAM index.
-// Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
+// Represents a BAM or Tabix index.
 
 import BinaryParser from "../binary.js"
+import {optimizeChunks} from "./indexUtils.js"
 
 const BAI_MAGIC = 21578050
 const TABIX_MAGIC = 21578324
-const MB = 1000000
 
-async function parseBamIndex(arrayBuffer, genome) {
+
+async function parseBamIndex(arrayBuffer) {
     const index = new BamIndex()
-    await index.parse(arrayBuffer, false, genome)
+    await index.parse(arrayBuffer, false)
     return index
 }
 
-async function parseTabixIndex(arrayBuffer, genome) {
+async function parseTabixIndex(arrayBuffer) {
     const index = new BamIndex()
-    await index.parse(arrayBuffer, true, genome)
+    await index.parse(arrayBuffer, true)
     return index
 }
 
@@ -25,7 +25,7 @@ class BamIndex {
 
     }
 
-    async parse(arrayBuffer, tabix, genome) {
+    async parse(arrayBuffer, tabix) {
 
         const indices = []
         let blockMin = Number.MAX_SAFE_INTEGER
@@ -50,10 +50,6 @@ class BamIndex {
 
                 for (let i = 0; i < nref; i++) {
                     let seq_name = parser.getString()
-                    // Translate to "official" chr name.
-                    if (genome) {
-                        seq_name = genome.getChromosomeName(seq_name)
-                    }
                     sequenceIndexMap[seq_name] = i
                     seqNames[i] = seq_name
                 }
@@ -124,19 +120,19 @@ class BamIndex {
 
     }
 
-    get chromosomeNames() {
+    get sequenceNames() {
         return Object.keys(this.sequenceIndexMap)
     }
 
     /**
-     * Fetch blocks for a particular genomic range.  This method is public so it can be unit-tested.
+     * Fetch chunks for a particular genomic range.  This method is public so it can be unit-tested.
      *
      * @param refId  the sequence dictionary index of the chromosome
      * @param min  genomic start position
      * @param max  genomic end position
-     * @param return an array of {minv: {filePointer, offset}, {maxv: {filePointer, offset}}
+     * @param return an array of objects representing chunks (file spans) {minv: {block, offset}, {maxv: {block, offset}}
      */
-    blocksForRange(refId, min, max) {
+    chunksForRange(refId, min, max) {
 
         const bam = this
         const ba = bam.indices[refId]
@@ -145,18 +141,22 @@ class BamIndex {
             return []
         } else {
             const overlappingBins = reg2bins(min, max)        // List of bin #s that overlap min, max
-            const chunks = []
 
+            //console.log("bin ranges")
+            //for(let b of overlappingBins) {
+            //    console.log(`${b[0]} - ${b[1]}`)
+            //}
+
+            const chunks = []
             // Find chunks in overlapping bins.  Leaf bins (< 4681) are not pruned
             for (let binRange of overlappingBins) {
                 for (let bin = binRange[0]; bin <= binRange[1]; bin++) {
                     if (ba.binIndex[bin]) {
-                        const binChunks = ba.binIndex[bin],
-                            nchnk = binChunks.length
-                        for (let c = 0; c < nchnk; ++c) {
-                            const cs = binChunks[c][0]
-                            const ce = binChunks[c][1]
-                            chunks.push({minv: cs, maxv: ce, bin: bin})
+                        const binChunks = ba.binIndex[bin]
+                        for (let c of binChunks) {
+                            const cs = c[0]
+                            const ce = c[1]
+                            chunks.push({minv: cs, maxv: ce})
                         }
                     }
                 }
@@ -164,16 +164,15 @@ class BamIndex {
 
             // Use the linear index to find minimum file position of chunks that could contain alignments in the region
             const nintv = ba.linearIndex.length
-            let lowest = null
-            const minLin = Math.min(min >> 14, nintv - 1)
+
+            let lowest
+            const minLin = Math.min(min >> 14, nintv - 1)    // i.e. min / 16384
             const maxLin = Math.min(max >> 14, nintv - 1)
-            for (let i = minLin; i <= maxLin; ++i) {
+            for (let i = minLin; i <= maxLin; i++) {
                 const vp = ba.linearIndex[i]
                 if (vp) {
-                    // todo -- I think, but am not sure, that the values in the linear index have to be in increasing order.  So the first non-null should be minimum
-                    if (!lowest || vp.isLessThan(lowest)) {
-                        lowest = vp
-                    }
+                    lowest = vp       // lowest file offset that contains alignments overlapping (min, max)
+                    break
                 }
             }
 
@@ -182,58 +181,7 @@ class BamIndex {
     }
 }
 
-function optimizeChunks(chunks, lowest) {
 
-    const mergedChunks = []
-    let lastChunk = null
-
-    if (chunks.length === 0) return chunks
-
-    chunks.sort(function (c0, c1) {
-        const dif = c0.minv.block - c1.minv.block
-        if (dif !== 0) {
-            return dif
-        } else {
-            return c0.minv.offset - c1.minv.offset
-        }
-    })
-
-    chunks.forEach(function (chunk) {
-
-        if (!lowest || chunk.maxv.isGreaterThan(lowest)) {
-            if (lastChunk === null) {
-                mergedChunks.push(chunk)
-                lastChunk = chunk
-            } else {
-                if (canMerge(lastChunk, chunk)) {
-                    if (chunk.maxv.isGreaterThan(lastChunk.maxv)) {
-                        lastChunk.maxv = chunk.maxv
-                    }
-                } else {
-                    mergedChunks.push(chunk)
-                    lastChunk = chunk
-                }
-            }
-        } else {
-            //console.log(`skipping chunk ${chunk.minv.block} - ${chunk.maxv.block}`)
-        }
-    })
-
-    return mergedChunks
-}
-
-
-/**
- * Merge 2 blocks if the gap between them is < 1kb and the total resulting size < 100mb
- * @param chunk1
- * @param chunk2
- * @returns {boolean|boolean}
- */
-function canMerge(chunk1, chunk2) {
-    const gap = chunk2.minv.block - chunk1.maxv.block
-    const total = chunk2.maxv.block - chunk1.minv.block
-    return gap < 30000 && total < 10 * MB
-}
 
 /**
  * Calculate the list of bins that overlap with region [beg, end]

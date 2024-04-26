@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config =
+        {
+            locus: "myc",
+            reference: {
+                id: "hg38",
+                "ucscID": "hg38",
+                "name": "Human (hg38)",
+                "fastaURL": "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+                "indexURL": "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
+                "cytobandURL": "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/cytoBandIdeo.txt.gz",
+                "aliasURL": "https://hgdownload.cse.ucsc.edu/goldenPath/hg38/database/chromAlias.txt.gz",
+                "chromSizes": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+                "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+                "tracks": [
+                    {
+                        "name": "Refseq Genes",
+                        "format": "refgene",
+                        "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz",
+                        "indexed": false,
+                        "removable": false,
+                        "order": 1000000,
+                        "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$"
+                    }
+                ],
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+            }
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+        .then(browser => {
+
+        })
+
+
+</script>
+
+</body>
+
+</html>

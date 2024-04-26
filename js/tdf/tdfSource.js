@@ -29,13 +29,14 @@ import GenomicInterval from "../genome/genomicInterval.js"
 
 class TDFSource {
 
+    searchable = false
     constructor(config, genome) {
         this.genome = genome
-        this.windowFunction = config.windowFunction || "mean"
         this.reader = new TDFReader(config, genome)
+        this.queryable = true
     }
 
-    async getFeatures({chr, start, end, bpPerPixel}) {
+    async getFeatures({chr, start, end, bpPerPixel, windowFunction = "mean"}) {
 
         if (chr.toLowerCase() === "all") {
             const wgFeatures = []
@@ -45,7 +46,7 @@ class TDFSource {
                 for (let c of genome.wgChromosomeNames) {
                     const len = genome.getChromosome(c).bpLength
                     bpPerPixel = len / 1000
-                    const chrFeatures = await this._getFeatures(c, 0, len, bpPerPixel)
+                    const chrFeatures = await this._getFeatures(c, 0, len, bpPerPixel, windowFunction)
                     if (chrFeatures) {
                         for (let f of chrFeatures) {
                             const wg = Object.assign({}, f)
@@ -61,11 +62,10 @@ class TDFSource {
             return wgFeatures
 
         } else {
-            return this._getFeatures(chr, start, end, bpPerPixel)
+            return this._getFeatures(chr, start, end, bpPerPixel, windowFunction)
         }
     }
-
-    async _getFeatures(chr, start, end, bpPerPixel) {
+    async _getFeatures(chr, start, end, bpPerPixel, windowFunction) {
         const genomicInterval = new GenomicInterval(chr, start, end)
         const genome = this.genome
 
@@ -87,7 +87,7 @@ class TDFSource {
         if (queryChr === undefined) queryChr = chr
         if (maxZoom === undefined) maxZoom = -1
 
-        const wf = zoom > maxZoom ? "raw" : this.windowFunction
+        const wf = zoom > maxZoom ? "raw" : windowFunction
         const dataset = await this.reader.readDataset(queryChr, wf, zoom)
         if (dataset == null) {
             return []
@@ -123,6 +123,10 @@ class TDFSource {
 
     get supportsWholeGenome() {
         return true
+    }
+
+    get windowFunctions() {
+        return this.reader.windowFunctions
     }
 }
 
@@ -195,7 +199,7 @@ var log2 = Math.log(2)
 
 function zoomLevelForScale(chr, bpPerPixel, genome) {
 
-    // Convert bpPerPixel to IGV "zoom" level.   This is a bit convoluted,  IGV computes zoom levels assuming
+    // Convert bpPerPixel to IGV "zoom" level.   This is a bit convoluted,  TDF is computed zoom levels assuming
     // display in a 700 pixel window.  The fully zoomed out view of a chromosome is zoom level "0".
     // Zoom level 1 is magnified 2X,  and so forth
 

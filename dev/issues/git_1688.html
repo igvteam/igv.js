@@ -1,0 +1,50 @@
+
+<html>
+<head>
+    <title>igv.js embedding example</title>
+</head>
+
+<body>
+
+<div id="igvDiv"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config = {
+        // reference: "hg38",
+        showNavigation: true,
+        showRuler: true,
+        reference: {
+            id: "hg38",
+            fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
+            cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt"
+        },
+        locus: "chr1:7371015-7377019",
+        tracks: [
+            {
+                url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg38/gencode.v24.annotation.sorted.gtf.gz',
+                indexURL: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg38/gencode.v24.annotation.sorted.gtf.gz.tbi',
+                name: 'Gencode v24',
+                format: 'gtf',
+                visibilityWindow: 10000000,
+                displayMode: "EXPANDED"
+            },
+            {
+                url: 'git_1688.gtf',
+                name: 'Gencode',
+                format: 'gtf',
+                visibilityWindow: 10000000,
+                displayMode: "EXPANDED"
+            }
+        ]
+    }
+
+    const browser = await igv.createBrowser(document.getElementById("igvDiv"), config)
+
+</script>
+
+</body>
+</html>

@@ -1,30 +1,4 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2018 The Regents of the University of California
- * Author: Jim Robinson
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 
-import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import gmodCRAM from "../vendor/cram-bundle.js"
 import AlignmentContainer from "../bam/alignmentContainer.js"
 import BamUtils from "../bam/bamUtils.js"
@@ -47,6 +21,7 @@ const CRAM_MATE_MAPPED_FLAG = 0x2
  */
 class CramReader {
 
+    chrAliasTable = new Map()
     constructor(config, genome, browser) {
 
         this.config = config
@@ -54,12 +29,12 @@ class CramReader {
         this.genome = genome
 
         this.cramFile = new gmodCRAM.CramFile({
-            filehandle: new FileHandler(config.url, config),
+            filehandle: config.fileHandle ? config.fileHandle : new FileHandler(config.url, config),
             seqFetch: config.seqFetch || seqFetch.bind(this),
             checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
         })
 
-        const indexFileHandle = new FileHandler(config.indexURL, config)
+        const indexFileHandle = config.indexFileHandle ? config.indexFileHandle : new FileHandler(config.indexURL, config)
         this.indexedCramFile = new gmodCRAM.IndexedCramFile({
             cram: this.cramFile,
             index: new gmodCRAM.CraiIndex({
@@ -70,35 +45,25 @@ class CramReader {
 
         BamUtils.setReaderDefaults(this, config)
 
-        function seqFetch(seqID, start, end) {
-
-            const sequence = this.genome.sequence
+        async function seqFetch(seqID, start, end) {
             const genome = this.genome
-
-            return this.getHeader()
-                .then(function (header) {
-                    const chr = genome.getChromosomeName(header.chrNames[seqID])
-                    return sequence.getSequence(chr, start - 1, end)
-                })
+            const header = await this.getHeader()
+            const chr = genome.getChromosomeName(header.indexToChr[seqID])
+            return this.genome.getSequence(chr, start - 1, end)
         }
     }
 
 
     /**
-     * Parse the sequence dictionary from the SAM header and build chr name tables.  This function
-     * is public so it can be unit tested.
-     *
-     * @returns {PromiseLike<chrName, chrToIndex, chrAliasTable}>}
+     * Parse the sequence dictionary from the SAM header and build chr name tables.
      */
 
     async getHeader() {
 
         if (!this.header) {
-            const genome = this.genome
             const samHeader = await this.cramFile.getSamHeader()
             const chrToIndex = {}
-            const chrNames = []
-            const chrAliasTable = {}
+            const indexToChr = []
             const readGroups = []
 
             for (let line of samHeader) {
@@ -106,12 +71,8 @@ class CramReader {
                     for (let d of line.data) {
                         if (d.tag === "SN") {
                             const seq = d.value
-                            chrToIndex[seq] = chrNames.length
-                            chrNames.push(seq)
-                            if (genome) {
-                                const alias = genome.getChromosomeName(seq)
-                                chrAliasTable[alias] = seq
-                            }
+                            chrToIndex[seq] = indexToChr.length
+                            indexToChr.push(seq)
                             break
                         }
                     }
@@ -121,22 +82,56 @@ class CramReader {
             }
 
             this.header = {
-                chrNames: chrNames,
+                indexToChr: indexToChr,
                 chrToIndex: chrToIndex,
-                chrAliasTable: chrAliasTable,
+                chrNames: Object.keys(chrToIndex),
                 readGroups: readGroups
+
             }
         }
 
         return this.header
     }
 
+    async #getRefId(chr) {
+
+        await this.getHeader()
+
+        if (this.chrAliasTable.has(chr)) {
+            chr = this.chrAliasTable.get(chr)
+            if (chr === undefined) {
+                return undefined
+            }
+        }
+
+        let refId = this.header.chrToIndex[chr]
+
+        // Try alias
+        if (refId === undefined) {
+            const aliasRecord = await this.genome.getAliasRecord(chr)
+            let alias
+            if (aliasRecord) {
+                const aliases = Object.keys(aliasRecord)
+                    .filter(k => k !== "start" && k !== "end")
+                    .map(k => aliasRecord[k])
+                    .filter(a => undefined !== this.header.chrToIndex[a])
+                if (aliases.length > 0) {
+                    alias = aliases[0]
+                    refId = this.header.chrToIndex[aliases[0]]
+                }
+            }
+            this.chrAliasTable.set(chr, alias)  // alias may be undefined => no alias exists. Setting prevents repeated attempts
+        }
+        return refId
+    }
+
+
     async readAlignments(chr, bpStart, bpEnd) {
 
-        const browser = this.browser
         const header = await this.getHeader()
-        const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr
-        const chrIdx = header.chrToIndex[queryChr]
+
+        const chrIdx = await this.#getRefId(chr)
+
         const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
 
         if (chrIdx === undefined) {
@@ -178,7 +173,7 @@ class CramReader {
                 if (message && message.indexOf("MD5") >= 0) {
                     message = "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
                 }
-                Alert.presentAlert(new Error(message))
+                this.browser.alert.present(new Error(message))
                 throw error
             }
         }

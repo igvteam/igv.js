@@ -1,0 +1,372 @@
+$igv-axis-column-width: 50px;
+
+$igv-scrollbar-outer-width: 14px;
+$igv-scrollbar-inner-border-width: 1px;
+$igv-scrollbar-inner-left: 2px;
+$igv-scrollbar-inner-width: $igv-scrollbar-outer-width - 2 * ($igv-scrollbar-inner-left + $igv-scrollbar-inner-border-width);
+
+$igv-track-drag-column-width: 12px;
+
+$igv-track-gear-menu-column-width: 28px;
+
+$igv-trackgear-grey-color: #7F7F7F;
+$igv-trackgear-popover-border-radius: 4px;
+$igv-trackgear-font-color: #4b4b4b;
+$igv-trackgear-default-font-face: 'Open Sans', sans-serif;
+
+$igv-column-item-margin-top: 5px;
+
+$igv-column-shim-width: 1px;
+$igv-column-shim-margin: 2px;
+
+$igv-zoom-in-notice-width: 128px;
+$igv-zoom-in-notice-height: 16px;
+
+$igv-default-font-face: 'Open Sans', sans-serif;
+
+$igv-navbar-font-size: 12px;
+$igv-navbar-height: 32px;
+$igv-navbar-toggle-light-color: #f3f3f3;
+$igv-navbar-toggle-dark-dark: #737373;
+$igv-navbar-button-height: 18px;
+$igv-navbar-button-width: 96px;
+$igv-navbar-button-font-size: 11px;
+$igv-navbar-button-border-radius: 6px;
+$igv-button-width: 75px;
+$igv-button-height: 28px;
+
+$igv-button-border-radius: 2px;
+
+$igv-button-ok-color: #5ea4e0;
+$igv-button-ok-hover-color: #3b5c7f;
+
+$igv-button-cancel-color: #c4c4c4;
+$igv-button-cancel-hover-color: #7f7f7f;
+
+$igv-border-color: #bfbfbf;
+
+$igv-ideogram-height: 16px;
+
+$igv-panel-border-width: 1px;
+$igv-panel-border-color: #292929;
+
+$igv-ruler-sweeper-color: rgba(68, 134, 247, 0.25);
+$igv-ruler-blue-color: rgb(0, 102, 255);
+
+$igv-light-grey-color: #bfbfbf;
+$igv-grey-color: #7F7F7F;
+$igv-dark-grey-color: #373737;
+
+$igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
+
+$igv-trackgear-grey-color: #7F7F7F;
+$igv-trackgear-popover-border-radius: 4px;
+$igv-trackgear-font-color: #4b4b4b;
+$igv-trackgear-default-font-face: 'Open Sans', sans-serif;
+
+
+@mixin generic-input {
+  input {
+    display: block;
+    height: 100%;
+    width: 100%;
+
+    padding-left: 4px;
+
+    font-family: $igv-default-font-face;
+    font-weight: 400;
+    color: $igv-dark-grey-color;
+    text-align: left;
+
+    outline: none;
+
+    border-style: solid;
+    border-width: thin;
+    border-color: $igv-grey-color;
+
+    background-color: white;
+  }
+}
+
+@import "igv-ui-dropdown";
+@import "igv-ui-popover";
+@import "igv-ui-alert-dialog";
+@import "igv-ui-colorpicker";
+@import "igv-ui-generic-dialog-container";
+@import "igv-ui-generic-container";
+@import "igv-ui-dialog";
+@import "igv-ui-panel";
+@import "igv-ui-textbox";
+@import "igv-ui-table";
+
+.igv-ui-center-fixed {
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+
+
+@import "color";
+@import "font";
+@import "navbar";
+@import "dom-misc";
+@import "igv-center-line";
+@import "igv-cursor-guide";
+@import "igv-user-feedback";
+@import "igv-generic-dialog-container";
+@import "igv-generic-container";
+@import "igv-menu-popup";
+@import "igv-user-feedback";
+@import "spinner";
+@import "roi";
+
+@mixin igv-column-base {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.igv-container {
+
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-start;
+
+  padding-top: 4px;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+
+  min-height: 160px;
+}
+
+.igv-viewport {
+  position: relative;
+
+  margin-top: $igv-column-item-margin-top;
+  line-height: 1;
+  overflow-x: hidden;
+  overflow-y: hidden;
+
+}
+
+.igv-viewport-content {
+  position: relative;
+  width: 100%;
+
+  > canvas {
+    position: relative;
+    display: block;
+  }
+}
+
+.igv-column-container {
+
+  position: relative;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  width: 100%;
+
+}
+
+.igv-column-shim {
+  width: $igv-column-shim-width;
+  margin-left: $igv-column-shim-margin;
+  margin-right: $igv-column-shim-margin;
+  background-color: $igv-apple_crayon_iron;
+}
+
+.igv-axis-column {
+
+  @include igv-column-base;
+
+  width: $igv-axis-column-width;
+
+  > div {
+    position: relative;
+
+    margin-top: $igv-column-item-margin-top;
+    width: 100%;
+
+    //background-color: rgba(101, 211, 19, 1);
+
+    > div {
+      z-index: 512;
+      position: absolute;
+      top: 8px;
+      left: 8px;
+      width: fit-content;
+      height: fit-content;
+      background-color: transparent;
+      display: grid;
+      align-items: start;
+      justify-items: center;
+      //place-items: flex-start center;
+      > input {
+        display: block;
+        margin: unset;
+        cursor: pointer;
+      }
+    }
+
+  }
+}
+
+.igv-column {
+  position: relative;
+  @include igv-column-base;
+
+}
+
+.igv-sample-info-column {
+  @include igv-column-base;
+}
+
+.igv-sample-name-column {
+  @include igv-column-base;
+}
+
+.igv-scrollbar-column {
+
+  @include igv-column-base;
+
+  width: $igv-scrollbar-outer-width;
+
+  > div {
+
+    position: relative;
+
+    margin-top: $igv-column-item-margin-top;
+    width: $igv-scrollbar-outer-width;
+
+    > div {
+
+      cursor: pointer;
+
+      position: absolute;
+      top: 0;
+      left: $igv-scrollbar-inner-left;
+
+      width: $igv-scrollbar-inner-width;
+
+      border-width: $igv-scrollbar-inner-border-width;
+      border-style: solid;
+
+      //border-color: transparent;
+      border-color: #c4c4c4;
+
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+
+      //background-color: chartreuse;
+      //background-color: transparent;
+    }
+
+    > div:hover {
+      background-color: #c4c4c4;
+    }
+
+  }
+
+}
+
+.igv-track-drag-column {
+
+  @include igv-column-base;
+
+  width: $igv-track-drag-column-width;
+
+  background-color: white;
+
+  // track drag/reorder handle
+  > .igv-track-drag-handle {
+    z-index: 512;
+    position: relative;
+    cursor: pointer;
+
+    margin-top: $igv-column-item-margin-top;
+    width: 100%;
+
+    border-style: solid;
+    border-width: 0;
+    border-top-right-radius: 6px;
+    border-bottom-right-radius: 6px;
+  }
+
+  .igv-track-drag-handle-color {
+    background-color: #c4c4c4;
+  }
+
+  .igv-track-drag-handle-hover-color {
+    background-color: #787878;
+  }
+
+  .igv-track-drag-handle-selected-color {
+    background-color: #0963fa;
+  }
+
+  > .igv-track-drag-shim {
+    position: relative;
+
+    margin-top: $igv-column-item-margin-top;
+    width: 100%;
+
+    border-style: solid;
+    border-width: 0;
+  }
+
+}
+
+.igv-gear-menu-column {
+
+  @include igv-column-base;
+
+  width: $igv-track-gear-menu-column-width;
+
+  // gear gutter
+  > div {
+
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+
+    margin-top: $igv-column-item-margin-top;
+    width: 100%;
+    background: white;
+
+    // gear container
+    > div {
+      position: relative;
+
+      margin-top: 4px;
+      width: 16px;
+      height: 16px;
+      color: $igv-trackgear-grey-color;
+    }
+
+    > div:hover {
+      cursor: pointer;
+      color: #444;
+    }
+  }
+}

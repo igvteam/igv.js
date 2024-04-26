@@ -28,6 +28,7 @@
 import HtsgetReader from "./htsgetReader.js"
 import getDataWrapper from "../feature/dataWrapper.js"
 import VcfParser from "../variant/vcfParser.js"
+import {isgzipped, ungzip} from "../../node_modules/igv-utils/src/bgzf.js"
 
 class HtsgetVariantReader extends HtsgetReader {
 
@@ -38,7 +39,11 @@ class HtsgetVariantReader extends HtsgetReader {
 
     async readHeader() {
         if (!this.header) {
-            const data = await this.readHeaderData()
+            let data = await this.readHeaderData()
+            if (isgzipped(data)) {
+                data = ungzip(data)
+            }
+
             const dataWrapper = getDataWrapper(data)
             this.header = await this.parser.parseHeader(dataWrapper, this.genome)
             this.chrAliasTable = this.header.chrAliasTable
@@ -49,7 +54,7 @@ class HtsgetVariantReader extends HtsgetReader {
     async readFeatures(chr, start, end) {
 
         if (this.config.format && this.config.format.toUpperCase() !== "VCF") {
-            throw  Error(`htsget format ${this.config.format} is not supported`)
+            throw Error(`htsget format ${this.config.format} is not supported`)
         }
 
         if (!this.chrAliasTable) {
@@ -58,7 +63,10 @@ class HtsgetVariantReader extends HtsgetReader {
 
         let queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr
 
-        const data = await this.readData(queryChr, start, end)
+        let data = await this.readData(queryChr, start, end)
+        if (isgzipped(data)) {
+            data = ungzip(data)
+        }
 
         const dataWrapper = getDataWrapper(data)
 

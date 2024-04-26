@@ -29,23 +29,15 @@
 </script>
 <script type="module">
 
-    import igv from "../../js";
-
-    const div = document.getElementById("myDiv");
-    const options = {
-        showRuler: true,
-        showChromosomeWidget: true,
-        genome: "hg19"
-    };
+    import igv from "../../js/index.js";
 
     let igvBrowser;
-    igv.createBrowser(div, options)
-        .then(function (browser) {
-            igvBrowser = browser;
-        })
+    igv.createBrowser(document.getElementById("myDiv"), { genome: "hg19" })
+        .then(browser => igvBrowser = browser)
 
-    function loadSession() {
-        var sessionFile = document.getElementById('session').files[0];
+    const loadSession = () => {
+
+        const sessionFile = document.getElementById('session').files[0];
         igvBrowser
             .loadSession({file: sessionFile})
             .catch(function (error) {

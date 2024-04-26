@@ -24,42 +24,74 @@
  * THE SOFTWARE.
  */
 import PairedAlignment from "./pairedAlignment.js"
-import {canBePaired, packAlignmentRows, pairAlignments, unpairAlignments} from "./alignmentUtils.js"
-import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
+import BaseModificationCounts from "./mods/baseModificationCounts.js"
+import BamAlignmentRow from "./bamAlignmentRow.js"
+import orientationTypes from "./orientationTypes.js"
+import {isNumber} from "../util/igvUtils.js"
+
+const alignmentSpace = 2
 
 
+/**
+ * AlignmentContainer contains alignments for a genomic region and manages downsampling,  packing into rows,
+ * as well as computation of coverage and base modification counts.   Coverage and base modification counts are
+ * calculated prior to downsampling.  After initialization an AlignmentContainer exposes 3 properties used
+ * by BamTrack
+ *    - coverageMap
+ *    - sequence
+ *    - packedAlignments
+ */
 class AlignmentContainer {
 
-    //            this.config.samplingWindowSize, this.config.samplingDepth,
-    //             this.config.pairsSupported, this.config.alleleFreqThreshold)
-    constructor(chr, start, end, {samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold}) {
+    constructor(chr, start, end,
+                {
+                    samplingWindowSize,
+                    samplingDepth,
+                    alleleFreqThreshold,
+                    colorBy,
+                    filter
+                }) {
 
         this.chr = chr
         this.start = Math.floor(start)
         this.end = Math.ceil(end)
         this.length = (end - start)
-
-        this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 : alleleFreqThreshold
-
         this.coverageMap = new CoverageMap(chr, start, end, this.alleleFreqThreshold)
-        this.alignments = []
         this.downsampledIntervals = []
 
-        this.samplingWindowSize = samplingWindowSize === undefined ? 100 : samplingWindowSize
-        this.samplingDepth = samplingDepth === undefined ? 1000 : samplingDepth
-
-        this.pairsSupported = pairsSupported === undefined ? true : pairsSupported
+        this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 : alleleFreqThreshold
+        this.samplingWindowSize = samplingWindowSize || 100
+        this.samplingDepth = samplingDepth || 1000
         this.paired = false  // false until proven otherwise
-        this.pairsCache = {}  // working cache of paired alignments by read name
 
-        this.downsampledReads = new Set()
-
-        this.currentBucket = new DownsampleBucket(this.start, this.start + this.samplingWindowSize, this)
-
-        this.filter = function filter(alignment) {         // TODO -- pass this in
+        this.filter = filter || ((alignment) => {
             return alignment.isMapped() && !alignment.isFailsVendorQualityCheck()
+        })
+
+        // Enable basemods
+        if (colorBy && colorBy.startsWith("basemod")) {
+            this.baseModCounts = new BaseModificationCounts()
         }
 
+        // Transient members -- used during downsampling and prior to packing
+        this.alignments = []
+        this.pairsCache = {}  // working cache of paired alignments by read name
+        this.downsampledReads = new Set()
+        this.currentBucket = new DownsampleBucket(this.start, this.start + this.samplingWindowSize, this)
+    }
+
+    pack({viewAsPairs, showSoftClips, expectedPairOrientation, groupBy}) {
+
+        let alignments = this.allAlignments()
+        if (viewAsPairs) {
+            alignments = pairAlignments(alignments)
+        } else {
+            alignments = unpairAlignments(alignments)
+        }
+        this.packedGroups = packAlignmentRows(alignments, showSoftClips, expectedPairOrientation, groupBy)
+        if (this.alignments) {
+            delete this.alignments
+        }
     }
 
     push(alignment) {
@@ -68,21 +100,22 @@ class AlignmentContainer {
 
         this.coverageMap.incCounts(alignment)   // Count coverage before any downsampling
 
-        if (this.pairsSupported && this.downsampledReads.has(alignment.readName)) {
-            return   // Mate already downsampled -- pairs are treated as a single alignment for downsampling
+        if (this.baseModCounts) {
+            this.baseModCounts.incrementCounts(alignment)
+        }
+
+        if (this.downsampledReads.has(alignment.readName)) {
+            return   // Mate already downsampled -- pairs and chimeric alignments are treated as a single alignment for downsampling
         }
 
         if (alignment.start >= this.currentBucket.end) {
             this.finishBucket()
+            this.paired = this.paired || this.currentBucket.paired
             this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this)
         }
 
         this.currentBucket.addAlignment(alignment)
 
-    }
-
-    forEach(callback) {
-        this.alignments.forEach(callback)
     }
 
     finish() {
@@ -91,12 +124,20 @@ class AlignmentContainer {
             this.finishBucket()
         }
 
+        this.hasAlignments = this.alignments.length > 0
+
         this.alignments.sort(function (a, b) {
             return a.start - b.start
         })
 
-        this.pairsCache = undefined
-        this.downsampledReads = undefined
+        if (this.baseModCounts) {
+            this.baseModCounts.computeSimplex()
+        }
+
+        delete this.currentBucket
+        delete this.pairsCache
+        delete this.downsampledReads
+
     }
 
     contains(chr, start, end) {
@@ -120,62 +161,46 @@ class AlignmentContainer {
         this.paired = this.paired || this.currentBucket.paired
     }
 
-    setViewAsPairs(bool) {
-        let alignments
-        if (bool) {
-            alignments = pairAlignments(this.packedAlignmentRows)
-        } else {
-            alignments = unpairAlignments(this.packedAlignmentRows)
-        }
-        this.packedAlignmentRows = packAlignmentRows(alignments, this.start, this.end)
-    }
-
-    setShowSoftClips(bool) {
-        const alignments = this.allAlignments()
-        this.packedAlignmentRows = packAlignmentRows(alignments, this.start, this.end, bool)
-    }
-
-    repack(bpPerPixel, showSoftClips) {
-        const alignments = this.allAlignments()
-        this.packedAlignmentRows = packAlignmentRows(alignments, this.start, this.end, showSoftClips, bpPerPixel)
-
-    }
-
     allAlignments() {
-        const alignments = []
-        for (let row of this.packedAlignmentRows) {
-            for (let alignment of row.alignments) {
-                alignments.push(alignment)
-            }
+        if (this.alignments) {
+            return this.alignments
+        } else {
+            return Array.from(this.packedGroups.values()).flatMap(group => group.rows.flatMap(row => row.alignments))
         }
-        return alignments
     }
 
     getMax(start, end) {
         return this.coverageMap.getMax(start, end)
+    }
+
+    sortRows(options) {
+
+        for (let group of this.packedGroups.values()) {
+            group.sortRows(options, this)
+        }
     }
 }
 
 
 class DownsampleBucket {
 
-    constructor(start, end, alignmentContainer) {
+    constructor(start, end, {samplingDepth, downsampledReads, pairsCache}) {
 
         this.start = start
         this.end = end
         this.alignments = []
         this.downsampledCount = 0
-        this.samplingDepth = alignmentContainer.samplingDepth
-        this.pairsSupported = alignmentContainer.pairsSupported
-        this.downsampledReads = alignmentContainer.downsampledReads
-        this.pairsCache = alignmentContainer.pairsCache
+        this.samplingDepth = samplingDepth
+        this.downsampledReads = downsampledReads
+        this.pairsCache = pairsCache
+        this.paired = false  // Until proven otherwise
     }
 
     addAlignment(alignment) {
 
         var idx, replacedAlignment, pairedAlignment
 
-        if (this.pairsSupported && canBePaired(alignment)) {
+        if (canBePaired(alignment)) {
             pairedAlignment = this.pairsCache[alignment.readName]
             if (pairedAlignment) {
                 // Not subject to downsampling, just update the existing alignment
@@ -187,7 +212,7 @@ class DownsampleBucket {
 
         if (this.alignments.length < this.samplingDepth) {
 
-            if (this.pairsSupported && canBePaired(alignment)) {
+            if (canBePaired(alignment)) {
 
                 // First alignment in a pair
                 pairedAlignment = new PairedAlignment(alignment)
@@ -209,7 +234,7 @@ class DownsampleBucket {
                 //  idx = Math.floor(Math.random() * (this.alignments.length - 1));
                 replacedAlignment = this.alignments[idx]   // To be replaced
 
-                if (this.pairsSupported && canBePaired(alignment)) {
+                if (canBePaired(alignment)) {
 
                     if (this.pairsCache[replacedAlignment.readName] !== undefined) {
                         this.pairsCache[replacedAlignment.readName] = undefined
@@ -228,11 +253,8 @@ class DownsampleBucket {
             } else {
                 this.downsampledReads.add(alignment.readName)
             }
-
             this.downsampledCount++
         }
-
-
     }
 }
 
@@ -337,6 +359,69 @@ class CoverageMap {
             }
         }
     }
+
+    getPosCount(pos, base) {
+
+        const offset = pos - this.bpStart
+        if (offset < 0 || offset >= this.coverage.length) return 0
+        const c = this.coverage[offset]
+
+        switch (base) {
+            case 'A':
+            case 'a':
+                return c.posA
+            case 'C':
+            case 'c':
+                return c.posC
+            case 'T':
+            case 't':
+                return c.posT
+            case 'G':
+            case 'g':
+                return c.posG
+            case 'N':
+            case 'n':
+                return c.posN
+            default:
+                return 0
+        }
+    }
+
+    getNegCount(pos, base) {
+        const offset = pos - this.bpStart
+        if (offset < 0 || offset >= this.coverage.length) return 0
+        const c = this.coverage[offset]
+
+        switch (base) {
+            case 'A':
+            case 'a':
+                return c.negA
+            case 'C':
+            case 'c':
+                return c.negC
+            case 'T':
+            case 't':
+                return c.negT
+            case 'G':
+            case 'g':
+                return c.negG
+            case 'N':
+            case 'n':
+                return c.negN
+            default:
+                return 0
+        }
+
+    }
+
+    getCount(pos, base) {
+        return this.getPosCount(pos, base) + this.getNegCount(pos, base)
+    }
+
+    getTotalCount(pos) {
+        const offset = pos - this.bpStart
+        return (offset >= 0 && offset < this.coverage.length) ? this.coverage[offset].total : 0
+    }
 }
 
 
@@ -379,6 +464,12 @@ class Coverage {
         this.threshold = alleleThreshold
     }
 
+    hoverText() {
+        const pos = this.posA + this.posT + this.posC + this.posG + this.posN
+        const neg = this.negA + this.negT + this.negC + this.negG + this.negN
+        return `${this.total} (${pos}+, ${neg}-)`
+    }
+
     isMismatch(refBase) {
         const threshold = this.threshold * ((this.qualityWeight && this.qual) ? this.qual : this.total)
         let mismatchQualitySum = 0
@@ -406,5 +497,254 @@ class DownsampledInterval {
             {name: "# downsampled:", value: this.counts}]
     }
 }
+
+class Group {
+
+    pixelTop = 0
+    pixelBottom = 0
+    rows = []
+
+
+    constructor(name) {
+        this.name = this.name
+    }
+
+    push(row) {
+        this.rows.push(row)
+    }
+
+    get length() {
+        return this.rows.length
+    }
+
+    sortRows(options, alignmentContainer) {
+
+        const newRows = []
+        const undefinedRow = []
+        for (let row of this.rows) {
+            const alignment = row.findAlignment(options.position, options.sortAsPairs)
+            if (undefined !== alignment) {
+                newRows.push(row)
+            } else {
+                undefinedRow.push(row)
+            }
+        }
+
+
+        newRows.sort((rowA, rowB) => {
+            const direction = options.direction
+            const rowAValue = rowA.getSortValue(options, alignmentContainer)
+            const rowBValue = rowB.getSortValue(options, alignmentContainer)
+
+            if (rowBValue === undefined && rowBValue !== undefined) return 1
+            else if (rowAValue !== undefined && rowBValue === undefined) return -1
+
+            const i = rowAValue > rowBValue ? 1 : (rowAValue < rowBValue ? -1 : 0)
+            return true === direction ? i : -i
+        })
+
+        for (let row of undefinedRow) {
+            newRows.push(row)
+        }
+
+        this.rows = newRows
+
+    }
+
+}
+
+
+function canBePaired(alignment) {
+    return alignment.isPaired() &&
+        alignment.mate &&
+        alignment.isMateMapped() &&
+        alignment.chr === alignment.mate.chr &&
+        (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary())
+}
+
+
+function pairAlignments(alignments) {
+
+    const pairCache = new Map()
+    const result = alignments.map(alignment => {
+        if (canBePaired(alignment)) {
+            let pairedAlignment = pairCache.get(alignment.readName)
+            if (pairedAlignment) {
+                pairedAlignment.setSecondAlignment(alignment)
+                pairCache.delete(alignment.readName)
+                return pairedAlignment
+            } else {
+                pairedAlignment = new PairedAlignment(alignment)
+                pairCache.set(alignment.readName, pairedAlignment)
+                return pairedAlignment
+            }
+        } else {
+            return alignment
+        }
+    })
+    return result
+}
+
+function unpairAlignments(alignments) {
+    return alignments.flatMap(alignment => alignment instanceof PairedAlignment ?
+        [alignment.firstAlignment, alignment.secondAlignment].filter(Boolean) :
+        [alignment])
+}
+
+function packAlignmentRows(alignments, showSoftClips, expectedPairOrientation, groupBy) {
+
+    if (!alignments || alignments.length === 0) {
+        return new Map()
+    } else {
+
+        // Separate alignments into groups
+        const groupedAlignments = new Map()
+        if (groupBy) {
+            let tag
+            if (groupBy.startsWith("tag:")) {
+                tag = groupBy.substring(4)
+                groupBy = "tag"
+            }
+            for (let a of alignments) {
+                const group = getGroupValue(a, groupBy, tag, expectedPairOrientation) || ""
+                if (!groupedAlignments.has(group)) {
+                    groupedAlignments.set(group, [])
+                }
+                groupedAlignments.get(group).push(a)
+            }
+        } else {
+            groupedAlignments.set("", alignments)
+        }
+
+        const packed = new Map()
+        const orderedGroupNames = Array.from(groupedAlignments.keys()).sort("pairOrientation" === groupBy ?
+            pairOrientationComparator(expectedPairOrientation) : groupNameComparator)
+        for (let groupName of orderedGroupNames) {
+
+            let alignments = groupedAlignments.get(groupName)
+
+            alignments.sort(function (a, b) {
+                return showSoftClips ? a.scStart - b.scStart : a.start - b.start
+            })
+
+            const group = new Group(groupName)
+            packed.set(groupName, group)
+            let alignmentRow
+            let nextStart = 0
+            let nextIDX = 0
+            const allocated = new Set()
+            const startNewRow = () => {
+                alignmentRow = new BamAlignmentRow()
+                group.push(alignmentRow)
+                nextStart = 0
+                nextIDX = 0
+                allocated.clear()
+            }
+            startNewRow()
+
+            while (alignments.length > 0) {
+                if (nextIDX >= 0 && nextIDX < alignments.length) {
+                    const alignment = alignments[nextIDX]
+                    allocated.add(alignment)
+                    alignmentRow.alignments.push(alignment)
+                    nextStart = showSoftClips ?
+                        alignment.scStart + alignment.scLengthOnRef + alignmentSpace :
+                        alignment.start + alignment.lengthOnRef + alignmentSpace
+                    nextIDX = binarySearch(alignments, (a) => (showSoftClips ? a.scStart : a.start) > nextStart, nextIDX)
+                } else {
+                    // Remove allocated alignments and start new row
+                    alignments = alignments.filter(a => !allocated.has(a))
+                    startNewRow()
+                }
+            }
+        }
+        //console.log(`Done in ${Date.now() - t0} ms`)
+        return packed
+    }
+}
+
+/**
+ * Return 0 <= i <= array.length such that !pred(array[i - 1]) && pred(array[i]).
+ *
+ * returns an index 0 ≤ i ≤ array.length such that the given predicate is false for array[i - 1] and true for array[i]* *
+ */
+function binarySearch(array, pred, min) {
+    let lo = min - 1, hi = array.length
+    while (1 + lo < hi) {
+        const mi = lo + ((hi - lo) >> 1)
+        if (pred(array[mi])) {
+            hi = mi
+        } else {
+            lo = mi
+        }
+    }
+    return hi
+}
+
+function getGroupValue(al, groupBy, tag, expectedPairOrientation) {
+
+    switch (groupBy) {
+        // case 'HAPLOTYPE':
+        //     return al.getHaplotypeName();
+        case 'strand':
+            return al.strand ? '+' : '-'
+        case 'firstOfPairStrand':
+            const strand = al.firstOfPairStrand
+            return strand === undefined ? "" : strand ? '+' : '-'
+        case 'mateChr':
+            return (al.mate && al.isMateMapped()) ? al.mate.chr : ""
+        case 'pairOrientation':
+            return orientationTypes[expectedPairOrientation][al.pairOrientation] || ""
+        case 'chimeric':
+            return al.tags()['SA'] ? "chimeric" : ""
+        case 'supplementary':
+            return al.isSupplementary ? "supplementary" : ""
+        case 'readOrder':
+            if (al.isPaired() && al.isFirstOfPair()) {
+                return "first"
+            } else if (al.isPaired() && al.isSecondOfPair()) {
+                return "second"
+            } else {
+                return ""
+            }
+        case 'phase':
+            return al.tags()['HP'] || ""
+        case 'tag':
+            return al.tags()[tag] || ""
+        // Add cases for other options as needed
+        default:
+            return undefined
+    }
+}
+
+
+function groupNameComparator(o1, o2) {
+    if (!o1 && !o2) {
+        return 0
+    } else if (!o1) {
+        return 1
+    } else if (!o2) {
+        return -1
+    } else {
+        // no nulls
+        if (o1 === o2) {
+            return 0
+        } else {
+            if (isNumber(o1) && typeof isNumber(o2)) {
+                return Number.parseFloat(o1) - Number.parseFloat(o2)
+            } else {
+                let s1 = o1.toString()
+                let s2 = o2.toString()
+                return s1.localeCompare(s2, undefined, {sensitivity: 'base'})
+            }
+        }
+    }
+}
+
+function pairOrientationComparator(expectedPairOrientation) {
+    const orientationValues = ['LL', 'RR', 'RL', 'LR', '']
+    return (o1, o2) => orientationValues.indexOf(o1) - orientationValues.indexOf(o2)
+}
+
 
 export default AlignmentContainer

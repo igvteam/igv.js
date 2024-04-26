@@ -46,6 +46,7 @@ class GCNVTrack extends TrackBase {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
+            if(this.disposed) return;   // This track was removed during async load
             this.sampleNames = this.header.columnNames.slice(3)
 
             // Set generic properties from track line
@@ -75,7 +76,7 @@ class GCNVTrack extends TrackBase {
     }
 
     menuItemList() {
-        return MenuUtils.numericDataMenuItems(this.trackView)
+        return this.numericDataMenuItems()
     }
 
     async getFeatures(chr, start, end) {
@@ -321,12 +322,12 @@ class GCNVTrack extends TrackBase {
         return []
     }
 
-    popupData(clickState, featureList) {
+    popupData(clickState, features) {
 
-        featureList = this.clickedFeatures(clickState, featureList)
+        if(features === undefined) features = this.clickedFeatures(clickState)
 
         const items = []
-        featureList.forEach(function (f) {
+        features.forEach(function (f) {
             for (let property of Object.keys(f)) {
                 if (isSimpleType(f[property])) {
                     items.push({name: property, value: f[property]})

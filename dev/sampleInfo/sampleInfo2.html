@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <script src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs"
+            data-app-key="1h7gqkxv11tb4d2"></script>
+
+</head>
+
+<body>
+
+<button id="loadTrackButton">Load Seg Track</button>
+<button id="loadSampleInfoButton">Load Sample Info</button>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from '../../js/index.js'
+
+    const config =
+        {
+            genome: "hg19"
+        }
+
+    let browser
+    (async () => {
+        browser = await igv.createBrowser(document.getElementById('myDiv'), config)
+        console.log(`browser ${browser.guid} is good to go.`)
+        document.getElementById('loadTrackButton').addEventListener('click', (e) => loadTrackOrSampleInfo("https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0"))
+        document.getElementById('loadSampleInfoButton').addEventListener('click', (e) => loadTrackOrSampleInfo("https://www.dropbox.com/s/zn8nkd7bhdlg84x/GBMSampleInfo.txt?dl=0"))
+    })()
+
+    function loadTrackOrSampleInfo(url) {
+        browser.loadTrackList([{url}])
+    }
+
+
+</script>
+
+</body>
+
+</html>
+

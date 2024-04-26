@@ -135,11 +135,6 @@ class GFFHelper {
         features = features.filter(f => filterTypes === undefined || !filterTypes.has(f.type))
 
         for (let f of features) {
-
-            if (f.type === "biological_region") {
-                console.log()
-            }
-
             if (isTranscript(f.type)) {
                 const transcriptId = f.id // getAttribute(f.attributeString, "transcript_id", /\s+/);
                 if (undefined !== transcriptId) {
@@ -165,7 +160,7 @@ class GFFHelper {
 
                         let transcript = transcripts[id]
                         if (!transcript && this.format === "gtf") {
-                            // GTF does not require explicit transcript record, start one with this feature.
+                            // GTF does not require explicit a transcript or mRNA record, start one with this feature.
                             const psuedoTranscript = Object.assign({}, f)
                             psuedoTranscript.type = "transcript"
                             transcript = new GFFTranscript(psuedoTranscript)
@@ -176,7 +171,8 @@ class GFFHelper {
 
                             if (isExon(f.type)) {
                                 if (parents.length > 1) {
-                                    // Make a copy as exon can be modified differently by CDS, etc, for each transcript
+                                    // Multiple parents, this is unusual.  Make a copy as exon can be modified
+                                    // differently by CDS, etc, for each parent
                                     const e2 = new GFFFeature(f)
                                     transcript.addExon(e2)
                                 } else {

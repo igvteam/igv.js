@@ -24,9 +24,10 @@
  */
 
 import IGVGraphics from "./igv-canvas.js"
-import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
-import {isSecureContext} from "./util/igvUtils.js"
+import {expandRegion, isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
+import {loadSequence} from "./genome/fasta.js"
+import {defaultNucleotideColors} from "./util/nucleotideColors.js";
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
 
@@ -110,17 +111,21 @@ const TRANSLATED_HEIGHT = 115
 const SEQUENCE_HEIGHT = 15
 const FRAME_HEIGHT = 25
 const FRAME_BORDER = 5
+const BP_PER_PIXEL_THRESHOLD = 1 / 10
+
+const bppSequenceThreshold = 10
 
 class SequenceTrack {
 
+
     constructor(config, browser) {
 
-        this.type = "sequence"
-        this.browser = browser
-        this.removable = false
         this.config = config
-        this.name = "Sequence"
-        this.id = "sequence"
+        this.browser = browser
+        this.type = "sequence"
+        this.removable = config.removable === true  // defaults to false
+        this.name = config.name
+        this.id = config.id
         this.sequenceType = config.sequenceType || "dna"             //   dna | rna | prot
         this.disableButtons = false
         this.order = config.order || defaultSequenceTrackOrder
@@ -129,6 +134,16 @@ class SequenceTrack {
         this.reversed = config.reversed === true
         this.frameTranslate = config.frameTranslate === true
         this.height = this.frameTranslate ? TRANSLATED_HEIGHT : DEFAULT_HEIGHT
+
+        // Hack for backward compatibility
+        if(config.url) {
+            config.fastaURL = config.url
+        }
+
+        if(!config.fastaURL) {
+            // Mark this as the genome reference sequence ==> backward compatibility convention
+            this.id = config.id || "sequence"
+        }
 
     }
 
@@ -163,7 +178,6 @@ class SequenceTrack {
         ]
     }
 
-
     contextMenuItemList(clickState) {
         const viewport = clickState.viewport
         if (viewport.referenceFrame.bpPerPixel <= 1) {
@@ -176,11 +190,13 @@ class SequenceTrack {
                 {
                     label: this.reversed ? 'View visible sequence (reversed)...' : 'View visible sequence...',
                     click: async () => {
-                        let seq = await this.browser.genome.sequence.getSequence(chr, start, end)
-                        if (this.reversed) {
+                        let seq = await this.browser.genome.getSequence(chr, start, end)
+                        if (!seq) {
+                            seq = "Unknown sequence"
+                        } else if (this.reversed) {
                             seq = reverseComplementSequence(seq)
                         }
-                        Alert.presentAlert(seq)
+                        this.browser.alert.present(seq)
                     }
                 }
             ]
@@ -188,15 +204,17 @@ class SequenceTrack {
                 items.push({
                     label: 'Copy visible sequence',
                     click: async () => {
-                        let seq = await this.browser.genome.sequence.getSequence(chr, start, end)
-                        if (this.reversed) {
+                        let seq = await this.browser.genome.getSequence(chr, start, end)
+                        if (!seq) {
+                            seq = "Unknown sequence"
+                        } else if (this.reversed) {
                             seq = reverseComplementSequence(seq)
                         }
                         try {
                             await navigator.clipboard.writeText(seq)
                         } catch (e) {
                             console.error(e)
-                            Alert.presentAlert(`error copying sequence to clipboard ${e}`)
+                            this.browser.alert.present(`error copying sequence to clipboard ${e}`)
                         }
                     }
 
@@ -209,7 +227,6 @@ class SequenceTrack {
             return undefined
         }
     }
-
 
     translateSequence(seq) {
 
@@ -236,13 +253,35 @@ class SequenceTrack {
         return threeFrame
     }
 
+    /**
+     * Return the source for sequence.  If an explicit fasta url is defined, use it, otherwise fetch sequence
+     * from the current genome
+     * *
+     * @returns {Promise<WrappedFasta|*>}
+     */
+    async getSequenceSource() {
+        if(this.config.fastaURL) {
+            if(!this.fasta) {
+                this.fasta = new WrappedFasta(this.config, this.browser.genome)
+                await this.fasta.init()
+            }
+            return this.fasta
+        } else {
+            return this.browser.genome
+        }
+    }
+
     async getFeatures(chr, start, end, bpPerPixel) {
+
         start = Math.floor(start)
         end = Math.floor(end)
-        if (bpPerPixel && bpPerPixel > 1) {
+
+        if (bpPerPixel && bpPerPixel > bppSequenceThreshold) {
             return null
         } else {
-            const sequence = await this.browser.genome.sequence.getSequence(chr, start, end)
+            const sequenceSource = await this.getSequenceSource()
+            //const extent = expandRegion(start, end, 1e5)
+            const sequence = await sequenceSource.getSequence(chr, start, end)
             return {
                 bpStart: start,
                 sequence: sequence
@@ -257,6 +296,9 @@ class SequenceTrack {
         if (options.features) {
 
             let sequence = options.features.sequence
+            if(!sequence) {
+                return
+            }
 
             if (this.reversed) {
                 sequence = sequence.split('').map(function (cv) {
@@ -272,17 +314,30 @@ class SequenceTrack {
                 const seqIdx = Math.floor(bp - sequenceBpStart)
 
                 if (seqIdx >= 0 && seqIdx < sequence.length) {
-                    const baseLetter = sequence[seqIdx]
+
                     const offsetBP = bp - options.bpStart
                     const aPixel = offsetBP / options.bpPerPixel
                     const pixelWidth = 1 / options.bpPerPixel
-                    const color = this.fillColor(baseLetter)
+                    const baseLetter = sequence[seqIdx]
+                    const color = this.fillColor(baseLetter.toUpperCase())
 
-                    if (options.bpPerPixel > 1 / 10) {
-                        IGVGraphics.fillRect(ctx, aPixel, 5, pixelWidth, SEQUENCE_HEIGHT - 5, {fillStyle: color})
+                    if (options.bpPerPixel > BP_PER_PIXEL_THRESHOLD) {
+                        IGVGraphics.fillRect(ctx, aPixel, FRAME_BORDER, pixelWidth, SEQUENCE_HEIGHT - FRAME_BORDER, {fillStyle: color})
                     } else {
-                        let textPixel = aPixel + 0.5 * (pixelWidth - ctx.measureText(baseLetter).width)
-                        IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
+                        const textPixel = aPixel + 0.5 * (pixelWidth - ctx.measureText(baseLetter).width)
+
+
+
+
+                        if ('y' === options.axis) {
+                            ctx.save()
+                            IGVGraphics.labelTransformWithContext(ctx, textPixel)
+                            IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
+                            ctx.restore()
+                        } else {
+                            IGVGraphics.strokeText(ctx, baseLetter, textPixel, SEQUENCE_HEIGHT, {strokeStyle: color})
+                        }
+
                     }
                 }
             }
@@ -348,7 +403,8 @@ class SequenceTrack {
         if (this.color) {
             return this.color
         } else if ("dna" === this.sequenceType) {
-            return this.browser.nucleotideColors[index] || 'gray'
+            // return this.browser.nucleotideColors[index] || 'gray'
+            return defaultNucleotideColors[index] || 'gray'
         } else {
             return 'rgb(0, 0, 150)'
         }
@@ -374,7 +430,34 @@ class SequenceTrack {
 
 }
 
-export {defaultSequenceTrackOrder}
+/**
+ * Wrapper for a Fasta object that does chr name alias translation.   This is not neccessary for the genome fasta,
+ * as it defines the reference name, but can be neccessary if loading an additional fasta as a track
+ *
+ */
+class WrappedFasta {
+
+    constructor(config, genome) {
+        this.config = config;
+        this.genome = genome
+    }
+
+    async init() {
+        this.fasta = await loadSequence(this.config)
+        this.chrNameMap = new Map()
+        for(let name of this.fasta.chromosomeNames) {
+            this.chrNameMap.set(this.genome.getChromosomeName(name), name)
+        }
+    }
+
+    async getSequence(chr, start, end) {
+        const chrName = this.chrNameMap.has(chr) ? this.chrNameMap.get(chr) : chr
+        return this.fasta.getSequence(chrName, start, end)
+    }
+
+}
+
+export {defaultSequenceTrackOrder, bppSequenceThreshold, translationDict }
 
 export default SequenceTrack
 

@@ -35,7 +35,8 @@ import {
     decodeReflat,
     decodeRepeatMasker,
     decodeSNP,
-    decodeWig
+    decodeWig,
+    decodeBedmethyl
 } from "./decode/ucsc.js"
 import {decodeGFF3, decodeGTF} from "./gff/gff.js"
 import {decodeFusionJuncSpan} from "./decode/fusionJuncSpan.js"
@@ -43,6 +44,8 @@ import {decodeGtexGWAS} from "./decode/gtexGWAS.js"
 import {decodeCustom} from "./decode/custom.js"
 import {decodeGcnv} from "../gcnv/gcnvDecoder.js"
 import DecodeError from "./decode/decodeError.js"
+import GFFHelper from "./gff/gffHelper.js"
+import GenomicInterval from "../genome/genomicInterval.js"
 
 /**
  *  Parser for column style (tab delimited, etc) text file formats (bed, gff, vcf, etc).
@@ -200,7 +203,12 @@ class FeatureParser {
             fixBedPE(allFeatures)
         }
 
-        return allFeatures
+        if (("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) &&
+            this.config.assembleGFF !== false) {
+            return  (new GFFHelper(this.config)).combineFeatures(allFeatures)
+        } else {
+            return allFeatures
+        }
 
     }
 
@@ -267,7 +275,12 @@ class FeatureParser {
                 this.decode = decodeBed
                 this.delimiter = this.config.delimiter || /\s+/
                 break
+            case "bedmethyl":
+                this.decode = decodeBedmethyl
+                this.delimiter = this.config.delimiter || /\s+/
+                break
             case "bedpe":
+            case "hiccups":
                 this.decode = decodeBedpe
                 this.delimiter = this.config.delimiter || "\t"
                 break

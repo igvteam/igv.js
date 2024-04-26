@@ -1,7 +1,20 @@
 import "./utils/mockObjects.js"
-import igv from "../js/index.js";
-import {assert} from 'chai';
+import {assert} from 'chai'
+import _igv from "../js/index.js"
 
+const oauth = _igv.oauth
+
+// Use a mock IGV object.  We need to avoid importing index.js for this test.
+
+const igv = {
+    oauth,
+    setGoogleOauthToken: (accessToken) => {
+        return oauth.setToken(accessToken)
+    },
+    setOauthToken: (accessToken, host) => {
+        return oauth.setToken(accessToken, host)
+    }
+}
 /**
  * Created by Jim Robinson on 9/15/2018
  *
@@ -12,12 +25,11 @@ suite("testOauth", function () {
 
     test("Test google token", function () {
 
-        igv.oauth.setToken("foo");
-        assert.equal(igv.oauth.google.access_token, "foo");
-        assert.equal(igv.oauth.getToken(), "foo");
+        igv.oauth.setToken("foo")
+        assert.equal(igv.oauth.getToken(), "foo")
 
-        igv.oauth.removeToken();
-        assert.ok(undefined === igv.oauth.google.access_token);
+        igv.oauth.removeToken()
+        assert.ok(undefined === igv.oauth.getToken())
 
         // Legacy method
         // igv.setGoogleOauthToken("foo");
@@ -26,18 +38,18 @@ suite("testOauth", function () {
 
     test("Test exact host", function () {
 
-        igv.setOauthToken("foo", "host");
-        assert.equal(igv.oauth.getToken("host"), "foo");
+        igv.setOauthToken("foo", "host")
+        assert.equal(igv.oauth.getToken("host"), "foo")
 
-        igv.oauth.removeToken("host");
-        assert.ok(undefined === igv.oauth.getToken("host"));
+        igv.oauth.removeToken("host")
+        assert.ok(undefined === igv.oauth.getToken("host"))
     })
 
     test("Test wildcard host", function () {
-        igv.setOauthToken("foo", "hos*");
-        assert.equal(igv.oauth.getToken("host.com"), "foo");
+        igv.setOauthToken("foo", "hos*")
+        assert.equal(igv.oauth.getToken("host.com"), "foo")
 
-        igv.oauth.removeToken("hos*");
-        assert.ok(undefined === igv.oauth.getToken("host"));
+        igv.oauth.removeToken("hos*")
+        assert.ok(undefined === igv.oauth.getToken("host"))
     })
 })

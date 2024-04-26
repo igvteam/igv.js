@@ -31,17 +31,43 @@ import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
-import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js"
+import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
 
 const isString = StringUtils.isString
 
-
+const DEFAULT_COLOR = "rgb(0,0,150)"
 const DEFAULT_VISIBILITY_WINDOW = 1000000
 const TOP_MARGIN = 10
 const STANDARD_FIELDS = new Map([["REF", "referenceBases"], ["ALT", "alternateBases"], ["QUAL", "quality"], ["FILTER", "filter"]])
 
 
 class VariantTrack extends TrackBase {
+
+    static defaults = {
+        displayMode: "EXPANDED",
+        sortDirection: "ASC",
+        showGenotypes: true,
+        squishedVariantHeight: 2,
+        squishedCallHeight: 1,
+        expandedCallHeight: 10,
+        expandedVGap: 2,
+        squishedVGap: 1,
+        expandedGroupGap: 10,
+        squishedGroupGap: 5,
+        featureHeight: 14,
+        noGenotypeColor: "rgb(200,180,180)",
+        noCallColor: "rgb(225, 225, 225)",
+        nonRefColor: "rgb(200, 200, 215)",
+        mixedColor: "rgb(200, 220, 200)",
+        homrefColor: "rgb(200, 200, 200)",
+        homvarColor: "rgb(17,248,254)",
+        hetvarColor: "rgb(34,12,253)",
+        colorBy: undefined,
+        visibilityWindow: undefined,
+        labelDisplayMode: undefined,
+        type: "variant"
+    }
 
     constructor(config, browser) {
         super(config, browser)
@@ -51,38 +77,19 @@ class VariantTrack extends TrackBase {
 
         super.init(config)
 
-        this.visibilityWindow = config.visibilityWindow
-        this.displayMode = config.displayMode || "EXPANDED"    // COLLAPSED | EXPANDED | SQUISHED
-        this.labelDisplayMode = config.labelDisplayMode
         this.expandedVariantHeight = config.expandedVariantHeight || config.variantHeight || 10
-        this.squishedVariantHeight = config.squishedVariantHeight || 2
-        this.squishedCallHeight = config.squishedCallHeight || 1
-        this.expandedCallHeight = config.expandedCallHeight || 10
-        this.expandedVGap = config.expandedVGap !== undefined ? config.expandedVGap : 2
-        this.squishedVGap = config.squishedVGap !== undefined ? config.squishedVGap : 1
-        this.expandedGroupGap = config.expandedGroupGap || 10
-        this.squishedGroupGap = config.squishedGroupGap || 5
-        this.featureHeight = config.featureHeight || 14
-        this.visibilityWindow = config.visibilityWindow
-        this.featureSource = FeatureSource(config, this.browser.genome)
-        this.noGenotypeColor = config.noGenotypeColor || "rgb(200,180,180)"
-        this.noCallColor = config.noCallColor || "rgb(225, 225, 225)"
-        this.nonRefColor = config.nonRefColor || "rgb(200, 200, 215)"
-        this.mixedColor = config.mixedColor || "rgb(200, 220, 200)"
-        this.homrefColor = config.homrefColor || "rgb(200, 200, 200)"
-        this.homvarColor = config.homvarColor || "rgb(17,248,254)"
-        this.hetvarColor = config.hetvarColor || "rgb(34,12,253)"
-        this.sortDirection = "ASC"
-        this.type = config.type || "variant"
 
-        this.colorBy = config.colorBy   // Can be undefined => default
+        this.featureSource = FeatureSource(config, this.browser.genome)
+
         this._initColorBy = config.colorBy
         if (config.colorTable) {
             this.colorTables = new Map()
             this.colorTables.set(config.colorBy, new ColorTable(config.colorTable))
         }
+        this._color = config.color
+        this._strokecolor = config.strokecolor
+        this._context_hook = config.context_hook
 
-        this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes
 
         // The number of variant rows are computed dynamically, but start with "1" by default
         this.variantRowCount(1)
@@ -92,6 +99,7 @@ class VariantTrack extends TrackBase {
     async postInit() {
 
         this.header = await this.getHeader()   // cricital, don't remove'
+        if (this.disposed) return   // This track was removed during async load
         if (undefined === this.visibilityWindow && this.config.indexed !== false) {
             const fn = FileUtils.isFile(this.config.url) ? this.config.url.name : this.config.url
             if (isString(fn) && fn.toLowerCase().includes("gnomad")) {
@@ -107,11 +115,11 @@ class VariantTrack extends TrackBase {
     }
 
     get supportsWholeGenome() {
-        return this.config.indexed === false || this.config.supportsWholeGenome === true
+        return !this.config.indexURL  || this.config.supportsWholeGenome === true
     }
 
     get color() {
-        return this._color
+        return this._color || DEFAULT_COLOR
     }
 
     set color(c) {
@@ -193,7 +201,10 @@ class VariantTrack extends TrackBase {
         const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
         this.variantBandHeight = TOP_MARGIN + rowCount * (variantHeight + vGap)
 
-        const callSets = this.callSets
+        let callSets = this.callSets
+        if (!callSets && this._f) {
+            callSets = this._f.callSets   // "Complementary" variant for structural variants
+        }
         const nCalls = this.getCallsetsLength()
         if (callSets && nCalls > 0 && this.showGenotypes !== false) {
             IGVGraphics.strokeLine(context, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '})
@@ -226,8 +237,19 @@ class VariantTrack extends TrackBase {
                     x += 1
                     w -= 2
                 }
-                context.fillStyle = this.getVariantColor(variant)
+                context.fillStyle = this.getColorForFeature(variant)
                 context.fillRect(x, y, w, h)
+
+                //only paint stroke if a color is defined
+                let strokecolor = this.getVariantStrokecolor(variant)
+                if (strokecolor) {
+                    context.strokeStyle = strokecolor
+                    context.strokeRect(x, y, w, h)
+                }
+
+                // call hook if _context_hook fn is defined
+                this.callContextHook(variant, context, x, y, w, h)
+
                 variant.pixelRect = {x, y, w, h}
 
                 // Loop though the calls for this variant.  There will potentially be a call for each sample.
@@ -238,44 +260,46 @@ class VariantTrack extends TrackBase {
                     this.sampleHeight = nVariantRows * (callHeight + vGap)  // For each sample, there is a call for each variant at this position
 
                     let sampleNumber = 0
-                    for (let callSet of callSets) {
-                        const call = variant.calls[callSet.id]
-                        if (call) {
-                            const row = "COLLAPSED" === this.displayMode ? 0 : variant.row
-                            const py = this.sampleYOffset + sampleNumber * this.sampleHeight + row * (callHeight + vGap)
-                            let allVar = true  // until proven otherwise
-                            let allRef = true
-                            let noCall = false
+                    if (callSets && variant.calls) {
+                        for (let callSet of callSets) {
+                            const call = variant.calls[callSet.id]
+                            if (call) {
+                                const row = "COLLAPSED" === this.displayMode ? 0 : variant.row
+                                const py = this.sampleYOffset + sampleNumber * this.sampleHeight + row * (callHeight + vGap)
+                                let allVar = true  // until proven otherwise
+                                let allRef = true
+                                let noCall = false
 
-                            if (call.genotype) {
-                                for (let g of call.genotype) {
-                                    if ('.' === g) {
-                                        noCall = true
-                                        break
-                                    } else {
-                                        if (g !== 0) allRef = false
-                                        if (g === 0) allVar = false
+                                if (call.genotype) {
+                                    for (let g of call.genotype) {
+                                        if ('.' === g) {
+                                            noCall = true
+                                            break
+                                        } else {
+                                            if (g !== 0) allRef = false
+                                            if (g === 0) allVar = false
+                                        }
                                     }
                                 }
+
+                                if (!call.genotype) {
+                                    context.fillStyle = this.noGenotypeColor
+                                } else if (noCall) {
+                                    context.fillStyle = this.noCallColor
+                                } else if (allRef) {
+                                    context.fillStyle = this.homrefColor
+                                } else if (allVar) {
+                                    context.fillStyle = this.homvarColor
+                                } else {
+                                    context.fillStyle = this.hetvarColor
+                                }
+
+                                context.fillRect(x, py, w, callHeight)
+
+                                callSet.pixelRect = {x, y: py, w, h: callHeight}
                             }
-
-                            if (!call.genotype) {
-                                context.fillStyle = this.noGenotypeColor
-                            } else if (noCall) {
-                                context.fillStyle = this.noCallColor
-                            } else if (allRef) {
-                                context.fillStyle = this.homrefColor
-                            } else if (allVar) {
-                                context.fillStyle = this.homvarColor
-                            } else {
-                                context.fillStyle = this.hetvarColor
-                            }
-
-                            context.fillRect(x, py, w, callHeight)
-
-                            callSet.pixelRect = {x, y: py, w, h: callHeight}
+                            sampleNumber++
                         }
-                        sampleNumber++
                     }
                 }
             }
@@ -285,7 +309,8 @@ class VariantTrack extends TrackBase {
         }
     };
 
-    getVariantColor(variant) {
+
+    getColorForFeature(variant) {
 
         const v = variant._f || variant
         let variantColor
@@ -311,15 +336,45 @@ class VariantTrack extends TrackBase {
         } else if ("MIXED" === v.type) {
             variantColor = this.mixedColor
         } else {
-            variantColor = this.defaultColor
+            variantColor = this.color
         }
+
+        if(v.isFiltered()) {
+            variantColor = IGVColor.addAlpha(variantColor, 0.2)
+        }
+
         return variantColor
     }
 
 
-    clickedFeatures(clickState, features) {
+    getVariantStrokecolor(variant) {
 
-        let featureList = super.clickedFeatures(clickState, features)
+        const v = variant._f || variant
+        let variantStrokeColor
+
+        if (this._strokecolor) {
+            variantStrokeColor = (typeof this._strokecolor === "function") ? this._strokecolor(v) : this._strokecolor
+        } else {
+            variantStrokeColor = undefined
+        }
+        return variantStrokeColor
+    }
+
+    callContextHook(variant, context, x, y, w, h) {
+        if (this._context_hook) {
+            if (typeof this._context_hook === "function") {
+                const v = variant._f || variant
+
+                context.save()
+                this._context_hook(v, context, x, y, w, h)
+                context.restore()
+            }
+        }
+    }
+
+    clickedFeatures(clickState) {
+
+        let featureList = super.clickedFeatures(clickState)
 
         const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
         const callHeight = vGap + ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight)
@@ -355,9 +410,9 @@ class VariantTrack extends TrackBase {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    popupData(clickState, features) {
+    popupData(clickState, featureList) {
 
-        const featureList = this.clickedFeatures(clickState, features)
+        if (featureList === undefined) featureList = this.clickedFeatures(clickState)
         const genomicLocation = clickState.genomicLocation
         const genomeID = this.browser.genome.id
         const sampleInformation = this.browser.sampleInformation
@@ -515,9 +570,8 @@ class VariantTrack extends TrackBase {
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')})
             menuItems.push({
                 object: $(createCheckbox("Show Genotypes", this.showGenotypes)),
-                click: () => {
+                click: function showGenotypesHandler() {
                     this.showGenotypes = !this.showGenotypes
-                    //adjustTrackHeight();
                     this.trackView.checkContentHeight()
                     this.trackView.repaintViews()
                 }
@@ -536,7 +590,7 @@ class VariantTrack extends TrackBase {
             menuItems.push(
                 {
                     object: $(createCheckbox(lut[displayMode], displayMode === this.displayMode)),
-                    click: () => {
+                    click: function displayModeHandler() {
                         this.displayMode = displayMode
                         this.trackView.checkContentHeight()
                         this.trackView.repaintViews()
@@ -550,11 +604,22 @@ class VariantTrack extends TrackBase {
             menuItems.push('<hr>')
             menuItems.push({
                 label: 'Add SVs to circular view',
-                click: () => {
+                click: function circularViewHandler() {
                     const inView = []
                     for (let viewport of this.trackView.viewports) {
                         this.sendChordsForViewport(viewport)
                     }
+                }
+            })
+        }
+
+        // Experimental CNVPytor support
+        if (this.canCovertToPytor()) {
+            menuItems.push('<hr>')
+            menuItems.push({
+                label: 'Convert to CNVpytor track',
+                click: function cnvPytorHandler () {
+                    this.convertToPytor()
                 }
             })
         }
@@ -585,9 +650,16 @@ class VariantTrack extends TrackBase {
 
     sendChordsForViewport(viewport) {
         const refFrame = viewport.referenceFrame
-        const inView = "all" === refFrame.chr ?
-            this.featureSource.getAllFeatures() :
-            this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
+        let inView
+        if ("all" === refFrame.chr) {
+            const all = this.featureSource.getAllFeatures()
+            const arrays = Object.keys(all).map(k => all[k])
+            inView = [].concat(...arrays)
+        } else {
+            inView = this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
+
+        }
+
         const chords = makeVCFChords(inView)
         sendChords(chords, this, refFrame, 0.5)
     }
@@ -601,7 +673,7 @@ class VariantTrack extends TrackBase {
     colorByCB(menuItem, showCheck) {
 
         const $e = $(createCheckbox(menuItem.label, showCheck))
-        const clickHandler = () => {
+        function clickHandler() {
 
             if (menuItem.key === this.colorBy) {
                 this.colorBy = undefined
@@ -646,6 +718,69 @@ class VariantTrack extends TrackBase {
             this.colorTables.set(key, tbl)
         }
         return this.colorTables.get(key)
+    }
+
+    ///////////// CNVPytor converstion support follows ////////////////////////////////////////////////////////////
+
+    /**
+     * This do-nothing method is neccessary to allow conversion to a CNVPytor track, which needs dom elements for an
+     *     // axis.  The dom elements are created as a side effect of this function being defined
+     */
+    paintAxis() {
+    }
+
+    /**
+     * Check conditions for pytor track
+     * (1) 1 and only 1 genotype (callset)
+     * (2) DP info field
+     * (3) AD info field
+     * (4) Not indexed -- must read entire file
+     */
+    canCovertToPytor() {
+
+        if(this.config.indexURL) {
+            return false;
+        }
+        if(this.header) {
+            return Object.keys(this.header.callSets).length === 1 &&
+                this.header.FORMAT &&
+                this.header.FORMAT.AD &&
+                this.header.FORMAT.DP
+        } else {
+            // Cant know until header is read
+            return false
+        }
+    }
+
+    async convertToPytor() {
+
+        // Store state in case track is reverted
+        this.variantState = { ...this.config, ...this.getState() };
+        this.variantState.trackHeight = this.height
+
+
+        this.trackView.startSpinner()
+        // The timeout is neccessary to give the spinner time to start.
+        setTimeout(async () => {
+            try {
+                const newConfig = Object.assign({}, this.config)
+                Object.setPrototypeOf(this, CNVPytorTrack.prototype)
+
+                this.init(newConfig)
+                await this.postInit()
+
+                this.trackView.clearCachedFeatures()
+                this.trackView.setTrackHeight(this.config.height || CNVPytorTrack.DEFAULT_TRACK_HEIGHT)
+                this.trackView.checkContentHeight()
+                this.trackView.updateViews()
+                this.trackView.track.autoHeight = false
+
+
+            } finally {
+                this.trackView.stopSpinner()
+            }
+        }, 100)
+
     }
 }
 

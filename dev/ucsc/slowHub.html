@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+    import Hub from "../../js/ucsc/ucscHub.js"
+
+
+    const hubOptions = {
+        includeTracks: true
+    }
+
+    const hub = await Hub.loadHub("https://hgdownload.soe.ucsc.edu/hubs/GCA/004/027/145/GCA_004027145.1/hub.txt", hubOptions)
+
+
+    const igvConfig = {
+        showChromosomeWidget: false,
+        locus: hub.getDefaultPosition(),
+        reference: hub.getGenomeConfig()
+    }
+
+    //igvConfig.reference.chromAliasBbURL = undefined   // TODO <- chromAliasBB is slowish
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+      console.log(browser.getTrackURLs())
+
+
+</script>
+
+</body>
+
+</html>

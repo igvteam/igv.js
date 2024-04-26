@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dev - alignment - bam</title>
+</head>
+
+<body>
+
+<button id="log-state">Log Session</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config =
+        {
+            "genome": "hg19",
+            "locus": "chr1:155,159,012-155,164,131",
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "alignment",
+                    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam",
+                    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam.bai",
+                    "name": "NA12878",
+                    "format": "bam"
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+        .then(browser => {
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+        })
+
+
+</script>
+
+</body>
+
+</html>

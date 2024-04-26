@@ -1,36 +1,13 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2016-2017 The Regents of the University of California
- * Author: Jim Robinson
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 
-import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import {makeDraggable, UIUtils} from "../../node_modules/igv-utils/src/index.js"
+import makeDraggable from "./utils/draggable.js"
+import {attachDialogCloseHandlerWithParent} from "./utils/ui-utils.js"
 
 class DataRangeDialog {
 
-    constructor($parent, alert) {
+    constructor(browser, $parent) {
+
+        this.browser = browser
 
         // dialog container
         this.$container = $("<div>", {class: 'igv-generic-dialog-container'})
@@ -40,9 +17,9 @@ class DataRangeDialog {
         // dialog header
         const $header = $("<div>", {class: 'igv-generic-dialog-header'})
         this.$container.append($header)
-        UIUtils.attachDialogCloseHandlerWithParent($header[0], () => {
-            this.$minimum_input.val(undefined)
-            this.$maximum_input.val(undefined)
+        attachDialogCloseHandlerWithParent($header[0], () => {
+            this.$minimum_input.val('')
+            this.$maximum_input.val('')
             this.$container.offset({left: 0, top: 0})
             this.$container.hide()
         })
@@ -82,8 +59,8 @@ class DataRangeDialog {
         this.$cancel.text('Cancel')
 
         this.$cancel.on('click', () => {
-            this.$minimum_input.val(undefined)
-            this.$maximum_input.val(undefined)
+            this.$minimum_input.val('')
+            this.$maximum_input.val('')
             this.$container.offset({left: 0, top: 0})
             this.$container.hide()
         })
@@ -94,57 +71,71 @@ class DataRangeDialog {
         this.$container.hide()
     }
 
-    configure(trackView) {
+    configure(trackViewOrTrackViewList) {
 
-        const dataRange = trackView.dataRange()
-        let min
-        let max
-        if (dataRange) {
-            min = dataRange.min
-            max = dataRange.max
+        let dataRange
+        if (Array.isArray(trackViewOrTrackViewList)) {
+            dataRange = { min: Number.MAX_SAFE_INTEGER, max:-Number.MAX_SAFE_INTEGER }
+            for (const trackView of trackViewOrTrackViewList) {
+                if (trackView.dataRange) {
+                    dataRange.min = Math.min(trackView.dataRange.min, dataRange.min)
+                    dataRange.max = Math.max(trackView.dataRange.max, dataRange.max)
+                }
+            }
         } else {
-            min = 0
-            max = 100
+            dataRange = trackViewOrTrackViewList.dataRange
         }
 
-        this.$minimum_input.val(min)
-        this.$maximum_input.val(max)
+        if (dataRange) {
+            this.$minimum_input.val(dataRange.min)
+            this.$maximum_input.val(dataRange.max)
+        }
 
         this.$minimum_input.unbind()
         this.$minimum_input.on('keyup', (e) => {
             if (13 === e.keyCode) {
-                this.processResults(trackView)
+                this.processResults(trackViewOrTrackViewList)
             }
         })
 
         this.$maximum_input.unbind()
         this.$maximum_input.on('keyup', (e) => {
             if (13 === e.keyCode) {
-                this.processResults(trackView)
+                this.processResults(trackViewOrTrackViewList)
             }
         })
 
         this.$ok.unbind()
         this.$ok.on('click', (e) => {
-            this.processResults(trackView)
+            this.processResults(trackViewOrTrackViewList)
         })
     }
 
+    processResults(trackViewOfTrackViewList) {
 
-    processResults(trackView) {
+        if ('' !== this.$minimum_input.val() && '' !== this.$maximum_input.val()) {
 
-        const min = Number(this.$minimum_input.val())
-        const max = Number(this.$maximum_input.val())
-        if (isNaN(min) || isNaN(max)) {
-            Alert.presentAlert(new Error('Must input numeric values'), undefined)
-        } else {
-            trackView.setDataRange(min, max)
+            const min = Number(this.$minimum_input.val())
+            const max = Number(this.$maximum_input.val())
+
+            if (isNaN(min) || isNaN(max)) {
+                this.browser.alert.present(new Error('Must input numeric values'), undefined)
+            } else {
+                const list = Array.isArray(trackViewOfTrackViewList) ? trackViewOfTrackViewList : [ trackViewOfTrackViewList ]
+                for (const trackView of list) {
+                    trackView.dataRange = { min, max }
+                }
+
+            }
+
+            this.$minimum_input.val('')
+            this.$maximum_input.val('')
+
         }
 
-        this.$minimum_input.val(undefined)
-        this.$maximum_input.val(undefined)
         this.$container.offset({left: 0, top: 0})
         this.$container.hide()
+
     }
 
     present($parent) {

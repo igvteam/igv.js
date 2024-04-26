@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>IGV-JB</title>
+    <!-- Font Awesome CSS-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
+    <!-- Juicebox CSS-->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/juicebox.js@2.2.2/dist/css/juicebox.css">
+
+</head>
+<body>
+
+
+<div id="igvDiv" style="flex-grow:0;flex-shrink:0;flex-basis: 950px"></div>
+
+
+<script type="module">
+
+    import igv from "../../js"
+
+
+    // Start igv.js and create regions
+    const igvConfig =
+        {
+            genome: "hg19",
+            locus: "chr8:61,424,086-62,080,568",
+            "tracks": [
+                {
+                    "url": "https://www.encodeproject.org/files/ENCFF000ARZ/@@download/ENCFF000ARZ.bigWig",
+                    "name": "H3K4me1 bigwig",
+                    "autoscaleGroup": "1"
+                },
+                {
+                    "url":  "../../test/data/tdf/ENCFF000ARZ.wig.tdf",
+                    "name":  "H3K4me1 tdf",
+                    "autoscaleGroup": "1"
+                },
+                {
+                    "url": "../../test/data/wig/ENCFF000ARZ.wig",
+                    "name": "H3K4me1 mean",
+                    "autoscaleGroup": "1"
+                },
+                {
+                    "url": "../../test/data/wig/ENCFF000ARZ.wig",
+                    "name": "H3K4me1 min",
+                    "windowFunction": "min",
+                    "autoscaleGroup": "1"
+                },
+                {
+                    "url": "../../test/data/wig/ENCFF000ARZ.wig",
+                    "name": "H3K4me1 max",
+                    "windowFunction": "max",
+                    "autoscaleGroup": "1"
+                },
+                {
+                    "url": "../../test/data/wig/ENCFF000ARZ.wig",
+                    "name": "H3K4me1 none",
+                    "windowFunction": "none",
+                    "autoscaleGroup": "1"
+                },
+                {
+                    "url": "../../test/data/wig/ENCFF000ARZ.wig",
+                    "name": "H3K4me1 points",
+                    "graphType": "points",
+                    "windowFunction": "none",
+                    "autoscaleGroup": "1"
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById("igvDiv"), igvConfig)
+
+        .then(async function (igvBrowser) {
+
+
+        })
+
+
+</script>
+
+</body>
+</html>
