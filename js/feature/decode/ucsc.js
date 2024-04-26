@@ -234,7 +234,8 @@ function decodeGenePredExt(tokens, header) {
             end: parseInt(tokens[4 + shift]),
             cdStart: cdStart,
             cdEnd: cdEnd,
-            id: tokens[0 + shift]
+            id: tokens[0 + shift],
+            score: tokens[10 + shift]
         },
         exonCount = parseInt(tokens[7 + shift]),
         exonStarts = tokens[8 + shift].split(','),

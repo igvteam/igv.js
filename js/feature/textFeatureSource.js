@@ -167,11 +167,12 @@ class TextFeatureSource {
 
         if (isWholeGenome) {
             if (!this.wgFeatures) {
-                if (this.queryable) {   // queryable sources don't support whole genome view
-                    this.wgFeatures = []
-                } else {
-                    this.wgFeatures = this.getWGFeatures(this.featureCache.getAllFeatures())
-                }
+                this.wgFeatures = this.getWGFeatures(this.featureCache.getAllFeatures())
+                // if (this.queryable) {   // queryable sources don't support whole genome view
+                //     this.wgFeatures = []
+                // } else {
+                //     this.wgFeatures = this.getWGFeatures(this.featureCache.getAllFeatures())
+                // }
             }
             return this.wgFeatures
         } else {

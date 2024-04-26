@@ -207,14 +207,14 @@ class FeatureTrack extends TrackBase {
                     options.rowLastLabelX[row] = -Number.MAX_SAFE_INTEGER
                 }
             }
-            const pixelsPerFeature = pixelWidth / Math.max(...rowFeatureCount)
+            const pixelsPerFeature = pixelWidth / Math.max(1, Math.max(...rowFeatureCount.filter(Number))) 
 
             let lastPxEnd = []
             for (let feature of featureList) {
                 if (feature.end < bpStart) continue
                 if (feature.start > bpEnd) break
                 const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row
-                options.drawLabel = options.labelAllFeatures || pixelsPerFeature > 10
+                options.drawLabel = this.config.labelAllFeatures || pixelsPerFeature > 10
                 const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel)
                 const last = lastPxEnd[row]
                 if (!last || pxEnd > last) {

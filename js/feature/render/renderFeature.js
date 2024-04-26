@@ -191,7 +191,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         let pixelXOffset = options.pixelXOffset || 0
         const t1 = Math.max(featureX, -pixelXOffset)
         const t2 = Math.min(featureX1, -pixelXOffset + options.viewportWidth)
-        const centerX = (t1 + t2) / 2
+        let centerX = (t1 + t2) / 2
 
         let transform
         if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
@@ -217,7 +217,8 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         const textBox = ctx.measureText(name)
         const xleft = centerX - textBox.width / 2
         const xright = centerX + textBox.width / 2
-        if (options.labelAllFeatures || xleft > options.rowLastLabelX[feature.row] || gtexSelection) {
+        const lastLabelX = options.rowLastLabelX[feature.row] || -Number.MAX_SAFE_INTEGER
+        if (options.labelAllFeatures || xleft > lastLabelX || gtexSelection) {
             options.rowLastLabelX[feature.row] = xright
             IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
         }

@@ -28,7 +28,6 @@ import TDFSource from "../tdf/tdfSource.js"
 import TrackBase from "../trackBase.js"
 import BWSource from "../bigwig/bwSource.js"
 import IGVGraphics from "../igv-canvas.js"
-import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import MenuUtils from "../ui/menuUtils.js"
 
@@ -46,7 +45,6 @@ class WigTrack extends TrackBase {
         this.type = "wig"
         this.height = config.height || 50
         this.featureType = 'numeric'
-        this.paintAxis = paintAxis
 
         const format = config.format ? config.format.toLowerCase() : config.format
         this.flipAxis = config.flipAxis ? config.flipAxis : false
@@ -148,7 +146,6 @@ class WigTrack extends TrackBase {
     }
 
     draw(options) {
-
         const features = options.features
         const ctx = options.context
         const bpPerPixel = options.bpPerPixel
@@ -191,11 +188,15 @@ class WigTrack extends TrackBase {
                     let y = yScale(f.value)
 
                     const rectEnd = Math.ceil((f.end - bpStart) / bpPerPixel)
-                    const width = Math.max(1, rectEnd - x)
-
-                    let c = (f.value < 0 && this.altColor) ? this.altColor : posColor
-                    const color = (typeof c === "function") ? c(f.value) : c
-
+                    const width = Math.max(this.config.lineWidth || 3, rectEnd - x)
+                    let color = ""
+                    if (f.hasOwnProperty("color")){
+                        color = f.color
+                    }
+                    else{
+                        let c = (f.value < 0 && this.altColor) ? this.altColor : posColor
+                        color = (typeof c === "function") ? c(f.value) : c
+                    }
                     if (this.graphType === "points") {
                         const pointSize = this.config.pointSize || 3
                         const px = x + width / 2
@@ -212,12 +213,6 @@ class WigTrack extends TrackBase {
                         lastValue = f.value
                         lastPixelEnd = pixelEnd
                     }
-                }
-
-                // If the track includes negative values draw a baseline
-                if (this.dataRange.min < 0) {
-                    const basepx = (this.dataRange.max / (this.dataRange.max - this.dataRange.min)) * options.pixelHeight
-                    IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor})
                 }
             }
         }
@@ -236,6 +231,38 @@ class WigTrack extends TrackBase {
                 }
             }
         }
+    }
+
+    paintAxis(ctx, pixelWidth, pixelHeight) {
+
+        IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+        var font = {
+            'font': 'normal 10px Arial',
+            'textAlign': 'right',
+            'strokeStyle': "black"
+        }
+
+        const yScale = (this.dataRange.max - this.dataRange.min) / pixelHeight
+        const n = Math.ceil((this.dataRange.max - this.dataRange.min) * 10 / pixelHeight)
+        if(this.config.hasOwnProperty("axis")){
+            for(let p = 0; p < this.config.axis.length; p++){
+                const yp = pixelHeight - Math.round((this.config.axis[p] - this.dataRange.min) / yScale)
+                IGVGraphics.strokeLine(ctx, 45, yp, 50, yp, font) // Offset dashes up by 2 pixel
+                IGVGraphics.fillText(ctx, this.config.axis[p] , 44, yp + 4, font) // Offset numbers down by 2 pixels;
+            }
+            if(this.config.axis.length > 0){
+                let y0 = pixelHeight - Math.round((this.config.axis[0] - this.dataRange.min) / yScale)
+                let y1 = pixelHeight - Math.round((this.config.axis[this.config.axis.length - 1] - this.dataRange.min) / yScale)
+                IGVGraphics.strokeLine(ctx, 49, y0, 49, y1, font)
+            }
+        }else{
+            for (let p = this.dataRange.min; p < this.dataRange.max; p += n) {
+                const yp = pixelHeight - Math.round((p - this.dataRange.min) / yScale)
+                IGVGraphics.strokeLine(ctx, 45, yp, 50, yp, font) // Offset dashes up by 2 pixel
+                IGVGraphics.fillText(ctx, Math.floor(p), 44, yp + 4, font) // Offset numbers down by 2 pixels;
+            }
+        }
+
     }
 
     popupData(clickState, features) {
@@ -291,7 +318,7 @@ class WigTrack extends TrackBase {
         }
     }
 
-    get supportsWholeGenome() {
+    supportsWholeGenome() {
         return !this.config.indexURL && this.config.supportsWholeGenome !== false
     }
 

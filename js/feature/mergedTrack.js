@@ -25,8 +25,8 @@
  */
 
 import TrackBase from "../trackBase.js"
-import paintAxis from "../util/paintAxis.js"
 import MenuUtils from "../ui/menuUtils.js"
+import IGVGraphics from "../igv-canvas.js"
 
 /**
  * Represents 2 or more wig tracks overlaid on a common viewport.
@@ -37,7 +37,7 @@ class MergedTrack extends TrackBase {
         super(config, browser)
         this.type = "merged"
         this.featureType = 'numeric'
-        this.paintAxis = paintAxis
+        // this.paintAxis = paintAxis
     }
 
     init(config) {
@@ -114,6 +114,8 @@ class MergedTrack extends TrackBase {
 
         items = items.concat(MenuUtils.numericDataMenuItems(this.trackView))
 
+        items = items.concat(MenuUtils.changePointsSizeMenuItem(this.trackView))
+
         return items
     }
 
@@ -137,7 +139,7 @@ class MergedTrack extends TrackBase {
             this.tracks[i].dataRange = this.dataRange
             this.tracks[i].flipAxis = this.flipAxis
             this.tracks[i].logScale = this.logScale
-            this.tracks[i].graphType = this.graphType
+            // this.tracks[i].graphType = this.graphType
             this.tracks[i].draw(trackOptions)
         }
     }
@@ -163,6 +165,37 @@ class MergedTrack extends TrackBase {
 
     get supportsWholeGenome() {
         return this.tracks.every(track => track.supportsWholeGenome())
+    }
+
+    paintAxis(ctx, pixelWidth, pixelHeight) {
+
+        IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+        var font = {
+            'font': 'normal 10px Arial',
+            'textAlign': 'right',
+            'strokeStyle': "black"
+        }
+
+        const yScale = (this.dataRange.max - this.dataRange.min) / pixelHeight
+        const n = Math.ceil((this.dataRange.max - this.dataRange.min) * 10 / pixelHeight)
+        if(this.config.hasOwnProperty("axis")){
+            for(let p = 0; p < this.config.axis.length; p++){
+                const yp = pixelHeight - Math.round((this.config.axis[p] - this.dataRange.min) / yScale)
+                IGVGraphics.strokeLine(ctx, 45, yp, 50, yp, font) // Offset dashes up by 2 pixel
+                IGVGraphics.fillText(ctx, this.config.axis[p] , 44, yp + 4, font) // Offset numbers down by 2 pixels;
+            }
+            if(this.config.axis.length > 0){
+                let y0 = pixelHeight - Math.round((this.config.axis[0] - this.dataRange.min) / yScale)
+                let y1 = pixelHeight - Math.round((this.config.axis[this.config.axis.length - 1] - this.dataRange.min) / yScale)
+                IGVGraphics.strokeLine(ctx, 49, y0, 49, y1, font)
+            }
+        }else{
+            for (let p = this.dataRange.min; p < this.dataRange.max; p += n) {
+                const yp = pixelHeight - Math.round((p - this.dataRange.min) / yScale)
+                IGVGraphics.strokeLine(ctx, 45, yp, 50, yp, font) // Offset dashes up by 2 pixel
+                IGVGraphics.fillText(ctx, Math.floor(p), 44, yp + 4, font) // Offset numbers down by 2 pixels;
+            }
+        }
     }
 }
 
