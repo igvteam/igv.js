@@ -84,6 +84,43 @@ const MenuUtils = {
         return menuItems
     },
 
+    changePointsSizeMenuItem: function(trackView) {
+        const menuItems = []
+
+        const $e = $('<div>')
+        $e.text('Set point size')
+    
+        menuItems.push( {
+            object: $e,
+            click: e => {
+                const callback = function () {
+                    let value = trackView.browser.inputDialog.input.value
+                    value = ('' === value || undefined === value) ? 'untitled' : value.trim()
+                    for (var i = 0; i < trackView.track.config.tracks.length; i++) {
+                        // 检查是否为 "points"
+                        if (trackView.track.config.tracks[i].graphType === "points") {
+                            // 修改 pointSize
+                            trackView.track.config.tracks[i].pointSize = value; 
+                        }
+                    }
+                    trackView.repaintViews()
+                }
+        
+                const config =
+                    {
+                        label: 'Set point size',
+                        value: (getTrackPointSize(trackView.track) || 'unnamed'),
+                        callback
+                    }
+        
+                trackView.browser.inputDialog.present(config, e)
+        
+            }
+        })
+
+        return menuItems
+    },
+
     trackMenuItemListHelper: function (itemList, menuPopup) {
 
         var list = []
@@ -308,6 +345,11 @@ function getTrackLabelText(track) {
     txt = vp.$trackLabel.text()
 
     return txt
+}
+
+function getTrackPointSize(track){
+    let a = track.tracks.filter((a) => { return a.config.graphType == "points"}).map((a) => {return a.config.pointSize})
+    return a.length > 0 ? a[0] : 3 
 }
 
 export default MenuUtils
