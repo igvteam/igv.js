@@ -185,6 +185,23 @@ function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainCol
                 ctx.fillStyle = getCytobandColor(stainColors, cytoband)
                 IGVGraphics.fillRect(ctx, start, shim + ideogramTop, (end - start), height - 2 * shim)
             }
+            let text = `${cytoband.name}`;
+            ctx.font = "9px sans-serif"
+            let text_width = ctx.measureText(text).width;
+            if (text_width < end - start && cytoband.type !== "c") {
+              let color;
+  
+              if (cytoband.type === 'p') {
+                color = 'white';
+              } else {
+                color = 'black';
+              }
+  
+              IGVGraphics.fillText(ctx, text, start + (end - start - text_width) / 2, center / 0.75, {
+                fillStyle: color
+              });
+            }
+            
         }
     }
 
