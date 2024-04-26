@@ -31,6 +31,8 @@
 //    IGVGraphics.strokeLine(context, 0, 0, 10, 10);
 //
 
+import {randomRGB} from "./util/colorPalletes.js";
+
 var debug = false
 
 var log = function (msg) {
@@ -94,10 +96,6 @@ const IGVGraphics = {
     },
 
     fillRect: function (ctx, x, y, w, h, properties) {
-
-        var c
-        x = Math.round(x)
-        y = Math.round(y)
 
         if (properties) {
             ctx.save()
@@ -292,20 +290,24 @@ const IGVGraphics = {
         if (fill) {
             ctx.fill()
         }
-    }
+    },
 
+    drawRandomColorVerticalLines: ctx => {
+        for (let x = 0; x < ctx.canvas.width; x++) {
+            IGVGraphics.fillRect(ctx, x, 0, 1, ctx.canvas.height, { fillStyle: randomRGB(100, 250) })
+        }
+    },
+
+    labelTransformWithContext: (ctx, exe) => {
+        ctx.translate(exe, 0);
+        ctx.scale(-1, 1);
+        ctx.translate(-exe, 0);
+    }
 
 }
 
 function doPath(ctx, x, y) {
-
-
     var i, len = x.length
-    for (i = 0; i < len; i++) {
-        x[i] = Math.round(x[i])
-        y[i] = Math.round(y[i])
-    }
-
     ctx.beginPath()
     ctx.moveTo(x[0], y[0])
     for (i = 1; i < len; i++) {

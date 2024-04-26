@@ -79,6 +79,7 @@ class SpliceJunctionTrack extends TrackBase {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
+            if (this.disposed) return   // This track was removed during async load
         }
 
         // Set properties from track line
@@ -135,7 +136,8 @@ class SpliceJunctionTrack extends TrackBase {
 
             junctionRenderingContext.referenceFrame = options.viewport.referenceFrame
             junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start
-            junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(options.viewport.contentDiv).width())
+            junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart +
+                junctionRenderingContext.referenceFrame.toBP(options.viewport.getWidth())
 
             // For a given viewport, records where features that are < 2px in width have been rendered already.
             // This prevents wasteful rendering of multiple such features onto the same pixels.
@@ -383,9 +385,9 @@ class SpliceJunctionTrack extends TrackBase {
         ctx.fillText(label, junctionMiddlePx - ctx.measureText(label).width / 2, (7 * topY + cy) / 8)
     }
 
-    clickedFeatures(clickState, features) {
+    clickedFeatures(clickState) {
 
-        const allFeatures = super.clickedFeatures(clickState, features)
+        const allFeatures = super.clickedFeatures(clickState)
 
         return allFeatures.filter(function (feature) {
             return (feature.isVisible && feature.attributes)
@@ -397,7 +399,7 @@ class SpliceJunctionTrack extends TrackBase {
      */
     popupData(clickState, features) {
 
-        features = this.clickedFeatures(clickState, features)
+        if (features === undefined) features = this.clickedFeatures(clickState)
         const genomicLocation = clickState.genomicLocation
 
         const data = []

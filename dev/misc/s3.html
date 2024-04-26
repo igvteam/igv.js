@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="https://igv.org/web/https://igv.org/web/img/favicon.ico" rel="shortcut icon">
+
+    <title>hg19 test</title>
+
+</head>
+
+<body>
+
+<p>
+
+
+<h1>S3 URL resolver</h1>
+
+<p>
+    <b>
+        Example of using a function to resolve a URL.  The example is trivial and won't work got general s3 urls, but
+        illustrates the principle of using a function to translate a URL.
+    </b>
+</p>
+<p>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr1:155,138,124-155,153,715",
+            tracks:
+                [
+                    {
+                        name: "Phase 3 WGS variants",
+                        url: () => resolveS3("s3://1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz"),
+                        indexURL: () => resolveS3("s3://1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi")
+                    }
+                ]
+
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+
+    /**
+     * Trivial URL mapper.  In a real use case this function might fetch signed URLs.
+     *
+     * @param s3URL
+     * @returns {Promise<*>}
+     */
+    async function resolveS3(s3URL) {
+        return s3URL.replace("s3://", "https://s3.amazonaws.com/")
+    }
+
+
+</script>
+
+</body>
+
+</html>

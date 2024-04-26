@@ -2,21 +2,16 @@
  * Colors used for coding omosomes
  */
 
-const Colors = {
+const GWASColors = {
     "X": "rgb(204, 153, 0)",
     "Y": "rgb(153, 204, 0)",
     "Un": "darkGray)",
     "1": "rgb(80, 80, 255)",
-//"1": Color.red);
-    "I": "rgb(139, 155, 187)",
     "2": "rgb(206, 61, 50)",
-    "II": "rgb(206, 61, 50)",
     "2a": "rgb(210, 65, 55)",
     "2b": "rgb(215, 70, 60)",
     "3": "rgb(116, 155, 88)",
-    "III": "rgb(116, 155, 88)",
     "4": "rgb(240, 230, 133)",
-    "IV": "rgb(240, 230, 133)",
     "5": "rgb(70, 105, 131)",
     "6": "rgb(186, 99, 56)",
     "7": "rgb(93, 177, 221)",
@@ -64,10 +59,28 @@ const Colors = {
 }
 
 //  aliasing
-for (let key of Object.keys(Colors)) {
+for (let key of Object.keys(GWASColors)) {
     const altName = "chr" + key
-    Colors[altName] = Colors[key]
+    GWASColors[altName] = GWASColors[key]
+}
+
+// romanizing
+for(let a = 1; a <= 48; a++) {
+    if(a === 10) continue   // Don't overide "X"
+    const roman = romanize(a)
+    GWASColors[roman] = GWASColors[a.toString()]
 }
 
 
-export default Colors
+function romanize (num) {
+    if (!+num) return false;
+    var digits = String(+num).split('');
+    var key = ['','C','CC','CCC','CD','D','DC','DCC','DCCC','CM',
+        '','X','XX','XXX','XL','L','LX','LXX','LXXX','XC',
+        '','I','II','III','IV','V','VI','VII','VIII','IX'];
+    var roman = '', i = 3;
+    while (i--) roman = (key[+digits.pop() + (i * 10)] || '') + roman;
+    return Array(+digits.join('') + 1).join('M') + roman;
+}
+
+export default GWASColors

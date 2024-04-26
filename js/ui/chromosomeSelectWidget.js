@@ -24,55 +24,79 @@
  * THE SOFTWARE.
  */
 
-import {DOMUtils} from '../../node_modules/igv-utils/src/index.js'
+import * as DOMUtils from "../ui/utils/dom-utils.js"
 
-const ChromosomeSelectWidget = function (browser, parent) {
+const maximumSequenceCountExceeded = "Maximum sequence count exceeded"
 
-    this.container = DOMUtils.div({class: 'igv-chromosome-select-widget-container'})
-    parent.appendChild(this.container)
+class ChromosomeSelectWidget {
 
-    this.select = document.createElement('select')
-    this.select.setAttribute('name', 'chromosome-select-widget')
-    this.container.appendChild(this.select)
+    constructor(browser, parent) {
 
-    this.select.addEventListener('change', () => {
-        this.select.blur()
-        if (this.select.value !== '') {
-            browser.search(this.select.value)
+        this.container = DOMUtils.div({class: 'igv-chromosome-select-widget-container'})
+        parent.appendChild(this.container)
+
+        this.select = document.createElement('select')
+        this.select.setAttribute('name', 'chromosome-select-widget')
+        this.container.appendChild(this.select)
+
+        this.select.addEventListener('change', () => {
+            this.select.blur()
+            if (this.select.value !== '' && maximumSequenceCountExceeded !== this.select.value) {
+                browser.search(this.select.value)
+            }
+        })
+
+        this.showAllChromosomes = browser.config.showAllChromosomes !== false   // i.e. default to true
+
+    }
+
+    show() {
+        this.container.style.display = 'flex'
+    }
+
+    hide() {
+        this.container.style.display = 'none'
+    }
+
+    update(genome) {
+
+        // Start with explicit chromosome name list
+        const list = genome.wgChromosomeNames || []
+
+        if (this.showAllChromosomes && genome.chromosomeNames.length > 1) {
+            const exclude = new Set(list)
+            let count = 0
+            for (let nm of genome.chromosomeNames) {
+                if (++count === 1000) {
+                    list.push(maximumSequenceCountExceeded)
+                    break
+                }
+                if (!exclude.has(nm)) {
+                    list.push(nm)
+                }
+            }
         }
-    })
 
-    this.showAllChromosomes = browser.config.showAllChromosomes !== false   // i.e. default to true
+        this.select.innerHTML = ''
 
-}
+        // Add the "all" selector if whole genome view is supported
+        if (genome.showWholeGenomeView()) {
+            list.unshift("all")
+        }
 
-ChromosomeSelectWidget.prototype.show = function () {
-    this.container.style.display = 'flex'
-}
+        for (let name of list) {
+            const option = document.createElement('option')
+            option.setAttribute('value', name)
+            option.innerText = genome.getChromosomeDisplayName(name)
+            this.select.appendChild(option)
+            // if(this.selectDisplayCSS) {
+            //     this.select.style.display = this.selectDisplayCSS
+            //     this.container.style.display = this.containerDisplayCSS
+            //     document.getElementsByClassName("igv-search-container")[0].style.width = his.searchContainerWidthCSS
+            //}
+        }
 
-ChromosomeSelectWidget.prototype.hide = function () {
-    this.container.style.display = 'none'
-}
-
-ChromosomeSelectWidget.prototype.update = function (genome) {
-
-    const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice()
-    // console.log(`${ this.showAllChromosomes ? 'Do' : 'Do not'} show all chromosomes. List ${ list }`)
-
-    if (genome.showWholeGenomeView()) {
-        list.unshift('all')
-        list.unshift('')
     }
-
-    this.select.innerHTML = ''
-
-    for (let name of list) {
-        const option = document.createElement('option')
-        option.setAttribute('value', name)
-        option.innerText = name
-        this.select.appendChild(option)
-    }
-
 }
 
 export default ChromosomeSelectWidget

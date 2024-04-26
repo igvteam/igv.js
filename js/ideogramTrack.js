@@ -48,7 +48,7 @@ class IdeogramTrack {
         return this.height
     }
 
-    draw({context, referenceFrame, pixelWidth, pixelHeight}) {
+    async draw({context, referenceFrame, pixelWidth, pixelHeight}) {
 
         const chr = referenceFrame.chr
         const chromosome = referenceFrame.genome.getChromosome(chr)
@@ -59,7 +59,7 @@ class IdeogramTrack {
 
         const stainColors = []
 
-        drawIdeogram({
+        await drawIdeogram({
             ctx: context,
             chr,
             referenceFrame,
@@ -117,7 +117,7 @@ class IdeogramTrack {
     }
 }
 
-function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors}) {
+async function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors}) {
 
     const shim = 1
     const shim2 = 0.5 * shim
@@ -129,7 +129,7 @@ function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainCol
 
     IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: IGVColor.greyScale(255)})
 
-    const cytobands = genome.getCytobands(chr)
+    const cytobands = await genome.getCytobands(chr)
     if (cytobands) {
 
         const center = (ideogramTop + height / 2)

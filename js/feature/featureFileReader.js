@@ -32,7 +32,8 @@ import GWASParser from "../gwas/gwasParser.js"
 import AEDParser from "../aed/AEDParser.js"
 import {loadIndex} from "../bam/indexFactory.js"
 import getDataWrapper from "./dataWrapper.js"
-import BGZipLineReader from "../util/BGZipLineReader.js"
+import BGZLineReader from "../util/bgzLineReader.js"
+import BGZBlockLoader from "../bam/bgzBlockLoader.js"
 
 /**
  * Reader for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -42,14 +43,15 @@ import BGZipLineReader from "../util/BGZipLineReader.js"
  */
 class FeatureFileReader {
 
-    constructor(config, genome) {
+    sequenceNames
 
-        var uriParts
+    constructor(config, genome) {
 
         this.config = config || {}
         this.genome = genome
         this.indexURL = config.indexURL
-        this.indexed = config.indexed
+        this.indexed = config.indexed || this.indexURL !== undefined
+        this.queryable = this.indexed
 
         if (FileUtils.isFile(this.config.url)) {
             this.filename = this.config.url.name
@@ -57,7 +59,7 @@ class FeatureFileReader {
             this.indexed = false  // by definition
             this.dataURI = config.url
         } else {
-            uriParts = URIUtils.parseUri(this.config.url)
+            const uriParts = URIUtils.parseUri(this.config.url)
             this.filename = config.filename || uriParts.file
         }
 
@@ -66,6 +68,7 @@ class FeatureFileReader {
         if (this.config.format === "vcf" && !this.config.indexURL) {
             console.warn("Warning: index file not specified.  The entire vcf file will be loaded.")
         }
+
     }
 
     async defaultVisibilityWindow() {
@@ -74,7 +77,7 @@ class FeatureFileReader {
             if (index && index.lastBlockPosition) {
                 let gl = 0
                 const s = 10000
-                for (let c of index.chromosomeNames) {
+                for (let c of index.sequenceNames) {
                     const chromosome = this.genome.getChromosome(c)
                     if (chromosome) {
                         gl += chromosome.bpLength
@@ -92,6 +95,11 @@ class FeatureFileReader {
      * @param end
      */
     async readFeatures(chr, start, end) {
+
+        // insure that header has been loaded
+        if(!this.dataURI && !this.header) {
+            await this.readHeader()
+        }
 
         const index = await this.getIndex()
         if (index) {
@@ -120,10 +128,12 @@ class FeatureFileReader {
                     // Note - it should be impossible to get here
                     throw new Error("Unable to load index: " + this.config.indexURL)
                 }
+                this.sequenceNames = new Set(index.sequenceNames)
 
                 let dataWrapper
                 if (index.tabix) {
-                    dataWrapper = new BGZipLineReader(this.config)
+                    this._blockLoader = new BGZBlockLoader(this.config);
+                    dataWrapper = new BGZLineReader(this.config)
                 } else {
                     // Tribble
                     const maxSize = Object.values(index.chrIndex)
@@ -151,6 +161,11 @@ class FeatureFileReader {
                 // Reset data wrapper and parse features
                 dataWrapper = getDataWrapper(data)
                 this.features = await this.parser.parseFeatures(dataWrapper)   // cache features
+
+                // Extract chromosome names
+                this.sequenceNames = new Set();
+                for(let f of this.features) this.sequenceNames.add(f.chr);
+
                 return this.header
             }
         }
@@ -203,57 +218,33 @@ class FeatureFileReader {
         const config = this.config
         const parser = this.parser
         const tabix = this.index.tabix
+
         const refId = tabix ? this.index.sequenceIndexMap[chr] : chr
         if (refId === undefined) {
             return []
         }
 
-        const genome = this.genome
-        const blocks = this.index.blocksForRange(refId, start, end)
-        if (!blocks || blocks.length === 0) {
+        const chunks = this.index.chunksForRange(refId, start, end)
+        if (!chunks || chunks.length === 0) {
             return []
         } else {
             const allFeatures = []
-            for (let block of blocks) {
-
-                const startPos = block.minv.block
-                const startOffset = block.minv.offset
-                const endOffset = block.maxv.offset
-                let endPos
-
-                if (tabix) {
-                    let lastBlockSize = 0
-                    if (endOffset > 0) {
-                        const bsizeOptions = buildOptions(config, {
-                            range: {
-                                start: block.maxv.block,
-                                size: 26
-                            }
-                        })
-                        const abuffer = await igvxhr.loadArrayBuffer(config.url, bsizeOptions)
-                        lastBlockSize = BGZip.bgzBlockSize(abuffer)
-                    }
-                    endPos = block.maxv.block + lastBlockSize
-                } else {
-                    endPos = block.maxv.block
-                }
-
-                const options = buildOptions(config, {
-                    range: {
-                        start: startPos,
-                        size: endPos - startPos + 1
-                    }
-                })
+            for (let chunk of chunks) {
 
                 let inflated
                 if (tabix) {
-                    const data = await igvxhr.loadArrayBuffer(config.url, options)
-                    inflated = BGZip.unbgzf(data)
+                    inflated = await this._blockLoader.getData(chunk.minv, chunk.maxv)
                 } else {
+                    const options = buildOptions(config, {
+                        range: {
+                            start: chunk.minv.block,
+                            size: chunk.maxv.block - chunk.minv.block + 1
+                        }
+                    })
                     inflated = await igvxhr.loadString(config.url, options)
                 }
 
-                const slicedData = startOffset ? inflated.slice(startOffset) : inflated
+                const slicedData = chunk.minv.offset ? inflated.slice(chunk.minv.offset) : inflated
                 const dataWrapper = getDataWrapper(slicedData)
                 let slicedFeatures = await parser.parseFeatures(dataWrapper)
 
@@ -265,8 +256,7 @@ class FeatureFileReader {
                 for (let i = 0; i < slicedFeatures.length; i++) {
                     const f = slicedFeatures[i]
 
-                    const canonicalChromosome = genome ? genome.getChromosomeName(f.chr) : f.chr
-                    if (canonicalChromosome !== chr) {
+                    if (f.chr !== chr) {
                         if (allFeatures.length === 0) {
                             continue  //adjacent chr to the left
                         } else {
@@ -313,7 +303,7 @@ class FeatureFileReader {
      */
     async loadIndex() {
         const indexURL = this.config.indexURL
-        return loadIndex(indexURL, this.config, this.genome)
+        return loadIndex(indexURL, this.config)
     }
 
     async loadFeaturesFromDataURI() {

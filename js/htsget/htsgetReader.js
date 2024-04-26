@@ -32,9 +32,13 @@ class HtsgetReader {
     constructor(config, genome) {
         this.config = config
         this.genome = genome
-        this.format = config.format ? config.format.toUpperCase() : "BAM"    // Backward compatibility
+        if (config.format) {
+            this.format = config.format.toUpperCase()
+        } else {
+            throw Error('Format is required, and must be either "bam" or "cram"')
+        }
         if (!(this.format === "BAM" || this.format === "VCF")) {
-            throw  Error(`htsget format ${config.format} is not supported`)
+            throw Error(`htsget format ${config.format} is not supported`)
         }
     }
 
@@ -83,7 +87,7 @@ class HtsgetReader {
             if (ticket.htsget) {
                 const format = ticket.htsget.format
                 if (!(format === "BAM" || format === "VCF")) {
-                    throw  Error(`htsget format ${format} is not supported`)
+                    throw Error(`htsget format ${format} is not supported`)
                 }
                 config.format = format.toLowerCase()
                 config.sourceType = "htsget"

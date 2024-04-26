@@ -30,6 +30,18 @@
                 name: "GWAS",
                 url: "https://s3.amazonaws.com/igv.org.demo/gwas_sample.gwas.gz",
                 indexed: false
+            },
+            {
+                type: "gwas",
+                format: "gwas",
+                name: "GWAS - custom color table",
+                colorTable: {
+                    "1": "red",
+                    "2": "blue",
+                    "3": "green"
+                },
+                url: "https://s3.amazonaws.com/igv.org.demo/gwas_sample.gwas.gz",
+                indexed: false
             }
         ]
     }

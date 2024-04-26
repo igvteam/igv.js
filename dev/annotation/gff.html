@@ -19,8 +19,15 @@
 
     var options =
         {
-            genome: "hg38",
-            locus: "myc",
+            //genome: "hg38",
+            reference: {
+                "id": "hg38",
+                "name": "Human (GRCh38/hg38)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa.fai",
+                //"twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+            },
+                locus: "chr8:127,736,541-127,736,692 chr1:155,186,114-155,186,153",
             tracks:
                 [
                     {

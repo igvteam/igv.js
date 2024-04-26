@@ -1,30 +1,6 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2016 University of California San Diego
- * Author: Jim Robinson
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
 
-import {DOMUtils} from "../../node_modules/igv-utils/src/index.js"
+import * as DOMUtils from "../ui/utils/dom-utils.js"
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 class CursorGuide {
 
@@ -51,20 +27,14 @@ class CursorGuide {
 
         function mouseMoveHandler(event) {
 
+            const tag = event.target.tagName
+
             const {x, y} = DOMUtils.translateMouseCoordinates(event, this.columnContainer)
             this.horizontalGuide.style.top = `${y}px`
 
-            const target = document.elementFromPoint(event.clientX, event.clientY)
+            if ('CANVAS' === event.target.tagName) {
 
-            let viewport = undefined
-
-            if (target.parentElement) {
-
-                if (target.parentElement.classList.contains('igv-viewport-content')) {
-                    viewport = target.parentElement.parentElement
-                } else if (target.parentElement.classList.contains('igv-viewport') && target.classList.contains('igv-viewport-content')) {
-                    viewport = target.parentElement
-                }
+                const viewport = findAncestorOfClass(event.target, 'igv-viewport')
 
                 if (viewport && browser.getRulerTrackView()) {
 
@@ -79,23 +49,26 @@ class CursorGuide {
                         }
                     }
 
-                    const rulerViewport = browser.getRulerTrackView().viewports[index]
-                    const result = rulerViewport.mouseMove(event)
+                    if (!(undefined === index)) {
 
-                    if (result) {
+                        const rulerViewport = browser.getRulerTrackView().viewports[index]
+                        const result = rulerViewport.mouseMove(event)
 
-                        const {start, bp, end} = result
-                        const interpolant = (bp - start) / (end - start)
+                        if (result) {
 
-                        if (this.customMouseHandler) {
-                            this.customMouseHandler({start, bp, end, interpolant})
-                        }
+                            const {start, bp, end} = result
+                            const interpolant = (bp - start) / (end - start)
 
-                    }
+                            if (this.customMouseHandler) {
+                                this.customMouseHandler({start, bp, end, interpolant})
+                            }
+                        } // if (result)
 
-                }
+                    } // if (index)
 
-            }
+                } // if (viewport && browser.getRulerTrackView())
+
+            } // if ('CANVAS' === event.target.tagName) {
 
         }
     }
@@ -130,6 +103,25 @@ class CursorGuide {
         }
 
     }
+
+}
+
+/**
+ * Walk up the tree until a parent is found with the given classname.  If no ancestor is found return undefined.
+ * @param target
+ * @param classname
+ * @returns {*}
+ */
+function findAncestorOfClass(target, classname) {
+
+    while (target.parentElement) {
+        if (target.parentElement.classList.contains(classname)) {
+            return target.parentElement
+        } else {
+            target = target.parentElement
+        }
+    }
+    return undefined
 
 }
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr1:1-100",
+            tracks: [
+                {
+                    type: "alignment",
+                    format: "bam",
+                    url: "../../test/data/bam/overhanging_softclip.bam",
+                    indexURL: "../../test/data/bam/overhanging_softclip.bam.bai",
+                    showSoftClips: true,
+                    showMismatches: false
+                }
+            ]
+
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

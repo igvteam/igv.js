@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>Aplysia Genome Viewer</title>
+
+    <!-- IGV JS-->
+    <!-- <script src="dist/igv.min.js"></script>-->
+    <script src="https://cdn.jsdelivr.net/npm/igv@2.12.6/dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const igvDiv = document.getElementById("igv-div")
+    const options = {
+        reference: {
+            id: "aplysia",
+            fastaURL: "./annotation-data/aleksy.hic.genome.sorted.fa",
+            indexURL: "./annotation-data/aleksy.hic.genome.sorted.fa.fai",
+            wholeGenomeView: false,
+            tracks: [
+                {
+                    name: "Unigenes",
+                    type: "annotation",
+                    format: "gff3",
+                    displayMode: "expanded",
+                    height: 300,
+                    url: "./annotation-data/unigenes.nofasta.sorted.gff.gz",
+                    colorBy: "biotype",
+                    searchable: true,
+                    searchableFields: ["ID", "Name"],
+                    colorTable: {
+                        "antisense": "blueviolet",
+                        "protein_coding": "blue",
+                        "retained_intron": "rgb(0, 150, 150)",
+                        "processed_transcript": "purple",
+                        "processed_pseudogene": "#7fff00",
+                        "unprocessed_pseudogene": "#d2691e",
+                        "*": "blue"
+                    }
+                },
+                {
+                    name: "Aleksey's annotation",
+                    type: "annotation",
+                    format: "gff3",
+                    displayMode: "expanded",
+                    height: 300,
+                    url: "./annotation-data/aleksey.nofasta.sorted.gff.gz",
+                    colorBy: "biotype",
+                    colorTable: {
+                        "antisense": "blueviolet",
+                        "protein_coding": "blue",
+                        "retained_intron": "rgb(0, 150, 150)",
+                        "processed_transcript": "purple",
+                        "processed_pseudogene": "#7fff00",
+                        "unprocessed_pseudogene": "#d2691e",
+                        "*": "black"
+                    }
+                }
+            ]
+        },
+    }
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+        })
+
+
+</script>
+
+</body>
+
+</html>

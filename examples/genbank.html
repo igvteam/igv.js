@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>igv.js</title>
+
+</head>
+
+<body>
+
+<h1>Genbank example</h1>
+
+<p>Illustrates use of .gbk file to define reference sequence and annotations.</p>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.min.js"
+
+    const igvConfig = {
+        reference: {
+            gbkURL: "https://ftp.ncbi.nlm.nih.gov/genomes/archive/old_genbank/Fungi/Candida_dubliniensis_CD36_uid38659/FM992689.gbk"
+        },
+        tracks: [
+            {
+                name: "Annotations",
+                type: "annotation",
+                format: "gbk",
+                url: "https://ftp.ncbi.nlm.nih.gov/genomes/archive/old_genbank/Fungi/Candida_dubliniensis_CD36_uid38659/FM992689.gbk",
+            }
+        ]
+    }
+
+    igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+
+
+</script>
+
+</body>
+
+</html>

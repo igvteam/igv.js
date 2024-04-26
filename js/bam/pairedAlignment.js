@@ -119,19 +119,62 @@ class PairedAlignment {
         return Math.abs(this.firstAlignment.fragmentLength)
     }
 
-    firstOfPairStrand() {
+    get firstOfPairStrand() {
+        return this.firstAlignment.firstOfPairStrand
+    }
 
-        if (this.firstAlignment.isFirstOfPair()) {
-            return this.firstAlignment.strand
-        } else if (this.secondAlignment && this.secondAlignment.isFirstOfPair()) {
-            return this.secondAlignment.strand
-        } else {
-            return this.firstAlignment.mate.strand    // Assumption is mate is first-of-pair
-        }
+    get pairOrientation() {
+        return this.firstAlignment.pairOrientation
     }
 
     hasTag(str) {
-        return this.firstAlignment.hasTag(str) || (this.secondAlignment &&  this.secondAlignment.hasTag(str))
+        return this.firstAlignment.hasTag(str) || (this.secondAlignment && this.secondAlignment.hasTag(str))
+    }
+
+    getGroupValue({option, tag}) {
+        switch (option) {
+            case "strand":
+                return this.isNegativeStrand() ? '-' : '+'
+            case "FIRST_IN_PAIR_STRAND":
+                if (this.isPaired()) {
+                    if (this.isFirstOfPair()) {
+                        return this.isNegativeStrand() ? '-' : '+'
+                    } else if (this.isSecondOfPair()) {
+                        return this.isNegativeStrand() ? '+' : '-'
+                    } else {
+                        return
+                    }
+                } else {
+                    return
+                }
+            case "START":
+                return this.start
+            case "INSERT_SIZE":
+                return this.fragmentLength
+            case "MATE_CHR":
+                return this.mate ? this.mate.chr : undefined
+            case "MQ":
+                return this.mq
+            case "ALIGNED_READ_LENGTH":
+                return this.lengthOnRef
+            case "TAG": {
+                return this.tags()[tag]
+            }
+            case 'PHASE':
+                return this.tags()["HP"]
+            case 'READ_ORDER':
+                if (this.isPaired() && this.isFirstOfPair()) {
+                    return "FIRST"
+                } else if (this.isPaired() && this.isSecondOfPair()) {
+                    return "SECOND"
+                } else {
+                    return ""
+                }
+
+
+            default:
+                return
+        }
     }
 }
 

@@ -1,9 +1,10 @@
 {
   "name": "igv",
-  "version": "2.12.6",
+  "version": "2.16.0",
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
+  "type": "module",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "files": [
     "dist/**"
@@ -11,8 +12,10 @@
   "scripts": {
     "prepack": "npm run build",
     "prepare": "npm run build",
-    "build": "node scripts/updateVersion.js && node scripts/generateEmbedCss.js && npx rollup --config",
-    "test": "mocha -u tdd -r esm"
+    "build": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config",
+    "build_iife": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config rollup.config.iife.js",
+    "updateCSS": "node scripts/generateEmbedCss.cjs",
+    "test": "node test/utils/forceESM.cjs && mocha -ui tdd"
   },
   "author": {
     "name": "Jim Robinson"
@@ -30,7 +33,8 @@
   "keywords": [
     "IGV",
     "genomics",
-    "visualization"
+    "visualization",
+    "bioinformatics"
   ],
   "license": "MIT",
   "repository": {
@@ -39,30 +43,23 @@
   },
   "browserslist": "> 1%, not dead",
   "devDependencies": {
-    "@babel/core": "^7.16.12",
-    "@babel/plugin-transform-regenerator": "^7.8.3",
-    "@babel/plugin-transform-runtime": "^7.11.5",
-    "@babel/preset-env": "^7.16.11",
-    "@rollup/plugin-babel": "^5.3.0",
-    "@rollup/plugin-commonjs": "^18.1.0",
-    "@rollup/plugin-node-resolve": "^11.2.1",
-    "@xmldom/xmldom": "^0.7.5",
+    "@rollup/plugin-strip": "^3.0.1",
+    "@rollup/plugin-terser": "^0.4.0",
+    "@xmldom/xmldom": "^0.7.9",
     "atob": "^2.1.2",
     "btoa": "^1.2.1",
-    "chai": "^4.2.0",
-    "circular-view": "github:igvteam/circular-view#v0.2.3",
-    "core-js": "^3.20.3",
+    "chai": "^4.3.7",
+    "circular-view": "github:igvteam/circular-view#v0.2.4",
+    "dompurify": "^3.0.9",
     "eslint": "^6.4.0",
-    "esm": "^3.2.25",
-    "igv-ui": "github:igvteam/igv-ui#v1.2.5",
-    "igv-utils": "github:igvteam/igv-utils#v1.3.12",
-    "mocha": "^8.1.3",
-    "regenerator-runtime": "^0.13.3",
+    "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v0.5.6",
+    "html2canvas": "^1.4.1",
+    "igv-utils": "github:igvteam/igv-utils#v1.4.8",
+    "mocha": "^10.2.0",
     "rollup": "^2.66.0",
     "rollup-plugin-copy": "^3.3.0",
-    "rollup-plugin-strip": "^1.2.2",
-    "rollup-plugin-terser": "^7.0.2",
     "sass": "^1.45.1",
+    "vanilla-picker": "^2.12.1",
     "w3c-xmlhttprequest": "^3.0.0"
   }
 }

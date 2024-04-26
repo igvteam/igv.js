@@ -35,8 +35,8 @@ import BamFilter from "./bamFilter.js"
  *
  * https://github.com/dasmoth/dalliance/blob/master/js/bam.js
  */
-
-const SEQ_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N']
+//=ACMGRSVTWYHKDBN
+const SEQ_DECODER = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N']
 const CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?']
 const READ_STRAND_FLAG = 0x10
 const MATE_STRAND_FLAG = 0x20
@@ -51,23 +51,11 @@ const MAXIMUM_SAMPLING_DEPTH = 10000
 
 const BamUtils = {
 
-    readHeader: function (url, options, genome) {
+    readHeader: async function (url, options, genome) {
 
-        return igvxhr.loadArrayBuffer(url, options)
-
-            .then(function (compressedBuffer) {
-
-                var header, unc, uncba
-
-                unc = BGZip.unbgzf(compressedBuffer)
-                uncba = unc
-
-                header = BamUtils.decodeBamHeader(uncba, genome)
-
-                return header
-
-            })
-
+        const compressedBuffer = await igvxhr.loadArrayBuffer(url, options)
+        const uncba = BGZip.unbgzf(compressedBuffer)
+        return BamUtils.decodeBamHeader(uncba, genome)
     },
 
     /**
@@ -97,7 +85,6 @@ const BamUtils = {
 
         chrToIndex = {}
         chrNames = []
-        chrAliasTable = {}
 
         for (i = 0; i < nRef; ++i) {
             var lName = readInt(ba, p)
@@ -111,11 +98,6 @@ const BamUtils = {
             chrToIndex[name] = i
             chrNames[i] = name
 
-            if (genome) {
-                alias = genome.getChromosomeName(name)
-                chrAliasTable[alias] = name
-            }
-
             p = p + 8 + lName
         }
 
@@ -123,8 +105,7 @@ const BamUtils = {
             magicNumber: magic,
             size: p,
             chrNames: chrNames,
-            chrToIndex: chrToIndex,
-            chrAliasTable: chrAliasTable
+            chrToIndex: chrToIndex
         }
 
     },
@@ -420,12 +401,6 @@ const BamUtils = {
         if (reader.samplingDepth > MAXIMUM_SAMPLING_DEPTH) {
             console.log("Warning: attempt to set sampling depth > maximum value of " + MAXIMUM_SAMPLING_DEPTH)
             reader.samplingDepth = MAXIMUM_SAMPLING_DEPTH
-        }
-
-        if (config.viewAsPairs) {
-            reader.pairsSupported = true
-        } else {
-            reader.pairsSupported = config.pairsSupported === undefined ? true : config.pairsSupported
         }
     },
 

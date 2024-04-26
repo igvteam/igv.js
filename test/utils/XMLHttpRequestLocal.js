@@ -20,14 +20,16 @@ class XMLHttpRequestLocal {
         this.onabort = undefined;
         this.response = undefined;
         this.headers = new Map();
+        this.responseHeaders = new Map();
     }
 
     open(method, url) {
 
-        if ('GET' !== method) {
+        if ('POST' === method) {
             throw Error(method + " not supported");
         }
         this.path = url;
+        this.method = method
     }
 
     setRequestHeader(key, value) {
@@ -35,39 +37,28 @@ class XMLHttpRequestLocal {
     }
 
     send() {
+
+        if(this.method === 'HEAD') {
+            const stats = fs.statSync(this.path)
+            const fileSizeInBytes = stats.size
+            this.responseHeaders.set('content-length', fileSizeInBytes)
+            if (typeof this.onload === 'function') {
+                this.onload();
+                return
+            }
+        }
+
         let b;
         const rangeString = this.headers.get('range');
         if (rangeString && rangeString.startsWith('bytes=')) {
-
-
-            const stats = fs.statSync(this.path);
-            const fileSize = stats.size;
-
+            const fd = fs.openSync(this.path, 'r');
             const tokens = rangeString.substring(6).split('-');
             const start = parseInt(tokens[0]);
-
-            if (start > fileSize) {
-                this.status = 416;
-            }
-
-            else {
-                const end = parseInt(tokens[1]);
-                let length;
-                if(end > fileSize) {
-                    this.status = 216;
-                    length = fileSize - start + 1;
-                } else {
-                    this.status = 206;
-                    length = end - start + 1;
-                }
-
-                b = Buffer.alloc(length);
-                const fd = fs.openSync(this.path, 'r');
-                const foo = fs.readSync(fd, b, 0, length, start);
-                fs.closeSync(fd);
-                this.status = 206;
-            }
-
+            const length = parseInt(tokens[1]) - start + 1;
+            b = Buffer.alloc(length);
+            fs.readSync(fd, b, 0, length, start);
+            fs.closeSync(fd);
+            this.status = 206;
         } else {
             b = fs.readFileSync(this.path);
             this.status = 200;
@@ -75,11 +66,11 @@ class XMLHttpRequestLocal {
 
         if ("arraybuffer" === this.responseType) {
             // Small node buffers can use shared backing buffers, thus the slice is neccessary.   See https://nodejs.org/dist/latest-v12.x/docs/api/buffer.html#buffer_buf_byteoffset
-            const arrayBuffer = b ? b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength) : undefined;
+            const arrayBuffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
             this.response = arrayBuffer;
         } else {
             // Assume default (text)
-            this.response = b ? b.toString() : undefined;
+            this.response = b.toString();
         }
         if (typeof this.onload === 'function') {
             this.onload();
@@ -88,6 +79,11 @@ class XMLHttpRequestLocal {
 
     abort() {
         // Ignore
+    }
+
+    getResponseHeader(name) {
+        return this.responseHeaders.get(name.toLowerCase())
+
     }
 }
 

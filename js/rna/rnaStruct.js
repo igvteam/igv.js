@@ -157,9 +157,9 @@ class RnaStructTrack extends TrackBase {
         }
     }
 
-    clickedFeatures(clickState, features) {
+    clickedFeatures(clickState) {
 
-        features = super.clickedFeatures(clickState, features)
+        const features = super.clickedFeatures(clickState)
 
         const clicked = []
 
@@ -201,28 +201,22 @@ class RnaStructTrack extends TrackBase {
 
     popupData(clickState, features) {
 
-        // We use the featureCache property rather than method to avoid async load.  If the
-        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-
-        features = this.clickedFeatures(clickState, features)
+        if(features === undefined) features = this.clickedFeatures(clickState)
 
         if (features && features.length > 0) {
 
-            return TrackBase.extractPopupData(features[0], this.getGenomeId())
+            return this.extractPopupData(features[0], this.getGenomeId())
 
         }
     }
 
     menuItemList() {
-
-        var self = this
-
         return [
             {
                 name: "Toggle arc direction",
-                click: function () {
-                    self.arcOrientation = !self.arcOrientation
-                    self.trackView.repaintViews()
+                click: function toggleArcDirectionHandler() {
+                    this.arcOrientation = !this.arcOrientation
+                    this.trackView.repaintViews()
                 }
             }
         ]

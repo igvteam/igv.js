@@ -30,7 +30,6 @@ import BamWebserviceReader from "./bamWebserviceReader.js"
 import HtsgetBamReader from "../htsget/htsgetBamReader.js"
 import CramReader from "../cram/cramReader.js"
 import Ga4ghAlignmentReader from "../ga4gh/ga4ghAlignmentReader.js"
-import {packAlignmentRows, unpairAlignments} from "./alignmentUtils.js"
 import {isDataURL} from "../util/igvUtils.js"
 import * as TrackUtils from "../util/trackUtils.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
@@ -45,9 +44,6 @@ class BamSource {
         this.genome = genome
 
         if (isDataURL(config.url)) {
-            if ("cram" === config.format) {
-                throw "CRAM data uris are not supported"
-            }
             this.config.indexed = false
         }
 
@@ -66,7 +62,7 @@ class BamSource {
                 if (StringUtils.isString(this.config.url)) {
                     const inferIndexPath = TrackUtils.inferIndexPath(this.config.url, "bai")
                     if (inferIndexPath) {
-                        console.error(`Warning: no indexURL specified for ${this.config.url}.  Guessing ${this.baiPath}`)
+                        console.error(`Warning: no indexURL specified for ${this.config.url}.  Guessing ${inferIndexPath}`)
                         this.config.indexURL = inferIndexPath
                     } else {
                         console.error(`Warning: no indexURL specified for ${this.config.url}.`)
@@ -84,36 +80,17 @@ class BamSource {
                 this.bamReader = new BamReaderNonIndexed(config, genome)
             }
         }
-
-        this.viewAsPairs = config.viewAsPairs
-        this.showSoftClips = config.showSoftClips
     }
 
-    setViewAsPairs(bool) {
-        this.viewAsPairs = bool
-    }
-
-    setShowSoftClips(bool) {
-        this.showSoftClips = bool
-    }
 
     async getAlignments(chr, bpStart, bpEnd) {
 
         const genome = this.genome
-        const showSoftClips = this.showSoftClips
 
         const alignmentContainer = await this.bamReader.readAlignments(chr, bpStart, bpEnd)
-        let alignments = alignmentContainer.alignments
-        if (!this.viewAsPairs) {
-            alignments = unpairAlignments([{alignments: alignments}])
-        }
-        const hasAlignments = alignments.length > 0
-        alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips)
 
-        this.alignmentContainer = alignmentContainer
-
-        if (hasAlignments) {
-            const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
+        if (alignmentContainer.hasAlignments) {
+            const sequence = await genome.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
             if (sequence) {
                 alignmentContainer.coverageMap.refSeq = sequence    // TODO -- fix this
                 alignmentContainer.sequence = sequence           // TODO -- fix this

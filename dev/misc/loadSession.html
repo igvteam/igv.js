@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev - Load Session</title>
+
+</head>
+
+<body>
+
+<p><input id="fileInput" type="file"/></p>
+<p><input id="processFileInput" type="button" value="Load Session File"></p>
+
+<p><input id="urlInput" type="text" placeholder="Enter Session URL"></p>
+<p><input id="processURLInput" type="button" value="Load Session URL"></p>
+
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+</div>
+
+<script type="text/javascript">
+
+
+</script>
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    let browser
+    (async () => {
+        browser = await igv.createBrowser(document.getElementById('myDiv'), { genome: "hg19" })
+        console.log(`browser ${browser.guid} is good to go.`)
+        document.getElementById('processFileInput').addEventListener('click', processFile)
+        document.getElementById('processURLInput').addEventListener('click', processUrl)
+    })()
+
+
+    async function processFile() {
+        const [sessionFile] = document.getElementById("fileInput").files
+        const trackConfigurations = await browser.loadSession({ file: sessionFile})
+        const str = trackConfigurations.map(config => JSON.stringify(config, null, 2)).join('\n')
+        console.log(str)
+    }
+
+    async function processUrl() {
+        const url = document.getElementById("urlInput").value
+        const trackConfigurations = await browser.loadSession({ url })
+        const str = trackConfigurations.map(config => JSON.stringify(config, null, 2)).join('\n')
+        console.log(str)
+    }
+
+
+
+</script>
+
+</body>
+
+</html>

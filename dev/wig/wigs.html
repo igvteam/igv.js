@@ -23,6 +23,18 @@
         genome: "hg19",
         tracks: [
             {
+                name: 'All pos bars',
+                url: '../../test/data/wig/allPositive.bedgraph',
+                // color: '#0f0',
+                indexed: false
+            },
+            {
+                name: 'All negative bars',
+                url: '../../test/data/wig/allNegativewig.bedgraph',
+                // color: '#f00',
+                indexed: false
+            },
+            {
                 name: 'All negative points',
                 url: '../../test/data/wig/allNegativewig.bedgraph',
                 indexed: false,
@@ -34,9 +46,15 @@
                 ]
             },
             {
-                name: 'All negative bars',
-                url: '../../test/data/wig/allNegativewig.bedgraph',
-                indexed: false
+                name: 'All pos points',
+                url: '../../test/data/wig/allPositive.bedgraph',
+                indexed: false,
+                graphType: "points",
+                guideLines: [
+                    {dotted: true, y: 0, color: "green"},
+                    {dotted: true, y: 0.25, color: "blue"},
+                    {dotted: true, y: 0.5, color: "red"}
+                ]
             },
             {
                 name: 'Mixed_pos_neg_points',
@@ -54,22 +72,6 @@
                 url: '../../test/data/wig/mixedPosNeg.bedgraph',
                 indexed: false
             },
-            {
-                name: 'All pos points',
-                url: '../../test/data/wig/allPositive.bedgraph',
-                indexed: false,
-                graphType: "points",
-                guideLines: [
-                    {dotted: true, y: 0, color: "green"},
-                    {dotted: true, y: 0.25, color: "blue"},
-                    {dotted: true, y: 0.5, color: "red"}
-                ]
-            },
-            {
-                name: 'All pos bars',
-                url: '../../test/data/wig/allPositive.bedgraph',
-                indexed: false
-            }
         ]
     };
 

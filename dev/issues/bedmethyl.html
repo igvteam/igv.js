@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/https://igv.org/web/img/favicon.ico">
+    <title>await demo</title>
+    <script src="https://code.jquery.com/jquery-3.4.0.min.js"></script>
+</head>
+<body>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script type="module">
+
+    import igv from "../../js"
+
+    const config = {
+        "genome": "hg38",
+        "locus": "chr20:22,613,882-22,616,334",
+        "tracks": [
+
+            {
+                "url": "../../test/data/bedmethyl/sample.bedmethyl",
+                "name": "Tab delimiters",
+                "format": "bedmethyl",
+                "type": "annotation"
+            },
+            {
+                "url": "../../test/data/bedmethyl/sample.mixed_delimiters.bedmethyl",
+                "name": "Mixed delimiters",
+                "format": "bedmethyl"
+            }
+        ]
+    }
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+
+
+</script>
+
+
+</body>
+
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>Test BAM alignments on small sequence << bam index interval size</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            reference: {
+                fastaURL: "../../test/data/bam/sam_spec_ref.fasta",
+                indexed: false
+            },
+            locus: [
+                "ref:1-50"
+            ],
+            tracks: [
+                {
+                    type: "alignment",
+                    url: "../../test/data/bam/sam_spec_example.bam",
+                    indexURL: "../../test/data/bam/sam_spec_example.bam.bai",
+                    name: "Alignments",
+                }
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+
+            document.getElementById("gotoButton").addEventListener("click", () => browser.search("chr1:155,155,322-155,155,392"));
+
+            document.getElementById("button1").addEventListener("click", () => {
+                const bamTrack = browser.findTracks("id", "myBamTrack")[0];
+                bamTrack.sort({
+                    chr: "chr1",
+                    position: 155155358,
+                    option: "BASE",
+                    direction: "ASC"
+                });
+            })
+
+            document.getElementById("button2").addEventListener("click", () => {
+                const bamTrack = browser.findTracks("id", "myBamTrack")[0];
+                bamTrack.sort({
+                    chr: "chr1",
+                    position: 155155361,
+                    option: "BASE",
+                    direction: "ASC"
+                });
+            })
+
+        })
+
+
+</script>
+
+</body>
+
+</html>
