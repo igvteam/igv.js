@@ -6,7 +6,6 @@ import GFFHelper from "./gff/gffHelper.js"
 import GtexReader from "../gtex/gtexReader.js"
 import ImmVarReader from "../gtex/immvarReader.js"
 import Ga4ghVariantReader from "../ga4gh/ga4ghVariantReader.js"
-import CivicReader from "../civic/civicReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
 import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 import {computeWGFeatures, packFeatures} from "./featureUtils.js"
@@ -55,9 +54,6 @@ class TextFeatureSource {
         } else if (config.sourceType === 'custom') {
             this.reader = new CustomServiceReader(config.source)
             this.queryable = false !== config.source.queryable
-        } else if ("civic-ws" === config.sourceType) {
-            this.reader = new CivicReader(config)
-            this.queryable = false
         } else {
             // File of some type (i.e. not a webservice)
             this.reader = new FeatureFileReader(config, genome)
