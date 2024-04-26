@@ -25,3 +25,5 @@ igv.css.map
 /config_demo.json
 /dev/oauth/oauthConfigPrivate.js
 /encode/
+examples/data
+test/data
