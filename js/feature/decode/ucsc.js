@@ -123,6 +123,17 @@ function decodeBed(tokens, header, maxColumnCount = Number.MAX_SAFE_INTEGER) {
     return feature
 }
 
+
+function decodeGappedPeak(tokens, header) {
+    const feature = decodeBed(tokens, header)
+    if (feature && tokens.length > 14) {
+        feature.signal = Number(tokens[12])
+        feature.pValue = Number(tokens[13])
+        feature.qValue  = Number(tokens[14])
+    }
+    return feature
+}
+
 /**
  * Decode a bedMethyl file.
  * Reference: https://www.encodeproject.org/data-standards/wgbs/
@@ -365,9 +376,9 @@ function decodeExons(exonCount, startsString, endsString, frameOffsetsString) {
         const start = parseInt(exonStarts[i])
         const end = parseInt(exonEnds[i])
         const exon = {start, end}
-        if(frameOffsets) {
+        if (frameOffsets) {
             const fo = parseInt(frameOffsets[i])
-            if(fo != -1) exon.readingFrame = fo;
+            if (fo != -1) exon.readingFrame = fo
         }
         exons.push(exon)
     }
@@ -419,6 +430,15 @@ function decodePeak(tokens, header) {
         chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
         pValue: pValue, qValue: qValue
     }
+}
+
+function decodeNarrowPeak(tokens, header) {
+
+    const feature = decodePeak(tokens, header)
+    if(tokens.length > 9) {
+        feature.peak = Number(tokens[9])
+    }
+    return feature
 }
 
 function decodeBedGraph(tokens, header) {
@@ -629,6 +649,6 @@ class PSLFeature {
 
 export {
     decodeBed, decodeBedGraph, decodeGenePred, decodeGenePredExt, decodePeak, decodeReflat, decodeRepeatMasker,
-    decodeSNP, decodeWig, decodePSL, decodeBedmethyl
+    decodeSNP, decodeWig, decodePSL, decodeBedmethyl, decodeGappedPeak, decodeNarrowPeak
 }
 

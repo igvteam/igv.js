@@ -36,7 +36,9 @@ import {
     decodeRepeatMasker,
     decodeSNP,
     decodeWig,
-    decodeBedmethyl
+    decodeBedmethyl,
+    decodeGappedPeak,
+    decodeNarrowPeak
 } from "./decode/ucsc.js"
 import {decodeGFF3, decodeGTF} from "./gff/gff.js"
 import {decodeFusionJuncSpan} from "./decode/fusionJuncSpan.js"
@@ -45,7 +47,6 @@ import {decodeCustom} from "./decode/custom.js"
 import {decodeGcnv} from "../gcnv/gcnvDecoder.js"
 import DecodeError from "./decode/decodeError.js"
 import GFFHelper from "./gff/gffHelper.js"
-import GenomicInterval from "../genome/genomicInterval.js"
 
 /**
  *  Parser for column style (tab delimited, etc) text file formats (bed, gff, vcf, etc).
@@ -205,7 +206,7 @@ class FeatureParser {
 
         if (("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) &&
             this.config.assembleGFF !== false) {
-            return  (new GFFHelper(this.config)).combineFeatures(allFeatures)
+            return (new GFFHelper(this.config)).combineFeatures(allFeatures)
         } else {
             return allFeatures
         }
@@ -215,11 +216,14 @@ class FeatureParser {
     setDecoder(format) {
 
         switch (format) {
-            case "narrowpeak":
             case "broadpeak":
             case "regionpeak":
             case "peaks":
                 this.decode = decodePeak
+                this.delimiter = this.config.delimiter || /\s+/
+                break
+            case "narrowpeak":
+                this.decode = decodeNarrowPeak
                 this.delimiter = this.config.delimiter || /\s+/
                 break
             case "bedgraph":
@@ -273,6 +277,10 @@ class FeatureParser {
                 break
             case "bed":
                 this.decode = decodeBed
+                this.delimiter = this.config.delimiter || /\s+/
+                break
+            case "gappedpeak":
+                this.decode = decodeGappedPeak
                 this.delimiter = this.config.delimiter || /\s+/
                 break
             case "bedmethyl":
