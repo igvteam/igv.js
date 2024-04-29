@@ -7,8 +7,8 @@ import {createBlatTrack, maxSequenceSize} from "../blat/blatTrack.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"
 import orientationTypes from "./orientationTypes.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
-import {getChrColor} from "./bamTrack.js"
 import TrackBase from "../trackBase.js"
+import {getChrColor} from "../util/getChrColor.js"
 
 const alignmentStartGap = 5
 const downsampleRowHeight = 5
