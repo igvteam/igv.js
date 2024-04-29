@@ -5,7 +5,7 @@ import GenomeUtils from "./genome/genomeUtils.js"
 import {IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {createIcon} from "./ui/utils/icons.js"
-import {getChrColor} from "./bam/bamTrack.js"
+import {getChrColor} from "./util/getChrColor.js"
 
 let timer
 let currentViewport = undefined

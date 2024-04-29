@@ -1,5 +1,4 @@
 import {numberFormatter} from "../../node_modules/igv-utils/src/stringUtils.js"
-import BamUtils from "./bamUtils.js"
 
 class SupplementaryAlignment {
 
@@ -10,7 +9,7 @@ class SupplementaryAlignment {
         this.strand = tokens[2].charAt(0)
         this.mapQ = parseInt(tokens[4])
         this.numMismatches = parseInt(tokens[5])
-        this.lenOnRef = BamUtils.computeLengthOnReference(tokens[3])
+        this.lenOnRef = computeLengthOnReference(tokens[3])
     }
 
     printString() {
@@ -25,4 +24,29 @@ function createSupplementaryAlignments(str) {
 }
 
 
-export {createSupplementaryAlignments}
+function computeLengthOnReference(cigarString) {
+
+    let len = 0
+    let buf = ''
+
+    for (let i = 0; i < cigarString.length; i++) {
+        const c = cigarString.charCodeAt(i)
+        if (c > 47 && c < 58) {
+            buf += cigarString.charAt(i)
+        } else {
+            switch (c) {
+                case 78:  // N
+                case 68:  // D
+                case 77:  // M
+                case 61:  // =
+                case 88:  // X
+                    len += parseInt(buf.toString())
+            }
+            buf = ''
+        }
+    }
+    return len
+}
+
+
+export {createSupplementaryAlignments, computeLengthOnReference}
