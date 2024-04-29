@@ -33,7 +33,8 @@ import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
 import {makeBedPEChords, sendChords} from "../jbrowse/circularViewUtils.js"
-import {getChrColor} from "../bam/bamTrack.js"
+
+import {getChrColor} from "../util/getChrColor.js"
 
 function getArcType(config) {
     if (!config.arcType) {
