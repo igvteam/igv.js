@@ -6,7 +6,7 @@ import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
 import GFFHelper from "../js/feature/gff/gffHelper.js"
-import {parseAttributeString, decodeGFFAttribute} from "../js/feature/gff/gff.js"
+import {decodeGFFAttribute, parseAttributeString} from "../js/feature/gff/parseAttributeString.js"
 
 suite("testGFF", function () {
 

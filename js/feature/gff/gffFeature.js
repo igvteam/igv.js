@@ -1,6 +1,8 @@
 import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
 import {isCoding, isIntron, isUTR} from "./so.js"
-import {parseAttributeString} from "./gff.js"
+
+
+import {parseAttributeString} from "./parseAttributeString.js"
 
 const filterPopupProperties = new Set(["id", "parent", "name"])
 
