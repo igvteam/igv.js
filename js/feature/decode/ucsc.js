@@ -1,6 +1,7 @@
 import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
-import {parseAttributeString} from "../gff/gff.js"
 import DecodeError from "./decodeError.js"
+
+import {parseAttributeString} from "../gff/parseAttributeString.js"
 
 
 /**
