@@ -1,13 +1,10 @@
 import {igvxhr, FileUtils, IGVMath} from '../../node_modules/igv-utils/src/index.js'
-import SampleInfoViewport from "./sampleInfoViewport.js";
 import {
     appleCrayonRGB,
-    appleCrayonRGBA,
-    randomRGB,
     rgbaColor,
     rgbStringHeatMapLerp, rgbStringLerp,
     rgbStringTokens
-} from "../util/colorPalletes.js";
+} from "../util/colorPalletes.js"
 import {distinctColorsPalette} from './sampleInfoPaletteLibrary.js'
 
 let attributeNames
@@ -57,35 +54,29 @@ class SampleInfo {
         return attributeNames
     }
 
+    get attributeCount() {
+        return attributeNames ? attributeNames.length : 0
+    }
+
     getAttributes(sampleName) {
 
         const key = undefined === copyNumberDictionary ? sampleName : (copyNumberDictionary[sampleName] || sampleName)
         return sampleDictionary[key]
     }
 
-    async loadSampleInfoFile(browser, path) {
-        let string
+    async loadSampleInfoFile(path) {
         try {
-            string = await igvxhr.loadString(path)
-            this.processSampleInfoFileAsString(browser, string)
+            const string = await igvxhr.loadString(path)
+            this.processSampleInfoFileAsString(string)
+            if (false === FileUtils.isFile(path)) {
+                this.sampleInfoFiles.push(path)
+            }
         } catch (e) {
             console.error(e.message)
         }
-
-        if (false === FileUtils.isFile(path)) {
-            this.sampleInfoFiles.push(path)
-        }
-
-        await SampleInfoViewport.update(browser)
-
-        const found = browser.findTracks(t => typeof t.getSamples === 'function')
-        if (found.length > 0) {
-            browser.sampleInfoControl.setButtonVisibility(true)
-        }
-
     }
 
-    processSampleInfoFileAsString(browser, string) {
+    processSampleInfoFileAsString(string) {
 
         // split file into sections: samples, sample-mapping, etc.
         const sections = string.split('#').filter(line => line.length > 0)
@@ -191,6 +182,7 @@ class SampleInfo {
         }
     }
 }
+
 
 function createSampleMappingTables(sections, sectionName) {
 
@@ -451,18 +443,18 @@ function toNumericalRepresentation(obj) {
 
 function stringToRGBString(str) {
 
-    let hash = 0;
+    let hash = 0
     for (let i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        hash = str.charCodeAt(i) + ((hash << 5) - hash)
     }
 
-    let color = [];
+    let color = []
     for (let i = 0; i < 3; i++) {
-        const value = (hash >> (i * 8)) & 0xff;
-        color.push(value);
+        const value = (hash >> (i * 8)) & 0xff
+        color.push(value)
     }
 
-    return `rgb(${color.join(', ')})`;
+    return `rgb(${color.join(', ')})`
 }
 
 // identify an array that is predominantly numerical and replace string with undefined

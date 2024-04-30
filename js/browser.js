@@ -14,7 +14,6 @@ import {getTrack} from "./trackFactory.js"
 import ROISet from "./roi/ROISet.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genomeUtils.js"
-import loadPlinkFile from "./sample/sampleInformation.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
 import {createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
@@ -66,6 +65,7 @@ import TrackBase from "./trackBase.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
 import {loadGenbank} from "./gbk/genbankParser.js"
 import igvCss from "./embedCss.js"
+import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConstants.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -366,7 +366,7 @@ class Browser {
     }
 
     getSampleInfoViewportWidth() {
-        return SampleInfoViewport.getSampleInfoColumnWidth(this)
+        return this.getSampleInfoColumnWidth()
     }
 
     isMultiLocusMode() {
@@ -1239,7 +1239,7 @@ class Browser {
         }
 
         if ("sampleinfo" === type) {
-            await this.sampleInfo.loadSampleInfoFile(this, config.url)
+            await this.loadSampleInfo(config)
             return undefined
         } else {
             // Set defaults if specified
@@ -1842,16 +1842,42 @@ class Browser {
         }
     }
 
-    async loadSampleInformation(url) {
-        var name = url
-        if (FileUtils.isFile(url)) {
-            name = url.name
+    async loadSampleInfo(config) {
+
+        await this.sampleInfo.loadSampleInfoFile(config.url)
+
+        for (const {sampleNameViewport} of this.trackViews) {
+            sampleNameViewport.setWidth(this.getSampleInfoColumnWidth())
         }
-        var ext = name.substr(name.lastIndexOf('.') + 1)
-        if (ext === 'fam') {
-            this.sampleInformation = await loadPlinkFile(url)
+
+        await this.layoutChange()
+
+        const found = this.findTracks(t => typeof t.getSamples === 'function')
+        if (found.length > 0) {
+            this.sampleInfoControl.setButtonVisibility(true)
         }
-    };
+    }
+
+    getSampleInfoColumnWidth() {
+
+        if (!this.sampleInfo.attributeCount) {
+            return 0
+        } else {
+
+            const found = this.findTracks(t => typeof t.getSamples === 'function')
+            const isFound = found.length > 0
+            const isInitialized = this.sampleInfo.isInitialized()
+            const doShowSampleInfo = this.sampleInfoControl.showSampleInfo
+            const status = isFound && isInitialized && doShowSampleInfo
+
+            if (status) {
+                return this.sampleInfo.attributeCount * sampleInfoTileWidth + sampleInfoTileXShim
+            } else {
+                return 0
+            }
+        }
+    }
+
 
 // EVENTS
 

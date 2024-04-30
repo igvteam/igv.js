@@ -28,10 +28,9 @@ import {buildOptions} from "../util/igvUtils.js"
 
 const splitLines = StringUtils.splitLines
 
-class SampleInformation {
+class PlinkSampleInformation {
     constructor() {
         this.attributes = {}
-        this.plinkLoaded = false
     }
 
     async loadPlinkFile(url, config) {
@@ -52,7 +51,6 @@ class SampleInformation {
                 phenotype: line_arr[5]
             }
         }
-        this.plinkLoaded = true
         return this
     }
 
@@ -77,7 +75,7 @@ class SampleInformation {
 }
 
 function loadPlinkFile(url, config) {
-    const si = new SampleInformation()
+    const si = new PlinkSampleInformation()
     return si.loadPlinkFile(url, config)
 }
 
