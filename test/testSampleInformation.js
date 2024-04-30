@@ -1,8 +1,8 @@
 import "./utils/mockObjects.js"
-import loadPlinkFile from "../js/sample/sampleInformation.js"
+import loadPlinkFile from "../js/sample/plinkSampleInformation.js"
 import {assert} from 'chai'
 
-suite("testRnaStruct", function () {
+suite("test sample info", function () {
 
     test('Load Plink', async function () {
         const sampleInformation = await loadPlinkFile('test/data/misc/pedigree.fam')
