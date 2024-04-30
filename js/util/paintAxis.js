@@ -49,8 +49,10 @@ function paintAxis(ctx, width, height, colorOrUndefined) {
             return number.toFixed()
         } else if (Math.abs(number) >= 1) {
             return number.toFixed(1)
-        } else {
+        } else if (Math.abs(number) >= 0.1) {
             return number.toFixed(2)
+        } else {
+            return number.toExponential(1)
         }
     }
 }
