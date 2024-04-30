@@ -1,9 +1,7 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import {attributeNamesMap, emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
-
-const sampleInfoTileXShim = 8
-const sampleInfoTileWidth = 16
+import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 
 class SampleInfoViewport {
 
@@ -32,31 +30,6 @@ class SampleInfoViewport {
         this.setWidth(width)
 
         this.addMouseHandlers()
-    }
-
-    static getSampleInfoColumnWidth(browser) {
-
-        if (undefined === browser.sampleInfo.getAttributeNames()) {
-            return 0
-        } else {
-
-            const found = browser.findTracks(t => typeof t.getSamples === 'function')
-            const isFound = found.length > 0
-
-            const isInitialized = browser.sampleInfo.isInitialized()
-
-            const doShowSampleInfo = browser.sampleInfoControl.showSampleInfo
-
-            const status = isFound && isInitialized && doShowSampleInfo
-
-            if (false === status) {
-                return 0
-            } else {
-                const sampleInfoAttributeCount = browser.sampleInfo.getAttributeNames().length
-                return sampleInfoAttributeCount * sampleInfoTileWidth + sampleInfoTileXShim
-            }
-
-        }
     }
 
     checkCanvas() {
@@ -90,16 +63,6 @@ class SampleInfoViewport {
     setWidth(width) {
         this.viewport.innerWidth = width
         this.checkCanvas()
-    }
-
-    static async update(browser) {
-
-        for (const {sampleNameViewport} of browser.trackViews) {
-            sampleNameViewport.setWidth(SampleInfoViewport.getSampleInfoColumnWidth(browser))
-        }
-
-        await browser.layoutChange()
-
     }
 
     async repaint(samples) {
