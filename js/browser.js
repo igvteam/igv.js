@@ -83,6 +83,8 @@ const column_multi_locus_shim_width = 2 + 1 + 2
 
 class Browser {
 
+    static shadowRoot
+
     constructor(config, parentDiv) {
 
         this.config = config
@@ -90,16 +92,16 @@ class Browser {
         this.namespace = '.browser_' + this.guid
 
         this.parent = parentDiv
+        if(!Browser.shadowRoot) {
+            // Only attach the shadow dom once.  We can attach multiple browsers to the shadow root
+            Browser.shadowRoot = parentDiv.attachShadow({mode: "open"})
+            const sheet = new CSSStyleSheet()
+            sheet.replaceSync(igvCss)
+            Browser.shadowRoot.adoptedStyleSheets = [sheet]
+        }
 
         this.root = DOMUtils.div({class: 'igv-container'})
-
-
-        const shadow = parentDiv.attachShadow({mode: "open"})
-        shadow.appendChild(this.root)
-
-        const sheet = new CSSStyleSheet()
-        sheet.replaceSync(igvCss)
-        shadow.adoptedStyleSheets = [sheet]
+        Browser.shadowRoot.appendChild(this.root)
 
         // spinner
         this.spinner = DOMUtils.div({class: 'igv-loading-spinner-container'})
