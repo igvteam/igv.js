@@ -403,7 +403,6 @@ function summarizeData(features, startBP, bpPerPixel, windowFunction = "mean") {
         // depending on window function
         let startBin = Math.floor((f.start - startBP) / binSize)
         const endBin = Math.floor((f.end - startBP) / binSize)
-
         if (!currentBinData) {
             // First time
             if (endBin > startBin) {
@@ -442,7 +441,7 @@ function summarizeData(features, startBP, bpPerPixel, windowFunction = "mean") {
     const c = []
     let lastFeature = summaryFeatures[0]
     for (let f of summaryFeatures) {
-        if (lastFeature.value === f.value) {
+        if (lastFeature.value === f.value && f.start <= lastFeature.end) {
             lastFeature.end = f.end
         } else {
             c.push(lastFeature)
