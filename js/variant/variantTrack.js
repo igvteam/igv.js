@@ -30,6 +30,7 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
+import {emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js";
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js"
 import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
@@ -93,6 +94,18 @@ class VariantTrack extends TrackBase {
 
         // The number of variant rows are computed dynamically, but start with "1" by default
         this.variantRowCount(1)
+
+        // Explicitly set samples -- used to select a subset of samples from a dataset
+        this.sampleKeys = []
+        this.sampleNames = new Map()
+        if (config.samples) {
+            // Explicit setting, keys == names
+            for (let s of config.samples) {
+                this.sampleKeys.push(s)
+                this.sampleNames.set(s, s)
+            }
+            this.explicitSamples = true
+        }
 
     }
 
@@ -176,7 +189,7 @@ class VariantTrack extends TrackBase {
      */
     computePixelHeight(features) {
 
-        if (!features || features.length == 0) return TOP_MARGIN
+        if (!features || 0 === features.length) return TOP_MARGIN
 
         const nVariantRows = (this.displayMode === "COLLAPSED") ? 1 : this.nVariantRows
         const vGap = (this.displayMode === "SQUISHED") ? this.squishedVGap : this.expandedVGap
