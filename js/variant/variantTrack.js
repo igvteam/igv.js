@@ -34,7 +34,7 @@ import {emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js";
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js"
 import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
-import SampleInfoControl from "../sample/sampleInfoControl.js"
+import {sortBySampleName} from "../sample/sampleUtils.js"
 
 const isString = StringUtils.isString
 
@@ -586,6 +586,28 @@ class VariantTrack extends TrackBase {
                     menuItems.push(this.colorByCB({key: undefined, label: 'None'}, this.colorBy === undefined))
                     menuItems.push('<hr/>')
                 }
+            }
+        }
+
+
+        menuItems.push('<hr/>')
+        menuItems.push(sortBySampleName())
+
+        if (sampleDictionary) {
+            menuItems.push('<hr/>')
+            menuItems.push("Sort by attribute:")
+            for (const attribute of this.browser.sampleInfo.getAttributeNames()) {
+
+                const object = $('<div>')
+                object.html(`&nbsp;&nbsp;${ attribute.split(emptySpaceReplacement).join(' ') }`)
+
+                function attributeSort() {
+                    this.sampleNames = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleNames, attribute, this.trackView.sampleInfoViewport.sortDirection)
+                    this.trackView.repaintViews()
+                    this.trackView.sampleInfoViewport.sortDirection *= -1
+                }
+
+                menuItems.push({ object, click:attributeSort })
             }
         }
 
