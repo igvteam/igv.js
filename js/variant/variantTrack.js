@@ -589,12 +589,11 @@ class VariantTrack extends TrackBase {
             }
         }
 
-
-        menuItems.push('<hr/>')
         menuItems.push(sortBySampleName())
+        menuItems.push('<hr/>')
 
         if (sampleDictionary) {
-            menuItems.push('<hr/>')
+
             menuItems.push("Sort by attribute:")
             for (const attribute of this.browser.sampleInfo.getAttributeNames()) {
 
@@ -610,6 +609,8 @@ class VariantTrack extends TrackBase {
                 menuItems.push({ object, click:attributeSort })
             }
         }
+
+        menuItems.push('<hr/>')
 
         if (this.getCallsetsLength() > 0) {
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')})
