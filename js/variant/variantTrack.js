@@ -596,6 +596,8 @@ class VariantTrack extends TrackBase {
                     this.showGenotypes = !this.showGenotypes
                     this.trackView.checkContentHeight()
                     this.trackView.repaintViews()
+
+                    this.browser.sampleNameControl.performClickWithState(this.browser, this.showGenotypes)
                 }
             })
         }
