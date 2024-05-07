@@ -34,6 +34,7 @@ import {emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js";
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js"
 import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
+import SampleInfoControl from "../sample/sampleInfoControl.js"
 
 const isString = StringUtils.isString
 
@@ -596,8 +597,8 @@ class VariantTrack extends TrackBase {
                     this.showGenotypes = !this.showGenotypes
                     this.trackView.checkContentHeight()
                     this.trackView.repaintViews()
-
                     this.browser.sampleNameControl.performClickWithState(this.browser, this.showGenotypes)
+                    this.browser.sampleInfoControl.performClickWithState(this.browser, this.showGenotypes)
                 }
             })
         }

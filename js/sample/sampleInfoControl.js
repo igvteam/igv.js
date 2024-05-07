@@ -49,18 +49,22 @@ class SampleInfoControl extends NavbarButton {
         })
 
         this.button.addEventListener('click', () => {
-
-            this.showSampleInfo = !this.showSampleInfo
-
-            for (const {sampleInfoViewport} of browser.trackViews) {
-                false === this.showSampleInfo ? sampleInfoViewport.hide() : sampleInfoViewport.show()
-            }
-
-            this.setState(this.showSampleInfo)
-
-            browser.layoutChange()
-
+            this.performClickWithState(browser, undefined)
         })
+
+    }
+
+    performClickWithState(browser, doShowSampleInfoOrUndefined) {
+
+        this.showSampleInfo = undefined === doShowSampleInfoOrUndefined ? !this.showSampleInfo : doShowSampleInfoOrUndefined
+
+        for (const {sampleInfoViewport} of browser.trackViews) {
+            false === this.showSampleInfo ? sampleInfoViewport.hide() : sampleInfoViewport.show()
+        }
+
+        this.setState(this.showSampleInfo)
+
+        browser.layoutChange()
 
     }
 
