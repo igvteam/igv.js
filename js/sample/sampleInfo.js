@@ -382,13 +382,15 @@ function updateSampleDictionary(sampleTableAsString) {
 
     const lines = sampleTableAsString.split(/[\r\n]/)
 
-    // discard "sampleTable"
-    lines.shift()
+    // discard "sampleTable" if present
+    if (lines[0].includes('sampleTable')) {
+        lines.shift()
+    }
 
-    // shift attribute labels
-    const scratch = lines.shift().split('\t')
+    // shift array with first item that is 'sample' or 'Linking_id'. Remaining items are attribute names
+    const scratch = lines.shift().split('\t').filter(line => line.length > 0)
 
-    // discard "Linking_id"
+    // discard 'sample' or 'Linking_id'
     scratch.shift()
 
     attributeNames = scratch.map(label => label.split(' ').join(emptySpaceReplacement))

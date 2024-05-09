@@ -9,6 +9,7 @@ import {ColorTable, randomRGB} from "../util/colorPalletes.js"
 import {emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js";
 import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
+import {sortBySampleName} from "../sample/sampleUtils.js"
 
 
 class SegTrack extends TrackBase {
@@ -533,22 +534,6 @@ class SegTrack extends TrackBase {
             }
         }
     }
-}
-
-
-function sortBySampleName() {
-
-    const object = $('<div>')
-    object.text('Sort by sample names')
-
-    function sampleNameSort () {
-        this.sampleKeys.sort((a, b) => this.trackView.sampleNameViewport.sortDirection * a.localeCompare(b))
-        this.trackView.repaintViews()
-        this.trackView.sampleNameViewport.sortDirection *= -1
-    }
-
-    return { object, click:sampleNameSort }
-
 }
 
 // Default copy number scales
