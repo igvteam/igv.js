@@ -82,14 +82,6 @@ class SampleNameViewport {
         this.checkCanvas()
     }
 
-    show() {
-        this.viewport.style.display = 'block'
-    }
-
-    hide() {
-        this.viewport.style.display = 'none'
-    }
-
     async repaint(samples) {
 
         if (samples.names.length > 0) {
