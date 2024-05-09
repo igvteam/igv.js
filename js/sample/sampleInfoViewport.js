@@ -192,11 +192,20 @@ class SampleInfoViewport {
     removeMouseHandlers() {
         this.viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
-    
+
     dispose() {
         this.removeMouseHandlers()
         this.viewport.remove()
     }
+
+    show() {
+        this.viewport.style.display = 'block'
+    }
+
+    hide() {
+        this.viewport.style.display = 'none'
+    }
+
 }
 
 export default SampleInfoViewport

@@ -215,6 +215,15 @@ class SampleNameViewport {
         this.removeMouseHandlers()
         this.viewport.remove()
     }
+
+    show() {
+        this.viewport.style.display = 'block'
+    }
+
+    hide() {
+        this.viewport.style.display = 'none'
+    }
+
 }
 
 function getYFont(context, text, y, height) {
