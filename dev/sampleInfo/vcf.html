@@ -31,22 +31,23 @@
     const config =
         {
             genome: "hg19",
+            locus: '22:36,656,703-36,658,223',
             // locus: [ 'myc', 'ace' ],
             // locus: 'ace',
             // locus: 'all',
             showSampleNames: true,
-            tracks:
-                [
-                    {
-                        name: 'GBM Copy Number',
-                        url: 'https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0'
-                    },
-                    {
-                        type: 'sampleinfo',
-                        url: 'https://www.dropbox.com/s/zn8nkd7bhdlg84x/GBMSampleInfo.txt?dl=0'
-                    }
+            tracks: [
+                {
+                    name: 'VCF File',
+                    height: 640,
+                    url: 'https://www.dropbox.com/scl/fi/i6u9o4a92iyceb77wyqma/ALL.apol1.sample.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf?rlkey=ndjjoliqkax9vqsjvw8waj8uz&st=j4ufojhc&dl=0'
+                },
+                {
+                    type: 'sampleinfo',
+                    url: 'https://www.dropbox.com/scl/fi/daqluy7vom9avohigi0b5/integrated_call_samples_v3.20130502.ALL.panel?rlkey=v8pn4egvgku0pcvkpg5bwgm3t&st=ke45s1pc&dl=0'
+                }
 
-                ]
+            ]
         };
 
     let browser

@@ -47,17 +47,7 @@ class SampleNameControl extends NavbarButton {
         })
 
         this.button.addEventListener('click', () => {
-
-            browser.showSampleNames = !browser.showSampleNames
-
-            for (const {sampleNameViewport} of browser.trackViews) {
-                false === browser.showSampleNames ? sampleNameViewport.hide() : sampleNameViewport.show()
-            }
-
-            this.setState(browser.showSampleNames)
-
-            browser.layoutChange()
-
+            this.performClickWithState(browser, undefined)
         })
 
         if (true === browser.config.showSampleNameButton) {
@@ -65,6 +55,20 @@ class SampleNameControl extends NavbarButton {
         } else {
             this.hide()
         }
+
+    }
+
+    performClickWithState(browser, doShowSampleNamesOrUndefined) {
+
+        browser.showSampleNames = undefined === doShowSampleNamesOrUndefined ? !browser.showSampleNames : doShowSampleNamesOrUndefined
+
+        for (const {sampleNameViewport} of browser.trackViews) {
+            false === doShowSampleNamesOrUndefined ? sampleNameViewport.hide() : sampleNameViewport.show()
+        }
+
+        this.setState(doShowSampleNamesOrUndefined)
+
+        browser.layoutChange()
 
     }
 

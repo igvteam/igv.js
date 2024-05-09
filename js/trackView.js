@@ -691,7 +691,13 @@ class TrackView {
             function trackGearClickHandler(event) {
                 event.preventDefault()
                 event.stopPropagation()
+
                 if ('none' === this.trackGearPopup.popover.style.display) {
+
+                    for (const otherTrackView of browser.trackViews.filter(t => t !== this && undefined !== t.trackGearPopup)) {
+                        otherTrackView.trackGearPopup.popover.style.display = 'none'
+                    }
+
                     this.trackGearPopup.presentMenuList(this, browser.menuUtils.trackMenuItemList(this))
                 } else {
                     this.trackGearPopup.popover.style.display = 'none'
