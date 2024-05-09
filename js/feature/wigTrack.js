@@ -403,39 +403,31 @@ function summarizeData(features, startBP, bpPerPixel, windowFunction = "mean") {
         // depending on window function
         let startBin = Math.floor((f.start - startBP) / binSize)
         const endBin = Math.floor((f.end - startBP) / binSize)
-        if (!currentBinData) {
-            // First time
-            if (endBin > startBin) {
-                // Fill bins up to "endBin"
-                const start = startBP + startBin * binSize
-                const end = startBP + endBin * binSize
-                summaryFeatures.push({chr, start, end, value: f.value})
-            }
-            currentBinData = new SummaryBinData(endBin, f.value)
 
-        } else {
-
-            if (startBin === currentBinData.bin) {
-                currentBinData.add(f.value)
-                startBin++
-            }
-
-            if (endBin > currentBinData.bin) {
-
-                finishBin(currentBinData)
-
-                // filler
-                if (endBin > startBin) {
-                    const start = startBP + startBin * binSize
-                    const end = startBP + endBin * binSize
-                    summaryFeatures.push({chr, start, end, value: f.value})
-                }
-
-                currentBinData = new SummaryBinData(endBin, f.value)
-            }
+        if (currentBinData && startBin === currentBinData.bin) {
+            currentBinData.add(f)
+            startBin++
         }
+
+        if (!currentBinData || endBin > currentBinData.bin) {
+
+            if(currentBinData) {
+                finishBin(currentBinData)
+            }
+
+            // Feature stretches across multiple bins.
+            if (endBin > startBin) {
+                const end = startBP + endBin * binSize
+                summaryFeatures.push({chr, start: f.start, end, value: f.value})
+            }
+
+            currentBinData = new SummaryBinData(endBin, f)
+        }
+
     }
-    finishBin(currentBinData)
+    if(currentBinData) {
+        finishBin(currentBinData)
+    }
 
     // Consolidate
     const c = []
@@ -455,18 +447,18 @@ function summarizeData(features, startBP, bpPerPixel, windowFunction = "mean") {
 }
 
 class SummaryBinData {
-    constructor(bin, value) {
+    constructor(bin, feature) {
         this.bin = bin
-        this.sumData = value
+        this.sumData = feature.value
         this.count = 1
-        this.min = value
-        this.max = value
+        this.min = feature.value
+        this.max = feature.value
     }
 
-    add(value) {
-        this.sumData += value
-        this.max = Math.max(value, this.max)
-        this.min = Math.min(value, this.min)
+    add(feature) {
+        this.sumData += feature.value
+        this.max = Math.max(feature.value, this.max)
+        this.min = Math.min(feature.value, this.min)
         this.count++
     }
 
