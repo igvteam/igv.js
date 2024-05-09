@@ -30,9 +30,11 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
+import {emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js";
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js"
 import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
+import {sortBySampleName} from "../sample/sampleUtils.js"
 
 const isString = StringUtils.isString
 
@@ -93,6 +95,18 @@ class VariantTrack extends TrackBase {
 
         // The number of variant rows are computed dynamically, but start with "1" by default
         this.variantRowCount(1)
+
+        // Explicitly set samples -- used to select a subset of samples from a dataset
+        this.sampleKeys = []
+        this.sampleNames = new Map()
+        if (config.samples) {
+            // Explicit setting, keys == names
+            for (let s of config.samples) {
+                this.sampleKeys.push(s)
+                this.sampleNames.set(s, s)
+            }
+            this.explicitSamples = true
+        }
 
     }
 
@@ -160,10 +174,20 @@ class VariantTrack extends TrackBase {
     }
 
     getSamples() {
+
+        const vGap = ("SQUISHED" === this.displayMode) ? this.squishedVGap : this.expandedVGap
+        const nVariantRows = "COLLAPSED" === this.displayMode ? 1 : this.nVariantRows
+        const variantHeight =  ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
+        const callHeight =  ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight)
+        const height = nVariantRows * (callHeight + vGap)
+
+        // Y Offset at which samples begin
+        const yOffset = TOP_MARGIN + nVariantRows * (variantHeight + vGap)
+
         return {
-            yOffset: this.sampleYOffset,
             names: this.sampleNames,
-            height: this.sampleHeight
+            yOffset,
+            height
         }
     }
 
@@ -176,7 +200,7 @@ class VariantTrack extends TrackBase {
      */
     computePixelHeight(features) {
 
-        if (!features || features.length == 0) return TOP_MARGIN
+        if (!features || 0 === features.length) return TOP_MARGIN
 
         const nVariantRows = (this.displayMode === "COLLAPSED") ? 1 : this.nVariantRows
         const vGap = (this.displayMode === "SQUISHED") ? this.squishedVGap : this.expandedVGap
@@ -566,6 +590,29 @@ class VariantTrack extends TrackBase {
             }
         }
 
+        menuItems.push(sortBySampleName())
+        menuItems.push('<hr/>')
+
+        if (sampleDictionary) {
+
+            menuItems.push("Sort by attribute:")
+            for (const attribute of this.browser.sampleInfo.getAttributeNames()) {
+
+                const object = $('<div>')
+                object.html(`&nbsp;&nbsp;${ attribute.split(emptySpaceReplacement).join(' ') }`)
+
+                function attributeSort() {
+                    this.sampleNames = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleNames, attribute, this.trackView.sampleInfoViewport.sortDirection)
+                    this.trackView.repaintViews()
+                    this.trackView.sampleInfoViewport.sortDirection *= -1
+                }
+
+                menuItems.push({ object, click:attributeSort })
+            }
+        }
+
+        menuItems.push('<hr/>')
+
         if (this.getCallsetsLength() > 0) {
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')})
             menuItems.push({
@@ -574,6 +621,8 @@ class VariantTrack extends TrackBase {
                     this.showGenotypes = !this.showGenotypes
                     this.trackView.checkContentHeight()
                     this.trackView.repaintViews()
+                    this.browser.sampleNameControl.performClickWithState(this.browser, this.showGenotypes)
+                    this.browser.sampleInfoControl.performClickWithState(this.browser, this.showGenotypes)
                 }
             })
         }
