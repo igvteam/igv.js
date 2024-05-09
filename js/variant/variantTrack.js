@@ -176,12 +176,13 @@ class VariantTrack extends TrackBase {
     getSamples() {
 
         const vGap = ("SQUISHED" === this.displayMode) ? this.squishedVGap : this.expandedVGap
-
-        const yOffset = vGap
-
         const nVariantRows = "COLLAPSED" === this.displayMode ? 1 : this.nVariantRows
-        const callHeight = vGap + ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight)
+        const variantHeight =  ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
+        const callHeight =  ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight)
         const height = nVariantRows * (callHeight + vGap)
+
+        // Y Offset at which samples begin
+        const yOffset = TOP_MARGIN + nVariantRows * (variantHeight + vGap)
 
         return {
             names: this.sampleNames,

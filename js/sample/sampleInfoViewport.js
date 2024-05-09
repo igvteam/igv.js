@@ -89,7 +89,7 @@ class SampleInfoViewport {
 
             shim = tileHeight - 2 * shim <= 1 ? 0 : 1
 
-            let y = 'variant' === this.trackView.track.type ? this.contentTop + shim + tileHeight : this.contentTop
+            let y = this.contentTop + samples.yOffset
 
             this.hitList = {}
             for (const sampleName of samples.names) {
