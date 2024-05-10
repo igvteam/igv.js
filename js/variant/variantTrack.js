@@ -598,16 +598,23 @@ class VariantTrack extends TrackBase {
             menuItems.push("Sort by attribute:")
             for (const attribute of this.browser.sampleInfo.getAttributeNames()) {
 
-                const object = $('<div>')
-                object.html(`&nbsp;&nbsp;${ attribute.split(emptySpaceReplacement).join(' ') }`)
+                if(this.sampleNames.some(s => {
+                    const attrs = this.browser.sampleInfo.getAttributes(s)
+                    return attrs && attrs[attribute]
+                })) {
 
-                function attributeSort() {
-                    this.sampleNames = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleNames, attribute, this.trackView.sampleInfoViewport.sortDirection)
-                    this.trackView.repaintViews()
-                    this.trackView.sampleInfoViewport.sortDirection *= -1
+
+                    const object = $('<div>')
+                    object.html(`&nbsp;&nbsp;${attribute.split(emptySpaceReplacement).join(' ')}`)
+
+                    function attributeSort() {
+                        this.sampleNames = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleNames, attribute, this.trackView.sampleInfoViewport.sortDirection)
+                        this.trackView.repaintViews()
+                        this.trackView.sampleInfoViewport.sortDirection *= -1
+                    }
+
+                    menuItems.push({object, click: attributeSort})
                 }
-
-                menuItems.push({ object, click:attributeSort })
             }
         }
 
