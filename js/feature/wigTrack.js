@@ -298,11 +298,18 @@ class WigTrack extends TrackBase {
             })
 
             // Display closest 10
-            const displayFeatures = features.length > 10 ? features.slice(0, 10) : features
+            let displayFeatures = features.length > 10 ? features.slice(0, 10) : features
 
             // Resort in ascending order
             displayFeatures.sort(function (a, b) {
                 return a.start - b.start
+            })
+
+            displayFeatures = displayFeatures.map(feature => {
+                feature.start = Math.floor(feature.start)
+                feature.end = Math.floor(feature.end)
+                feature.value = feature.value.toFixed(4)
+                return feature
             })
 
             for (let selectedFeature of displayFeatures) {
