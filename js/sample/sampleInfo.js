@@ -395,7 +395,13 @@ function updateSampleDictionary(sampleTableAsString) {
 
     attributeNames = scratch.map(label => label.split(' ').join(emptySpaceReplacement))
 
-    attributeNamesMap = new Map(attributeNames.map((name, index) => [name, index]))
+    if(!attributeNamesMap) {
+        attributeNamesMap = new Map();
+    }
+    let idx = attributeNamesMap.size;
+    for(let name of attributeNames) {
+        attributeNamesMap.set(name, idx++)
+    }
 
     const cooked = lines.filter(line => line.length > 0)
 
