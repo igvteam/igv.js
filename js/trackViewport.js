@@ -849,7 +849,7 @@ class TrackViewport extends Viewport {
         const referenceFrame = this.referenceFrame
         const viewportCoords = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
         const canvasCoords = DOMUtils.translateMouseCoordinates(event, this.canvas)
-        const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x))
+        const genomicLocation = Math.floor(((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x)))
 
         return {
             event,
