@@ -12,9 +12,9 @@
 
 <body>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+<button id="loadSampleInfoButton">Load Sample Info</button>
 
-</div>
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
@@ -55,8 +55,9 @@
         }
 
     const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
-
-    browser.loadSampleInfo({url: "https://www.dropbox.com/scl/fi/daqluy7vom9avohigi0b5/integrated_call_samples_v3.20130502.ALL.panel?rlkey=v8pn4egvgku0pcvkpg5bwgm3t&st=thwap65c&dl=0"})
+    document.getElementById('loadSampleInfoButton').addEventListener('click', (e) => {
+        browser.loadSampleInfo({url: "https://www.dropbox.com/scl/fi/daqluy7vom9avohigi0b5/integrated_call_samples_v3.20130502.ALL.panel?rlkey=v8pn4egvgku0pcvkpg5bwgm3t&st=thwap65c&dl=0"})
+    })
 
 
 </script>
