@@ -311,12 +311,12 @@ class WigTrack extends TrackBase {
                         popupData.push('<hr/>')
                     }
                     let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
-                        StringUtils.numberFormatter(selectedFeature.start + 1)
-                        : StringUtils.numberFormatter(selectedFeature.start + 1) + "-" + StringUtils.numberFormatter(selectedFeature.end)
+                        StringUtils.numberFormatter(Math.floor(selectedFeature.start) + 1)
+                        : StringUtils.numberFormatter(Math.floor(selectedFeature.start) + 1) + "-" + StringUtils.numberFormatter(Math.floor(selectedFeature.end))
                     popupData.push({name: "Position:", value: posString})
                     popupData.push({
                         name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                        value: StringUtils.numberFormatter(selectedFeature.value)
+                        value: StringUtils.numberFormatter(selectedFeature.value.toFixed(4))
                     })
                 }
             }
