@@ -108,16 +108,23 @@ class SegTrack extends TrackBase {
             menuItems.push("Sort by attribute:")
             for (const attribute of this.browser.sampleInfo.getAttributeNames()) {
 
-                const object = $('<div>')
-                object.html(`&nbsp;&nbsp;${ attribute.split(emptySpaceReplacement).join(' ') }`)
+                const sampleNames = this.sampleKeys.map(key => this.sampleNames.get(key))
+                if(sampleNames.some(s => {
+                    const attrs = this.browser.sampleInfo.getAttributes(s)
+                    return attrs && attrs[attribute]
+                })) {
 
-                function attributeSort() {
-                    this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, this.trackView.sampleInfoViewport.sortDirection)
-                    this.trackView.repaintViews()
-                    this.trackView.sampleInfoViewport.sortDirection *= -1
+                    const object = $('<div>')
+                    object.html(`&nbsp;&nbsp;${attribute.split(emptySpaceReplacement).join(' ')}`)
+
+                    function attributeSort() {
+                        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, this.trackView.sampleInfoViewport.sortDirection)
+                        this.trackView.repaintViews()
+                        this.trackView.sampleInfoViewport.sortDirection *= -1
+                    }
+
+                    menuItems.push({object, click: attributeSort})
                 }
-
-                menuItems.push({ object, click:attributeSort })
             }
         }
 
