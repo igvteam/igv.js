@@ -40,7 +40,7 @@ class CramReader {
             index: new gmodCRAM.CraiIndex({
                 filehandle: indexFileHandle
             }),
-            fetchSizeLimit: config.fetchSizeLimit || 30000000
+            fetchSizeLimit: config.fetchSizeLimit || 100000000
         })
 
         BamUtils.setReaderDefaults(this, config)
