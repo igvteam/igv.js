@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const options = {
+        genome: "hg38",
+        locus: "chr8:63,624,117-63,628,916",
+        tracks:
+            [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "name": "Homo sapiens 8988T DNase-seq",
+                    "url": "https://www.encodeproject.org/files/ENCFF278CUB/@@download/ENCFF278CUB.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens 8988T",
+                        "AssayType": "DNase-seq",
+                        "Target": "",
+                        "BioRep": "1",
+                        "TechRep": "1_1,1_2",
+                        "OutputType": "read-depth normalized signal",
+                        "Format": "bigWig",
+                        "Lab": "Gregory Crawford, Duke",
+                        "Accession": "ENCFF278CUB",
+                        "Experiment": "ENCSR000EID"
+                    },
+                    "order": 0,
+                    "format": "bigwig",
+                    "type": "wig"
+                },
+                {
+                    "name": "Homo sapiens 8988T DNase-seq",
+                    "url": "https://www.encodeproject.org/files/ENCFF140GVM/@@download/ENCFF140GVM.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens 8988T",
+                        "AssayType": "DNase-seq",
+                        "Target": "",
+                        "BioRep": "1",
+                        "TechRep": "1_1,1_2",
+                        "OutputType": "read-depth normalized signal",
+                        "Format": "bigWig",
+                        "Lab": "Gregory Crawford, Duke",
+                        "Accession": "ENCFF140GVM",
+                        "Experiment": "ENCSR000EID"
+                    },
+                    "order": 1,
+                    "format": "bigwig",
+                    "type": "wig"
+                },
+                {
+                    "name": "MANE Transcripts",
+                    "format": "bigbed",
+                    "url": "https://hgdownload.soe.ucsc.edu/gbdb/hg38/mane/mane.bb",
+                    "visibilityWindow": -1,
+                    "order": 1000000,
+                    "type": "annotation",
+                    "height": 70
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "removable": false,
+                    "order": 1000001,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
+            ]
+    };
+
+    igv.createBrowser(document.getElementById("myDiv"), options).then(function (browser) {});
+
+
+</script>
+
+</body>
+
+</html>
+
