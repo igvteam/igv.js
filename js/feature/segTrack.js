@@ -6,7 +6,7 @@ import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "../igv-icons.js"
 import {GradientColorScale} from "../util/colorScale.js"
 import {ColorTable, randomRGB} from "../util/colorPalletes.js"
-import {emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js";
+import {attributeNames, emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js";
 import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
 import {sortBySampleName} from "../sample/sampleUtils.js"
@@ -106,7 +106,7 @@ class SegTrack extends TrackBase {
         if (sampleDictionary) {
             menuItems.push('<hr/>')
             menuItems.push("Sort by attribute:")
-            for (const attribute of this.browser.sampleInfo.getAttributeNames()) {
+            for (const attribute of attributeNames) {
 
                 const sampleNames = this.sampleKeys.map(key => this.sampleNames.get(key))
                 if(sampleNames.some(s => {
