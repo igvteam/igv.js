@@ -116,7 +116,7 @@ class SampleInfoViewport {
                             const x = sampleInfoTileXShim + index * sampleInfoTileWidth
                             const yy = y + shim
                             const hh = tileHeight - (2 * shim)
-                            context.fillRect(x, yy, sampleInfoTileWidth, hh)
+                            context.fillRect(x, yy, sampleInfoTileWidth - 1, hh)
 
                             const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
                             this.hitList[key] = `${attribute}#${value}`
