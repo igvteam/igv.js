@@ -94,7 +94,13 @@ class SampleInfo {
         accumulateDictionary(attributeRangeLUT, lut)
 
         // Ensure unique attribute names list
-        attributeNames = Array.from(new Set([...attributeNames, ...names]))
+        const currentAttributeNameSet = new Set(attributeNames)
+        for (const name of names) {
+            if (!currentAttributeNameSet.has(name)) {
+                attributeNames.push(name)
+            }
+        }
+        // attributeNames = Array.from(new Set([...attributeNames, ...names]))
 
         accumulateMap(attributeNamesMap, map)
         accumulateDictionary(sampleDictionary, dictionary)
