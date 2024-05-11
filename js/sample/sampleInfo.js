@@ -55,10 +55,6 @@ class SampleInfo {
         return Object.keys(sampleDictionary).length > 0
     }
 
-    getAttributeNames() {
-        return attributeNames
-    }
-
     get attributeCount() {
         return attributeNames ? attributeNames.length : 0
     }
@@ -498,6 +494,6 @@ function stringToRGBString(str) {
 }
 
 // identify an array that is predominantly numerical and replace string with undefined
-export {sampleDictionary, emptySpaceReplacement, attributeNamesMap}
+export {sampleDictionary, emptySpaceReplacement, attributeNamesMap, attributeNames}
 
 export default SampleInfo
