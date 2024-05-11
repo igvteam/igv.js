@@ -116,7 +116,7 @@
             ]
         };
 
-    const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
+    const browser = await igv.createBrowser(document.getElementById('myDiv'), config_session)
     document.getElementById('loadSampleInfoButton').addEventListener('click', (e) => {
         browser.loadSampleInfo({url: "https://www.dropbox.com/scl/fi/daqluy7vom9avohigi0b5/integrated_call_samples_v3.20130502.ALL.panel?rlkey=v8pn4egvgku0pcvkpg5bwgm3t&st=thwap65c&dl=0"})
     })
