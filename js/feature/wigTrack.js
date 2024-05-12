@@ -96,7 +96,7 @@ class WigTrack extends TrackBase {
 
         // Summarize features to current resolution.  This needs to be done here, rather than in the "draw" function,
         // for group autoscale to work.
-        if ("all" !== chr && this.summarize && ("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
+        if (this.summarize && ("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
             return summarizeData(features, start, bpPerPixel, windowFunction)
         } else {
             return features
@@ -243,12 +243,12 @@ class WigTrack extends TrackBase {
                     } else {
 
                         const height = Math.min(pixelHeight, y - y0)
-                        IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
-
+                        const w = Math.max(1, width)
+                        IGVGraphics.fillRect(ctx, x, y0, w, height, {fillStyle: color})
                         if (f.value > this.dataRange.max) {
-                            IGVGraphics.fillRect(ctx, x, 0, width, 3, {fillStyle: this.overflowColor})
+                            IGVGraphics.fillRect(ctx, x, 0, w, 3, {fillStyle: this.overflowColor})
                         } else if (f.value < this.dataRange.min) {
-                            IGVGraphics.fillRect(ctx, x, pixelHeight - 3, width, 3, {fillStyle: this.overflowColor})
+                            IGVGraphics.fillRect(ctx, x, pixelHeight - 3, w, 3, {fillStyle: this.overflowColor})
                         }
 
                     }
