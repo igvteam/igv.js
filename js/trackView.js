@@ -657,7 +657,7 @@ class TrackView {
 
     createTrackDragHandle(browser) {
 
-        if (true === multiTrackSelectExclusionTypes.has(this.track.type)) {
+        if ('sequence' !== this.track.type && true === multiTrackSelectExclusionTypes.has(this.track.type)) {
             this.dragHandle = DOMUtils.div({class: 'igv-track-drag-shim'})
         } else {
             this.dragHandle = DOMUtils.div({class: 'igv-track-drag-handle'})
@@ -757,7 +757,7 @@ class TrackView {
 
     addTrackDragMouseHandlers(browser) {
 
-        if (false === multiTrackSelectExclusionTypes.has(this.track.type)) {
+        if ('sequence' === this.track.type || false === multiTrackSelectExclusionTypes.has(this.track.type)) {
 
             let currentDragHandle = undefined
 
