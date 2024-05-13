@@ -58,12 +58,8 @@ class SampleInfoControl extends NavbarButton {
 
         this.showSampleInfo = undefined === doShowSampleInfoOrUndefined ? !this.showSampleInfo : doShowSampleInfoOrUndefined
 
-        // const column = browser.columnContainer.querySelector('.igv-sample-info-column')
-        // column.style.display = false === this.showSampleInfo ? 'none' : 'flex'
-
-        for (const {sampleInfoViewport} of browser.trackViews) {
-            false === this.showSampleInfo ? sampleInfoViewport.hide() : sampleInfoViewport.show()
-        }
+        const column = browser.columnContainer.querySelector('.igv-sample-info-column')
+        column.style.display = false === this.showSampleInfo ? 'none' : 'flex'
 
         this.setState(this.showSampleInfo)
 

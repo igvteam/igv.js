@@ -62,12 +62,8 @@ class SampleNameControl extends NavbarButton {
 
         browser.showSampleNames = undefined === doShowSampleNamesOrUndefined ? !browser.showSampleNames : doShowSampleNamesOrUndefined
 
-        // const column = browser.columnContainer.querySelector('.igv-sample-name-column')
-        // column.style.display = false === browser.showSampleNames ? 'none' : 'flex'
-
-        for (const {sampleNameViewport} of browser.trackViews) {
-            false === browser.showSampleNames ? sampleNameViewport.hide() : sampleNameViewport.show()
-        }
+        const column = browser.columnContainer.querySelector('.igv-sample-name-column')
+        column.style.display = false === browser.showSampleNames ? 'none' : 'flex'
 
         this.setState(browser.showSampleNames)
 
