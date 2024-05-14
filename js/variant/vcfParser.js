@@ -105,13 +105,11 @@ class VcfParser {
                     }
                 } else if (line.startsWith("#CHROM")) {
                     const tokens = line.split("\t")
-
                     if (tokens.length > 8) {
-
-                        // call set names -- use column index for id
-                        header.callSets = []
+                        // Map of sample name -> index
+                        header.sampleNameMap = new Map();
                         for (let j = 9; j < tokens.length; j++) {
-                            header.callSets.push({id: j, name: tokens[j]})
+                            header.sampleNameMap.set(tokens[j], j-9)
                         }
                     }
                 }
@@ -119,7 +117,6 @@ class VcfParser {
             } else {
                 break
             }
-
         }
 
         this.header = header  // Will need to intrepret genotypes and info field
@@ -137,8 +134,8 @@ class VcfParser {
     async parseFeatures(dataWrapper) {
 
         const allFeatures = []
-        const callSets = this.header.callSets
-        const nExpectedColumns = 8 + (callSets ? callSets.length + 1 : 0)
+        const sampleNames = this.header.sampleNameMap ?  Array.from(this.header.sampleNameMap.keys()) : undefined
+        const nExpectedColumns = 8 + (sampleNames ? sampleNames.length + 1 : 0)
         let line
         while ((line = await dataWrapper.nextLine()) !== undefined) {
             if (line && !line.startsWith("#")) {
@@ -155,18 +152,18 @@ class VcfParser {
                         // Format
                         const callFields = extractCallFields(tokens[8].split(":"))
 
-                        variant.calls = {}
+                        variant.calls = []
                         for (let index = 9; index < tokens.length; index++) {
 
                             const token = tokens[index]
+                            const sampleIndex = index - 9
 
-                            const callSet = callSets[index - 9]
                             const call = {
-                                callSetName: callSet.name,
+                                sample: sampleNames[sampleIndex],
                                 info: {}
                             }
 
-                            variant.calls[callSet.id] = call
+                            variant.calls[sampleIndex] = call
 
                             token.split(":").forEach(function (callToken, idx) {
 
