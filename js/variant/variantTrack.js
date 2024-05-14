@@ -144,7 +144,9 @@ class VariantTrack extends TrackBase {
             if (typeof this.featureSource.getHeader === "function") {
                 const header = await this.featureSource.getHeader()
                 this.header = header
-                if(!this.explicitSamples) this.sampleKeys = Array.from(header.sampleNameMap.keys())
+                if(!this.explicitSamples) {
+                    this.sampleKeys = header.sampleNameMap ? Array.from(header.sampleNameMap.keys()) : []
+                }
             }
         }
 

@@ -107,8 +107,7 @@ class VcfParser {
                     const tokens = line.split("\t")
 
                     if (tokens.length > 8) {
-
-                        // call set names -- use column index for id
+                        // Map of sample name -> index
                         header.sampleNameMap = new Map();
                         for (let j = 9; j < tokens.length; j++) {
                             header.sampleNameMap.set(tokens[j], j-9)
@@ -119,7 +118,6 @@ class VcfParser {
             } else {
                 break
             }
-
         }
 
         this.header = header  // Will need to intrepret genotypes and info field
@@ -137,7 +135,7 @@ class VcfParser {
     async parseFeatures(dataWrapper) {
 
         const allFeatures = []
-        const callSets = Array.from(this.header.sampleNameMap.keys())
+        const callSets = this.header.sampleNameMap ?  Array.from(this.header.sampleNameMap.keys()) : undefined
         const nExpectedColumns = 8 + (callSets ? callSets.length + 1 : 0)
         let line
         while ((line = await dataWrapper.nextLine()) !== undefined) {
