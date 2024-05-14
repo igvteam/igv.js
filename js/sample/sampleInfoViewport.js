@@ -1,7 +1,8 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
-import {appleCrayonRGB} from '../util/colorPalletes.js'
+import {appleCrayonRGB, randomRGB} from '../util/colorPalletes.js'
 import {attributeNames, emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
+import IGVGraphics from "../igv-canvas.js"
 
 class SampleInfoViewport {
 
@@ -18,6 +19,11 @@ class SampleInfoViewport {
 
         this.viewport.style.height = `${trackView.track.height}px`
 
+        if (null === this.viewport.previousElementSibling) {
+            this.viewport.style.zIndex = 64
+            this.viewport.style.overflow = 'visible'
+        }
+
         this.canvas = document.createElement('canvas')
         this.viewport.appendChild(this.canvas)
         this.ctx = this.canvas.getContext("2d")
@@ -32,11 +38,11 @@ class SampleInfoViewport {
         this.addMouseHandlers()
     }
 
-    checkCanvas() {
+    resizeCanvas() {
 
         const dpi = window.devicePixelRatio
-        const requiredHeight = this.viewport.clientHeight
         const requiredWidth = this.browser.getSampleInfoViewportWidth()
+        const requiredHeight = null === this.viewport.previousElementSibling ? 66 : this.viewport.clientHeight
 
         if (this.canvas.width !== requiredWidth * dpi || this.canvas.height !== requiredHeight * dpi) {
             const canvas = this.canvas
@@ -46,6 +52,11 @@ class SampleInfoViewport {
             canvas.style.height = `${requiredHeight}px`
             this.ctx = this.canvas.getContext("2d")
             this.ctx.scale(dpi, dpi)
+
+            if (null === this.viewport.previousElementSibling) {
+                IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+            }
+
         }
 
     }
@@ -54,21 +65,29 @@ class SampleInfoViewport {
 
         if (typeof this.trackView.track.getSamples === 'function') {
             this.contentTop = contentTop
-            const samples = this.trackView.track.getSamples()
-            this.repaint(samples)
+            this.repaint()
         }
 
     }
 
     setWidth(width) {
         this.viewport.innerWidth = width
-        this.checkCanvas()
+        this.resizeCanvas()
     }
 
-    async repaint(samples) {
+    async repaint() {
 
-        this.checkCanvas()
-        this.draw({context: this.ctx, samples})
+        this.resizeCanvas()
+
+        if (typeof this.trackView.track.getSamples === 'function') {
+            const samples = this.trackView.track.getSamples()
+            if (samples.names && samples.names.length > 0) {
+                this.draw({context: this.ctx, samples})
+            }
+        } else if (null === this.viewport.previousElementSibling) {
+            this.renderSampleInfoColumns(this.ctx)
+        }
+
     }
 
     draw({context, samples}) {
@@ -79,7 +98,6 @@ class SampleInfoViewport {
         context.fillRect(0, 0, context.canvas.width, context.canvas.height)
 
         if (sampleDictionary && samples && samples.names.length > 0) {
-            // this.browser.sampleInfo.attributeNames
 
             const viewportHeight = this.viewport.getBoundingClientRect().height
 
@@ -133,6 +151,36 @@ class SampleInfoViewport {
 
         }
 
+
+    }
+
+    renderSampleInfoColumns(context) {
+
+        const drawRotatedText = (ctx, text, x, y, width, height) => {
+
+            const fudge = 2
+            const fudgePercentage = 0.01515
+            ctx.save()
+
+            ctx.translate(fudge + x + width/2, y + height/2)
+            ctx.rotate(-Math.PI/2)
+            ctx.textAlign = 'start'
+
+            ctx.font = '9px trebuchet ms'
+            ctx.fillStyle = appleCrayonRGB('lead')
+            ctx.fillText(text, 0, 0)
+
+            ctx.restore()
+        }
+
+        if (sampleDictionary) {
+
+            for (let i = 0; i < attributeNames.length; i++) {
+                const x = sampleInfoTileXShim + i * sampleInfoTileWidth
+                IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+                drawRotatedText(context, attributeNames[i], x, 0, sampleInfoTileWidth - 1, context.canvas.height)
+            }
+        }
     }
 
     renderSVGContext(context, {deltaX, deltaY}) {

@@ -373,12 +373,7 @@ class TrackView {
     }
 
     repaintSampleInfo() {
-        if (typeof this.track.getSamples === 'function') {
-            const samples = this.track.getSamples()
-            if (samples.names && samples.names.length > 0) {
-                this.sampleInfoViewport.repaint(samples)
-            }
-        }
+        this.sampleInfoViewport.repaint()
     }
 
     repaintSamples() {
