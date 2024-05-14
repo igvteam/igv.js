@@ -109,9 +109,9 @@ class VcfParser {
                     if (tokens.length > 8) {
 
                         // call set names -- use column index for id
-                        header.callSets = []
+                        header.sampleNameMap = new Map();
                         for (let j = 9; j < tokens.length; j++) {
-                            header.callSets.push({id: j, name: tokens[j]})
+                            header.sampleNameMap.set(tokens[j], j-9)
                         }
                     }
                 }
@@ -137,7 +137,7 @@ class VcfParser {
     async parseFeatures(dataWrapper) {
 
         const allFeatures = []
-        const callSets = this.header.callSets
+        const callSets = Array.from(this.header.sampleNameMap.keys())
         const nExpectedColumns = 8 + (callSets ? callSets.length + 1 : 0)
         let line
         while ((line = await dataWrapper.nextLine()) !== undefined) {
@@ -155,18 +155,17 @@ class VcfParser {
                         // Format
                         const callFields = extractCallFields(tokens[8].split(":"))
 
-                        variant.calls = {}
+                        variant.calls = []
                         for (let index = 9; index < tokens.length; index++) {
 
                             const token = tokens[index]
 
-                            const callSet = callSets[index - 9]
                             const call = {
-                                callSetName: callSet.name,
+                                callSetName: callSets[index-9],
                                 info: {}
                             }
 
-                            variant.calls[callSet.id] = call
+                            variant.calls[index - 9] = call
 
                             token.split(":").forEach(function (callToken, idx) {
 

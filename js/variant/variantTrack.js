@@ -30,7 +30,7 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
-import {attributeNames, emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js";
+import {attributeNames, emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js"
 import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
@@ -97,13 +97,10 @@ class VariantTrack extends TrackBase {
         this.variantRowCount(1)
 
         // Explicitly set samples -- used to select a subset of samples from a dataset
-        this.sampleKeys = []
-        this.sampleNames = new Map()
         if (config.samples) {
             // Explicit setting, keys == names
             for (let s of config.samples) {
-                this.sampleKeys.push(s)
-                this.sampleNames.set(s, s)
+                this.sampleKeys = config.samples
             }
             this.explicitSamples = true
         }
@@ -129,7 +126,7 @@ class VariantTrack extends TrackBase {
     }
 
     get supportsWholeGenome() {
-        return !this.config.indexURL  || this.config.supportsWholeGenome === true
+        return !this.config.indexURL || this.config.supportsWholeGenome === true
     }
 
     get color() {
@@ -146,19 +143,17 @@ class VariantTrack extends TrackBase {
         if (!this.header) {
             if (typeof this.featureSource.getHeader === "function") {
                 const header = await this.featureSource.getHeader()
-                if (header) {
-                    this.callSets = header.callSets || []
-                }
                 this.header = header
+                if(!this.explicitSamples) this.sampleKeys = Array.from(header.sampleNameMap.keys())
             }
-            this.sampleNames = this.callSets ? this.callSets.map(cs => cs.name) : []
         }
+
 
         return this.header
     }
 
     getCallsetsLength() {
-        return this.callSets ? this.callSets.length : 0
+        return this.sampleKeys ? this.sampleKeys.length : 0
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
@@ -177,15 +172,15 @@ class VariantTrack extends TrackBase {
 
         const vGap = ("SQUISHED" === this.displayMode) ? this.squishedVGap : this.expandedVGap
         const nVariantRows = "COLLAPSED" === this.displayMode ? 1 : this.nVariantRows
-        const variantHeight =  ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
-        const callHeight =  ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight)
+        const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
+        const callHeight = ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight)
         const height = nVariantRows * (callHeight + vGap)
 
         // Y Offset at which samples begin
         const yOffset = TOP_MARGIN + nVariantRows * (variantHeight + vGap)
 
         return {
-            names: this.sampleNames,
+            names: this.sampleKeys,
             yOffset,
             height
         }
@@ -225,10 +220,8 @@ class VariantTrack extends TrackBase {
         const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
         this.variantBandHeight = TOP_MARGIN + rowCount * (variantHeight + vGap)
 
-        let callSets = this.callSets
-        if (!callSets && this._f) {
-            callSets = this._f.callSets   // "Complementary" variant for structural variants
-        }
+        let callSets = this.sampleColumns
+
         const nCalls = this.getCallsetsLength()
         if (callSets && nCalls > 0 && this.showGenotypes !== false) {
             IGVGraphics.strokeLine(context, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '})
@@ -274,9 +267,9 @@ class VariantTrack extends TrackBase {
                 // call hook if _context_hook fn is defined
                 this.callContextHook(variant, context, x, y, w, h)
 
-                variant.pixelRect = {x, y, w, h}
+                //variant.pixelRect = {x, y, w, h}
 
-                // Loop though the calls for this variant.  There will potentially be a call for each sample.
+                // Loop though the samples for this variant.
                 if (nCalls > 0 && this.showGenotypes !== false) {
 
                     const nVariantRows = "COLLAPSED" === this.displayMode ? 1 : this.nVariantRows
@@ -284,47 +277,49 @@ class VariantTrack extends TrackBase {
                     this.sampleHeight = nVariantRows * (callHeight + vGap)  // For each sample, there is a call for each variant at this position
 
                     let sampleNumber = 0
-                    if (callSets && variant.calls) {
-                        for (let callSet of callSets) {
-                            const call = variant.calls[callSet.id]
-                            if (call) {
-                                const row = "COLLAPSED" === this.displayMode ? 0 : variant.row
-                                const py = this.sampleYOffset + sampleNumber * this.sampleHeight + row * (callHeight + vGap)
-                                let allVar = true  // until proven otherwise
-                                let allRef = true
-                                let noCall = false
 
-                                if (call.genotype) {
-                                    for (let g of call.genotype) {
-                                        if ('.' === g) {
-                                            noCall = true
-                                            break
-                                        } else {
-                                            if (g !== 0) allRef = false
-                                            if (g === 0) allVar = false
-                                        }
+                    for(let sample of this.sampleKeys) {
+
+                        const index = this.header.sampleNameMap.get(sample)
+                        const call = variant.calls[index]
+                        if (call) {
+                            const row = "COLLAPSED" === this.displayMode ? 0 : variant.row
+                            const py = this.sampleYOffset + sampleNumber * this.sampleHeight + row * (callHeight + vGap)
+                            let allVar = true  // until proven otherwise
+                            let allRef = true
+                            let noCall = false
+
+                            if (call.genotype) {
+                                for (let g of call.genotype) {
+                                    if ('.' === g) {
+                                        noCall = true
+                                        break
+                                    } else {
+                                        if (g !== 0) allRef = false
+                                        if (g === 0) allVar = false
                                     }
                                 }
-
-                                if (!call.genotype) {
-                                    context.fillStyle = this.noGenotypeColor
-                                } else if (noCall) {
-                                    context.fillStyle = this.noCallColor
-                                } else if (allRef) {
-                                    context.fillStyle = this.homrefColor
-                                } else if (allVar) {
-                                    context.fillStyle = this.homvarColor
-                                } else {
-                                    context.fillStyle = this.hetvarColor
-                                }
-
-                                context.fillRect(x, py, w, callHeight)
-
-                                callSet.pixelRect = {x, y: py, w, h: callHeight}
                             }
-                            sampleNumber++
+
+                            if (!call.genotype) {
+                                context.fillStyle = this.noGenotypeColor
+                            } else if (noCall) {
+                                context.fillStyle = this.noCallColor
+                            } else if (allRef) {
+                                context.fillStyle = this.homrefColor
+                            } else if (allVar) {
+                                context.fillStyle = this.homvarColor
+                            } else {
+                                context.fillStyle = this.hetvarColor
+                            }
+
+                            context.fillRect(x, py, w, callHeight)
+
+                            //callSet.pixelRect = {x, y: py, w, h: callHeight}
                         }
+                        sampleNumber++
                     }
+
                 }
             }
 
@@ -363,7 +358,7 @@ class VariantTrack extends TrackBase {
             variantColor = this.color
         }
 
-        if(v.isFiltered()) {
+        if (v.isFiltered()) {
             variantColor = IGVColor.addAlpha(variantColor, 0.2)
         }
 
@@ -411,16 +406,16 @@ class VariantTrack extends TrackBase {
             if ("COLLAPSED" !== this.displayMode) {
                 featureList = featureList.filter(f => f.row === variantRow)
             }
-        } else if (this.callSets) {
-            const callSets = this.callSets
+        } else if (this.sampleKeys) {
             const sampleY = yOffset - this.variantBandHeight
             const sampleRow = Math.floor(sampleY / this.sampleHeight)
-            if (sampleRow >= 0 && sampleRow < callSets.length) {
+            if (sampleRow >= 0 && sampleRow < this.sampleKeys.length) {
                 const variantRow = Math.floor((sampleY - sampleRow * this.sampleHeight) / callHeight)
                 const variants = "COLLAPSED" === this.displayMode ? featureList : featureList.filter(f => f.row === variantRow)
-                const cs = callSets[sampleRow]
+                const sampleName = this.sampleKeys[sampleRow]
+                const index = this.header.sampleNameMap.get(sampleName)
                 featureList = variants.map(v => {
-                    const call = v.calls[cs.id]
+                    const call = v.calls[index]
                     expandGenotype(call, v)
                     return call
                 })
@@ -504,7 +499,7 @@ class VariantTrack extends TrackBase {
 //
 //     const featureList = this.clickedFeatures(clickState);
 //
-//     if (this.callSets && featureList && featureList.length > 0) {
+//     if (this.sampleColumns && featureList && featureList.length > 0) {
 //
 //         featureList.forEach(function (variant) {
 //
@@ -513,7 +508,7 @@ class VariantTrack extends TrackBase {
 //                 menuItems.push({
 //                     label: 'Sort by allele length',
 //                     click: function () {
-//                         sortCallSetsByAlleleLength(self.callSets, variant, self.sortDirection);
+//                         sortCallSetsByAlleleLength(self.sampleColumns, variant, self.sortDirection);
 //                         self.sortDirection = (self.sortDirection === "ASC") ? "DESC" : "ASC";
 //                         self.trackView.repaintViews();
 //                     }
@@ -598,7 +593,7 @@ class VariantTrack extends TrackBase {
             menuItems.push("Sort by attribute:")
             for (const attribute of attributeNames) {
 
-                if(this.sampleNames.some(s => {
+                if (this.sampleKeys.some(s => {
                     const attrs = this.browser.sampleInfo.getAttributes(s)
                     return attrs && attrs[attribute]
                 })) {
@@ -608,7 +603,7 @@ class VariantTrack extends TrackBase {
                     object.html(`&nbsp;&nbsp;${attribute.split(emptySpaceReplacement).join(' ')}`)
 
                     function attributeSort() {
-                        this.sampleNames = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleNames, attribute, this.trackView.sampleInfoViewport.sortDirection)
+                        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, this.trackView.sampleInfoViewport.sortDirection)
                         this.trackView.repaintViews()
                         this.trackView.sampleInfoViewport.sortDirection *= -1
                     }
@@ -674,7 +669,7 @@ class VariantTrack extends TrackBase {
             menuItems.push('<hr>')
             menuItems.push({
                 label: 'Convert to CNVpytor track',
-                click: function cnvPytorHandler () {
+                click: function cnvPytorHandler() {
                     this.convertToPytor()
                 }
             })
@@ -729,6 +724,7 @@ class VariantTrack extends TrackBase {
     colorByCB(menuItem, showCheck) {
 
         const $e = $(createCheckbox(menuItem.label, showCheck))
+
         function clickHandler() {
 
             if (menuItem.key === this.colorBy) {
@@ -794,11 +790,11 @@ class VariantTrack extends TrackBase {
      */
     canCovertToPytor() {
 
-        if(this.config.indexURL) {
-            return false;
+        if (this.config.indexURL) {
+            return false
         }
-        if(this.header) {
-            return Object.keys(this.header.callSets).length === 1 &&
+        if (this.header) {
+            return Object.keys(this.sampleKeys).length === 1 &&
                 this.header.FORMAT &&
                 this.header.FORMAT.AD &&
                 this.header.FORMAT.DP
@@ -811,7 +807,7 @@ class VariantTrack extends TrackBase {
     async convertToPytor() {
 
         // Store state in case track is reverted
-        this.variantState = { ...this.config, ...this.getState() };
+        this.variantState = {...this.config, ...this.getState()}
         this.variantState.trackHeight = this.height
 
 
