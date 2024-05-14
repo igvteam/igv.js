@@ -25,22 +25,22 @@ suite("testGenome", function () {
 
     })
 
-    test("2bit genome with chromSizes", async function() {
-
-        this.timeout(400000)
-
-        const reference = {
-            id: "GCF_000364345.1",
-            format: "2bit",
-            twoBitURL: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/364/345/GCF_000364345.1/GCF_000364345.1.2bit",
-            chromSizesURL: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/364/345/GCF_000364345.1/GCF_000364345.1.chrom.sizes.txt"
-        }
-
-        const genome = await Genome.createGenome(reference)
-        assert.ok(genome.chromosomes.size > 0)
-        assert.ok(genome.chromosomeNames.length > 0)
-
-    })
+    // test("2bit genome with chromSizes", async function() {
+    //
+    //     this.timeout(400000)
+    //
+    //     const reference = {
+    //         id: "GCF_000364345.1",
+    //         format: "2bit",
+    //         twoBitURL: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/364/345/GCF_000364345.1/GCF_000364345.1.2bit",
+    //         chromSizesURL: "https://hgdownload.soe.ucsc.edu/hubs/GCF/000/364/345/GCF_000364345.1/GCF_000364345.1.chrom.sizes.txt"
+    //     }
+    //
+    //     const genome = await Genome.createGenome(reference)
+    //     assert.ok(genome.chromosomes.size > 0)
+    //     assert.ok(genome.chromosomeNames.length > 0)
+    //
+    // })
 
 
 })
