@@ -105,7 +105,6 @@ class VcfParser {
                     }
                 } else if (line.startsWith("#CHROM")) {
                     const tokens = line.split("\t")
-
                     if (tokens.length > 8) {
                         // Map of sample name -> index
                         header.sampleNameMap = new Map();
@@ -135,8 +134,8 @@ class VcfParser {
     async parseFeatures(dataWrapper) {
 
         const allFeatures = []
-        const callSets = this.header.sampleNameMap ?  Array.from(this.header.sampleNameMap.keys()) : undefined
-        const nExpectedColumns = 8 + (callSets ? callSets.length + 1 : 0)
+        const sampleNames = this.header.sampleNameMap ?  Array.from(this.header.sampleNameMap.keys()) : undefined
+        const nExpectedColumns = 8 + (sampleNames ? sampleNames.length + 1 : 0)
         let line
         while ((line = await dataWrapper.nextLine()) !== undefined) {
             if (line && !line.startsWith("#")) {
@@ -157,13 +156,14 @@ class VcfParser {
                         for (let index = 9; index < tokens.length; index++) {
 
                             const token = tokens[index]
+                            const sampleIndex = index - 9
 
                             const call = {
-                                callSetName: callSets[index-9],
+                                sample: sampleNames[sampleIndex],
                                 info: {}
                             }
 
-                            variant.calls[index - 9] = call
+                            variant.calls[sampleIndex] = call
 
                             token.split(":").forEach(function (callToken, idx) {
 
