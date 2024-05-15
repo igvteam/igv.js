@@ -3,6 +3,7 @@ import {appleCrayonRGB, randomRGB} from '../util/colorPalletes.js'
 import {attributeNames, emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 import IGVGraphics from "../igv-canvas.js"
+import {defaultRulerHeight} from "../rulerTrack.js"
 
 const sampleInfoColumnHeightShim = 64
 
@@ -121,6 +122,7 @@ class SampleInfoViewport {
                 this.draw({context: this.ctx, samples})
             }
         } else if (null === this.viewport.previousElementSibling) {
+            this.browser.trackViews[ 1 ].setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? sampleInfoColumnHeightShim : defaultRulerHeight, true)
             this.renderSampleInfoColumns(this.ctx)
         }
 

@@ -373,6 +373,7 @@ class TrackView {
     }
 
     repaintSampleInfo() {
+
         this.sampleInfoViewport.repaint()
     }
 
