@@ -287,7 +287,7 @@ class TrackView {
             $viewport.height(newHeight)
         }
 
-        this.sampleInfoViewport.viewport.style.height = `${newHeight}px`
+        this.sampleInfoViewport.setHeight(newHeight)
 
         this.sampleNameViewport.viewport.style.height = `${newHeight}px`
 

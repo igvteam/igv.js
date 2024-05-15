@@ -4,6 +4,8 @@ import {attributeNames, emptySpaceReplacement, sampleDictionary} from './sampleI
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 import IGVGraphics from "../igv-canvas.js"
 
+const sampleInfoColumnHeightShim = 64
+
 class SampleInfoViewport {
 
     constructor(trackView, column, width) {
@@ -42,7 +44,15 @@ class SampleInfoViewport {
 
         const dpi = window.devicePixelRatio
         const requiredWidth = this.browser.getSampleInfoViewportWidth()
-        const requiredHeight = null === this.viewport.previousElementSibling ? 66 : this.viewport.clientHeight
+
+        let requiredHeight
+        if (this.browser.trackViews.length > 1 && null === this.viewport.previousElementSibling) {
+            const [ at, bt ] = [ this.browser.trackViews[0].track, this.browser.trackViews[1].track ]
+            requiredHeight = at.height + bt.height
+        } else {
+            requiredHeight = this.viewport.clientHeight
+        }
+
 
         if (this.canvas.width !== requiredWidth * dpi || this.canvas.height !== requiredHeight * dpi) {
             const canvas = this.canvas
@@ -54,7 +64,8 @@ class SampleInfoViewport {
             this.ctx.scale(dpi, dpi)
 
             if (null === this.viewport.previousElementSibling) {
-                IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+                // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+                IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: randomRGB(150,250) })
             }
 
         }
@@ -73,6 +84,31 @@ class SampleInfoViewport {
     setWidth(width) {
         this.viewport.innerWidth = width
         this.resizeCanvas()
+    }
+
+    setHeight(newHeight) {
+
+        const w = this.browser.getSampleInfoViewportWidth()
+
+        this.viewport.style.width = `${w}px`
+        this.viewport.style.height = `${newHeight}px`
+
+        const dpi = window.devicePixelRatio
+
+        this.canvas.width = w * dpi
+        this.canvas.height = newHeight * dpi
+
+        this.canvas.style.width = `${w}px`
+        this.canvas.style.height = `${newHeight}px`
+
+        this.ctx = this.canvas.getContext('2d')
+        this.ctx.scale(dpi, dpi)
+
+        if (null === this.viewport.previousElementSibling) {
+            IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: randomRGB(150,250) })
+            // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+        }
+
     }
 
     async repaint() {
@@ -151,7 +187,6 @@ class SampleInfoViewport {
 
         }
 
-
     }
 
     renderSampleInfoColumns(context) {
@@ -177,7 +212,8 @@ class SampleInfoViewport {
 
             for (let i = 0; i < attributeNames.length; i++) {
                 const x = sampleInfoTileXShim + i * sampleInfoTileWidth
-                IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+                // IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+                IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: randomRGB(150,250) })
                 drawRotatedText(context, attributeNames[i], x, 0, sampleInfoTileWidth - 1, context.canvas.height)
             }
         }
@@ -257,4 +293,5 @@ class SampleInfoViewport {
 
 }
 
+export { sampleInfoColumnHeightShim }
 export default SampleInfoViewport
