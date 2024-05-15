@@ -4,6 +4,7 @@ import {attributeNames, emptySpaceReplacement, sampleDictionary} from './sampleI
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 import IGVGraphics from "../igv-canvas.js"
 import {defaultRulerHeight} from "../rulerTrack.js"
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 const sampleInfoColumnHeightShim = 64
 
@@ -212,11 +213,16 @@ class SampleInfoViewport {
 
         if (sampleDictionary) {
 
+            this.hitList = {}
             for (let i = 0; i < attributeNames.length; i++) {
                 const x = sampleInfoTileXShim + i * sampleInfoTileWidth
                 // IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: appleCrayonRGB('snow') })
                 IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: randomRGB(150,250) })
                 drawRotatedText(context, attributeNames[i], x, 0, sampleInfoTileWidth - 1, context.canvas.height)
+
+                const key = `${Math.floor(x)}#0#${sampleInfoTileWidth - 1}#${Math.ceil(context.canvas.height)}`
+                this.hitList[key] = `${attributeNames[i]}`
+
             }
         }
     }
@@ -258,20 +264,47 @@ class SampleInfoViewport {
 
                 const entries = Object.entries(this.hitList)
 
-                const {x, y} = DOMUtils.translateMouseCoordinates(event, this.viewport)
+                if (null === this.viewport.previousElementSibling) {
 
-                this.viewport.setAttribute('title', '')
+                    const getXY = (column, viewport) => {
+                        const { marginTop } = window.getComputedStyle(viewport)
+                        const {x, y} = DOMUtils.translateMouseCoordinates(event, this.browser.columnContainer.querySelector('.igv-sample-info-column'))
+                        return { x:Math.floor(x), y: Math.floor(y - parseInt(marginTop, 10)) }
+                    }
 
-                for (const [bbox, value] of entries) {
-                    const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
-                    if (x < xx || x > xx + width || y < yy || y > yy + height) {
-                        // do nothing
-                    } else {
-                        const [a, b] = value.split('#')
-                        this.viewport.setAttribute('title', `${a.split(emptySpaceReplacement).join(' ')}: ${'-' === b ? '' : b}`)
-                        break
+                    const column = this.browser.columnContainer.querySelector('.igv-sample-info-column')
+                    const { x, y } = getXY(column, this.viewport)
+
+                    column.setAttribute('title', '')
+                    for (const [bbox, value] of entries) {
+
+                        const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                        if (x < xx || x > xx + width || y < yy || y > yy + height) {
+                            // do nothing
+                        } else {
+                            column.setAttribute('title', `${value}`)
+                            break
+                        }
+                    }
+
+                } else {
+
+                    const {x, y} = DOMUtils.translateMouseCoordinates(event, this.viewport)
+
+                    this.viewport.setAttribute('title', '')
+
+                    for (const [bbox, value] of entries) {
+                        const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                        if (x < xx || x > xx + width || y < yy || y > yy + height) {
+                            // do nothing
+                        } else {
+                            const [a, b] = value.split('#')
+                            this.viewport.setAttribute('title', `${a.split(emptySpaceReplacement).join(' ')}: ${'-' === b ? '' : b}`)
+                            break
+                        }
                     }
                 }
+
             }
         }
     }
