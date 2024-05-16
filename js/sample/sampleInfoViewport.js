@@ -198,8 +198,6 @@ class SampleInfoViewport {
 
         const drawRotatedText = (ctx, text, x, y, width, height) => {
 
-            console.log(`draw sample info column title ${ text }`)
-
             const xShim = 2
             const yShim = 2
 
