@@ -46,6 +46,7 @@ class SampleInfoViewport {
     resizeCanvas() {
 
         const dpi = window.devicePixelRatio
+        // const dpi = 1
         const requiredWidth = this.browser.getSampleInfoViewportWidth()
 
         let requiredHeight
@@ -197,8 +198,11 @@ class SampleInfoViewport {
 
         const drawRotatedText = (ctx, text, x, y, width, height) => {
 
-            const fudge = 2
-            const fudgePercentage = 0.01515
+            console.log(`draw sample info column title ${ text }`)
+
+            const xShim = 2
+            const yShim = 2
+
             ctx.save()
 
             ctx.translate(x + width/2, y + height)
@@ -207,7 +211,7 @@ class SampleInfoViewport {
 
             ctx.font = '10px verdana'
             ctx.fillStyle = appleCrayonRGB('lead')
-            ctx.fillText(text, 2, 0)
+            ctx.fillText(text, xShim, yShim)
 
             ctx.restore()
         }
@@ -216,12 +220,15 @@ class SampleInfoViewport {
 
             this.hitList = {}
             for (let i = 0; i < attributeNames.length; i++) {
-                const x = sampleInfoTileXShim + i * sampleInfoTileWidth
-                IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: appleCrayonRGB('snow') })
-                // IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: randomRGB(150,250) })
-                drawRotatedText(context, attributeNames[i], x, 0, sampleInfoTileWidth - 1, context.canvas.height)
+                const x = (sampleInfoTileXShim + i * sampleInfoTileWidth)
+                const w = (sampleInfoTileWidth - 1)
+                const h = Math.round(context.canvas.height/window.devicePixelRatio)
 
-                const key = `${Math.floor(x)}#0#${sampleInfoTileWidth - 1}#${Math.ceil(context.canvas.height)}`
+                IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: appleCrayonRGB('snow') })
+                // IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: randomRGB(150,250) })
+                drawRotatedText(context, attributeNames[i], x, 0, w, h)
+
+                const key = `${Math.floor(x)}#0#${w}#${Math.ceil(h)}`
                 this.hitList[key] = `${attributeNames[i]}`
 
             }
