@@ -145,7 +145,7 @@ class SampleNameViewport {
         function clickHandler(event) {
 
             event.preventDefault()
-            event.stopPropagation()
+            // event.stopPropagation()
 
             const config =
                 {
@@ -167,7 +167,7 @@ class SampleNameViewport {
         this.viewport.addEventListener('mousemove', this.boundMouseMoveHandler)
 
         function mouseMove(event) {
-            event.stopPropagation()
+            // event.stopPropagation()
 
             if (this.hitList) {
 

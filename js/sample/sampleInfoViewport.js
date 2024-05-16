@@ -25,7 +25,7 @@ class SampleInfoViewport {
         this.viewport.style.height = `${trackView.track.height}px`
 
         if (null === this.viewport.previousElementSibling) {
-            this.viewport.style.zIndex = 64
+            this.viewport.style.zIndex = 16
             this.viewport.style.overflow = 'visible'
         }
 
@@ -264,7 +264,7 @@ class SampleInfoViewport {
         this.viewport.addEventListener('mousemove', this.boundMouseMoveHandler)
 
         function mouseMove(event) {
-            event.stopPropagation()
+            // event.stopPropagation()
 
             if (this.hitList) {
 
