@@ -301,7 +301,7 @@ class TrackView {
         this.repaintViews()
 
         this.updateScrollbar()
-        
+
         this.dragHandle.style.height = `${newHeight}px`
         this.gearContainer.style.height = `${newHeight}px`
 

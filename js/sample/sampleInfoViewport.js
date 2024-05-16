@@ -205,7 +205,7 @@ class SampleInfoViewport {
             ctx.rotate(-Math.PI/2)
             ctx.textAlign = 'left'
 
-            ctx.font = '9px trebuchet ms'
+            ctx.font = '10px verdana'
             ctx.fillStyle = appleCrayonRGB('lead')
             ctx.fillText(text, 2, 0)
 
