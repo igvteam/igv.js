@@ -6,7 +6,8 @@ import IGVGraphics from "../igv-canvas.js"
 import {defaultRulerHeight} from "../rulerTrack.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
-const sampleInfoColumnHeightShim = 64
+// const sampleInfoColumnHeightShim = 64
+const sampleInfoColumnHeightShim = 96
 
 class SampleInfoViewport {
 
@@ -66,8 +67,8 @@ class SampleInfoViewport {
             this.ctx.scale(dpi, dpi)
 
             if (null === this.viewport.previousElementSibling) {
-                // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
-                IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: randomRGB(150,250) })
+                IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+                // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: randomRGB(150,250) })
             }
 
         }
@@ -200,13 +201,13 @@ class SampleInfoViewport {
             const fudgePercentage = 0.01515
             ctx.save()
 
-            ctx.translate(fudge + x + width/2, y + height/2)
+            ctx.translate(x + width/2, y + height)
             ctx.rotate(-Math.PI/2)
-            ctx.textAlign = 'start'
+            ctx.textAlign = 'left'
 
             ctx.font = '9px trebuchet ms'
             ctx.fillStyle = appleCrayonRGB('lead')
-            ctx.fillText(text, 0, 0)
+            ctx.fillText(text, 2, 0)
 
             ctx.restore()
         }
@@ -216,8 +217,8 @@ class SampleInfoViewport {
             this.hitList = {}
             for (let i = 0; i < attributeNames.length; i++) {
                 const x = sampleInfoTileXShim + i * sampleInfoTileWidth
-                // IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: appleCrayonRGB('snow') })
-                IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: randomRGB(150,250) })
+                IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+                // IGVGraphics.fillRect(context, x, 0, sampleInfoTileWidth - 1, context.canvas.height, { fillStyle: randomRGB(150,250) })
                 drawRotatedText(context, attributeNames[i], x, 0, sampleInfoTileWidth - 1, context.canvas.height)
 
                 const key = `${Math.floor(x)}#0#${sampleInfoTileWidth - 1}#${Math.ceil(context.canvas.height)}`
