@@ -974,6 +974,8 @@ class TrackView {
 
 }
 
+
+
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
     if (typeof track.paintAxis === 'function') {

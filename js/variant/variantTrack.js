@@ -50,6 +50,7 @@ class VariantTrack extends TrackBase {
         displayMode: "EXPANDED",
         sortDirection: "ASC",
         showGenotypes: true,
+        expandedVariantHeight: 10,
         squishedVariantHeight: 2,
         squishedCallHeight: 1,
         expandedCallHeight: 10,
@@ -58,6 +59,7 @@ class VariantTrack extends TrackBase {
         expandedGroupGap: 10,
         squishedGroupGap: 5,
         featureHeight: 14,
+        color: "rgb(0,0,150)",
         noGenotypeColor: "rgb(200,180,180)",
         noCallColor: "rgb(225, 225, 225)",
         nonRefColor: "rgb(200, 200, 215)",
@@ -79,7 +81,10 @@ class VariantTrack extends TrackBase {
 
         super.init(config)
 
-        this.expandedVariantHeight = config.expandedVariantHeight || config.variantHeight || 10
+        if (config.variantHeight) {
+            // Override for backward compatibility
+            this.expandedVariantHeight = config.variantHeight
+        }
 
         this.featureSource = FeatureSource(config, this.browser.genome)
 
@@ -92,9 +97,8 @@ class VariantTrack extends TrackBase {
         this._strokecolor = config.strokecolor
         this._context_hook = config.context_hook
 
-
         // The number of variant rows are computed dynamically, but start with "1" by default
-        this.variantRowCount(1)
+        this.nVariantRows = 1
 
         // Explicitly set samples -- used to select a subset of samples from a dataset
         if (config.samples) {
@@ -108,11 +112,11 @@ class VariantTrack extends TrackBase {
     async postInit() {
 
         this.header = await this.getHeader()
+        if (this.disposed) return   // This track was removed during async load
+
         if (this.header && !this.sampleKeys) {
             this.sampleKeys = this.header.sampleNameMap ? Array.from(this.header.sampleNameMap.keys()) : []
         }
-
-        if (this.disposed) return   // This track was removed during async load
         if (undefined === this.visibilityWindow && this.config.indexed !== false) {
             const fn = FileUtils.isFile(this.config.url) ? this.config.url.name : this.config.url
             if (isString(fn) && fn.toLowerCase().includes("gnomad")) {
@@ -123,8 +127,10 @@ class VariantTrack extends TrackBase {
                 this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW
             }
         }
+        if(this.config.sort) {
+            this.sortSamplesByGenotype(this.config.sort)
+        }
         return this
-
     }
 
     get supportsWholeGenome() {
@@ -416,7 +422,9 @@ class VariantTrack extends TrackBase {
                 const index = this.header.sampleNameMap.get(sampleName)
                 featureList = variants.map(v => {
                     const call = v.calls[index]
-                    expandGenotype(call, v)
+                    // This is hacky, but it avoids expanding all calls in advance in case one is clicked, or
+                    // alternatively storing backpoints to the variant for all calls.
+                    call.genotypeString = expandGenotype(call, v)
                     return call
                 })
             }
@@ -448,43 +456,6 @@ class VariantTrack extends TrackBase {
             if (typeof f.popupData === 'function') {
                 const v = f.popupData(genomicLocation, genomeID)
                 Array.prototype.push.apply(popupData, v)
-            } else {
-                // Assume this is a call (genotype)
-                const call = f
-
-                if (call.sample !== undefined) {
-                    popupData.push({name: 'Name', value: call.sample})
-                }
-
-                if (call.genotypeName) {
-                    popupData.push({name: 'Genotype', value: call.genotypeName})
-                }
-
-                if (call.phaseset !== undefined) {
-                    popupData.push({name: 'Phase set', value: call.phaseset})
-                }
-                if (call.genotypeLikelihood !== undefined) {
-                    popupData.push({name: 'genotypeLikelihood', value: call.genotypeLikelihood.toString()})
-                }
-
-                if (sampleInformation) {
-                    var attr = sampleInformation.getAttributes(call.sample)
-                    if (attr) {
-                        Object.keys(attr).forEach(function (attrName) {
-                            var displayText = attrName.replace(/([A-Z])/g, " $1")
-                            displayText = displayText.charAt(0).toUpperCase() + displayText.slice(1)
-                            popupData.push({name: displayText, value: attr[attrName]})
-                        })
-                    }
-                }
-
-                var infoKeys = Object.keys(call.info)
-                if (infoKeys.length) {
-                    popupData.push('<hr/>')
-                }
-                infoKeys.forEach(function (key) {
-                    popupData.push({name: key, value: decodeURIComponent(call.info[key])})
-                })
             }
         }
         return popupData
@@ -681,21 +652,92 @@ class VariantTrack extends TrackBase {
 
     contextMenuItemList(clickState) {
 
+        const list = []
+
+        if(this.hasSamples() && this.showGenotypes) {
+            const referenceFrame = clickState.viewport.referenceFrame
+            const genomicLocation = clickState.genomicLocation
+
+            // Define a region 5 "pixels" wide in genomic coordinates
+            const direction = this.config.sort ?
+                (this.config.sort.direction === "ASC" ? "DESC" : "ASC") :      // Toggle from previous sort
+                "DESC"
+            const bpWidth = referenceFrame.toBP(2.5)
+
+
+            list.push(
+                {
+                    label: 'Sort by genotype',
+                    click: (e) => {
+
+                        const sort = {
+                            direction,
+                            sortBy: 'genotype',
+                            chr: clickState.viewport.referenceFrame.chr,
+                            start: Math.floor(genomicLocation - bpWidth),
+                            end: Math.ceil(genomicLocation + bpWidth)
+                        }
+                        const viewport = clickState.viewport
+                        const features = viewport.cachedFeatures
+                        this.sortSamplesByGenotype(sort, features)
+
+                        this.config.sort = sort
+                    }
+                }
+            )
+            list.push('<hr/>')
+        }
+
         // Experimental JBrowse circular view integration
         if (this.browser.circularView) {
-            const viewport = clickState.viewport
-            const list = []
 
+            const viewport = clickState.viewport
             list.push({
                 label: 'Add SVs to Circular View',
                 click: () => {
                     this.sendChordsForViewport(viewport)
                 }
             })
-
             list.push('<hr/>')
-            return list
         }
+
+        return list
+
+    }
+
+    /**
+     * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
+     */
+    async sortSamplesByGenotype({chr, start, end, direction}, featureList) {
+
+        if (!featureList) {
+            featureList = await this.featureSource.getFeatures({chr, start, end})
+        }
+        if (!featureList) return
+
+        const scores = new Map()
+        const d2 = (direction === "ASC" ? 1 : -1)
+
+        // Compute score for each sample
+        for (let variant of featureList) {
+            if (variant.end < start) continue
+            if (variant.start > end) break
+            for (let call of variant.calls) {
+                const sample = call.sample
+                const callScore = call.zygosityScore();
+                scores.set(sample, scores.has(sample) ? scores.get(sample) + callScore: callScore)
+            }
+        }
+
+        // Now sort sample names by score
+        this.sampleKeys.sort(function (a, b) {
+            let sa = scores.get(a) || 0
+            let sb = scores.get(b) || 0
+            return d2 * (sa - sb)
+        })
+
+        this.trackView.repaintViews()
+
     }
 
 
@@ -847,7 +889,7 @@ function expandGenotype(call, variant) {
             const altArray = variant.alternateBases.split(",")
             for (let allele of call.genotype) {
                 if (gt.length > 0) {
-                    gt += "|"
+                    gt += " | "
                 }
                 if ('.' === allele) {
                     gt += '.'
@@ -859,7 +901,7 @@ function expandGenotype(call, variant) {
                 }
             }
         }
-        call.genotypeName = gt
+        return gt
     }
 }
 

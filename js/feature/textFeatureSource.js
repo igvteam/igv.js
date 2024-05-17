@@ -2,10 +2,8 @@ import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
 import FeatureFileReader from "./featureFileReader.js"
 import CustomServiceReader from "./customServiceReader.js"
 import UCSCServiceReader from "./ucscServiceReader.js"
-import GFFHelper from "./gff/gffHelper.js"
 import GtexReader from "../gtex/gtexReader.js"
 import ImmVarReader from "../gtex/immvarReader.js"
-import Ga4ghVariantReader from "../ga4gh/ga4ghVariantReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
 import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 import {computeWGFeatures, packFeatures} from "./featureUtils.js"
@@ -37,8 +35,7 @@ class TextFeatureSource {
             this.reader = config.reader
             this.queryable = config.queryable !== false
         } else if (config.sourceType === "ga4gh") {
-            this.reader = new Ga4ghVariantReader(config, genome)
-            this.queryable = true
+            throw Error("Unsupported source type 'ga4gh'")
         } else if (config.sourceType === "immvar") {
             this.reader = new ImmVarReader(config)
             this.queryable = true
