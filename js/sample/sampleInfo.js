@@ -17,7 +17,7 @@ let colorDictionary = {}
 const emptySpaceReplacement = '|'
 const colorForNA = appleCrayonRGB('magnesium')
 
-const sampleInfoFileHeaders = ["#sampleTable", "#sampleMapping", "#colors"]
+const sampleInfoFileHeaders = ['#sampleTable', '#sampleMapping', '#colors']
 
 class SampleInfo {
     constructor(browser) {
@@ -261,7 +261,10 @@ function createSectionDictionary(string) {
     let currentHeader = null
 
     for (const line of lines) {
-        if (sampleInfoFileHeaders.includes(line)) {
+        if (line.startsWith('sample')) {
+            currentHeader = '#sampleTable'
+            dictionary[currentHeader] = [ line ]
+        } else if (sampleInfoFileHeaders.includes(line)) {
             currentHeader = line
             dictionary[currentHeader] = []
         } else if (currentHeader && false === line.startsWith('#')) {
