@@ -11,11 +11,13 @@ let attributeNames = []
 let attributeNamesMap = new Map()
 let attributeRangeLUT = {}
 let sampleDictionary = {}
-let copyNumberDictionary
+let sampleMappingDictionary = {}
 let colorDictionary = {}
 
 const emptySpaceReplacement = '|'
 const colorForNA = appleCrayonRGB('magnesium')
+
+const sampleInfoFileHeaders = ["#sampleTable", "#sampleMapping", "#colors"]
 
 class SampleInfo {
     constructor(browser) {
@@ -47,7 +49,7 @@ class SampleInfo {
         attributeNamesMap = new Map()
         attributeRangeLUT = {}
         sampleDictionary = {}
-        copyNumberDictionary = undefined
+        sampleMappingDictionary = {}
         colorDictionary = {}
     }
 
@@ -61,7 +63,7 @@ class SampleInfo {
 
     getAttributes(sampleName) {
 
-        const key = undefined === copyNumberDictionary ? sampleName : (copyNumberDictionary[sampleName] || sampleName)
+        const key = 0 === Object.keys(sampleMappingDictionary) ? sampleName : (sampleMappingDictionary[sampleName] || sampleName)
         return sampleDictionary[key]
     }
 
@@ -79,32 +81,24 @@ class SampleInfo {
 
     processSampleInfoFileAsString(string) {
 
-        // split file into sections: samples, sample-mapping, etc.
-        const sections = string.split('#').filter(line => line.length > 0)
+        const sectionDictionary = createSectionDictionary(string)
 
-        // First section is always samples
-        const { dictionary, map, names } = updateWithSampleTable(sections[0])
+        for (const [header, value] of Object.entries(sectionDictionary)) {
+            switch (header) {
+                case '#sampleTable':
+                    console.log('Accumulate sample table data')
+                    accumulateSampleTableDictionary(value)
+                    break;
+                case '#sampleMapping':
+                    console.log('Accumulate sample mapping data')
+                    accumulateSampleMappingDictionary(value)
+                    break;
+                case '#colors':
+                    console.log('Accumulate color table data')
+                    accumulateColorScheme(value)
+                    break;
 
-        // Establish the range of values for each attribute
-        const lut = createAttributeRangeLUT(names, dictionary)
-        accumulateDictionary(attributeRangeLUT, lut)
-
-        // Ensure unique attribute names list
-        const currentAttributeNameSet = new Set(attributeNames)
-        for (const name of names) {
-            if (!currentAttributeNameSet.has(name)) {
-                attributeNames.push(name)
             }
-        }
-        // attributeNames = Array.from(new Set([...attributeNames, ...names]))
-
-        accumulateMap(attributeNamesMap, map)
-        accumulateDictionary(sampleDictionary, dictionary)
-
-        // If there are more sections look for the copy-number section
-        if (sections.length > 1) {
-            createSampleMappingTables(sections, 'copynumber')
-            createColorScheme(sections)
         }
 
     }
@@ -197,6 +191,87 @@ class SampleInfo {
     }
 }
 
+function accumulateSampleTableDictionary(lines) {
+
+    // shift array with first item that is 'sample' or 'Linking_id'. Remaining items are attribute names
+    const scratch = lines.shift().split('\t').filter(line => line.length > 0)
+
+    // discard 'sample' or 'Linking_id'
+    scratch.shift()
+
+    const attributes = scratch.map(label => label.split(' ').join(emptySpaceReplacement))
+
+    const attributeMap = new Map(attributes.map((name, index) => [name, index]))
+
+    const cooked = lines.filter(line => line.length > 0)
+
+    let samples
+    for (const line of cooked) {
+
+        const record = line.split('\t')
+        const _key_ = record.shift()
+
+        if (undefined === samples) {
+            samples = {}
+        }
+
+        samples[_key_] = {}
+
+        for (let i = 0; i < record.length; i++) {
+            const obj = {}
+
+            if ("" === record[i]) {
+                obj[attributes[i]] = '-'
+            } else {
+                obj[attributes[i]] = record[i]
+            }
+
+            Object.assign(samples[_key_], obj)
+        }
+
+    } // for (lines)
+
+    for (const [key, record] of Object.entries(samples)) {
+        samples[key] = toNumericalRepresentation(record)
+    }
+
+    // Establish the range of values for each attribute
+    const lut = createAttributeRangeLUT(attributes, samples)
+    accumulateDictionary(attributeRangeLUT, lut)
+
+    // Ensure unique attribute names list
+    const currentAttributeNameSet = new Set(attributeNames)
+    for (const name of attributes) {
+        if (!currentAttributeNameSet.has(name)) {
+            attributeNames.push(name)
+        }
+    }
+
+    accumulateMap(attributeNamesMap, attributeMap)
+    accumulateDictionary(sampleDictionary, samples)
+
+}
+
+function createSectionDictionary(string) {
+
+    const dictionary = {}
+
+    const lines = string.split(/\r?\n|\r/).map(line => line.trim()).filter(line => '' !== line)
+
+    let currentHeader = null
+
+    for (const line of lines) {
+        if (sampleInfoFileHeaders.includes(line)) {
+            currentHeader = line
+            dictionary[currentHeader] = []
+        } else if (currentHeader && false === line.startsWith('#')) {
+            dictionary[currentHeader].push(line)
+        }
+    }
+
+    return dictionary
+}
+
 function accumulateMap(accumulator, map) {
     map.forEach((value, key) => {
         if (!accumulator.has(key) || accumulator.get(key) !== value) {
@@ -213,149 +288,118 @@ function accumulateDictionary(accumulator, dictionary) {
     }
 }
 
-function createSampleMappingTables(sections, sectionName) {
+function accumulateSampleMappingDictionary(lines) {
 
-    let found
-    if ('copynumber' === sectionName) {
-        found = sections.filter(string => string.startsWith(sectionName))
-        if (found.length > 0) {
+    for (const line of lines) {
+        const [key, value] = line.split('\t')
+        sampleMappingDictionary[key] = value
+    }
+}
 
-            // Get the copy-number section. It is one long string
-            let copyNumber = found[0]
+function accumulateColorScheme(colorSettings) {
 
-            // split into lines
-            copyNumber = copyNumber.split(/[\r\n]/).filter(line => line.length > 0)
-            copyNumber.shift()
+    const mappingfunction = (token, index, array) => {
 
-            for (const line of copyNumber) {
-                const [a, b] = line.split('\t')
+        let result
+        switch (index) {
+            case 0:
+                result = token.split(' ').join(emptySpaceReplacement)
+                break
+            case 1:
+                result = token.includes(':') ? token.split(':').map(str => parseFloat(str)) : token
+                break
+            case 2:
+                result = `rgb(${token})`
+                break
+            case 3:
+                result = `rgb(${token})`
+        }
 
-                if (undefined === copyNumberDictionary) {
-                    copyNumberDictionary = {}
-                }
-                copyNumberDictionary[a] = b
-            }
+        return result
+    }
 
+    const mappings = colorSettings.map(setting => {
+        const list = setting.split('\t')
+        const result = list.map(mappingfunction)
+        return result
+    })
+
+    const triplets = mappings
+        .filter(mapping => 3 === mapping.length && !mapping.includes('*'))
+        .filter(([a, b, c]) => !Array.isArray(b))
+
+    const tmp = {}
+    for (const triplet of triplets) {
+        const [attribute, value, rgb] = triplet
+        if (undefined === tmp[attribute]) {
+            tmp[attribute] = {}
+        }
+        tmp[attribute][value.toUpperCase()] = rgb
+    }
+
+    for (const [k, v] of Object.entries(tmp)) {
+        const lut = Object.assign({}, v)
+        colorDictionary[k] = attributeValue => {
+
+            const key = attributeValue.toUpperCase()
+            const color = lut[key] || appleCrayonRGB('snow')
+            return color
         }
     }
 
-}
+    const clamped = mappings.filter(mapping => Array.isArray(mapping[1]))
 
-function createColorScheme(sections) {
+    for (const cl of clamped) {
+        const [a, b] = cl[1]
+        const attribute = cl[0]
 
-    const found = sections.filter(string => string.startsWith('colors'))
+        if (3 === cl.length) {
 
-    if (found.length > 0) {
+            const [_r, _g, _b] = rgbStringTokens(cl[2])
 
-        let colorSettings = found[0]
-
-        colorSettings = colorSettings.split(/[\r\n]/).filter(line => line.length > 0)
-        colorSettings.shift()
-
-        const mappingfunction = (token, index, array) => {
-
-            let result
-            switch (index) {
-                case 0:
-                    result = token.split(' ').join(emptySpaceReplacement)
-                    break
-                case 1:
-                    result = token.includes(':') ? token.split(':').map(str => parseFloat(str)) : token
-                    break
-                case 2:
-                    result = `rgb(${token})`
-                    break
-                case 3:
-                    result = `rgb(${token})`
+            colorDictionary[attribute] = attributeValue => {
+                attributeValue = IGVMath.clamp(attributeValue, a, b)
+                const interpolant = (attributeValue - a) / (b - a)
+                return rgbaColor(_r, _g, _b, interpolant)
             }
 
-            return result
-        }
+        } else if (4 === cl.length) {
 
-        const mappings = colorSettings.map(setting => {
-            const list = setting.split('\t')
-            const result = list.map(mappingfunction)
-            return result
-        })
-
-        const triplets = mappings
-            .filter(mapping => 3 === mapping.length && !mapping.includes('*'))
-            .filter(([a, b, c]) => !Array.isArray(b))
-
-        const tmp = {}
-        for (const triplet of triplets) {
-            const [attribute, value, rgb] = triplet
-            if (undefined === tmp[attribute]) {
-                tmp[attribute] = {}
-            }
-            tmp[attribute][value.toUpperCase()] = rgb
-        }
-
-        for (const [k, v] of Object.entries(tmp)) {
-            const lut = Object.assign({}, v)
-            colorDictionary[k] = attributeValue => {
-
-                const key = attributeValue.toUpperCase()
-                const color = lut[key] || appleCrayonRGB('snow')
-                return color
-            }
-        }
-
-        const clamped = mappings.filter(mapping => Array.isArray(mapping[1]))
-
-        for (const cl of clamped) {
             const [a, b] = cl[1]
-            const attribute = cl[0]
+            const [attribute, ignore, rgbA, rgbB] = cl
 
-            if (3 === cl.length) {
-
-                const [_r, _g, _b] = rgbStringTokens(cl[2])
-
-                colorDictionary[attribute] = attributeValue => {
-                    attributeValue = IGVMath.clamp(attributeValue, a, b)
-                    const interpolant = (attributeValue - a) / (b - a)
-                    return rgbaColor(_r, _g, _b, interpolant)
-                }
-
-            } else if (4 === cl.length) {
-
-                const [a, b] = cl[1]
-                const [attribute, ignore, rgbA, rgbB] = cl
-
-                colorDictionary[attribute] = attributeValue => {
-                    attributeValue = IGVMath.clamp(attributeValue, a, b)
-                    const interpolant = (attributeValue - a) / (b - a)
-                    return rgbStringHeatMapLerp(rgbA, rgbB, interpolant)
-                }
+            colorDictionary[attribute] = attributeValue => {
+                attributeValue = IGVMath.clamp(attributeValue, a, b)
+                const interpolant = (attributeValue - a) / (b - a)
+                return rgbStringHeatMapLerp(rgbA, rgbB, interpolant)
             }
         }
+    }
 
-        const wildCards = mappings.filter(mapping => 3 === mapping.length && mapping.includes('*'))
+    const wildCards = mappings.filter(mapping => 3 === mapping.length && mapping.includes('*'))
 
-        for (const wildCard of wildCards) {
+    for (const wildCard of wildCards) {
 
-            if ('*' === wildCard[1]) {
-                const [attribute, star, rgb] = wildCard
+        if ('*' === wildCard[1]) {
+            const [attribute, star, rgb] = wildCard
 
-                colorDictionary[attribute] = attributeValue => {
+            colorDictionary[attribute] = attributeValue => {
 
-                    if ('NA' === attributeValue) {
-                        return colorForNA
-                    } else {
-                        const [min, max] = attributeRangeLUT[attribute]
-                        const interpolant = (attributeValue - min) / (max - min)
+                if ('NA' === attributeValue) {
+                    return colorForNA
+                } else {
+                    const [min, max] = attributeRangeLUT[attribute]
+                    const interpolant = (attributeValue - min) / (max - min)
 
-                        const [r, g, b] = rgbStringTokens(rgb)
-                        return rgbaColor(r, g, b, interpolant)
-                    }
-
+                    const [r, g, b] = rgbStringTokens(rgb)
+                    return rgbaColor(r, g, b, interpolant)
                 }
 
-            } else if ('*' === wildCard[0]) {
-                const [star, attributeValue, rgb] = wildCard
-                colorDictionary[attributeValue] = () => rgb
             }
 
+        } else if ('*' === wildCard[0]) {
+            const [star, attributeValue, rgb] = wildCard
+            colorDictionary[attributeValue] = () => rgb
         }
 
     }
@@ -405,63 +449,6 @@ function createAttributeRangeLUT(names, dictionary) {
     }
 
     return lut
-}
-
-function updateWithSampleTable(sampleTableAsString) {
-
-    let tempDict
-    let tempMap
-    let tempAttributeNames
-
-    const lines = sampleTableAsString.split(/[\r\n]/)
-
-    // discard "sampleTable" if present
-    if (lines[0].includes('sampleTable')) {
-        lines.shift()
-    }
-
-    // shift array with first item that is 'sample' or 'Linking_id'. Remaining items are attribute names
-    const scratch = lines.shift().split('\t').filter(line => line.length > 0)
-
-    // discard 'sample' or 'Linking_id'
-    scratch.shift()
-
-    tempAttributeNames = scratch.map(label => label.split(' ').join(emptySpaceReplacement))
-
-    tempMap = new Map(tempAttributeNames.map((name, index) => [name, index]))
-
-    const cooked = lines.filter(line => line.length > 0)
-
-    for (const line of cooked) {
-
-        const record = line.split('\t')
-        const _key_ = record.shift()
-
-        if (undefined === tempDict) {
-            tempDict = {}
-        }
-
-        tempDict[_key_] = {}
-
-        for (let i = 0; i < record.length; i++) {
-            const obj = {}
-
-            if ("" === record[i]) {
-                obj[tempAttributeNames[i]] = '-'
-            } else {
-                obj[tempAttributeNames[i]] = record[i]
-            }
-
-            Object.assign(tempDict[_key_], obj)
-        }
-
-    } // for (lines)
-
-    for (const [key, record] of Object.entries(tempDict)) {
-        tempDict[key] = toNumericalRepresentation(record)
-    }
-
-    return { dictionary: tempDict, map: tempMap, names: tempAttributeNames }
 }
 
 function toNumericalRepresentation(obj) {
