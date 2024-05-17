@@ -199,7 +199,7 @@ class CNVPytorTrack extends TrackBase {
                 }
                 this.header = header
             }
-            this.sampleNames = this.callSets ? this.callSets.map(cs => cs.name) : []
+            this.sampleKeys = this.callSets ? this.callSets.map(cs => cs.name) : []
         }
 
         return this.header

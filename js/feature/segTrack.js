@@ -33,12 +33,10 @@ class SegTrack extends TrackBase {
 
         // Explicitly set samples -- used to select a subset of samples from a dataset
         this.sampleKeys = []
-        this.sampleNames = new Map()
         if (config.samples) {
             // Explicit setting, keys == names
             for (let s of config.samples) {
                 this.sampleKeys.push(s)
-                this.sampleNames.set(s, s)
             }
             this.explicitSamples = true
         }
@@ -108,7 +106,7 @@ class SegTrack extends TrackBase {
             menuItems.push("Sort by attribute:")
             for (const attribute of attributeNames) {
 
-                const sampleNames = this.sampleKeys.map(key => this.sampleNames.get(key))
+                const sampleNames = this.sampleKeys
                 if(sampleNames.some(s => {
                     const attrs = this.browser.sampleInfo.getAttributes(s)
                     return attrs && attrs[attribute]
@@ -183,7 +181,7 @@ class SegTrack extends TrackBase {
 
     getSamples() {
         return {
-            names: this.sampleKeys.map(key => this.sampleNames.get(key)),
+            names: this.sampleKeys,
             height: this.sampleHeight,
             yOffset: 0
         }
@@ -533,10 +531,10 @@ class SegTrack extends TrackBase {
 
         if (this.explicitSamples) return
 
+        const sampleKeySet = new Set(this.sampleKeys)
         for (let feature of featureList) {
             const sampleKey = feature.sampleKey || feature.sample
-            if (!this.sampleNames.has(sampleKey)) {
-                this.sampleNames.set(sampleKey, feature.sample)
+            if (!sampleKeySet.has(sampleKey)) {
                 this.sampleKeys.push(sampleKey)
             }
         }

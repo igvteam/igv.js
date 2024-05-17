@@ -11,14 +11,7 @@
 
 <body>
 
-<p><input id="fileInput" type="file"></p>
-<p><input id="processFileInput" type="button" value="Load Sample Info File"></p>
-
-<p><input  id="urlInput" type="text" placeholder="Enter Sample Info URL"></p>
-<p><input  id="processURLInput" type="button" value="Load Sample Info URL"></p>
-
-<p><input  id="trackURLInput" type="text" placeholder="Enter Track URL"></p>
-<p><input  id="processTrackURLInput" type="button" value="Load Track URL"></p>
+<button id="logSession">Log Session</button>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
@@ -30,52 +23,34 @@
 
     const config =
         {
-            genome: "hg19",
-            locus: '22:36,656,703-36,658,223',
-            // locus: [ 'myc', 'ace' ],
-            // locus: 'ace',
-            // locus: 'all',
-            // showSampleNames: true,
-            tracks: [
-                // {
-                //     name: 'VCF File',
-                //     height: 640,
-                //     url: 'https://www.dropbox.com/scl/fi/i6u9o4a92iyceb77wyqma/ALL.apol1.sample.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf?rlkey=ndjjoliqkax9vqsjvw8waj8uz&st=j4ufojhc&dl=0'
-                // },
-                // {
-                //     type: 'sampleinfo',
-                //     url: 'https://www.dropbox.com/scl/fi/daqluy7vom9avohigi0b5/integrated_call_samples_v3.20130502.ALL.panel?rlkey=v8pn4egvgku0pcvkpg5bwgm3t&st=ke45s1pc&dl=0'
-                // }
-
+            genome: "hg38",
+            "locus": "chr22:36,655,100-36,656,060",
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sampleinfo",
+                    "url": "../../test/data/sample/integrated_call_samples_v3.20130502.ALL.panel"
+                },
+                {
+                    "url": "../../test/data/vcf/genotypes.vcf",
+                    "name": "ALL.apol1.sample.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf",
+                    "format": "vcf",
+                    "type": "variant",
+                    "height": 500,
+                    "sort": {
+                        "direction": "DESC",
+                        "sortBy": "genotype",
+                        "chr": "chr22",
+                        "start": 36655509,
+                        "end": 36655513
+                    }
+                }
             ]
         };
 
-    let browser
-    (async () => {
-        browser = await igv.createBrowser(document.getElementById('myDiv'), config)
-        console.log(`browser ${ browser.guid } is good to go.`)
-        document.getElementById('processFileInput').addEventListener('click', processFile)
-        document.getElementById('processURLInput').addEventListener('click', processUrl)
-        document.getElementById('processTrackURLInput').addEventListener('click', processTrackUrl)
-    })()
+ const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
+    document.getElementById("logSession").addEventListener("click", () => console.log(browser.toJSON()))
 
-    async function processFile() {
-        const [ file ] = document.getElementById("fileInput").files
-        await browser.loadTrack({ type: 'sampleinfo', url: file })
-        await browser.layoutChange()
-    }
-
-    async function processUrl() {
-        const url = document.getElementById("urlInput").value
-        await browser.loadTrack({ type: 'sampleinfo', url })
-        await browser.layoutChange()
-    }
-
-    async function processTrackUrl() {
-        const url = document.getElementById("trackURLInput").value
-        await browser.loadTrack({ url })
-        await browser.layoutChange()
-    }
 
 </script>
 

@@ -29,7 +29,6 @@ import BamReader from "./bamReader.js"
 import BamWebserviceReader from "./bamWebserviceReader.js"
 import HtsgetBamReader from "../htsget/htsgetBamReader.js"
 import CramReader from "../cram/cramReader.js"
-import Ga4ghAlignmentReader from "../ga4gh/ga4ghAlignmentReader.js"
 import {isDataURL} from "../util/igvUtils.js"
 import * as TrackUtils from "../util/trackUtils.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
@@ -48,7 +47,7 @@ class BamSource {
         }
 
         if ("ga4gh" === config.sourceType) {
-            this.bamReader = new Ga4ghAlignmentReader(config, genome)
+            throw Error("Unsupported source type 'ga4gh'")
         } else if ("pysam" === config.sourceType) {
             this.bamReader = new BamWebserviceReader(config, genome)
         } else if ("htsget" === config.sourceType) {

@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {createVCFVariant} from "./variant.js"
+import {Variant, Call} from "./variant.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 /**
@@ -107,9 +107,9 @@ class VcfParser {
                     const tokens = line.split("\t")
                     if (tokens.length > 8) {
                         // Map of sample name -> index
-                        header.sampleNameMap = new Map();
+                        header.sampleNameMap = new Map()
                         for (let j = 9; j < tokens.length; j++) {
-                            header.sampleNameMap.set(tokens[j], j-9)
+                            header.sampleNameMap.set(tokens[j], j - 9)
                         }
                     }
                 }
@@ -134,7 +134,7 @@ class VcfParser {
     async parseFeatures(dataWrapper) {
 
         const allFeatures = []
-        const sampleNames = this.header.sampleNameMap ?  Array.from(this.header.sampleNameMap.keys()) : undefined
+        const sampleNames = this.header.sampleNameMap ? Array.from(this.header.sampleNameMap.keys()) : undefined
         const nExpectedColumns = 8 + (sampleNames ? sampleNames.length + 1 : 0)
         let line
         while ((line = await dataWrapper.nextLine()) !== undefined) {
@@ -142,60 +142,41 @@ class VcfParser {
 
                 const tokens = line.split("\t")
                 if (tokens.length === nExpectedColumns) {
-                    const variant = createVCFVariant(tokens)
+                    const variant = new Variant(tokens)
                     variant.header = this.header       // Keep a pointer to the header to interpret fields for popup text
                     //variant.line = line              // Uncomment for debugging
                     allFeatures.push(variant)
 
                     if (tokens.length > 9) {
+                        //example...	GT	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0	0|0
+                        //example...    GT:DR:DV	./.:.:11
 
-                        // Format
-                        const callFields = extractCallFields(tokens[8].split(":"))
+                        const formatFields = extractFormatFields(tokens[8].split(":"))
 
                         variant.calls = []
                         for (let index = 9; index < tokens.length; index++) {
-
+                            const sample = sampleNames[index-9]
                             const token = tokens[index]
-                            const sampleIndex = index - 9
+                            const call = new Call({formatFields, sample, token})
+                            variant.calls.push(call)
 
-                            const call = {
-                                sample: sampleNames[sampleIndex],
-                                info: {}
-                            }
-
-                            variant.calls[sampleIndex] = call
-
-                            token.split(":").forEach(function (callToken, idx) {
-
-                                switch (idx) {
-                                    case callFields.genotypeIndex:
-                                        call.genotype = []
-                                        callToken.split(/[\|\/]/).forEach(function (s) {
-                                            call.genotype.push('.' === s ? s : parseInt(s))
-                                        })
-                                        break
-
-                                    default:
-                                        call.info[callFields.fields[idx]] = callToken
-                                }
-                            })
                         }
-                    }
 
-                    // If this is a structural variant create a complement of this variant for the other end
-                    // The test for "SV" is not comprehensive, there is not yet a standard for this
-                    if (variant.info && variant.info.CHR2 && variant.info.END) {
-                        allFeatures.push(svComplement(variant))
+                        // If this is a structural variant create a complement of this variant for the other end
+                        // The test for "SV" is not comprehensive, there is not yet a standard for this
+                        if (variant.info && variant.info.CHR2 && variant.info.END) {
+                            allFeatures.push(svComplement(variant))
+                        }
                     }
                 }
             }
         }
-
         return allFeatures
+
     }
 }
 
-function extractCallFields(tokens) {
+function extractFormatFields(tokens) {
 
     const callFields = {
         genotypeIndex: -1,
