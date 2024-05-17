@@ -30,91 +30,28 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
  * Create a variant from an array of tokens representing a line in a "VCF" file
  * @param tokens
  */
-function createVCFVariant(tokens) {
-    const variant = new Variant()
-    variant.chr = tokens[0] // TODO -- use genome aliases
-    variant.pos = parseInt(tokens[1])
-    variant.names = tokens[2]    // id in VCF
-    variant.referenceBases = tokens[3]
-    variant.alternateBases = tokens[4]
-    variant.quality = tokens[5]
-    variant.filter = tokens[6]
-    variant.info = {}
-    const infoStr = tokens[7]
-    if (infoStr) {
-        for (let elem of infoStr.split(';')) {
-            var element = elem.split('=')
-            variant.info[element[0]] = element[1]
-        }
-    }
-    variant.init()
-    return variant
-}
-
-
-/**
- * @deprecated - the GA4GH API has been deprecated.  This code no longer maintained.
- * @param json
- * @returns {Variant}
- */
-function createGAVariant(json) {
-
-    var variant = new Variant()
-
-    variant.chr = json.referenceName
-    variant.start = parseInt(json.start)  // Might get overriden below
-    variant.end = parseInt(json.end)      // Might get overriden below
-    variant.pos = variant.start + 1       // GA4GH is 0 based.
-    variant.names = arrayToString(json.names, "; ")
-    variant.referenceBases = json.referenceBases
-    variant.alternateBases = arrayToString(json.alternateBases)
-    variant.quality = json.quality
-    variant.filter = arrayToString(json.filter)
-
-
-    // Flatten GA4GH attributes array
-    variant.info = {}
-    if (json.info) {
-        Object.keys(json.info).forEach(function (key) {
-            var value,
-                valueArray = json.info[key]
-
-            if (Array.isArray(valueArray)) {
-                value = valueArray.join(",")
-            } else {
-                value = valueArray
-            }
-            variant.info[key] = value
-        })
-    }
-
-
-    // Need to build a hash of calls for fast lookup
-    // Note from the GA4GH spec on call ID:
-    //
-    // The ID of the call set this variant call belongs to. If this field is not present,
-    // the ordering of the call sets from a SearchCallSetsRequest over this GAVariantSet
-    // is guaranteed to match the ordering of the calls on this GAVariant.
-    // The number of results will also be the same.
-    variant.calls = {}
-    var order = 0, id
-    if (json.calls) {
-        json.calls.forEach(function (call) {
-            id = call.callSetId
-            variant.calls[id] = call
-            order++
-
-        })
-    }
-
-    init(variant)
-
-    return variant
-
-}
 
 
 class Variant {
+
+    constructor(tokens) {
+        this.chr = tokens[0] // TODO -- use genome aliases
+        this.pos = parseInt(tokens[1])
+        this.names = tokens[2]    // id in VCF
+        this.referenceBases = tokens[3]
+        this.alternateBases = tokens[4]
+        this.quality = tokens[5]
+        this.filter = tokens[6]
+        this.info = {}
+        const infoStr = tokens[7]
+        if (infoStr) {
+            for (let elem of infoStr.split(';')) {
+                var element = elem.split('=')
+                this.info[element[0]] = element[1]
+            }
+        }
+        this.init()
+    }
 
     init() {
 
@@ -132,9 +69,6 @@ class Variant {
         }
         if (this.type === undefined) {
             this.type = determineType(ref, altBases)
-        }
-        if (this.type === "NONVARIANT") {
-            this.heterozygosity = 0
         }
 
         // Determine start/end coordinates -- these are the coordinates representing the actual variant,
@@ -235,6 +169,10 @@ class Variant {
             {name: "Filter", value: this.filter}
         ]
 
+        if (this.type) {
+            fields.push({name: "Type", value: this.type})
+        }
+
         if ("SNP" === this.type) {
             let ref = this.referenceBases
             if (ref.length === 1) {
@@ -251,10 +189,6 @@ class Variant {
             }
         }
 
-        if (this.hasOwnProperty("heterozygosity")) {
-            fields.push({name: "Heterozygosity", value: this.heterozygosity})
-        }
-
         if (this.info) {
             fields.push({html: '<hr style="border-top: dotted 1px;border-color: #c9c3ba" />'})
             for (let key of Object.keys(this.info)) {
@@ -266,7 +200,7 @@ class Variant {
     }
 
     getInfo(tag) {
-        return this.info ? this.info[tag] : undefined;
+        return this.info ? this.info[tag] : undefined
     }
 
     isRefBlock() {
@@ -277,6 +211,127 @@ class Variant {
         return !("." === this.filter || "PASS" === this.filter)
     }
 
+}
+
+
+class Call {
+
+    constructor({formatFields, sample, token}) {
+
+        this.info = {}
+        this.sample = sample
+        const ct = token.split(":")
+        for (let idx = 0; idx < ct.length; idx++) {
+            const callToken = ct[idx]
+            if (idx == formatFields.genotypeIndex) {
+                this.genotype = []
+                for (let s of callToken.split(/[\|\/]/)) {
+                    this.genotype.push('.' === s ? s : parseInt(s))
+                }
+            } else {
+                this.info[formatFields.fields[idx]] = callToken
+            }
+        }
+
+    }
+
+
+    get zygosity() {
+        if (!this._zygosity) {
+            if (!this.genotype) {
+                this._zygosity = 'unknown'
+            } else {
+                let allVar = true  // until proven otherwise
+                let allRef = true
+                let noCall = false
+
+                for (let g of this.genotype) {
+                    if ('.' === g) {
+                        noCall = true
+                        break
+                    } else {
+                        if (g !== 0) allRef = false
+                        if (g === 0) allVar = false
+                    }
+                }
+                if (noCall) {
+                    this._zygosity = 'nocall'
+                } else if (allRef) {
+                    this._zygosity = 'homref'
+                } else if (allVar) {
+                    this._zygosity = 'homvar'
+                } else {
+                    this._zygosity = 'hetvar'
+                }
+            }
+        }
+        return this._zygosity
+    }
+
+    /**
+     * Used in sorting
+     */
+    zygosityScore() {
+        const zygosity = this.zygosity
+        switch (zygosity) {
+            case 'homvar':
+                return 4
+            case 'hetvar':
+                return 3
+            case 'homref':
+                return 2
+            case 'nocall':
+                return 1
+            default:
+                return 0
+        }
+    }
+
+    #zygosityLabel() {
+        const zygosity = this.zygosity
+        switch (zygosity) {
+            case 'homref':
+                return 'Homozygous reference'
+            case 'homvar':
+                return 'Homozygous variant'
+            case 'hetvar':
+                return 'Heterozygous'
+            default:
+                return ''
+        }
+    }
+
+
+    popupData(genomicLocation, genomeID) {
+
+        const popupData = []
+
+        if (this.sample !== undefined) {
+            popupData.push({name: 'Sample', value: this.sample})
+        }
+
+        // Genotype string is set in VariantTrack when call is clicked -- this is for memory efficienty, very few
+        // calls will get clicked
+        if (this.genotypeString) {
+            popupData.push({name: 'Genotype', value: this.genotypeString})
+        }
+
+        const zygosity = this.#zygosityLabel()
+        if (zygosity) {
+            popupData.push({name: 'Zygosity', value: zygosity})
+        }
+
+
+        var infoKeys = Object.keys(this.info)
+        if (infoKeys.length) {
+            popupData.push('<hr/>')
+        }
+        infoKeys.forEach(function (key) {
+            popupData.push({name: key, value: decodeURIComponent(this.info[key])})
+        })
+
+        return popupData
+    }
 }
 
 const knownAltBases = new Set(["A", "C", "T", "G"].map(c => c.charCodeAt(0)))
@@ -330,5 +385,4 @@ function arrayToString(value, delim) {
 }
 
 
-export {createVCFVariant, createGAVariant}
-
+export {Variant, Call}

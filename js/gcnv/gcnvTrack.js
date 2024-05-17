@@ -47,7 +47,7 @@ class GCNVTrack extends TrackBase {
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
             if(this.disposed) return;   // This track was removed during async load
-            this.sampleNames = this.header.columnNames.slice(3)
+            this.sampleKeys = this.header.columnNames.slice(3)
 
             // Set generic properties from track line
             this.setTrackProperties(this.header)   // setTrackProperties defined in TrackBase
@@ -171,7 +171,7 @@ class GCNVTrack extends TrackBase {
                     this.clickDetectorCache[x1] = []
                     this.clickDetectorCache[x2] = []
                     for (let i = 0; i < feature.values.length; i++) {
-                        const sampleName = this.sampleNames[i]
+                        const sampleName = this.sampleKeys[i]
                         const value = feature.values[i]
                         const y = yScale(value)
                         if (x1 - previousX >= X_PIXEL_DIFF_THRESHOLD) {
