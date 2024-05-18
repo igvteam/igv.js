@@ -13,7 +13,7 @@ import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
 
 const alignmentStartGap = 5
-const downsampleRowHeight = 5
+const downsampleRowHeight = 10
 const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)"
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
 const DEFAULT_HIGHLIGHT_COLOR = "#00ff00"
