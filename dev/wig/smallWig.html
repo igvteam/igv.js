@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const div = document.getElementById("myDiv");
+    const options = {
+        genome: "hg19",
+        tracks: [
+            {
+                name: 'Wig',
+                url: '../../test/data/wig/NA12878.SLX.sample.wig'
+            }
+        ]
+    };
+
+    igv.createBrowser(div, options).then(function (browser) {
+    });
+
+
+</script>
+
+</body>
+
+</html>
+
