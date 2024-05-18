@@ -158,6 +158,7 @@ class BAMTrack extends TrackBase {
             }
         }
 
+        this.alignmentTrack.hasPairs = this.alignmentTrack.hasPairs || alignmentContainer.hasPairs
 
         return alignmentContainer
     }
@@ -266,7 +267,7 @@ class BAMTrack extends TrackBase {
         const tagLabel = 'tag' + (this.alignmentTrack.colorByTag ? ' (' + this.alignmentTrack.colorByTag + ')' : '')
         colorByMenuItems.push({key: 'tag', label: tagLabel})
         for (let item of colorByMenuItems) {
-            const selected = (this.alignmentTrack.colorBy === item.key)
+            const selected = (this.alignmentTrack.colorBy === undefined && item.key === 'none') || this.alignmentTrack.colorBy === item.key
             menuItems.push(this.colorByCB(item, selected))
         }
 
@@ -292,7 +293,7 @@ class BAMTrack extends TrackBase {
         groupByMenuItems.push({key: 'tag', label: 'tag'})
 
         for (let item of groupByMenuItems) {
-            const selected = this.alignmentTrack.groupBy === undefined && item.key === 'none' || this.alignmentTrack.groupBy === item.key
+            const selected = (this.alignmentTrack.groupBy === undefined && item.key === 'none') || this.alignmentTrack.groupBy === item.key
             menuItems.push(this.groupByCB(item, selected))
         }
 
@@ -336,10 +337,10 @@ class BAMTrack extends TrackBase {
         // Show all bases
         menuItems.push('<hr/>')
         menuItems.push({
-            object: $(createCheckbox("Show all bases", this.showAllBases)),
+            object: $(createCheckbox("Show all bases", this.alignmentTrack.showAllBases)),
             click: function showAllBasesHandler() {
-                this.showAllBases = !this.showAllBases
-                this.config.showAllBases = this.showAllBases
+                this.alignmentTrack.showAllBases = !this.alignmentTrack.showAllBases
+                this.config.showAllBases = this.alignmentTrack.showAllBases
                 this.trackView.repaintViews()
             }
         })
@@ -347,30 +348,30 @@ class BAMTrack extends TrackBase {
         // Show mismatches
         menuItems.push('<hr/>')
         menuItems.push({
-            object: $(createCheckbox("Show mismatches", this.showMismatches)),
+            object: $(createCheckbox("Show mismatches", this.alignmentTrack.showMismatches)),
             click: function showMismatchesHandler() {
-                this.showMismatches = !this.showMismatches
-                this.config.showMismatches = this.showMismatches
+                this.alignmentTrack.showMismatches = !this.alignmentTrack.showMismatches
+                this.config.showMismatches = this.alignmentTrack.showMismatches
                 this.trackView.repaintViews()
             }
         })
 
         // Insertions
         menuItems.push({
-            object: $(createCheckbox("Show insertions", this.showInsertions)),
+            object: $(createCheckbox("Show insertions", this.alignmentTrack.showInsertions)),
             click: function showInsertionsHandler() {
-                this.showInsertions = !this.showInsertions
-                this.config.showInsertions = this.showInsertions
+                this.alignmentTrack.showInsertions = !this.alignmentTrack.showInsertions
+                this.config.showInsertions = this.alignmentTrack.showInsertions
                 this.trackView.repaintViews()
             }
         })
 
         // Soft clips
         menuItems.push({
-            object: $(createCheckbox("Show soft clips", this.showSoftClips)),
+            object: $(createCheckbox("Show soft clips", this.alignmentTrack.showSoftClips)),
             click: function showSoftClipsHandler() {
-                this.showSoftClips = !this.showSoftClips
-                this.config.showSoftClips = this.showSoftClips
+                this.alignmentTrack.showSoftClips = !this.alignmentTrack.showSoftClips
+                this.config.showSoftClips = this.alignmentTrack.showSoftClips
                 const alignmentContainers = this.getCachedAlignmentContainers()
                 for (let ac of alignmentContainers) {
                     ac.pack(this)
@@ -383,15 +384,15 @@ class BAMTrack extends TrackBase {
         if (this.alignmentTrack.hasPairs) {
             menuItems.push('<hr/>')
             menuItems.push({
-                object: $(createCheckbox("View as pairs", this.viewAsPairs)),
+                object: $(createCheckbox("View as pairs", this.alignmentTrack.viewAsPairs)),
                 click: function viewAsPairsHandler() {
-                    const b = !this.viewAsPairs
+                    const b = !this.alignmentTrack.viewAsPairs
                     if (b && this.alignmentTrack.groupBy && !pairCompatibleGroupOptions.has(this.alignmentTrack.groupBy)) {
                         this.browser.alert.present(`'View as Pairs' is incompatible with 'Group By ${this.alignmentTrack.groupBy}'`)
                         return
                     }
-                    this.viewAsPairs = b
-                    this.config.viewAsPairs = this.viewAsPairs
+                    this.alignmentTrack.viewAsPairs = b
+                    this.config.viewAsPairs = this.alignmentTrack.viewAsPairs
                     const alignmentContainers = this.getCachedAlignmentContainers()
                     for (let ac of alignmentContainers) {
                         ac.pack(this)
@@ -471,11 +472,7 @@ class BAMTrack extends TrackBase {
         if (menuItem.key !== 'tag') {
 
             function clickHandler() {
-                if (menuItem.key === 'none') {
-                    this.alignmentTrack.colorBy = undefined
-                } else {
-                    this.alignmentTrack.colorBy = menuItem.key
-                }
+                this.alignmentTrack.colorBy = menuItem.key
                 this.trackView.repaintViews()
             }
 
@@ -670,6 +667,7 @@ class BAMTrack extends TrackBase {
         const chords = makeSupplementalAlignmentChords(inView)
         sendChords(chords, this, refFrame, 0.02)
     }
+
 }
 
 export default BAMTrack
