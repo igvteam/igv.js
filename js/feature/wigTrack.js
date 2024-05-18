@@ -243,8 +243,7 @@ class WigTrack extends TrackBase {
                     } else {
 
                         const height = Math.min(pixelHeight, y - y0)
-                        const w = Math.max(1, width)
-                        IGVGraphics.fillRect(ctx, x, y0, w, height, {fillStyle: color})
+                        IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
                         if (f.value > this.dataRange.max) {
                             IGVGraphics.fillRect(ctx, x, 0, w, 3, {fillStyle: this.overflowColor})
                         } else if (f.value < this.dataRange.min) {
