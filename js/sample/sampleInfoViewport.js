@@ -1,6 +1,6 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {appleCrayonRGB} from '../util/colorPalletes.js'
-import {attributeNamesMap, emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
+import {attributeNames, emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 
 class SampleInfoViewport {
@@ -79,7 +79,7 @@ class SampleInfoViewport {
         context.fillRect(0, 0, context.canvas.width, context.canvas.height)
 
         if (sampleDictionary && samples && samples.names.length > 0) {
-            this.browser.sampleInfo.getAttributeNames();
+            // this.browser.sampleInfo.attributeNames
 
             const viewportHeight = this.viewport.getBoundingClientRect().height
 
@@ -112,10 +112,11 @@ class SampleInfoViewport {
 
                             context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
 
-                            const x = sampleInfoTileXShim + attributeNamesMap.get(attribute) * sampleInfoTileWidth
+                            const index = attributeNames.indexOf(attribute)
+                            const x = sampleInfoTileXShim + index * sampleInfoTileWidth
                             const yy = y + shim
                             const hh = tileHeight - (2 * shim)
-                            context.fillRect(x, yy, sampleInfoTileWidth, hh)
+                            context.fillRect(x, yy, sampleInfoTileWidth - 1, hh)
 
                             const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
                             this.hitList[key] = `${attribute}#${value}`

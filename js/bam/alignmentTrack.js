@@ -9,9 +9,11 @@ import orientationTypes from "./orientationTypes.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import TrackBase from "../trackBase.js"
 import {getChrColor} from "../util/getChrColor.js"
+import $ from "../vendor/jquery-3.3.1.slim.js"
+import {createCheckbox} from "../igv-icons.js"
 
 const alignmentStartGap = 5
-const downsampleRowHeight = 5
+const downsampleRowHeight = 10
 const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)"
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
 const DEFAULT_HIGHLIGHT_COLOR = "#00ff00"
@@ -27,7 +29,7 @@ class AlignmentTrack extends TrackBase {
         showAllBases: false,
         showInsertions: true,
         showMismatches: true,
-        colorBy: "unexpectedPair",
+        colorBy: undefined,
         groupBy: undefined,
         displayMode: "EXPANDED",
         alignmentRowHeight: 14,
@@ -153,8 +155,8 @@ class AlignmentTrack extends TrackBase {
         const bpStart = options.bpStart
         const pixelWidth = options.pixelWidth
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        const showSoftClips = this.parent.showSoftClips
-        const showAllBases = this.parent.showAllBases
+        const showSoftClips = this.showSoftClips
+        const showAllBases = this.showAllBases
         const nucleotideColors = this.browser.nucleotideColors
 
         ctx.save()
@@ -164,6 +166,11 @@ class AlignmentTrack extends TrackBase {
             referenceSequence = referenceSequence.toUpperCase()
         }
         let alignmentRowYInset = 0
+
+        // Set colorBy default if neccessary
+        if(!this.colorBy) {
+            this.colorBy = this.hasPairs ? "unexpectedPair" : "none"
+        }
 
         let pixelTop = options.pixelTop
         if (this.top) {
@@ -221,7 +228,6 @@ class AlignmentTrack extends TrackBase {
 
                     for (let alignment of alignmentRow.alignments) {
 
-                        this.hasPairs = this.hasPairs || alignment.isPaired()
                         if (this.browser.circularView) {
                             // This is an expensive check, only do it if needed
                             this.hasSupplemental = this.hasSupplemental || alignment.hasTag('SA')
@@ -369,7 +375,7 @@ class AlignmentTrack extends TrackBase {
                 }
             }
 
-            if (alignment.insertions && this.parent.showInsertions) {
+            if (alignment.insertions && this.showInsertions) {
                 let lastXBlockStart = -1
                 for (let insertionBlock of alignment.insertions) {
                     if (this.hideSmallIndels && insertionBlock.len <= this.indelSizeThreshold) {
@@ -429,7 +435,7 @@ class AlignmentTrack extends TrackBase {
                 }
             }
 
-            if ("basemod2" === this.colorBy || "basemod" === this.parent.colorBy) {
+            if ("basemod2" === this.colorBy || "basemod" === this.colorBy) {
                 const context = (
                     {
                         ctx,
@@ -438,7 +444,7 @@ class AlignmentTrack extends TrackBase {
                         bpEnd,
                         pixelEnd: pixelWidth
                     })
-                this.baseModRenderer.drawModifications(alignment, y, alignmentHeight, context, this.parent.colorBy)
+                this.baseModRenderer.drawModifications(alignment, y, alignmentHeight, context, this.colorBy)
             }
 
 
@@ -539,7 +545,7 @@ class AlignmentTrack extends TrackBase {
 
                 if (isSoftClip ||
                     showAllBases ||
-                    this.parent.showMismatches && (referenceSequence && alignment.seq && alignment.seq !== "*")) {
+                    this.showMismatches && (referenceSequence && alignment.seq && alignment.seq !== "*")) {
 
                     const seq = alignment.seq ? alignment.seq.toUpperCase() : undefined
                     const qual = alignment.qual
@@ -675,7 +681,7 @@ class AlignmentTrack extends TrackBase {
 
         if (clickedObject) {
 
-            const showSoftClips = this.parent.showSoftClips
+            const showSoftClips = this.showSoftClips
             const clickedAlignment = (typeof clickedObject.alignmentContaining === 'function') ?
                 clickedObject.alignmentContaining(clickState.genomicLocation, showSoftClips) :
                 clickedObject
@@ -812,7 +818,7 @@ class AlignmentTrack extends TrackBase {
         const y = clickState.y
         const offsetY = y - this.top
         const genomicLocation = clickState.genomicLocation
-        const showSoftClips = this.parent.showSoftClips
+        const showSoftClips = this.showSoftClips
 
         let minGroupY = Number.MAX_VALUE
         for (let group of features.packedGroups.values()) {
@@ -884,7 +890,7 @@ class AlignmentTrack extends TrackBase {
         }
         let colorBy = this.colorBy
         let tag
-        if (colorBy.startsWith("tag:")) {
+        if (colorBy && colorBy.startsWith("tag:")) {
             tag = colorBy.substring(4)
             colorBy = "tag"
         }
@@ -923,9 +929,9 @@ class AlignmentTrack extends TrackBase {
                 if (alignment.mate && alignment.isMateMapped()) {
                     if (alignment.mate.chr !== alignment.chr) {
                         color = getChrColor(alignment.mate.chr)
-                    } else if (this.parent.minTemplateLength && Math.abs(alignment.fragmentLength) < this.parent.minTemplateLength) {
+                    } else if (this.minTemplateLength && Math.abs(alignment.fragmentLength) < this.minTemplateLength) {
                         color = this.smallTLENColor
-                    } else if (this.parent.maxTemplateLength && Math.abs(alignment.fragmentLength) > this.parent.maxTemplateLength) {
+                    } else if (this.maxTemplateLength && Math.abs(alignment.fragmentLength) > this.maxTemplateLength) {
                         color = this.largeTLENColor
                     }
                 }

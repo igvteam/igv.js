@@ -7,10 +7,10 @@ import {
 } from "../util/colorPalletes.js"
 import {distinctColorsPalette} from './sampleInfoPaletteLibrary.js'
 
-let attributeNames
-let attributeNamesMap
-let attributeRangeLUT
-let sampleDictionary
+let attributeNames = []
+let attributeNamesMap = new Map()
+let attributeRangeLUT = {}
+let sampleDictionary = {}
 let copyNumberDictionary
 let colorDictionary = {}
 
@@ -43,15 +43,16 @@ class SampleInfo {
     }
 
     initialize() {
-        sampleDictionary = undefined
+        attributeNames = []
+        attributeNamesMap = new Map()
+        attributeRangeLUT = {}
+        sampleDictionary = {}
+        copyNumberDictionary = undefined
+        colorDictionary = {}
     }
 
     isInitialized() {
-        return undefined !== sampleDictionary
-    }
-
-    getAttributeNames() {
-        return attributeNames
+        return Object.keys(sampleDictionary).length > 0
     }
 
     get attributeCount() {
@@ -82,10 +83,23 @@ class SampleInfo {
         const sections = string.split('#').filter(line => line.length > 0)
 
         // First section is always samples
-        updateSampleDictionary(sections[0])
+        const { dictionary, map, names } = updateWithSampleTable(sections[0])
 
         // Establish the range of values for each attribute
-        attributeRangeLUT = createAttributeRangeLUT(sampleDictionary)
+        const lut = createAttributeRangeLUT(names, dictionary)
+        accumulateDictionary(attributeRangeLUT, lut)
+
+        // Ensure unique attribute names list
+        const currentAttributeNameSet = new Set(attributeNames)
+        for (const name of names) {
+            if (!currentAttributeNameSet.has(name)) {
+                attributeNames.push(name)
+            }
+        }
+        // attributeNames = Array.from(new Set([...attributeNames, ...names]))
+
+        accumulateMap(attributeNamesMap, map)
+        accumulateDictionary(sampleDictionary, dictionary)
 
         // If there are more sections look for the copy-number section
         if (sections.length > 1) {
@@ -99,7 +113,7 @@ class SampleInfo {
 
         // Use for diagnostic rendering
         // return randomRGB(180, 240)
-
+``
         // if (value === 'NA') {
         //     console.log(`${ attribute } : ${ value }`)
         // }
@@ -183,6 +197,21 @@ class SampleInfo {
     }
 }
 
+function accumulateMap(accumulator, map) {
+    map.forEach((value, key) => {
+        if (!accumulator.has(key) || accumulator.get(key) !== value) {
+            accumulator.set(key, value)
+        }
+    });
+}
+
+function accumulateDictionary(accumulator, dictionary) {
+    for (const [key, value] of Object.entries(dictionary)) {
+        if (!(key in accumulator) || accumulator[key] !== value) {
+            accumulator[key] = value
+        }
+    }
+}
 
 function createSampleMappingTables(sections, sectionName) {
 
@@ -333,12 +362,12 @@ function createColorScheme(sections) {
 
 }
 
-function createAttributeRangeLUT(dictionary) {
+function createAttributeRangeLUT(names, dictionary) {
 
     const lut = {}
     for (const value of Object.values(dictionary)) {
 
-        for (const attribute of attributeNames) {
+        for (const attribute of names) {
 
             let item = value[attribute]
 
@@ -378,7 +407,11 @@ function createAttributeRangeLUT(dictionary) {
     return lut
 }
 
-function updateSampleDictionary(sampleTableAsString) {
+function updateWithSampleTable(sampleTableAsString) {
+
+    let tempDict
+    let tempMap
+    let tempAttributeNames
 
     const lines = sampleTableAsString.split(/[\r\n]/)
 
@@ -393,9 +426,9 @@ function updateSampleDictionary(sampleTableAsString) {
     // discard 'sample' or 'Linking_id'
     scratch.shift()
 
-    attributeNames = scratch.map(label => label.split(' ').join(emptySpaceReplacement))
+    tempAttributeNames = scratch.map(label => label.split(' ').join(emptySpaceReplacement))
 
-    attributeNamesMap = new Map(attributeNames.map((name, index) => [name, index]))
+    tempMap = new Map(tempAttributeNames.map((name, index) => [name, index]))
 
     const cooked = lines.filter(line => line.length > 0)
 
@@ -404,30 +437,31 @@ function updateSampleDictionary(sampleTableAsString) {
         const record = line.split('\t')
         const _key_ = record.shift()
 
-        if (undefined === sampleDictionary) {
-            sampleDictionary = {}
+        if (undefined === tempDict) {
+            tempDict = {}
         }
 
-        sampleDictionary[_key_] = {}
+        tempDict[_key_] = {}
 
         for (let i = 0; i < record.length; i++) {
             const obj = {}
 
             if ("" === record[i]) {
-                obj[attributeNames[i]] = '-'
+                obj[tempAttributeNames[i]] = '-'
             } else {
-                obj[attributeNames[i]] = record[i]
+                obj[tempAttributeNames[i]] = record[i]
             }
 
-            Object.assign(sampleDictionary[_key_], obj)
+            Object.assign(tempDict[_key_], obj)
         }
 
     } // for (lines)
 
-    for (const [key, record] of Object.entries(sampleDictionary)) {
-        sampleDictionary[key] = toNumericalRepresentation(record)
+    for (const [key, record] of Object.entries(tempDict)) {
+        tempDict[key] = toNumericalRepresentation(record)
     }
 
+    return { dictionary: tempDict, map: tempMap, names: tempAttributeNames }
 }
 
 function toNumericalRepresentation(obj) {
@@ -460,6 +494,6 @@ function stringToRGBString(str) {
 }
 
 // identify an array that is predominantly numerical and replace string with undefined
-export {sampleDictionary, emptySpaceReplacement, attributeNamesMap}
+export {sampleDictionary, emptySpaceReplacement, attributeNamesMap, attributeNames}
 
 export default SampleInfo
