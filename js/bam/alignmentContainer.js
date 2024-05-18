@@ -78,6 +78,8 @@ class AlignmentContainer {
         this.pairsCache = {}  // working cache of paired alignments by read name
         this.downsampledReads = new Set()
         this.currentBucket = new DownsampleBucket(this.start, this.start + this.samplingWindowSize, this)
+
+        this.hasPairs = false // until proven otherwise
     }
 
     pack({viewAsPairs, showSoftClips, expectedPairOrientation, groupBy}) {
@@ -95,6 +97,8 @@ class AlignmentContainer {
     }
 
     push(alignment) {
+
+        this.hasPairs = this.hasPairs ||  alignment.isPaired()
 
         if (this.filter(alignment) === false) return
 
