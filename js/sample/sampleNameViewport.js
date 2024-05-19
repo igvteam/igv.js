@@ -1,21 +1,10 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
-import {appleCrayonRGB, randomRGB, randomRGBConstantAlpha} from '../util/colorPalletes.js'
+import {appleCrayonRGB} from '../util/colorPalletes.js'
 import IGVGraphics from "../igv-canvas.js"
-import {attributeNamesMap, sampleDictionary} from "./sampleInfo.js"
-import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 
 const maxSampleNameViewportWidth = 200
 const fudgeTextMetricWidth = 4
 const maxFontSize = 10
-
-const fontConfigureTemplate =
-    {
-        // font: '2pt sans-serif',
-        textAlign: 'start',
-        textBaseline: 'bottom',
-        strokeStyle: 'black',
-        fillStyle: 'black'
-    }
 
 class SampleNameViewport {
 
@@ -46,10 +35,6 @@ class SampleNameViewport {
         this.sortDirection = 1
 
         this.setWidth(width)
-
-        if (false === this.browser.showSampleNames) {
-            this.hide()
-        }
 
         this.addMouseHandlers()
     }
@@ -160,7 +145,7 @@ class SampleNameViewport {
         function clickHandler(event) {
 
             event.preventDefault()
-            event.stopPropagation()
+            // event.stopPropagation()
 
             const config =
                 {
@@ -182,7 +167,7 @@ class SampleNameViewport {
         this.viewport.addEventListener('mousemove', this.boundMouseMoveHandler)
 
         function mouseMove(event) {
-            event.stopPropagation()
+            // event.stopPropagation()
 
             if (this.hitList) {
 
@@ -216,32 +201,6 @@ class SampleNameViewport {
         this.viewport.remove()
     }
 
-    show() {
-        this.viewport.style.display = 'block'
-    }
-
-    hide() {
-        this.viewport.style.display = 'none'
-    }
-
-}
-
-function getYFont(context, text, y, height) {
-    const shim = getSampleNameYShim(context, text, height)
-    return y + height - getSampleNameYShim(context, text, height)
-}
-
-function getSampleNameYShim(context, text, h) {
-    const {actualBoundingBoxAscent, actualBoundingBoxDescent} = context.measureText(text)
-    return (h - (actualBoundingBoxAscent + actualBoundingBoxDescent)) / 2
-}
-
-function configureFont(ctx, {textAlign, textBaseline, strokeStyle, fillStyle}, sampleHeight) {
-    const pixels = Math.min(sampleHeight, maxFontSize)
-    ctx.font = `${pixels}px sans-serif`
-    ctx.textAlign = textAlign
-    ctx.textBaseline = textBaseline
-    ctx.fillStyle = fillStyle
 }
 
 function drawTextInRect(context, text, x, y, width, height) {

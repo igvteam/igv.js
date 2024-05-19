@@ -1852,12 +1852,13 @@ class Browser {
             sampleNameViewport.setWidth(this.getSampleInfoColumnWidth())
         }
 
-        await this.layoutChange()
-
         const found = this.findTracks(t => typeof t.getSamples === 'function')
         if (found.length > 0) {
+            this.sampleInfoControl.performClickWithState(this, true)
             this.sampleInfoControl.setButtonVisibility(true)
         }
+
+        // await this.layoutChange()
     }
 
     getSampleInfoColumnWidth() {

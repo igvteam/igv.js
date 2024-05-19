@@ -287,7 +287,7 @@ class TrackView {
             $viewport.height(newHeight)
         }
 
-        this.sampleInfoViewport.viewport.style.height = `${newHeight}px`
+        this.sampleInfoViewport.setHeight(newHeight)
 
         this.sampleNameViewport.viewport.style.height = `${newHeight}px`
 
@@ -300,9 +300,7 @@ class TrackView {
 
         this.repaintViews()
 
-        if (false === scrollbarExclusionTypes.has(this.track.type)) {
-            this.updateScrollbar()
-        }
+        this.updateScrollbar()
 
         this.dragHandle.style.height = `${newHeight}px`
         this.gearContainer.style.height = `${newHeight}px`
@@ -314,15 +312,20 @@ class TrackView {
         const viewportHeight = this.viewports[0].$viewport.height()
         this.outerScroll.style.height = `${viewportHeight}px`
 
-        const viewportContentHeight = this.maxViewportContentHeight()
-        const innerScrollHeight = Math.round((viewportHeight / viewportContentHeight) * viewportHeight)
+        if (false === scrollbarExclusionTypes.has(this.track.type)) {
 
-        if (viewportContentHeight > viewportHeight) {
-            this.innerScroll.style.display = 'block'
-            this.innerScroll.style.height = `${innerScrollHeight}px`
-        } else {
-            this.innerScroll.style.display = 'none'
+            const viewportContentHeight = this.maxViewportContentHeight()
+            const innerScrollHeight = Math.round((viewportHeight / viewportContentHeight) * viewportHeight)
+
+            if (viewportContentHeight > viewportHeight) {
+                this.innerScroll.style.display = 'block'
+                this.innerScroll.style.height = `${innerScrollHeight}px`
+            } else {
+                this.innerScroll.style.display = 'none'
+            }
+
         }
+
     }
 
     moveScroller(delta) {
@@ -373,12 +376,8 @@ class TrackView {
     }
 
     repaintSampleInfo() {
-        if (typeof this.track.getSamples === 'function') {
-            const samples = this.track.getSamples()
-            if (samples.names && samples.names.length > 0) {
-                this.sampleInfoViewport.repaint(samples)
-            }
-        }
+
+        this.sampleInfoViewport.repaint()
     }
 
     repaintSamples() {
