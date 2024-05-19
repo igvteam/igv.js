@@ -1,7 +1,13 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
-import {appleCrayonRGB} from '../util/colorPalletes.js'
+import {appleCrayonRGB, randomRGB} from '../util/colorPalletes.js'
 import {attributeNames, emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
+import IGVGraphics from "../igv-canvas.js"
+import {defaultRulerHeight} from "../rulerTrack.js"
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+
+// const sampleInfoColumnHeightShim = 64
+const sampleInfoColumnHeightShim = 96
 
 class SampleInfoViewport {
 
@@ -18,6 +24,11 @@ class SampleInfoViewport {
 
         this.viewport.style.height = `${trackView.track.height}px`
 
+        if (null === this.viewport.previousElementSibling) {
+            this.viewport.style.zIndex = 16
+            this.viewport.style.overflow = 'visible'
+        }
+
         this.canvas = document.createElement('canvas')
         this.viewport.appendChild(this.canvas)
         this.ctx = this.canvas.getContext("2d")
@@ -32,11 +43,20 @@ class SampleInfoViewport {
         this.addMouseHandlers()
     }
 
-    checkCanvas() {
+    resizeCanvas() {
 
         const dpi = window.devicePixelRatio
-        const requiredHeight = this.viewport.clientHeight
+        // const dpi = 1
         const requiredWidth = this.browser.getSampleInfoViewportWidth()
+
+        let requiredHeight
+        if (this.browser.trackViews.length > 1 && null === this.viewport.previousElementSibling) {
+            const [ at, bt ] = [ this.browser.trackViews[0].track, this.browser.trackViews[1].track ]
+            requiredHeight = at.height + bt.height
+        } else {
+            requiredHeight = this.viewport.clientHeight
+        }
+
 
         if (this.canvas.width !== requiredWidth * dpi || this.canvas.height !== requiredHeight * dpi) {
             const canvas = this.canvas
@@ -46,6 +66,12 @@ class SampleInfoViewport {
             canvas.style.height = `${requiredHeight}px`
             this.ctx = this.canvas.getContext("2d")
             this.ctx.scale(dpi, dpi)
+
+            if (null === this.viewport.previousElementSibling) {
+                IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+                // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: randomRGB(150,250) })
+            }
+
         }
 
     }
@@ -54,21 +80,55 @@ class SampleInfoViewport {
 
         if (typeof this.trackView.track.getSamples === 'function') {
             this.contentTop = contentTop
-            const samples = this.trackView.track.getSamples()
-            this.repaint(samples)
+            this.repaint()
         }
 
     }
 
     setWidth(width) {
         this.viewport.innerWidth = width
-        this.checkCanvas()
+        this.resizeCanvas()
     }
 
-    async repaint(samples) {
+    setHeight(newHeight) {
 
-        this.checkCanvas()
-        this.draw({context: this.ctx, samples})
+        const w = this.browser.getSampleInfoViewportWidth()
+
+        this.viewport.style.width = `${w}px`
+        this.viewport.style.height = `${newHeight}px`
+
+        const dpi = window.devicePixelRatio
+
+        this.canvas.width = w * dpi
+        this.canvas.height = newHeight * dpi
+
+        this.canvas.style.width = `${w}px`
+        this.canvas.style.height = `${newHeight}px`
+
+        this.ctx = this.canvas.getContext('2d')
+        this.ctx.scale(dpi, dpi)
+
+        if (null === this.viewport.previousElementSibling) {
+            IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: randomRGB(150,250) })
+            // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+        }
+
+    }
+
+    async repaint() {
+
+        this.resizeCanvas()
+
+        if (typeof this.trackView.track.getSamples === 'function') {
+            const samples = this.trackView.track.getSamples()
+            if (samples.names && samples.names.length > 0) {
+                this.draw({context: this.ctx, samples})
+            }
+        } else if (null === this.viewport.previousElementSibling) {
+            this.browser.trackViews[ 1 ].setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? sampleInfoColumnHeightShim : defaultRulerHeight, true)
+            this.renderSampleInfoColumns(this.ctx)
+        }
+
     }
 
     draw({context, samples}) {
@@ -79,7 +139,6 @@ class SampleInfoViewport {
         context.fillRect(0, 0, context.canvas.width, context.canvas.height)
 
         if (sampleDictionary && samples && samples.names.length > 0) {
-            // this.browser.sampleInfo.attributeNames
 
             const viewportHeight = this.viewport.getBoundingClientRect().height
 
@@ -135,6 +194,45 @@ class SampleInfoViewport {
 
     }
 
+    renderSampleInfoColumns(context) {
+
+        const drawRotatedText = (ctx, text, x, y, width, height) => {
+
+            const xShim = 2
+            const yShim = 2
+
+            ctx.save()
+
+            ctx.translate(x + width/2, y + height)
+            ctx.rotate(-Math.PI/2)
+            ctx.textAlign = 'left'
+
+            ctx.font = '10px verdana'
+            ctx.fillStyle = appleCrayonRGB('lead')
+            ctx.fillText(text, xShim, yShim)
+
+            ctx.restore()
+        }
+
+        if (sampleDictionary) {
+
+            this.hitList = {}
+            for (let i = 0; i < attributeNames.length; i++) {
+                const x = (sampleInfoTileXShim + i * sampleInfoTileWidth)
+                const w = (sampleInfoTileWidth - 1)
+                const h = Math.round(context.canvas.height/window.devicePixelRatio)
+
+                IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: appleCrayonRGB('snow') })
+                // IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: randomRGB(150,250) })
+                drawRotatedText(context, attributeNames[i], x, 0, w, h)
+
+                const key = `${Math.floor(x)}#0#${w}#${Math.ceil(h)}`
+                this.hitList[key] = `${attributeNames[i]}`
+
+            }
+        }
+    }
+
     renderSVGContext(context, {deltaX, deltaY}) {
 
         if (typeof this.trackView.track.getSamples === 'function') {
@@ -166,26 +264,53 @@ class SampleInfoViewport {
         this.viewport.addEventListener('mousemove', this.boundMouseMoveHandler)
 
         function mouseMove(event) {
-            event.stopPropagation()
+            // event.stopPropagation()
 
             if (this.hitList) {
 
                 const entries = Object.entries(this.hitList)
 
-                const {x, y} = DOMUtils.translateMouseCoordinates(event, this.viewport)
+                if (null === this.viewport.previousElementSibling) {
 
-                this.viewport.setAttribute('title', '')
+                    const getXY = (column, viewport) => {
+                        const { marginTop } = window.getComputedStyle(viewport)
+                        const {x, y} = DOMUtils.translateMouseCoordinates(event, this.browser.columnContainer.querySelector('.igv-sample-info-column'))
+                        return { x:Math.floor(x), y: Math.floor(y - parseInt(marginTop, 10)) }
+                    }
 
-                for (const [bbox, value] of entries) {
-                    const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
-                    if (x < xx || x > xx + width || y < yy || y > yy + height) {
-                        // do nothing
-                    } else {
-                        const [a, b] = value.split('#')
-                        this.viewport.setAttribute('title', `${a.split(emptySpaceReplacement).join(' ')}: ${'-' === b ? '' : b}`)
-                        break
+                    const column = this.browser.columnContainer.querySelector('.igv-sample-info-column')
+                    const { x, y } = getXY(column, this.viewport)
+
+                    column.setAttribute('title', '')
+                    for (const [bbox, value] of entries) {
+
+                        const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                        if (x < xx || x > xx + width || y < yy || y > yy + height) {
+                            // do nothing
+                        } else {
+                            column.setAttribute('title', `${value}`)
+                            break
+                        }
+                    }
+
+                } else {
+
+                    const {x, y} = DOMUtils.translateMouseCoordinates(event, this.viewport)
+
+                    this.viewport.setAttribute('title', '')
+
+                    for (const [bbox, value] of entries) {
+                        const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                        if (x < xx || x > xx + width || y < yy || y > yy + height) {
+                            // do nothing
+                        } else {
+                            const [a, b] = value.split('#')
+                            this.viewport.setAttribute('title', `${a.split(emptySpaceReplacement).join(' ')}: ${'-' === b ? '' : b}`)
+                            break
+                        }
                     }
                 }
+
             }
         }
     }
@@ -209,4 +334,5 @@ class SampleInfoViewport {
 
 }
 
+export { sampleInfoColumnHeightShim }
 export default SampleInfoViewport

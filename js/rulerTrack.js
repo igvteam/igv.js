@@ -28,12 +28,13 @@ import {IGVColor, StringUtils} from "../node_modules/igv-utils/src/index.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 
 const numberFormatter = StringUtils.numberFormatter
+const defaultRulerHeight = 40
 
 class RulerTrack {
     constructor(browser) {
 
         this.browser = browser
-        this.height = 40
+        this.height = defaultRulerHeight
         this.name = ""
         this.id = "ruler"
         this.disableButtons = true
@@ -231,4 +232,5 @@ class Tick {
     }
 }
 
+export { defaultRulerHeight }
 export default RulerTrack

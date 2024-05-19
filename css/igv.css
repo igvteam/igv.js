@@ -1288,7 +1288,7 @@
   right: 0;
   top: 50%;
   height: 1px;
-  z-index: 1;
+  z-index: 32;
   margin-left: 50px;
   margin-right: 54px;
   border-top-style: dotted;
@@ -1306,7 +1306,7 @@
   bottom: 0;
   left: 50%;
   width: 1px;
-  z-index: 1;
+  z-index: 32;
   border-left-style: dotted;
   border-left-width: thin;
   border-left-color: rgba(127, 127, 127, 0.76);

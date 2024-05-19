@@ -27,6 +27,7 @@
 import NavbarButton from "../ui/navbarButton.js"
 import {sampleInfoImage, sampleInfoImageHover} from "../ui/navbarIcons/sampleInfo.js"
 import { buttonLabel } from "../ui/navbarIcons/buttonLabel.js"
+import {sampleInfoColumnHeightShim} from "./sampleInfoViewport.js"
 
 class SampleInfoControl extends NavbarButton {
 
@@ -58,11 +59,11 @@ class SampleInfoControl extends NavbarButton {
 
         this.showSampleInfo = undefined === doShowSampleInfoOrUndefined ? !this.showSampleInfo : doShowSampleInfoOrUndefined
 
-        // const column = browser.columnContainer.querySelector('.igv-sample-info-column')
-        // column.style.display = false === this.showSampleInfo ? 'none' : 'flex'
+        const column = browser.columnContainer.querySelector('.igv-sample-info-column')
+        column.style.display = false === this.showSampleInfo ? 'none' : 'flex'
 
-        for (const {sampleInfoViewport} of browser.trackViews) {
-            false === this.showSampleInfo ? sampleInfoViewport.hide() : sampleInfoViewport.show()
+        if ('flex' === column.style.display) {
+            browser.trackViews[ 1 ].setTrackHeight(sampleInfoColumnHeightShim, true)
         }
 
         this.setState(this.showSampleInfo)
