@@ -8,7 +8,6 @@ import {
 import {distinctColorsPalette} from './sampleInfoPaletteLibrary.js'
 
 let attributeNames = []
-let attributeNamesMap = new Map()
 let attributeRangeLUT = {}
 let sampleDictionary = {}
 let sampleMappingDictionary = {}
@@ -46,7 +45,6 @@ class SampleInfo {
 
     initialize() {
         attributeNames = []
-        attributeNamesMap = new Map()
         attributeRangeLUT = {}
         sampleDictionary = {}
         sampleMappingDictionary = {}
@@ -201,8 +199,6 @@ function accumulateSampleTableDictionary(lines) {
 
     const attributes = scratch.map(label => label.split(' ').join(emptySpaceReplacement))
 
-    const attributeMap = new Map(attributes.map((name, index) => [name, index]))
-
     const cooked = lines.filter(line => line.length > 0)
 
     let samples
@@ -247,7 +243,6 @@ function accumulateSampleTableDictionary(lines) {
         }
     }
 
-    accumulateMap(attributeNamesMap, attributeMap)
     accumulateDictionary(sampleDictionary, samples)
 
 }
@@ -273,14 +268,6 @@ function createSectionDictionary(string) {
     }
 
     return dictionary
-}
-
-function accumulateMap(accumulator, map) {
-    map.forEach((value, key) => {
-        if (!accumulator.has(key) || accumulator.get(key) !== value) {
-            accumulator.set(key, value)
-        }
-    });
 }
 
 function accumulateDictionary(accumulator, dictionary) {
@@ -484,6 +471,6 @@ function stringToRGBString(str) {
 }
 
 // identify an array that is predominantly numerical and replace string with undefined
-export {sampleDictionary, emptySpaceReplacement, attributeNamesMap, attributeNames}
+export {sampleDictionary, emptySpaceReplacement, attributeNames}
 
 export default SampleInfo
