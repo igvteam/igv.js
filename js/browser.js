@@ -1858,6 +1858,10 @@ class Browser {
             this.sampleInfoControl.setButtonVisibility(true)
         }
 
+        for (const {sampleInfoViewport} of this.trackViews) {
+            sampleInfoViewport.repaint()
+        }
+
         // await this.layoutChange()
     }
 

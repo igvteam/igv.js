@@ -5,14 +5,12 @@
     <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
-    <script src="https://www.dropbox.com/static/api/2/dropins.js" id="dropboxjs"
-            data-app-key="1h7gqkxv11tb4d2"></script>
-
 </head>
 
 <body>
 
-<button id="loadSampleInfoButton">Load Sample Info</button>
+<p><input id="fileInput" type="file"></p>
+<p><input id="processFileInput" type="button" value="Load Sample Info File"></p>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -38,14 +36,14 @@
             "locus": "chr22:36,655,100-36,656,060",
             "roi": [],
             "tracks": [
-                {
-                    "type": "sampleinfo",
-                    "url": "https://www.dropbox.com/scl/fi/uxnc8zqw4thgcf2q2edb2/GBMSampleInfo.txt?rlkey=rsge5rgavtpobi08r43k73wt3&dl=0"
-                },
-                {
-                    "type": "sampleinfo",
-                    "url": "https://www.dropbox.com/scl/fi/daqluy7vom9avohigi0b5/integrated_call_samples_v3.20130502.ALL.panel?rlkey=v8pn4egvgku0pcvkpg5bwgm3t&st=thwap65c&dl=0"
-                },
+                // {
+                //     "type": "sampleinfo",
+                //     "url": "https://www.dropbox.com/scl/fi/uxnc8zqw4thgcf2q2edb2/GBMSampleInfo.txt?rlkey=rsge5rgavtpobi08r43k73wt3&dl=0"
+                // },
+                // {
+                //     "type": "sampleinfo",
+                //     "url": "https://www.dropbox.com/scl/fi/daqluy7vom9avohigi0b5/integrated_call_samples_v3.20130502.ALL.panel?rlkey=v8pn4egvgku0pcvkpg5bwgm3t&st=thwap65c&dl=0"
+                // },
                 {
                     "type": "sequence",
                     "order": -9007199254740991
@@ -83,6 +81,14 @@
         };
 
     const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
+
+    document.getElementById('processFileInput').addEventListener('click', processFile)
+
+    async function processFile() {
+        const [ file ] = document.getElementById('fileInput').files
+        await browser.loadSampleInfo({ url: file })
+        // await browser.layoutChange()
+    }
 
 
 </script>
