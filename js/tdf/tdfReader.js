@@ -241,7 +241,6 @@ class TDFReader {
         }
     }
 
-
     async readTiles(tileIndeces, nTracks) {
 
         tileIndeces.sort(function (a, b) {
@@ -253,54 +252,43 @@ class TDFReader {
         })
 
         if (tileIndeces.length === 0) {
-            return Promise.resolve([])
+            return []
         }
 
-        const firstEntry = tileIndeces[0]
-        const lastEntry = tileIndeces[tileIndeces.length - 1]
-        const position = firstEntry.position
-        const size = (lastEntry.position + lastEntry.size) - position
-        const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {
-            range: {
-                start: position,
-                size: size
-            }
-        }))
+        tileIndeces = consolidateTiles(tileIndeces)
 
         const tiles = []
 
-        // Loop through and decode tiles
         for (let indexEntry of tileIndeces) {
-            const start = indexEntry.position - position
-            const size = indexEntry.size
-            if (size > 0) {
-                let tileData
-                if (this.compressed) {
-                    const plain = BGZip.inflate(data.slice(start, start + size))
-                    tileData = plain.buffer
-                } else {
-                    tileData = data.slice(start, start + size)
-                }
 
-                const binaryParser = new BinaryParser(new DataView(tileData))
-                const type = binaryParser.getString()
-                let tile
-                switch (type) {
-                    case "fixedStep":
-                        tile = createFixedStep(binaryParser, nTracks)
-                        break
-                    case "variableStep":
-                        tile = createVariableStep(binaryParser, nTracks)
-                        break
-                    case "bed":
-                    case "bedWithName":
-                        tile = createBed(binaryParser, nTracks, type)
-                        break
-                    default:
-                        throw "Unknown tile type: " + type
+            const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {
+                range: {
+                    start: indexEntry.position,
+                    size: indexEntry.size
                 }
-                tiles.push(tile)
+            }))
+
+            const tileData = this.compressed ? BGZip.inflate(data).buffer : data
+
+            const binaryParser = new BinaryParser(new DataView(tileData))
+            const type = binaryParser.getString()
+            let tile
+            switch (type) {
+                case "fixedStep":
+                    tile = createFixedStep(binaryParser, nTracks)
+                    break
+                case "variableStep":
+                    tile = createVariableStep(binaryParser, nTracks)
+                    break
+                case "bed":
+                case "bedWithName":
+                    tile = createBed(binaryParser, nTracks, type)
+                    break
+                default:
+                    throw "Unknown tile type: " + type
             }
+            tiles.push(tile)
+
         }
         return tiles
     }
@@ -441,7 +429,23 @@ function createBed(binaryParser, nTracks, type) {
         nTracks: nTracks,
         nPositions: nPositions
     }
+}
 
+function consolidateTiles(tiles) {
+
+    const consolidated = []
+    let current = tiles[0]
+    for (let i = 1; i < tiles.length; i++) {
+        const t = tiles[i]
+        if (t.position > current.position + current.size) {
+            consolidated.push(current)
+            current = t
+        } else {
+            current.size = t.position + t.size - current.position
+        }
+    }
+    consolidated.push(current)
+    return consolidated
 }
 
 export default TDFReader
