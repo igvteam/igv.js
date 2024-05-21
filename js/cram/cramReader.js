@@ -1,4 +1,3 @@
-
 import gmodCRAM from "../vendor/cram-bundle.js"
 import AlignmentContainer from "../bam/alignmentContainer.js"
 import BamUtils from "../bam/bamUtils.js"
@@ -6,6 +5,7 @@ import BamAlignment from "../bam/bamAlignment.js"
 import AlignmentBlock from "../bam/alignmentBlock.js"
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
+
 
 const READ_STRAND_FLAG = 0x10
 const MATE_STRAND_FLAG = 0x20
@@ -22,6 +22,7 @@ const CRAM_MATE_MAPPED_FLAG = 0x2
 class CramReader {
 
     chrAliasTable = new Map()
+
     constructor(config, genome, browser) {
 
         this.config = config
@@ -29,12 +30,12 @@ class CramReader {
         this.genome = genome
 
         this.cramFile = new gmodCRAM.CramFile({
-            filehandle: config.fileHandle ? config.fileHandle : new FileHandler(config.url, config),
+            filehandle: config.fileHandle ? config.fileHandle : new FileHandler2(config.url, config),
             seqFetch: config.seqFetch || seqFetch.bind(this),
             checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
         })
 
-        const indexFileHandle = config.indexFileHandle ? config.indexFileHandle : new FileHandler(config.indexURL, config)
+        const indexFileHandle = config.indexFileHandle ? config.indexFileHandle : new FileHandler2(config.indexURL, config)
         this.indexedCramFile = new gmodCRAM.IndexedCramFile({
             cram: this.cramFile,
             index: new gmodCRAM.CraiIndex({
@@ -337,32 +338,30 @@ class CramReader {
     }
 }
 
-class FileHandler {
+class FileHandler2 {
 
     constructor(source, config) {
         this.position = 0
         this.url = source
         this.config = config
-        this.cache = new BufferCache({
-            fetch: (start, length) => this._fetch(start, length),
-        })
     }
 
-    async _fetch(position, length) {
-
-        const loadRange = {start: position, size: length}
-        this._stat = {size: undefined}
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config, {range: loadRange}))
-        return Buffer.from(arrayBuffer)
-    }
-
+    /**
+     * read(
+     *     buf: Buffer,
+     *     offset: number,
+     *     length: number,
+     *     position: number,
+     *     opts?: FilehandleOptions,
+     *   ): Promise<{ bytesRead: number; buffer: Buffer }>
+     */
     async read(buffer, offset = 0, length = Infinity, position = 0) {
-        let readPosition = position
-        if (readPosition === null) {
-            readPosition = this.position
-            this.position += length
-        }
-        return this.cache.get(buffer, offset, length, position)
+
+        const options = buildOptions(this.config, {range: {start: position, size: length}})
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, options)
+        const a = Buffer.from(arrayBuffer)
+        a.copy(buffer, offset, 0, length)
+
     }
 
     async readFile() {
@@ -374,6 +373,7 @@ class FileHandler {
         if (!this._stat) {
             const buf = Buffer.allocUnsafe(10)
             await this.read(buf, 0, 10, 0)
+            this._stat = {size: undefined}
             if (!this._stat)
                 throw new Error(`unable to determine size of file at ${this.url}`)
         }
@@ -381,65 +381,55 @@ class FileHandler {
     }
 }
 
-class BufferCache {
+class RequestAggregator {
 
-    constructor({fetch, size = 10000000, chunkSize = 32768}) {
-
-        this.fetch = fetch
-        this.chunkSize = chunkSize
-        this.lruCache = new QuickLRU({maxSize: Math.floor(size / chunkSize)})
+    constructor(url) {
+        this.url = url
     }
 
-    async get(outputBuffer, offset, length, position) {
-        if (outputBuffer.length < offset + length)
-            throw new Error('output buffer not big enough for request')
+    async loadArrayBuffer(options) {
+        if(options.range) {
 
-        // calculate the list of chunks involved in this fetch
-        const firstChunk = Math.floor(position / this.chunkSize)
-        const lastChunk = Math.floor((position + length) / this.chunkSize)
 
-        // fetch them all as necessary
-        const fetches = new Array(lastChunk - firstChunk + 1)
-        for (let chunk = firstChunk; chunk <= lastChunk; chunk += 1) {
-            fetches[chunk - firstChunk] = this._getChunk(chunk).then(data => ({
-                data,
-                chunkNumber: chunk,
-            }))
+        } else {
+            return igvxhr.loadArrayBuffer(this.url, options)
         }
+    }
+}
 
-        // stitch together the response buffer using them
-        const chunks = await Promise.all(fetches)
-        const chunksOffset = position - chunks[0].chunkNumber * this.chunkSize
-        chunks.forEach(({data, chunkNumber}) => {
-            const chunkPositionStart = chunkNumber * this.chunkSize
-            let copyStart = 0
-            let copyEnd = this.chunkSize
-            let copyOffset =
-                offset + (chunkNumber - firstChunk) * this.chunkSize - chunksOffset
+class Agreggated {
 
-            if (chunkNumber === firstChunk) {
-                copyOffset = offset
-                copyStart = chunksOffset
-            }
-            if (chunkNumber === lastChunk) {
-                copyEnd = position + length - chunkPositionStart
-            }
+    pending = []
 
-            data.copy(outputBuffer, copyOffset, copyStart, copyEnd)
+    constructor(url) {
+        this.url = url
+    }
+
+    async loadArrayBuffer(options) {
+        pending.push(options)
+        return new Promise(async (resolve, reject) => {
+            interval.features = await this.sequenceReader.readSequence(chr, qstart, qend)
+            resolve(interval)
         })
     }
 
-    _getChunk(chunkNumber) {
-        const cachedPromise = this.lruCache.get(chunkNumber)
-        if (cachedPromise) return cachedPromise
+    async fetch() {
 
-        const freshPromise = this.fetch(
-            chunkNumber * this.chunkSize,
-            this.chunkSize,
-        )
-        this.lruCache.set(chunkNumber, freshPromise)
-        return freshPromise
+        // Aggregate pending requests
+
+        // Loop through aggregated requests
+
+        // Allocate results to original requests
+
+        // Resolve cached promises for original request
+
     }
+
+
+
+
+
+
 }
 
 
