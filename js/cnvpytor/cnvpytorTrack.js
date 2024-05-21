@@ -244,6 +244,8 @@ class CNVPytorTrack extends TrackBase {
                 object: $(checkBox),
                 click: async function binSizesHandler() {
                     this.bin_size = rd_bin
+                    // data loader image
+                    this.trackView.startSpinner()
 
                     await this.recreate_tracks(rd_bin)
                     this.clearCachedFeatures()
@@ -280,6 +282,9 @@ class CNVPytorTrack extends TrackBase {
                 object: $(checkBox),
                 click: async function cnvCallerHandler() {
                     this.cnv_caller = cnv_caller
+                    // data loader image
+                    this.trackView.startSpinner()
+
                     await this.recreate_tracks(this.bin_size)
                     this.clearCachedFeatures()
                     this.trackView.updateViews()
@@ -517,7 +522,12 @@ class CNVPytorTrack extends TrackBase {
             // if number >= 100, show whole number
             // if >= 1 show 1 significant digits
             // if <  1 show 2 significant digits
-
+            
+            // change the label for negative number to positive; For BAF likelihood section
+            if(number < 0){
+                return Math.abs(number)
+            }
+            
             if (number === 0) {
                 return "0"
             } else if (Math.abs(number) >= 10) {
