@@ -9,7 +9,7 @@ import {ColorTable, randomRGB} from "../util/colorPalletes.js"
 import {attributeNames, emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js"
 import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
-import {sortBySampleName} from "../sample/sampleUtils.js"
+import {doSortByAttributes, sortBySampleName} from "../sample/sampleUtils.js"
 
 
 class SegTrack extends TrackBase {
@@ -103,7 +103,7 @@ class SegTrack extends TrackBase {
         menuItems.push('<hr/>')
         menuItems.push(sortBySampleName())
 
-        if (sampleDictionary) {
+        if (true === doSortByAttributes(this.browser.sampleInfo, this.sampleKeys)) {
             menuItems.push('<hr/>')
             menuItems.push("Sort by attribute:")
             for (const attribute of attributeNames) {
