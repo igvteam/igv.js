@@ -536,6 +536,7 @@ class SegTrack extends TrackBase {
             const sampleKey = feature.sampleKey || feature.sample
             if (!sampleKeySet.has(sampleKey)) {
                 this.sampleKeys.push(sampleKey)
+                sampleKeySet.add(sampleKey)
             }
         }
     }
