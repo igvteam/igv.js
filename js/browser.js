@@ -1050,19 +1050,26 @@ class Browser {
             return this.addTrack(config, newTrack)
 
         } catch (error) {
+
+            let msg = error.message || error.error || error.toString()
+
             const httpMessages =
                 {
                     "401": "Access unauthorized",
                     "403": "Access forbidden",
                     "404": "Not found"
                 }
-            console.error(error)
-            let msg = error.message || error.error || error.toString()
+
             if (httpMessages.hasOwnProperty(msg)) {
                 msg = httpMessages[msg]
             }
-            msg += (": " + config.url)
-            this.alert.present(new Error(msg), undefined)
+
+            msg = `${ msg } : ${ FileUtils.isFile(config.url) ? config.url.name : config.url }`
+            // msg += (": " + FileUtils.isFile(config.url) ? config.url.name : config.url)
+            const err = new Error(msg)
+            console.error(err)
+            throw err
+            // this.alert.present(new Error(msg), undefined)
         }
     }
 
@@ -1212,7 +1219,8 @@ class Browser {
 
             // If neither format nor type is known assume a sample information file.  We should do some validation here
             if (!config.format) {
-                type = "sampleinfo"
+                // type = "sampleinfo"
+                throw Error(`Attempt to load unrecognized track type`)
             } else if (config.format === "hic") {
                 const hicFile = new HicFile(config)
                 await hicFile.readHeaderAndFooter()
