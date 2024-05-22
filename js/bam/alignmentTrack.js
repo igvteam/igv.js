@@ -14,6 +14,7 @@ import {createCheckbox} from "../igv-icons.js"
 
 const alignmentStartGap = 5
 const downsampleRowHeight = 10
+const groupGap = 10
 const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)"
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
 const DEFAULT_HIGHLIGHT_COLOR = "#00ff00"
@@ -139,7 +140,7 @@ class AlignmentTrack extends TrackBase {
                 this.squishedRowHeight :
                 this.alignmentRowHeight
             for (let group of alignmentContainer.packedGroups.values()) {
-                h += (alignmentRowHeight * group.length) + 10
+                h += (alignmentRowHeight * group.length) + groupGap
             }
             return h + 5
         } else {
@@ -283,7 +284,7 @@ class AlignmentTrack extends TrackBase {
 
                     ctx.restore()
 
-                    alignmentY += 10  // Group separator
+                    alignmentY += groupGap  // Group separator
                 }
             }
         }
