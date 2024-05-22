@@ -43,6 +43,7 @@
   },
   "browserslist": "> 1%, not dead",
   "devDependencies": {
+    "@gmod/cram": "^2.0.3",
     "@rollup/plugin-strip": "^3.0.1",
     "@rollup/plugin-terser": "^0.4.0",
     "@xmldom/xmldom": "^0.7.9",

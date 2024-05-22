@@ -3,8 +3,7 @@ import AlignmentContainer from "../bam/alignmentContainer.js"
 import BamUtils from "../bam/bamUtils.js"
 import BamAlignment from "../bam/bamAlignment.js"
 import AlignmentBlock from "../bam/alignmentBlock.js"
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
-import {buildOptions} from "../util/igvUtils.js"
+import FileHandler from "./fileHandler.js"
 
 
 const READ_STRAND_FLAG = 0x10
@@ -30,18 +29,18 @@ class CramReader {
         this.genome = genome
 
         this.cramFile = new gmodCRAM.CramFile({
-            filehandle: config.fileHandle ? config.fileHandle : new FileHandler2(config.url, config),
+            filehandle: config.fileHandle ? config.fileHandle : new FileHandler(config.url, config),
             seqFetch: config.seqFetch || seqFetch.bind(this),
             checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
         })
 
-        const indexFileHandle = config.indexFileHandle ? config.indexFileHandle : new FileHandler2(config.indexURL, config)
+        const indexFileHandle = config.indexFileHandle ? config.indexFileHandle : new FileHandler(config.indexURL, config)
         this.indexedCramFile = new gmodCRAM.IndexedCramFile({
             cram: this.cramFile,
             index: new gmodCRAM.CraiIndex({
                 filehandle: indexFileHandle
             }),
-            fetchSizeLimit: config.fetchSizeLimit || 100000000
+            fetchSizeLimit: config.fetchSizeLimit || 1000000000
         })
 
         BamUtils.setReaderDefaults(this, config)
@@ -128,7 +127,7 @@ class CramReader {
 
 
     async readAlignments(chr, bpStart, bpEnd) {
-
+const t0 = Date.now()
         const header = await this.getHeader()
 
         const chrIdx = await this.#getRefId(chr)
@@ -168,6 +167,8 @@ class CramReader {
                 }
 
                 alignmentContainer.finish()
+const dt = Date.now() - t0
+console.log(`${alignmentContainer.alignments.length} loaded in ${dt} ms`)
                 return alignmentContainer
             } catch (error) {
                 let message = error.message
@@ -338,99 +339,8 @@ class CramReader {
     }
 }
 
-class FileHandler2 {
-
-    constructor(source, config) {
-        this.position = 0
-        this.url = source
-        this.config = config
-    }
-
-    /**
-     * read(
-     *     buf: Buffer,
-     *     offset: number,
-     *     length: number,
-     *     position: number,
-     *     opts?: FilehandleOptions,
-     *   ): Promise<{ bytesRead: number; buffer: Buffer }>
-     */
-    async read(buffer, offset = 0, length = Infinity, position = 0) {
-
-        const options = buildOptions(this.config, {range: {start: position, size: length}})
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, options)
-        const a = Buffer.from(arrayBuffer)
-        a.copy(buffer, offset, 0, length)
-
-    }
-
-    async readFile() {
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config))
-        return Buffer.from(arrayBuffer)
-    }
-
-    async stat() {
-        if (!this._stat) {
-            const buf = Buffer.allocUnsafe(10)
-            await this.read(buf, 0, 10, 0)
-            this._stat = {size: undefined}
-            if (!this._stat)
-                throw new Error(`unable to determine size of file at ${this.url}`)
-        }
-        return this._stat
-    }
-}
-
-class RequestAggregator {
-
-    constructor(url) {
-        this.url = url
-    }
-
-    async loadArrayBuffer(options) {
-        if(options.range) {
 
 
-        } else {
-            return igvxhr.loadArrayBuffer(this.url, options)
-        }
-    }
-}
-
-class Agreggated {
-
-    pending = []
-
-    constructor(url) {
-        this.url = url
-    }
-
-    async loadArrayBuffer(options) {
-        pending.push(options)
-        return new Promise(async (resolve, reject) => {
-            interval.features = await this.sequenceReader.readSequence(chr, qstart, qend)
-            resolve(interval)
-        })
-    }
-
-    async fetch() {
-
-        // Aggregate pending requests
-
-        // Loop through aggregated requests
-
-        // Allocate results to original requests
-
-        // Resolve cached promises for original request
-
-    }
-
-
-
-
-
-
-}
 
 
 // From https://github.com/sindresorhus/quick-lru
