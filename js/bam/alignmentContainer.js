@@ -62,7 +62,6 @@ class AlignmentContainer {
         this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 : alleleFreqThreshold
         this.samplingWindowSize = samplingWindowSize || 100
         this.samplingDepth = samplingDepth || 1000
-        this.paired = false  // false until proven otherwise
 
         this.filter = filter || ((alignment) => {
             return alignment.isMapped() && !alignment.isFailsVendorQualityCheck()
@@ -75,7 +74,7 @@ class AlignmentContainer {
 
         // Transient members -- used during downsampling and prior to packing
         this.alignments = []
-        this.pairsCache = {}  // working cache of paired alignments by read name
+        this.pairsCache = new Map()  // working cache of paired alignments by read name
         this.downsampledReads = new Set()
         this.currentBucket = new DownsampleBucket(this.start, this.start + this.samplingWindowSize, this)
 
@@ -98,7 +97,7 @@ class AlignmentContainer {
 
     push(alignment) {
 
-        this.hasPairs = this.hasPairs ||  alignment.isPaired()
+        this.hasPairs = this.hasPairs || alignment.isPaired()
 
         if (this.filter(alignment) === false) return
 
@@ -109,12 +108,12 @@ class AlignmentContainer {
         }
 
         if (this.downsampledReads.has(alignment.readName)) {
+            this.currentBucket.downsampledCount++
             return   // Mate already downsampled -- pairs and chimeric alignments are treated as a single alignment for downsampling
         }
 
         if (alignment.start >= this.currentBucket.end) {
             this.finishBucket()
-            this.paired = this.paired || this.currentBucket.paired
             this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this)
         }
 
@@ -162,7 +161,6 @@ class AlignmentContainer {
                 this.currentBucket.end,
                 this.currentBucket.downsampledCount))
         }
-        this.paired = this.paired || this.currentBucket.paired
     }
 
     allAlignments() {
@@ -197,58 +195,54 @@ class DownsampleBucket {
         this.samplingDepth = samplingDepth
         this.downsampledReads = downsampledReads
         this.pairsCache = pairsCache
-        this.paired = false  // Until proven otherwise
+        this.hasPairs = false // until proven otherwise
     }
 
     addAlignment(alignment) {
 
-        var idx, replacedAlignment, pairedAlignment
+
+        this.hasPairs = this.hasPairs || alignment.isPaired()
+
+        const samplingDepth = this.hasPairs ? Math.ceil(this.samplingDepth / 2) : this.samplingDepth
 
         if (canBePaired(alignment)) {
-            pairedAlignment = this.pairsCache[alignment.readName]
+            const pairedAlignment = this.pairsCache.get(alignment.readName)
             if (pairedAlignment) {
-                // Not subject to downsampling, just update the existing alignment
+                // Not subject to downsampling, just update the existing paired alignment
                 pairedAlignment.setSecondAlignment(alignment)
-                this.pairsCache[alignment.readName] = undefined   // Don't need to track this anymore. NOTE: Don't "delete", causes runtime performance issues
+                this.pairsCache.delete(alignment.readName)
                 return
             }
         }
 
-        if (this.alignments.length < this.samplingDepth) {
+        if (this.alignments.length < samplingDepth) {
 
             if (canBePaired(alignment)) {
-
-                // First alignment in a pair
-                pairedAlignment = new PairedAlignment(alignment)
-                this.paired = true
-                this.pairsCache[alignment.readName] = pairedAlignment
+                // First alignment of a pair
+                const pairedAlignment = new PairedAlignment(alignment)
+                this.pairsCache.set(alignment.readName, pairedAlignment)
                 this.alignments.push(pairedAlignment)
-
             } else {
                 this.alignments.push(alignment)
             }
 
         } else {
+            // Alignment count has reached sampling depth, use resevoir sampling
 
-            idx = Math.floor(Math.random() * (this.samplingDepth + this.downsampledCount - 1))
+            const idx = Math.floor(Math.random() * (samplingDepth + this.downsampledCount - 1))
 
-            if (idx < this.samplingDepth) {
+            if (idx < samplingDepth) {
 
-                // Keep the new item
-                //  idx = Math.floor(Math.random() * (this.alignments.length - 1));
-                replacedAlignment = this.alignments[idx]   // To be replaced
+                // Select an alignment to replace
+                const replacedAlignment = this.alignments[idx]
+                if(this.pairsCache.has(replacedAlignment.readName)) {
+                    this.pairsCache.delete(replacedAlignment.readName)
+                }
 
                 if (canBePaired(alignment)) {
-
-                    if (this.pairsCache[replacedAlignment.readName] !== undefined) {
-                        this.pairsCache[replacedAlignment.readName] = undefined
-                    }
-
-                    pairedAlignment = new PairedAlignment(alignment)
-                    this.paired = true
-                    this.pairsCache[alignment.readName] = pairedAlignment
+                    const pairedAlignment = new PairedAlignment(alignment)
+                    this.pairsCache.set(alignment.readName, pairedAlignment)
                     this.alignments[idx] = pairedAlignment
-
                 } else {
                     this.alignments[idx] = alignment
                 }

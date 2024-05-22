@@ -90,6 +90,10 @@ class BAMTrack extends TrackBase {
         return this.alignmentTrack.expectedPairOrientation
     }
 
+    get viewAsPairs() {
+        return this.alignmentTrack.viewAsPairs
+    }
+
     set height(h) {
         this._height = h
         if (this.showAlignments) {
@@ -141,7 +145,7 @@ class BAMTrack extends TrackBase {
 
         const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
 
-        if (alignmentContainer.paired && !this._pairedEndStats && !this.config.maxFragmentLength) {
+        if (alignmentContainer.hasPairs && !this._pairedEndStats && !this.config.maxFragmentLength) {
             const pairedEndStats = new PairedEndStats(alignmentContainer.allAlignments(), this.config)
             if (pairedEndStats.totalCount > 99) {
                 this._pairedEndStats = pairedEndStats

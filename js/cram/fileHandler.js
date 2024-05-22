@@ -8,12 +8,13 @@ export default class FileHandler {
         this.position = 0
         this.url = source
         this.config = config
-        if (FileUtils.isFile(source)) {
+        if (FileUtils.isFile(source) || config.cacheFetches === false) {
             this.useCache = false
         } else {
             this.useCache = true
             this.cache = new BufferCache({
                 fetch: (start, length) => this._fetch(start, length),
+                fetchSize: config.fetchSize || 10000
             })
         }
     }
