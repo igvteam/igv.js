@@ -71,6 +71,9 @@ class ROITable extends RegionTableBase {
 
         copySequenceButton.id = 'igv-roi-hide-show-button'
         copySequenceButton.textContent = 'Copy Sequence'
+        copySequenceButton.style.pointerEvents = 'none'
+        copySequenceButton.title = 'Maximum Region size: 1MB'
+
         this.copySequenceButton = copySequenceButton
 
         async function copySequenceButtonHandler(event) {
@@ -141,6 +144,17 @@ class ROITable extends RegionTableBase {
         }
 
         this.toggleROIButton.textContent = false === isVisible ? 'Show all ROIs' : 'Hide all ROIs'
+
+    }
+
+    setTableRowSelectionState(isTableRowSelected) {
+        super.setTableRowSelectionState(isTableRowSelected)
+
+        const selected = this.tableDOM.querySelectorAll('.igv-roi-table-row-selected')
+        if (selected.length > 0) {
+            this.copySequenceButton.style.pointerEvents = selected.length > 1 ? 'none' : 'auto'
+        }
+
 
     }
 
