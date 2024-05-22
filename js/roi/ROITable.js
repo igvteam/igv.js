@@ -79,25 +79,29 @@ class ROITable extends RegionTableBase {
 
             // capture loci
             const selected = this.tableDOM.querySelectorAll('.igv-roi-table-row-selected')
-            const loci = []
-            for (let el of selected) {
-                const { locus } = parseRegionKey(el.dataset.region)
-                loci.push(locus)
-            }
 
-            // unselect
-            for (let el of this.tableDOM.querySelectorAll('.igv-roi-table-row')) {
-                el.classList.remove('igv-roi-table-row-selected')
-            }
+            if (selected.length > 0) {
 
-            this.setTableRowSelectionState(false)
+                const loci = []
+                for (let el of selected) {
+                    const { locus } = parseRegionKey(el.dataset.region)
+                    loci.push(locus)
+                }
 
-            if (loci.length > 0) {
-                const { chr, start, end } = parseLocusString(loci[0], this.browser.isSoftclipped())
-                const seq = await this.browser.genome.getSequence(chr, start, end)
-                console.log(`copy sequence to clipboard: ${ seq }`)
-                await navigator.clipboard.writeText(seq)
+                // unselect
+                for (let el of this.tableDOM.querySelectorAll('.igv-roi-table-row')) {
+                    el.classList.remove('igv-roi-table-row-selected')
+                }
 
+                this.setTableRowSelectionState(false)
+
+                if (loci.length > 0) {
+                    const { chr, start, end } = parseLocusString(loci[0], this.browser.isSoftclipped())
+                    const seq = await this.browser.genome.getSequence(chr, start, end)
+                    console.log(`copy sequence to clipboard: ${ seq }`)
+                    await navigator.clipboard.writeText(seq)
+
+                }
             }
 
 
