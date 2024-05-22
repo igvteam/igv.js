@@ -3,12 +3,11 @@ import { StringUtils } from '../../node_modules/igv-utils/src/index.js'
 
 import { createRegionKey, parseRegionKey } from './ROIManager.js'
 import RegionTableBase from '../ui/regionTableBase.js'
+import {parseLocusString} from "../search.js"
 
 class ROITable extends RegionTableBase {
     constructor(config) {
-
-        const cooked = Object.assign({ 'width':'512px' }, config)
-        super(cooked)
+        super(Object.assign({ 'width':'640px' }, config))
     }
 
     tableRowDOM(record) {
@@ -65,14 +64,55 @@ class ROITable extends RegionTableBase {
 
         this.gotoButton.textContent = 'Go to selected region(s)'
 
+
+        // Copy Sequence Button
+        const copySequenceButton = DOMUtils.div({ class: 'igv-roi-table-button' })
+        this._footerDOM.appendChild(copySequenceButton)
+
+        copySequenceButton.id = 'igv-roi-hide-show-button'
+        copySequenceButton.textContent = 'Copy Sequence'
+        this.copySequenceButton = copySequenceButton
+
+        async function copySequenceButtonHandler(event) {
+            event.preventDefault()
+            event.stopPropagation()
+
+            // capture loci
+            const selected = this.tableDOM.querySelectorAll('.igv-roi-table-row-selected')
+            const loci = []
+            for (let el of selected) {
+                const { locus } = parseRegionKey(el.dataset.region)
+                loci.push(locus)
+            }
+
+            // unselect
+            for (let el of this.tableDOM.querySelectorAll('.igv-roi-table-row')) {
+                el.classList.remove('igv-roi-table-row-selected')
+            }
+
+            this.setTableRowSelectionState(false)
+
+            if (loci.length > 0) {
+                const { chr, start, end } = parseLocusString(loci[0], this.browser.isSoftclipped())
+                const seq = await this.browser.genome.getSequence(chr, start, end)
+                console.log(`copy sequence to clipboard: ${ seq }`)
+                await navigator.clipboard.writeText(seq)
+
+            }
+
+
+        }
+
+        this.boundCopySequenceButtonHandler = copySequenceButtonHandler.bind(this)
+        this.copySequenceButton.addEventListener('click', this.boundCopySequenceButtonHandler)
+
+
         // Hide/Show Button
         const toggleROIButton = DOMUtils.div({ class: 'igv-roi-table-button' })
-        const dom = this._footerDOM
-        dom.appendChild(toggleROIButton)
+        this._footerDOM.appendChild(toggleROIButton)
 
         toggleROIButton.id = 'igv-roi-hide-show-button'
         toggleROIButton.textContent = 'Hide all ROIs'
-
         this.toggleROIButton = toggleROIButton
 
         function toggleROIButtonHandler(event) {
@@ -82,7 +122,6 @@ class ROITable extends RegionTableBase {
         }
 
         this.boundToggleDisplayButtonHandler = toggleROIButtonHandler.bind(this)
-
         this.toggleROIButton.addEventListener('click', this.boundToggleDisplayButtonHandler)
 
     }
