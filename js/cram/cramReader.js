@@ -127,7 +127,7 @@ class CramReader {
 
 
     async readAlignments(chr, bpStart, bpEnd) {
-const t0 = Date.now()
+
         const header = await this.getHeader()
 
         const chrIdx = await this.#getRefId(chr)
@@ -167,8 +167,7 @@ const t0 = Date.now()
                 }
 
                 alignmentContainer.finish()
-const dt = Date.now() - t0
-console.log(`${alignmentContainer.alignments.length} loaded in ${dt} ms`)
+
                 return alignmentContainer
             } catch (error) {
                 let message = error.message
@@ -339,133 +338,6 @@ console.log(`${alignmentContainer.alignments.length} loaded in ${dt} ms`)
     }
 }
 
-
-
-
-
-// From https://github.com/sindresorhus/quick-lru
-// MIT License
-//
-// Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//     The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-'use strict'
-
-class QuickLRU {
-    constructor(options = {}) {
-        if (!(options.maxSize && options.maxSize > 0)) {
-            throw new TypeError('`maxSize` must be a number greater than 0')
-        }
-
-        this.maxSize = options.maxSize
-        this.cache = new Map()
-        this.oldCache = new Map()
-        this._size = 0
-    }
-
-    _set(key, value) {
-        this.cache.set(key, value)
-        this._size++
-
-        if (this._size >= this.maxSize) {
-            this._size = 0
-            this.oldCache = this.cache
-            this.cache = new Map()
-        }
-    }
-
-    get(key) {
-        if (this.cache.has(key)) {
-            return this.cache.get(key)
-        }
-
-        if (this.oldCache.has(key)) {
-            const value = this.oldCache.get(key)
-            this._set(key, value)
-            return value
-        }
-    }
-
-    set(key, value) {
-        if (this.cache.has(key)) {
-            this.cache.set(key, value)
-        } else {
-            this._set(key, value)
-        }
-
-        return this
-    }
-
-    has(key) {
-        return this.cache.has(key) || this.oldCache.has(key)
-    }
-
-    peek(key) {
-        if (this.cache.has(key)) {
-            return this.cache.get(key)
-        }
-
-        if (this.oldCache.has(key)) {
-            return this.oldCache.get(key)
-        }
-    }
-
-    delete(key) {
-        const deleted = this.cache.delete(key)
-        if (deleted) {
-            this._size--
-        }
-
-        return this.oldCache.delete(key) || deleted
-    }
-
-    clear() {
-        this.cache.clear()
-        this.oldCache.clear()
-        this._size = 0
-    }
-
-    * keys() {
-        for (const [key] of this) {
-            yield key
-        }
-    }
-
-    * values() {
-        for (const [, value] of this) {
-            yield value
-        }
-    }
-
-    * [Symbol.iterator]() {
-        for (const item of this.cache) {
-            yield item
-        }
-
-        for (const item of this.oldCache) {
-            const [key] = item
-            if (!this.cache.has(key)) {
-                yield item
-            }
-        }
-    }
-
-    get size() {
-        let oldCacheSize = 0
-        for (const key of this.oldCache.keys()) {
-            if (!this.cache.has(key)) {
-                oldCacheSize++
-            }
-        }
-
-        return this._size + oldCacheSize
-    }
-}
 
 export default CramReader
 

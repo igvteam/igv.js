@@ -1,6 +1,6 @@
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr, FileUtils} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
-import BufferCache from "./bufferCache.js"
+
 
 export default class FileHandler {
 
@@ -8,9 +8,14 @@ export default class FileHandler {
         this.position = 0
         this.url = source
         this.config = config
-        this.cache = new BufferCache({
-            fetch: (start, length) => this._fetch(start, length),
-        })
+        if (FileUtils.isFile(source)) {
+            this.useCache = false
+        } else {
+            this.useCache = true
+            this.cache = new BufferCache({
+                fetch: (start, length) => this._fetch(start, length),
+            })
+        }
     }
 
     async _fetch(position, length) {
@@ -23,14 +28,12 @@ export default class FileHandler {
 
     async read(buffer, offset = 0, length = Infinity, position = 0) {
 
-        if(length === 0) return
-
-        let readPosition = position
-        if (readPosition === null) {
-            readPosition = this.position
-            this.position += length
+        if(this.useCache) {
+            await this.cache.get(buffer, offset, position, length)
+        } else {
+            const buf = await this._fetch(position, length)
+            buf.copy(buffer, offset)
         }
-        return this.cache.get(buffer, offset, length, position)
     }
 
     async readFile() {
@@ -46,5 +49,38 @@ export default class FileHandler {
                 throw new Error(`unable to determine size of file at ${this.url}`)
         }
         return this._stat
+    }
+}
+
+class BufferCache {
+
+    constructor({fetch, fetchSize = 30000}) {
+        this.fetch = fetch
+        this.position = 0
+        this.buffer = Buffer.allocUnsafe(0)
+        this.fetchSize = fetchSize
+    }
+
+    async get(outputBuffer, offset, start, length) {
+
+        if (outputBuffer.length < offset + length) {
+            throw new Error('output buffer not big enough for request')
+        }
+
+        if (start >= this.position && start + length <= this.position + this.buffer.length) {
+            // Complete overlap
+        } else {
+            const l = Math.max(length, this.fetchSize)
+            this.buffer = await this.fetch(start, l)
+            this.position = start
+
+        }
+
+        const targetStart = offset
+        const sourceStart = start - this.position
+        const sourceEnd = sourceStart + length
+
+        this.buffer.copy(outputBuffer, targetStart, sourceStart, sourceEnd)
+
     }
 }
