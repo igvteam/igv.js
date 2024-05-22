@@ -14,12 +14,12 @@ class RegionTableBase {
         this.tableRowSelectionList = []
 
         this.tableDOM = DOMUtils.div({ class: 'igv-roi-table' })
-        // if(config.width) {
-        //     let [ w ] = config.width.split('px')
-        //     w = parseInt(w, 10)
-        //     this.tableDOM.style.width = `${Math.min(w, 1600)}px`
-        //
-        // }
+
+        if(config.width) {
+            let [ w ] = config.width.split('px')
+            w = parseInt(w, 10)
+            this.tableDOM.style.width = `${Math.min(w, 1600)}px`
+        }
 
         config.parent.appendChild(this.tableDOM)
 
