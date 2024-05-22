@@ -739,6 +739,7 @@ class TrackView {
 
         this.boundColumnContainerMouseUpHandler = columnContainerMouseUpHandler.bind(this)
         browser.columnContainer.addEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
+        browser.columnContainer.addEventListener('mouseleave', this.boundColumnContainerMouseUpHandler)
 
         function columnContainerMouseUpHandler(event) {
             browser.columnContainer.removeEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
@@ -751,6 +752,7 @@ class TrackView {
             this.innerScroll.removeEventListener('mousedown', this.boundTrackScrollMouseDownHandler)
             this.browser.columnContainer.removeEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
             this.browser.columnContainer.removeEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
+            this.browser.columnContainer.removeEventListener('mouseleave', this.boundColumnContainerMouseMoveHandler)
         }
     }
 
