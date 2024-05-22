@@ -1,11 +1,10 @@
-
 import gmodCRAM from "../vendor/cram-bundle.js"
 import AlignmentContainer from "../bam/alignmentContainer.js"
 import BamUtils from "../bam/bamUtils.js"
 import BamAlignment from "../bam/bamAlignment.js"
 import AlignmentBlock from "../bam/alignmentBlock.js"
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
-import {buildOptions} from "../util/igvUtils.js"
+import FileHandler from "./fileHandler.js"
+
 
 const READ_STRAND_FLAG = 0x10
 const MATE_STRAND_FLAG = 0x20
@@ -22,6 +21,7 @@ const CRAM_MATE_MAPPED_FLAG = 0x2
 class CramReader {
 
     chrAliasTable = new Map()
+
     constructor(config, genome, browser) {
 
         this.config = config
@@ -40,7 +40,7 @@ class CramReader {
             index: new gmodCRAM.CraiIndex({
                 filehandle: indexFileHandle
             }),
-            fetchSizeLimit: config.fetchSizeLimit || 100000000
+            fetchSizeLimit: config.fetchSizeLimit || 1000000000
         })
 
         BamUtils.setReaderDefaults(this, config)
@@ -167,6 +167,7 @@ class CramReader {
                 }
 
                 alignmentContainer.finish()
+
                 return alignmentContainer
             } catch (error) {
                 let message = error.message
@@ -337,235 +338,6 @@ class CramReader {
     }
 }
 
-class FileHandler {
-
-    constructor(source, config) {
-        this.position = 0
-        this.url = source
-        this.config = config
-        this.cache = new BufferCache({
-            fetch: (start, length) => this._fetch(start, length),
-        })
-    }
-
-    async _fetch(position, length) {
-
-        const loadRange = {start: position, size: length}
-        this._stat = {size: undefined}
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config, {range: loadRange}))
-        return Buffer.from(arrayBuffer)
-    }
-
-    async read(buffer, offset = 0, length = Infinity, position = 0) {
-        let readPosition = position
-        if (readPosition === null) {
-            readPosition = this.position
-            this.position += length
-        }
-        return this.cache.get(buffer, offset, length, position)
-    }
-
-    async readFile() {
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config))
-        return Buffer.from(arrayBuffer)
-    }
-
-    async stat() {
-        if (!this._stat) {
-            const buf = Buffer.allocUnsafe(10)
-            await this.read(buf, 0, 10, 0)
-            if (!this._stat)
-                throw new Error(`unable to determine size of file at ${this.url}`)
-        }
-        return this._stat
-    }
-}
-
-class BufferCache {
-
-    constructor({fetch, size = 10000000, chunkSize = 32768}) {
-
-        this.fetch = fetch
-        this.chunkSize = chunkSize
-        this.lruCache = new QuickLRU({maxSize: Math.floor(size / chunkSize)})
-    }
-
-    async get(outputBuffer, offset, length, position) {
-        if (outputBuffer.length < offset + length)
-            throw new Error('output buffer not big enough for request')
-
-        // calculate the list of chunks involved in this fetch
-        const firstChunk = Math.floor(position / this.chunkSize)
-        const lastChunk = Math.floor((position + length) / this.chunkSize)
-
-        // fetch them all as necessary
-        const fetches = new Array(lastChunk - firstChunk + 1)
-        for (let chunk = firstChunk; chunk <= lastChunk; chunk += 1) {
-            fetches[chunk - firstChunk] = this._getChunk(chunk).then(data => ({
-                data,
-                chunkNumber: chunk,
-            }))
-        }
-
-        // stitch together the response buffer using them
-        const chunks = await Promise.all(fetches)
-        const chunksOffset = position - chunks[0].chunkNumber * this.chunkSize
-        chunks.forEach(({data, chunkNumber}) => {
-            const chunkPositionStart = chunkNumber * this.chunkSize
-            let copyStart = 0
-            let copyEnd = this.chunkSize
-            let copyOffset =
-                offset + (chunkNumber - firstChunk) * this.chunkSize - chunksOffset
-
-            if (chunkNumber === firstChunk) {
-                copyOffset = offset
-                copyStart = chunksOffset
-            }
-            if (chunkNumber === lastChunk) {
-                copyEnd = position + length - chunkPositionStart
-            }
-
-            data.copy(outputBuffer, copyOffset, copyStart, copyEnd)
-        })
-    }
-
-    _getChunk(chunkNumber) {
-        const cachedPromise = this.lruCache.get(chunkNumber)
-        if (cachedPromise) return cachedPromise
-
-        const freshPromise = this.fetch(
-            chunkNumber * this.chunkSize,
-            this.chunkSize,
-        )
-        this.lruCache.set(chunkNumber, freshPromise)
-        return freshPromise
-    }
-}
-
-
-// From https://github.com/sindresorhus/quick-lru
-// MIT License
-//
-// Copyright (c) Sindre Sorhus <sindresorhus@gmail.com> (sindresorhus.com)
-//
-// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-//
-//     The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-//
-//     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-
-'use strict'
-
-class QuickLRU {
-    constructor(options = {}) {
-        if (!(options.maxSize && options.maxSize > 0)) {
-            throw new TypeError('`maxSize` must be a number greater than 0')
-        }
-
-        this.maxSize = options.maxSize
-        this.cache = new Map()
-        this.oldCache = new Map()
-        this._size = 0
-    }
-
-    _set(key, value) {
-        this.cache.set(key, value)
-        this._size++
-
-        if (this._size >= this.maxSize) {
-            this._size = 0
-            this.oldCache = this.cache
-            this.cache = new Map()
-        }
-    }
-
-    get(key) {
-        if (this.cache.has(key)) {
-            return this.cache.get(key)
-        }
-
-        if (this.oldCache.has(key)) {
-            const value = this.oldCache.get(key)
-            this._set(key, value)
-            return value
-        }
-    }
-
-    set(key, value) {
-        if (this.cache.has(key)) {
-            this.cache.set(key, value)
-        } else {
-            this._set(key, value)
-        }
-
-        return this
-    }
-
-    has(key) {
-        return this.cache.has(key) || this.oldCache.has(key)
-    }
-
-    peek(key) {
-        if (this.cache.has(key)) {
-            return this.cache.get(key)
-        }
-
-        if (this.oldCache.has(key)) {
-            return this.oldCache.get(key)
-        }
-    }
-
-    delete(key) {
-        const deleted = this.cache.delete(key)
-        if (deleted) {
-            this._size--
-        }
-
-        return this.oldCache.delete(key) || deleted
-    }
-
-    clear() {
-        this.cache.clear()
-        this.oldCache.clear()
-        this._size = 0
-    }
-
-    * keys() {
-        for (const [key] of this) {
-            yield key
-        }
-    }
-
-    * values() {
-        for (const [, value] of this) {
-            yield value
-        }
-    }
-
-    * [Symbol.iterator]() {
-        for (const item of this.cache) {
-            yield item
-        }
-
-        for (const item of this.oldCache) {
-            const [key] = item
-            if (!this.cache.has(key)) {
-                yield item
-            }
-        }
-    }
-
-    get size() {
-        let oldCacheSize = 0
-        for (const key of this.oldCache.keys()) {
-            if (!this.cache.has(key)) {
-                oldCacheSize++
-            }
-        }
-
-        return this._size + oldCacheSize
-    }
-}
 
 export default CramReader
 
