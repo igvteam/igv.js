@@ -6,13 +6,15 @@ import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "../igv-icons.js"
 import {GradientColorScale} from "../util/colorScale.js"
 import {ColorTable, randomRGB} from "../util/colorPalletes.js"
-import {attributeNames, emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js";
+import {attributeNames, emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js"
 import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
 import {sortBySampleName} from "../sample/sampleUtils.js"
 
 
 class SegTrack extends TrackBase {
+
+    #sortDirections = new Map()
 
     constructor(config, browser) {
         super(config, browser)
@@ -52,7 +54,7 @@ class SegTrack extends TrackBase {
                     this.colorTable = new ColorTable(MUT_COLORS)
                     break
                 case "shoebox":
-                    if (config.colorScale) this.sbColorScale =  HicColorScale.parse(config.colorScale)
+                    if (config.colorScale) this.sbColorScale = HicColorScale.parse(config.colorScale)
                     break
                 default:
                     // Color scales for "seg" (copy number) tracks.
@@ -107,7 +109,7 @@ class SegTrack extends TrackBase {
             for (const attribute of attributeNames) {
 
                 const sampleNames = this.sampleKeys
-                if(sampleNames.some(s => {
+                if (sampleNames.some(s => {
                     const attrs = this.browser.sampleInfo.getAttributes(s)
                     return attrs && attrs[attribute]
                 })) {
@@ -116,9 +118,15 @@ class SegTrack extends TrackBase {
                     object.html(`&nbsp;&nbsp;${attribute.split(emptySpaceReplacement).join(' ')}`)
 
                     function attributeSort() {
-                        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, this.trackView.sampleInfoViewport.sortDirection)
-                        this.trackView.repaintViews()
-                        this.trackView.sampleInfoViewport.sortDirection *= -1
+                        const sortDirection = this.#sortDirections.get(attribute) || 1
+                        this.sortByAttribute(attribute, sortDirection)
+                        this.#sortDirections.set(attribute, sortDirection * -1)
+
+                        this.config.sort = {
+                            option: "ATTRIBUTE",
+                            attribute: attribute,
+                            direction: sortDirection === 1 ? "ASC" : "DESC"
+                        }
                     }
 
                     menuItems.push({object, click: attributeSort})
@@ -142,7 +150,7 @@ class SegTrack extends TrackBase {
                     value: this.sbColorScale.threshold,
                     callback: () => {
                         const t = Number(this.browser.inputDialog.value, 10)
-                        if(t) {
+                        if (t) {
                             this.sbColorScale.setThreshold(t)
                             this.trackView.repaintViews()
                         }
@@ -150,7 +158,7 @@ class SegTrack extends TrackBase {
                 }, e)
             }
 
-            menuItems.push({ object: $('<div>Set color scale threshold</div>'), dialog: dialogPresentationHandler })
+            menuItems.push({object: $('<div>Set color scale threshold</div>'), dialog: dialogPresentationHandler})
         }
 
         menuItems.push('<hr/>')
@@ -189,9 +197,17 @@ class SegTrack extends TrackBase {
 
     async getFeatures(chr, start, end) {
         const features = await this.featureSource.getFeatures({chr, start, end})
+        // New segments could conceivably add new samples
+        this.updateSampleKeys(features)
+
         if (this.initialSort) {
             const sort = this.initialSort
-            this.sortSamples(sort.chr, sort.start, sort.end, sort.direction, features)
+            if (sort.option === undefined || sort.option.toUpperCase() === "VALUE") {
+                this.sortByValue(sort, features)
+            } else if ("ATTRIBUTE" === sort.option.toUpperCase() && sort.attribute) {
+                const sortDirection = "DESC" === sort.direction ? 1 : -1
+                this.sortByAttribute(sort.attribute, sortDirection)
+            }
             this.initialSort = undefined  // Sample order is sorted,
         }
         return features
@@ -210,9 +226,6 @@ class SegTrack extends TrackBase {
                 const threshold = this.featureSource.hicFile.percentile95 || 2000
                 this.sbColorScale = new HicColorScale({threshold, r: 0, g: 0, b: 255})
             }
-
-            // New segments could conceivably add new samples
-            this.updateSampleKeys(features)
 
             // Create a map for fast id -> row lookup
             const samples = {}
@@ -371,7 +384,18 @@ class SegTrack extends TrackBase {
     /**
      * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
      */
-    async sortSamples(chr, start, end, direction, featureList) {
+    async sortByValue(sort, featureList) {
+
+        const chr = sort.chr
+        let start, end
+        if (sort.position) {
+            start = sort.position - 1
+            end = start + 1
+        } else {
+            start = sort.start
+            end = sort.end
+        }
+
 
         if (!featureList) {
             featureList = await this.featureSource.getFeatures({chr, start, end})
@@ -381,7 +405,7 @@ class SegTrack extends TrackBase {
         this.updateSampleKeys(featureList)
 
         const scores = {}
-        const d2 = (direction === "ASC" ? 1 : -1)
+        const d2 = (sort.direction === "ASC" ? 1 : -1)
 
         const sortSeg = () => {
             // Compute weighted average score for each sample
@@ -437,6 +461,12 @@ class SegTrack extends TrackBase {
 
     }
 
+    sortByAttribute(attribute, sortDirection) {
+
+        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection)
+        this.trackView.repaintViews()
+    }
+
     clickedFeatures(clickState) {
 
         const allFeatures = super.clickedFeatures(clickState)
@@ -484,43 +514,37 @@ class SegTrack extends TrackBase {
 
     contextMenuItemList(clickState) {
 
-        const referenceFrame = clickState.viewport.referenceFrame
         const genomicLocation = clickState.genomicLocation
-
-        // Define a region 5 "pixels" wide in genomic coordinates
-        const direction = this.config.sort ?
-            (this.config.sort.direction === "ASC" ? "DESC" : "ASC") :      // Toggle from previous sort
-            "DESC"
-        const bpWidth = referenceFrame.toBP(2.5)
 
         const sortHandler = (sort) => {
             const viewport = clickState.viewport
             const features = viewport.cachedFeatures
-            this.sortSamples(sort.chr, sort.start, sort.end, sort.direction, features)
+            this.sortByValue(sort, features)
         }
 
-        const sortLabel = this.type === 'seg' || this.type === 'shoebox' ? 'Sort by value' : 'Sort by type'
+        // We can't know genomic location intended with precision, define a buffer 5 "pixels" wide in genomic coordinates
+        const bpWidth = referenceFrame.toBP(2.5)
 
-        return [
-            {
-                label: sortLabel, click: (e) => {
-
-
+        return ["DESC", "ASC"].map(direction => {
+            const dirLabel = direction === "DESC" ? "descending" : "ascending"
+            const sortLabel = this.type === 'seg' || this.type === 'shoebox' ?
+                `Sort by value (${dirLabel})` :
+                `Sort by type (${dirLabel})`
+            return {
+                label: sortLabel,
+                click: () => {
                     const sort = {
+                        option: "VALUE",   // Either VALUE or ATTRIBUTE
                         direction,
                         chr: clickState.viewport.referenceFrame.chr,
-                        start: genomicLocation - bpWidth,
-                        end: genomicLocation + bpWidth
-
+                        start: Math.floor(genomicLocation - bpWidth),
+                        end: Math.floor(genomicLocation + bpWidth)
                     }
-
                     sortHandler(sort)
-
                     this.config.sort = sort
-
                 }
-            }]
-
+            }
+        })
     }
 
     get supportsWholeGenome() {
