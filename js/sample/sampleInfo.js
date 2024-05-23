@@ -6,6 +6,7 @@ import {
     rgbStringTokens
 } from "../util/colorPalletes.js"
 import {distinctColorsPalette} from './sampleInfoPaletteLibrary.js'
+import TrackBase from "../trackBase.js"
 
 let attributeNames = []
 let attributeRangeLUT = {}
@@ -69,9 +70,7 @@ class SampleInfo {
         try {
             const string = await igvxhr.loadString(path)
             this.processSampleInfoFileAsString(string)
-            if (false === FileUtils.isFile(path)) {
-                this.sampleInfoFiles.push(path)
-            }
+            this.sampleInfoFiles.push(path)
         } catch (e) {
             console.error(e.message)
         }
@@ -183,7 +182,9 @@ class SampleInfo {
 
     toJSON(trackJson) {
         for (const url of this.sampleInfoFiles) {
-            trackJson.push({type: 'sampleinfo', url})
+            const raw = { type: 'sampleinfo', url }
+            const cooked = TrackBase.localFileInspection(raw)
+            trackJson.push(cooked)
         }
     }
 }
@@ -469,7 +470,6 @@ function stringToRGBString(str) {
     return `rgb(${color.join(', ')})`
 }
 
-// identify an array that is predominantly numerical and replace string with undefined
 export {sampleDictionary, emptySpaceReplacement, attributeNames}
 
 export default SampleInfo

@@ -34,6 +34,7 @@ import {attributeNames, emptySpaceReplacement, sampleDictionary} from "../sample
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js"
 import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
+import {doSortByAttributes} from "../sample/sampleUtils.js"
 
 const isString = StringUtils.isString
 
@@ -578,8 +579,9 @@ class VariantTrack extends TrackBase {
             }
         }
 
+        if (true === doSortByAttributes(this.browser.sampleInfo, this.sampleKeys)) {
 
-        if (sampleDictionary) {
+            menuItems.push('<hr/>')
 
             menuItems.push("Sort by attribute:")
             for (const attribute of attributeNames) {
