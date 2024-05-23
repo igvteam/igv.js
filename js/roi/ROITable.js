@@ -4,6 +4,7 @@ import { StringUtils } from '../../node_modules/igv-utils/src/index.js'
 import { createRegionKey, parseRegionKey } from './ROIManager.js'
 import RegionTableBase from '../ui/regionTableBase.js'
 import {parseLocusString} from "../search.js"
+import {appleCrayonRGB} from "../util/colorPalletes.js"
 
 class ROITable extends RegionTableBase {
     constructor(config) {
@@ -71,10 +72,10 @@ class ROITable extends RegionTableBase {
 
         copySequenceButton.id = 'igv-roi-hide-show-button'
         copySequenceButton.textContent = 'Copy Sequence'
-        copySequenceButton.style.pointerEvents = 'none'
         copySequenceButton.title = 'Maximum Region size: 1MB'
-
         this.copySequenceButton = copySequenceButton
+
+        enableButton(this.copySequenceButton, false)
 
         async function copySequenceButtonHandler(event) {
             event.preventDefault()
@@ -113,7 +114,6 @@ class ROITable extends RegionTableBase {
         this.boundCopySequenceButtonHandler = copySequenceButtonHandler.bind(this)
         this.copySequenceButton.addEventListener('click', this.boundCopySequenceButtonHandler)
 
-
         // Hide/Show Button
         const toggleROIButton = DOMUtils.div({ class: 'igv-roi-table-button' })
         this._footerDOM.appendChild(toggleROIButton)
@@ -149,10 +149,14 @@ class ROITable extends RegionTableBase {
 
     setTableRowSelectionState(isTableRowSelected) {
         super.setTableRowSelectionState(isTableRowSelected)
-
         const selected = this.tableDOM.querySelectorAll('.igv-roi-table-row-selected')
-        if (selected.length > 0) {
-            this.copySequenceButton.style.pointerEvents = selected.length > 1 ? 'none' : 'auto'
+
+        if (selected.length > 0 && selected.length < 2) {
+            const { locus } = parseRegionKey(selected[ 0 ].dataset.region)
+            const { chr, start, end } = parseLocusString(locus, this.browser.isSoftclipped())
+            enableButton(this.copySequenceButton, (end - start) < 1e6)
+        } else {
+            enableButton(this.copySequenceButton, false)
         }
 
 
@@ -161,6 +165,7 @@ class ROITable extends RegionTableBase {
     dispose() {
 
         document.removeEventListener('click', this.boundGotoButtonHandler)
+        document.removeEventListener('click', this.boundCopySequenceButtonHandler)
         document.removeEventListener('click', this.boundToggleDisplayButtonHandler)
 
         this.browser.roiTableControl.buttonHandler(false)
@@ -211,6 +216,13 @@ class ROITable extends RegionTableBase {
         }
 
     }
+
+}
+
+function enableButton(button, doEnable) {
+    button.style.pointerEvents = doEnable ? 'auto' : 'none'
+    button.style.color = doEnable ? appleCrayonRGB('licorice') : appleCrayonRGB('silver')
+    button.style.borderColor = doEnable ? appleCrayonRGB('licorice') : appleCrayonRGB('silver')
 
 }
 
