@@ -693,7 +693,7 @@ class Browser {
         }
 
         if (localTrackFileNames.length > 0) {
-            alert(`Local files cannot be loaded automatically.\nThis session contains the following local file(s):\n${localTrackFileNames.map(str => `    ${str}`).join('\n')}`)
+            alert(`Local files cannot be loaded automatically.\nThis session contains references to these local files:\n${localTrackFileNames.map(str => `    ${str}`).join('\n')}`)
         }
 
         const nonLocalTrackConfigurations = trackConfigurations.filter((config) => undefined === config.file)
