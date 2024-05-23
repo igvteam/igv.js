@@ -2056,7 +2056,7 @@ class Browser {
         }
 
         if (localFileDetections.length > 0) {
-            alert(`This session will be saved with the following local file(s):\n${localFileDetections.map(str => `    ${str}`).join('\n')}\nLocal files cannot be loaded automatically when a saved session is restored.`)
+            alert(`This session includes reference(s) to local file(s):\n${localFileDetections.map(str => `    ${str}`).join('\n')}\nLocal files cannot be loaded automatically when a saved session is restored.`)
         }
 
         return json
