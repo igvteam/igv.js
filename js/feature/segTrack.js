@@ -9,7 +9,6 @@ import {ColorTable, randomRGB} from "../util/colorPalletes.js"
 import {attributeNames, emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js"
 import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
-import {sortBySampleName} from "../sample/sampleUtils.js"
 
 
 class SegTrack extends TrackBase {
@@ -99,9 +98,6 @@ class SegTrack extends TrackBase {
     menuItemList() {
 
         const menuItems = []
-
-        menuItems.push('<hr/>')
-        menuItems.push(sortBySampleName())
 
         if (sampleDictionary) {
             menuItems.push('<hr/>')
