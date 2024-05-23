@@ -84,15 +84,12 @@ class SampleInfo {
         for (const [header, value] of Object.entries(sectionDictionary)) {
             switch (header) {
                 case '#sampleTable':
-                    console.log('Accumulate sample table data')
                     accumulateSampleTableDictionary(value)
                     break;
                 case '#sampleMapping':
-                    console.log('Accumulate sample mapping data')
                     accumulateSampleMappingDictionary(value)
                     break;
                 case '#colors':
-                    console.log('Accumulate color table data')
                     accumulateColorScheme(value)
                     break;
 
@@ -149,6 +146,8 @@ class SampleInfo {
     }
 
     getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
+
+        sortDirection = sortDirection || 1
 
         const numbers = sampleKeys.filter(key => {
             const value = this.getAttributes(key)[attribute]

@@ -73,6 +73,8 @@ class VariantTrack extends TrackBase {
         type: "variant"
     }
 
+    #sortDirections = new Map()
+
     constructor(config, browser) {
         super(config, browser)
     }
@@ -105,7 +107,11 @@ class VariantTrack extends TrackBase {
             // Explicit setting, keys == names
             for (let s of config.samples) {
                 this.sampleKeys = config.samples
-            }
+            }1
+        }
+
+        if(config.sort) {
+            this.initialSort = config.sort
         }
     }
 
@@ -127,9 +133,7 @@ class VariantTrack extends TrackBase {
                 this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW
             }
         }
-        if(this.config.sort) {
-            this.sortSamplesByGenotype(this.config.sort)
-        }
+
         return this
     }
 
@@ -164,7 +168,26 @@ class VariantTrack extends TrackBase {
         if (this.header === undefined) {
             this.header = await this.getHeader()
         }
-        return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow: this.visibilityWindow})
+        const features = await this.featureSource.getFeatures({
+            chr,
+            start,
+            end,
+            bpPerPixel,
+            visibilityWindow: this.visibilityWindow
+        })
+
+        if (this.initialSort) {
+            const sort = this.initialSort
+            if (sort.option === undefined || sort.option.toUpperCase() === "GENOTYPE") {
+                this.sortSamplesByGenotype(sort, features)
+            } else if ("ATTRIBUTE" === sort.option.toUpperCase() && sort.attribute) {
+                const sortDirection = "ASC" === sort.direction ? 1 : -1
+                this.sortByAttribute(sort.attribute, sortDirection)
+            }
+            this.initialSort = undefined  // Sample order is sorted,
+        }
+
+        return features
     }
 
     hasSamples() {
@@ -574,9 +597,14 @@ class VariantTrack extends TrackBase {
                     object.html(`&nbsp;&nbsp;${attribute.split(emptySpaceReplacement).join(' ')}`)
 
                     function attributeSort() {
-                        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, this.trackView.sampleInfoViewport.sortDirection)
-                        this.trackView.repaintViews()
-                        this.trackView.sampleInfoViewport.sortDirection *= -1
+                        const sortDirection = this.#sortDirections.get(attribute) || 1
+                        this.sortByAttribute(attribute, sortDirection)
+                        this.config.sort = {
+                            option: "ATTRIBUTE",
+                            attribute: attribute,
+                            direction: sortDirection > 0 ? "ASC" : "DESC"
+                        }
+                        this.#sortDirections.set(attribute, sortDirection * -1)
                     }
 
                     menuItems.push({object, click: attributeSort})
@@ -654,16 +682,15 @@ class VariantTrack extends TrackBase {
 
         const list = []
 
-        if(this.hasSamples() && this.showGenotypes) {
+        if (this.hasSamples() && this.showGenotypes) {
             const referenceFrame = clickState.viewport.referenceFrame
             const genomicLocation = clickState.genomicLocation
 
-            // Define a region 5 "pixels" wide in genomic coordinates
-            const direction = this.config.sort ?
-                (this.config.sort.direction === "ASC" ? "DESC" : "ASC") :      // Toggle from previous sort
-                "DESC"
+            // We can't know genomic location intended with precision, define a buffer 5 "pixels" wide in genomic coordinates
             const bpWidth = referenceFrame.toBP(2.5)
 
+            const direction = this.#sortDirections.get('genotype') || 1
+            this.#sortDirections.set('genotype', direction * -1)  // Toggle for next sort
 
             list.push(
                 {
@@ -672,10 +699,11 @@ class VariantTrack extends TrackBase {
 
                         const sort = {
                             direction,
-                            sortBy: 'genotype',
+                            option: 'genotype',
                             chr: clickState.viewport.referenceFrame.chr,
                             start: Math.floor(genomicLocation - bpWidth),
                             end: Math.ceil(genomicLocation + bpWidth)
+
                         }
                         const viewport = clickState.viewport
                         const features = viewport.cachedFeatures
@@ -705,10 +733,11 @@ class VariantTrack extends TrackBase {
 
     }
 
-    /**
-     * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
-     */
-    async sortSamplesByGenotype({chr, start, end, direction}, featureList) {
+
+    async sortSamplesByGenotype({chr, position, start, end, direction}, featureList) {
+
+        if (start === undefined) start = position - 1
+        if (end === undefined) end = position
 
         if (!featureList) {
             featureList = await this.featureSource.getFeatures({chr, start, end})
@@ -724,8 +753,8 @@ class VariantTrack extends TrackBase {
             if (variant.start > end) break
             for (let call of variant.calls) {
                 const sample = call.sample
-                const callScore = call.zygosityScore();
-                scores.set(sample, scores.has(sample) ? scores.get(sample) + callScore: callScore)
+                const callScore = call.zygosityScore()
+                scores.set(sample, scores.has(sample) ? scores.get(sample) + callScore : callScore)
             }
         }
 
@@ -736,6 +765,18 @@ class VariantTrack extends TrackBase {
             return d2 * (sa - sb)
         })
 
+        this.trackView.repaintViews()
+    }
+
+    sortByAttribute(attribute, sortDirection) {
+
+        this.config.sort = {
+            option: "ATTRIBUTE",
+            attribute: attribute,
+            direction: sortDirection === 1 ? "ASC" : "DESC"
+        }
+
+        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection)
         this.trackView.repaintViews()
 
     }
