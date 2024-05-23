@@ -72,7 +72,7 @@ class ROITable extends RegionTableBase {
 
         copySequenceButton.id = 'igv-roi-hide-show-button'
         copySequenceButton.textContent = 'Copy Sequence'
-        copySequenceButton.title = 'Maximum Region size: 1MB'
+        copySequenceButton.title = 'One region only of max size 1 mb'
         this.copySequenceButton = copySequenceButton
 
         enableButton(this.copySequenceButton, false)
@@ -102,7 +102,6 @@ class ROITable extends RegionTableBase {
                 if (loci.length > 0) {
                     const { chr, start, end } = parseLocusString(loci[0], this.browser.isSoftclipped())
                     const seq = await this.browser.genome.getSequence(chr, start, end)
-                    console.log(`copy sequence to clipboard: ${ seq }`)
                     await navigator.clipboard.writeText(seq)
 
                 }
