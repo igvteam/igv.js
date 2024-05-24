@@ -5,6 +5,7 @@ import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import {assert} from 'chai'
 import getDataWrapper from "../js/feature/dataWrapper.js"
 import {createGenome} from "./utils/MockGenome.js"
+import pack from "../js/feature/featurePacker.js"
 
 const genome = createGenome()
 import Browser from "../js/browser.js"
@@ -226,6 +227,37 @@ suite("testVariant", function () {
         assert.equal(features.length, 2)
 
     })
+
+    test("Packing with insertion", async function () {
+
+        // chr14	105246530	.	G	GT	.	.	Gene=AKT1;MutationCDS=c.100G>GT;MutationAA=p.C3D
+        // chr14	105246530	.	G	T	.	.	Gene=AKT1;MutationCDS=c.100C>T;MutationAA=p.A1B
+        // chr14	105246530	.	GC	G	.	.	Gene=AKT1;MutationCDS=c.100GC>G;MutationAA=p.B2C
+        // chr14	105246530	.	G	C	.	.	Gene=AKT1;MutationCDS=c.100G>C;MutationAA=p.D4E
+
+        const url = "dev/issues/1714/targeted_variants.vcf"
+
+        // Example from 4.2 spec
+        const data = await igvxhr.loadString(url, {})
+        const parser = new VcfParser()
+
+        let dataWrapper = getDataWrapper(data)
+        await parser.parseHeader(dataWrapper)
+
+        dataWrapper = getDataWrapper(data)
+        const featureList = await parser.parseFeatures(dataWrapper)
+        const len = featureList.length
+        assert.equal(4, len)   // # of features (determined by greping file)
+
+
+        pack(featureList, Number.MAX_SAFE_INTEGER)
+        const maxRow = featureList.reduce((max, f) => Math.max(max, f.row), 0);
+        assert.equal(maxRow, 2)
+
+        assert.ok(featureList)
+
+    })
+
 
 })
 

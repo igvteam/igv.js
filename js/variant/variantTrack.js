@@ -107,10 +107,10 @@ class VariantTrack extends TrackBase {
             // Explicit setting, keys == names
             for (let s of config.samples) {
                 this.sampleKeys = config.samples
-            }1
+            }
         }
 
-        if(config.sort) {
+        if (config.sort) {
             this.initialSort = config.sort
         }
     }
@@ -273,8 +273,9 @@ class VariantTrack extends TrackBase {
                 const h = variantHeight
 
                 // Compute pixel width.   Minimum width is 3 pixels,  if > 5 pixels create gap between variants
-                let x = Math.round((variant.start - bpStart) / bpPerPixel)
-                let x1 = Math.round((variant.end - bpStart) / bpPerPixel)
+                let x = (variant.start - bpStart) / bpPerPixel
+                let x1 = (variant.end - bpStart) / bpPerPixel
+
                 let w = Math.max(1, x1 - x)
                 if (w < 3) {
                     w = 3
@@ -465,7 +466,6 @@ class VariantTrack extends TrackBase {
         if (featureList === undefined) featureList = this.clickedFeatures(clickState)
         const genomicLocation = clickState.genomicLocation
         const genomeID = this.browser.genome.id
-        const sampleInformation = this.browser.sampleInformation
 
         let popupData = []
         for (let v of featureList) {

@@ -148,6 +148,12 @@ class Variant {
                     this.start = this.pos - 1
                     this.end = this.pos
                 }
+
+                // Infer an insertion from start === end
+                if (this.start === this.end) {
+                    this.start -= 0.5
+                    this.end += 0.5
+                }
             }
         }
     }
@@ -360,8 +366,14 @@ function determineType(ref, altAlleles) {
         const types = alleles.map(function (a) {
             if (refLength === 1 && a.length === 1) {
                 return "SNP"
+            } else if ("<NON_REF>" === a) {
+                return "NONVARIANT"
+            } else if (a.length > refLength && isKnownAlt(a)) {
+                return "INSERTION"
+            } else if (a.length < refLength && isKnownAlt(a)) {
+                return "DELETION"
             } else {
-                return "<NON_REF>" === a ? "NONVARIANT" : "OTHER"
+                return "OTHER"
             }
         })
         let type = types[0]
