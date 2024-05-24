@@ -490,7 +490,7 @@ class DownsampledInterval {
 
     popupData(genomicLocation) {
         return [
-            {name: "start", value: this.start + 1},
+            {name: "start", value: Math.floor(this.start + 1)},
             {name: "end", value: this.end},
             {name: "# downsampled:", value: this.counts}]
     }
