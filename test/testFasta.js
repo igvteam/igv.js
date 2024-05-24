@@ -195,4 +195,61 @@ suite("testFasta", function () {
 
     })
 
+    test("guess indexFile based on indexURL", async function () {
+        const fasta = new FastaSequence({
+                indexFile: 'https://will-be-used-only-if-no-index-url',
+                indexURL: 'https://foo/bar',
+            }
+        )
+        assert.equal(
+            fasta.indexFile,
+            "https://foo/bar",
+            "`this.indexFile` should be the same as `ref.indexURL`, even when there is `ref.indexFile`"
+        )
+    })
+
+    test("guess indexFile based on indexFile", async function () {
+        const fasta = new FastaSequence({
+                indexFile: 'https://foo/bar'
+            }
+        )
+        assert.equal(
+            fasta.indexFile,
+            "https://foo/bar",
+            "`this.indexFile` should be the same as `ref.indexFile` if no `ref.indexURL`"
+        )
+    })
+
+    test("guess indexFile based on fastaURL", async function () {
+        const fastaString = new FastaSequence({
+                fastaURL: 'https://foo/bar'
+            }
+        )
+        assert.equal(
+            fastaString.indexFile,
+            "https://foo/bar.fai",
+            "`this.indexFile` is the same URL as `ref.fastaURL` + '.fai' extension"
+        )
+
+        const fastaThunk = new FastaSequence({
+                fastaURL: () => 'https://foo/bar'
+            }
+        )
+        assert.equal(
+            await fastaThunk.indexFile(),
+            "https://foo/bar.fai",
+            "`this.indexFile` produced from `ref.fastaURL` should be produced from resolved fastaURL string"
+        )
+
+        const fastaAsyncThunk = new FastaSequence({
+                fastaURL: () => Promise.resolve('https://foo/bar')
+            }
+        )
+        let fastaURL = await fastaAsyncThunk.indexFile()
+        assert.equal(
+            fastaURL,
+            "https://foo/bar.fai",
+            "`this.indexFile` produced from `ref.fastaURL` should be produced from resolved fastaURL string"
+        )
+    })
 })
