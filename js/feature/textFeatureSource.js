@@ -63,8 +63,8 @@ class TextFeatureSource {
             }
         }
 
-        // Flag indicating if features loaded by this source can be searched for by name or attribute
-        this.searchable = config.searchable === true || config.searchableFields !== undefined
+        // Flag indicating if features loaded by this source can be searched for by name or attribute, true by default
+        this.searchable = config.searchable !== false
 
     }
 
