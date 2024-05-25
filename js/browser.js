@@ -675,6 +675,13 @@ class Browser {
 
         await this.roiManager.initialize()
 
+        // Sample info
+        if(session.sampleinfo) {
+            for(let si of session.sampleinfo) {
+                this.loadSampleInfo(si)
+            }
+        }
+
         // Tracks.  Start with genome tracks, if any, then append session tracks
         const genomeTracks = genomeConfig.tracks || []
         const trackConfigurations = session.tracks ? genomeTracks.concat(session.tracks) : genomeTracks
@@ -1249,6 +1256,7 @@ class Browser {
         }
 
         if ("sampleinfo" === type) {
+            // Deprecated option
             await this.loadSampleInfo(config)
             return undefined
         } else {
@@ -2003,10 +2011,14 @@ class Browser {
 
         json["roi"] = this.roiManager.toJSON()
 
+        // Sample info
+        const si = this.sampleInfo.toJSON()
+        if(si.length > 0) {
+            json["sampleinfo"] = si
+        }
+
+        // Tracks
         const trackJson = []
-
-        this.sampleInfo.toJSON(trackJson)
-
         const errors = []
         for (const {track} of this.trackViews) {
             try {
