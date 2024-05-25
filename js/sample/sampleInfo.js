@@ -180,12 +180,14 @@ class SampleInfo {
 
     }
 
-    toJSON(trackJson) {
+    toJSON() {
+        const json = []
         for (const url of this.sampleInfoFiles) {
-            const raw = { type: 'sampleinfo', url }
+            const raw = { url }
             const cooked = TrackBase.localFileInspection(raw)
-            trackJson.push(cooked)
+            json.push(cooked)
         }
+        return json
     }
 }
 
