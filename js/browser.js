@@ -676,9 +676,16 @@ class Browser {
         await this.roiManager.initialize()
 
         // Sample info
+        const localSampleInfoFiles = []
         if(session.sampleinfo) {
-            for(let si of session.sampleinfo) {
-                this.loadSampleInfo(si)
+            for(const config of session.sampleinfo) {
+
+                if (config.file) {
+                    localSampleInfoFiles.push(config.file)
+                } else {
+                    this.loadSampleInfo(config)
+                }
+
             }
         }
 
@@ -697,6 +704,10 @@ class Browser {
         const localIndexFileNames = trackConfigurations.filter((config) => undefined !== config.indexFile).map(({indexFile}) => indexFile)
         if (localIndexFileNames.length > 0) {
             localTrackFileNames.push(...localIndexFileNames)
+        }
+
+        if (localSampleInfoFiles.length > 0) {
+            localTrackFileNames.push(...localSampleInfoFiles)
         }
 
         if (localTrackFileNames.length > 0) {
