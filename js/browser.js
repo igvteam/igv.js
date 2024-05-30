@@ -2022,12 +2022,6 @@ class Browser {
 
         json["roi"] = this.roiManager.toJSON()
 
-        // Sample info
-        const si = this.sampleInfo.toJSON()
-        if(si.length > 0) {
-            json["sampleinfo"] = si
-        }
-
         // Tracks
         const trackJson = []
         const errors = []
@@ -2075,6 +2069,29 @@ class Browser {
                 if ('file' === key || 'indexFile' === key) {
                     localFileDetections.push(json[key])
                 }
+            }
+        }
+
+        // Sample info
+        const localSampleInfoFileDetections = []
+        if (this.sampleInfo.sampleInfoFiles.length > 0) {
+
+            for (const path of this.sampleInfo.sampleInfoFiles) {
+                const config = TrackBase.localFileInspection({ url: path })
+                if (config.file) {
+                    localSampleInfoFileDetections.push(config.file)
+                }
+            }
+
+            if (localSampleInfoFileDetections.length > 0) {
+                const si = this.sampleInfo.toJSON()
+                if(si.length > 0) {
+                    json["sampleinfo"] = si
+                }
+            }
+
+            if (localSampleInfoFileDetections.length > 0) {
+                localFileDetections.push(...localSampleInfoFileDetections)
             }
         }
 
