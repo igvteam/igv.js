@@ -591,11 +591,12 @@ class TrackBase {
             {
                 url: 'file',
                 indexURL: 'indexFile'
-            }
+            };
 
         for (const key of ['url', 'indexURL']) {
             if (cooked[key] && cooked[key] instanceof File) {
                 cooked[ lut[ key ] ] = cooked[key].name
+                delete cooked[key]
             }
         }
 
