@@ -102,8 +102,8 @@ suite("testVariant", function () {
         // Insertion
         const ins = featureList[6]
         assert.equal(ins.pos, 1234580)
-        assert.equal(ins.start, 1234582)
-        assert.equal(ins.end, 1234582)
+        assert.equal(ins.start, 1234581.5)
+        assert.equal(ins.end, 1234582.5)
 
     })
 
