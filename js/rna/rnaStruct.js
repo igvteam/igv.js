@@ -255,7 +255,7 @@ class RNAFeatureSource {
 
             const options = buildOptions(this.config)
 
-            const data = await igvxhr.loadString(this.config.url, options)
+            const data = await igvxhr.loadByteArray(this.config.url, options)
 
             this.featureCache = new FeatureCache(parseBP(data), genome)
 
