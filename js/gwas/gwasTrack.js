@@ -28,10 +28,9 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {BinnedColorScale, ConstantColorScale} from "../util/colorScale.js"
 import {doAutoscale} from "../util/igvUtils.js"
-import MenuUtils from "../ui/menuUtils.js"
 import GWASColors from "./gwasColors.js"
-import {ColorTable, randomColor} from "../util/colorPalletes.js"
-import GwasColors from "./gwasColors.js"
+import {ColorTable} from "../util/colorPalletes.js"
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 const DEFAULT_POPOVER_WINDOW = 100000000
 
@@ -213,7 +212,6 @@ class GWASTrack extends TrackBase {
             for (let f of features) {
                 const xDelta = Math.abs(clickState.canvasX - f.px)
                 const yDelta = Math.abs(clickState.canvasY - f.py)
-                const value = f[this.valueProperty]
                 if (xDelta < this.dotSize && yDelta < this.dotSize) {
                     if (count > 0) {
                         data.push("<HR/>")
@@ -222,11 +220,13 @@ class GWASTrack extends TrackBase {
                         data.push("...")
                         break
                     }
+                    f = f._f || f     // Extract "real" feature from potential psuedo feature (e.g. whole genome)
                     if (typeof f.popupData === 'function') {
                         data = data.concat(f.popupData())
                     } else {
-                        const chr = f.realChr || f.chr
-                        const pos = (f.realStart || f.start) + 1
+                        const value = f[this.valueProperty]
+                        const chr = f.chr
+                        const pos = StringUtils.numberFormatter(f.start + 1)
                         data.push({name: 'chromosome', value: chr})
                         data.push({name: 'position', value: pos})
                         data.push({name: 'name', value: f.name})
