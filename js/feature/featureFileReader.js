@@ -154,7 +154,7 @@ class FeatureFileReader {
             } else {
                 // If this is a non-indexed file we will load all features in advance
                 const options = buildOptions(this.config)
-                const data = await igvxhr.loadString(this.config.url, options)
+                const data = await igvxhr.loadByteArray(this.config.url, options)
                 let dataWrapper = getDataWrapper(data)
                 this.header = await this.parser.parseHeader(dataWrapper)
 
@@ -201,7 +201,7 @@ class FeatureFileReader {
             return tmp
         } else {
             const options = buildOptions(this.config)    // Add oauth token, if any
-            const data = await igvxhr.loadString(this.config.url, options)
+            const data = await igvxhr.loadByteArray(this.config.url, options)
             if (!this.header) {
                 const dataWrapper = getDataWrapper(data)
                 this.header = await this.parser.parseHeader(dataWrapper)
