@@ -35,6 +35,9 @@ import getDataWrapper from "./dataWrapper.js"
 import BGZLineReader from "../util/bgzLineReader.js"
 import BGZBlockLoader from "../bam/bgzBlockLoader.js"
 
+// Conservative estimate of the maximum allowed string length
+const MAX_STRING_LENGTH = 500000000
+
 /**
  * Reader for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
  *
@@ -97,7 +100,7 @@ class FeatureFileReader {
     async readFeatures(chr, start, end) {
 
         // insure that header has been loaded
-        if(!this.dataURI && !this.header) {
+        if (!this.dataURI && !this.header) {
             await this.readHeader()
         }
 
@@ -132,7 +135,7 @@ class FeatureFileReader {
 
                 let dataWrapper
                 if (index.tabix) {
-                    this._blockLoader = new BGZBlockLoader(this.config);
+                    this._blockLoader = new BGZBlockLoader(this.config)
                     dataWrapper = new BGZLineReader(this.config)
                 } else {
                     // Tribble
@@ -154,7 +157,14 @@ class FeatureFileReader {
             } else {
                 // If this is a non-indexed file we will load all features in advance
                 const options = buildOptions(this.config)
-                const data = await igvxhr.loadByteArray(this.config.url, options)
+                let data = await igvxhr.loadByteArray(this.config.url, options)
+
+                // If the data size is < max string length decode entire string with TextDecoder.  This is much faster
+                // than decoding by line
+                if(data.length < MAX_STRING_LENGTH) {
+                    data = new TextDecoder().decode(data)
+                }
+
                 let dataWrapper = getDataWrapper(data)
                 this.header = await this.parser.parseHeader(dataWrapper)
 
@@ -163,8 +173,8 @@ class FeatureFileReader {
                 this.features = await this.parser.parseFeatures(dataWrapper)   // cache features
 
                 // Extract chromosome names
-                this.sequenceNames = new Set();
-                for(let f of this.features) this.sequenceNames.add(f.chr);
+                this.sequenceNames = new Set()
+                for (let f of this.features) this.sequenceNames.add(f.chr)
 
                 return this.header
             }
