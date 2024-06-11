@@ -21,7 +21,7 @@ suite("test sample info", function () {
 
     test('Sample table', async function () {
         const sampleInfo = new SampleInfo(browser)
-        await sampleInfo.loadSampleInfoFile('test/data/sample/GBM-sampleTable.txt')
+        await sampleInfo.loadSampleInfoFile('test/data/sample/GBM-sampletable.txt')
         const attributes = sampleInfo.getAttributes("FALLS_p_TCGAaffxB4_1_GenomeWideSNP_6_C06_190576")
         assert.equal(sampleInfo.attributeCount, 12)
         assert.ok(sampleInfo.hasAttributes())
