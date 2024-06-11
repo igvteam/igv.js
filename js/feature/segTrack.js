@@ -5,8 +5,8 @@ import IGVGraphics from "../igv-canvas.js"
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "../igv-icons.js"
 import {GradientColorScale} from "../util/colorScale.js"
-import {ColorTable, randomRGB} from "../util/colorPalletes.js"
-import {attributeNames, emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js"
+import {ColorTable} from "../util/colorPalletes.js"
+import SampleInfo from "../sample/sampleInfo.js"
 import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
@@ -103,7 +103,7 @@ class SegTrack extends TrackBase {
         if (true === doSortByAttributes(this.browser.sampleInfo, this.sampleKeys)) {
             menuItems.push('<hr/>')
             menuItems.push("Sort by attribute:")
-            for (const attribute of attributeNames) {
+            for (const attribute of this.browser.sampleInfo.attributeNames) {
 
                 const sampleNames = this.sampleKeys
                 if (sampleNames.some(s => {
@@ -112,7 +112,7 @@ class SegTrack extends TrackBase {
                 })) {
 
                     const object = $('<div>')
-                    object.html(`&nbsp;&nbsp;${attribute.split(emptySpaceReplacement).join(' ')}`)
+                    object.html(`&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`)
 
                     function attributeSort() {
                         const sortDirection = this.#sortDirections.get(attribute) || 1

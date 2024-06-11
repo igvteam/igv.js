@@ -51,7 +51,6 @@ import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
 import ROITableControl from './roi/roiTableControl.js'
 import SampleInfo from "./sample/sampleInfo.js"
-import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import HicFile from "./hic/straw/hicFile.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
 import Hub from "./ucsc/ucscHub.js"
@@ -1123,7 +1122,7 @@ class Browser {
 
         if (typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
 
-            if (this.sampleInfo.isInitialized()) {
+            if (this.sampleInfo.hasAttributes()) {
                 this.sampleInfoControl.setButtonVisibility(true)
             }
 
@@ -1900,9 +1899,9 @@ class Browser {
 
             const found = this.findTracks(t => typeof t.getSamples === 'function')
             const isFound = found.length > 0
-            const isInitialized = this.sampleInfo.isInitialized()
+            const hasAttributes = this.sampleInfo.hasAttributes()
             const doShowSampleInfo = this.sampleInfoControl.showSampleInfo
-            const status = isFound && isInitialized && doShowSampleInfo
+            const status = isFound && hasAttributes && doShowSampleInfo
 
             if (status) {
                 return this.sampleInfo.attributeCount * sampleInfoTileWidth + sampleInfoTileXShim
