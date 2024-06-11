@@ -2075,20 +2075,17 @@ class Browser {
         const localSampleInfoFileDetections = []
         if (this.sampleInfo.sampleInfoFiles.length > 0) {
 
+            const si = this.sampleInfo.toJSON()
+            if(si.length > 0) {
+                json["sampleinfo"] = si
+            }
+
             for (const path of this.sampleInfo.sampleInfoFiles) {
                 const config = TrackBase.localFileInspection({ url: path })
                 if (config.file) {
                     localSampleInfoFileDetections.push(config.file)
                 }
             }
-
-            if (localSampleInfoFileDetections.length > 0) {
-                const si = this.sampleInfo.toJSON()
-                if(si.length > 0) {
-                    json["sampleinfo"] = si
-                }
-            }
-
             if (localSampleInfoFileDetections.length > 0) {
                 localFileDetections.push(...localSampleInfoFileDetections)
             }
