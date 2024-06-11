@@ -54,6 +54,10 @@ class PlinkSampleInformation {
     hasAttributes() {
         return Object.keys(this.attributes).length > 0
     }
+
+    get attributeCount() {
+        return Object.keys(this.attributes).length
+    }
 }
 
 function loadPlinkFile(url, config) {

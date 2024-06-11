@@ -30,7 +30,7 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
-import {attributeNames, emptySpaceReplacement, sampleDictionary} from "../sample/sampleInfo.js"
+import SampleInfo from "../sample/sampleInfo.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, StringUtils, IGVColor} from "../../node_modules/igv-utils/src/index.js"
 import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
@@ -584,7 +584,7 @@ class VariantTrack extends TrackBase {
             menuItems.push('<hr/>')
 
             menuItems.push("Sort by attribute:")
-            for (const attribute of attributeNames) {
+            for (const attribute of this.browser.sampleInfo.attributeNames) {
 
                 if (this.sampleKeys.some(s => {
                     const attrs = this.browser.sampleInfo.getAttributes(s)
@@ -593,7 +593,7 @@ class VariantTrack extends TrackBase {
 
 
                     const object = $('<div>')
-                    object.html(`&nbsp;&nbsp;${attribute.split(emptySpaceReplacement).join(' ')}`)
+                    object.html(`&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`)
 
                     function attributeSort() {
                         const sortDirection = this.#sortDirections.get(attribute) || 1

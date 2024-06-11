@@ -1,10 +1,9 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {appleCrayonRGB, randomRGB} from '../util/colorPalletes.js'
-import {attributeNames, emptySpaceReplacement, sampleDictionary} from './sampleInfo.js'
+import SampleInfo from './sampleInfo.js'
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 import IGVGraphics from "../igv-canvas.js"
 import {defaultRulerHeight} from "../rulerTrack.js"
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 // const sampleInfoColumnHeightShim = 64
 const sampleInfoColumnHeightShim = 96
@@ -51,7 +50,7 @@ class SampleInfoViewport {
 
         let requiredHeight
         if (this.browser.trackViews.length > 1 && null === this.viewport.previousElementSibling) {
-            const [ at, bt ] = [ this.browser.trackViews[0].track, this.browser.trackViews[1].track ]
+            const [at, bt] = [this.browser.trackViews[0].track, this.browser.trackViews[1].track]
             requiredHeight = at.height + bt.height
         } else {
             requiredHeight = this.viewport.clientHeight
@@ -68,7 +67,7 @@ class SampleInfoViewport {
             this.ctx.scale(dpi, dpi)
 
             if (null === this.viewport.previousElementSibling) {
-                IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+                IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, {fillStyle: appleCrayonRGB('snow')})
                 // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: randomRGB(150,250) })
             }
 
@@ -109,7 +108,7 @@ class SampleInfoViewport {
         this.ctx.scale(dpi, dpi)
 
         if (null === this.viewport.previousElementSibling) {
-            IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: randomRGB(150,250) })
+            IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, {fillStyle: randomRGB(150, 250)})
             // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
         }
 
@@ -125,7 +124,7 @@ class SampleInfoViewport {
                 this.draw({context: this.ctx, samples})
             }
         } else if (null === this.viewport.previousElementSibling) {
-            this.browser.trackViews[ 1 ].setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? sampleInfoColumnHeightShim : defaultRulerHeight, true)
+            this.browser.trackViews[1].setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? sampleInfoColumnHeightShim : defaultRulerHeight, true)
             this.renderSampleInfoColumns(this.ctx)
         }
 
@@ -138,8 +137,9 @@ class SampleInfoViewport {
         context.fillStyle = appleCrayonRGB('snow')
         context.fillRect(0, 0, context.canvas.width, context.canvas.height)
 
-        if (sampleDictionary && samples && samples.names.length > 0) {
+        if (samples && samples.names.length > 0) {
 
+            const attributeNames = this.browser.sampleInfo.attributeNames
             const viewportHeight = this.viewport.getBoundingClientRect().height
 
             let shim = 1
@@ -160,6 +160,7 @@ class SampleInfoViewport {
                 if (y + tileHeight > 0) {
 
                     const attributes = this.browser.sampleInfo.getAttributes(sampleName)
+
 
                     if (attributes) {
 
@@ -203,8 +204,8 @@ class SampleInfoViewport {
 
             ctx.save()
 
-            ctx.translate(x + width/2, y + height)
-            ctx.rotate(-Math.PI/2)
+            ctx.translate(x + width / 2, y + height)
+            ctx.rotate(-Math.PI / 2)
             ctx.textAlign = 'left'
 
             ctx.font = '10px verdana'
@@ -214,23 +215,22 @@ class SampleInfoViewport {
             ctx.restore()
         }
 
-        if (sampleDictionary) {
+        const attributeNames = this.browser.sampleInfo.attributeNames
+        this.hitList = {}
+        for (let i = 0; i < attributeNames.length; i++) {
+            const x = (sampleInfoTileXShim + i * sampleInfoTileWidth)
+            const w = (sampleInfoTileWidth - 1)
+            const h = Math.round(context.canvas.height / window.devicePixelRatio)
 
-            this.hitList = {}
-            for (let i = 0; i < attributeNames.length; i++) {
-                const x = (sampleInfoTileXShim + i * sampleInfoTileWidth)
-                const w = (sampleInfoTileWidth - 1)
-                const h = Math.round(context.canvas.height/window.devicePixelRatio)
+            IGVGraphics.fillRect(context, x, 0, w, h, {fillStyle: appleCrayonRGB('snow')})
+            // IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: randomRGB(150,250) })
+            drawRotatedText(context, attributeNames[i], x, 0, w, h)
 
-                IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: appleCrayonRGB('snow') })
-                // IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: randomRGB(150,250) })
-                drawRotatedText(context, attributeNames[i], x, 0, w, h)
+            const key = `${Math.floor(x)}#0#${w}#${Math.ceil(h)}`
+            this.hitList[key] = `${attributeNames[i]}`
 
-                const key = `${Math.floor(x)}#0#${w}#${Math.ceil(h)}`
-                this.hitList[key] = `${attributeNames[i]}`
-
-            }
         }
+
     }
 
     renderSVGContext(context, {deltaX, deltaY}) {
@@ -273,13 +273,16 @@ class SampleInfoViewport {
                 if (null === this.viewport.previousElementSibling) {
 
                     const getXY = (column, viewport) => {
-                        const { marginTop } = window.getComputedStyle(viewport)
-                        const {x, y} = DOMUtils.translateMouseCoordinates(event, this.browser.columnContainer.querySelector('.igv-sample-info-column'))
-                        return { x:Math.floor(x), y: Math.floor(y - parseInt(marginTop, 10)) }
+                        const {marginTop} = window.getComputedStyle(viewport)
+                        const {
+                            x,
+                            y
+                        } = DOMUtils.translateMouseCoordinates(event, this.browser.columnContainer.querySelector('.igv-sample-info-column'))
+                        return {x: Math.floor(x), y: Math.floor(y - parseInt(marginTop, 10))}
                     }
 
                     const column = this.browser.columnContainer.querySelector('.igv-sample-info-column')
-                    const { x, y } = getXY(column, this.viewport)
+                    const {x, y} = getXY(column, this.viewport)
 
                     column.setAttribute('title', '')
                     for (const [bbox, value] of entries) {
@@ -305,7 +308,7 @@ class SampleInfoViewport {
                             // do nothing
                         } else {
                             const [a, b] = value.split('#')
-                            this.viewport.setAttribute('title', `${a.split(emptySpaceReplacement).join(' ')}: ${'-' === b ? '' : b}`)
+                            this.viewport.setAttribute('title', `${a.split(SampleInfo.emptySpaceReplacement).join(' ')}: ${'-' === b ? '' : b}`)
                             break
                         }
                     }
@@ -334,5 +337,5 @@ class SampleInfoViewport {
 
 }
 
-export { sampleInfoColumnHeightShim }
+export {sampleInfoColumnHeightShim}
 export default SampleInfoViewport
