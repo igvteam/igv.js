@@ -7,7 +7,7 @@ suite("test sample info", function () {
 
     // Mock browser object
     const browser = {
-        getTracks: () => [{getSamples: function (){}}]
+        tracks: [{getSamples: function (){}}]
     }
 
     test('Sample Info', async function () {

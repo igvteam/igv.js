@@ -25,7 +25,7 @@ class SampleInfo {
 
         this.sampleInfoFiles = []
 
-        const found = browser.getTracks().some(t => typeof t.getSamples === 'function')
+        const found = browser.tracks.some(t => typeof t.getSamples === 'function')
         if (found.length > 0) {
             browser.sampleInfoControl.setButtonVisibility(true)
         }
