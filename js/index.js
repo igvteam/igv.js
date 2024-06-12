@@ -11,7 +11,8 @@ import {registerFileFormats} from "./util/trackUtils.js"
 import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import {registerTrackClass, registerTrackCreatorFunction} from "./trackFactory.js"
 import TrackBase from "./trackBase.js"
-import Hub from "./ucsc/ucscHub.js"
+import GenomeUtils from "./genome/genomeUtils.js"
+import TrackView from "./trackView.js"
 import Browser from "./browser.js"
 
 const setApiKey = igvxhr.setApiKey
@@ -28,6 +29,8 @@ function setOauthToken(accessToken, host) {
 const oauth = igvxhr.oauth
 
 export default {
+    GenomeUtils,
+    TrackView,
     TrackUtils,
     IGVGraphics,
     MenuUtils,
