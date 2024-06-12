@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>Olga Dudechenko: Woolly Mammoth</title>
+
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const config =
+        {
+            "locus": "all",
+            "reference":
+                {
+                    id: 'Loxafr3.0_HiC',
+                    name: "Woolly Mammoth",
+                    "fastaURL": "https://dnazoo.s3.wasabisys.com/Loxodonta_africana/Loxafr3.0_HiC.fasta",
+                    "indexURL": "https://dnazoo.s3.wasabisys.com/Loxodonta_africana/Loxafr3.0_HiC.fasta.fai"
+                },
+            tracks:
+                [
+                    {
+                        "name": "Refseq Genes",
+                        "format": "refgene",
+                        "type": "annotation",
+                        "url": "https://dnazoo.s3.wasabisys.com/Loxodonta_africana/Loxafr3.0_HiC.refseq_annotations.bed",
+                        indexed: 'false',
+                        "order": 1000001,
+                        "height": 70,
+                    },
+                    {
+                        url: 'https://www.dropbox.com/scl/fi/yczvlb961oh77sgv9syc6/MP_skin_CRUSH_Loxafr3.0_HiC.bedgraph?rlkey=e2j6wm62gxoiiyhh0m3bems7q&dl=0',
+                    },
+                ]
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+</script>
+
+</body>
+
+</html>
