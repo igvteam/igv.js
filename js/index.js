@@ -4,7 +4,6 @@ import MenuUtils from "./ui/menuUtils.js"
 import DataRangeDialog from "./ui/dataRangeDialog.js"
 import IGVGraphics from "./igv-canvas.js"
 import {createBrowser, createTrack, removeAllBrowsers, removeBrowser, visibilityChange} from './igv-create.js'
-import embedCss from "./embedCss.js"
 import version from "./version.js"
 import * as TrackUtils from "./util/trackUtils.js"
 import {registerFileFormats} from "./util/trackUtils.js"
@@ -13,6 +12,7 @@ import {registerTrackClass, registerTrackCreatorFunction} from "./trackFactory.j
 import TrackBase from "./trackBase.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import TrackView from "./trackView.js"
+import * as DOMUtils from "./ui/utils/dom-utils.js"
 import Browser from "./browser.js"
 
 const setApiKey = igvxhr.setApiKey
@@ -29,6 +29,7 @@ function setOauthToken(accessToken, host) {
 const oauth = igvxhr.oauth
 
 export default {
+    DOMUtils,
     GenomeUtils,
     TrackView,
     TrackUtils,

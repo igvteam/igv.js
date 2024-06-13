@@ -7,11 +7,13 @@ const BACKUP_GENOMES_URL = "https://s3.amazonaws.com/igv.org.genomes/genomes.jso
 
 const GenomeUtils = {
 
+    KNOWN_GENOMES: undefined,
+
     initializeGenomes: async function (config) {
 
-        if (!GenomeUtils.KNOWN_GENOMES) {
+        if (undefined === GenomeUtils.KNOWN_GENOMES) {
 
-            const table = {}
+            GenomeUtils.KNOWN_GENOMES = {}
 
             // Get default genomes
             if (config.loadDefaultGenomes !== false) {
@@ -43,15 +45,14 @@ const GenomeUtils = {
                 }
             }
 
-            GenomeUtils.KNOWN_GENOMES = table
-
             function processJson(jsonArray) {
                 jsonArray.forEach(function (json) {
-                    table[json.id] = json
+                    GenomeUtils.KNOWN_GENOMES[json.id] = json
                 })
-                return table
             }
         }
+
+        return GenomeUtils.KNOWN_GENOMES
     },
 
     isWholeGenomeView: function (chr) {

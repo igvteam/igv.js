@@ -105,6 +105,8 @@ class TrackView {
 
     createAxis(browser, track) {
 
+        const materialProviderExclusionTrackTypes = new Set(['ruler', 'sequence', 'ideogram'])
+
         const axis = DOMUtils.div()
         browser.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
@@ -121,26 +123,24 @@ class TrackView {
             axis.appendChild(this.axisCanvas)
         }
 
-        if (false === multiTrackSelectExclusionTypes.has(this.track.type)) {
+        if (false === materialProviderExclusionTrackTypes.has(this.track.type)) {
 
-            const trackSelectionContainer = DOMUtils.div()
-            axis.appendChild(trackSelectionContainer)
+            const parent = DOMUtils.div()
+            axis.appendChild(parent)
 
             const html = `<input type="checkbox" name="track-select">`
             const input = document.createRange().createContextualFragment(html).firstChild
-            trackSelectionContainer.appendChild(input)
-            input.checked = this.track.isMultiSelection || false
+            parent.appendChild(input)
+            input.checked = false
 
             input.addEventListener('change', event => {
                 event.preventDefault()
                 event.stopPropagation()
-                this.track.isMultiSelection = event.target.checked
-                setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
-                this.browser.overlayTrackButton.setVisibility( isOverlayTrackCriteriaMet(this.browser) )
+                browser.fireEvent('dataValueMaterialCheckbox', [this.track])
+
             })
 
-            setMultiTrackSelectionState(this, axis, ENABLE_MULTI_TRACK_SELECTION)
-
+            this.materialProviderInput = input
         }
 
         return axis
@@ -975,8 +975,6 @@ class TrackView {
 
 }
 
-
-
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
     if (typeof track.paintAxis === 'function') {
@@ -995,10 +993,5 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
 }
 
-function maxViewportContentHeight(viewports) {
-    const heights = viewports.map(viewport => viewport.getContentHeight())
-    return Math.max(...heights)
-}
-
-export {igv_axis_column_width, maxViewportContentHeight, setDragHandleSelectionState}
+export {igv_axis_column_width, setDragHandleSelectionState}
 export default TrackView
