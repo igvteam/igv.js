@@ -35,8 +35,6 @@ import PairedEndStats from "./pairedEndStats.js"
 import AlignmentTrack from "./alignmentTrack.js"
 import CoverageTrack from "./coverageTrack.js"
 
-const pairCompatibleGroupOptions = new Set(["firstOfPairStrand"])
-
 class BAMTrack extends TrackBase {
 
     static defaults = {
@@ -56,8 +54,12 @@ class BAMTrack extends TrackBase {
 
         this.type = "alignment"
         this.featureSource = new BamSource(config, this.browser)
-        this.coverageTrack = new CoverageTrack(config, this)
-        this.alignmentTrack = new AlignmentTrack(config, this)
+
+        const coverageTrackConfig = Object.assign({parent: this}, config)
+        this.coverageTrack = new CoverageTrack(coverageTrackConfig, this)
+
+        const alignmentTrackConfig = Object.assign({parent: this}, config)
+        this.alignmentTrack = new AlignmentTrack(alignmentTrackConfig, this.browser)
 
         super.init(config)
 
@@ -153,7 +155,7 @@ class BAMTrack extends TrackBase {
         }
 
         // Must pack before sorting
-        alignmentContainer.pack(this)
+        alignmentContainer.pack(this.alignmentTrack)
 
         const sort = this.sortObject
         if (sort) {
@@ -253,54 +255,7 @@ class BAMTrack extends TrackBase {
 
         menuItems = menuItems.concat(this.numericDataMenuItems())
 
-        // Color by items //////////////////////////////////////////////////
-        menuItems.push('<hr/>')
-        const $e = $('<div class="igv-track-menu-category">')
-        $e.text('Color by:')
-        menuItems.push({name: undefined, object: $e, click: undefined, init: undefined})
-
-        const colorByMenuItems = []
-        colorByMenuItems.push({key: 'none', label: 'none'})
-        colorByMenuItems.push({key: 'strand', label: 'read strand'})
-        if (this.alignmentTrack.hasPairs) {
-            colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'})
-            colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'})
-            colorByMenuItems.push({key: 'tlen', label: 'insert size (TLEN)'})
-            colorByMenuItems.push({key: 'unexpectedPair', label: 'pair orientation & insert size (TLEN)'})
-        }
-        const tagLabel = 'tag' + (this.alignmentTrack.colorByTag ? ' (' + this.alignmentTrack.colorByTag + ')' : '')
-        colorByMenuItems.push({key: 'tag', label: tagLabel})
-        for (let item of colorByMenuItems) {
-            const selected = (this.alignmentTrack.colorBy === undefined && item.key === 'none') || this.alignmentTrack.colorBy === item.key
-            menuItems.push(this.colorByCB(item, selected))
-        }
-
-
-        // Group by items //////////////////////////////////////////////////
-        menuItems.push('<hr/>')
-        const $e2 = $('<div class="igv-track-menu-category">')
-        $e2.text('Group by:')
-        menuItems.push({name: undefined, object: $e2, click: undefined, init: undefined})
-
-        const groupByMenuItems = []
-        groupByMenuItems.push({key: 'none', label: 'none'})
-        groupByMenuItems.push({key: 'strand', label: 'read strand'})
-        if (this.alignmentTrack.hasPairs) {
-            groupByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'})
-            groupByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'})
-            groupByMenuItems.push({key: 'mateChr', label: 'chromosome of mate'})
-        }
-        groupByMenuItems.push({key: 'chimeric', label: 'chimeric'})
-        groupByMenuItems.push({key: 'supplementary', label: 'supplementary flag'})
-        groupByMenuItems.push({key: 'readOrder', label: 'read order'})
-        //groupByMenuItems.push({key: 'phase', label: 'phase'})
-        groupByMenuItems.push({key: 'tag', label: 'tag'})
-
-        for (let item of groupByMenuItems) {
-            const selected = (this.alignmentTrack.groupBy === undefined && item.key === 'none') || this.alignmentTrack.groupBy === item.key
-            menuItems.push(this.groupByCB(item, selected))
-        }
-
+        menuItems = menuItems.concat(this.alignmentTrack.menuItemList())
 
         // Show coverage / alignment options
         const adjustTrackHeight = () => {
@@ -338,239 +293,9 @@ class BAMTrack extends TrackBase {
             click: showAlignmentHandler
         })
 
-        // Show all bases
-        menuItems.push('<hr/>')
-        menuItems.push({
-            object: $(createCheckbox("Show all bases", this.alignmentTrack.showAllBases)),
-            click: function showAllBasesHandler() {
-                this.alignmentTrack.showAllBases = !this.alignmentTrack.showAllBases
-                this.config.showAllBases = this.alignmentTrack.showAllBases
-                this.trackView.repaintViews()
-            }
-        })
 
-        // Show mismatches
-        menuItems.push('<hr/>')
-        menuItems.push({
-            object: $(createCheckbox("Show mismatches", this.alignmentTrack.showMismatches)),
-            click: function showMismatchesHandler() {
-                this.alignmentTrack.showMismatches = !this.alignmentTrack.showMismatches
-                this.config.showMismatches = this.alignmentTrack.showMismatches
-                this.trackView.repaintViews()
-            }
-        })
-
-        // Insertions
-        menuItems.push({
-            object: $(createCheckbox("Show insertions", this.alignmentTrack.showInsertions)),
-            click: function showInsertionsHandler() {
-                this.alignmentTrack.showInsertions = !this.alignmentTrack.showInsertions
-                this.config.showInsertions = this.alignmentTrack.showInsertions
-                this.trackView.repaintViews()
-            }
-        })
-
-        // Soft clips
-        menuItems.push({
-            object: $(createCheckbox("Show soft clips", this.alignmentTrack.showSoftClips)),
-            click: function showSoftClipsHandler() {
-                this.alignmentTrack.showSoftClips = !this.alignmentTrack.showSoftClips
-                this.config.showSoftClips = this.alignmentTrack.showSoftClips
-                const alignmentContainers = this.getCachedAlignmentContainers()
-                for (let ac of alignmentContainers) {
-                    ac.pack(this)
-                }
-                this.trackView.repaintViews()
-            }
-        })
-
-        // View as pairs
-        if (this.alignmentTrack.hasPairs) {
-            menuItems.push('<hr/>')
-            menuItems.push({
-                object: $(createCheckbox("View as pairs", this.alignmentTrack.viewAsPairs)),
-                click: function viewAsPairsHandler() {
-                    const b = !this.alignmentTrack.viewAsPairs
-                    if (b && this.alignmentTrack.groupBy && !pairCompatibleGroupOptions.has(this.alignmentTrack.groupBy)) {
-                        this.browser.alert.present(`'View as Pairs' is incompatible with 'Group By ${this.alignmentTrack.groupBy}'`)
-                        return
-                    }
-                    this.alignmentTrack.viewAsPairs = b
-                    this.config.viewAsPairs = this.alignmentTrack.viewAsPairs
-                    const alignmentContainers = this.getCachedAlignmentContainers()
-                    for (let ac of alignmentContainers) {
-                        ac.pack(this)
-                    }
-                    this.trackView.checkContentHeight()
-                    this.trackView.repaintViews()
-                }
-            })
-        }
-
-        // Add chords to JBrowse circular view, if present
-        if (this.browser.circularView &&
-            (this.alignmentTrack.hasPairs || this.alignmentTrack.hasSupplemental)) {
-            menuItems.push('<hr/>')
-            if (this.alignmentTrack.hasPairs) {
-                menuItems.push({
-                    label: 'Add discordant pairs to circular view',
-                    click: function discordantPairsHandler() {
-                        for (let viewport of this.trackView.viewports) {
-                            this.addPairedChordsForViewport(viewport)
-                        }
-                    }
-                })
-            }
-            if (this.alignmentTrack.hasSupplemental) {
-                menuItems.push({
-                    label: 'Add split reads to circular view',
-                    click: function splitReadsHandler() {
-                        for (let viewport of this.trackView.viewports) {
-                            this.addSplitChordsForViewport(viewport)
-                        }
-                    }
-                })
-            }
-        }
-
-
-        // Display mode
-        menuItems.push('<hr/>')
-        const $dml = $('<div class="igv-track-menu-category">')
-        $dml.text('Display mode:')
-        menuItems.push({name: undefined, object: $dml, click: undefined, init: undefined})
-
-        menuItems.push({
-            object: $(createCheckbox("expand", this.alignmentTrack.displayMode === "EXPANDED")),
-            click: function expandHandler() {
-                this.alignmentTrack.displayMode = "EXPANDED"
-                this.config.displayMode = "EXPANDED"
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-            }
-        })
-
-        menuItems.push({
-            object: $(createCheckbox("squish", this.alignmentTrack.displayMode === "SQUISHED")),
-            click: function squishHandler() {
-                this.alignmentTrack.displayMode = "SQUISHED"
-                this.config.displayMode = "SQUISHED"
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-            }
-        })
 
         return menuItems
-    }
-
-    /**
-     * Create a "color by" checkbox menu item, optionally initially checked
-     * @param menuItem
-     * @param showCheck
-     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
-     */
-    colorByCB(menuItem, showCheck) {
-
-        const $e = $(createCheckbox(menuItem.label, showCheck))
-
-        if (menuItem.key !== 'tag') {
-
-            function clickHandler() {
-                this.alignmentTrack.colorBy = menuItem.key
-                this.trackView.repaintViews()
-            }
-
-            return {name: undefined, object: $e, click: clickHandler, init: undefined}
-        } else {
-
-            function dialogPresentationHandler(ev) {
-
-                this.browser.inputDialog.present({
-                    label: 'Tag Name',
-                    value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
-                    callback: (tag) => {
-                        if (tag) {
-                            this.alignmentTrack.colorBy = 'tag:' + tag
-                            if (!this.alignmentTrack.tagColors) {
-                                this.alignmentTrack.tagColors = new PaletteColorTable("Set1")
-                            }
-                        } else {
-                            this.alignmentTrack.colorBy = undefined
-                        }
-                        this.trackView.repaintViews()
-                    }
-                }, ev)
-            }
-
-            return {name: undefined, object: $e, dialog: dialogPresentationHandler, init: undefined}
-
-        }
-    }
-
-    get groupBy() {
-        return this.alignmentTrack.groupBy
-    }
-
-    /**
-     * Create a "group by" checkbox menu item, optionally initially checked
-     * TODO -- combine with colorByCB
-     * @param menuItem
-     * @param showCheck
-     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
-     */
-    groupByCB(menuItem, showCheck) {
-
-        const $e = $(createCheckbox(menuItem.label, showCheck))
-
-        if (menuItem.key !== 'tag') {
-
-            function clickHandler() {
-                if (menuItem.key === 'none') {
-                    this.alignmentTrack.groupBy = undefined
-                } else {
-                    this.alignmentTrack.groupBy = menuItem.key
-                }
-
-                const alignmentContainers = this.getCachedAlignmentContainers()
-                for (let ac of alignmentContainers) {
-                    ac.pack(this)
-                }
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-            }
-
-            return {name: undefined, object: $e, click: clickHandler, init: undefined}
-        } else {
-
-            function dialogPresentationHandler(ev) {
-
-                let currentTag = ''
-                if (this.alignmentTrack.groupBy && this.alignmentTrack.groupBy.startsWith('tag:')) {
-                    currentTag = this.alignmentTrack.groupBy.substring(4)
-                }
-
-                this.browser.inputDialog.present({
-                    label: 'Tag Name',
-                    value: currentTag,
-                    callback: (tag) => {
-                        if (tag) {
-                            this.alignmentTrack.groupBy = 'tag:' + tag
-                        } else {
-                            this.alignmentTrack.groupBy = 'none'
-                        }
-                        const alignmentContainers = this.getCachedAlignmentContainers()
-                        for (let ac of alignmentContainers) {
-                            ac.pack(this)
-                        }
-                        this.trackView.checkContentHeight()
-                        this.trackView.repaintViews()
-                    }
-                }, ev)
-            }
-
-            return {name: undefined, object: $e, dialog: dialogPresentationHandler, init: undefined}
-
-        }
     }
 
 

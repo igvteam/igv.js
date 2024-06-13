@@ -2,6 +2,7 @@
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {createSupplementaryAlignments} from "./supplementaryAlignment.js"
 import {getBaseModificationSets} from "./mods/baseModificationUtils.js"
+import orientationTypes from "./orientationTypes.js"
 
 
 const READ_PAIRED_FLAG = 0x1
@@ -110,6 +111,10 @@ class BamAlignment {
             }
         }
         return this.tagDict
+    }
+
+    getTag(key) {
+        return this.tags()[key]
     }
 
 
@@ -335,6 +340,44 @@ class BamAlignment {
         }
         return this.baseModificationSets
     }
+
+     getGroupValue( groupBy, tag, expectedPairOrientation) {
+
+        const al = this
+        switch (groupBy) {
+            // case 'HAPLOTYPE':
+            //     return al.getHaplotypeName();
+            case 'strand':
+                return al.strand ? '+' : '-'
+            case 'firstOfPairStrand':
+                const strand = al.firstOfPairStrand
+                return strand === undefined ? "" : strand ? '+' : '-'
+            case 'mateChr':
+                return (al.mate && al.isMateMapped()) ? al.mate.chr : ""
+            case 'pairOrientation':
+                return orientationTypes[expectedPairOrientation][al.pairOrientation] || ""
+            case 'chimeric':
+                return al.tags()['SA'] ? "chimeric" : ""
+            case 'supplementary':
+                return al.isSupplementary ? "supplementary" : ""
+            case 'readOrder':
+                if (al.isPaired() && al.isFirstOfPair()) {
+                    return "first"
+                } else if (al.isPaired() && al.isSecondOfPair()) {
+                    return "second"
+                } else {
+                    return ""
+                }
+            case 'phase':
+                return al.tags()['HP'] || ""
+            case 'tag':
+                return al.tags()[tag] || ""
+            // Add cases for other options as needed
+            default:
+                return undefined
+        }
+    }
+
 
 }
 
