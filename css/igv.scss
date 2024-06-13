@@ -206,6 +206,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
     //background-color: rgba(101, 211, 19, 1);
 
     > div {
+      display: grid;
       z-index: 512;
       position: absolute;
       top: 8px;
@@ -213,7 +214,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
       width: fit-content;
       height: fit-content;
       background-color: transparent;
-      display: grid;
+
       align-items: start;
       justify-items: center;
       //place-items: flex-start center;

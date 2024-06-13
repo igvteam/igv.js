@@ -1,6 +1,6 @@
 
 import * as DOMUtils from "../ui/utils/dom-utils.js"
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {lerp} from "../util/igvUtils.js"
 
 class CursorGuide {
 
@@ -71,6 +71,24 @@ class CursorGuide {
             } // if ('CANVAS' === event.target.tagName) {
 
         }
+    }
+
+    updateWithInterpolant(interpolant) {
+
+        // Column Container Viewport
+        const { x:xc } = this.columnContainer.getBoundingClientRect()
+
+        // Ruler Viewport
+        const viewport = this.browser.getRulerTrackView().viewports[ 0 ].$viewport.get(0)
+        const { x, width } = viewport.getBoundingClientRect()
+        // console.log(`CursorGuide columnContainer x ${ xc } viewport ${ x }`)
+
+        const left = x - xc
+        const pixel = Math.floor(lerp(left, width + left, interpolant))
+
+        // console.log(`CursorGuide verticalGuide.style.left ${ pixel }`)
+
+        this.verticalGuide.style.left = `${ pixel }px`
     }
 
     removeMouseHandler() {

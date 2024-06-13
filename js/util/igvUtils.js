@@ -253,8 +253,12 @@ function expandRegion(start, end, extent) {
     }
 }
 
+function lerp (a, b, x) {
+    return a * (1.0 - x) + b * x;
+}
+
 export {
-    createColumn, extend, isSimpleType, buildOptions, validateGenomicExtent, doAutoscale, isNumber,
+    lerp, createColumn, extend, isSimpleType, buildOptions, validateGenomicExtent, doAutoscale, isNumber,
     getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext,
     getElementAbsoluteHeight, expandRegion
 }

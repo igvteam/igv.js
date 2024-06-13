@@ -41,9 +41,10 @@ async function createBrowser(parentDiv, config) {
 
     if (undefined === config) config = {}
 
+    let knownGenomes
     // Initialize pre-defined genomes.  The genome list is shared among all browser instances
     if (!GenomeUtils.KNOWN_GENOMES) {
-        await GenomeUtils.initializeGenomes(config)
+        knownGenomes = await GenomeUtils.initializeGenomes(config)
     }
 
     setDefaults(config)
@@ -84,7 +85,7 @@ async function createBrowser(parentDiv, config) {
     browser.stopSpinner()
     navbarDidResize(browser, browser.$navigation.width())
 
-    return browser
+    return { browser, knownGenomes }
 
 }
 
