@@ -49,6 +49,26 @@
                         "M": "red",
                         "R": "blue",
                     }
+                },
+                {
+                    "type": "alignment",
+                    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam",
+                    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam.bai",
+                    "name": "Function",
+                    "format": "bam",
+                    "color": (alignment) => {
+                        const tag = alignment.getTag("XT")
+                        switch(tag) {
+                            case "U":
+                                return "green"
+                            case "M":
+                                return "red"
+                            case "R":
+                                return "blue"
+                            default:
+                                return "black"
+                        }
+                    }
                 }
             ]
         }

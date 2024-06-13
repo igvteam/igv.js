@@ -1,7 +1,7 @@
 import BaseModificationRenderer from "./mods/baseModificationRenderer.js"
 import IGVGraphics from "../igv-canvas.js"
 import PairedAlignment from "./pairedAlignment.js"
-import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
+import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import {createBlatTrack, maxSequenceSize} from "../blat/blatTrack.js"
 import {reverseComplementSequence} from "../util/sequenceUtils.js"
@@ -12,6 +12,7 @@ import {getChrColor} from "../util/getChrColor.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
 
+
 const alignmentStartGap = 5
 const downsampleRowHeight = 10
 const groupGap = 10
@@ -21,6 +22,8 @@ const DEFAULT_HIGHLIGHT_COLOR = "#00ff00"
 const MINIMUM_BLAT_LENGTH = 20
 const bisulfiteColorFw1 = "rgb(195, 195, 195)"
 const bisulfiteColorRev1 = "rgb(195, 210, 195)"
+
+const pairCompatibleGroupOptions = new Set(["firstOfPairStrand"])
 
 class AlignmentTrack extends TrackBase {
 
@@ -61,12 +64,12 @@ class AlignmentTrack extends TrackBase {
     }
 
 
-    constructor(config, parent) {
+    constructor(config, browser) {
 
-        super(config, parent.browser)
+        super(config, browser)
 
         // Explicit color table for tags
-        if(config.tagColorTable) {
+        if (config.tagColorTable) {
             this.tagColors = new ColorTable(config.tagColorTable)
         }
 
@@ -79,8 +82,6 @@ class AlignmentTrack extends TrackBase {
         if (config.maxFragmentLength) this.maxTLEN = config.maxFragmentLength
         if (config.colorBy && config.colorByTag) this.colorBy = config.colorBy + ":" + config.colorByTag
 
-
-        this.parent = parent
         this.featureSource = parent.featureSource
         this.top = 0 === config.coverageTrackHeight ? 0 : config.coverageTrackHeight + 5
 
@@ -97,9 +98,23 @@ class AlignmentTrack extends TrackBase {
         this.hasPairs = false   // Until proven otherwise
         this.hasSupplemental = false
 
+
+        this._groupByTags = []
+        this._groupByPositions = []
+        if(config.groupBy) {
+            this.groupBy = config.groupBy
+            if (config.groupBy.startsWith("base:")) {
+                this._groupByPositions.push(config.groupBy.substring(5))
+            }
+            if (config.groupBy.startsWith("tag:")) {
+                this._groupByTags.push(config.groupBy.substring(4))
+            }
+        }
     }
 
     init(config) {
+        this.parent = config.parent  // A hack to get around initialization problem
+        delete config.parent
         super.init(config)
     }
 
@@ -169,7 +184,7 @@ class AlignmentTrack extends TrackBase {
         let alignmentRowYInset = 0
 
         // Set colorBy default if neccessary
-        if(!this.colorBy) {
+        if (!this.colorBy) {
             this.colorBy = this.hasPairs ? "unexpectedPair" : "none"
         }
 
@@ -259,21 +274,21 @@ class AlignmentTrack extends TrackBase {
 
                 group.pixelBottom = alignmentY
 
-                if (this.groupBy) {
+                if (this.groupBy && groupName) {
 
                     ctx.save()
                     ctx.font = '400 12px sans-serif'
                     const textMetrics = ctx.measureText(groupName)
-                    const w = Math.max(textMetrics.width, 20)
+                    const w = textMetrics.width + 10
                     const x = -options.pixelShift + options.viewportWidth - w - 10
-                    const h = 12
+                    const h = textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent + 10
                     const baselineY = Math.min(group.pixelTop + h - 1, group.pixelBottom)
 
                     ctx.textAlign = "center"
                     ctx.fillStyle = 'white'
                     ctx.strokeStyle = 'lightGray'
                     ctx.beginPath()
-                    ctx.roundRect(x, baselineY - h + 2, w, h, 2)
+                    ctx.roundRect(x, baselineY - textMetrics.actualBoundingBoxAscent - 5, w, h, 2)
                     ctx.fill()
                     ctx.stroke()
 
@@ -620,13 +635,306 @@ class AlignmentTrack extends TrackBase {
         return clickedObject ? clickedObject.popupData(clickState.genomicLocation) : undefined
     };
 
+    /**
+     * Return menu items for the AlignmentTrack
+     *
+     * NOTE: click handler functions are called in the context of the parent BAMTrack, thus the rather odd looking
+     * reference to "this.alignmentTrack" in click handler function scopes.
+     *
+     * @returns {*[]}
+     */
+    menuItemList() {
+
+        // Start with overage track items
+        let menuItems = []
+
+        // Color by items //////////////////////////////////////////////////
+        menuItems.push('<hr/>')
+        const $e = $('<div class="igv-track-menu-category">')
+        $e.text('Color by:')
+        menuItems.push({name: undefined, object: $e, click: undefined, init: undefined})
+
+        const colorByMenuItems = []
+        colorByMenuItems.push({key: 'none', label: 'none'})
+        colorByMenuItems.push({key: 'strand', label: 'read strand'})
+        if (this.hasPairs) {
+            colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'})
+            colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'})
+            colorByMenuItems.push({key: 'tlen', label: 'insert size (TLEN)'})
+            colorByMenuItems.push({key: 'unexpectedPair', label: 'pair orientation & insert size (TLEN)'})
+        }
+        const tagLabel = 'tag' + (this.colorByTag ? ' (' + this.colorByTag + ')' : '')
+        colorByMenuItems.push({key: 'tag', label: tagLabel})
+        for (let item of colorByMenuItems) {
+            const selected = (this.colorBy === undefined && item.key === 'none') || this.colorBy === item.key
+            menuItems.push(this.colorByCB(item, selected))
+        }
+
+
+        // Group by items //////////////////////////////////////////////////
+        menuItems.push('<hr/>')
+        const $e2 = $('<div class="igv-track-menu-category">')
+        $e2.text('Group by:')
+        menuItems.push({name: undefined, object: $e2, click: undefined, init: undefined})
+
+        const groupByMenuItems = []
+        groupByMenuItems.push({key: 'none', label: 'none'})
+        groupByMenuItems.push({key: 'strand', label: 'read strand'})
+        if (this.hasPairs) {
+            groupByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'})
+            groupByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'})
+            groupByMenuItems.push({key: 'mateChr', label: 'chromosome of mate'})
+        }
+        groupByMenuItems.push({key: 'chimeric', label: 'chimeric'})
+        groupByMenuItems.push({key: 'supplementary', label: 'supplementary flag'})
+        groupByMenuItems.push({key: 'readOrder', label: 'read order'})
+        //groupByMenuItems.push({key: 'phase', label: 'phase'})
+
+        for (let groupByTag of this._groupByTags) {
+            groupByMenuItems.push({key: `tag:${groupByTag}`, label: `tag:${groupByTag}`})
+        }
+        for (let groupByPos of this._groupByPositions) {
+            groupByMenuItems.push({key: `base:${groupByPos}`, label: `base:${groupByPos}`})
+        }
+
+        groupByMenuItems.push({key: 'tag', label: 'tag...'})
+
+        for (let item of groupByMenuItems) {
+            const selected = (this.groupBy === undefined && item.key === 'none') || this.groupBy === item.key
+            menuItems.push(this.groupByCB(item, selected))
+        }
+
+        // Show all bases
+        menuItems.push('<hr/>')
+        menuItems.push({
+            object: $(createCheckbox("Show all bases", this.showAllBases)),
+            click: function showAllBasesHandler() {
+                this.alignmentTrack.showAllBases = !this.alignmentTrack.showAllBases
+                this.trackView.repaintViews()
+            }
+        })
+
+        // Show mismatches
+        menuItems.push({
+            object: $(createCheckbox("Show mismatches", this.showMismatches)),
+            click: function showMismatchesHandler() {
+                this.alignmentTrack.showMismatches = !this.alignmentTrack.showMismatches
+                this.trackView.repaintViews()
+            }
+        })
+
+        // Insertions
+        menuItems.push({
+            object: $(createCheckbox("Show insertions", this.showInsertions)),
+            click: function showInsertionsHandler() {
+                this.alignmentTrack.showInsertions = !this.alignmentTrack.showInsertions
+                this.trackView.repaintViews()
+            }
+        })
+
+        // Soft clips
+        menuItems.push({
+            object: $(createCheckbox("Show soft clips", this.showSoftClips)),
+            click: function showSoftClipsHandler() {
+                this.alignmentTrack.showSoftClips = !this.alignmentTrack.showSoftClips
+                const alignmentContainers = this.getCachedAlignmentContainers()
+                for (let ac of alignmentContainers) {
+                    ac.pack(this)
+                }
+                this.trackView.repaintViews()
+            }
+        })
+
+        // View as pairs
+        if (this.hasPairs) {
+            menuItems.push('<hr/>')
+            menuItems.push({
+                object: $(createCheckbox("View as pairs", this.viewAsPairs)),
+                click: function viewAsPairsHandler() {
+                    const b = !this.alignmentTrack.viewAsPairs
+                    if (b && this.groupBy && !pairCompatibleGroupOptions.has(this.groupBy)) {
+                        this.browser.alert.present(`'View as Pairs' is incompatible with 'Group By ${this.groupBy}'`)
+                        return
+                    }
+                    this.alignmentTrack.viewAsPairs = b
+                    const alignmentContainers = this.getCachedAlignmentContainers()
+                    for (let ac of alignmentContainers) {
+                        ac.pack(this)
+                    }
+                    this.trackView.checkContentHeight()
+                    this.trackView.repaintViews()
+                }
+            })
+        }
+
+        // Add chords to JBrowse circular view, if present
+        if (this.browser.circularView &&
+            (this.hasPairs || this.hasSupplemental)) {
+            menuItems.push('<hr/>')
+            if (this.hasPairs) {
+                menuItems.push({
+                    label: 'Add discordant pairs to circular view',
+                    click: function discordantPairsHandler() {
+                        for (let viewport of this.trackView.viewports) {
+                            this.addPairedChordsForViewport(viewport)
+                        }
+                    }
+                })
+            }
+            if (this.hasSupplemental) {
+                menuItems.push({
+                    label: 'Add split reads to circular view',
+                    click: function splitReadsHandler() {
+                        for (let viewport of this.trackView.viewports) {
+                            this.addSplitChordsForViewport(viewport)
+                        }
+                    }
+                })
+            }
+        }
+
+
+        // Display mode
+        menuItems.push('<hr/>')
+        const $dml = $('<div class="igv-track-menu-category">')
+        $dml.text('Display mode:')
+        menuItems.push({name: undefined, object: $dml, click: undefined, init: undefined})
+
+        menuItems.push({
+            object: $(createCheckbox("expand", this.displayMode === "EXPANDED")),
+            click: function expandHandler() {
+                this.alignmentTrack.displayMode = "EXPANDED"
+                this.trackView.checkContentHeight()
+                this.trackView.repaintViews()
+            }
+        })
+
+        menuItems.push({
+            object: $(createCheckbox("squish", this.displayMode === "SQUISHED")),
+            click: function squishHandler() {
+                this.alignmentTrack.displayMode = "SQUISHED"
+                this.trackView.checkContentHeight()
+                this.trackView.repaintViews()
+            }
+        })
+
+        return menuItems
+    }
+
+    /**
+     * Create a "color by" checkbox menu item, optionally initially checked
+     *
+     * NOTE: click handler functions are called in the context of the parent BAMTrack, thus the rather odd looking
+     * reference to "this.alignmentTrack".
+     *
+     * @param menuItem
+     * @param showCheck
+     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
+     */
+    colorByCB(menuItem, showCheck) {
+
+        const $e = $(createCheckbox(menuItem.label, showCheck))
+
+        if (menuItem.key !== 'tag') {
+
+            function clickHandler() {
+                this.alignmentTrack.colorBy = menuItem.key
+                this.trackView.repaintViews()
+            }
+
+            return {name: undefined, object: $e, click: clickHandler, init: undefined}
+        } else {
+
+            function dialogPresentationHandler(ev) {
+
+                this.browser.inputDialog.present({
+                    label: 'Tag Name',
+                    value: this.colorByTag ? this.colorByTag : '',
+                    callback: (tag) => {
+                        if (tag) {
+                            this.alignmentTrack.colorBy = 'tag:' + tag
+                            if (!this.alignmentTrack.tagColors) {
+                                this.alignmentTrack.tagColors = new PaletteColorTable("Set1")
+                            }
+                        } else {
+                            this.alignmentTrack.colorBy = undefined
+                        }
+                        this.trackView.repaintViews()
+                    }
+                }, ev)
+            }
+
+            return {name: undefined, object: $e, dialog: dialogPresentationHandler, init: undefined}
+
+        }
+    }
+
+
+    /**
+     * Create a "group by" checkbox menu item, optionally initially checked.
+     *
+     * NOTE: click handler functions are called in the context of the parent BAMTrack, thus the rather odd looking
+     * reference to "this.alignmentTrack".
+     *
+     * @param menuItem
+     * @param showCheck
+     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
+     */
+    groupByCB(menuItem, showCheck) {
+
+        const $e = $(createCheckbox(menuItem.label, showCheck))
+
+        function clickHandler(ev) {
+
+            const doGroupBy = () => {
+                const alignmentContainers = this.getCachedAlignmentContainers()
+                for (let ac of alignmentContainers) {
+                    ac.pack(this.alignmentTrack)
+                }
+                this.trackView.checkContentHeight()
+                this.trackView.repaintViews()
+            }
+
+            if (menuItem.key === 'tag') {
+                let currentTag = ''
+                if (this.alignmentTrack.groupBy && this.alignmentTrack.groupBy.startsWith('tag:')) {
+                    currentTag = this.alignmentTrack.groupBy.substring(4)
+                }
+
+                this.browser.inputDialog.present({
+                    label: 'Tag Name',
+                    value: currentTag,
+                    callback: (tag) => {
+                        if (tag) {
+                            this.alignmentTrack.groupBy = 'tag:' + tag
+                            this.alignmentTrack._groupByTags.push(tag)
+                            doGroupBy()
+                        }
+                    }
+                }, ev)
+            } else {
+
+                if (menuItem.key === 'none') {
+                    this.alignmentTrack.groupBy = undefined
+                } else {
+                    this.alignmentTrack.groupBy = menuItem.key
+                }
+                doGroupBy()
+            }
+        }
+
+        return {name: undefined, object: $e, dialog: clickHandler, init: undefined}
+
+    }
+
+
     contextMenuItemList(clickState) {
 
         const viewport = clickState.viewport
         const list = []
 
         const sortByOption = (option) => {
-            const cs = this.parent.sortObject
+            const cs = this.sortObject
             const direction = (cs && cs.position === Math.floor(clickState.genomicLocation)) ? !cs.direction : true
             const newSortObject = {
                 chr: viewport.referenceFrame.chr,
@@ -635,7 +943,7 @@ class AlignmentTrack extends TrackBase {
                 direction: direction,
                 sortAsPairs: viewport.trackView.track.viewAsPairs
             }
-            this.parent.sortObject = newSortObject
+            this.sortObject = newSortObject
             viewport.cachedFeatures.sortRows(newSortObject)
             viewport.repaint()
         }
@@ -651,7 +959,7 @@ class AlignmentTrack extends TrackBase {
         list.push({label: '&nbsp; aligned read length', click: () => sortByOption("ALIGNED_READ_LENGTH")})
         list.push({
             label: '&nbsp; tag', click: () => {
-                const cs = this.parent.sortObject
+                const cs = this.sortObject
                 const direction = (cs && cs.position === Math.floor(clickState.genomicLocation)) ? !cs.direction : true
                 const config =
                     {
@@ -667,7 +975,7 @@ class AlignmentTrack extends TrackBase {
                                     direction: direction
                                 }
                                 this.sortByTag = tag
-                                this.parent.sortObject = newSortObject
+                                this.sortObject = newSortObject
                                 viewport.cachedFeatures.sortRows(newSortObject)
                                 viewport.repaint()
                             }
@@ -677,6 +985,24 @@ class AlignmentTrack extends TrackBase {
             }
         })
         list.push('<hr/>')
+
+        // Positional group by options
+        const position = `${viewport.referenceFrame.chr}:${StringUtils.numberFormatter(Math.floor(clickState.genomicLocation) + 1)}`
+        list.push({
+            label: `Group by base @${position}`,
+            click: () => {
+                this._groupByPositions.push(position)
+                this.groupBy = `base:${position}`
+                const alignmentContainers = this.getCachedAlignmentContainers()
+                for (let ac of alignmentContainers) {
+                    ac.pack(this)
+                }
+                this.trackView.checkContentHeight()
+                this.trackView.repaintViews()
+            }
+        })
+        list.push('<hr/>')
+
 
         const clickedObject = this.getClickedObject(clickState)
 
@@ -748,7 +1074,7 @@ class AlignmentTrack extends TrackBase {
                             click: () => {
                                 const sequence = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(seqstring) : seqstring
                                 const name = `${clickedAlignment.readName} - blat`
-                                const title = `${this.parent.name} - ${name}`
+                                const title = `${this.name} - ${name}`
                                 createBlatTrack({sequence, browser: this.browser, name, title})
                             }
                         })
@@ -762,7 +1088,7 @@ class AlignmentTrack extends TrackBase {
                                 const clippedSequence = seqstring.substr(softClips.left.seqOffset, softClips.left.len)
                                 const sequence = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(clippedSequence) : clippedSequence
                                 const name = `${clickedAlignment.readName} - blat left clip`
-                                const title = `${this.parent.name} - ${name}`
+                                const title = `${this.name} - ${name}`
                                 createBlatTrack({sequence, browser: this.browser, name, title})
                             }
                         })
@@ -774,7 +1100,7 @@ class AlignmentTrack extends TrackBase {
                                 const clippedSequence = seqstring.substr(softClips.right.seqOffset, softClips.right.len)
                                 const sequence = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(clippedSequence) : clippedSequence
                                 const name = `${clickedAlignment.readName} - blat right clip`
-                                const title = `${this.parent.name} - ${name}`
+                                const title = `${this.name} - ${name}`
                                 createBlatTrack({sequence, browser: this.browser, name, title})
                             }
                         })
@@ -791,7 +1117,7 @@ class AlignmentTrack extends TrackBase {
                 list.push({
                     label: 'Add discordant pairs to circular view',
                     click: () => {
-                        this.parent.addPairedChordsForViewport(viewport)
+                        this.addPairedChordsForViewport(viewport)
                     }
                 })
             }
@@ -799,7 +1125,7 @@ class AlignmentTrack extends TrackBase {
                 list.push({
                     label: 'Add split reads to circular view',
                     click: () => {
-                        this.parent.addSplitChordsForViewport(viewport)
+                        this.addSplitChordsForViewport(viewport)
                     }
                 })
             }
@@ -870,8 +1196,8 @@ class AlignmentTrack extends TrackBase {
             case "firstOfPairStrand":
             case "pairOrientation":
             case "tag":
-                if (this.parent.color) {
-                    return (typeof this.parent.color === "function") ? this.parent.color(alignment) : this.parent.color
+                if (this.color) {
+                    return (typeof this.color === "function") ? this.color(alignment) : this.color
                 } else {
                     return DEFAULT_CONNECTOR_COLOR
                 }
@@ -884,8 +1210,8 @@ class AlignmentTrack extends TrackBase {
     getAlignmentColor(alignment) {
 
         let color = DEFAULT_ALIGNMENT_COLOR   // The default color if nothing else applies
-        if (this.parent.color) {
-            color = (typeof this.parent.color === "function") ? this.parent.color(alignment) : this.parent.color
+        if (this.color) {
+            color = (typeof this.color === "function") ? this.color(alignment) : this.color
         } else {
             color = DEFAULT_ALIGNMENT_COLOR
         }
@@ -979,6 +1305,49 @@ class AlignmentTrack extends TrackBase {
             config.highlightedReads = Array.from(this.highlightedReads)
         }
         return config
+    }
+
+
+    // Property delegates
+
+    get name() {
+        return this.parent.name
+    }
+
+    set name(nm) {
+        this.parent.name = nm
+    }
+
+    get color() {
+        return this.parent.color
+    }
+
+    set color(c) {
+        this.parent.color = c
+    }
+
+    get trackView() {
+        return this.parent.trackView
+    }
+
+    get getCachedAlignmentContainers() {
+        return this.parent.getCachedAlignmentContainers
+    }
+
+    get sortObject() {
+        return this.parent.sortObject
+    }
+
+    set sortObject(obj) {
+        this.parent.sortObject = obj
+    }
+
+    addPairedChordsForViewport(viewport) {
+        return this.parent.addPairedChordsForViewport(viewport)
+    }
+
+    addSplitChordsForViewport(viewport) {
+        return this.parent.addSplitChordsForViewport(viewport)
     }
 
 }

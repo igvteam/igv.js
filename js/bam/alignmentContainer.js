@@ -235,7 +235,7 @@ class DownsampleBucket {
 
                 // Select an alignment to replace
                 const replacedAlignment = this.alignments[idx]
-                if(this.pairsCache.has(replacedAlignment.readName)) {
+                if (this.pairsCache.has(replacedAlignment.readName)) {
                     this.pairsCache.delete(replacedAlignment.readName)
                 }
 
@@ -528,7 +528,6 @@ class Group {
             }
         }
 
-
         newRows.sort((rowA, rowB) => {
             const direction = options.direction
             const rowAValue = rowA.getSortValue(options, alignmentContainer)
@@ -598,13 +597,8 @@ function packAlignmentRows(alignments, showSoftClips, expectedPairOrientation, g
         // Separate alignments into groups
         const groupedAlignments = new Map()
         if (groupBy) {
-            let tag
-            if (groupBy.startsWith("tag:")) {
-                tag = groupBy.substring(4)
-                groupBy = "tag"
-            }
             for (let a of alignments) {
-                const group = getGroupValue(a, groupBy, tag, expectedPairOrientation) || ""
+                const group = getGroupValue(a, groupBy, expectedPairOrientation) || ""
                 if (!groupedAlignments.has(group)) {
                     groupedAlignments.set(group, [])
                 }
@@ -615,8 +609,7 @@ function packAlignmentRows(alignments, showSoftClips, expectedPairOrientation, g
         }
 
         const packed = new Map()
-        const orderedGroupNames = Array.from(groupedAlignments.keys()).sort("pairOrientation" === groupBy ?
-            pairOrientationComparator(expectedPairOrientation) : groupNameComparator)
+        const orderedGroupNames = Array.from(groupedAlignments.keys()).sort(getGroupComparator(groupBy, expectedPairOrientation))
         for (let groupName of orderedGroupNames) {
 
             let alignments = groupedAlignments.get(groupName)
@@ -679,7 +672,20 @@ function binarySearch(array, pred, min) {
     return hi
 }
 
-function getGroupValue(al, groupBy, tag, expectedPairOrientation) {
+function getGroupValue(al, groupBy, expectedPairOrientation) {
+
+    let tag, chr, pos
+    if (groupBy.startsWith("tag:")) {
+        tag = groupBy.substring(4)
+        groupBy = "tag"
+    } else if (groupBy.startsWith("base:")) {
+        const tokens = groupBy.split(":")
+        if (tokens.length === 3) {
+            groupBy = "base"
+            chr = tokens[1]
+            pos = Number.parseInt(tokens[2].replaceAll(",", "")) - 1
+        }
+    }
 
     switch (groupBy) {
         // case 'HAPLOTYPE':
@@ -710,11 +716,52 @@ function getGroupValue(al, groupBy, tag, expectedPairOrientation) {
         case 'tag':
             return al.tags()[tag] || ""
         // Add cases for other options as needed
+        case 'base':
+
+            // Use a string prefix to enforce grouping rules:
+            //    1: alignments with a base at the position
+            //    2: alignments with a gap at the position
+            //    3: alignment that do not overlap the position (or are on a different chromosome)
+
+            if (al.chr === chr &&
+                al.start <= pos &&
+                al.end > pos) {
+
+                const baseAtPos = al.readBaseAt(pos)
+                if (baseAtPos) {
+                    return baseAtPos
+                } else {
+                    return "GAP"
+                }
+            } else { // does not overlap position
+                return ""
+            }
+
         default:
             return undefined
     }
 }
 
+function getGroupComparator(groupName, expectedPairOrientation) {
+    switch (groupName) {
+        case "pairOrientation":
+            return pairOrientationComparator(expectedPairOrientation)
+        default:
+            return groupName && groupName.startsWith("base:") ?
+                baseComparator :
+                groupNameComparator
+    }
+}
+
+const baseRank = new Map([["A", 1], ["T", 2], ["C", 3], ["G", 4], ["N", 5], ["GAP", 5], ["", 7]])
+
+function baseComparator(o1, o2) {
+    if (baseRank.has(o1) && baseRank.has(o2)) {
+        return baseRank.get(o1) - baseRank.get(o2)
+    } else {
+        return o1.localeCompare(o2, undefined, {sensitivity: 'base'})
+    }
+}
 
 function groupNameComparator(o1, o2) {
     if (!o1 && !o2) {

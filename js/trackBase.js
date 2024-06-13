@@ -177,7 +177,6 @@ class TrackBase {
         const jsonableConfigKeys = Object.keys(this.config).filter(key => isJSONable(this.config[key]))
 
         for (const key of jsonableConfigKeys) {
-
             if (!key.startsWith("_")) {
                 state[key] = this.config[key]
             }
@@ -187,7 +186,7 @@ class TrackBase {
         for (let key of Object.keys(state)) {
             if (key.startsWith("_")) continue   // transient property
             const value = this[key]
-            if (value && (isSimpleType(value) || typeof value === "boolean" || key === "metadata")) {
+            if (value !== undefined && (isSimpleType(value) || typeof value === "boolean" || key === "metadata")) {
                 state[key] = value
             }
         }
