@@ -914,13 +914,13 @@ class Browser {
 
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
-        if (this.doShowCenterLine && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
-            this.centerLineButton.boundMouseClickHandler()
-        }
+        // if (this.doShowCenterLine && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
+        //     this.centerLineButton.boundMouseClickHandler()
+        // }
 
-        if (this.doShowCursorGuide && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
-            this.cursorGuideButton.boundMouseClickHandler()
-        }
+        // if (this.doShowCursorGuide && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
+        //     this.cursorGuideButton.boundMouseClickHandler()
+        // }
 
         this.setCenterLineAndCenterLineButtonVisibility(GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
 

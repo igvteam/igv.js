@@ -27,8 +27,6 @@ class CursorGuide {
 
         function mouseMoveHandler(event) {
 
-            const tag = event.target.tagName
-
             const {x, y} = DOMUtils.translateMouseCoordinates(event, this.columnContainer)
             this.horizontalGuide.style.top = `${y}px`
 
@@ -62,7 +60,8 @@ class CursorGuide {
                             if (this.customMouseHandler) {
                                 this.customMouseHandler({start, bp, end, interpolant})
                             }
-                        } // if (result)
+
+                        }
 
                     } // if (index)
 
