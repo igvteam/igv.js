@@ -27,7 +27,6 @@ import {navbarDidResize} from "./responsiveNavbar.js"
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js"
 import WindowSizePanel from "./windowSizePanel.js"
 import CursorGuide from "./ui/cursorGuide.js"
-import CursorGuideButton from "./ui/cursorGuideButton.js"
 import CenterLineButton from './ui/centerLineButton.js'
 import TrackLabelControl from "./ui/trackLabelControl.js"
 import SampleNameControl from "./sample/sampleNameControl.js"
@@ -309,8 +308,6 @@ class Browser {
         this.multiTrackSelectButton = new MultiTrackSelectButton(this, $toggle_button_container.get(0))
 
         this.cursorGuide = new CursorGuide(this.columnContainer, this)
-
-        this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
 
         this.centerLineButton = new CenterLineButton(this, $toggle_button_container.get(0))
 
@@ -913,14 +910,6 @@ class Browser {
         navbarDidResize(this, this.$navigation.width(), isWGV)
 
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
-
-        // if (this.doShowCenterLine && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
-        //     this.centerLineButton.boundMouseClickHandler()
-        // }
-
-        // if (this.doShowCursorGuide && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
-        //     this.cursorGuideButton.boundMouseClickHandler()
-        // }
 
         this.setCenterLineAndCenterLineButtonVisibility(GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
 

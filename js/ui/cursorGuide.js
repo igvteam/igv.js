@@ -16,8 +16,6 @@ class CursorGuide {
 
         this.addMouseHandler(browser)
 
-        this.setVisibility(browser.config.showCursorGuide)
-
     }
 
     addMouseHandler(browser) {
@@ -33,8 +31,9 @@ class CursorGuide {
             if ('CANVAS' === event.target.tagName) {
 
                 const viewport = findAncestorOfClass(event.target, 'igv-viewport')
+                const rulerTrackView = browser.getRulerTrackView()
 
-                if (viewport && browser.getRulerTrackView()) {
+                if (viewport && rulerTrackView) {
 
                     this.verticalGuide.style.left = `${x}px`
 
@@ -49,7 +48,7 @@ class CursorGuide {
 
                     if (!(undefined === index)) {
 
-                        const rulerViewport = browser.getRulerTrackView().viewports[index]
+                        const rulerViewport = rulerTrackView.viewports[index]
                         const result = rulerViewport.mouseMove(event)
 
                         if (result) {
@@ -85,42 +84,12 @@ class CursorGuide {
         const left = x - xc
         const pixel = Math.floor(lerp(left, width + left, interpolant))
 
-        // console.log(`CursorGuide verticalGuide.style.left ${ pixel }`)
-
         this.verticalGuide.style.left = `${ pixel }px`
     }
 
     removeMouseHandler() {
         this.columnContainer.removeEventListener('mousemove', this.boundMouseMoveHandler)
     }
-
-    setVisibility(showCursorGuide) {
-        if (true === showCursorGuide) {
-            this.show()
-        } else {
-            this.hide()
-        }
-    }
-
-    show() {
-        this.verticalGuide.style.display = 'block'
-        this.horizontalGuide.style.display = 'block'
-
-    }
-
-    hide() {
-
-        this.verticalGuide.style.display = 'none'
-        this.horizontalGuide.style.display = 'none'
-
-        if (this.browser.getRulerTrackView()) {
-            for (let viewport of this.browser.getRulerTrackView().viewports) {
-                viewport.$tooltip.hide()
-            }
-        }
-
-    }
-
 }
 
 /**
