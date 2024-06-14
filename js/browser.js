@@ -205,8 +205,6 @@ class Browser {
 
         this.doShowCenterLine = config.showCenterGuide
 
-        this.doShowCursorGuide = config.showCursorGuide
-
         this.showSampleNames = config.showSampleNames
 
         this.sampleNameViewportWidth = undefined
@@ -942,15 +940,6 @@ class Browser {
     }
 
     // cursor guide
-    setCursorGuideVisibility(doShowCursorGuide) {
-
-        if (doShowCursorGuide) {
-            this.cursorGuide.show()
-        } else {
-            this.cursorGuide.hide()
-        }
-    }
-
     setCustomCursorGuideMouseHandler(mouseHandler) {
         this.cursorGuide.customMouseHandler = mouseHandler
     }
