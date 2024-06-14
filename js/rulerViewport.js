@@ -148,47 +148,44 @@ class RulerViewport extends TrackViewport {
 
     mouseMove(event) {
 
-        if (true === this.browser.config.showCursorGuide) {
-
-            if (undefined === currentViewport) {
-                currentViewport = this
-                this.$tooltip.show()
-            } else if (currentViewport.guid !== this.guid) {
-                if (currentViewport.$tooltip) {
-                    currentViewport.$tooltip.hide()
-                }
-                this.$tooltip.show()
-                currentViewport = this
-            } else {
-                this.$tooltip.show()
+        if (undefined === currentViewport) {
+            currentViewport = this
+            this.$tooltip.show()
+        } else if (currentViewport.guid !== this.guid) {
+            if (currentViewport.$tooltip) {
+                currentViewport.$tooltip.hide()
             }
-
-            const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrame.chr))
-
-            if (isWholeGenome) {
-                this.$tooltip.hide()
-                return undefined
-            }
-
-            const {x} = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
-            const {start, end, bpPerPixel} = this.referenceFrame
-            const bp = Math.round(0.5 + start + Math.max(0, x) * bpPerPixel)
-
-            this.$tooltipContent.text(StringUtils.numberFormatter(bp))
-
-            const {width: ww} = this.$tooltipContent.get(0).getBoundingClientRect()
-            const {width: w} = this.$viewport.get(0).getBoundingClientRect()
-
-            this.$tooltip.css({left: `${IGVMath.clamp(x, 0, w - ww)}px`})
-
-            // hide tooltip when movement stops
-            clearTimeout(timer)
-            timer = setTimeout(() => {
-                if (this.$tooltip) this.$tooltip.hide()
-            }, toolTipTimeout)
-
-            return { start, bp, end }
+            this.$tooltip.show()
+            currentViewport = this
+        } else {
+            this.$tooltip.show()
         }
+
+        const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrame.chr))
+
+        if (isWholeGenome) {
+            this.$tooltip.hide()
+            return undefined
+        }
+
+        const {x} = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
+        const {start, end, bpPerPixel} = this.referenceFrame
+        const bp = Math.round(0.5 + start + Math.max(0, x) * bpPerPixel)
+
+        this.$tooltipContent.text(StringUtils.numberFormatter(bp))
+
+        const {width: ww} = this.$tooltipContent.get(0).getBoundingClientRect()
+        const {width: w} = this.$viewport.get(0).getBoundingClientRect()
+
+        this.$tooltip.css({left: `${IGVMath.clamp(x, 0, w - ww)}px`})
+
+        // hide tooltip when movement stops
+        clearTimeout(timer)
+        timer = setTimeout(() => {
+            if (this.$tooltip) this.$tooltip.hide()
+        }, toolTipTimeout)
+
+        return { start, bp, end }
 
     }
 
