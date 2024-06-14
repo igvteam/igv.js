@@ -298,10 +298,14 @@ class TrackBase {
                             min = Number(tokens[0])
                             max = Number(tokens[1])
                         }
-                        tracklineConfg.autoscale = false
-                        tracklineConfg.dataRange = {min, max}
-                        this.viewLimitMin = min
-                        this.viewLimitMax = max
+                        if(Number.isNaN(max) || Number.isNaN(min)) {
+                         console.warn(`Unexpected viewLimits value in track line: ${properties["viewLimits"]}`)
+                        } else {
+                            tracklineConfg.autoscale = false
+                            tracklineConfg.dataRange = {min, max}
+                            this.viewLimitMin = min
+                            this.viewLimitMax = max
+                        }
                     }
                 case "name":
                     tracklineConfg[key] = properties[key]

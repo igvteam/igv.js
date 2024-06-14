@@ -308,10 +308,18 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         }
         if (t.hasProperty("viewLimits")) {
             const tokens = t.getProperty("viewLimits").split(":")
-            config.min = Number.parseInt(tokens[0])
+            let min, max
             if (tokens.length > 1) {
-                config.max = Number.parseInt(tokens[1])
+                min = Number.parseInt(tokens[0])
+                max = Number.parseInt(tokens[1])
             }
+            if (Number.isNaN(max) || Number.isNaN(min)) {
+                console.warn(`Unexpected viewLimits value in track line: ${properties["viewLimits"]}`)
+            } else {
+                config.min = min
+                config.max = max
+            }
+
         }
         if (t.hasProperty("itemRgb")) {
             // TODO -- this not supported yet
