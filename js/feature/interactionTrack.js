@@ -61,6 +61,7 @@ class InteractionTrack extends TrackBase {
         showBlocks: true,
         blockHeight: 3,
         thickness: 1,
+        color: "rgb(180,25,137)",
         alpha: 0.02,
         logScale: true,
     }
@@ -72,11 +73,9 @@ class InteractionTrack extends TrackBase {
     init(config) {
 
         super.init(config)
-
         this.sinTheta = Math.sin(this.theta)
         this.cosTheta = Math.cos(this.theta)
         this.arcType = getArcType(config)   // nested | proportional | inView | partialInView
-        this.alpha = config.alpha || 0.02  // was: 0.15
         this.painter = {flipAxis: !this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
 
         if (config.valueColumn) {
