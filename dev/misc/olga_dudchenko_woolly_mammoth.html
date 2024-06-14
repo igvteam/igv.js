@@ -24,22 +24,23 @@
             "locus": "all",
             "reference":
                 {
-                    id: 'Loxafr3.0_HiC',
-                    name: "Woolly Mammoth",
+                    "id": "Loxafr3.0_HiC",
+                    "name": "Woolly Mammoth",
                     "fastaURL": "https://dnazoo.s3.wasabisys.com/Loxodonta_africana/Loxafr3.0_HiC.fasta",
-                    "indexURL": "https://dnazoo.s3.wasabisys.com/Loxodonta_africana/Loxafr3.0_HiC.fasta.fai"
+                    "indexURL": "https://dnazoo.s3.wasabisys.com/Loxodonta_africana/Loxafr3.0_HiC.fasta.fai",
+                    "tracks": [
+                        {
+                            "name": "Refseq Genes",
+                            "id": "Loxafr3_0_HiC_genes",
+                            "url": "https://dnazoo.s3.wasabisys.com/Loxodonta_africana/Loxafr3.0_HiC.refseq_annotations.bed",
+                            "removable": false,
+                            "order": 1000000
+                        }
+                    ]
+
                 },
             tracks:
                 [
-                    {
-                        "name": "Refseq Genes",
-                        "format": "refgene",
-                        "type": "annotation",
-                        "url": "https://dnazoo.s3.wasabisys.com/Loxodonta_africana/Loxafr3.0_HiC.refseq_annotations.bed",
-                        indexed: 'false',
-                        "order": 1000001,
-                        "height": 70,
-                    },
                     {
                         url: 'https://www.dropbox.com/scl/fi/yczvlb961oh77sgv9syc6/MP_skin_CRUSH_Loxafr3.0_HiC.bedgraph?rlkey=e2j6wm62gxoiiyhh0m3bems7q&dl=0',
                     },
