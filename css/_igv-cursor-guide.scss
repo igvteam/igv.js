@@ -1,6 +1,6 @@
 .igv-cursor-guide-horizontal {
 
-  display: none;
+  display: block;
 
   pointer-events: none;
 
@@ -27,6 +27,8 @@
 
 .igv-cursor-guide-vertical {
 
+  display: block;
+
   pointer-events: none;
 
   user-select: none;
@@ -45,7 +47,5 @@
   border-left-style: dotted;
   border-left-width: thin;
   border-left-color: rgba(127, 127, 127, 0.76);
-
-  display: none;
 
 }
