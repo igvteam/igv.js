@@ -601,6 +601,10 @@ class TrackBase {
 
         return cooked
     }
+
+    static getDefaultColor() {
+        return 'rgb(150,150,150)'
+    }
 }
 
 function hoverText(clickState) {
