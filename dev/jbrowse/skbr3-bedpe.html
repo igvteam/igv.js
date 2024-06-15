@@ -31,50 +31,40 @@
 </ul>
 
 </p>
+<div id="jbrowse_circular_genome_view"
+     style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
 
 <div id="igvDiv">
-    <div id="jbrowse_circular_genome_view"
-         style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
 
 </div>
 
 <script type="module">
-    https://igv-genepattern-org.s3.amazonaws.com/demo/skbr3/SKBR3_Sniffles_variants_tra.bedpe
-    import {makeDraggable} from '../../node_modules/igv-ui/dist/igv-ui.js'
+
+    import makeDraggable from '../../js/ui/utils/draggable.js'
     import igv from "../../js/index.js";
 
     // Start igv.js and create regions
-    var options =
+    const options =
         {
             genome: "hg19",
             tracks: [
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/reads_lr_skbr3.fa_ngmlr-0.2.3_mapped.bam.sniffles1kb_auto_l8_s5_noalt_filtered.tra.vcf", //https://s3.amazonaws.com/igv.org.demo/SKBR3/sniffles_tra.vcf",
-                    type: "variant",
-                    format: "vcf",
+                    url: "https://igv-genepattern-org.s3.amazonaws.com/demo/skbr3/SKBR3_Sniffles_variants_tra.bedpe",
+                    type: "interact",
+                    format: "bedpe",
                     name: "sniffles translocations",
                     supportsWholeGenome: true,
                     visibilityWindow: -1,
                     showGenotypes: false,
-                    height: 40,
+                    height: 600,
                     color: 'rgb(0,150,0)'
                 },
-                {
-                    id: "delly",
-                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.delly_noalt_filtered.tra.vcf",
-                    type: "variant",
-                    format: "vcf",
-                    name: "delly translocations",
-                    supportsWholeGenome: true,
-                    visibilityWindow: -1,
-                    showGenotypes: false,
-                    height: 40
-                }
+
             ],
             showCircularView: true
         };
 
-    var igvDiv = document.getElementById("igvDiv");
+    const igvDiv = document.getElementById("igvDiv");
 
     igv.createBrowser(igvDiv, options)
         .then(async function (browser) {
