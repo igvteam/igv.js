@@ -916,6 +916,11 @@ class VariantTrack extends TrackBase {
         }, 100)
 
     }
+
+    static getDefaultColor() {
+        return 'rgb(0,0,150)'
+    }
+
 }
 
 

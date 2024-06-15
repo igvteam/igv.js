@@ -530,6 +530,11 @@ class FeatureTrack extends TrackBase {
     dispose() {
         this.trackView = undefined
     }
+
+    static getDefaultColor() {
+        return 'rgb(0, 0, 150)'
+    }
+
 }
 
 /**

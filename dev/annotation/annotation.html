@@ -20,15 +20,8 @@
     var options =
         {
             genome: "hg19",
-           // locus: "myc",
             tracks:
                 [
-                    {
-                        "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
-                        "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz.tbi",
-                        "name": "Bed - Tabix Index",
-                        "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$"
-                    },
                     {
                         "type": "annotation",
                         "format": "bed",
@@ -37,32 +30,6 @@
                         "supportsWholeGenome": true,
                         "name": "Bed - No Index"
                     },
-
-                    {
-                        "type": "annotation",
-                        "format": "bed",
-                        "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
-                        "indexURL": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx",
-                        "name": "Bed - Tribble Index"
-                    },
-                    {
-                        "type": "annotation",
-                        "format": "bed",
-                        "url": "https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz",
-                        "indexURL": "https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi",
-                        "name": "dbSNP 137 - Tabix index",
-                        "visibilityWindow": 200000,
-                        "infoURL": "https://www.ncbi.nlm.nih.gov/snp/?term=$$"
-                    },
-                    {
-                        "type": "annotation",
-                        "format": "gtf",
-                        "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz",
-                        "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi",
-                        "name": "Gencode v24 (gtf) -- genes filtered",
-                        "visibilityWindow": 10000000,
-                        "filterTypes": ["gene", "chromosome"]
-                    }
                 ]
         };
 
