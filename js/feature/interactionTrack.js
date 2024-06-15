@@ -110,7 +110,7 @@ class InteractionTrack extends TrackBase {
 
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
-            if (this.disposed) return;   // This track was removed during async load
+            if (this.disposed) return   // This track was removed during async load
         }
 
         // Set properties from track line
@@ -552,13 +552,18 @@ class InteractionTrack extends TrackBase {
      * @param refFrame
      */
     addChordsForViewport(refFrame) {
-        const cachedFeatures = "all" === refFrame.chr ?
-            this.featureSource.getAllFeatures() :
-            this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
 
-        // inView features are simply features that have been drawn, i.e. have a drawState
-        const inView = cachedFeatures.filter(f => f.drawState)
-        if (inView.length === 0) return;
+        let inView
+        if ("all" === refFrame.chr) {
+            inView = Object.values(this.featureSource.getAllFeatures()).flat()
+        } else {
+            const cachedFeatures =
+                this.featureSource.featureCache.queryFeatures(refFrame.chr, refFrame.start, refFrame.end)
+            // inView features are simply features that have been drawn, i.e. have a drawState
+            inView = cachedFeatures.filter(f => f.drawState)
+        }
+
+        if (inView.length === 0) return
 
         const chords = makeBedPEChords(inView)
         sendChords(chords, this, refFrame, 0.5)
@@ -618,7 +623,7 @@ class InteractionTrack extends TrackBase {
                 const columnNames = this.header.columnNames
                 const stdColumns = this.header.hiccups ? 6 : 10
                 for (let i = stdColumns; i < columnNames.length; i++) {
-                    if (this.header.colorColumn === i) continue;
+                    if (this.header.colorColumn === i) continue
                     if (columnNames[i] === 'info') {
                         extractInfoColumn(data, f.extras[i - stdColumns])
                     } else {
@@ -731,7 +736,7 @@ function estimateTheta(x) {
     let thetaLeft = idx === 0 ? 0 : theta[idx - 1]
     let thetaRight = idx < theta.length ? theta[idx] : Math.PI / 2
 
-    return Math.min(Math.PI/2,  (thetaLeft + r * (thetaRight - thetaLeft)))
+    return Math.min(Math.PI / 2, (thetaLeft + r * (thetaRight - thetaLeft)))
 
 }
 
@@ -800,7 +805,7 @@ function getWGFeatures(allFeatures) {
         if (chrFeatures) {
             for (let f of chrFeatures) {
                 if (!f.dup) {
-                    const bin = f.score  ? Math.max(0, Math.min(nBins - 1, Math.floor(Math.log(f.score) / binSize))) : 0
+                    const bin = f.score ? Math.max(0, Math.min(nBins - 1, Math.floor(Math.log(f.score) / binSize))) : 0
                     if (binnedFeatures[bin].length < featuresPerBin) {
                         binnedFeatures[bin].push(makeWGFeature(f))
                     } else {
