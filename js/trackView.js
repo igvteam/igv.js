@@ -377,18 +377,18 @@ class TrackView {
 
     repaintSampleInfo() {
 
-        this.sampleInfoViewport.repaint()
+        // this.sampleInfoViewport.repaint()
     }
 
     repaintSamples() {
 
-        if (typeof this.track.getSamples === 'function') {
-            const samples = this.track.getSamples()
-            if (samples.names && samples.names.length > 0) {
-                this.sampleNameViewport.repaint(samples)
-            }
-
-        }
+        // if (typeof this.track.getSamples === 'function') {
+        //     const samples = this.track.getSamples()
+        //     if (samples.names && samples.names.length > 0) {
+        //         this.sampleNameViewport.repaint(samples)
+        //     }
+        //
+        // }
     }
 
     // track labels
