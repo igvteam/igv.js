@@ -24,10 +24,11 @@
  */
 
 import IGVGraphics from "./igv-canvas.js"
-import {expandRegion, isSecureContext} from "./util/igvUtils.js"
+import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
 import {loadSequence} from "./genome/fasta.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js";
+import {createBlatTrack} from "./blat/blatTrack.js"
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
 
@@ -148,7 +149,7 @@ class SequenceTrack {
     }
 
     menuItemList() {
-        return [
+        const menuItems = [
             {
                 name: this.reversed ? "Forward" : "Reverse",
                 click: () => {
@@ -200,6 +201,7 @@ class SequenceTrack {
                     }
                 }
             ]
+
             if (isSecureContext()) {
                 items.push({
                     label: 'Copy visible sequence',
@@ -217,9 +219,25 @@ class SequenceTrack {
                             this.browser.alert.present(`error copying sequence to clipboard ${e}`)
                         }
                     }
-
                 })
             }
+
+            items.push({
+                label: 'BLAT read sequence',
+                    click: async () => {
+                        let sequence = await this.browser.genome.getSequence(chr, start, end)
+                        if (sequence) {
+                            if (this.reversed) {
+                                sequence = reverseComplementSequence(sequence)
+                            }
+                            const name = `blat: ${chr}:${start + 1}-${end}`
+                            const title = `blat: ${chr}:${start + 1}-${end}`
+                            createBlatTrack({sequence, browser: this.browser, name, title})
+                        }
+                    }
+            })
+
+
             items.push('<hr/>')
 
             return items
