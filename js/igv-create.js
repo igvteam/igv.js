@@ -59,7 +59,7 @@ async function createBrowser(parentDiv, config) {
     }
     if (config.clientId && (!GoogleAuth.isInitialized())) {
         await GoogleAuth.init({
-            clientId: config.clientId,
+            client_id: config.clientId,
             apiKey: config.apiKey,
             scope: 'https://www.googleapis.com/auth/userinfo.profile'
         })
