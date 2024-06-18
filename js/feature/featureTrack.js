@@ -324,7 +324,7 @@ class FeatureTrack extends TrackBase {
                 // If we have clicked over an exon number it.
                 // Disabled for GFF and GTF files if the visibility window is < the feature length since we don't know if we have all exons
                 const isGFF = "gff" === this.config.format || "gff3" === this.config.format || "gtf" === this.config.format
-                if (f.exons) {
+                if (f.exons && f.exons.length > 1) {
                     for (let i = 0; i < f.exons.length; i++) {
                         const exon = f.exons[i]
                         if (genomicLocation >= exon.start && genomicLocation <= exon.end) {

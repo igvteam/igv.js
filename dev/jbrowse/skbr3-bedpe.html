@@ -21,6 +21,7 @@
 
 </head>
 <body>
+<button id="bookmark">Bookmark</button>
 
 <p>
 <h2>Circular genome view with VCF tracks</h2>
@@ -46,6 +47,7 @@
     // Start igv.js and create regions
     const options =
         {
+            "queryParametersSupported": true,
             genome: "hg19",
             tracks: [
                 {
@@ -73,6 +75,14 @@
             browser.createCircularView(circularViewContainer, true);
             makeDraggable(circularViewContainer, browser.circularView.toolbar);
             browser.circularView.setSize(512)
+
+            document.getElementById('bookmark').addEventListener('click', () => {
+                const path = window.location.href.slice()
+                const idx = path.indexOf("?")
+                const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+                //window.location = url
+                window.history.pushState({}, "IGV", url)
+            })
 
 
         })
