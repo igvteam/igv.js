@@ -55,7 +55,7 @@
     "eslint": "^6.4.0",
     "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v0.5.6",
     "html2canvas": "^1.4.1",
-    "igv-utils": "github:igvteam/igv-utils#v1.5.5",
+    "igv-utils": "github:igvteam/igv-utils#v1.5.7",
     "mocha": "^10.2.0",
     "rollup": "^2.66.0",
     "rollup-plugin-copy": "^3.3.0",
