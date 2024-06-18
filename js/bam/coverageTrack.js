@@ -108,10 +108,10 @@ class CoverageTrack  {
 
                 const refBase = sequence[i]
 
-                if ("basemod2" === this.parent.colorBy || "basemod" === this.parent.colorBy) {
+                if ("basemod2" === this.parent.config.colorBy || "basemod" === this.parent.config.colorBy) {
                     //context, pX, pBottom, dX, barHeight, pos, alignmentContainer
                     const threshold = 0.5   // TODD - parameter
-                    drawModifications(ctx, x, this.height, w, h, bp, alignmentContainer, this.parent.colorBy, threshold)
+                    drawModifications(ctx, x, this.height, w, h, bp, alignmentContainer, this.parent.config.colorBy, threshold)
 
                 } else if (item.isMismatch(refBase)) {
                     IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[refBase]})
