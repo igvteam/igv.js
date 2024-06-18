@@ -1,5 +1,10 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
-import * as UIUtils from  "../ui/utils/ui-utils.js"
+import * as UIUtils from "../ui/utils/ui-utils.js"
+import {isSecureContext} from "../util/igvUtils.js"
+import {createBlatTrack} from "../blat/blatTrack.js"
+
+const maxSequenceSize = 100000
+const maxBlatSize = 25000
 
 class ROIMenu {
     constructor(browser, parent) {
@@ -7,7 +12,7 @@ class ROIMenu {
         this.browser = browser
 
         // container
-        this.container = DOMUtils.div({ class: 'igv-roi-menu' })
+        this.container = DOMUtils.div({class: 'igv-roi-menu'})
         parent.appendChild(this.container)
 
         // header
@@ -74,6 +79,61 @@ class ROIMenu {
 
         })
 
+        // sequence
+
+        // copy
+        if (isSecureContext() && feature.end - feature.start < maxBlatSize) {
+            const copySequence = DOMUtils.div()
+            this.body.appendChild(copySequence)
+            copySequence.innerText = 'Copy reference sequence'
+            copySequence.addEventListener('click', async () => {
+                this.container.style.display = 'none'
+                let sequence = await this.browser.genome.getSequence(feature.chr, feature.start, feature.end)
+                if (!sequence) {
+                    sequence = "Unknown sequence"
+                }
+                try {
+                    await navigator.clipboard.writeText(sequence)
+                } catch (e) {
+                    console.error(e)
+                    this.browser.alert.present(`error copying sequence to clipboard ${e}`)
+                }
+            })
+        }
+
+        if (feature.end - feature.start <= maxSequenceSize) {
+            // blat
+            const blatSequence = DOMUtils.div()
+            this.body.appendChild(blatSequence)
+            blatSequence.innerText = 'BLAT reference sequence'
+            blatSequence.addEventListener('click', async () => {
+                this.container.style.display = 'none'
+                const {chr, start, end} = feature
+                let sequence = await this.browser.genome.getSequence(chr, start, end)
+                if (sequence) {
+                    const name = `blat: ${chr}:${start + 1}-${end}`
+                    const title = `blat: ${chr}:${start + 1}-${end}`
+                    createBlatTrack({sequence, browser: this.browser, name, title})
+                }
+            })
+        }
+
+
+        // items.push({
+        //     label: 'BLAT read sequence',
+        //     click: async () => {
+        //         let sequence = await this.browser.genome.getSequence(chr, start, end)
+        //         if (sequence) {
+        //             if (this.reversed) {
+        //                 sequence = reverseComplementSequence(sequence)
+        //             }
+        //             const name = `blat: ${chr}:${start + 1}-${end}`
+        //             const title = `blat: ${chr}:${start + 1}-${end}`
+        //             createBlatTrack({sequence, browser: this.browser, name, title})
+        //         }
+        //     }
+        // })
+
 
         // Delete Region
         const _delete_ = DOMUtils.div()
@@ -87,18 +147,13 @@ class ROIMenu {
         })
 
 
-
-
-
-
-
         // columnContainer.addEventListener('click', event => {
         //     event.stopPropagation()
         //     this.container.style.display = 'none'
         // })
 
-        this.container.style.left = `${ x }px`
-        this.container.style.top  = `${ y }px`
+        this.container.style.left = `${x}px`
+        this.container.style.top = `${y}px`
         this.container.style.display = 'flex'
 
     }
@@ -125,7 +180,7 @@ class ROIMenu {
         // })
 
         // Description:
-        row = DOMUtils.div({ class: 'igv-roi-menu-row-edit-description' })
+        row = DOMUtils.div({class: 'igv-roi-menu-row-edit-description'})
         this.container.appendChild(row)
 
         row.addEventListener('click', e => {
@@ -164,7 +219,7 @@ class ROIMenu {
 
 
         // Delete
-        row = DOMUtils.div({ class: 'igv-roi-menu-row' })
+        row = DOMUtils.div({class: 'igv-roi-menu-row'})
         row.innerText = 'Delete region'
         this.container.appendChild(row)
 
@@ -174,8 +229,8 @@ class ROIMenu {
             this.browser.roiManager.deleteUserDefinedRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
         })
 
-        this.container.style.left = `${ x }px`
-        this.container.style.top  = `${ y }px`
+        this.container.style.left = `${x}px`
+        this.container.style.top = `${y}px`
         this.container.style.display = 'flex'
 
         columnContainer.addEventListener('click', event => {
@@ -191,9 +246,11 @@ class ROIMenu {
 
 }
 
-function removeAllChildNodes(parent) {
+function
+
+removeAllChildNodes(parent) {
     while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
+        parent.removeChild(parent.firstChild)
     }
 }
 
