@@ -37,7 +37,7 @@ class ROIManager {
         this.roiTable.renderTable(records)
 
         if (this.roiSets.length > 0) {
-            const isVisible = this.roiSets[ 0 ].isVisible
+            const isVisible = this.roiSets[0].isVisible
             this.roiTable.setROIVisibility(isVisible)
         }
 
@@ -77,7 +77,7 @@ class ROIManager {
         const records = []
 
         for (let roiSet of this.roiSets) {
-            const setName = roiSet.isUserDefined ? '' : (roiSet.name || '')
+            const setName = (roiSet.name || '')
             const allFeatures = await roiSet.getAllFeatures()
             for (let chr of Object.keys(allFeatures)) {
                 for (let feature of allFeatures[chr]) {
@@ -129,7 +129,7 @@ class ROIManager {
 
     toggleROIs() {
 
-        const isVisible = !(this.roiSets[ 0 ].isVisible)
+        const isVisible = !(this.roiSets[0].isVisible)
         this.roiTable.setROIVisibility(isVisible)
 
         for (const roiSet of this.roiSets) {
@@ -182,7 +182,7 @@ class ROIManager {
                         el.style.width = `${pixelWidth}px`
 
                     } else {
-                        const element = this.createRegionElement(browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey, feature.name)
+                        const element = this.createRegionElement(browser.columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey, feature)
                         columns[i].appendChild(element)
                     }
                 }
@@ -190,7 +190,7 @@ class ROIManager {
         }
     }
 
-    createRegionElement(columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey, name) {
+    createRegionElement(columnContainer, pixelTop, pixelX, pixelWidth, roiSet, regionKey, feature) {
 
         const regionElement = DOMUtils.div({class: 'igv-roi-region'})
 
@@ -206,27 +206,15 @@ class ROIManager {
 
         header.style.backgroundColor = roiSet.headerColor
 
-        if (true === roiSet.isUserDefined) {
-            header.addEventListener('click', event => {
-                event.preventDefault()
-                event.stopPropagation()
+        header.addEventListener('click', event => {
+            event.preventDefault()
+            event.stopPropagation()
 
-                const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-                this.roiMenu.present(x, y, this, columnContainer, regionElement)
-            })
-        } else if (name) {
-            header.addEventListener('click', event => {
-                event.preventDefault()
-                event.stopPropagation()
-                if (this.popover) {
-                    this.popover.dispose()
-                }
-                this.popover = new Popover(columnContainer, true, roiSet.name, undefined)
-                this.popover.presentContentWithEvent(event, name)
-            })
-        } else {
-            header.style.pointerEvents = 'none'
-        }
+            const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
+            const isUserDefined = roiSet.isUserDefined
+            this.roiMenu.present(feature, isUserDefined, event, this, columnContainer, regionElement)
+        })
+
 
         return regionElement
     }
@@ -236,15 +224,15 @@ class ROIManager {
         for (const regionElement of document.querySelectorAll('.igv-roi-region')) {
 
             // body
-            const { x, y, width, height } = regionElement.getBoundingClientRect()
+            const {x, y, width, height} = regionElement.getBoundingClientRect()
             context.fillStyle = regionElement.style.backgroundColor
-            context.fillRect(x-deltaX, y+deltaY, width, height)
+            context.fillRect(x - deltaX, y + deltaY, width, height)
 
             // header
             const header = regionElement.querySelector('div')
-            const { x:xx, y:yy, width:ww, height:hh } = header.getBoundingClientRect()
+            const {x: xx, y: yy, width: ww, height: hh} = header.getBoundingClientRect()
             context.fillStyle = header.style.backgroundColor
-            context.fillRect(xx-deltaX, yy+deltaY, ww, hh)
+            context.fillRect(xx - deltaX, yy + deltaY, ww, hh)
         }
     }
 
@@ -265,13 +253,11 @@ class ROIManager {
         return userDefinedROISet
     }
 
-    async deleteUserDefinedRegionWithKey(regionKey, columnContainer) {
+    async deleteRegionWithKey(regionKey, columnContainer) {
 
         columnContainer.querySelectorAll(createSelector(regionKey)).forEach(node => node.remove())
 
-        const feature = await this.findUserDefinedRegionWithKey(regionKey)
-
-        const set = await this.getUserDefinedROISet()
+        const {feature, set} = await this.findRegionWithKey(regionKey)
 
         if (set) {
             set.removeFeature(feature)
@@ -286,22 +272,21 @@ class ROIManager {
 
     }
 
-    async findUserDefinedRegionWithKey(regionKey) {
+    async findRegionWithKey(regionKey) {
 
         const {chr, start, end} = parseRegionKey(regionKey)
-        const set = await this.getUserDefinedROISet()
 
-        if (set) {
-            const features = await set.getFeatures(chr, start, end)
+        for (let set of this.roiSets) {
+                const features = await set.getFeatures(chr, start, end)
 
-            for (let feature of features) {
-                if (feature.chr === chr && feature.start >= start && feature.end <= end) {
-                    return feature
+                for (let feature of features) {
+                    if (feature.chr === chr && feature.start >= start && feature.end <= end) {
+                        return {feature, set}
+                    }
                 }
-            }
         }
 
-        return undefined
+        return {feature: undefined, set: undefined}
     }
 
     toJSON() {

@@ -71,19 +71,11 @@ class ROISet {
     }
 
     addFeature(feature) {
-        if (this.isUserDefined) {
-            this.featureSource.addFeature(feature)
-        } else {
-            console.error("Attempt to add ROI to non user-defined set")
-        }
+        this.featureSource.addFeature(feature)
     }
 
     removeFeature(feature) {
-        if (this.isUserDefined) {
-            this.featureSource.removeFeature(feature)
-        } else {
-            console.error("Attempt to remove ROI from non user-defined set")
-        }
+        this.featureSource.removeFeature(feature)
     }
 
     toJSON() {
