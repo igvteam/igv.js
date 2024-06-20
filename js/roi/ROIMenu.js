@@ -1,5 +1,5 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
-import * as UIUtils from  "../ui/utils/ui-utils.js"
+import * as UIUtils from "../ui/utils/ui-utils.js"
 
 class ROIMenu {
     constructor(browser, parent) {
@@ -7,7 +7,7 @@ class ROIMenu {
         this.browser = browser
 
         // container
-        this.container = DOMUtils.div({ class: 'igv-roi-menu' })
+        this.container = DOMUtils.div({class: 'igv-roi-menu'})
         parent.appendChild(this.container)
 
         // header
@@ -24,82 +24,50 @@ class ROIMenu {
 
     }
 
-    async present(x, y, roiManager, columnContainer, regionElement) {
+    menuItems(feature, isUserDefined, event, roiManager, columnContainer, regionElement) {
 
-        removeAllChildNodes(this.body)
+        const items = [`<b>${feature.name || ''}</b>`,]
 
-        const feature = await this.browser.roiManager.findUserDefinedRegionWithKey(regionElement.dataset.region)
-
-        // Description Copy
-        const _description_copy_ = DOMUtils.div()
-        this.body.appendChild(_description_copy_)
-
-        const placeholder = 'Description'
-        const str = (feature.name || placeholder)
-
-        _description_copy_.innerText = str
-        _description_copy_.setAttribute('title', str)
-        placeholder === str ? _description_copy_.classList.add('igv-roi-placeholder') : _description_copy_.classList.remove('igv-roi-placeholder')
-
-
-        // Set Description
-        const description = DOMUtils.div()
-        this.body.appendChild(description)
-        description.innerText = 'Set Description'
-
-        description.addEventListener('click', event => {
-
-            event.stopPropagation()
-
-            this.container.style.display = 'none'
-
-            const callback = () => {
-
-                const value = this.browser.inputDialog.value || ''
-                feature.name = value.trim()
-
-                this.container.style.display = 'none'
-
-                this.browser.roiManager.repaintTable()
-            }
-
-            const config =
+        if (isUserDefined) {
+            items.push(
+                '<hr/>',
                 {
-                    label: 'Description',
-                    value: (feature.name || ''),
-                    callback
+                    label: 'Set description ...',
+                    click: () => {
+                        const callback = () => {
+                            const value = this.browser.inputDialog.value || ''
+                            feature.name = value.trim()
+                            this.browser.roiManager.repaintTable()
+                        }
+                        const config =
+                            {
+                                label: 'Description',
+                                value: (feature.name || ''),
+                                callback
+                            }
+
+                        this.browser.inputDialog.present(config, event)
+
+                    }
+                },
+                {
+                    label: 'Delete region',
+                    click: () => {
+                        this.browser.roiManager.deleteRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
+                        this.browser.roiManager.repaintTable()
+                    }
                 }
+            )
+        }
 
-            this.browser.inputDialog.present(config, event)
-
-        })
-
-
-        // Delete Region
-        const _delete_ = DOMUtils.div()
-        this.body.appendChild(_delete_)
-        _delete_.innerText = 'Delete Region'
-
-        _delete_.addEventListener('click', event => {
-            event.stopPropagation()
-            this.container.style.display = 'none'
-            this.browser.roiManager.deleteUserDefinedRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
-        })
+        return items
+    }
 
 
+    async present(feature, isUserDefined, event, roiManager, columnContainer, regionElement) {
 
-
-
-
-
-        // columnContainer.addEventListener('click', event => {
-        //     event.stopPropagation()
-        //     this.container.style.display = 'none'
-        // })
-
-        this.container.style.left = `${ x }px`
-        this.container.style.top  = `${ y }px`
-        this.container.style.display = 'flex'
+        const menuItems = this.menuItems(feature, isUserDefined, event, roiManager, columnContainer, regionElement)
+        this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
 
     }
 
@@ -125,7 +93,7 @@ class ROIMenu {
         // })
 
         // Description:
-        row = DOMUtils.div({ class: 'igv-roi-menu-row-edit-description' })
+        row = DOMUtils.div({class: 'igv-roi-menu-row-edit-description'})
         this.container.appendChild(row)
 
         row.addEventListener('click', e => {
@@ -164,7 +132,7 @@ class ROIMenu {
 
 
         // Delete
-        row = DOMUtils.div({ class: 'igv-roi-menu-row' })
+        row = DOMUtils.div({class: 'igv-roi-menu-row'})
         row.innerText = 'Delete region'
         this.container.appendChild(row)
 
@@ -174,8 +142,8 @@ class ROIMenu {
             this.browser.roiManager.deleteUserDefinedRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
         })
 
-        this.container.style.left = `${ x }px`
-        this.container.style.top  = `${ y }px`
+        this.container.style.left = `${x}px`
+        this.container.style.top = `${y}px`
         this.container.style.display = 'flex'
 
         columnContainer.addEventListener('click', event => {
@@ -193,7 +161,7 @@ class ROIMenu {
 
 function removeAllChildNodes(parent) {
     while (parent.firstChild) {
-        parent.removeChild(parent.firstChild);
+        parent.removeChild(parent.firstChild)
     }
 }
 
