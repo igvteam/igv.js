@@ -25,14 +25,16 @@
 
 import BWReader from "./bwReader.js"
 import pack from "../feature/featurePacker.js"
+import BaseFeatureSource from "../feature/baseFeatureSource.js"
 
-class BWSource {
+class BWSource extends BaseFeatureSource {
 
     queryable = true
     wgValues = {}
     windowFunctions = ["mean", "min", "max"]
 
     constructor(config, genome) {
+        super(genome)
         this.reader = new BWReader(config, genome)
         this.genome = genome
         this.format = config.format || "bigwig"

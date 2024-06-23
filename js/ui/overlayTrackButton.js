@@ -33,7 +33,7 @@ function trackOverlayClickHandler(e) {
 
         const tracks = getMultiSelectedTrackViews(this.browser).map(({ track }) => track)
         for (const track of tracks) {
-            track.isMultiSelection = false
+            track.selected = false
         }
 
         // Flatten any merged tracks.  Must do this before there removal

@@ -11,6 +11,7 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {isSecureContext, expandRegion} from "../util/igvUtils.js"
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
+import {findFeatureAfterCenter} from "./featureUtils.js"
 
 const DEFAULT_COLOR = 'rgb(0, 0, 150)'
 
@@ -26,7 +27,6 @@ class FeatureTrack extends TrackBase {
         autoHeight: false,
         useScore: false
     }
-
 
     constructor(config, browser) {
         super(config, browser)
@@ -122,7 +122,6 @@ class FeatureTrack extends TrackBase {
         }
     }
 
-
     /**
      * Return boolean indicating if this track supports the whole genome view.  Generally this is non-indexed feature
      * tracks.
@@ -142,10 +141,34 @@ class FeatureTrack extends TrackBase {
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
-
         const visibilityWindow = this.visibilityWindow
-
         return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
+    }
+
+    /**
+     * Return the first feature in this track whose start position is > position
+     * @param chr
+     * @param position
+     * @returns {Promise<void>}
+     */
+    async nextFeatureAfter(chr, position, direction) {
+        const viewport = this.trackView.viewports[0]
+        let features = viewport.cachedFeatures
+        if (features && Array.isArray(features) && features.length > 0) {
+            // Check chromosome, all cached features will share a chromosome
+            const chrName = this.browser.genome.getChromosomeName(features[0].chr)
+            if(chrName === chr) {
+                const next = findFeatureAfterCenter(features, position, direction)
+                if(next) {
+                    return next
+                }
+            }
+        }
+
+        if(typeof this.featureSource.nextFeature === 'function') {
+            return this.featureSource.nextFeature(chr, position, direction, this.visibilityWindow)
+        }
+
     }
 
 

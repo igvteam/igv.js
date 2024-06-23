@@ -56,7 +56,7 @@ import {translateSession} from "./hic/shoeboxUtils.js"
 import Hub from "./ucsc/ucscHub.js"
 import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import OverlayTrackButton from "./ui/overlayTrackButton.js"
-import MenuUtils from "./ui/menuUtils.js"
+import MenuUtils, {multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
 import {trackViewportPopoverList} from './trackViewport.js'
@@ -91,7 +91,7 @@ class Browser {
         this.namespace = '.browser_' + this.guid
 
         this.parent = parentDiv
-        if(!Browser.shadowRoot) {
+        if (!Browser.shadowRoot) {
             // Only attach the shadow dom once.  We can attach multiple browsers to the shadow root
             Browser.shadowRoot = parentDiv.attachShadow({mode: "open"})
             const sheet = new CSSStyleSheet()
@@ -170,7 +170,7 @@ class Browser {
             }
         })
 
-        this.addMouseHandlers()
+        this.addEventHandlers()
 
         this.sampleInfo = new SampleInfo(this)
 
@@ -284,6 +284,10 @@ class Browser {
         // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
         this.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'})
         $searchContainer.append(this.$searchInput)
+        // Stop event propagation to prevent feature track keyboard navigation
+        this.$searchInput[0].addEventListener('keyup', (event) => {
+            event.stopImmediatePropagation()
+        })
 
         this.$searchInput.change(() => this.doSearch(this.$searchInput.val()))
 
@@ -676,8 +680,8 @@ class Browser {
 
         // Sample info
         const localSampleInfoFiles = []
-        if(session.sampleinfo) {
-            for(const config of session.sampleinfo) {
+        if (session.sampleinfo) {
+            for (const config of session.sampleinfo) {
 
                 if (config.file) {
                     localSampleInfoFiles.push(config.file)
@@ -743,7 +747,7 @@ class Browser {
             trackView.removeDOMFromColumnContainer()
         }
 
-        // discard all columns
+        // discard all columns   TODO - why do we do this?
         const elements = this.columnContainer.querySelectorAll('.igv-axis-column, .igv-column-shim, .igv-column, .igv-sample-info-column, .igv-sample-name-column, .igv-scrollbar-column, .igv-track-drag-column, .igv-gear-menu-column')
         elements.forEach(column => column.remove())
 
@@ -1081,7 +1085,7 @@ class Browser {
                 msg = httpMessages[msg]
             }
 
-            msg = `${ msg } : ${ FileUtils.isFile(config.url) ? config.url.name : config.url }`
+            msg = `${msg} : ${FileUtils.isFile(config.url) ? config.url.name : config.url}`
             // msg += (": " + FileUtils.isFile(config.url) ? config.url.name : config.url)
             const err = new Error(msg)
             console.error(err)
@@ -1381,6 +1385,9 @@ class Browser {
         return this.trackViews.filter(tv => tv.track && tv.track.name).map(tv => tv.track.name)
     }
 
+    getSelectedTrackViews() {
+        return this.trackViews.filter(trackView => true === trackView.track.selected)
+    }
 
     /**
      * NOTE: Public API function
@@ -1839,10 +1846,9 @@ class Browser {
             // create reference frame list based on search loci
             this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length), this.isSoftclipped())
 
-            // discard viewport DOM elements
+            // discard track viewport DOM elements
             for (let trackView of this.trackViews) {
-                // empty axis column, viewport columns, sampleName column, scroll column, drag column, gear column
-                trackView.removeDOMFromColumnContainer()
+                trackView.removeViewportsFromColumnContainer()
             }
 
             // discard ONLY viewport columns
@@ -1852,12 +1858,12 @@ class Browser {
             viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-info-column'), this.referenceFrameList.length)
             this.fireEvent('didchangecolumnlayout')
 
-            this.centerLineList = this.createCenterLineList(this.columnContainer)
-
-            // Populate the columns
+            // Create the viewport objects
             for (let trackView of this.trackViews) {
-                trackView.addDOMToColumnContainer(this, this.columnContainer, this.referenceFrameList)
+                trackView.createViewports(this, this.columnContainer, this.referenceFrameList)
             }
+
+            this.centerLineList = this.createCenterLineList(this.columnContainer)
 
             this.updateUIWithReferenceFrameList()
 
@@ -1966,7 +1972,7 @@ class Browser {
     }
 
     dispose() {
-        this.removeMouseHandlers()
+        this.removeEventHandlers()
         for (let trackView of this.trackViews) {
             trackView.dispose()
         }
@@ -2076,12 +2082,12 @@ class Browser {
         if (this.sampleInfo.sampleInfoFiles.length > 0) {
 
             const si = this.sampleInfo.toJSON()
-            if(si.length > 0) {
+            if (si.length > 0) {
                 json["sampleinfo"] = si
             }
 
             for (const path of this.sampleInfo.sampleInfoFiles) {
-                const config = TrackBase.localFileInspection({ url: path })
+                const config = TrackBase.localFileInspection({url: path})
                 if (config.file) {
                     localSampleInfoFileDetections.push(config.file)
                 }
@@ -2233,18 +2239,20 @@ class Browser {
     /**
      * Mouse handlers to support drag (pan)
      */
-    addMouseHandlers() {
+    addEventHandlers() {
         this.addWindowResizeHandler()
         this.addRootMouseUpHandler()
         this.addRootMouseLeaveHandler()
         this.addColumnContainerEventHandlers()
+        this.addKeyboardHandler()
     }
 
-    removeMouseHandlers() {
+    removeEventHandlers() {
         this.removeWindowResizeHandler()
         this.removeRootMouseUpHandler()
         this.removeRootMouseLeaveHandler()
         this.removeColumnContainerEventHandlers()
+        this.removeKeyboardHandler()
     }
 
     addWindowResizeHandler() {
@@ -2300,6 +2308,17 @@ class Browser {
         this.columnContainer.removeEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
         this.columnContainer.removeEventListener('touchend', this.boundColumnContainerTouchEndHandler)
     }
+
+    addKeyboardHandler() {
+        this.keyUpHandler = keyUpHandler.bind(this)
+        document.addEventListener("keyup", this.keyUpHandler)
+    }
+
+    removeKeyboardHandler() {
+        console.log("Remove handler")
+        document.addEventListener("keyup", this.keyUpHandler)
+    }
+
 
     static uncompressSession(url) {
 
@@ -2467,6 +2486,40 @@ function handleMouseMove(e) {
 function mouseUpOrLeave(e) {
     this.cancelTrackPan()
     this.endTrackDrag()
+}
+
+/**
+ * Handle keyup event, used for navigating feature tracks with hot keys.  This will get bound to the browser object
+ * @param event
+ */
+async function keyUpHandler(event) {
+console.log(event)
+    if (event.code === 'KeyF' || event.code === 'KeyB') {
+
+        const selectedTrackViews = this.getSelectedTrackViews()
+        if (selectedTrackViews.length > 0) {
+            const track = selectedTrackViews[0].track
+            if (typeof track.nextFeatureAfter === 'function') {
+                const direction = 'KeyF' === event.code
+                const chr = this.referenceFrameList[0].chr
+                const center = this.referenceFrameList[0].center
+                const nextFeature = await track.nextFeatureAfter(chr, center, direction)
+                if (nextFeature) {
+                    const nextChr = await this.genome.getChromosomeName(nextFeature.chr)
+                    if (chr === nextChr) {
+                        const newCenter = (nextFeature.start + nextFeature.end) / 2
+                        this.referenceFrameList[0].shift(newCenter - center)
+                        this.updateViews()
+                    } else {
+                        const extent = Math.round(this.referenceFrameList[0].end - this.referenceFrameList[0].start)
+                        const newStart = Math.max(1, Math.round(nextFeature.start - extent / 2))
+                        const newEnd = newStart + extent
+                        this.search(`${nextChr}:${newStart}-${newEnd}`)
+                    }
+                }
+            }
+        }
+    }
 }
 
 

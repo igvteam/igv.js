@@ -4,16 +4,14 @@ import Dialog from "./components/dialog.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {colorPalettes} from "../util/colorPalletes.js"
 
-const colorPickerTrackTypeSet = new Set([ 'bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact' ])
+const colorPickerTrackTypeSet = new Set(['bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact'])
 
 const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp', 'shoebox'])
 
 const multiTrackSelectExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
 
 const autoScaleGroupColorHash =
-    {
-
-    };
+    {}
 
 class MenuUtils {
     constructor(browser) {
@@ -72,7 +70,7 @@ class MenuUtils {
             list.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}))
             list.push(unsetColorMenuItem({trackView, label: "Unset track color"}))
 
-            if(trackView.track.config.type === 'wig' || trackView.track.config.type === 'annotation') {
+            if (trackView.track.config.type === 'wig' || trackView.track.config.type === 'annotation') {
                 list.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
                 list.push(unsetAltColorMenuItem({trackView, label: "Unset alt color"}))
             }
@@ -96,7 +94,7 @@ class MenuUtils {
         const list = []
 
         const selected = getMultiSelectedTrackViews(trackView.browser)
-        const isSingleTrackType = didSelectSingleTrackType(selected.map(({ track }) => track.type))
+        const isSingleTrackType = didSelectSingleTrackType(selected.map(({track}) => track.type))
 
         if (true === isSingleTrackType) {
 
@@ -116,7 +114,7 @@ class MenuUtils {
                 list.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}))
                 list.push(unsetColorMenuItem({trackView, label: "Unset track color"}))
 
-                if(trackView.track.config.type === 'wig' || trackView.track.config.type === 'annotation') {
+                if (trackView.track.config.type === 'wig' || trackView.track.config.type === 'annotation') {
                     list.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
                     list.push(unsetAltColorMenuItem({trackView, label: "Unset alt color"}))
                 }
@@ -152,17 +150,17 @@ function groupAutoScaleMenuItem() {
         const colorPalette = colorPalettes['Dark2']
         const randomIndex = Math.floor(Math.random() * colorPalette.length)
 
-        const autoScaleGroupID = `auto-scale-group-${ DOMUtils.guid() }`
-        autoScaleGroupColorHash[ autoScaleGroupID ] = colorPalette[randomIndex]
+        const autoScaleGroupID = `auto-scale-group-${DOMUtils.guid()}`
+        autoScaleGroupColorHash[autoScaleGroupID] = colorPalette[randomIndex]
 
-        for (const { track } of this.browser.multiSelectedTrackViews) {
+        for (const {track} of this.browser.multiSelectedTrackViews) {
             track.autoscaleGroup = autoScaleGroupID
         }
 
         this.browser.updateViews()
     }
 
-    return { object, doAllMultiSelectedTracks:true, click }
+    return {object, doAllMultiSelectedTracks: true, click}
 
 }
 
@@ -210,7 +208,7 @@ function trackRemovalMenuItem(trackView) {
         this.trackView.browser._removeTrack(this)
     }
 
-    return { object, click:trackRemovalHandler, menuItemType: 'removeTrack' }
+    return {object, click: trackRemovalHandler, menuItemType: 'removeTrack'}
 
 }
 
@@ -297,7 +295,7 @@ function trackHeightMenuItem() {
 
                 const tracks = []
                 if (isMultiSelectedTrackView(this.trackView)) {
-                    tracks.push(...(getMultiSelectedTrackViews(this.trackView.browser).map(({ track }) => track)))
+                    tracks.push(...(getMultiSelectedTrackViews(this.trackView.browser).map(({track}) => track)))
                 } else {
                     tracks.push(this)
                 }
@@ -336,7 +334,7 @@ function trackHeightMenuItem() {
 
     }
 
-    return { object, dialog:dialogHandler }
+    return {object, dialog: dialogHandler}
 
 }
 
@@ -355,26 +353,32 @@ function canShowColorPicker(track) {
 }
 
 function didSelectSingleTrackType(types) {
-    const unique = [ ...new Set(types) ]
+    const unique = [...new Set(types)]
     return 1 === unique.length
 }
 
+// TODO -- this function really isn't needed
 function getMultiSelectedTrackViews(browser) {
-
-    const candidates = browser.trackViews.filter(({ track }) => { return false === multiTrackSelectExclusionTypes.has(track.type) })
-
-    let selected = candidates.filter(trackView => true === trackView.track.isMultiSelection)
-
-    selected = 0 === selected.length ? undefined : selected
-
-    return selected
+    const selected = browser.getSelectedTrackViews()
+    return 0 === selected.length ? undefined : selected
 }
 
 function isMultiSelectedTrackView(trackView) {
-    const selected = getMultiSelectedTrackViews(trackView.browser)
-    return selected && selected.length > 1 && new Set(selected).has(trackView)
+
+    return true === trackView.track.selected
+
+    // TODO -- this is rather twisted
+    //const selected = getMultiSelectedTrackViews(trackView.browser)
+    //return selected && selected.length > 1 && new Set(selected).has(trackView)
 }
 
-export { autoScaleGroupColorHash, canShowColorPicker, multiTrackSelectExclusionTypes, getMultiSelectedTrackViews, isMultiSelectedTrackView, didSelectSingleTrackType }
+export {
+    autoScaleGroupColorHash,
+    canShowColorPicker,
+    multiTrackSelectExclusionTypes,
+    getMultiSelectedTrackViews,
+    isMultiSelectedTrackView,
+    didSelectSingleTrackType
+}
 
 export default MenuUtils

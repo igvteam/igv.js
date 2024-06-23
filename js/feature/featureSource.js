@@ -29,6 +29,7 @@ import TDFSource from "../tdf/tdfSource.js"
 import StaticFeatureSource from "./staticFeatureSource.js"
 import {loadGenbank} from "../gbk/genbankParser.js"
 import GenbankFeatureSource from "../gbk/genbankFeatureSource.js"
+import {findFeatureAfterCenter} from "./featureUtils.js"
 
 const bbFormats = new Set(['bigwig', 'bw', 'bigbed', 'bb', 'biginteract', 'biggenepred', 'bignarrowpeak'])
 
@@ -36,17 +37,20 @@ function FeatureSource(config, genome) {
 
     const format = config.format ? config.format.toLowerCase() : undefined
 
+    let featureSource
     if (config.features) {
-        return new StaticFeatureSource(config, genome)
+        featureSource = new StaticFeatureSource(config, genome)
     } else if (bbFormats.has(format)) {
-        return new BWSource(config, genome)
+        featureSource =  new BWSource(config, genome)
     } else if ("tdf" === format) {
-        return new TDFSource(config, genome)
+        featureSource =  new TDFSource(config, genome)
     } else if ("gbk" === format) {
-        return new GenbankFeatureSource(config, genome)
+        featureSource =  new GenbankFeatureSource(config, genome)
     } else {
-        return new TextFeatureSource(config, genome)
+        featureSource =  new TextFeatureSource(config, genome)
     }
+
+    return featureSource
 }
 
 export default FeatureSource

@@ -55,7 +55,8 @@ class TrackBase {
         visibilityWindow: undefined,   // Identifies property that should be copied from config
         color: undefined,  // Identifies property that should be copied from config
         altColor: undefined,  // Identifies property that should be copied from config
-        supportHiDPI: true
+        supportHiDPI: true,
+        selected: false
     }
 
     constructor(config, browser) {
@@ -107,8 +108,6 @@ class TrackBase {
         this.removable = config.removable === undefined ? true : config.removable      // Defaults to true
         this.minHeight = config.minHeight || Math.min(25, this.height)
         this.maxHeight = config.maxHeight || Math.max(1000, this.height)
-
-        this.isMultiSelection = config.isMultiSelection || false
 
         if (config.onclick) {
             this.onclick = config.onclick

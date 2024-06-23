@@ -15,36 +15,36 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
             genome: "hg19",
-           // locus: "myc",
+             locus: "myc",
             tracks:
                 [
-                    {
-                        "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
-                        "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz.tbi",
-                        "name": "Bed - Tabix Index",
-                        "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$"
-                    },
-                    {
-                        "type": "annotation",
-                        "format": "bed",
-                        "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
-                        "indexed": false,
-                        "supportsWholeGenome": true,
-                        "name": "Bed - No Index"
-                    },
-
-                    {
-                        "type": "annotation",
-                        "format": "bed",
-                        "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
-                        "indexURL": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx",
-                        "name": "Bed - Tribble Index"
-                    },
+                    // {
+                    //     "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
+                    //     "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz.tbi",
+                    //     "name": "Bed - Tabix Index",
+                    //     "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$"
+                    // },
+                    // {
+                    //     "type": "annotation",
+                    //     "format": "bed",
+                    //     "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
+                    //     "indexed": false,
+                    //     "supportsWholeGenome": true,
+                    //     "name": "Bed - No Index"
+                    // },
+                    //
+                    // {
+                    //     "type": "annotation",
+                    //     "format": "bed",
+                    //     "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
+                    //     "indexURL": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx",
+                    //     "name": "Bed - Tribble Index"
+                    // },
                     {
                         "type": "annotation",
                         "format": "bed",
@@ -52,25 +52,58 @@
                         "indexURL": "https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi",
                         "name": "dbSNP 137 - Tabix index",
                         "visibilityWindow": 200000,
-                        "infoURL": "https://www.ncbi.nlm.nih.gov/snp/?term=$$"
+                        "infoURL": "https://www.ncbi.nlm.nih.gov/snp/?term=$$",
+                        "selected": true
                     },
-                    {
-                        "type": "annotation",
-                        "format": "gtf",
-                        "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz",
-                        "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi",
-                        "name": "Gencode v24 (gtf) -- genes filtered",
-                        "visibilityWindow": 10000000,
-                        "filterTypes": ["gene", "chromosome"]
-                    }
+                    // {
+                    //     "type": "annotation",
+                    //     "format": "gtf",
+                    //     "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz",
+                    //     "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi",
+                    //     "name": "Gencode v24 (gtf) -- genes filtered",
+                    //     "visibilityWindow": 10000000,
+                    //     "filterTypes": ["gene", "chromosome"]
+                    // }
                 ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
+
+            // const track = browser.findTracks("name", "dbSNP 137 - Tabix index")[0]
+            //
+            // document.addEventListener("keyup", async (event) => {
+            //     if(event.code === 'KeyF') {
+            //         const locusString = browser.currentLoci()
+            //         const tokens = locusString.split(':')
+            //         const chr = tokens[0]
+            //         const startEnd = tokens[1].split("-")
+            //         const start = Number.parseInt(startEnd[0].replace(",", "")) - 1
+            //         const end = Number.parseInt(startEnd[1].replace(",", ""))
+            //         const center = (start + end) / 2
+            //         const nextFeature = await track.nextFeatureAfter(chr, center)
+            //         if (nextFeature) {
+            //             const nextChr = await browser.genome.getChromosomeName(nextFeature.chr)
+            //             if (chr === nextChr) {
+            //                 const newCenter = (nextFeature.start + nextFeature.end) / 2
+            //                 const shift = Math.round(newCenter - center)
+            //                 // browser.search(`${nextChr}:${start + shift}-${end + shift}`)
+            //                 browser.referenceFrameList[0].start += shift
+            //                 browser.referenceFrameList[0].end += shift
+            //                 browser.updateViews()
+            //             } else {
+            //                 const extent = Math.round(end - start)
+            //                 const newStart = Math.max(1, Math.round(nextFeature.start - extent / 2))
+            //                 const newEnd = newStart + extent
+            //                 browser.search(`${nextChr}:${newStart}-${newEnd}`)
+            //             }
+            //         }
+            //     }
+            //    console.log(event)
+            // })
         })
 
 

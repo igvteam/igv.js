@@ -1023,7 +1023,7 @@ class AlignmentTrack extends TrackBase {
                                 if (chromosomeObject) {
                                     this.selectedReadName = clickedAlignment.readName
                                     //this.browser.presentMultiLocusPanel(clickedAlignment, referenceFrame)
-                                    const bpWidth = referenceFrame.end - referenceFrame.start
+                                    const bpWidth = referenceFrame.bpPerPixel * clickState.viewport.getWidth()
                                     const frameStart = clickedAlignment.mate.position - bpWidth / 2
                                     const frameEnd = clickedAlignment.mate.position + bpWidth / 2
                                     this.browser.addMultiLocusPanel(chromosomeObject.name, frameStart, frameEnd, referenceFrame)
