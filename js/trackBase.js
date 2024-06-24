@@ -25,7 +25,6 @@
 
 import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
-import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "./ui/menuUtils.js"
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "./igv-icons.js"
 
@@ -62,14 +61,6 @@ class TrackBase {
     constructor(config, browser) {
         this.browser = browser
         this.init(config)
-    }
-
-    set selected(s) {
-        this._selected = s
-    }
-
-    get selected() {
-        return this._selected
     }
 
     /**
@@ -533,8 +524,8 @@ class TrackBase {
 
         function dialogPresentationHandler() {
 
-            if (isMultiSelectedTrackView(this.trackView)) {
-                this.browser.dataRangeDialog.configure(getMultiSelectedTrackViews(this.trackView.browser))
+            if (this.trackView.track.selected) {
+                this.browser.dataRangeDialog.configure(this.trackView.browser.getSelectedTrackViews())
             } else {
                 this.browser.dataRangeDialog.configure(this.trackView)
             }

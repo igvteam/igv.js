@@ -4,7 +4,6 @@ import * as DOMUtils from "./utils/dom-utils.js"
 import GenericColorPicker from "./components/genericColorPicker.js"
 import {createCheckbox} from "../igv-icons.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import {getMultiSelectedTrackViews, isMultiSelectedTrackView} from "./menuUtils.js"
 
 class MenuPopup {
     constructor(parent) {
@@ -111,9 +110,9 @@ class MenuPopup {
 
                     if (item.click) {
 
-                        if (isMultiSelectedTrackView(trackView)) {
+                        if (trackView.track.selected) {
 
-                            trackView.browser.multiSelectedTrackViews = getMultiSelectedTrackViews(trackView.browser)
+                            trackView.browser.multiSelectedTrackViews = trackView.browser.getSelectedTrackViews()
 
                             if (true === item.doAllMultiSelectedTracks) {
                                 item.click.call(trackView.track, e)

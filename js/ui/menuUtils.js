@@ -93,7 +93,7 @@ class MenuUtils {
 
         const list = []
 
-        const selected = getMultiSelectedTrackViews(trackView.browser)
+        const selected = trackView.browser.getSelectedTrackViews()
         const isSingleTrackType = didSelectSingleTrackType(selected.map(({track}) => track.type))
 
         if (true === isSingleTrackType) {
@@ -130,7 +130,7 @@ class MenuUtils {
 }
 
 function didMultiSelect(trackView) {
-    const selected = getMultiSelectedTrackViews(trackView.browser)
+    const selected = trackView.browser.getSelectedTrackViews()
     return selected && selected.length > 1 && new Set(selected).has(trackView)
 }
 
@@ -199,7 +199,7 @@ function visibilityWindowMenuItem() {
 
 function trackRemovalMenuItem(trackView) {
 
-    const str = isMultiSelectedTrackView(trackView) ? 'Remove tracks' : 'Remove track'
+    const str = trackView.track.selected ? 'Remove tracks' : 'Remove track'
 
     const object = $('<div>')
     object.text(str)
@@ -294,8 +294,8 @@ function trackHeightMenuItem() {
             if (undefined !== number) {
 
                 const tracks = []
-                if (isMultiSelectedTrackView(this.trackView)) {
-                    tracks.push(...(getMultiSelectedTrackViews(this.trackView.browser).map(({track}) => track)))
+                if (trackView.track.selected) {
+                    tracks.push(...(this.trackView.browser.getSelectedTrackViews().map(({track}) => track)))
                 } else {
                     tracks.push(this)
                 }
@@ -357,27 +357,10 @@ function didSelectSingleTrackType(types) {
     return 1 === unique.length
 }
 
-// TODO -- this function really isn't needed
-function getMultiSelectedTrackViews(browser) {
-    const selected = browser.getSelectedTrackViews()
-    return 0 === selected.length ? undefined : selected
-}
-
-function isMultiSelectedTrackView(trackView) {
-
-    return true === trackView.track.selected
-
-    // TODO -- this is rather twisted
-    //const selected = getMultiSelectedTrackViews(trackView.browser)
-    //return selected && selected.length > 1 && new Set(selected).has(trackView)
-}
-
 export {
     autoScaleGroupColorHash,
     canShowColorPicker,
     multiTrackSelectExclusionTypes,
-    getMultiSelectedTrackViews,
-    isMultiSelectedTrackView,
     didSelectSingleTrackType
 }
 
