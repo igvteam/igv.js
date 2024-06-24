@@ -250,7 +250,7 @@ class TrackViewport extends Viewport {
         const pixelWidth = isWGV ? this.$viewport.width() : 3 * this.$viewport.width()
         const bpPerPixel = this.referenceFrame.bpPerPixel
         const bpStart = this.referenceFrame.start - (isWGV ? 0 : this.$viewport.width() * bpPerPixel)
-        const bpEnd = this.referenceFrame.end + (isWGV ? 0 : this.$viewport.width() * bpPerPixel) + 1
+        const bpEnd = this.referenceFrame.start   + (isWGV ? 0 : 2 * this.$viewport.width() * bpPerPixel) + 1
         return {
             bpStart, bpEnd, pixelWidth
         }

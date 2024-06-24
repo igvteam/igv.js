@@ -13,7 +13,6 @@ const DEFAULT_MAX_WG_COUNT = 10000
  */
 async function computeWGFeatures(allFeatures, genome, maxWGCount) {
 
-
     const makeWGFeature = (f) => {
         const wg = Object.assign({}, f)
         wg.chr = "all"
@@ -30,11 +29,11 @@ async function computeWGFeatures(allFeatures, genome, maxWGCount) {
     let count = 0
     for (let c of genome.wgChromosomeNames) {
 
-        if(Array.isArray(allFeatures)) {
+        if (Array.isArray(allFeatures)) {
             const featureDict = {}
-            for(let f of allFeatures) {
+            for (let f of allFeatures) {
                 const chr = genome.getChromosomeName(f.chr)
-                if(!featureDict.hasOwnProperty(chr)) {
+                if (!featureDict.hasOwnProperty(chr)) {
                     featureDict[chr] = []
                 }
                 featureDict[chr].push(f)
@@ -99,4 +98,47 @@ function packFeatures(features, maxRows) {
 }
 
 
-export {computeWGFeatures, packFeatures}
+/**
+ * Return the index at which a new feature should be inserted in the sorted featureList.  It is assumed
+ * that featureList is sorted by the compare function.  If featureList has 1 or more features with compare === 0
+ * the new feature should be inserted at the end.
+ *
+ * @param featureList
+ * @param center
+ * @param direction -- forward === true, reverse === false
+ * @returns {feature}
+ */
+
+function findFeatureAfterCenter(featureList, center, direction = true) {
+
+    const featureCenter = (feature) => (feature.start + feature.end) / 2
+
+    const compare = direction ?
+        (o1, o2) => o1.start - o2.start + o1.end - o2.end :
+        (o2, o1) => o1.start - o2.start + o1.end - o2.end
+    const sortedList = Array.from(featureList)
+    sortedList.sort(compare)
+
+    let low = 0
+    let high = sortedList.length
+    while (low < high) {
+        let mid = Math.floor((low + high) / 2)
+        if(direction) {
+            if (featureCenter(sortedList[mid]) <= center) {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+        } else {
+            if (featureCenter(sortedList[mid]) >= center) {
+                low = mid + 1
+            } else {
+                high = mid
+            }
+
+        }
+    }
+    return sortedList[low]
+}
+
+export {computeWGFeatures, packFeatures, findFeatureAfterCenter}

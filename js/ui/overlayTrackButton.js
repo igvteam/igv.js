@@ -1,7 +1,6 @@
 import NavbarButton from "./navbarButton.js"
 import { overlayTrackImage, overlayTrackImageHover } from "./navbarIcons/overlayTrack.js"
 import { buttonLabel } from "./navbarIcons/buttonLabel.js"
-import {didSelectSingleTrackType, getMultiSelectedTrackViews} from "./menuUtils.js"
 import MergedTrack from "../feature/mergedTrack.js"
 
 
@@ -31,9 +30,9 @@ function trackOverlayClickHandler(e) {
 
     if (true === isOverlayTrackCriteriaMet(this.browser)) {
 
-        const tracks = getMultiSelectedTrackViews(this.browser).map(({ track }) => track)
+        const tracks = this.browser.getSelectedTrackViews().map(({ track }) => track)
         for (const track of tracks) {
-            track.isMultiSelection = false
+            track.selected = false
         }
 
         // Flatten any merged tracks.  Must do this before there removal
@@ -70,7 +69,7 @@ function trackOverlayClickHandler(e) {
 
 function isOverlayTrackCriteriaMet(browser) {
 
-    const selected = getMultiSelectedTrackViews(browser)
+    const selected = browser.getSelectedTrackViews()
 
     if (selected && selected.length > 1) {
 

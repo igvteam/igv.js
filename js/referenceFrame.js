@@ -37,12 +37,14 @@ class ReferenceFrame {
 
         this.chr =  chr // this.genome.getChromosomeName(chr)
         this.start = start
-
-        // TODO WARNING THIS IS NOT UPDATED !!!
         this.end = end
 
         this.bpPerPixel = bpPerPixel
         this.id = DOMUtils.guid()
+    }
+
+    get center() {
+        return (this.start + this.end) / 2
     }
 
     get locusSearchString() {
@@ -66,6 +68,10 @@ class ReferenceFrame {
         return this.start + this.bpPerPixel * pixels
     }
 
+    calculateCenter(pixels) {
+        return this.start + this.bpPerPixel * pixels / 2
+    }
+
     calculateBPP(end, pixels) {
         return (end - this.start) / pixels
     }
@@ -82,6 +88,15 @@ class ReferenceFrame {
 
     toBP(pixels) {
         return this.bpPerPixel * pixels
+    }
+
+    /**
+     * Shift frame by delta in base pairs
+     * @param delta
+     */
+    shift(delta) {
+        this.start += delta
+        this.end += delta
     }
 
     /**
@@ -248,28 +263,6 @@ function createReferenceFrameList(loci, genome, browserFlanking, minimumBases, v
     })
 }
 
-function adjustReferenceFrame(scaleFactor, referenceFrame, viewportWidth, alignmentStart, alignmentLength) {
 
-    referenceFrame.bpPerPixel *= scaleFactor
-
-    const alignmentEE = alignmentStart + alignmentLength
-    const alignmentCC = (alignmentStart + alignmentEE) / 2
-
-    referenceFrame.start = alignmentCC - (referenceFrame.bpPerPixel * (viewportWidth / 2))
-    referenceFrame.end = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
-}
-
-function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
-
-    const alignmentEE = alignmentStart + alignmentLength
-    const alignmentCC = (alignmentStart + alignmentEE) / 2
-
-    const ss = alignmentCC - (bpp * (viewportWidth / 2))
-    const ee = ss + (bpp * viewportWidth)
-
-    return new ReferenceFrame(genome, chromosomeName, ss, ee, bpp)
-
-}
-
-export {createReferenceFrameList, adjustReferenceFrame, createReferenceFrameWithAlignment}
+export {createReferenceFrameList}
 export default ReferenceFrame

@@ -33,8 +33,7 @@ import {createIcon} from "./ui/utils/icons.js"
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import { autoScaleGroupColorHash, getMultiSelectedTrackViews, multiTrackSelectExclusionTypes } from "./ui/menuUtils.js"
-import { ENABLE_MULTI_TRACK_SELECTION, setMultiTrackSelectionState, setDragHandleSelectionState } from './ui/multiTrackSelectButton.js'
+import { autoScaleGroupColorHash, multiTrackSelectExclusionTypes } from "./ui/menuUtils.js"
 import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
 import {isOverlayTrackCriteriaMet} from "./ui/overlayTrackButton.js"
 
@@ -77,14 +76,7 @@ class TrackView {
         // Axis
         this.axis = this.createAxis(browser, this.track)
 
-        // Create a viewport for each reference frame
-        this.viewports = []
-        const viewportWidth = browser.calculateViewportWidth(referenceFrameList.length)
-        const viewportColumns = columnContainer.querySelectorAll('.igv-column')
-        for (let i = 0; i < viewportColumns.length; i++) {
-            const viewport = createViewport(this, viewportColumns[i], referenceFrameList[i], viewportWidth)
-            this.viewports.push(viewport)
-        }
+        this.createViewports(browser, columnContainer, referenceFrameList)
 
         // Sample Info
         this.sampleInfoViewport = new SampleInfoViewport(this, browser.columnContainer.querySelector('.igv-sample-info-column'), browser.getSampleInfoViewportWidth())
@@ -101,6 +93,25 @@ class TrackView {
         // Track Gear
         this.createTrackGearPopup(browser)
 
+    }
+
+    /**
+     * Create a viewport object for each reference frame.  It is assumed that viewport DOM objects have already been
+     * created.   Obviously this is rather fragile, refactoring here would be a good idea.
+     *
+     * @param browser
+     * @param columnContainer
+     * @param referenceFrameList
+     */
+    createViewports(browser, columnContainer, referenceFrameList) {
+
+        this.viewports = []
+        const viewportWidth = browser.calculateViewportWidth(referenceFrameList.length)
+        const viewportColumns = columnContainer.querySelectorAll('.igv-column')
+        for (let i = 0; i < viewportColumns.length; i++) {
+            const viewport = createViewport(this, viewportColumns[i], referenceFrameList[i], viewportWidth)
+            this.viewports.push(viewport)
+        }
     }
 
     createAxis(browser, track) {
@@ -129,17 +140,17 @@ class TrackView {
             const html = `<input type="checkbox" name="track-select">`
             const input = document.createRange().createContextualFragment(html).firstChild
             trackSelectionContainer.appendChild(input)
-            input.checked = this.track.isMultiSelection || false
+            input.checked = this.track.selected || false
 
             input.addEventListener('change', event => {
                 event.preventDefault()
                 event.stopPropagation()
-                this.track.isMultiSelection = event.target.checked
-                setDragHandleSelectionState(this, this.dragHandle, event.target.checked)
+                this.track.selected = event.target.checked
+                this.setDragHandleSelectionState(event.target.checked)
                 this.browser.overlayTrackButton.setVisibility( isOverlayTrackCriteriaMet(this.browser) )
             })
 
-            setMultiTrackSelectionState(this, axis, ENABLE_MULTI_TRACK_SELECTION)
+            this.setTrackSelectionState(axis, false)
 
         }
 
@@ -239,9 +250,9 @@ class TrackView {
 
                 }
 
-            const selected = getMultiSelectedTrackViews(this.browser)
+            const selected = browser.getSelectedTrackViews()
 
-            if (selected && new Set(selected).has(this)) {
+            if (selected.length > 0 && new Set(selected).has(this)) {
 
                 colorHandlers =
                     {
@@ -771,7 +782,7 @@ class TrackView {
                 event.preventDefault()
 
                 currentDragHandle = event.target
-                if (false === this.track.isMultiSelection) {
+                if (false === this.track.selected) {
                     currentDragHandle.classList.remove('igv-track-drag-handle-color')
                     currentDragHandle.classList.add('igv-track-drag-handle-hover-color')
                 }
@@ -790,7 +801,7 @@ class TrackView {
 
                 if (currentDragHandle && event.target !== currentDragHandle) {
 
-                    if (false === this.track.isMultiSelection) {
+                    if (false === this.track.selected) {
                         currentDragHandle.classList.remove('igv-track-drag-handle-hover-color')
                         currentDragHandle.classList.add('igv-track-drag-handle-color')
                     }
@@ -808,7 +819,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if (false === this.track.isMultiSelection) {
+                    if (false === this.track.selected) {
                         event.target.classList.remove('igv-track-drag-handle-color')
                         event.target.classList.add('igv-track-drag-handle-hover-color')
                     }
@@ -823,7 +834,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if (false === this.track.isMultiSelection) {
+                    if (false === this.track.selected) {
                         event.target.classList.remove('igv-track-drag-handle-hover-color')
                         event.target.classList.add('igv-track-drag-handle-color')
                     }
@@ -837,7 +848,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if (false === this.track.isMultiSelection) {
+                    if (false === this.track.selected) {
                         event.target.classList.remove('igv-track-drag-handle-hover-color')
                         event.target.classList.add('igv-track-drag-handle-color')
                     }
@@ -874,11 +885,7 @@ class TrackView {
 
         // Axis
         this.axis.remove()
-
-        // Track Viewports
-        for (let viewport of this.viewports) {
-            viewport.$viewport.remove()
-        }
+        this.removeViewportsFromColumnContainer()
 
         // Sample Info Viewport
         this.sampleInfoViewport.dispose()
@@ -898,6 +905,13 @@ class TrackView {
         this.removeTrackGearMouseHandlers()
         this.gearContainer.remove()
 
+    }
+
+    removeViewportsFromColumnContainer() {
+        // Track Viewports
+        for (let viewport of this.viewports) {
+            viewport.$viewport.remove()
+        }
     }
 
     /**
@@ -973,6 +987,41 @@ class TrackView {
         return Math.max(...this.viewports.map(viewport => viewport.getContentHeight()))
     }
 
+    setTrackSelectionState(axis, doEnableMultiSelection) {
+
+        const container = axis.querySelector('div')
+
+        if (false !== doEnableMultiSelection) {
+            container.style.display = 'grid'
+        } else {
+
+            const trackSelectInput = container.querySelector('[name=track-select]')
+            trackSelectInput.checked = this.track.selected
+
+            if (this.dragHandle) {
+                this.setDragHandleSelectionState(false)
+            }
+
+            container.style.display = 'none'
+        }
+    }
+
+    setDragHandleSelectionState(isSelected) {
+
+        const dragHandle = this.dragHandle
+
+        if (isSelected) {
+            dragHandle.classList.remove('igv-track-drag-handle-color')
+            dragHandle.classList.remove('igv-track-drag-handle-hover-color')
+            dragHandle.classList.add('igv-track-drag-handle-selected-color')
+        } else {
+            dragHandle.classList.remove('igv-track-drag-handle-hover-color')
+            dragHandle.classList.remove('igv-track-drag-handle-selected-color')
+            dragHandle.classList.add('igv-track-drag-handle-color')
+        }
+
+    }
+
 }
 
 
@@ -1000,5 +1049,5 @@ function maxViewportContentHeight(viewports) {
     return Math.max(...heights)
 }
 
-export {igv_axis_column_width, maxViewportContentHeight, setDragHandleSelectionState}
+export {igv_axis_column_width, maxViewportContentHeight}
 export default TrackView
