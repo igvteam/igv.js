@@ -82,7 +82,7 @@ class AlignmentTrack extends TrackBase {
         if (config.maxFragmentLength) this.maxTLEN = config.maxFragmentLength
         if (config.colorBy && config.colorByTag) this.colorBy = config.colorBy + ":" + config.colorByTag
 
-        this.featureSource = parent.featureSource
+        this.featureSource = this.parent.featureSource
         this.top = 0 === config.coverageTrackHeight ? 0 : config.coverageTrackHeight + 5
 
         this.pairColors = {
@@ -1023,7 +1023,7 @@ class AlignmentTrack extends TrackBase {
                                 if (chromosomeObject) {
                                     this.selectedReadName = clickedAlignment.readName
                                     //this.browser.presentMultiLocusPanel(clickedAlignment, referenceFrame)
-                                    const bpWidth = referenceFrame.end - referenceFrame.start
+                                    const bpWidth = referenceFrame.bpPerPixel * clickState.viewport.getWidth()
                                     const frameStart = clickedAlignment.mate.position - bpWidth / 2
                                     const frameEnd = clickedAlignment.mate.position + bpWidth / 2
                                     this.browser.addMultiLocusPanel(chromosomeObject.name, frameStart, frameEnd, referenceFrame)

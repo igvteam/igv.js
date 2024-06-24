@@ -26,11 +26,13 @@
 
 import TDFReader from "./tdfReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
+import BaseFeatureSource from "../feature/baseFeatureSource.js"
 
-class TDFSource {
+class TDFSource extends BaseFeatureSource {
 
     searchable = false
     constructor(config, genome) {
+        super(genome)
         this.genome = genome
         this.reader = new TDFReader(config, genome)
         this.queryable = true

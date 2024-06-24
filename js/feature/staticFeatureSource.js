@@ -24,7 +24,8 @@
  */
 
 import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
-import {computeWGFeatures, packFeatures} from "./featureUtils.js"
+import {computeWGFeatures, findFeatureAfterCenter, packFeatures} from "./featureUtils.js"
+import BaseFeatureSource from "./baseFeatureSource.js"
 
 /**
  * feature source for features supplied directly, as opposed to reading and parsing from a file or webservice
@@ -32,10 +33,11 @@ import {computeWGFeatures, packFeatures} from "./featureUtils.js"
  * @param config
  * @constructor
  */
-class StaticFeatureSource {
+class StaticFeatureSource extends BaseFeatureSource {
 
     constructor(config, genome) {
 
+        super(genome)
         this.config = config
         this.genome = genome
         this.queryable = false
@@ -128,7 +130,6 @@ class StaticFeatureSource {
             return this.featureMap.get(term.toUpperCase())
         }
     }
-
 }
 
 
@@ -158,5 +159,56 @@ function mapProperties(features, mappings) {
     })
 }
 
+/**
+ * This function is used to apply properties normally added during parsing to  features supplied directly in the
+ * config as an array of objects.   At the moment the only application is bedpe type features.
+ * @param features
+ */
+// function fixFeatures(features, genome) {
+//
+//     if (!features || features.length === 0) return []
+//
+//     const isBedPE = features[0].chr === undefined && features[0].chr1 !== undefined
+//     if (isBedPE) {
+//         const interChrFeatures = []
+//         for (let feature of features) {
+//
+//             if (genome) {
+//                 feature.chr1 = genome.getChromosomeName(feature.chr1)
+//                 feature.chr2 = genome.getChromosomeName(feature.chr2)
+//             }
+//
+//             // Set total extent of feature
+//             if (feature.chr1 === feature.chr2) {
+//                 feature.chr = feature.chr1
+//                 feature.start = Math.min(feature.start1, feature.start2)
+//                 feature.end = Math.max(feature.end1, feature.end2)
+//             } else {
+//                 interChrFeatures.push(feature)
+//             }
+//         }
+//
+//         // Make copies of inter-chr features, one for each chromosome
+//         for (let f1 of interChrFeatures) {
+//             const f2 = Object.assign({dup: true}, f1)
+//             features.push(f2)
+//
+//             f1.chr = f1.chr1
+//             f1.start = f1.start1
+//             f1.end = f1.end1
+//
+//             f2.chr = f2.chr2
+//             f2.start = f2.start2
+//             f2.end = f2.end2
+//         }
+//     } else if (genome) {
+//         for (let feature of features) {
+//             feature.chr = genome.getChromosomeName(feature.chr)
+//         }
+//     }
+//
+//
+//     return features
+// }
 
 export default StaticFeatureSource

@@ -1,9 +1,11 @@
 import {loadGenbank} from "./genbankParser.js"
 import StaticFeatureSource from "../feature/staticFeatureSource.js"
+import BaseFeatureSource from "../feature/baseFeatureSource.js"
 
-class GenbankFeatureSource {
+class GenbankFeatureSource extends BaseFeatureSource {
 
-    constructor(config) {
+    constructor(config, genome) {
+        super(genome)
         this.config = config
         this.searchable = true
     }

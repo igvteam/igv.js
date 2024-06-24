@@ -15,12 +15,12 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
             genome: "hg19",
-           // locus: "myc",
+             locus: "myc",
             tracks:
                 [
                     {
@@ -52,7 +52,7 @@
                         "indexURL": "https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi",
                         "name": "dbSNP 137 - Tabix index",
                         "visibilityWindow": 200000,
-                        "infoURL": "https://www.ncbi.nlm.nih.gov/snp/?term=$$"
+                        "infoURL": "https://www.ncbi.nlm.nih.gov/snp/?term=$$",
                     },
                     {
                         "type": "annotation",
@@ -61,16 +61,17 @@
                         "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi",
                         "name": "Gencode v24 (gtf) -- genes filtered",
                         "visibilityWindow": 10000000,
-                        "filterTypes": ["gene", "chromosome"]
+                        "filterTypes": ["gene", "chromosome"],
+                        "selected": true
                     }
                 ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 

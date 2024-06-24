@@ -51,7 +51,7 @@ class InputDialog {
         DOMUtils.hide(this.container)
 
         this._input.addEventListener('keyup', e => {
-            if (13 === e.keyCode) {
+            if ('Enter' === e.code) {
                 if (typeof this.callback === 'function') {
                     this.callback(this._input.value)
                     this.callback = undefined
@@ -59,6 +59,7 @@ class InputDialog {
                 this._input.value = undefined
                 DOMUtils.hide(this.container)
             }
+            e.stopImmediatePropagation()   // Prevent key event to cause track keyboard navigation ("next feature")
         })
 
         this.ok.addEventListener('click', () => {
