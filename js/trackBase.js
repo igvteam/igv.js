@@ -64,6 +64,14 @@ class TrackBase {
         this.init(config)
     }
 
+    set selected(s) {
+        this._selected = s
+    }
+
+    get selected() {
+        return this._selected
+    }
+
     /**
      * Initialize track properties from the config object.  This method is typically overriden in subclasses, which
      * will call this implementation as super.init(config).

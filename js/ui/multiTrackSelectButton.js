@@ -23,18 +23,7 @@ class MultiTrackSelectButton extends NavbarButton {
         })
 
         const mouseClickHandler = () => {
-            this.enableMultiTrackSelection = !this.enableMultiTrackSelection
-            for (const trackView of this.browser.trackViews) {
-                if (false === multiTrackSelectExclusionTypes.has(trackView.track.type)) {
-                    trackView.setMultiTrackSelectionState(trackView.axis, this.enableMultiTrackSelection)
-                }
-            }
-            this.setState(this.enableMultiTrackSelection)
-
-            // If enableMultiTrackSelection is false hide Overlay button
-            if (false === this.enableMultiTrackSelection) {
-                this.browser.overlayTrackButton.setVisibility(false)
-            }
+            this.setMultiTrackSelection(!this.enableMultiTrackSelection)
         }
 
         this.boundMouseClickHandler = mouseClickHandler.bind(this)
@@ -43,6 +32,26 @@ class MultiTrackSelectButton extends NavbarButton {
 
         this.setVisibility(true)
 
+    }
+
+    setMultiTrackSelection(enableMultiTrackSelection) {
+        this.enableMultiTrackSelection = enableMultiTrackSelection
+        for (const trackView of this.browser.trackViews) {
+            if (false === multiTrackSelectExclusionTypes.has(trackView.track.type)) {
+                trackView.setTrackSelectionState(trackView.axis, this.enableMultiTrackSelection)
+
+                // If closing the selection boxes set track selected property to false
+                if (!this.enableMultiTrackSelection) {
+                    trackView.track.selected = false
+                }
+            }
+        }
+        this.setState(this.enableMultiTrackSelection)
+
+        // If enableMultiTrackSelection is false hide Overlay button
+        if (false === this.enableMultiTrackSelection) {
+            this.browser.overlayTrackButton.setVisibility(false)
+        }
     }
 }
 

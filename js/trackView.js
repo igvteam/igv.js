@@ -150,7 +150,7 @@ class TrackView {
                 this.browser.overlayTrackButton.setVisibility( isOverlayTrackCriteriaMet(this.browser) )
             })
 
-            this.setMultiTrackSelectionState(axis, false)
+            this.setTrackSelectionState(axis, false)
 
         }
 
@@ -987,7 +987,7 @@ class TrackView {
         return Math.max(...this.viewports.map(viewport => viewport.getContentHeight()))
     }
 
-    setMultiTrackSelectionState(axis, doEnableMultiSelection) {
+    setTrackSelectionState(axis, doEnableMultiSelection) {
 
         const container = axis.querySelector('div')
 
@@ -995,14 +995,8 @@ class TrackView {
             container.style.display = 'grid'
         } else {
 
-            this.track.selected = false
-
-            // if (trackView.track.autoscaleGroup) {
-            //     trackView.track.autoscaleGroup = undefined
-            // }
-
             const trackSelectInput = container.querySelector('[name=track-select]')
-            trackSelectInput.checked = false
+            trackSelectInput.checked = this.track.selected
 
             if (this.dragHandle) {
                 this.setDragHandleSelectionState(false)

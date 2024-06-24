@@ -734,6 +734,11 @@ class Browser {
             rtv.updateViews()
         }
 
+        // If any tracks are selected show the selectino buttons
+        if(this.trackViews.some(tv => tv.track.selected)) {
+            this.multiTrackSelectButton.setMultiTrackSelection(true)
+        }
+
         this.updateUIWithReferenceFrameList()
 
         return trackConfigurations
@@ -2493,28 +2498,76 @@ function mouseUpOrLeave(e) {
  * @param event
  */
 async function keyUpHandler(event) {
-console.log(event)
+
+    // Feature jumping disabled in multi-locus view
+    if(this.referenceFrameList.length > 1) return
+
     if (event.code === 'KeyF' || event.code === 'KeyB') {
 
         const selectedTrackViews = this.getSelectedTrackViews()
+
         if (selectedTrackViews.length > 0) {
+
             const track = selectedTrackViews[0].track
+
             if (typeof track.nextFeatureAfter === 'function') {
+
+                const referenceFrame = this.referenceFrameList[0]
+                const viewportWidth = referenceFrame.viewport ? referenceFrame.viewport.getWidth() : this.calculateViewportWidth(this.referenceFrameList.length)
+
+
+                // Check visibility window
+                const isWGV = 'all' === referenceFrame.chr.toLowerCase()
+                const vizWindow = track.visibilityWindow
+                if(isWGV || (vizWindow && vizWindow > 0 && referenceFrame.bpPerPixel * viewportWidth > vizWindow)) {
+                    return
+                }
+
+
                 const direction = 'KeyF' === event.code
-                const chr = this.referenceFrameList[0].chr
-                const center = this.referenceFrameList[0].center
+                const chr = referenceFrame.chr
+                const center = referenceFrame.center
                 const nextFeature = await track.nextFeatureAfter(chr, center, direction)
                 if (nextFeature) {
                     const nextChr = await this.genome.getChromosomeName(nextFeature.chr)
                     if (chr === nextChr) {
+
+                        // On same chromoeoms
                         const newCenter = (nextFeature.start + nextFeature.end) / 2
-                        this.referenceFrameList[0].shift(newCenter - center)
+                        if (event.shiftKey) {
+
+                            // Zoom to next feature with 10% buffer
+                            const minimumBases = this.config.minimumBases || 40
+                            const extent = Math.max(minimumBases, 1.1 * (nextFeature.end - nextFeature.start))
+                            referenceFrame.start = Math.max(0, newCenter - extent / 2)
+                            referenceFrame.end = newCenter + extent / 2
+                            referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth
+                        } else {
+
+                            // Center next feature leaving resolution unchanged
+                            referenceFrame.shift(newCenter - center)
+                        }
                         this.updateViews()
                     } else {
-                        const extent = Math.round(this.referenceFrameList[0].end - this.referenceFrameList[0].start)
-                        const newStart = Math.max(1, Math.round(nextFeature.start - extent / 2))
-                        const newEnd = newStart + extent
-                        this.search(`${nextChr}:${newStart}-${newEnd}`)
+
+                        // Change in chromosome
+                        referenceFrame.chr = nextChr
+                        const newCenter = (nextFeature.start + nextFeature.end) / 2
+                        if (event.shiftKey) {
+
+                            // Zoom to next feature with 10% buffer
+                            const minimumBases = this.config.minimumBases || 40
+                            const extent = Math.max(minimumBases, 1.1 * (nextFeature.end - nextFeature.start))
+                            referenceFrame.start  = Math.max(0, newCenter - extent / 2)
+                            referenceFrame.end = referenceFrame.start + extent
+                            referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth
+                        } else {
+
+                            // Center next feature leaving resolution unchanged
+                            referenceFrame.start = newCenter - (viewportWidth * referenceFrame.bpPerPixel) / 2
+                            referenceFrame.end = referenceFrame.start + viewportWidth * referenceFrame.bpPerPixel
+                        }
+                        this.updateViews()
                     }
                 }
             }
