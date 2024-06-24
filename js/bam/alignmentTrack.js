@@ -82,7 +82,7 @@ class AlignmentTrack extends TrackBase {
         if (config.maxFragmentLength) this.maxTLEN = config.maxFragmentLength
         if (config.colorBy && config.colorByTag) this.colorBy = config.colorBy + ":" + config.colorByTag
 
-        this.featureSource = parent.featureSource
+        this.featureSource = this.parent.featureSource
         this.top = 0 === config.coverageTrackHeight ? 0 : config.coverageTrackHeight + 5
 
         this.pairColors = {
