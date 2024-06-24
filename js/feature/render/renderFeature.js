@@ -355,11 +355,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         if (name === undefined) name = feature.id || feature.ID
         if (!name || name === '.') return
 
-
-        let pixelXOffset = options.pixelXOffset || 0
-        const t1 = Math.max(featureX, -pixelXOffset)
-        const t2 = Math.min(featureX1, -pixelXOffset + options.viewportWidth)
-        let centerX = (t1 + t2) / 2
+        let centerX = (featureX + featureX1) / 2
 
         let transform
         if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
