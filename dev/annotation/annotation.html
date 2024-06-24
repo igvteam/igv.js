@@ -72,38 +72,6 @@
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
             console.log("Created IGV browser")
-
-            // const track = browser.findTracks("name", "dbSNP 137 - Tabix index")[0]
-            //
-            // document.addEventListener("keyup", async (event) => {
-            //     if(event.code === 'KeyF') {
-            //         const locusString = browser.currentLoci()
-            //         const tokens = locusString.split(':')
-            //         const chr = tokens[0]
-            //         const startEnd = tokens[1].split("-")
-            //         const start = Number.parseInt(startEnd[0].replace(",", "")) - 1
-            //         const end = Number.parseInt(startEnd[1].replace(",", ""))
-            //         const center = (start + end) / 2
-            //         const nextFeature = await track.nextFeatureAfter(chr, center)
-            //         if (nextFeature) {
-            //             const nextChr = await browser.genome.getChromosomeName(nextFeature.chr)
-            //             if (chr === nextChr) {
-            //                 const newCenter = (nextFeature.start + nextFeature.end) / 2
-            //                 const shift = Math.round(newCenter - center)
-            //                 // browser.search(`${nextChr}:${start + shift}-${end + shift}`)
-            //                 browser.referenceFrameList[0].start += shift
-            //                 browser.referenceFrameList[0].end += shift
-            //                 browser.updateViews()
-            //             } else {
-            //                 const extent = Math.round(end - start)
-            //                 const newStart = Math.max(1, Math.round(nextFeature.start - extent / 2))
-            //                 const newEnd = newStart + extent
-            //                 browser.search(`${nextChr}:${newStart}-${newEnd}`)
-            //             }
-            //         }
-            //     }
-            //    console.log(event)
-            // })
         })
 
 
