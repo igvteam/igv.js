@@ -250,7 +250,7 @@ class TrackView {
 
                 }
 
-            const selected = browser.getSelectedTrackViews()
+            const selected = this.browser.getSelectedTrackViews()
 
             if (selected.length > 0 && new Set(selected).has(this)) {
 
