@@ -146,33 +146,6 @@ class FeatureTrack extends TrackBase {
     }
 
     /**
-     * Return the first feature in this track whose start position is > position
-     * @param chr
-     * @param position
-     * @returns {Promise<void>}
-     */
-    async nextFeatureAfter(chr, position, direction) {
-        const viewport = this.trackView.viewports[0]
-        let features = viewport.cachedFeatures
-        if (features && Array.isArray(features) && features.length > 0) {
-            // Check chromosome, all cached features will share a chromosome
-            const chrName = this.browser.genome.getChromosomeName(features[0].chr)
-            if(chrName === chr) {
-                const next = findFeatureAfterCenter(features, position, direction)
-                if(next) {
-                    return next
-                }
-            }
-        }
-
-        if(typeof this.featureSource.nextFeature === 'function') {
-            return this.featureSource.nextFeature(chr, position, direction, this.visibilityWindow)
-        }
-
-    }
-
-
-    /**
      * The required height in pixels required for the track content.   This is not the visible track height, which
      * can be smaller (with a scrollbar) or larger.
      *
