@@ -56,7 +56,7 @@ import {translateSession} from "./hic/shoeboxUtils.js"
 import Hub from "./ucsc/ucscHub.js"
 import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import OverlayTrackButton from "./ui/overlayTrackButton.js"
-import MenuUtils, {multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
+import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
 import {trackViewportPopoverList} from './trackViewport.js'
