@@ -112,7 +112,7 @@ class MenuPopup {
 
                         if (trackView.track.selected) {
 
-                            trackView.browser.multiSelectedTrackViews = trackView.browser.getSelectedTrackViews()
+                            const multiSelectedTrackViews = trackView.browser.getSelectedTrackViews()
 
                             if (true === item.doAllMultiSelectedTracks) {
                                 item.click.call(trackView.track, e)
@@ -124,12 +124,12 @@ class MenuPopup {
 
                                         trackView.browser.overlayTrackButton.setVisibility(false)
 
-                                        for (const { track } of trackView.browser.multiSelectedTrackViews) {
+                                        for (const { track } of multiSelectedTrackViews) {
                                             item.click.call(track, e)
                                         }
                                     }
 
-                                    const count = trackView.browser.multiSelectedTrackViews.length
+                                    const count = multiSelectedTrackViews.length
 
                                     const config =
                                         {
@@ -141,7 +141,7 @@ class MenuPopup {
 
                                 } else {
 
-                                    for (const { track } of trackView.browser.multiSelectedTrackViews) {
+                                    for (const { track } of multiSelectedTrackViews) {
                                         item.click.call(track, e)
                                     }
 
@@ -149,7 +149,6 @@ class MenuPopup {
                             }
 
                         } else {
-                            trackView.browser.multiSelectedTrackViews = undefined
                             item.click.call(trackView.track, e)
                         }
 

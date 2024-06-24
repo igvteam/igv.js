@@ -153,7 +153,8 @@ function groupAutoScaleMenuItem() {
         const autoScaleGroupID = `auto-scale-group-${DOMUtils.guid()}`
         autoScaleGroupColorHash[autoScaleGroupID] = colorPalette[randomIndex]
 
-        for (const {track} of this.browser.multiSelectedTrackViews) {
+        const multiSelectedTrackViews = this.browser.getSelectedTrackViews()
+        for (const {track} of multiSelectedTrackViews) {
             track.autoscaleGroup = autoScaleGroupID
         }
 
