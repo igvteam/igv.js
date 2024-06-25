@@ -80,7 +80,9 @@ class AlignmentTrack extends TrackBase {
         if (config.largeFragmentLengthColor) this.largeTLENColor = config.largeFragmentLengthColor
         if (config.minFragmentLength) this.minTLEN = config.minFragmentLength
         if (config.maxFragmentLength) this.maxTLEN = config.maxFragmentLength
-        if (config.colorBy && config.colorByTag) this.colorBy = config.colorBy + ":" + config.colorByTag
+        if (config.colorBy && config.colorByTag) {
+            this.colorBy = config.colorBy + ":" + config.colorByTag
+        }
 
         this.featureSource = this.parent.featureSource
         this.top = 0 === config.coverageTrackHeight ? 0 : config.coverageTrackHeight + 5
@@ -101,7 +103,7 @@ class AlignmentTrack extends TrackBase {
 
         this._groupByTags = []
         this._groupByPositions = []
-        if(config.groupBy) {
+        if (config.groupBy) {
             this.groupBy = config.groupBy
             if (config.groupBy.startsWith("base:")) {
                 this._groupByPositions.push(config.groupBy.substring(5))
@@ -663,8 +665,7 @@ class AlignmentTrack extends TrackBase {
             colorByMenuItems.push({key: 'tlen', label: 'insert size (TLEN)'})
             colorByMenuItems.push({key: 'unexpectedPair', label: 'pair orientation & insert size (TLEN)'})
         }
-        const tagLabel = 'tag' + (this.colorByTag ? ' (' + this.colorByTag + ')' : '')
-        colorByMenuItems.push({key: 'tag', label: tagLabel})
+        colorByMenuItems.push({key: 'tag', label: 'tag'})
         for (let item of colorByMenuItems) {
             const selected = (this.colorBy === undefined && item.key === 'none') || this.colorBy === item.key
             menuItems.push(this.colorByCB(item, selected))
@@ -847,17 +848,20 @@ class AlignmentTrack extends TrackBase {
 
             function dialogPresentationHandler(ev) {
 
+                const tag = this.alignmentTrack.colorBy.startsWith("tag:") ? this.alignmentTrack.colorBy.substring(4) : ''
+
                 this.browser.inputDialog.present({
                     label: 'Tag Name',
-                    value: this.colorByTag ? this.colorByTag : '',
+                    value: tag,
                     callback: (tag) => {
+                        const alignmentTrack = this.alignmentTrack
                         if (tag) {
-                            this.alignmentTrack.colorBy = 'tag:' + tag
-                            if (!this.alignmentTrack.tagColors) {
-                                this.alignmentTrack.tagColors = new PaletteColorTable("Set1")
+                            alignmentTrack.colorBy = 'tag:' + tag
+                            if (!alignmentTrack.tagColors) {
+                                alignmentTrack.tagColors = new PaletteColorTable("Set1")
                             }
                         } else {
-                            this.alignmentTrack.colorBy = undefined
+                            alignmentTrack.colorBy = undefined
                         }
                         this.trackView.repaintViews()
                     }
@@ -1267,10 +1271,10 @@ class AlignmentTrack extends TrackBase {
             case "tag":
                 const tagValue = alignment.tags()[tag]
                 if (tagValue !== undefined) {
-                    if (this.bamColorTag === this.colorByTag) {
-                        // UCSC style color option
-                        color = "rgb(" + tagValue + ")"
-                    } else {
+                    if (this.bamColorTag === tag) {
+                        color = IGVColor.createColorStringSafe(tagValue)
+                    }
+                    if (!color) {
                         if (!this.tagColors) {
                             this.tagColors = new PaletteColorTable(this.tagColorPallete)
                         }
