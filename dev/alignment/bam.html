@@ -7,7 +7,7 @@
 <body>
 
 <h2>
-    BAM file, grouped by strand and sorted by base @chr1:155,155,389
+    BAM file, grouped by strand, sorted by base @chr1:155,155,389, filtered by mapping quality
 </h2>
 
 <button id="log-state">Log Session</button>
@@ -39,7 +39,11 @@
                         "direction": "ASC"
                     },
                     groupBy: "strand",
-                    height: 800
+                    height: 800,
+                    filter: {mq: 30}
+                    // filter: (alignment) => {
+                    //     return !alignment.isFailsVendorQualityCheck() && alignment.mq >= 30
+                    // }
                 }
             ]
         }

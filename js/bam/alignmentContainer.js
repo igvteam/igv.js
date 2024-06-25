@@ -48,8 +48,7 @@ class AlignmentContainer {
                     samplingWindowSize,
                     samplingDepth,
                     alleleFreqThreshold,
-                    colorBy,
-                    filter
+                    colorBy
                 }) {
 
         this.chr = chr
@@ -62,10 +61,6 @@ class AlignmentContainer {
         this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 : alleleFreqThreshold
         this.samplingWindowSize = samplingWindowSize || 100
         this.samplingDepth = samplingDepth || 1000
-
-        this.filter = filter || ((alignment) => {
-            return alignment.isMapped() && !alignment.isFailsVendorQualityCheck()
-        })
 
         // Enable basemods
         if (colorBy && colorBy.startsWith("basemod")) {
@@ -98,8 +93,6 @@ class AlignmentContainer {
     push(alignment) {
 
         this.hasPairs = this.hasPairs || alignment.isPaired()
-
-        if (this.filter(alignment) === false) return
 
         this.coverageMap.incCounts(alignment)   // Count coverage before any downsampling
 
