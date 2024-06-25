@@ -362,7 +362,9 @@ const BamUtils = {
 
     setReaderDefaults: function (reader, config) {
 
-        reader.filter = new BamFilter(config.filter)
+        reader.filter = typeof config.filter === 'function' ?
+            {pass: config.filter} :
+            new BamFilter(config.filter)
 
         if (config.readgroup) {
             reader.filter.readgroups = new Set([config.readgroup])

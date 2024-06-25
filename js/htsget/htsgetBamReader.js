@@ -58,7 +58,7 @@ class HtsgetBamReader extends HtsgetReader {
 
         const chrIdx = this.header.chrToIndex[chr]
         const alignmentContainer = new AlignmentContainer(chr, start, end, this.config)
-        BamUtils.decodeBamRecords(ba, this.header.size, alignmentContainer, this.header.chrNames, chrIdx, start, end)
+        BamUtils.decodeBamRecords(ba, this.header.size, alignmentContainer, this.header.chrNames, chrIdx, start, end, this.filter)
         alignmentContainer.finish()
 
         return alignmentContainer
