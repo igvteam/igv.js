@@ -26,6 +26,7 @@
 import IGVGraphics from "./igv-canvas.js"
 import {IGVColor, StringUtils} from "../node_modules/igv-utils/src/index.js"
 import GenomeUtils from "./genome/genomeUtils.js"
+import {isInteger} from "./util/igvUtils.js"
 
 const numberFormatter = StringUtils.numberFormatter
 const defaultRulerHeight = 40
@@ -162,6 +163,22 @@ class RulerTrack {
     }
 }
 
+/**
+ * Potentially shorten the chromosome name for whole genome view
+ * @param name
+ */
+function shortenChromsomeName(name) {
+
+    if(name.startsWith("chr")) {
+        const tmp = name.substring(3)
+        if(isInteger(tmp)) {
+            return tmp
+        }
+    }
+    return name
+
+}
+
 function findSpacing(bpLength, isSVG) {
 
     if (bpLength < 10) {
@@ -232,5 +249,5 @@ class Tick {
     }
 }
 
-export { defaultRulerHeight }
+export { defaultRulerHeight, shortenChromsomeName }
 export default RulerTrack

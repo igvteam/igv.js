@@ -149,9 +149,13 @@ const isNumber = function (num) {
         return num - num === 0
     }
     if (typeof num === 'string' && num.trim() !== '') {
-        return Number.isFinite ? Number.isFinite(+num) : isFinite(+num)
+        return Number.isFinite(+num)
     }
     return false
+}
+
+function isInteger(str) {
+    return Number.isSafeInteger(Number.parseInt(str))
 }
 
 async function getFilename(url) {
@@ -256,5 +260,5 @@ function expandRegion(start, end, extent) {
 export {
     createColumn, extend, isSimpleType, buildOptions, validateGenomicExtent, doAutoscale, isNumber,
     getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext,
-    getElementAbsoluteHeight, expandRegion
+    getElementAbsoluteHeight, expandRegion, isInteger
 }

@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import Genome from "../js/genome/genome.js"
 import {assert} from 'chai'
-import CytobandFileBB from "../js/genome/cytobandFileBB.js"
+import {shortenChromsomeName} from "../js/rulerTrack.js"
 
 
 suite("testGenome", function () {
@@ -41,6 +41,19 @@ suite("testGenome", function () {
     //     assert.ok(genome.chromosomeNames.length > 0)
     //
     // })
+
+
+    test("Shorten name", function() {
+
+        const names = ["chr1", "chromosome_1"]
+        const expected = ["1", "chromosome_1"]
+
+        for(let i=0; i<names.length; i++) {
+            const shortened = shortenChromsomeName(names[i])
+            assert.equal(shortened, expected[i])
+        }
+
+    })
 
 
 })
