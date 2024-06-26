@@ -15,7 +15,12 @@ suite("testCSIIndex", function () {
         const bamReader = new BamReader({
                 type: 'bam',
                 url: 'test/data/bam/HG02450.bam',
-                indexURL: 'test/data/bam/HG02450.bam.csi'
+                indexURL: 'test/data/bam/HG02450.bam.csi',
+                filter: {              // Allow duplicates, secondary, and supplementary
+                    //duplicate: true,
+                    //secondary: true,
+                    //supplementary: true
+                }
             },
             genome)
 
