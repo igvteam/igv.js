@@ -12,6 +12,7 @@ class BamFilter {
     }
 
     pass(alignment) {
+        if(!alignment.isMapped()) return false
         if (this.vendorFailed && alignment.isFailsVendorQualityCheck()) return false
         if (this.duplicate && alignment.isDuplicate()) return false
         if (this.secondary && alignment.isSecondary()) return false

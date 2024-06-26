@@ -5,7 +5,6 @@ import BamReaderNonIndexed from "../js/bam/bamReaderNonIndexed.js"
 import {createGenome} from "./utils/MockGenome.js"
 
 
-
 suite("testBAM", function () {
 
     test("BAM alignments - CSI index", async function () {
@@ -38,7 +37,12 @@ suite("testBAM", function () {
         const bamReader = new BamReader({
                 type: 'bam',
                 url: 'test/data/bam/na12889.bam',
-                indexURL: 'test/data/bam/na12889.bam.csi'
+                indexURL: 'test/data/bam/na12889.bam.csi',
+                // filter: {              // Allow duplicates, secondary, and supplementary
+                //     duplicate: true,
+                //     secondary: true,
+                //     supplementary: true
+                // }
             },
             genome)
 
@@ -56,10 +60,10 @@ suite("testBAM", function () {
         const end = 155160000
 
         const bamReader = new BamReaderNonIndexed({
-                type: 'bam',
-                url: 'test/data/bam/na12889.bam',
-                indexed: false
-            })
+            type: 'bam',
+            url: 'test/data/bam/na12889.bam',
+            indexed: false
+        })
 
         let alignmentContainer = await bamReader.readAlignments("chr1", start, end)
         validate(assert, alignmentContainer)
