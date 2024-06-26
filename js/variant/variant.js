@@ -217,6 +217,10 @@ class Variant {
         return !("." === this.filter || "PASS" === this.filter)
     }
 
+    alleleFreq() {
+        return this.info ? this.info["AF"] : undefined
+    }
+
 }
 
 
