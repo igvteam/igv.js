@@ -67,7 +67,9 @@ class VariantTrack extends TrackBase {
         homrefColor: "rgb(200, 200, 200)",
         homvarColor: "rgb(17,248,254)",
         hetvarColor: "rgb(34,12,253)",
-        colorBy: undefined,
+        refColor: "rgb(0,0,220)",
+        altColor: "rgb(255,0,0)",
+        colorBy: "alleleFrequency",
         visibilityWindow: undefined,
         labelDisplayMode: undefined,
         type: "variant"
@@ -113,6 +115,8 @@ class VariantTrack extends TrackBase {
         if (config.sort) {
             this.initialSort = config.sort
         }
+
+        this._colorByItems = new Map([['none', 'None'], ['AF', 'Allele frequency']])
     }
 
     async postInit() {
@@ -284,8 +288,20 @@ class VariantTrack extends TrackBase {
                     x += 1
                     w -= 2
                 }
-                context.fillStyle = this.getColorForFeature(variant)
-                context.fillRect(x, y, w, h)
+
+                const af = variant.alleleFreq()
+                if ("AF" === this.colorBy && af) {
+                    const hAlt = Math.min(1, af) * h
+                    const hRef = h - hAlt
+                    context.fillStyle = variant.isFiltered() ? this.refColorFiltered : this.refColor
+                    context.fillRect(x, y, w, hRef)
+                    context.fillStyle = variant.isFiltered() ? this.altColorFiltered : this.altColor
+                    context.fillRect(x, y + hRef, w, hAlt)
+
+                } else {
+                    context.fillStyle = this.getColorForFeature(variant)
+                    context.fillRect(x, y, w, h)
+                }
 
                 //only paint stroke if a color is defined
                 let strokecolor = this.getVariantStrokecolor(variant)
@@ -358,13 +374,26 @@ class VariantTrack extends TrackBase {
         }
     };
 
+    get refColorFiltered() {
+        if (!this._refColorFiltered) {
+            this._refColorFiltered = IGVColor.addAlpha(this.refColor, 0.2)
+        }
+        return this._refColorFiltered
+    }
+
+    get altColorFiltered() {
+        if (!this._altColorFiltered) {
+            this._altColorFiltered = IGVColor.addAlpha(this.altColor, 0.2)
+        }
+        return this._altColorFiltered
+    }
 
     getColorForFeature(variant) {
 
         const v = variant._f || variant
         let variantColor
 
-        if (this.colorBy) {
+        if (this.colorBy && 'none' !== this.colorBy) {
             const colorBy = this.colorBy
             let value
             if (v.info.hasOwnProperty(colorBy)) {
@@ -558,24 +587,28 @@ class VariantTrack extends TrackBase {
             // For now stick to explicit info fields (well, exactly 1 for starters)
             if (this.header.INFO) {
                 //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => this.header.INFO[key].Type === "String")
-                const stringInfoKeys = this.header.INFO.SVTYPE ? ['SVTYPE'] : []
-                if (this._initColorBy && this._initColorBy !== 'SVTYPE') {
-                    stringInfoKeys.push(this._initColorBy)
+                const colorByItems = this._colorByItems
+                if(this.header.INFO.VT) {
+                    colorByItems.set('VT', 'Variant Type')
                 }
-                if (stringInfoKeys.length > 0) {
-                    menuItems.push('<hr/>')
-                    const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">')
-                    $e.text('Color by:')
-                    menuItems.push({name: undefined, object: $e, click: undefined, init: undefined})
-                    stringInfoKeys.sort()
-                    for (let item of stringInfoKeys) {
-                        const selected = (this.colorBy === item)
-                        const label = item ? item : 'None'
-                        menuItems.push(this.colorByCB({key: item, label: label}, selected))
-                    }
-                    menuItems.push(this.colorByCB({key: undefined, label: 'None'}, this.colorBy === undefined))
-                    menuItems.push('<hr/>')
+                if (this.header.INFO.SVTYPE) {
+                    colorByItems.set('SVTYPE', 'SV Type')
                 }
+                if (this._initColorBy && !colorByItems.has(this._initColorBy)) {
+                    colorByItems.set(this._initColorBy, this._initColorBy)
+                }
+
+                menuItems.push('<hr/>')
+                const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">')
+                $e.text('Color by:')
+                menuItems.push({name: undefined, object: $e, click: undefined, init: undefined})
+                for (let key of colorByItems.keys()) {
+                    const selected = (this.colorBy === key)
+                    menuItems.push(this.colorByCB({key: key, label: colorByItems.get(key)}, selected))
+                }
+
+                menuItems.push(this.colorByCB({key: 'info', label: 'Info field...'}))
+
             }
         }
 
@@ -807,21 +840,34 @@ class VariantTrack extends TrackBase {
 
         const $e = $(createCheckbox(menuItem.label, showCheck))
 
-        function clickHandler() {
+        if (menuItem.key !== 'info') {
+            function clickHandler() {
 
-            if (menuItem.key === this.colorBy) {
-                this.colorBy = undefined
-                delete this.config.colorBy
-                this.trackView.repaintViews()
-            } else {
                 this.colorBy = menuItem.key
                 this.config.colorBy = menuItem.key
                 this.trackView.repaintViews()
             }
 
-        }
+            return {name: undefined, object: $e, click: clickHandler, init: undefined}
+        } else {
+            function dialogPresentationHandler(ev) {
+                this.browser.inputDialog.present({
+                    label: 'Info field',
+                    value: '',
+                    callback: (infoField) => {
+                        if (infoField) {
+                            this.colorBy = infoField
+                            this._colorByItems.set(infoField, infoField)
+                        } else {
+                            this.colorBy = undefined
+                        }
+                        this.trackView.repaintViews()
+                    }
+                }, ev)
+            }
 
-        return {name: undefined, object: $e, click: clickHandler, init: undefined}
+            return {name: undefined, object: $e, dialog: dialogPresentationHandler, init: undefined}
+        }
     }
 
     getState() {
