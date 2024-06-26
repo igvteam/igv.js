@@ -2261,22 +2261,22 @@ class Browser {
         this.boundColumnContainerTouchEndHandler = mouseUpOrLeave.bind(this)
 
         this.columnContainer.addEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
-        this.columnContainer.addEventListener('touchmove', this.boundColumnContainerTouchMoveHandler)
+        // this.columnContainer.addEventListener('touchmove', this.boundColumnContainerTouchMoveHandler)
 
         this.columnContainer.addEventListener('mouseleave', this.boundColumnContainerMouseLeaveHandler)
 
         this.columnContainer.addEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
-        this.columnContainer.addEventListener('touchend', this.boundColumnContainerTouchEndHandler)
+        // this.columnContainer.addEventListener('touchend', this.boundColumnContainerTouchEndHandler)
     }
 
     removeColumnContainerEventHandlers() {
         this.columnContainer.removeEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
-        this.columnContainer.removeEventListener('touchmove', this.boundColumnContainerTouchMoveHandler)
+        // this.columnContainer.removeEventListener('touchmove', this.boundColumnContainerTouchMoveHandler)
 
         this.columnContainer.removeEventListener('mouseleave', this.boundColumnContainerMouseLeaveHandler)
 
         this.columnContainer.removeEventListener('mouseup', this.boundColumnContainerMouseUpHandler)
-        this.columnContainer.removeEventListener('touchend', this.boundColumnContainerTouchEndHandler)
+        // this.columnContainer.removeEventListener('touchend', this.boundColumnContainerTouchEndHandler)
     }
 
     static uncompressSession(url) {

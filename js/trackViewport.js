@@ -617,7 +617,7 @@ class TrackViewport extends Viewport {
             mouseDownCoords = DOMUtils.pageCoordinates(event)
         }
         viewport.addEventListener('mousedown', md)
-        viewport.addEventListener('touchstart', md)
+        // viewport.addEventListener('touchstart', md)
 
         // Mouse up
         const mu = (event) => {
@@ -633,7 +633,7 @@ class TrackViewport extends Viewport {
             }
         }
         viewport.addEventListener('mouseup', mu)
-        viewport.addEventListener('touchend', mu)
+        // viewport.addEventListener('touchend', mu)
 
         // Mouse move
         if (typeof this.trackView.track.hoverText === 'function') {
