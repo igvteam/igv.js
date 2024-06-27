@@ -59,7 +59,6 @@ class VariantTrack extends TrackBase {
         expandedGroupGap: 10,
         squishedGroupGap: 5,
         featureHeight: 14,
-        color: "rgb(0,0,150)",
         noGenotypeColor: "rgb(200,180,180)",
         noCallColor: "rgb(225, 225, 225)",
         nonRefColor: "rgb(200, 200, 215)",
@@ -75,6 +74,7 @@ class VariantTrack extends TrackBase {
         type: "variant"
     }
 
+    colorTables = new Map()
     #sortDirections = new Map()
 
     constructor(config, browser) {
@@ -95,10 +95,11 @@ class VariantTrack extends TrackBase {
         this._initColorBy = config.colorBy
         if (config.colorTable) {
             this.colorTables = new Map()
-            this.colorTables.set(config.colorBy, new ColorTable(config.colorTable))
+            const key = config.colorBy || "*"
+            this.colorTables.set(key, new ColorTable(config.colorTable))
         }
         this._color = config.color
-        this._strokecolor = config.strokecolor
+        this.strokecolor = config.strokecolor
         this._context_hook = config.context_hook
 
         // The number of variant rows are computed dynamically, but start with "1" by default
@@ -151,7 +152,9 @@ class VariantTrack extends TrackBase {
 
     set color(c) {
         this._color = c
-        this.colorBy = undefined
+        if(c) {
+            this.colorBy = undefined
+        }
     }
 
     async getHeader() {
@@ -407,8 +410,8 @@ class VariantTrack extends TrackBase {
                 variantColor = "gray"
             }
 
-        } else if (this._color) {
-            variantColor = (typeof this._color === "function") ? this._color(variant) : this._color
+        } else if (this.color) {
+            variantColor = (typeof this.color === "function") ? this.color(variant) : this.color
         } else if ("NONVARIANT" === v.type) {
             variantColor = this.nonRefColor
         } else if ("MIXED" === v.type) {
@@ -430,8 +433,8 @@ class VariantTrack extends TrackBase {
         const v = variant._f || variant
         let variantStrokeColor
 
-        if (this._strokecolor) {
-            variantStrokeColor = (typeof this._strokecolor === "function") ? this._strokecolor(v) : this._strokecolor
+        if (this.strokecolor) {
+            variantStrokeColor = (typeof this.strokecolor === "function") ? this.strokecolor(v) : this.strokecolor
         } else {
             variantStrokeColor = undefined
         }
@@ -873,20 +876,27 @@ class VariantTrack extends TrackBase {
     getState() {
 
         const config = super.getState()
-        if (this._color && typeof this._color !== "function") {
-            config.color = this._color
+        if (this.color && typeof this.color !== "function") {
+            config.color = this.color
         }
         return config
 
     }
 
+    /**
+     * Return the variant type for the given key, which should be a colorable attribute
+     * @param key
+     * @returns {any}
+     */
     getVariantColorTable(key) {
 
-        if (!this.colorTables) {
-            this.colorTables = new Map()
+        if(this.colorTables.has(key)) {
+            return this.colorTables.get(key)
         }
-
-        if (!this.colorTables.has(key)) {
+        else if(this.colorTables.has("*")) {
+            return this.colorTables.get("*")
+        }
+        else {
             let tbl
             switch (key) {
                 case "SVTYPE" :
@@ -896,8 +906,8 @@ class VariantTrack extends TrackBase {
                     tbl = new PaletteColorTable("Set1")
             }
             this.colorTables.set(key, tbl)
+            return tbl
         }
-        return this.colorTables.get(key)
     }
 
     ///////////// CNVPytor converstion support follows ////////////////////////////////////////////////////////////

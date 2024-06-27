@@ -22,13 +22,18 @@
     const options =
         {
             genome: "hg19",
-            locus: "chr22:24,092,525-24,098,760",
+            locus: "chr22:24,094,742-24,096,686",
             tracks: [
                 {
                     "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz?versionId=null",
                     "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi?versionId=null",
                     "name": "1KG Sites",
-                    "colorBy": "AA"
+                    "colorBy": "AA",
+                    "colorTable": {
+                        "A|||": "red",
+                        "B|||": "green",
+                        "C|||": "blue"
+                    }
                 },
                 {
                     "type": "variant",

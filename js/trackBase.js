@@ -29,8 +29,6 @@ import $ from "./vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
 
-const DEFAULT_COLOR = 'rgb(150,150,150)'
-
 const fixColor = (colorString) => {
     if (StringUtils.isString(colorString)) {
         return (colorString.indexOf(",") > 0 && !(colorString.startsWith("rgb(") || colorString.startsWith("rgba("))) ?
@@ -49,15 +47,22 @@ const fixColor = (colorString) => {
  */
 class TrackBase {
 
+    /**
+     * Defautl properties.  These are potentially overriden by settings in the track config
+     */
     static defaults = {
         height: 50,
         autoHeight: false,
-        visibilityWindow: undefined,   // Identifies property that should be copied from config
-        color: undefined,  // Identifies property that should be copied from config
-        altColor: undefined,  // Identifies property that should be copied from config
         supportHiDPI: true,
-        selected: false
+        selected: false,
+        removable: true
     }
+
+    /**
+     * Properties without defaults that should be copied if set in the config
+     * @type {string[]}
+     */
+    static otherConfigPropertys = ["visibilityWindow", "color", "altColor", "name", "type", "url", "order", "autoscaleGroup"]
 
     constructor(config, browser) {
         this.browser = browser
@@ -80,32 +85,37 @@ class TrackBase {
 
         // Set default properties
         const defaults = Object.assign({}, TrackBase.defaults)
-        if(this.constructor.defaults) {
-            for(let key of Object.keys(this.constructor.defaults)) {
+        if (this.constructor.defaults) {
+            for (let key of Object.keys(this.constructor.defaults)) {
                 defaults[key] = this.constructor.defaults[key]
             }
         }
-        for(let key of Object.keys(defaults)) {
+
+        for (let key of Object.keys(defaults)) {
             this[key] = config.hasOwnProperty(key) ? config[key] : defaults[key]
-            if(key === 'color' || key === 'altColor') {
-                this[key] = fixColor(this[key])
+        }
+
+        for (let key of TrackBase.otherConfigPropertys) {
+            if (config.hasOwnProperty(key)) {
+                if (key === 'color' || key === 'altColor') {
+                    this[key] = fixColor(this[key])
+                } else {
+                    this[key] = config[key]
+                }
             }
         }
 
-        if (config.name || config.label) {
-            this.name = config.name || config.label
-        } else if (FileUtils.isFile(config.url)) {
-            this.name = config.url.name
-        } else if (StringUtils.isString(config.url) && !config.url.startsWith("data:")) {
-            this.name = FileUtils.getFilename(config.url)
+        if (!config.name) {
+            if (config.label) {
+                this.name = config.name || config.label
+            } else if (FileUtils.isFile(config.url)) {
+                this.name = config.url.name
+            } else if (StringUtils.isString(config.url) && !config.url.startsWith("data:")) {
+                this.name = FileUtils.getFilename(config.url)
+            }
         }
 
-        this.url = config.url
-        if(this.config.type) this.type = this.config.type
         this.id = this.config.id === undefined ? this.name : this.config.id
-        this.order = config.order
-        this.autoscaleGroup = config.autoscaleGroup
-        this.removable = config.removable === undefined ? true : config.removable      // Defaults to true
         this.minHeight = config.minHeight || Math.min(25, this.height)
         this.maxHeight = config.maxHeight || Math.max(1000, this.height)
 
@@ -157,7 +167,7 @@ class TrackBase {
 
     repaintViews() {
         if (this.trackView) {
-            this.trackView.repaintViews();
+            this.trackView.repaintViews()
         }
     }
 
@@ -297,8 +307,8 @@ class TrackBase {
                             min = Number(tokens[0])
                             max = Number(tokens[1])
                         }
-                        if(Number.isNaN(max) || Number.isNaN(min)) {
-                         console.warn(`Unexpected viewLimits value in track line: ${properties["viewLimits"]}`)
+                        if (Number.isNaN(max) || Number.isNaN(min)) {
+                            console.warn(`Unexpected viewLimits value in track line: ${properties["viewLimits"]}`)
                         } else {
                             tracklineConfg.autoscale = false
                             tracklineConfg.dataRange = {min, max}
@@ -532,7 +542,8 @@ class TrackBase {
             }
             this.browser.dataRangeDialog.present($(this.browser.columnContainer))
         }
-        menuItems.push({ object, dialog:dialogPresentationHandler })
+
+        menuItems.push({object, dialog: dialogPresentationHandler})
 
         if (this.logScale !== undefined) {
 
@@ -543,7 +554,7 @@ class TrackBase {
                 this.trackView.repaintViews()
             }
 
-            menuItems.push({ object, click:logScaleHandler })
+            menuItems.push({object, click: logScaleHandler})
         }
 
         object = $(createCheckbox("Autoscale", this.autoscale))
@@ -554,7 +565,7 @@ class TrackBase {
             this.browser.updateViews()
         }
 
-        menuItems.push({ object, click:autoScaleHandler })
+        menuItems.push({object, click: autoScaleHandler})
 
         return menuItems
     }
@@ -571,15 +582,15 @@ class TrackBase {
         if (features && Array.isArray(features) && features.length > 0) {
             // Check chromosome, all cached features will share a chromosome
             const chrName = this.browser.genome.getChromosomeName(features[0].chr)
-            if(chrName === chr) {
+            if (chrName === chr) {
                 const next = findFeatureAfterCenter(features, position, direction)
-                if(next) {
+                if (next) {
                     return next
                 }
             }
         }
 
-        if(typeof this.featureSource.nextFeature === 'function') {
+        if (typeof this.featureSource.nextFeature === 'function') {
             return this.featureSource.nextFeature(chr, position, direction, this.visibilityWindow)
         }
     }
@@ -618,11 +629,11 @@ class TrackBase {
             {
                 url: 'file',
                 indexURL: 'indexFile'
-            };
+            }
 
         for (const key of ['url', 'indexURL']) {
             if (cooked[key] && cooked[key] instanceof File) {
-                cooked[ lut[ key ] ] = cooked[key].name
+                cooked[lut[key]] = cooked[key].name
                 delete cooked[key]
             }
         }

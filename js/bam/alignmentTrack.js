@@ -63,13 +63,14 @@ class AlignmentTrack extends TrackBase {
         tagColorPallete: "Set1"
     }
 
+    _colorTables = new Map()
 
     constructor(config, browser) {
 
         super(config, browser)
 
-        // Explicit color table for tags
-        if (config.tagColorTable) {
+        // Explicit color table
+        if (config.colorTable || config.tagColorTable) {
             this.tagColors = new ColorTable(config.tagColorTable)
         }
 
@@ -1195,7 +1196,14 @@ class AlignmentTrack extends TrackBase {
             return this.pairConnectorColor
         }
 
-        switch (this.colorBy) {
+        let colorBy = this.colorBy
+        let tag
+        if (colorBy && colorBy.startsWith("tag:")) {
+            tag = colorBy.substring(4)
+            colorBy = "tag"
+        }
+
+        switch (colorBy) {
             case "strand":
             case "firstOfPairStrand":
             case "pairOrientation":
@@ -1213,12 +1221,13 @@ class AlignmentTrack extends TrackBase {
 
     getAlignmentColor(alignment) {
 
-        let color = DEFAULT_ALIGNMENT_COLOR   // The default color if nothing else applies
+        let color
         if (this.color) {
             color = (typeof this.color === "function") ? this.color(alignment) : this.color
         } else {
             color = DEFAULT_ALIGNMENT_COLOR
         }
+
         let colorBy = this.colorBy
         let tag
         if (colorBy && colorBy.startsWith("tag:")) {
@@ -1274,12 +1283,11 @@ class AlignmentTrack extends TrackBase {
                     if (this.bamColorTag === tag) {
                         color = IGVColor.createColorStringSafe(tagValue)
                     }
-                    if (!color) {
-                        if (!this.tagColors) {
-                            this.tagColors = new PaletteColorTable(this.tagColorPallete)
-                        }
-                        color = this.tagColors.getColor(tagValue)
+                    if (!this.tagColors) {
+                        this.tagColors = new PaletteColorTable(this.tagColorPallete)
                     }
+                    color = this.tagColors.getColor(tagValue)
+
                 }
                 break
         }
