@@ -78,16 +78,19 @@ class TrackBase {
             config.displayMode = config.displayMode.toUpperCase()
         }
 
-        // Set default properties
+        // Base default settings
         const defaults = Object.assign({}, TrackBase.defaults)
-        if(this.constructor.defaults) {
-            for(let key of Object.keys(this.constructor.defaults)) {
+
+        // Overide with class specific default settings
+        if (this.constructor.defaults) {
+            for (let key of Object.keys(this.constructor.defaults)) {
                 defaults[key] = this.constructor.defaults[key]
             }
         }
-        for(let key of Object.keys(defaults)) {
+
+        for (let key of Object.keys(defaults)) {
             this[key] = config.hasOwnProperty(key) ? config[key] : defaults[key]
-            if(key === 'color' || key === 'altColor') {
+            if ((key === 'color' || key === 'altColor') && this[key]) {
                 this[key] = fixColor(this[key])
             }
         }
@@ -101,7 +104,7 @@ class TrackBase {
         }
 
         this.url = config.url
-        if(this.config.type) this.type = this.config.type
+        if (this.config.type) this.type = this.config.type
         this.id = this.config.id === undefined ? this.name : this.config.id
         this.order = config.order
         this.autoscaleGroup = config.autoscaleGroup
@@ -157,7 +160,7 @@ class TrackBase {
 
     repaintViews() {
         if (this.trackView) {
-            this.trackView.repaintViews();
+            this.trackView.repaintViews()
         }
     }
 
@@ -297,8 +300,8 @@ class TrackBase {
                             min = Number(tokens[0])
                             max = Number(tokens[1])
                         }
-                        if(Number.isNaN(max) || Number.isNaN(min)) {
-                         console.warn(`Unexpected viewLimits value in track line: ${properties["viewLimits"]}`)
+                        if (Number.isNaN(max) || Number.isNaN(min)) {
+                            console.warn(`Unexpected viewLimits value in track line: ${properties["viewLimits"]}`)
                         } else {
                             tracklineConfg.autoscale = false
                             tracklineConfg.dataRange = {min, max}
@@ -532,7 +535,8 @@ class TrackBase {
             }
             this.browser.dataRangeDialog.present($(this.browser.columnContainer))
         }
-        menuItems.push({ object, dialog:dialogPresentationHandler })
+
+        menuItems.push({object, dialog: dialogPresentationHandler})
 
         if (this.logScale !== undefined) {
 
@@ -543,7 +547,7 @@ class TrackBase {
                 this.trackView.repaintViews()
             }
 
-            menuItems.push({ object, click:logScaleHandler })
+            menuItems.push({object, click: logScaleHandler})
         }
 
         object = $(createCheckbox("Autoscale", this.autoscale))
@@ -554,7 +558,7 @@ class TrackBase {
             this.browser.updateViews()
         }
 
-        menuItems.push({ object, click:autoScaleHandler })
+        menuItems.push({object, click: autoScaleHandler})
 
         return menuItems
     }
@@ -571,15 +575,15 @@ class TrackBase {
         if (features && Array.isArray(features) && features.length > 0) {
             // Check chromosome, all cached features will share a chromosome
             const chrName = this.browser.genome.getChromosomeName(features[0].chr)
-            if(chrName === chr) {
+            if (chrName === chr) {
                 const next = findFeatureAfterCenter(features, position, direction)
-                if(next) {
+                if (next) {
                     return next
                 }
             }
         }
 
-        if(typeof this.featureSource.nextFeature === 'function') {
+        if (typeof this.featureSource.nextFeature === 'function') {
             return this.featureSource.nextFeature(chr, position, direction, this.visibilityWindow)
         }
     }
@@ -618,11 +622,11 @@ class TrackBase {
             {
                 url: 'file',
                 indexURL: 'indexFile'
-            };
+            }
 
         for (const key of ['url', 'indexURL']) {
             if (cooked[key] && cooked[key] instanceof File) {
-                cooked[ lut[ key ] ] = cooked[key].name
+                cooked[lut[key]] = cooked[key].name
                 delete cooked[key]
             }
         }

@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {Variant, Call} from "./variant.js"
+import {Variant, Call, SVComplement} from "./variant.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 /**
@@ -192,14 +192,7 @@ function extractFormatFields(tokens) {
 
 function svComplement(v) {
 
-    const chr2 = v.info.CHR2
-    const pos2 = Number.parseInt(v.info.END)
-    return {
-        chr: chr2,
-        start: pos2 - 1,
-        end: pos2,
-        _f: v
-    }
+    return new SVComplement(v)
 
 }
 

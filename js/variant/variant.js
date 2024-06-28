@@ -31,6 +31,8 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
  * @param tokens
  */
 
+const STANDARD_FIELDS = new Map([["REF", "referenceBases"], ["ALT", "alternateBases"], ["QUAL", "quality"], ["FILTER", "filter"]])
+
 
 class Variant {
 
@@ -52,6 +54,14 @@ class Variant {
         }
         this.init()
     }
+
+    getAttributeValue(key) {
+        if (STANDARD_FIELDS.has(key)) {
+            key = STANDARD_FIELDS.get(key)
+        }
+        return this.hasOwnProperty(key) ? this[key] : this.info[key]
+    }
+
 
     init() {
 
@@ -220,7 +230,77 @@ class Variant {
     alleleFreq() {
         return this.info ? this.info["AF"] : undefined
     }
+}
 
+/**
+ * Represents the "other end" of an SV which specifies the breakpoint as CHR2 and END info fields.
+ */
+class SVComplement {
+
+    constructor(v) {
+        this.mate = v
+        this.chr = v.info.CHR2
+        this.pos = Number.parseInt(v.info.END)
+        this.start = this.pos - 1
+        this.end = this.pos
+    }
+
+    get info() {
+        return this.mate.info
+    }
+
+    get names() {
+        return this.mate.names
+    }
+
+    get referenceBases() {
+        return this.mate.referenceBases
+    }
+
+    get alternateBases() {
+        return this.mate.alternateBases
+    }
+
+    get quality() {
+        return this.mate.quality
+    }
+
+    get filter() {
+        return this.mate.filter
+    }
+
+    get calls() {
+        return this.mate.calls
+    }
+
+    getAttributeValue(key) {
+       return this.mate.getAttributeValue(key)
+    }
+
+    getInfo(tag) {
+        this.mate.getInfo(tag)
+    }
+
+    isFiltered() {
+        return this.mate.isFiltered()
+    }
+
+    alleleFreq() {
+        return this.mate.alleleFreq()
+    }
+
+    popupData(genomicLocation, genomeId) {
+        const popupData = []
+
+        popupData.push("SV Breakpoint")
+        popupData.push({name: 'Chr', value: this.chr})
+        popupData.push({name: 'Pos', value: `${StringUtils.numberFormatter(this.pos)}`})
+        popupData.push({html: '<hr style="border-top: dotted 1px;border-color: #c9c3ba" />'})
+        popupData.push("SV")
+        popupData.push(... this.mate.popupData(genomicLocation, genomeId))
+
+        return popupData
+    }
 }
 
 
@@ -401,4 +481,4 @@ function arrayToString(value, delim) {
 }
 
 
-export {Variant, Call}
+export {Variant, Call, SVComplement}

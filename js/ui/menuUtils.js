@@ -295,7 +295,7 @@ function trackHeightMenuItem() {
             if (undefined !== number) {
 
                 const tracks = []
-                if (trackView.track.selected) {
+                if (this.trackView.track.selected) {
                     tracks.push(...(this.trackView.browser.getSelectedTrackViews().map(({track}) => track)))
                 } else {
                     tracks.push(this)
