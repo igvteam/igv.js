@@ -31,6 +31,8 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
  * @param tokens
  */
 
+const STANDARD_FIELDS = new Map([["REF", "referenceBases"], ["ALT", "alternateBases"], ["QUAL", "quality"], ["FILTER", "filter"]])
+
 
 class Variant {
 
@@ -52,6 +54,14 @@ class Variant {
         }
         this.init()
     }
+
+    getAttributeValue(key) {
+        if(STANDARD_FIELDS.has(key)) {
+            key = STANDARD_FIELDS.get(key)
+        }
+        return this.hasOwnProperty(key) ? this[key] : this.info[key]
+    }
+
 
     init() {
 

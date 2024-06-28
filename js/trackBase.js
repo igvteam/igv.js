@@ -29,6 +29,8 @@ import $ from "./vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
 
+const DEFAULT_COLOR = 'rgb(150,150,150)'
+
 const fixColor = (colorString) => {
     if (StringUtils.isString(colorString)) {
         return (colorString.indexOf(",") > 0 && !(colorString.startsWith("rgb(") || colorString.startsWith("rgba("))) ?
@@ -47,22 +49,15 @@ const fixColor = (colorString) => {
  */
 class TrackBase {
 
-    /**
-     * Defautl properties.  These are potentially overriden by settings in the track config
-     */
     static defaults = {
         height: 50,
         autoHeight: false,
+        visibilityWindow: undefined,   // Identifies property that should be copied from config
+        color: undefined,  // Identifies property that should be copied from config
+        altColor: undefined,  // Identifies property that should be copied from config
         supportHiDPI: true,
-        selected: false,
-        removable: true
+        selected: false
     }
-
-    /**
-     * Properties without defaults that should be copied if set in the config
-     * @type {string[]}
-     */
-    static otherConfigPropertys = ["visibilityWindow", "color", "altColor", "name", "type", "url", "order", "autoscaleGroup"]
 
     constructor(config, browser) {
         this.browser = browser
@@ -83,8 +78,10 @@ class TrackBase {
             config.displayMode = config.displayMode.toUpperCase()
         }
 
-        // Set default properties
+        // Base default settings
         const defaults = Object.assign({}, TrackBase.defaults)
+
+        // Overide with class specific default settings
         if (this.constructor.defaults) {
             for (let key of Object.keys(this.constructor.defaults)) {
                 defaults[key] = this.constructor.defaults[key]
@@ -93,29 +90,25 @@ class TrackBase {
 
         for (let key of Object.keys(defaults)) {
             this[key] = config.hasOwnProperty(key) ? config[key] : defaults[key]
-        }
-
-        for (let key of TrackBase.otherConfigPropertys) {
-            if (config.hasOwnProperty(key)) {
-                if (key === 'color' || key === 'altColor') {
-                    this[key] = fixColor(this[key])
-                } else {
-                    this[key] = config[key]
-                }
+            if ((key === 'color' || key === 'altColor') && this[key]) {
+                this[key] = fixColor(this[key])
             }
         }
 
-        if (!config.name) {
-            if (config.label) {
-                this.name = config.name || config.label
-            } else if (FileUtils.isFile(config.url)) {
-                this.name = config.url.name
-            } else if (StringUtils.isString(config.url) && !config.url.startsWith("data:")) {
-                this.name = FileUtils.getFilename(config.url)
-            }
+        if (config.name || config.label) {
+            this.name = config.name || config.label
+        } else if (FileUtils.isFile(config.url)) {
+            this.name = config.url.name
+        } else if (StringUtils.isString(config.url) && !config.url.startsWith("data:")) {
+            this.name = FileUtils.getFilename(config.url)
         }
 
+        this.url = config.url
+        if (this.config.type) this.type = this.config.type
         this.id = this.config.id === undefined ? this.name : this.config.id
+        this.order = config.order
+        this.autoscaleGroup = config.autoscaleGroup
+        this.removable = config.removable === undefined ? true : config.removable      // Defaults to true
         this.minHeight = config.minHeight || Math.min(25, this.height)
         this.maxHeight = config.maxHeight || Math.max(1000, this.height)
 

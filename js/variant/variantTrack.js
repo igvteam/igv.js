@@ -41,8 +41,6 @@ const isString = StringUtils.isString
 const DEFAULT_COLOR = "rgb(0,0,150)"
 const DEFAULT_VISIBILITY_WINDOW = 1000000
 const TOP_MARGIN = 10
-const STANDARD_FIELDS = new Map([["REF", "referenceBases"], ["ALT", "alternateBases"], ["QUAL", "quality"], ["FILTER", "filter"]])
-
 
 class VariantTrack extends TrackBase {
 
@@ -68,19 +66,19 @@ class VariantTrack extends TrackBase {
         hetvarColor: "rgb(34,12,253)",
         refColor: "rgb(0,0,220)",
         altColor: "rgb(255,0,0)",
-        colorBy: "alleleFrequency",
+        colorBy: "AF",
         visibilityWindow: undefined,
         labelDisplayMode: undefined,
         type: "variant"
     }
 
-    colorTables = new Map()
     #sortDirections = new Map()
 
     constructor(config, browser) {
         super(config, browser)
     }
 
+    // Note -- init gets called during base class construction.  Confusing
     init(config) {
 
         super.init(config)
@@ -93,14 +91,19 @@ class VariantTrack extends TrackBase {
         this.featureSource = FeatureSource(config, this.browser.genome)
 
         this._initColorBy = config.colorBy
+        this.colorTables = new Map()
         if (config.colorTable) {
-            this.colorTables = new Map()
             const key = config.colorBy || "*"
             this.colorTables.set(key, new ColorTable(config.colorTable))
         }
-        this._color = config.color
+
         this.strokecolor = config.strokecolor
         this._context_hook = config.context_hook
+
+        // If a color is explicitly set disable colorBy
+        if (config.color) {
+            this.colorBy = undefined
+        }
 
         // The number of variant rows are computed dynamically, but start with "1" by default
         this.nVariantRows = 1
@@ -152,7 +155,7 @@ class VariantTrack extends TrackBase {
 
     set color(c) {
         this._color = c
-        if(c) {
+        if (c) {
             this.colorBy = undefined
         }
     }
@@ -165,7 +168,6 @@ class VariantTrack extends TrackBase {
         }
         return this.header
     }
-
     getSampleCount() {
         return this.sampleKeys ? this.sampleKeys.length : 0
     }
@@ -397,18 +399,9 @@ class VariantTrack extends TrackBase {
         let variantColor
 
         if (this.colorBy && 'none' !== this.colorBy) {
-            const colorBy = this.colorBy
-            let value
-            if (v.info.hasOwnProperty(colorBy)) {
-                value = v.info[colorBy]
-            } else if (STANDARD_FIELDS.has(colorBy)) {
-                const key = STANDARD_FIELDS.get(colorBy)
-                value = v[key]
-            }
-            variantColor = this.getVariantColorTable(colorBy).getColor(value)
-            if (!variantColor) {
-                variantColor = "gray"
-            }
+
+            const value = v.getAttributeValue(this.colorBy)
+            variantColor = value !== undefined ? this.getVariantColorTable(this.colorBy).getColor(value) : "gray"
 
         } else if (this.color) {
             variantColor = (typeof this.color === "function") ? this.color(variant) : this.color
@@ -591,7 +584,7 @@ class VariantTrack extends TrackBase {
             if (this.header.INFO) {
                 //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => this.header.INFO[key].Type === "String")
                 const colorByItems = this._colorByItems
-                if(this.header.INFO.VT) {
+                if (this.header.INFO.VT) {
                     colorByItems.set('VT', 'Variant Type')
                 }
                 if (this.header.INFO.SVTYPE) {
@@ -845,9 +838,9 @@ class VariantTrack extends TrackBase {
 
         if (menuItem.key !== 'info') {
             function clickHandler() {
-
-                this.colorBy = menuItem.key
-                this.config.colorBy = menuItem.key
+                const colorBy = ('none' === menuItem.key)  ? undefined : menuItem.key
+                this.colorBy = colorBy
+                this.config.colorBy = colorBy
                 this.trackView.repaintViews()
             }
 
@@ -890,13 +883,11 @@ class VariantTrack extends TrackBase {
      */
     getVariantColorTable(key) {
 
-        if(this.colorTables.has(key)) {
+        if (this.colorTables.has(key)) {
             return this.colorTables.get(key)
-        }
-        else if(this.colorTables.has("*")) {
+        } else if (this.colorTables.has("*")) {
             return this.colorTables.get("*")
-        }
-        else {
+        } else {
             let tbl
             switch (key) {
                 case "SVTYPE" :
