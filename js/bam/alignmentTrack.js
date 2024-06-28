@@ -71,7 +71,7 @@ class AlignmentTrack extends TrackBase {
 
         // Explicit color table
         if (config.colorTable || config.tagColorTable) {
-            this.tagColors = new ColorTable(config.tagColorTable)
+            this.colorTable = new ColorTable(config.tagColorTable)
         }
 
         // Backward compatibility overrides
@@ -858,8 +858,8 @@ class AlignmentTrack extends TrackBase {
                         const alignmentTrack = this.alignmentTrack
                         if (tag) {
                             alignmentTrack.colorBy = 'tag:' + tag
-                            if (!alignmentTrack.tagColors) {
-                                alignmentTrack.tagColors = new PaletteColorTable("Set1")
+                            if (!alignmentTrack.colorTable) {
+                                alignmentTrack.colorTable = new PaletteColorTable("Set1")
                             }
                         } else {
                             alignmentTrack.colorBy = undefined
@@ -1283,10 +1283,10 @@ class AlignmentTrack extends TrackBase {
                     if (this.bamColorTag === tag) {
                         color = IGVColor.createColorStringSafe(tagValue)
                     }
-                    if (!this.tagColors) {
-                        this.tagColors = new PaletteColorTable(this.tagColorPallete)
+                    if (!this.colorTable) {
+                        this.colorTable = new PaletteColorTable(this.tagColorPallete)
                     }
-                    color = this.tagColors.getColor(tagValue)
+                    color = this.colorTable.getColor(tagValue)
 
                 }
                 break

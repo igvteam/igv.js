@@ -8,6 +8,11 @@
 
 <button id="log-state">Log Session</button>
 
+<p>
+    <b>Expected: </b>
+    <a target="_blank" href="https://drive.google.com/file/d/1-8Ik6Oysgn2CA2jlU6GrHu5oGkkNijX9/view?usp=sharing">bam-colors.png</a>
+</p>
+
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
@@ -17,8 +22,7 @@
     const config =
         {
             "genome": "hg19",
-            "locus": "chr1:155,159,012-155,164,131",
-            "roi": [],
+            "locus": "chr1:155,160,935-155,161,837",
             "tracks": [
                 {
                     "type": "alignment",
@@ -26,16 +30,8 @@
                     "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam.bai",
                     "name": "Color by tag",
                     "format": "bam",
-                    "colorBy": "tag:XT"
-                },
-                {
-                    "type": "alignment",
-                    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam",
-                    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam.bai",
-                    "name": "Specify pallete",
-                    "format": "bam",
                     "colorBy": "tag:XT",
-                    "tagColorPallete": "Pastel1"
+                    "height": 200
                 },
                 {
                     "type": "alignment",
@@ -44,11 +40,12 @@
                     "name": "Explicit table",
                     "format": "bam",
                     "colorBy": "tag:XT",
-                    "tagColorTable": {
+                    "colorTable": {
                         "U": "green",
                         "M": "red",
                         "R": "blue",
-                    }
+                    },
+                    "height": 200
                 },
                 {
                     "type": "alignment",
@@ -68,7 +65,8 @@
                             default:
                                 return "black"
                         }
-                    }
+                    },
+                    "height": 200
                 }
             ]
         }
