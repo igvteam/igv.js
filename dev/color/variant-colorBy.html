@@ -14,17 +14,26 @@
 <h3>Example illustrating options for coloring VCF variants</h3>
 <h4>
     <ol>
-        <li>color function</li>
-        <li>INFO tag with color table</li>
-        <li>INFO tag with default colors</li>
+        <li>Color function</li>
+        <li>Color by INFO tag with color table</li>
+        <li>Color by INFO tag with default colors</li>
+        <li>Color by ALT field</li>
+        <li>Color by FILTER field</li>
+        <li>Override default color</li>
     </ol>
 </h4>
+
+<p>
+    <b>Expected: </b>
+    <a target="_blank" href="https://drive.google.com/file/d/13GkQjgHlJiPdBIGcPJrCXLSBtSL1cCTv/view?usp=sharing">variant-colors.png</a>
+
+</p>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import igv from "../../js";
+    import igv from "../../js/index.js"
 
     const options =
         {
@@ -37,22 +46,22 @@
                     name: "Color by function, SVTYPE",
                     visibilityWindow: -1,
                     color: function (variant) {
-                        const svtype = variant.info["SVTYPE"];
+                        const svtype = variant.info["SVTYPE"]
                         switch (svtype) {
                             case 'DEL':
-                                return "#ff2101";
+                                return "#ff2101"
                             case 'INS':
-                                return "#001888";
+                                return "#001888"
                             case 'DUP':
-                                return "#028401";
+                                return "#028401"
                             case 'INV':
-                                return "#008688";
+                                return "#008688"
                             case 'CNV':
-                                return "#8931ff";
+                                return "#8931ff"
                             case 'BND':
-                                return "#891100";
+                                return "#891100"
                             default:
-                                return "#002eff";
+                                return "#002eff"
                         }
                     }
                 },
@@ -129,15 +138,22 @@
                     visibilityWindow: -1
                 }
             ]
-        };
+        }
 
-    const igvDiv = document.getElementById("igvDiv");
+    const igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
 
         .then(function (browser) {
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+            document.getElementById('bookmark').addEventListener('click', () => {
+                const path = window.location.href.slice()
+                const idx = path.indexOf("?")
+                const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+                window.history.pushState({}, "IGV", url)
+            })
+        })
 
-        });
 
 </script>
 

@@ -63,14 +63,15 @@ class AlignmentTrack extends TrackBase {
         tagColorPallete: "Set1"
     }
 
+    _colorTables = new Map()
 
     constructor(config, browser) {
 
         super(config, browser)
 
-        // Explicit color table for tags
-        if (config.tagColorTable) {
-            this.tagColors = new ColorTable(config.tagColorTable)
+        // Explicit color table
+        if (config.colorTable || config.tagColorTable) {
+            this.colorTable = new ColorTable(config.tagColorTable)
         }
 
         // Backward compatibility overrides
@@ -857,8 +858,8 @@ class AlignmentTrack extends TrackBase {
                         const alignmentTrack = this.alignmentTrack
                         if (tag) {
                             alignmentTrack.colorBy = 'tag:' + tag
-                            if (!alignmentTrack.tagColors) {
-                                alignmentTrack.tagColors = new PaletteColorTable("Set1")
+                            if (!alignmentTrack.colorTable) {
+                                alignmentTrack.colorTable = new PaletteColorTable("Set1")
                             }
                         } else {
                             alignmentTrack.colorBy = undefined
@@ -1195,7 +1196,14 @@ class AlignmentTrack extends TrackBase {
             return this.pairConnectorColor
         }
 
-        switch (this.colorBy) {
+        let colorBy = this.colorBy
+        let tag
+        if (colorBy && colorBy.startsWith("tag:")) {
+            tag = colorBy.substring(4)
+            colorBy = "tag"
+        }
+
+        switch (colorBy) {
             case "strand":
             case "firstOfPairStrand":
             case "pairOrientation":
@@ -1213,12 +1221,13 @@ class AlignmentTrack extends TrackBase {
 
     getAlignmentColor(alignment) {
 
-        let color = DEFAULT_ALIGNMENT_COLOR   // The default color if nothing else applies
+        let color
         if (this.color) {
             color = (typeof this.color === "function") ? this.color(alignment) : this.color
         } else {
             color = DEFAULT_ALIGNMENT_COLOR
         }
+
         let colorBy = this.colorBy
         let tag
         if (colorBy && colorBy.startsWith("tag:")) {
@@ -1274,12 +1283,11 @@ class AlignmentTrack extends TrackBase {
                     if (this.bamColorTag === tag) {
                         color = IGVColor.createColorStringSafe(tagValue)
                     }
-                    if (!color) {
-                        if (!this.tagColors) {
-                            this.tagColors = new PaletteColorTable(this.tagColorPallete)
-                        }
-                        color = this.tagColors.getColor(tagValue)
+                    if (!this.colorTable) {
+                        this.colorTable = new PaletteColorTable(this.tagColorPallete)
                     }
+                    color = this.colorTable.getColor(tagValue)
+
                 }
                 break
         }
