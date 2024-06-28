@@ -66,13 +66,12 @@ class VariantTrack extends TrackBase {
         hetvarColor: "rgb(34,12,253)",
         refColor: "rgb(0,0,220)",
         altColor: "rgb(255,0,0)",
-        colorBy: "AF",
         visibilityWindow: undefined,
         labelDisplayMode: undefined,
         type: "variant"
     }
 
-    #sortDirections = new Map()
+    _sortDirections = new Map()
 
     constructor(config, browser) {
         super(config, browser)
@@ -90,7 +89,6 @@ class VariantTrack extends TrackBase {
 
         this.featureSource = FeatureSource(config, this.browser.genome)
 
-        this._initColorBy = config.colorBy
         this.colorTables = new Map()
         if (config.colorTable) {
             const key = config.colorBy || "*"
@@ -120,12 +118,36 @@ class VariantTrack extends TrackBase {
             this.initialSort = config.sort
         }
 
-        this._colorByItems = new Map([['none', 'None'], ['AF', 'Allele frequency']])
+        this._colorByItems = new Map([['none', 'None']])
     }
 
     async postInit() {
 
         this.header = await this.getHeader()
+
+        // Set colorBy, if not explicitly set default to allele frequency, if available, otherwise default to none (undefined)
+        const infoFields = new Set(Object.keys(this.header.INFO))
+        if (this.config.colorBy) {
+            this.colorBy = this.config.colorBy
+        } else if (!this.config.color && infoFields.has('AF')) {
+            this.colorBy = 'AF'
+        }
+
+        // Configure menu items based on info available
+        if (infoFields.has('AF')) {
+            this._colorByItems.set('AF', 'Allele frequency')
+        }
+        if (infoFields.has('VT')) {
+            this._colorByItems.set('VT', 'Variant Type')
+        }
+        if (infoFields.has('SVTYPE')) {
+            this._colorByItems.set('SVTYPE', 'SV Type')
+        }
+        if (this.config.colorBy && !this._colorByItems.has(this.config.colorBy)) {
+            this._colorByItems.set(this.config.colorBy, this.config.colorBy)
+        }
+
+
         if (this.disposed) return   // This track was removed during async load
 
         if (this.header && !this.sampleKeys) {
@@ -168,6 +190,7 @@ class VariantTrack extends TrackBase {
         }
         return this.header
     }
+
     getSampleCount() {
         return this.sampleKeys ? this.sampleKeys.length : 0
     }
@@ -272,8 +295,8 @@ class VariantTrack extends TrackBase {
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
 
             // Loop through variants.  A variant == a row in a VCF file
-            for (let variant of features) {
-
+            for (let v of features) {
+                const variant = v._f || v   // Unwrap whole gnom
                 if (variant.end < bpStart) continue
                 if (variant.start > bpEnd) break
 
@@ -294,7 +317,12 @@ class VariantTrack extends TrackBase {
                     w -= 2
                 }
 
-                const af = variant.alleleFreq()
+                let af
+                try {
+                    af = variant.alleleFreq()
+                } catch (e) {
+                    console.log(e)
+                }
                 if ("AF" === this.colorBy && af) {
                     const hAlt = Math.min(1, af) * h
                     const hRef = h - hAlt
@@ -584,16 +612,6 @@ class VariantTrack extends TrackBase {
             if (this.header.INFO) {
                 //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => this.header.INFO[key].Type === "String")
                 const colorByItems = this._colorByItems
-                if (this.header.INFO.VT) {
-                    colorByItems.set('VT', 'Variant Type')
-                }
-                if (this.header.INFO.SVTYPE) {
-                    colorByItems.set('SVTYPE', 'SV Type')
-                }
-                if (this._initColorBy && !colorByItems.has(this._initColorBy)) {
-                    colorByItems.set(this._initColorBy, this._initColorBy)
-                }
-
                 menuItems.push('<hr/>')
                 const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">')
                 $e.text('Color by:')
@@ -625,14 +643,14 @@ class VariantTrack extends TrackBase {
                     object.html(`&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`)
 
                     function attributeSort() {
-                        const sortDirection = this.#sortDirections.get(attribute) || 1
+                        const sortDirection = this._sortDirections.get(attribute) || 1
                         this.sortByAttribute(attribute, sortDirection)
                         this.config.sort = {
                             option: "ATTRIBUTE",
                             attribute: attribute,
                             direction: sortDirection > 0 ? "ASC" : "DESC"
                         }
-                        this.#sortDirections.set(attribute, sortDirection * -1)
+                        this._sortDirections.set(attribute, sortDirection * -1)
                     }
 
                     menuItems.push({object, click: attributeSort})
@@ -717,8 +735,8 @@ class VariantTrack extends TrackBase {
             // We can't know genomic location intended with precision, define a buffer 5 "pixels" wide in genomic coordinates
             const bpWidth = referenceFrame.toBP(2.5)
 
-            const direction = this.#sortDirections.get('genotype') || 1
-            this.#sortDirections.set('genotype', direction * -1)  // Toggle for next sort
+            const direction = this._sortDirections.get('genotype') || 1
+            this._sortDirections.set('genotype', direction * -1)  // Toggle for next sort
 
             list.push(
                 {
@@ -838,7 +856,7 @@ class VariantTrack extends TrackBase {
 
         if (menuItem.key !== 'info') {
             function clickHandler() {
-                const colorBy = ('none' === menuItem.key)  ? undefined : menuItem.key
+                const colorBy = ('none' === menuItem.key) ? undefined : menuItem.key
                 this.colorBy = colorBy
                 this.config.colorBy = colorBy
                 this.trackView.repaintViews()
