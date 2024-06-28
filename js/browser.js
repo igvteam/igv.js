@@ -82,8 +82,6 @@ const column_multi_locus_shim_width = 2 + 1 + 2
 
 class Browser {
 
-    static shadowRoot
-
     constructor(config, parentDiv) {
 
         this.config = config
@@ -91,16 +89,15 @@ class Browser {
         this.namespace = '.browser_' + this.guid
 
         this.parent = parentDiv
-        if (!Browser.shadowRoot) {
-            // Only attach the shadow dom once.  We can attach multiple browsers to the shadow root
-            Browser.shadowRoot = parentDiv.attachShadow({mode: "open"})
-            const sheet = new CSSStyleSheet()
-            sheet.replaceSync(igvCss)
-            Browser.shadowRoot.adoptedStyleSheets = [sheet]
-        }
+
+        const shadowRoot = parentDiv.attachShadow({mode: "open"})
+        const sheet = new CSSStyleSheet()
+        sheet.replaceSync(igvCss)
+        shadowRoot.adoptedStyleSheets = [sheet]
+
 
         this.root = DOMUtils.div({class: 'igv-container'})
-        Browser.shadowRoot.appendChild(this.root)
+        shadowRoot.appendChild(this.root)
 
         // spinner
         this.spinner = DOMUtils.div({class: 'igv-loading-spinner-container'})
@@ -735,7 +732,7 @@ class Browser {
         }
 
         // If any tracks are selected show the selectino buttons
-        if(this.trackViews.some(tv => tv.track.selected)) {
+        if (this.trackViews.some(tv => tv.track.selected)) {
             this.multiTrackSelectButton.setMultiTrackSelection(true)
         }
 
@@ -2500,7 +2497,7 @@ function mouseUpOrLeave(e) {
 async function keyUpHandler(event) {
 
     // Feature jumping disabled in multi-locus view
-    if(this.referenceFrameList.length > 1) return
+    if (this.referenceFrameList.length > 1) return
 
     if (event.code === 'KeyF' || event.code === 'KeyB') {
 
@@ -2519,7 +2516,7 @@ async function keyUpHandler(event) {
                 // Check visibility window
                 const isWGV = 'all' === referenceFrame.chr.toLowerCase()
                 const vizWindow = track.visibilityWindow
-                if(isWGV || (vizWindow && vizWindow > 0 && referenceFrame.bpPerPixel * viewportWidth > vizWindow)) {
+                if (isWGV || (vizWindow && vizWindow > 0 && referenceFrame.bpPerPixel * viewportWidth > vizWindow)) {
                     return
                 }
 
@@ -2558,7 +2555,7 @@ async function keyUpHandler(event) {
                             // Zoom to next feature with 10% buffer
                             const minimumBases = this.config.minimumBases || 40
                             const extent = Math.max(minimumBases, 1.1 * (nextFeature.end - nextFeature.start))
-                            referenceFrame.start  = Math.max(0, newCenter - extent / 2)
+                            referenceFrame.start = Math.max(0, newCenter - extent / 2)
                             referenceFrame.end = referenceFrame.start + extent
                             referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth
                         } else {
