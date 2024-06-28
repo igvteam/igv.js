@@ -5,34 +5,13 @@ import NonIndexedFasta from "../js/genome/nonIndexedFasta.js"
 
 suite("testFasta", function () {
 
-    //const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
-
-    // test("FastaSequence - Test fasata with no index", async function () {
-    //
-    //     this.timeout(100000)
-    //
-    //     const fasta = await loadFasta(
-    //         {
-    //             fastaURL: dataURL + "fasta/test.fasta",
-    //             indexed: false
-    //         }
-    //     )
-    //
-    //     // Note -- coordinates are UCSC style
-    //     // chr22:29565177-29565216
-    //     const expectedSequence = "GCTGC"
-    //     const seq = await fasta.getSequence("CACNG6--RPLP2", 60, 65)
-    //     assert.equal(seq, expectedSequence)
-    //
-    // })
-
     test("FastaSequence - Test getSequence", async function () {
 
         this.timeout(100000)
 
         const fasta = new FastaSequence({
-                fastaURL: "https://www.dropbox.com/s/bpf7g2ynx8qep73/chr22.fa?dl=0",
-                indexURL: "https://www.dropbox.com/s/1jx9327vjkd87w5/chr22.fa.fai?dl=0"
+                fastaURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa",
+                indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.fai?"
             }
         )
         await fasta.init()
@@ -44,32 +23,10 @@ suite("testFasta", function () {
         const seqString = sequence.toUpperCase()
         assert.equal(seqString, expectedSeqString)
 
-
         const noSSequence = await fasta.readSequence("noSuchChr", 0, 10)
         assert.equal(null, noSSequence)
 
     })
-
-
-    // test("FastaSequence - Test getSequence block compressed", async function () {
-    //
-    //     this.timeout(100000)
-    //     const fasta = await loadFasta({
-    //             fastaURL: dataURL + "fasta/chr22.fa.gz",
-    //             indexURL: dataURL + "fasta/chr22.fa.gz.fai",
-    //             compressedIndexURL: dataURL + "fasta/chr22.fa.gz.gzi"
-    //         }
-    //     )
-    //
-    //     // Note -- coordinates are UCSC style
-    //     // chr22:29565177-29565216
-    //     const sequence = await fasta.getSequence("chr22", 29565176, 29565216)
-    //     const expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA",
-    //         seqString = sequence.toUpperCase()
-    //     assert.equal(seqString, expectedSeqString)
-    //
-    // })
-
 
     /**
      * Test "old" syntax partial fasta (pre multi-locus support)
@@ -195,61 +152,4 @@ suite("testFasta", function () {
 
     })
 
-    test("guess indexFile based on indexURL", async function () {
-        const fasta = new FastaSequence({
-                indexFile: 'https://will-be-used-only-if-no-index-url',
-                indexURL: 'https://foo/bar',
-            }
-        )
-        assert.equal(
-            fasta.indexFile,
-            "https://foo/bar",
-            "`this.indexFile` should be the same as `ref.indexURL`, even when there is `ref.indexFile`"
-        )
-    })
-
-    test("guess indexFile based on indexFile", async function () {
-        const fasta = new FastaSequence({
-                indexFile: 'https://foo/bar'
-            }
-        )
-        assert.equal(
-            fasta.indexFile,
-            "https://foo/bar",
-            "`this.indexFile` should be the same as `ref.indexFile` if no `ref.indexURL`"
-        )
-    })
-
-    test("guess indexFile based on fastaURL", async function () {
-        const fastaString = new FastaSequence({
-                fastaURL: 'https://foo/bar'
-            }
-        )
-        assert.equal(
-            fastaString.indexFile,
-            "https://foo/bar.fai",
-            "`this.indexFile` is the same URL as `ref.fastaURL` + '.fai' extension"
-        )
-
-        const fastaThunk = new FastaSequence({
-                fastaURL: () => 'https://foo/bar'
-            }
-        )
-        assert.equal(
-            await fastaThunk.indexFile(),
-            "https://foo/bar.fai",
-            "`this.indexFile` produced from `ref.fastaURL` should be produced from resolved fastaURL string"
-        )
-
-        const fastaAsyncThunk = new FastaSequence({
-                fastaURL: () => Promise.resolve('https://foo/bar')
-            }
-        )
-        let fastaURL = await fastaAsyncThunk.indexFile()
-        assert.equal(
-            fastaURL,
-            "https://foo/bar.fai",
-            "`this.indexFile` produced from `ref.fastaURL` should be produced from resolved fastaURL string"
-        )
-    })
 })

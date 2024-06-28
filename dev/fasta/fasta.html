@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>IGV</title>
+</head>
+
+<body>
+
+<h2>
+    FASTA reference
+</h2>
+
+
+<p>
+<h3>No index</h3>
+<div id="igvDiv1" style="padding-bottom: 20px; height: auto"></div>
+</p>
+
+<p>
+<h3>.fai index </h3>
+<div id="igvDiv2" style="padding-bottom: 20px; height: auto"></div>
+</p>
+
+<p>
+<h3>Compressed fasta</h3>
+<div id="igvDiv3" style="padding-bottom: 20px; height: auto"></div>
+</p>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    igv.createBrowser(document.getElementById('igvDiv1'), {
+        locus: "chr22:16,099,617-16,099,656",
+        reference: {
+            fastaURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa"
+        }
+    })
+
+    igv.createBrowser(document.getElementById('igvDiv2'), {
+        locus: "chr22:16,099,617-16,099,656",
+        reference: {
+            fastaURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa",
+            indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.fai"
+        }
+    })
+
+    igv.createBrowser(document.getElementById('igvDiv3'), {
+        locus: "chr22:16,099,617-16,099,656",
+        reference: {
+            fastaURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.gz",
+            indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.gz.fai",
+            compressedIndexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.gz.gzi"
+        }
+    })
+
+</script>
+
+</body>
+
+</html>

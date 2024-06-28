@@ -19,10 +19,10 @@ async function loadSequence(reference, browser) {
         fasta = new ChromSizes(reference.fastaURL || reference.url)
     } else if ("2bit" === reference.format || reference.twoBitURL) {
         fasta = new CachedSequence(new Twobit(reference), browser)
-    } else if (isDataURL(reference.fastaURL) || reference.indexed === false) {
+    } else if (isDataURL(reference.fastaURL) || !reference.indexURL) {
         fasta = new NonIndexedFasta(reference)
     } else if("gbk" === reference.format || reference.gbkURL) {
-
+        // Genbank files do not crete a fasta object
     }
 
     else {

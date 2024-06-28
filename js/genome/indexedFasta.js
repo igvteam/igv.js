@@ -33,25 +33,6 @@ const splitLines = StringUtils.splitLines
 
 const reservedProperties = new Set(['fastaURL', 'indexURL', 'compressedIndexURL', 'cytobandURL', 'indexed'])
 
-//Tries to guess indexFile based on IGV reference.
-//Note that URLs could be async thunks.
-//The idea of guessing it that way is copied from IGV desktop.
-function guessIndexFile(reference) {
-  if (reference.indexURL) {
-    return reference.indexURL
-  }
-  if (reference.indexFile) {
-    return reference.indexFile
-  }
-  if (typeof reference.fastaURL === 'function') {
-    return async () => {
-      const fastaURL = await reference.fastaURL();
-      return fastaURL + '.fai'
-    }
-  }
-  return reference.fastaURL + '.fai'
-}
-
 class FastaSequence {
 
     #chromosomeNames
@@ -60,8 +41,8 @@ class FastaSequence {
     constructor(reference) {
 
         this.file = reference.fastaURL
-        this.indexFile = guessIndexFile(reference)
-        this.compressedIndexFile = reference.compressedIndexURL || false
+        this.indexFile = reference.indexURL
+        this.compressedIndexFile = reference.compressedIndexURL
         this.withCredentials = reference.withCredentials
 
 
