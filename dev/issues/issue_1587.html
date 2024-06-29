@@ -6,13 +6,21 @@
 
 <body>
 
-<button id="loadButton">Load</button>
+<h1>Issue 1587</h1>
+
+Reported issue was very slow load of an alignment file (long read RNA seq).  The root cause was in the packing algorithm.
+Click the "Load" button to load the test file
+
+<p>
+    <button id="loadButton">Load</button>
+</p>
+
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
@@ -20,11 +28,11 @@
             "locus": "chr1:198,683,443-198,713,056"
         }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
             document.getElementById("loadButton").addEventListener("click", () => {
                 browser.loadTrack({
                     "name": "BAM",

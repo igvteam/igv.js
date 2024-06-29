@@ -14,10 +14,11 @@
 <h4>
     <ol>
         <li>color function</li>
-        <li>INFO tag with color table</li>
-        <li>INFO tag with default colors</li>
-        <li>INFO tag with strokecolor</li>
-        <li>INFO tag with contexthook</li>
+        <li>Color by INFO field "SVTYPE" with color table</li>
+        <li>Color by INFO field "REGIONID" with default colors</li>
+        <li>Color by INFO field "SVTYPE" combined with strokecolor function for allelle frequency "AF"</li>
+        <li>Color by alternate bases ("ALT")</li>
+        <li>Rendering customization with context_hook</li>
     </ol>
 </h4>
 
@@ -94,7 +95,7 @@
 
     const options =
         {
-            locus: "chr22",
+            locus: "chr22:21,056,366-21,672,302",
             genome: "hg38",
             tracks: [
                 {
@@ -148,6 +149,22 @@
                 {
                     url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
+                    name: "Color by ALT",
+                    colorBy: "ALT",
+                    colorTable: {
+                        "<DEL>": "#ff2101",
+                        "<INS>": "#001888",
+                        "<DUP>": "#028401",
+                        "<INV>": "#008688",
+                        "<CNV>": "#8931ff",
+                        "<BND>": "#891100",
+                        "*": "#002eff"
+                    },
+                    visibilityWindow: -1
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
                     name: "Color strokecolor",
                     colorBy: "SVTYPE",
                     visibilityWindow: -1,
@@ -164,7 +181,7 @@
                 {
                     url: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz",
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/nstd186.GRCh38.variant_call.vcf.gz.tbi",
-                    name: "Color context hook",
+                    name: "Customization with context_hook",
                     colorBy: "SVTYPE",
                     visibilityWindow: -1,
                     context_hook: function(variant, context, x, y, w, h){

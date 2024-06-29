@@ -51,7 +51,15 @@
             fastaURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.gz",
             indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.gz.fai",
             compressedIndexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.gz.gzi"
-        }
+        },
+        tracks: [
+            {
+                name: "Sequence track",
+                type: "sequence",
+                url: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa",
+                indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/fasta/chr22.fa.fai"
+            }
+        ]
     })
 
 </script>

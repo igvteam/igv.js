@@ -7,6 +7,12 @@
 </head>
 <body>
 
+<h1>Color by insert size (tlen)</h1>
+
+Three options for color by insert size (tlen)
+* Default
+* Set min and max by percentile
+* Set min and max explicitly
 
 <div id="igvDiv"></div>
 
@@ -29,7 +35,8 @@
                     name: "Default",
                     showMismatches: false,
                     height: 500,
-                    colorBy: "tlen"
+                    colorBy: "tlen",
+                    viewAsPairs: true
                 },
                 {
                     url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam",
@@ -41,7 +48,8 @@
                     height: 500,
                     colorBy: "tlen",
                     minTLENPercentile: 5.0,
-                    maxTLENPercentile: 95.0
+                    maxTLENPercentile: 95.0,
+                    viewAsPairs: true
 
                 },
                 {
@@ -49,12 +57,13 @@
                     indexURL: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.bai",
                     type: "alignment",
                     format: "bam",
-                    name: "TLEN 50 - 500",
+                    name: "TLEN 50 - 600",
                     showMismatches: false,
                     height: 500,
                     colorBy: "tlen",
                     minTLEN: 50,
-                    maxTLEN: 500
+                    maxTLEN: 600,
+                    viewAsPairs: true
                 }
             ]
         }
