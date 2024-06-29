@@ -83,8 +83,8 @@ class BAMTrack extends TrackBase {
         this.browser.off('trackdragend', this._dragEnd)
     }
 
-    setHighlightedReads(highlightedReads) {
-        this.alignmentTrack.setHighlightedReads(highlightedReads)
+    setHighlightedReads(highlightedReads, highlightColor) {
+        this.alignmentTrack.setHighlightedReads(highlightedReads, highlightColor)
         this.updateViews()
     }
 
