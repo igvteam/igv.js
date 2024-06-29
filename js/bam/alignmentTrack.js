@@ -137,9 +137,12 @@ class AlignmentTrack extends TrackBase {
         this.top = (0 === coverageTrack.height || false === showCoverage) ? 0 : (5 + coverageTrack.height)
     }
 
-    setHighlightedReads(highlightedReads) {
+    setHighlightedReads(highlightedReads, highlightColor) {
         if (!Array.isArray(highlightedReads) || !highlightedReads.every(i => typeof i === "string")) {
             throw new Error("AlignmentTrack.setHighlightedReads() only accept array of strings")
+        }
+        if(highlightColor) {
+            this.highlightColor = highlightColor
         }
         this.highlightedReads = new Set(highlightedReads)
     }

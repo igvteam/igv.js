@@ -6,8 +6,20 @@
 
 <body>
 
-<button id="log-state">Log Session</button>
-<button id="highlight-reads">Highlight Reads</button>
+<h1>Highlight reads</h1>
+
+This example illustrates highlighting alignments via the api
+
+<pre>
+    const bamTracks = browser.findTracks('type', 'alignment')
+    bamTracks[0].setHighlightedReads(["SRR099953.99059361", "SRR099953.79101554"],  "#0000ff")
+</pre>
+
+<p>
+    <button id="highlight-reads">Highlight Reads</button>
+    <button id="log-state">Log Session</button>
+</p>
+
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -29,11 +41,9 @@
                         url: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam",
                         indexURL: "https://1000genomes.s3.amazonaws.com/phase3/data/NA19625/exome_alignment/NA19625.mapped.ILLUMINA.bwa.ASW.exome.20120522.bam.bai",
                         name: "NA12878n",
-                        highlightColor: "#0000ff",
-                        //highlightedReads: ["SRR099953.99059361", "SRR099953.79101554"]
                     }
                 ]
-        };
+        }
 
     igv.createBrowser(document.getElementById('igvDiv'), config)
         .then(browser => {
@@ -41,7 +51,7 @@
 
             document.getElementById("highlight-reads").addEventListener("click", () => {
                 const bamTracks = browser.findTracks('type', 'alignment')
-                bamTracks[0].setHighlightedReads(["SRR099953.99059361", "SRR099953.79101554"])
+                bamTracks[0].setHighlightedReads(["SRR099953.99059361", "SRR099953.79101554"], "#0000ff")
             })
 
         })
