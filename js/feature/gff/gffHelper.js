@@ -1,7 +1,7 @@
 import {isExon, isTranscript, isTranscriptPart} from "./so.js"
 import {GFFFeature, GFFTranscript} from "./gffFeature.js"
 
-const gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus", "name"]
+const gffNameFields = ["Name", "transcript_id", "gene_name", "gene", "gene_id", "alias", "locus", "name" ]
 
 class GFFHelper {
 
