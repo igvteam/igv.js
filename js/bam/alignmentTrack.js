@@ -81,6 +81,7 @@ class AlignmentTrack extends TrackBase {
         if (config.largeFragmentLengthColor) this.largeTLENColor = config.largeFragmentLengthColor
         if (config.minFragmentLength) this.minTLEN = config.minFragmentLength
         if (config.maxFragmentLength) this.maxTLEN = config.maxFragmentLength
+        if (config.displayMode) this.displayMode = config.displayMode.toUpperCase()
         if (config.colorBy && config.colorByTag) {
             this.colorBy = config.colorBy + ":" + config.colorByTag
         }
@@ -113,12 +114,20 @@ class AlignmentTrack extends TrackBase {
                 this._groupByTags.push(config.groupBy.substring(4))
             }
         }
+
+        // Listen for locus change events,  needed to repack alignments when in "FULL" mode
+        this._locusChange = locusChange.bind(this)
+        this.browser.on('locuschange', this._locusChange)
     }
 
     init(config) {
         this.parent = config.parent  // A hack to get around initialization problem
         delete config.parent
         super.init(config)
+    }
+
+    dispose() {
+        this.browser.off('locuschage', this._locusChange)
     }
 
     /**
@@ -805,25 +814,21 @@ class AlignmentTrack extends TrackBase {
         $dml.text('Display mode:')
         menuItems.push({name: undefined, object: $dml, click: undefined, init: undefined})
 
+        for(let mode of ["EXPANDED", "SQUISHED", "FULL"])
         menuItems.push({
-            object: $(createCheckbox("expand", this.displayMode === "EXPANDED")),
+            object: $(createCheckbox(mode.toLowerCase(), this.displayMode === mode)),
             click: function expandHandler() {
-                this.alignmentTrack.displayMode = "EXPANDED"
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-            }
-        })
-
-        menuItems.push({
-            object: $(createCheckbox("squish", this.displayMode === "SQUISHED")),
-            click: function squishHandler() {
-                this.alignmentTrack.displayMode = "SQUISHED"
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
+                this.alignmentTrack.setDisplayMode(mode)
             }
         })
 
         return menuItems
+    }
+
+    setDisplayMode(mode) {
+        this.displayMode = mode
+        this.trackView.checkContentHeight()
+        this.trackView.repaintViews()
     }
 
     /**
@@ -878,6 +883,7 @@ class AlignmentTrack extends TrackBase {
     }
 
 
+
     /**
      * Create a "group by" checkbox menu item, optionally initially checked.
      *
@@ -894,14 +900,7 @@ class AlignmentTrack extends TrackBase {
 
         function clickHandler(ev) {
 
-            const doGroupBy = () => {
-                const alignmentContainers = this.getCachedAlignmentContainers()
-                for (let ac of alignmentContainers) {
-                    ac.pack(this.alignmentTrack)
-                }
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-            }
+            const doGroupBy = () => this.alignmentTrack.repackAlignments()
 
             if (menuItem.key === 'tag') {
                 let currentTag = ''
@@ -933,6 +932,15 @@ class AlignmentTrack extends TrackBase {
 
         return {name: undefined, object: $e, dialog: clickHandler, init: undefined}
 
+    }
+
+    repackAlignments() {
+        const alignmentContainers = this.getCachedAlignmentContainers()
+        for (let ac of alignmentContainers) {
+            if(typeof ac.pack === 'function') ac.pack(this)
+        }
+        this.trackView.checkContentHeight()
+        this.trackView.repaintViews()
     }
 
 
@@ -1386,5 +1394,12 @@ function shadedBaseColor(qual, baseColor) {
     }
     return baseColor
 }
+
+function locusChange() {
+    if ("FULL" === this.displayMode && !this.browser.isTrackPanning()) {
+        this.repackAlignments()
+    }
+}
+
 
 export default AlignmentTrack
