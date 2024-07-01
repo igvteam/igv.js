@@ -35,6 +35,7 @@ import PairedEndStats from "./pairedEndStats.js"
 import AlignmentTrack from "./alignmentTrack.js"
 import CoverageTrack from "./coverageTrack.js"
 
+
 class BAMTrack extends TrackBase {
 
     static defaults = {
@@ -80,8 +81,9 @@ class BAMTrack extends TrackBase {
     }
 
     dispose() {
-        this.browser.off('trackdragend', this._dragEnd)
+        this.alignmentTrack.dispose()
     }
+
 
     setHighlightedReads(highlightedReads, highlightColor) {
         this.alignmentTrack.setHighlightedReads(highlightedReads, highlightColor)
@@ -146,6 +148,7 @@ class BAMTrack extends TrackBase {
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel, viewport) {
 
         const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
+        alignmentContainer.viewport = viewport
 
         if (alignmentContainer.hasPairs && !this._pairedEndStats && !this.config.maxFragmentLength) {
             const pairedEndStats = new PairedEndStats(alignmentContainer.allAlignments(), this.config)
@@ -292,7 +295,6 @@ class BAMTrack extends TrackBase {
             object: $(createCheckbox("Show Alignments", this.showAlignments)),
             click: showAlignmentHandler
         })
-
 
 
         return menuItems
