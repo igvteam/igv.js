@@ -147,6 +147,13 @@ class TrackViewport extends Viewport {
         }
     }
 
+    genomicRange() {
+        return {
+            start: this.referenceFrame.start,
+            end: this.referenceFrame.start + this.referenceFrame.bpPerPixel * this.$viewport.width()
+        }
+    }
+
     /**
      * Set the content top of the current view.  This is triggered by scrolling.   If the current canvas extent is not
      * sufficient to cover the new vertical range repaint.

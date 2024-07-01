@@ -738,6 +738,8 @@ class Browser {
 
         this.updateUIWithReferenceFrameList()
 
+        this.updateLocusSearchWidget()
+
         return trackConfigurations
 
     }
@@ -911,8 +913,6 @@ class Browser {
     updateUIWithReferenceFrameList() {
 
         const referenceFrameList = this.referenceFrameList
-
-        this.updateLocusSearchWidget()
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
 
