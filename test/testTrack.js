@@ -12,7 +12,13 @@ const genome = createGenome()
 
 suite("test getState()", function () {
 
-    const browser = {genome}
+    const browser = {
+        genome,
+        on: () => {
+        },
+        off: () => {
+        }
+    }
 
     test("wig track default state", async function () {
 
