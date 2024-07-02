@@ -87,10 +87,14 @@ class Browser {
         this.config = config
         this.guid = DOMUtils.guid()
         this.namespace = '.browser_' + this.guid
-
+        
         this.parent = parentDiv
 
-        const shadowRoot = parentDiv.attachShadow({mode: "open"})
+        let shadowRoot = parentDiv.shadowRoot
+        if (!shadowRoot) {
+            shadowRoot = parentDiv.attachShadow({mode: "open"})
+        }
+
         const sheet = new CSSStyleSheet()
         sheet.replaceSync(igvCss)
         shadowRoot.adoptedStyleSheets = [sheet]
