@@ -87,17 +87,17 @@ class Browser {
         this.config = config
         this.guid = DOMUtils.guid()
         this.namespace = '.browser_' + this.guid
-        
+
         this.parent = parentDiv
 
         let shadowRoot = parentDiv.shadowRoot
         if (!shadowRoot) {
             shadowRoot = parentDiv.attachShadow({mode: "open"})
+            const sheet = new CSSStyleSheet()
+            sheet.replaceSync(igvCss)
+            shadowRoot.adoptedStyleSheets = [sheet]
         }
 
-        const sheet = new CSSStyleSheet()
-        sheet.replaceSync(igvCss)
-        shadowRoot.adoptedStyleSheets = [sheet]
 
 
         this.root = DOMUtils.div({class: 'igv-container'})
