@@ -145,7 +145,7 @@ class AlignmentContainer {
         const packFull = (alignments, groupName) => {
 
             alignments.sort(function (a, b) {
-                return showSoftClips ? a.scStart - b.scStart : a.start - b.start
+                return a.start - b.start
             })
             const group = new Group(groupName)
             const {start, end} = this.viewport.genomicRange()
