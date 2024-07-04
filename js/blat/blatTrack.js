@@ -38,7 +38,7 @@ class BlatTrack extends FeatureTrack {
             const config =
                 {
                     browser: this.browser,
-                    parent: this.browser.parent,
+                    parent: this.browser.columnContainer,
                     headerTitle: this.config.title,
                     description: this.sequence,
                     dismissHandler: () => {

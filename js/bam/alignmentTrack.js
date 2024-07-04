@@ -1082,7 +1082,7 @@ class AlignmentTrack extends TrackBase {
 
                 // TODO if genome supports blat
                 const seqstring = clickedAlignment.seq
-                if (seqstring && "*" != seqstring) {
+                if (seqstring && "*" !== seqstring) {
 
                     if (seqstring.length < maxSequenceSize) {
                         list.push({
