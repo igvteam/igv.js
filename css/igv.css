@@ -1895,6 +1895,13 @@
 .igv-roi-table {
   position: absolute;
   z-index: 1024;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+  resize: both;
+  overflow: hidden;
   width: min-content;
   max-width: 1600px;
   border-color: #7f7f7f;
@@ -1905,11 +1912,6 @@
   font-size: 12px;
   font-weight: 400;
   background-color: white;
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: stretch;
   cursor: default;
 }
 .igv-roi-table > div {
@@ -2010,16 +2012,15 @@
   border-right: unset;
 }
 .igv-roi-table > .igv-roi-table-row-container {
-  overflow: auto;
-  resize: both;
-  max-width: 1600px;
-  height: 360px;
-  background-color: transparent;
   display: flex;
   flex-flow: column;
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: stretch;
+  overflow: auto;
+  min-height: 360px;
+  flex: 1 1 auto;
+  background-color: transparent;
 }
 .igv-roi-table > .igv-roi-table-row-container > .igv-roi-table-row {
   height: 24px;
