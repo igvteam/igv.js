@@ -50,7 +50,7 @@ class SampleInfoViewport {
 
         let requiredHeight
         if (this.browser.trackViews.length > 1 && null === this.viewport.previousElementSibling) {
-            const [at, bt] = [this.browser.trackViews[0].track, this.browser.trackViews[1].track]
+            const [at, bt] = [this.browser.ideogramTrackView.track, this.browser.rulerTrackView.track]
             requiredHeight = at.height + bt.height
         } else {
             requiredHeight = this.viewport.clientHeight
@@ -124,7 +124,9 @@ class SampleInfoViewport {
                 this.draw({context: this.ctx, samples})
             }
         } else if (null === this.viewport.previousElementSibling) {
-            this.browser.trackViews[1].setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? sampleInfoColumnHeightShim : defaultRulerHeight, true)
+            if(this.browser.rulerTrackView) {
+                this.browser.rulerTrackView.setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? sampleInfoColumnHeightShim : defaultRulerHeight, true)
+            }
             this.renderSampleInfoColumns(this.ctx)
         }
 

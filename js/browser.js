@@ -630,7 +630,8 @@ class Browser {
         }
 
         if (false !== session.showRuler) {
-            this.trackViews.push(new TrackView(this, this.columnContainer, new RulerTrack(this)))
+            const rulerTrackView = new TrackView(this, this.columnContainer, new RulerTrack(this))
+            this.trackViews.push(rulerTrackView)
         }
 
         // Restore gtex selections.
@@ -1455,7 +1456,22 @@ class Browser {
                 this.trackViews.push(trackView)
             }
         }
+    }
 
+    /**
+     * Currently the ideogram  is always in position 1.  This is a bit fragile, we will wrap it in property to be
+     * explicict
+     */
+    get ideogramTrackView() {
+        return this.trackViews[0]
+    }
+
+    /**
+     * Currently the ruler track is always in position 1.  This is a bit fragile, we will wrap it in property to be
+     * explicict
+     */
+    get rulerTrackView() {
+        return this.trackViews[1]
     }
 
     /**
@@ -1476,7 +1492,6 @@ class Browser {
     get tracks() {
         return this.trackViews.map(tv => tv.track).filter(t => t !== undefined)
     }
-
 
     getTrackURLs() {
         return new Set(this.tracks
