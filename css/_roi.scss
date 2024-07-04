@@ -338,7 +338,7 @@ $igv-roi-table-background-color: #eee;
 
     overflow: auto;
 
-    min-height: (15 * $dimension);
+    height: (15 * $dimension);
     flex: 1 1 auto;
 
     background-color: transparent;
@@ -389,6 +389,7 @@ $igv-roi-table-background-color: #eee;
   // footer buttons
   > div:last-child {
 
+    min-height: $dimension-large;
     height: $dimension-large;
     line-height: $dimension-large;
 

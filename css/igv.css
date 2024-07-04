@@ -2018,7 +2018,7 @@
   justify-content: flex-start;
   align-items: stretch;
   overflow: auto;
-  min-height: 360px;
+  height: 360px;
   flex: 1 1 auto;
   background-color: transparent;
 }
@@ -2051,6 +2051,7 @@
   background-color: rgba(0, 0, 0, 0.04);
 }
 .igv-roi-table > div:last-child {
+  min-height: 32px;
   height: 32px;
   line-height: 32px;
   border-top-color: #7f7f7f;
