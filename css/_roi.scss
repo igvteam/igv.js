@@ -153,8 +153,15 @@ $igv-roi-table-background-color: #eee;
   position: absolute;
   z-index: 1024;
 
-  //overflow: auto;
-  //resize: both;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+
+  resize: both;
+  overflow: hidden;
+
   width: min-content;
   max-width: 1600px;
 
@@ -168,12 +175,6 @@ $igv-roi-table-background-color: #eee;
   font-weight: 400;
 
   background-color: white;
-
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: stretch;
 
   // default div styling
   > div {
@@ -329,20 +330,19 @@ $igv-roi-table-background-color: #eee;
   // table row container
   > .igv-roi-table-row-container {
 
-    overflow: auto;
-    resize: both;
-
-    max-width: 1600px;
-
-    height: (15 * $dimension);
-
-    background-color: transparent;
-
     display: flex;
     flex-flow: column;
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: stretch;
+
+    overflow: auto;
+
+    min-height: (15 * $dimension);
+    flex: 1 1 auto;
+
+    background-color: transparent;
+    //background-color: rgba(135, 206, 235, 0.36);
 
     // table row
     > .igv-roi-table-row {
