@@ -20,8 +20,6 @@ const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)"
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)"
 const DEFAULT_HIGHLIGHT_COLOR = "#00ff00"
 const MINIMUM_BLAT_LENGTH = 20
-const bisulfiteColorFw1 = "rgb(195, 195, 195)"
-const bisulfiteColorRev1 = "rgb(195, 210, 195)"
 
 const pairCompatibleGroupOptions = new Set(["firstOfPairStrand"])
 
@@ -40,6 +38,8 @@ class AlignmentTrack extends TrackBase {
         squishedRowHeight: 3,
         negStrandColor: "rgba(150, 150, 230, 0.75)",
         posStrandColor: "rgba(230, 150, 150, 0.75)",
+        baseModPosStrandColor: "rgb(195, 195, 195)",
+        baseModNegStrandColor: "rgb(195, 210, 195)",
         insertionColor: "rgb(138, 94, 161)",
         insertionTextColor: "white",
         showInsertionText: false,
@@ -1246,6 +1246,11 @@ class AlignmentTrack extends TrackBase {
             colorBy = "tag"
         }
         switch (colorBy) {
+
+            case "basemod":
+            case "basemod2":
+                color = alignment.strand ? this.baseModPosStrandColor : this.baseModNegStrandColor
+                break
             case "strand":
                 color = alignment.strand ? this.posStrandColor : this.negStrandColor
                 break

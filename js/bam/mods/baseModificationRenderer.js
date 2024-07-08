@@ -1,4 +1,3 @@
-
 import {byteToUnsignedInt} from "./baseModificationUtils.js"
 import {getModColor} from "./baseModificationColors.js"
 
@@ -27,8 +26,6 @@ class BaseModificationRenderer {
 
     drawModifications(alignment, y, height, context, colorOption) { //alignment, bpStart, locScale, rowRect, ctx, colorOption) {
 
-        const threshold = 0.5   // TODO - parameter
-
         const {ctx, pixelEnd, bpStart, bpPerPixel} = context
 
         const baseModificationSets = alignment.getBaseModificationSets()
@@ -36,7 +33,7 @@ class BaseModificationRenderer {
 
             for (let block of alignment.blocks) {
 
-                if(block.type === 'S') continue;   // Soft clip
+                if (block.type === 'S') continue   // Soft clip
 
                 // Compute bounds
                 const pY = y
@@ -75,13 +72,11 @@ class BaseModificationRenderer {
 
                     if (modification) {
 
-                        const scaledThreshold = threshold * 255
-
                         let c
-                        if (noModLh > maxLh && colorOption === "basemod2" && noModLh >= scaledThreshold) {
-                            c = getModColor("NONE_" + canonicalBase, noModLh, colorOption);
-                        } else if (maxLh >= scaledThreshold) {
-                            c = getModColor(modification, maxLh, colorOption);
+                        if (noModLh > maxLh && colorOption === "basemod2") {
+                            c = getModColor("NONE_" + canonicalBase, noModLh, colorOption)
+                        } else {
+                            c = getModColor(modification, maxLh, colorOption)
                         }
 
                         ctx.fillStyle = c
@@ -92,14 +87,13 @@ class BaseModificationRenderer {
                             pX--
                         }
                         ctx.fillRect(pX, pY, dX, Math.max(1, dY - 2))
+
                     }
                 }
             }
         }
     }
 }
-
-
 
 
 export default BaseModificationRenderer

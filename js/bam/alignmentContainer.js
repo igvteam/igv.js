@@ -149,8 +149,8 @@ class AlignmentContainer {
             })
             const group = new Group(groupName)
             const {start, end} = this.viewport.genomicRange()
-            for(let a of alignments) {
-                if(a.end < start || a.start > end) {
+            for (let a of alignments) {
+                if (a.end < start || a.start > end) {
                     this.#unpacked.push(a)
                 } else {
                     const alignmentRow = new BamAlignmentRow()
@@ -265,9 +265,9 @@ class AlignmentContainer {
         if (this.alignments) {
             return this.alignments
         } else {
-            const all =  Array.from(this.packedGroups.values()).flatMap(group => group.rows.flatMap(row => row.alignments))
-            if(this.#unpacked && this.#unpacked.length > 0) {
-                for(let a of this.#unpacked) {
+            const all = Array.from(this.packedGroups.values()).flatMap(group => group.rows.flatMap(row => row.alignments))
+            if (this.#unpacked && this.#unpacked.length > 0) {
+                for (let a of this.#unpacked) {
                     all.push(a)
                 }
             }
@@ -784,6 +784,9 @@ function getGroupComparator(groupName, expectedPairOrientation) {
     switch (groupName) {
         case "pairOrientation":
             return pairOrientationComparator(expectedPairOrientation)
+        case 'strand':
+        case 'firstOfPairStrand':
+            return groupStrandComparator
         default:
             return groupName && groupName.startsWith("base:") ?
                 baseComparator :
@@ -798,6 +801,16 @@ function baseComparator(o1, o2) {
         return baseRank.get(o1) - baseRank.get(o2)
     } else {
         return o1.localeCompare(o2, undefined, {sensitivity: 'base'})
+    }
+}
+
+function groupStrandComparator(o1, o2) {
+    if (o1 === o2) {
+        return 0
+    } else if (o1 && o2) {
+        return -o1.localeCompare(o2)
+    } else {
+        return o1 ? 1 : -1
     }
 }
 

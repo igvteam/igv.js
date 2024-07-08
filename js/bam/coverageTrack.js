@@ -72,7 +72,8 @@ class CoverageTrack  {
             strokeStyle: color
         })
 
-        const w = Math.max(1, Math.ceil(1.0 / bpPerPixel))
+        const wFactor =0.99
+        const w =  Math.max(1, 1.0 / bpPerPixel)
         for (let i = 0, len = coverageMap.coverage.length; i < len; i++) {
 
             const bp = (coverageMap.bpStart + i)
@@ -82,9 +83,9 @@ class CoverageTrack  {
             const item = coverageMap.coverage[i]
             if (!item) continue
 
-            const h = Math.round((item.total / this.dataRange.max) * this.height)
+            const h = (item.total / this.dataRange.max) * this.height
             const y = this.height - h
-            const x = Math.floor((bp - bpStart) / bpPerPixel)
+            const x = (bp - bpStart) / bpPerPixel
 
 
             // IGVGraphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
@@ -110,7 +111,7 @@ class CoverageTrack  {
 
                 if ("basemod2" === this.parent.config.colorBy || "basemod" === this.parent.config.colorBy) {
                     //context, pX, pBottom, dX, barHeight, pos, alignmentContainer
-                    const threshold = 0.5   // TODD - parameter
+                    const threshold = "basemod2" === this.parent.config.colorBy ? 0.5 : 0   // TODD - parameter
                     drawModifications(ctx, x, this.height, w, h, bp, alignmentContainer, this.parent.config.colorBy, threshold)
 
                 } else if (item.isMismatch(refBase)) {
