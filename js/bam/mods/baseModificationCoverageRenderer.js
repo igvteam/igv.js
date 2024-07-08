@@ -42,13 +42,15 @@ function drawModifications(ctx,
 
             if (detectable == 0) continue  //No informative reads
 
-            const count = modificationCounts.getCount(pos, key, threshold, colorOption === "basemod2")
+            const includeNoMod = colorOption === "basemod2"
+
+            const count = modificationCounts.getCount(pos, key, threshold, includeNoMod )
             if (count == 0) continue
 
             const modFraction = (modifiable / total) * (count / detectable)
             const modHeight = Math.round(modFraction * barHeight)
 
-            const likelihoodSum = modificationCounts.getLikelihoodSum(pos, key, threshold, "basemod2")
+            const likelihoodSum = modificationCounts.getLikelihoodSum(pos, key, threshold, includeNoMod)
             const averageLikelihood = likelihoodSum / count
 
             const baseY = pBottom - modHeight
