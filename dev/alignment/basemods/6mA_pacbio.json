@@ -10,7 +10,8 @@
       "height": 400,
       "name": "PacBio - 6mA 2 Color",
       "colorBy": "basemod2",
-      "groupBy": "strand"
+      "groupBy": "strand",
+      "baseModificationThreshold": 0
     },
     {
       "type": "alignment",

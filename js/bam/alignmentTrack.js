@@ -144,6 +144,10 @@ class AlignmentTrack extends TrackBase {
         return this._baseModRenderer
     }
 
+    get baseModificationThreshold() {
+        return this.parent.baseModificationThreshold
+    }
+
     setTop(coverageTrack, showCoverage) {
         this.top = (0 === coverageTrack.height || false === showCoverage) ? 0 : (5 + coverageTrack.height)
     }
@@ -480,7 +484,7 @@ class AlignmentTrack extends TrackBase {
                         bpEnd,
                         pixelEnd: pixelWidth
                     })
-                this.baseModRenderer.drawModifications(alignment, y, alignmentHeight, context, this.colorBy)
+                this.baseModRenderer.drawModifications(alignment, y, alignmentHeight, context, this.colorBy, this.baseModificationThreshold)
             }
 
 

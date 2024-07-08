@@ -24,7 +24,7 @@ class BaseModificationRenderer {
         this.context = context
     }
 
-    drawModifications(alignment, y, height, context, colorOption) { //alignment, bpStart, locScale, rowRect, ctx, colorOption) {
+    drawModifications(alignment, y, height, context, colorOption, threshold) {
 
         const {ctx, pixelEnd, bpStart, bpPerPixel} = context
 
@@ -72,11 +72,13 @@ class BaseModificationRenderer {
 
                     if (modification) {
 
+                        const scaledThreshold = threshold * 255
+
                         let c
-                        if (noModLh > maxLh && colorOption === "basemod2") {
-                            c = getModColor("NONE_" + canonicalBase, noModLh, colorOption)
-                        } else {
-                            c = getModColor(modification, maxLh, colorOption)
+                        if (noModLh > maxLh && colorOption === "basemod2" && noModLh >= scaledThreshold) {
+                            c = getModColor("NONE_" + canonicalBase, noModLh, colorOption);
+                        } else if (maxLh >= scaledThreshold) {
+                            c = getModColor(modification, maxLh, colorOption);
                         }
 
                         ctx.fillStyle = c

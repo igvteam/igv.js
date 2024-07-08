@@ -161,7 +161,7 @@ class BaseModificationCounts {
     getValueString(position, colorOption) {
         let buffer = ''
         buffer += ("<br>---------<br>")
-        buffer += ("Modifications with likelihood > " + (lastThreshold * 100) + "%")
+        buffer += ("Modifications with likelihood > " + (this.lastThreshold * 100) + "%")
 
         for (let key of this.maxLikelihoods.keys()) {
             const t = maxLikelihoods.get(key)
@@ -170,9 +170,9 @@ class BaseModificationCounts {
             }
             if (t.has(position)) {
                 let includeNoMods = colorOption === "basemod2"
-                const count = this.getCount(position, key, lastThreshold, includeNoMods)
+                const count = this.getCount(position, key, this.lastThreshold, includeNoMods)
                 if (count > 0) {
-                    const likelihoodSum = getLikelihoodSum(position, key, lastThreshold, includeNoMods)
+                    const likelihoodSum = getLikelihoodSum(position, key, this.lastThreshold, includeNoMods)
                     const averageLikelihood = (likelihoodSum / count) * .3921568      // => 100/255
                     const modName = modificationName(key.modification)
                     buffer.append("<br>&nbsp;&nbsp;" + modName + " (" + key.base + key.strand + "): " + count + "  @ average likelihood " + averageLikelihood + "%")
