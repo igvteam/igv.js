@@ -1,4 +1,5 @@
 import {complementBase} from "../../util/sequenceUtils.js"
+import BaseModificationKey from "./baseModificationKey.js"
 
 class BaseModificationSet {
 
@@ -15,6 +16,7 @@ class BaseModificationSet {
         this.strand = strand
         this.likelihoods = likelihoods
         this.canonicalBase = this.strand == '+' ? this.base : complementBase(this.base)
+        this.key = BaseModificationKey.getKey(base, strand, modification)
     }
 
     containsPosition(pos) {

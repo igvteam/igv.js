@@ -11,6 +11,7 @@ import TrackBase from "../trackBase.js"
 import {getChrColor} from "../util/getChrColor.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
+import BaseModificationKey from "./mods/baseModificationKey.js"
 
 
 const alignmentStartGap = 5
@@ -64,6 +65,7 @@ class AlignmentTrack extends TrackBase {
     }
 
     _colorTables = new Map()
+    _baseModificationKeys = new Set()
 
     constructor(config, browser) {
 
@@ -150,7 +152,7 @@ class AlignmentTrack extends TrackBase {
         if (!Array.isArray(highlightedReads) || !highlightedReads.every(i => typeof i === "string")) {
             throw new Error("AlignmentTrack.setHighlightedReads() only accept array of strings")
         }
-        if(highlightColor) {
+        if (highlightColor) {
             this.highlightColor = highlightColor
         }
         this.highlightedReads = new Set(highlightedReads)
@@ -191,6 +193,9 @@ class AlignmentTrack extends TrackBase {
         const nucleotideColors = this.browser.nucleotideColors
 
         ctx.save()
+
+        // Update base modification keys.
+        this._baseModificationKeys.add(...alignmentContainer.baseModificationKeys)
 
         let referenceSequence = alignmentContainer.sequence
         if (referenceSequence) {
@@ -684,6 +689,11 @@ class AlignmentTrack extends TrackBase {
             menuItems.push(this.colorByCB(item, selected))
         }
 
+        if (this._baseModificationKeys.size > 0) {
+            menuItems.push(this.basemodColorByCB({key: 'basemod', label: 'base modification'}, this.colorBy === 'basemod'))
+            menuItems.push(this.basemodColorByCB({key: 'basemod2', label: 'base modification 2-color)'}, this.colorBy === 'basemod2'))
+        }
+
 
         // Group by items //////////////////////////////////////////////////
         menuItems.push('<hr/>')
@@ -814,13 +824,13 @@ class AlignmentTrack extends TrackBase {
         $dml.text('Display mode:')
         menuItems.push({name: undefined, object: $dml, click: undefined, init: undefined})
 
-        for(let mode of ["EXPANDED", "SQUISHED", "FULL"])
-        menuItems.push({
-            object: $(createCheckbox(mode.toLowerCase(), this.displayMode === mode)),
-            click: function expandHandler() {
-                this.alignmentTrack.setDisplayMode(mode)
-            }
-        })
+        for (let mode of ["EXPANDED", "SQUISHED", "FULL"])
+            menuItems.push({
+                object: $(createCheckbox(mode.toLowerCase(), this.displayMode === mode)),
+                click: function expandHandler() {
+                    this.alignmentTrack.setDisplayMode(mode)
+                }
+            })
 
         return menuItems
     }
@@ -882,6 +892,21 @@ class AlignmentTrack extends TrackBase {
         }
     }
 
+    basemodColorByCB(menuItem, showCheck) {
+
+        const $e = $(createCheckbox(menuItem.label, showCheck))
+
+        function clickHandler() {
+            this.alignmentTrack.colorBy = menuItem.key
+            if('strand' !== this.alignmentTrack.groupBy) {
+                this.alignmentTrack.groupBy = 'strand'
+                this.alignmentTrack.repackAlignments()
+            }
+            this.trackView.repaintViews()
+        }
+
+        return {name: undefined, object: $e, click: clickHandler, init: undefined}
+    }
 
 
     /**
@@ -937,7 +962,7 @@ class AlignmentTrack extends TrackBase {
     repackAlignments() {
         const alignmentContainers = this.getCachedAlignmentContainers()
         for (let ac of alignmentContainers) {
-            if(typeof ac.pack === 'function') ac.pack(this)
+            if (typeof ac.pack === 'function') ac.pack(this)
         }
         this.trackView.checkContentHeight()
         this.trackView.repaintViews()

@@ -98,6 +98,10 @@ class BAMTrack extends TrackBase {
         return this.alignmentTrack.viewAsPairs
     }
 
+    get colorBy() {
+        return this.alignmentTrack.colorBy
+    }
+
     set height(h) {
         this._height = h
         if (this.showAlignments) {

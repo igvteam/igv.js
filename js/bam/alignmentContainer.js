@@ -44,6 +44,7 @@ const alignmentSpace = 2
 class AlignmentContainer {
 
     #unpacked = []
+    baseModificationKeys = new Set()
 
     constructor(chr, start, end,
                 {
@@ -200,6 +201,12 @@ class AlignmentContainer {
         this.hasPairs = this.hasPairs || alignment.isPaired()
 
         this.coverageMap.incCounts(alignment)   // Count coverage before any downsampling
+
+        const baseModificationSets = alignment.getBaseModificationSets()
+        if(baseModificationSets) {
+            this.baseModificationKeys.add(...baseModificationSets.map(s => s.key))
+        }
+
 
         if (this.baseModCounts) {
             this.baseModCounts.incrementCounts(alignment)
