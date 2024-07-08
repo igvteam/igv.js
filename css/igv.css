@@ -80,6 +80,7 @@
   color: #444;
 }
 .igv-ui-popover > div:last-child {
+  user-select: text;
   overflow-y: auto;
   overflow-x: hidden;
   max-height: 400px;
@@ -90,7 +91,6 @@
   border-bottom-right-radius: 4px;
 }
 .igv-ui-popover > div:last-child > div {
-  user-select: all;
   margin-left: 4px;
   margin-right: 4px;
   min-width: 220px;
