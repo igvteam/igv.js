@@ -69,6 +69,8 @@ $igv-ui-popover-content-height: calc(100% - #{$igv-ui-popover-header-height} - 2
     // content
     >div:last-child {
 
+        user-select: text;
+
         overflow-y: auto;
         overflow-x: hidden;
 
@@ -81,11 +83,8 @@ $igv-ui-popover-content-height: calc(100% - #{$igv-ui-popover-header-height} - 2
         border-bottom-left-radius: $igv-trackgear-popover-border-radius;
         border-bottom-right-radius: $igv-trackgear-popover-border-radius;
 
-
         // row
         >div {
-
-            user-select: all;
 
             margin-left: 4px;
             margin-right: 4px;
