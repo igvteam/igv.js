@@ -21,7 +21,7 @@ const codeValues = new Map([
 
 
 function modificationName(modification) {
-    return "Base modification: " + ((codeValues.has(modification)) ? codeValues.get(modification) : "Uknown")
+    return  (codeValues.has(modification)) ? codeValues.get(modification) : "Uknown"
 }
 
 

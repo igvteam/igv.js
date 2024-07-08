@@ -141,14 +141,17 @@ class CoverageTrack  {
         const genomicLocation = Math.floor(clickState.genomicLocation)
         const coverageMap = features.coverageMap
         const coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart)
-        return coverageMap.coverage[coverageMapIndex]
+        return {
+            coverage: coverageMap.coverage[coverageMapIndex],
+            baseModCounts: features.baseModCounts,
+            hoverText: () => coverageMap.coverage[coverageMapIndex].hoverText()}
     }
 
     popupData(clickState) {
 
         const nameValues = []
 
-        const coverage = this.getClickedObject(clickState)
+        const {coverage, baseModCounts} = this.getClickedObject(clickState)
         if (coverage) {
             const genomicLocation = Math.floor(clickState.genomicLocation)
             const referenceFrame = clickState.viewport.referenceFrame
@@ -185,6 +188,13 @@ class CoverageTrack  {
             nameValues.push('<HR/>')
             nameValues.push({name: 'DEL', value: coverage.del.toString()})
             nameValues.push({name: 'INS', value: coverage.ins.toString()})
+
+            if(baseModCounts) {
+                nameValues.push('<hr/>');
+                nameValues.push(...baseModCounts.popupData(genomicLocation, this.parent.colorBy))
+
+            }
+
         }
 
         return nameValues
