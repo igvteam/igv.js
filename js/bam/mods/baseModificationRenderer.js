@@ -31,6 +31,13 @@ class BaseModificationRenderer {
         const baseModificationSets = alignment.getBaseModificationSets()
         if (baseModificationSets) {
 
+            let selectedModification
+            const parts = colorOption.split(":")
+            if(parts.length == 2) {
+                colorOption = parts[0]
+                selectedModification = parts[1]
+            }
+
             for (let block of alignment.blocks) {
 
                 if (block.type === 'S') continue   // Soft clip
@@ -58,6 +65,9 @@ class BaseModificationRenderer {
                     let canonicalBase = 0
 
                     for (let bmSet of baseModificationSets) {
+                        if(selectedModification && bmSet.modification !== selectedModification) {
+                            continue
+                        }
                         if (bmSet.containsPosition(i)) {
                             const lh = byteToUnsignedInt(bmSet.likelihoods.get(i))
                             noModLh -= lh

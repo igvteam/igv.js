@@ -12,6 +12,7 @@ import {getChrColor} from "../util/getChrColor.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
 import BaseModificationKey from "./mods/baseModificationKey.js"
+import {modificationName} from "./mods/baseModificationUtils.js"
 
 
 const alignmentStartGap = 5
@@ -65,7 +66,7 @@ class AlignmentTrack extends TrackBase {
     }
 
     _colorTables = new Map()
-    _baseModificationKeys = new Set()
+    _baseModifications = new Set()
 
     constructor(config, browser) {
 
@@ -199,7 +200,9 @@ class AlignmentTrack extends TrackBase {
         ctx.save()
 
         // Update base modification keys.
-        this._baseModificationKeys.add(...alignmentContainer.baseModificationKeys)
+        for (let k of alignmentContainer.baseModificationKeys) {
+            this._baseModifications.add(k.modification)
+        }
 
         let referenceSequence = alignmentContainer.sequence
         if (referenceSequence) {
@@ -475,7 +478,7 @@ class AlignmentTrack extends TrackBase {
                 }
             }
 
-            if ("basemod2" === this.colorBy || "basemod" === this.colorBy) {
+            if (this.colorBy && this.colorBy.startsWith("basemod")) {
                 const context = (
                     {
                         ctx,
@@ -693,11 +696,38 @@ class AlignmentTrack extends TrackBase {
             menuItems.push(this.colorByCB(item, selected))
         }
 
-        if (this._baseModificationKeys.size > 0) {
-            menuItems.push(this.basemodColorByCB({key: 'basemod', label: 'base modification'}, this.colorBy === 'basemod'))
-            menuItems.push(this.basemodColorByCB({key: 'basemod2', label: 'base modification 2-color)'}, this.colorBy === 'basemod2'))
-        }
 
+        const size = this._baseModifications.size
+        if (size > 0) {
+            menuItems.push('<hr style="border-top:1px dotted;border-bottom: none;">')
+            let label = size === 1 ? 'base modification' : 'base modification (all)'
+            menuItems.push(this.basemodColorByCB({
+                key: 'basemod', label
+            }))
+            if (size > 1) {
+                for (let m of this._baseModifications) {
+                    let key =
+                        menuItems.push(this.basemodColorByCB({
+                            key: 'basemod:' + m,
+                            label: `base modification (${modificationName(m)})`
+                        }))
+                }
+            }
+
+            menuItems.push('<hr style="border-top:1px dotted;border-bottom: none;">')
+            label = size === 1 ? 'base modification 2-color' : 'base modification 2-color (all)'
+            menuItems.push(this.basemodColorByCB({
+                key: 'basemod2', label
+            }))
+            if (size > 1) {
+                for (let m of this._baseModifications) {
+                    menuItems.push(this.basemodColorByCB({
+                        key: 'basemod2:' + m,
+                        label: `base modification 2-color (${modificationName(m)})`
+                    }))
+                }
+            }
+        }
 
         // Group by items //////////////////////////////////////////////////
         menuItems.push('<hr/>')
@@ -896,13 +926,15 @@ class AlignmentTrack extends TrackBase {
         }
     }
 
-    basemodColorByCB(menuItem, showCheck) {
+    basemodColorByCB(menuItem) {
 
+        const showCheck = this.colorBy === menuItem.key
+        
         const $e = $(createCheckbox(menuItem.label, showCheck))
 
         function clickHandler() {
             this.alignmentTrack.colorBy = menuItem.key
-            if('strand' !== this.alignmentTrack.groupBy) {
+            if ('strand' !== this.alignmentTrack.groupBy) {
                 this.alignmentTrack.groupBy = 'strand'
                 this.alignmentTrack.repackAlignments()
             }

@@ -109,7 +109,7 @@ class CoverageTrack  {
 
                 const refBase = sequence[i]
 
-                if ("basemod2" === this.parent.colorBy || "basemod" === this.parent.colorBy) {
+                if (this.parent.colorBy && this.parent.colorBy.startsWith("basemod")) {
                     drawModifications(ctx, x, this.height, w, h, bp, alignmentContainer, this.parent.colorBy, this.parent.baseModificationThreshold)
 
                 } else if (item.isMismatch(refBase)) {
