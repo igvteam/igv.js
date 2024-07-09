@@ -24,12 +24,19 @@ class BaseModificationRenderer {
         this.context = context
     }
 
-    drawModifications(alignment, y, height, context, colorOption) { //alignment, bpStart, locScale, rowRect, ctx, colorOption) {
+    drawModifications(alignment, y, height, context, colorOption, threshold) {
 
         const {ctx, pixelEnd, bpStart, bpPerPixel} = context
 
         const baseModificationSets = alignment.getBaseModificationSets()
         if (baseModificationSets) {
+
+            let selectedModification
+            const parts = colorOption.split(":")
+            if(parts.length == 2) {
+                colorOption = parts[0]
+                selectedModification = parts[1]
+            }
 
             for (let block of alignment.blocks) {
 
@@ -58,6 +65,9 @@ class BaseModificationRenderer {
                     let canonicalBase = 0
 
                     for (let bmSet of baseModificationSets) {
+                        if(selectedModification && bmSet.modification !== selectedModification) {
+                            continue
+                        }
                         if (bmSet.containsPosition(i)) {
                             const lh = byteToUnsignedInt(bmSet.likelihoods.get(i))
                             noModLh -= lh
@@ -72,11 +82,13 @@ class BaseModificationRenderer {
 
                     if (modification) {
 
+                        const scaledThreshold = threshold * 255
+
                         let c
-                        if (noModLh > maxLh && colorOption === "basemod2") {
-                            c = getModColor("NONE_" + canonicalBase, noModLh, colorOption)
-                        } else {
-                            c = getModColor(modification, maxLh, colorOption)
+                        if (noModLh > maxLh && colorOption === "basemod2" && noModLh >= scaledThreshold) {
+                            c = getModColor("NONE_" + canonicalBase, noModLh, colorOption);
+                        } else if (maxLh >= scaledThreshold) {
+                            c = getModColor(modification, maxLh, colorOption);
                         }
 
                         ctx.fillStyle = c
