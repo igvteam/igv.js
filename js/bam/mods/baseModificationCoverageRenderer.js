@@ -31,6 +31,18 @@ function drawModifications(ctx,
 
         const total = coverageMap.getTotalCount(pos)
 
+        // If site has no modification likelihoods skip (don't draw only "NONE_")
+        const realModificationKeys = sortedKeys.filter(key => {
+            if (selectedModification) {
+                return selectedModification === key.modification
+            } else {
+                return !key.modification.startsWith("NONE_")
+            }
+        })
+        if(!realModificationKeys.find(key => modificationCounts.getCount(pos, key, 0, false) > 0)) {
+            return
+        }
+
         for (let key of sortedKeys) {
 
             //if (filter && !filter.pass(key.modification, key.getCanonicalBase())) continue;
@@ -41,6 +53,7 @@ function drawModifications(ctx,
             if(selectedModification && selectedModification !== key.modification && !key.modification.startsWith("NONE_")) {
                 continue
             }
+
 
             const base = key.base
             const compl = complementBase(base)
@@ -70,7 +83,6 @@ function drawModifications(ctx,
             ctx.fillStyle = modColor
             ctx.fillRect(pX, baseY, dX, modHeight)
             pBottom = baseY
-
         }
     }
 }
