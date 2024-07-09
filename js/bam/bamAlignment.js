@@ -1,7 +1,7 @@
 
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {createSupplementaryAlignments} from "./supplementaryAlignment.js"
-import {getBaseModificationSets} from "./mods/baseModificationUtils.js"
+import {byteToUnsignedInt, getBaseModificationSets, modificationName} from "./mods/baseModificationUtils.js"
 import orientationTypes from "./orientationTypes.js"
 
 
@@ -245,6 +245,25 @@ class BamAlignment {
         nameValues.push({name: 'Read Base:', value: this.readBaseAt(genomicLocation)})
         nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)})
 
+        const bmSets = this.getBaseModificationSets()
+        if(bmSets) {
+            const i = this.positionToReadIndex(genomicLocation)
+            if(undefined !== i) {
+                let found = false
+                for (let bmSet of bmSets) {
+                    if (bmSet.containsPosition(i)) {
+                        if(!found) {
+                            nameValues.push('<hr/>')
+                            nameValues.push('<b>Base modifications:</b>')
+                            found = true
+                        }
+                        const lh = Math.round((100/255) * byteToUnsignedInt(bmSet.likelihoods.get(i)))
+                        nameValues.push(`${bmSet.fullName()} @ likelihood =  ${lh}%`)
+                    }
+                }
+            }
+        }
+
         return nameValues
 
 
@@ -375,6 +394,15 @@ class BamAlignment {
             // Add cases for other options as needed
             default:
                 return undefined
+        }
+    }
+
+    positionToReadIndex( position) {
+        const block = blockAtGenomicLocation(this.blocks, position)
+        if (block) {
+            return (position - block.start) + block.seqOffset
+        } else {
+            return undefined
         }
     }
 

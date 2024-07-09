@@ -17,6 +17,13 @@ function drawModifications(ctx,
 
     if (modificationCounts) {
 
+        let selectedModification
+        const parts = colorOption.split(":")
+        if(parts.length == 2) {
+            colorOption = parts[0]
+            selectedModification = parts[1]
+        }
+
         //Set<BaseModificationKey> allModificationKeys = modificationCounts.getAllModificationKeys();
         //List<BaseModificationKey> sortedKeys = new ArrayList<>(allModificationKeys);
         const sortedKeys = Array.from(modificationCounts.allModifications)
@@ -30,6 +37,10 @@ function drawModifications(ctx,
 
             if (key.modification.startsWith("NONE_") && colorOption !== "basemod2")
                 continue
+
+            if(selectedModification && selectedModification !== key.modification && !key.modification.startsWith("NONE_")) {
+                continue
+            }
 
             const base = key.base
             const compl = complementBase(base)

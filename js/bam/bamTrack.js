@@ -44,7 +44,8 @@ class BAMTrack extends TrackBase {
         showCoverage: true,
         showAlignments: true,
         height: 300,
-        coverageTrackHeight: 50
+        coverageTrackHeight: 50,
+        baseModificationThreshold: 0
     }
 
     constructor(config, browser) {
