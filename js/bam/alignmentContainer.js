@@ -204,9 +204,10 @@ class AlignmentContainer {
 
         const baseModificationSets = alignment.getBaseModificationSets()
         if(baseModificationSets) {
-            this.baseModificationKeys.add(...baseModificationSets.map(s => s.key))
+            for(let bms of baseModificationSets) {
+                this.baseModificationKeys.add(bms.key)
+            }
         }
-
 
         if (this.baseModCounts) {
             this.baseModCounts.incrementCounts(alignment)
