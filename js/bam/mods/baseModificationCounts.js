@@ -73,40 +73,41 @@ class BaseModificationCounts {
                                 maxLH = lh
                                 maxKey = key
                             }
-
-                            // Count the modification with highest likelihood, which might be the likelihood of no-modification
-                            if (canonicalBase != 0) {
-                                const position = block.start + blockIdx
-
-                                const noModKey = BaseModificationKey.getKey(canonicalBase, '+', "NONE_" + canonicalBase)
-                                this.allModifications.add(noModKey)
-
-                                const pushLikelihood = (position, byteLikelihood, modKey, likelihoods) => {
-                                    let t = likelihoods.get(modKey)
-                                    if (!t) {
-                                        t = new Map()
-                                        likelihoods.set(modKey, t)
-                                    }
-                                    let byteArrayList = t.get(position)
-                                    if (!byteArrayList) {
-                                        byteArrayList = []
-                                        t.set(position, byteArrayList)
-                                    }
-                                    byteArrayList.push(byteLikelihood)
-                                }
-
-                                // mono color counts -- does not include no-modification
-                                pushLikelihood(position, maxLH, maxKey, this.maxLikelihoods)
-
-                                // 2-color counts, which include no-modification
-                                if (noModLH > maxLH) {
-                                    pushLikelihood(position, noModLH, noModKey, this.nomodLikelihoods)
-                                } else {
-                                    pushLikelihood(position, maxLH, maxKey, this.nomodLikelihoods)
-                                }
-                            }
                         }
                     }
+                    // Count the modification with highest likelihood, which might be the likelihood of no-modification
+                    if (canonicalBase != 0) {
+                        const position = block.start + blockIdx
+
+                        const noModKey = BaseModificationKey.getKey(canonicalBase, '+', "NONE_" + canonicalBase)
+                        this.allModifications.add(noModKey)
+
+                        const pushLikelihood = (position, byteLikelihood, modKey, likelihoods) => {
+                            let t = likelihoods.get(modKey)
+                            if (!t) {
+                                t = new Map()
+                                likelihoods.set(modKey, t)
+                            }
+                            let byteArrayList = t.get(position)
+                            if (!byteArrayList) {
+                                byteArrayList = []
+                                t.set(position, byteArrayList)
+                            }
+                            byteArrayList.push(byteLikelihood)
+                        }
+
+                        // mono color counts -- does not include no-modification
+                        pushLikelihood(position, maxLH, maxKey, this.maxLikelihoods)
+
+                        // 2-color counts, which include no-modification
+                        if (noModLH > maxLH) {
+                            pushLikelihood(position, noModLH, noModKey, this.nomodLikelihoods)
+                        } else {
+                            pushLikelihood(position, maxLH, maxKey, this.nomodLikelihoods)
+                        }
+
+                    }
+
                 }
             }
         }
