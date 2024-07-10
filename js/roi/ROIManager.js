@@ -1,6 +1,7 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import ROISet, {screenCoordinates} from './ROISet.js'
 import Popover from "../ui/popover.js"
+import {getElementVerticalDimension} from "../util/igvUtils.js"
 
 class ROIManager {
 
@@ -9,10 +10,38 @@ class ROIManager {
         this.browser = browser
         this.roiMenu = roiMenu
         this.roiTable = roiTable
-        this.top = top
+        // this.top = top
+        this.top = 0
         this.roiSets = roiSets || []
         this.boundLocusChangeHandler = locusChangeHandler.bind(this)
         browser.on('locuschange', this.boundLocusChangeHandler)
+
+        this.constructionHelper(browser)
+
+    }
+
+    constructionHelper(browser) {
+
+        const updateROIDimensions = () => {
+
+            const tracks = browser.findTracks(track => new Set(['ideogram', 'ruler']).has(track.type))
+            const [ rectA, rectB ] = tracks
+                .map( track => track.trackView.viewports[ 0 ].$viewport.get(0))
+                .map(element => getElementVerticalDimension(element))
+
+            const elements = browser.columnContainer.querySelectorAll('.igv-roi-region')
+
+            if (elements) {
+                for (const element of elements) {
+                    element.style.marginTop = `${ rectA.height  + rectB.height }px`
+                }
+
+            }
+        }
+
+        this.observer = new MutationObserver(updateROIDimensions)
+        const [ column ] = browser.columnContainer.querySelectorAll('.igv-column')
+        this.observer.observe(column, { attributes: true, childList: true, subtree: true })
 
     }
 
