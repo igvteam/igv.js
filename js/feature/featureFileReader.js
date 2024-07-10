@@ -125,64 +125,76 @@ class FeatureFileReader {
         if (this.dataURI) {
             await this.loadFeaturesFromDataURI(this.dataURI)
             return this.header
-        } else {
+        } else if (this.config.indexURL) {
+            const index = await this.getIndex()
+            if (!index) {
+                // Note - it should be impossible to get here
+                throw new Error("Unable to load index: " + this.config.indexURL)
+            }
+            this.sequenceNames = new Set(index.sequenceNames)
 
-            if (this.config.indexURL) {
-                const index = await this.getIndex()
-                if (!index) {
-                    // Note - it should be impossible to get here
-                    throw new Error("Unable to load index: " + this.config.indexURL)
+            let dataWrapper
+            if (index.tabix) {
+                this._blockLoader = new BGZBlockLoader(this.config)
+                dataWrapper = new BGZLineReader(this.config)
+            } else {
+                // Tribble
+                const maxSize = Object.values(index.chrIndex)
+                    .flatMap(chr => chr.blocks)
+                    .map(block => block.max)
+                    .reduce((previous, current) =>
+                        Math.min(previous, current), Number.MAX_SAFE_INTEGER)
+
+                const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}})
+                const data = await igvxhr.loadString(this.config.url, options)
+                dataWrapper = getDataWrapper(data)
+            }
+
+            this.header = await this.parser.parseHeader(dataWrapper)
+            return this.header
+
+        } else if ("service" === this.config.sourceType) {
+            if (this.config.seqnamesURL) {
+                // Side effect, a bit ugly
+                const options = buildOptions(this.config, {})
+                const seqnameString = await igvxhr.loadString(this.config.seqnamesURL, options)
+                if (seqnameString) {
+                    this.sequenceNames = new Set(seqnameString.split(",").map(sn => sn.trim()).filter(sn => sn))
                 }
-                this.sequenceNames = new Set(index.sequenceNames)
-
-                let dataWrapper
-                if (index.tabix) {
-                    this._blockLoader = new BGZBlockLoader(this.config)
-                    dataWrapper = new BGZLineReader(this.config)
-                } else {
-                    // Tribble
-                    const maxSize = Object.values(index.chrIndex)
-                        .flatMap(chr => chr.blocks)
-                        .map(block => block.max)
-                        .reduce((previous, current) =>
-                            Math.min(previous, current), Number.MAX_SAFE_INTEGER)
-
-                    const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}})
-                    const data = await igvxhr.loadString(this.config.url, options)
-                    dataWrapper = getDataWrapper(data)
-                }
-
-
+            }
+            if (this.config.headerURL) {
+                const options = buildOptions(this.config, {})
+                const data = await igvxhr.loadString(this.config.headerURL, options)
+                const dataWrapper = getDataWrapper(data)
                 this.header = await this.parser.parseHeader(dataWrapper)  // Cache header, might be needed to parse features
                 return this.header
-
-            } else if ("service" === this.config.sourceType) {
-                // TODO -- optional service call to fetch sequence names, or file header
-            } else {
-                // If this is a non-indexed file we will load all features in advance
-                const options = buildOptions(this.config)
-                let data = await igvxhr.loadByteArray(this.config.url, options)
-
-                // If the data size is < max string length decode entire string with TextDecoder.  This is much faster
-                // than decoding by line
-                if (data.length < MAX_STRING_LENGTH) {
-                    data = new TextDecoder().decode(data)
-                }
-
-                let dataWrapper = getDataWrapper(data)
-                this.header = await this.parser.parseHeader(dataWrapper)
-
-                // Reset data wrapper and parse features
-                dataWrapper = getDataWrapper(data)
-                this.features = await this.parser.parseFeatures(dataWrapper)   // cache features
-
-                // Extract chromosome names
-                this.sequenceNames = new Set()
-                for (let f of this.features) this.sequenceNames.add(f.chr)
-
-                return this.header
             }
+
+        } else {
+            // If this is a non-indexed file we will load all features in advance
+            const options = buildOptions(this.config)
+            let data = await igvxhr.loadByteArray(this.config.url, options)
+
+            // If the data size is < max string length decode entire string with TextDecoder.  This is much faster
+            // than decoding by line
+            if (data.length < MAX_STRING_LENGTH) {
+                data = new TextDecoder().decode(data)
+            }
+
+            let dataWrapper = getDataWrapper(data)
+            this.header = await this.parser.parseHeader(dataWrapper)
+
+            // Reset data wrapper and parse features
+            dataWrapper = getDataWrapper(data)
+            this.features = await this.parser.parseFeatures(dataWrapper)   // cache features
+
+            // Extract chromosome names
+            this.sequenceNames = new Set()
+            for (let f of this.features) this.sequenceNames.add(f.chr)
+
+            return this.header
         }
+
     }
 
 

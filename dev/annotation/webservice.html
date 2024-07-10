@@ -9,9 +9,45 @@
 
 <p>
 
-<h1>Annotation tracks</h1>
+<h1>Webservice example</h1>
 
-<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+<p>
+This example illustrates use of a web service for loading bed and vcf tracks.  Tracks are defined as follows
+
+    <pre>
+    {
+        sourceType: "service",
+        format: "bed",
+        name: "Bed features",
+        url: "http://localhost:8080/basic_feature_3_columns.bed?chr=$CHR&start=$STARTend=$END",
+        headerURL:  "http://localhost:8080/basic_feature_3_columns.bed?class=header",
+        seqnamesURL:  "http://localhost:8080/basic_feature_3_columns.bed?class=seqnames"
+        },
+        {
+        sourceType: "service",
+        format: "vcf",
+        name: "VCF variants",
+        url: "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?chr=$CHR&start=$STARTend=$END",
+        headerURL:  "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?class=header",
+        seqnamesURL:  "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?class=seqnames"
+    }
+    </pre>
+
+Properties
+<ul>
+    <li><b>sourceType: "service"</b> - indicates the data source is a web service, as opposed to a file</li>
+    <li><b>url</b> - A url template for the features.  The symbols $CHR, $START, and $END are substituted for genomic coordinates at runtime. </li>
+    <li><b>headerURL</b> - A url to fetch the header portion of the file.  It is required for VCF files, optional for BED and GFF formats. </li>
+    <li><b>seqnamesURL</b> - A url to featch a comma delimited list of sequence names for the resource.  Optional, but useful to support chromosome
+        aliasing (e.g. 1 == chr1).  It should return a comma delimited list of sequence names for the track file.  If ommited the sequence names
+        must match the names as defined by the genomic reference. </li>
+</ul>
+
+</p>
+
+<p>To run this example first start the node webservice "featureService.js" in "test/service"</p>
+
+<div id="igvDiv" style="margin-top: 50px; border:1px solid lightgray"></div>
 
 <script type="module">
 
@@ -20,13 +56,25 @@
     var options =
         {
             genome: "hg19",
+            locus: "chr1",
             tracks:
                 [
                     {
-                        "sourceType": "service",
-                        "url": "http://localhost:8080/%2FUsers%2Fjrobinso%2Figv-team%20Dropbox%2FJames%20Robinson%2Fprojects%2Figv.js%2Ftest%2Fdata%2Fbed%2Fbasic_feature_3_columns.bed?chr=$CHR&start=$STARTend=$END",
-                        "format": "bed",
-                        "name": "test"
+                        sourceType: "service",
+                        format: "bed",
+                        name: "Bed features",
+                        url: "http://localhost:8080/basic_feature_3_columns.bed?chr=$CHR&start=$STARTend=$END",
+                        headerURL:  "http://localhost:8080/basic_feature_3_columns.bed?class=header",
+                        seqnamesURL:  "http://localhost:8080/basic_feature_3_columns.bed?class=seqnames"
+                    },
+                    {
+                        sourceType: "service",
+                        format: "vcf",
+                        name: "VCF variants",
+                        url: "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?chr=$CHR&start=$STARTend=$END",
+                        headerURL:  "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?class=header",
+                        seqnamesURL:  "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?class=seqnames"
+
                     }
                 ]
         }
