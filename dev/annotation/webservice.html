@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>Webservice example</h1>
+
+<p>
+This example illustrates use of a web service for loading bed and vcf tracks.  Tracks are defined as follows
+
+    <pre>
+    {
+        sourceType: "service",
+        format: "bed",
+        name: "Bed features",
+        url: "http://localhost:8080/basic_feature_3_columns.bed?chr=$CHR&start=$STARTend=$END",
+        headerURL:  "http://localhost:8080/basic_feature_3_columns.bed?class=header",
+        seqnamesURL:  "http://localhost:8080/basic_feature_3_columns.bed?class=seqnames"
+        },
+        {
+        sourceType: "service",
+        format: "vcf",
+        name: "VCF variants",
+        url: "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?chr=$CHR&start=$STARTend=$END",
+        headerURL:  "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?class=header",
+        seqnamesURL:  "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?class=seqnames"
+    }
+    </pre>
+
+Properties
+<ul>
+    <li><b>sourceType: "service"</b> - indicates the data source is a web service, as opposed to a file</li>
+    <li><b>url</b> - A url template for the features.  The symbols $CHR, $START, and $END are substituted for genomic coordinates at runtime. </li>
+    <li><b>headerURL</b> - A url to fetch the header portion of the file.  It is required for VCF files, optional for BED and GFF formats. </li>
+    <li><b>seqnamesURL</b> - A url to featch a comma delimited list of sequence names for the resource.  Optional, but useful to support chromosome
+        aliasing (e.g. 1 == chr1).  It should return a comma delimited list of sequence names for the track file.  If omitted the sequence names
+        must match the names as defined by the genomic reference. </li>
+</ul>
+
+</p>
+
+<p>To run this example first start the node webservice "featureService.js" in "test/service"</p>
+
+<div id="igvDiv" style="margin-top: 50px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr1",
+            tracks:
+                [
+                    {
+                        sourceType: "service",
+                        format: "bed",
+                        name: "Bed features",
+                        url: "http://localhost:8080/basic_feature_3_columns.bed?chr=$CHR&start=$STARTend=$END",
+                        headerURL:  "http://localhost:8080/basic_feature_3_columns.bed?class=header",
+                        seqnamesURL:  "http://localhost:8080/basic_feature_3_columns.bed?class=seqnames"
+                    },
+                    {
+                        sourceType: "service",
+                        format: "vcf",
+                        name: "VCF variants",
+                        url: "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?chr=$CHR&start=$STARTend=$END",
+                        headerURL:  "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?class=header",
+                        seqnamesURL:  "http://localhost:8080/SKBR3_Sniffles_variants_tra.vcf?class=seqnames"
+
+                    }
+                ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+        })
+
+
+</script>
+
+</body>
+
+</html>

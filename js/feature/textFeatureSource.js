@@ -54,6 +54,9 @@ class TextFeatureSource extends BaseFeatureSource {
         } else if (config.sourceType === 'custom') {
             this.reader = new CustomServiceReader(config.source)
             this.queryable = false !== config.source.queryable
+        } else if ('service' === config.sourceType) {
+            this.reader = new FeatureFileReader(config, genome)
+            this.queryable = true
         } else {
             // File of some type (i.e. not a webservice)
             this.reader = new FeatureFileReader(config, genome)
@@ -229,7 +232,7 @@ class TextFeatureSource extends BaseFeatureSource {
         if (!this.featureMap) {
             this.featureMap = new Map()
         }
-        const searchableFields = config.searchableFields || ["name", "transcript_id", "gene_id", "gene_name", "id" ]
+        const searchableFields = config.searchableFields || ["name", "transcript_id", "gene_id", "gene_name", "id"]
         for (let feature of featureList) {
             for (let field of searchableFields) {
                 let key
@@ -239,9 +242,9 @@ class TextFeatureSource extends BaseFeatureSource {
                 if (key) {
                     key = key.replaceAll(' ', '+').toUpperCase()
                     // If feature is already present keep largest one
-                    if(this.featureMap.has(key)) {
+                    if (this.featureMap.has(key)) {
                         const f2 = this.featureMap.get(key)
-                        if(feature.end - feature.start < f2.end - f2.start) {
+                        if (feature.end - feature.start < f2.end - f2.start) {
                             continue
                         }
                     }
