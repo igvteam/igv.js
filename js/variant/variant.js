@@ -416,9 +416,9 @@ class Call {
         if (infoKeys.length) {
             popupData.push('<hr/>')
         }
-        infoKeys.forEach(function (key) {
+        for(let key of infoKeys) {
             popupData.push({name: key, value: decodeURIComponent(this.info[key])})
-        })
+        }
 
         return popupData
     }
