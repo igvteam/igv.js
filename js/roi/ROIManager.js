@@ -31,9 +31,10 @@ class ROIManager {
 
             const elements = browser.columnContainer.querySelectorAll('.igv-roi-region')
 
+            const fudge = -1
             if (elements) {
                 for (const element of elements) {
-                    element.style.marginTop = `${ rectA.height  + rectB.height }px`
+                    element.style.marginTop = `${ rectA.height  + rectB.height + fudge }px`
                 }
 
             }
