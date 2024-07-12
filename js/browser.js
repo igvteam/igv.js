@@ -733,7 +733,7 @@ class Browser {
 
         // The ruler and ideogram tracks are not explicitly loaded, but needs updated nonetheless.
         for (let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler' || tv.track.type === 'ideogram')) {
-            rtv.updateViews()
+            await rtv.updateViews()
         }
 
         // If any tracks are selected show the selectino buttons
