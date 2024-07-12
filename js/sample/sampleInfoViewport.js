@@ -5,8 +5,7 @@ import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js
 import IGVGraphics from "../igv-canvas.js"
 import {defaultRulerHeight} from "../rulerTrack.js"
 
-// const sampleInfoColumnHeightShim = 64
-const sampleInfoColumnHeightShim = 96
+const MaxSampleInfoColumnHeight = 128
 
 class SampleInfoViewport {
 
@@ -125,11 +124,16 @@ class SampleInfoViewport {
             }
         } else if (null === this.viewport.previousElementSibling) {
             if(this.browser.rulerTrackView) {
-                this.browser.rulerTrackView.setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? sampleInfoColumnHeightShim : defaultRulerHeight, true)
+                this.browser.rulerTrackView.setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? this.calculateSampleInfoColumnHeight() : defaultRulerHeight, true)
             }
             this.renderSampleInfoColumns(this.ctx)
         }
 
+    }
+
+    calculateSampleInfoColumnHeight() {
+        const lengths = this.browser.sampleInfo.attributeNames.map(name => this.ctx.measureText(name).width)
+        return Math.min(Math.max(...lengths), MaxSampleInfoColumnHeight)
     }
 
     draw({context, samples}) {
@@ -339,5 +343,4 @@ class SampleInfoViewport {
 
 }
 
-export {sampleInfoColumnHeightShim}
 export default SampleInfoViewport
