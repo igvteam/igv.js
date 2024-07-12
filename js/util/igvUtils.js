@@ -257,8 +257,23 @@ function expandRegion(start, end, extent) {
     }
 }
 
+function getElementVerticalDimension(element) {
+
+    const style = window.getComputedStyle(element)
+
+    const marginTop = parseInt(style.marginTop);
+    const marginBottom = parseInt(style.marginBottom);
+
+    const { top, bottom, height } = element.getBoundingClientRect()
+    return {
+        top: Math.floor(top) - marginTop,
+        bottom: Math.floor(bottom) + marginBottom,
+        height: Math.floor(height) + marginTop + marginBottom
+    };
+}
+
 export {
     createColumn, extend, isSimpleType, buildOptions, validateGenomicExtent, doAutoscale, isNumber,
     getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext,
-    getElementAbsoluteHeight, expandRegion, isInteger
+    getElementAbsoluteHeight, expandRegion, isInteger, getElementVerticalDimension
 }
