@@ -51,10 +51,15 @@ class SampleInfo {
         this.sampleMappingDictionary = {}
         this.colorDictionary = {}
         this.attributeRangeLUT = {}
+        this.initialized = false
     }
 
     get attributeCount() {
         return this.attributeNames ? this.attributeNames.length : 0
+    }
+
+    isInitialized() {
+        return this.initialized
     }
 
     hasAttributes() {
@@ -95,6 +100,8 @@ class SampleInfo {
 
             }
         }
+
+        this.initialized = true
 
     }
 
