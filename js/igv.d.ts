@@ -2,6 +2,9 @@
 // allow extra keys
 type ExtraKeys<T> = T & { [key: string]: any };
 
+declare class Opaque<N extends string> {
+    private readonly __opaque_brand: N;
+}
 
 // TODO: Unworked types for placeholder purposes
 type Track = any;
@@ -74,6 +77,8 @@ export interface ReferenceGenome {
      * only true is allowed in the type definition. 
      * 
      * @type {boolean=}
+     * 
+     * @deprecated
      */
     indexed?: true;
     /**
@@ -145,7 +150,11 @@ interface CreateOptExtras {
 
 export type CreateOpt = GenomeOpt & CreateOptExtras;
 
+
 declare class _Browser {
+    // this forces the user to cast the return value to acknowledge this is not stable
+    toJSON(): Opaque<'igv.js session JSON'>;
+    compressedSession(): string;
     toSVG(): string;
 }
 
