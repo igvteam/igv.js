@@ -109,8 +109,8 @@ class SampleInfoViewport {
         this.ctx.scale(dpi, dpi)
 
         if (null === this.viewport.previousElementSibling) {
-            IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, {fillStyle: randomRGB(150, 250)})
-            // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+            // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, {fillStyle: randomRGB(150, 250)})
+            IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
         }
 
     }
@@ -230,8 +230,8 @@ class SampleInfoViewport {
             const w = (sampleInfoTileWidth - 1)
             const h = Math.round(context.canvas.height / window.devicePixelRatio)
 
-            // IGVGraphics.fillRect(context, x, 0, w, h, {fillStyle: appleCrayonRGB('snow')})
-            IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: randomRGB(150,250) })
+            IGVGraphics.fillRect(context, x, 0, w, h, {fillStyle: appleCrayonRGB('snow')})
+            // IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: randomRGB(150,250) })
             drawRotatedText(context, attributeNames[i], x, 0, w, h)
 
             const key = `${Math.floor(x)}#0#${w}#${Math.ceil(h)}`
