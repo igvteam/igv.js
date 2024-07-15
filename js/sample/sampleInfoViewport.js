@@ -30,6 +30,8 @@ class SampleInfoViewport {
         this.canvas = document.createElement('canvas')
         this.viewport.appendChild(this.canvas)
         this.ctx = this.canvas.getContext("2d")
+        this.ctx.font = '10px verdana'
+
 
         this.contentTop = 0
         this.hitList = undefined
@@ -133,7 +135,8 @@ class SampleInfoViewport {
 
     calculateSampleInfoColumnHeight() {
         const lengths = this.browser.sampleInfo.attributeNames.map(name => this.ctx.measureText(name).width)
-        return Math.min(Math.max(...lengths), MaxSampleInfoColumnHeight)
+        const fudge = 4
+        return fudge + Math.min(Math.max(...lengths), MaxSampleInfoColumnHeight)
     }
 
     draw({context, samples}) {
@@ -209,12 +212,11 @@ class SampleInfoViewport {
             const yShim = 2
 
             ctx.save()
+            ctx.font = '10px verdana'
 
             ctx.translate(x + width / 2, y + height)
             ctx.rotate(-Math.PI / 2)
             ctx.textAlign = 'left'
-
-            ctx.font = '10px verdana'
             ctx.fillStyle = appleCrayonRGB('lead')
             ctx.fillText(text, xShim, yShim)
 
@@ -228,8 +230,8 @@ class SampleInfoViewport {
             const w = (sampleInfoTileWidth - 1)
             const h = Math.round(context.canvas.height / window.devicePixelRatio)
 
-            IGVGraphics.fillRect(context, x, 0, w, h, {fillStyle: appleCrayonRGB('snow')})
-            // IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: randomRGB(150,250) })
+            // IGVGraphics.fillRect(context, x, 0, w, h, {fillStyle: appleCrayonRGB('snow')})
+            IGVGraphics.fillRect(context, x, 0, w, h, { fillStyle: randomRGB(150,250) })
             drawRotatedText(context, attributeNames[i], x, 0, w, h)
 
             const key = `${Math.floor(x)}#0#${w}#${Math.ceil(h)}`
