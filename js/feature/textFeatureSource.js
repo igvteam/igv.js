@@ -194,9 +194,13 @@ class TextFeatureSource extends BaseFeatureSource {
             intervalStart = 0
             intervalEnd = Math.max(chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER, end)
         } else if (visibilityWindow > (end - start) && this.config.expandQuery !== false) {
-            const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
-            intervalStart = Math.max(0, (start + end) / 2 - expansionWindow)
-            intervalEnd = start + expansionWindow
+            let expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
+            if(this.config.minQuerySize && expansionWindow < this.config.minQuerySize) {
+                expansionWindow = this.config.minQuerySize
+            }
+            intervalStart = Math.max(0, (start + end - expansionWindow) / 2)
+            intervalEnd = intervalStart + expansionWindow
+            console.log(`query ${intervalStart} - ${intervalEnd}`)
         }
 
         let features = await reader.readFeatures(queryChr, intervalStart, intervalEnd)

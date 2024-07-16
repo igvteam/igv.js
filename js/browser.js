@@ -41,7 +41,6 @@ import {viewportColumnManager} from './viewportColumnManager.js'
 import ViewportCenterLine from './ui/viewportCenterLine.js'
 import IdeogramTrack from "./ideogramTrack.js"
 import RulerTrack from "./rulerTrack.js"
-import GtexSelection from "./gtex/gtexSelection.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import CustomButton from "./ui/customButton.js"
@@ -65,6 +64,7 @@ import {bppSequenceThreshold} from "./sequenceTrack.js"
 import {loadGenbank} from "./gbk/genbankParser.js"
 import igvCss from "./embedCss.js"
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConstants.js"
+import XQTLSelections from "./gtex/xqtlSelections.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -82,6 +82,8 @@ const column_multi_locus_shim_width = 2 + 1 + 2
 
 class Browser {
 
+    xqtlSelections = new XQTLSelections()
+
     constructor(config, parentDiv) {
 
         this.config = config
@@ -97,8 +99,6 @@ class Browser {
             sheet.replaceSync(igvCss)
             shadowRoot.adoptedStyleSheets = [sheet]
         }
-
-
 
         this.root = DOMUtils.div({class: 'igv-container'})
         shadowRoot.appendChild(this.root)
@@ -188,9 +188,6 @@ class Browser {
 
     initialize(config) {
 
-        if (config.gtex) {
-            GtexUtils.gtexLoaded = true
-        }
         this.flanking = config.flanking
         this.crossDomainProxy = config.crossDomainProxy
         this.formats = config.formats
@@ -634,15 +631,8 @@ class Browser {
             this.trackViews.push(rulerTrackView)
         }
 
-        // Restore gtex selections.
-        if (session.gtexSelections) {
-            for (let referenceFrame of this.referenceFrameList) {
-                for (let s of Object.keys(session.gtexSelections)) {
-                    const gene = session.gtexSelections[s].gene
-                    const snp = session.gtexSelections[s].snp
-                    referenceFrame.selection = new GtexSelection(gene, snp)
-                }
-            }
+        if(session.xqtlSelections) {
+            this.xqtlSelections = XQTLSelections.fromJSON(session.xqtlSelections)
         }
 
         if (this.roiManager) {
@@ -1074,6 +1064,7 @@ class Browser {
                 return
             }
 
+            this.xqtlLoaded = this.xqtlLoaded || "eqtl" === newTrack.type
 
             return this.addTrack(config, newTrack)
 
@@ -1856,13 +1847,31 @@ class Browser {
      * NOTE: This is part of the API
      * @param string
      * @param init  true if called during browser initialization
+     * @param qtlSearch true if search is initiated from an xqtl track
+     *
      * @returns {Promise<boolean>}  true if found, false if not
      */
-    async search(string, init) {
+    async search(string, init, qtlSearch) {
 
         const loci = await search(this, string)
 
         if (loci && loci.length > 0) {
+
+            let snpSelection = false
+            if (qtlSearch) {
+                this.xqtlSelections.clear()
+                let snpSelection = false
+                for (let l of loci) {
+                    if (l.name) {
+                        if (l.end - l.start == 1) {
+                            snpSelection = true
+                            this.xqtlSelections.addSnp(l.name)
+                        } else if (l.name) {
+                            this.xqtlSelections.addGene(l.name)
+                        }
+                    }
+                }
+            }
 
             // create reference frame list based on search loci
             this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length), this.isSoftclipped())
@@ -1890,6 +1899,13 @@ class Browser {
 
             if (!init) {
                 await this.updateViews()
+
+                // Updating xqtl tracks can affect annotation tracks if the queried locus is a SNP.  If so repaint the tracks
+                if (snpSelection) {
+                    for (let tv of this.trackViews.filter(tv => "annotation" === tv.track.type)) {
+                        tv.repaintViews()
+                    }
+                }
             }
             return true
         } else {
@@ -2026,27 +2042,18 @@ class Browser {
 
         // Build locus array (multi-locus view).  Use the first track to extract the loci, any track could be used.
         const locus = []
-        const gtexSelections = {}
-        let hasGtexSelections = false
         let anyTrackView = this.trackViews[0]
         for (let {referenceFrame} of anyTrackView.viewports) {
             const locusString = referenceFrame.getLocusString()
             locus.push(locusString)
-            if (referenceFrame.selection) {
-                const selection = {
-                    gene: referenceFrame.selection.gene,
-                    snp: referenceFrame.selection.snp
-                }
-                gtexSelections[locusString] = selection
-                hasGtexSelections = true
-            }
         }
         json["locus"] = locus.length === 1 ? locus[0] : locus
-        if (hasGtexSelections) {
-            json["gtexSelections"] = gtexSelections
-        }
 
         json["roi"] = this.roiManager.toJSON()
+
+        if(!this.xqtlSelections.isEmpty()) {
+            json["xqtlSelections"] = this.xqtlSelections.toJSON()
+        }
 
         // Tracks
         const trackJson = []

@@ -29,6 +29,8 @@ import IGVGraphics from "../igv-canvas.js"
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
 import MenuUtils from "../ui/menuUtils.js"
 import GtexUtils from "./gtexUtils.js"
+import {reverseComplementSequence} from "../util/sequenceUtils.js"
+import {PaletteColorTable} from "../util/colorPalletes.js"
 
 class EqtlTrack extends TrackBase {
 
@@ -40,6 +42,7 @@ class EqtlTrack extends TrackBase {
     init(config) {
         super.init(config)
 
+        this.type = "eqtl"
         this.name = config.name
         this.pValueField = config.pValueField || "pValue"
         this.geneField = config.geneField || "geneSymbol"
@@ -71,8 +74,6 @@ class EqtlTrack extends TrackBase {
             2000000 : config.visibilityWindow >= 0 ? Math.min(2000000, config.visibilityWindow) : 2000000
 
         this.featureSource = FeatureSource(config, this.browser.genome)
-
-        GtexUtils.gtexLoaded = true
     }
 
     paintAxis(ctx, pixelWidth, pixelHeight) {
@@ -118,50 +119,63 @@ class EqtlTrack extends TrackBase {
         const pValueField = this.pValueField
         const visibilityWindow = this.visibilityWindow
         const features = await this.featureSource.getFeatures({chr, start, end, visibilityWindow})
-        features.forEach(function (f) {
+        for (let f of features) {
             f.value = f[pValueField]
-        })
+        }
+
+
         return features
     }
 
     draw(options) {
 
-        const ctx = options.context
-
-        const pixelWidth = options.pixelWidth
-        const pixelHeight = options.pixelHeight
+        const {context, referenceFrame, pixelWidth, pixelHeight} = options
 
         if (this.background) {
-            IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background})
+            IGVGraphics.fillRect(context, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background})
         }
-        IGVGraphics.strokeLine(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider})
+        IGVGraphics.strokeLine(context, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider})
+
+        referenceFrame.feature && referenceFrame.feature.match(/RS[0-9]+/)
 
         const drawEqtls = (drawSelected) => {
 
             const radius = drawSelected ? 2 * this.dotSize : this.dotSize
             const bpStart = options.bpStart
             const yScale = (this.dataRange.max - this.dataRange.min) / pixelHeight
-            const selection = options.referenceFrame.selection
 
             for (let eqtl of options.features) {
+
+                if (eqtl.snp.toUpperCase() === referenceFrame.feature) {
+                    // TODO -- highlight associated gene?
+                }
 
                 const px = (eqtl.start - bpStart + 0.5) / options.bpPerPixel
                 if (px < 0) continue
                 else if (px > pixelWidth) break
 
-                const snp = eqtl.snp.toUpperCase()
-                const geneName = eqtl[this.geneField].toUpperCase()
+                const geneSymbol = eqtl[this.geneField].toUpperCase()
 
-                const isSelected = selection &&
-                    (selection.snp === snp || selection.gene === geneName)
+                let isSelected
+                // 3 modes, specific eqtl, snp, or gene (phenotype) focused.
+                if (this.browser.xqtlSelections.qtl) {
+                    isSelected = compareQTLs(this.browser.xqtlSelections.qtl, eqtl)
+                } else if (this.browser.xqtlSelections.snps.size > 0) {
+                    isSelected = this.browser.xqtlSelections.hasSnp(eqtl.snp.toUpperCase())
+                    if (isSelected) {
+                        this.browser.xqtlSelections.addGene(geneSymbol)
+                    }
+                } else {
+                    isSelected = this.browser.xqtlSelections.hasFeature(geneSymbol)
+                }
 
                 if (!drawSelected || isSelected) {
 
                     // Add eqtl's gene to the selection if this is the selected snp.
-                    // TODO -- this should not be done here in the rendering code.
-                    if (selection && selection.snp === snp) {
-                        selection.addGene(geneName)
-                    }
+                    // // TODO -- this should not be done here in the rendering code.
+                    // if (selection && selection.snp === snp) {
+                    //     selection.addGene(geneSymbol)
+                    // }
 
                     var mLogP = -Math.log(eqtl[this.pValueField]) / Math.LN10
                     if (mLogP >= this.dataRange.min) {
@@ -180,16 +194,16 @@ class EqtlTrack extends TrackBase {
                         eqtl.radius = radius
 
                         let color
-                        if (drawSelected && selection) {
-                            color = selection.colorForGene(geneName)
-                            IGVGraphics.setProperties(ctx, {fillStyle: color, strokeStyle: "black"})
+                        if (drawSelected && isSelected) {
+                            color = this.browser.xqtlSelections.colorForGene(geneSymbol)
+                            IGVGraphics.setProperties(context, {fillStyle: color, strokeStyle: "black"})
                         } else {
                             color = capped ? "rgb(150, 150, 150)" : "rgb(180, 180, 180)"
-                            IGVGraphics.setProperties(ctx, {fillStyle: color, strokeStyle: color})
+                            IGVGraphics.setProperties(context, {fillStyle: color, strokeStyle: color})
                         }
 
-                        IGVGraphics.fillCircle(ctx, px, py, radius)
-                        IGVGraphics.strokeCircle(ctx, px, py, radius)
+                        IGVGraphics.fillCircle(context, px, py, radius)
+                        IGVGraphics.strokeCircle(context, px, py, radius)
                     }
                 }
             }
@@ -206,36 +220,96 @@ class EqtlTrack extends TrackBase {
      */
     popupData(clickState, features) {
 
-        if(features === undefined) features = clickState.viewport.cachedFeatures
+        if (features === undefined) features = clickState.viewport.cachedFeatures
         if (!features || features.length === 0) return []
 
         const tolerance = 3
         const tissue = this.name
         const popupData = []
 
-        for (let feature of features) {
-            // Hit test --use square vs circle for efficiency (no sqrt)
-            if (Math.abs(feature.px - clickState.canvasX) < (feature.radius + tolerance) &&
-                Math.abs(feature.py - clickState.canvasY) < (feature.radius + tolerance)) {
-
-                if (popupData.length > 0) {
-                    popupData.push('<hr/>')
-                }
+        for (let feature of this._clickedFeatures(clickState, features)) {
+            if (popupData.length > 0) {
+                popupData.push('<hr/>')
+            }
+            if (typeof feature.popupData === 'function') {
+                popupData.push(...feature.popupData(clickState))
+            } else {
                 popupData.push(
                     {name: "snp id", value: feature.snp},
-                    {name: "gene id", value: feature.geneId},
-                    {name: "gene name", value: feature.geneName},
+                    {name: "gene id", value: feature.gencodeId},
+                    {name: "gene name", value: feature.geneSymbol},
                     {name: "p value", value: feature.pValue},
                     {name: "tissue", value: tissue})
-
             }
         }
-
         return popupData
     }
 
+    _clickedFeatures(clickState, features) {
+        const dist = (f, cs) => {
+            return Math.sqrt((f.px - cs.canvasX) * (f.px - cs.canvasX) + (f.py - cs.canvasY) * (f.py - cs.canvasY))
+        }
+
+        const tolerance = 6
+        const candidateFeatures = features.filter(feature => dist(feature, clickState) < tolerance)
+
+        if(candidateFeatures.length > 1) {
+            candidateFeatures.sort((a, b) => dist(a, clickState) - dist(b, clickState))
+            const firstD = dist(candidateFeatures[0], clickState)
+            return candidateFeatures.filter(f => dist(f, clickState) <= firstD)
+        } else {
+            return candidateFeatures
+        }
+
+    }
+
+    contextMenuItemList(clickState) {
+
+        const menuData = []
+
+        // We use the cached features rather than method to avoid async load.  If the
+        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+        const features = clickState.viewport.cachedFeatures
+        if (features) {
+            const clickedFeatures = this._clickedFeatures(clickState, features)
+            if (clickedFeatures.length > 0) {
+                menuData.push({
+                    label: `Highlight associated features`,
+                    click: async () => {
+                        this.browser.xqtlSelections.clear()
+                        for (let f of clickedFeatures) {
+                            this.browser.xqtlSelections.qtl = f
+                            this.browser.xqtlSelections.addGene(f.geneSymbol)
+                        }
+                        this.browser.repaintViews()
+                    }
+                })
+                menuData.push('<hr\>')
+            }
+        }
+        return menuData
+
+    }
+
     menuItemList() {
-        return this.numericDataMenuItems()
+        const menuItems = []
+        menuItems.push(...this.numericDataMenuItems())
+        menuItems.push('<hr/>')
+
+        function dialogPresentationHandler(ev) {
+
+            this.browser.inputDialog.present({
+                label: 'Search for...',
+                value: '',
+                callback: async (term) => {
+                    await this.browser.search(term, false, true)
+                }
+            }, ev)
+        }
+
+        menuItems.push({label: 'Search for...', dialog: dialogPresentationHandler})
+
+        return menuItems
     }
 
     doAutoscale(featureList) {
@@ -257,6 +331,11 @@ class EqtlTrack extends TrackBase {
         return this.dataRange
     }
 
+}
+
+
+function compareQTLs(a, b) {
+    return a.chr === b.chr && a.start === b.start && a.pValue === b.pValue
 }
 
 export default EqtlTrack

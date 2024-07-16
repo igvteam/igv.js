@@ -364,25 +364,19 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         const labelY = getFeatureLabelY(featureY, transform)
 
         let color = this.getColorForFeature(feature)
-        let geneColor
-        let gtexSelection = false
-        if (referenceFrame.selection && GtexUtils.gtexLoaded) {
-            // TODO -- for gtex, figure out a better way to do this
-            gtexSelection = true
-            geneColor = referenceFrame.selection.colorForGene(name)
-        }
+        let selected = this.browser.xqtlSelections.hasFeature(feature.name.toUpperCase())
 
         const geneFontStyle = {
             textAlign: "SLANT" === this.labelDisplayMode ? undefined : 'center',
-            fillStyle: geneColor || color,
-            strokeStyle: geneColor || color
+            fillStyle: color,
+            strokeStyle:  color
         }
 
         const textBox = ctx.measureText(name)
         const xleft = centerX - textBox.width / 2
         const xright = centerX + textBox.width / 2
         const lastLabelX = options.rowLastLabelX[feature.row] || -Number.MAX_SAFE_INTEGER
-        if (options.labelAllFeatures || xleft > lastLabelX || gtexSelection) {
+        if (options.labelAllFeatures || xleft > lastLabelX || selected) {
             options.rowLastLabelX[feature.row] = xright
 
             if ('y' === options.axis) {

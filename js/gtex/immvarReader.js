@@ -57,8 +57,8 @@ ImmVarReader.prototype.readFeatures = function (queryChr, queryStart, queryEnd) 
 
                 json.eqtls.forEach(function (eqtl) {
                     eqtl.chr = eqtl.chromosome
-                    eqtl.start = eqtl.position
-                    eqtl.end = eqtl.position + 1
+                    eqtl.start = eqtl.pos
+                    eqtl.end = eqtl.pos + 1
                 })
 
                 fulfill(json.eqtls)

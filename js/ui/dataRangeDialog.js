@@ -96,11 +96,13 @@ class DataRangeDialog {
             if (13 === e.keyCode) {
                 this.processResults(trackViewOrTrackViewList)
             }
+            e.stopImmediatePropagation()
         })
 
         this.$maximum_input.unbind()
         this.$maximum_input.on('keyup', (e) => {
             if (13 === e.keyCode) {
+                e.stopImmediatePropagation()
                 this.processResults(trackViewOrTrackViewList)
             }
         })

@@ -86,16 +86,19 @@ suite("testSearch", function () {
         assert.equal(locus1.chr, "chr1")
         assert.equal(locus1.start, 99)
         assert.equal(locus1.end, 200)
+        assert.isUndefined(locus1.name)
 
         const locus2 = results[1]
         assert.equal(locus2.chr, "chr8")
         assert.equal(locus2.start, 127735432)
         assert.equal(locus2.end, 127742951)
+        assert.equal(locus2.name, 'MYC')
 
         const locus3 = results[2]
         assert.equal(locus3.chr, "chr1")
         assert.equal(locus3.start, 155185822)
         assert.equal(locus3.end, 155192915)
+        assert.equal(locus3.name, 'MUC1')
     })
 
     test("search name with spaces from bed file", async function () {
@@ -112,9 +115,11 @@ suite("testSearch", function () {
 
         const mockBrowser = {
             genome: {
-                loadChromosome: async (chr) => chr,
+                loadChromosome: async (chr) => {
+                    return "chr1" === chr ? {name: chr, bpLength: Number.MAX_SAFE_INTEGER} : undefined
+                },
                 getChromosomeName: (chr) => chr,
-                getChromosome: (chr) => {return {name: chr, bpLenght: 0}}
+                getChromosome: (chr) => {return "chr1" === chr ? {name: chr, bpLength: Number.MAX_SAFE_INTEGER} : undefined}
             },
             tracks: [{
                 featureSource: featureSource,
@@ -124,6 +129,13 @@ suite("testSearch", function () {
         }
 
         const found = await search(mockBrowser, "kan2 marker")
+        assert.equal(found.length, 1)
+        const locus = found[0]
+        assert.equal(locus.chr, "chr1")
+        assert.equal(locus.start, 1849)
+        assert.equal(locus.end, 2665)
+        assert.equal(locus.name, 'KAN2 MARKER')
+
         assert.ok(found)
     })
 

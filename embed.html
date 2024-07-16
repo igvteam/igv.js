@@ -20,7 +20,8 @@
     document.addEventListener("DOMContentLoaded", function () {
         var div = document.getElementById('igvDiv');
         var config = {
-            queryParametersSupported: true
+            genome: "hg19",
+           // queryParametersSupported: true
         };
         igv.createBrowser(div, config);
 

@@ -480,7 +480,10 @@ class FeatureTrack extends TrackBase {
         const feature = f._f || f    // f might be a "whole genome" wrapper
 
         let color
-        if (this.altColor && "-" === feature.strand) {
+
+        if(this.browser.xqtlSelections.hasFeature(f.name.toUpperCase())) {
+            color = this.browser.xqtlSelections.colorForGene(f.name.toUpperCase())
+        } else if (this.altColor && "-" === feature.strand) {
             color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor
         } else if (this.color) {
             color = (typeof this.color === "function") ? this.color(feature) : this.color  // Explicit setting via menu, or possibly track line if !config.color
