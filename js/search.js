@@ -8,6 +8,31 @@ const DEFAULT_SEARCH_CONFIG = {
     coords: 0
 }
 
+async function searchFeatures(browser, name) {
+
+    const searchConfig = browser.searchConfig || DEFAULT_SEARCH_CONFIG
+    let feature
+
+    const searchableTracks = browser.tracks.filter(t => t.searchable)
+    for (let track of searchableTracks) {
+        const feature = await track.search(name)
+        if (feature) {
+            return feature
+        }
+    }
+
+    // If still not found try webservice, if enabled
+    if (browser.config && false !== browser.config.search) {
+        try {
+            feature = await searchWebService(browser, name, searchConfig)
+            return feature    // Might be undefined
+        } catch (error) {
+            console.log("Search service not available " + error)
+        }
+    }
+
+}
+
 /**
  * Return an object representing the locus of the given string.  Object is of the form
  * {
@@ -30,7 +55,6 @@ async function search(browser, string) {
 
     const loci = string.split(' ')
 
-    let searchConfig = browser.searchConfig || DEFAULT_SEARCH_CONFIG
     let list = []
 
     const searchForLocus = async (locus) => {
@@ -59,36 +83,19 @@ async function search(browser, string) {
             locusObject = undefined
 
             // Not a locus string, search track annotations
-            const searchableTracks = browser.tracks.filter(t => t.searchable)
-            for (let track of searchableTracks) {
-                const feature = await track.search(locus)
-                if (feature) {
-                    locusObject = {
-                        chr: feature.chr,
-                        start: feature.start,
-                        end: feature.end,
-                        name: feature.name.toUpperCase()
-                    }
-                    break
-                }
-            }
+            const feature = await searchFeatures(browser, locus)
+            if(feature) {
+                locusObject = {
+                    chr: feature.chr,
+                    start: feature.start,
+                    end: feature.end,
+                    name: (feature.name || locus).toUpperCase(),
 
-            // If still not found try webservice, if enabled
-            if (!locusObject && (browser.config && false !== browser.config.search)) {
-                try {
-                    locusObject = await searchWebService(browser, locus, searchConfig)
-                } catch (error) {
-                    console.log("Search service not available " + error)
                 }
-            }
-
-            // If found, assure locus object has a name
-            if(locusObject && !locusObject.name) {
-                locusObject.name = locus          .toUpperCase()
             }
 
             // If still not found assume locus is a chromosome name.
-            if(!locusObject) {
+            if (!locusObject) {
                 chromosome = await browser.genome.loadChromosome(locus)
                 if (chromosome) {
                     locusObject = {chr: chromosome.name}
@@ -272,7 +279,7 @@ function processSearchResult(browser, result, searchConfig) {
         const type = result.type ? result.type : "gene"
         if (searchConfig.geneField && searchConfig.snpField) {
             const name = result[searchConfig.geneField] || result[searchConfig.snpField]  // Should never have both
-            if(name) locusObject.name = name.toUpperCase()
+            if (name) locusObject.name = name.toUpperCase()
         }
 
         return locusObject
@@ -313,7 +320,7 @@ function parseSearchResults(browser, data) {
 
 
 // Export some functions for unit testing
-export {parseLocusString, searchWebService}
+export {parseLocusString, searchWebService, searchFeatures}
 
 export default search
 

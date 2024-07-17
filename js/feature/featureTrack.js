@@ -224,9 +224,15 @@ class FeatureTrack extends TrackBase {
             const pixelsPerFeature = pixelWidth / maxFeatureCount
 
             let lastPxEnd = []
+            const selectedFeatures = []
             for (let feature of features) {
                 if (feature.end < bpStart) continue
                 if (feature.start > bpEnd) break
+
+                if (this.displayMode === 'COLLAPSED' && this.browser.qtlSelections.hasPhenotype(feature.name.toUpperCase())) {
+                    selectedFeatures.push(feature)
+                }
+
                 const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row
                 options.drawLabel = options.labelAllFeatures || pixelsPerFeature > 10
                 const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel)
@@ -244,6 +250,12 @@ class FeatureTrack extends TrackBase {
                     }
                     lastPxEnd[row] = pxEnd
                 }
+            }
+
+            // If any features are selected redraw them here.  This insures selected features are visible in collapsed mode
+            for (let feature of selectedFeatures) {
+                options.drawLabel = true
+                this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, context, options)
             }
 
         } else {
@@ -481,8 +493,8 @@ class FeatureTrack extends TrackBase {
 
         let color
 
-        if(this.browser.xqtlSelections.hasFeature(f.name.toUpperCase())) {
-            color = this.browser.xqtlSelections.colorForGene(f.name.toUpperCase())
+        if (this.browser.qtlSelections.hasPhenotype(f.name.toUpperCase())) {
+            color = this.browser.qtlSelections.colorForGene(f.name.toUpperCase())
         } else if (this.altColor && "-" === feature.strand) {
             color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor
         } else if (this.color) {

@@ -6,7 +6,7 @@ import MergedTrack from "./feature/mergedTrack.js"
 import BAMTrack from "./bam/bamTrack.js"
 import InteractionTrack from "./feature/interactionTrack.js"
 import VariantTrack from "./variant/variantTrack.js"
-import EqtlTrack from "./gtex/eqtlTrack.js"
+import QTLTrack from "./qtl/qtlTrack.js"
 import GWASTrack from "./gwas/gwasTrack.js"
 import GCNVTrack from "./gcnv/gcnvTrack.js"
 import RnaStructTrack from "./rna/rnaStruct.js"
@@ -32,7 +32,8 @@ const trackFunctions =
         ['interaction', (config, browser) => new InteractionTrack(config, browser)],
         ['interact', (config, browser) => new InteractionTrack(config, browser)],
         ['variant', (config, browser) => new VariantTrack(config, browser)],
-        ['eqtl', (config, browser) => new EqtlTrack(config, browser)],
+        ['qtl', (config, browser) => new QTLTrack(config, browser)],
+        ['eqtl', (config, browser) => new QTLTrack(config, browser)],
         ['gwas', (config, browser) => new GWASTrack(config, browser)],
         ['arc', (config, browser) => new RnaStructTrack(config, browser)],
         ['gcnv', (config, browser) => new GCNVTrack(config, browser)],

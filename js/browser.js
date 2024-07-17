@@ -17,7 +17,6 @@ import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
 import {createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
-import GtexUtils from "./gtex/gtexUtils.js"
 import {defaultSequenceTrackOrder} from './sequenceTrack.js'
 import version from "./version.js"
 import FeatureSource from "./feature/featureSource.js"
@@ -64,7 +63,7 @@ import {bppSequenceThreshold} from "./sequenceTrack.js"
 import {loadGenbank} from "./gbk/genbankParser.js"
 import igvCss from "./embedCss.js"
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConstants.js"
-import XQTLSelections from "./gtex/xqtlSelections.js"
+import QTLSelections from "./qtl/qtlSelections.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -82,7 +81,7 @@ const column_multi_locus_shim_width = 2 + 1 + 2
 
 class Browser {
 
-    xqtlSelections = new XQTLSelections()
+    qtlSelections = new QTLSelections()
 
     constructor(config, parentDiv) {
 
@@ -631,8 +630,8 @@ class Browser {
             this.trackViews.push(rulerTrackView)
         }
 
-        if(session.xqtlSelections) {
-            this.xqtlSelections = XQTLSelections.fromJSON(session.xqtlSelections)
+        if (session.qtlSelections) {
+            this.qtlSelections = QTLSelections.fromJSON(session.qtlSelections)
         }
 
         if (this.roiManager) {
@@ -1063,8 +1062,6 @@ class Browser {
             } else if (undefined === newTrack) {
                 return
             }
-
-            this.xqtlLoaded = this.xqtlLoaded || "eqtl" === newTrack.type
 
             return this.addTrack(config, newTrack)
 
@@ -1851,23 +1848,23 @@ class Browser {
      *
      * @returns {Promise<boolean>}  true if found, false if not
      */
-    async search(string, init, qtlSearch) {
+    async search(string, init) {
 
         const loci = await search(this, string)
 
         if (loci && loci.length > 0) {
 
+            // Special search mode for qtl focused sites, specifically GTEX
             let snpSelection = false
-            if (qtlSearch) {
-                this.xqtlSelections.clear()
-                let snpSelection = false
+            if (this.config.enableQTLSearch && loci.some(l => l.name)) {
+                this.qtlSelections.clear()
                 for (let l of loci) {
                     if (l.name) {
                         if (l.end - l.start == 1) {
                             snpSelection = true
-                            this.xqtlSelections.addSnp(l.name)
+                            this.qtlSelections.addSnp(l.name)
                         } else if (l.name) {
-                            this.xqtlSelections.addGene(l.name)
+                            this.qtlSelections.addPhenotype(l.name)
                         }
                     }
                 }
@@ -2051,8 +2048,8 @@ class Browser {
 
         json["roi"] = this.roiManager.toJSON()
 
-        if(!this.xqtlSelections.isEmpty()) {
-            json["xqtlSelections"] = this.xqtlSelections.toJSON()
+        if (!this.qtlSelections.isEmpty()) {
+            json["qtlSelections"] = this.qtlSelections.toJSON()
         }
 
         // Tracks

@@ -46,13 +46,10 @@ class GtexReader {
 
     async readFeatures(chr, bpStart, bpEnd) {
 
-
-
-
         // GTEX uses UCSC chromosome naming conventions.
-        const queryChr = chr.startsWith("chr") ? chr : "chr" + chr
+        const queryChr = chr.startsWith("chr") ? chr : chr === "MT" ? "chrM" : "chr" + chr
 
-        if(!this.gtexChrs.has(queryChr)) {
+        if (!this.gtexChrs.has(queryChr)) {
             return []
         }
 
@@ -67,15 +64,7 @@ class GtexReader {
         })
 
         if (json && json.singleTissueEqtl) {
-            for (let eqtl of json.singleTissueEqtl) {
-                eqtl.chr = eqtl.chromosome
-                eqtl.start = eqtl.pos - 1
-                eqtl.end = eqtl.start + 1
-                eqtl.snp = eqtl.snpId
-                eqtl.geneName = eqtl.geneSymbol
-                eqtl.geneId = eqtl.gencodeId
-            }
-            return json.singleTissueEqtl
+            return json.singleTissueEqtl.map(json => new EQTL(json))
         } else {
             return []
         }
@@ -96,5 +85,25 @@ class GtexReader {
 //     "tissueSiteDetailId": "Muscle_Skeletal",
 //     "variantId": "chr16_21999621_G_GA_b38"
 // }
+class EQTL {
+
+    constructor(eqtl) {
+        this.chr = eqtl.chromosome
+        this.start = eqtl.pos - 1
+        this.end = this.start + 1
+        this.snp = eqtl.snpId
+        this.phenotype = eqtl.geneSymbol
+        this.pValue = eqtl.pValue
+        this.json = eqtl
+    }
+
+    popupData() {
+        return Object.keys(this.json).map(key => {
+            return {name: key, value: this.json[key]}
+        })
+    }
+}
+
+
 
 export default GtexReader

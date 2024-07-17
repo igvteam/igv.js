@@ -14,10 +14,16 @@
 
 <body>
 
-<h3>QTL example</h3>
-
 <button id="log-state">Log Session</button>
 <button id="bookmark">Bookmark</button>
+
+<h3>GTEX EQTL example</h3>
+
+<p>This example used the special GTEX search mode (enabled with the <b>enableQTLSearch</b> property). Searching for a
+    gene or snp from the search box highlights
+    the associated features. In the case of a snp this includes all eqtls for the snp, and associated genes. For a
+    gene search this includes the gene and its associated eqtls.</p>
+<p>Try searching for the snp <b>rs11704810</b> or the gene <b>SMARCB1</b></p>
 
 <div id="igvDiv"></div>
 
@@ -29,34 +35,21 @@
         queryParametersSupported: true,
         genome: "hg38",
         locus: "chr22:23,767,847-23,844,164",
-        //minimumBases: 100000,
+        minimumBases: 100000,
+        enableQTLSearch: true,
+        search: {
+            url: "https://gtexportal.org/api/v2/reference/features/$FEATURE$",
+            resultsField: "features"
+        },
         tracks: [
-            // {
-            //     type: "eqtl",
-            //     format: "xqtl",
-            //     name: "B cell eQTL",
-            //     geneField: "phenotype",
-            //     url: "B.cell_eQTL.tsv",
-            //     //url: "https://igv-genepattern-org.s3.amazonaws.com/test/xqtl/B.cell_eQTL.tsv.gz",
-            // },
             {
                 type: "qtl",
-                format: "xqtl",
-                name: "Moncyte hQTL",
-                geneField: "phenotype",
-                url: "Monocyte_hQTL.tsv.gz",
-                indexURL: "Monocyte_hQTL.tsv.gz.tbi",
-                visibilityWindow: -1
-                //url: "https://igv-genepattern-org.s3.amazonaws.com/test/xqtl/B.cell_eQTL.tsv.gz",
-            },
-            {
-                type: "annotation",
-                format: "bed",
-                name: "H3k4me1 peaks",
-                url: "Monocyte_phenotypes.bed.gz",
-                indexURL: "Monocyte_phenotypes.bed.gz.tbi",
-                visibilityWindow: -1,
-                displayMode: "COLLAPSED"
+                sourceType: "gtex-ws",
+                url: "https://gtexportal.org/api/v2/association/singleTissueEqtlByLocation",
+                tissueSiteDetailId: "Muscle_Skeletal",
+                name: "Muscle Skeletal",
+                visibilityWindow: 2000000,
+                minQuerySize: 100000
             }
         ]
     }

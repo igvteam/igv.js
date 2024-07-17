@@ -34,7 +34,7 @@ import {loadIndex} from "../bam/indexFactory.js"
 import getDataWrapper from "./dataWrapper.js"
 import BGZLineReader from "../util/bgzLineReader.js"
 import BGZBlockLoader from "../bam/bgzBlockLoader.js"
-import XQTLParser from "../gtex/xqtlParser.js"
+import QTLParser from "../qtl/QTLParser.js"
 
 // Conservative estimate of the maximum allowed string length
 const MAX_STRING_LENGTH = 500000000
@@ -213,7 +213,7 @@ class FeatureFileReader {
             case "gwas" :
                 return new GWASParser(config)
             case "xqtl":
-                return new XQTLParser(config)
+                return new QTLParser(config)
             case "aed" :
                 return new AEDParser(config)
             default:

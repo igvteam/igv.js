@@ -27,12 +27,8 @@ import FeatureSource from '../feature/featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
-import MenuUtils from "../ui/menuUtils.js"
-import GtexUtils from "./gtexUtils.js"
-import {reverseComplementSequence} from "../util/sequenceUtils.js"
-import {PaletteColorTable} from "../util/colorPalletes.js"
 
-class EqtlTrack extends TrackBase {
+class QTLTrack extends TrackBase {
 
     constructor(config, browser) {
 
@@ -42,11 +38,8 @@ class EqtlTrack extends TrackBase {
     init(config) {
         super.init(config)
 
-        this.type = "eqtl"
+        this.type = "qtl"
         this.name = config.name
-        this.pValueField = config.pValueField || "pValue"
-        this.geneField = config.geneField || "geneSymbol"
-        this.snpField = config.snpField || "snp"
 
         const min = config.minLogP || config.min
         const max = config.maxLogP || config.max
@@ -70,8 +63,8 @@ class EqtlTrack extends TrackBase {
         this.disableButtons = config.disableButtons
 
         // Limit visibility window to 2 mb,  gtex server gets flaky beyond that
-        this.visibilityWindow = config.visibilityWindow === undefined ?
-            2000000 : config.visibilityWindow >= 0 ? Math.min(2000000, config.visibilityWindow) : 2000000
+        //this.visibilityWindow = config.visibilityWindow === undefined ?
+        //    2000000 : config.visibilityWindow >= 0 ? Math.min(2000000, config.visibilityWindow) : 2000000
 
         this.featureSource = FeatureSource(config, this.browser.genome)
     }
@@ -115,15 +108,8 @@ class EqtlTrack extends TrackBase {
     };
 
     async getFeatures(chr, start, end) {
-
-        const pValueField = this.pValueField
         const visibilityWindow = this.visibilityWindow
         const features = await this.featureSource.getFeatures({chr, start, end, visibilityWindow})
-        for (let f of features) {
-            f.value = f[pValueField]
-        }
-
-
         return features
     }
 
@@ -154,19 +140,19 @@ class EqtlTrack extends TrackBase {
                 if (px < 0) continue
                 else if (px > pixelWidth) break
 
-                const geneSymbol = eqtl[this.geneField].toUpperCase()
+                const geneSymbol = eqtl.phenotype.toUpperCase()
 
                 let isSelected
-                // 3 modes, specific eqtl, snp, or gene (phenotype) focused.
-                if (this.browser.xqtlSelections.qtl) {
-                    isSelected = compareQTLs(this.browser.xqtlSelections.qtl, eqtl)
-                } else if (this.browser.xqtlSelections.snps.size > 0) {
-                    isSelected = this.browser.xqtlSelections.hasSnp(eqtl.snp.toUpperCase())
+                // 3 modes, specific qtl, snp, or phenotype (e.g. gene) focused.
+                if (this.browser.qtlSelections.qtl) {
+                    isSelected = compareQTLs(this.browser.qtlSelections.qtl, eqtl)
+                } else if (this.browser.qtlSelections.snps.size > 0) {
+                    isSelected = this.browser.qtlSelections.hasSnp(eqtl.snp.toUpperCase())
                     if (isSelected) {
-                        this.browser.xqtlSelections.addGene(geneSymbol)
+                        this.browser.qtlSelections.addPhenotype(geneSymbol)
                     }
                 } else {
-                    isSelected = this.browser.xqtlSelections.hasFeature(geneSymbol)
+                    isSelected = this.browser.qtlSelections.hasPhenotype(geneSymbol)
                 }
 
                 if (!drawSelected || isSelected) {
@@ -174,10 +160,10 @@ class EqtlTrack extends TrackBase {
                     // Add eqtl's gene to the selection if this is the selected snp.
                     // // TODO -- this should not be done here in the rendering code.
                     // if (selection && selection.snp === snp) {
-                    //     selection.addGene(geneSymbol)
+                    //     selection.addPhenotype(geneSymbol)
                     // }
 
-                    var mLogP = -Math.log(eqtl[this.pValueField]) / Math.LN10
+                    var mLogP = -Math.log(eqtl.pValue) / Math.LN10
                     if (mLogP >= this.dataRange.min) {
                         let capped
                         if (mLogP > this.dataRange.max) {
@@ -195,7 +181,7 @@ class EqtlTrack extends TrackBase {
 
                         let color
                         if (drawSelected && isSelected) {
-                            color = this.browser.xqtlSelections.colorForGene(geneSymbol)
+                            color = this.browser.qtlSelections.colorForGene(geneSymbol)
                             IGVGraphics.setProperties(context, {fillStyle: color, strokeStyle: "black"})
                         } else {
                             color = capped ? "rgb(150, 150, 150)" : "rgb(180, 180, 180)"
@@ -253,7 +239,7 @@ class EqtlTrack extends TrackBase {
         const tolerance = 6
         const candidateFeatures = features.filter(feature => dist(feature, clickState) < tolerance)
 
-        if(candidateFeatures.length > 1) {
+        if (candidateFeatures.length > 1) {
             candidateFeatures.sort((a, b) => dist(a, clickState) - dist(b, clickState))
             const firstD = dist(candidateFeatures[0], clickState)
             return candidateFeatures.filter(f => dist(f, clickState) <= firstD)
@@ -276,10 +262,10 @@ class EqtlTrack extends TrackBase {
                 menuData.push({
                     label: `Highlight associated features`,
                     click: async () => {
-                        this.browser.xqtlSelections.clear()
+                        this.browser.qtlSelections.clear()
                         for (let f of clickedFeatures) {
-                            this.browser.xqtlSelections.qtl = f
-                            this.browser.xqtlSelections.addGene(f.geneSymbol)
+                            this.browser.qtlSelections.qtl = f
+                            this.browser.qtlSelections.addPhenotype(f.phenotype)
                         }
                         this.browser.repaintViews()
                     }
@@ -302,7 +288,64 @@ class EqtlTrack extends TrackBase {
                 label: 'Search for...',
                 value: '',
                 callback: async (term) => {
-                    await this.browser.search(term, false, true)
+
+                    term = term.trim()
+
+                    let matchingFeatures = await this.featureSource.findFeatures(f => f.phenotype === term || f.snp === term)
+
+                    if(matchingFeatures.length == 0) {
+                        const found = await this.browser.search(term)
+                        if(found) {
+                            matchingFeatures = await this.featureSource.findFeatures(f => f.phenotype === term || f.snp === term)
+                        }
+                    }
+
+                    let chr, start, end
+                    if (matchingFeatures.length > 0) {
+                        this.browser.qtlSelections.clear()
+
+                        const genes = []
+                        chr = this.browser.genome.getChromosomeName(matchingFeatures[0].chr)
+                        start = matchingFeatures[0].start
+                        end = matchingFeatures[0].end
+                        for (let qtl of matchingFeatures) {
+                            if (qtl.snp === term) {
+                                this.browser.qtlSelections.addSnp(qtl.snp)
+                            }
+                            this.browser.qtlSelections.addPhenotype(qtl.phenotype)
+                            genes.push(qtl.phenotype)
+
+                            if (qtl.chr === chr) {
+                                start = Math.min(start, qtl.start)
+                                end = Math.max(end, qtl.end)
+                            } else {
+                                // TODO split screen?
+                            }
+                        }
+
+
+                        const searchableTracks = this.browser.tracks.filter(t => t.searchable)
+
+                        for (let track of searchableTracks) {
+                            for (let term of genes) {
+                                const feature = await track.search(term)
+                                if (feature) {
+                                    if (feature.chr === chr) {
+                                        start = Math.min(start, feature.start)
+                                        end = Math.max(end, feature.end)
+                                    } else {
+                                        // TODO split screen?
+                                    }
+                                }
+                            }
+                        }
+
+                        const flanking = Math.floor(0.1 * (end - start))
+                        start = Math.max(0, start - flanking)
+                        end += flanking
+
+                        await this.browser.search(`${chr}:${start}-${end}`)
+                    }
                 }
             }, ev)
         }
@@ -316,9 +359,9 @@ class EqtlTrack extends TrackBase {
 
         if (featureList.length > 0) {
 
-            var values = featureList
+            const values = featureList
                 .map(function (eqtl) {
-                    return -Math.log(eqtl.value) / Math.LN10
+                    return -Math.log(eqtl.pValue) / Math.LN10
                 })
 
             this.dataRange.max = IGVMath.percentile(values, this.autoscalePercentile)
@@ -338,4 +381,4 @@ function compareQTLs(a, b) {
     return a.chr === b.chr && a.start === b.start && a.pValue === b.pValue
 }
 
-export default EqtlTrack
+export default QTLTrack

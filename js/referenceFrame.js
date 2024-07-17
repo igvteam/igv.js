@@ -1,14 +1,10 @@
 import {StringUtils} from "../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {prettyBasePairNumber, validateGenomicExtent} from "./util/igvUtils.js"
-import FeatureSelection from "./gtex/featureSelection.js"
-import XQTLSelections from "./gtex/xqtlSelections.js"
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
 
 class ReferenceFrame {
-
-    xqtlSelections = new XQTLSelections()
 
     constructor(genome, chr, start, end, bpPerPixel) {
         console.log("New frame")

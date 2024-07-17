@@ -2,8 +2,7 @@ import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
 import FeatureFileReader from "./featureFileReader.js"
 import CustomServiceReader from "./customServiceReader.js"
 import UCSCServiceReader from "./ucscServiceReader.js"
-import GtexReader from "../gtex/gtexReader.js"
-import ImmVarReader from "../gtex/immvarReader.js"
+import GtexReader from "../qtl/gtexReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
 import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 import {computeWGFeatures, findFeatureAfterCenter, packFeatures} from "./featureUtils.js"
@@ -39,10 +38,7 @@ class TextFeatureSource extends BaseFeatureSource {
             this.queryable = config.queryable !== false
         } else if (config.sourceType === "ga4gh") {
             throw Error("Unsupported source type 'ga4gh'")
-        } else if (config.sourceType === "immvar") {
-            this.reader = new ImmVarReader(config)
-            this.queryable = true
-        } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
+        } else if ((config.type === "eqtl" || config.type === "qtl") && config.sourceType === "gtex-ws") {
             this.reader = new GtexReader(config)
             this.queryable = true
         } else if ("htsget" === config.sourceType) {
@@ -152,6 +148,10 @@ class TextFeatureSource extends BaseFeatureSource {
         } else {
             return this.featureCache.queryFeatures(chr, start, end)
         }
+    }
+
+    async findFeatures(fn) {
+        return this.featureCache ? this.featureCache.findFeatures(fn) : []
     }
 
     supportsWholeGenome() {
