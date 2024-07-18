@@ -6,7 +6,7 @@ import {colorPalettes} from "../util/colorPalletes.js"
 
 const colorPickerTrackTypeSet = new Set(['bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact'])
 
-const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp', 'shoebox'])
+const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'qtl', 'snp', 'shoebox'])
 
 const multiTrackSelectExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
 

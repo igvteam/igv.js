@@ -17,7 +17,6 @@ import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
 import {createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
-import GtexUtils from "./gtex/gtexUtils.js"
 import {defaultSequenceTrackOrder} from './sequenceTrack.js'
 import version from "./version.js"
 import FeatureSource from "./feature/featureSource.js"
@@ -41,7 +40,6 @@ import {viewportColumnManager} from './viewportColumnManager.js'
 import ViewportCenterLine from './ui/viewportCenterLine.js'
 import IdeogramTrack from "./ideogramTrack.js"
 import RulerTrack from "./rulerTrack.js"
-import GtexSelection from "./gtex/gtexSelection.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import CustomButton from "./ui/customButton.js"
@@ -65,6 +63,7 @@ import {bppSequenceThreshold} from "./sequenceTrack.js"
 import {loadGenbank} from "./gbk/genbankParser.js"
 import igvCss from "./embedCss.js"
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConstants.js"
+import QTLSelections from "./qtl/qtlSelections.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -82,6 +81,8 @@ const column_multi_locus_shim_width = 2 + 1 + 2
 
 class Browser {
 
+    qtlSelections = new QTLSelections()
+
     constructor(config, parentDiv) {
 
         this.config = config
@@ -97,8 +98,6 @@ class Browser {
             sheet.replaceSync(igvCss)
             shadowRoot.adoptedStyleSheets = [sheet]
         }
-
-
 
         this.root = DOMUtils.div({class: 'igv-container'})
         shadowRoot.appendChild(this.root)
@@ -188,9 +187,6 @@ class Browser {
 
     initialize(config) {
 
-        if (config.gtex) {
-            GtexUtils.gtexLoaded = true
-        }
         this.flanking = config.flanking
         this.crossDomainProxy = config.crossDomainProxy
         this.formats = config.formats
@@ -634,15 +630,8 @@ class Browser {
             this.trackViews.push(rulerTrackView)
         }
 
-        // Restore gtex selections.
-        if (session.gtexSelections) {
-            for (let referenceFrame of this.referenceFrameList) {
-                for (let s of Object.keys(session.gtexSelections)) {
-                    const gene = session.gtexSelections[s].gene
-                    const snp = session.gtexSelections[s].snp
-                    referenceFrame.selection = new GtexSelection(gene, snp)
-                }
-            }
+        if (session.qtlSelections) {
+            this.qtlSelections = QTLSelections.fromJSON(session.qtlSelections)
         }
 
         if (this.roiManager) {
@@ -1073,7 +1062,6 @@ class Browser {
             } else if (undefined === newTrack) {
                 return
             }
-
 
             return this.addTrack(config, newTrack)
 
@@ -1856,6 +1844,7 @@ class Browser {
      * NOTE: This is part of the API
      * @param string
      * @param init  true if called during browser initialization
+     *
      * @returns {Promise<boolean>}  true if found, false if not
      */
     async search(string, init) {
@@ -2026,27 +2015,18 @@ class Browser {
 
         // Build locus array (multi-locus view).  Use the first track to extract the loci, any track could be used.
         const locus = []
-        const gtexSelections = {}
-        let hasGtexSelections = false
         let anyTrackView = this.trackViews[0]
         for (let {referenceFrame} of anyTrackView.viewports) {
             const locusString = referenceFrame.getLocusString()
             locus.push(locusString)
-            if (referenceFrame.selection) {
-                const selection = {
-                    gene: referenceFrame.selection.gene,
-                    snp: referenceFrame.selection.snp
-                }
-                gtexSelections[locusString] = selection
-                hasGtexSelections = true
-            }
         }
         json["locus"] = locus.length === 1 ? locus[0] : locus
-        if (hasGtexSelections) {
-            json["gtexSelections"] = gtexSelections
-        }
 
         json["roi"] = this.roiManager.toJSON()
+
+        if (!this.qtlSelections.isEmpty()) {
+            json["qtlSelections"] = this.qtlSelections.toJSON()
+        }
 
         // Tracks
         const trackJson = []
