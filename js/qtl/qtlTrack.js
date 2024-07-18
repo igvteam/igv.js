@@ -45,7 +45,7 @@ class QTLTrack extends TrackBase {
         const min = config.minLogP || config.min
         const max = config.maxLogP || config.max
         this.dataRange = {
-            min: min || 3.5,
+            min: min !== undefined ? min :  3.5,
             max: max || 25
         }
         if (!max) {

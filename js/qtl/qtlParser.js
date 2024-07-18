@@ -76,50 +76,63 @@ class QTLParser {
     }
 
     async parseHeader(dataWrapper) {
+
+        const config = this.config
+        if(config.delimiter) this.delimiter = config.delimiter
+
         const headerLine = await dataWrapper.nextLine()
-        return this.parseHeaderLine(headerLine)
+        const columns = this.parseHeaderLine(headerLine)
+
+        // Config overrides
+
+        if (config.chrColumn) this.chrColumn = config.chrColumn - 1
+        if (config.snpColumn) this.snpColumn = config.snpColumn - 1
+        if (config.posColumn) this.posColumn = config.posColumn - 1
+        if (config.pValueColumn) this.pValueColumn = config.pValueColumn - 1
+        if (config.phenotypeColumn) this.phenotypeColumn = config.phenotypeColumn - 1
+
+        return columns
     }
 
     parseHeaderLine(headerLine) {
         this.columns = headerLine.split(this.delimiter)
-        if (!this.config.columns) {
-            for (let i = 0; i < this.columns.length; i++) {
-                const c = this.columns[i].toLowerCase()
-                switch (c) {
-                    case 'chr':
-                    case 'chromosome':
-                    case 'chr_id':
-                    case 'chrom':
-                        this.chrCol = i
-                        break
-                    case 'bp':
-                    case 'pos':
-                    case 'position':
-                    case 'chr_pos':
-                    case 'chromEnd':
-                        this.posCol = i
-                        break
-                    case 'p':
-                    case 'pval':
-                    case 'pvalue':
-                    case 'p-value':
-                    case 'p.value':
-                        this.pValueCol = i
-                        break
-                    case 'rsid':
-                    case 'variant':
-                    case 'snp':
-                        this.snpCol = i
-                        break
-                    case 'phenotype':
-                    case 'gene':
-                    case 'gene_id':
-                    case 'molecular_trait_id':
-                        this.phenotypeColumn = i
-                        break
-                }
+        for (let i = 0; i < this.columns.length; i++) {
+            const c = this.columns[i].toLowerCase()
+            switch (c) {
+                case 'chr':
+                case 'chromosome':
+                case 'chr_id':
+                case 'chrom':
+                    this.chrColumn = i
+                    break
+                case 'bp':
+                case 'pos':
+                case 'position':
+                case 'chr_pos':
+                case 'chromEnd':
+                    this.posColumn = i
+                    break
+                case 'p':
+                case 'pval':
+                case 'pvalue':
+                case 'p-value':
+                case 'p.value':
+                    this.pValueColumn = i
+                    break
+                case 'rsid':
+                case 'variant':
+                case 'snp':
+                    this.snpColumn = i
+                    break
+                case 'phenotype':
+                case 'gene':
+                case 'gene_id':
+                case 'molecular_trait_id':
+                    this.phenotypeColumn = i
+                    break
             }
         }
+
         // TODO validate
         return this.columns
     }
@@ -147,17 +160,17 @@ class QTLParser {
         }
 
         while ((line = dataWrapper.nextLine()) !== undefined) {
-            const tokens = line.split(/\t/)
+            const tokens = line.split(this.delimiter)
             if (tokens.length === this.columns.length) {
-                const posString = tokens[this.posCol]
+                const posString = tokens[this.posColumn]
                 if (posString.indexOf(";") > 0 || posString.length == 0 || posString.indexOf('x') > 0) {
                     continue
                 }
-                const chr = tokens[this.chrCol]
-                const pValue = parseValue(tokens[this.pValueCol])
+                const chr = tokens[this.chrColumn]
+                const pValue = parseValue(tokens[this.pValueColumn])
                 const start = parseInt(posString) - 1
                 const end = start + 1
-                const snp = tokens[this.snpCol]
+                const snp = tokens[this.snpColumn]
                 const phenotype = tokens[this.phenotypeColumn]
                 const qtl = new QTL({chr, start, end, pValue, snp, phenotype}, this.columns, tokens)
 
