@@ -27,6 +27,7 @@ import FeatureSource from '../feature/featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
+import {searchFeatures} from "../search.js"
 
 class QTLTrack extends TrackBase {
 
@@ -141,6 +142,9 @@ class QTLTrack extends TrackBase {
                 else if (px > pixelWidth) break
 
                 const phenotype = eqtl.phenotype.toUpperCase()
+                if (phenotype === "ENSG00000186716") {
+                    console.log()
+                }
 
                 let isSelected
                 // 3 modes, specific qtl, snp, or phenotype (e.g. gene) focused.
@@ -281,31 +285,37 @@ class QTLTrack extends TrackBase {
                 value: '',
                 callback: async (term) => {
 
-                    term = term.trim()
+                    term = term.trim().toUpperCase()
 
-                    let matchingFeatures = await this.featureSource.findFeatures(f => f.phenotype === term || f.snp === term)
-
+                    // Find qtls from this track matching either snp or phenotype
+                    const matching = f => {
+                        return (f.phenotype.toUpperCase() === term || f.snp.toUpperCase() === term) &&
+                            -Math.log(f.pValue) / Math.LN10  > this.dataRange.min
+                    }
+                    let matchingFeatures = await this.featureSource.findFeatures(matching)
                     if (matchingFeatures.length == 0) {
+                        // Possibly move to another genomic locus containing the search term
                         const found = await this.browser.search(term)
                         if (found) {
-                            matchingFeatures = await this.featureSource.findFeatures(f => f.phenotype === term || f.snp === term)
+                            matchingFeatures = await this.featureSource.findFeatures(matching)
                         }
                     }
 
+                    // Add found features to qtlSelections and compute spanned genomic region.  Currently
+                    // this only works for cis-QTLs
                     let chr, start, end
                     if (matchingFeatures.length > 0) {
                         this.browser.qtlSelections.clear()
-
-                        const genes = []
-                        chr = this.browser.genome.getChromosomeName(matchingFeatures[0].chr)
+                        const genes = new Set()
+                        chr = matchingFeatures[0].chr
                         start = matchingFeatures[0].start
                         end = matchingFeatures[0].end
                         for (let qtl of matchingFeatures) {
-                            if (qtl.snp === term) {
+                            if (qtl.snp.toUpperCase() === term) {
                                 this.browser.qtlSelections.addSnp(qtl.snp)
                             }
                             this.browser.qtlSelections.addPhenotype(qtl.phenotype)
-                            genes.push(qtl.phenotype)
+                            genes.add(qtl.phenotype)
 
                             if (qtl.chr === chr) {
                                 start = Math.min(start, qtl.start)
@@ -316,24 +326,16 @@ class QTLTrack extends TrackBase {
                         }
 
 
-                        const searchableTracks = this.browser.tracks.filter(t => t.searchable)
-
-                        const compareChrs = (a, b) => {
-                            const ca = this.browser.genome.getChromosomeName(a)
-                            const cb = this.browser.genome.getChromosomeName(b)
-                            return ca === cb
-                        }
-
-                        for (let track of searchableTracks) {
-                            for (let term of genes) {
-                                const feature = await track.search(term)
-                                if (feature) {
-                                    if (compareChrs(feature.chr, chr)) {
-                                        start = Math.min(start, feature.start)
-                                        end = Math.max(end, feature.end)
-                                    } else {
-                                        // TODO split screen?
-                                    }
+                        // possibly Expand region to bring phenotype in view
+                        const canonicalChrName = this.browser.genome.getChromosomeName(chr)
+                        for (let term of genes) {
+                            const feature = await searchFeatures(this.browser, term)
+                            if (feature) {
+                                if (canonicalChrName === this.browser.genome.getChromosomeName(feature.chr)) {
+                                    start = Math.min(start, feature.start)
+                                    end = Math.max(end, feature.end)
+                                } else {
+                                    // TODO split screen?
                                 }
                             }
                         }
@@ -355,20 +357,14 @@ class QTLTrack extends TrackBase {
 
     doAutoscale(featureList) {
 
-        if (featureList.length > 0) {
-
-            const values = featureList
-                .map(function (eqtl) {
-                    return -Math.log(eqtl.pValue) / Math.LN10
-                })
-
-            this.dataRange.max = IGVMath.percentile(values, this.autoscalePercentile)
-        } else {
-            // No features -- default
-            const max = this.config.maxLogP || this.config.max
-            this.dataRange.max = max || 25
+        let max = this.config.max || 25 // default
+        if(featureList.length > 0) {
+            const values = featureList.map(eqtl => -Math.log(eqtl.pValue) / Math.LN10)
+            values.sort((a, b) => a-b)
+            const k = Math.floor(values.length * (this.autoscalePercentile / 100))
+            max = values[k]
         }
-
+        this.dataRange.max = Math.max(max, 10)
         return this.dataRange
     }
 

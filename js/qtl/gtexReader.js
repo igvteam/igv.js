@@ -85,6 +85,8 @@ class GtexReader {
 //     "tissueSiteDetailId": "Muscle_Skeletal",
 //     "variantId": "chr16_21999621_G_GA_b38"
 // }
+
+
 class EQTL {
 
     constructor(eqtl) {

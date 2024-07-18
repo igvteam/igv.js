@@ -259,18 +259,10 @@ class TextFeatureSource extends BaseFeatureSource {
     }
 
     search(term) {
-        term = term.toUpperCase()
-        let feature
         if (this.featureMap) {
-            feature = this.featureMap.get(term)
+            return this.featureMap.get(term.toUpperCase())
         }
-        if(!feature) {
-            const foundFeatures = this.featureCache.findFeatures(f => f.name.toUpperCase() === term)
-            if(foundFeatures && foundFeatures.length > 0) {
-                feature = foundFeatures[0]
-            }
-        }
-        return feature
+
     }
 }
 

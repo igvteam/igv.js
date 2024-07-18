@@ -60,7 +60,7 @@ const MIN_EXPONENT = Math.log10(Number.MIN_VALUE)
 class QTLParser {
 
     chrCol = -1
-    snpCol =  -1
+    snpCol = -1
     posCol = -1
     pValueCol = -1
     phenotypeColumn = -1
@@ -114,6 +114,7 @@ class QTLParser {
                     case 'phenotype':
                     case 'gene':
                     case 'gene_id':
+                    case 'molecular_trait_id':
                         this.phenotypeColumn = i
                         break
                 }
@@ -135,11 +136,11 @@ class QTLParser {
 
         const parseValue = (valueString) => {
             // Don't try to parse extremely small values
-            const idx = valueString.indexOf("E");
-            if(idx > 0) {
-                const exp = Number.parseInt(valueString.substring(idx + 1));
+            const idx = valueString.indexOf("E")
+            if (idx > 0) {
+                const exp = Number.parseInt(valueString.substring(idx + 1))
                 if (exp < MIN_EXPONENT) {
-                   return Number.MIN_VALUE;
+                    return Number.MIN_VALUE
                 }
             }
             return Number(valueString)
@@ -149,7 +150,7 @@ class QTLParser {
             const tokens = line.split(/\t/)
             if (tokens.length === this.columns.length) {
                 const posString = tokens[this.posCol]
-                if(posString.indexOf(";") > 0 || posString.length == 0 || posString.indexOf('x') > 0) {
+                if (posString.indexOf(";") > 0 || posString.length == 0 || posString.indexOf('x') > 0) {
                     continue
                 }
                 const chr = tokens[this.chrCol]
@@ -168,36 +169,7 @@ class QTLParser {
     }
 }
 
-// if (json && json.singleTissueEqtl) {
-//     for (let eqtl of json.singleTissueEqtl) {
-//         eqtl.chr = eqtl.chromosome
-//         eqtl.start = eqtl.pos - 1
-//         eqtl.end = eqtl.start + 1
-//         eqtl.snp = eqtl.snpId
-//         eqtl.geneName = eqtl.geneSymbol
-//         eqtl.geneId = eqtl.gencodeId
-//     }
-//     return json.singleTissueEqtl
-// } else {
-//     return []
-// }
-// }
-// }
 
-// Example GTEX eqtl
-// {
-//     "chromosome": "chr16",
-//     "datasetId": "gtex_v8",
-//     "gencodeId": "ENSG00000275445.1",
-//     "geneSymbol": "CTD-2649C14.3",
-//     "geneSymbolUpper": "CTD-2649C14.3",
-//     "nes": 0.51295,
-//     "pValue": 5.57674e-14,
-//     "pos": 21999621,
-//     "snpId": "rs35368623",
-//     "tissueSiteDetailId": "Muscle_Skeletal",
-//     "variantId": "chr16_21999621_G_GA_b38"
-// }
 class QTL {
 
     constructor({chr, start, end, pValue, snp, phenotype}, headers, tokens) {
@@ -213,7 +185,7 @@ class QTL {
 
     popupData() {
         const data = []
-        for(let i=0; i< this.headers.length; i++) {
+        for (let i = 0; i < this.headers.length; i++) {
             data.push({name: this.headers[i], value: this.tokens[i]})
         }
         return data
