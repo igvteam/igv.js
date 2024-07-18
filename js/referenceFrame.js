@@ -1,32 +1,6 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 import {StringUtils} from "../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {prettyBasePairNumber, validateGenomicExtent} from "./util/igvUtils.js"
-import GtexSelection from "./gtex/gtexSelection.js"
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
 
@@ -34,11 +8,9 @@ class ReferenceFrame {
 
     constructor(genome, chr, start, end, bpPerPixel) {
         this.genome = genome
-
-        this.chr =  chr // this.genome.getChromosomeName(chr)
+        this.chr = chr // this.genome.getChromosomeName(chr)
         this.start = start
         this.end = end
-
         this.bpPerPixel = bpPerPixel
         this.id = DOMUtils.guid()
     }
@@ -48,7 +20,7 @@ class ReferenceFrame {
     }
 
     get locusSearchString() {
-        return `${this.chr}:${this.start+1}-${this.end}`
+        return `${this.chr}:${this.start + 1}-${this.end}`
     }
 
     /**
@@ -113,7 +85,7 @@ class ReferenceFrame {
 
         this.start += deltaBP
 
-        if(clamp) {
+        if (clamp) {
             this.clampStart(viewportWidth)
         }
 
@@ -184,14 +156,14 @@ class ReferenceFrame {
 
     getMultiLocusLabelLocusOnly(pixels) {
         const margin = '&nbsp'
-        const {chr, start, end } = this.getPresentationLocusComponents(pixels)
+        const {chr, start, end} = this.getPresentationLocusComponents(pixels)
         return `${margin}${chr}:${start}-${end}${margin}`
     }
 
     getMultiLocusLabel(pixels) {
         const margin = '&nbsp'
         const space = '&nbsp &nbsp'
-        const {chr, start, end } = this.getPresentationLocusComponents(pixels)
+        const {chr, start, end} = this.getPresentationLocusComponents(pixels)
         const ss = Math.floor(this.start) + 1
         const ee = Math.round(this.start + this.bpPerPixel * pixels)
         return `${margin}${chr}:${start}-${end}${margin}${margin}(${prettyBasePairNumber(ee - ss)})${margin}`
@@ -233,31 +205,29 @@ class ReferenceFrame {
 
 function createReferenceFrameList(loci, genome, browserFlanking, minimumBases, viewportWidth, isSoftclipped) {
 
-    return loci.map(locus => {
+    return loci.map(l => {
 
-        // If a flanking region is defined, and the search object is a symbol ("gene") type, adjust start and end
-        if (browserFlanking && locus.gene) {
+        const locus = Object.assign({}, l)  // Copy as we might mutate this object
+
+        // If a flanking region is defined, and the search object is a feature (has a name) type, adjust start and end
+        if (browserFlanking && locus.name) {
             locus.start = Math.max(0, locus.start - browserFlanking)
             locus.end += browserFlanking
         }
 
         // Validate the range.  This potentionally modifies start & end of locus.
-        if(!isSoftclipped) {
+        if (!isSoftclipped) {
             const chromosome = genome.getChromosome(locus.chr)
             validateGenomicExtent(chromosome.bpLength, locus, minimumBases)
         }
 
-        const referenceFrame = new ReferenceFrame(genome,
+        const referenceFrame = new ReferenceFrame(
+            genome,
             locus.chr,
             locus.start,
             locus.end,
-            (locus.end - locus.start) / viewportWidth)
-
-
-        // GTEX hack
-        if (locus.gene || locus.snp) {
-            referenceFrame.selection = new GtexSelection(locus.gene, locus.snp)
-        }
+            (locus.end - locus.start) / viewportWidth
+        )
 
         return referenceFrame
     })
