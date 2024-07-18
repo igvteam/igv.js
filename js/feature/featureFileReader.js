@@ -34,7 +34,7 @@ import {loadIndex} from "../bam/indexFactory.js"
 import getDataWrapper from "./dataWrapper.js"
 import BGZLineReader from "../util/bgzLineReader.js"
 import BGZBlockLoader from "../bam/bgzBlockLoader.js"
-import QTLParser from "../qtl/QTLParser.js"
+import QTLParser from "../qtl/qtlParser.js"
 
 // Conservative estimate of the maximum allowed string length
 const MAX_STRING_LENGTH = 500000000
