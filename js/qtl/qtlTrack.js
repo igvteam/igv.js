@@ -140,28 +140,20 @@ class QTLTrack extends TrackBase {
                 if (px < 0) continue
                 else if (px > pixelWidth) break
 
-                const geneSymbol = eqtl.phenotype.toUpperCase()
+                const phenotype = eqtl.phenotype.toUpperCase()
 
                 let isSelected
                 // 3 modes, specific qtl, snp, or phenotype (e.g. gene) focused.
                 if (this.browser.qtlSelections.qtl) {
                     isSelected = compareQTLs(this.browser.qtlSelections.qtl, eqtl)
                 } else if (this.browser.qtlSelections.snps.size > 0) {
-                    isSelected = this.browser.qtlSelections.hasSnp(eqtl.snp.toUpperCase())
-                    if (isSelected) {
-                        this.browser.qtlSelections.addPhenotype(geneSymbol)
-                    }
+                    isSelected = this.browser.qtlSelections.hasSnp(eqtl.snp.toUpperCase()) &&
+                        this.browser.qtlSelections.hasPhenotype(phenotype)
                 } else {
-                    isSelected = this.browser.qtlSelections.hasPhenotype(geneSymbol)
+                    isSelected = this.browser.qtlSelections.hasPhenotype(phenotype)
                 }
 
                 if (!drawSelected || isSelected) {
-
-                    // Add eqtl's gene to the selection if this is the selected snp.
-                    // // TODO -- this should not be done here in the rendering code.
-                    // if (selection && selection.snp === snp) {
-                    //     selection.addPhenotype(geneSymbol)
-                    // }
 
                     var mLogP = -Math.log(eqtl.pValue) / Math.LN10
                     if (mLogP >= this.dataRange.min) {
@@ -181,7 +173,7 @@ class QTLTrack extends TrackBase {
 
                         let color
                         if (drawSelected && isSelected) {
-                            color = this.browser.qtlSelections.colorForGene(geneSymbol)
+                            color = this.browser.qtlSelections.colorForGene(phenotype)
                             IGVGraphics.setProperties(context, {fillStyle: color, strokeStyle: "black"})
                         } else {
                             color = capped ? "rgb(150, 150, 150)" : "rgb(180, 180, 180)"
@@ -293,9 +285,9 @@ class QTLTrack extends TrackBase {
 
                     let matchingFeatures = await this.featureSource.findFeatures(f => f.phenotype === term || f.snp === term)
 
-                    if(matchingFeatures.length == 0) {
+                    if (matchingFeatures.length == 0) {
                         const found = await this.browser.search(term)
-                        if(found) {
+                        if (found) {
                             matchingFeatures = await this.featureSource.findFeatures(f => f.phenotype === term || f.snp === term)
                         }
                     }
@@ -326,11 +318,17 @@ class QTLTrack extends TrackBase {
 
                         const searchableTracks = this.browser.tracks.filter(t => t.searchable)
 
+                        const compareChrs = (a, b) => {
+                            const ca = this.browser.genome.getChromosomeName(a)
+                            const cb = this.browser.genome.getChromosomeName(b)
+                            return ca === cb
+                        }
+
                         for (let track of searchableTracks) {
                             for (let term of genes) {
                                 const feature = await track.search(term)
                                 if (feature) {
-                                    if (feature.chr === chr) {
+                                    if (compareChrs(feature.chr, chr)) {
                                         start = Math.min(start, feature.start)
                                         end = Math.max(end, feature.end)
                                     } else {

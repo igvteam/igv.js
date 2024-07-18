@@ -84,10 +84,13 @@ class QTLSelections {
         }
         return qtlSelections
     }
-
 }
 
-var brewer = []
+function compareQTLs(a, b) {
+    return a.chr === b.chr && a.start === b.start && a.pValue === b.pValue
+}
+
+const brewer = []
 // Set +!
 brewer.push("rgb(228,26,28)")
 brewer.push("rgb(55,126,184)")

@@ -1844,7 +1844,6 @@ class Browser {
      * NOTE: This is part of the API
      * @param string
      * @param init  true if called during browser initialization
-     * @param qtlSearch true if search is initiated from an xqtl track
      *
      * @returns {Promise<boolean>}  true if found, false if not
      */
@@ -1853,22 +1852,6 @@ class Browser {
         const loci = await search(this, string)
 
         if (loci && loci.length > 0) {
-
-            // Special search mode for qtl focused sites, specifically GTEX
-            let snpSelection = false
-            if (this.config.enableQTLSearch && loci.some(l => l.name)) {
-                this.qtlSelections.clear()
-                for (let l of loci) {
-                    if (l.name) {
-                        if (l.end - l.start == 1) {
-                            snpSelection = true
-                            this.qtlSelections.addSnp(l.name)
-                        } else if (l.name) {
-                            this.qtlSelections.addPhenotype(l.name)
-                        }
-                    }
-                }
-            }
 
             // create reference frame list based on search loci
             this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length), this.isSoftclipped())
@@ -1896,13 +1879,6 @@ class Browser {
 
             if (!init) {
                 await this.updateViews()
-
-                // Updating xqtl tracks can affect annotation tracks if the queried locus is a SNP.  If so repaint the tracks
-                if (snpSelection) {
-                    for (let tv of this.trackViews.filter(tv => "annotation" === tv.track.type)) {
-                        tv.repaintViews()
-                    }
-                }
             }
             return true
         } else {

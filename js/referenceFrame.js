@@ -7,7 +7,6 @@ import {prettyBasePairNumber, validateGenomicExtent} from "./util/igvUtils.js"
 class ReferenceFrame {
 
     constructor(genome, chr, start, end, bpPerPixel) {
-        console.log("New frame")
         this.genome = genome
         this.chr = chr // this.genome.getChromosomeName(chr)
         this.start = start

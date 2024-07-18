@@ -212,7 +212,7 @@ class FeatureFileReader {
                 return new SegParser("maf")
             case "gwas" :
                 return new GWASParser(config)
-            case "xqtl":
+            case "qtl":
                 return new QTLParser(config)
             case "aed" :
                 return new AEDParser(config)
