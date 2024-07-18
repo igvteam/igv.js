@@ -281,7 +281,7 @@ class QTLTrack extends TrackBase {
         function dialogPresentationHandler(ev) {
 
             this.browser.inputDialog.present({
-                label: 'Search for snp or phenotype ...',
+                label: 'Search for snp or phenotype',
                 value: '',
                 callback: async (term) => {
 
