@@ -6,9 +6,235 @@ declare class Opaque<N extends string> {
     private readonly __opaque_brand: N;
 }
 
-// TODO: Unworked types for placeholder purposes
-type Track = any;
-type ColorSpec = any;
+export type Track = Tracks.TrackCommonOptions &
+    ((Tracks.AnnotationTrackOptions & Tracks.TypeFormatPair<'annotation', Tracks.AnnotationFormat>) |
+        (Tracks.WigTrackOptions & Tracks.TypeFormatPair<'wig', Tracks.WigFormat>));
+
+export namespace Tracks {
+    export interface TypeFormatPair<K extends string, F extends string> {
+        type?: K;
+        format?: F;
+    }
+
+    export interface TrackCommonOptions {
+        name: string;
+        url: string | Promise<string>;
+        indexURL?: string | Promise<string>;
+        indexed?: false;
+        order?: number;
+        color?: string;
+        height?: number;
+        autoHeight?: boolean;
+        minHeight?: number;
+        maxHeight?: number;
+        visibilityWindow?: number;
+        removable?: boolean;
+        headers?: Record<string, string>;
+        oauthToken?: string | (() => string | Promise<string>);
+    }
+
+    export type AnnotationFormat = "bed" | "gff3" | "gtf" | "genePred" | "genePredExt" | "peaks" | "narrowPeak" | "broadPeak" | "bigBed" | "bedpe";
+
+    export type AnnotationTrackDisplay = {
+        /**
+         * Annotation display mode, one of "COLLAPSED", "EXPANDED", "SQUISHED"
+         * 
+         * @type {"COLLAPSED" | "EXPANDED" | "SQUISHED"}
+         * @default "EXPANDED"
+         * 
+         */
+        displayMode: "EXPANDED",
+        /**
+         * Height of each row of features in "EXPANDED" mode
+         * 
+         * @type {number}
+         * @default 30
+         * 
+         */
+        expandedRowHeight: number,
+    } | {
+        /**
+         * Annotation display mode, one of "COLLAPSED", "EXPANDED", "SQUISHED"
+         * 
+         * @type {"COLLAPSED" | "EXPANDED" | "SQUISHED"}
+         * @default "EXPANDED"
+         * 
+         */
+        displayMode: "SQUISHED",
+        /**
+         * Height of each row of features in "EXPANDED" mode
+         * 
+         * @type {number}
+         * @default 15
+         * 
+         */
+        squishedRowHeight: number,
+    } | {
+        /**
+         * Annotation display mode, one of "COLLAPSED", "EXPANDED", "SQUISHED"
+         * 
+         * @type {"COLLAPSED" | "EXPANDED" | "SQUISHED"}
+         * @default "EXPANDED"
+         * 
+         */
+        displayMode?: "COLLAPSED",
+    }
+
+    export type AnnotationTrackSearch = {
+        /**
+         * If true, feature names for this track can be searched for. Use this option with caution, it is memory intensive. This option will not work with indexed tracks.
+         * 
+         * @type {boolean}
+         * @default false
+         * 
+         */
+        searchable: true,
+        /**
+         * For use with the searchable option in conjunction with GFF files. An array of field (column 9) names to be included in feature searches. When searching for feature attributes spaces need to be escaped with a "+" sign or percent encoded ("%20).
+         * 
+         * @type {string[]}
+         * 
+         */
+        searchableFields: string[],
+    } | {
+        /**
+         * If true, feature names for this track can be searched for. Use this option with caution, it is memory intensive. This option will not work with indexed tracks.
+         * 
+         * @type {boolean}
+         * @default false
+         * 
+         */
+        searchable?: false,
+    }
+
+    interface AnnotationTrackCommonOptions {
+        /**
+         * For GFF/GTF file formats. Name of column 9 property to be used for feature label.
+         * 
+         * @type {string}
+         */
+        nameField?: string;
+        /**
+         * Maximum number of rows of features to display
+         * 
+         * @type {number}
+         * @default 500
+         */
+        maxRows?: number;
+        /**
+         * Array of gff feature types to filter from display.
+         * 
+         * @type {string[]}
+         * @default ["chromosome", "gene"]
+         */
+        filterTypes?: string[];
+        /**
+         * CSS color value for track features, e.g. "#ff0000" or "rgb(100,0,100)".
+         * 
+         * @type {string}
+         * @default "rgb(0,0,150)"
+         */
+        color?: string,
+        /**
+         * If supplied, used for features on negative strand
+         * 
+         * @type {string}
+         * @default "rgb(100,100,100)"
+         */
+        altColor?: string,
+        /**
+         * Used with GFF/GTF files. Name of column 9 attribute to color features by.
+         * 
+         * @type {string}
+         * 
+         */
+        colorBy?: string,
+        /**
+         * Used in conjunction with colorBy property. Maps attribute values to CSS colors. See example below.
+         * 
+         * @type {Record<string, string>}
+         * 
+         */
+        colorTable?: Record<string, string>,
+    }
+
+    export type AnnotationTrackOptions = ExtraKeys<AnnotationTrackDisplay & AnnotationTrackSearch & AnnotationTrackCommonOptions>;
+
+    export type WigFormat = "wig" | "bigWig";
+
+    export interface WigTrackCommonOptions {
+        /**
+         * Autoscale track to maximum value in view
+         * 
+         * @type {boolean}
+         */
+        autoscale?: boolean;
+        /**
+         * Identifier for an autoscale group. Tracks with the same identifier are autoscaled together.
+         * 
+         * @type {string}
+         */
+        autoscaleGroup?: string;
+        /**
+         * Sets the minimum value for the data (y-axis) scale. Usually zero.
+         * 
+         * @type {number}
+         */
+        min?: number;
+        /**
+         * Sets the maximum value for the data (y-axis) scale. This value is ignored if autoscale = true
+         * 
+         * @type {number}
+         */
+        max?: number;
+        /**
+         * Track color as as an "rgb(,,,)" string, a hex string, or css color name. Alternatively a function can be supplied which takes value as a parameter and returns a color.
+         * 
+         * @type {string}
+         */
+        color?: string,
+        /**
+         * If supplied, used for negative values. See description of color field above.
+         * 
+         * @type {string}
+         */
+        altColor?: string,
+        /**
+         * Draws a horizontal line for each object in the given array: 
+         * guideLines: [ {color: [color], y: [number], dotted: [bool]} ] 
+         * 
+         * Note: y value should be between min and max or it will not show.
+         * 
+         * @type {object}
+         */
+        guidelines?: Array<{ color: string, y: number, dotted: boolean }>;
+        /**
+         * Type of graph, either "bar" or "points"
+         * 
+         * @type {"points" | "bar"}
+         * @default "points"
+         */
+        graphType?: "points" | "bar";
+        /**
+         * If true, track is drawn "upside down" with zero at top
+         * 
+         * @type {boolean}
+         * @default false
+         */
+        flipAxis?: boolean;
+        /**
+         * Applicable to tracks created from bigwig and tdf files.
+         * Governs how data is summarized when zooming out.
+         * Options include min, max, and mean.
+         * 
+         * @type {"mean" | "max" | "min"}
+         * @default "mean"
+         */
+        windowFunction?: "mean" | "max" | "min";
+    }
+
+    export type WigTrackOptions = ExtraKeys<WigTrackCommonOptions>;
+}
 
 type Nucleotide = 'A' | 'C' | 'G' | 'T' | 'N';
 type AnnotationFormat = 'bed' | 'gff3' | 'gtf' | 'genePred' | 'genePredExt' | 'peaks' | 'narrowPeak' | 'broadPeak' | 'bigBed' | 'bedpe';
@@ -138,7 +364,7 @@ interface CreateOptExtras {
      * Color table for nucleotides in sequence an bam tracks. Object with keys "A", "C", "T", "G", and "N"
      * 
      */
-    nucleotideColors?: Partial<Record<Nucleotide, ColorSpec>>;
+    nucleotideColors?: Partial<Record<Nucleotide, string>>;
 
     /**
      * 
