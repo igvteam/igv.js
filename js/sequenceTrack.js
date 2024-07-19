@@ -27,7 +27,7 @@ import IGVGraphics from "./igv-canvas.js"
 import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
 import {loadSequence} from "./genome/fasta.js"
-import {defaultNucleotideColors} from "./util/nucleotideColors.js";
+import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER
@@ -137,11 +137,11 @@ class SequenceTrack {
         this.height = this.frameTranslate ? TRANSLATED_HEIGHT : DEFAULT_HEIGHT
 
         // Hack for backward compatibility
-        if(config.url) {
+        if (config.url) {
             config.fastaURL = config.url
         }
 
-        if(!config.fastaURL) {
+        if (!config.fastaURL) {
             // Mark this as the genome reference sequence ==> backward compatibility convention
             this.id = config.id || "sequence"
         }
@@ -224,17 +224,17 @@ class SequenceTrack {
 
             items.push({
                 label: 'BLAT read sequence',
-                    click: async () => {
-                        let sequence = await this.browser.genome.getSequence(chr, start, end)
-                        if (sequence) {
-                            if (this.reversed) {
-                                sequence = reverseComplementSequence(sequence)
-                            }
-                            const name = `blat: ${chr}:${start + 1}-${end}`
-                            const title = `blat: ${chr}:${start + 1}-${end}`
-                            createBlatTrack({sequence, browser: this.browser, name, title})
+                click: async () => {
+                    let sequence = await this.browser.genome.getSequence(chr, start, end)
+                    if (sequence) {
+                        if (this.reversed) {
+                            sequence = reverseComplementSequence(sequence)
                         }
+                        const name = `blat: ${chr}:${start + 1}-${end}`
+                        const title = `blat: ${chr}:${start + 1}-${end}`
+                        createBlatTrack({sequence, browser: this.browser, name, title})
                     }
+                }
             })
 
 
@@ -278,8 +278,8 @@ class SequenceTrack {
      * @returns {Promise<WrappedFasta|*>}
      */
     async getSequenceSource() {
-        if(this.config.fastaURL) {
-            if(!this.fasta) {
+        if (this.config.fastaURL) {
+            if (!this.fasta) {
                 this.fasta = new WrappedFasta(this.config, this.browser.genome)
                 await this.fasta.init()
             }
@@ -314,7 +314,7 @@ class SequenceTrack {
         if (options.features) {
 
             let sequence = options.features.sequence
-            if(!sequence) {
+            if (!sequence) {
                 return
             }
 
@@ -343,8 +343,6 @@ class SequenceTrack {
                         IGVGraphics.fillRect(ctx, aPixel, FRAME_BORDER, pixelWidth, SEQUENCE_HEIGHT - FRAME_BORDER, {fillStyle: color})
                     } else {
                         const textPixel = aPixel + 0.5 * (pixelWidth - ctx.measureText(baseLetter).width)
-
-
 
 
                         if ('y' === options.axis) {
@@ -421,8 +419,7 @@ class SequenceTrack {
         if (this.color) {
             return this.color
         } else if ("dna" === this.sequenceType) {
-            // return this.browser.nucleotideColors[index] || 'gray'
-            return defaultNucleotideColors[index] || 'gray'
+            return this.browser.nucleotideColors[index] || 'gray'
         } else {
             return 'rgb(0, 0, 150)'
         }
@@ -456,14 +453,14 @@ class SequenceTrack {
 class WrappedFasta {
 
     constructor(config, genome) {
-        this.config = config;
+        this.config = config
         this.genome = genome
     }
 
     async init() {
         this.fasta = await loadSequence(this.config)
         this.chrNameMap = new Map()
-        for(let name of this.fasta.chromosomeNames) {
+        for (let name of this.fasta.chromosomeNames) {
             this.chrNameMap.set(this.genome.getChromosomeName(name), name)
         }
     }
@@ -475,7 +472,7 @@ class WrappedFasta {
 
 }
 
-export {defaultSequenceTrackOrder, bppSequenceThreshold, translationDict }
+export {defaultSequenceTrackOrder, bppSequenceThreshold, translationDict}
 
 export default SequenceTrack
 
