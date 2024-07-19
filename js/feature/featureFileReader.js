@@ -172,15 +172,26 @@ class FeatureFileReader {
             }
 
         } else {
-            // If this is a non-indexed file we will load all features in advance
-            const options = buildOptions(this.config)
-            let data = await igvxhr.loadByteArray(this.config.url, options)
+
+            let data
+
+            if (this.config._filecontents) {
+                // In rare instances the entire file must be read and decoded to determine the file format.
+                // When this occurs the file contents are temporarily stashed to prevent needing to read the file twice
+                data = this.config._filecontents
+                delete this.config._filecontents
+            } else {
+                // If this is a non-indexed file we will load all features in advance
+                const options = buildOptions(this.config)
+                data = await igvxhr.loadByteArray(this.config.url, options)
+            }
 
             // If the data size is < max string length decode entire string with TextDecoder.  This is much faster
             // than decoding by line
             if (data.length < MAX_STRING_LENGTH) {
                 data = new TextDecoder().decode(data)
             }
+
 
             let dataWrapper = getDataWrapper(data)
             this.header = await this.parser.parseHeader(dataWrapper)

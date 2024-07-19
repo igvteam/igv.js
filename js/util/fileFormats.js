@@ -1,3 +1,57 @@
+/**
+ * Utilities for creating and registering custom file formats for generic delimited files.  A format definition consists
+ * of an ordered list of fields, and optional delimiter specified.
+ *
+ *
+ */
+
+
+/**
+ * Register a new custom file format.
+ * @param name
+ * @param fields
+ */
+function registerFileFormats(name, fields) {
+    FileFormats[name] = {fields: fields}
+}
+
+/**
+ * Return a custom format object with the given name.
+ * @param name
+ * @returns {*}
+ */
+function getFormat(name) {
+
+    if (FileFormats && FileFormats[name]) {
+        return expandFormat(FileFormats[name])
+    } else {
+        return undefined
+    }
+
+    function expandFormat(format) {
+
+        const fields = format.fields
+        const keys = ['chr', 'start', 'end']
+
+        for (let i = 0; i < fields.length; i++) {
+            for (let key of keys) {
+                if (key === fields[i]) {
+                    format[key] = i
+                }
+            }
+        }
+
+        return format
+    }
+}
+
+
+
+/**
+ * Table of custom formats, with several pre-defined.
+ *
+ * @type {{wgrna: {fields: string[]}, cpgislandext: {fields: string[]}, clinVarMain: {fields: string[]}, gwascatalog: {fields: string[]}}}
+ */
 const FileFormats = {
 
     gwascatalog: {
@@ -46,7 +100,6 @@ const FileFormats = {
 
     cpgislandext: {
         fields:
-
             [
                 'bin',
                 'chr',
@@ -100,4 +153,6 @@ const FileFormats = {
     }
 }
 
-export default FileFormats
+
+
+export {registerFileFormats, getFormat}
