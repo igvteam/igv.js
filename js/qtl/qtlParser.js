@@ -181,7 +181,6 @@ class QTLParser {
         return allFeatures
     }
 
-
     /**
      * Test first line to see if this is a QTL file.  Used to determine file format for the case of generic
      * extensions such as "tsv"
@@ -205,7 +204,6 @@ class QTLParser {
         }
         return true
     }
-
 }
 
 
