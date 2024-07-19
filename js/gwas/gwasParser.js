@@ -99,6 +99,29 @@ class GWASParser {
         }
         return allFeatures
     }
+
+    /**
+     * Test first line to see if this is a GWAS file.  Used to determine file format for the case of generic
+     * extensions such as "tsv"
+     * @param firstLine
+     */
+    static isGWAS(firstLine) {
+        const tokens = firstLine.split('\t')
+        if (tokens.length < 5) {
+            return false
+        }
+        const requiredHeaders =
+            [
+                ['chr', 'chromosome', 'chr_id', 'chrom'],
+                ['bp', 'pos', 'position', 'chr_pos', 'chromEnd'],
+                ['p', 'pval', 'p-value', 'p.value']
+            ]
+        for (let h of requiredHeaders) {
+            if (!tokens.some(t => h.includes(t.toLowerCase()))) return false
+        }
+        return true
+    }
+
 }
 
 class GWASFeature {

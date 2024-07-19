@@ -2,7 +2,7 @@ import {FileUtils, StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import FeatureSource from '../feature/featureSource.js'
 import {appleCrayonRGBA} from '../util/colorPalletes.js'
 import {computeWGFeatures} from "../feature/featureUtils.js"
-import * as TrackUtils from "../util/trackUtils.js"
+import {inferFileFormatFromName} from "../util/fileFormatUtils.js"
 
 
 const appleCrayonColorName = 'nickel'
@@ -38,7 +38,7 @@ class ROISet {
                 config.format = config.format.toLowerCase()
             } else {
                 const filename = FileUtils.getFilename(config.url)
-                config.format = TrackUtils.inferFileFormat(filename)
+                config.format = inferFileFormatFromName(filename)
             }
             this.featureSource = config.featureSource || FeatureSource(config, genome)
         }

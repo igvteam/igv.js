@@ -17,7 +17,7 @@ import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
 import {createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
-import {defaultSequenceTrackOrder} from './sequenceTrack.js'
+import {bppSequenceThreshold, defaultSequenceTrackOrder} from './sequenceTrack.js'
 import version from "./version.js"
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
@@ -59,11 +59,11 @@ import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
 import {trackViewportPopoverList} from './trackViewport.js'
 import TrackBase from "./trackBase.js"
-import {bppSequenceThreshold} from "./sequenceTrack.js"
 import {loadGenbank} from "./gbk/genbankParser.js"
 import igvCss from "./embedCss.js"
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConstants.js"
 import QTLSelections from "./qtl/qtlSelections.js"
+import {inferFileFormat, inferFileFormatFromContents} from "./util/fileFormatUtils.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -1206,15 +1206,8 @@ class Browser {
             } else if (config.fastaURL) {
                 config.format = "fasta"  // by definition
             } else {
-                let filename = config.filename
-                if (!filename) {
-                    filename = await getFilename(url)
-                }
-
-                const format = TrackUtils.inferFileFormat(filename)
-                if ("tsv" === format) {
-                    config.format = await TrackUtils.inferFileFormatFromHeader(config)
-                } else if (format) {
+                const format = await inferFileFormat(config)
+                if (format) {
                     config.format = format
                 } else {
                     if (config.sourceType === "htsget") {
