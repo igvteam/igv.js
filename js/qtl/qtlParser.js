@@ -78,7 +78,7 @@ class QTLParser {
     async parseHeader(dataWrapper) {
 
         const config = this.config
-        if(config.delimiter) this.delimiter = config.delimiter
+        if (config.delimiter) this.delimiter = config.delimiter
 
         const headerLine = await dataWrapper.nextLine()
         const columns = this.parseHeaderLine(headerLine)
@@ -180,6 +180,32 @@ class QTLParser {
         }
         return allFeatures
     }
+
+
+    /**
+     * Test first line to see if this is a QTL file.  Used to determine file format for the case of generic
+     * extensions such as "tsv"
+     * @param firstLine
+     */
+    static isQTL(firstLine) {
+        const tokens = firstLine.split('\t')
+        if (tokens.length < 5) {
+            return false
+        }
+        const requiredHeaders =
+            [
+                ['chr', 'chromosome', 'chr_id', 'chrom'],
+                ['bp', 'pos', 'position', 'chr_pos', 'chromEnd'],
+                ['p', 'pval', 'p-value', 'p.value'],
+                ['rsid', 'variant', 'snp'],
+                ['phenotype', 'gene', 'gene_id', 'molecular_trait_id']
+            ]
+        for (let h of requiredHeaders) {
+            if (!tokens.some(t => h.includes(t.toLowerCase()))) return false
+        }
+        return true
+    }
+
 }
 
 

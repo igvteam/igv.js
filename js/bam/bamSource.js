@@ -30,7 +30,6 @@ import BamWebserviceReader from "./bamWebserviceReader.js"
 import HtsgetBamReader from "../htsget/htsgetBamReader.js"
 import CramReader from "../cram/cramReader.js"
 import {isDataURL} from "../util/igvUtils.js"
-import * as TrackUtils from "../util/trackUtils.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 class BamSource {
@@ -59,7 +58,7 @@ class BamSource {
         } else {
             if (!this.config.indexURL && config.indexed !== false) {
                 if (StringUtils.isString(this.config.url)) {
-                    const inferIndexPath = TrackUtils.inferIndexPath(this.config.url, "bai")
+                    const inferIndexPath = inferIndexPath(this.config.url, "bai")
                     if (inferIndexPath) {
                         console.error(`Warning: no indexURL specified for ${this.config.url}.  Guessing ${inferIndexPath}`)
                         this.config.indexURL = inferIndexPath
