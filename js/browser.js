@@ -1205,7 +1205,7 @@ class Browser {
                 config.format = config.format.toLowerCase()
             } else if (config.fastaURL) {
                 config.format = "fasta"  // by definition
-            } else {
+            } else if (!config.sourceType) {
                 const format = await inferFileFormat(config)
                 if (format) {
                     config.format = format
