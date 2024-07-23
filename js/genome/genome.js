@@ -201,6 +201,10 @@ class Genome {
         return this.#wgChromosomeNames ?  this.#wgChromosomeNames.slice() : undefined
     }
 
+    get showChromosomeWidget() {
+        return this.config.showChromosomeWidget
+    }
+
     /**
      * Return the genome coordinate in kb for the give chromosome and position.
      * NOTE: This might return undefined if the chr is filtered from whole genome view.
