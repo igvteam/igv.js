@@ -128,6 +128,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
             twoBitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
             nameSet: "ucsc",
             wholeGenomeView: false,
+            showChromosomeWidget: false
         }
 
         if (this.genomeStanza.hasProperty("defaultPos")) {

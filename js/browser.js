@@ -63,7 +63,7 @@ import {loadGenbank} from "./gbk/genbankParser.js"
 import igvCss from "./embedCss.js"
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConstants.js"
 import QTLSelections from "./qtl/qtlSelections.js"
-import {inferFileFormat, inferFileFormatFromContents} from "./util/fileFormatUtils.js"
+import {inferFileFormat} from "./util/fileFormatUtils.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -819,6 +819,7 @@ class Browser {
         // chromosome select widget -- Show this IFF its not explicitly hidden AND the genome has pre-loaded chromosomes
         const showChromosomeWidget =
             this.config.showChromosomeWidget !== false &&
+            this.genome.showChromosomeWidget !== false &&
             genome.chromosomeNames &&
             genome.chromosomeNames.length > 1
 
@@ -1206,15 +1207,14 @@ class Browser {
             } else if (config.fastaURL) {
                 config.format = "fasta"  // by definition
             } else if (!config.sourceType) {
+                // If not a webservice, see if we can infer a format from the URL
                 const format = await inferFileFormat(config)
                 if (format) {
                     config.format = format
-                } else {
-                    if (config.sourceType === "htsget") {
-                        // Check for htsget URL.  This is a longshot
-                        await HtsgetReader.inferFormat(config)
-                    }
                 }
+            } else if (config.sourceType === "htsget") {
+                // Finally check for htsget URL.  This is a longshot
+                await HtsgetReader.inferFormat(config)
             }
         }
 
@@ -1226,10 +1226,9 @@ class Browser {
 
         if (!type) {
 
-            // If neither format nor type is known assume a sample information file.  We should do some validation here
+            // If neither format nor type are known throw an error
             if (!config.format) {
-                // type = "sampleinfo"
-                throw Error(`Attempt to load unrecognized track type`)
+                throw Error(`Unrecognized track:  ${JSON.stringify(config)}`)
             } else if (config.format === "hic") {
                 const hicFile = new HicFile(config)
                 await hicFile.readHeaderAndFooter()
@@ -1257,34 +1256,28 @@ class Browser {
             config.type = type
         }
 
-        if ("sampleinfo" === type) {
-            // Deprecated option
-            await this.loadSampleInfo(config)
-            return undefined
-        } else {
-            // Set defaults if specified
-            if (this.trackDefaults && type) {
-                const settings = this.trackDefaults[type]
-                if (settings) {
-                    for (let property in settings) {
-                        if (settings.hasOwnProperty(property) && config[property] === undefined) {
-                            config[property] = settings[property]
-                        }
+        // Set defaults if specified
+        if (this.trackDefaults && type) {
+            const settings = this.trackDefaults[type]
+            if (settings) {
+                for (let property in settings) {
+                    if (settings.hasOwnProperty(property) && config[property] === undefined) {
+                        config[property] = settings[property]
                     }
                 }
             }
+        }
 
-            const track = getTrack(type, config, this)
-            if (undefined === track) {
-                this.alert.present(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
-            } else {
+        const track = getTrack(type, config, this)
+        if (undefined === track) {
+            this.alert.present(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
+        } else {
 
-                if (config.roi && config.roi.length > 0) {
-                    track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
-                }
-
-                return track
+            if (config.roi && config.roi.length > 0) {
+                track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
             }
+
+            return track
         }
     }
 
