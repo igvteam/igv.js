@@ -416,21 +416,5 @@ function parseVariableStep(line) {
     return {format: "variableStep", chrom, span}
 }
 
-const spaceDelimited = new Set([
-    "narrowpeak",
-    "broadpeak",
-    "regionpeak",
-    "peaks",
-    "fusionjuncspan",
-    "bedgraph",
-    "wig",
-    "refflat",
-    "genepred",
-    "genepredext",
-    "ensgene",
-    "refgene",
-    "bed",
-    "interact"
-])
 
 export default FeatureParser
