@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+<select id="select">
+    <option value=""></option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCF/000/186/305/GCF_000186305.1/hub.txt">Many chromosomes ~ same
+        size
+    </option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCA/022/747/635/GCA_022747635.1/hub.txt">Many chromosomes -
+        gradually decreasing
+        chromosomes
+    </option>
+    <option value="https://hgdownload.soe.ucsc.edu/hubs/GCF/013/103/735/GCF_013103735.1/hub.txt">24 large chromosomes
+    </option>
+    <option value="">T2T</option>
+</select>
+
+<label>
+    Enter full URL to hub.txt file
+    <input id="hub-input" type="text" style="width: 600px">
+</label>
+
+<button id="load-genome">Load hub as genome</button>
+<button id="load-session">Load hub as session</button>
+
+<br>
+<button id="dump-session">Dump session</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+    import Hub from "../../js/ucsc/ucscHub.js"
+
+
+    const hubOptions = {
+        includeTracks: true
+    }
+
+    const hub = await Hub.loadHub("https://hgdownload.soe.ucsc.edu/hubs/GCF/002/006/095/GCF_002006095.1/hub.txt", hubOptions)
+
+    const igvConfig = {
+        reference: hub.getGenomeConfig(),
+        listeners: {
+            'genomechange': ({genome, trackConfigurations}) => {
+                console.log('genomechange')
+                console.log(genome)
+                console.log(trackConfigurations)
+            }
+        }
+    }
+
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+
+
+    const selector = document.getElementById("select")
+    selector.addEventListener("change", () => document.getElementById("hub-input").value = selector.value)
+
+    document.getElementById("hub-input").value = "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/hub.txt"
+
+    document.getElementById("load-genome").addEventListener("click", async () => {
+        await browser.loadGenome({url: document.getElementById("hub-input").value})
+    })
+
+    document.getElementById("load-session").addEventListener("click", () =>
+        browser.loadSession({url: document.getElementById("hub-input").value}))
+
+    document.getElementById("dump-session").addEventListener("click", () => {
+        console.log(browser.toJSON())
+    })
+
+</script>
+
+</body>
+
+</html>

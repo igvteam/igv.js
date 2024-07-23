@@ -1473,12 +1473,6 @@ class Browser {
             .map(track => track.config.url))
     }
 
-    getTrackConfigs() {
-        return new Set(this.tracks
-            .filter(track => track.config && StringUtils.isString(track.config.url))
-            .map(track => JSON.stringify(track.config)))
-    }
-
 
     /**
      * Set the track height globally for all tracks.  (Note: Its not clear why this is useful).
