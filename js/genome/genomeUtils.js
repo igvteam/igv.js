@@ -88,7 +88,7 @@ const GenomeUtils = {
                     try {
                         const hubURL = convertToHubURL(genomeID)
                         const hub = await Hub.loadHub(hubURL)
-                        reference = hub.getGenomeConfig("genes")
+                        reference = hub.getGenomeConfig()
                     } catch (e) {
                         console.error(e)
                     }
