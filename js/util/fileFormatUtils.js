@@ -79,11 +79,7 @@ function compareArrays(a, b) {
 async function inferFileFormat(config) {
 
     // First try determining format from file extension
-    let filename = config.filename
-    if (!filename) {
-        filename = await getFilename(config.url)
-    }
-    let format = inferFileFormatFromName(filename)
+    let format = await inferFileFormatFromName(config)
 
     // Try determining from first few bytes of file
     if (!format) {
@@ -93,10 +89,12 @@ async function inferFileFormat(config) {
 
 }
 
-function inferFileFormatFromName(fn) {
+async function inferFileFormatFromName(config) {
 
-    var idx, ext
-
+    let fn = config.filename
+    if (!fn) {
+        fn = await getFilename(config.url)
+    }
     fn = fn.toLowerCase()
 
     // Special case -- UCSC refgene files
@@ -106,13 +104,6 @@ function inferFileFormatFromName(fn) {
         fn.endsWith("refgene.sorted.txt.gz") ||
         fn.endsWith("refgene.sorted.txt.bgz")) {
         return "refgene"
-    }
-
-
-    //Strip parameters -- handle local files later
-    idx = fn.indexOf("?")
-    if (idx > 0) {
-        fn = fn.substr(0, idx)
     }
 
     // String gzip extension
@@ -128,8 +119,8 @@ function inferFileFormatFromName(fn) {
         fn = fn.substring(0, fn.length - 4)
     }
 
-    idx = fn.lastIndexOf(".")
-    ext = idx < 0 ? fn : fn.substring(idx + 1)
+    const idx = fn.lastIndexOf(".")
+    const ext = idx < 0 ? fn : fn.substring(idx + 1)
 
     switch (ext) {
         case "bw":
