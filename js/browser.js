@@ -1162,7 +1162,7 @@ class Browser {
     }
 
     /**
-     * Public API function. Return list of user-defined regions-of-interest
+     * Public API function. Return a promise for the list of user-defined regions-of-interest
      */
     async getUserDefinedROIs() {
 
