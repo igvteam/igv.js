@@ -241,7 +241,7 @@ class WigTrack extends TrackBase {
                         }
 
                     } else {
-
+                        // Default graph type (bar)
                         const height = Math.min(pixelHeight, y - y0)
                         IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
                         if (f.value > this.dataRange.max) {

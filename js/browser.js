@@ -1467,13 +1467,6 @@ class Browser {
         return this.trackViews.map(tv => tv.track).filter(t => t !== undefined)
     }
 
-    getTrackURLs() {
-        return new Set(this.tracks
-            .filter(track => track.config && StringUtils.isString(track.config.url))
-            .map(track => track.config.url))
-    }
-
-
     /**
      * Set the track height globally for all tracks.  (Note: Its not clear why this is useful).
      * @param newHeight
