@@ -1021,6 +1021,9 @@ class Browser {
      */
     async loadTrack(config) {
 
+        // Default configuration sync option to true.  This is the expected behavior for public API calls
+        config.sync = (config.sync !== false)
+
         const newTrack = this._loadTrack(config)
 
         if (newTrack && config.autoscaleGroup) {
