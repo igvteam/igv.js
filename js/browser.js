@@ -1164,7 +1164,7 @@ class Browser {
     /**
      * Public API function. Return list of user-defined regions-of-interest
      */
-    getUserDefinedROIs() {
+    async getUserDefinedROIs() {
 
         if (this.roiManager) {
 
@@ -1173,7 +1173,7 @@ class Browser {
                 return []
             }
 
-            const featureHash = set.getAllFeatures()
+            const featureHash = await set.getAllFeatures()
             const featureList = []
             for (let value of Object.values(featureHash)) {
                 featureList.push(...value)
