@@ -83,7 +83,7 @@
             const list = document.createElement("ul")
             div.appendChild(list)
 
-            const rois = await browser.getUserDefinedROIs()
+            const rois = browser.getUserDefinedROIs()
             if (rois) {
                 for (let r of rois) {
                     const li = document.createElement('li')

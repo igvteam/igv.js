@@ -493,7 +493,7 @@ class FeatureTrack extends TrackBase {
 
         let color
 
-        if (this.browser.qtlSelections.hasPhenotype(f.name.toUpperCase())) {
+        if (f.name && this.browser.qtlSelections.hasPhenotype(f.name.toUpperCase())) {
             color = this.browser.qtlSelections.colorForGene(f.name.toUpperCase())
         } else if (this.altColor && "-" === feature.strand) {
             color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor
