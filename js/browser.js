@@ -1151,7 +1151,7 @@ class Browser {
      * @returns {Promise<void>}
      */
     async loadROI(config) {
-        await this.roiManager.loadROI(config, this.genome)
+        return this.roiManager.loadROI(config, this.genome)
     }
 
     /**
@@ -1164,16 +1164,16 @@ class Browser {
     /**
      * Public API function. Return a promise for the list of user-defined regions-of-interest
      */
-    async getUserDefinedROIs() {
+    getUserDefinedROIs() {
 
         if (this.roiManager) {
 
-            const set = await this.roiManager.getUserDefinedROISet()
+            const set = this.roiManager.getUserDefinedROISet()
             if (undefined === set) {
                 return []
             }
 
-            const featureHash = await set.getAllFeatures()
+            const featureHash = set.getAllFeatures()
             const featureList = []
             for (let value of Object.values(featureHash)) {
                 featureList.push(...value)
@@ -1824,14 +1824,14 @@ class Browser {
     /**
      * Search for the locus string
      * NOTE: This is part of the API
-     * @param string
+     * @param stringOrArray
      * @param init  true if called during browser initialization
      *
      * @returns {Promise<boolean>}  true if found, false if not
      */
-    async search(string, init) {
+    async search(stringOrArray, init) {
 
-        const loci = await search(this, string)
+        const loci = await search(this, stringOrArray)
 
         if (loci && loci.length > 0) {
 

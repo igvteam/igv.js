@@ -266,7 +266,7 @@ class ROIManager {
         }
     }
 
-    async getUserDefinedROISet() {
+    getUserDefinedROISet() {
         return this.roiSets.find(roiSet => true === roiSet.isUserDefined)
     }
 
