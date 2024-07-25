@@ -8,7 +8,11 @@ declare class Opaque<N extends string> {
 
 export type Track = Tracks.TrackCommonOptions &
     ((Tracks.AnnotationTrackOptions & Tracks.TypeFormatPair<'annotation', Tracks.AnnotationFormat>) |
-        (Tracks.WigTrackOptions & Tracks.TypeFormatPair<'wig', Tracks.WigFormat>));
+        (Tracks.WigTrackOptions & Tracks.TypeFormatPair<'wig', Tracks.WigFormat>) |
+        (Tracks.WigMergedTrackOptions & { type: 'merged' }) |
+        (Tracks.VariantTrackOptions & Tracks.TypeFormatPair<'variant', Tracks.VariantFormat>) |
+        (Tracks.SegTrackOptions & Tracks.TypeFormatPair<'seg', Tracks.SegTrackFormat>) |
+        (Tracks.CnvPyTorTrackOptions & Tracks.TypeFormatPair<'cnvpytor', Tracks.CnvPyTorFormat>));
 
 export namespace Tracks {
     export interface TypeFormatPair<K extends string, F extends string> {
@@ -234,6 +238,51 @@ export namespace Tracks {
     }
 
     export type WigTrackOptions = ExtraKeys<WigTrackCommonOptions>;
+
+    export type WigMergedTrackOptions = ExtraKeys<{
+        tracks: (TypeFormatPair<'wig', WigFormat> & WigTrackOptions)[];
+    }>;
+
+    export type VariantFormat = "vcf";
+
+    export type VariantTrackOptions = ExtraKeys<{
+        displayMode?: "EXPANDED" | "SQUISHED" | "COLLAPSED";
+        squishedCallHeight?: number;
+        expandedCallHeight?: number;
+        color?: string | ((variant: Record<string, string>) => string);
+        colorBy?: string;
+        colorTable?: Record<string, string>;
+        noCallColor?: string;
+        homvarColor?: string;
+        hetvarColor?: string;
+        homrefColor?: string;
+    }>;
+
+    export type SegTrackFormat = "seg";
+
+    export type SegTrackOptions = {
+        isLog?: boolean;
+        displayMode?: "EXPANDED" | "SQUISHED" | "FILL";
+        sort?: ({
+            position: number
+        } | {
+            start: number,
+            end: number
+        }) & {
+            direction?: "ASC" | "DESC"
+            chr: string
+        }
+    }
+
+    export type CnvPyTorFormat = "pytor" | "vcf";
+
+    export type CnvPyTorTrackOptions = {
+        signal_name?: string;
+        cnv_caller?: "ReadDepth" | "2D";
+        bin_size?: number;
+        colors?: string[];
+    }
+
 }
 
 type Nucleotide = 'A' | 'C' | 'G' | 'T' | 'N';
