@@ -20,7 +20,8 @@
 <script type="module">
 
     import igv from "../../js/index.js";
-    import {StringUtils} from "../node_modules/igv-utils/src/index.js";
+    import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
     const numberFormatter = StringUtils.numberFormatter;
 
     let browser;
@@ -30,8 +31,8 @@
       const options =
             {
                 genome: "hg19",
-                locus: [ 'egfr', 'myc' ],
-                // locus: "myc",
+                // locus: [ 'egfr', 'myc' ],
+                locus: "myc",
                 showAllChromosomes: true,
                 showCursorTrackingGuide: true,
                 tracks:
@@ -47,8 +48,8 @@
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options);
 
-        browser.setCustomCursorGuideMouseHandler(({bp, start, end, interpolant}) => {
-            console.log(`startBP ${ numberFormatter(start) } bp ${ numberFormatter(bp) } interpolant ${ interpolant.toFixed(3) } `);
+        browser.setCustomCursorGuideMouseHandler(({bp, interpolant}) => {
+            console.log(`base-pair ${ numberFormatter(bp) } interpolant ${ interpolant.toFixed(3) } `);
         });
 
     })();
