@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>ROI - Test getUserDefinedROIs method</title>
+
+</head>
+
+<body>
+
+<h2>ROI - Test getUserDefinedROIs method</h2>
+
+<p>
+    <button id='roi-clear-button'>Clear All ROI Sets</button>
+    <button id='roi-get-button'>Get User-Defined ROIs</button>
+</p>
+
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<div>
+    <h3>User defined ROIs:</h3>
+    <div id="user-defined-rois"></div>
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    (async () => {
+
+        const browser_config =
+            {
+                locus: "chr1:67,646,911-67,676,107",
+                genome: "hg19",
+
+                doShowROITableButton: true,
+
+                tracks:
+                    [
+                    ]
+            }
+
+        const browser = await igv.createBrowser(document.getElementById('myDiv'), browser_config)
+        document.getElementById("roi-clear-button").addEventListener('click', () => {
+            browser.clearROIs()
+            document.getElementById("user-defined-rois").innerHTML = ""
+
+        })
+        document.getElementById("roi-get-button").addEventListener('click', async () => {
+
+            const rois = await browser.getUserDefinedROIs()
+
+            if (rois) {
+
+                const div = document.getElementById("user-defined-rois")
+                div.innerHTML = ""
+                
+                const list = document.createElement("ul")
+                div.appendChild(list)
+
+                for (const { chr, start, end } of rois) {
+                    const li = document.createElement('li')
+                    li.innerText = `${chr}:${start + 1}-${end}`
+                    list.appendChild(li)
+                }
+            }
+        })
+    })()
+
+</script>
+
+</body>
+
+</html>
