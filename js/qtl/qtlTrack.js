@@ -133,25 +133,17 @@ class QTLTrack extends TrackBase {
 
             for (let eqtl of options.features) {
 
-                if (eqtl.snp.toUpperCase() === referenceFrame.feature) {
-                    // TODO -- highlight associated gene?
-                }
-
                 const px = (eqtl.start - bpStart + 0.5) / options.bpPerPixel
                 if (px < 0) continue
                 else if (px > pixelWidth) break
 
-                const phenotype = eqtl.phenotype.toUpperCase()
-                if (phenotype === "ENSG00000186716") {
-                    console.log()
-                }
-
+                const phenotype = eqtl.phenotype
                 let isSelected
                 // 3 modes, specific qtl, snp, or phenotype (e.g. gene) focused.
                 if (this.browser.qtlSelections.qtl) {
                     isSelected = compareQTLs(this.browser.qtlSelections.qtl, eqtl)
                 } else if (this.browser.qtlSelections.snps.size > 0) {
-                    isSelected = this.browser.qtlSelections.hasSnp(eqtl.snp.toUpperCase()) &&
+                    isSelected = this.browser.qtlSelections.hasSnp(eqtl.snp) &&
                         this.browser.qtlSelections.hasPhenotype(phenotype)
                 } else {
                     isSelected = this.browser.qtlSelections.hasPhenotype(phenotype)
@@ -285,66 +277,68 @@ class QTLTrack extends TrackBase {
                 value: '',
                 callback: async (term) => {
 
-                    term = term.trim().toUpperCase()
+                    if (term) {
+                        term = term.trim().toUpperCase()
 
-                    // Find qtls from this track matching either snp or phenotype
-                    const matching = f => {
-                        return (f.phenotype.toUpperCase() === term || f.snp.toUpperCase() === term) &&
-                            -Math.log(f.pValue) / Math.LN10  > this.dataRange.min
-                    }
-                    let matchingFeatures = await this.featureSource.findFeatures(matching)
-                    if (matchingFeatures.length == 0) {
-                        // Possibly move to another genomic locus containing the search term
-                        const found = await this.browser.search(term)
-                        if (found) {
-                            matchingFeatures = await this.featureSource.findFeatures(matching)
+                        // Find qtls from this track matching either snp or phenotype
+                        const matching = f => {
+                            return ((f.phenotype && f.phenotype.toUpperCase()) === term || (f.snp && f.snp.toUpperCase() === term)) &&
+                                -Math.log(f.pValue) / Math.LN10 > this.dataRange.min
                         }
-                    }
-
-                    // Add found features to qtlSelections and compute spanned genomic region.  Currently
-                    // this only works for cis-QTLs
-                    let chr, start, end
-                    if (matchingFeatures.length > 0) {
-                        this.browser.qtlSelections.clear()
-                        const genes = new Set()
-                        chr = matchingFeatures[0].chr
-                        start = matchingFeatures[0].start
-                        end = matchingFeatures[0].end
-                        for (let qtl of matchingFeatures) {
-                            if (qtl.snp.toUpperCase() === term) {
-                                this.browser.qtlSelections.addSnp(qtl.snp)
-                            }
-                            this.browser.qtlSelections.addPhenotype(qtl.phenotype)
-                            genes.add(qtl.phenotype)
-
-                            if (qtl.chr === chr) {
-                                start = Math.min(start, qtl.start)
-                                end = Math.max(end, qtl.end)
-                            } else {
-                                // TODO split screen?
+                        let matchingFeatures = await this.featureSource.findFeatures(matching)
+                        if (matchingFeatures.length == 0) {
+                            // Possibly move to another genomic locus containing the search term
+                            const found = await this.browser.search(term)
+                            if (found) {
+                                matchingFeatures = await this.featureSource.findFeatures(matching)
                             }
                         }
 
+                        // Add found features to qtlSelections and compute spanned genomic region.  Currently
+                        // this only works for cis-QTLs
+                        let chr, start, end
+                        if (matchingFeatures.length > 0) {
+                            this.browser.qtlSelections.clear()
+                            const genes = new Set()
+                            chr = matchingFeatures[0].chr
+                            start = matchingFeatures[0].start
+                            end = matchingFeatures[0].end
+                            for (let qtl of matchingFeatures) {
+                                if (qtl.snp && qtl.snp.toUpperCase() === term) {
+                                    this.browser.qtlSelections.addSnp(qtl.snp)
+                                }
+                                this.browser.qtlSelections.addPhenotype(qtl.phenotype)
+                                genes.add(qtl.phenotype)
 
-                        // possibly Expand region to bring phenotype in view
-                        const canonicalChrName = this.browser.genome.getChromosomeName(chr)
-                        for (let term of genes) {
-                            const feature = await searchFeatures(this.browser, term)
-                            if (feature) {
-                                if (canonicalChrName === this.browser.genome.getChromosomeName(feature.chr)) {
-                                    start = Math.min(start, feature.start)
-                                    end = Math.max(end, feature.end)
+                                if (qtl.chr === chr) {
+                                    start = Math.min(start, qtl.start)
+                                    end = Math.max(end, qtl.end)
                                 } else {
                                     // TODO split screen?
                                 }
                             }
+
+
+                            // possibly Expand region to bring phenotype in view
+                            const canonicalChrName = this.browser.genome.getChromosomeName(chr)
+                            for (let term of genes) {
+                                const feature = await searchFeatures(this.browser, term)
+                                if (feature) {
+                                    if (canonicalChrName === this.browser.genome.getChromosomeName(feature.chr)) {
+                                        start = Math.min(start, feature.start)
+                                        end = Math.max(end, feature.end)
+                                    } else {
+                                        // TODO split screen?
+                                    }
+                                }
+                            }
+
+                            const flanking = Math.floor(0.1 * (end - start))
+                            start = Math.max(0, start - flanking)
+                            end += flanking
+
+                            await this.browser.search(`${chr}:${start}-${end}`)
                         }
-
-                        const flanking = Math.floor(0.1 * (end - start))
-                        start = Math.max(0, start - flanking)
-                        end += flanking
-
-                        await this.browser.search(`${chr}:${start}-${end}`)
                     }
                 }
             }, ev)

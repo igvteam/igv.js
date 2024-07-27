@@ -363,7 +363,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         const labelY = getFeatureLabelY(featureY, transform)
 
         let color = this.getColorForFeature(feature)
-        let selected = this.browser.qtlSelections.hasPhenotype(feature.name.toUpperCase())
+        let selected = this.browser.qtlSelections.hasPhenotype(feature.name)
 
         const geneFontStyle = {
             textAlign: "SLANT" === this.labelDisplayMode ? undefined : 'center',
