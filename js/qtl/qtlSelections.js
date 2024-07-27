@@ -34,11 +34,11 @@ class QTLSelections {
     }
 
     hasSnp(snp) {
-        return this.snps.has(snp.toUpperCase())
+        return snp && this.snps.has(snp.toUpperCase())
     }
 
     hasPhenotype(name) {
-        return this.phenotypeColors.has(name.toUpperCase())
+        return name && this.phenotypeColors.has(name.toUpperCase())
     }
 
     hasQTL(qtl) {
@@ -46,7 +46,7 @@ class QTLSelections {
     }
 
     colorForGene(geneName) {
-        return this.phenotypeColors.get(geneName.toUpperCase())
+        return geneName ? this.phenotypeColors.get(geneName.toUpperCase()) : "black"
     }
 
     /**

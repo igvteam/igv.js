@@ -229,7 +229,7 @@ class FeatureTrack extends TrackBase {
                 if (feature.end < bpStart) continue
                 if (feature.start > bpEnd) break
 
-                if (this.displayMode === 'COLLAPSED' && this.browser.qtlSelections.hasPhenotype(feature.name.toUpperCase())) {
+                if (this.displayMode === 'COLLAPSED' && this.browser.qtlSelections.hasPhenotype(feature.name)) {
                     selectedFeatures.push(feature)
                 }
 
@@ -493,8 +493,8 @@ class FeatureTrack extends TrackBase {
 
         let color
 
-        if (f.name && this.browser.qtlSelections.hasPhenotype(f.name.toUpperCase())) {
-            color = this.browser.qtlSelections.colorForGene(f.name.toUpperCase())
+        if (f.name && this.browser.qtlSelections.hasPhenotype(f.name)) {
+            color = this.browser.qtlSelections.colorForGene(f.name)
         } else if (this.altColor && "-" === feature.strand) {
             color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor
         } else if (this.color) {
