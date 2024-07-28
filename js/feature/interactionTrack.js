@@ -74,7 +74,11 @@ class InteractionTrack extends TrackBase {
 
         super.init(config)
 
-        this.arcOrientation = config.arcOrientation === true || (config.arcOrientation && config.arcOrientation === "UP")
+        // Backward compatibility hack
+        this.arcOrientation = config.arcOrientation === undefined ||
+            config.arcOrientation === true ||
+            "UP" === config.arcOrientation.toUpperCase()
+
         this.sinTheta = Math.sin(this.theta)
         this.cosTheta = Math.cos(this.theta)
         this.arcType = getArcType(config)   // nested | proportional | inView | partialInView

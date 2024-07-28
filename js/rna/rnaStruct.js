@@ -42,7 +42,9 @@ class RnaStructTrack extends TrackBase {
         }
 
         // Backward compatibility hack
-        this.arcOrientation = config.arcOrientation === true || (config.arcOrientation && "UP" === config.arcOrientation.toUpperCase())
+        this.arcOrientation = config.arcOrientation === undefined ||
+            config.arcOrientation === true ||
+            "UP" === config.arcOrientation.toUpperCase()
 
         this.theta = Math.PI / 2
 
