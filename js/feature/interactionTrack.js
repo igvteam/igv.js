@@ -57,7 +57,7 @@ class InteractionTrack extends TrackBase {
     static defaults = {
         height: 250,
         theta: Math.PI / 4,
-        arcOrientation: true,
+        arcOrientation: "UP",
         showBlocks: true,
         blockHeight: 3,
         thickness: 1,
@@ -73,6 +73,8 @@ class InteractionTrack extends TrackBase {
     init(config) {
 
         super.init(config)
+
+        this.arcOrientation = config.arcOrientation === true || (config.arcOrientation && config.arcOrientation === "UP")
         this.sinTheta = Math.sin(this.theta)
         this.cosTheta = Math.cos(this.theta)
         this.arcType = getArcType(config)   // nested | proportional | inView | partialInView
