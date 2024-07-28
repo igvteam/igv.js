@@ -27,6 +27,7 @@ class SampleInfo {
         if (found.length > 0) {
             browser.sampleInfoControl.setButtonVisibility(true)
         }
+        this.initialize()
 
     }
 
