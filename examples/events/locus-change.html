@@ -11,25 +11,14 @@
     <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
     <title>IGV Examples - Locus Change</title>
 
-    <!-- Bootstrap 4 - CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Bootstrap 5.3 - CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 
-    <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-            crossorigin="anonymous"></script>
+    <!-- Examples CSS -->
+    <link rel="stylesheet" href="css/custom-track-click.css">
 
-    <!-- Bootstrap 4 - JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
-
-    <!-- IGV JS-->
-    <script src="../../dist/igv.min.js"></script>
+    <!-- Bootstrap 5.3 - JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
 </head>
 
@@ -60,33 +49,22 @@
 
 </main>
 
-<script type="text/javascript">
+<script type="module">
 
-    $(document).ready(function () {
+    import igv from "../../dist/igv.esm.min.js"
 
+    var HASH_PREFIX = "#/locus/";
+    var currentHash = window.location.hash;
+    var locus = (0 === currentHash && currentHash.indexOf(HASH_PREFIX)) ? currentHash.substr(HASH_PREFIX.length) : "chr1:155,160,475-155,184,282";
 
-        var HASH_PREFIX = "#/locus/";
-        var currentHash = window.location.hash;
-        var locus = (0 === currentHash && currentHash.indexOf(HASH_PREFIX)) ? currentHash.substr(HASH_PREFIX.length) : "chr1:155,160,475-155,184,282";
-
-        var options = {
-            locus: locus,
-            genome: "hg19"
-        };
-
-        var $igv = $("#igvDiv");
-        var browser = igv.createBrowser($igv.get(0), options)
-
-                .then(function (browser) {
-                    console.log("Created IGV browser");
-
-                    browser.on('locuschange', function (referenceFrameList) {
-                        let loc = referenceFrameList.map(rf => rf.getLocusString()).join('%20');
-                        window.location.replace(HASH_PREFIX + loc);
-                    });
-                });
-
-    });
+    var browser = igv.createBrowser(document.getElementById('igvDiv'), { locus, genome: 'hg19'})
+        .then(browser => {
+            console.log("Created IGV browser");
+            browser.on('locuschange', referenceFrameList => {
+                let loc = referenceFrameList.map(rf => rf.getLocusString()).join('%20');
+                window.location.replace(HASH_PREFIX + loc);
+            });
+        });
 
 </script>
 

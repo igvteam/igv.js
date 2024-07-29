@@ -4,26 +4,11 @@
 <head>
     <meta charset="utf-8">
     <meta content="Jim Robinson" name="author">
-    <link href=img/favicon.ico rel="shortcut icon">
+    <link href="img/favicon.ico" rel="shortcut icon">
     <title>igv.js</title>
 
-    <!-- Bootstrap 4 - CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
-    <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-            crossorigin="anonymous"></script>
-
-    <!-- Bootstrap 4 - JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
-
+    <!-- Bootstrap 5.3 - CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 
 </head>
 
@@ -31,21 +16,21 @@
 
 <nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
     <a class="navbar-brand" href="#">API Example</a>
-    <div class="collapse navbar-collapse">
-        <ul class="navbar-nav mr-auto">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarCollapse">
+        <ul class="navbar-nav me-auto mb-2 mb-md-0">
             <li class="nav-item dropdown">
-                <a id="igv-example-api-dropdown" href="#" class="dropdown-toggle" data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false" style="color: white">Tracks</a>
+                <a id="igv-example-api-dropdown" href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Tracks</a>
                 <ul id="track-menu" class="dropdown-menu" style="width:350px">
-
                     <!-- Menu items will be appended here -->
-
                 </ul>
             </li>
-
         </ul>
     </div>
 </nav>
+
 <main role="main" class="container-fluid">
     <div style="padding-top: 64px">
         This example illustrates use of the igv.js API to dynamically add tracks from a dropdown
@@ -59,28 +44,24 @@
         </p>
         See the
         <a href="https://github.com/igvteam/igv.js/wiki">developer wiki for more details.</a>
-
     </div>
 
     <div id='igvDiv' style="padding-top: 64px"></div>
-
-
 </main>
 
-<script type="module">
+<!-- Bootstrap 5.3 - JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
+<script type="module">
     import igv from "../dist/igv.esm.min.js"
 
-    const options =
-        {
-            locus: "chr1:155,160,475-155,184,282",
-            genome: "hg19"
-        }
+    const options = {
+        locus: "chr1:155,160,475-155,184,282",
+        genome: "hg19"
+    }
 
     const igvDiv = document.getElementById('igvDiv')
-
     const browser = await igv.createBrowser(igvDiv, options)
-
 
     // Add the menu items
     const tracks = [
@@ -115,16 +96,12 @@
     for (let config of tracks) {
         const a = document.createElement("a")
         a.setAttribute("href", "#")
+        a.classList.add("dropdown-item")
         a.addEventListener('click', () => browser.loadTrack(config))
         a.innerText = config.name
-        const li = document.createElement("li")
-        li.appendChild(a)
-        menu.appendChild(li)
+        menu.appendChild(a)
     }
-
-
 </script>
 
 </body>
-
 </html>
