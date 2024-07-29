@@ -32,21 +32,27 @@ import TextFeatureSource from "../feature/textFeatureSource.js"
 
 class RnaStructTrack extends TrackBase {
 
+    static defaults = {
+        height: 300,
+        theta: Math.PI / 2,
+        arcOrientation: "UP",
+
+    }
+
     constructor(config, browser) {
 
         super(config, browser)
 
-        // Set defaults
-        if (!config.height) {
-            this.height = 300
+        // Backward compatibility hack, arcOrientation was previously a boolean, now a string
+        if(config.arcOrientation === false) {
+            this.arcOrientation = "DOWN"
+        } else if(config.arcOrientation === true) {
+            this.arcOrientation = "UP"
+        } else if(config.arcOrientation) {
+            this.arcOrientation = config.arcOrientation.toUpperCase()
+        } else {
+            this.arcOrientation = "UP"
         }
-
-        // Backward compatibility hack
-        this.arcOrientation = config.arcOrientation === undefined ||
-            config.arcOrientation === true ||
-            "UP" === config.arcOrientation.toUpperCase()
-
-        this.theta = Math.PI / 2
 
         if ("bp" === config.format) {
             this.featureSource = new RNAFeatureSource(config, browser.genome)
@@ -71,7 +77,7 @@ class RnaStructTrack extends TrackBase {
         const bpPerPixel = options.bpPerPixel
         const bpStart = options.bpStart
         const xScale = bpPerPixel
-        const orientation = this.arcOrientation
+        const orientation = "UP" === this.arcOrientation
 
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
@@ -218,19 +224,11 @@ class RnaStructTrack extends TrackBase {
             {
                 name: "Toggle arc direction",
                 click: function toggleArcDirectionHandler() {
-                    this.arcOrientation = !this.arcOrientation
+                    this.arcOrientation = "UP" === this.arcOrientation ? "DOWN" : "UP"
                     this.trackView.repaintViews()
                 }
             }
         ]
-    }
-
-    getState() {
-        const state = super.getState()
-        if(this.arcOrientation) {
-            state["arcOrientation"] = "UP"
-        }
-        return state
     }
 }
 
