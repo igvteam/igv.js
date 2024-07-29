@@ -870,7 +870,14 @@ class AlignmentTrack extends TrackBase {
     }
 
     setDisplayMode(mode) {
+        const repack = "FULL" === this.displayMode || "FULL" === mode
         this.displayMode = mode
+        if (repack) {
+            const alignmentContainers = this.getCachedAlignmentContainers()
+            for (let ac of alignmentContainers) {
+                ac.pack(this)
+            }
+        }
         this.trackView.checkContentHeight()
         this.trackView.repaintViews()
     }
@@ -929,7 +936,7 @@ class AlignmentTrack extends TrackBase {
     basemodColorByCB(menuItem) {
 
         const showCheck = this.colorBy === menuItem.key
-        
+
         const $e = $(createCheckbox(menuItem.label, showCheck))
 
         function clickHandler() {
