@@ -23,11 +23,7 @@ class ROISet {
 
         if (config.name) {
             this.name = config.name
-        } else if (config.url && FileUtils.isFile(config.url)) {
-            this.name = config.url.name
-        } else if (config.url && StringUtils.isString(config.url) && !config.url.startsWith("data:")) {
-            this.name = FileUtils.getFilename(config.url)
-        }
+        } 
 
         this.isUserDefined = config.isUserDefined
 
