@@ -17,6 +17,10 @@ async function blat({url, userSeq, db}) {
 
     url = url || defaultBlatServer
 
+    if(!db) {
+        throw Error("Blat database is not defined")
+    }
+
     const results = await postData(url, userSeq, db)
 
     const fields = results.fields
