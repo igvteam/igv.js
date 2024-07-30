@@ -142,14 +142,6 @@ function setDefaults(config) {
         config.showTrackLabels = true
     }
 
-    if (undefined === config.doShowROITableButton) {
-        config.doShowROITableButton = false
-    }
-
-    if (undefined === config.showROITable) {
-        config.showROITable = false
-    }
-
     if (undefined === config.showCursorTrackingGuideButton) {
         config.showCursorTrackingGuideButton = true
     }

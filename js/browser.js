@@ -177,9 +177,11 @@ class Browser {
         this.setControls(config)
 
         // Region of interest
-        this.doShowROITable = config.showROITable
-        this.doShowROITableButton = config.doShowROITableButton
         this.roiManager = new ROIManager(this)
+    }
+
+    get doShowROITable() {
+        return this.roiManager.roiTableIsVisible()
     }
 
     startSpinner() {
