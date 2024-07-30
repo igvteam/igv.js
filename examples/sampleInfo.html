@@ -28,7 +28,7 @@
 
 <script type="module">
 
-    import igv from "../dist/igv.esm.min.js"
+    import igv from "../dist/igv.esm.js"
 
     const config1 =
         {
@@ -81,11 +81,9 @@
             ]
         }
 
-    const igvDiv1 = document.getElementById("igv-div1")
-    igv.createBrowser(igvDiv1, config1)
+    igv.createBrowser(document.getElementById("igv-div1"), config1)
 
-    const igvDiv2 = document.getElementById("igv-div2")
-    igv.createBrowser(igvDiv2, config2)
+    igv.createBrowser(document.getElementById("igv-div2"), config2)
 
 
 </script>
