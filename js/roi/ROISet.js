@@ -24,15 +24,17 @@ class ROISet {
 
         this.isUserDefined = config.isUserDefined
 
-        if (config.features) {
+        if (config.featureSource) {
+            // This is unusual, but permitted
+            this.featureSource = config.featureSource
+        } else if (config.features) {
             this.featureSource = new DynamicFeatureSource(config.features, genome)
+        } else if (config.format) {
+            FeatureSource(config, genome)
         } else {
-            if (config.format) {
-                this.featureSource = config.featureSource || FeatureSource(config, genome)
-            } else {
-                throw Error('ROI configuration must specify file format')
-            }
+            throw Error('ROI configuration must define either features or file format')
         }
+
 
         if (true === this.isUserDefined) {
             this.color = config.color || ROI_USER_DEFINED_COLOR
@@ -71,7 +73,13 @@ class ROISet {
 
     toJSON() {
         if (this.url) {
-            return {name: this.name, color: this.color, url: this.url, isUserDefined: this.isUserDefined, isVisible: this.isVisible}
+            return {
+                name: this.name,
+                color: this.color,
+                url: this.url,
+                isUserDefined: this.isUserDefined,
+                isVisible: this.isVisible
+            }
         } else {
             const featureMap = this.featureSource.getAllFeatures()
             const features = []
@@ -80,7 +88,13 @@ class ROISet {
                     features.push(f)
                 }
             }
-            return {name: this.name, color: this.color, features: features, isUserDefined: this.isUserDefined, isVisible: this.isVisible}
+            return {
+                name: this.name,
+                color: this.color,
+                features: features,
+                isUserDefined: this.isUserDefined,
+                isVisible: this.isVisible
+            }
         }
     }
 
