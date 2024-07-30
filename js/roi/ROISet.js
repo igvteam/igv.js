@@ -1,9 +1,6 @@
-import {FileUtils, StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import FeatureSource from '../feature/featureSource.js'
 import {appleCrayonRGBA} from '../util/colorPalletes.js'
 import {computeWGFeatures} from "../feature/featureUtils.js"
-import {inferFileFormatFromName} from "../util/fileFormatUtils.js"
-
 
 const appleCrayonColorName = 'nickel'
 
@@ -23,21 +20,21 @@ class ROISet {
 
         if (config.name) {
             this.name = config.name
-        } 
+        }
 
         this.isUserDefined = config.isUserDefined
 
-        if (config.features) {
+        if (config.featureSource) {
+            // This is unusual, but permitted
+            this.featureSource = config.featureSource
+        } else if (config.features) {
             this.featureSource = new DynamicFeatureSource(config.features, genome)
+        } else if (config.format) {
+            this.featureSource = FeatureSource(config, genome)
         } else {
-            if (config.format) {
-                config.format = config.format.toLowerCase()
-            } else {
-                const filename = FileUtils.getFilename(config.url)
-                config.format = inferFileFormatFromName(filename)
-            }
-            this.featureSource = config.featureSource || FeatureSource(config, genome)
+            throw Error('ROI configuration must define either features or file format')
         }
+
 
         if (true === this.isUserDefined) {
             this.color = config.color || ROI_USER_DEFINED_COLOR
@@ -76,7 +73,13 @@ class ROISet {
 
     toJSON() {
         if (this.url) {
-            return {name: this.name, color: this.color, url: this.url, isUserDefined: this.isUserDefined, isVisible: this.isVisible}
+            return {
+                name: this.name,
+                color: this.color,
+                url: this.url,
+                isUserDefined: this.isUserDefined,
+                isVisible: this.isVisible
+            }
         } else {
             const featureMap = this.featureSource.getAllFeatures()
             const features = []
@@ -85,7 +88,13 @@ class ROISet {
                     features.push(f)
                 }
             }
-            return {name: this.name, color: this.color, features: features, isUserDefined: this.isUserDefined, isVisible: this.isVisible}
+            return {
+                name: this.name,
+                color: this.color,
+                features: features,
+                isUserDefined: this.isUserDefined,
+                isVisible: this.isVisible
+            }
         }
     }
 

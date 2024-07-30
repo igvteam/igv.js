@@ -175,6 +175,11 @@ class Browser {
         this.sampleInfo = new SampleInfo(this)
 
         this.setControls(config)
+
+        // Region of interest
+        this.doShowROITable = config.showROITable
+        this.doShowROITableButton = config.doShowROITableButton
+        this.roiManager = new ROIManager(this)
     }
 
     startSpinner() {
@@ -197,9 +202,6 @@ class Browser {
         }
 
         this.doShowTrackLabels = config.showTrackLabels
-
-        this.doShowROITable = config.showROITable
-        this.doShowROITableButton = config.doShowROITableButton
 
         this.doShowCenterLine = config.showCenterGuide
 
@@ -634,40 +636,13 @@ class Browser {
             this.qtlSelections = QTLSelections.fromJSON(session.qtlSelections)
         }
 
-        if (this.roiManager) {
-            this.roiManager.dispose()
-        }
-
-        const roiMenu = new ROIMenu(this, this.columnContainer)
-        const roiTableConfig =
-            {
-                browser: this,
-                parent: this.columnContainer,
-                headerTitle: 'Regions of Interest',
-                dismissHandler: () => this.roiTableControl.buttonHandler(false),
-                gotoButtonHandler: ROITable.gotoButtonHandler
-            }
+        this.roiManager.clearROIs()
         if (session.roi) {
-
-            const roiSetList = session.roi.map(c => new ROISet(c, this.genome))
-
-            const named = roiSetList.filter(({name}) => name !== undefined && name.length > 0)
-
-            roiTableConfig.columnFormat = ROITable.getColumnFormatConfiguration(named.length > 0)
-
-            const roiTable = new ROITable(roiTableConfig)
-
-            this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, roiSetList)
+            this.roiManager.loadROI(session.roi)
         } else {
-
-            roiTableConfig.columnFormat = ROITable.getColumnFormatConfiguration(false)
-
-            const roiTable = new ROITable(roiTableConfig)
-
-            this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, undefined)
+            // Reset is called by loadROI, if no ROIs are loaded we need to call it explicitly
+            await this.roiManager.reset()
         }
-
-        await this.roiManager.initialize()
 
         // Sample info
         const localSampleInfoFiles = []
@@ -1967,6 +1942,9 @@ class Browser {
         this.removeEventHandlers()
         for (let trackView of this.trackViews) {
             trackView.dispose()
+        }
+        if (this.roiManager) {
+            this.roiManager.dispose()
         }
     }
 
