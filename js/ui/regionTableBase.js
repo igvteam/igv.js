@@ -172,6 +172,10 @@ class RegionTableBase {
         this.tableDOM.style.display = 'none'
     }
 
+    isVisible() {
+        return this.tableDOM.style.display !== 'none'
+    }
+
     dispose() {
 
         this.tableDOM.innerHTML = ''
