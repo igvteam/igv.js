@@ -4,12 +4,11 @@ import TrackBase from "../trackBase.js"
 import BWSource from "../bigwig/bwSource.js"
 import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
-import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import { IGVColor, StringUtils } from "../../node_modules/igv-utils/src/index.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import {createCheckbox} from "../igv-icons.js"
+import { createCheckbox } from "../igv-icons.js"
 
 const DEFAULT_COLOR = 'rgb(150, 150, 150)'
-
 
 class WigTrack extends TrackBase {
 
@@ -31,7 +30,6 @@ class WigTrack extends TrackBase {
     }
 
     init(config) {
-
         super.init(config)
 
         this.type = "wig"
@@ -51,7 +49,6 @@ class WigTrack extends TrackBase {
             this.featureSource = FeatureSource(config, this.browser.genome)
         }
 
-
         // Override autoscale default
         if (config.max === undefined || config.autoscale === true) {
             this.autoscale = true
@@ -70,7 +67,6 @@ class WigTrack extends TrackBase {
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
-
         const windowFunction = this.windowFunction
 
         const features = await this.featureSource.getFeatures({
@@ -81,6 +77,7 @@ class WigTrack extends TrackBase {
             visibilityWindow: this.visibilityWindow,
             windowFunction
         })
+
         if (this.normalize && this.featureSource.normalizationFactor) {
             const scaleFactor = this.featureSource.normalizationFactor
             for (let f of features) {
@@ -114,10 +111,10 @@ class WigTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
 
-            items.push({label: 'Flip y-axis', click})
+            items.push({ label: 'Flip y-axis', click })
         }
 
-        if(this.featureSource.windowFunctions) {
+        if (this.featureSource.windowFunctions) {
             items.push(...this.wigSummarizationItems())
         }
 
@@ -127,39 +124,34 @@ class WigTrack extends TrackBase {
     }
 
     wigSummarizationItems() {
-
         const windowFunctions = this.featureSource.windowFunctions
 
         const menuItems = []
         menuItems.push('<hr/>')
         menuItems.push("<div>Windowing function</div>")
         for (const wf of windowFunctions) {
-            const object = $(createCheckbox(wf, this.windowFunction === wf))
+            const object = createCheckbox(wf, this.windowFunction === wf)
 
             function clickHandler() {
                 this.windowFunction = wf
                 this.trackView.updateViews()
             }
 
-            menuItems.push({object, click: clickHandler})
+            menuItems.push({ object, click: clickHandler })
         }
 
         return menuItems
     }
 
-
     async getHeader() {
-
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
         }
         return this.header
     }
 
-    // TODO: refactor to igvUtils.js
     getScaleFactor(min, max, height, logScale) {
-        const scale = logScale ? height / (Math.log10(max + 1) - (min <= 0 ? 0 : Math.log10(min + 1))) : height / (max - min)
-        return scale
+        return logScale ? height / (Math.log10(max + 1) - (min <= 0 ? 0 : Math.log10(min + 1))) : height / (max - min)
     }
 
     computeYPixelValue(yValue, yScaleFactor) {
@@ -167,187 +159,140 @@ class WigTrack extends TrackBase {
     }
 
     computeYPixelValueInLogScale(yValue, yScaleFactor) {
-        let maxValue = this.dataRange.max
-        let minValue = this.dataRange.min
-        if (maxValue <= 0) return 0 // TODO:
-        if (minValue <= -1) minValue = 0
-        minValue = (minValue <= 0) ? 0 : Math.log10(minValue + 1)
-        maxValue = Math.log10(maxValue + 1)
+        let { min, max } = this.dataRange
+        if (max <= 0) return 0 // TODO: handle case where max is non-positive
+        if (min <= -1) min = 0
+        min = (min <= 0) ? 0 : Math.log10(min + 1)
+        max = Math.log10(max + 1)
         yValue = Math.log10(yValue + 1)
-        return ((this.flipAxis ? (yValue - minValue) : (maxValue - yValue)) * yScaleFactor)
+        return (this.flipAxis ? (yValue - min) : (max - yValue)) * yScaleFactor
     }
 
     draw(options) {
-
-        const features = options.features
-        const ctx = options.context
-        const bpPerPixel = options.bpPerPixel
-        const bpStart = options.bpStart
-        const pixelWidth = options.pixelWidth
-        const pixelHeight = options.pixelHeight
+        const { features, context: ctx, bpPerPixel, bpStart, pixelWidth, pixelHeight } = options
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
         const posColor = this.color || DEFAULT_COLOR
 
-        let lastNegValue = 1
-        const scaleFactor = this.getScaleFactor(this.dataRange.min, this.dataRange.max, options.pixelHeight, this.logScale)
-        const yScale = (yValue) => this.logScale
-            ? this.computeYPixelValueInLogScale(yValue, scaleFactor)
-            : this.computeYPixelValue(yValue, scaleFactor)
+        const scaleFactor = this.getScaleFactor(this.dataRange.min, this.dataRange.max, pixelHeight, this.logScale)
+        const yScale = this.logScale ? yValue => this.computeYPixelValueInLogScale(yValue, scaleFactor) : yValue => this.computeYPixelValue(yValue, scaleFactor)
 
         if (features && features.length > 0) {
-
             if (this.dataRange.min === undefined) this.dataRange.min = 0
 
-            // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
-            // nothing to paint.
             if (this.dataRange.max > this.dataRange.min) {
-
                 let lastPixelEnd = -1
                 let lastY
                 const y0 = yScale(0)
 
-                for (let f of features) {
-
-                    if (f.end < bpStart) continue
-                    if (f.start > bpEnd) break
+                features.forEach(f => {
+                    if (f.end < bpStart || f.start > bpEnd) return
 
                     const x = (f.start - bpStart) / bpPerPixel
-                    if (isNaN(x)) continue
+                    if (isNaN(x)) return
 
-                    let y = yScale(f.value)
-
+                    const y = yScale(f.value)
                     const rectEnd = (f.end - bpStart) / bpPerPixel
                     const width = rectEnd - x
-
                     const color = options.alpha ? IGVColor.addAlpha(this.getColorForFeature(f), options.alpha) : this.getColorForFeature(f)
 
                     if (this.graphType === "line") {
                         if (lastY !== undefined) {
-                            IGVGraphics.strokeLine(ctx, lastPixelEnd, lastY, x, y, {
-                                "fillStyle": color,
-                                "strokeStyle": color
-                            })
+                            IGVGraphics.strokeLine(ctx, lastPixelEnd, lastY, x, y, { fillStyle: color, strokeStyle: color })
                         }
-                        IGVGraphics.strokeLine(ctx, x, y, x + width, y, {"fillStyle": color, "strokeStyle": color})
+                        IGVGraphics.strokeLine(ctx, x, y, x + width, y, { fillStyle: color, strokeStyle: color })
                     } else if (this.graphType === "points") {
                         const pointSize = this.config.pointSize || 3
                         const px = x + width / 2
-                        IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color})
+                        IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, { fillStyle: color, strokeStyle: color })
 
                         if (f.value > this.dataRange.max) {
-                            IGVGraphics.fillCircle(ctx, px, pointSize / 2, pointSize / 2, 3, {fillStyle: this.overflowColor})
+                            IGVGraphics.fillCircle(ctx, px, pointSize / 2, pointSize / 2, 3, { fillStyle: this.overflowColor })
                         } else if (f.value < this.dataRange.min) {
-                            IGVGraphics.fillCircle(ctx, px, pixelHeight - pointSize / 2, pointSize / 2, 3, {fillStyle: this.overflowColor})
+                            IGVGraphics.fillCircle(ctx, px, pixelHeight - pointSize / 2, pointSize / 2, 3, { fillStyle: this.overflowColor })
                         }
 
                     } else {
                         // Default graph type (bar)
                         const height = Math.min(pixelHeight, y - y0)
-                        IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
+                        IGVGraphics.fillRect(ctx, x, y0, width, height, { fillStyle: color })
                         if (f.value > this.dataRange.max) {
-                            IGVGraphics.fillRect(ctx, x, 0, width, 3, {fillStyle: this.overflowColor})
+                            IGVGraphics.fillRect(ctx, x, 0, width, 3, { fillStyle: this.overflowColor })
                         } else if (f.value < this.dataRange.min) {
-                            IGVGraphics.fillRect(ctx, x, pixelHeight - 3, width, 3, {fillStyle: this.overflowColor})
+                            IGVGraphics.fillRect(ctx, x, pixelHeight - 3, width, 3, { fillStyle: this.overflowColor })
                         }
-
                     }
                     lastPixelEnd = x + width
                     lastY = y
-                }
+                })
 
-                // If the track includes negative values draw a baseline
                 if (this.dataRange.min < 0) {
                     const ratio = this.dataRange.max / (this.dataRange.max - this.dataRange.min)
-                    const basepx = this.flipAxis ? (1 - ratio) * options.pixelHeight : ratio * options.pixelHeight
-                    IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: this.baselineColor})
+                    const basepx = this.flipAxis ? (1 - ratio) * pixelHeight : ratio * pixelHeight
+                    IGVGraphics.strokeLine(ctx, 0, basepx, pixelWidth, basepx, { strokeStyle: this.baselineColor })
                 }
             }
         }
 
-        // Draw guidelines
         if (this.config.hasOwnProperty('guideLines')) {
-            for (let line of this.config.guideLines) {
+            this.config.guideLines.forEach(line => {
                 if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
-                    let y = yScale(line.y)
-                    let props = {
-                        'strokeStyle': line['color'],
-                        'strokeWidth': 2
+                    const y = yScale(line.y)
+                    const props = {
+                        strokeStyle: line.color,
+                        strokeWidth: 2
                     }
-                    if (line['dotted']) IGVGraphics.dashedLine(options.context, 0, y, options.pixelWidth, y, 5, props)
-                    else IGVGraphics.strokeLine(options.context, 0, y, options.pixelWidth, y, props)
+                    if (line.dotted) IGVGraphics.dashedLine(ctx, 0, y, pixelWidth, y, 5, props)
+                    else IGVGraphics.strokeLine(ctx, 0, y, pixelWidth, y, props)
                 }
-            }
+            })
         }
     }
 
-    popupData(clickState, features) {
+    popupData(clickState, features = this.clickedFeatures(clickState)) {
+        if (features.length === 0) return []
 
-        if (features === undefined) features = this.clickedFeatures(clickState)
+        const genomicLocation = clickState.genomicLocation
+        const popupData = []
 
-        if (features && features.length > 0) {
+        features.sort((a, b) => {
+            const distA = Math.abs((a.start + a.end) / 2 - genomicLocation)
+            const distB = Math.abs((b.start + b.end) / 2 - genomicLocation)
+            return distA - distB
+        })
 
-            const genomicLocation = clickState.genomicLocation
-            const popupData = []
+        const displayFeatures = features.length > 10 ? features.slice(0, 10) : features
 
-            // Sort features based on distance from click
-            features.sort(function (a, b) {
-                const distA = Math.abs((a.start + a.end) / 2 - genomicLocation)
-                const distB = Math.abs((b.start + b.end) / 2 - genomicLocation)
-                return distA - distB
-            })
+        displayFeatures.sort((a, b) => a.start - b.start)
 
-            // Display closest 10
-            const displayFeatures = features.length > 10 ? features.slice(0, 10) : features
-
-            // Resort in ascending order
-            displayFeatures.sort(function (a, b) {
-                return a.start - b.start
-            })
-
-            for (let selectedFeature of displayFeatures) {
-                if (selectedFeature) {
-                    if (popupData.length > 0) {
-                        popupData.push('<hr/>')
-                    }
-                    let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
-                        StringUtils.numberFormatter(Math.floor(selectedFeature.start) + 1)
-                        : StringUtils.numberFormatter(Math.floor(selectedFeature.start) + 1) + "-" + StringUtils.numberFormatter(Math.floor(selectedFeature.end))
-                    popupData.push({name: "Position:", value: posString})
-                    popupData.push({
-                        name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                        value: StringUtils.numberFormatter(selectedFeature.value.toFixed(4))
-                    })
+        displayFeatures.forEach(selectedFeature => {
+            if (selectedFeature) {
+                if (popupData.length > 0) {
+                    popupData.push('<hr/>')
                 }
+                const posString = (selectedFeature.end - selectedFeature.start) === 1 ?
+                    StringUtils.numberFormatter(Math.floor(selectedFeature.start) + 1) :
+                    `${StringUtils.numberFormatter(Math.floor(selectedFeature.start) + 1)}-${StringUtils.numberFormatter(Math.floor(selectedFeature.end))}`
+                popupData.push({ name: "Position:", value: posString })
+                popupData.push({ name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", value: StringUtils.numberFormatter(selectedFeature.value.toFixed(4)) })
             }
-            if (displayFeatures.length < features.length) {
-                popupData.push("<hr/>...")
-            }
+        })
 
-            return popupData
-
-        } else {
-            return []
+        if (displayFeatures.length < features.length) {
+            popupData.push("<hr/>...")
         }
+
+        return popupData
     }
 
     get supportsWholeGenome() {
         return !this.config.indexURL && this.config.supportsWholeGenome !== false
     }
 
-    /**
-     * Return color for feature.
-     * @param feature
-     * @returns {string}
-     */
-
     getColorForFeature(f) {
-        let c = (f.value < 0 && this.altColor) ? this.altColor : this.color || DEFAULT_COLOR
+        const c = (f.value < 0 && this.altColor) ? this.altColor : this.color || DEFAULT_COLOR
         return (typeof c === "function") ? c(f.value) : c
     }
 
-    /**
-     * Called when the track is removed.  Do any needed cleanup here
-     */
     dispose() {
         this.trackView = undefined
     }
@@ -364,12 +309,10 @@ class WigTrack extends TrackBase {
  * @returns {*|*[]}
  */
 function summarizeData(features, startBP, bpPerPixel, windowFunction = "mean") {
-
     if (bpPerPixel <= 1 || !features || features.length === 0) {
         return features
     }
 
-    // Assume features are sorted by position.  Wig features cannot overlap.  Note, UCSC "reductionLevel" == bpPerPixel
     const chr = features[0].chr
     const binSize = bpPerPixel
     const summaryFeatures = []
@@ -392,14 +335,11 @@ function summarizeData(features, startBP, bpPerPixel, windowFunction = "mean") {
                 throw Error(`Unknown window function: ${windowFunction}`)
         }
         const description = `${windowFunction} of ${bin.count} values`
-        summaryFeatures.push({chr, start, end, value, description})
+        summaryFeatures.push({ chr, start, end, value, description })
     }
 
     let currentBinData
     for (let f of features) {
-
-        // Loop through bins this feature overlaps, updating the weighted sum for each bin or min/max,
-        // depending on window function
         let startBin = Math.floor((f.start - startBP) / binSize)
         const endBin = Math.floor((f.end - startBP) / binSize)
 
@@ -409,40 +349,36 @@ function summarizeData(features, startBP, bpPerPixel, windowFunction = "mean") {
         }
 
         if (!currentBinData || endBin > currentBinData.bin) {
-
-            if(currentBinData) {
+            if (currentBinData) {
                 finishBin(currentBinData)
             }
 
-            // Feature stretches across multiple bins.
             if (endBin > startBin) {
                 const end = startBP + endBin * binSize
-                summaryFeatures.push({chr, start: f.start, end, value: f.value})
+                summaryFeatures.push({ chr, start: f.start, end, value: f.value })
             }
 
             currentBinData = new SummaryBinData(endBin, f)
         }
 
     }
-    if(currentBinData) {
+    if (currentBinData) {
         finishBin(currentBinData)
     }
 
-    // Consolidate
     const c = []
     let lastFeature = summaryFeatures[0]
-    for (let f of summaryFeatures) {
+    summaryFeatures.forEach(f => {
         if (lastFeature.value === f.value && f.start <= lastFeature.end) {
             lastFeature.end = f.end
         } else {
             c.push(lastFeature)
             lastFeature = f
         }
-    }
+    })
     c.push(lastFeature)
 
     return c
-
 }
 
 class SummaryBinData {
@@ -467,4 +403,4 @@ class SummaryBinData {
 }
 
 export default WigTrack
-export {summarizeData}
+export { summarizeData }
