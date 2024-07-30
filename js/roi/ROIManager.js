@@ -22,7 +22,7 @@ class ROIManager {
 
             const tracks = browser.findTracks(track => new Set(['ideogram', 'ruler']).has(track.type))
             const [rectA, rectB] = tracks
-                .map(track => track.trackView.viewports[0].$viewport.get(0))
+                .map(track => track.trackView.viewports[0].viewportElement)
                 .map(element => getElementVerticalDimension(element))
 
             const elements = browser.columnContainer.querySelectorAll('.igv-roi-region')

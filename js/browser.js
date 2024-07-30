@@ -1304,8 +1304,8 @@ class Browser {
 
             axis.remove()
 
-            for (let {$viewport} of viewports) {
-                $viewport.detach()
+            for (let {viewportElement} of viewports) {
+                viewportElement.remove()
             }
 
             sampleInfoViewport.viewport.remove()
@@ -1333,8 +1333,8 @@ class Browser {
             this.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
             for (let i = 0; i < viewportColumns.length; i++) {
-                const {$viewport} = viewports[i]
-                viewportColumns[i].appendChild($viewport.get(0))
+                const {viewportElement} = viewports[i]
+                viewportColumns[i].appendChild(viewportElement)
             }
 
             this.columnContainer.querySelector('.igv-sample-info-column').appendChild(sampleInfoViewport.viewport)
@@ -1646,8 +1646,8 @@ class Browser {
         const indexRight = 1 + indexLeft
 
         // TODO -- this is really ugly
-        const {$viewport} = this.trackViews[0].viewports[indexLeft]
-        const viewportColumn = viewportColumnManager.insertAfter($viewport.get(0).parentElement)
+        const {viewportElement} = this.trackViews[0].viewports[indexLeft]
+        const viewportColumn = viewportColumnManager.insertAfter(viewportElement.parentElement)
         this.fireEvent('didchangecolumnlayout')
 
         if (indexRight === this.referenceFrameList.length) {
@@ -1691,9 +1691,9 @@ class Browser {
 
         // find the $column corresponding to this referenceFrame and remove it
         const index = this.referenceFrameList.indexOf(referenceFrame)
-        const {$viewport} = this.trackViews[0].viewports[index]
+        const {viewportElement} = this.trackViews[0].viewports[index]
 
-        viewportColumnManager.removeColumnAtIndex(index, $viewport.parent().get(0))
+        viewportColumnManager.removeColumnAtIndex(index, viewportElement.parentElement)
         this.fireEvent('didchangecolumnlayout')
 
         for (let {viewports} of this.trackViews) {
@@ -2425,7 +2425,7 @@ function handleMouseMove(e) {
                     Math.abs(y - this.vpMouseDown.mouseDownY) > this.constants.scrollThreshold) {
                     // Scrolling => dragging track vertically
                     this.isScrolling = true
-                    const viewportHeight = viewport.$viewport.height()
+                    const viewportHeight = viewport.viewportElement.clientHeight
                     const contentHeight = viewport.trackView.maxViewportContentHeight()
                     this.vpMouseDown.r = viewportHeight / contentHeight
                 }
@@ -2435,7 +2435,7 @@ function handleMouseMove(e) {
         if (this.dragObject) {
             const clampDrag = !this.isSoftclipped()
             let deltaX = this.vpMouseDown.lastMouseX - x
-            const viewChanged = referenceFrame.shiftPixels(deltaX, viewport.$viewport.width(), clampDrag)
+            const viewChanged = referenceFrame.shiftPixels(deltaX, viewport.viewportElement.clientWidth, clampDrag)
             if (viewChanged) {
                 this.updateViews()
             }

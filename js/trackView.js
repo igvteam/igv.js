@@ -177,7 +177,7 @@ class TrackView {
 
         const {width: axisWidth} = this.axis.getBoundingClientRect()
 
-        const {y} = this.viewports[0].$viewport.get(0).getBoundingClientRect()
+        const {y} = this.viewports[0].viewportElement.getBoundingClientRect()
 
         let delta =
             {
@@ -187,7 +187,7 @@ class TrackView {
 
         for (let viewport of this.viewports) {
             viewport.renderSVGContext(context, delta)
-            const {width} = viewport.$viewport.get(0).getBoundingClientRect()
+            const {width} = viewport.viewportElement.getBoundingClientRect()
             delta.deltaX += width
         }
 
@@ -273,8 +273,8 @@ class TrackView {
             this.paintAxis()
         }
 
-        for (let {$viewport} of this.viewports) {
-            $viewport.height(newHeight)
+        for (let {viewportElement} of this.viewports) {
+            viewportElement.style.height = `${newHeight}px`
         }
 
         this.sampleInfoViewport.setHeight(newHeight)
@@ -299,7 +299,7 @@ class TrackView {
 
     updateScrollbar() {
 
-        const viewportHeight = this.viewports[0].$viewport.height()
+        const viewportHeight = this.viewports[0].viewportElement.clientHeight
         this.outerScroll.style.height = `${viewportHeight}px`
 
         if (false === scrollbarExclusionTypes.has(this.track.type)) {
@@ -325,7 +325,7 @@ class TrackView {
         $(this.innerScroll).css('top', `${top}px`)
 
         const contentHeight = this.maxViewportContentHeight()
-        const contentTop = -Math.round(top * (contentHeight / this.viewports[0].$viewport.height()))
+        const contentTop = -Math.round(top * (contentHeight / this.viewports[0].viewportElement.clientHeight))
 
         for (let viewport of this.viewports) {
             viewport.setTop(contentTop)
@@ -595,7 +595,7 @@ class TrackView {
 
             // Adjust scrollbar, if needed, to insure content is in view
             const currentTop = this.viewports[0].getContentTop()
-            const viewportHeight = this.viewports[0].$viewport.height()
+            const viewportHeight = this.viewports[0].viewportElement.clientHeight
             const minTop = Math.min(0, viewportHeight - contentHeight)
             if (currentTop < minTop) {
                 for (let viewport of this.viewports) {
@@ -889,7 +889,7 @@ class TrackView {
     removeViewportsFromColumnContainer() {
         // Track Viewports
         for (let viewport of this.viewports) {
-            viewport.$viewport.remove()
+            viewport.viewportElement.remove()
         }
     }
 

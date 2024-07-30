@@ -185,7 +185,7 @@ class FeatureTrack extends TrackBase {
      *                 referenceFrame: this.referenceFrame,
      *                 selection: this.selection,
      *                 viewport: this,
-     *                 viewportWidth: this.$viewport.width()
+     *                 viewportWidth: this.viewportElement.width()
      * @param options
      */
     draw(options) {

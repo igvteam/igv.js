@@ -38,7 +38,7 @@ function createViewport(trackView, column, referenceFrame, width) {
         const viewportObject = new TrackViewport(trackView, column, referenceFrame, width)
         referenceFrame.viewport = viewportObject
         // if ('sequence' === trackView.track.type) {
-        //     viewportObject.$viewport.get(0).style.marginTop = '0px'
+        //     viewportObject.viewportElement.style.marginTop = '0px'
         // }
 
         return viewportObject

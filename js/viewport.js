@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import AlertDialog from "./ui/components/alertDialog.js"
 import SequenceTrack from "./sequenceTrack.js"
@@ -38,23 +37,23 @@ class Viewport {
 
         this.browser = trackView.browser
 
-        this.$viewport = $('<div class="igv-viewport">')
-        viewportColumn.appendChild(this.$viewport.get(0))
+        this.viewportElement = document.createElement('div')
+        this.viewportElement.className = 'igv-viewport'
+        viewportColumn.appendChild(this.viewportElement)
 
         if (trackView.track.height) {
-            this.$viewport.get(0).style.height = `${trackView.track.height}px`
+            this.viewportElement.style.height = `${trackView.track.height}px`
         }
 
         // Create an alert dialog for the sequence track to copy ref sequence to.
         if (trackView.track instanceof SequenceTrack) {
-            this.alert = new AlertDialog(this.$viewport.get(0))
+            this.alert = new AlertDialog(this.viewportElement)
         }
 
         this.contentTop = 0
-        this.contentHeight = this.$viewport.height()
+        this.contentHeight = this.viewportElement.clientHeight
 
-
-        this.$viewport.width(width)
+        this.viewportElement.style.width = `${width}px`
 
         this.initializationHelper()
 
@@ -68,8 +67,7 @@ class Viewport {
         if (!this.messageDiv) {
             this.messageDiv = document.createElement('div')
             this.messageDiv.className = 'igv-viewport-message'
-            //this.contentDiv.append(this.messageDiv)
-            this.$viewport.append($(this.messageDiv))
+            this.viewportElement.appendChild(this.messageDiv)
         }
         this.messageDiv.textContent = message
         this.messageDiv.style.display = 'inline-block'
@@ -99,16 +97,11 @@ class Viewport {
     setTop(contentTop) {
 
         this.contentTop = contentTop
-        const viewportHeight = this.$viewport.height()
+        const viewportHeight = this.viewportElement.clientHeight
         const viewTop = -contentTop
         const viewBottom = viewTop + viewportHeight
 
-        //this.$content.css('top', `${contentTop}px`)
-        //
-        // if (undefined === this.canvasVerticalRange || this.canvasVerticalRange.bottom < viewBottom || this.canvasVerticalRange.top > viewTop) {
-        //     console.log("Repaint " + this.canvasVerticalRange)
-        //    this.repaint()
-        // }
+        // Implement the required functionality here as needed
 
     }
 
@@ -135,11 +128,10 @@ class Viewport {
         let track = this.trackView.track
         features = features || this.cachedFeatures
         if ("FILL" === track.displayMode) {
-            this.setContentHeight(this.$viewport.height())
+            this.setContentHeight(this.viewportElement.clientHeight)
         } else if (typeof track.computePixelHeight === 'function') {
             if (features && features.length > 0) {
                 let requiredContentHeight = track.computePixelHeight(features)
-                //let currentContentHeight = this.$content.height()
                 let currentContentHeight = this.contentHeight
                 if (requiredContentHeight !== currentContentHeight) {
                     this.setContentHeight(requiredContentHeight)
@@ -149,12 +141,11 @@ class Viewport {
     }
 
     getContentHeight() {
-        //return this.$content.height()
         return this.contentHeight
     }
 
     setContentHeight(contentHeight) {
-       this.contentHeight = contentHeight
+        this.contentHeight = contentHeight
     }
 
     isLoading() {
@@ -166,15 +157,15 @@ class Viewport {
     }
 
     isVisible() {
-        return this.$viewport.width()
+        return this.viewportElement.clientWidth
     }
 
     setWidth(width) {
-        this.$viewport.width(width)
+        this.viewportElement.style.width = `${width}px`
     }
 
     getWidth() {
-        return this.$viewport.width()
+        return this.viewportElement.clientWidth
     }
 
     getContentTop() {
@@ -196,7 +187,7 @@ class Viewport {
      */
     dispose() {
 
-        this.$viewport.get(0).remove()
+        this.viewportElement.remove()
 
         // Null out all properties -- this should not be neccessary, but just in case there is a
         // reference to self somewhere we want to free memory.
