@@ -14,23 +14,23 @@ James T Robinson, Helga Thorvaldsdottir, Douglass Turner, Jill P Mesirov, igv.js
 implementation of the Integrative Genomics Viewer (IGV), Bioinformatics, Volume 39, Issue 1, January 2023, 
 btac830, https://doi.org/10.1093/bioinformatics/btac830
  
-Below are examples and a quickstart guide.  See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.  
+Below are examples and a quickstart guide.  See the [developer documentation](https://igv.org/doc/igvjs) for more documentation.  
 
 # Examples
  
-***[Alignments](https://igv.org/web/release/2.15.13/examples/cram-vcf.html)***
+***[Alignments](https://igv.org/web/release/3.0.0/examples/cram-vcf.html)***
 
-***[Interactions](https://igv.org/web/release/2.15.13/examples/interact.html)***
+***[Interactions](https://igv.org/web/release/3.0.0/examples/interact.html)***
 
-***[Copy number](https://igv.org/web/release/2.15.13/examples/copyNumber.html)***
+***[Copy number](https://igv.org/web/release/3.0.0/examples/copyNumber.html)***
 
-***[Multiple regions](https://igv.org/web/release/2.15.13/examples/multi-locus.html)***
+***[Multiple regions](https://igv.org/web/release/3.0.0/examples/multi-locus.html)***
 
-***[Mutation Annotation Format (MAF)](https://igv.org/web/release/2.15.13/examples/maf-tcga.html)***
+***[Mutation Annotation Format (MAF)](https://igv.org/web/release/3.0.0/examples/maf-tcga.html)***
 
-***[Variant color options](https://igv.org/web/release/2.15.13/examples/variant-colors.html)***
+***[Variant color options](https://igv.org/web/release/3.0.0/examples/variant-colors.html)***
 
-***[More](https://igv.org/web/release/2.15.13/examples/)***
+***[More](https://igv.org/web/release/3.0.0/examples/)***
 
  
 # Quickstart
@@ -39,18 +39,18 @@ Below are examples and a quickstart guide.  See the [Wiki](https://github.com/ig
 igv.js consists of a single javascript file with no external dependencies.  
 
 Pre-built files for script include, AMD, or CJS module systems (igv.min.js) and an ES6 module (igv.esm.min.js)
-can be downloaded from [https://cdn.jsdelivr.net/npm/igv@2.15.13/dist/](https://cdn.jsdelivr.net/npm/igv@2.15.13/dist/). 
+can be downloaded from [https://cdn.jsdelivr.net/npm/igv@3.0.0/dist/](https://cdn.jsdelivr.net/npm/igv@3.0.0/dist/). 
 
 To import igv as an ES6 module
 
 ```javascript
-import igv from "https://cdn.jsdelivr.net/npm/igv@2.15.13/dist/igv.esm.min.js"
+import igv from "https://cdn.jsdelivr.net/npm/igv@3.0.0/dist/igv.esm.min.js"
 ``` 
 
 Or as a script include (defines the "igv" global)
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/igv@2.15.13/dist/igv.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/igv@3.0.0/dist/igv.min.js"></script>
 ```   
  
 Alternatively you can install with npm  
