@@ -41,7 +41,7 @@ class FeatureTrack extends TrackBase {
         if (config._featureSource) {
             this.featureSource = config._featureSource
             delete config._featureSource
-        } else {
+        } else if ('blat' !== config.type) {
             this.featureSource = config.featureSource ?
                 config.featureSource :
                 FeatureSource(config, this.browser.genome)

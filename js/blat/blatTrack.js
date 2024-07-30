@@ -1,6 +1,7 @@
 import FeatureTrack from "../feature/featureTrack.js"
 import BlatTable from "./blatTable.js"
 import {blat} from "./blatClient.js"
+import StaticFeatureSource from "../feature/staticFeatureSource.js"
 
 const maxSequenceSize = 25000
 
@@ -15,11 +16,21 @@ class BlatTrack extends FeatureTrack {
         this.table = undefined
     }
 
+    async postInit() {
+        if(!this.featureSource) {
+            const db = this.browser.genome.id   // TODO -- blat specific property
+            const url = this.browser.config["blatServerURL"]
+            const features = await blat({url, userSeq: this.sequence, db})
+            this._features = features;
+            this.featureSource = new StaticFeatureSource({features}, this.browser.genome)
+        }
+    }
+
     openTableView() {
 
         if (undefined === this.table) {
 
-            const rows = this.config.features.map(f => [
+            const rows = this._features.map(f => [
                 f.chr,
                 (f.start + 1),
                 f.end,
@@ -81,10 +92,7 @@ class BlatTrack extends FeatureTrack {
         // Release DOM element for table
         if (this.table) {
             this.table.popover.parentElement.removeChild(this.table.popover)
-
         }
-
-
     }
 }
 
@@ -96,13 +104,8 @@ async function createBlatTrack({sequence, browser, name, title}) {
         return
     }
 
-    const db = browser.genome.id   // TODO -- blat specific property
-
-    const url = browser.config["blatServerURL"]
-
     try {
 
-        const features = await blat({url, userSeq: sequence, db})
         const trackConfig = {
             type: 'blat',
             name: name || 'blat results',
@@ -110,7 +113,7 @@ async function createBlatTrack({sequence, browser, name, title}) {
             sequence: sequence,
             altColor: 'rgb(176, 176, 236)',
             color: 'rgb(236, 176, 176)',
-            features: features
+            searchable: false
         }
 
         const track = await browser.loadTrack(trackConfig)
