@@ -2,8 +2,7 @@
 <html lang="en">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
+    <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
@@ -11,25 +10,14 @@
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
     <title>IGV - Custom Track Click</title>
 
-    <!-- Bootstrap 4 - CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Bootstrap 5.3 - CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 
     <!-- Examples CSS -->
     <link rel="stylesheet" href="css/custom-track-click.css">
 
-    <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-            crossorigin="anonymous"></script>
-
-    <!-- Bootstrap 4 - JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
+    <!-- Bootstrap 5.3 - JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
 </head>
 
@@ -66,43 +54,36 @@
 
 <script type="module">
 
-    import igv from "../dist/igv.esm.min.js"
+    import igv from "../../dist/igv.esm.min.js"
 
-    var options =
-        {
-            showNavigation: true,
-            locus: "chr1:155,160,475-155,184,282",
-            genome: "hg19",
+    const options = {
+        showNavigation: true,
+        locus: "chr1:155,160,475-155,184,282",
+        genome: "hg19"
+    }
 
-        }
+    igv.createBrowser(document.getElementById('igv-custom-track-click'), options)
+        .then(browser => {
+            const genesInList = {}
 
-    var igv_custom_track_click = $('#igv-custom-track-click')
-
-    igv.createBrowser(igv_custom_track_click.get(0), options)
-
-        .then(function (browser) {
-
-            var genesInList = {}
-
-            browser.on('trackclick', function (track, popoverData) {
-                var symbol = null
-                popoverData.forEach(function (nameValue) {
+            browser.on('trackclick', (track, popoverData) => {
+                let symbol = null
+                for (const nameValue of popoverData) {
                     if (nameValue.name && nameValue.name.toLowerCase() === 'name') {
                         symbol = nameValue.value
                     }
-                })
+                }
 
                 if (symbol && !genesInList[symbol]) {
                     genesInList[symbol] = true
-                    $("#geneList").append('<li><a href="https://uswest.ensembl.org/Multi/Search/Results?q=' + symbol + '">' + symbol + '</a></li>')
+                    const el = document.getElementById('geneList')
+                    el.innerHTML += `<li><a href="https://uswest.ensembl.org/Multi/Search/Results?q=${symbol}">${symbol}</a></li>`
                 }
 
                 // Prevent default pop-over behavior
                 return false
             })
         })
-
-
 </script>
 
 </body>
