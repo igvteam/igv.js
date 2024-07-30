@@ -1,11 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <meta content="Jim Robinson" name="author">
-    <link href=img/favicon.ico rel="shortcut icon">
     <title>igv.js</title>
-
 </head>
 
 <body>
@@ -81,10 +77,7 @@
         }
 
 
-    igv.createBrowser(igvDiv, options)
-        .then(function (browser) {
-            console.log("Created IGV browser")
-        })
+    const browser = await igv.createBrowser(igvDiv, options)
 
 
 </script>

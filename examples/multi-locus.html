@@ -17,30 +17,26 @@
 
 <script type="module">
 
-    import igv from '../js/index.js'
+    import igv from '../dist/igv.esm.js'
 
-    (async () => {
+    const options =
+        {
+            genome: "hg19",
+            locus: ['myc', 'chr1:155,157,300-155,163,706', 'myc'],
+            tracks: [
+                {
+                    type: 'alignment',
+                    format: 'bam',
+                    url: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam',
+                    indexURL: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam.bai',
+                    name: 'HG01879'
+                }
 
-        const options =
-            {
-                genome: "hg19",
-                locus: ['myc', 'chr1:155,157,300-155,163,706', 'myc'],
-                tracks: [
-                    {
-                        type: 'alignment',
-                        format: 'bam',
-                        url: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam',
-                        indexURL: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam.bai',
-                        name: 'HG01879'
-                    }
+            ]
+        }
 
-                ]
-            }
+    const browser = await igv.createBrowser(document.getElementById('igv-div'), options)
 
-        const browser = await igv.createBrowser(document.getElementById('igv-div'), options)
-        console.log(`${browser.guid} is good to go`)
-
-    })()
 
 </script>
 

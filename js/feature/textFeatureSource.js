@@ -200,7 +200,6 @@ class TextFeatureSource extends BaseFeatureSource {
             }
             intervalStart = Math.max(0, (start + end - expansionWindow) / 2)
             intervalEnd = intervalStart + expansionWindow
-            console.log(`query ${intervalStart} - ${intervalEnd}`)
         }
 
         let features = await reader.readFeatures(queryChr, intervalStart, intervalEnd)
