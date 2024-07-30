@@ -7,7 +7,18 @@ import {parseLocusString} from "../search.js"
 import {appleCrayonRGB} from "../util/colorPalletes.js"
 
 class ROITable extends RegionTableBase {
-    constructor(config) {
+    constructor(browser) {
+
+        const config =
+            {
+                browser: browser,
+                parent: browser.columnContainer,
+                headerTitle: 'Regions of Interest',
+                dismissHandler: () => browser.roiTableControl.buttonHandler(false),
+                gotoButtonHandler: ROITable.gotoButtonHandler
+            }
+        config.columnFormat = ROITable.getColumnFormatConfiguration(true)
+
         super(Object.assign({ 'width':'640px' }, config))
     }
 
