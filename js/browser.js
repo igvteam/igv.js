@@ -639,9 +639,10 @@ class Browser {
         this.roiManager.clearROIs()
         if (session.roi) {
             this.roiManager.loadROI(session.roi)
+        } else {
+            // Reset is called by loadROI, if no ROIs are loaded we need to call it explicitly
+            await this.roiManager.reset()
         }
-
-        await this.roiManager.initialize()
 
         // Sample info
         const localSampleInfoFiles = []

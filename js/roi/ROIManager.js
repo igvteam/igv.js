@@ -17,11 +17,6 @@ class ROIManager {
         this.roiSets = []
         this.boundLocusChangeHandler = locusChangeHandler.bind(this)
         browser.on('locuschange', this.boundLocusChangeHandler)
-        this.constructionHelper(browser)
-
-    }
-
-    constructionHelper(browser) {
 
         const updateROIDimensions = () => {
 
@@ -42,12 +37,12 @@ class ROIManager {
         }
 
         this.observer = new MutationObserver(updateROIDimensions)
-        const [ column ] = browser.columnContainer.querySelectorAll('.igv-column')
-        this.observer.observe(column, { attributes: true, childList: true, subtree: true })
+        //const [ column ] = browser.columnContainer.querySelectorAll('.igv-column')
+        this.observer.observe(browser.columnContainer, { attributes: true, childList: true, subtree: true })
 
     }
 
-    async initialize() {
+    async reset() {
 
         if (this.roiSets.length > 0) {
             this.browser.doShowROITableButton = true
@@ -88,7 +83,7 @@ class ROIManager {
             this.roiSets.push(new ROISet(config, genome))
         }
 
-        await this.initialize()
+        await this.reset()
 
     }
 
