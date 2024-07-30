@@ -1,9 +1,6 @@
-import {FileUtils, StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import FeatureSource from '../feature/featureSource.js'
 import {appleCrayonRGBA} from '../util/colorPalletes.js'
 import {computeWGFeatures} from "../feature/featureUtils.js"
-import {inferFileFormatFromName} from "../util/fileFormatUtils.js"
-
 
 const appleCrayonColorName = 'nickel'
 
@@ -23,7 +20,7 @@ class ROISet {
 
         if (config.name) {
             this.name = config.name
-        } 
+        }
 
         this.isUserDefined = config.isUserDefined
 
@@ -31,12 +28,10 @@ class ROISet {
             this.featureSource = new DynamicFeatureSource(config.features, genome)
         } else {
             if (config.format) {
-                config.format = config.format.toLowerCase()
+                this.featureSource = config.featureSource || FeatureSource(config, genome)
             } else {
-                const filename = FileUtils.getFilename(config.url)
-                config.format = inferFileFormatFromName(filename)
+                throw Error('ROI configuration must specify file format')
             }
-            this.featureSource = config.featureSource || FeatureSource(config, genome)
         }
 
         if (true === this.isUserDefined) {

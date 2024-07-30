@@ -13,15 +13,21 @@
 
 <body>
 
+
+<button id="bookmark">Bookmark</button>
+
+
 <div id="container" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
 </div>
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     const options = {
+
+        queryParametersSupported: true,
 
         locus: '1:67,655,272-67,684,468',
 
@@ -34,7 +40,7 @@
         roi:
             [
                 {
-                    name: 'ROI set 1',
+                    //name: 'ROI set 1',
                     url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
                     indexed: false,
                     color: "rgba(94,255,1,0.25)"
@@ -106,9 +112,13 @@
                         ]
                 }
             ]
-    };
+    }
 
-    igv.createBrowser(document.getElementById('container'), options);
+    const browser = await igv.createBrowser(document.getElementById('container'), options)
+
+    document.getElementById("bookmark").addEventListener("click",
+        () => window.history.pushState({}, "IGV", browser.sessionURL()))
+
 
 </script>
 

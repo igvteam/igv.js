@@ -1,21 +1,22 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import ROISet, {screenCoordinates} from './ROISet.js'
-import Popover from "../ui/popover.js"
-import {getElementVerticalDimension} from "../util/igvUtils.js"
+import {getElementVerticalDimension, getFilename} from "../util/igvUtils.js"
+import {inferFileFormat} from "../util/fileFormatUtils.js"
+import ROIMenu from "./ROIMenu.js"
+import ROITable from "./ROITable.js"
+
 
 class ROIManager {
 
-    constructor(browser, roiMenu, roiTable, top, roiSets) {
+    constructor(browser) {
 
         this.browser = browser
-        this.roiMenu = roiMenu
-        this.roiTable = roiTable
-        // this.top = top
+        this.roiMenu = new ROIMenu(browser, browser.columnContainer)
+        this.roiTable = new ROITable(browser, browser.columnContainer)
         this.top = 0
-        this.roiSets = roiSets || []
+        this.roiSets = []
         this.boundLocusChangeHandler = locusChangeHandler.bind(this)
         browser.on('locuschange', this.boundLocusChangeHandler)
-
         this.constructionHelper(browser)
 
     }
@@ -77,8 +78,14 @@ class ROIManager {
 
         const configs = Array.isArray(config) ? config : [config]
 
-        for (let c of configs) {
-            this.roiSets.push(new ROISet(c, genome))
+        for (let config of configs) {
+            if (!config.name && config.url) {
+                config.name = await getFilename(config.url)
+            }
+            if (config.url && !config.format) {
+                    config.format = await inferFileFormat(config)
+                }
+            this.roiSets.push(new ROISet(config, genome))
         }
 
         await this.initialize()

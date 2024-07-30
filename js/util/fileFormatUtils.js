@@ -79,7 +79,10 @@ function compareArrays(a, b) {
 async function inferFileFormat(config) {
 
     // First try determining format from file extension
-    let format = await inferFileFormatFromName(config)
+    if (!config.filename) {
+        config.filename = await getFilename(config.url)
+    }
+    let format = await inferFileFormatFromName(config.filename)
 
     // Try determining from first few bytes of file
     if (!format) {
@@ -89,11 +92,10 @@ async function inferFileFormat(config) {
 
 }
 
-async function inferFileFormatFromName(config) {
+function inferFileFormatFromName(fn) {
 
-    let fn = config.filename
     if (!fn) {
-        fn = await getFilename(config.url)
+        return
     }
     fn = fn.toLowerCase()
 
@@ -266,7 +268,7 @@ async function inferFileFormatFromContents(config) {
 //
 // }
 
-export {inferFileFormatFromName, inferFileFormatFromContents}
+export {inferFileFormatFromContents}
 export {inferIndexPath}
 export {inferFileFormat}
 export {knownFileExtensions}
