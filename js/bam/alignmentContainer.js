@@ -764,7 +764,6 @@ function getGroupValue(al, groupBy, expectedPairOrientation) {
         // Add cases for other options as needed
         case 'base':
 
-            // Use a string prefix to enforce grouping rules:
             //    1: alignments with a base at the position
             //    2: alignments with a gap at the position
             //    3: alignment that do not overlap the position (or are on a different chromosome)
