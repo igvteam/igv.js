@@ -14,7 +14,7 @@ class ROITable extends RegionTableBase {
                 browser: browser,
                 parent: browser.columnContainer,
                 headerTitle: 'Regions of Interest',
-                dismissHandler: () => this.roiTableControl.buttonHandler(false),
+                dismissHandler: () => browser.roiTableControl.buttonHandler(false),
                 gotoButtonHandler: ROITable.gotoButtonHandler
             }
         config.columnFormat = ROITable.getColumnFormatConfiguration(true)

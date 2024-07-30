@@ -21,8 +21,8 @@ class ROIManager {
         const updateROIDimensions = () => {
 
             const tracks = browser.findTracks(track => new Set(['ideogram', 'ruler']).has(track.type))
-            const [ rectA, rectB ] = tracks
-                .map( track => track.trackView.viewports[ 0 ].$viewport.get(0))
+            const [rectA, rectB] = tracks
+                .map(track => track.trackView.viewports[0].$viewport.get(0))
                 .map(element => getElementVerticalDimension(element))
 
             const elements = browser.columnContainer.querySelectorAll('.igv-roi-region')
@@ -30,7 +30,7 @@ class ROIManager {
             const fudge = -0.5
             if (elements) {
                 for (const element of elements) {
-                    element.style.marginTop = `${ rectA.height  + rectB.height + fudge }px`
+                    element.style.marginTop = `${rectA.height + rectB.height + fudge}px`
                 }
 
             }
@@ -38,7 +38,7 @@ class ROIManager {
 
         this.observer = new MutationObserver(updateROIDimensions)
         //const [ column ] = browser.columnContainer.querySelectorAll('.igv-column')
-        this.observer.observe(browser.columnContainer, { attributes: true, childList: true, subtree: true })
+        this.observer.observe(browser.columnContainer, {attributes: true, childList: true, subtree: true})
 
     }
 
@@ -78,8 +78,8 @@ class ROIManager {
                 config.name = await getFilename(config.url)
             }
             if (config.url && !config.format) {
-                    config.format = await inferFileFormat(config)
-                }
+                config.format = await inferFileFormat(config)
+            }
             this.roiSets.push(new ROISet(config, genome))
         }
 
@@ -276,6 +276,7 @@ class ROIManager {
 
         const config =
             {
+                name: 'user defined',
                 isUserDefined: true,
                 features: []
             }
@@ -309,13 +310,13 @@ class ROIManager {
         const {chr, start, end} = parseRegionKey(regionKey)
 
         for (let set of this.roiSets) {
-                const features = await set.getFeatures(chr, start, end)
+            const features = await set.getFeatures(chr, start, end)
 
-                for (let feature of features) {
-                    if (feature.chr === chr && feature.start >= start && feature.end <= end) {
-                        return {feature, set}
-                    }
+            for (let feature of features) {
+                if (feature.chr === chr && feature.start >= start && feature.end <= end) {
+                    return {feature, set}
                 }
+            }
         }
 
         return {feature: undefined, set: undefined}

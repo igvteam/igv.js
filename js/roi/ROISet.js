@@ -30,7 +30,7 @@ class ROISet {
         } else if (config.features) {
             this.featureSource = new DynamicFeatureSource(config.features, genome)
         } else if (config.format) {
-            FeatureSource(config, genome)
+            this.featureSource = FeatureSource(config, genome)
         } else {
             throw Error('ROI configuration must define either features or file format')
         }

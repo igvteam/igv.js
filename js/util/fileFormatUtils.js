@@ -78,11 +78,13 @@ function compareArrays(a, b) {
 
 async function inferFileFormat(config) {
 
+    let format
+
     // First try determining format from file extension
-    if (!config.filename) {
-        config.filename = await getFilename(config.url)
+    const filename = config.filename || await getFilename(config.url)
+    if(filename) {
+        format = await inferFileFormatFromName(filename)
     }
-    let format = await inferFileFormatFromName(config.filename)
 
     // Try determining from first few bytes of file
     if (!format) {
