@@ -393,7 +393,7 @@ class FeatureFileReader {
 
             dataWrapper = getDataWrapper(plain)
             const features = []
-            await this._parse().parseFeatures(features, dataWrapper)
+            await this._parse(features, dataWrapper)
             return features
         }
     }

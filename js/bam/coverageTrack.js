@@ -141,10 +141,14 @@ class CoverageTrack  {
         const genomicLocation = Math.floor(clickState.genomicLocation)
         const coverageMap = features.coverageMap
         const coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart)
-        return {
-            coverage: coverageMap.coverage[coverageMapIndex],
-            baseModCounts: features.baseModCounts,
-            hoverText: () => coverageMap.coverage[coverageMapIndex].hoverText()}
+        const coverage = coverageMap.coverage[coverageMapIndex]
+        if(coverage) {
+            return {
+                coverage: coverage,
+                baseModCounts: features.baseModCounts,
+                hoverText: () => coverageMap.coverage[coverageMapIndex].hoverText()
+            }
+        }
     }
 
     popupData(clickState) {
