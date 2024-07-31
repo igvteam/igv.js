@@ -461,11 +461,9 @@ class Browser {
         // Append svg t testing, not used in production
         if (container) {
             const svg = document.createElement("svg");
-            svg.innerHTML = svgString
-            container.append(svg)
-            container.appendChild(svg)
+            svg.innerHTML = svgString; // Insert SVG content
+            container.appendChild(svg); // Append the SVG to the container
         }
-
         const path = filename || 'igvjs.svg'
         const data = URL.createObjectURL(new Blob([svgString], {type: "application/octet-stream"}))
         FileUtils.download(path, data)
@@ -2599,11 +2597,11 @@ function toggleTrackLabels(trackViews, isVisible) {
 
     for (let {viewports} of trackViews) {
         for (let viewport of viewports) {
-            if (viewport.trackLabel) {
+            if (viewport.trackLabelElement) {
                 if (0 === viewports.indexOf(viewport) && true === isVisible) {
-                    viewport.trackLabel.style.display = 'block'
+                    viewport.trackLabelElement.style.display = 'block'
                 } else {
-                    viewport.trackLabel.style.display = 'none'
+                    viewport.trackLabelElement.style.display = 'none'
                 }
             }
         }

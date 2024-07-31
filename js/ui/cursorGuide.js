@@ -98,7 +98,7 @@ class CursorGuide {
 
         if (this.browser.getRulerTrackView()) {
             for (let viewport of this.browser.getRulerTrackView().viewports) {
-                viewport.$tooltip.hide()
+                viewport.tooltip.style.display = 'none'
             }
         }
 
