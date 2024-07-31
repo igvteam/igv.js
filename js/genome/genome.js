@@ -345,12 +345,12 @@ function isDigit(val) {
 function generateGenomeID(config) {
     if (config.id !== undefined) {
         return config.id
-    } else if (config.fastaURL && StringUtils.isString(config.fastaURL)) {
+    } else if (config.fastaURL && StringUtils.isString(config.fastaURL) && !config.fastaURL.startsWith("data:")) {
         return config.fastaURL
     } else if (config.fastaURL && config.fastaURL.name) {
         return config.fastaURL.name
     } else {
-        return ("0000" + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4)
+        return ""
     }
 }
 
