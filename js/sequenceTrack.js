@@ -149,7 +149,7 @@ class SequenceTrack {
     }
 
     menuItemList() {
-        const menuItems = [
+        return [
             {
                 name: this.reversed ? "Forward" : "Reverse",
                 click: () => {
