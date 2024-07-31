@@ -38,10 +38,10 @@ class TrackViewport extends Viewport {
             this.$zoomInNotice = this.createZoomInNotice(this.$viewport)
         }
 
-        if (track.name && "sequence" !== track.id) {
+        if ("sequence" !== track.id) {
             this.$trackLabel = $('<div class="igv-track-label">')
             this.$viewport.append(this.$trackLabel)
-            this.setTrackLabel(track.name)
+            this.setTrackLabel(track.name || "")
             if (false === this.browser.doShowTrackLabels) {
                 this.$trackLabel.hide()
             }
