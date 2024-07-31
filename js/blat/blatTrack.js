@@ -14,10 +14,18 @@ class BlatTrack extends FeatureTrack {
         }
         this.sequence = config.sequence
         this.table = undefined
+
+        // On initial creation features are fetched before track construction
+        if(config.features) {
+            this._features = config.features
+            this.featureSource = new StaticFeatureSource({features: config.features}, this.browser.genome)
+            delete config.features
+        }
     }
 
     async postInit() {
         if(!this.featureSource) {
+            // This will be the case when restoring from a session
             const db = this.browser.genome.id   // TODO -- blat specific property
             const url = this.browser.config["blatServerURL"]
             const features = await blat({url, userSeq: this.sequence, db})
@@ -106,6 +114,10 @@ async function createBlatTrack({sequence, browser, name, title}) {
 
     try {
 
+        const db = browser.genome.id   // TODO -- blat specific property
+        const url = browser.config["blatServerURL"]
+        const features = await blat({url, userSeq: this.sequence, db})
+
         const trackConfig = {
             type: 'blat',
             name: name || 'blat results',
@@ -113,7 +125,8 @@ async function createBlatTrack({sequence, browser, name, title}) {
             sequence: sequence,
             altColor: 'rgb(176, 176, 236)',
             color: 'rgb(236, 176, 176)',
-            searchable: false
+            searchable: false,
+            features
         }
 
         const track = await browser.loadTrack(trackConfig)
