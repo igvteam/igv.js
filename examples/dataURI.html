@@ -12,13 +12,16 @@
 </head>
 <body>
 
-<h1>Examples use of data URIs</h1>
+<h1>Example use of data URIs</h1>
+
+Sequence, annotation, and alignment data is encoded in the page as data URIs.   See [Data-URIs](https://igv.org/doc/igvjs/#Data-URIs/) for more details.
+See also [igv-reports](https://github.com/igvteam/igv-reports).
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../dist/igv.esm.min.js"
 
     const igvDiv = document.getElementById("igvDiv");
     const options =
