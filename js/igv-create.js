@@ -82,7 +82,7 @@ async function createBrowser(parentDiv, config) {
     }
 
     browser.stopSpinner()
-    navbarDidResize(browser, browser.$navigation.width())
+    navbarDidResize(browser, browser.navigationElement.clientWidth)
 
     return browser
 

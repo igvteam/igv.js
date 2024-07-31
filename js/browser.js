@@ -1,4 +1,3 @@
-import $ from "./vendor/jquery-3.3.1.slim.js"
 import {BGZip, FileUtils, igvxhr, StringUtils, URIUtils} from "../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {createIcon} from "./ui/utils/icons.js"
@@ -229,132 +228,140 @@ class Browser {
     }
 
     setControls(config) {
+        const navBar = this.createStandardControls(config);
+        this.columnContainer.parentNode.insertBefore(navBar, this.columnContainer);
+        this.navigationElement = navBar;
 
-        const $navBar = this.createStandardControls(config)
-        $navBar.insertBefore($(this.columnContainer))
-        this.$navigation = $navBar
-
-        if (false === config.showControls) {
-            $navBar.hide()
+        if (config.showControls === false) {
+            navBar.style.display = 'none';
         }
-
     }
 
     createStandardControls(config) {
 
-        const $navBar = $('<div>', {class: 'igv-navbar'})
-        this.$navigation = $navBar
+        const navBar = document.createElement('div');
+        navBar.className = 'igv-navbar';
+        this.navigationElement = navBar;
 
-        const $navbarLeftContainer = $('<div>', {class: 'igv-navbar-left-container'})
-        $navBar.append($navbarLeftContainer)
+        const navbarLeftContainer = document.createElement('div');
+        navbarLeftContainer.className = 'igv-navbar-left-container';
+        navBar.appendChild(navbarLeftContainer);
 
         // IGV logo
-        const $logo = $('<div>', {class: 'igv-logo'})
-        $navbarLeftContainer.append($logo)
+        const logoDiv = document.createElement('div');
+        logoDiv.className = 'igv-logo';
+        navbarLeftContainer.appendChild(logoDiv);
 
-        const logoSvg = logo()
-        logoSvg.css("width", "34px")
-        logoSvg.css("height", "32px")
-        $logo.append(logoSvg)
+        const logoSvg = logo();
+        logoSvg.style.width = "34px";
+        logoSvg.style.height = "32px";
+        logoDiv.appendChild(logoSvg);
 
-        this.$current_genome = $('<div>', {class: 'igv-current-genome'})
-        $navbarLeftContainer.append(this.$current_genome)
-        this.$current_genome.text('')
+        this.currentGenomeElement = document.createElement('div');
+        this.currentGenomeElement.className = 'igv-current-genome';
+        navbarLeftContainer.appendChild(this.currentGenomeElement);
+        this.currentGenomeElement.textContent = '';
 
-        const $genomicLocation = $('<div>', {class: 'igv-navbar-genomic-location'})
-        $navbarLeftContainer.append($genomicLocation)
+        const genomicLocation = document.createElement('div');
+        genomicLocation.className = 'igv-navbar-genomic-location';
+        navbarLeftContainer.appendChild(genomicLocation);
 
-        // chromosome select widget
-        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0))
+        // Chromosome select widget
+        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, genomicLocation);
         if (config.showChromosomeWidget !== false) {
-            this.chromosomeSelectWidget.show()
+            this.chromosomeSelectWidget.show();
         } else {
-            this.chromosomeSelectWidget.hide()
+            this.chromosomeSelectWidget.hide();
         }
 
-        const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'})
-        $genomicLocation.append($locusSizeGroup)
+        const locusSizeGroup = document.createElement('div');
+        locusSizeGroup.className = 'igv-locus-size-group';
+        genomicLocation.appendChild(locusSizeGroup);
 
-        const $searchContainer = $('<div>', {class: 'igv-search-container'})
-        $locusSizeGroup.append($searchContainer)
+        const searchContainer = document.createElement('div');
+        searchContainer.className = 'igv-search-container';
+        locusSizeGroup.appendChild(searchContainer);
 
-        // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
-        this.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'})
-        $searchContainer.append(this.$searchInput)
+        this.searchInput = document.createElement('input');
+        this.searchInput.className = 'igv-search-input';
+        this.searchInput.type = 'text';
+        this.searchInput.placeholder = 'Locus Search';
+        searchContainer.appendChild(this.searchInput);
         // Stop event propagation to prevent feature track keyboard navigation
-        this.$searchInput[0].addEventListener('keyup', (event) => {
-            event.stopImmediatePropagation()
-        })
+        this.searchInput.addEventListener('keyup', (event) => {
+            event.stopImmediatePropagation();
+        });
 
-        this.$searchInput.change(() => this.doSearch(this.$searchInput.val()))
+        this.searchInput.addEventListener('change', () => this.doSearch(this.searchInput.value));
 
-        const searchIconContainer = DOMUtils.div({class: 'igv-search-icon-container'})
-        $searchContainer.append($(searchIconContainer))
+        const searchIconContainer = DOMUtils.div({class: 'igv-search-icon-container'});
+        searchContainer.appendChild(searchIconContainer);
 
-        searchIconContainer.appendChild(createIcon("search"))
+        searchIconContainer.appendChild(createIcon("search"));
 
-        searchIconContainer.addEventListener('click', () => this.doSearch(this.$searchInput.val()))
+        searchIconContainer.addEventListener('click', () => this.doSearch(this.searchInput.value));
 
-        this.windowSizePanel = new WindowSizePanel($locusSizeGroup.get(0), this)
+        this.windowSizePanel = new WindowSizePanel(locusSizeGroup, this);
 
-        const $navbarRightContainer = $('<div>', {class: 'igv-navbar-right-container'})
-        $navBar.append($navbarRightContainer)
+        const navbarRightContainer = document.createElement('div');
+        navbarRightContainer.className = 'igv-navbar-right-container';
+        navBar.appendChild(navbarRightContainer);
 
-        const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">')
-        $navbarRightContainer.append($toggle_button_container)
-        this.$toggle_button_container = $toggle_button_container
+        const toggleButtonContainer = document.createElement('div');
+        toggleButtonContainer.className = 'igv-navbar-toggle-button-container';
+        navbarRightContainer.appendChild(toggleButtonContainer);
+        this.toggleButtonContainer = toggleButtonContainer;
 
-        this.overlayTrackButton = new OverlayTrackButton(this, $toggle_button_container.get(0))
-        this.overlayTrackButton.setVisibility(false)
+        this.overlayTrackButton = new OverlayTrackButton(this, toggleButtonContainer);
+        this.overlayTrackButton.setVisibility(false);
 
-        this.multiTrackSelectButton = new MultiTrackSelectButton(this, $toggle_button_container.get(0))
+        this.multiTrackSelectButton = new MultiTrackSelectButton(this, toggleButtonContainer);
 
-        this.cursorGuide = new CursorGuide(this.columnContainer, this)
+        this.cursorGuide = new CursorGuide(this.columnContainer, this);
 
-        this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
+        this.cursorGuideButton = new CursorGuideButton(this, toggleButtonContainer);
 
-        this.centerLineButton = new CenterLineButton(this, $toggle_button_container.get(0))
+        this.centerLineButton = new CenterLineButton(this, toggleButtonContainer);
 
-        this.setTrackLabelVisibility(config.showTrackLabels)
-        this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), this)
+        this.setTrackLabelVisibility(config.showTrackLabels);
+        this.trackLabelControl = new TrackLabelControl(toggleButtonContainer, this);
 
         // ROI Control
-        this.roiTableControl = new ROITableControl($toggle_button_container.get(0), this)
+        this.roiTableControl = new ROITableControl(toggleButtonContainer, this);
 
-        this.sampleInfoControl = new SampleInfoControl($toggle_button_container.get(0), this)
+        this.sampleInfoControl = new SampleInfoControl(toggleButtonContainer, this);
 
-        this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
+        this.sampleNameControl = new SampleNameControl(toggleButtonContainer, this);
 
-        if (true === config.showSVGButton) {
-            this.saveImageControl = new SaveImageControl($toggle_button_container.get(0), this)
+        if (config.showSVGButton === true) {
+            this.saveImageControl = new SaveImageControl(toggleButtonContainer, this);
         }
 
         if (config.customButtons) {
             for (let b of config.customButtons) {
-                new CustomButton($toggle_button_container.get(0), this, b)
+                new CustomButton(toggleButtonContainer, this, b);
             }
         }
 
-        this.zoomWidget = new ZoomWidget(this, $navbarRightContainer.get(0))
+        this.zoomWidget = new ZoomWidget(this, navbarRightContainer);
 
-        if (false === config.showNavigation) {
-            this.$navigation.hide()
+        if (config.showNavigation === false) {
+            this.navigationElement.style.display = 'none';
         }
 
-        this.sliderDialog = new SliderDialog(this.root)
-        this.sliderDialog.container.id = `igv-slider-dialog-${DOMUtils.guid()}`
+        this.sliderDialog = new SliderDialog(this.root);
+        this.sliderDialog.container.id = `igv-slider-dialog-${DOMUtils.guid()}`;
 
-        this.inputDialog = new InputDialog(this.root)
-        this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
+        this.inputDialog = new InputDialog(this.root);
+        this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`;
 
-        this.dataRangeDialog = new DataRangeDialog(this, $(this.root))
-        this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${DOMUtils.guid()}`
+        this.dataRangeDialog = new DataRangeDialog(this, this.root);
+        this.dataRangeDialog.container.id = `igv-data-range-dialog-${DOMUtils.guid()}`;
 
-        this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432})
-        this.genericColorPicker.container.id = `igv-track-color-picker-${DOMUtils.guid()}`
+        this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432});
+        this.genericColorPicker.container.id = `igv-track-color-picker-${DOMUtils.guid()}`;
 
-        return $navBar
-
+        return navBar;
     }
 
     getSampleNameViewportWidth() {
@@ -797,8 +804,9 @@ class Browser {
 
     updateNavbarDOMWithGenome(genome) {
         let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0, 8)}...${genome.id.substring(genome.id.length - 8)}`)
-        this.$current_genome.text(genomeLabel)
-        this.$current_genome.attr('title', genome.description)
+        this.currentGenomeElement.innerText = genomeLabel
+        this.currentGenomeElement.setAttribute('title', genome.description);
+
 
         // chromosome select widget -- Show this IFF its not explicitly hidden AND the genome has pre-loaded chromosomes
         const showChromosomeWidget =
@@ -895,7 +903,7 @@ class Browser {
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
 
-        navbarDidResize(this, this.$navigation.width(), isWGV)
+        navbarDidResize(this, this.navigationElement.clientWidth, isWGV)
 
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
@@ -1491,7 +1499,7 @@ class Browser {
 
         if (this.referenceFrameList) {
             const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr)
-            navbarDidResize(this, this.$navigation.width(), isWGV)
+            navbarDidResize(this, this.navigationElement.clientWidth, isWGV)
         }
 
         resize.call(this)
@@ -1577,9 +1585,7 @@ class Browser {
             this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
         }
 
-        const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
-
-        this.$searchInput.val(loc)
+        this.searchInput.value = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
 
         this.fireEvent('locuschange', [this.referenceFrameList])
     }
@@ -2543,28 +2549,61 @@ async function keyUpHandler(event) {
 
 
 function logo() {
+    const svgNS = "http://www.w3.org/2000/svg";
+    const xlinkNS = "http://www.w3.org/1999/xlink";
 
-    return $(
-        '<svg width="690px" height="324px" viewBox="0 0 690 324" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
-        '<title>IGV</title>' +
-        '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">' +
-        '<g id="IGV" fill="#666666">' +
-        '<polygon id="Path" points="379.54574 8.00169252 455.581247 8.00169252 515.564813 188.87244 532.884012 253.529506 537.108207 253.529506 554.849825 188.87244 614.833392 8.00169252 689.60164 8.00169252 582.729511 320.722144 486.840288 320.722144"></polygon>' +
-        '<path d="M261.482414,323.793286 C207.975678,323.793286 168.339046,310.552102 142.571329,284.069337 C116.803612,257.586572 103.919946,217.158702 103.919946,162.784513 C103.919946,108.410325 117.437235,67.8415913 144.472217,41.0770945 C171.507199,14.3125977 212.903894,0.930550071 268.663545,0.930550071 C283.025879,0.930550071 298.232828,1.84616386 314.284849,3.6774189 C330.33687,5.50867394 344.839793,7.97378798 357.794056,11.072835 L357.794056,68.968378 C339.48912,65.869331 323.578145,63.5450806 310.060654,61.9955571 C296.543163,60.4460336 284.574731,59.6712835 274.154998,59.6712835 C255.850062,59.6712835 240.502308,61.4320792 228.111274,64.9537236 C215.720241,68.4753679 205.793482,74.2507779 198.330701,82.2801269 C190.867919,90.309476 185.587729,100.87425 182.48997,113.974767 C179.392212,127.075284 177.843356,143.345037 177.843356,162.784513 C177.843356,181.942258 179.251407,198.000716 182.067551,210.960367 C184.883695,223.920018 189.671068,234.41436 196.429813,242.443709 C203.188559,250.473058 212.059279,256.178037 223.042241,259.558815 C234.025202,262.939594 247.683295,264.629958 264.01693,264.629958 C268.241146,264.629958 273.098922,264.489094 278.590403,264.207362 C284.081883,263.925631 289.643684,263.50304 295.275972,262.939577 L295.275972,159.826347 L361.595831,159.826347 L361.595831,308.579859 C344.698967,313.087564 327.239137,316.750019 309.215815,319.567334 C291.192494,322.38465 275.281519,323.793286 261.482414,323.793286 L261.482414,323.793286 L261.482414,323.793286 Z" id="Path"></path>;' +
-        '<polygon id="Path" points="0.81355666 5.00169252 73.0472883 5.00169252 73.0472883 317.722144 0.81355666 317.722144"></polygon>' +
-        '</g> </g> </svg>'
-    )
+    const svg = document.createElementNS(svgNS, 'svg');
+    svg.setAttribute('width', '690px');
+    svg.setAttribute('height', '324px');
+    svg.setAttribute('viewBox', '0 0 690 324');
+    svg.setAttribute('version', '1.1');
+    svg.setAttribute('xmlns', svgNS);
+    svg.setAttribute('xmlns:xlink', xlinkNS);
+
+    const title = document.createElementNS(svgNS, 'title');
+    title.textContent = 'IGV';
+    svg.appendChild(title);
+
+    const g1 = document.createElementNS(svgNS, 'g');
+    g1.setAttribute('id', 'Page-1');
+    g1.setAttribute('stroke', 'none');
+    g1.setAttribute('stroke-width', '1');
+    g1.setAttribute('fill', 'none');
+    g1.setAttribute('fill-rule', 'evenodd');
+    svg.appendChild(g1);
+
+    const g2 = document.createElementNS(svgNS, 'g');
+    g2.setAttribute('id', 'IGV');
+    g2.setAttribute('fill', '#666666');
+    g1.appendChild(g2);
+
+    const polygon1 = document.createElementNS(svgNS, 'polygon');
+    polygon1.setAttribute('id', 'Path');
+    polygon1.setAttribute('points', '379.54574 8.00169252 455.581247 8.00169252 515.564813 188.87244 532.884012 253.529506 537.108207 253.529506 554.849825 188.87244 614.833392 8.00169252 689.60164 8.00169252 582.729511 320.722144 486.840288 320.722144');
+    g2.appendChild(polygon1);
+
+    const path = document.createElementNS(svgNS, 'path');
+    path.setAttribute('d', 'M261.482414,323.793286 C207.975678,323.793286 168.339046,310.552102 142.571329,284.069337 C116.803612,257.586572 103.919946,217.158702 103.919946,162.784513 C103.919946,108.410325 117.437235,67.8415913 144.472217,41.0770945 C171.507199,14.3125977 212.903894,0.930550071 268.663545,0.930550071 C283.025879,0.930550071 298.232828,1.84616386 314.284849,3.6774189 C330.33687,5.50867394 344.839793,7.97378798 357.794056,11.072835 L357.794056,68.968378 C339.48912,65.869331 323.578145,63.5450806 310.060654,61.9955571 C296.543163,60.4460336 284.574731,59.6712835 274.154998,59.6712835 C255.850062,59.6712835 240.502308,61.4320792 228.111274,64.9537236 C215.720241,68.4753679 205.793482,74.2507779 198.330701,82.2801269 C190.867919,90.309476 185.587729,100.87425 182.48997,113.974767 C179.392212,127.075284 177.843356,143.345037 177.843356,162.784513 C177.843356,181.942258 179.251407,198.000716 182.067551,210.960367 C184.883695,223.920018 189.671068,234.41436 196.429813,242.443709 C203.188559,250.473058 212.059279,256.178037 223.042241,259.558815 C234.025202,262.939594 247.683295,264.629958 264.01693,264.629958 C268.241146,264.629958 273.098922,264.489094 278.590403,264.207362 C284.081883,263.925631 289.643684,263.50304 295.275972,262.939577 L295.275972,159.826347 L361.595831,159.826347 L361.595831,308.579859 C344.698967,313.087564 327.239137,316.750019 309.215815,319.567334 C291.192494,322.38465 275.281519,323.793286 261.482414,323.793286 L261.482414,323.793286 L261.482414,323.793286 Z');
+    path.setAttribute('id', 'Path');
+    g2.appendChild(path);
+
+    const polygon2 = document.createElementNS(svgNS, 'polygon');
+    polygon2.setAttribute('id', 'Path');
+    polygon2.setAttribute('points', '0.81355666 5.00169252 73.0472883 5.00169252 73.0472883 317.722144 0.81355666 317.722144');
+    g2.appendChild(polygon2);
+
+    return svg;
 }
 
 function toggleTrackLabels(trackViews, isVisible) {
 
     for (let {viewports} of trackViews) {
         for (let viewport of viewports) {
-            if (viewport.$trackLabel) {
+            if (viewport.trackLabel) {
                 if (0 === viewports.indexOf(viewport) && true === isVisible) {
-                    viewport.$trackLabel.show()
+                    viewport.trackLabel.style.display = 'block'
                 } else {
-                    viewport.$trackLabel.hide()
+                    viewport.trackLabel.style.display = 'none'
                 }
             }
         }

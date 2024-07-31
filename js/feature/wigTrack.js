@@ -5,7 +5,6 @@ import BWSource from "../bigwig/bwSource.js"
 import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
 import { IGVColor, StringUtils } from "../../node_modules/igv-utils/src/index.js"
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import { createCheckbox } from "../igv-icons.js"
 
 const DEFAULT_COLOR = 'rgb(150, 150, 150)'
