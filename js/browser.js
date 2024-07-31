@@ -2318,7 +2318,7 @@ class Browser {
     createCircularView(container, show) {
         show = show === true   // convert undefined to boolean
         this.circularView = createCircularView(container, this)
-        this.circularViewControl = new CircularViewControl(this.$toggle_button_container.get(0), this)
+        this.circularViewControl = new CircularViewControl(this.toggleButtonContainer, this)
         this.circularView.setAssembly({
             name: this.genome.id,
             id: this.genome.id,
