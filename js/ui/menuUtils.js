@@ -340,13 +340,7 @@ function trackHeightMenuItem() {
 }
 
 function getTrackLabelText(track) {
-    var vp,
-        txt
-
-    vp = track.trackView.viewports[0]
-    txt = vp.$trackLabel.text()
-
-    return txt
+    return track.name
 }
 
 function canShowColorPicker(track) {
