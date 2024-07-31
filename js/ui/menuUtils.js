@@ -186,7 +186,6 @@ function visibilityWindowMenuItem() {
         this.browser.inputDialog.present(config, e)
     }
 
-    object.addEventListener('click', click)
     return {object, click}
 }
 
@@ -266,7 +265,6 @@ function trackRenameMenuItem() {
         this.browser.inputDialog.present(config, e)
     }
 
-    object.addEventListener('click', click)
     return {object, click}
 }
 
@@ -319,7 +317,7 @@ function trackHeightMenuItem() {
         this.browser.inputDialog.present(config, e)
     }
 
-    object.addEventListener('click', dialogHandler)
+    // object.addEventListener('click', dialogHandler)
     return {object, dialog: dialogHandler}
 }
 
