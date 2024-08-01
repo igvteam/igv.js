@@ -744,6 +744,7 @@ class Browser {
     async loadReference(genomeConfig, initialLocus) {
 
         this.removeAllTracks()   // Do this first, before new genome is set
+        this.roiManager.clearROIs()
 
         let genome
         if (genomeConfig.gbkURL) {
