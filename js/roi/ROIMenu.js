@@ -41,7 +41,6 @@ class ROIMenu {
 
         if (isUserDefined) {
             items.push(
-                '<hr/>',
                 {
                     label: 'Set description ...',
                     click: () => {
@@ -68,7 +67,6 @@ class ROIMenu {
 
         // copy
         if (isSecureContext() && feature.end - feature.start < maxSequenceSize) {
-            items.push('<hr/>')
             items.push({
                 label: 'Copy reference sequence',
                 click: async () => {
@@ -89,7 +87,6 @@ class ROIMenu {
 
         if (feature.end - feature.start <= maxBlatSize) {
             // blat
-            items.push('<hr/>')
             items.push({
                 label: 'BLAT reference sequence',
                 click: async () => {
