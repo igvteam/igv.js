@@ -3,7 +3,7 @@ import * as UIUtils from "../ui/utils/ui-utils.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import {createBlatTrack} from "../blat/blatTrack.js"
 
-const maxSequenceSize = 100000
+const maxSequenceSize = 1000000
 const maxBlatSize = 25000
 
 
@@ -67,7 +67,7 @@ class ROIMenu {
         // sequence
 
         // copy
-        if (isSecureContext() && feature.end - feature.start < maxBlatSize) {
+        if (isSecureContext() && feature.end - feature.start < maxSequenceSize) {
             items.push('<hr/>')
             items.push({
                 label: 'Copy reference sequence',
@@ -87,7 +87,7 @@ class ROIMenu {
             })
         }
 
-        if (feature.end - feature.start <= maxSequenceSize) {
+        if (feature.end - feature.start <= maxBlatSize) {
             // blat
             items.push('<hr/>')
             items.push({
