@@ -251,9 +251,9 @@ class ROIManager {
         return regionElement
     }
 
-    renderSVGContext(context, {deltaX, deltaY}) {
+    renderSVGContext(columnContainer, context, {deltaX, deltaY}) {
 
-        for (const regionElement of document.querySelectorAll('.igv-roi-region')) {
+        for (const regionElement of columnContainer.querySelectorAll('.igv-roi-region')) {
 
             // body
             const {x, y, width, height} = regionElement.getBoundingClientRect()
