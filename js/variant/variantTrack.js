@@ -296,17 +296,16 @@ class VariantTrack extends TrackBase {
 
             // Loop through variants.  A variant == a row in a VCF file
             for (let v of features) {
-                const variant = v._f || v   // Unwrap whole gnom
-                if (variant.end < bpStart) continue
-                if (variant.start > bpEnd) break
+                if (v.end < bpStart) continue
+                if (v.start > bpEnd) break
 
                 const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
-                const y = TOP_MARGIN + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (variantHeight + vGap))
+                const y = TOP_MARGIN + ("COLLAPSED" === this.displayMode ? 0 : v.row * (variantHeight + vGap))
                 const h = variantHeight
 
                 // Compute pixel width.   Minimum width is 3 pixels,  if > 5 pixels create gap between variants
-                let x = (variant.start - bpStart) / bpPerPixel
-                let x1 = (variant.end - bpStart) / bpPerPixel
+                let x = (v.start - bpStart) / bpPerPixel
+                let x1 = (v.end - bpStart) / bpPerPixel
 
                 let w = Math.max(1, x1 - x)
                 if (w < 3) {
@@ -317,6 +316,7 @@ class VariantTrack extends TrackBase {
                     w -= 2
                 }
 
+                const variant = v._f || v   // True variant record, used for whole genome view and SV mate records
                 let af
                 try {
                     af = variant.alleleFreq()
