@@ -1,6 +1,6 @@
 import {igvxhr, FileUtils} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
-
+import Buffer from "./buffer/index.js"
 
 export default class FileHandler {
 
