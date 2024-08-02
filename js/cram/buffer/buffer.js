@@ -9,12 +9,16 @@
 
 'use strict'
 
-const base64 = require('base64-js')
-const ieee754 = require('ieee754')
+import base64 from './base64.js'
+import ieee754 from './ieee754.js'
+
 const customInspectSymbol =
   (typeof Symbol === 'function' && typeof Symbol['for'] === 'function') // eslint-disable-line dot-notation
     ? Symbol['for']('nodejs.util.inspect.custom') // eslint-disable-line dot-notation
     : null
+
+const K_MAX_LENGTH = 0x7fffffff
+
 
 /**
  * If `Buffer.TYPED_ARRAY_SUPPORT`:
@@ -2098,5 +2102,11 @@ function defineBigIntMethod (fn) {
 function BufferBigIntNotDefined () {
   throw new Error('BigInt not supported')
 }
+
+// exports.Buffer = Buffer
+// exports.SlowBuffer = SlowBuffer
+// exports.INSPECT_MAX_BYTES = 50
+// exports.kMaxLength = K_MAX_LENGTH
+
 
 export default Buffer
