@@ -451,7 +451,7 @@ class Browser {
 
         // ROI -> SVG
         delta.deltaX = x
-        this.roiManager.renderSVGContext(context, delta)
+        this.roiManager.renderSVGContext(this.columnContainer, context, delta)
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
         context.setHeight(height)
