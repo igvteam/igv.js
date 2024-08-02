@@ -253,7 +253,7 @@ class ROIManager {
 
     renderSVGContext(context, {deltaX, deltaY}) {
 
-        for (const regionElement of document.querySelectorAll('.igv-roi-region')) {
+        for (const regionElement of this.browser.root.querySelectorAll('.igv-roi-region')) {
 
             // body
             const {x, y, width, height} = regionElement.getBoundingClientRect()

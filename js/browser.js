@@ -15,7 +15,7 @@ import ROISet from "./roi/ROISet.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
-import {createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
+import {createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import {bppSequenceThreshold, defaultSequenceTrackOrder} from './sequenceTrack.js'
 import version from "./version.js"
@@ -616,16 +616,10 @@ class Browser {
 
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
-        let ideogramHeight = 0
         if (false !== session.showIdeogram) {
-
             const track = new IdeogramTrack(this)
             track.id = 'ideogram'
-
             const trackView = new TrackView(this, this.columnContainer, track)
-            const {$viewport} = trackView.viewports[0]
-            ideogramHeight = getElementAbsoluteHeight($viewport.get(0))
-
             this.trackViews.push(trackView)
         }
 
