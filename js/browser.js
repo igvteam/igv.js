@@ -739,6 +739,7 @@ class Browser {
 
         this.removeAllTracks()   // Do this first, before new genome is set
         this.roiManager.clearROIs()
+        this.multiTrackSelectButton.setMultiTrackSelection(false)
 
         let genome
         if (genomeConfig.gbkURL) {
@@ -1110,8 +1111,9 @@ class Browser {
         this.reorderTracks()
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
 
-        return newTrack
+        this.multiTrackSelectButton.setMultiTrackSelection(this.multiTrackSelectButton.enableMultiTrackSelection)
 
+        return newTrack
 
     }
 
