@@ -447,23 +447,25 @@ class Browser {
         return context.getSerializedSvg(true)
     }
 
-    saveSVGtoFile(config) {
+    saveSVGtoFile(filename, container) {
 
-        let svg = this.toSVG()
+        let svgString = this.toSVG()
 
-        // For testing
-        if (config.$container) {
-            config.$container.empty()
-            config.$container.append(svg)
+        // Append svg t testing, not used in production
+        if (container) {
+            const svg = document.createElement("svg");
+            svg.innerHTML = svgString
+            container.append(svg)
+            container.appendChild(svg)
         }
 
-        const path = config.filename || 'igvjs.svg'
-        const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
+        const path = filename || 'igvjs.svg'
+        const data = URL.createObjectURL(new Blob([svgString], {type: "application/octet-stream"}))
         FileUtils.download(path, data)
         URL.revokeObjectURL(data)  // Important to prevent memory leak
     }
 
-    savePNGtoFile({filename}) {
+    savePNGtoFile(filename) {
 
         const svgAsString = this.toSVG()
 
