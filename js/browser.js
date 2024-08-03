@@ -10,7 +10,6 @@ import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width} from "./trackView.js"
 import C2S from "./canvas2svg.js"
 import {getTrack} from "./trackFactory.js"
-import ROISet from "./roi/ROISet.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
@@ -43,8 +42,6 @@ import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import CustomButton from "./ui/customButton.js"
 import ROIManager from './roi/ROIManager.js'
-import ROITable from './roi/ROITable.js'
-import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
 import ROITableControl from './roi/roiTableControl.js'
 import SampleInfo from "./sample/sampleInfo.js"
@@ -463,7 +460,7 @@ class Browser {
         const path = config.filename || 'igvjs.svg'
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
         FileUtils.download(path, data)
-        URL.revokeObjectURL(data)
+        URL.revokeObjectURL(data)  // Important to prevent memory leak
     }
 
     savePNGtoFile({filename}) {
@@ -494,8 +491,7 @@ class Browser {
             filename = filename || 'igvjs.png'
             FileUtils.download(filename, data)
 
-
-            // Here the image is ready to use, e.g., document.body.appendChild(createdImage);
+            // Free temporary object URL
             URL.revokeObjectURL(svgObjectUrl)
         }
         img.addEventListener('load', onImageLoaded)
