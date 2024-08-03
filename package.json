@@ -4,6 +4,7 @@
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
+  "types": "dist/igv.d.ts",
   "type": "module",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "files": [
@@ -12,8 +13,8 @@
   "scripts": {
     "prepack": "npm run build",
     "prepare": "npm run build",
-    "build": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config",
-    "build_iife": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config rollup.config.iife.js",
+    "build": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config && cp js/igv.d.ts dist/igv.d.ts",
+    "build_iife": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config rollup.config.iife.js && cp js/igv.d.ts dist/igv.d.ts",
     "updateCSS": "node scripts/generateEmbedCss.cjs",
     "test": "node test/utils/forceESM.cjs && mocha -ui tdd"
   },
@@ -58,7 +59,7 @@
     "igv-utils": "github:igvteam/igv-utils#v1.5.8",
     "mocha": "^10.2.0",
     "rollup": "^2.66.0",
-    "rollup-plugin-copy": "^3.3.0",
+    "rollup-plugin-copy": "^3.5.0",
     "sass": "^1.45.1",
     "vanilla-picker": "^2.12.1",
     "w3c-xmlhttprequest": "^3.0.0"
