@@ -4,6 +4,9 @@ import {blat} from "./blatClient.js"
 import StaticFeatureSource from "../feature/staticFeatureSource.js"
 
 const maxSequenceSize = 25000
+//const blatServer = "https://genome.ucsc.edu/cgi-bin/hgBlat"
+const defaultBlatServer = "https://igv.org/services/blatUCSC.php"
+//const blatServer = "http://localhost:8000/blatUCSC.php"
 
 class BlatTrack extends FeatureTrack {
 
@@ -115,8 +118,8 @@ async function createBlatTrack({sequence, browser, name, title}) {
     try {
 
         const db = browser.genome.id   // TODO -- blat specific property
-        const url = browser.config["blatServerURL"]
-        const features = await blat({url, userSeq: this.sequence, db})
+        const url = browser.config["blatServerURL"] || defaultBlatServer
+        const features = await blat({url, userSeq: sequence, db})
 
         const trackConfig = {
             type: 'blat',
