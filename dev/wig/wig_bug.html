@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const div = document.getElementById("myDiv");
+    const options = {
+        "version": "2.15.11",
+        "showSampleNames": false,
+        "reference": {
+            "id": "NC_016856.1",
+            "name": "Salmonella enterica subsp. enterica serovar Typhimurium str. 14028S",
+            "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/NC_016856.1/NC_016856.1.fna",
+            "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/NC_016856.1/NC_016856.1.fna.fai"
+        },
+        "locus": "NC_016856.1:1-4,870,265",
+        "roi": [],
+        "tracks": [
+            {
+                "url": "https://www.dropbox.com/scl/fi/1poop3sea7se7pwpelmbs/forward_minus.wig?rlkey=zq9aesin370ykddlak057chfe&dl=0",
+                "filename": "forward_minus.wig",
+                "name": "forward_MINUS",
+                "format": "wig",
+                "type": "wig",
+                "height": 256,
+                "color": "rgb(255,0,0)",
+                "order": 4
+            }
+        ]
+    }
+    igv.createBrowser(div, options).then(function (browser) {
+    });
+
+
+</script>
+
+</body>
+
+</html>
+
