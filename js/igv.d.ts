@@ -425,12 +425,50 @@ interface CreateOptExtras {
 
 export type CreateOpt = GenomeOpt & CreateOptExtras;
 
+declare class ROISet {
+    url: string;
+    name: string;
+    isUserDefined: boolean;
+    color: string;
+    headerColor: string;
+    isvisible: boolean;
+}
+
+interface DefineROI {
+    url: string;
+    name: string;
+    format: string;
+    color: string;
+}
 
 declare class _Browser {
-    // this forces the user to cast the return value to acknowledge this is not stable
+    currentLoci(): string[] | string;
+    loadGenome(genome: string | ReferenceGenome): Promise<void>;
+    loadSessionObject(session: Opaque<'igv.js session JSON'>): void;
+    loadSession(session: string): void;
+    // TODO: check the return type
+    loadTrack(track: Track): Promise<any>;
+    loadSampleInfo({ url: string }): void;
+    findTracks(func: (track: Track) => boolean): Track[];
+    findTracks(property: string, value: any): Track[];
+    removeTRack(track: Track): void;
+    removeTrackByName(trackName: string): void;
+    loadROI(roi: DefineROI | DefineROI[]): void;
+    clearROIs(): void;
+    getUserDefinedROIs(): Promise<ROISet>;
+    search(query: string): void;
+    zoomIn(): void;
+    zoomOut(): void;
+    visibilityChange(): void;
     toJSON(): Opaque<'igv.js session JSON'>;
     compressedSession(): string;
     toSVG(): string;
+    setCustomCursorGuideMouseHandler(handler: (state: {
+        bp: number,
+        start: number,
+        end: number,
+        interpolant: number,
+    }) => void): void;
 }
 
 export type Browser = _Browser;
