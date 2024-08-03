@@ -35,10 +35,6 @@ function show(elem) {
     }
 }
 
-function hideAll(selector) {
-    document.querySelectorAll(selector).forEach(elem => { hide(elem) });
-}
-
 function empty(elem) {
     while(elem.firstChild){
         elem.removeChild(elem.firstChild);
@@ -113,5 +109,5 @@ function translateMouseCoordinates(event, domElement) {
 
 }
 
-export { create, div, hide, show, offset, hideAll, empty, pageCoordinates, relativeDOMBBox,
+export { create, div, hide, show, offset, empty, pageCoordinates, relativeDOMBBox,
     applyStyle, guid, translateMouseCoordinates }

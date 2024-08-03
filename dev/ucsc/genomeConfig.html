@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+   const igvConfig = {
+        reference: {
+            "hubURL": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/hub.txt",
+            "id": "GCA_000002305.1",
+            "name": "horse (Twilight 2007 genbank) (GCA_000002305.1)",
+            "twoBitURL": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/GCA_000002305.1.2bit",
+            "nameSet": "ucsc",
+            //"wholeGenomeView": false,
+            //"showChromosomeWidget": false,
+            aliasURL: "https://hgdownload.soe.ucsc.edu/hubs/GCF/002/006/095/GCF_002006095.1/GCF_002006095.1.chromAlias.txt",
+            "locus": "CM000377.2",
+            "blat": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/dynablat-01.soe.ucsc.edu 4040 dynamic GCA/000/002/305/GCA_000002305.1",
+            "chromAliasBbURL": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/GCA_000002305.1.chromAlias.bb",
+            "twoBitBptURL": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/GCA_000002305.1.2bit.bpt",
+            "chromSizesURL": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/GCA_000002305.1.chrom.sizes.txt",
+            "description": "horse (Twilight 2007 genbank)\nEquus caballus/GCA_000002305.1_EquCab2.0 genome assembly",
+            "cytobandBbURL": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.cytoBand.bb",
+            "tracks": [
+                {
+                    "id": "gc5Base",
+                    "name": "GC Percent",
+                    "format": "bigWig",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.gc5Base.bw",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.gc5Base\">GC Percent in 5-Base Windows</a>",
+                    "autoscale": false,
+                    "maxHeight": 128,
+                    "height": 36,
+                    "minHeight": 16,
+                    "color": "rgb(0,0,0)",
+                    "altColor": "rgb(128,128,128)",
+                    "min": 30,
+                    "max": 70,
+                    "group": "map",
+                    "order": 21
+                },
+                {
+                    "id": "repeatMaskerSINE",
+                    "name": "SINE",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.rmsk.SINE.bb",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.repeatMasker\">SINE Repeating Elements by RepeatMasker</a>",
+                    "group": "varRep",
+                    "order": 71
+                },
+                {
+                    "id": "repeatMaskerLINE",
+                    "name": "LINE",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.rmsk.LINE.bb",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.repeatMasker\">LINE Repeating Elements by RepeatMasker</a>",
+                    "group": "varRep",
+                    "order": 72
+                },
+                {
+                    "id": "repeatMaskerLTR",
+                    "name": "LTR",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.rmsk.LTR.bb",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.repeatMasker\">LTR Repeating Elements by RepeatMasker</a>",
+                    "group": "varRep",
+                    "order": 73
+                },
+                {
+                    "id": "repeatMaskerDNA",
+                    "name": "DNA",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.rmsk.DNA.bb",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.repeatMasker\">DNA Repeating Elements by RepeatMasker</a>",
+                    "group": "varRep",
+                    "order": 74
+                },
+                {
+                    "id": "repeatMaskerSimple",
+                    "name": "Simple",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.rmsk.Simple.bb",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.repeatMasker\">Simple Repeating Elements by RepeatMasker</a>",
+                    "group": "varRep",
+                    "order": 75
+                },
+                {
+                    "id": "repeatMaskerLowComplexity",
+                    "name": "Low Complexity",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.rmsk.Low_complexity.bb",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.repeatMasker\">Low Complexity Repeating Elements by RepeatMasker</a>",
+                    "group": "varRep",
+                    "order": 76
+                },
+                {
+                    "id": "repeatMaskerSatellite",
+                    "name": "Satellite",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.rmsk.Satellite.bb",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.repeatMasker\">Satellite Repeating Elements by RepeatMasker</a>",
+                    "group": "varRep",
+                    "order": 77
+                },
+                {
+                    "id": "repeatMaskerRNA",
+                    "name": "RNA",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.rmsk.RNA.bb",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.repeatMasker\">RNA Repeating Elements by RepeatMasker</a>",
+                    "group": "varRep",
+                    "order": 78
+                },
+                {
+                    "id": "repeatMaskerOther",
+                    "name": "Other",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.rmsk.Other.bb",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.repeatMasker\">Other Repeating Elements by RepeatMasker</a>",
+                    "group": "varRep",
+                    "order": 79
+                },
+                {
+                    "id": "simpleRepeat",
+                    "name": "Simple Repeats",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.simpleRepeat.bb",
+                    "displayMode": "COLLAPSED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.simpleRepeat\">Simple Tandem Repeats by TRF</a>",
+                    "group": "varRep",
+                    "order": 80
+                },
+                {
+                    "id": "cpgIslandExt",
+                    "name": "CpG Islands",
+                    "format": "bigBed",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.cpgIslandExt.bb",
+                    "displayMode": "EXPANDED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.cpgIslands\">CpG Islands (Islands < 300 Bases are Light Green)</a>",
+                    "group": "regulation",
+                    "order": 51
+                },
+                {
+                    "id": "augustus",
+                    "name": "Augustus",
+                    "format": "bigGenePred",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.augustus.bb",
+                    "displayMode": "EXPANDED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.augustus\">Augustus Gene Predictions</a>",
+                    "color": "rgb(180,0,0)",
+                    "group": "genes",
+                    "order": 31
+                },
+                {
+                    "id": "xenoRefGene",
+                    "name": "RefSeq mRNAs",
+                    "format": "bigGenePred",
+                    "url": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/bbi/GCA_000002305.1_EquCab2.0.xenoRefGene.bb",
+                    "displayMode": "EXPANDED",
+                    "description": "<a target=\"_blank\" href=\"https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/html/GCA_000002305.1_EquCab2.0.xenoRefGene\">RefSeq mRNAs mapped to this assembly</a>",
+                    "color": "rgb(180,0,0)",
+                    "searchIndex": "name",
+                    "searchTrix": "https://hgdownload.soe.ucsc.edu/hubs/GCA/000/002/305/GCA_000002305.1/ixIxx/GCA_000002305.1_EquCab2.0.xenoRefGene.ix",
+                    "group": "rna",
+                    "order": 41
+                }
+            ]
+        }
+    }
+
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+
+</script>
+
+</body>
+
+</html>

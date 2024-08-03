@@ -1,5 +1,4 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import html2canvas from '../node_modules/html2canvas/dist/html2canvas.esm.js'
 import {BGZip, FileUtils, igvxhr, StringUtils, URIUtils} from "../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {createIcon} from "./ui/utils/icons.js"
@@ -15,7 +14,7 @@ import ROISet from "./roi/ROISet.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
-import {createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
+import {createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import {bppSequenceThreshold, defaultSequenceTrackOrder} from './sequenceTrack.js'
 import version from "./version.js"
@@ -418,19 +417,13 @@ class Browser {
     toSVG() {
 
         const {x, y, width, height} = this.columnContainer.getBoundingClientRect()
-
-        const h_render = 8000
-
+        const h_render = height
         const config =
             {
-
                 width,
                 height: h_render,
-
                 backdropColor: 'white',
-
                 multiLocusGap: 0,
-
                 viewbox:
                     {
                         x: 0,
@@ -438,7 +431,6 @@ class Browser {
                         width,
                         height: h_render
                     }
-
             }
 
         const context = new C2S(config)
@@ -451,27 +443,18 @@ class Browser {
 
         // ROI -> SVG
         delta.deltaX = x
+
         this.roiManager.renderSVGContext(this.columnContainer, context, delta)
 
-        // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
-        context.setHeight(height)
 
         return context.getSerializedSvg(true)
-
-    }
-
-    renderSVG($container) {
-        const svg = this.toSVG()
-        $container.empty()
-        $container.append(svg)
-
-        return svg
     }
 
     saveSVGtoFile(config) {
 
         let svg = this.toSVG()
 
+        // For testing
         if (config.$container) {
             config.$container.empty()
             config.$container.append(svg)
@@ -480,15 +463,45 @@ class Browser {
         const path = config.filename || 'igvjs.svg'
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
         FileUtils.download(path, data)
+        URL.revokeObjectURL(data)
     }
 
-    savePNGtoFile(filename) {
-        html2canvas(this.columnContainer, {allowTaint: true}).then(canvas => {
-            const path = filename || 'igvjs.png'
-            const data = canvas.toDataURL('image/png')
-            FileUtils.download(path, data)
+    savePNGtoFile({filename}) {
+
+        const svgAsString = this.toSVG()
+
+        const svgBlob = new Blob([svgAsString], {
+            type: 'image/svg+xml'
         })
+        const svgObjectUrl = URL.createObjectURL(svgBlob)
+
+        const img = document.createElement('img')
+
+        const onImageLoaded = () => {
+
+            const dimensions = this.columnContainer.getBoundingClientRect()
+            const devicePixelRatio = window.devicePixelRatio
+            const w = dimensions.width * devicePixelRatio
+            const h = dimensions.height * devicePixelRatio
+            const canvas = document.createElement('canvas')
+            canvas.width = w
+            canvas.height = h
+            const context = canvas.getContext('2d')
+            context.scale(devicePixelRatio, devicePixelRatio)
+
+            context.drawImage(img, 0, 0)
+            const data = canvas.toDataURL("image/png")
+            filename = filename || 'igvjs.png'
+            FileUtils.download(filename, data)
+
+
+            // Here the image is ready to use, e.g., document.body.appendChild(createdImage);
+            URL.revokeObjectURL(svgObjectUrl)
+        }
+        img.addEventListener('load', onImageLoaded)
+        img.src = svgObjectUrl
     }
+
 
     /**
      * Initialize a session from an object, json, or by loading from a file.
@@ -616,16 +629,10 @@ class Browser {
 
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
-        let ideogramHeight = 0
         if (false !== session.showIdeogram) {
-
             const track = new IdeogramTrack(this)
             track.id = 'ideogram'
-
             const trackView = new TrackView(this, this.columnContainer, track)
-            const {$viewport} = trackView.viewports[0]
-            ideogramHeight = getElementAbsoluteHeight($viewport.get(0))
-
             this.trackViews.push(trackView)
         }
 
@@ -745,6 +752,7 @@ class Browser {
 
         this.removeAllTracks()   // Do this first, before new genome is set
         this.roiManager.clearROIs()
+        this.multiTrackSelectButton.setMultiTrackSelection(false)
 
         let genome
         if (genomeConfig.gbkURL) {
@@ -1116,8 +1124,9 @@ class Browser {
         this.reorderTracks()
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
 
-        return newTrack
+        this.multiTrackSelectButton.setMultiTrackSelection(this.multiTrackSelectButton.enableMultiTrackSelection)
 
+        return newTrack
 
     }
 
