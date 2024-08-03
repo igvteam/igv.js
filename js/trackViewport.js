@@ -473,9 +473,7 @@ class TrackViewport extends Viewport {
             const y = deltaY + this.contentTop
             const yClipOffset = -this.contentTop
 
-            if (context.saveWithTranslationAndClipRect) {
-                context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
-            }
+            context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
 
             let {start, bpPerPixel} = this.referenceFrame
 

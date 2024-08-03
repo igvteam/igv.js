@@ -62,7 +62,7 @@ class SaveImageControl extends NavbarButton {
                 {
                     label: "Save as PNG",
                     click: e => {
-                        this.browser.savePNGtoFile(undefined)
+                        this.browser.savePNGtoFile({})
                         this.dropdown.dismiss()
                     }
                 },
