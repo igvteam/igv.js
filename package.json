@@ -16,7 +16,7 @@
     "build": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config && cp js/igv.d.ts dist/igv.d.ts",
     "build_iife": "node scripts/updateVersion.cjs && node scripts/generateEmbedCss.cjs && npx rollup --config rollup.config.iife.js && cp js/igv.d.ts dist/igv.d.ts",
     "updateCSS": "node scripts/generateEmbedCss.cjs",
-    "test": "node test/utils/forceESM.cjs && mocha -ui tdd"
+    "test": "mocha -ui tdd"
   },
   "author": {
     "name": "Jim Robinson"
