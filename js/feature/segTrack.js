@@ -520,7 +520,7 @@ class SegTrack extends TrackBase {
         }
 
         // We can't know genomic location intended with precision, define a buffer 5 "pixels" wide in genomic coordinates
-        const bpWidth = referenceFrame.toBP(2.5)
+        const bpWidth = clickState.referenceFrame.toBP(2.5)
 
         return ["DESC", "ASC"].map(direction => {
             const dirLabel = direction === "DESC" ? "descending" : "ascending"
@@ -533,7 +533,7 @@ class SegTrack extends TrackBase {
                     const sort = {
                         option: "VALUE",   // Either VALUE or ATTRIBUTE
                         direction,
-                        chr: clickState.viewport.referenceFrame.chr,
+                        chr: clickState.referenceFrame.chr,
                         start: Math.floor(genomicLocation - bpWidth),
                         end: Math.floor(genomicLocation + bpWidth)
                     }
