@@ -215,11 +215,13 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
         let aaLetter
         if (undefined === aminoAcidLetter) {
 
-            const sequence = sequenceInterval.getSequence(start, end)
+            if(sequenceInterval.hasSequence(start, end)) {
 
-            if (sequence && 3 === sequence.length) {
-                const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
-                aaLetter = translationDict[key]
+                const sequence = sequenceInterval.getSequence(start, end)
+                if (sequence && 3 === sequence.length) {
+                    const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
+                    aaLetter = translationDict[key]
+                }
             }
 
         } else {

@@ -8,12 +8,16 @@ class SequenceInterval extends GenomicInterval {
 
     getSequence(start, end) {
         if (start < this.start || end > this.end) {
-            throw Error("Range out of bounds")
+            return null
         }
         const offset = start - this.start
         const n = end - start
         const seq = this.features ? this.features.substring(offset, offset + n) : null
         return seq
+    }
+
+    hasSequence(start, end) {
+        return start >= this.start && end <= this.end
     }
 
 }
