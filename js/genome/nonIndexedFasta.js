@@ -78,7 +78,7 @@ class NonIndexedFasta {
         }
 
         if (end <= 0) {
-            return Promise.resolve(prefix)
+            return prefix
         }
 
         const seq = seqSlice.sequence
