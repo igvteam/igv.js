@@ -10,6 +10,7 @@ suite("hub.txt", function () {
 
     test("genome config", async function () {
 
+        this.timeout(20000)
 
         const hub = await Hub.loadHub(hubURL)
         assert.ok(hub.hubStanza)
@@ -29,6 +30,9 @@ suite("hub.txt", function () {
     })
 
     test("track configs", async function() {
+
+        this.timeout(20000)
+
         const hub = await Hub.loadHub(hubURL)
         const groupedTrackConfigurations  = hub.getGroupedTrackConfigurations();
         assert.equal(5, groupedTrackConfigurations.length);
