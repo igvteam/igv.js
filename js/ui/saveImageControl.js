@@ -55,14 +55,14 @@ class SaveImageControl extends NavbarButton {
                 {
                     label: "Save as SVG",
                     click: e => {
-                        this.browser.saveSVGtoFile({})
+                        this.browser.saveSVGtoFile("igvjs.svg")
                         this.dropdown.dismiss()
                     }
                 },
                 {
                     label: "Save as PNG",
                     click: e => {
-                        this.browser.savePNGtoFile({})
+                        this.browser.savePNGtoFile("igvjs.png")
                         this.dropdown.dismiss()
                     }
                 },
