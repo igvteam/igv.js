@@ -131,13 +131,6 @@ class SegTrack extends TrackBase {
             }
         }
 
-        const lut =
-            {
-                "SQUISHED": "Squish",
-                "EXPANDED": "Expand",
-                "FILL": "Fill"
-            }
-
         if (this.type === 'shoebox' && this.sbColorScale) {
             menuItems.push('<hr/>')
 
@@ -160,6 +153,12 @@ class SegTrack extends TrackBase {
 
         menuItems.push('<hr/>')
         menuItems.push("DisplayMode:")
+        const lut =
+            {
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand",
+                "FILL": "Fill"
+            }
         const displayOptions = this.type === 'seg' || this.type === 'shoebox' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"]
         for (let displayMode of displayOptions) {
             const checkBox = createCheckbox(lut[displayMode], displayMode === this.displayMode)
@@ -172,6 +171,7 @@ class SegTrack extends TrackBase {
                         this.trackView.checkContentHeight()
                         this.trackView.repaintViews()
                         this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta)
+                        this.browser.checkSampleNameViewportWidth()
                     }
                 })
         }

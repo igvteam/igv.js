@@ -68,32 +68,22 @@ class SampleNameViewport {
     }
 
     async repaint(samples) {
-
-        if (samples.names.length > 0) {
-            if (true === this.browser.showSampleNames) {
-                this.checkCanvas()
-                this.draw({context: this.ctx, samples})
-
-                if (undefined === this.browser.sampleNameViewportWidth) {
-                    const lengths = samples.names.map(name => this.ctx.measureText(name).width)
-                    this.browser.sampleNameViewportWidth = Math.min(maxSampleNameViewportWidth, fudgeTextMetricWidth + Math.ceil(Math.max(...lengths)))
-                    this.browser.layoutChange()
-                }
-
-            }
+        if (true === this.browser.showSampleNames && samples.names && samples.names.length > 0) {
+            this.checkCanvas()
+            this.draw({context: this.ctx, samples})
         }
-
     }
 
     draw({context, samples}) {
 
-        IGVGraphics.fillRect(context, 0, 0, context.canvas.width, samples.height, { fillStyle: appleCrayonRGB('snow') })
+        IGVGraphics.fillRect(context, 0, 0, context.canvas.width, samples.height, {fillStyle: appleCrayonRGB('snow')})
 
         if (samples && samples.names.length > 0) {
             const viewportHeight = this.viewport.getBoundingClientRect().height
 
             const tileHeight = samples.height
             const shim = tileHeight - 2 <= 1 ? 0 : 1
+            const hh = tileHeight - (2 * shim)
 
             let y = this.contentTop + samples.yOffset
             this.hitList = {}
@@ -105,10 +95,9 @@ class SampleNameViewport {
                 if (y + tileHeight > 0) {
                     const x = 0
                     const yy = y + shim
-                    const hh = tileHeight - (2 * shim)
                     // IGVGraphics.fillRect(context, x, yy, context.canvas.width, hh, { fillStyle: randomRGB(100, 250) })
 
-                    drawTextInRect(context, sampleName, x + 2, yy, context.canvas.width, hh);
+                    drawTextInRect(context, sampleName, x + 2, yy, context.canvas.width, hh)
                 }
 
                 y += tileHeight
@@ -199,6 +188,18 @@ class SampleNameViewport {
     dispose() {
         this.removeMouseHandlers()
         this.viewport.remove()
+    }
+
+    computeSampleViewportWidth(samples) {
+        const tileHeight = samples.height
+        const shim = tileHeight - 2 <= 1 ? 0 : 1
+        const hh = tileHeight - (2 * shim)
+        const pixels = Math.min(hh, maxFontSize)
+        this.ctx.font = `${pixels}px sans-serif`
+        this.ctx.textAlign = 'start'
+        this.ctx.fillStyle = appleCrayonRGB('lead')
+        const lengths = samples.names.map(name => this.ctx.measureText(name).width)
+        return Math.min(maxSampleNameViewportWidth, fudgeTextMetricWidth + Math.ceil(Math.max(...lengths)))
     }
 
 }

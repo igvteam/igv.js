@@ -398,8 +398,17 @@ class TrackView {
             if (samples.names && samples.names.length > 0) {
                 this.sampleNameViewport.repaint(samples)
             }
-
         }
+    }
+
+    computeSampleNameViewportWidth() {
+        if (typeof this.track.getSamples === 'function') {
+            const samples = this.track.getSamples()
+            if (samples.names && samples.names.length > 0) {
+                return this.sampleNameViewport.computeSampleViewportWidth(samples)
+            }
+        }
+        return 0
     }
 
     // track labels
@@ -1023,7 +1032,6 @@ class TrackView {
     }
 
 }
-
 
 
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {

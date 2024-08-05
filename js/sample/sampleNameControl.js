@@ -67,7 +67,11 @@ class SampleNameControl extends NavbarButton {
 
         this.setState(browser.showSampleNames)
 
+        if(browser.showSampleNames) {
+            browser.checkSampleNameViewportWidth()
+        }
         browser.layoutChange()
+
 
     }
 
