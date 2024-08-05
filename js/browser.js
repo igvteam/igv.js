@@ -1564,7 +1564,7 @@ class Browser {
 
     repaintViews() {
         if (this.showSampleNames && undefined === this.sampleNameViewportWidth) {
-            this.checkSampleNameViewportWidth()
+            this.sampleNameViewportWidth = Math.max(...this.trackViews.map(tv => tv.computeSampleNameViewportWidth()));
         }
 
         for (let trackView of this.trackViews) {
@@ -1575,10 +1575,7 @@ class Browser {
     checkSampleNameViewportWidth() {
         // Check sample name
         if (this.showSampleNames) {
-            let width = 0
-            for (let tv of this.trackViews) {
-                width = Math.max(width, tv.computeSampleNameViewportWidth())
-            }
+            const width = Math.max(...this.trackViews.map(tv => tv.computeSampleNameViewportWidth()));
             if (this.sampleNameViewportWidth !== width) {
                 this.sampleNameViewportWidth = width
                 this.layoutChange()
