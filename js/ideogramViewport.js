@@ -27,6 +27,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import TrackViewport from "./trackViewport.js"
+import {appleCrayonRGB} from "./util/colorPalletes.js"
 
 class IdeogramViewport extends TrackViewport {
 
@@ -87,34 +88,40 @@ class IdeogramViewport extends TrackViewport {
         this.$viewport.width(width)
     }
 
-    drawSVGWithContext(context, width, height, id, x, y, yClipOffset) {
+    renderSVGContext(context, {deltaX, deltaY}, includeLabel = true) {
+
+        const {width, height} = this.$viewport.get(0).getBoundingClientRect()
+
+        const str = 'ideogram'
+        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
+        const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
+
+        const x = deltaX
+        const y = deltaY + this.contentTop
+        const yClipOffset = -this.contentTop
 
         context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
-
-        this.trackView.track.draw({
-            context,
-            referenceFrame: this.referenceFrame,
-            pixelWidth: width,
-            pixelHeight: height
-        })
-
+        this.trackView.track.draw({ context, pixelWidth:width, pixelHeight:height, referenceFrame:this.referenceFrame })
         context.restore()
+
     }
 
     repaint() {
-        this.draw({referenceFrame: this.referenceFrame})
+        const {width, height} = this.$viewport.get(0).getBoundingClientRect()
+        const config =
+            {
+                context:this.ideogram_ctx,
+                pixelWidth: width,
+                pixelHeight: height,
+                referenceFrame: this.referenceFrame
+            }
+
+        this.draw(config)
     }
 
-    async draw({referenceFrame}) {
-
-        IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, this.$viewport.width(), this.$viewport.height())
-
-        this.trackView.track.draw({
-            context: this.ideogram_ctx,
-            referenceFrame,
-            pixelWidth: this.$viewport.width(),
-            pixelHeight: this.$viewport.height()
-        })
+    async draw({ context, pixelWidth, pixelHeight, referenceFrame }) {
+        IGVGraphics.configureHighDPICanvas(context, pixelWidth, pixelHeight)
+        this.trackView.track.draw({ context, pixelWidth, pixelHeight, referenceFrame })
     }
 
     startSpinner() {

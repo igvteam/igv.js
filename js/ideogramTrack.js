@@ -129,7 +129,13 @@ async function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, st
 
     IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: IGVColor.greyScale(255)})
 
-    const cytobands = await genome.getCytobands(chr)
+    let cytobands
+    if (0 === genome.cytobandSource.cytobands.size) {
+        cytobands = await genome.getCytobands(chr)
+    } else {
+        cytobands = genome.cytobandSource.cytobands.get(chr)
+    }
+
     if (cytobands) {
 
         const center = (ideogramTop + height / 2)
