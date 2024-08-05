@@ -186,10 +186,11 @@ class Genome {
         }
     }
 
-    getCytobands(chr) {
+    async getCytobands(chr) {
         if (this.cytobandSource) {
             const chrName = this.getChromosomeName(chr)
-            return this.cytobandSource.getCytobands(chrName)
+            const cytos = await this.cytobandSource.getCytobands(chrName)
+            return cytos
         }
     }
 
