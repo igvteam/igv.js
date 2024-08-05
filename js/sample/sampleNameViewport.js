@@ -142,9 +142,6 @@ class SampleNameViewport {
                     value: this.browser.sampleNameViewportWidth,
                     callback: newWidth => {
                         this.browser.sampleNameViewportWidth = parseInt(newWidth)
-                        // for (let {sampleNameViewport} of this.browser.trackViews) {
-                        //     sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
-                        // }
                         this.browser.layoutChange()
                     }
                 }

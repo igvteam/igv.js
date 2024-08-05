@@ -453,7 +453,7 @@ class Browser {
 
         // Append svg t testing, not used in production
         if (container) {
-            const svg = document.createElement("svg");
+            const svg = document.createElement("svg")
             svg.innerHTML = svgString
             container.append(svg)
             container.appendChild(svg)
@@ -993,9 +993,7 @@ class Browser {
             this.updateViews()
         }
 
-        if(this.showSampleNames && loadedTracks.some(t => typeof t.getSamples === 'function')) {
-            this.checkSampleNameViewportWidth()
-        }
+        this.checkSampleNameViewportWidth()
 
         return loadedTracks
     }
@@ -1011,7 +1009,7 @@ class Browser {
     async loadTrack(config) {
 
         const newTrack = await this._loadTrack(config)
-        if(newTrack) {
+        if (newTrack) {
 
             // If this track is in an autoscale group update all track views.  An optimization would be to update only
             // trackViews in the same group
@@ -1565,7 +1563,7 @@ class Browser {
     }
 
     repaintViews() {
-        if(this.showSampleNames && undefined === this.sampleNameViewportWidth) {
+        if (this.showSampleNames && undefined === this.sampleNameViewportWidth) {
             this.checkSampleNameViewportWidth()
         }
 

@@ -197,7 +197,7 @@ class TrackView {
             delta.deltaX += width
         }
 
-        if (true === this.browser.showSampleNames) {
+        if (this.browser.showSampleNames) {
             this.sampleNameViewport.renderSVGContext(context, delta)
         }
     }
