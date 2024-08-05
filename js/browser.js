@@ -1857,8 +1857,8 @@ class Browser {
 
         await this.sampleInfo.loadSampleInfoFile(config.url)
 
-        for (const {sampleNameViewport} of this.trackViews) {
-            sampleNameViewport.setWidth(this.getSampleInfoColumnWidth())
+        for (const {sampleInfoViewport} of this.trackViews) {
+            sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
         }
 
         const found = this.findTracks(t => typeof t.getSamples === 'function')
