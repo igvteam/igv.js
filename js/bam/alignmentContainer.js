@@ -54,6 +54,10 @@ class AlignmentContainer {
                     colorBy
                 }) {
 
+        this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 : alleleFreqThreshold
+        this.samplingWindowSize = samplingWindowSize || 100
+        this.samplingDepth = samplingDepth || 1000
+
         this.chr = chr
         this.start = Math.floor(start)
         this.end = Math.ceil(end)
@@ -61,9 +65,6 @@ class AlignmentContainer {
         this.coverageMap = new CoverageMap(chr, start, end, this.alleleFreqThreshold)
         this.downsampledIntervals = []
 
-        this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 : alleleFreqThreshold
-        this.samplingWindowSize = samplingWindowSize || 100
-        this.samplingDepth = samplingDepth || 1000
 
         // Enable basemods
         if (colorBy && colorBy.startsWith("basemod")) {
