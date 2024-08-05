@@ -27,7 +27,6 @@ import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import TrackViewport from "./trackViewport.js"
-import {appleCrayonRGB} from "./util/colorPalletes.js"
 
 class IdeogramViewport extends TrackViewport {
 
