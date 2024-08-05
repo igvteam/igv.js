@@ -114,7 +114,7 @@ class IdeogramTrack {
     }
 }
 
-async function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors, features}) {
+function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors, features}) {
 
     const shim = 1
     const shim2 = 0.5 * shim
