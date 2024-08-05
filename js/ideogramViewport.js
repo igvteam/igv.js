@@ -30,6 +30,8 @@ import TrackViewport from "./trackViewport.js"
 
 class IdeogramViewport extends TrackViewport {
 
+    featureCache = new IdeogramFeatureCache()
+
     constructor(trackView, viewportColumn, referenceFrame, width) {
         super(trackView, viewportColumn, referenceFrame, width)
     }
@@ -37,13 +39,54 @@ class IdeogramViewport extends TrackViewport {
     initializationHelper() {
 
         this.canvas = document.createElement('canvas')
+
         this.canvas.className = 'igv-ideogram-canvas'
-        //this.$content.append($(this.canvas))
         this.$viewport.append($(this.canvas))
         this.ideogram_ctx = this.canvas.getContext('2d')
 
         this.addMouseHandlers()
     }
+
+    async getFeatures(chr, start, end, bpPerPixel) {
+        if (this.featureCache.containsRange(chr)) {
+            return this.featureCache.get(chr)
+        } else {
+          return this.loadFeatures()
+        }
+    }
+
+    async loadFeatures() {
+        const chr = this.referenceFrame.chr;
+        const features = await  this.referenceFrame.genome.getCytobands(chr)
+        this.featureCache.set(chr, features)
+        return features
+    }
+
+    repaint() {
+
+        if (undefined === this.featureCache) {
+            return
+        }
+
+        const {width, height} = this.$viewport[0].getBoundingClientRect()
+        IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, width, height)
+
+        const chr = this.referenceFrame.chr
+        const features = this.featureCache.get(chr)
+
+        const config =
+            {
+                context: this.ideogram_ctx,
+                pixelWidth: width,
+                pixelHeight: height,
+                referenceFrame: this.referenceFrame,
+                features
+            }
+
+        this.trackView.track.draw(config)
+
+    }
+
 
     addMouseHandlers() {
         this.addViewportClickHandler(this.$viewport.get(0))
@@ -100,35 +143,42 @@ class IdeogramViewport extends TrackViewport {
         const yClipOffset = -this.contentTop
 
         context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
-        this.trackView.track.draw({ context, pixelWidth:width, pixelHeight:height, referenceFrame:this.referenceFrame })
+        this.trackView.track.draw({
+            context,
+            pixelWidth: width,
+            pixelHeight: height,
+            referenceFrame: this.referenceFrame,
+            features: this.featureCache.get(this.referenceFrame.chr)
+        })
         context.restore()
 
     }
 
-    repaint() {
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect()
-        const config =
-            {
-                context:this.ideogram_ctx,
-                pixelWidth: width,
-                pixelHeight: height,
-                referenceFrame: this.referenceFrame
-            }
-
-        this.draw(config)
-    }
-
-    async draw({ context, pixelWidth, pixelHeight, referenceFrame }) {
-        IGVGraphics.configureHighDPICanvas(context, pixelWidth, pixelHeight)
-        this.trackView.track.draw({ context, pixelWidth, pixelHeight, referenceFrame })
-    }
 
     startSpinner() {
     }
 
     stopSpinner() {
     }
+}
 
+/**
+ * A very simple feature cache.  The smallest chunk of features for ideograms is a whole chromosome
+ */
+class IdeogramFeatureCache {
+    features = new Map()
+
+    containsRange(chr) {
+        return this.features.has(chr)
+    }
+
+    set(chr, features) {
+        this.features.set(chr, features)
+    }
+
+    get(chr) {
+        return this.features.get(chr)
+    }
 }
 
 export default IdeogramViewport
