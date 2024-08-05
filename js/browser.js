@@ -453,7 +453,7 @@ class Browser {
 
         // Append svg t testing, not used in production
         if (container) {
-            const svg = document.createElement("svg");
+            const svg = document.createElement("svg")
             svg.innerHTML = svgString
             container.append(svg)
             container.appendChild(svg)
@@ -586,7 +586,6 @@ class Browser {
 
         this.sampleInfoControl.setButtonVisibility(false)
 
-        this.showSampleNames = session.showSampleNames || false
         this.sampleNameControl.setState(this.showSampleNames === true)
 
         if (session.sampleNameViewportWidth) {
@@ -716,6 +715,8 @@ class Browser {
 
         this.updateLocusSearchWidget()
 
+        this.setShowSampleNames(session.showSampleNames || false)
+        
         return trackConfigurations
 
     }
@@ -992,6 +993,9 @@ class Browser {
         if (groupAutoscaleViews.length > 0) {
             this.updateViews()
         }
+
+        this.checkSampleNameViewportWidth()
+
         return loadedTracks
     }
 
@@ -1005,15 +1009,19 @@ class Browser {
      */
     async loadTrack(config) {
 
-        // Default configuration sync option to true.  This is the expected behavior for public API calls
-        config.sync = (config.sync !== false)
+        const newTrack = await this._loadTrack(config)
+        if (newTrack) {
 
-        const newTrack = this._loadTrack(config)
+            // If this track is in an autoscale group update all track views.  An optimization would be to update only
+            // trackViews in the same group
+            if (config.autoscaleGroup) {
+                await this.updateViews()
+            }
 
-        if (newTrack && config.autoscaleGroup) {
-            // Await newTrack load and update all views
-            await newTrack
-            this.updateViews()
+            // If this track supports sample names, and sample names are showing, check the viewport width
+            if (this.showSampleNames && typeof newTrack.getSamples === 'function') {
+                this.checkSampleNameViewportWidth()
+            }
         }
 
         return newTrack
@@ -1556,9 +1564,50 @@ class Browser {
     }
 
     repaintViews() {
+        if (this.showSampleNames && undefined === this.sampleNameViewportWidth) {
+            this.sampleNameViewportWidth = Math.max(...this.trackViews.map(tv => tv.computeSampleNameViewportWidth()));
+        }
+
         for (let trackView of this.trackViews) {
             trackView.repaintViews()
         }
+    }
+
+    setShowSampleNames(showSampleNames) {
+
+        this.showSampleNames = showSampleNames
+
+        const column = this.columnContainer.querySelector('.igv-sample-name-column')
+
+        column.style.display = false === this.showSampleNames ? 'none' : 'flex'
+
+        let doLayout = true
+        if (this.showSampleNames) {
+            doLayout = !this.checkSampleNameViewportWidth()
+        }
+        if (doLayout) {
+            this.layoutChange()
+        }
+    }
+
+    /**
+     * Check the sample name viewport width.  Should be called from actions that could potentially change the required
+     * width.
+     *
+     * @returns {boolean} true if width has changed
+     */
+    checkSampleNameViewportWidth() {
+
+        // Check sample name
+        if (this.showSampleNames) {
+            const width = Math.max(...this.trackViews.map(tv => tv.computeSampleNameViewportWidth()));
+            if (this.sampleNameViewportWidth !== width) {
+                this.sampleNameViewportWidth = width
+                this.layoutChange()
+                return true
+            }
+        }
+        return false
     }
 
     updateLocusSearchWidget() {
@@ -1857,8 +1906,8 @@ class Browser {
 
         await this.sampleInfo.loadSampleInfoFile(config.url)
 
-        for (const {sampleNameViewport} of this.trackViews) {
-            sampleNameViewport.setWidth(this.getSampleInfoColumnWidth())
+        for (const {sampleInfoViewport} of this.trackViews) {
+            sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
         }
 
         const found = this.findTracks(t => typeof t.getSamples === 'function')

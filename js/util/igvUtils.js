@@ -207,6 +207,7 @@ function isDataURL(obj) {
 function createColumn(columnContainer, className) {
     const column = DOMUtils.div({class: className})
     columnContainer.appendChild(column)
+    return column
 }
 
 
