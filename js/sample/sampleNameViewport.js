@@ -16,6 +16,7 @@ class SampleNameViewport {
         this.browser = trackView.browser
 
         this.viewport = DOMUtils.div({class: 'igv-viewport'})
+        //this.viewport.style.width = "100%"
 
         column.appendChild(this.viewport)
 
@@ -41,7 +42,7 @@ class SampleNameViewport {
 
     checkCanvas() {
 
-        const width = this.browser.sampleNameViewportWidth || 0
+        const width = this.viewport.clientWidth || 0
         this.ctx.canvas.width = width * window.devicePixelRatio
         this.ctx.canvas.style.width = `${width}px`
 
