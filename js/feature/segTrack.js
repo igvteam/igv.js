@@ -1,16 +1,14 @@
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import FeatureSource from './featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
-import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
-import {createCheckbox} from "../igv-icons.js"
-import {GradientColorScale} from "../util/colorScale.js"
-import {ColorTable} from "../util/colorPalletes.js"
+import { IGVMath } from "../../node_modules/igv-utils/src/index.js"
+import { createCheckbox } from "../igv-icons.js"
+import { GradientColorScale } from "../util/colorScale.js"
+import { ColorTable } from "../util/colorPalletes.js"
 import SampleInfo from "../sample/sampleInfo.js"
 import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
-import {doSortByAttributes} from "../sample/sampleUtils.js"
-
+import { doSortByAttributes } from "../sample/sampleUtils.js"
 
 class SegTrack extends TrackBase {
 
@@ -31,7 +29,7 @@ class SegTrack extends TrackBase {
         this.maxHeight = config.maxHeight || 500
         this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2
         this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 13
-        this.sampleHeight = this.squishedRowHeight      // Initial value, will get overwritten when rendered
+        this.sampleHeight = this.squishedRowHeight // Initial value, will get overwritten when rendered
 
         // Explicitly set samples -- used to select a subset of samples from a dataset
         this.sampleKeys = []
@@ -45,7 +43,7 @@ class SegTrack extends TrackBase {
 
         // Color settings
         if (config.color) {
-            this.color = config.color    // Overrides defaults, can be a function
+            this.color = config.color // Overrides defaults, can be a function
         } else if (config.colorTable) {
             this.colorTable = new ColorTable(config.colorTable)
         } else {
@@ -62,7 +60,6 @@ class SegTrack extends TrackBase {
                     this.negColorScale = new GradientColorScale(config.negColorScale || NEG_COLOR_SCALE)
             }
         }
-
 
         // Create featureSource
         // Disable whole genome downsampling unless explicitly.
@@ -87,14 +84,13 @@ class SegTrack extends TrackBase {
     async postInit() {
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
-            if (this.disposed) return   // This track was removed during async load
+            if (this.disposed) return // This track was removed during async load
         }
         // Set properties from track line
         if (this.header) {
             this.setTrackProperties(this.header)
         }
     }
-
 
     menuItemList() {
 
@@ -111,10 +107,10 @@ class SegTrack extends TrackBase {
                     return attrs && attrs[attribute]
                 })) {
 
-                    const object = $('<div>')
-                    object.html(`&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`)
+                    const object = document.createElement('div')
+                    object.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`
 
-                    function attributeSort() {
+                    object.addEventListener('click', () => {
                         const sortDirection = this.#sortDirections.get(attribute) || 1
                         this.sortByAttribute(attribute, sortDirection)
                         this.#sortDirections.set(attribute, sortDirection * -1)
@@ -124,19 +120,18 @@ class SegTrack extends TrackBase {
                             attribute: attribute,
                             direction: sortDirection === 1 ? "ASC" : "DESC"
                         }
-                    }
+                    })
 
-                    menuItems.push({object, click: attributeSort})
+                    menuItems.push({ object })
                 }
             }
         }
 
-        const lut =
-            {
-                "SQUISHED": "Squish",
-                "EXPANDED": "Expand",
-                "FILL": "Fill"
-            }
+        const lut = {
+            "SQUISHED": "Squish",
+            "EXPANDED": "Expand",
+            "FILL": "Fill"
+        }
 
         if (this.type === 'shoebox' && this.sbColorScale) {
             menuItems.push('<hr/>')
@@ -155,7 +150,10 @@ class SegTrack extends TrackBase {
                 }, e)
             }
 
-            menuItems.push({object: $('<div>Set color scale threshold</div>'), dialog: dialogPresentationHandler})
+            const divElement = document.createElement('div');
+            divElement.textContent = 'Set color scale threshold';
+            divElement.addEventListener('click', dialogPresentationHandler.bind(this));
+            menuItems.push({ object: divElement });
         }
 
         menuItems.push('<hr/>')
@@ -163,17 +161,17 @@ class SegTrack extends TrackBase {
         const displayOptions = this.type === 'seg' || this.type === 'shoebox' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"]
         for (let displayMode of displayOptions) {
             const checkBox = createCheckbox(lut[displayMode], displayMode === this.displayMode)
-            menuItems.push(
-                {
-                    object: $(checkBox),
-                    click: function displayModeHandler() {
-                        this.displayMode = displayMode
-                        this.config.displayMode = displayMode
-                        this.trackView.checkContentHeight()
-                        this.trackView.repaintViews()
-                        this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta)
-                    }
-                })
+            const object = document.createElement('div');
+            object.appendChild(checkBox);
+            object.addEventListener('click', () => {
+                this.displayMode = displayMode
+                this.config.displayMode = displayMode
+                this.trackView.checkContentHeight()
+                this.trackView.repaintViews()
+                this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta)
+            })
+
+            menuItems.push({ object })
         }
 
         return menuItems
@@ -181,7 +179,7 @@ class SegTrack extends TrackBase {
     }
 
     hasSamples() {
-        return true   // SEG, MUT, and MAF tracks have samples by definition
+        return true // SEG, MUT, and MAF tracks have samples by definition
     }
 
     getSamples() {
@@ -193,7 +191,7 @@ class SegTrack extends TrackBase {
     }
 
     async getFeatures(chr, start, end) {
-        const features = await this.featureSource.getFeatures({chr, start, end})
+        const features = await this.featureSource.getFeatures({ chr, start, end })
         // New segments could conceivably add new samples
         this.updateSampleKeys(features)
 
@@ -205,15 +203,14 @@ class SegTrack extends TrackBase {
                 const sortDirection = "DESC" === sort.direction ? 1 : -1
                 this.sortByAttribute(sort.attribute, sortDirection)
             }
-            this.initialSort = undefined  // Sample order is sorted,
+            this.initialSort = undefined // Sample order is sorted,
         }
         return features
     }
 
+    draw({ context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart }) {
 
-    draw({context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
-
-        IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+        IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, { 'fillStyle': "rgb(255, 255, 255)" })
 
         if (features && features.length > 0) {
 
@@ -221,7 +218,7 @@ class SegTrack extends TrackBase {
 
             if (this.type === "shoebox" && !this.sbColorScale) {
                 const threshold = this.featureSource.hicFile.percentile95 || 2000
-                this.sbColorScale = new HicColorScale({threshold, r: 0, g: 0, b: 255})
+                this.sbColorScale = new HicColorScale({ threshold, r: 0, g: 0, b: 255 })
             }
 
             // Create a map for fast id -> row lookup
@@ -241,14 +238,14 @@ class SegTrack extends TrackBase {
                     this.sampleHeight = this.squishedRowHeight
                     border = 0
                     break
-                default:   // EXPANDED
+                default: // EXPANDED
                     this.sampleHeight = this.expandedRowHeight
                     border = 1
             }
             const rowHeight = this.sampleHeight
 
             for (let segment of features) {
-                segment.pixelRect = undefined   // !important, reset this in case segment is not drawn
+                segment.pixelRect = undefined // !important, reset this in case segment is not drawn
             }
 
             const pixelBottom = pixelTop + pixelHeight
@@ -333,7 +330,7 @@ class SegTrack extends TrackBase {
                 }
 
 
-                f.pixelRect = {x, y, w, h}
+                f.pixelRect = { x, y, w, h }
 
                 // Use for diagnostic rendering
                 // context.fillStyle = randomRGB(180, 240)
@@ -349,7 +346,6 @@ class SegTrack extends TrackBase {
 
     }
 
-
     checkForLog(features) {
         if (this.isLog === undefined) {
             this.isLog = false
@@ -363,8 +359,8 @@ class SegTrack extends TrackBase {
     }
 
     /**
-     * Optional method to compute pixel height to accomodate the list of features.  The implementation below
-     * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
+     * Optional method to compute pixel height to accommodate the list of features.  The implementation below
+     * has side effects (modifying the samples hash).  This is unfortunate, but harmless.
      *
      * Note displayMode "FILL" is handled by the viewport
      *
@@ -393,9 +389,8 @@ class SegTrack extends TrackBase {
             end = sort.end
         }
 
-
         if (!featureList) {
-            featureList = await this.featureSource.getFeatures({chr, start, end})
+            featureList = await this.featureSource.getFeatures({ chr, start, end })
         }
         if (!featureList) return
 
@@ -531,7 +526,7 @@ class SegTrack extends TrackBase {
                 label: sortLabel,
                 click: () => {
                     const sort = {
-                        option: "VALUE",   // Either VALUE or ATTRIBUTE
+                        option: "VALUE", // Either VALUE or ATTRIBUTE
                         direction,
                         chr: clickState.referenceFrame.chr,
                         start: Math.floor(genomicLocation - bpWidth),
@@ -564,8 +559,8 @@ class SegTrack extends TrackBase {
 }
 
 // Default copy number scales
-const POS_COLOR_SCALE = {low: 0.1, lowR: 255, lowG: 255, lowB: 255, high: 1.5, highR: 255, highG: 0, highB: 0}
-const NEG_COLOR_SCALE = {low: -1.5, lowR: 0, lowG: 0, lowB: 255, high: -0.1, highR: 255, highG: 255, highB: 255}
+const POS_COLOR_SCALE = { low: 0.1, lowR: 255, lowG: 255, lowB: 255, high: 1.5, highR: 255, highG: 0, highB: 0 }
+const NEG_COLOR_SCALE = { low: -1.5, lowR: 0, lowG: 0, lowB: 255, high: -0.1, highR: 255, highG: 255, highB: 255 }
 
 
 // Mut and MAF file default color table
@@ -612,6 +607,5 @@ const MUT_COLORS = {
     // Variant_Classification
 
 }
-
 
 export default SegTrack
