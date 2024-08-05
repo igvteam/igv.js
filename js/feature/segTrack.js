@@ -552,13 +552,19 @@ class SegTrack extends TrackBase {
 
         if (this.explicitSamples) return
 
+        let newKeys = false
         const sampleKeySet = new Set(this.sampleKeys)
         for (let feature of featureList) {
             const sampleKey = feature.sampleKey || feature.sample
             if (!sampleKeySet.has(sampleKey)) {
                 this.sampleKeys.push(sampleKey)
                 sampleKeySet.add(sampleKey)
+                newKeys = true
             }
+        }
+
+        if(newKeys) {
+            this.browser.checkSampleNameViewportWidth()
         }
     }
 }

@@ -152,6 +152,7 @@ class VariantTrack extends TrackBase {
 
         if (this.header && !this.sampleKeys) {
             this.sampleKeys = this.header.sampleNameMap ? Array.from(this.header.sampleNameMap.keys()) : []
+            this.browser.checkSampleNameViewportWidth()
         }
         if (undefined === this.visibilityWindow && this.config.indexed !== false) {
             const fn = FileUtils.isFile(this.config.url) ? this.config.url.name : this.config.url

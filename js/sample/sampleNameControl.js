@@ -26,7 +26,7 @@
 
 import NavbarButton from "../ui/navbarButton.js"
 import {sampleNameImage, sampleNameImageHover} from "../ui/navbarIcons/sampleNames.js"
-import { sampleNameButtonLabel } from "../ui/navbarIcons/buttonLabel.js"
+import {sampleNameButtonLabel} from "../ui/navbarIcons/buttonLabel.js"
 
 class SampleNameControl extends NavbarButton {
 
@@ -47,7 +47,8 @@ class SampleNameControl extends NavbarButton {
         })
 
         this.button.addEventListener('click', () => {
-            this.performClickWithState(browser, undefined)
+            browser.setShowSampleNames(!browser.showSampleNames)
+            this.setState(browser.showSampleNames)
         })
 
         if (true === browser.config.showSampleNameButton) {
@@ -58,22 +59,6 @@ class SampleNameControl extends NavbarButton {
 
     }
 
-    performClickWithState(browser, doShowSampleNamesOrUndefined) {
-
-        browser.showSampleNames = undefined === doShowSampleNamesOrUndefined ? !browser.showSampleNames : doShowSampleNamesOrUndefined
-
-        const column = browser.columnContainer.querySelector('.igv-sample-name-column')
-        column.style.display = false === browser.showSampleNames ? 'none' : 'flex'
-
-        this.setState(browser.showSampleNames)
-
-        if(browser.showSampleNames) {
-            browser.checkSampleNameViewportWidth()
-        }
-        browser.layoutChange()
-
-
-    }
 
 }
 

@@ -586,7 +586,6 @@ class Browser {
 
         this.sampleInfoControl.setButtonVisibility(false)
 
-        this.showSampleNames = session.showSampleNames || false
         this.sampleNameControl.setState(this.showSampleNames === true)
 
         if (session.sampleNameViewportWidth) {
@@ -716,6 +715,8 @@ class Browser {
 
         this.updateLocusSearchWidget()
 
+        this.setShowSampleNames(session.showSampleNames || false)
+        
         return trackConfigurations
 
     }
@@ -1572,15 +1573,41 @@ class Browser {
         }
     }
 
+    setShowSampleNames(showSampleNames) {
+
+        this.showSampleNames = showSampleNames
+
+        const column = this.columnContainer.querySelector('.igv-sample-name-column')
+
+        column.style.display = false === this.showSampleNames ? 'none' : 'flex'
+
+        let doLayout = true
+        if (this.showSampleNames) {
+            doLayout = !this.checkSampleNameViewportWidth()
+        }
+        if (doLayout) {
+            this.layoutChange()
+        }
+    }
+
+    /**
+     * Check the sample name viewport width.  Should be called from actions that could potentially change the required
+     * width.
+     *
+     * @returns {boolean} true if width has changed
+     */
     checkSampleNameViewportWidth() {
+
         // Check sample name
         if (this.showSampleNames) {
             const width = Math.max(...this.trackViews.map(tv => tv.computeSampleNameViewportWidth()));
             if (this.sampleNameViewportWidth !== width) {
                 this.sampleNameViewportWidth = width
                 this.layoutChange()
+                return true
             }
         }
+        return false
     }
 
     updateLocusSearchWidget() {
