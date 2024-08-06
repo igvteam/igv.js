@@ -165,224 +165,215 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
-    var igvBrowser;
+    import igv from "../../js/index.js"
 
-    $(document).ready(function () {
-
-        var div = $("#igvDiv")[0],
-            options = {
-                showNavigation: true,
-                showIdeogram: true,
-                showRuler: true,
-                reference: {
-                    id: "hg19"
+    const options =
+        {
+            showNavigation: true,
+            showIdeogram: true,
+            showRuler: true,
+            genome: "hg19",
+            locus: locus,
+            tracks: [
+                {
+                    url: 'https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bw',
+                    name: 'CCRs',
+                    type: "wig",
+                    color: function(value) {
+                        var c;
+                        if (value < 90){
+                            c = "rgb(0,0,255)"
+                        }
+                        if (value >= 90){
+                            c = "rgb(255,165,0)"
+                        }
+                        if (value >= 95){
+                            c = "rgb(255,0,0)"
+                        }
+                        if (value >= 99){
+                            c = "rgb(139,0,0)"
+                        }
+                        return c
+                    },
+                    height: 200,
+                    visibilityWindow: 500000,
+                    order: 1
                 },
-                genome: "hg19",
-                locus: locus,
-                tracks: [
-                    {
-                        url: 'https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bw',
-                        name: 'CCRs',
-                        type: "wig",
-                        color: function(value) {
-                            var c;
-                            if (value < 90){
-                                c = "rgb(0,0,255)"
-                            }
-                            if (value >= 90){
-                                c = "rgb(255,165,0)"
-                            }
-                            if (value >= 95){
-                                c = "rgb(255,0,0)"
-                            }
-                            if (value >= 99){
-                                c = "rgb(139,0,0)"
-                            }
-                            return c
-                        },
-                        height: 200,
-                        visibilityWindow: 500000,
-                        order: 1
+                {
+                    url: 'https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bw',
+                    name: 'X-CCRs',
+                    type: "wig",
+                    color: function(value) {
+                        var c;
+                        if (value < 90){
+                            c = "rgb(0,0,255)"
+                        }
+                        if (value >= 90){
+                            c = "rgb(255,165,0)"
+                        }
+                        if (value >= 95){
+                            c = "rgb(255,0,0)"
+                        }
+                        if (value >= 99){
+                            c = "rgb(139,0,0)"
+                        }
+                        return c
                     },
-                    {
-                        url: 'https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bw',
-                        name: 'X-CCRs',
-                        type: "wig",
-                        color: function(value) {
-                            var c;
-                            if (value < 90){
-                                c = "rgb(0,0,255)"
-                            }
-                            if (value >= 90){
-                                c = "rgb(255,165,0)"
-                            }
-                            if (value >= 95){
-                                c = "rgb(255,0,0)"
-                            }
-                            if (value >= 99){
-                                c = "rgb(139,0,0)"
-                            }
-                            return c
-                        },
-                        height: 200,
-                        visibilityWindow: 500000,
-                        order: 2
+                    height: 200,
+                    visibilityWindow: 500000,
+                    order: 2
+                },
+                {
+                    name: "CCRs in BED12",
+                    type: "annotation",
+                    format: "bed",
+                    sourceType: "file",
+                    url: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bed12.bed.gz",
+                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bed12.bed.gz.tbi",
+                    order: 3,
+                    height: 50,
+                    visibilityWindow: 500000,
+                    displayMode: "EXPANDED"
+                },
+                {
+                    name: "X-CCRs in BED12",
+                    type: "annotation",
+                    format: "bed",
+                    sourceType: "file",
+                    url: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bed12.bed.gz",
+                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bed12.bed.gz.tbi",
+                    order: 4,
+                    height: 50,
+                    visibilityWindow: 500000,
+                    displayMode: "EXPANDED"
+                },
+                {
+                    name: "Ensembl Transcripts",
+                    type: "annotation",
+                    format: "gtf",
+                    sourceType: "file",
+                    url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/Homo_sapiens.GRCh37.75.gtf.gz",
+                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/Homo_sapiens.GRCh37.75.gtf.gz.tbi",
+                    order: 5,
+                    visibilityWindow: 500000,
+                    displayMode: "COLLAPSED",
+                    autoHeight: true
+                },
+                {
+                    name: "Pfam domains",
+                    type: "annotation",
+                    format: "bed",
+                    sourceType: "file",
+                    url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/pfams.bed12.bed.gz",
+                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/pfams.bed12.bed.gz.tbi",
+                    order: 6,
+                    height: 50,
+                    color: "#019c01",
+                    visibilityWindow: 500000,
+                    displayMode: "COLLAPSED"
+                },
+                {
+                    name: "ClinVar protein-changing pathogenics",
+                    type: "variant",
+                    format: "vcf",
+                    color: "#000000",
+                    url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/clinvar-functional-pathogenics.vcf.gz",
+                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/clinvar-functional-pathogenics.vcf.gz.tbi",
+                    order: 7,
+                    visibilityWindow: 500000
+                },
+                {
+                    name: "COSMIC Cancer-Related Coding Variants",
+                    type: "variant",
+                    format: "vcf",
+                    color: "#551a8b",
+                    url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/CosmicCodingMuts.vcf.gz",
+                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/CosmicCodingMuts.vcf.gz.tbi",
+                    order: 8,
+                    visibilityWindow: 500000
+                },
+                {
+                    name: "gnomAD protein-changing high quality variants",
+                    type: "variant",
+                    format: "vcf",
+                    color: "#bebebe",
+                    url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-functional-pass.vcf.gz",
+                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-functional-pass.vcf.gz.tbi",
+                    order: 9,
+                    visibilityWindow: 500000
+                },
+                {
+                    name: "gnomAD coverage at 10x",
+                    url:  "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-coverage.bw",
+                    type: "wig",
+                    color: function(value) {
+                        var c;
+                        if (value < 0.5){
+                            c = "#ff8c00"
+                        }
+                        if (value >= 0.5){
+                            c = "#add8e6"
+                        }
+                        return c
                     },
-                    {
-                        name: "CCRs in BED12",
-                        type: "annotation",
-                        format: "bed",
-                        sourceType: "file",
-                        url: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bed12.bed.gz",
-                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bed12.bed.gz.tbi",
-                        order: 3,
-                        height: 50,
-                        visibilityWindow: 500000,
-                        displayMode: "EXPANDED"
+                    height: 50,
+                    order: 10,
+                    visibilityWindow: 500000
+                },
+                {
+                    name: "Segmental Duplications",
+                    type: "annotation",
+                    format: "bed",
+                    sourceType: "file",
+                    url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/hgsegmental.bed.gz",
+                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/hgsegmental.bed.gz.tbi",
+                    order: 11,
+                    visibilityWindow: 500000,
+                    displayMode: "EXPANDED"
+                },
+                {
+                    name: "Self-Chains at 90% Identity",
+                    type: "annotation",
+                    format: "bed",
+                    sourceType: "file",
+                    url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/self-chains.id90.bed.gz",
+                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/self-chains.id90.bed.gz.tbi",
+                    order: 12,
+                    visibilityWindow: 500000,
+                    displayMode: "EXPANDED"
+                },
+                {
+                    name: "gnomAD: all variants",
+                    type: "variant",
+                    format: "vcf",
+                    color: "#bebebe",
+                    url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-vep-vt.vcf.gz",
+                    indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-vep-vt.vcf.gz.tbi",
+                    order: 13,
+                    visibilityWindow: 500000
+                },
+                {
+                    url: 'https://s3.us-east-2.amazonaws.com/ccrs/tracks/gerp.bw',
+                    name: 'GERP++',
+                    type: "wig",
+                    color: function(value) {
+                        var c;
+                        if (value < 1.7){
+                            c = "rgb(0,0,255)"
+                        }
+                        if (value >= 1.7){
+                            c = "rgb(255,0,0)"
+                        }
+                        return c
                     },
-                    {
-                        name: "X-CCRs in BED12",
-                        type: "annotation",
-                        format: "bed",
-                        sourceType: "file",
-                        url: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bed12.bed.gz",
-                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bed12.bed.gz.tbi",
-                        order: 4,
-                        height: 50,
-                        visibilityWindow: 500000,
-                        displayMode: "EXPANDED"
-                    },
-                    {
-                        name: "Ensembl Transcripts",
-                        type: "annotation",
-                        format: "gtf",
-                        sourceType: "file",
-                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/Homo_sapiens.GRCh37.75.gtf.gz",
-                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/Homo_sapiens.GRCh37.75.gtf.gz.tbi",
-                        order: 5,
-                        visibilityWindow: 500000,
-                        displayMode: "COLLAPSED",
-                        autoHeight: true
-                    },
-                    {
-                        name: "Pfam domains",
-                        type: "annotation",
-                        format: "bed",
-                        sourceType: "file",
-                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/pfams.bed12.bed.gz",
-                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/pfams.bed12.bed.gz.tbi",
-                        order: 6,
-                        height: 50,
-                        color: "#019c01",
-                        visibilityWindow: 500000,
-                        displayMode: "COLLAPSED"
-                    },
-                    {
-                        name: "ClinVar protein-changing pathogenics",
-                        type: "variant",
-                        format: "vcf",
-                        color: "#000000",
-                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/clinvar-functional-pathogenics.vcf.gz",
-                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/clinvar-functional-pathogenics.vcf.gz.tbi",
-                        order: 7,
-                        visibilityWindow: 500000
-                    },
-                    {
-                        name: "COSMIC Cancer-Related Coding Variants",
-                        type: "variant",
-                        format: "vcf",
-                        color: "#551a8b",
-                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/CosmicCodingMuts.vcf.gz",
-                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/CosmicCodingMuts.vcf.gz.tbi",
-                        order: 8,
-                        visibilityWindow: 500000
-                    },
-                    {
-                        name: "gnomAD protein-changing high quality variants",
-                        type: "variant",
-                        format: "vcf",
-                        color: "#bebebe",
-                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-functional-pass.vcf.gz",
-                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-functional-pass.vcf.gz.tbi",
-                        order: 9,
-                        visibilityWindow: 500000
-                    },
-                    {
-                        name: "gnomAD coverage at 10x",
-                        url:  "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-coverage.bw",
-                        type: "wig",
-                        color: function(value) {
-                            var c;
-                            if (value < 0.5){
-                                c = "#ff8c00"
-                            }
-                            if (value >= 0.5){
-                                c = "#add8e6"
-                            }
-                            return c
-                        },
-                        height: 50,
-                        order: 10,
-                        visibilityWindow: 500000
-                    },
-                    {
-                        name: "Segmental Duplications",
-                        type: "annotation",
-                        format: "bed",
-                        sourceType: "file",
-                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/hgsegmental.bed.gz",
-                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/hgsegmental.bed.gz.tbi",
-                        order: 11,
-                        visibilityWindow: 500000,
-                        displayMode: "EXPANDED"
-                    },
-                    {
-                        name: "Self-Chains at 90% Identity",
-                        type: "annotation",
-                        format: "bed",
-                        sourceType: "file",
-                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/self-chains.id90.bed.gz",
-                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/self-chains.id90.bed.gz.tbi",
-                        order: 12,
-                        visibilityWindow: 500000,
-                        displayMode: "EXPANDED"
-                    },
-                    {
-                        name: "gnomAD: all variants",
-                        type: "variant",
-                        format: "vcf",
-                        color: "#bebebe",
-                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-vep-vt.vcf.gz",
-                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-vep-vt.vcf.gz.tbi",
-                        order: 13,
-                        visibilityWindow: 500000
-                    },
-                    {
-                        url: 'https://s3.us-east-2.amazonaws.com/ccrs/tracks/gerp.bw',
-                        name: 'GERP++',
-                        type: "wig",
-                        color: function(value) {
-                            var c;
-                            if (value < 1.7){
-                                c = "rgb(0,0,255)"
-                            }
-                            if (value >= 1.7){
-                                c = "rgb(255,0,0)"
-                            }
-                            return c
-                        },
-                        order: 14
-                    }
-                ]
-            };
+                    order: 14
+                }
+            ]
+        };
 
-        igv.createBrowser(div, options)
-            .then(function (b) {
-                igvBrowser = b;
-            })
-
-    });
+    let igvBrowser
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(b => igvBrowser = b)
 
     function load() {
 

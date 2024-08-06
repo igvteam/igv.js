@@ -11,14 +11,15 @@
     <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
     <title>Integrative Genomics Viewer: Events</title>
 
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <!-- Bootstrap 5.3 - CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 </head>
 
-<body role="document">
+<body>
 
 <div class="container">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md">
             <h2>IGV.js Example - Events</h2>
             <p class="lead">Use IGV's events to extend default behavior and improve integration with other parts of your app.</p>
 
@@ -34,43 +35,43 @@
                 <tr>
                     <td>locuschange</td>
                     <td>
-                        <p>Fired whenever the viewer locus changes.</p><br/>
+                        <p>Fired whenever the viewer locus changes.</p><br />
                         <strong>Note: as of release 2.10.0 an array of reference frames is passed to the handler to account
-                        for multi-locus views.</strong>
-                        <strong>Arguments Passed to Handler Fn:  </strong>
-                        <div class="well">
-                            <dl class="dl-horizontal">
-                                <dt>referenceFrameList</dt>
-                                <dd>[{chr, start, end, label}, {chr, start, end, label}, ...]</dd>
+                            for multi-locus views.</strong>
+                        <strong>Arguments Passed to Handler Fn: </strong>
+                        <div class="border p-2 mb-3">
+                            <dl class="row">
+                                <dt class="col-sm-3">referenceFrameList</dt>
+                                <dd class="col-sm-9">[{chr, start, end, label}, {chr, start, end, label}, ...]</dd>
                             </dl>
                         </div>
                     </td>
-                    <td><a href="events/locus-change.html">Track locus in page URL</a></td>
+                    <td><a href="./events/locus-change.html">Track locus in page URL</a></td>
                 </tr>
                 <tr>
                     <td>trackclick</td>
                     <td>
                         <p>Fired whenever the user clicks on a track feature - use this event to customize popover behavior/appearance.
-                            <ul>
-                                <li>The handler function can return a <code>string</code> to override the default popover contents.</li>
-                                <li>If the handler function returns <code>false</code> the default popup will not be shown.</li>
-                                <li>If the handler function returns <code>undefined</code> then the default popup will be shown.</li>
-                            </ul>
-                        </p><br/>
+                        <ul>
+                            <li>The handler function can return a <code>string</code> to override the default popover contents.</li>
+                            <li>If the handler function returns <code>false</code> the default popup will not be shown.</li>
+                            <li>If the handler function returns <code>undefined</code> then the default popup will be shown.</li>
+                        </ul>
+                        </p><br />
 
                         <strong>Arguments Passed to Handler Fn:</strong>
-                        <div class="well">
-                            <dl class="dl-horizontal">
-                                <dt>track</dt>
-                                <dd>{object} trackView track object</dd>
-                                <dt>popupData</dt>
-                                <dd>{object[]} data that would normally be shown in popup</dd>
+                        <div class="border p-2 mb-3">
+                            <dl class="row">
+                                <dt class="col-sm-3">track</dt>
+                                <dd class="col-sm-9">{object} trackView track object</dd>
+                                <dt class="col-sm-3">popupData</dt>
+                                <dd class="col-sm-9">{object[]} data that would normally be shown in popup</dd>
                             </dl>
                         </div>
                     </td>
                     <td>
-                        <a href="events/custom-track-popover.html">Custom Track Popover</a><br/>
-                        <a href="events/custom-track-click.html">Popover Track Click Handling</a>
+                        <a href="./events/custom-track-popover.html">Custom Track Popover</a><br />
+                        <a href="./events/custom-track-click.html">Popover Track Click Handling</a>
                     </td>
                 </tr>
                 <tr>
@@ -83,31 +84,29 @@
                 <tr>
                     <td>trackremoved</td>
                     <td>
-                        <p>Fired whenever a track is removed from the viewer</p><br/>
+                        <p>Fired whenever a track is removed from the viewer</p><br />
 
                         <strong>Arguments Passed to Handler Fn:</strong>
-                        <div class="well">
-                            <dl class="dl-horizontal">
-                                <dt>track</dt>
-                                <dd>{object} removed track</dd>
+                        <div class="border p-2 mb-3">
+                            <dl class="row">
+                                <dt class="col-sm-3">track</dt>
+                                <dd class="col-sm-9">{object} removed track</dd>
                             </dl>
                         </div>
                     </td>
                     <td>
-                        <a href="events/track-reorder.html">Track Reorder</a><br/>
+                        <a href="./events/track-reorder.html">Track Reorder</a><br />
                     </td>
-                    <td></td>
-                </tr>
                 <tr>
                     <td>trackorderchanged</td>
                     <td>
-                        <p>Fired whenever the track order is changed, either by (1) dragging, (2) adding a new track, or (3) removing a track</p><br/>
+                        <p>Fired whenever the track order is changed, either by (1) dragging, (2) adding a new track, or (3) removing a track</p><br />
 
                         <strong>Arguments Passed to Handler Fn:</strong>
-                        <div class="well">
-                            <dl class="dl-horizontal">
-                                <dt>trackNames</dt>
-                                <dd>{Array} ordered list of track names</dd>
+                        <div class="border p-2 mb-3">
+                            <dl class="row">
+                                <dt class="col-sm-3">trackNames</dt>
+                                <dd class="col-sm-9">{Array} ordered list of track names</dd>
                             </dl>
                         </div>
                     </td>
@@ -118,32 +117,54 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-12">
-            <h4 class="page-header">Subscribe to an Event</h4>
-            <code>on(&lt;event name&gt;, &lt;handler fn&gt;, [this])</code><br/>
+        <div class="col-md">
+            <h4 class="my-4">Subscribe to an Event</h4>
+            <code>on(&lt;event name&gt;, &lt;handler fn&gt;, [this])</code><br />
             <pre>
-    var div = $("#igvDiv")[0],
-        options = {
-            ...
-        };
+    const div = document.getElementById('igvDiv');
+    const options = {
+        ...
+    };
 
-    var browser = igv.createBrowser(div, options);
+    const browser = igv.createBrowser(div, options);
 
-    var onLocusChange = function (referenceFrame) {
-        alert("Locus changed to: " + referenceFrame.label);
+    const onLocusChange = (referenceFrame) => {
+        alert(`Locus changed to: ${referenceFrame.label}`);
     };
 
     browser.on("locuschange", onLocusChange);
-            </pre>
+                </pre>
 
-            <h4 class="page-header">Unsubscribe Handler</h4>
-            <code>un(&lt;event name&gt;, &lt;handler fn&gt;)</code><br/>
+            <h4 class="my-4">Unsubscribe Handler</h4>
+            <code>un(&lt;event name&gt;, &lt;handler fn&gt;)</code><br />
             <pre>
     browser.un("locuschange", onLocusChange);
-            </pre>
+                </pre>
         </div>
     </div>
 </div>
+
+<script type="module">
+
+    import igv from "../js/index.js"; // Make sure the path is correct
+
+    (async () => {
+        const browser = await igv.createBrowser(document.getElementById('igvDiv'), {});
+
+        const onLocusChange = referenceFrameList => {
+
+            for (const { label } of referenceFrameList) {
+                console.log(`Locus changed to: ${label}`);
+            }
+
+        }
+
+        // Subscribe to the locuschange event
+        browser.on("locuschange", onLocusChange);
+
+    })()
+
+</script>
 
 </body>
 
