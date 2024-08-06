@@ -34,7 +34,7 @@ import $ from "../vendor/jquery-3.3.1.slim.js"
 
 
 /**
- * Represents 2 or more wig tracks overlaid on a common viewport.
+ * Represents 2 or more  tracks overlaid on a common viewport.
  */
 class MergedTrack extends TrackBase {
 
@@ -46,7 +46,6 @@ class MergedTrack extends TrackBase {
     constructor(config, browser) {
         super(config, browser)
         this.type = "merged"
-        this.featureType = "numeric"
         this.paintAxis = paintAxis
         this.graphType = config.graphType
     }
@@ -62,7 +61,7 @@ class MergedTrack extends TrackBase {
 
         this.tracks = []
         if (this.config.tracks) {
-            // Configured merged track
+            // Track configurations, actual track objects to be created.
             for (let tconf of this.config.tracks) {
                 tconf.isMergedTrack = true
                 const t = await this.browser.createTrack(tconf)
@@ -87,9 +86,8 @@ class MergedTrack extends TrackBase {
                 this.autoscale = !this.tracks.every(t => t.config.autoscale || t.config.max !== undefined)
             }
         } else {
-            // Dynamic merged track
+            // Dynamic merged tracks
             this.tracks = this.config._tracks
-            this.autoscale = false
             delete this.config._tracks
         }
 
@@ -422,17 +420,19 @@ class MergedFeatureCollection {
         let max = -Number.MAX_VALUE
 
         for (let a of this.featureArrays) {
-            for (let f of a) {
-                if (typeof f.value === 'undefined' || Number.isNaN(f.value)) {
-                    continue
+            if(Array.isArray(a)) {
+                for (let f of a) {
+                    if (typeof f.value === 'undefined' || Number.isNaN(f.value)) {
+                        continue
+                    }
+                    if (f.end < start) {
+                        continue
+                    }
+                    if (f.start > end) {
+                        break
+                    }
+                    max = Math.max(max, f.value)
                 }
-                if (f.end < start) {
-                    continue
-                }
-                if (f.start > end) {
-                    break
-                }
-                max = Math.max(max, f.value)
             }
         }
 
@@ -443,15 +443,17 @@ class MergedFeatureCollection {
     getMin(start, end) {
         let min = 0
         for (let a of this.featureArrays) {
-            for (let f of a) {
-                if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
-                    if (f.end < start) {
-                        continue
+            if (Array.isArray(a)) {
+                for (let f of a) {
+                    if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
+                        if (f.end < start) {
+                            continue
+                        }
+                        if (f.start > end) {
+                            break
+                        }
+                        min = Math.min(min, f.value)
                     }
-                    if (f.start > end) {
-                        break
-                    }
-                    min = Math.min(min, f.value)
                 }
             }
         }
