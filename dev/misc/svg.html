@@ -2,14 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-
     <title>SVG demo</title>
-
-
 </head>
-
 <body>
-
 <div id="igv-centering-container">
     <div id='igv-app-container'></div>
 </div>
@@ -20,15 +15,10 @@
     </button>
 </div>
 
-<div id="igv-svg-container">
-</div>
-
-</body>
+<div id="igv-svg-container"></div>
 
 <script type="module">
-
-    import $ from '../../js/vendor/jquery-3.3.1.slim.js'
-    import igv from '../../js/index.js'
+    import igv from '../../js/index.js';
 
     (async () => {
 
@@ -41,12 +31,11 @@
                     url: '../../test/data/wig/allNegativewig.bedgraph',
                     indexed: false,
                     graphType: "points",
-                    guideLines:
-                        [
-                            {dotted: true, y: 0, color: "green"},
-                            {dotted: true, y: -0.25, color: "blue"},
-                            {dotted: true, y: -0.5, color: "red"}
-                        ]
+                    guideLines: [
+                        {dotted: true, y: 0, color: "green"},
+                        {dotted: true, y: -0.25, color: "blue"},
+                        {dotted: true, y: -0.5, color: "red"}
+                    ]
                 },
                 {
                     name: 'All negative bars',
@@ -58,12 +47,11 @@
                     url: '../../test/data/wig/mixedPosNeg.bedgraph',
                     indexed: false,
                     graphType: "points",
-                    guideLines:
-                        [
-                            {dotted: true, y: 0, color: "green"},
-                            {dotted: true, y: -0.5, color: "blue"},
-                            {dotted: true, y: 0.5, color: "red"}
-                        ]
+                    guideLines: [
+                        {dotted: true, y: 0, color: "green"},
+                        {dotted: true, y: -0.5, color: "blue"},
+                        {dotted: true, y: 0.5, color: "red"}
+                    ]
                 },
                 {
                     name: 'Mixed pos neg bars',
@@ -75,12 +63,11 @@
                     url: '../../test/data/wig/allPositive.bedgraph',
                     indexed: false,
                     graphType: "points",
-                    guideLines:
-                        [
-                            {dotted: true, y: 0, color: "green"},
-                            {dotted: true, y: 0.25, color: "blue"},
-                            {dotted: true, y: 0.5, color: "red"}
-                        ]
+                    guideLines: [
+                        {dotted: true, y: 0, color: "green"},
+                        {dotted: true, y: 0.25, color: "blue"},
+                        {dotted: true, y: 0.5, color: "red"}
+                    ]
                 },
                 {
                     name: 'All pos bars',
@@ -90,13 +77,13 @@
             ]
         };
 
-        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), bedgraph_options)
+        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), bedgraph_options);
 
-        // $('#igv-draw-svg-button').on('click', () => browser.renderSVG($('#igv-svg-container')))
-        $('#igv-draw-svg-button').on('click', () => browser.saveSVGtoFile(null, $('#igv-svg-container')[0]))
+        document.getElementById('igv-draw-svg-button').addEventListener('click', () => {
+            browser.saveSVGtoFile(null, document.getElementById('igv-svg-container'));
+        });
 
-
-    })()
-
+    })();
 </script>
+</body>
 </html>

@@ -67,7 +67,7 @@ class IdeogramViewport extends TrackViewport {
             return
         }
 
-        const {width, height} = this.$viewport[0].getBoundingClientRect()
+        const {width, height} = this.viewportElement.getBoundingClientRect()
         IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, width, height)
 
         const chr = this.referenceFrame.chr
@@ -131,7 +131,7 @@ class IdeogramViewport extends TrackViewport {
 
     renderSVGContext(context, {deltaX, deltaY}, includeLabel = true) {
 
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect()
+        const {width, height} = this.viewportElement.getBoundingClientRect()
 
         const str = 'ideogram'
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
@@ -152,7 +152,7 @@ class IdeogramViewport extends TrackViewport {
         context.restore()
 
     }
-    
+
     startSpinner() {
     }
 
