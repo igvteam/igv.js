@@ -141,12 +141,12 @@ class CNVPytorTrack extends TrackBase {
                 if (this.signals.includes(signal_name)) {
                     let tconf = {}
                     tconf.type = "wig"
-                    tconf.isMergedTrack = true
                     tconf.features = wig
                     tconf.name = signal_name
                     tconf.color = this.signal_colors.filter(x => x.singal_name === signal_name).map(x => x.color)
                     const t = await this.browser.createTrack(tconf)
                     if (t) {
+                        t.isMergedTrack = true
                         t.autoscale = false     // Scaling done from merged track
                         this.tracks.push(t)
                     } else {
@@ -328,12 +328,12 @@ class CNVPytorTrack extends TrackBase {
             if (this.signals.includes(signal_name)) {
                 let tconf = {}
                 tconf.type = "wig"
-                tconf.isMergedTrack = true
                 tconf.features = wig
                 tconf.name = signal_name
                 tconf.color = this.signal_colors.filter(x => x.singal_name === signal_name).map(x => x.color)
                 const t = await this.browser.createTrack(tconf)
                 if (t) {
+                    t.isMergedTrack = true
                     t.autoscale = false     // Scaling done from merged track
                     this.tracks.push(t)
                 } else {

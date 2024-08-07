@@ -49,13 +49,13 @@ function trackOverlayClickHandler(e) {
             {
                 name: 'Overlay',
                 type: 'merged',
+                autoscale: false,
                 alpha: 0.5, //fudge * (1.0/tracks.length),
                 height: Math.max(...tracks.map(({ height }) => height)),
                 order: Math.min(...tracks.map(({ order }) => order)),
-                _tracks: flattenedTracks
             }
 
-        const mergedTrack = new MergedTrack(config, this.browser)
+        const mergedTrack = new MergedTrack(config, this.browser, flattenedTracks)
 
         for (const track of tracks) {
             this.browser.removeTrack(track)
