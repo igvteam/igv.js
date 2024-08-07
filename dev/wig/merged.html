@@ -6,6 +6,8 @@
 </head>
 
 <body>
+<button id="log-state">Log Session</button>
+<button id="bookmark">Bookmark</button>
 
 <h1>Merged track</h1>
 
@@ -22,27 +24,34 @@
 
     var options =
         {
+            queryParametersSupported: true,
             genome: "hg19",
             locus: "chr4:40,174,668-40,221,204",
             tracks: [
-                // {
-                //     "type": "wig",
-                //     "format": "bigwig",
-                //     "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
-                //     "color": "red",
-                //     "name": "ENCFF000ASJ"
-                // },
-                // {
-                //     "type": "wig",
-                //     "format": "bigwig",
-                //     "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
-                //     "color": "green",
-                //     "name": "ENCFF351WPV"
-                // },
                 {
-                    name: "Merged - group autoscaled",
+                    name: "Merged - autoscaled",
                     type: "merged",
                     autoscale: true,
+                    tracks: [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red"
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green"
+                        }
+                    ]
+                },
+                {
+                    name: "Merged - fixed scale",
+                    type: "merged",
+                    min: 0,
+                    max: 100,
                     tracks: [
                         {
                             "type": "wig",
@@ -77,7 +86,27 @@
                             "autoscale": true
                         }
                     ]
-                }
+                },
+                {
+                    name: "Merged - individual fixed scale",
+                    type: "merged",
+                    tracks: [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red",
+                            "max": 100
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green",
+                            "max": 50
+                        }
+                    ]
+                },
             ]
         }
 
@@ -85,7 +114,14 @@
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser")
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+
+            document.getElementById('bookmark').addEventListener('click', () => {
+                const path = window.location.href.slice()
+                const idx = path.indexOf("?")
+                const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+                window.history.pushState({}, "IGV", url)
+            })
         })
 
 

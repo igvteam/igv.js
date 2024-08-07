@@ -563,6 +563,14 @@ class TrackBase {
         return menuItems
     }
 
+    setDataRange({ min, max }) {
+
+        this.dataRange = { min, max }
+        this.autoscale = false
+        this.autoscaleGroup = undefined
+        this.trackView.repaintViews()
+    }
+
     /**
      * Return the first feature in this track whose start position is > position
      * @param chr

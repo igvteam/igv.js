@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import FeatureSource from './featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
@@ -38,10 +37,14 @@ someMotifValues.forEach(motif => {
     JUNCTION_MOTIF_PALETTE.getColor(motif)
 })
 
-// rendering context with values that only need to be computed once per render, rather than for each splice junction
-const junctionRenderingContext = {}
 
 class SpliceJunctionTrack extends TrackBase {
+
+    static defaults = {
+        margin: 10,
+        colorByNumReadsThreshold: 5,
+        height: 100
+    }
 
     constructor(config, browser) {
         super(config, browser)
@@ -63,16 +66,6 @@ class SpliceJunctionTrack extends TrackBase {
                 FeatureSource(config, this.browser.genome)
         }
 
-        this.margin = config.margin === undefined ? 10 : config.margin
-
-        if (!this.height) {
-            this.height = 100
-        }
-
-        //set defaults
-        if (config.colorByNumReadsThreshold === undefined) {
-            config.colorByNumReadsThreshold = 5
-        }
     }
 
     async postInit() {
@@ -127,12 +120,15 @@ class SpliceJunctionTrack extends TrackBase {
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
 
 
-        if (!this.config.isMergedTrack) {
+        if (!this.isMergedTrack) {
             IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
         }
 
         if (featureList) {
 
+
+            // rendering context with values that only need to be computed once per render, rather than for each splice junction
+            const junctionRenderingContext = {}
 
             junctionRenderingContext.referenceFrame = options.viewport.referenceFrame
             junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start
@@ -146,7 +142,7 @@ class SpliceJunctionTrack extends TrackBase {
             for (let feature of featureList) {
                 if (feature.end < bpStart) continue
                 if (feature.start > bpEnd) break
-                this.renderJunction(feature, bpStart, bpPerPixel, pixelHeight, ctx)
+                this.renderJunction(feature, bpStart, bpPerPixel, pixelHeight, ctx, junctionRenderingContext)
             }
 
         } else {
@@ -163,7 +159,7 @@ class SpliceJunctionTrack extends TrackBase {
      * @param pixelHeight  pixel height of the current canvas
      * @param ctx  the canvas 2d context
      */
-    renderJunction(feature, bpStart, xScale, pixelHeight, ctx) {
+    renderJunction(feature, bpStart, xScale, pixelHeight, ctx, junctionRenderingContext) {
         // cache whether this junction is rendered or filtered out. Use later to exclude non-rendered junctions from click detection.
         feature.isVisible = false
 
@@ -247,7 +243,7 @@ class SpliceJunctionTrack extends TrackBase {
         }
 
         const py = this.margin
-        const rowHeight = this.height
+        const rowHeight = pixelHeight
 
         const cy = py + 0.5 * rowHeight
         let topY = py

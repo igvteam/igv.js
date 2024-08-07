@@ -9,6 +9,7 @@ class CoverageTrack  {
 
 
     constructor(config, parent) {
+        this.featureType = 'numeric'
         this.parent = parent
         this.featureSource = parent.featureSource
 

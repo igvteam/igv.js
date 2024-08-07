@@ -202,27 +202,6 @@ class TrackView {
         }
     }
 
-    get dataRange() {
-        return this.track.dataRange ? this.track.dataRange : undefined
-    }
-
-    set dataRange({ min, max }) {
-
-        this.track.dataRange = { min, max }
-
-        this.track.autoscale = false
-        this.track.autoscaleGroup = undefined
-
-        const list = this.browser.trackViews.filter(({track}) => track.autoscaleGroup)
-        if (1 === list.length) {
-            list[0].track.autoscale = false
-            list[0].track.autoscaleGroup = undefined
-            list[0].repaintViews()
-        }
-
-        this.repaintViews()
-
-    }
 
     presentColorPicker(key) {
 
