@@ -77,13 +77,13 @@ class DataRangeDialog {
         if (Array.isArray(trackViewOrTrackViewList)) {
             dataRange = { min: Number.MAX_SAFE_INTEGER, max:-Number.MAX_SAFE_INTEGER }
             for (const trackView of trackViewOrTrackViewList) {
-                if (trackView.dataRange) {
-                    dataRange.min = Math.min(trackView.dataRange.min, dataRange.min)
-                    dataRange.max = Math.max(trackView.dataRange.max, dataRange.max)
+                if (trackView.track.dataRange) {
+                    dataRange.min = Math.min(trackView.track.dataRange.min, dataRange.min)
+                    dataRange.max = Math.max(trackView.track.dataRange.max, dataRange.max)
                 }
             }
         } else {
-            dataRange = trackViewOrTrackViewList.dataRange
+            dataRange = trackViewOrTrackViewList.track.dataRange
         }
 
         if (dataRange) {
@@ -125,7 +125,7 @@ class DataRangeDialog {
             } else {
                 const list = Array.isArray(trackViewOfTrackViewList) ? trackViewOfTrackViewList : [ trackViewOfTrackViewList ]
                 for (const trackView of list) {
-                    trackView.dataRange = { min, max }
+                    trackView.track.setDataRange({ min, max })
                 }
 
             }
