@@ -199,7 +199,7 @@ class FeatureTrack extends TrackBase {
         }
 
 
-        if (!this.config.isMergedTrack) {
+        if (!this.isMergedTrack) {
             IGVGraphics.fillRect(context, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
         }
 

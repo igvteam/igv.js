@@ -32,38 +32,36 @@ import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {doAutoscale} from "../util/igvUtils.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
 
-
 /**
  * Represents 2 or more  tracks overlaid on a common viewport.
  */
 class MergedTrack extends TrackBase {
 
     static defaults = {
+        autoscale: undefined,
         alpha: 0.5,
         height: 50
     }
 
-    constructor(config, browser) {
+    constructor(config, browser, tracks) {
         super(config, browser)
         this.type = "merged"
         this.paintAxis = paintAxis
         this.graphType = config.graphType
+        if (tracks) {
+            this.tracks = tracks   // Dynamic creation, actual track objects (not configurations)
+        } else {
+            this.tracks = []
+        }
     }
 
-    init(config) {
-        if (!(config.tracks || config._tracks)) {
-            throw Error("Error: no tracks defined for merged track" + config)
-        }
-        super.init(config)
-    }
 
     async postInit() {
 
-        this.tracks = []
         if (this.config.tracks) {
-            // Track configurations, actual track objects to be created.
+            // Track configurations, this indicates a configured merged track as opposed to dynamic merge through the UI
+            // Actual track objects need to be created.
             for (let tconf of this.config.tracks) {
-                tconf.isMergedTrack = true
                 const t = await this.browser.createTrack(tconf)
                 if (t) {
                     this.tracks.push(t)
@@ -74,22 +72,26 @@ class MergedTrack extends TrackBase {
                     await t.postInit()
                 }
             }
-            // Explicit merged settings -- these will override any individual track settings
-            if (this.config.autoscale) {
-                this.autoscale = this.config.autoscale
-            } else if (this.config.max !== undefined) {
-                this.dataRange = {
-                    min: this.config.min || 0,
-                    max: this.config.max
-                }
-            } else {
-                this.autoscale = !this.tracks.every(t => t.config.autoscale || t.config.max !== undefined)
+            // Default to autoscale unless scale if range or autoscale is not otherwise defined
+            const allTracksSpecified = this.config.tracks.every(config => config.autoscale !== undefined || config.max !== undefined)
+            if (!allTracksSpecified) {
+                this.config.autoscale = this.config.max === undefined
             }
-        } else {
-            // Dynamic merged tracks
-            this.tracks = this.config._tracks
-            delete this.config._tracks
         }
+
+        // Mark constitutive tracks as merged.
+        for (let t of this.tracks) t.isMergedTrack = true
+
+        // Explicit settings -- these will override any individual track settings
+        if(this.config.autoscale) {
+            this.autoscale = this.config.autoscale
+        } else if (this.config.max !== undefined) {
+            this.setDataRange ({
+                min: this.config.min || 0,
+                max: this.config.max
+            })
+        }
+
 
         if (this.config.flipAxis !== undefined) {
             for (let t of this.tracks) t.flipAxis = this.config.flipAxis
@@ -100,25 +102,28 @@ class MergedTrack extends TrackBase {
         }
 
         this.resolutionAware = this.tracks.some(t => t.resolutionAware)
-
     }
 
     set flipAxis(b) {
         this.config.flipAxis = b
-        for (let t of this.tracks) t.flipAxis = b
+        for (let t of numericTracks(this.tracks)) {
+            t.flipAxis = b
+        }
     }
 
     get flipAxis() {
-        return this.tracks.every(t => t.flipAxis)
+        return numericTracks(this.tracks).every(t => t.flipAxis)
     }
 
     set logScale(b) {
         this.config.logScale = b
-        for (let t of this.tracks) t.logScale = b
+        for (let t of numericTracks(this.tracks)) {
+            t.logScale = b
+        }
     }
 
     get logScale() {
-        return this.tracks.every(t => t.logScale)
+        return numericTracks(this.tracks).every(t => t.logScale)
     }
 
     get height() {
@@ -136,49 +141,76 @@ class MergedTrack extends TrackBase {
         }
     }
 
+    set autoscale(b) {
+        this._autoscale = b
+        if(b === false && this.tracks) {
+            for(let t of this.tracks) t.autoscale = false
+        }
+    }
+
+    get autoscale() {
+        return this._autoscale
+    }
+
+    /**
+     * Set the data range of all constitutive numeric tracks.  This method is called from the menu item, i.e. an explicit
+     * setting, so it should disable autoscale as well.
+     *
+     * @param min
+     * @param max
+     */
+
+    setDataRange({min, max}) {
+        this.autoscale = false
+        for (const track of numericTracks(this.tracks)) {
+            track.dataRange = {min, max}
+            track.autoscale = false
+            track.autoscaleGroup = false
+        }
+    }
+
+    set dataRange({min, max}) {
+        for (const track of numericTracks(this.tracks)) {
+            track.dataRange = {min, max}
+        }
+    }
+
+    /**
+     * Return a DataRang {min, max} if all constitutive numeric tracks have identical range.  A numeric track is defined
+     * as a track with a data range.  Otherwise return undefined.
+     *
+     * @returns {{min: any, max: any}|undefined}
+     */
     get dataRange() {
-
-        if (undefined === this.tracks || 0 === this.tracks.length) {
-            return undefined
+        if(this.tracks) {
+            const num = numericTracks(this.tracks)
+            if (num.length > 0) {
+                const firstRange = num[0].dataRange
+                if (num.every(t => t.dataRange && t.dataRange.min === firstRange.min && t.dataRange.max === firstRange.max)) {
+                    return firstRange
+                }
+            }
         }
-
-        const list = this.tracks.filter(track => undefined !== track.dataRange)
-        if (list.length !== this.tracks.length) {
-            return undefined
-        }
-
-        const minSet = new Set(this.tracks.map(({dataRange}) => dataRange.min))
-        if (1 !== minSet.size) {
-            return undefined
-        }
-
-        const maxSet = new Set(this.tracks.map(({dataRange}) => dataRange.max))
-        if (1 !== maxSet.size) {
-            return undefined
-        }
-
-        return { min: [ ...minSet ][ 0 ],  max: [ ...maxSet ][ 0 ] }
+        return undefined
     }
 
-    set dataRange({ min, max }) {
-        for (const track of this.tracks) {
-            track.dataRange = { min, max }
-        }
-    }
 
     menuItemList() {
         const items = []
-        if (this.flipAxis !== undefined) {
-            items.push({
-                label: "Flip y-axis",
-                click: function flipYAxisHandler() {
-                    this.flipAxis = !this.flipAxis
-                    this.trackView.repaintViews()
-                }
-            })
-        }
+        if (numericTracks(this.tracks).length > 0) {
 
-        items.push(...this.numericDataMenuItems())
+            if (this.flipAxis !== undefined) {
+                items.push({
+                    label: "Flip y-axis",
+                    click: function flipYAxisHandler() {
+                        this.flipAxis = !this.flipAxis
+                        this.trackView.repaintViews()
+                    }
+                })
+            }
+
+            items.push(...this.numericDataMenuItems())
+        }
 
         items.push('<hr/>')
         items.push(this.overlayTrackAlphaAdjustmentMenuItem())
@@ -206,11 +238,6 @@ class MergedTrack extends TrackBase {
             const trackOptions = Object.assign({}, options)
             trackOptions.features = mergedFeatures.featureArrays[i]
             trackOptions.alpha = this.alpha
-
-            if (this.dataRange) {
-                // Single data scale for all tracks
-                this.tracks[i].dataRange = this.dataRange
-            }
 
             if (this.graphType) {
                 this.tracks[i].graphType = this.graphType
@@ -305,6 +332,7 @@ class MergedTrack extends TrackBase {
         let scaleChange
 
         if (this.autoscale) {
+            // Overrides any specific track scale settings
             scaleChange = true
             let allFeatures = []
             for (let visibleViewport of visibleViewports) {
@@ -319,7 +347,12 @@ class MergedTrack extends TrackBase {
                         allFeatures.push({value: mergedFeatureCollection.getMin(start, end)})
                     }
                 }
-                this.dataRange = doAutoscale(allFeatures)
+                const dataRange = doAutoscale(allFeatures)
+                for (const track of numericTracks(this.tracks)) {
+                    // Do not use this.dataRange, as that has side effects
+                    track.dataRange = dataRange
+                }
+
             }
         } else {
             // Individual track scaling
@@ -399,6 +432,7 @@ class MergedTrack extends TrackBase {
                 if (groupAutoscale) {
                     track.autoscaleGroup = name
                 }
+                track.isMergedTrack = false
                 browser.addTrack(track.config, track)
             }
             browser.updateViews()
@@ -420,7 +454,7 @@ class MergedFeatureCollection {
         let max = -Number.MAX_VALUE
 
         for (let a of this.featureArrays) {
-            if(Array.isArray(a)) {
+            if (Array.isArray(a)) {
                 for (let f of a) {
                     if (typeof f.value === 'undefined' || Number.isNaN(f.value)) {
                         continue
@@ -459,6 +493,16 @@ class MergedFeatureCollection {
         }
         return min
     }
+}
+
+/**
+ * Heuristic for finding numeric tracks.
+ *
+ * @param tracks
+ * @returns {*}
+ */
+const numericTracks = (tracks) => {
+    return tracks ? tracks.filter(track => undefined !== track.dataRange || undefined !== track.autoscale || undefined !== track.autoscaleGroup) : []
 }
 
 
