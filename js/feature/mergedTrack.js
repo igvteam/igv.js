@@ -227,7 +227,14 @@ class MergedTrack extends TrackBase {
 
         const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
         const featureArrays = await Promise.all(promises)
-        return new MergedFeatureCollection(featureArrays)
+        
+        if (featureArrays.every((arr) => arr.length === 0)){
+            return new MergedFeatureCollection([], [])
+        }
+        else {
+            const trackNames = this.tracks.map((t) => t.name)
+            return new MergedFeatureCollection(featureArrays, trackNames)
+        }
     }
 
     draw(options) {
@@ -446,8 +453,11 @@ class MergedTrack extends TrackBase {
 
 class MergedFeatureCollection {
 
-    constructor(featureArrays) {
+    constructor(featureArrays,trackNames) {
         this.featureArrays = featureArrays
+        //trackNames is needed for the popup data to populate track names 
+        //preserving the order of the actual tracks
+        this.trackNames = trackNames
     }
 
     getMax(start, end) {
