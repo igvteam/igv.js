@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>indel</title>
+
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr6:63,498,615-63,498,653",
+            tracks: [
+                {
+                    "url": "../../test/data/vcf/noheader.vcf"
+                },
+
+            ]
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (browser) {
+
+        })
+
+
+</script>
+
+</body>
+
+</html>

@@ -126,23 +126,26 @@ class VariantTrack extends TrackBase {
         this.header = await this.getHeader()
 
         // Set colorBy, if not explicitly set default to allele frequency, if available, otherwise default to none (undefined)
-        const infoFields = new Set(Object.keys(this.header.INFO))
-        if (this.config.colorBy) {
-            this.colorBy = this.config.colorBy
-        } else if (!this.config.color && infoFields.has('AF')) {
-            this.colorBy = 'AF'
+        if(this.header.INFO) {
+            const infoFields = new Set(Object.keys(this.header.INFO))
+            if (this.config.colorBy) {
+                this.colorBy = this.config.colorBy
+            } else if (!this.config.color && infoFields.has('AF')) {
+                this.colorBy = 'AF'
+            }
+
+            // Configure menu items based on info available
+            if (infoFields.has('AF')) {
+                this._colorByItems.set('AF', 'Allele frequency')
+            }
+            if (infoFields.has('VT')) {
+                this._colorByItems.set('VT', 'Variant Type')
+            }
+            if (infoFields.has('SVTYPE')) {
+                this._colorByItems.set('SVTYPE', 'SV Type')
+            }
         }
 
-        // Configure menu items based on info available
-        if (infoFields.has('AF')) {
-            this._colorByItems.set('AF', 'Allele frequency')
-        }
-        if (infoFields.has('VT')) {
-            this._colorByItems.set('VT', 'Variant Type')
-        }
-        if (infoFields.has('SVTYPE')) {
-            this._colorByItems.set('SVTYPE', 'SV Type')
-        }
         if (this.config.colorBy && !this._colorByItems.has(this.config.colorBy)) {
             this._colorByItems.set(this.config.colorBy, this.config.colorBy)
         }
