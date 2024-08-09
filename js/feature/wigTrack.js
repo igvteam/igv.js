@@ -184,12 +184,10 @@ class WigTrack extends TrackBase {
         const bpPerPixel = options.bpPerPixel
         const bpStart = options.bpStart
         const pixelWidth = options.pixelWidth
-        const pixelHeight = options.pixelHeight
+        const pixelHeight = options.pixelHeight - 1
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        const posColor = this.color || DEFAULT_COLOR
-
-        let lastNegValue = 1
-        const scaleFactor = this.getScaleFactor(this.dataRange.min, this.dataRange.max, options.pixelHeight, this.logScale)
+        
+        const scaleFactor = this.getScaleFactor(this.dataRange.min, this.dataRange.max, pixelHeight, this.logScale)
         const yScale = (yValue) => this.logScale
             ? this.computeYPixelValueInLogScale(yValue, scaleFactor)
             : this.computeYPixelValue(yValue, scaleFactor)
