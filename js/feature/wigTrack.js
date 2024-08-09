@@ -158,7 +158,7 @@ class WigTrack extends TrackBase {
 
     // TODO: refactor to igvUtils.js
     getScaleFactor(min, max, height, logScale) {
-        const scale = logScale ? height / (Math.log10(max + 1) - (min < 0 ? -Math.log10(Math.abs(min) + 1) : Math.log10(min + 1))) : height / (max - min)
+        const scale = logScale ? height / (Math.log10(Math.abs(max) + 1) - (min < 0 ? -Math.log10(Math.abs(min) + 1) : Math.log10(min + 1))) : height / (max - min)
         return scale
     }
 
