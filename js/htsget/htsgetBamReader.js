@@ -44,8 +44,8 @@ class HtsgetBamReader extends HtsgetReader {
             const ba = BGZip.unbgzf(compressedData.buffer)
             this.header = BamUtils.decodeBamHeader(ba, this.genome)
             this.chrAliasTable = new Map()
-            for (let key of Object.keys(this.header.chrAliasTable)) {
-                this.chrAliasTable.set(key, this.header.chrAliasTable[key])
+            for (let name of this.header.chrNames) {
+                this.chrAliasTable.set(name, this.genome.getChromosomeName(name))
             }
         }
 
@@ -55,6 +55,7 @@ class HtsgetBamReader extends HtsgetReader {
 
         // BAM decoding
         const ba = BGZip.unbgzf(compressedData.buffer)
+        this.header = BamUtils.decodeBamHeader(ba, this.genome)
 
         const chrIdx = this.header.chrToIndex[chr]
         const alignmentContainer = new AlignmentContainer(chr, start, end, this.config)
