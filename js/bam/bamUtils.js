@@ -34,46 +34,41 @@ const BamUtils = {
     },
 
     /**
+     * @param ba - UInt8Array  bytes to decode
      *
-     * @param ba  bytes to decode as a UInt8Array
-     * @param genome  optional igv genome object
-     * @returns {{ magicNumer: number, size: number, chrNames: Array, chrToIndex: ({}|*), chrAliasTable: ({}|*) }}
+     * @returns {{size: *, chrNames: *[], magicNumber: *, chrToIndex: {}}}
      */
-    decodeBamHeader: function (ba, genome) {
+    decodeBamHeader: function (ba) {
 
-        var magic, samHeaderLen, samHeader, chrToIndex, chrNames, chrAliasTable, alias
 
-        magic = readInt(ba, 0)
+        const magic = readInt(ba, 0)
         if (magic !== BAM1_MAGIC_NUMBER) {
             throw new Error('BAM header errror: bad magic number.  This could be caused by either a corrupt or missing file.')
         }
 
-        samHeaderLen = readInt(ba, 4)
-        samHeader = ''
-
+        const samHeaderLen = readInt(ba, 4)
+        let samHeader = ''
         for (var i = 0; i < samHeaderLen; ++i) {
             samHeader += String.fromCharCode(ba[i + 8])
         }
 
-        var nRef = readInt(ba, samHeaderLen + 8)
-        var p = samHeaderLen + 12
+        const nRef = readInt(ba, samHeaderLen + 8)
+        let p = samHeaderLen + 12
 
-        chrToIndex = {}
-        chrNames = []
+        const chrToIndex = {}
+        const chrNames = []
 
         for (i = 0; i < nRef; ++i) {
-            var lName = readInt(ba, p)
-            var name = ''
-            for (var j = 0; j < lName - 1; ++j) {
+            const len = readInt(ba, p)
+            let name = ''
+            for (var j = 0; j < len - 1; ++j) {
                 name += String.fromCharCode(ba[p + 4 + j])
             }
-            var lRef = readInt(ba, p + lName + 4)
-            //dlog(name + ': ' + lRef);
 
             chrToIndex[name] = i
             chrNames[i] = name
 
-            p = p + 8 + lName
+            p = p + 8 + len
         }
 
         return {
