@@ -20,7 +20,7 @@ class ChromAliasBB {
     }
 
     /**
-     * Return the canonical chromosome name for the alias.  If none found return the alias.
+     * Return the cached canonical chromosome name for the alias.  If none found return the alias.
      *
      * Note this will only work if a "search" for ths chromosome has been performed previously.
      *
