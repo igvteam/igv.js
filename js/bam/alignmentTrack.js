@@ -1229,23 +1229,24 @@ class AlignmentTrack extends TrackBase {
         const y = clickState.y
         const offsetY = y - this.top
         const genomicLocation = clickState.genomicLocation
-        const showSoftClips = this.showSoftClips
+ 
+        if(features.packedGroups) {
+            let minGroupY = Number.MAX_VALUE
+            for (let group of features.packedGroups.values()) {
+                minGroupY = Math.min(minGroupY, group.pixelTop)
+                if (offsetY > group.pixelTop && offsetY <= group.pixelBottom) {
 
-        let minGroupY = Number.MAX_VALUE
-        for (let group of features.packedGroups.values()) {
-            minGroupY = Math.min(minGroupY, group.pixelTop)
-            if (offsetY > group.pixelTop && offsetY <= group.pixelBottom) {
+                    const alignmentRowHeight = this.displayMode === "SQUISHED" ?
+                        this.squishedRowHeight :
+                        this.alignmentRowHeight
 
-                const alignmentRowHeight = this.displayMode === "SQUISHED" ?
-                    this.squishedRowHeight :
-                    this.alignmentRowHeight
+                    let packedAlignmentsIndex = Math.floor((offsetY - group.pixelTop) / alignmentRowHeight)
 
-                let packedAlignmentsIndex = Math.floor((offsetY - group.pixelTop) / alignmentRowHeight)
-
-                if (packedAlignmentsIndex >= 0 && packedAlignmentsIndex < group.length) {
-                    const alignmentRow = group.rows[packedAlignmentsIndex]
-                    const clicked = alignmentRow.alignments.filter(alignment => alignment.containsLocation(genomicLocation, showSoftClips))
-                    if (clicked.length > 0) return clicked[0]
+                    if (packedAlignmentsIndex >= 0 && packedAlignmentsIndex < group.length) {
+                        const alignmentRow = group.rows[packedAlignmentsIndex]
+                        const clicked = alignmentRow.alignments.filter(alignment => alignment.containsLocation(genomicLocation, this.showSoftClips))
+                        if (clicked.length > 0) return clicked[0]
+                    }
                 }
             }
         }

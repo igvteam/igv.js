@@ -273,7 +273,7 @@ class AlignmentContainer {
     allAlignments() {
         if (this.alignments) {
             return this.alignments
-        } else {
+        } else if (this.packedGroups) {
             const all = Array.from(this.packedGroups.values()).flatMap(group => group.rows.flatMap(row => row.alignments))
             if (this.#unpacked && this.#unpacked.length > 0) {
                 for (let a of this.#unpacked) {
@@ -281,6 +281,8 @@ class AlignmentContainer {
                 }
             }
             return all
+        } else {
+            return []
         }
     }
 
@@ -289,9 +291,10 @@ class AlignmentContainer {
     }
 
     sortRows(options) {
-
-        for (let group of this.packedGroups.values()) {
-            group.sortRows(options, this)
+        if(this.packedGroups) {
+            for (let group of this.packedGroups.values()) {
+                group.sortRows(options, this)
+            }
         }
     }
 }
