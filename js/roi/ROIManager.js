@@ -198,7 +198,7 @@ class ROIManager {
             if (features) {
 
                 for (let feature of features) {
-
+                    if ('name' in roiSet) feature['roiSet'] = roiSet.name
                     const regionKey = createRegionKey(chr, feature.start, feature.end)
 
                     const {
