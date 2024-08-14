@@ -198,7 +198,6 @@ class ROIManager {
             if (features) {
 
                 for (let feature of features) {
-                    if ('name' in roiSet) feature['roiSet'] = roiSet.name
                     const regionKey = createRegionKey(chr, feature.start, feature.end)
 
                     const {
@@ -243,8 +242,7 @@ class ROIManager {
             event.stopPropagation()
 
             const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-            const isUserDefined = roiSet.isUserDefined
-            this.roiMenu.present(feature, isUserDefined, event, this, columnContainer, regionElement)
+            this.roiMenu.present(feature, roiSet, event, this, columnContainer, regionElement)
         })
 
 

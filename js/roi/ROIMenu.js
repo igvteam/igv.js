@@ -30,17 +30,17 @@ class ROIMenu {
 
     }
 
-    async present(feature, isUserDefined, event, roiManager, columnContainer, regionElement) {
-        const menuItems = this.menuItems(feature, isUserDefined, event, roiManager, columnContainer, regionElement)
+    async present(feature, roiSet, event, roiManager, columnContainer, regionElement) {
+        const menuItems = this.menuItems(feature, roiSet, event, roiManager, columnContainer, regionElement)
         this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
     }
 
-    menuItems(feature, isUserDefined, event, roiManager, columnContainer, regionElement) {
+    menuItems(feature, roiSet, event, roiManager, columnContainer, regionElement) {
         const items = feature.name ? [`<b>${feature.name}</b><br/>`]  : []
-        if ('roiSet' in feature) items.push(`<b>ROI Set: ${feature.roiSet}</b>`)
+        if ('name' in roiSet) items.push(`<b>ROI Set: ${roiSet.name}</b>`)
         if (items.length > 0) items.push(`<hr/>`)
 
-        if (isUserDefined) {
+        if (roiSet.isUserDefined) {
             items.push(
                 {
                     label: 'Set description ...',
@@ -104,7 +104,7 @@ class ROIMenu {
         }
 
 
-        if (isUserDefined) {
+        if (roiSet.isUserDefined) {
             items.push(
                 '<hr/>',
                 {
