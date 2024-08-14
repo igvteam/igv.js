@@ -36,7 +36,7 @@ class ROIMenu {
     }
 
     menuItems(feature, isUserDefined, event, roiManager, columnContainer, regionElement) {
-        const items = feature.name ? [`<b>Description: ${feature.name}</b><br/>`]  : []
+        const items = feature.name ? [`<b>${feature.name}</b><br/>`]  : []
         if ('roiSet' in feature) items.push(`<b>ROI Set: ${feature.roiSet}</b>`)
         if (items.length > 0) items.push(`<hr/>`)
 
