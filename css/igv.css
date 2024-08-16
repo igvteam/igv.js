@@ -1610,6 +1610,7 @@
   top: 0;
   left: 0;
   width: max-content;
+  max-width: 400px;
   z-index: 512;
   cursor: pointer;
   font-family: "Open Sans", sans-serif;
