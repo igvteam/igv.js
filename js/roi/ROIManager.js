@@ -24,13 +24,17 @@ class ROIManager {
             const [rectA, rectB] = tracks
                 .map(track => track.trackView.viewports[0].$viewport.get(0))
                 .map(element => getElementVerticalDimension(element))
-
+            
+            //Covers cases in which ruler and/or ideogram are hidden
+            const heightA = rectA ? rectA.height : 0
+            const heightB = rectB ? rectB.height : 0
+            
             const elements = browser.columnContainer.querySelectorAll('.igv-roi-region')
 
             const fudge = -0.5
             if (elements) {
                 for (const element of elements) {
-                    element.style.marginTop = `${rectA.height + rectB.height + fudge}px`
+                    element.style.marginTop = `${heightA + heightB + fudge}px`
                 }
 
             }
