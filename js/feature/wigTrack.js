@@ -158,7 +158,9 @@ class WigTrack extends TrackBase {
 
     // TODO: refactor to igvUtils.js
     getScaleFactor(min, max, height, logScale) {
-        const scale = logScale ? height / (Math.log10(max + 1) - (min <= 0 ? 0 : Math.log10(min + 1))) : height / (max - min)
+        const minValue = (logScale === true) ? ((min < 0) ? -Math.log10(Math.abs(min) + 1) : Math.log10(Math.abs(min) + 1)) : min
+        const maxValue = (logScale === true) ? Math.log10(Math.abs(max) + 1) : max
+        const scale = height / (maxValue - minValue)
         return scale
     }
 
@@ -168,12 +170,11 @@ class WigTrack extends TrackBase {
 
     computeYPixelValueInLogScale(yValue, yScaleFactor) {
         let maxValue = this.dataRange.max
-        let minValue = this.dataRange.min
-        if (maxValue <= 0) return 0 // TODO:
-        if (minValue <= -1) minValue = 0
-        minValue = (minValue <= 0) ? 0 : Math.log10(minValue + 1)
-        maxValue = Math.log10(maxValue + 1)
-        yValue = Math.log10(yValue + 1)
+        let minValue =  this.dataRange.min
+        minValue = (minValue < 0) ? -Math.log10(Math.abs(minValue) + 1) : Math.log10(Math.abs(minValue) + 1)
+        maxValue = (maxValue < 0) ? -Math.log10(Math.abs(maxValue) + 1) : Math.log10(Math.abs(maxValue) + 1)
+        
+        yValue = (yValue < 0) ? -Math.log10(Math.abs(yValue) +1) : Math.log10(yValue + 1)
         return ((this.flipAxis ? (yValue - minValue) : (maxValue - yValue)) * yScaleFactor)
     }
 
@@ -184,12 +185,10 @@ class WigTrack extends TrackBase {
         const bpPerPixel = options.bpPerPixel
         const bpStart = options.bpStart
         const pixelWidth = options.pixelWidth
-        const pixelHeight = options.pixelHeight
+        const pixelHeight = options.pixelHeight - 1
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        const posColor = this.color || DEFAULT_COLOR
-
-        let lastNegValue = 1
-        const scaleFactor = this.getScaleFactor(this.dataRange.min, this.dataRange.max, options.pixelHeight, this.logScale)
+        
+        const scaleFactor = this.getScaleFactor(this.dataRange.min, this.dataRange.max, pixelHeight, this.logScale)
         const yScale = (yValue) => this.logScale
             ? this.computeYPixelValueInLogScale(yValue, scaleFactor)
             : this.computeYPixelValue(yValue, scaleFactor)
@@ -247,7 +246,7 @@ class WigTrack extends TrackBase {
                         if (f.value > this.dataRange.max) {
                             IGVGraphics.fillRect(ctx, x, 0, width, 3, {fillStyle: this.overflowColor})
                         } else if (f.value < this.dataRange.min) {
-                            IGVGraphics.fillRect(ctx, x, pixelHeight - 3, width, 3, {fillStyle: this.overflowColor})
+                            IGVGraphics.fillRect(ctx, x, pixelHeight - 2, width, 3, {fillStyle: this.overflowColor})
                         }
 
                     }
@@ -257,8 +256,12 @@ class WigTrack extends TrackBase {
 
                 // If the track includes negative values draw a baseline
                 if (this.dataRange.min < 0) {
-                    const ratio = this.dataRange.max / (this.dataRange.max - this.dataRange.min)
-                    const basepx = this.flipAxis ? (1 - ratio) * options.pixelHeight : ratio * options.pixelHeight
+                    let maxValue = this.dataRange.max
+                    let minValue =  this.dataRange.min
+                    minValue = (this.logScale === true) ? ((minValue < 0) ? -Math.log10(Math.abs(minValue) + 1) : Math.log10(Math.abs(minValue) + 1)) : minValue
+                    maxValue = (this.logScale === true) ? ((maxValue < 0) ? -Math.log10(Math.abs(maxValue) + 1) : Math.log10(Math.abs(maxValue) + 1)) : maxValue
+                    const ratio = maxValue / (maxValue - minValue)
+                    const basepx = this.flipAxis ? (1 - ratio) * pixelHeight : ratio * pixelHeight
                     IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: this.baselineColor})
                 }
             }
