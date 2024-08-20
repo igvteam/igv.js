@@ -766,7 +766,7 @@ const ACCEPTABLE_RESPONSE_TYPES = ['', 'arraybuffer', 'blob', 'document', 'json'
  * @see {@link https://fetch.spec.whatwg.org/#forbidden-header-name Fetch Standard - forbidden header name}
  */
 
-const FORBIDDEN_REQUEST_HEADERS = ['accept-charset', 'accept-encoding', 'access-control-request-headers', 'access-control-request-method', 'connection', 'content-length', 'cookie', 'cookie2', 'date', 'dnt', 'expect', 'host', 'keep-alive', 'origin', 'referer', 'te', 'trailer', 'transfer-encoding', 'upgrade', 'user-agent', 'via']
+const FORBIDDEN_REQUEST_HEADERS = ['accept-charset', 'accept-encoding', 'access-control-request-headers', 'access-control-request-method', 'connection', 'content-length', 'cookie', 'cookie2', 'date', 'dnt', 'expect', 'host', 'keep-alive', 'origin', 'referer', 'te', 'trailer', 'transfer-encoding', 'upgrade', 'via']
 /**
  * @see {@link https://fetch.spec.whatwg.org/#forbidden-response-header-name Fetch Standard - forbidden response header name}
  */
@@ -1178,10 +1178,13 @@ class XMLHttpRequest extends XMLHttpRequestEventTarget {
 
 
     send(body = null) {
+
         if (this.readyState !== XMLHttpRequest.OPENED || !_classPrivateFieldLooseBase(this, _client)[_client]) {
             // TODO: Add human readable message.
             throw new DOMException('', 'InvalidStateError')
         }
+
+        this.setRequestHeader('User-Agent', 'Mozilla')  // We are emulating a browser
 
         if (body) {
             const bodyInit = body instanceof ArrayBuffer || body instanceof Uint8Array ? Buffer.from(body) : body
