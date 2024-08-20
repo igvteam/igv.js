@@ -30,7 +30,10 @@ import BaseFeatureSource from "../feature/baseFeatureSource.js"
 
 class TDFSource extends BaseFeatureSource {
 
+    #wgValues = {}
     searchable = false
+
+
     constructor(config, genome) {
         super(genome)
         this.genome = genome
@@ -41,28 +44,7 @@ class TDFSource extends BaseFeatureSource {
     async getFeatures({chr, start, end, bpPerPixel, windowFunction = "mean"}) {
 
         if (chr.toLowerCase() === "all") {
-            const wgFeatures = []
-            const genome = this.genome
-            const chrNames = this.genome.wgChromosomeNames
-            if (chrNames) {
-                for (let c of genome.wgChromosomeNames) {
-                    const len = genome.getChromosome(c).bpLength
-                    bpPerPixel = len / 1000
-                    const chrFeatures = await this._getFeatures(c, 0, len, bpPerPixel, windowFunction)
-                    if (chrFeatures) {
-                        for (let f of chrFeatures) {
-                            const wg = Object.assign({}, f)
-                            wg.chr = "all"
-                            wg.start = genome.getGenomeCoordinate(f.chr, f.start)
-                            wg.end = genome.getGenomeCoordinate(f.chr, f.end)
-                            wg._f = f
-                            wgFeatures.push(wg)
-                        }
-                    }
-                }
-            }
-            return wgFeatures
-
+            return this.getWGValues(windowFunction, bpPerPixel)
         } else {
             return this._getFeatures(chr, start, end, bpPerPixel, windowFunction)
         }
@@ -130,6 +112,38 @@ class TDFSource extends BaseFeatureSource {
     get windowFunctions() {
         return this.reader.windowFunctions
     }
+
+    async getWGValues(windowFunction, bpPerPixel) {
+
+        const cached = this.#wgValues[windowFunction]
+        if (cached && cached.bpPerPixel > 0.8 * bpPerPixel && cached.bpPerPixel < 1.2 * bpPerPixel) {
+            return cached.values
+        } else {
+            const wgFeatures = []
+            const genome = this.genome
+            const chrNames = this.genome.wgChromosomeNames
+            if (chrNames) {
+                for (let c of genome.wgChromosomeNames) {
+                    const len = genome.getChromosome(c).bpLength
+                    bpPerPixel = len / 1000
+                    const chrFeatures = await this._getFeatures(c, 0, len, bpPerPixel, windowFunction)
+                    if (chrFeatures) {
+                        for (let f of chrFeatures) {
+                            const wg = Object.assign({}, f)
+                            wg.chr = "all"
+                            wg.start = genome.getGenomeCoordinate(f.chr, f.start)
+                            wg.end = genome.getGenomeCoordinate(f.chr, f.end)
+                            wg._f = f
+                            wgFeatures.push(wg)
+                        }
+                    }
+                }
+            }
+            this.#wgValues[windowFunction] = {values: wgFeatures, bpPerPixel}
+            return wgFeatures
+        }
+    }
+
 }
 
 function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {

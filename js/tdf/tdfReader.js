@@ -255,8 +255,6 @@ class TDFReader {
             return []
         }
 
-        tileIndeces = consolidateTiles(tileIndeces)
-
         const tiles = []
 
         for (let indexEntry of tileIndeces) {
@@ -268,7 +266,13 @@ class TDFReader {
                 }
             }))
 
-            const tileData = this.compressed ? BGZip.inflate(data).buffer : data
+            let tileData
+            try {
+                tileData = this.compressed ? BGZip.inflate(data).buffer : data
+            } catch (e) {
+                console.error(e)
+                continue
+            }
 
             const binaryParser = new BinaryParser(new DataView(tileData))
             const type = binaryParser.getString()
@@ -288,7 +292,6 @@ class TDFReader {
                     throw "Unknown tile type: " + type
             }
             tiles.push(tile)
-
         }
         return tiles
     }
@@ -431,21 +434,5 @@ function createBed(binaryParser, nTracks, type) {
     }
 }
 
-function consolidateTiles(tiles) {
-
-    const consolidated = []
-    let current = tiles[0]
-    for (let i = 1; i < tiles.length; i++) {
-        const t = tiles[i]
-        if (t.position > current.position + current.size) {
-            consolidated.push(current)
-            current = t
-        } else {
-            current.size = t.position + t.size - current.position
-        }
-    }
-    consolidated.push(current)
-    return consolidated
-}
 
 export default TDFReader
