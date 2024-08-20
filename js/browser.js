@@ -64,6 +64,7 @@ import igvCss from "./embedCss.js"
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConstants.js"
 import QTLSelections from "./qtl/qtlSelections.js"
 import {inferFileFormat} from "./util/fileFormatUtils.js"
+import {convertToHubURL} from "./ucsc/ucscUtils.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -818,6 +819,10 @@ class Browser {
      * @returns genome
      */
     async loadGenome(idOrConfig) {
+
+        if(idOrConfig.genarkAccession) {
+            idOrConfig.url = convertToHubURL(idOrConfig.genarkAccession)
+        }
 
         // Translate the generic "url" field, used by clients such as igv-webapp
         if (idOrConfig.url) {
