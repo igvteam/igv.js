@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const div = document.getElementById("myDiv");
+    const options = {
+        "genome": "hg19",
+        "tracks": [
+
+            {
+                "url": "https://s3.amazonaws.com/igv.org.test/data/bedgraph/ENCFF439GUL_sample.bedgraph.gz",
+                "name": "Bedgraph",
+                "format": "bedgraph",
+                "type": "wig",
+                "min": 0,
+                "max": 10
+            },
+            {
+                "name": "Bigwig",
+                "type": "wig",
+                "format": "bigwig",
+                "url": "https://s3.amazonaws.com/igv.org.genomes/mm10/gc5Base.bw",
+                "min": 0,
+                "max": 100,
+                "order": 0
+            },
+            {
+                url: "https://www.broadinstitute.org/igvdata/annotations/hg19/hg19.gc5base.tdf",
+                name: "TDF",
+                type: "wig",
+                format: "tdf"
+            }
+        ]
+    }
+
+    igv.createBrowser(div, options).then(function (browser) {
+    });
+
+
+</script>
+
+</body>
+
+</html>
+
