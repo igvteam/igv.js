@@ -8,6 +8,7 @@ import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 import {computeWGFeatures, findFeatureAfterCenter, packFeatures} from "./featureUtils.js"
 import ChromAliasManager from "./chromAliasManager.js"
 import BaseFeatureSource from "./baseFeatureSource.js"
+import {summarizeData} from "./wigTrack.js"
 
 const DEFAULT_MAX_WG_COUNT = 10000
 
@@ -117,7 +118,7 @@ class TextFeatureSource extends BaseFeatureSource {
      * @param end
      * @param bpPerPixel
      */
-    async getFeatures({chr, start, end, bpPerPixel, visibilityWindow}) {
+    async getFeatures({chr, start, end, bpPerPixel, visibilityWindow, windowFunction}) {
 
         const isWholeGenome = ("all" === chr.toLowerCase())
 
@@ -139,7 +140,12 @@ class TextFeatureSource extends BaseFeatureSource {
         if (isWholeGenome) {
             if (!this.wgFeatures) {
                 if (this.supportsWholeGenome()) {
-                    this.wgFeatures = await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.maxWGCount)
+                    if("wig" === this.config.type) {
+                        const allWgFeatures = await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, 1000000)
+                        this.wgFeatures = summarizeData(allWgFeatures, 0, bpPerPixel, windowFunction)
+                    } else {
+                        this.wgFeatures = await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.maxWGCount)
+                    }
                 } else {
                     this.wgFeatures = []
                 }
