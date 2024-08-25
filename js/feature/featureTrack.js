@@ -556,7 +556,8 @@ function monitorTrackDrag(track) {
 
     function onDragEnd() {
         if (track.trackView && track.displayMode !== "SQUISHED") {
-            track.trackView.updateViews()      // TODO -- refine this to the viewport that was dragged after DOM refactor
+            // Repaint views to adjust feature name if center is moved out of view
+            track.trackView.repaintViews()
         }
     }
 
