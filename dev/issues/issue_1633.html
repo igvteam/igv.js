@@ -15,23 +15,19 @@
 
     var options =
         {
-            genome: "hg38",
-            locus: "X:73,819,307-73,856,333",
+            genome: "hg19",
+            locus: "chr7:57,774,280-59,316,560",
             tracks: [
                 {
-                    type: 'annotation',
-                    format: 'gff3',
-                    url: 'https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/Homo_sapiens.GRCh38.109.chr.sorted.gff3.gz',
-                    indexURL: "https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/Homo_sapiens.GRCh38.109.chr.sorted.gff3.gz.tbi",
-                    autoHeight: true
-                },
-                // {
-                //     type: 'annotation',
-                //     format: 'gff3',
-                //     url: 'https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/homo_sapiens.GRCh38.sorted.gff3.gz',
-                //     indexURL: "https://ftp.ebi.ac.uk/pub/databases/RNAcentral/.ensembl/homo_sapiens.GRCh38.sorted.gff3.gz.tbi",
-                //     height: 600
-                // }
+                    "type": "annotation",
+                    "format": "gtf",
+                    "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz",
+                    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi",
+                    "name": "Gencode v24 (gtf) -- genes filtered",
+                    "visibilityWindow": 10000000,
+                    "filterTypes": ["gene", "chromosome"],
+                    "autoHeight": true
+                }
             ]
         }
 

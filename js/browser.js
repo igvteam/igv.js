@@ -454,7 +454,7 @@ class Browser {
 
         // Append svg t testing, not used in production
         if (container) {
-            const svg = document.createElement("svg");
+            const svg = document.createElement("svg")
             svg.innerHTML = svgString
             container.append(svg)
             container.appendChild(svg)
@@ -825,7 +825,7 @@ class Browser {
      */
     async loadGenome(idOrConfig) {
 
-        if(idOrConfig.genarkAccession) {
+        if (idOrConfig.genarkAccession) {
             idOrConfig.url = convertToHubURL(idOrConfig.genarkAccession)
         }
 
@@ -2123,7 +2123,7 @@ class Browser {
 
         if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
             this.updateViews()
-            this.fireEvent('trackdragend')
+            this.fireEvent('trackdragend', [dragObject.viewport])
         }
     }
 
