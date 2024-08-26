@@ -105,20 +105,30 @@ class FeatureFileReader {
             await this.readHeader()
         }
 
+        let allFeatures
         const index = await this.getIndex()
         if (index) {
             this.indexed = true
-            return this.loadFeaturesWithIndex(chr, start, end)
+            allFeatures = await this.loadFeaturesWithIndex(chr, start, end)
         } else if (this.dataURI) {
             this.indexed = false
-            return this.loadFeaturesFromDataURI()
+            allFeatures = await this.loadFeaturesFromDataURI()
         } else if ("service" === this.config.sourceType) {
-            return this.loadFeaturesFromService(chr, start, end)
+            allFeatures = await this.loadFeaturesFromService(chr, start, end)
         } else {
             this.indexed = false
-            return this.loadFeaturesNoIndex()
+            allFeatures = await this.loadFeaturesNoIndex()
         }
 
+        allFeatures.sort(function (a, b) {
+            if (a.chr === b.chr) {
+                return a.start - b.start
+            } else {
+                return a.chr.localeCompare(b.chr)
+            }
+        })
+
+        return allFeatures
     }
 
     async readHeader() {
@@ -290,9 +300,6 @@ class FeatureFileReader {
                 await this._parse(allFeatures, dataWrapper, chr, end, start)
 
             }
-            allFeatures.sort(function (a, b) {
-                return a.start - b.start
-            })
 
             return allFeatures
         }
@@ -322,8 +329,13 @@ class FeatureFileReader {
 
         let features = await this.parser.parseFeatures(dataWrapper)
 
-        // Filter psuedo-features (e.g. created mates for VCF SV records)  TODO why?
-        //slicedFeatures = slicedFeatures.filter(f => f._f === undefined)
+        features.sort(function (a, b) {
+            if (a.chr === b.chr) {
+                return a.start - b.start
+            } else {
+                return a.chr.localeCompare(b.chr)
+            }
+        })
 
         // Filter features not in requested range.
         if (undefined === chr) {
@@ -332,28 +344,21 @@ class FeatureFileReader {
             let inInterval = false
             for (let i = 0; i < features.length; i++) {
                 const f = features[i]
-                if (f.chr !== chr) {
-                    if (allFeatures.length === 0) {
-                        continue  //adjacent chr to the left
-                    } else {
-                        break //adjacent chr to the right
+                if (f.chr === chr) {
+                    if (f.start > end) {
+                        allFeatures.push(f)  // First feature beyond interval
+                        break
                     }
-                }
-                if (f.start > end) {
-                    allFeatures.push(f)  // First feature beyond interval
-                    break
-                }
-                if (f.end >= start && f.start <= end) {
-                    // All this to grab first feature before start of interval.  Needed for some track renderers, like line plot
-                    if (!inInterval) {
-                        inInterval = true
-                        if (i > 0) {
-                            allFeatures.push(features[i - 1])
-                        } else {
-                            // TODO -- get block before this one for first feature;
+                    if (f.end >= start && f.start <= end) {
+                        // All this to grab first feature before start of interval.  Needed for some track renderers, like line plot
+                        if (!inInterval) {
+                            inInterval = true
+                            if (i > 0) {
+                                allFeatures.push(features[i - 1])
+                            }
                         }
+                        allFeatures.push(f)
                     }
-                    allFeatures.push(f)
                 }
             }
         }
