@@ -26,9 +26,7 @@ class GFFHelper {
         } else {
             combinedFeatures = this.combineFeaturesByType(features)
         }
-        combinedFeatures.sort(function (a, b) {
-            return a.start - b.start
-        })
+
         this.numberExons(combinedFeatures, genomicInterval)
         this.nameFeatures(combinedFeatures)
         return combinedFeatures

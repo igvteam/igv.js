@@ -10,6 +10,18 @@ import {decodeGFFAttribute, parseAttributeString} from "../js/feature/gff/parseA
 
 suite("testGFF", function () {
 
+    const combineFeatures = (features, helper) => {
+        const combinedFeatures = helper.combineFeatures(features)
+        combinedFeatures.sort(function (a, b) {
+            if (a.chr === b.chr) {
+                return a.start - b.start
+            } else {
+                return a.chr.localeCompare(b.chr)
+            }
+        })
+        return combinedFeatures
+    }
+
     test("Eden GFF", async function () {
 
         const chr = "chr1"
@@ -32,7 +44,7 @@ suite("testGFF", function () {
 
         // Combine features
         const helper = new GFFHelper({format: "gff3"})
-        const combinedFeatures = helper.combineFeatures(features)
+        const combinedFeatures = combineFeatures(features, helper)
         assert.equal(4, combinedFeatures.length)
 
         // Check last transcript
@@ -73,7 +85,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
         // Combine features
         const helper = new GFFHelper({format: "gff3"})
-        const combinedFeatures = helper.combineFeatures(features)
+        const combinedFeatures = combineFeatures(features, helper)
         assert.equal(1, combinedFeatures.length)
         assert.equal(3, combinedFeatures[0].exons.length)
     })
@@ -97,7 +109,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
         // Combine features
         const helper = new GFFHelper({format: "gff3"})
-        const combinedFeatures = helper.combineFeatures(features)
+        const combinedFeatures = combineFeatures(features, helper)
 
         // 9 mRNAs, 11 biological regions
         assert.equal(20, combinedFeatures.length)
@@ -125,7 +137,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
         // Combine features
         const helper = new GFFHelper({format: "gtf"})
-        const combinedFeatures = helper.combineFeatures(features)
+        const combinedFeatures = combineFeatures(features, helper)
         assert.equal(2, combinedFeatures.length)
 
         const transcript1 = combinedFeatures[0]
@@ -159,7 +171,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
         // Combine features
         const helper = new GFFHelper({format: "gtf"})
-        const combinedFeatures = helper.combineFeatures(features)
+        const combinedFeatures = combineFeatures(features, helper)
         assert.equal(2, combinedFeatures.length)
         assert.equal(3, combinedFeatures[0].exons.length)
         assert.equal(3, combinedFeatures[0].exons.length)
@@ -184,7 +196,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
         // Combine features
         const helper = new GFFHelper({format: "gtf"})
-        const combinedFeatures = helper.combineFeatures(features)
+        const combinedFeatures = combineFeatures(features, helper)
         assert.equal(1, combinedFeatures.length)
         assert.equal(2, combinedFeatures[0].exons.length)
 
@@ -226,7 +238,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
         // Combine features
         const helper = new GFFHelper({format: "gtf"})
-        const combinedFeatures = helper.combineFeatures(features)
+        const combinedFeatures = combineFeatures(features, helper)
         assert.equal(5, combinedFeatures.length)
         assert.equal(5, combinedFeatures[0].exons.length)
 
@@ -260,7 +272,6 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
         assert.equal(t2.exons[4].cdEnd, 73222)
 
     })
-
 
     test("GFF query", async function () {
 
