@@ -975,8 +975,6 @@ class VariantTrack extends TrackBase {
                 this.trackView.setTrackHeight(this.config.height || CNVPytorTrack.DEFAULT_TRACK_HEIGHT)
                 this.trackView.checkContentHeight()
                 this.trackView.updateViews()
-                this.trackView.track.autoHeight = false
-
 
             } finally {
                 this.trackView.stopSpinner()
