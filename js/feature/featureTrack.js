@@ -24,7 +24,6 @@ class FeatureTrack extends TrackBase {
         displayMode: "EXPANDED", // COLLAPSED | EXPANDED | SQUISHED
         margin: 10,
         featureHeight: 14,
-        autoHeight: false,
         useScore: false
     }
 

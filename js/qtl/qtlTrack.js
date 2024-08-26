@@ -60,12 +60,7 @@ class QTLTrack extends TrackBase {
         this.divider = config.divider || "rgb(225,225,225)"
         this.dotSize = config.dotSize || 2
         this.height = config.height || 100
-        this.autoHeight = false
         this.disableButtons = config.disableButtons
-
-        // Limit visibility window to 2 mb,  gtex server gets flaky beyond that
-        //this.visibilityWindow = config.visibilityWindow === undefined ?
-        //    2000000 : config.visibilityWindow >= 0 ? Math.min(2000000, config.visibilityWindow) : 2000000
 
         this.featureSource = FeatureSource(config, this.browser.genome)
     }
