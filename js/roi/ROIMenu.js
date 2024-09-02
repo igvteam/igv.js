@@ -111,8 +111,8 @@ class ROIMenu {
                     label: 'Delete',
                     click: () => {
                         roiSet.removeFeature(feature)
-                        this.browser.roiManager.deleteRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
-                        this.browser.roiManager.repaintTable()
+                        roiManager.deleteRegionWithKey(regionElement.dataset.region, columnContainer)
+                        roiManager.repaintTable()
                     }
                 }
             )
