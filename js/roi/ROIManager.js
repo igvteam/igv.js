@@ -289,14 +289,7 @@ class ROIManager {
     }
 
     async deleteRegionWithKey(regionKey, columnContainer) {
-
         columnContainer.querySelectorAll(createSelector(regionKey)).forEach(node => node.remove())
-
-        const {feature, set} = await this.findRegionWithKey(regionKey)
-
-        if (set) {
-            set.removeFeature(feature)
-        }
 
         const records = await this.getTableRecords()
 
@@ -305,23 +298,6 @@ class ROIManager {
             this.setROITableButtonVisibility(false)
         }
 
-    }
-
-    async findRegionWithKey(regionKey) {
-
-        const {chr, start, end} = parseRegionKey(regionKey)
-
-        for (let set of this.roiSets) {
-            const features = await set.getFeatures(chr, start, end)
-
-            for (let feature of features) {
-                if (feature.chr === chr && feature.start >= start && feature.end <= end) {
-                    return {feature, set}
-                }
-            }
-        }
-
-        return {feature: undefined, set: undefined}
     }
 
     toJSON() {
