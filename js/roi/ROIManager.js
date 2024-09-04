@@ -274,6 +274,10 @@ class ROIManager {
         return this.roiSets.find(roiSet => true === roiSet.isUserDefined)
     }
 
+    deleteUserDefinedROISet(){
+        this.roiSets = this.roiSets.filter(roiSet => roiSet.isUserDefined !== true);
+    }
+    
     initializeUserDefinedROISet() {
 
         const config =

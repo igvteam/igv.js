@@ -109,8 +109,14 @@ class ROIMenu {
                 '<hr/>',
                 {
                     label: 'Delete',
-                    click: () => {
+                    click: async () => {
                         roiSet.removeFeature(feature)
+                        const userDefinedFeatures = await roiSet.getAllFeatures()
+                        
+                        // Delete user defined ROI Set if it is empty
+                        if (Object.keys(userDefinedFeatures).length === 0) {
+                            roiManager.deleteUserDefinedROISet()
+                        }
                         roiManager.deleteRegionWithKey(regionElement.dataset.region, columnContainer)
                         roiManager.repaintTable()
                     }
