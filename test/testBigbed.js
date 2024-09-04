@@ -163,14 +163,14 @@ table chromatinInteract
 
         this.timeout(10000)
 
-        const url = "https://s3.amazonaws.com/igv.org.genomes/hg38/clinvarMain.bb",
+        const url = "https://hgdownload.soe.ucsc.edu/gbdb/hg38/bbi/clinvar/clinvarMain.bb",
             chr = "chr22",
             start = 23786974,
             end = 23787050
 
         const bwReader = new BWReader({url: url})
         const features = await bwReader.readFeatures(chr, start, chr, end)
-        assert.equal(features.length, 3)
+        assert.equal(features.length, 4)
 
     })
 
