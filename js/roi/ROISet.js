@@ -184,6 +184,10 @@ class DynamicFeatureSource {
         if (this.featureMap[chr]) {
             const match = `${chr}-${start}-${end}`
             this.featureMap[chr] = this.featureMap[chr].filter(feature => match !== `${feature.chr}-${feature.start}-${feature.end}`)
+            // Check if featureMap for a specific chromosome is empty now and delete it if yes
+            if (this.featureMap[chr].length === 0) {
+                delete this.featureMap[chr];
+            }
         }
     }
 }
