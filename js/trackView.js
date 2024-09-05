@@ -422,7 +422,7 @@ class TrackView {
         const viewportsToRepaint = visibleViewports.filter(vp => vp.needsRepaint()).filter(viewport => viewport.checkZoomIn())
 
         // Get viewports that require a data load
-        const viewportsToReload = visibleViewports.filter(viewport => viewport.needsReload())
+        const viewportsToReload = visibleViewports.filter(viewport => viewport.checkZoomIn()).filter(viewport => viewport.needsReload())
 
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
