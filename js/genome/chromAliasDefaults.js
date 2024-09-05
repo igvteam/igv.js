@@ -14,6 +14,9 @@ class ChromAliasDefaults {
         this.update(id, chromosomeNames)
     }
 
+    async preload() {
+        // no-op
+    }
 
     /**
      * Return the canonical chromosome name for the alias.  If none found return the alias

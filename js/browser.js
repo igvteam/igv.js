@@ -1579,7 +1579,7 @@ class Browser {
         }
 
         if (this.chromosomeSelectWidget) {
-            this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
+            this.chromosomeSelectWidget.setValue(referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : '')
         }
 
         const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
