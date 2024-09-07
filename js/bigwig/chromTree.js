@@ -32,7 +32,6 @@ export default class ChromTree {
             const idToName = []
             let sumLengths = 0
             const readTreeNode = (offset) => {
-
                 if (offset >= 0) binaryParser.position = offset
                 const type = binaryParser.getByte()
                 const reserved = binaryParser.getByte()
@@ -69,7 +68,7 @@ export default class ChromTree {
             }
 
             // Recursively walk tree to populate dictionary
-            readTreeNode(binaryParser, -1)
+            readTreeNode( -1)
 
             return new ChromTree(header, nameToId, idToName, sumLengths)
         }

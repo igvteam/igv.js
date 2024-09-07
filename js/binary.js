@@ -34,6 +34,20 @@ class BinaryParser {
         this.length = dataView.byteLength
     }
 
+    /**
+     * Print the first "n" bytes to the console.  Used for debugging.
+     * @param n
+     */
+    dumpBytes (n = 100) {
+        const pos = this.position
+        const bytes = []
+        for(let i=0; i<= n; i++) {
+            bytes.push(this.getByte())
+        }
+        console.log(bytes.join(" "))
+        this.setPosition(pos)
+    }
+
     setPosition(position) {
         this.position = position
     }

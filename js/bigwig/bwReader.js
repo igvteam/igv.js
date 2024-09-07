@@ -281,6 +281,16 @@ class BWReader {
         }
     }
 
+    /**
+     * The BB header consists of
+     *  (1) the common header
+     *  (2) the zoom headers
+     *  (3) autosql
+     *  (4) total summary block (version 2 and later)
+     *
+     *  In addition, we read the chromomsome B+ tree
+     * @returns {Promise<*>}
+     */
     async loadHeader() {
 
         if (this.header) {
@@ -298,7 +308,7 @@ class BWReader {
             // Assume low-to-high unless proven otherwise
             this.littleEndian = true
 
-            let binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
+            const binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
             let magic = binaryParser.getUInt()
             if (magic === BIGWIG_MAGIC_LTH) {
                 this.type = "bigwig"
@@ -335,30 +345,33 @@ class BWReader {
                 extensionOffset: binaryParser.getLong()
             }
 
+            // Read the next chunk containing zoom headers, autosql, and total summary if present.  TotalSummary size = 40 bytes
             const startOffset = BBFILE_HEADER_SIZE
+            const size = header.totalSummaryOffset > 0 ?
+                header.totalSummaryOffset - startOffset + 40 :
+                Math.min(header.fullDataOffset, header.chromTreeOffset) - startOffset
             let range = {
                 start: startOffset,
-                size: (header.fullDataOffset - startOffset + 4)
+                size: size
             }
             data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: range}))
-
-            const nZooms = header.nZoomLevels
-            binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
+            const extHeaderParser = new BinaryParser(new DataView(data), this.littleEndian)
 
             // Load zoom headers, store in order of decreasing reduction level (increasing resolution)
+            const nZooms = header.nZoomLevels
             this.zoomLevelHeaders = []
             this.firstZoomDataOffset = Number.MAX_SAFE_INTEGER
             for (let i = 1; i <= nZooms; i++) {
                 const zoomNumber = nZooms - i
-                const zlh = new ZoomLevelHeader(zoomNumber, binaryParser)
+                const zlh = new ZoomLevelHeader(zoomNumber, extHeaderParser)
                 this.firstZoomDataOffset = Math.min(zlh.dataOffset, this.firstZoomDataOffset)
                 this.zoomLevelHeaders[zoomNumber] = zlh
             }
 
             // Autosql
             if (header.autoSqlOffset > 0) {
-                binaryParser.position = header.autoSqlOffset - startOffset
-                const autoSqlString = binaryParser.getString()
+                extHeaderParser.position = header.autoSqlOffset - startOffset
+                const autoSqlString = extHeaderParser.getString()
                 if (autoSqlString) {
                     this.autoSql = parseAutoSQL(autoSqlString)
                 }
@@ -366,35 +379,73 @@ class BWReader {
 
             // Total summary
             if (header.totalSummaryOffset > 0) {
-                binaryParser.position = header.totalSummaryOffset - startOffset
-                this.totalSummary = new BWTotalSummary(binaryParser)
+                extHeaderParser.position = header.totalSummaryOffset - startOffset
+                this.totalSummary = new BWTotalSummary(extHeaderParser)
             }
 
-            // Chrom data index
-            if (header.chromTreeOffset > 0) {
-                binaryParser.position = header.chromTreeOffset - startOffset
-                this.chromTree = await ChromTree.parseTree(binaryParser, startOffset, this.genome)
-                this.chrNames = new Set(this.chromTree.idToName)
-            } else {
-                // TODO -- this is an error, not expected
-                throw "BigWig chromosome tree offset <= 0"
+            // Chrom data index.  The start is known, size is not, but we can estimate it
+            const bufferSize = Math.min(200000, Math.max(10000, header.fullDataOffset - header.chromTreeOffset))
+            this.chromTree = await this.#readChromTree(header.chromTreeOffset, bufferSize)
+            this.chrNames = new Set(this.chromTree.idToName)
+
+            // Estimate feature density from dataCount (bigbed only)
+            if("bigbed" === this.type) {
+                const dataCount = await this.#readDataCount(header.fullDataOffset)
+                this.featureDensity = dataCount / this.chromTree.sumLengths
             }
-
-            //Finally total data count
-            binaryParser.position = header.fullDataOffset - startOffset
-            header.dataCount = binaryParser.getInt()
-
-            this.featureDensity = header.dataCount / this.chromTree.sumLengths
 
             this.header = header
-
 
             //extension
             if (header.extensionOffset > 0) {
                 await this.loadExtendedHeader(header.extensionOffset)
             }
-          return this.header
+            return this.header
         }
+    }
+
+    async #readDataCount(offset) {
+        const data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+            range: {
+                start: offset,
+                size: 4
+            }
+        }))
+        const binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
+        return binaryParser.getInt()
+    }
+
+    /**
+     * Used when the chromTreeOffset is > fullDataOffset, that is when the chrom tree is not in the initial chunk
+     * read for parsing the header.  We know the start position, but not the total size of the chrom tree
+     *
+     * @returns {Promise<void>}
+     */
+    async #readChromTree(chromTreeOffset, bufferSize) {
+
+        let size = bufferSize
+        const load = async () => {
+            const data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {
+                range: {
+                    start: chromTreeOffset,
+                    size: size
+                }
+            }))
+            const binaryParser = new BinaryParser(new DataView(data), this.littleEndian)
+            return ChromTree.parseTree(binaryParser, chromTreeOffset, this.genome)
+        }
+
+        let error
+        while (size < 1000000) {
+            try {
+                const chromTree = await load()
+                return chromTree
+            } catch (e) {
+                error = e
+                size *= 2
+            }
+        }
+        throw (error)
     }
 
     async loadExtendedHeader(offset) {

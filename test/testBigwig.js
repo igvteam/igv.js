@@ -11,7 +11,6 @@ suite("testBigWig", function () {
 
         this.timeout(10000)
 
-        //chr21:19,146,376-19,193,466
         const url = "https://s3.amazonaws.com/igv.org.test/data/uncompressed.bw",
             chr = "chr21",
             start = 0,
@@ -21,14 +20,27 @@ suite("testBigWig", function () {
         const bwReader = new BWReader({url: url})
         const features = await bwReader.readFeatures(chr, start, chr, end, bpPerPixel)
         assert.equal(features.length, 8)   // Verified in iPad app
+    })
 
+
+    /**
+     * Test a BW file with an unusual layout (chromTree after full data).
+     */
+    test("chromTree", async function () {
+
+        this.timeout(10000)
+
+        const url = "https://data.broadinstitute.org/igvdata/test/data/bb/chromTreeTest.bigwig"
+        const bwReader = new BWReader({url: url})
+        const header = await bwReader.loadHeader()
+        assert.ok(header)
+        assert.equal(bwReader.chrNames.size, 6)
     })
 
     test("bigwig", async function () {
 
         this.timeout(10000)
 
-        //chr21:19,146,376-19,193,466
         const url = "test/data/bb/fixedStep.bw"
         const chr = "chr1"
         const bwReader = new BWReader({url: url})
