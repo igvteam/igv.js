@@ -9,7 +9,7 @@ import Chromosome from "../genome/chromosome.js"
  */
 class Genbank {
 
-    constructor({chr, locus, accession, aliases, features, sequence}) {
+    constructor({chr, locus, accession = "unknown", aliases, features, sequence}) {
         this.chr = chr
         this.locus = locus
         this.accession = accession
