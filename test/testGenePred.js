@@ -1,16 +1,6 @@
 import "./utils/mockObjects.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
-import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai'
-import Genome from "../js/genome/genome.js"
-import {decodeGenePredExt} from "../js/feature/decode/ucsc.js"
-
-const reference = {
-    "id": "hg38",
-    "name": "Human (GRCh38/hg38)",
-    "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa",
-    "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa.fai",
-}
 
 
 suite("testGenePredExt", function () {
@@ -20,7 +10,6 @@ suite("testGenePredExt", function () {
 
         this.timeout(200000)
 
-        const genome = await Genome.createGenome(reference)
 
         const config = {
             format: "refgene",
