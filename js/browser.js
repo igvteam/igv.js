@@ -2471,7 +2471,7 @@ function mouseUpOrLeave(e) {
 async function keyUpHandler(event) {
 
     // Feature jumping disabled in multi-locus view
-    if (this.referenceFrameList.length > 1) return
+    if (!this.referenceFrameList || this.referenceFrameList.length > 1) return
 
     if (event.code === 'KeyF' || event.code === 'KeyB') {
 
