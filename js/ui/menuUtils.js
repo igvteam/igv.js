@@ -302,6 +302,8 @@ function trackHeightMenuItem() {
                 }
 
                 for (const track of tracks) {
+                    // Explicitly setting track height turns off autoHeight
+                    track.trackView.autoHeight = false
 
                     // If explicitly setting the height adjust min or max, if necessary
                     if (track.minHeight !== undefined && track.minHeight > number) {
@@ -314,9 +316,6 @@ function trackHeightMenuItem() {
 
                     track.trackView.checkContentHeight()
                     track.trackView.repaintViews()
-
-                    // Explicitly setting track height turns off autoHeight
-                    track.trackView.autoHeight = false
 
                 } // for (tracks)
 
