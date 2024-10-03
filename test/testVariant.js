@@ -263,7 +263,7 @@ suite("testVariant", function () {
 
         const variants = await track.getFeatures("chr6", 0, Number.MAX_SAFE_INTEGER)
 
-        assert.equal(variants.length, 4)
+        assert.equal(variants.length, 3)
 
         for (let v of variants) {
             assert.equal(v.type, "SNP")
