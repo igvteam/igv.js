@@ -1,0 +1,27 @@
+{
+  "version": "2.16.0",
+  "showSampleNames": false,
+  "sampleNameViewportWidth": 6,
+  "genome": "hg38",
+  "locus": "chr6:152,971,612-152,992,127",
+  "roi": [],
+  "sampleinfo": [
+    {
+      "type": "sampleinfo",
+      "url": "https://www.dropbox.com/s/oeg6y37mvyfjif3/sampleInfo.txt?dl=0"
+    }
+  ],
+  "tracks": [
+    {
+      "url": "https://www.dropbox.com/scl/fi/9begjuwqq1kwhcbtnrioq/model2.allChr.f.2.hg38.r10-Yan-Hu.hic?rlkey=n94vc1qvlsn19fjocki9ereff&dl=0",
+      "filename": "model2.allChr.f.2.hg38.r10-Yan-Hu.hic",
+      "name": "m",
+      "order": 0,
+      "format": "hic",
+      "type": "shoebox",
+      "displayMode": "SQUISHED",
+      "height": 500,
+      "visibilityWindow": 1000000
+    }
+  ]
+}
