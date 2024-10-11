@@ -23,7 +23,8 @@ class WigTrack extends TrackBase {
         scaleFactor: undefined,
         overflowColor: `rgb(255, 32, 255)`,
         baselineColor: 'lightGray',
-        summarize: true
+        summarize: true,
+        visibilityWindow: undefined
     }
 
     constructor(config, browser) {
@@ -67,6 +68,10 @@ class WigTrack extends TrackBase {
         const header = await this.getHeader()
         if (this.disposed) return   // This track was removed during async load
         if (header) this.setTrackProperties(header)
+    }
+
+    supportsWholeGenome() {
+        return this.visibilityWindow === undefined || this.visibilityWindow < 0
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
