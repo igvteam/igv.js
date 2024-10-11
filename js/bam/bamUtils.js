@@ -11,13 +11,22 @@ import BamFilter from "./bamFilter.js"
  * https://github.com/dasmoth/dalliance/blob/master/js/bam.js
  */
 //=ACMGRSVTWYHKDBN
+const BAM1_MAGIC_BYTES = new Uint8Array([0x42, 0x41, 0x4d, 0x01]) // BAM\1
+const BAM1_MAGIC_NUMBER = readInt(BAM1_MAGIC_BYTES, 0)
+
 const SEQ_DECODER = ['=', 'A', 'C', 'M', 'G', 'R', 'S', 'V', 'T', 'W', 'Y', 'H', 'K', 'D', 'B', 'N']
 const CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?']
 const READ_STRAND_FLAG = 0x10
 const MATE_STRAND_FLAG = 0x20
-
-const BAM1_MAGIC_BYTES = new Uint8Array([0x42, 0x41, 0x4d, 0x01]) // BAM\1
-const BAM1_MAGIC_NUMBER = readInt(BAM1_MAGIC_BYTES, 0)
+const ELEMENT_SIZE = {
+    c: 1,
+    C: 1,
+    s: 2,
+    S: 2,
+    i: 4,
+    I: 4,
+    f: 4
+}
 
 const DEFAULT_ALLELE_FREQ_THRESHOLD = 0.2
 const DEFAULT_SAMPLING_WINDOW_SIZE = 100
@@ -268,7 +277,9 @@ const BamUtils = {
 
             alignment.seq = seq
             alignment.qual = qualArray
-            alignment.tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd))  // decode these on demand
+
+            const tagBA = new Uint8Array(ba.buffer.slice(p, blockEnd))
+            alignment.tagDict = decodeBamTags(tagBA)
 
             this.setPairOrientation(alignment)
 
@@ -525,10 +536,6 @@ function readInt(ba, offset) {
     return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset])
 }
 
-function readShort(ba, offset) {
-    return (ba[offset + 1] << 8) | (ba[offset])
-}
-
 /**
  * Build a list of cigar operators from a cigarString.  Removes padding operators and concatenates consecutive
  * operators of the same type
@@ -582,6 +589,110 @@ function decodeSamTags(tags) {
 
     return tagDict
 }
+
+/**
+ * Decode bam tags from the supplied UInt8Array
+ *
+ * A [!-~] Printable character
+ * i [-+]?[0-9]+ Signed integer16
+ * f [-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)? Single-precision floating number
+ * Z [ !-~]* Printable string, including space
+ * H ([0-9A-F][0-9A-F])* Byte array in the Hex format17
+ * B [cCsSiIf](,[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?)* Integer or numeric array
+ *
+ * @param ba A byte array (UInt8Array)
+ * @returns {{}}  Tag values
+ */
+function decodeBamTags(ba) {
+
+    let p = 0
+    const len = ba.length
+    const tags = {}
+    const dataView = new DataView(ba.buffer)
+
+    while (p < len) {
+        const tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1])
+        p += 2
+
+        const type = String.fromCharCode(ba[p++])
+        let value
+        if (type === 'A') {
+            value = String.fromCharCode(ba[p])
+            p++
+        } else if (type === 'i' || type === 'I') {
+            value = dataView.getInt32(p, true)
+            p += 4
+        } else if (type === 'c') {
+            value = dataView.getInt8(p, true)
+            p++
+        } else if (type === 'C') {
+            value = dataView.getUint8(p, true)
+            p++
+        } else if (type === 's' || type === 'S') {
+            value = dataView.getInt16(p, true)
+            p += 2
+        } else if (type === 'f') {
+            value = dataView.getFloat32(p, true)
+            p += 4
+        } else if (type === 'Z') {
+            value = ''
+            for (; ;) {
+                var cc = ba[p++]
+                if (cc === 0) {
+                    break
+                } else {
+                    value += String.fromCharCode(cc)
+                }
+            }
+        } else if (type === 'B') {
+            //‘cCsSiIf’, corresponding to int8 , uint8 t, int16 t, uint16 t, int32 t, uint32 t and float
+            const elementType = String.fromCharCode(ba[p++])
+            let elementSize = ELEMENT_SIZE[elementType]
+            if (elementSize === undefined) {
+                tags[tag] = `Error: unknown element type '${elementType}'`
+                break
+            }
+            const numElements = dataView.getInt32(p, true)
+            p += 4
+            const pEnd = p + numElements * elementSize
+            value = []
+
+            while (p < pEnd) {
+                switch (elementType) {
+                    case 'c':
+                        value.push(dataView.getInt8(p, true))
+                        break
+                    case 'C':
+                        value.push(dataView.getUint8(p, true))
+                        break
+                    case 's':
+                        value.push(dataView.getInt16(p, true))
+                        break
+                    case 'S':
+                        value.push(dataView.getUint16(p, true))
+                        break
+                    case 'i':
+                        value.push(dataView.getInt32(p, true))
+                        break
+                    case 'I':
+                        value.push(dataView.getUint32(p, true))
+                        break
+                    case 'f':
+                        value.push(dataView.getFloat32(p, true))
+                }
+                p += elementSize
+            }
+        } else {
+            //'Unknown type ' + type;
+            value = 'Error unknown type: ' + type
+            tags[tag] = value
+            break
+        }
+        tags[tag] = value
+    }
+    return tags
+}
+
 
 export default BamUtils
 

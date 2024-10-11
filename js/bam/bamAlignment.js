@@ -102,14 +102,6 @@ class BamAlignment {
     }
 
     tags() {
-        if (!this.tagDict) {
-            if (this.tagBA) {
-                this.tagDict = decodeTags(this.tagBA)
-                this.tagBA = undefined
-            } else {
-                this.tagDict = {}  // Mark so we don't try again.  The record has no tags
-            }
-        }
         return this.tagDict
     }
 
@@ -341,7 +333,7 @@ class BamAlignment {
     }
 
     getBaseModificationSets() {
-        this.tags()
+
         if (!this.baseModificationSets && (this.tagDict["MM"] || this.tagDict["Mm"])) {
 
             const mm = this.tagDict["MM"] || this.tagDict["Mm"]
