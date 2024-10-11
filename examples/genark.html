@@ -1,0 +1,26 @@
+<html>
+
+<body>
+
+<h1>UCSC Genark Example</h1>
+
+<p>Example of specifying a genome hosted at the <a href="https://hgdownload.soe.ucsc.edu/hubs/" target="_blank">UCSC
+    Genark</a> assembly hub. For a complete list of available assemblies see the
+    <a href="https://hgdownload.soe.ucsc.edu/hubs/UCSC_GI.assemblyHubList.txt" target="_blank">hub assembly list.</a>
+</p>
+
+<div id="igvDiv"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.min.js"
+
+    const config = {genome: "GCA_000002305.1"}
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+
+</script>
+
+</body>
+
+</html>
