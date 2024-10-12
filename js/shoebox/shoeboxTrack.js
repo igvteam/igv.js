@@ -1,15 +1,8 @@
 import $ from "../vendor/jquery-3.3.1.slim.js"
-import FeatureSource from './featureSource.js'
+import FeatureSource from "../feature/featureSource.js"
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
-import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
-import {createCheckbox} from "../igv-icons.js"
-import {GradientColorScale} from "../util/colorScale.js"
-import {ColorTable} from "../util/colorPalletes.js"
-import SampleInfo from "../sample/sampleInfo.js"
-import HicColorScale from "../hic/hicColorScale.js"
-import ShoeboxSource from "../hic/shoeboxSource.js"
-import {doSortByAttributes} from "../sample/sampleUtils.js"
+import ShoeboxColorScale from "./shoeboxColorScale.js"
 
 
 class ShoeboxTrack extends TrackBase {
@@ -18,7 +11,6 @@ class ShoeboxTrack extends TrackBase {
         height: 300,
         rowHeight: 3,
         max: 3000,
-        color: "rgb(0,0,255)"
     }
 
     constructor(config, browser) {
@@ -57,49 +49,58 @@ class ShoeboxTrack extends TrackBase {
         // Must do the following after setting track properties as they can be overriden via a track line
 
         // Color settings
-        const max = this.dataRange.max
-        let r = 0;
-        let g = 0;
-        let b = 0;
-        if(this.color && this.color.startsWith("rgb(")) {
-            const comps = this.color.substring(4).replace(")","").split(",")
-            if(comps.length === 3) {
-                r = Number.parseInt(comps[0].trim())
-                g = Number.parseInt(comps[1].trim())
-                b = Number.parseInt(comps[2].trim())
-            }
+        if (this.config.colorScale) {
+            this.colorScale = ShoeboxColorScale.parse(this.config.colorScale)
+        } else {
+            const min = this.dataRange.min
+            const max = this.dataRange.max
+            this.colorScale = new ShoeboxColorScale({min, max, color: this.color})
         }
-        this.colorScale = new HicColorScale({threshold: max, r,g,b})
-
     }
 
+    get color() {
+        return this._color || "rgb(0,0,255)"
+    }
+
+    set color(color) {
+        this._color = color
+        if (this.colorScale) {
+            this.colorScale.updateColor(color)
+        }
+    }
 
     menuItemList() {
 
         const menuItems = []
 
-        if (this.colorScale) {
-            menuItems.push('<hr/>')
 
-            function dialogPresentationHandler(e) {
-                this.browser.inputDialog.present({
-                    label: 'Color Scale Threshold',
-                    value: this.colorScale.threshold,
-                    callback: () => {
-                        const t = Number(this.browser.inputDialog.value, 10)
-                        if (t) {
-                            this.colorScale.setThreshold(t)
-                            this.trackView.repaintViews()
-                        }
-                    }
-                }, e)
+        menuItems.push('<hr/>')
+
+        // Data range
+        let object = $('<div>')
+        object.text('Set data range')
+
+        function dialogPresentationHandler() {
+
+            if (this.trackView.track.selected) {
+                this.browser.dataRangeDialog.configure(this.trackView.browser.getSelectedTrackViews())
+            } else {
+                this.browser.dataRangeDialog.configure(this.trackView)
             }
-
-            menuItems.push({object: $('<div>Set color scale threshold</div>'), dialog: dialogPresentationHandler})
+            this.browser.dataRangeDialog.present($(this.browser.columnContainer))
         }
 
-        return menuItems
+        menuItems.push({object, dialog: dialogPresentationHandler})
 
+        return menuItems
+    }
+
+    setDataRange({min, max}) {
+        this.dataRange.min = min
+        this.dataRange.max = max
+        this.colorScale.min = min
+        this.colorScale.max = max
+        this.trackView.repaintViews()
     }
 
     hasSamples() {
@@ -231,43 +232,16 @@ class ShoeboxTrack extends TrackBase {
         return items
     }
 
-    contextMenuItemList(clickState) {
-
-        const genomicLocation = clickState.genomicLocation
-
-        const sortHandler = (sort) => {
-            const viewport = clickState.viewport
-            const features = viewport.cachedFeatures
-            this.sortByValue(sort, features)
-        }
-
-        // We can't know genomic location intended with precision, define a buffer 5 "pixels" wide in genomic coordinates
-        const bpWidth = clickState.referenceFrame.toBP(2.5)
-
-        return ["DESC", "ASC"].map(direction => {
-            const dirLabel = direction === "DESC" ? "descending" : "ascending"
-            const sortLabel = this.type === 'seg' || this.type === 'shoebox' ?
-                `Sort by value (${dirLabel})` :
-                `Sort by type (${dirLabel})`
-            return {
-                label: sortLabel,
-                click: () => {
-                    const sort = {
-                        option: "VALUE",   // Either VALUE or ATTRIBUTE
-                        direction,
-                        chr: clickState.referenceFrame.chr,
-                        start: Math.floor(genomicLocation - bpWidth),
-                        end: Math.floor(genomicLocation + bpWidth)
-                    }
-                    sortHandler(sort)
-                    this.config.sort = sort
-                }
-            }
-        })
-    }
-
     get supportsWholeGenome() {
         return false
+    }
+
+    getState() {
+
+        const config = super.getState()
+        config.colorScale = this.colorScale.stringify()
+        return config
+
     }
 
 }
