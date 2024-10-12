@@ -36,6 +36,7 @@ import {
     decodePeak,
     decodeReflat,
     decodeRepeatMasker,
+    decodeShoebox,
     decodeSNP,
     decodeWig
 } from "./decode/ucsc.js"
@@ -317,6 +318,10 @@ class FeatureParser {
                 break
             case "gcnv":
                 this.decode = decodeGcnv
+                this.delimiter = "\t"
+                break
+            case "shoebox":
+                this.decode = decodeShoebox
                 this.delimiter = "\t"
                 break
             default:

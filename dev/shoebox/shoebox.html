@@ -19,15 +19,62 @@
 
     var options =
         {
-            genome: "hg38"
+            sampleNameViewportWidth: 6,
+            genome: "hg38",
+            locus: "chr1:1,001,575-1,002,408",
+            tracks: [
+                {
+                    "url": "https://www.dropbox.com/scl/fi/2tv6vnqqlfy6kxzahshwc/pseudobulk_14.bed?rlkey=ytrotr3v197k26pe2dettfgsr&dl=0",
+                    "name": "pseudobulk 14",
+                    "type": "shoebox",
+                    "format": "shoebox"
+                },
+                {
+                    "name": "Homo sapiens HepG2 H3K4me3 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF752OCZ/@@download/ENCFF752OCZ.bigWig",
+                    "color": "rgb(0,150,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens HepG2",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K4me3 ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "signal p-value",
+                        "Format": "bigWig",
+                        "Lab": "John Stamatoyannopoulos, UW",
+                        "Accession": "ENCFF752OCZ",
+                        "Experiment": "ENCSR000DUF"
+                    },
+                    "format": "bigwig",
+                    "type": "wig"
+                },
+                {
+                    "name": "Homo sapiens HepG2 CTCF ",
+                    "url": "https://www.encodeproject.org/files/ENCFF160QOX/@@download/ENCFF160QOX.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens HepG2",
+                        "AssayType": "ChIP-seq",
+                        "Target": "CTCF ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Richard Myers, HAIB",
+                        "Accession": "ENCFF160QOX",
+                        "Experiment": "ENCSR000BIE"
+                    },
+                    "format": "bigwig",
+                    "type": "wig"
+                }
+            ]
         }
+
 
     var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
             console.log("Created IGV browser")
-            browser.loadSession({url: "session.json"})
         })
 
 
