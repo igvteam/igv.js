@@ -14,7 +14,7 @@ import IdeogramTrack from "./ideogramTrack.js"
 import SpliceJunctionTrack from "./feature/spliceJunctionTrack.js"
 import BlatTrack from "./blat/blatTrack.js"
 import CNVPytorTrack from "./cnvpytor/cnvpytorTrack.js"
-import ShoeboxTrack from "./feature/shoeboxTrack.js"
+import ShoeboxTrack from "./shoebox/shoeboxTrack.js"
 //import CNVPytorTrack from "./CNVpytor/cnvpytorTrack.js"
 
 
