@@ -538,6 +538,29 @@ function decodeSNP(tokens, header) {
 
 }
 
+function decodeShoebox(tokens, header, maxColumnCount = Number.MAX_SAFE_INTEGER) {
+
+    if (tokens.length < 4) return undefined
+
+    const chr = tokens[0]
+    const start = parseInt(tokens[1])
+    const end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1
+    if (isNaN(start) || isNaN(end)) {
+        return new DecodeError(`Unparsable bed record.`)
+    }
+    const feature = new UCSCBedFeature({chr: chr, start: start, end: end, score: 1000})
+
+    const values = []
+    for(let i = 3; i< tokens.length; i++) {
+        values.push(Number.parseInt(tokens[i]))
+    }
+    feature.values = values;
+
+
+    return feature
+}
+
+
 class UCSCBedFeature {
 
     constructor(properties) {
@@ -650,6 +673,6 @@ class PSLFeature {
 
 export {
     decodeBed, decodeBedGraph, decodeGenePred, decodeGenePredExt, decodePeak, decodeReflat, decodeRepeatMasker,
-    decodeSNP, decodeWig, decodePSL, decodeBedmethyl, decodeGappedPeak, decodeNarrowPeak
+    decodeSNP, decodeWig, decodePSL, decodeBedmethyl, decodeGappedPeak, decodeNarrowPeak, decodeShoebox
 }
 

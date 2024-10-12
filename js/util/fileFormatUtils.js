@@ -235,6 +235,10 @@ async function inferFileFormatFromContents(config) {
     if (firstLine.startsWith("##gff-version")) {
         return "gff"
     }
+    if(firstLine.startsWith("##fileformat=")) {
+        return firstLine.substring(13).toLowerCase();   // Non standard extension of VCF convention
+    }
+
 
     // QTL test must preceed GWAS test as GWAS files will also pass the QTL test
     if (QTLParser.isQTL(firstLine)) {
