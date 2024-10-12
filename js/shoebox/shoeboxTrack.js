@@ -33,6 +33,7 @@ class ShoeboxTrack extends TrackBase {
 
         // Create featureSource
         const configCopy = Object.assign({}, this.config)
+        configCopy.format = 'shoebox'   // bit of a hack
         this.featureSource = FeatureSource(configCopy, this.browser.genome)
     }
 
