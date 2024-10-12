@@ -70,14 +70,14 @@ class ShoeboxColorScale {
         return "" + this.min + "," + this.max + ',' + `rgb(${this.r},${this.g},${this.b})`
     }
 
-    static parse(string) {
+    static parse(str) {
 
        const tokens = str.split(",")
 
        const cs = {
             min: Number.parseFloat(tokens[0]),
             max: Number.parseFloat(tokens[1]),
-            color: tokens[2]
+            color: `${tokens[2]},${tokens[3]},${tokens[4]}`
         }
         return new ShoeboxColorScale(cs)
     }
