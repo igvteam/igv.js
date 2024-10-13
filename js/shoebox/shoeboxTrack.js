@@ -50,8 +50,9 @@ class ShoeboxTrack extends TrackBase {
         // Must do the following after setting track properties as they can be overriden via a track line
 
         // Color settings
-        if (this.config.colorScale) {
-            this.colorScale = ShoeboxColorScale.parse(this.config.colorScale)
+        if (this.config.colorScale && this.config.colorScale.max && this.config.colorScale.color) {   // Minimal validation
+            this.colorScale = new ShoeboxColorScale(this.config.colorScale)
+
         } else {
             const min = this.dataRange.min
             const max = this.dataRange.max
@@ -240,7 +241,7 @@ class ShoeboxTrack extends TrackBase {
     getState() {
 
         const config = super.getState()
-        config.colorScale = this.colorScale.stringify()
+        config.colorScale = this.colorScale.toJson()
         return config
 
     }
