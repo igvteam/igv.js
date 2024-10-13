@@ -38,6 +38,7 @@ class ShoeboxColorScale {
         this.updateColor(scale.color || "rgb(0,0,255)")
 
     }
+
     updateColor(color) {
         const comps = color.substring(4).replace(")", "").split(",")
         if (comps.length === 3) {
@@ -45,6 +46,7 @@ class ShoeboxColorScale {
             this.g = Number.parseInt(comps[1].trim())
             this.b = Number.parseInt(comps[2].trim())
         }
+        this.cache = []
     }
 
     setMinMax(min, max) {
@@ -66,15 +68,24 @@ class ShoeboxColorScale {
         return this.cache[bin]
     }
 
-    stringify() {
-        return "" + this.min + "," + this.max + ',' + `rgb(${this.r},${this.g},${this.b})`
+    /**
+     *
+     * @returns {{min: (*|number), color: string, max}}
+     */
+    toJson() {
+        return {
+            min: this.min,
+            max: this.max,
+            color: `rgb(${this.r},${this.g},${this.b})`
+        }
     }
 
+    // For short-term backward compatibility
     static parse(str) {
 
-       const tokens = str.split(",")
+        const tokens = str.split(",")
 
-       const cs = {
+        const cs = {
             min: Number.parseFloat(tokens[0]),
             max: Number.parseFloat(tokens[1]),
             color: `${tokens[2]},${tokens[3]},${tokens[4]}`
