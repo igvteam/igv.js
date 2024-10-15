@@ -11,6 +11,7 @@ class ShoeboxTrack extends TrackBase {
         height: 300,
         rowHeight: 3,
         max: 3000,
+        visibilityWindow: 1000000
     }
 
     constructor(config, browser) {
@@ -117,9 +118,9 @@ class ShoeboxTrack extends TrackBase {
         }
     }
 
-    async getFeatures(chr, start, end) {
-        const features = await this.featureSource.getFeatures({chr, start, end})
-        return features
+    async getFeatures(chr, start, end, bpPerPixel) {
+        const visibilityWindow = this.visibilityWindow
+        return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
     }
 
 
