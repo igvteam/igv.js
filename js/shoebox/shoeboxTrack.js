@@ -11,7 +11,7 @@ class ShoeboxTrack extends TrackBase {
         height: 300,
         rowHeight: 3,
         max: 3000,
-        visibilityWindow: 1000000
+        visibilityWindow: 10000
     }
 
     constructor(config, browser) {
