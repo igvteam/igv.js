@@ -6,7 +6,7 @@ import {buttonLabel} from "./navbarIcons/buttonLabel.js"
 
 class MultiTrackSelectButton extends NavbarButton {
 
-    constructor(browser, parent, enableMultiTrackSelection) {
+    constructor(browser, parent, enableMultiTrackSelection, visibility = true) {
 
         super(browser, parent, 'Select Tracks', buttonLabel, multiSelectImage, multiSelectImageHover, enableMultiTrackSelection = false)
         this.enableMultiTrackSelection = enableMultiTrackSelection
@@ -30,7 +30,7 @@ class MultiTrackSelectButton extends NavbarButton {
 
         this.button.addEventListener('click', this.boundMouseClickHandler)
 
-        this.setVisibility(true)
+        this.setVisibility(visibility)
 
     }
 

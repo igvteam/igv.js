@@ -308,7 +308,8 @@ class Browser {
         this.overlayTrackButton = new OverlayTrackButton(this, $toggle_button_container.get(0))
         this.overlayTrackButton.setVisibility(false)
 
-        this.multiTrackSelectButton = new MultiTrackSelectButton(this, $toggle_button_container.get(0))
+        const showMultiSelect = config.showMultiSelectButton !== false
+        this.multiTrackSelectButton = new MultiTrackSelectButton(this, $toggle_button_container.get(0), false, showMultiSelect)
 
         this.cursorGuide = new CursorGuide(this.columnContainer, this)
 
