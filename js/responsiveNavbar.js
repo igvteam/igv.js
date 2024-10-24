@@ -244,8 +244,13 @@ class ResponsiveNavbar {
         }
     }
 
-    updateLocus(loc) {
-        this.$searchInput.val(loc)
+    updateLocus(loc, chrName) {
+        if(this.$searchInput) {
+            this.$searchInput.val(loc)
+        }
+        if (this.chromosomeSelectWidget) {
+            this.chromosomeSelectWidget.select.value = chrName
+        }
     }
 
     currentNavbarButtonClass() {

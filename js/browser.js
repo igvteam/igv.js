@@ -1453,13 +1453,11 @@ class Browser {
             referenceFrame.end = referenceFrame.start + referenceFrame.bpPerPixel * width
         }
 
-        if (this.chromosomeSelectWidget) {
-            this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
-        }
+        const chrName = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
 
         const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
 
-        this.navbar.updateLocus(loc)
+        this.navbar.updateLocus(loc, chrName)
 
         this.fireEvent('locuschange', [this.referenceFrameList])
     }
