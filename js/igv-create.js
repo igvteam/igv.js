@@ -26,7 +26,6 @@
 import {GoogleAuth, igvxhr} from '../node_modules/igv-utils/src/index.js'
 import Browser from "./browser.js"
 import GenomeUtils from "./genome/genomeUtils.js"
-import {navbarDidResize} from "./responsiveNavbar.js"
 
 let allBrowsers = []
 
@@ -82,7 +81,7 @@ async function createBrowser(parentDiv, config) {
     }
 
     browser.stopSpinner()
-    navbarDidResize(browser, browser.$navigation.width())
+    browser.navbar.navbarDidResize()
 
     return browser
 

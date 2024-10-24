@@ -38,6 +38,7 @@
     import igv from "../../js/index.js";
 
     const options = {
+        queryParametersSupported: true,
         "genome": "hg19",
         "locus": "myc egfr",
         "tracks": [
@@ -94,7 +95,12 @@
             })
 
             document.getElementById("bookmarkButton").addEventListener("click",
-                () => window.history.pushState({}, "IGV", browser.sessionURL()))
+                () => {
+                    const path = window.location.href.slice()
+                    const idx = path.indexOf("?")
+                    const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+                    window.history.pushState({}, "IGV", url)
+                })
 
             document.getElementById("svgButton").addEventListener("click", () => {
                 let svg = browser.toSVG();

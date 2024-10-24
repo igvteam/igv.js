@@ -2,8 +2,6 @@ import $ from "./vendor/jquery-3.3.1.slim.js"
 import html2canvas from '../node_modules/html2canvas/dist/html2canvas.esm.js'
 import {BGZip, FileUtils, igvxhr, StringUtils, URIUtils} from "../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
-import {createIcon} from "./ui/utils/icons.js"
-import SliderDialog from "./ui/components/sliderDialog.js"
 import InputDialog from "./ui/components/inputDialog.js"
 import GenericColorPicker from "./ui/components/genericColorPicker.js"
 import Alert from './ui/alert.js'
@@ -22,19 +20,9 @@ import version from "./version.js"
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
-import {navbarDidResize} from "./responsiveNavbar.js"
-import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js"
-import WindowSizePanel from "./windowSizePanel.js"
-import CursorGuide from "./ui/cursorGuide.js"
-import CursorGuideButton from "./ui/cursorGuideButton.js"
-import CenterLineButton from './ui/centerLineButton.js'
-import TrackLabelControl from "./ui/trackLabelControl.js"
-import SampleNameControl from "./sample/sampleNameControl.js"
-import SampleInfoControl from "./sample/sampleInfoControl.js"
-import ZoomWidget from "./ui/zoomWidget.js"
+import ResponsiveNavbar from "./responsiveNavbar.js"
 import DataRangeDialog from "./ui/dataRangeDialog.js"
 import HtsgetReader from "./htsget/htsgetReader.js"
-import SaveImageControl from "./ui/saveImageControl.js"
 import MenuPopup from "./ui/menuPopup.js"
 import {viewportColumnManager} from './viewportColumnManager.js'
 import ViewportCenterLine from './ui/viewportCenterLine.js'
@@ -42,18 +30,14 @@ import IdeogramTrack from "./ideogramTrack.js"
 import RulerTrack from "./rulerTrack.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
-import CustomButton from "./ui/customButton.js"
 import ROIManager from './roi/ROIManager.js'
 import ROITable from './roi/ROITable.js'
 import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
-import ROITableControl from './roi/roiTableControl.js'
 import SampleInfo from "./sample/sampleInfo.js"
 import HicFile from "./hic/straw/hicFile.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
 import Hub from "./ucsc/ucscHub.js"
-import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
-import OverlayTrackButton from "./ui/overlayTrackButton.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
@@ -65,6 +49,22 @@ import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConst
 import QTLSelections from "./qtl/qtlSelections.js"
 import {inferFileFormat} from "./util/fileFormatUtils.js"
 import {convertToHubURL} from "./ucsc/ucscUtils.js"
+import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js"
+import {createIcon} from "./ui/utils/icons.js"
+import WindowSizePanel from "./windowSizePanel.js"
+import OverlayTrackButton from "./ui/overlayTrackButton.js"
+import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
+import CursorGuide from "./ui/cursorGuide.js"
+import CursorGuideButton from "./ui/cursorGuideButton.js"
+import CenterLineButton from "./ui/centerLineButton.js"
+import TrackLabelControl from "./ui/trackLabelControl.js"
+import ROITableControl from "./roi/roiTableControl.js"
+import SampleInfoControl from "./sample/sampleInfoControl.js"
+import SampleNameControl from "./sample/sampleNameControl.js"
+import SaveImageControl from "./ui/saveImageControl.js"
+import CustomButton from "./ui/customButton.js"
+import ZoomWidget from "./ui/zoomWidget.js"
+import SliderDialog from "./ui/components/sliderDialog.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -156,7 +156,6 @@ class Browser {
                 this.sampleNameControl.setState(this.showSampleNames)
                 this.sampleNameControl.hide()
 
-
                 this.layoutChange()
             }
         })
@@ -175,7 +174,7 @@ class Browser {
 
         this.sampleInfo = new SampleInfo(this)
 
-        this.setControls(config)
+        this.createStandardControls(config)
 
         // Region of interest
         this.roiManager = new ROIManager(this)
@@ -233,121 +232,18 @@ class Browser {
         }
     }
 
-    setControls(config) {
-
-        const $navBar = this.createStandardControls(config)
-        $navBar.insertBefore($(this.columnContainer))
-        this.$navigation = $navBar
-
-        if (false === config.showControls) {
-            $navBar.hide()
-        }
-
-    }
-
     createStandardControls(config) {
 
-        const $navBar = $('<div>', {class: 'igv-navbar'})
-        this.$navigation = $navBar
-
-        const $navbarLeftContainer = $('<div>', {class: 'igv-navbar-left-container'})
-        $navBar.append($navbarLeftContainer)
-
-        // IGV logo
-        const $logo = $('<div>', {class: 'igv-logo'})
-        $navbarLeftContainer.append($logo)
-
-        const logoSvg = logo()
-        logoSvg.css("width", "34px")
-        logoSvg.css("height", "32px")
-        $logo.append(logoSvg)
-
-        this.$current_genome = $('<div>', {class: 'igv-current-genome'})
-        $navbarLeftContainer.append(this.$current_genome)
-        this.$current_genome.text('')
-
-        const $genomicLocation = $('<div>', {class: 'igv-navbar-genomic-location'})
-        $navbarLeftContainer.append($genomicLocation)
-
-        // chromosome select widget
-        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0))
-        if (config.showChromosomeWidget !== false) {
-            this.chromosomeSelectWidget.show()
-        } else {
-            this.chromosomeSelectWidget.hide()
-        }
-
-        const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'})
-        $genomicLocation.append($locusSizeGroup)
-
-        const $searchContainer = $('<div>', {class: 'igv-search-container'})
-        $locusSizeGroup.append($searchContainer)
-
-        // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
-        this.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'})
-        $searchContainer.append(this.$searchInput)
-        // Stop event propagation to prevent feature track keyboard navigation
-        this.$searchInput[0].addEventListener('keyup', (event) => {
-            event.stopImmediatePropagation()
-        })
-
-        this.$searchInput.change(() => this.doSearch(this.$searchInput.val()))
-
-        const searchIconContainer = DOMUtils.div({class: 'igv-search-icon-container'})
-        $searchContainer.append($(searchIconContainer))
-
-        searchIconContainer.appendChild(createIcon("search"))
-
-        searchIconContainer.addEventListener('click', () => this.doSearch(this.$searchInput.val()))
-
-        this.windowSizePanel = new WindowSizePanel($locusSizeGroup.get(0), this)
-
-        const $navbarRightContainer = $('<div>', {class: 'igv-navbar-right-container'})
-        $navBar.append($navbarRightContainer)
-
-        const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">')
-        $navbarRightContainer.append($toggle_button_container)
-        this.$toggle_button_container = $toggle_button_container
-
-        this.overlayTrackButton = new OverlayTrackButton(this, $toggle_button_container.get(0))
-        this.overlayTrackButton.setVisibility(false)
-
-        this.multiTrackSelectButton = new MultiTrackSelectButton(this, $toggle_button_container.get(0))
-
-        this.cursorGuide = new CursorGuide(this.columnContainer, this)
-
-        this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
-
-        this.centerLineButton = new CenterLineButton(this, $toggle_button_container.get(0))
-
         this.setTrackLabelVisibility(config.showTrackLabels)
-        this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), this)
 
-        // ROI Control
-        this.roiTableControl = new ROITableControl($toggle_button_container.get(0), this)
+        this.navbar = new ResponsiveNavbar(config, this)
 
-        this.sampleInfoControl = new SampleInfoControl($toggle_button_container.get(0), this)
+        this.navbar.$navigation.insertBefore($(this.columnContainer))
 
-        this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
-
-        if (true === config.showSVGButton) {
-            this.saveImageControl = new SaveImageControl($toggle_button_container.get(0), this)
+        if (false === config.showControls) {
+            this.navbar.hide()
         }
-
-        if (config.customButtons) {
-            for (let b of config.customButtons) {
-                new CustomButton($toggle_button_container.get(0), this, b)
-            }
-        }
-
-        this.zoomWidget = new ZoomWidget(this, $navbarRightContainer.get(0))
-
-        if (false === config.showNavigation) {
-            this.$navigation.hide()
-        }
-
-        this.sliderDialog = new SliderDialog(this.root)
-        this.sliderDialog.container.id = `igv-slider-dialog-${DOMUtils.guid()}`
+        this.cursorGuide = new CursorGuide(this.columnContainer, this)
 
         this.inputDialog = new InputDialog(this.root)
         this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
@@ -358,7 +254,8 @@ class Browser {
         this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432})
         this.genericColorPicker.container.id = `igv-track-color-picker-${DOMUtils.guid()}`
 
-        return $navBar
+        this.sliderDialog = new SliderDialog(this.root)
+        this.sliderDialog.container.id = `igv-slider-dialog-${DOMUtils.guid()}`
 
     }
 
@@ -574,10 +471,10 @@ class Browser {
             session = await translateSession(session)
         }
 
-        this.sampleInfoControl.setButtonVisibility(false)
+        this.navbar.sampleInfoControl.setButtonVisibility(false)
 
         this.showSampleNames = session.showSampleNames || false
-        this.sampleNameControl.setState(this.showSampleNames === true)
+        this.navbar.sampleNameControl.setState(this.showSampleNames === true)
 
         if (session.sampleNameViewportWidth) {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
@@ -703,9 +600,9 @@ class Browser {
             await rtv.updateViews()
         }
 
-        // If any tracks are selected show the selectino buttons
+        // If any tracks are selected show the selection buttons
         if (this.trackViews.some(tv => tv.track.selected)) {
-            this.multiTrackSelectButton.setMultiTrackSelection(true)
+            this.navbar.setEnableTrackSelection(true)
         }
 
         this.updateUIWithReferenceFrameList()
@@ -746,7 +643,8 @@ class Browser {
 
         this.removeAllTracks()   // Do this first, before new genome is set
         this.roiManager.clearROIs()
-        this.multiTrackSelectButton.setMultiTrackSelection(false)
+
+        this.navbar.setEnableTrackSelection(false)
 
         let genome
         if (genomeConfig.gbkURL) {
@@ -759,8 +657,7 @@ class Browser {
 
         this.genome = genome
 
-        this.updateNavbarDOMWithGenome(genome)
-
+        this.navbar.updateGenome(genome)
 
         let locus = initialLocus || genome.initialLocus
         if (Array.isArray(locus)) {
@@ -788,26 +685,6 @@ class Browser {
                     chromosomes: makeCircViewChromosomes(this.genome)
                 })
             }
-        }
-    }
-
-    updateNavbarDOMWithGenome(genome) {
-        let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0, 8)}...${genome.id.substring(genome.id.length - 8)}`)
-        this.$current_genome.text(genomeLabel)
-        this.$current_genome.attr('title', genome.description)
-
-        // chromosome select widget -- Show this IFF its not explicitly hidden AND the genome has pre-loaded chromosomes
-        const showChromosomeWidget =
-            this.config.showChromosomeWidget !== false &&
-            this.genome.showChromosomeWidget !== false &&
-            genome.chromosomeNames &&
-            genome.chromosomeNames.length > 1
-
-        if (showChromosomeWidget) {
-            this.chromosomeSelectWidget.update(genome)
-            this.chromosomeSelectWidget.show()
-        } else {
-            this.chromosomeSelectWidget.hide()
         }
     }
 
@@ -895,16 +772,16 @@ class Browser {
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
 
-        navbarDidResize(this, this.$navigation.width(), isWGV)
+        this.navbar.navbarDidResize()
 
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
         if (this.doShowCenterLine && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
-            this.centerLineButton.boundMouseClickHandler()
+            this.navbar.centerLineButton.boundMouseClickHandler()
         }
 
         if (this.doShowCursorGuide && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
-            this.cursorGuideButton.boundMouseClickHandler()
+            this.navbar.cursorGuideButton.boundMouseClickHandler()
         }
 
         this.setCenterLineAndCenterLineButtonVisibility(GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
@@ -914,9 +791,9 @@ class Browser {
     setCenterLineAndCenterLineButtonVisibility(isWholeGenomeView) {
 
         if (isWholeGenomeView) {
-            this.centerLineButton.setVisibility(!isWholeGenomeView)
+            this.navbar.centerLineButton.setVisibility(false)
         } else {
-            this.centerLineButton.setVisibility(this.config.showCenterGuideButton)
+            this.navbar.centerLineButton.setVisibility(this.config.showCenterGuideButton)
         }
 
         for (let centerLine of this.centerLineList) {
@@ -1122,7 +999,7 @@ class Browser {
         this.reorderTracks()
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
 
-        this.multiTrackSelectButton.setMultiTrackSelection(this.multiTrackSelectButton.enableMultiTrackSelection)
+        newTrack.trackView.enableTrackSelection(this.navbar.getEnableTrackSelection())
 
         return newTrack
 
@@ -1490,8 +1367,7 @@ class Browser {
         }
 
         if (this.referenceFrameList) {
-            const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr)
-            navbarDidResize(this, this.$navigation.width(), isWGV)
+            this.navbar.navbarDidResize()
         }
 
         resize.call(this)
@@ -1573,13 +1449,11 @@ class Browser {
             referenceFrame.end = referenceFrame.start + referenceFrame.bpPerPixel * width
         }
 
-        if (this.chromosomeSelectWidget) {
-            this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
-        }
+        const chrName = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
 
         const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
 
-        this.$searchInput.val(loc)
+        this.navbar.updateLocus(loc, chrName)
 
         this.fireEvent('locuschange', [this.referenceFrameList])
     }
@@ -1856,7 +1730,7 @@ class Browser {
     async loadSampleInfo(config) {
 
         await this.sampleInfo.loadSampleInfoFile(config.url)
- 
+
         for (const {sampleInfoViewport} of this.trackViews) {
             sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
         }
@@ -2312,7 +2186,7 @@ class Browser {
     createCircularView(container, show) {
         show = show === true   // convert undefined to boolean
         this.circularView = createCircularView(container, this)
-        this.circularViewControl = new CircularViewControl(this.$toggle_button_container.get(0), this)
+        this.circularViewControl = new CircularViewControl(this.navbar.toggle_button_container, this)
         this.circularView.setAssembly({
             name: this.genome.id,
             id: this.genome.id,
@@ -2332,6 +2206,30 @@ class Browser {
             this.circularViewControl.setState(isVisible)
         }
     }
+
+
+
+    // Navbar delegates
+    get sampleInfoControl() {
+        return this.navbar.sampleInfoControl
+    }
+
+    get overlayTrackButton() {
+        return this.navbar.overlayTrackButton
+    }
+
+    get roiTableControl() {
+        return this.navbar.roiTableControl
+    }
+
+    get sampleInfoControl() {
+        return this.navbar.sampleInfoControl
+    }
+
+    get sampleNameControl() {
+        return this.navbar.sampleNameControl
+    }
+
 }
 
 function getFileExtension(input) {
@@ -2539,21 +2437,6 @@ async function keyUpHandler(event) {
             }
         }
     }
-}
-
-
-function logo() {
-
-    return $(
-        '<svg width="690px" height="324px" viewBox="0 0 690 324" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
-        '<title>IGV</title>' +
-        '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">' +
-        '<g id="IGV" fill="#666666">' +
-        '<polygon id="Path" points="379.54574 8.00169252 455.581247 8.00169252 515.564813 188.87244 532.884012 253.529506 537.108207 253.529506 554.849825 188.87244 614.833392 8.00169252 689.60164 8.00169252 582.729511 320.722144 486.840288 320.722144"></polygon>' +
-        '<path d="M261.482414,323.793286 C207.975678,323.793286 168.339046,310.552102 142.571329,284.069337 C116.803612,257.586572 103.919946,217.158702 103.919946,162.784513 C103.919946,108.410325 117.437235,67.8415913 144.472217,41.0770945 C171.507199,14.3125977 212.903894,0.930550071 268.663545,0.930550071 C283.025879,0.930550071 298.232828,1.84616386 314.284849,3.6774189 C330.33687,5.50867394 344.839793,7.97378798 357.794056,11.072835 L357.794056,68.968378 C339.48912,65.869331 323.578145,63.5450806 310.060654,61.9955571 C296.543163,60.4460336 284.574731,59.6712835 274.154998,59.6712835 C255.850062,59.6712835 240.502308,61.4320792 228.111274,64.9537236 C215.720241,68.4753679 205.793482,74.2507779 198.330701,82.2801269 C190.867919,90.309476 185.587729,100.87425 182.48997,113.974767 C179.392212,127.075284 177.843356,143.345037 177.843356,162.784513 C177.843356,181.942258 179.251407,198.000716 182.067551,210.960367 C184.883695,223.920018 189.671068,234.41436 196.429813,242.443709 C203.188559,250.473058 212.059279,256.178037 223.042241,259.558815 C234.025202,262.939594 247.683295,264.629958 264.01693,264.629958 C268.241146,264.629958 273.098922,264.489094 278.590403,264.207362 C284.081883,263.925631 289.643684,263.50304 295.275972,262.939577 L295.275972,159.826347 L361.595831,159.826347 L361.595831,308.579859 C344.698967,313.087564 327.239137,316.750019 309.215815,319.567334 C291.192494,322.38465 275.281519,323.793286 261.482414,323.793286 L261.482414,323.793286 L261.482414,323.793286 Z" id="Path"></path>;' +
-        '<polygon id="Path" points="0.81355666 5.00169252 73.0472883 5.00169252 73.0472883 317.722144 0.81355666 317.722144"></polygon>' +
-        '</g> </g> </svg>'
-    )
 }
 
 function toggleTrackLabels(trackViews, isVisible) {

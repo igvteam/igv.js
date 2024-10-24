@@ -31,9 +31,9 @@ import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 
 class CenterLineButton extends NavbarButton {
 
-    constructor(browser, parent) {
+    constructor(parent, browser) {
 
-        super(browser, parent, 'Center Line', buttonLabel, centerlineImage, centerlineImageHover, browser.config.showCenterGuide)
+        super(parent, browser, 'Center Line', buttonLabel, centerlineImage, centerlineImageHover, browser.config.showCenterGuide)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowCenterLine) {

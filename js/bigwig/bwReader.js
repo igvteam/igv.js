@@ -56,8 +56,9 @@ class BWReader {
         this.loader = isDataURL(this.path) ?
             new DataBuffer(this.path) : igvxhr
 
-        if (config.searchTrix) {
-            this._trix = new Trix(`${config.searchTrix}x`, config.searchTrix)
+        const trixURL = config.trixURL || config.searchTrix
+        if (trixURL) {
+            this._trix = new Trix(`${trixURL}x`, trixURL)
         }
 
     }
