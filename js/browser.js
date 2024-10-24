@@ -239,6 +239,7 @@ class Browser {
         if (false === config.showControls) {
             this.navbar.hide()
         }
+        this.cursorGuide = new CursorGuide(this.columnContainer, this)
 
         this.inputDialog = new InputDialog(this.root)
         this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
@@ -822,14 +823,14 @@ class Browser {
     setCursorGuideVisibility(doShowCursorGuide) {
 
         if (doShowCursorGuide) {
-            this.navbar.cursorGuide.show()
+            this.cursorGuide.show()
         } else {
-            this.navbar.cursorGuide.hide()
+            this.cursorGuide.hide()
         }
     }
 
     setCustomCursorGuideMouseHandler(mouseHandler) {
-        this.navbar.cursorGuide.customMouseHandler = mouseHandler
+        this.cursorGuide.customMouseHandler = mouseHandler
     }
 
     // center line
@@ -2190,7 +2191,7 @@ class Browser {
     createCircularView(container, show) {
         show = show === true   // convert undefined to boolean
         this.circularView = createCircularView(container, this)
-        this.circularViewControl = new CircularViewControl(this.navbar.$toggle_button_container.get(0), this)
+        this.circularViewControl = new CircularViewControl(this.navbar.toggle_button_container, this)
         this.circularView.setAssembly({
             name: this.genome.id,
             id: this.genome.id,

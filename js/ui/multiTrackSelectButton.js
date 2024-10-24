@@ -5,9 +5,9 @@ import {multiTrackSelectExclusionTypes} from './menuUtils.js'
 
 class MultiTrackSelectButton extends NavbarButton {
 
-    constructor(browser, parent, navbar, enableMultiTrackSelection, visibility = true) {
+    constructor(parent, browser, navbar, enableMultiTrackSelection, visibility = true) {
 
-        super(browser, parent, 'Select Tracks', buttonLabel, multiSelectImage, multiSelectImageHover, false)
+        super(parent, browser, 'Select Tracks', buttonLabel, multiSelectImage, multiSelectImageHover, false)
 
         this.navbar = navbar
         this.enableMultiTrackSelection = false  // Initial state

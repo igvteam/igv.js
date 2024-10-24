@@ -5,9 +5,9 @@ import MergedTrack from "../feature/mergedTrack.js"
 
 
 class OverlayTrackButton extends NavbarButton {
-    constructor(browser, parent) {
+    constructor(parent, browser) {
 
-        super(browser, parent, 'Overlay Tracks', buttonLabel, overlayTrackImage, overlayTrackImageHover, false)
+        super(parent, browser, 'Overlay Tracks', buttonLabel, overlayTrackImage, overlayTrackImageHover, false)
 
         this.button.addEventListener('mouseenter', () => this.setState(true))
         this.button.addEventListener('mouseleave', () => this.setState(false))

@@ -32,7 +32,7 @@ class SampleInfoControl extends NavbarButton {
 
     constructor(parent, browser) {
 
-        super(browser, parent, 'Sample Info', buttonLabel, sampleInfoImage, sampleInfoImageHover, false)
+        super(parent, browser, 'Sample Info', buttonLabel, sampleInfoImage, sampleInfoImageHover, false)
 
         this.showSampleInfo = false
 

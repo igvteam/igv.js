@@ -41,6 +41,7 @@ import SampleNameControl from "./sample/sampleNameControl.js"
 import SaveImageControl from "./ui/saveImageControl.js"
 import CustomButton from "./ui/customButton.js"
 import ZoomWidget from "./ui/zoomWidget.js"
+import NavbarButton from "./ui/navbarButton.js"
 
 class ResponsiveNavbar {
     constructor(config, browser) {
@@ -48,13 +49,15 @@ class ResponsiveNavbar {
         this.browser = browser
         this.config = config
 
+        this.currentClass = 'igv-navbar-text-button'
+
         // DOM element for
         const $navBar = $('<div>', {class: 'igv-navbar'})
         this.$navigation = $navBar
 
         const $navbarLeftContainer = $('<div>', {class: 'igv-navbar-left-container'})
         $navBar.append($navbarLeftContainer)
-        $navbarLeftContainer
+        this.navbarLeftContainer = $navbarLeftContainer.get(0)
 
         // IGV logo
         const $logo = $('<div>', {class: 'igv-logo'})
@@ -105,39 +108,39 @@ class ResponsiveNavbar {
 
         const $navbarRightContainer = $('<div>', {class: 'igv-navbar-right-container'})
         $navBar.append($navbarRightContainer)
+        this.navbarRightContainer = $navbarRightContainer.get(0)
 
         const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">')
         $navbarRightContainer.append($toggle_button_container)
-        this.$toggle_button_container = $toggle_button_container
+        const toggleButtonContainer = $toggle_button_container.get(0)
+        this.toggle_button_container = toggleButtonContainer  // TODO -- for circular view , refactor this
 
-        this.overlayTrackButton = new OverlayTrackButton(browser, $toggle_button_container.get(0))
+        this.overlayTrackButton = new OverlayTrackButton(toggleButtonContainer, browser)
         this.overlayTrackButton.setVisibility(false)
 
         const showMultiSelect = config.showMultiSelectButton !== false
-        this.multiTrackSelectButton = new MultiTrackSelectButton(browser, $toggle_button_container.get(0), this, showMultiSelect)
+        this.multiTrackSelectButton = new MultiTrackSelectButton(toggleButtonContainer, browser, this, showMultiSelect)
 
-        this.cursorGuide = new CursorGuide(browser.columnContainer, browser)
+        this.cursorGuideButton = new CursorGuideButton(toggleButtonContainer, browser)
 
-        this.cursorGuideButton = new CursorGuideButton(browser, $toggle_button_container.get(0))
+        this.centerLineButton = new CenterLineButton(toggleButtonContainer, browser)
 
-        this.centerLineButton = new CenterLineButton(browser, $toggle_button_container.get(0))
-
-        this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), browser)
+        this.trackLabelControl = new TrackLabelControl(toggleButtonContainer, browser)
 
         // ROI Control
-        this.roiTableControl = new ROITableControl($toggle_button_container.get(0), browser)
+        this.roiTableControl = new ROITableControl(toggleButtonContainer, browser)
 
-        this.sampleInfoControl = new SampleInfoControl($toggle_button_container.get(0), browser)
+        this.sampleInfoControl = new SampleInfoControl(toggleButtonContainer, browser)
 
-        this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), browser)
+        this.sampleNameControl = new SampleNameControl(toggleButtonContainer, browser)
 
         if (true === config.showSVGButton) {
-            this.saveImageControl = new SaveImageControl($toggle_button_container.get(0), browser)
+            this.saveImageControl = new SaveImageControl(toggleButtonContainer, browser)
         }
 
         if (config.customButtons) {
             for (let b of config.customButtons) {
-                new CustomButton($toggle_button_container.get(0), browser, b)
+                new CustomButton(toggleButtonContainer, browser, b)
             }
         }
 
@@ -147,18 +150,18 @@ class ResponsiveNavbar {
             this.$navigation.hide()
         }
 
-        this.navbarRightContainer = $navbarRightContainer.get(0)
-        this.navbarLeftContainer = $navbarLeftContainer.get(0)
+
+
     }
 
     navbarDidResize() {
+
 
         const navbarWidth = this.$navigation.width()
         const currentClass = this.currentNavbarButtonClass()
         if ('igv-navbar-text-button' === currentClass) {
             this.textButtonContainerWidth = this.navbarRightContainer.getBoundingClientRect().width
         }
-
         const browser = this.browser
         const isWGV =
             (browser.isMultiLocusWholeGenomeView()) ||
@@ -175,8 +178,6 @@ class ResponsiveNavbar {
 
         const delta = rightContainerX - leftContainerExtent
 
-        // console.log(`Current class ${ currentClass } Delta: ${ StringUtils.numberFormatter(Math.floor(delta))}`)
-
         let navbarButtonClass
         const threshold = 8
         if ('igv-navbar-text-button' === currentClass && delta < threshold) {
@@ -188,7 +189,8 @@ class ResponsiveNavbar {
             }
         }
         // Update all the buttons (buttons are listeners)
-        if(currentClass !== navbarButtonClass) {
+        if(navbarButtonClass && currentClass !== navbarButtonClass) {
+            this.currentClass = navbarButtonClass
             this.browser.fireEvent('navbar-resize', [navbarButtonClass])
         }
         
@@ -250,8 +252,9 @@ class ResponsiveNavbar {
     }
 
     currentNavbarButtonClass() {
-        const el = this.$navigation.get(0).querySelector('.igv-navbar-text-button')
-        return el ? 'igv-navbar-text-button' : 'igv-navbar-icon-button'
+        return this.currentClass
+        //const el = this.$navigation.get(0).querySelector('.igv-navbar-text-button')
+        //return el ? 'igv-navbar-text-button' : 'igv-navbar-icon-button'
     }
 
     setEnableTrackSelection(b) {
