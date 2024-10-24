@@ -31,9 +31,9 @@ import { buttonLabel } from "./navbarIcons/buttonLabel.js"
 
 class CursorGuideButton extends NavbarButton {
 
-    constructor(browser, parent) {
+    constructor(parent, browser) {
 
-        super(browser, parent, 'Crosshairs', buttonLabel, cursorImage, cursorImageHover, browser.doShowCursorGuide)
+        super(parent, browser, 'Crosshairs', buttonLabel, cursorImage, cursorImageHover, browser.doShowCursorGuide)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowCursorGuide) {

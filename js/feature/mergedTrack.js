@@ -152,6 +152,19 @@ class MergedTrack extends TrackBase {
         return this._autoscale
     }
 
+    set autoscaleGroup(g) {
+        if(this.tracks) {
+            for(let t of this.tracks) t.autoscaleGroup = g
+        }
+    }
+
+    get autoscaleGroup() {
+        if(this.tracks && this.tracks.length > 0) {
+            const g = this.tracks[0].autoscaleGroup
+            return (this.tracks.some(t => g !== t.autoscaleGroup)) ? undefined : g
+        }
+    }
+
     /**
      * Set the data range of all constitutive numeric tracks.  This method is called from the menu item, i.e. an explicit
      * setting, so it should disable autoscale as well.

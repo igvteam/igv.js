@@ -32,7 +32,7 @@ class ROITableControl extends NavbarButton {
 
     constructor(parent, browser)  {
 
-        super(browser, parent, [ 'ROI', 'Regions of Interest Table' ], buttonLabel, roiImage, roiImageHover, false)
+        super(parent, browser, ['ROI', 'Regions of Interest Table'], buttonLabel, roiImage, roiImageHover, false)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowROITable) {

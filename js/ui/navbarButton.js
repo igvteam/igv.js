@@ -28,7 +28,7 @@ import * as DOMUtils from "../ui/utils/dom-utils.js"
 
 class NavbarButton {
 
-    constructor(browser, parent, title, buttonLabel, imageSVG, imageHoverSVG, initialButtonState) {
+    constructor(parent, browser, title, buttonLabel, imageSVG, imageHoverSVG, initialButtonState) {
 
         this.browser = browser
 
@@ -85,7 +85,7 @@ class NavbarButton {
     }
 
     configureTextButton(textContent) {
-
+        console.log(`text ${this.title}`)
         this.button.classList.add('igv-navbar-text-button')
 
         const tempDiv = document.createElement('div')
@@ -100,6 +100,7 @@ class NavbarButton {
     }
 
     configureIconButton() {
+        console.log(`icon ${this.title}`)
         this.button.classList.add('igv-navbar-icon-button')
     }
 
@@ -138,11 +139,6 @@ class NavbarButton {
         } else {
             this.hide()
         }
-    }
-
-    static currentNavbarButtonClass(browser) {
-        const el = browser.$navigation.get(0).querySelector('.igv-navbar-text-button')
-        return el ? 'igv-navbar-text-button' : 'igv-navbar-icon-button'
     }
 }
 

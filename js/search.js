@@ -13,6 +13,7 @@ async function searchFeatures(browser, name) {
     const searchConfig = browser.searchConfig || DEFAULT_SEARCH_CONFIG
     let feature
 
+    name = name.toUpperCase()
     const searchableTracks = browser.tracks.filter(t => t.searchable)
     for (let track of searchableTracks) {
         const feature = await track.search(name)

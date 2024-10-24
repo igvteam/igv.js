@@ -1,15 +1,16 @@
 import NavbarButton from "./navbarButton.js"
-import {multiTrackSelectExclusionTypes} from './menuUtils.js'
 import {multiSelectImage, multiSelectImageHover} from "./navbarIcons/multiSelect.js"
 import {buttonLabel} from "./navbarIcons/buttonLabel.js"
-
+import {multiTrackSelectExclusionTypes} from './menuUtils.js'
 
 class MultiTrackSelectButton extends NavbarButton {
 
-    constructor(browser, parent, enableMultiTrackSelection) {
+    constructor(parent, browser, navbar, enableMultiTrackSelection, visibility = true) {
 
-        super(browser, parent, 'Select Tracks', buttonLabel, multiSelectImage, multiSelectImageHover, enableMultiTrackSelection = false)
-        this.enableMultiTrackSelection = enableMultiTrackSelection
+        super(parent, browser, 'Select Tracks', buttonLabel, multiSelectImage, multiSelectImageHover, false)
+
+        this.navbar = navbar
+        this.enableMultiTrackSelection = false  // Initial state
         this.button.addEventListener('mouseenter', event => {
             if (false === enableMultiTrackSelection) {
                 this.setState(true)
@@ -23,6 +24,7 @@ class MultiTrackSelectButton extends NavbarButton {
         })
 
         const mouseClickHandler = () => {
+            // Toggle the selection state
             this.setMultiTrackSelection(!this.enableMultiTrackSelection)
         }
 
@@ -30,29 +32,26 @@ class MultiTrackSelectButton extends NavbarButton {
 
         this.button.addEventListener('click', this.boundMouseClickHandler)
 
-        this.setVisibility(true)
+        this.setVisibility(visibility)
 
     }
 
     setMultiTrackSelection(enableMultiTrackSelection) {
-        this.enableMultiTrackSelection = enableMultiTrackSelection
-        for (const trackView of this.browser.trackViews) {
-            if (false === multiTrackSelectExclusionTypes.has(trackView.track.type)) {
-                trackView.setTrackSelectionState(trackView.axis, this.enableMultiTrackSelection)
 
-                // If closing the selection boxes set track selected property to false
-                if (!this.enableMultiTrackSelection) {
-                    trackView.track.selected = false
-                }
-            }
-        }
+        this.enableMultiTrackSelection = enableMultiTrackSelection
         this.setState(this.enableMultiTrackSelection)
 
-        // If enableMultiTrackSelection is false hide Overlay button
+        // If enableMultiTrackSelection is false hide the Overly button
         if (false === this.enableMultiTrackSelection) {
-            this.browser.overlayTrackButton.setVisibility(false)
+            this.navbar.overlayTrackButton.setVisibility(false)
         }
+
+        for (const trackView of this.browser.trackViews) {
+            trackView.enableTrackSelection(enableMultiTrackSelection)
+        }
+
     }
+
 }
 
 export default MultiTrackSelectButton
