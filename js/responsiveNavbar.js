@@ -54,6 +54,7 @@ class ResponsiveNavbar {
 
         const $navbarLeftContainer = $('<div>', {class: 'igv-navbar-left-container'})
         $navBar.append($navbarLeftContainer)
+        $navbarLeftContainer
 
         // IGV logo
         const $logo = $('<div>', {class: 'igv-logo'})
@@ -140,33 +141,24 @@ class ResponsiveNavbar {
             }
         }
 
-        this.zoomWidget = new ZoomWidget(browser, $navbarRightContainer.get(0))
+        this.zoomWidget = new ZoomWidget(config, browser, $navbarRightContainer.get(0))
 
         if (false === config.showNavigation) {
             this.$navigation.hide()
         }
 
+        this.navbarRightContainer = $navbarRightContainer.get(0)
+        this.navbarLeftContainer = $navbarLeftContainer.get(0)
     }
 
     navbarDidResize() {
 
-        const width = this.$navigation.width()
+        const navbarWidth = this.$navigation.width()
         const currentClass = this.currentNavbarButtonClass()
         if ('igv-navbar-text-button' === currentClass) {
-            this.textButtonContainerWidth = this.$navigation.get(0).querySelector('.igv-navbar-right-container').getBoundingClientRect().width
+            this.textButtonContainerWidth = this.navbarRightContainer.getBoundingClientRect().width
         }
 
-        const responsiveClasses = this.getResponsiveClasses(width)
-
-        $(this.zoomWidget.zoomContainer).removeClass()
-        $(this.zoomWidget.zoomContainer).addClass(responsiveClasses.zoomContainer)
-
-        this.browser.fireEvent('navbar-resize', [responsiveClasses.navbarButton])
-    }
-
-    getResponsiveClasses(navbarWidth) {
-
-        const navbarResponsiveClasses = {}
         const browser = this.browser
         const isWGV =
             (browser.isMultiLocusWholeGenomeView()) ||
@@ -177,35 +169,39 @@ class ResponsiveNavbar {
         const {
             x: leftContainerX,
             width: leftContainerWidth
-        } = this.$navigation.get(0).querySelector('.igv-navbar-left-container').getBoundingClientRect()
+        } = this.navbarLeftContainer.getBoundingClientRect()
         const leftContainerExtent = leftContainerX + leftContainerWidth
-        const {x: rightContainerX} = this.$navigation.get(0).querySelector('.igv-navbar-right-container').getBoundingClientRect()
+        const {x: rightContainerX} = this.navbarRightContainer.getBoundingClientRect()
 
         const delta = rightContainerX - leftContainerExtent
 
-        const currentClass = this.currentNavbarButtonClass()
-
         // console.log(`Current class ${ currentClass } Delta: ${ StringUtils.numberFormatter(Math.floor(delta))}`)
 
+        let navbarButtonClass
         const threshold = 8
         if ('igv-navbar-text-button' === currentClass && delta < threshold) {
-            navbarResponsiveClasses.navbarButton = 'igv-navbar-icon-button'
+            navbarButtonClass = 'igv-navbar-icon-button'
         } else if (this.textButtonContainerWidth && 'igv-navbar-icon-button' === currentClass) {
             const length = navbarWidth - leftContainerExtent
             if (length - this.textButtonContainerWidth > threshold) {
-                navbarResponsiveClasses.navbarButton = 'igv-navbar-text-button'
+                navbarButtonClass = 'igv-navbar-text-button'
             }
-
         }
-
+        // Update all the buttons (buttons are listeners)
+        if(currentClass !== navbarButtonClass) {
+            this.browser.fireEvent('navbar-resize', [navbarButtonClass])
+        }
+        
+        let zoomContainerClass
         if (isWGV) {
-            navbarResponsiveClasses.zoomContainer = 'igv-zoom-widget-hidden'
+            zoomContainerClass = 'igv-zoom-widget-hidden'
         } else {
-            navbarResponsiveClasses.zoomContainer = navbarWidth > 860 ? 'igv-zoom-widget' : 'igv-zoom-widget-900'
+            zoomContainerClass = navbarWidth > 860 ? 'igv-zoom-widget' : 'igv-zoom-widget-900'
         }
-
-        return navbarResponsiveClasses
+        $(this.zoomWidget.zoomContainer).removeClass()
+        $(this.zoomWidget.zoomContainer).addClass(zoomContainerClass)
     }
+
 
     setCenterLineButtonVisibility(isWholeGenomeView) {
         if (isWholeGenomeView) {
