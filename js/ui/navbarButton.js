@@ -139,11 +139,6 @@ class NavbarButton {
             this.hide()
         }
     }
-
-    static currentNavbarButtonClass(browser) {
-        const el = browser.$navigation.get(0).querySelector('.igv-navbar-text-button')
-        return el ? 'igv-navbar-text-button' : 'igv-navbar-icon-button'
-    }
 }
 
 export default NavbarButton
