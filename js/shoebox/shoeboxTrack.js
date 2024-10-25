@@ -25,6 +25,8 @@ class ShoeboxTrack extends TrackBase {
         this.height = config.height || 300
         this.rowHeight = config.rowHeight || 3
         this.max = config.max || 3000
+        this.colorScale = new ShoeboxColorScale({min: 0, max: 3000, color: this.color})
+
 
         // Hardcoded -- todo get from track line
         this.sampleKeys = []
@@ -48,17 +50,6 @@ class ShoeboxTrack extends TrackBase {
             this.setTrackProperties(this.header)
         }
 
-        // Must do the following after setting track properties as they can be overriden via a track line
-
-        // Color settings
-        if (this.config.colorScale && this.config.colorScale.max && this.config.colorScale.color) {   // Minimal validation
-            this.colorScale = new ShoeboxColorScale(this.config.colorScale)
-
-        } else {
-            const min = this.dataRange.min
-            const max = this.dataRange.max
-            this.colorScale = new ShoeboxColorScale({min, max, color: this.color})
-        }
     }
 
     get color() {
@@ -101,8 +92,6 @@ class ShoeboxTrack extends TrackBase {
     setDataRange({min, max}) {
         this.dataRange.min = min
         this.dataRange.max = max
-        this.colorScale.min = min
-        this.colorScale.max = max
         this.trackView.repaintViews()
     }
 
@@ -145,31 +134,30 @@ class ShoeboxTrack extends TrackBase {
                 // Pixel x values
                 const xLeft = Math.round((f.start - bpStart) / bpPerPixel)
                 const xRight = Math.round((f.end - bpStart) / bpPerPixel)
-                const w = Math.max(1, xRight - xLeft)
+                const w = xRight - xLeft
 
                 // Loop through value array
-                let row = 0
 
                 for (let i = f.values.length - 1; i >= 0; i--) {
 
                     const v = f.values[i]
 
-                    const y = row * rowHeight
+                    if(v >= this.dataRange.min) {
 
+                        const row = f.values.length - 1 - i
+                        const y = row * rowHeight
+                        const bottom = y + rowHeight
 
-                    const bottom = y + rowHeight
+                        if (bottom < pixelTop || y > pixelBottom) {
+                            continue
+                        }
 
-                    if (bottom < pixelTop || y > pixelBottom) {
-                        continue
+                        const color = this.colorScale.getColor(v)
+
+                        context.fillStyle = color
+
+                        context.fillRect(xLeft, y, w, h)
                     }
-
-                    const color = this.colorScale.getColor(v)
-
-                    context.fillStyle = color
-
-                    context.fillRect(xLeft, y, w, h)
-
-                    row++
                 }
             }
         } else {
