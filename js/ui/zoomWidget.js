@@ -22,41 +22,39 @@ class ZoomWidget {
             browser.zoomOut()
         })
 
-        // Range slider (optional)
-        if (config.showZoomSlider !== false) {
-            const el = DOMUtils.div()
-            this.zoomContainer.appendChild(el)
-            this.slider = document.createElement('input')
-            this.slider.type = 'range'
+        // Range slider
+        const el = DOMUtils.div()
+        this.zoomContainer.appendChild(el)
+        this.slider = document.createElement('input')
+        this.slider.type = 'range'
 
-            this.slider.min = `${sliderMin}`
-            this.slider.max = `${sliderMax}`
+        this.slider.min = `${sliderMin}`
+        this.slider.max = `${sliderMax}`
 
-            el.appendChild(this.slider)
+        el.appendChild(this.slider)
 
-            this.slider.addEventListener('change', e => {
+        this.slider.addEventListener('change', e => {
 
-                e.preventDefault()
-                e.stopPropagation()
+            e.preventDefault()
+            e.stopPropagation()
 
-                const referenceFrame = browser.referenceFrameList[0]
-                const {bpLength} = referenceFrame.genome.getChromosome(referenceFrame.chr)
-                const {end, start} = referenceFrame
+            const referenceFrame = browser.referenceFrameList[0]
+            const {bpLength} = referenceFrame.genome.getChromosome(referenceFrame.chr)
+            const {end, start} = referenceFrame
 
-                const extent = end - start
+            const extent = end - start
 
-                // bpLength/(end - start)
-                const scaleFactor = Math.pow(2, e.target.valueAsNumber)
+            // bpLength/(end - start)
+            const scaleFactor = Math.pow(2, e.target.valueAsNumber)
 
-                // (end - start) = bpLength/scaleFactor
-                const zoomedExtent = bpLength / scaleFactor
+            // (end - start) = bpLength/scaleFactor
+            const zoomedExtent = bpLength / scaleFactor
 
-                // console.log(`zoom-widget - slider ${ e.target.value } scaleFactor ${ scaleFactor } extent-zoomed ${ StringUtils.numberFormatter(Math.round(zoomedExtent)) }`)
+            // console.log(`zoom-widget - slider ${ e.target.value } scaleFactor ${ scaleFactor } extent-zoomed ${ StringUtils.numberFormatter(Math.round(zoomedExtent)) }`)
 
-                browser.zoomWithScaleFactor(zoomedExtent / extent)
+            browser.zoomWithScaleFactor(zoomedExtent / extent)
 
-            })
-        }
+        })
 
         // zoom in
         this.zoomInButton = DOMUtils.div()
@@ -82,7 +80,7 @@ class ZoomWidget {
 
     update(referenceFrameList) {
 
-        if(this.slider) {
+        if (this.slider) {
             const referenceFrame = referenceFrameList[0]
             const {bpLength} = referenceFrame.genome.getChromosome(referenceFrame.chr)
             const {start, end} = referenceFrame

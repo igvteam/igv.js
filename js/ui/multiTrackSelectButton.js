@@ -5,7 +5,7 @@ import {multiTrackSelectExclusionTypes} from './menuUtils.js'
 
 class MultiTrackSelectButton extends NavbarButton {
 
-    constructor(parent, browser, navbar, enableMultiTrackSelection, visibility = true) {
+    constructor(parent, browser, navbar, enableMultiTrackSelection) {
 
         super(parent, browser, 'Select Tracks', buttonLabel, multiSelectImage, multiSelectImageHover, false)
 
@@ -31,8 +31,6 @@ class MultiTrackSelectButton extends NavbarButton {
         this.boundMouseClickHandler = mouseClickHandler.bind(this)
 
         this.button.addEventListener('click', this.boundMouseClickHandler)
-
-        this.setVisibility(visibility)
 
     }
 
