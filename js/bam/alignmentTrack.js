@@ -938,10 +938,6 @@ class AlignmentTrack extends TrackBase {
 
         function clickHandler() {
             this.alignmentTrack.colorBy = menuItem.key
-            if ('strand' !== this.alignmentTrack.groupBy) {
-                this.alignmentTrack.groupBy = 'strand'
-                this.alignmentTrack.repackAlignments()
-            }
             this.trackView.repaintViews()
         }
 
