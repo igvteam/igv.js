@@ -54,13 +54,23 @@ class BWReader {
         this.config = config
         this.bufferSize = BUFFER_SIZE
         this.loader = isDataURL(this.path) ?
-            new DataBuffer(this.path) : igvxhr
+            new DataBuffer(BGZip.decodeDataURI(this.path).buffer) :
+            igvxhr
 
         const trixURL = config.trixURL || config.searchTrix
         if (trixURL) {
             this._trix = new Trix(`${trixURL}x`, trixURL)
         }
 
+    }
+
+    /**
+     * Preload all the data for this bb file
+     * @returns {Promise<void>}
+     */
+    async preload() {
+        const data = await igvxhr.loadArrayBuffer(this.path)
+        this.loader = new DataBuffer(data)
     }
 
     async readWGFeatures(bpPerPixel, windowFunction) {
@@ -732,8 +742,8 @@ function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, ch
 
 class DataBuffer {
 
-    constructor(dataURI) {
-        this.data = BGZip.decodeDataURI(dataURI).buffer
+    constructor(data) {
+        this.data = data
     }
 
     /**
@@ -762,49 +772,5 @@ class DataBuffer {
     }
 }
 
-class WholeFileBuffer {
-
-    data
-
-    constructor(path) {
-        this.path = path
-    }
-
-    async loadFile() {
-        this.data = await igvxhr.loadArrayBuffer(this.path)
-    }
-
-    /**
-     * igvxhr interface
-     * @param ignore
-     * @param options
-     * @returns {any}
-     */
-    async loadArrayBuffer(ignore, options) {
-        if (!this.data) {
-            await this.loadFile()
-        }
-        const range = options.range
-        return range ? this.data.slice(range.start, range.start + range.size) : this.data
-    }
-
-    /**
-     * BufferedReader interface
-     *
-     * @param requestedRange - byte rangeas {start, size}
-     * @param fulfill - function to receive result
-     * @param asUint8 - optional flag to return result as an UInt8Array
-     */
-    async dataViewForRange(requestedRange, asUint8) {
-        if (!this.data) {
-            await this.loadFile()
-        }
-        const len = Math.min(this.data.byteLength - requestedRange.start, requestedRange.size)
-        return asUint8 ?
-            new Uint8Array(this.data, requestedRange.start, len) :
-            new DataView(this.data, requestedRange.start, len)
-    }
-
-}
 
 export default BWReader
