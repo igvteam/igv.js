@@ -57,28 +57,28 @@ class Genome {
 
         if (config.chromAliasBbURL) {
             this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
-            if(!this.chromosomeNames) {
+            if (!this.chromosomeNames) {
                 this.chromosomeNames = await this.chromAlias.getChromosomeNames()
             }
         } else if (config.aliasURL) {
             this.chromAlias = new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
         } else if (this.chromosomeNames) {
-            this.chromAlias = new ChromAliasDefaults(this.id, this.chromosomeNames);
+            this.chromAlias = new ChromAliasDefaults(this.id, this.chromosomeNames)
         }
 
         if (config.cytobandBbURL) {
             this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
-            if(!this.chromosomeNames) {
+            if (!this.chromosomeNames) {
                 this.chromosomeNames = await this.cytobandSource.getChromosomeNames()
             }
         } else if (config.cytobandURL) {
             this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
-            if(!this.chromosomeNames) {
+            if (!this.chromosomeNames) {
                 this.chromosomeNames = await this.cytobandSource.getChromosomeNames()
             }
-            if(this.chromosomes.size === 0) {
+            if (this.chromosomes.size === 0) {
                 const c = await this.cytobandSource.getChromosomes()
-                for(let chromosome of c) {
+                for (let chromosome of c) {
                     this.chromosomes.set(c.name, c)
                 }
             }
@@ -96,6 +96,7 @@ class Genome {
             } else {
                 this.#wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
             }
+            await this.chromAlias.preload(this.#wgChromosomeNames)
         }
 
         // Optionally create the psuedo chromosome "all" to support whole genome view
@@ -162,15 +163,15 @@ class Genome {
     async loadChromosome(chr) {
 
         if (this.chromAlias) {
-           const chromAliasRecord = await this.chromAlias.search(chr)
-            if(chromAliasRecord) {
+            const chromAliasRecord = await this.chromAlias.search(chr)
+            if (chromAliasRecord) {
                 chr = chromAliasRecord.chr
             }
         }
 
         if (!this.chromosomes.has(chr)) {
             let chromosome
-            const  sequenceRecord = await this.sequence.getSequenceRecord(chr)
+            const sequenceRecord = await this.sequence.getSequenceRecord(chr)
             if (sequenceRecord) {
                 chromosome = new Chromosome(chr, 0, sequenceRecord.bpLength)
             }
@@ -180,6 +181,7 @@ class Genome {
 
         return this.chromosomes.get(chr)
     }
+
     async getAliasRecord(chr) {
         if (this.chromAlias) {
             return this.chromAlias.search(chr)
@@ -199,7 +201,7 @@ class Genome {
     }
 
     get wgChromosomeNames() {
-        return this.#wgChromosomeNames ?  this.#wgChromosomeNames.slice() : undefined
+        return this.#wgChromosomeNames ? this.#wgChromosomeNames.slice() : undefined
     }
 
     get showChromosomeWidget() {
@@ -303,7 +305,7 @@ class Genome {
      * @param end
      */
     getSequenceInterval(chr, start, end) {
-        if(typeof this.sequence.getSequenceInterval === 'function') {
+        if (typeof this.sequence.getSequenceInterval === 'function') {
             return this.sequence.getSequenceInterval(chr, start, end)
         } else {
             return undefined
