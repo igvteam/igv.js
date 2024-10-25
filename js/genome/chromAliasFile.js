@@ -78,6 +78,9 @@ class ChromAliasFile {
                     aliasRecord[key] = tokens[i]
                     this.aliasRecordCache.set(tokens[i], aliasRecord)
                 }
+
+                this.aliasRecordCache.set(chr.toLowerCase(), aliasRecord)
+                this.aliasRecordCache.set(chr.toUpperCase(), aliasRecord)
             }
         }
     }
