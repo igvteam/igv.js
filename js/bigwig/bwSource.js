@@ -31,7 +31,7 @@ class BWSource extends BaseFeatureSource {
 
     queryable = true
     #wgValues = {}
-    windowFunctions = ["mean", "min", "max"]
+    windowFunctions = ["mean", "min", "max", "none"]
 
     constructor(config, genome) {
         super(genome)

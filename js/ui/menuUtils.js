@@ -4,9 +4,9 @@ import Dialog from "./components/dialog.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {colorPalettes} from "../util/colorPalletes.js"
 
-const colorPickerTrackTypeSet = new Set(['bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact'])
+const colorPickerTrackTypeSet = new Set(['bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact', 'shoebox'])
 
-const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'qtl', 'snp', 'shoebox'])
+const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'qtl', 'snp', 'shoebox', 'wig'])
 
 const multiTrackSelectExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
 
@@ -83,7 +83,7 @@ class MenuUtils {
 
         if (isVisibilityWindowType(trackView)) {
             list.push('<hr/>')
-            list.push(visibilityWindowMenuItem())
+            list.push(visibilityWindowMenuItem(trackView.track.type))
         }
 
         return list
@@ -166,7 +166,7 @@ function groupAutoScaleMenuItem() {
 }
 
 
-function visibilityWindowMenuItem() {
+function visibilityWindowMenuItem(trackType) {
 
     const object = $('<div>')
     object.text('Set visibility window')
@@ -184,9 +184,12 @@ function visibilityWindowMenuItem() {
             this.trackView.updateViews()
         }
 
+        const label = 'wig' === trackType ?
+            'Visibility window (bp). Enter 0 for whole chromosome, -1 for whole genome.' :
+            'Visibility window (bp). Enter 0 for whole chromosome.'
         const config =
             {
-                label: 'Visibility Window',
+                label,
                 value: this.visibilityWindow,
                 callback
             }
@@ -302,6 +305,8 @@ function trackHeightMenuItem() {
                 }
 
                 for (const track of tracks) {
+                    // Explicitly setting track height turns off autoHeight
+                    track.trackView.autoHeight = false
 
                     // If explicitly setting the height adjust min or max, if necessary
                     if (track.minHeight !== undefined && track.minHeight > number) {
@@ -314,9 +319,6 @@ function trackHeightMenuItem() {
 
                     track.trackView.checkContentHeight()
                     track.trackView.repaintViews()
-
-                    // Explicitly setting track height turns off autoHeight
-                    track.trackView.autoHeight = false
 
                 } // for (tracks)
 

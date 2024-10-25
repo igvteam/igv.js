@@ -304,6 +304,7 @@ class AlignmentTrack extends TrackBase {
                 if (this.groupBy && groupName) {
 
                     ctx.save()
+
                     ctx.font = '400 12px sans-serif'
                     const textMetrics = ctx.measureText(groupName)
                     const w = textMetrics.width + 10
@@ -314,14 +315,10 @@ class AlignmentTrack extends TrackBase {
                     ctx.textAlign = "center"
                     ctx.fillStyle = 'white'
                     ctx.strokeStyle = 'lightGray'
-                    ctx.beginPath()
-                    ctx.roundRect(x, baselineY - textMetrics.actualBoundingBoxAscent - 5, w, h, 2)
-                    ctx.fill()
-                    ctx.stroke()
+                    IGVGraphics.roundRect(ctx, x, baselineY - textMetrics.actualBoundingBoxAscent - 5, w, h, 2, 1, 1)
 
                     ctx.fillStyle = 'black'
                     ctx.fillText(groupName, x + w / 2, baselineY)
-
                     IGVGraphics.dashedLine(ctx, 0, alignmentY, pixelWidth, alignmentY)
 
                     ctx.restore()
@@ -1229,7 +1226,7 @@ class AlignmentTrack extends TrackBase {
         const y = clickState.y
         const offsetY = y - this.top
         const genomicLocation = clickState.genomicLocation
- 
+
         if(features.packedGroups) {
             let minGroupY = Number.MAX_VALUE
             for (let group of features.packedGroups.values()) {

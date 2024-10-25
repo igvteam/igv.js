@@ -475,7 +475,8 @@ class TrackViewport extends Viewport {
 
             context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
 
-            let {start, bpPerPixel} = this.referenceFrame
+            const {start, bpPerPixel} = this.referenceFrame
+            const pixelXOffset = Math.round((start - this.referenceFrame.start) / bpPerPixel)
 
             const config =
                 {
@@ -486,6 +487,8 @@ class TrackViewport extends Viewport {
                     pixelTop: yClipOffset,
                     pixelWidth: width,
                     pixelHeight: height,
+                    pixelXOffset,
+                    pixelShift: pixelXOffset,
                     bpStart: start,
                     bpEnd: start + (width * bpPerPixel),
                     bpPerPixel,

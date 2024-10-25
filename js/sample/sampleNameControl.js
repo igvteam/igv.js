@@ -32,7 +32,7 @@ class SampleNameControl extends NavbarButton {
 
     constructor(parent, browser) {
 
-        super(browser, parent, 'Sample Names', sampleNameButtonLabel, sampleNameImage, sampleNameImageHover, browser.config.showSampleNames)
+        super(parent, browser, 'Sample Names', sampleNameButtonLabel, sampleNameImage, sampleNameImageHover, browser.config.showSampleNames)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.showSampleNames) {

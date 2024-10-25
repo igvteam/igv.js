@@ -245,7 +245,10 @@ class TextFeatureSource extends BaseFeatureSource {
         for (let feature of featureList) {
             for (let field of searchableFields) {
                 let key
-                if (typeof feature.getAttributeValue === 'function') {
+                if(feature.hasOwnProperty(field)) {
+                    key = feature[field];
+                }
+                else if (typeof feature.getAttributeValue === 'function') {
                     key = feature.getAttributeValue(field)
                 }
                 if (key) {

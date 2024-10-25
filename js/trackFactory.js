@@ -14,6 +14,7 @@ import IdeogramTrack from "./ideogramTrack.js"
 import SpliceJunctionTrack from "./feature/spliceJunctionTrack.js"
 import BlatTrack from "./blat/blatTrack.js"
 import CNVPytorTrack from "./cnvpytor/cnvpytorTrack.js"
+import ShoeboxTrack from "./shoebox/shoeboxTrack.js"
 //import CNVPytorTrack from "./CNVpytor/cnvpytorTrack.js"
 
 
@@ -25,7 +26,7 @@ const trackFunctions =
         ['seg', (config, browser) => new SegTrack(config, browser)],
         ['mut', (config, browser) => new SegTrack(config, browser)],
         ['maf', (config, browser) => new SegTrack(config, browser)],
-        ['shoebox', (config, browser) => new SegTrack(config, browser)],
+        ['shoebox', (config, browser) => new ShoeboxTrack(config, browser)],
         ['wig', (config, browser) => new WigTrack(config, browser)],
         ['merged', (config, browser) => new MergedTrack(config, browser)],
         ['alignment', (config, browser) => new BAMTrack(config, browser)],
