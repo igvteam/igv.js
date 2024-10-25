@@ -24,6 +24,16 @@ class Hub {
                 const groupsTxtURL = baseURL + genome.getProperty("groups")
                 groups = await loadStanzas(groupsTxtURL)
             }
+
+            // If the genome has a chromSizes file, and it is not too large, set the chromSizesURL property.  This will
+            // enable whole genome view and the chromosome pulldown
+            if (genome.hasProperty("chromSizes")) {
+                const chromSizesURL = baseURL + genome.getProperty("chromSizes")
+                const l = await getContentLength(chromSizesURL)
+                if (l !== null && Number.parseInt(l) < 1000000) {
+                    genome.setProperty("chromSizesURL", chromSizesURL)
+                }
+            }
         }
 
         // TODO -- categorize extra "user" supplied and other tracks in some distinctive way before including them
@@ -126,8 +136,13 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
             name: name,
             twoBitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
             nameSet: "ucsc",
-            wholeGenomeView: false,
-            showChromosomeWidget: false
+        }
+
+        if (this.genomeStanza.hasProperty("chromSizesURL")) {
+            config.chromSizesURL = this.genomeStanza.getProperty("chromSizesURL")
+        } else {
+            config.wholeGenomeView = false
+            config.showChromosomeWidget = false
         }
 
         if (this.genomeStanza.hasProperty("defaultPos")) {
@@ -416,6 +431,26 @@ class Stanza {
                     return "COLLAPSED"
             }
         }
+    }
+}
+
+
+/**
+ * Return the content length of the resource.  If the content length cannot be determined return null;
+ * @param url
+ * @returns {Promise<number|string>}
+ */
+async function getContentLength(url) {
+    try {
+        const response = await fetch(url, {method: 'HEAD'})
+        const headers = response.headers
+        if (headers.has("content-length")) {
+            return headers.get("content-length")
+        } else {
+            return null
+        }
+    } catch (e) {
+        return null
     }
 }
 

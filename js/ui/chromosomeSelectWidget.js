@@ -47,7 +47,7 @@ class ChromosomeSelectWidget {
         })
 
         this.showAllChromosomes = browser.config.showAllChromosomes !== false   // i.e. default to true
-
+        this.genome = browser.genome
     }
 
     show() {
@@ -58,10 +58,16 @@ class ChromosomeSelectWidget {
         this.container.style.display = 'none'
     }
 
+    setValue(chrName) {
+        this.select.value = this.genome.getChromosomeDisplayName(chrName)
+    }
+
     update(genome) {
 
+        this.genome = genome
+
         // Start with explicit chromosome name list
-        const list = genome.wgChromosomeNames || []
+        const list = genome.wgChromosomeNames.map(nm => genome.getChromosomeDisplayName(nm)) || []
 
         if (this.showAllChromosomes && genome.chromosomeNames.length > 1) {
             const exclude = new Set(list)
@@ -72,6 +78,7 @@ class ChromosomeSelectWidget {
                     break
                 }
                 if (!exclude.has(nm)) {
+                    nm = genome.getChromosomeDisplayName(nm)
                     list.push(nm)
                 }
             }
