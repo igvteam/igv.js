@@ -118,6 +118,8 @@ class ChromAliasDefaults {
                     } else if (Number.isInteger(Number(name))) {
                         record["ucsc"] = "chr" + name
                     }
+
+
                 }
             }
 
@@ -125,9 +127,9 @@ class ChromAliasDefaults {
                 for (let a of Object.values(rec)) {
                     this.aliasRecordCache.set(a, rec)
                 }
+                this.aliasRecordCache.set(rec.chr.toLowerCase(), rec)
+                this.aliasRecordCache.set(rec.chr.toUpperCase(), rec)
             }
-            this.aliasRecordCache.set(name.toLowerCase(), rec)
-            this.aliasRecordCache.set(name.toUpperCase(), rec)
 
         }
     }
