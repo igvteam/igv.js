@@ -32,7 +32,7 @@ class ROITableControl extends NavbarButton {
 
     constructor(parent, browser)  {
 
-        super(browser, parent, [ 'ROI', 'Regions of Interest Table' ], buttonLabel, roiImage, roiImageHover, browser.doShowROITable)
+        super(parent, browser, ['ROI', 'Regions of Interest Table'], buttonLabel, roiImage, roiImageHover, false)
 
         this.button.addEventListener('mouseenter', () => {
             if (false === browser.doShowROITable) {
@@ -48,14 +48,13 @@ class ROITableControl extends NavbarButton {
 
         this.button.addEventListener('click', () => this.buttonHandler(!browser.doShowROITable))
 
-        this.setVisibility(browser.doShowROITableButton)
+        this.setVisibility(false)  // Hide initially, it will be un-hidden if ROIs are loaded
 
     }
 
     buttonHandler(status) {
-        this.browser.doShowROITable = status
-        this.setState(this.browser.doShowROITable)
-        this.browser.setROITableVisibility(this.browser.doShowROITable)
+        this.setState(status)
+        this.browser.setROITableVisibility(status)
     }
 }
 

@@ -3,7 +3,6 @@ import {convertToHubURL} from "../ucsc/ucscUtils.js"
 import Hub from "../ucsc/ucscHub.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json"
-const BACKUP_GENOMES_URL = "https://s3.amazonaws.com/igv.org.genomes/genomes.json"
 
 const GenomeUtils = {
 
@@ -15,21 +14,9 @@ const GenomeUtils = {
 
             // Get default genomes
             if (config.loadDefaultGenomes !== false) {
-                try {
-                    const url = DEFAULT_GENOMES_URL
-                    const jsonArray = await igvxhr.loadJson(url, {timeout: 5000})
-                    processJson(jsonArray)
-                } catch (e) {
-                    console.error(e)
-                    try {
-                        const url = BACKUP_GENOMES_URL
-                        const jsonArray = await igvxhr.loadJson(url, {})
-                        processJson(jsonArray)
-                    } catch (e) {
-                        console.error(e)
-                        console.warn("Errors loading default genome definitions.")
-                    }
-                }
+                const url = DEFAULT_GENOMES_URL
+                const jsonArray = await igvxhr.loadJson(url, {timeout: 5000})
+                processJson(jsonArray)
             }
 
             // Add user-defined genomes
@@ -41,6 +28,8 @@ const GenomeUtils = {
                 } else {
                     processJson(genomeList)
                 }
+            } else {
+
             }
 
             GenomeUtils.KNOWN_GENOMES = table
@@ -88,13 +77,13 @@ const GenomeUtils = {
                     try {
                         const hubURL = convertToHubURL(genomeID)
                         const hub = await Hub.loadHub(hubURL)
-                        reference = hub.getGenomeConfig("genes")
+                        reference = hub.getGenomeConfig()
                     } catch (e) {
                         console.error(e)
                     }
                 }
 
-                if(!reference) {
+                if (!reference) {
                     alert.present(new Error(`Unknown genome id: ${genomeID}`), undefined)
                 }
             }
@@ -104,7 +93,6 @@ const GenomeUtils = {
         }
     }
 }
-
 
 
 export default GenomeUtils

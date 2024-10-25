@@ -5,7 +5,6 @@
  https://genome.ucsc.edu/goldenpath/help/trackDb/trackDbHub.html
  */
 
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
 class Hub {
 
@@ -24,6 +23,16 @@ class Hub {
             if (genome.hasProperty("groups")) {
                 const groupsTxtURL = baseURL + genome.getProperty("groups")
                 groups = await loadStanzas(groupsTxtURL)
+            }
+
+            // If the genome has a chromSizes file, and it is not too large, set the chromSizesURL property.  This will
+            // enable whole genome view and the chromosome pulldown
+            if (genome.hasProperty("chromSizes")) {
+                const chromSizesURL = baseURL + genome.getProperty("chromSizes")
+                const l = await getContentLength(chromSizesURL)
+                if (l !== null && Number.parseInt(l) < 1000000) {
+                    genome.setProperty("chromSizesURL", chromSizesURL)
+                }
             }
         }
 
@@ -110,7 +119,7 @@ transBlat dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
 isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
  */
 
-    getGenomeConfig(includeTrackGroups = "all") {
+    getGenomeConfig(options = {}) {
         // TODO -- add blat?  htmlPath?
 
         const id = this.genomeStanza.getProperty("genome")
@@ -127,7 +136,13 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
             name: name,
             twoBitURL: this.baseURL + this.genomeStanza.getProperty("twoBitPath"),
             nameSet: "ucsc",
-            wholeGenomeView: false,
+        }
+
+        if (this.genomeStanza.hasProperty("chromSizesURL")) {
+            config.chromSizesURL = this.genomeStanza.getProperty("chromSizesURL")
+        } else {
+            config.wholeGenomeView = false
+            config.showChromosomeWidget = false
         }
 
         if (this.genomeStanza.hasProperty("defaultPos")) {
@@ -155,11 +170,11 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         if (this.genomeStanza.hasProperty("twoBitBptUrl")) {
             config.twoBitBptURL = this.baseURL + this.genomeStanza.getProperty("twoBitBptUrl")
         }
-        // chromSizes can take a very long time to load, and is not useful with the default WGV = off
-        // if (this.genomeStanza.hasProperty("chromSizes")) {
-        //     config.chromSizes = this.baseURL + this.genomeStanza.getProperty("chromSizes")
-        // }
 
+        // chromSizes can take a very long time to load, and is not useful with the default WGV = off
+        if (options.includeChromSizes && this.genomeStanza.hasProperty("chromSizes")) {
+            config.chromSizesURL = this.baseURL + this.genomeStanza.getProperty("chromSizes")
+        }
 
         if (this.hubStanza.hasProperty("longLabel")) {
             config.description = this.hubStanza.getProperty("longLabel").replace("/", "\n")
@@ -195,13 +210,10 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
             config.cytobandBbURL = this.baseURL + cytoStanza[0].getProperty("bigDataUrl")
         }
 
-        // Tracks.  To prevent loading tracks set `includeTrackGroups`to false or "none"
-        if (includeTrackGroups && "none" !== includeTrackGroups) {
-            const filter = (t) => !Hub.filterTracks.has(t.name) &&
-                "hide" !== t.getProperty("visibility") &&
-                ("all" === includeTrackGroups || t.getProperty("group") === includeTrackGroups)
-            config.tracks = this.#getTracksConfigs(filter)
-        }
+        // Tracks.
+        const filter = (t) => !Hub.filterTracks.has(t.name) && "hide" !== t.getProperty("visibility")
+        config.tracks = this.#getTracksConfigs(filter)
+
 
         return config
     }
@@ -335,7 +347,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
             config.searchIndex = t.getProperty("searchIndex")
         }
         if (t.hasProperty("searchTrix")) {
-            config.searchTrix = this.baseURL + t.getProperty("searchTrix")
+            config.trixURL = this.baseURL + t.getProperty("searchTrix")
         }
 
         if (t.hasProperty("group")) {
@@ -422,6 +434,26 @@ class Stanza {
     }
 }
 
+
+/**
+ * Return the content length of the resource.  If the content length cannot be determined return null;
+ * @param url
+ * @returns {Promise<number|string>}
+ */
+async function getContentLength(url) {
+    try {
+        const response = await fetch(url, {method: 'HEAD'})
+        const headers = response.headers
+        if (headers.has("content-length")) {
+            return headers.get("content-length")
+        } else {
+            return null
+        }
+    } catch (e) {
+        return null
+    }
+}
+
 /**
  * Parse a UCSC  file
  * @param url
@@ -429,7 +461,8 @@ class Stanza {
  */
 async function loadStanzas(url) {
 
-    const data = await igvxhr.loadString(url)
+    const response = await fetch(url)
+    const data = await response.text()
     const lines = data.split(/\n|\r\n|\r/g)
 
     const nodes = []

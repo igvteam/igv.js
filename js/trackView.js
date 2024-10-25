@@ -33,7 +33,7 @@ import {createIcon} from "./ui/utils/icons.js"
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
 import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
-import { autoScaleGroupColorHash, multiTrackSelectExclusionTypes } from "./ui/menuUtils.js"
+import {autoScaleGroupColorHash, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
 import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
 import {isOverlayTrackCriteriaMet} from "./ui/overlayTrackButton.js"
 
@@ -117,6 +117,8 @@ class TrackView {
     createAxis(browser, track) {
 
         const axis = DOMUtils.div()
+        this.axis = axis
+
         browser.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
 
         axis.dataset.tracktype = track.type
@@ -134,12 +136,12 @@ class TrackView {
 
         if (false === multiTrackSelectExclusionTypes.has(this.track.type)) {
 
-            const trackSelectionContainer = DOMUtils.div()
-            axis.appendChild(trackSelectionContainer)
+            this.trackSelectionContainer = DOMUtils.div()
+            axis.appendChild(this.trackSelectionContainer)
 
             const html = `<input type="checkbox" name="track-select">`
             const input = document.createRange().createContextualFragment(html).firstChild
-            trackSelectionContainer.appendChild(input)
+            this.trackSelectionContainer.appendChild(input)
             input.checked = this.track.selected || false
 
             input.addEventListener('change', event => {
@@ -147,10 +149,10 @@ class TrackView {
                 event.stopPropagation()
                 this.track.selected = event.target.checked
                 this.setDragHandleSelectionState(event.target.checked)
-                this.browser.overlayTrackButton.setVisibility( isOverlayTrackCriteriaMet(this.browser) )
+                this.browser.overlayTrackButton.setVisibility(isOverlayTrackCriteriaMet(this.browser))
             })
 
-            this.setTrackSelectionState(axis, false)
+            this.enableTrackSelection(false)
 
         }
 
@@ -202,27 +204,6 @@ class TrackView {
         }
     }
 
-    get dataRange() {
-        return this.track.dataRange ? this.track.dataRange : undefined
-    }
-
-    set dataRange({ min, max }) {
-
-        this.track.dataRange = { min, max }
-
-        this.track.autoscale = false
-        this.track.autoscaleGroup = undefined
-
-        const list = this.browser.trackViews.filter(({track}) => track.autoscaleGroup)
-        if (1 === list.length) {
-            list[0].track.autoscale = false
-            list[0].track.autoscaleGroup = undefined
-            list[0].repaintViews()
-        }
-
-        this.repaintViews()
-
-    }
 
     presentColorPicker(key) {
 
@@ -443,7 +424,7 @@ class TrackView {
         const viewportsToRepaint = visibleViewports.filter(vp => vp.needsRepaint()).filter(viewport => viewport.checkZoomIn())
 
         // Get viewports that require a data load
-        const viewportsToReload = viewportsToRepaint.filter(viewport => viewport.needsReload())
+        const viewportsToReload = visibleViewports.filter(viewport => viewport.checkZoomIn()).filter(viewport => viewport.needsReload())
 
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
@@ -987,13 +968,19 @@ class TrackView {
         return Math.max(...this.viewports.map(viewport => viewport.getContentHeight()))
     }
 
-    setTrackSelectionState(axis, doEnableMultiSelection) {
+    enableTrackSelection(doEnableMultiSelection) {
 
-        const container = axis.querySelector('div')
+        const container = this.trackSelectionContainer
+
+        if (!container || multiTrackSelectExclusionTypes.has(this.track.type)) {
+            return
+        }
 
         if (false !== doEnableMultiSelection) {
             container.style.display = 'grid'
         } else {
+            // If disabling selection set track selection state to false
+            this.track.selected = false
 
             const trackSelectInput = container.querySelector('[name=track-select]')
             trackSelectInput.checked = this.track.selected
@@ -1019,11 +1006,9 @@ class TrackView {
             dragHandle.classList.remove('igv-track-drag-handle-selected-color')
             dragHandle.classList.add('igv-track-drag-handle-color')
         }
-
     }
 
 }
-
 
 
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {

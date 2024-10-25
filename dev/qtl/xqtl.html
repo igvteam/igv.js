@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<h3>QTL example</h3>
+
+<button id="log-state">Log Session</button>
+<button id="bookmark">Bookmark</button>
+
+<div id="igvDiv"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    let options = {
+        queryParametersSupported: true,
+        minimumBases: 10000,
+        reference: {
+            "id": "hg38",
+            "name": "Human (GRCh38/hg38)",
+            "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/hg38/cytoBandIdeo.txt.gz",
+            "aliasURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/hg38/hg38_alias.tab",
+            "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+            "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+            "tracks": [
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "order": 1000001,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "displayMode": "COLLAPSED"
+                }
+            ],
+            "chromosomeOrder": "chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY"
+        },
+        locus: "chr22:23,828,634-23,989,357",
+        tracks: [
+            // {
+            //     type: "qtl",
+            //     format: "qtl",
+            //     name: "GTEx muscle (EMBL)",
+            //     url: "https://igv-genepattern-org.s3.amazonaws.com/test/qtl/QTD000281.all.chr22.tsv.gz",
+            //     indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/qtl/QTD000281.all.chr22.tsv.gz.tbi",
+            //     visibilityWindow: 2000000
+            // },
+            {
+                type: "qtl",
+                format: "qtl",
+                name: "B cell eQTL",
+                url: "https://igv-genepattern-org.s3.amazonaws.com/test/qtl/B.cell_eQTL.tsv.gz",
+                indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/qtl/B.cell_eQTL.tsv.gz.tbi",
+                visibilityWindow: 4000000
+            },
+            {
+                type: "qtl",
+                format: "qtl",
+
+                name: "Monocyte mQTL",
+                url: "https://igv-genepattern-org.s3.amazonaws.com/test/qtl/Monocyte_mQTL.tsv.gz",
+                indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/qtl/Monocyte_mQTL.tsv.gz.tbi",
+                visibilityWindow: 4000000
+            },
+            {
+                type: "qtl",
+                format: "qtl",
+                name: "Monocyte hQTL",
+
+                url: "https://igv-genepattern-org.s3.amazonaws.com/test/qtl/Monocyte_hQTL.tsv.gz",
+                indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/qtl/Monocyte_hQTL.tsv.gz.tbi",
+                visibilityWindow: 4000000
+            },
+            {
+                type: "annotation",
+                format: "bed",
+                name: "H3k4me1 peaks",
+                url: "https://igv-genepattern-org.s3.amazonaws.com/test/qtl/Monocyte_phenotypes.bed.gz",
+                indexURL: "https://igv-genepattern-org.s3.amazonaws.com/test/qtl/Monocyte_phenotypes.bed.gz.tbi",
+                visibilityWindow: -1,
+                displayMode: "COLLAPSED"
+            }
+        ]
+    }
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (browser) {
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+            document.getElementById('bookmark').addEventListener('click', () => {
+                const path = window.location.href.slice()
+                const idx = path.indexOf("?")
+                const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+                window.history.pushState({}, "IGV", url)
+            })
+        })
+
+
+</script>
+
+</body>
+
+</html>
+

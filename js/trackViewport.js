@@ -6,7 +6,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js"
 import Popover from "./ui/popover.js"
 import Viewport from "./viewport.js"
 import {FileUtils} from "../node_modules/igv-utils/src/index.js"
-import  * as DOMUtils  from "./ui/utils/dom-utils.js"
+import * as DOMUtils from "./ui/utils/dom-utils.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
@@ -38,10 +38,10 @@ class TrackViewport extends Viewport {
             this.$zoomInNotice = this.createZoomInNotice(this.$viewport)
         }
 
-        if (track.name && "sequence" !== track.id) {
+        if ("sequence" !== track.id) {
             this.$trackLabel = $('<div class="igv-track-label">')
             this.$viewport.append(this.$trackLabel)
-            this.setTrackLabel(track.name)
+            this.setTrackLabel(track.name || "")
             if (false === this.browser.doShowTrackLabels) {
                 this.$trackLabel.hide()
             }
@@ -257,7 +257,7 @@ class TrackViewport extends Viewport {
         const pixelWidth = isWGV ? this.$viewport.width() : 3 * this.$viewport.width()
         const bpPerPixel = this.referenceFrame.bpPerPixel
         const bpStart = this.referenceFrame.start - (isWGV ? 0 : this.$viewport.width() * bpPerPixel)
-        const bpEnd = this.referenceFrame.start   + (isWGV ? 0 : 2 * this.$viewport.width() * bpPerPixel) + 1
+        const bpEnd = isWGV ? Number.MAX_SAFE_INTEGER : this.referenceFrame.start +  2 * this.$viewport.width() * bpPerPixel + 1
         return {
             bpStart, bpEnd, pixelWidth
         }
@@ -419,14 +419,10 @@ class TrackViewport extends Viewport {
 
         const config =
             {
-
                 width,
                 height: h_render,
-
                 backdropColor: 'white',
-
                 multiLocusGap: 0,
-
                 viewbox:
                     {
                         x: 0,
@@ -434,7 +430,6 @@ class TrackViewport extends Viewport {
                         width,
                         height: h_render
                     }
-
             }
 
         const context = new C2S(config)
@@ -445,7 +440,7 @@ class TrackViewport extends Viewport {
                 deltaY: marginTop
             }
 
-        this.renderViewportToSVG(context, delta)
+        this.renderSVGContext(context, delta, false)
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
         context.setHeight(height)
@@ -461,37 +456,58 @@ class TrackViewport extends Viewport {
 
     }
 
-    // called by trackView.renderSVGContext() when rendering
-    // entire browser as SVG
 
-    renderViewportToSVG(context, {deltaX, deltaY}) {
+    renderSVGContext(context, {deltaX, deltaY}, includeLabel = true) {
 
-        if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
-            return
+        const zoomInNotice = this.$zoomInNotice && this.$zoomInNotice.is(":visible")
+
+        if (!zoomInNotice) {
+
+            const {width, height} = this.$viewport.get(0).getBoundingClientRect()
+
+            const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
+            const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
+            const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
+
+            const x = deltaX
+            const y = deltaY + this.contentTop
+            const yClipOffset = -this.contentTop
+
+            context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
+
+            const {start, bpPerPixel} = this.referenceFrame
+            const pixelXOffset = Math.round((start - this.referenceFrame.start) / bpPerPixel)
+
+            const config =
+                {
+                    context,
+                    viewport: this,
+                    referenceFrame: this.referenceFrame,
+                    top: yClipOffset,
+                    pixelTop: yClipOffset,
+                    pixelWidth: width,
+                    pixelHeight: height,
+                    pixelXOffset,
+                    pixelShift: pixelXOffset,
+                    bpStart: start,
+                    bpEnd: start + (width * bpPerPixel),
+                    bpPerPixel,
+                    viewportWidth: width,
+                    selection: this.selection
+                }
+
+            const features = this.featureCache ? this.featureCache.features : undefined
+            const roiFeatures = this.featureCache ? this.featureCache.roiFeatures : undefined
+            this.draw(config, features, roiFeatures)
+
+            context.restore()
         }
 
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect()
 
-        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
-        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
-        const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
-        this.drawSVGWithContext(context, width, height, id, deltaX, deltaY + this.contentTop, -this.contentTop)
-
-    }
-
-    renderSVGContext(context, {deltaX, deltaY}) {
-
-        this.renderViewportToSVG(context, {deltaX, deltaY})
-
-        if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
-            return
-        }
-
-        if (this.$trackLabel && true === this.browser.doShowTrackLabels) {
+        if (includeLabel && this.$trackLabel && this.browser.doShowTrackLabels) {
             const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0))
             this.renderTrackLabelSVG(context, deltaX + x, deltaY + y, width, height)
         }
-
     }
 
     // render track label element called from renderSVGContext()
@@ -515,37 +531,6 @@ class TrackViewport extends Viewport {
 
         context.strokeStyle = 'rgb(68, 68, 68)'
         context.strokeRect(0, 0, width, height)
-
-        context.restore()
-
-    }
-
-    // called by renderSVGContext()
-    drawSVGWithContext(context, width, height, id, x, y, yClipOffset) {
-
-        context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
-
-        let {start, bpPerPixel} = this.referenceFrame
-
-        const config =
-            {
-                context,
-                viewport: this,
-                referenceFrame: this.referenceFrame,
-                top: yClipOffset,
-                pixelTop: yClipOffset,
-                pixelWidth: width,
-                pixelHeight: height,
-                bpStart: start,
-                bpEnd: start + (width * bpPerPixel),
-                bpPerPixel,
-                viewportWidth: width,
-                selection: this.selection
-            }
-
-        const features = this.featureCache ? this.featureCache.features : undefined
-        const roiFeatures = this.featureCache ? this.featureCache.roiFeatures : undefined
-        this.draw(config, features, roiFeatures)
 
         context.restore()
 
@@ -806,7 +791,7 @@ class TrackViewport extends Viewport {
                                             po.dispose()
                                         })
 
-                                        trackViewportPopoverList.push( po )
+                                        trackViewportPopoverList.push(po)
 
                                         po.presentContentWithEvent(event, content)
                                     }
@@ -952,7 +937,7 @@ class FeatureCache {
 
     containsRange(chr, start, end, bpPerPixel, windowFunction) {
 
-        if(windowFunction && windowFunction !== this.windowFunction) return false
+        if (windowFunction && windowFunction !== this.windowFunction) return false
 
         // For multi-resolution tracks allow for a 2X change in bpPerPixel
         const r = this.multiresolution ? this.bpPerPixel / bpPerPixel : 1
@@ -978,5 +963,5 @@ function mergeArrays(a, b) {
 
 }
 
-export { trackViewportPopoverList }
+export {trackViewportPopoverList}
 export default TrackViewport

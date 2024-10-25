@@ -3,7 +3,7 @@ import * as UIUtils from "../ui/utils/ui-utils.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import {createBlatTrack} from "../blat/blatTrack.js"
 
-const maxSequenceSize = 100000
+const maxSequenceSize = 1000000
 const maxBlatSize = 25000
 
 
@@ -30,18 +30,18 @@ class ROIMenu {
 
     }
 
-    async present(feature, isUserDefined, event, roiManager, columnContainer, regionElement) {
-        const menuItems = this.menuItems(feature, isUserDefined, event, roiManager, columnContainer, regionElement)
+    async present(feature, roiSet, event, roiManager, columnContainer, regionElement) {
+        const menuItems = this.menuItems(feature, roiSet, event, roiManager, columnContainer, regionElement)
         this.browser.menuPopup.presentTrackContextMenu(event, menuItems)
     }
 
-    menuItems(feature, isUserDefined, event, roiManager, columnContainer, regionElement) {
+    menuItems(feature, roiSet, event, roiManager, columnContainer, regionElement) {
+        const items = feature.name ? [`<b>${feature.name}</b><br/>`]  : []
+        if ('name' in roiSet) items.push(`<b>ROI Set: ${roiSet.name}</b>`)
+        if (items.length > 0) items.push(`<hr/>`)
 
-        const items = [`<b>${feature.name || ''}</b>`,]
-
-        if (isUserDefined) {
+        if (roiSet.isUserDefined) {
             items.push(
-                '<hr/>',
                 {
                     label: 'Set description ...',
                     click: () => {
@@ -67,8 +67,7 @@ class ROIMenu {
         // sequence
 
         // copy
-        if (isSecureContext() && feature.end - feature.start < maxBlatSize) {
-            items.push('<hr/>')
+        if (isSecureContext() && feature.end - feature.start < maxSequenceSize) {
             items.push({
                 label: 'Copy reference sequence',
                 click: async () => {
@@ -87,9 +86,8 @@ class ROIMenu {
             })
         }
 
-        if (feature.end - feature.start <= maxSequenceSize) {
+        if (feature.end - feature.start <= maxBlatSize) {
             // blat
-            items.push('<hr/>')
             items.push({
                 label: 'BLAT reference sequence',
                 click: async () => {
@@ -106,14 +104,21 @@ class ROIMenu {
         }
 
 
-        if (isUserDefined) {
+        if (roiSet.isUserDefined) {
             items.push(
                 '<hr/>',
                 {
                     label: 'Delete',
-                    click: () => {
-                        this.browser.roiManager.deleteRegionWithKey(regionElement.dataset.region, this.browser.columnContainer)
-                        this.browser.roiManager.repaintTable()
+                    click: async () => {
+                        roiSet.removeFeature(feature)
+                        const userDefinedFeatures = await roiSet.getAllFeatures()
+                        
+                        // Delete user defined ROI Set if it is empty
+                        if (Object.keys(userDefinedFeatures).length === 0) {
+                            roiManager.deleteUserDefinedROISet()
+                        }
+                        roiManager.deleteRegionWithKey(regionElement.dataset.region, columnContainer)
+                        roiManager.repaintTable()
                     }
                 }
             )

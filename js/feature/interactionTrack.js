@@ -57,7 +57,7 @@ class InteractionTrack extends TrackBase {
     static defaults = {
         height: 250,
         theta: Math.PI / 4,
-        arcOrientation: true,
+        arcOrientation: "UP",
         showBlocks: true,
         blockHeight: 3,
         thickness: 1,
@@ -73,10 +73,22 @@ class InteractionTrack extends TrackBase {
     init(config) {
 
         super.init(config)
+
+        // Backward compatibility hack, arcOrientation was previously a boolean, now a string
+        if(config.arcOrientation === false) {
+            this.arcOrientation = "DOWN"
+        } else if(config.arcOrientation === true) {
+            this.arcOrientation = "UP"
+        } else if(config.arcOrientation) {
+            this.arcOrientation = config.arcOrientation.toUpperCase()
+        } else {
+            this.arcOrientation = "UP"
+        }
+
         this.sinTheta = Math.sin(this.theta)
         this.cosTheta = Math.cos(this.theta)
         this.arcType = getArcType(config)   // nested | proportional | inView | partialInView
-        this.painter = {flipAxis: !this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
+        this.painter = {flipAxis: "DOWN" === this.arcOrientation, dataRange: this.dataRange, paintAxis: paintAxis}
 
         if (config.valueColumn) {
             this.valueColumn = config.valueColumn
@@ -171,8 +183,8 @@ class InteractionTrack extends TrackBase {
 
             // Autoscale theta
             autoscaleNested.call(this)
-            const y = this.arcOrientation ? options.pixelHeight : 0
-            const direction = this.arcOrientation
+            const direction = "UP" === this.arcOrientation
+            const y = direction ? options.pixelHeight : 0
 
             ctx.font = "8px sans-serif"
             ctx.textAlign = "center"
@@ -229,7 +241,7 @@ class InteractionTrack extends TrackBase {
                         const e1 = (feature.end1 - bpStart) / xScale
                         const s2 = (feature.start2 - bpStart) / xScale
                         const e2 = (feature.end2 - bpStart) / xScale
-                        const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight
+                        const hb = direction ? -this.blockHeight : this.blockHeight
                         ctx.fillRect(s1, y, e1 - s1, hb)
                         ctx.fillRect(s2, y, e2 - s2, hb)
                     }
@@ -309,6 +321,7 @@ class InteractionTrack extends TrackBase {
         const xScale = bpPerPixel
         const refStart = options.referenceFrame.start
         const refEnd = options.referenceFrame.end
+        const direction = "UP" === this.arcOrientation
 
 
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
@@ -322,7 +335,7 @@ class InteractionTrack extends TrackBase {
             // we use the min as a filter but not moving the axis
             const effectiveMin = 0
             const yScale = this.getScaleFactor(effectiveMin, this.dataRange.max, options.pixelHeight - 1, this.logScale)
-            const y = this.arcOrientation ? options.pixelHeight : 0
+            const y = direction ? options.pixelHeight : 0
 
             for (let feature of featureList) {
 
@@ -378,7 +391,7 @@ class InteractionTrack extends TrackBase {
                     //     arcCaches.set(arcKey, arcHeights)
                     // }
 
-                    const counterClockwise = this.arcOrientation ? true : false
+                    const counterClockwise = direction
                     const color = feature.color || this.color
                     ctx.strokeStyle = color
                     ctx.lineWidth = feature.thickness || this.thickness || 1
@@ -406,7 +419,7 @@ class InteractionTrack extends TrackBase {
                         const e1 = (feature.end1 - bpStart) / xScale
                         const s2 = (feature.start2 - bpStart) / xScale
                         const e2 = (feature.end2 - bpStart) / xScale
-                        const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight
+                        const hb = direction ? -this.blockHeight : this.blockHeight
                         ctx.fillRect(s1, y, e1 - s1, hb)
                         ctx.fillRect(s2, y, e2 - s2, hb)
                     }
@@ -428,7 +441,7 @@ class InteractionTrack extends TrackBase {
                     ctx.textAlign = "center"
                     // get a sense of trans "spread"
                     ctx.fillStyle = getAlphaColor(getChrColor(otherChr), 0.5)
-                    if (this.arcOrientation) {
+                    if (direction) {
                         // UP
                         const y = this.height - h
                         ctx.fillRect(pixelStart, y, w, h)
@@ -452,11 +465,11 @@ class InteractionTrack extends TrackBase {
         // dataRane is interpreted differently for interactino tracks -- all arcs are drawn from "zero", irrespective of dataRange.min
         const axisRange = {min: 0, max: this.dataRange.max}
         if (this.arcType === "proportional") {
-            this.painter.flipAxis = !this.arcOrientation
+            this.painter.flipAxis = "DOWN" === this.arcOrientation
             this.painter.dataRange = axisRange
             this.painter.paintAxis(ctx, pixelWidth, pixelHeight)
         } else if (this.arcType === "inView" || this.arcType === "partialInView") {
-            this.painter.flipAxis = !this.arcOrientation
+            this.painter.flipAxis = "DOWN" === this.arcOrientation
             this.painter.dataRange = axisRange
             this.painter.paintAxis(ctx, pixelWidth, pixelHeight)
         } else {
@@ -494,7 +507,7 @@ class InteractionTrack extends TrackBase {
         items.push({
             name: "Toggle arc direction",
             click: function toggleArcDirectionHandler() {
-                this.arcOrientation = !this.arcOrientation
+                this.arcOrientation = "UP" === this.arcOrientation ? "DOWN" : "UP"
                 this.trackView.repaintViews()
             }
         })

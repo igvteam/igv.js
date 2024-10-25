@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>Base Modifications</h1>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.min.js"
+
+    const options = {
+        "genome": "hg38",
+        "locus": "chr11:119094729-119094804",
+        "tracks": [
+            {
+                "type": "alignment",
+                "format": "bam",
+                "url":      "https://igv-genepattern-org.s3.amazonaws.com/test/baseMods/6mA/pacbio/HG002_chr11_119076212_119102218.bam",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/test/baseMods/6mA/pacbio/HG002_chr11_119076212_119102218.bam.bai",
+                "height": 400,
+                "name": "5mC and 6mA - 2 color mode",
+                "colorBy": "basemod2",
+                "groupBy": "strand",
+                "baseModificationThreshold": 0
+            },
+            {
+                "type": "alignment",
+                "format": "bam",
+                "url":      "https://igv-genepattern-org.s3.amazonaws.com/test/baseMods/6mA/pacbio/HG002_chr11_119076212_119102218.bam",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/test/baseMods/6mA/pacbio/HG002_chr11_119076212_119102218.bam.bai",
+                "height": 400,
+                "name": "5mC and 6mA - mono color mode",
+                "colorBy": "basemod",
+                "groupBy": "strand"
+            }
+        ]
+    }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+        })
+
+</script>
+
+</body>
+
+</html>

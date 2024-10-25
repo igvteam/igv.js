@@ -34,6 +34,7 @@ import {loadIndex} from "../bam/indexFactory.js"
 import getDataWrapper from "./dataWrapper.js"
 import BGZLineReader from "../util/bgzLineReader.js"
 import BGZBlockLoader from "../bam/bgzBlockLoader.js"
+import QTLParser from "../qtl/qtlParser.js"
 
 // Conservative estimate of the maximum allowed string length
 const MAX_STRING_LENGTH = 500000000
@@ -104,20 +105,30 @@ class FeatureFileReader {
             await this.readHeader()
         }
 
+        let allFeatures
         const index = await this.getIndex()
         if (index) {
             this.indexed = true
-            return this.loadFeaturesWithIndex(chr, start, end)
+            allFeatures = await this.loadFeaturesWithIndex(chr, start, end)
         } else if (this.dataURI) {
             this.indexed = false
-            return this.loadFeaturesFromDataURI()
+            allFeatures = await this.loadFeaturesFromDataURI()
         } else if ("service" === this.config.sourceType) {
-            return this.loadFeaturesFromService(chr, start, end)
+            allFeatures = await this.loadFeaturesFromService(chr, start, end)
         } else {
             this.indexed = false
-            return this.loadFeaturesNoIndex()
+            allFeatures = await this.loadFeaturesNoIndex()
         }
 
+        allFeatures.sort(function (a, b) {
+            if (a.chr === b.chr) {
+                return a.start - b.start
+            } else {
+                return a.chr.localeCompare(b.chr)
+            }
+        })
+
+        return allFeatures
     }
 
     async readHeader() {
@@ -171,15 +182,28 @@ class FeatureFileReader {
             }
 
         } else {
-            // If this is a non-indexed file we will load all features in advance
-            const options = buildOptions(this.config)
-            let data = await igvxhr.loadByteArray(this.config.url, options)
+
+            let data
+
+            if (this.config._filecontents) {
+                // In rare instances the entire file must be read and decoded to determine the file format.
+                // When this occurs the file contents are temporarily stashed to prevent needing to read the file twice
+                data = this.config._filecontents
+                delete this.config._filecontents
+            } else {
+                // If this is a non-indexed file we will load all features in advance
+                const options = buildOptions(this.config)
+                data = await igvxhr.loadByteArray(this.config.url, options)
+            }
+
 
             // If the data size is < max string length decode entire string with TextDecoder.  This is much faster
             // than decoding by line
             if (data.length < MAX_STRING_LENGTH) {
                 data = new TextDecoder().decode(data)
             }
+
+
 
             let dataWrapper = getDataWrapper(data)
             this.header = await this.parser.parseHeader(dataWrapper)
@@ -211,6 +235,8 @@ class FeatureFileReader {
                 return new SegParser("maf")
             case "gwas" :
                 return new GWASParser(config)
+            case "qtl":
+                return new QTLParser(config)
             case "aed" :
                 return new AEDParser(config)
             default:
@@ -275,10 +301,8 @@ class FeatureFileReader {
                 const dataWrapper = getDataWrapper(slicedData)
                 await this._parse(allFeatures, dataWrapper, chr, end, start)
 
+
             }
-            allFeatures.sort(function (a, b) {
-                return a.start - b.start
-            })
 
             return allFeatures
         }
@@ -308,8 +332,14 @@ class FeatureFileReader {
 
         let features = await this.parser.parseFeatures(dataWrapper)
 
-        // Filter psuedo-features (e.g. created mates for VCF SV records)  TODO why?
-        //slicedFeatures = slicedFeatures.filter(f => f._f === undefined)
+        features.sort(function (a, b) {
+            if (a.chr === b.chr) {
+                return a.start - b.start
+            } else {
+                return a.chr.localeCompare(b.chr)
+            }
+        })
+
 
         // Filter features not in requested range.
         if (undefined === chr) {
@@ -318,25 +348,18 @@ class FeatureFileReader {
             let inInterval = false
             for (let i = 0; i < features.length; i++) {
                 const f = features[i]
-                if (f.chr !== chr) {
-                    if (allFeatures.length === 0) {
-                        continue  //adjacent chr to the left
-                    } else {
-                        break //adjacent chr to the right
+                if (f.chr === chr) {
+                    if (f.start > end) {
+                        allFeatures.push(f)  // First feature beyond interval
+                        break
                     }
-                }
-                if (f.start > end) {
-                    allFeatures.push(f)  // First feature beyond interval
-                    break
-                }
-                if (f.end >= start && f.start <= end) {
-                    // All this to grab first feature before start of interval.  Needed for some track renderers, like line plot
-                    if (!inInterval) {
-                        inInterval = true
-                        if (i > 0) {
-                            allFeatures.push(features[i - 1])
-                        } else {
-                            // TODO -- get block before this one for first feature;
+                    if (f.end >= start && f.start <= end) {
+                        // All this to grab first feature before start of interval.  Needed for some track renderers, like line plot
+                        if (!inInterval) {
+                            inInterval = true
+                            if (i > 0) {
+                                allFeatures.push(features[i - 1])
+                            }
                         }
                     }
                     allFeatures.push(f)
@@ -379,7 +402,9 @@ class FeatureFileReader {
 
             dataWrapper = getDataWrapper(plain)
             const features = []
-            await this._parse().parseFeatures(features, dataWrapper)
+
+            await this._parse(features, dataWrapper)
+
             return features
         }
     }

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dev - alignment - bam</title>
+</head>
+
+<body>
+
+<h2>
+    BAM file, grouped by strand, sorted by base @chr1:155,155,389, filtered by mapping quality
+</h2>
+
+<button id="log-state">Log Session</button>
+<button id="bookmark">Bookmark</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../../js/index.js"
+
+    const config =
+        {
+            "genome": "hg38",
+            "locus": "chr4:140563426-140563525",
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "alignment",
+                    "url": "ont.bam",
+                    "indexURL": "ont.bam.bai",
+                    "name": "ONT",
+                    "format": "bam",
+                    "colorBy": "basemod2:m",
+                    "groupBy": "strand"
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+        .then(browser => {
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+
+            document.getElementById('bookmark').addEventListener('click', () => {
+                const path = window.location.href.slice()
+                const idx = path.indexOf("?")
+                const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+                window.history.pushState({}, "IGV", url)
+            })
+        })
+
+
+</script>
+
+</body>
+
+</html>

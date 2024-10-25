@@ -1,4 +1,4 @@
-import gmodCRAM from "../vendor/cram-bundle.js"
+import gmodCRAM from "./cram-bundle.js"
 import AlignmentContainer from "../bam/alignmentContainer.js"
 import BamUtils from "../bam/bamUtils.js"
 import BamAlignment from "../bam/bamAlignment.js"

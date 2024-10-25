@@ -9,6 +9,7 @@ class CoverageTrack  {
 
 
     constructor(config, parent) {
+        this.featureType = 'numeric'
         this.parent = parent
         this.featureSource = parent.featureSource
 
@@ -141,10 +142,14 @@ class CoverageTrack  {
         const genomicLocation = Math.floor(clickState.genomicLocation)
         const coverageMap = features.coverageMap
         const coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart)
-        return {
-            coverage: coverageMap.coverage[coverageMapIndex],
-            baseModCounts: features.baseModCounts,
-            hoverText: () => coverageMap.coverage[coverageMapIndex].hoverText()}
+        const coverage = coverageMap.coverage[coverageMapIndex]
+        if(coverage) {
+            return {
+                coverage: coverage,
+                baseModCounts: features.baseModCounts,
+                hoverText: () => coverageMap.coverage[coverageMapIndex].hoverText()
+            }
+        }
     }
 
     popupData(clickState) {

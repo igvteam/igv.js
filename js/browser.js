@@ -1,9 +1,6 @@
 import $ from "./vendor/jquery-3.3.1.slim.js"
-import html2canvas from '../node_modules/html2canvas/dist/html2canvas.esm.js'
 import {BGZip, FileUtils, igvxhr, StringUtils, URIUtils} from "../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
-import {createIcon} from "./ui/utils/icons.js"
-import SliderDialog from "./ui/components/sliderDialog.js"
 import InputDialog from "./ui/components/inputDialog.js"
 import GenericColorPicker from "./ui/components/genericColorPicker.js"
 import Alert from './ui/alert.js'
@@ -11,60 +8,59 @@ import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width} from "./trackView.js"
 import C2S from "./canvas2svg.js"
 import {getTrack} from "./trackFactory.js"
-import ROISet from "./roi/ROISet.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
-import {createColumn, doAutoscale, getElementAbsoluteHeight, getFilename} from "./util/igvUtils.js"
+import {createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
-import GtexUtils from "./gtex/gtexUtils.js"
-import {defaultSequenceTrackOrder} from './sequenceTrack.js'
+import {bppSequenceThreshold, defaultSequenceTrackOrder} from './sequenceTrack.js'
 import version from "./version.js"
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
-import {navbarDidResize} from "./responsiveNavbar.js"
-import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js"
-import WindowSizePanel from "./windowSizePanel.js"
-import CursorGuide from "./ui/cursorGuide.js"
-import CursorGuideButton from "./ui/cursorGuideButton.js"
-import CenterLineButton from './ui/centerLineButton.js'
-import TrackLabelControl from "./ui/trackLabelControl.js"
-import SampleNameControl from "./sample/sampleNameControl.js"
-import SampleInfoControl from "./sample/sampleInfoControl.js"
-import ZoomWidget from "./ui/zoomWidget.js"
+import ResponsiveNavbar from "./responsiveNavbar.js"
 import DataRangeDialog from "./ui/dataRangeDialog.js"
 import HtsgetReader from "./htsget/htsgetReader.js"
-import SaveImageControl from "./ui/saveImageControl.js"
 import MenuPopup from "./ui/menuPopup.js"
 import {viewportColumnManager} from './viewportColumnManager.js'
 import ViewportCenterLine from './ui/viewportCenterLine.js'
 import IdeogramTrack from "./ideogramTrack.js"
 import RulerTrack from "./rulerTrack.js"
-import GtexSelection from "./gtex/gtexSelection.js"
 import CircularViewControl from "./ui/circularViewControl.js"
 import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
-import CustomButton from "./ui/customButton.js"
 import ROIManager from './roi/ROIManager.js'
-import ROITable from './roi/ROITable.js'
-import ROIMenu from './roi/ROIMenu.js'
 import TrackROISet from "./roi/trackROISet.js"
-import ROITableControl from './roi/roiTableControl.js'
 import SampleInfo from "./sample/sampleInfo.js"
 import HicFile from "./hic/straw/hicFile.js"
 import {translateSession} from "./hic/shoeboxUtils.js"
 import Hub from "./ucsc/ucscHub.js"
-import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
-import OverlayTrackButton from "./ui/overlayTrackButton.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
 import {trackViewportPopoverList} from './trackViewport.js'
 import TrackBase from "./trackBase.js"
-import {bppSequenceThreshold} from "./sequenceTrack.js"
 import {loadGenbank} from "./gbk/genbankParser.js"
 import igvCss from "./embedCss.js"
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConstants.js"
+import QTLSelections from "./qtl/qtlSelections.js"
+import {inferFileFormat} from "./util/fileFormatUtils.js"
+import {convertToHubURL} from "./ucsc/ucscUtils.js"
+import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js"
+import {createIcon} from "./ui/utils/icons.js"
+import WindowSizePanel from "./windowSizePanel.js"
+import OverlayTrackButton from "./ui/overlayTrackButton.js"
+import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
+import CursorGuide from "./ui/cursorGuide.js"
+import CursorGuideButton from "./ui/cursorGuideButton.js"
+import CenterLineButton from "./ui/centerLineButton.js"
+import TrackLabelControl from "./ui/trackLabelControl.js"
+import ROITableControl from "./roi/roiTableControl.js"
+import SampleInfoControl from "./sample/sampleInfoControl.js"
+import SampleNameControl from "./sample/sampleNameControl.js"
+import SaveImageControl from "./ui/saveImageControl.js"
+import CustomButton from "./ui/customButton.js"
+import ZoomWidget from "./ui/zoomWidget.js"
+import SliderDialog from "./ui/components/sliderDialog.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -82,6 +78,8 @@ const column_multi_locus_shim_width = 2 + 1 + 2
 
 class Browser {
 
+    qtlSelections = new QTLSelections()
+
     constructor(config, parentDiv) {
 
         this.config = config
@@ -97,8 +95,6 @@ class Browser {
             sheet.replaceSync(igvCss)
             shadowRoot.adoptedStyleSheets = [sheet]
         }
-
-
 
         this.root = DOMUtils.div({class: 'igv-container'})
         shadowRoot.appendChild(this.root)
@@ -156,7 +152,6 @@ class Browser {
                 this.sampleNameControl.setState(this.showSampleNames)
                 this.sampleNameControl.hide()
 
-
                 this.layoutChange()
             }
         })
@@ -175,7 +170,14 @@ class Browser {
 
         this.sampleInfo = new SampleInfo(this)
 
-        this.setControls(config)
+        this.createStandardControls(config)
+
+        // Region of interest
+        this.roiManager = new ROIManager(this)
+    }
+
+    get doShowROITable() {
+        return this.roiManager.roiTableIsVisible()
     }
 
     startSpinner() {
@@ -188,9 +190,6 @@ class Browser {
 
     initialize(config) {
 
-        if (config.gtex) {
-            GtexUtils.gtexLoaded = true
-        }
         this.flanking = config.flanking
         this.crossDomainProxy = config.crossDomainProxy
         this.formats = config.formats
@@ -201,9 +200,6 @@ class Browser {
         }
 
         this.doShowTrackLabels = config.showTrackLabels
-
-        this.doShowROITable = config.showROITable
-        this.doShowROITableButton = config.doShowROITableButton
 
         this.doShowCenterLine = config.showCenterGuide
 
@@ -232,121 +228,18 @@ class Browser {
         }
     }
 
-    setControls(config) {
-
-        const $navBar = this.createStandardControls(config)
-        $navBar.insertBefore($(this.columnContainer))
-        this.$navigation = $navBar
-
-        if (false === config.showControls) {
-            $navBar.hide()
-        }
-
-    }
-
     createStandardControls(config) {
 
-        const $navBar = $('<div>', {class: 'igv-navbar'})
-        this.$navigation = $navBar
-
-        const $navbarLeftContainer = $('<div>', {class: 'igv-navbar-left-container'})
-        $navBar.append($navbarLeftContainer)
-
-        // IGV logo
-        const $logo = $('<div>', {class: 'igv-logo'})
-        $navbarLeftContainer.append($logo)
-
-        const logoSvg = logo()
-        logoSvg.css("width", "34px")
-        logoSvg.css("height", "32px")
-        $logo.append(logoSvg)
-
-        this.$current_genome = $('<div>', {class: 'igv-current-genome'})
-        $navbarLeftContainer.append(this.$current_genome)
-        this.$current_genome.text('')
-
-        const $genomicLocation = $('<div>', {class: 'igv-navbar-genomic-location'})
-        $navbarLeftContainer.append($genomicLocation)
-
-        // chromosome select widget
-        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation.get(0))
-        if (config.showChromosomeWidget !== false) {
-            this.chromosomeSelectWidget.show()
-        } else {
-            this.chromosomeSelectWidget.hide()
-        }
-
-        const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'})
-        $genomicLocation.append($locusSizeGroup)
-
-        const $searchContainer = $('<div>', {class: 'igv-search-container'})
-        $locusSizeGroup.append($searchContainer)
-
-        // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
-        this.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'})
-        $searchContainer.append(this.$searchInput)
-        // Stop event propagation to prevent feature track keyboard navigation
-        this.$searchInput[0].addEventListener('keyup', (event) => {
-            event.stopImmediatePropagation()
-        })
-
-        this.$searchInput.change(() => this.doSearch(this.$searchInput.val()))
-
-        const searchIconContainer = DOMUtils.div({class: 'igv-search-icon-container'})
-        $searchContainer.append($(searchIconContainer))
-
-        searchIconContainer.appendChild(createIcon("search"))
-
-        searchIconContainer.addEventListener('click', () => this.doSearch(this.$searchInput.val()))
-
-        this.windowSizePanel = new WindowSizePanel($locusSizeGroup.get(0), this)
-
-        const $navbarRightContainer = $('<div>', {class: 'igv-navbar-right-container'})
-        $navBar.append($navbarRightContainer)
-
-        const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">')
-        $navbarRightContainer.append($toggle_button_container)
-        this.$toggle_button_container = $toggle_button_container
-
-        this.overlayTrackButton = new OverlayTrackButton(this, $toggle_button_container.get(0))
-        this.overlayTrackButton.setVisibility(false)
-
-        this.multiTrackSelectButton = new MultiTrackSelectButton(this, $toggle_button_container.get(0))
-
-        this.cursorGuide = new CursorGuide(this.columnContainer, this)
-
-        this.cursorGuideButton = new CursorGuideButton(this, $toggle_button_container.get(0))
-
-        this.centerLineButton = new CenterLineButton(this, $toggle_button_container.get(0))
-
         this.setTrackLabelVisibility(config.showTrackLabels)
-        this.trackLabelControl = new TrackLabelControl($toggle_button_container.get(0), this)
 
-        // ROI Control
-        this.roiTableControl = new ROITableControl($toggle_button_container.get(0), this)
+        this.navbar = new ResponsiveNavbar(config, this)
 
-        this.sampleInfoControl = new SampleInfoControl($toggle_button_container.get(0), this)
+        this.navbar.$navigation.insertBefore($(this.columnContainer))
 
-        this.sampleNameControl = new SampleNameControl($toggle_button_container.get(0), this)
-
-        if (true === config.showSVGButton) {
-            this.saveImageControl = new SaveImageControl($toggle_button_container.get(0), this)
+        if (false === config.showControls) {
+            this.navbar.hide()
         }
-
-        if (config.customButtons) {
-            for (let b of config.customButtons) {
-                new CustomButton($toggle_button_container.get(0), this, b)
-            }
-        }
-
-        this.zoomWidget = new ZoomWidget(this, $navbarRightContainer.get(0))
-
-        if (false === config.showNavigation) {
-            this.$navigation.hide()
-        }
-
-        this.sliderDialog = new SliderDialog(this.root)
-        this.sliderDialog.container.id = `igv-slider-dialog-${DOMUtils.guid()}`
+        this.cursorGuide = new CursorGuide(this.columnContainer, this)
 
         this.inputDialog = new InputDialog(this.root)
         this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
@@ -357,7 +250,8 @@ class Browser {
         this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432})
         this.genericColorPicker.container.id = `igv-track-color-picker-${DOMUtils.guid()}`
 
-        return $navBar
+        this.sliderDialog = new SliderDialog(this.root)
+        this.sliderDialog.container.id = `igv-slider-dialog-${DOMUtils.guid()}`
 
     }
 
@@ -418,19 +312,13 @@ class Browser {
     toSVG() {
 
         const {x, y, width, height} = this.columnContainer.getBoundingClientRect()
-
-        const h_render = 8000
-
+        const h_render = height
         const config =
             {
-
                 width,
                 height: h_render,
-
                 backdropColor: 'white',
-
                 multiLocusGap: 0,
-
                 viewbox:
                     {
                         x: 0,
@@ -438,7 +326,6 @@ class Browser {
                         width,
                         height: h_render
                     }
-
             }
 
         const context = new C2S(config)
@@ -451,44 +338,66 @@ class Browser {
 
         // ROI -> SVG
         delta.deltaX = x
-        this.roiManager.renderSVGContext(context, delta)
 
-        // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
-        context.setHeight(height)
+        this.roiManager.renderSVGContext(this.columnContainer, context, delta)
+
 
         return context.getSerializedSvg(true)
-
     }
 
-    renderSVG($container) {
-        const svg = this.toSVG()
-        $container.empty()
-        $container.append(svg)
+    saveSVGtoFile(filename, container) {
 
-        return svg
-    }
+        let svgString = this.toSVG()
 
-    saveSVGtoFile(config) {
-
-        let svg = this.toSVG()
-
-        if (config.$container) {
-            config.$container.empty()
-            config.$container.append(svg)
+        // Append svg t testing, not used in production
+        if (container) {
+            const svg = document.createElement("svg")
+            svg.innerHTML = svgString
+            container.append(svg)
+            container.appendChild(svg)
         }
 
-        const path = config.filename || 'igvjs.svg'
-        const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
+        const path = filename || 'igvjs.svg'
+        const data = URL.createObjectURL(new Blob([svgString], {type: "application/octet-stream"}))
         FileUtils.download(path, data)
+        URL.revokeObjectURL(data)  // Important to prevent memory leak
     }
 
     savePNGtoFile(filename) {
-        html2canvas(this.columnContainer, {allowTaint: true}).then(canvas => {
-            const path = filename || 'igvjs.png'
-            const data = canvas.toDataURL('image/png')
-            FileUtils.download(path, data)
+
+        const svgAsString = this.toSVG()
+
+        const svgBlob = new Blob([svgAsString], {
+            type: 'image/svg+xml'
         })
+        const svgObjectUrl = URL.createObjectURL(svgBlob)
+
+        const img = document.createElement('img')
+
+        const onImageLoaded = () => {
+
+            const dimensions = this.columnContainer.getBoundingClientRect()
+            const devicePixelRatio = window.devicePixelRatio
+            const w = dimensions.width * devicePixelRatio
+            const h = dimensions.height * devicePixelRatio
+            const canvas = document.createElement('canvas')
+            canvas.width = w
+            canvas.height = h
+            const context = canvas.getContext('2d')
+            context.scale(devicePixelRatio, devicePixelRatio)
+
+            context.drawImage(img, 0, 0)
+            const data = canvas.toDataURL("image/png")
+            filename = filename || 'igvjs.png'
+            FileUtils.download(filename, data)
+
+            // Free temporary object URL
+            URL.revokeObjectURL(svgObjectUrl)
+        }
+        img.addEventListener('load', onImageLoaded)
+        img.src = svgObjectUrl
     }
+
 
     /**
      * Initialize a session from an object, json, or by loading from a file.
@@ -573,10 +482,10 @@ class Browser {
             session = await translateSession(session)
         }
 
-        this.sampleInfoControl.setButtonVisibility(false)
+        this.navbar.sampleInfoControl.setButtonVisibility(false)
 
         this.showSampleNames = session.showSampleNames || false
-        this.sampleNameControl.setState(this.showSampleNames === true)
+        this.navbar.sampleNameControl.setState(this.showSampleNames === true)
 
         if (session.sampleNameViewportWidth) {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
@@ -616,16 +525,10 @@ class Browser {
 
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
-        let ideogramHeight = 0
         if (false !== session.showIdeogram) {
-
             const track = new IdeogramTrack(this)
             track.id = 'ideogram'
-
             const trackView = new TrackView(this, this.columnContainer, track)
-            const {$viewport} = trackView.viewports[0]
-            ideogramHeight = getElementAbsoluteHeight($viewport.get(0))
-
             this.trackViews.push(trackView)
         }
 
@@ -634,51 +537,17 @@ class Browser {
             this.trackViews.push(rulerTrackView)
         }
 
-        // Restore gtex selections.
-        if (session.gtexSelections) {
-            for (let referenceFrame of this.referenceFrameList) {
-                for (let s of Object.keys(session.gtexSelections)) {
-                    const gene = session.gtexSelections[s].gene
-                    const snp = session.gtexSelections[s].snp
-                    referenceFrame.selection = new GtexSelection(gene, snp)
-                }
-            }
+        if (session.qtlSelections) {
+            this.qtlSelections = QTLSelections.fromJSON(session.qtlSelections)
         }
 
-        if (this.roiManager) {
-            this.roiManager.dispose()
-        }
-
-        const roiMenu = new ROIMenu(this, this.columnContainer)
-        const roiTableConfig =
-            {
-                browser: this,
-                parent: this.columnContainer,
-                headerTitle: 'Regions of Interest',
-                dismissHandler: () => this.roiTableControl.buttonHandler(false),
-                gotoButtonHandler: ROITable.gotoButtonHandler
-            }
+        this.roiManager.clearROIs()
         if (session.roi) {
-
-            const roiSetList = session.roi.map(c => new ROISet(c, this.genome))
-
-            const named = roiSetList.filter(({name}) => name !== undefined && name.length > 0)
-
-            roiTableConfig.columnFormat = ROITable.getColumnFormatConfiguration(named.length > 0)
-
-            const roiTable = new ROITable(roiTableConfig)
-
-            this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, roiSetList)
+            this.roiManager.loadROI(session.roi)
         } else {
-
-            roiTableConfig.columnFormat = ROITable.getColumnFormatConfiguration(false)
-
-            const roiTable = new ROITable(roiTableConfig)
-
-            this.roiManager = new ROIManager(this, roiMenu, roiTable, ideogramHeight, undefined)
+            // Reset is called by loadROI, if no ROIs are loaded we need to call it explicitly
+            await this.roiManager.reset()
         }
-
-        await this.roiManager.initialize()
 
         // Sample info
         const localSampleInfoFiles = []
@@ -733,12 +602,12 @@ class Browser {
 
         // The ruler and ideogram tracks are not explicitly loaded, but needs updated nonetheless.
         for (let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler' || tv.track.type === 'ideogram')) {
-            rtv.updateViews()
+            await rtv.updateViews()
         }
 
-        // If any tracks are selected show the selectino buttons
+        // If any tracks are selected show the selection buttons
         if (this.trackViews.some(tv => tv.track.selected)) {
-            this.multiTrackSelectButton.setMultiTrackSelection(true)
+            this.navbar.setEnableTrackSelection(true)
         }
 
         this.updateUIWithReferenceFrameList()
@@ -778,6 +647,9 @@ class Browser {
     async loadReference(genomeConfig, initialLocus) {
 
         this.removeAllTracks()   // Do this first, before new genome is set
+        this.roiManager.clearROIs()
+
+        this.navbar.setEnableTrackSelection(false)
 
         let genome
         if (genomeConfig.gbkURL) {
@@ -790,8 +662,7 @@ class Browser {
 
         this.genome = genome
 
-        this.updateNavbarDOMWithGenome(genome)
-
+        this.navbar.updateGenome(genome)
 
         let locus = initialLocus || genome.initialLocus
         if (Array.isArray(locus)) {
@@ -822,25 +693,6 @@ class Browser {
         }
     }
 
-    updateNavbarDOMWithGenome(genome) {
-        let genomeLabel = (genome.id && genome.id.length < 20 ? genome.id : `${genome.id.substring(0, 8)}...${genome.id.substring(genome.id.length - 8)}`)
-        this.$current_genome.text(genomeLabel)
-        this.$current_genome.attr('title', genome.description)
-
-        // chromosome select widget -- Show this IFF its not explicitly hidden AND the genome has pre-loaded chromosomes
-        const showChromosomeWidget =
-            this.config.showChromosomeWidget !== false &&
-            genome.chromosomeNames &&
-            genome.chromosomeNames.length > 1
-
-        if (showChromosomeWidget) {
-            this.chromosomeSelectWidget.update(genome)
-            this.chromosomeSelectWidget.show()
-        } else {
-            this.chromosomeSelectWidget.hide()
-        }
-    }
-
     /**
      * Load a genome, defined by a string ID or a json-like configuration object. This includes a fasta reference
      * as well as optional cytoband and annotation tracks.
@@ -849,6 +701,10 @@ class Browser {
      * @returns genome
      */
     async loadGenome(idOrConfig) {
+
+        if (idOrConfig.genarkAccession) {
+            idOrConfig.url = convertToHubURL(idOrConfig.genarkAccession)
+        }
 
         // Translate the generic "url" field, used by clients such as igv-webapp
         if (idOrConfig.url) {
@@ -921,16 +777,16 @@ class Browser {
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
 
-        navbarDidResize(this, this.$navigation.width(), isWGV)
+        this.navbar.navbarDidResize()
 
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
         if (this.doShowCenterLine && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
-            this.centerLineButton.boundMouseClickHandler()
+            this.navbar.centerLineButton.boundMouseClickHandler()
         }
 
         if (this.doShowCursorGuide && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
-            this.cursorGuideButton.boundMouseClickHandler()
+            this.navbar.cursorGuideButton.boundMouseClickHandler()
         }
 
         this.setCenterLineAndCenterLineButtonVisibility(GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
@@ -940,9 +796,9 @@ class Browser {
     setCenterLineAndCenterLineButtonVisibility(isWholeGenomeView) {
 
         if (isWholeGenomeView) {
-            this.centerLineButton.setVisibility(!isWholeGenomeView)
+            this.navbar.centerLineButton.setVisibility(false)
         } else {
-            this.centerLineButton.setVisibility(this.config.showCenterGuideButton)
+            this.navbar.centerLineButton.setVisibility(this.config.showCenterGuideButton)
         }
 
         for (let centerLine of this.centerLineList) {
@@ -1031,6 +887,9 @@ class Browser {
      */
     async loadTrack(config) {
 
+        // Default configuration sync option to true.  This is the expected behavior for public API calls
+        config.sync = (config.sync !== false)
+
         const newTrack = this._loadTrack(config)
 
         if (newTrack && config.autoscaleGroup) {
@@ -1073,7 +932,6 @@ class Browser {
             } else if (undefined === newTrack) {
                 return
             }
-
 
             return this.addTrack(config, newTrack)
 
@@ -1146,8 +1004,9 @@ class Browser {
         this.reorderTracks()
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
 
-        return newTrack
+        newTrack.trackView.enableTrackSelection(this.navbar.getEnableTrackSelection())
 
+        return newTrack
 
     }
 
@@ -1159,7 +1018,7 @@ class Browser {
      * @returns {Promise<void>}
      */
     async loadROI(config) {
-        await this.roiManager.loadROI(config, this.genome)
+        return this.roiManager.loadROI(config, this.genome)
     }
 
     /**
@@ -1176,7 +1035,7 @@ class Browser {
 
         if (this.roiManager) {
 
-            const set = await this.roiManager.getUserDefinedROISet()
+            const set = this.roiManager.getUserDefinedROISet()
             if (undefined === set) {
                 return []
             }
@@ -1217,23 +1076,15 @@ class Browser {
                 config.format = config.format.toLowerCase()
             } else if (config.fastaURL) {
                 config.format = "fasta"  // by definition
-            } else {
-                let filename = config.filename
-                if (!filename) {
-                    filename = await getFilename(url)
-                }
-
-                const format = TrackUtils.inferFileFormat(filename)
-                if ("tsv" === format) {
-                    config.format = await TrackUtils.inferFileFormatFromHeader(config)
-                } else if (format) {
+            } else if (!config.sourceType) {
+                // If not a webservice, see if we can infer a format from the URL
+                const format = await inferFileFormat(config)
+                if (format) {
                     config.format = format
-                } else {
-                    if (config.sourceType === "htsget") {
-                        // Check for htsget URL.  This is a longshot
-                        await HtsgetReader.inferFormat(config)
-                    }
                 }
+            } else if (config.sourceType === "htsget") {
+                // Finally check for htsget URL.  This is a longshot
+                await HtsgetReader.inferFormat(config)
             }
         }
 
@@ -1245,10 +1096,9 @@ class Browser {
 
         if (!type) {
 
-            // If neither format nor type is known assume a sample information file.  We should do some validation here
+            // If neither format nor type are known throw an error
             if (!config.format) {
-                // type = "sampleinfo"
-                throw Error(`Attempt to load unrecognized track type`)
+                throw Error(`Unrecognized track:  ${JSON.stringify(config)}`)
             } else if (config.format === "hic") {
                 const hicFile = new HicFile(config)
                 await hicFile.readHeaderAndFooter()
@@ -1276,34 +1126,28 @@ class Browser {
             config.type = type
         }
 
-        if ("sampleinfo" === type) {
-            // Deprecated option
-            await this.loadSampleInfo(config)
-            return undefined
-        } else {
-            // Set defaults if specified
-            if (this.trackDefaults && type) {
-                const settings = this.trackDefaults[type]
-                if (settings) {
-                    for (let property in settings) {
-                        if (settings.hasOwnProperty(property) && config[property] === undefined) {
-                            config[property] = settings[property]
-                        }
+        // Set defaults if specified
+        if (this.trackDefaults && type) {
+            const settings = this.trackDefaults[type]
+            if (settings) {
+                for (let property in settings) {
+                    if (settings.hasOwnProperty(property) && config[property] === undefined) {
+                        config[property] = settings[property]
                     }
                 }
             }
+        }
 
-            const track = getTrack(type, config, this)
-            if (undefined === track) {
-                this.alert.present(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
-            } else {
+        const track = getTrack(type, config, this)
+        if (undefined === track) {
+            this.alert.present(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
+        } else {
 
-                if (config.roi && config.roi.length > 0) {
-                    track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
-                }
-
-                return track
+            if (config.roi && config.roi.length > 0) {
+                track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
             }
+
+            return track
         }
     }
 
@@ -1493,13 +1337,6 @@ class Browser {
         return this.trackViews.map(tv => tv.track).filter(t => t !== undefined)
     }
 
-    getTrackURLs() {
-        return new Set(this.tracks
-            .filter(track => track.config && StringUtils.isString(track.config.url))
-            .map(track => track.config.url))
-    }
-
-
     /**
      * Set the track height globally for all tracks.  (Note: Its not clear why this is useful).
      * @param newHeight
@@ -1535,8 +1372,7 @@ class Browser {
         }
 
         if (this.referenceFrameList) {
-            const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr)
-            navbarDidResize(this, this.$navigation.width(), isWGV)
+            this.navbar.navbarDidResize()
         }
 
         resize.call(this)
@@ -1618,13 +1454,11 @@ class Browser {
             referenceFrame.end = referenceFrame.start + referenceFrame.bpPerPixel * width
         }
 
-        if (this.chromosomeSelectWidget) {
-            this.chromosomeSelectWidget.select.value = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
-        }
+        const chrName = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
 
         const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
 
-        this.$searchInput.val(loc)
+        this.navbar.updateLocus(loc, chrName)
 
         this.fireEvent('locuschange', [this.referenceFrameList])
     }
@@ -1854,13 +1688,14 @@ class Browser {
     /**
      * Search for the locus string
      * NOTE: This is part of the API
-     * @param string
+     * @param stringOrArray
      * @param init  true if called during browser initialization
+     *
      * @returns {Promise<boolean>}  true if found, false if not
      */
-    async search(string, init) {
+    async search(stringOrArray, init) {
 
-        const loci = await search(this, string)
+        const loci = await search(this, stringOrArray)
 
         if (loci && loci.length > 0) {
 
@@ -1901,8 +1736,8 @@ class Browser {
 
         await this.sampleInfo.loadSampleInfoFile(config.url)
 
-        for (const {sampleNameViewport} of this.trackViews) {
-            sampleNameViewport.setWidth(this.getSampleInfoColumnWidth())
+        for (const {sampleInfoViewport} of this.trackViews) {
+            sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
         }
 
         const found = this.findTracks(t => typeof t.getSamples === 'function')
@@ -1997,6 +1832,9 @@ class Browser {
         for (let trackView of this.trackViews) {
             trackView.dispose()
         }
+        if (this.roiManager) {
+            this.roiManager.dispose()
+        }
     }
 
     /**
@@ -2026,27 +1864,18 @@ class Browser {
 
         // Build locus array (multi-locus view).  Use the first track to extract the loci, any track could be used.
         const locus = []
-        const gtexSelections = {}
-        let hasGtexSelections = false
         let anyTrackView = this.trackViews[0]
         for (let {referenceFrame} of anyTrackView.viewports) {
             const locusString = referenceFrame.getLocusString()
             locus.push(locusString)
-            if (referenceFrame.selection) {
-                const selection = {
-                    gene: referenceFrame.selection.gene,
-                    snp: referenceFrame.selection.snp
-                }
-                gtexSelections[locusString] = selection
-                hasGtexSelections = true
-            }
         }
         json["locus"] = locus.length === 1 ? locus[0] : locus
-        if (hasGtexSelections) {
-            json["gtexSelections"] = gtexSelections
-        }
 
         json["roi"] = this.roiManager.toJSON()
+
+        if (!this.qtlSelections.isEmpty()) {
+            json["qtlSelections"] = this.qtlSelections.toJSON()
+        }
 
         // Tracks
         const trackJson = []
@@ -2168,7 +1997,7 @@ class Browser {
 
         if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
             this.updateViews()
-            this.fireEvent('trackdragend')
+            this.fireEvent('trackdragend', [dragObject.viewport])
         }
     }
 
@@ -2362,7 +2191,7 @@ class Browser {
     createCircularView(container, show) {
         show = show === true   // convert undefined to boolean
         this.circularView = createCircularView(container, this)
-        this.circularViewControl = new CircularViewControl(this.$toggle_button_container.get(0), this)
+        this.circularViewControl = new CircularViewControl(this.navbar.toggle_button_container, this)
         this.circularView.setAssembly({
             name: this.genome.id,
             id: this.genome.id,
@@ -2382,6 +2211,30 @@ class Browser {
             this.circularViewControl.setState(isVisible)
         }
     }
+
+
+
+    // Navbar delegates
+    get sampleInfoControl() {
+        return this.navbar.sampleInfoControl
+    }
+
+    get overlayTrackButton() {
+        return this.navbar.overlayTrackButton
+    }
+
+    get roiTableControl() {
+        return this.navbar.roiTableControl
+    }
+
+    get sampleInfoControl() {
+        return this.navbar.sampleInfoControl
+    }
+
+    get sampleNameControl() {
+        return this.navbar.sampleNameControl
+    }
+
 }
 
 function getFileExtension(input) {
@@ -2516,7 +2369,7 @@ function mouseUpOrLeave(e) {
 async function keyUpHandler(event) {
 
     // Feature jumping disabled in multi-locus view
-    if (this.referenceFrameList.length > 1) return
+    if (!this.referenceFrameList || this.referenceFrameList.length > 1) return
 
     if (event.code === 'KeyF' || event.code === 'KeyB') {
 
@@ -2589,21 +2442,6 @@ async function keyUpHandler(event) {
             }
         }
     }
-}
-
-
-function logo() {
-
-    return $(
-        '<svg width="690px" height="324px" viewBox="0 0 690 324" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
-        '<title>IGV</title>' +
-        '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">' +
-        '<g id="IGV" fill="#666666">' +
-        '<polygon id="Path" points="379.54574 8.00169252 455.581247 8.00169252 515.564813 188.87244 532.884012 253.529506 537.108207 253.529506 554.849825 188.87244 614.833392 8.00169252 689.60164 8.00169252 582.729511 320.722144 486.840288 320.722144"></polygon>' +
-        '<path d="M261.482414,323.793286 C207.975678,323.793286 168.339046,310.552102 142.571329,284.069337 C116.803612,257.586572 103.919946,217.158702 103.919946,162.784513 C103.919946,108.410325 117.437235,67.8415913 144.472217,41.0770945 C171.507199,14.3125977 212.903894,0.930550071 268.663545,0.930550071 C283.025879,0.930550071 298.232828,1.84616386 314.284849,3.6774189 C330.33687,5.50867394 344.839793,7.97378798 357.794056,11.072835 L357.794056,68.968378 C339.48912,65.869331 323.578145,63.5450806 310.060654,61.9955571 C296.543163,60.4460336 284.574731,59.6712835 274.154998,59.6712835 C255.850062,59.6712835 240.502308,61.4320792 228.111274,64.9537236 C215.720241,68.4753679 205.793482,74.2507779 198.330701,82.2801269 C190.867919,90.309476 185.587729,100.87425 182.48997,113.974767 C179.392212,127.075284 177.843356,143.345037 177.843356,162.784513 C177.843356,181.942258 179.251407,198.000716 182.067551,210.960367 C184.883695,223.920018 189.671068,234.41436 196.429813,242.443709 C203.188559,250.473058 212.059279,256.178037 223.042241,259.558815 C234.025202,262.939594 247.683295,264.629958 264.01693,264.629958 C268.241146,264.629958 273.098922,264.489094 278.590403,264.207362 C284.081883,263.925631 289.643684,263.50304 295.275972,262.939577 L295.275972,159.826347 L361.595831,159.826347 L361.595831,308.579859 C344.698967,313.087564 327.239137,316.750019 309.215815,319.567334 C291.192494,322.38465 275.281519,323.793286 261.482414,323.793286 L261.482414,323.793286 L261.482414,323.793286 Z" id="Path"></path>;' +
-        '<polygon id="Path" points="0.81355666 5.00169252 73.0472883 5.00169252 73.0472883 317.722144 0.81355666 317.722144"></polygon>' +
-        '</g> </g> </svg>'
-    )
 }
 
 function toggleTrackLabels(trackViews, isVisible) {

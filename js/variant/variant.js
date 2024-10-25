@@ -46,7 +46,7 @@ class Variant {
         this.filter = tokens[6]
         this.info = {}
         const infoStr = tokens[7]
-        if (infoStr) {
+        if (infoStr && infoStr !== '.') {
             for (let elem of infoStr.split(';')) {
                 var element = elem.split('=')
                 this.info[element[0]] = element[1]
@@ -205,9 +205,10 @@ class Variant {
             }
         }
 
-        if (this.info) {
+        const infoKeys = Object.keys(this.info)
+        if (this.info && infoKeys.length > 0) {
             fields.push({html: '<hr style="border-top: dotted 1px;border-color: #c9c3ba" />'})
-            for (let key of Object.keys(this.info)) {
+            for (let key of infoKeys) {
                 fields.push({name: key, value: arrayToString(decodeURIComponent(this.info[key]))})
             }
         }
@@ -274,7 +275,7 @@ class SVComplement {
     }
 
     getAttributeValue(key) {
-       return this.mate.getAttributeValue(key)
+        return this.mate.getAttributeValue(key)
     }
 
     getInfo(tag) {
@@ -297,7 +298,7 @@ class SVComplement {
         popupData.push({name: 'Pos', value: `${StringUtils.numberFormatter(this.pos)}`})
         popupData.push({html: '<hr style="border-top: dotted 1px;border-color: #c9c3ba" />'})
         popupData.push("SV")
-        popupData.push(... this.mate.popupData(genomicLocation, genomeId))
+        popupData.push(...this.mate.popupData(genomicLocation, genomeId))
 
         return popupData
     }

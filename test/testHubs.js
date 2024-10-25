@@ -1,18 +1,18 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import Hub from "../js/ucsc/ucscHub.js"
-import Trix from "../js/bigwig/trix.js"
-import BWReader from "../js/bigwig/bwReader.js"
-import BPTree from "../js/bigwig/bpTree.js"
-import {isString} from "../node_modules/igv-utils/src/stringUtils.js"
+import {convertToHubURL} from "../js/ucsc/ucscUtils.js"
 
 
 suite("hub.txt", function () {
 
+    const hubURL = convertToHubURL("GCF_000186305.1")
 
     test("genome config", async function () {
 
-        const hub = await Hub.loadHub("test/data/hubs/hub.txt")
+        this.timeout(20000)
+
+        const hub = await Hub.loadHub(hubURL)
         assert.ok(hub.hubStanza)
         assert.ok(hub.genomeStanza)
         assert.equal(22, hub.trackStanzas.length)
@@ -30,7 +30,10 @@ suite("hub.txt", function () {
     })
 
     test("track configs", async function() {
-        const hub = await Hub.loadHub("test/data/hubs/hub.txt")
+
+        this.timeout(20000)
+
+        const hub = await Hub.loadHub(hubURL)
         const groupedTrackConfigurations  = hub.getGroupedTrackConfigurations();
         assert.equal(5, groupedTrackConfigurations.length);
     })

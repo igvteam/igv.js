@@ -23,22 +23,22 @@
  * THE SOFTWARE.
  */
 
-import * as TrackUtils from '../util/trackUtils.js'
 import {decodeBedpe, decodeBedpeDomain, fixBedPE} from './decode/bedpe.js'
 import {decodeInteract} from "./decode/interact.js"
 import {
     decodeBed,
     decodeBedGraph,
+    decodeBedmethyl,
+    decodeGappedPeak,
     decodeGenePred,
     decodeGenePredExt,
+    decodeNarrowPeak,
     decodePeak,
     decodeReflat,
     decodeRepeatMasker,
+    decodeShoebox,
     decodeSNP,
-    decodeWig,
-    decodeBedmethyl,
-    decodeGappedPeak,
-    decodeNarrowPeak
+    decodeWig
 } from "./decode/ucsc.js"
 import {decodeGFF3, decodeGTF} from "./gff/gff.js"
 import {decodeFusionJuncSpan} from "./decode/fusionJuncSpan.js"
@@ -47,6 +47,8 @@ import {decodeCustom} from "./decode/custom.js"
 import {decodeGcnv} from "../gcnv/gcnvDecoder.js"
 import DecodeError from "./decode/decodeError.js"
 import GFFHelper from "./gff/gffHelper.js"
+
+import {getFormat} from "../util/fileFormats.js"
 
 /**
  *  Parser for column style (tab delimited, etc) text file formats (bed, gff, vcf, etc).
@@ -318,8 +320,12 @@ class FeatureParser {
                 this.decode = decodeGcnv
                 this.delimiter = "\t"
                 break
+            case "shoebox":
+                this.decode = decodeShoebox
+                this.delimiter = "\t"
+                break
             default:
-                const customFormat = TrackUtils.getFormat(format)
+                const customFormat = getFormat(format)
                 if (customFormat !== undefined) {
                     this.decode = decodeCustom
                     this.header.customFormat = customFormat
@@ -415,21 +421,5 @@ function parseVariableStep(line) {
     return {format: "variableStep", chrom, span}
 }
 
-const spaceDelimited = new Set([
-    "narrowpeak",
-    "broadpeak",
-    "regionpeak",
-    "peaks",
-    "fusionjuncspan",
-    "bedgraph",
-    "wig",
-    "refflat",
-    "genepred",
-    "genepredext",
-    "ensgene",
-    "refgene",
-    "bed",
-    "interact"
-])
 
 export default FeatureParser

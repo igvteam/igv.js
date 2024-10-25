@@ -1,26 +1,55 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import ROISet, {screenCoordinates} from './ROISet.js'
-import Popover from "../ui/popover.js"
+import {getElementVerticalDimension, getFilename} from "../util/igvUtils.js"
+import {inferFileFormat} from "../util/fileFormatUtils.js"
+import ROIMenu from "./ROIMenu.js"
+import ROITable from "./ROITable.js"
+
 
 class ROIManager {
 
-    constructor(browser, roiMenu, roiTable, top, roiSets) {
+    constructor(browser) {
 
         this.browser = browser
-        this.roiMenu = roiMenu
-        this.roiTable = roiTable
-        this.top = top
-        this.roiSets = roiSets || []
+        this.roiMenu = new ROIMenu(browser, browser.columnContainer)
+        this.roiTable = new ROITable(browser, browser.columnContainer)
+        this.top = 0
+        this.roiSets = []
         this.boundLocusChangeHandler = locusChangeHandler.bind(this)
         browser.on('locuschange', this.boundLocusChangeHandler)
 
+        const updateROIDimensions = () => {
+
+            const tracks = browser.findTracks(track => new Set(['ideogram', 'ruler']).has(track.type))
+            const [rectA, rectB] = tracks
+                .map(track => track.trackView.viewports[0].$viewport.get(0))
+                .map(element => getElementVerticalDimension(element))
+            
+            //Covers cases in which ruler and/or ideogram are hidden
+            const heightA = rectA ? rectA.height : 0
+            const heightB = rectB ? rectB.height : 0
+            
+            const elements = browser.columnContainer.querySelectorAll('.igv-roi-region')
+
+            const fudge = -0.5
+            if (elements) {
+                for (const element of elements) {
+                    element.style.marginTop = `${heightA + heightB + fudge}px`
+                }
+
+            }
+        }
+
+        this.observer = new MutationObserver(updateROIDimensions)
+        //const [ column ] = browser.columnContainer.querySelectorAll('.igv-column')
+        this.observer.observe(browser.columnContainer, {attributes: true, childList: true, subtree: true})
+
     }
 
-    async initialize() {
+    async reset() {
 
         if (this.roiSets.length > 0) {
-            this.browser.doShowROITableButton = true
-            this.browser.roiTableControl.setVisibility(this.browser.doShowROITableButton)
+            this.browser.roiTableControl.setVisibility(true)
         }
 
         const promises = this.roiSets.map(roiSet => this.renderROISet({
@@ -47,11 +76,17 @@ class ROIManager {
 
         const configs = Array.isArray(config) ? config : [config]
 
-        for (let c of configs) {
-            this.roiSets.push(new ROISet(c, genome))
+        for (let config of configs) {
+            if (!config.name && config.url) {
+                config.name = await getFilename(config.url)
+            }
+            if (config.url && !config.format) {
+                config.format = await inferFileFormat(config)
+            }
+            this.roiSets.push(new ROISet(config, genome))
         }
 
-        await this.initialize()
+        await this.reset()
 
     }
 
@@ -102,6 +137,10 @@ class ROIManager {
         this.roiTable.dismiss()
     }
 
+    roiTableIsVisible() {
+        return this.roiTable.isVisible()
+    }
+
     async updateUserDefinedROISet(feature) {
 
         let userDefinedROISet = await this.getUserDefinedROISet()
@@ -112,9 +151,7 @@ class ROIManager {
 
         userDefinedROISet.addFeature(feature)
 
-        if (false === this.browser.doShowROITableButton) {
-            this.setROITableButtonVisibility(true)
-        }
+        this.setROITableButtonVisibility(true)
 
         await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: userDefinedROISet})
 
@@ -123,8 +160,7 @@ class ROIManager {
     }
 
     setROITableButtonVisibility(isVisible) {
-        this.browser.doShowROITableButton = isVisible
-        this.browser.roiTableControl.setVisibility(this.browser.doShowROITableButton)
+        this.browser.roiTableControl.setVisibility(isVisible)
     }
 
     toggleROIs() {
@@ -166,7 +202,6 @@ class ROIManager {
             if (features) {
 
                 for (let feature of features) {
-
                     const regionKey = createRegionKey(chr, feature.start, feature.end)
 
                     const {
@@ -211,17 +246,16 @@ class ROIManager {
             event.stopPropagation()
 
             const {x, y} = DOMUtils.translateMouseCoordinates(event, columnContainer)
-            const isUserDefined = roiSet.isUserDefined
-            this.roiMenu.present(feature, isUserDefined, event, this, columnContainer, regionElement)
+            this.roiMenu.present(feature, roiSet, event, this, columnContainer, regionElement)
         })
 
 
         return regionElement
     }
 
-    renderSVGContext(context, {deltaX, deltaY}) {
+    renderSVGContext(columnContainer, context, {deltaX, deltaY}) {
 
-        for (const regionElement of document.querySelectorAll('.igv-roi-region')) {
+        for (const regionElement of columnContainer.querySelectorAll('.igv-roi-region')) {
 
             // body
             const {x, y, width, height} = regionElement.getBoundingClientRect()
@@ -236,14 +270,19 @@ class ROIManager {
         }
     }
 
-    async getUserDefinedROISet() {
+    getUserDefinedROISet() {
         return this.roiSets.find(roiSet => true === roiSet.isUserDefined)
     }
 
+    deleteUserDefinedROISet(){
+        this.roiSets = this.roiSets.filter(roiSet => roiSet.isUserDefined !== true);
+    }
+    
     initializeUserDefinedROISet() {
 
         const config =
             {
+                name: 'user defined',
                 isUserDefined: true,
                 features: []
             }
@@ -254,14 +293,7 @@ class ROIManager {
     }
 
     async deleteRegionWithKey(regionKey, columnContainer) {
-
         columnContainer.querySelectorAll(createSelector(regionKey)).forEach(node => node.remove())
-
-        const {feature, set} = await this.findRegionWithKey(regionKey)
-
-        if (set) {
-            set.removeFeature(feature)
-        }
 
         const records = await this.getTableRecords()
 
@@ -270,23 +302,6 @@ class ROIManager {
             this.setROITableButtonVisibility(false)
         }
 
-    }
-
-    async findRegionWithKey(regionKey) {
-
-        const {chr, start, end} = parseRegionKey(regionKey)
-
-        for (let set of this.roiSets) {
-                const features = await set.getFeatures(chr, start, end)
-
-                for (let feature of features) {
-                    if (feature.chr === chr && feature.start >= start && feature.end <= end) {
-                        return {feature, set}
-                    }
-                }
-        }
-
-        return {feature: undefined, set: undefined}
     }
 
     toJSON() {

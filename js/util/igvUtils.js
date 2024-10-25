@@ -225,19 +225,6 @@ function isSecureContext() {
     return window.location.protocol === "https:" || window.location.hostname === "localhost"
 }
 
-// reference: https://pretagteam.com/question/find-element-height-including-margin
-function getElementAbsoluteHeight(element) {
-
-    // Get the DOM Node if you pass in a string
-    element = (typeof element === 'string') ? document.querySelector(element) : element
-
-    const styles = window.getComputedStyle(element)
-    const margin = parseFloat(styles['marginTop']) + parseFloat(styles['marginBottom'])
-    const height = element.offsetHeight
-
-    return Math.ceil(margin + height);
-}
-
 /**
  * Expand the region represented by (start,end) to span the extent.
  *
@@ -257,8 +244,22 @@ function expandRegion(start, end, extent) {
     }
 }
 
+function getElementVerticalDimension(element) {
+
+    const style = window.getComputedStyle(element)
+
+    const marginTop = parseInt(style.marginTop);
+    const marginBottom = parseInt(style.marginBottom);
+
+    const { top, bottom, height } = element.getBoundingClientRect()
+    return {
+        top: Math.floor(top) - marginTop,
+        bottom: Math.floor(bottom) + marginBottom,
+        height: Math.floor(height) + marginTop + marginBottom
+    };
+}
+
 export {
     createColumn, extend, isSimpleType, buildOptions, validateGenomicExtent, doAutoscale, isNumber,
-    getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext,
-    getElementAbsoluteHeight, expandRegion, isInteger
+    getFilename, prettyBasePairNumber, isDataURL, insertElementBefore, insertElementAfter, isSecureContext, expandRegion, isInteger, getElementVerticalDimension
 }

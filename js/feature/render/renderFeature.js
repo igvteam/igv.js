@@ -1,4 +1,3 @@
-import GtexUtils from "../../gtex/gtexUtils.js"
 import IGVGraphics from "../../igv-canvas.js"
 import {getEonStart, getExonEnd, getExonPhase} from "../exonUtils.js"
 import {translationDict} from "../../sequenceTrack.js"
@@ -216,11 +215,13 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
         let aaLetter
         if (undefined === aminoAcidLetter) {
 
-            const sequence = sequenceInterval.getSequence(start, end)
+            if(sequenceInterval.hasSequence(start, end)) {
 
-            if (sequence && 3 === sequence.length) {
-                const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
-                aaLetter = translationDict[key]
+                const sequence = sequenceInterval.getSequence(start, end)
+                if (sequence && 3 === sequence.length) {
+                    const key = '+' === strand ? sequence : complementSequence(sequence.split('').reverse().join(''))
+                    aaLetter = translationDict[key]
+                }
             }
 
         } else {
@@ -355,7 +356,11 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         if (name === undefined) name = feature.id || feature.ID
         if (!name || name === '.') return
 
-        let centerX = (featureX + featureX1) / 2
+        let pixelXOffset = options.pixelXOffset || 0
+        const t1 = Math.max(featureX, -pixelXOffset)
+        const t2 = Math.min(featureX1, -pixelXOffset + options.viewportWidth)
+        let centerX = (t1 + t2) / 2
+        //let centerX = (featureX + featureX1) / 2
 
         let transform
         if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
@@ -364,33 +369,33 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         const labelY = getFeatureLabelY(featureY, transform)
 
         let color = this.getColorForFeature(feature)
-        let geneColor
-        let gtexSelection = false
-        if (referenceFrame.selection && GtexUtils.gtexLoaded) {
-            // TODO -- for gtex, figure out a better way to do this
-            gtexSelection = true
-            geneColor = referenceFrame.selection.colorForGene(name)
-        }
+        let selected = this.browser.qtlSelections.hasPhenotype(feature.name)
 
         const geneFontStyle = {
             textAlign: "SLANT" === this.labelDisplayMode ? undefined : 'center',
-            fillStyle: geneColor || color,
-            strokeStyle: geneColor || color
+            fillStyle: color,
+            strokeStyle: color
         }
 
-        const textBox = ctx.measureText(name)
-        const xleft = centerX - textBox.width / 2
-        const xright = centerX + textBox.width / 2
+        const textMetrics = ctx.measureText(name)
+        const xleft = centerX - textMetrics.width / 2
+        const xright = centerX + textMetrics.width / 2
         const lastLabelX = options.rowLastLabelX[feature.row] || -Number.MAX_SAFE_INTEGER
-        if (options.labelAllFeatures || xleft > lastLabelX || gtexSelection) {
+        if (options.labelAllFeatures || xleft > lastLabelX || selected) {
             options.rowLastLabelX[feature.row] = xright
 
             if ('y' === options.axis) {
+                // TODO -- is this ever used?
                 ctx.save()
                 IGVGraphics.labelTransformWithContext(ctx, centerX)
                 IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
                 ctx.restore()
             } else {
+                ctx.clearRect(
+                    centerX - textMetrics.width / 2 - 1,
+                    labelY - textMetrics.actualBoundingBoxAscent - 1,
+                    textMetrics.width + 2,
+                    textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent + 2)
                 IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
             }
         }
@@ -416,14 +421,14 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
     if ('+' === strand) {
 
         if (phase) {
-            stringB = sequenceInterval.getSequence( phaseExtentStart, phaseExtentEnd)
+            stringB = sequenceInterval.getSequence(phaseExtentStart, phaseExtentEnd)
 
             if (!stringB) {
                 return undefined
             }
 
             [ss, ee] = [getExonEnd(leftExon) - (3 - phase), getExonEnd(leftExon)]
-            stringA = sequenceInterval.getSequence( ss, ee)
+            stringA = sequenceInterval.getSequence(ss, ee)
 
             if (!stringA) {
                 return undefined
@@ -434,7 +439,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
         }
 
         if (remainder) {
-            stringA = sequenceInterval.getSequence( remainder.start, remainder.end)
+            stringA = sequenceInterval.getSequence(remainder.start, remainder.end)
 
             if (!stringA) {
                 return undefined
@@ -442,7 +447,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
 
             const ritePhase = getExonPhase(riteExon)
             const riteStart = getEonStart(riteExon)
-            stringB = sequenceInterval.getSequence( riteStart, riteStart + ritePhase)
+            stringB = sequenceInterval.getSequence(riteStart, riteStart + ritePhase)
 
             if (!stringB) {
                 return undefined
@@ -455,14 +460,14 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
     } else {
 
         if (phase) {
-            stringA = sequenceInterval.getSequence( phaseExtentStart, phaseExtentEnd)
+            stringA = sequenceInterval.getSequence(phaseExtentStart, phaseExtentEnd)
 
             if (undefined === stringA) {
                 return undefined
             }
 
             [ss, ee] = [getEonStart(riteExon), getEonStart(riteExon) + (3 - phase)]
-            stringB = sequenceInterval.getSequence( ss, ee)
+            stringB = sequenceInterval.getSequence(ss, ee)
 
             if (undefined === stringB) {
                 return undefined
@@ -474,7 +479,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
         }
 
         if (remainder) {
-            stringB = sequenceInterval.getSequence( remainder.start, remainder.end)
+            stringB = sequenceInterval.getSequence(remainder.start, remainder.end)
 
             if (undefined === stringB) {
                 return undefined
@@ -482,7 +487,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
 
             const leftPhase = getExonPhase(leftExon)
             const leftEnd = getExonEnd(leftExon)
-            stringA = sequenceInterval.getSequence( leftEnd - leftPhase, leftEnd)
+            stringA = sequenceInterval.getSequence(leftEnd - leftPhase, leftEnd)
 
             if (undefined === stringA) {
                 return undefined

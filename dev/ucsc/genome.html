@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>twobit</title>
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    //https://hgdownload.soe.ucsc.edu/hubs/GCF/000/002/035/GCF_000002035.6/hub.txt
+   const igvConfig = {
+        genome: "GCF_000002035.6"
+    }
+
+
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), igvConfig)
+
+</script>
+
+</body>
+
+</html>

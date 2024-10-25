@@ -10,6 +10,7 @@ class MenuPopup {
         this.popover = DOMUtils.div({class: 'igv-menu-popup'})
 
         parent.appendChild(this.popover)
+        this.parent = parent
 
         const header = DOMUtils.div({class: 'igv-menu-popup-header'})
         this.popover.appendChild(header)
@@ -33,7 +34,7 @@ class MenuPopup {
 
     presentMenuList(trackView, menuList) {
 
-        hideAllMenuPopups()
+        hideAllMenuPopups(this.parent)
 
         if (menuList.length > 0) {
 
@@ -291,11 +292,11 @@ function present(e, popover) {
 
 }
 
-const hideAllMenuPopups = () => {
+const hideAllMenuPopups = parent => {
 
-    const menus = document.querySelectorAll('.igv-menu-popup')
-    for (let i = 0; i < menus.length; i++) {
-        menus[i].style.display = 'none'
+    const menus = parent.querySelectorAll('.igv-menu-popup')
+    for (const menu of menus) {
+        menu.style.display = 'none'
     }
 
 }

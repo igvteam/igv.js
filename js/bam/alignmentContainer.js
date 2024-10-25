@@ -54,6 +54,10 @@ class AlignmentContainer {
                     colorBy
                 }) {
 
+        this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 : alleleFreqThreshold
+        this.samplingWindowSize = samplingWindowSize || 100
+        this.samplingDepth = samplingDepth || 1000
+
         this.chr = chr
         this.start = Math.floor(start)
         this.end = Math.ceil(end)
@@ -61,9 +65,6 @@ class AlignmentContainer {
         this.coverageMap = new CoverageMap(chr, start, end, this.alleleFreqThreshold)
         this.downsampledIntervals = []
 
-        this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 : alleleFreqThreshold
-        this.samplingWindowSize = samplingWindowSize || 100
-        this.samplingDepth = samplingDepth || 1000
 
         // Enable basemods
         if (colorBy && colorBy.startsWith("basemod")) {
@@ -272,7 +273,7 @@ class AlignmentContainer {
     allAlignments() {
         if (this.alignments) {
             return this.alignments
-        } else {
+        } else if (this.packedGroups) {
             const all = Array.from(this.packedGroups.values()).flatMap(group => group.rows.flatMap(row => row.alignments))
             if (this.#unpacked && this.#unpacked.length > 0) {
                 for (let a of this.#unpacked) {
@@ -280,6 +281,8 @@ class AlignmentContainer {
                 }
             }
             return all
+        } else {
+            return []
         }
     }
 
@@ -288,9 +291,10 @@ class AlignmentContainer {
     }
 
     sortRows(options) {
-
-        for (let group of this.packedGroups.values()) {
-            group.sortRows(options, this)
+        if(this.packedGroups) {
+            for (let group of this.packedGroups.values()) {
+                group.sortRows(options, this)
+            }
         }
     }
 }
@@ -764,7 +768,6 @@ function getGroupValue(al, groupBy, expectedPairOrientation) {
         // Add cases for other options as needed
         case 'base':
 
-            // Use a string prefix to enforce grouping rules:
             //    1: alignments with a base at the position
             //    2: alignments with a gap at the position
             //    3: alignment that do not overlap the position (or are on a different chromosome)

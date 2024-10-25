@@ -32,18 +32,27 @@ import TextFeatureSource from "../feature/textFeatureSource.js"
 
 class RnaStructTrack extends TrackBase {
 
+    static defaults = {
+        height: 300,
+        theta: Math.PI / 2,
+        arcOrientation: "UP",
+
+    }
+
     constructor(config, browser) {
 
         super(config, browser)
 
-        // Set defaults
-        if (!config.height) {
-            this.height = 300
+        // Backward compatibility hack, arcOrientation was previously a boolean, now a string
+        if(config.arcOrientation === false) {
+            this.arcOrientation = "DOWN"
+        } else if(config.arcOrientation === true) {
+            this.arcOrientation = "UP"
+        } else if(config.arcOrientation) {
+            this.arcOrientation = config.arcOrientation.toUpperCase()
+        } else {
+            this.arcOrientation = "UP"
         }
-
-        this.arcOrientation = false
-
-        this.theta = Math.PI / 2
 
         if ("bp" === config.format) {
             this.featureSource = new RNAFeatureSource(config, browser.genome)
@@ -68,7 +77,7 @@ class RnaStructTrack extends TrackBase {
         const bpPerPixel = options.bpPerPixel
         const bpStart = options.bpStart
         const xScale = bpPerPixel
-        const orienation = this.arcOrientation
+        const orientation = "UP" === this.arcOrientation
 
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
@@ -99,13 +108,13 @@ class RnaStructTrack extends TrackBase {
                     let sa = Math.PI + (Math.PI / 2 - theta)
                     let ea = 2 * Math.PI - (Math.PI / 2 - theta)
 
-                    if (orienation) {
+                    if (orientation) {
+                        ctx.arc(x1, y1, r1, sa, ea)
+                        ctx.lineTo(el, y1)
+                    } else {
                         y1 = 0
                         ctx.arc(x1, y1, r1, ea, sa)
                         ctx.lineTo(er, y1)
-                    } else {
-                        ctx.arc(x1, y1, r1, sa, ea)
-                        ctx.lineTo(el, y1)
                     }
 
                     // Second arc
@@ -113,12 +122,12 @@ class RnaStructTrack extends TrackBase {
                     const r2 = (el - sr) / 2
                     const y2 = y1                        // Only for theta == pi/2
 
-                    if (orienation) {
-                        ctx.arc(x2, y2, r2, sa, ea, true)
-                        ctx.lineTo(el, y2)
-                    } else {
+                    if (orientation) {
                         ctx.arc(x2, y2, r2, ea, sa, true)
                         ctx.lineTo(sl, y2)
+                    } else {
+                        ctx.arc(x2, y2, r2, sa, ea, true)
+                        ctx.lineTo(el, y2)
                     }
 
                     ctx.stroke()
@@ -140,11 +149,11 @@ class RnaStructTrack extends TrackBase {
                     let sa = Math.PI + (Math.PI / 2 - theta)
                     let ea = 2 * Math.PI - (Math.PI / 2 - theta)
 
-                    if (orienation) {
+                    if (orientation) {
+                        ctx.arc(x, y, r, sa, ea)
+                    } else {
                         y = 0
                         ctx.arc(x, y, r, ea, sa)
-                    } else {
-                        ctx.arc(x, y, r, sa, ea)
                     }
 
                     ctx.stroke()
@@ -201,7 +210,7 @@ class RnaStructTrack extends TrackBase {
 
     popupData(clickState, features) {
 
-        if(features === undefined) features = this.clickedFeatures(clickState)
+        if (features === undefined) features = this.clickedFeatures(clickState)
 
         if (features && features.length > 0) {
 
@@ -215,15 +224,12 @@ class RnaStructTrack extends TrackBase {
             {
                 name: "Toggle arc direction",
                 click: function toggleArcDirectionHandler() {
-                    this.arcOrientation = !this.arcOrientation
+                    this.arcOrientation = "UP" === this.arcOrientation ? "DOWN" : "UP"
                     this.trackView.repaintViews()
                 }
             }
         ]
-
-    };
-
-
+    }
 }
 
 function sortByScore(featureList, direction) {

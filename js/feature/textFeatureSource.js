@@ -2,13 +2,13 @@ import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
 import FeatureFileReader from "./featureFileReader.js"
 import CustomServiceReader from "./customServiceReader.js"
 import UCSCServiceReader from "./ucscServiceReader.js"
-import GtexReader from "../gtex/gtexReader.js"
-import ImmVarReader from "../gtex/immvarReader.js"
+import GtexReader from "../qtl/gtexReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
 import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 import {computeWGFeatures, findFeatureAfterCenter, packFeatures} from "./featureUtils.js"
 import ChromAliasManager from "./chromAliasManager.js"
 import BaseFeatureSource from "./baseFeatureSource.js"
+import {summarizeData} from "./wigTrack.js"
 
 const DEFAULT_MAX_WG_COUNT = 10000
 
@@ -39,10 +39,7 @@ class TextFeatureSource extends BaseFeatureSource {
             this.queryable = config.queryable !== false
         } else if (config.sourceType === "ga4gh") {
             throw Error("Unsupported source type 'ga4gh'")
-        } else if (config.sourceType === "immvar") {
-            this.reader = new ImmVarReader(config)
-            this.queryable = true
-        } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
+        } else if ((config.type === "eqtl" || config.type === "qtl") && config.sourceType === "gtex-ws") {
             this.reader = new GtexReader(config)
             this.queryable = true
         } else if ("htsget" === config.sourceType) {
@@ -121,7 +118,7 @@ class TextFeatureSource extends BaseFeatureSource {
      * @param end
      * @param bpPerPixel
      */
-    async getFeatures({chr, start, end, bpPerPixel, visibilityWindow}) {
+    async getFeatures({chr, start, end, bpPerPixel, visibilityWindow, windowFunction}) {
 
         const isWholeGenome = ("all" === chr.toLowerCase())
 
@@ -143,7 +140,12 @@ class TextFeatureSource extends BaseFeatureSource {
         if (isWholeGenome) {
             if (!this.wgFeatures) {
                 if (this.supportsWholeGenome()) {
-                    this.wgFeatures = await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.maxWGCount)
+                    if("wig" === this.config.type) {
+                        const allWgFeatures = await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, 1000000)
+                        this.wgFeatures = summarizeData(allWgFeatures, 0, bpPerPixel, windowFunction)
+                    } else {
+                        this.wgFeatures = await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.maxWGCount)
+                    }
                 } else {
                     this.wgFeatures = []
                 }
@@ -152,6 +154,10 @@ class TextFeatureSource extends BaseFeatureSource {
         } else {
             return this.featureCache.queryFeatures(chr, start, end)
         }
+    }
+
+    async findFeatures(fn) {
+        return this.featureCache ? this.featureCache.findFeatures(fn) : []
     }
 
     supportsWholeGenome() {
@@ -194,9 +200,12 @@ class TextFeatureSource extends BaseFeatureSource {
             intervalStart = 0
             intervalEnd = Math.max(chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER, end)
         } else if (visibilityWindow > (end - start) && this.config.expandQuery !== false) {
-            const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
-            intervalStart = Math.max(0, (start + end) / 2 - expansionWindow)
-            intervalEnd = start + expansionWindow
+            let expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
+            if(this.config.minQuerySize && expansionWindow < this.config.minQuerySize) {
+                expansionWindow = this.config.minQuerySize
+            }
+            intervalStart = Math.max(0, (start + end - expansionWindow) / 2)
+            intervalEnd = intervalStart + expansionWindow
         }
 
         let features = await reader.readFeatures(queryChr, intervalStart, intervalEnd)
@@ -236,7 +245,10 @@ class TextFeatureSource extends BaseFeatureSource {
         for (let feature of featureList) {
             for (let field of searchableFields) {
                 let key
-                if (typeof feature.getAttributeValue === 'function') {
+                if(feature.hasOwnProperty(field)) {
+                    key = feature[field];
+                }
+                else if (typeof feature.getAttributeValue === 'function') {
                     key = feature.getAttributeValue(field)
                 }
                 if (key) {
@@ -258,6 +270,7 @@ class TextFeatureSource extends BaseFeatureSource {
         if (this.featureMap) {
             return this.featureMap.get(term.toUpperCase())
         }
+
     }
 }
 

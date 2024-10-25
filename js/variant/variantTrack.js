@@ -126,23 +126,26 @@ class VariantTrack extends TrackBase {
         this.header = await this.getHeader()
 
         // Set colorBy, if not explicitly set default to allele frequency, if available, otherwise default to none (undefined)
-        const infoFields = new Set(Object.keys(this.header.INFO))
-        if (this.config.colorBy) {
-            this.colorBy = this.config.colorBy
-        } else if (!this.config.color && infoFields.has('AF')) {
-            this.colorBy = 'AF'
+        if(this.header.INFO) {
+            const infoFields = new Set(Object.keys(this.header.INFO))
+            if (this.config.colorBy) {
+                this.colorBy = this.config.colorBy
+            } else if (!this.config.color && infoFields.has('AF')) {
+                this.colorBy = 'AF'
+            }
+
+            // Configure menu items based on info available
+            if (infoFields.has('AF')) {
+                this._colorByItems.set('AF', 'Allele frequency')
+            }
+            if (infoFields.has('VT')) {
+                this._colorByItems.set('VT', 'Variant Type')
+            }
+            if (infoFields.has('SVTYPE')) {
+                this._colorByItems.set('SVTYPE', 'SV Type')
+            }
         }
 
-        // Configure menu items based on info available
-        if (infoFields.has('AF')) {
-            this._colorByItems.set('AF', 'Allele frequency')
-        }
-        if (infoFields.has('VT')) {
-            this._colorByItems.set('VT', 'Variant Type')
-        }
-        if (infoFields.has('SVTYPE')) {
-            this._colorByItems.set('SVTYPE', 'SV Type')
-        }
         if (this.config.colorBy && !this._colorByItems.has(this.config.colorBy)) {
             this._colorByItems.set(this.config.colorBy, this.config.colorBy)
         }
@@ -296,17 +299,16 @@ class VariantTrack extends TrackBase {
 
             // Loop through variants.  A variant == a row in a VCF file
             for (let v of features) {
-                const variant = v._f || v   // Unwrap whole gnom
-                if (variant.end < bpStart) continue
-                if (variant.start > bpEnd) break
+                if (v.end < bpStart) continue
+                if (v.start > bpEnd) break
 
                 const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight
-                const y = TOP_MARGIN + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (variantHeight + vGap))
+                const y = TOP_MARGIN + ("COLLAPSED" === this.displayMode ? 0 : v.row * (variantHeight + vGap))
                 const h = variantHeight
 
                 // Compute pixel width.   Minimum width is 3 pixels,  if > 5 pixels create gap between variants
-                let x = (variant.start - bpStart) / bpPerPixel
-                let x1 = (variant.end - bpStart) / bpPerPixel
+                let x = (v.start - bpStart) / bpPerPixel
+                let x1 = (v.end - bpStart) / bpPerPixel
 
                 let w = Math.max(1, x1 - x)
                 if (w < 3) {
@@ -317,6 +319,7 @@ class VariantTrack extends TrackBase {
                     w -= 2
                 }
 
+                const variant = v._f || v   // True variant record, used for whole genome view and SV mate records
                 let af
                 try {
                     af = variant.alleleFreq()
@@ -972,8 +975,6 @@ class VariantTrack extends TrackBase {
                 this.trackView.setTrackHeight(this.config.height || CNVPytorTrack.DEFAULT_TRACK_HEIGHT)
                 this.trackView.checkContentHeight()
                 this.trackView.updateViews()
-                this.trackView.track.autoHeight = false
-
 
             } finally {
                 this.trackView.stopSpinner()

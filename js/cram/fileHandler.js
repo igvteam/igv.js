@@ -1,6 +1,6 @@
 import {igvxhr, FileUtils} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
-
+import Buffer from "./buffer/buffer.js"
 
 export default class FileHandler {
 
@@ -35,6 +35,7 @@ export default class FileHandler {
             const buf = await this._fetch(position, length)
             buf.copy(buffer, offset)
         }
+        return {bytesRead: length, buffer}
     }
 
     async readFile() {

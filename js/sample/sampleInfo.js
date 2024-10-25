@@ -23,38 +23,30 @@ class SampleInfo {
 
     constructor(browser) {
 
-        this.sampleInfoFiles = []
-
         const found = browser.tracks.some(t => typeof t.getSamples === 'function')
         if (found.length > 0) {
             browser.sampleInfoControl.setButtonVisibility(true)
         }
-
-        // TODO -- this just looks wrong, and should not be necessary.   If it is necessary the code should be in Browser
-        // browser.on('trackorderchanged', ignore => {
-        //
-        //     if (this.hasAttributes()) {
-        //
-        //         const found = browser.getTracks().some(track => typeof track.getSamples === 'function')
-        //
-        //         if (found.length > 0) {
-        //             browser.layoutChange()
-        //         }
-        //     }
-        // })
+        this.initialize()
 
     }
 
     initialize() {
+        this.sampleInfoFiles = []
         this.attributeNames = []
         this.sampleDictionary = {}
         this.sampleMappingDictionary = {}
         this.colorDictionary = {}
         this.attributeRangeLUT = {}
+        this.initialized = false
     }
 
     get attributeCount() {
         return this.attributeNames ? this.attributeNames.length : 0
+    }
+
+    isInitialized() {
+        return this.initialized
     }
 
     hasAttributes() {
@@ -95,6 +87,8 @@ class SampleInfo {
 
             }
         }
+
+        this.initialized = true
 
     }
 

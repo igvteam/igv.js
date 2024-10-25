@@ -3,14 +3,35 @@ import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js"
 
 const DEFAULT_SEARCH_CONFIG = {
     timeout: 5000,
-    type: "plain",   // Legacy plain text support -- deprecated
+    type: "plain",
     url: 'https://igv.org/genomes/locus.php?genome=$GENOME$&name=$FEATURE$',
-    coords: 0,
-    chromosomeField: "chromosome",
-    startField: "start",
-    endField: "end",
-    geneField: "gene",
-    snpField: "snp"
+    coords: 0
+}
+
+async function searchFeatures(browser, name) {
+
+    const searchConfig = browser.searchConfig || DEFAULT_SEARCH_CONFIG
+    let feature
+
+    name = name.toUpperCase()
+    const searchableTracks = browser.tracks.filter(t => t.searchable)
+    for (let track of searchableTracks) {
+        const feature = await track.search(name)
+        if (feature) {
+            return feature
+        }
+    }
+
+    // If still not found try webservice, if enabled
+    if (browser.config && false !== browser.config.search) {
+        try {
+            feature = await searchWebService(browser, name, searchConfig)
+            return feature    // Might be undefined
+        } catch (error) {
+            console.log("Search service not available " + error)
+        }
+    }
+
 }
 
 /**
@@ -35,7 +56,6 @@ async function search(browser, string) {
 
     const loci = string.split(' ')
 
-    let searchConfig = browser.searchConfig || DEFAULT_SEARCH_CONFIG
     let list = []
 
     const searchForLocus = async (locus) => {
@@ -51,48 +71,42 @@ async function search(browser, string) {
 
         let locusObject
         let chromosome
-        if(locus.includes(":")) {
+        if (locus.includes(":")) {
             locusObject = parseLocusString(locus, browser.isSoftclipped())
-            chromosome = await browser.genome.loadChromosome(locusObject.chr)
+            if (locusObject) {
+                chromosome = await browser.genome.loadChromosome(locusObject.chr)
+            }
         }
 
         if (!chromosome) {
+
+            // Not a locus string
             locusObject = undefined
 
             // Not a locus string, search track annotations
-            const searchableTracks = browser.tracks.filter(t => t.searchable)
-            for (let track of searchableTracks) {
-                const feature = await track.search(locus)
-                if (feature) {
-                    locusObject = {
-                        chr: feature.chr,
-                        start: feature.start,
-                        end: feature.end,
-                        gene: feature.name
-                    }
-                    break
+            const feature = await searchFeatures(browser, locus)
+            if(feature) {
+                locusObject = {
+                    chr: feature.chr,
+                    start: feature.start,
+                    end: feature.end,
+                    name: (feature.name || locus).toUpperCase(),
+
                 }
             }
 
-            // If still not found try webservice, if enabled
-            if (!locusObject && (browser.config && false !== browser.config.search)) {
-                try {
-                    locusObject = await searchWebService(browser, locus, searchConfig)
-                } catch (error) {
-                    console.log("Search service not available " + error)
+            // If still not found assume locus is a chromosome name.
+            if (!locusObject) {
+                chromosome = await browser.genome.loadChromosome(locus)
+                if (chromosome) {
+                    locusObject = {chr: chromosome.name}
                 }
-            }
-
-            // Finally assume string is a chromosome name.
-            chromosome = await browser.genome.loadChromosome(locus)
-            if(chromosome) {
-                locusObject = {chr: chromosome.name}
             }
         }
 
         // Force load chromosome here (a side effect, but neccessary to do this in an async function so it's available)
         if (locusObject) {
-            chromosome = chromosome ||  await browser.genome.loadChromosome(locusObject.chr)
+            chromosome = chromosome || await browser.genome.loadChromosome(locusObject.chr)
             locusObject.chr = chromosome.name    // Replace possible alias with canonical name
             if (locusObject.start === undefined && locusObject.end === undefined) {
                 locusObject.start = 0
@@ -122,7 +136,7 @@ async function search(browser, string) {
 }
 
 /**
- * Parse a locus string of the form <chr>:<start>-<end>
+ * Parse a locus string of the form <chr>:<start>-<end>.  If string does not parse as a locus return undefined
  *
  * @param locus
  * @param isSoftclipped
@@ -210,8 +224,7 @@ async function searchWebService(browser, locus, searchConfig) {
     const options = searchConfig.timeout ? {timeout: searchConfig.timeout} : undefined
     const result = await igvxhr.loadString(path, options)
 
-    const locusObject = processSearchResult(browser, result, searchConfig)
-    return locusObject
+    return processSearchResult(browser, result, searchConfig)
 }
 
 function processSearchResult(browser, result, searchConfig) {
@@ -265,11 +278,9 @@ function processSearchResult(browser, result, searchConfig) {
 
         // Some GTEX hacks
         const type = result.type ? result.type : "gene"
-        if (searchConfig.geneField && type === "gene") {
-            locusObject.gene = result[searchConfig.geneField]
-        }
-        if (searchConfig.snpField && type === "snp") {
-            locusObject.snp = result[searchConfig.snpField]
+        if (searchConfig.geneField && searchConfig.snpField) {
+            const name = result[searchConfig.geneField] || result[searchConfig.snpField]  // Should never have both
+            if (name) locusObject.name = name.toUpperCase()
         }
 
         return locusObject
@@ -278,52 +289,31 @@ function processSearchResult(browser, result, searchConfig) {
 
 /**
  * Parse the igv line-oriented (non json) search results.
+ * NOTE:  currently, and probably permanently,  this will always be a single line
  * Example
  *    EGFR    chr7:55,086,724-55,275,031    refseq
  *
  */
 function parseSearchResults(browser, data) {
 
-    const linesTrimmed = []
     const results = []
     const lines = StringUtils.splitLines(data)
 
-    lines.forEach(function (item) {
-        if ("" === item) {
-            // do nothing
-        } else {
-            linesTrimmed.push(item)
-        }
-    })
+    for (let line of lines) {
 
-    linesTrimmed.forEach(function (line) {
-
-        var tokens = line.split("\t"),
-            source,
-            locusTokens,
-            rangeTokens,
-            obj
+        const tokens = line.split("\t")
 
         if (tokens.length >= 3) {
-
-            locusTokens = tokens[1].split(":")
-            rangeTokens = locusTokens[1].split("-")
-            source = tokens[2].trim()
-
-            obj =
-                {
-                    gene: tokens[0],
-                    chromosome: browser.genome.getChromosomeName(locusTokens[0].trim()),
-                    start: parseInt(rangeTokens[0].replace(/,/g, '')),
-                    end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                    type: ("gtex" === source ? "snp" : "gene")
-                }
-
-            results.push(obj)
-
+            const locusTokens = tokens[1].split(":")
+            const rangeTokens = locusTokens[1].split("-")
+            results.push({
+                chromosome: browser.genome.getChromosomeName(locusTokens[0].trim()),
+                start: parseInt(rangeTokens[0].replace(/,/g, '')),
+                end: parseInt(rangeTokens[1].replace(/,/g, '')),
+                name: tokens[0].toUpperCase()
+            })
         }
-
-    })
+    }
 
     return results
 
@@ -331,7 +321,7 @@ function parseSearchResults(browser, data) {
 
 
 // Export some functions for unit testing
-export {parseLocusString, searchWebService}
+export {parseLocusString, searchWebService, searchFeatures}
 
 export default search
 

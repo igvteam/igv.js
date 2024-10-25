@@ -1,9 +1,6 @@
-import {FileUtils, StringUtils} from '../../node_modules/igv-utils/src/index.js'
 import FeatureSource from '../feature/featureSource.js'
 import {appleCrayonRGBA} from '../util/colorPalletes.js'
 import {computeWGFeatures} from "../feature/featureUtils.js"
-import * as TrackUtils from "../util/trackUtils.js"
-
 
 const appleCrayonColorName = 'nickel'
 
@@ -23,25 +20,21 @@ class ROISet {
 
         if (config.name) {
             this.name = config.name
-        } else if (config.url && FileUtils.isFile(config.url)) {
-            this.name = config.url.name
-        } else if (config.url && StringUtils.isString(config.url) && !config.url.startsWith("data:")) {
-            this.name = FileUtils.getFilename(config.url)
         }
 
         this.isUserDefined = config.isUserDefined
 
-        if (config.features) {
+        if (config.featureSource) {
+            // This is unusual, but permitted
+            this.featureSource = config.featureSource
+        } else if (config.features) {
             this.featureSource = new DynamicFeatureSource(config.features, genome)
+        } else if (config.format) {
+            this.featureSource = FeatureSource(config, genome)
         } else {
-            if (config.format) {
-                config.format = config.format.toLowerCase()
-            } else {
-                const filename = FileUtils.getFilename(config.url)
-                config.format = TrackUtils.inferFileFormat(filename)
-            }
-            this.featureSource = config.featureSource || FeatureSource(config, genome)
+            throw Error('ROI configuration must define either features or file format')
         }
+
 
         if (true === this.isUserDefined) {
             this.color = config.color || ROI_USER_DEFINED_COLOR
@@ -80,7 +73,13 @@ class ROISet {
 
     toJSON() {
         if (this.url) {
-            return {name: this.name, color: this.color, url: this.url, isUserDefined: this.isUserDefined, isVisible: this.isVisible}
+            return {
+                name: this.name,
+                color: this.color,
+                url: this.url,
+                isUserDefined: this.isUserDefined,
+                isVisible: this.isVisible
+            }
         } else {
             const featureMap = this.featureSource.getAllFeatures()
             const features = []
@@ -89,7 +88,13 @@ class ROISet {
                     features.push(f)
                 }
             }
-            return {name: this.name, color: this.color, features: features, isUserDefined: this.isUserDefined, isVisible: this.isVisible}
+            return {
+                name: this.name,
+                color: this.color,
+                features: features,
+                isUserDefined: this.isUserDefined,
+                isVisible: this.isVisible
+            }
         }
     }
 
@@ -179,6 +184,10 @@ class DynamicFeatureSource {
         if (this.featureMap[chr]) {
             const match = `${chr}-${start}-${end}`
             this.featureMap[chr] = this.featureMap[chr].filter(feature => match !== `${feature.chr}-${feature.start}-${feature.end}`)
+            // Check if featureMap for a specific chromosome is empty now and delete it if yes
+            if (this.featureMap[chr].length === 0) {
+                delete this.featureMap[chr];
+            }
         }
     }
 }

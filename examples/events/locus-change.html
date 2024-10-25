@@ -2,34 +2,17 @@
 <html lang="en">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
     <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
     <title>IGV Examples - Locus Change</title>
 
-    <!-- Bootstrap 4 - CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <!-- Bootstrap 5.3 - CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
 
-    <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-            crossorigin="anonymous"></script>
+    <!-- Examples CSS -->
+    <link rel="stylesheet" href="css/custom-track-click.css">
 
-    <!-- Bootstrap 4 - JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
-
-    <!-- IGV JS-->
-    <script src="../../dist/igv.min.js"></script>
+    <!-- Bootstrap 5.3 - JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 
 </head>
 
@@ -48,7 +31,7 @@
                 <h3>Try it out:</h3>
                 <ol>
                     <li>Zoom or pan the canvas in the IGV viewer.</li>
-                    <li>Notice that the page URL updated to match the new locus.</li>
+                    <li>Notice that the page URL updates to match the new locus.</li>
                 </ol>
             </div>
         </div>
@@ -60,33 +43,37 @@
 
 </main>
 
-<script type="text/javascript">
+<script type="module">
 
-    $(document).ready(function () {
+    import igv from "../../dist/igv.esm.min.js"
 
+    const config = {
+        genome: 'hg19',
+        queryParametersSupported: true
+    }
 
-        var HASH_PREFIX = "#/locus/";
-        var currentHash = window.location.hash;
-        var locus = (0 === currentHash && currentHash.indexOf(HASH_PREFIX)) ? currentHash.substr(HASH_PREFIX.length) : "chr1:155,160,475-155,184,282";
+    // If not specified in the URL, add an initial locus
+    if(window.location.href.indexOf("locus=") < 0) {
+        config.locus = "chr1:155,160,475-155,184,282"
+    }
 
-        var options = {
-            locus: locus,
-            genome: "hg19"
-        };
+    const browser = await igv.createBrowser(document.getElementById('igvDiv'), config)
 
-        var $igv = $("#igvDiv");
-        var browser = igv.createBrowser($igv.get(0), options)
+    browser.on('locuschange', referenceFrameList => {
+        let loc = referenceFrameList.map(rf => rf.getLocusString()).join('%20')
 
-                .then(function (browser) {
-                    console.log("Created IGV browser");
+        let updatedURL
+        const idx = window.location.href.indexOf("locus=")
+        if(idx > 0) {
+            updatedURL = window.location.href.substring(0, idx+6) + loc
+        } else {
+            const hasParameters = window.location.href.indexOf("?") > 0
+            updatedURL = `${window.location.href}${hasParameters ? "&" : "?"}locus=${loc}`
+        }
 
-                    browser.on('locuschange', function (referenceFrameList) {
-                        let loc = referenceFrameList.map(rf => rf.getLocusString()).join('%20');
-                        window.location.replace(HASH_PREFIX + loc);
-                    });
-                });
+        window.history.replaceState({}, "IGV Examples - Locus Change", updatedURL)
+    })
 
-    });
 
 </script>
 
