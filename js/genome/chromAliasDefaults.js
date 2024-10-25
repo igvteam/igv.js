@@ -126,6 +126,9 @@ class ChromAliasDefaults {
                     this.aliasRecordCache.set(a, rec)
                 }
             }
+            this.aliasRecordCache.set(name.toLowerCase(), rec)
+            this.aliasRecordCache.set(name.toUpperCase(), rec)
+
         }
     }
 
