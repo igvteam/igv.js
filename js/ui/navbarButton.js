@@ -85,7 +85,7 @@ class NavbarButton {
     }
 
     configureTextButton(textContent) {
-        console.log(`text ${this.title}`)
+
         this.button.classList.add('igv-navbar-text-button')
 
         const tempDiv = document.createElement('div')

@@ -36,6 +36,9 @@ class ShoeboxColorScale {
         this.nbins = 1000
         this.binsize = (this.max - this.min) / this.nbins
         this.updateColor(scale.color || "rgb(0,0,255)")
+        this.br = 255
+        this.bg = 255
+        this.bb = 255
 
     }
 
@@ -57,13 +60,16 @@ class ShoeboxColorScale {
     }
 
     getColor(value) {
-        const low = 0
-        if (value < this.min) return "white"
+         if (value <= this.min) return "white"
+        else if (value >= this.max) return `rgb(${this.r},${this.g},${this.b})`
 
         const bin = Math.floor((Math.min(this.max, value) - this.min) / this.binsize)
+
         if (undefined === this.cache[bin]) {
-            const alpha = (IGVMath.clamp(value, low, this.max) - low) / (this.max - low)
-            this.cache[bin] = `rgba(${this.r},${this.g},${this.b}, ${alpha})`
+            const alpha = (value - this.min) / (this.max - this.min)
+            const beta = 1 - alpha
+            this.cache[bin] = //`rgba(${this.r},${this.g},${this.b}, ${alpha})`
+                `rgb(${ Math.floor(alpha*this.r + beta*this.br)},${Math.floor(alpha*this.g + beta*this.bg)},${Math.floor(alpha*this.b + beta*this.bb)})`
         }
         return this.cache[bin]
     }
