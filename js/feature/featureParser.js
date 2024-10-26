@@ -36,7 +36,6 @@ import {
     decodePeak,
     decodeReflat,
     decodeRepeatMasker,
-    decodeShoebox,
     decodeSNP,
     decodeWig
 } from "./decode/ucsc.js"
@@ -45,6 +44,7 @@ import {decodeFusionJuncSpan} from "./decode/fusionJuncSpan.js"
 import {decodeGtexGWAS} from "./decode/gtexGWAS.js"
 import {decodeCustom} from "./decode/custom.js"
 import {decodeGcnv} from "../gcnv/gcnvDecoder.js"
+import decodeShoebox from "../shoebox/decodeShoebox.js"
 import DecodeError from "./decode/decodeError.js"
 import GFFHelper from "./gff/gffHelper.js"
 

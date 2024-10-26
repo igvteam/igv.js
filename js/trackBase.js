@@ -290,7 +290,7 @@ class TrackBase {
                     }
                     break
                 case "viewlimits":
-                    if (!this.config.autoscale) {   // autoscale in the config has precedence
+                    if (!this.config.autoscale && !this.config.max) {   //config has precedence
                         tokens = properties[key].split(":")
                         let min = 0
                         let max

@@ -4,14 +4,23 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import ShoeboxColorScale from "./shoeboxColorScale.js"
 
+/**
+ * Configurable properties
+ * min, max   (viewlimits)  - min / max values of the color scale.  Alpha is linearly varied from 100% (min) to 0% (max)
+ * color - base color before alpha is applied
+ * rowHeight - height of each row
+ */
 
 class ShoeboxTrack extends TrackBase {
 
     static defaults = {
         height: 300,
         rowHeight: 3,
-        max: 3000,
-        visibilityWindow: 10000
+        min: 0.5,
+        max: 3,
+        scale: 1.0,
+        visibilityWindow: 10000,
+        supportHiDPI: false
     }
 
     constructor(config, browser) {
@@ -19,21 +28,23 @@ class ShoeboxTrack extends TrackBase {
     }
 
     init(config) {
+
         super.init(config)
 
         this.type = "shoebox"
-        this.height = config.height || 300
-        this.rowHeight = config.rowHeight || 3
-        this.max = config.max || 3000
-        this.colorScale = new ShoeboxColorScale({min: 0, max: 3000, color: this.color})
 
-
-        // Hardcoded -- todo get from track line
+        // Hardcoded -- todo, perhaps, get from track line
         this.sampleKeys = []
         for (let i = 1; i <= 100; i++) {
             this.sampleKeys.push(i)
         }
 
+        if(config.max) {
+            this.dataRange = {
+                min: config.min || 0,
+                max: config.max
+            }
+        }
         // Create featureSource
         const configCopy = Object.assign({}, this.config)
         configCopy.format = 'shoebox'   // bit of a hack
@@ -47,8 +58,21 @@ class ShoeboxTrack extends TrackBase {
         }
         // Set properties from track line
         if (this.header) {
+            if(this.header.scale) {
+                this.header.scale = Number.parseFloat(this.header.scale)
+            }
             this.setTrackProperties(this.header)
         }
+
+        // Must do the following after setting track properties as they can be overriden via a track line
+
+        // Color settings
+        const min = this.dataRange.min
+        const max = this.dataRange.max
+        this.colorScale = new ShoeboxColorScale({min, max, color: this.color})
+
+        // This shouldn't be neccessary
+        if(!this.scale) this.scale = 1.0
 
     }
 
@@ -92,6 +116,7 @@ class ShoeboxTrack extends TrackBase {
     setDataRange({min, max}) {
         this.dataRange.min = min
         this.dataRange.max = max
+        this.colorScale.setMinMax(min, max)
         this.trackView.repaintViews()
     }
 
@@ -115,7 +140,6 @@ class ShoeboxTrack extends TrackBase {
 
     draw({context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
 
-
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
         if (features && features.length > 0) {
@@ -132,15 +156,14 @@ class ShoeboxTrack extends TrackBase {
                 if (f.end < bpStart || f.start > bpEnd) continue
 
                 // Pixel x values
-                const xLeft = Math.round((f.start - bpStart) / bpPerPixel)
-                const xRight = Math.round((f.end - bpStart) / bpPerPixel)
-                const w = xRight - xLeft
+                const xLeft = Math.floor((f.start - bpStart) / bpPerPixel)
+                const xRight = Math.floor((f.end - bpStart) / bpPerPixel)
+                const w = Math.max(1, xRight - xLeft)
 
                 // Loop through value array
-
                 for (let i = f.values.length - 1; i >= 0; i--) {
 
-                    const v = f.values[i]
+                    const v = f.values[i]                  // / this.scale
 
                     if(v >= this.dataRange.min) {
 
@@ -153,11 +176,11 @@ class ShoeboxTrack extends TrackBase {
                         }
 
                         const color = this.colorScale.getColor(v)
-
                         context.fillStyle = color
-
                         context.fillRect(xLeft, y, w, h)
+
                     }
+
                 }
             }
         } else {
