@@ -522,6 +522,10 @@ class Browser {
             this.qtlSelections = QTLSelections.fromJSON(session.qtlSelections)
         }
 
+        // ROIs
+        if(session.showROIOverlays !== undefined) {
+            this.roiManager.showOverlays = session.showROIOverlays
+        }
         this.roiManager.clearROIs()
         if (session.roi) {
             this.roiManager.loadROI(session.roi)
@@ -1852,7 +1856,13 @@ class Browser {
         }
         json["locus"] = locus.length === 1 ? locus[0] : locus
 
-        json["roi"] = this.roiManager.toJSON()
+        const roiSets = this.roiManager.toJSON()
+        if(roiSets) {
+            json["roi"] = roiSets
+            if(!this.roiManager.showOverlays){
+                json["showROIOverlays"] = false   // true is the default
+            }
+        }
 
         if (!this.qtlSelections.isEmpty()) {
             json["qtlSelections"] = this.qtlSelections.toJSON()

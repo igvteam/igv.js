@@ -13,7 +13,7 @@
 
 <body>
 
-
+<button id="log-state">Log Session</button>
 <button id="bookmark">Bookmark</button>
 
 
@@ -46,7 +46,7 @@
                 },
                 {
                     name: "ROI set 2",
-                    color: "rgba(3,52,249,0.25)",
+                    color: "darkviolet",
                     features: [
                         {
                             chr: "chr1",
@@ -116,6 +116,9 @@
 
     document.getElementById("bookmark").addEventListener("click",
         () => window.history.pushState({}, "IGV", browser.sessionURL()))
+
+    document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+
 
 
 </script>
