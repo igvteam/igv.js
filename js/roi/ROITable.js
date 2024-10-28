@@ -129,33 +129,24 @@ class ROITable extends RegionTableBase {
         this._footerDOM.appendChild(toggleROIButton)
 
         toggleROIButton.id = 'igv-roi-hide-show-button'
-        toggleROIButton.textContent = 'Hide all ROIs'
+        toggleROIButton.textContent = 'Hide Overlays'
         this.toggleROIButton = toggleROIButton
 
         function toggleROIButtonHandler(event) {
             event.preventDefault()
             event.stopPropagation()
-            this.browser.roiManager.toggleROIs()
+            this.roiManager.toggleROIs()
         }
 
         this.boundToggleDisplayButtonHandler = toggleROIButtonHandler.bind(this)
         this.toggleROIButton.addEventListener('click', this.boundToggleDisplayButtonHandler)
-
     }
 
-    setROIVisibility(isVisible) {
-
-        const elements = this.browser.columnContainer.querySelectorAll('.igv-roi-region')
-
-        for (let i = 0; i < elements.length; i++) {
-            const el = elements[ i ]
-            false === isVisible ? updateElementAlpha(el, 0.0) : el.style.backgroundColor = el.dataset.color
-
-        }
-
-        this.toggleROIButton.textContent = false === isVisible ? 'Show all ROIs' : 'Hide all ROIs'
-
+    // This is a rather roundabot way to get the manager
+    get roiManager() {
+        return this.browser.roiManager
     }
+
 
     setTableRowSelectionState(isTableRowSelected) {
         super.setTableRowSelectionState(isTableRowSelected)
@@ -236,19 +227,5 @@ function enableButton(button, doEnable) {
 
 }
 
-function updateElementAlpha(element, alpha) {
-
-    const rgba = window.getComputedStyle(element).backgroundColor;
-
-    const rgbaArray = rgba.match(/[\d.]+/g);
-
-    if (rgbaArray.length === 3) {
-        rgbaArray.push(1)
-    }
-
-    rgbaArray[3] = alpha;
-
-    element.style.backgroundColor = `rgba(${rgbaArray.join(', ')})`
-}
 
 export default ROITable
