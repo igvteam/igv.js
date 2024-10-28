@@ -35,11 +35,11 @@ class ShoeboxTrack extends TrackBase {
 
         // Hardcoded -- todo, perhaps, get from track line
         this.sampleKeys = []
-        for (let i = 1; i <= 100; i++) {
+        for (let i = 1; i <= this.rowCount; i++) {
             this.sampleKeys.push(i)
         }
 
-        if(config.max) {
+        if (config.max) {
             this.dataRange = {
                 min: config.min || 0,
                 max: config.max
@@ -58,7 +58,7 @@ class ShoeboxTrack extends TrackBase {
         }
         // Set properties from track line
         if (this.header) {
-            if(this.header.scale) {
+            if (this.header.scale) {
                 this.header.scale = Number.parseFloat(this.header.scale)
             }
             this.setTrackProperties(this.header)
@@ -72,8 +72,12 @@ class ShoeboxTrack extends TrackBase {
         this.colorScale = new ShoeboxColorScale({min, max, color: this.color})
 
         // This shouldn't be neccessary
-        if(!this.scale) this.scale = 1.0
+        if (!this.scale) this.scale = 1.0
 
+    }
+
+    get rowCount() {
+        return 100    // TODO  Hardcoded, get from data
     }
 
     get color() {
@@ -91,15 +95,56 @@ class ShoeboxTrack extends TrackBase {
 
         const menuItems = []
 
+        menuItems.push('<hr/>')
+        let object = $('<div>')
+        object.text('Set row height')
+
+        function dialogHandler(e) {
+
+            const callback = () => {
+
+                const number = parseInt(this.browser.inputDialog.value, 10)
+
+                if (undefined !== number) {
+
+                    const tracks = []
+                    if (this.trackView.track.selected) {
+                        tracks.push(...(this.trackView.browser.getSelectedTrackViews().map(({track}) => track)))
+                    } else {
+                        tracks.push(this)
+                    }
+
+                    for (const track of tracks) {
+                        track.rowHeight = number
+                        if(track.rowHeight * track.rowCount < track.height) {
+                            track.trackView.setTrackHeight(track.rowHeight * track.rowCount, true)
+                        }
+                        track.trackView.checkContentHeight()
+                        track.trackView.repaintViews()
+                    }
+                }
+            }
+
+            const config =
+                {
+                    label: 'Row Height',
+                    value: this.rowHeight,
+                    callback
+                }
+
+            this.browser.inputDialog.present(config, e)
+        }
+
+        menuItems.push({object, dialog: dialogHandler})
 
         menuItems.push('<hr/>')
 
         // Data range
-        let object = $('<div>')
+        object = $('<div>')
         object.text('Set data range')
 
-        function dialogPresentationHandler() {
-
+        // Note -- menu item handlers must be functions, not arrow functions
+        function dataRangeHandler() {
             if (this.trackView.track.selected) {
                 this.browser.dataRangeDialog.configure(this.trackView.browser.getSelectedTrackViews())
             } else {
@@ -108,7 +153,7 @@ class ShoeboxTrack extends TrackBase {
             this.browser.dataRangeDialog.present($(this.browser.columnContainer))
         }
 
-        menuItems.push({object, dialog: dialogPresentationHandler})
+        menuItems.push({object, dialog: dataRangeHandler})
 
         return menuItems
     }
@@ -165,7 +210,7 @@ class ShoeboxTrack extends TrackBase {
 
                     const v = f.values[i]                  // / this.scale
 
-                    if(v >= this.dataRange.min) {
+                    if (v >= this.dataRange.min) {
 
                         const row = f.values.length - 1 - i
                         const y = row * rowHeight
