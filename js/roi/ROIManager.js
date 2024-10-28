@@ -15,6 +15,7 @@ class ROIManager {
         this.roiTable = new ROITable(browser, browser.columnContainer)
         this.top = 0
         this.roiSets = []
+        this.showOverlays = true
         this.boundLocusChangeHandler = locusChangeHandler.bind(this)
         browser.on('locuschange', this.boundLocusChangeHandler)
 
@@ -66,15 +67,34 @@ class ROIManager {
         this.roiTable.renderTable(records)
 
         if (this.roiSets.length > 0) {
-            const isVisible = this.roiSets[0].isVisible
-            this.roiTable.setROIVisibility(isVisible)
+            this.setOverlayVisibility(this.showOverlays)
         }
+    }
 
+    setOverlayVisibility(isVisible) {
+
+        const elements = this.browser.columnContainer.querySelectorAll('.igv-roi-region')
+        for (let i = 0; i < elements.length; i++) {
+            const el = elements[i]
+            if (isVisible) {
+                // Restore element background color to its original value
+                el.style.backgroundColor = el.dataset.color
+            } else {
+                // Hide overlay by setting its transparency to zero.  A bit of an unusual method to hide an element.
+                el.style.backgroundColor = `rgba(0,0,0,0)`
+            }
+        }
+        this.roiTable.toggleROIButton.textContent = false === isVisible ? 'Show Overlays' : 'Hide Overlays'
     }
 
     async loadROI(config, genome) {
 
         const configs = Array.isArray(config) ? config : [config]
+
+        // Backward compatibility hack
+        if (configs.length > 0 && configs[0].isVisible === false) {
+            this.showOverlays = false
+        }
 
         for (let config of configs) {
             if (!config.name && config.url) {
@@ -164,13 +184,8 @@ class ROIManager {
     }
 
     toggleROIs() {
-
-        const isVisible = !(this.roiSets[0].isVisible)
-        this.roiTable.setROIVisibility(isVisible)
-
-        for (const roiSet of this.roiSets) {
-            roiSet.isVisible = isVisible
-        }
+        this.showOverlays = !this.showOverlays
+        this.setOverlayVisibility(this.showOverlays)
     }
 
     async renderAllROISets() {
@@ -232,9 +247,16 @@ class ROIManager {
         regionElement.style.top = `${pixelTop}px`
         regionElement.style.left = `${pixelX}px`
         regionElement.style.width = `${pixelWidth}px`
-        regionElement.style.backgroundColor = roiSet.color
         regionElement.dataset.color = roiSet.color
         regionElement.dataset.region = regionKey
+
+        if (this.showOverlays) {
+            // Restore element background color to its original value
+            regionElement.style.backgroundColor = roiSet.color
+        } else {
+            // Hide overlay by setting its transparency to zero.  A bit of an unusual method to hide an element.
+            regionElement.style.backgroundColor = `rgba(0,0,0,0)`
+        }
 
         const header = DOMUtils.div()
         regionElement.appendChild(header)
@@ -274,8 +296,8 @@ class ROIManager {
         return this.roiSets.find(roiSet => true === roiSet.isUserDefined)
     }
 
-    deleteUserDefinedROISet(){
-        this.roiSets = this.roiSets.filter(roiSet => roiSet.isUserDefined !== true);
+    deleteUserDefinedROISet() {
+        this.roiSets = this.roiSets.filter(roiSet => roiSet.isUserDefined !== true)
     }
     
     initializeUserDefinedROISet() {

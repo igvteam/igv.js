@@ -1,10 +1,12 @@
 import FeatureSource from '../feature/featureSource.js'
-import {appleCrayonRGBA} from '../util/colorPalletes.js'
+import {appleCrayonRGBA, rgbaStringTokens} from '../util/colorPalletes.js'
 import {computeWGFeatures} from "../feature/featureUtils.js"
+import * as DOMUtils from "../ui/utils/dom-utils.js"
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 const appleCrayonColorName = 'nickel'
 
-const ROI_DEFAULT_ALPHA = 2 / 16
+const ROI_DEFAULT_ALPHA = 1 / 16
 
 const ROI_DEFAULT_COLOR = appleCrayonRGBA(appleCrayonColorName, ROI_DEFAULT_ALPHA)
 const ROI_DEFAULT_HEADER_COLOR = 'rgb(190,190,190)'
@@ -35,23 +37,24 @@ class ROISet {
             throw Error('ROI configuration must define either features or file format')
         }
 
+        if(config.color && !config.color.startsWith("rgba")) {
+            config.color = IGVColor.addAlpha(config.color, ROI_DEFAULT_ALPHA)
+        }
 
         if (true === this.isUserDefined) {
             this.color = config.color || ROI_USER_DEFINED_COLOR
             this.headerColor = ROI_USER_HEADER_DEFINED_COLOR
 
         } else {
-
             this.color = config.color || ROI_DEFAULT_COLOR
             this.headerColor = ROI_DEFAULT_HEADER_COLOR
 
             // Use body color with alpha pinned to 1
-            // const [ r, g, b, discard ] = rgbaStringTokens(this.color)
-            // this.headerColor = `rgba(${ r },${ g },${ b },${ 1.0 })`
-
+             const [ r, g, b, discard ] = rgbaStringTokens(this.color)
+             this.headerColor = `rgba(${ r },${ g },${ b },${ 1.0 })`
         }
 
-        this.isVisible = undefined === config.isVisible ? true : config.isVisible
+        delete config.isVisible  // Deprecated
 
     }
 
