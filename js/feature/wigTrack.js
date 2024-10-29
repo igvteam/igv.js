@@ -7,6 +7,7 @@ import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
+import {ColorScaleFactory} from "../util/colorScale.js"
 
 const DEFAULT_COLOR = 'rgb(150, 150, 150)'
 
@@ -38,7 +39,6 @@ class WigTrack extends TrackBase {
         this.type = "wig"
         this.featureType = 'numeric'
         this.resolutionAware = true
-        this.paintAxis = paintAxis
 
         const format = config.format ? config.format.toLowerCase() : config.format
         if (config.featureSource) {
@@ -52,7 +52,6 @@ class WigTrack extends TrackBase {
             this.featureSource = FeatureSource(config, this.browser.genome)
         }
 
-
         // Override autoscale default
         if (config.max === undefined || config.autoscale === true) {
             this.autoscale = true
@@ -62,6 +61,19 @@ class WigTrack extends TrackBase {
                 max: config.max
             }
         }
+
+        if(config.colorScale) {
+            this._colorScale = ColorScaleFactory.fromJson(config.colorScale)
+        }
+
+        // Override default height for heatmaps
+        if("heatmap" === config.graphType && !config.height) {
+            this.height = 25
+        }
+    }
+
+    get paintAxis() {
+        return "heatmap" === this.graphType ? undefined : paintAxis
     }
 
     async postInit() {
@@ -244,7 +256,16 @@ class WigTrack extends TrackBase {
                             IGVGraphics.fillCircle(ctx, px, pixelHeight - pointSize / 2, pointSize / 2, 3, {fillStyle: this.overflowColor})
                         }
 
-                    } else {
+
+                    } else if (this.graphType === "heatmap") {
+                        if(!this._colorScale) {
+                            throw Error("Graphtype heatmap requires a color scale")
+                        }
+                        const color = this._colorScale.getColor(f.value)
+                        IGVGraphics.fillRect(ctx, x, 0, width, pixelHeight, {fillStyle: color})
+                    }
+
+                    else {
                         // Default graph type (bar)
                         const height = Math.min(pixelHeight, y - y0)
                         IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})

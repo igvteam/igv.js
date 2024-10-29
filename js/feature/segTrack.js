@@ -53,9 +53,9 @@ class SegTrack extends TrackBase {
                 case "mut":
                     this.colorTable = new ColorTable(MUT_COLORS)
                     break
-                case "shoebox":
-                    if (config.colorScale) this.sbColorScale = HicColorScale.parse(config.colorScale)
-                    break
+                // case "shoebox":
+                //     if (config.colorScale) this.sbColorScale = HicColorScale.parse(config.colorScale)
+                //     break
                 default:
                     // Color scales for "seg" (copy number) tracks.
                     this.posColorScale = new GradientColorScale(config.posColorScale || POS_COLOR_SCALE)
@@ -564,9 +564,10 @@ class SegTrack extends TrackBase {
 }
 
 // Default copy number scales
-const POS_COLOR_SCALE = {low: 0.1, lowR: 255, lowG: 255, lowB: 255, high: 1.5, highR: 255, highG: 0, highB: 0}
-const NEG_COLOR_SCALE = {low: -1.5, lowR: 0, lowG: 0, lowB: 255, high: -0.1, highR: 255, highG: 255, highB: 255}
-
+const POS_COLOR_SCALE = {low: 0.1, high: 1.5, lowColor: 'rgb(255,255,255)', highColor: 'rgb(255,0,0)'}
+const NEG_COLOR_SCALE = {low: -1.5, high: -0.1, lowColor: 'rgb(0,0,255)', highColor: 'rgb(255,255,255)'}
+//const POS_COLOR_SCALE = {low: 0.1, lowR: 255, lowG: 255, lowB: 255, high: 1.5, highR: 255, highG: 0, highB: 0}
+//const NEG_COLOR_SCALE = {low: -1.5, lowR: 0, lowG: 0, lowB: 255, high: -0.1, highR: 255, highG: 255, highB: 255}
 
 // Mut and MAF file default color table
 const MUT_COLORS = {
