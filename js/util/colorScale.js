@@ -1,3 +1,21 @@
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
+
+
+const ColorScaleFactory = {
+
+    fromJson: (obj) => {
+
+        switch(obj.type) {
+            case 'gradient':
+                return new GradientColorScale(obj)
+            case 'doubleGradient':
+                return new DoubleGradientScale(obj)
+            default:
+                throw Error("Unknown color scale type: " + obj)
+        }
+    }
+}
+
 /**
  *
  * @param cs - object containing
@@ -5,21 +23,22 @@
  * 2) array of colors for bins  (length == thresholds.length + 1)
  * @constructor
  */
-function BinnedColorScale(cs) {
-    this.thresholds = cs.thresholds
-    this.colors = cs.colors
-}
-
-BinnedColorScale.prototype.getColor = function (value) {
-
-    for (let threshold of this.thresholds) {
-        if (value < threshold) {
-            return this.colors[this.thresholds.indexOf(threshold)]
-        }
+class BinnedColorScale {
+    constructor(cs) {
+        this.thresholds = cs.thresholds
+        this.colors = cs.colors
     }
 
-    return this.colors[this.colors.length - 1]
+    getColor(value) {
 
+        for (let threshold of this.thresholds) {
+            if (value < threshold) {
+                return this.colors[this.thresholds.indexOf(threshold)]
+            }
+        }
+
+        return this.colors[this.colors.length - 1]
+    }
 }
 
 /**
@@ -36,28 +55,80 @@ BinnedColorScale.prototype.getColor = function (value) {
  *
  * @constructor
  */
-function GradientColorScale(scale) {
+class GradientColorScale {
+    constructor({low, high, lowColor, highColor}) {
 
-    this.scale = scale
-    this.lowColor = "rgb(" + scale.lowR + "," + scale.lowG + "," + scale.lowB + ")"
-    this.highColor = "rgb(" + scale.highR + "," + scale.highG + "," + scale.highB + ")"
-    this.diff = scale.high - scale.low
+        this.low = low
+        this.high = high
+        this.diff = high - low
+        this.lowColor = lowColor
+        this.highColor = highColor
+        this.lowComponents = IGVColor.rgbComponents(this.lowColor)
+        this.highComponents = IGVColor.rgbComponents(this.highColor)
+    }
+
+    getColor(value) {
+
+        if (value <= this.low) return this.lowColor
+        else if (value >= this.high) return this.highColor
+
+        const frac = (value - this.low) / this.diff
+        const r = Math.floor(this.lowComponents[0] + frac * (this.highComponents[0] - this.lowComponents[0]))
+        const g = Math.floor(this.lowComponents[1] + frac * (this.highComponents[1] - this.lowComponents[1]))
+        const b = Math.floor(this.lowComponents[2] + frac * (this.highComponents[2] - this.lowComponents[2]))
+
+        return "rgb(" + r + "," + g + "," + b + ")"
+    }
+
+    /**
+     * Return a simple json-like object, not a literaly json string
+     * @returns {{high, low, highColor, lowColor}}
+     */
+    toJson() {
+        return {
+            low: this.low,
+            high: this.high,
+            lowColor: this.lowColor,
+            highColor: this.highColor
+        }
+    }
 
 }
 
-GradientColorScale.prototype.getColor = function (value) {
+class DoubleGradientScale {
 
-    var scale = this.scale, r, g, b, frac
+    constructor({lowColor, midColor, highColor, low, mid, high}) {
+        this.mid = mid
+        this.midColor = midColor
+        this.lowGradientScale = new GradientColorScale({lowColor, highColor: midColor, low, high: mid})
+        this.highGradientScale = new GradientColorScale({lowColor: midColor, highColor, low: mid, high})
+    }
 
-    if (value <= scale.low) return this.lowColor
-    else if (value >= scale.high) return this.highColor
+    getColor(value) {
+        if (value < this.mid) {
+            return this.lowGradientScale.getColor(value)
+        } else if(value > this.mid) {
+            return this.highGradientScale.getColor(value)
+        } else {
+            return this.midColor
+        }
+    }
 
-    frac = (value - scale.low) / this.diff
-    r = Math.floor(scale.lowR + frac * (scale.highR - scale.lowR))
-    g = Math.floor(scale.lowG + frac * (scale.highG - scale.lowG))
-    b = Math.floor(scale.lowB + frac * (scale.highB - scale.lowB))
 
-    return "rgb(" + r + "," + g + "," + b + ")"
+    /**
+     * Return a simple json-like object, not a literaly json string
+     * @returns {{high, low, highColor, lowColor}}
+     */
+    toJson() {
+        return {
+            low: this.low,
+            mid: this.mid,
+            high: this.high,
+            lowColor: this.lowColor,
+            midColor: this.midColor,
+            highColor: this.highColor
+        }
+    }
 }
 
 class ConstantColorScale {
@@ -71,4 +142,4 @@ class ConstantColorScale {
 }
 
 
-export {BinnedColorScale, GradientColorScale, ConstantColorScale}
+export {BinnedColorScale, GradientColorScale, ConstantColorScale, DoubleGradientScale, ColorScaleFactory}
