@@ -21,7 +21,8 @@ class ShoeboxTrack extends TrackBase {
         max: 3,
         scale: 1.0,
         visibilityWindow: 10000,
-        supportHiDPI: false
+        supportHiDPI: false,
+        rowStepSize: 1        // Stepsize for each row in bp for footprint radius
     }
 
     constructor(config, browser) {
@@ -45,8 +46,9 @@ class ShoeboxTrack extends TrackBase {
         configCopy.format = 'shoebox'   // bit of a hack
         this.featureSource = FeatureSource(configCopy, this.browser.genome)
 
-        this.paintAxis = paintAxis
+        // this.paintAxis = paintAxis
     }
+
 
     async postInit() {
 
@@ -87,13 +89,6 @@ class ShoeboxTrack extends TrackBase {
         }
     }
 
-    get axisMin() {
-        return 1
-    }
-
-    get axisMax() {
-        return this.rowCount
-    }
 
     menuItemList() {
 
@@ -104,6 +99,7 @@ class ShoeboxTrack extends TrackBase {
         object.text('Set row height')
 
         const browser = this.browser
+
         function dialogHandler(e) {
 
             const callback = () => {
@@ -230,6 +226,32 @@ class ShoeboxTrack extends TrackBase {
 
     }
 
+    paintAxis(ctx, pixelWidth, pixelHeight) {
+
+        //IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+        var font = {
+            'font': 'normal 10px Arial',
+            'textAlign': 'right',
+            'strokeStyle': "black"
+        }
+
+        const max = 2 * (this.rowCount + 1) //2x for size in diameter, rather than radius
+        const min = 0
+        const yScale = (max - min) / pixelHeight
+
+        const n = 50
+        for (let p = n; p <= max; p += n) {
+            const yp = Math.max(10, pixelHeight - Math.round((p - min) / yScale))
+            IGVGraphics.strokeLine(ctx, 35, yp , 40, yp , font)
+            if(p > min ) {
+                IGVGraphics.fillText(ctx, prettyPrint(p), 30, yp + 4, font) // Offset numbers down by 2 pixels;
+            }
+        }
+        font['textAlign'] = 'center'
+        font['font'] = 'normal 10px Arial'
+            IGVGraphics.fillText(ctx, "Footprint size (bp)", 10, pixelHeight / 2, font, {rotate: {angle: -90}})
+    }
+
     /**
      * Optional method to compute pixel height to accomodate the list of features.
      *
@@ -300,5 +322,22 @@ class ShoeboxTrack extends TrackBase {
 
 }
 
+
+function prettyPrint(number) {
+
+    if (Number.isInteger(number)) {
+        return number
+    } else if (number % 1 === 0) {   // Number can be represented exactly as an integer
+        return number
+    } else if (Math.abs(number) >= 10) {
+        return number.toFixed()
+    } else if (Math.abs(number) >= 1) {
+        return number.toFixed(1)
+    } else if (Math.abs(number) >= 0.1) {
+        return number.toFixed(2)
+    } else {
+        return number.toExponential(1)
+    }
+}
 
 export default ShoeboxTrack

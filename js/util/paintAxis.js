@@ -50,8 +50,8 @@ function paintAxis(ctx, width, height, colorOrUndefined) {
 
     function prettyPrint(number) {
 
-        if (number === 0) {
-            return "0"
+        if (Number.isInteger(number)) {
+            return number
         } else if (number % 1 === 0) {   // Number can be represented exactly as an integer
             return number
         } else if (Math.abs(number) >= 10) {
