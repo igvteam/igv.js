@@ -45,6 +45,10 @@ class TrackViewport extends Viewport {
             if (false === this.browser.doShowTrackLabels) {
                 this.$trackLabel.hide()
             }
+            // Setting track height can affect label style
+            if (this.trackView.track.height) {
+                this.setHeight(this.trackView.track.height)
+            }
         }
 
         this.stopSpinner()
@@ -183,6 +187,33 @@ class TrackViewport extends Viewport {
         if(this.canvas && this.canvas._data) {
             let offset = contentTop + this.canvas._data.pixelTop
             this.canvas.style.top = `${offset}px`
+        }
+    }
+
+    setHeight(h) {
+        super.setHeight(h)
+        const labelElement = this.$viewport.get(0).querySelector(".igv-track-label");
+        if(labelElement) {
+            // If the track height is small center the label vertically.
+            if (h < 30) {
+                //labelElement.classList.add("igv-vertical-center")
+               // .igv-vertical-center {
+               //      margin: 0 ;
+               //      top: 50% ;
+               //      -ms-transform: translateY(-50%);
+               //      transform: translateY(-50%);
+               //  }
+                labelElement.style.margin = 0
+                labelElement.style.top = "50%"
+                labelElement.style.transform = "translateY(-50%)"
+                labelElement.style["-ms-transform"] = "translateY(-50%)"
+            } else {
+                //labelElement.classList.remove("igv-vertical-center")
+                labelElement.style.removeProperty("margin")
+                labelElement.style.removeProperty("top")
+                labelElement.style.removeProperty("transform")
+                labelElement.style.removeProperty("-ms-transform")
+            }
         }
     }
 
