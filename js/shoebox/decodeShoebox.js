@@ -6,7 +6,7 @@ export default function decodeShoebox(tokens, header, maxColumnCount = Number.MA
 
     const chr = tokens[0]
     const start = parseInt(tokens[1])
-    const end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1
+    const end = parseInt(tokens[2])
     if (isNaN(start) || isNaN(end)) {
         return new DecodeError(`Unparsable bed record.`)
     }
