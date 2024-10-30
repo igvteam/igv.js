@@ -3,6 +3,7 @@ import FeatureSource from "../feature/featureSource.js"
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import ShoeboxColorScale from "./shoeboxColorScale.js"
+import paintAxis from "../util/paintAxis.js"
 
 /**
  * Configurable properties
@@ -33,12 +34,6 @@ class ShoeboxTrack extends TrackBase {
 
         this.type = "shoebox"
 
-        // Hardcoded -- todo, perhaps, get from track line
-        this.sampleKeys = []
-        for (let i = 1; i <= this.rowCount; i++) {
-            this.sampleKeys.push(i)
-        }
-
         if (config.max) {
             this.dataRange = {
                 min: config.min || 0,
@@ -49,9 +44,12 @@ class ShoeboxTrack extends TrackBase {
         const configCopy = Object.assign({}, this.config)
         configCopy.format = 'shoebox'   // bit of a hack
         this.featureSource = FeatureSource(configCopy, this.browser.genome)
+
+        this.paintAxis = paintAxis
     }
 
     async postInit() {
+
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader()
             if (this.disposed) return   // This track was removed during async load
@@ -62,6 +60,8 @@ class ShoeboxTrack extends TrackBase {
                 this.header.scale = Number.parseFloat(this.header.scale)
             }
             this.setTrackProperties(this.header)
+
+            this.rowCount = this.header.firstFeature ? this.header.firstFeature.values.length : 100
         }
 
         // Must do the following after setting track properties as they can be overriden via a track line
@@ -76,10 +76,6 @@ class ShoeboxTrack extends TrackBase {
 
     }
 
-    get rowCount() {
-        return 100    // TODO  Hardcoded, get from data
-    }
-
     get color() {
         return this._color || "rgb(0,0,255)"
     }
@@ -91,6 +87,14 @@ class ShoeboxTrack extends TrackBase {
         }
     }
 
+    get axisMin() {
+        return 1
+    }
+
+    get axisMax() {
+        return this.rowCount
+    }
+
     menuItemList() {
 
         const menuItems = []
@@ -99,6 +103,7 @@ class ShoeboxTrack extends TrackBase {
         let object = $('<div>')
         object.text('Set row height')
 
+        const browser = this.browser
         function dialogHandler(e) {
 
             const callback = () => {
@@ -106,6 +111,8 @@ class ShoeboxTrack extends TrackBase {
                 const number = parseInt(this.browser.inputDialog.value, 10)
 
                 if (undefined !== number) {
+
+                    browser.sampleNameViewportWidth = undefined   // TODO, a better way to trigger this
 
                     const tracks = []
                     if (this.trackView.track.selected) {
@@ -116,7 +123,7 @@ class ShoeboxTrack extends TrackBase {
 
                     for (const track of tracks) {
                         track.rowHeight = number
-                        if(track.rowHeight * track.rowCount < track.height) {
+                        if (track.rowHeight * track.rowCount < track.height) {
                             track.trackView.setTrackHeight(track.rowHeight * track.rowCount, true)
                         }
                         track.trackView.checkContentHeight()
@@ -165,23 +172,12 @@ class ShoeboxTrack extends TrackBase {
         this.trackView.repaintViews()
     }
 
-    hasSamples() {
-        return true   // by definition
-    }
-
-    getSamples() {
-        return {
-            names: this.sampleKeys,
-            height: this.rowHeight,
-            yOffset: 0
-        }
-    }
-
     async getFeatures(chr, start, end, bpPerPixel) {
         const visibilityWindow = this.visibilityWindow
-        return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
-    }
+        const features = await this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow})
 
+        return features
+    }
 
     draw({context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
 
@@ -254,7 +250,6 @@ class ShoeboxTrack extends TrackBase {
             const rect = feature.pixelRect
             return rect && y >= rect.y && y <= (rect.y + rect.h)
         })
-
     }
 
     hoverText(clickState) {

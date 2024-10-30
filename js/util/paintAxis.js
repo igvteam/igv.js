@@ -4,21 +4,28 @@ const shim = .01
 const diagnosticColor = "rgb(251,128,114)"
 const colorStripWidth = 4
 const axesXOffset = colorStripWidth + 1
+
 function paintAxis(ctx, width, height, colorOrUndefined) {
 
-    if (undefined === this.dataRange || undefined === this.dataRange.max || undefined === this.dataRange.min) {
+    let axisMin = this.axisMin //|| this.dataRange ? this.dataRange.min : 0
+    let axisMax = this.axisMax //|| this.dataRange ? this.dataRange.max : undefined
+    if (undefined === axisMax && this.dataRange) {
+        axisMin = this.dataRange.min || 0
+        axisMax = this.dataRange.max
+    }
+    if (undefined === axisMax) {
         return
     }
 
-    IGVGraphics.fillRect(ctx, 0, 0, width, height, { fillStyle: 'white' })
+    IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: 'white'})
     if (colorOrUndefined) {
-        IGVGraphics.fillRect(ctx, width - colorStripWidth - 2, 0, colorStripWidth, height, { fillStyle: colorOrUndefined })
+        IGVGraphics.fillRect(ctx, width - colorStripWidth - 2, 0, colorStripWidth, height, {fillStyle: colorOrUndefined})
     }
 
     const flipAxis = (undefined === this.flipAxis) ? false : this.flipAxis
 
     const xTickStart = 0.95 * width - 8 - axesXOffset
-    const xTickEnd   = 0.95 * width - axesXOffset
+    const xTickEnd = 0.95 * width - axesXOffset
 
     const properties =
         {
@@ -30,13 +37,13 @@ function paintAxis(ctx, width, height, colorOrUndefined) {
 
     // tick
     IGVGraphics.strokeLine(ctx, xTickStart, shim * height, xTickEnd, shim * height, properties)
-    IGVGraphics.fillText(ctx, prettyPrint(flipAxis ? this.dataRange.min : this.dataRange.max), xTickStart + 4, shim * height + 12, properties)
+    IGVGraphics.fillText(ctx, prettyPrint(flipAxis ? axisMin : axisMax), xTickStart + 4, shim * height + 12, properties)
 
     const y = (1.0 - shim) * height
 
     // tick
     IGVGraphics.strokeLine(ctx, xTickStart, y, xTickEnd, y, properties)
-    IGVGraphics.fillText(ctx, prettyPrint(flipAxis ? this.dataRange.max : this.dataRange.min), xTickStart + 4, y - 4, properties)
+    IGVGraphics.fillText(ctx, prettyPrint(flipAxis ? axisMax : axisMin), xTickStart + 4, y - 4, properties)
 
     // vertical axis
     IGVGraphics.strokeLine(ctx, xTickEnd, shim * height, xTickEnd, y, properties)
@@ -45,6 +52,8 @@ function paintAxis(ctx, width, height, colorOrUndefined) {
 
         if (number === 0) {
             return "0"
+        } else if (Number.isInteger()) {
+            return number
         } else if (Math.abs(number) >= 10) {
             return number.toFixed()
         } else if (Math.abs(number) >= 1) {

@@ -127,7 +127,9 @@ class FeatureParser {
                 const tokens = line.split(this.delimiter || "\t")
                 try {
                     const tmpHeader = Object.assign({columnNames}, header)
-                    if (this.decode(tokens, tmpHeader)) {
+                    let firstFeature
+                    if (firstFeature = this.decode(tokens, tmpHeader)) {
+                        header.firstFeature = firstFeature
                         break
                     } else {
                         if (tokens.length > 1) {
