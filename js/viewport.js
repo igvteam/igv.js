@@ -42,7 +42,7 @@ class Viewport {
         viewportColumn.appendChild(this.$viewport.get(0))
 
         if (trackView.track.height) {
-            this.$viewport.get(0).style.height = `${trackView.track.height}px`
+            this.setHeight(trackView.track.height)
         }
 
         // Create an alert dialog for the sequence track to copy ref sequence to.
@@ -175,6 +175,10 @@ class Viewport {
 
     getWidth() {
         return this.$viewport.width()
+    }
+
+    setHeight(h) {
+        this.$viewport.height(h)
     }
 
     getContentTop() {

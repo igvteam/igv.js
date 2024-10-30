@@ -39,6 +39,7 @@ class WigTrack extends TrackBase {
         this.type = "wig"
         this.featureType = 'numeric'
         this.resolutionAware = true
+        this._paintAxis = paintAxis.bind(this)
 
         const format = config.format ? config.format.toLowerCase() : config.format
         if (config.featureSource) {
@@ -68,12 +69,12 @@ class WigTrack extends TrackBase {
 
         // Override default height for heatmaps
         if("heatmap" === config.graphType && !config.height) {
-            this.height = 25
+            this.height = 20
         }
     }
 
     get paintAxis() {
-        return "heatmap" === this.graphType ? undefined : paintAxis
+        return "heatmap" === this.graphType ? undefined : this._paintAxis
     }
 
     async postInit() {

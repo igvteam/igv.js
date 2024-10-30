@@ -275,8 +275,8 @@ class TrackView {
             this.paintAxis()
         }
 
-        for (let {$viewport} of this.viewports) {
-            $viewport.height(newHeight)
+        for (let vp of this.viewports) {
+            vp.setHeight(newHeight)
         }
 
         this.sampleInfoViewport.setHeight(newHeight)
