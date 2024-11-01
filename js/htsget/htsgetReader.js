@@ -64,7 +64,7 @@ class HtsgetReader {
                 promiseArray.push(Promise.resolve(dataUriToBytes(urlData.url)))
 
             } else {
-                const options = buildOptions({headers: urlData.headers || {}})
+                const options = {headers: urlData.headers || {}}
                 promiseArray.push(igvxhr.loadArrayBuffer(urlData.url, options))
             }
         }
