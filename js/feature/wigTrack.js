@@ -77,6 +77,10 @@ class WigTrack extends TrackBase {
         return "heatmap" === this.graphType ? undefined : this._paintAxis
     }
 
+    get colorScale() {
+        return this._colorScale
+    }
+
     async postInit() {
         const header = await this.getHeader()
         if (this.disposed) return   // This track was removed during async load

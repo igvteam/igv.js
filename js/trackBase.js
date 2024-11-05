@@ -28,6 +28,7 @@ import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/sr
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
+import ColorScaleEditor from "./ui/components/colorScaleEditor.js"
 
 const DEFAULT_COLOR = 'rgb(150,150,150)'
 
@@ -522,50 +523,54 @@ class TrackBase {
 
         menuItems.push('<hr/>')
 
-        // Data range
-        let object = $('<div>')
-        object.text('Set data range')
+        // Data range or color scale
 
-        function dialogPresentationHandler() {
+        if ("heatmap" === this.graphType && this.colorScale) {
 
-            if (this.trackView.track.selected) {
-                this.browser.dataRangeDialog.configure(this.trackView.browser.getSelectedTrackViews())
-            } else {
-                this.browser.dataRangeDialog.configure(this.trackView)
-            }
-            this.browser.dataRangeDialog.present($(this.browser.columnContainer))
-        }
+            menuItems.push({
+                label: 'Set color scale', click: function () {
+                    ColorScaleEditor.open(this.colorScale, this.browser.columnContainer, () =>this.trackView.repaintViews())
+                }
+            })
+        } else {
 
-        menuItems.push({object, dialog: dialogPresentationHandler})
+            function dialogPresentationHandler() {
 
-        if (this.logScale !== undefined) {
-
-            object = $(createCheckbox("Log scale", this.logScale))
-
-            function logScaleHandler() {
-                this.logScale = !this.logScale
-                this.trackView.repaintViews()
+                if (this.trackView.track.selected) {
+                    this.browser.dataRangeDialog.configure(this.trackView.browser.getSelectedTrackViews())
+                } else {
+                    this.browser.dataRangeDialog.configure(this.trackView)
+                }
+                this.browser.dataRangeDialog.present($(this.browser.columnContainer))
             }
 
-            menuItems.push({object, click: logScaleHandler})
+            menuItems.push({label: 'Set data range', dialog: dialogPresentationHandler})
+
+            if (this.logScale !== undefined) {
+
+                function logScaleHandler() {
+                    this.logScale = !this.logScale
+                    this.trackView.repaintViews()
+                }
+
+                menuItems.push({object: $(createCheckbox("Log scale", this.logScale)), click: logScaleHandler})
+            }
+
+            function autoScaleHandler() {
+                this.autoscaleGroup = undefined
+                this.autoscale = !this.autoscale
+                this.browser.updateViews()
+            }
+
+            menuItems.push({object: $(createCheckbox("Autoscale", this.autoscale)), click: autoScaleHandler})
         }
-
-        object = $(createCheckbox("Autoscale", this.autoscale))
-
-        function autoScaleHandler() {
-            this.autoscaleGroup = undefined
-            this.autoscale = !this.autoscale
-            this.browser.updateViews()
-        }
-
-        menuItems.push({object, click: autoScaleHandler})
 
         return menuItems
     }
 
-    setDataRange({ min, max }) {
+    setDataRange({min, max}) {
 
-        this.dataRange = { min, max }
+        this.dataRange = {min, max}
         this.autoscale = false
         this.autoscaleGroup = undefined
         this.trackView.repaintViews()

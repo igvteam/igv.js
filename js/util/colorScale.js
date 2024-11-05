@@ -5,11 +5,12 @@ const ColorScaleFactory = {
 
     fromJson: (obj) => {
 
-        switch(obj.type) {
+        switch (obj.type) {
             case 'gradient':
                 return new GradientColorScale(obj)
             case 'doubleGradient':
-                return new DoubleGradientScale(obj)
+            case 'diverging':
+                return new DivergingGradientScale(obj)
             default:
                 throw Error("Unknown color scale type: " + obj)
         }
@@ -41,30 +42,39 @@ class BinnedColorScale {
     }
 }
 
-/**
- *
- * @param scale - object with the following properties
- *           low
- *           lowR
- *           lowG
- *           lowB
- *           high
- *           highR
- *           highG
- *           highB
- *
- * @constructor
- */
+
 class GradientColorScale {
     constructor({low, high, lowColor, highColor}) {
+        this.type = 'gradient'
+        this.setProperties({low, high, lowColor, highColor})
+    }
 
+    setProperties({low, high, lowColor, highColor}) {
+        this.type = 'gradient'
         this.low = low
         this.high = high
-        this.diff = high - low
-        this.lowColor = lowColor
-        this.highColor = highColor
-        this.lowComponents = IGVColor.rgbComponents(this.lowColor)
-        this.highComponents = IGVColor.rgbComponents(this.highColor)
+        this._lowColor = lowColor
+        this._highColor = highColor
+        this.lowComponents = IGVColor.rgbComponents(lowColor)
+        this.highComponents = IGVColor.rgbComponents(highColor)
+    }
+
+    get lowColor() {
+        return this._lowColor
+    }
+
+    set lowColor(c) {
+        this._lowColor = c
+        this.lowComponents = IGVColor.rgbComponents(c)
+    }
+
+    get highColor() {
+        return this._highColor
+    }
+
+    set highColor(c) {
+        this._highColor = c
+        this.highComponents = IGVColor.rgbComponents(c)
     }
 
     getColor(value) {
@@ -72,7 +82,7 @@ class GradientColorScale {
         if (value <= this.low) return this.lowColor
         else if (value >= this.high) return this.highColor
 
-        const frac = (value - this.low) / this.diff
+        const frac = (value - this.low) / (this.high - this.low)
         const r = Math.floor(this.lowComponents[0] + frac * (this.highComponents[0] - this.lowComponents[0]))
         const g = Math.floor(this.lowComponents[1] + frac * (this.highComponents[1] - this.lowComponents[1]))
         const b = Math.floor(this.lowComponents[2] + frac * (this.highComponents[2] - this.lowComponents[2]))
@@ -93,41 +103,111 @@ class GradientColorScale {
         }
     }
 
+    clone() {
+        return new GradientColorScale(this.toJson())
+    }
+
 }
 
-class DoubleGradientScale {
+class DivergingGradientScale {
 
     constructor({lowColor, midColor, highColor, low, mid, high}) {
-        this.mid = mid
-        this.midColor = midColor
-        this.lowGradientScale = new GradientColorScale({lowColor, highColor: midColor, low, high: mid})
-        this.highGradientScale = new GradientColorScale({lowColor: midColor, highColor, low: mid, high})
+        this.type = 'diverging'
+        this.setProperties({lowColor, midColor, highColor, low, mid, high})
+    }
+
+    setProperties({lowColor, midColor, highColor, low, mid, high}) {
+        this._mid = mid
+        this.lowGradientScale = new GradientColorScale({
+            lowColor: lowColor,
+            highColor: midColor,
+            low: low,
+            high: mid
+        })
+        this.highGradientScale = new GradientColorScale({
+            lowColor: midColor,
+            highColor: highColor,
+            low: mid,
+            high: high
+        })
     }
 
     getColor(value) {
-        if (value < this.mid) {
+        if (value < this._mid) {
             return this.lowGradientScale.getColor(value)
-        } else if(value > this.mid) {
-            return this.highGradientScale.getColor(value)
         } else {
-            return this.midColor
+            return this.highGradientScale.getColor(value)
         }
+    }
+
+    get low() {
+        return this.lowGradientScale.low
+    }
+
+    set low(v) {
+        this.lowGradientScale.low = v
+    }
+
+    get high() {
+        return this.highGradientScale.high
+    }
+
+    set high(v) {
+        this.highGradientScale.high = v
+    }
+
+    get mid() {
+        return this._mid
+    }
+
+    set mid(v) {
+        this.lowGradientScale.high = v
+        this.highGradientScale.low = v
+    }
+
+    get lowColor() {
+        return this.lowGradientScale.lowColor
+    }
+
+    set lowColor(c) {
+        this.lowGradientScale.lowColor = c
+    }
+
+    get highColor() {
+        return this.highGradientScale.highColor
+    }
+
+    set highColor(c) {
+        this.highGradientScale.highColor = c
+    }
+
+    get midColor() {
+        return this.lowGradientScale.highColor
+    }
+
+    set midColor(c) {
+        this.lowGradientScale.highColor = c
+        this.highGradientScale.lowColor = c
     }
 
 
     /**
      * Return a simple json-like object, not a literaly json string
-     * @returns {{high, low, highColor, lowColor}}
+     * @returns {{high, mid, low, highColor, midColor, lowColor}}
      */
     toJson() {
         return {
-            low: this.low,
+            low: this.lowGradientScale.low,
             mid: this.mid,
-            high: this.high,
-            lowColor: this.lowColor,
+            high: this.highGradientScale.high,
+            lowColor: this.lowGradientScale.lowColor,
             midColor: this.midColor,
-            highColor: this.highColor
+            highColor: this.highGradientScale.highColor
         }
+    }
+
+    clone() {
+        return new DivergingGradientScale(this.toJson())
     }
 }
 
@@ -142,4 +222,4 @@ class ConstantColorScale {
 }
 
 
-export {BinnedColorScale, GradientColorScale, ConstantColorScale, DoubleGradientScale, ColorScaleFactory}
+export {BinnedColorScale, GradientColorScale, ConstantColorScale, DivergingGradientScale, ColorScaleFactory}
