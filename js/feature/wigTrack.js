@@ -395,7 +395,7 @@ class WigTrack extends TrackBase {
  */
 function summarizeData(features, startBP, bpPerPixel, windowFunction = "mean") {
 
-    if (bpPerPixel <= 1 || !features || features.length === 0) {
+    if (bpPerPixel <= 1 || !features || features.length === 0 || windowFunction === "none") {
         return features
     }
 

@@ -106,6 +106,9 @@ suite("testWig", function () {
         summarizedData = summarizeData(features, start, bpPerPixel, windowFunction)
         assert.equal(summarizedData.length, 953)
 
+        windowFunction = "none"
+        summarizedData = summarizeData(features, start, bpPerPixel, windowFunction)
+        assert.equal(summarizedData.length, 24546)
 
         // first bin
         // console.log(features[0].start)
