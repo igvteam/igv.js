@@ -35,12 +35,6 @@ class ColorScaleEditor {
 
         const newColorScale = colorScale.clone()
 
-        const divergingCheckbox = new Checkbox({
-            selected: "diverging" === colorScale.type, label: "Diverging Scale", onchange: (diverging) => {
-            }
-        })
-        divergingCheckbox.elem.style.marginBottom = "20px"
-
         const table = document.createElement('table')
 
         const legend = document.createElement('canvas')
@@ -97,6 +91,19 @@ class ColorScaleEditor {
             }
         })
         table.append(highColorElem)
+
+        const divergingCheckbox = new Checkbox({
+            selected: "diverging" === colorScale.type, label: "Diverging Scale", onchange: (diverging) => {
+                if(diverging) {
+
+                } else {
+
+                }
+            }
+        })
+        divergingCheckbox.elem.style.marginBottom = "20px"
+
+
 
         const panel = document.createElement('div')
         panel.appendChild(divergingCheckbox.elem)
