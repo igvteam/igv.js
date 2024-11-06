@@ -61,3 +61,33 @@ $igv-color-swatch-border-width: 2px;
   }
 
 }
+
+.igv-ui-color-more-colors {
+
+  position: relative;
+
+  box-sizing: content-box;
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+
+  width: calc(3 * #{$igv-color-swatch-size});
+  height: $igv-color-swatch-size;
+
+  font-family: $igv-default-font-face;
+  font-size: medium;
+  font-weight: 400;
+
+  color: black;
+  background-color: rgba(200,200,200);
+
+  border-style: solid;
+  border-width: $igv-color-swatch-border-width;
+  border-color: rgb(99, 99, 99);
+  border-radius: 4px;
+
+}
+

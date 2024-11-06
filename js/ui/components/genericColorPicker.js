@@ -1,6 +1,7 @@
-import {appleCrayonPalette} from "../utils/colorPalettes.js"
 import * as DOMUtils from "../utils/dom-utils.js"
+import Picker from "../../../node_modules/vanilla-picker/dist/vanilla-picker.csp.mjs"
 import GenericContainer from '../genericContainer.js'
+import {appleCrayonPalette} from "../utils/colorPalettes.js"
 
 class GenericColorPicker extends GenericContainer {
 
@@ -25,9 +26,10 @@ class GenericColorPicker extends GenericContainer {
 
     createSwatches(defaultColors) {
 
-        this.container.querySelectorAll('.igv-ui-color-swatch').forEach(swatch => swatch.remove())
+        this.container.querySelectorAll('.igv-ui-color-swatch, .igv-ui-color-more-colors').forEach(swatch => swatch.remove())
 
-        const hexColorStrings = Object.values(appleCrayonPalette)
+        const entries = Object.entries(appleCrayonPalette).filter(([ key, value ]) => key !== 'snow')
+        const hexColorStrings = entries.map(([ key, value ]) => value)
 
         for (let hexColorString of hexColorStrings) {
             const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
@@ -42,6 +44,12 @@ class GenericColorPicker extends GenericContainer {
                 this.decorateSwatch(swatch, hexColorString)
             }
         }
+
+        // present vanilla color picker
+        const moreColorsButton = DOMUtils.div({ class: 'igv-ui-color-more-colors' })
+        this.container.appendChild(moreColorsButton)
+        this.decorateMoreColorsButton(moreColorsButton)
+
 
     }
 
@@ -65,6 +73,68 @@ class GenericColorPicker extends GenericContainer {
 
     }
 
+    decorateMoreColorsButton(swatch) {
+
+        swatch.innerText = 'More Colors'
+
+        swatch.addEventListener('mouseenter', () => swatch.style.borderColor = 'black')
+
+        swatch.addEventListener('mouseleave', () => swatch.style.borderColor = 'white')
+
+        swatch.addEventListener('click', event => {
+            event.stopPropagation()
+            createAndPresentMoreColorsPicker(event.target, this.activeColorHandler)
+        })
+
+    }
+}
+
+function createAndPresentMoreColorsPicker(parent, colorHandler) {
+
+    let picker
+
+    parent.innerHTML = ''
+    parent.innerText = 'More Colors'
+
+    const colorPickerContainer = document.createElement('div');
+    colorPickerContainer.style.position = 'absolute';
+    parent.appendChild(colorPickerContainer);
+
+    const { width, height } = parent.getBoundingClientRect()
+    colorPickerContainer.style.left = `${0}px`;
+    colorPickerContainer.style.top = `${0}px`;
+    colorPickerContainer.style.width = `${width}px`;
+    colorPickerContainer.style.height = `${height}px`;
+
+    colorPickerContainer.addEventListener('click', (event) => {
+        event.stopPropagation()
+    })
+
+    const config =
+        {
+            parent: colorPickerContainer,
+            popup: 'bottom',
+            editor: false,
+            editorFormat: 'rgb',
+            alpha: false,
+            // color: parent.style.backgroundColor,
+        }
+
+    picker = new Picker(config)
+
+    // picker.onChange = (color) => {
+    //     console.log(`color changes: hex ${ color.hex } rgba ${ color.rgba }`)
+    // };
+
+    picker.onDone = (color) => {
+
+        // Remove alpha from hex color string
+        colorHandler(color.hex.substring(0,7))
+        picker.destroy()
+        colorPickerContainer.remove()
+    }
+
+    picker.show()
 }
 
 export default GenericColorPicker
