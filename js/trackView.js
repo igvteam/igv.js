@@ -204,7 +204,6 @@ class TrackView {
         }
     }
 
-
     presentColorPicker(key) {
 
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
@@ -252,6 +251,7 @@ class TrackView {
 
             this.browser.genericColorPicker.setActiveColorHandler(key)
             this.browser.genericColorPicker.show()
+
         }
 
     }
@@ -1009,7 +1009,6 @@ class TrackView {
     }
 
 }
-
 
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 

@@ -221,10 +221,11 @@ function colorPickerMenuItem({trackView, label, option}) {
     const object = $('<div>')
     object.text(label)
 
-    return {
-        object,
-        click: () => trackView.presentColorPicker(option)
+    const click = () => {
+        trackView.presentColorPicker(option)
     }
+
+    return { object, click }
 }
 
 function unsetColorMenuItem({trackView, label}) {
