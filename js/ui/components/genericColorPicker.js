@@ -117,14 +117,15 @@ function createAndPresentMoreColorsPicker(parent, colorHandler) {
             editor: false,
             editorFormat: 'rgb',
             alpha: false,
-            // color: parent.style.backgroundColor,
+            color: parent.style.backgroundColor,
         }
 
     picker = new Picker(config)
 
-    // picker.onChange = (color) => {
-    //     console.log(`color changes: hex ${ color.hex } rgba ${ color.rgba }`)
-    // };
+    picker.onChange = (color) => {
+        // console.log(`color changes: hex ${ color.hex } rgba ${ color.rgba }`)
+        parent.style.backgroundColor = color.rgba
+    };
 
     picker.onDone = (color) => {
 
@@ -133,6 +134,20 @@ function createAndPresentMoreColorsPicker(parent, colorHandler) {
         picker.destroy()
         colorPickerContainer.remove()
     }
+
+    function dismissPicker() {
+        picker.destroy()
+        colorPickerContainer.remove()
+        document.removeEventListener('click', onOutsideClick);
+    }
+
+    function onOutsideClick(event) {
+        if (!colorPickerContainer.contains(event.target) && parent !== event.target) {
+            dismissPicker();
+        }
+    }
+
+    document.addEventListener('click', onOutsideClick);
 
     picker.show()
 }
