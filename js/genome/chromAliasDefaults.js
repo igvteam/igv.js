@@ -71,39 +71,69 @@ class ChromAliasDefaults {
                         switch (name) {
                             case "23":
                                 record["ucsc"] = "chrX"
+                                record["assembly"] = "X"
                                 skipRest = true
                                 break
                             case "24":
                                 record["ucsc"] = "chrY"
+                                record["assembly"] = "Y"
                                 skipRest = true
                                 break
                             case "chrX":
                                 record["ncbi"] = "23"
+                                record["assembly"] = "X"
                                 skipRest = true
                                 break
                             case "chrY":
                                 record["ncbi"] = "24"
+                                record["assembly"] = "y"
                                 skipRest = true
                                 break
+                            case "X":
+                                record["ucsc"] = "chrX"
+                                record["ncbi"] = "23"
+                                skipRest = true
+                                break
+                            case "Y":
+                                record["ucsc"] = "chrY"
+                                record["ncbi"] = "24"
+                                skipRest = true
+                                break
+
                         }
                     } else if (id.startsWith("mm") || id.startsWith("GRCm") || id.startsWith("rheMac")) {
                         switch (name) {
                             case "21":
                                 record["ucsc"] = "chrX"
+                                record["assembly"] = "X"
                                 skipRest = true
                                 break
                             case "22":
                                 record["ucsc"] = "chrY"
+                                record["assembly"] = "Y"
                                 skipRest = true
                                 break
                             case "chrX":
                                 record["ncbi"] = "21"
+                                record["assembly"] = "X"
                                 skipRest = true
                                 break
                             case "chrY":
                                 record["ncbi"] = "22"
+                                record["assembly"] = "Y"
                                 skipRest = true
                                 break
+                            case "X":
+                                record["ucsc"] = "chrX"
+                                record["ncbi"] = "21"
+                                skipRest = true
+                                break
+                            case "Y":
+                                record["ucsc"] = "chrY"
+                                record["ncbi"] = "22"
+                                skipRest = true
+                                break
+
                         }
                     }
                     if (skipRest) continue
