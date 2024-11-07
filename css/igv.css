@@ -254,14 +254,18 @@
   width: calc(3 * 32px);
   height: 32px;
   font-family: "Open Sans", sans-serif;
-  font-size: medium;
+  font-size: 0.9rem;
   font-weight: 400;
-  color: black;
-  background-color: rgb(200, 200, 200);
+  color: #4b4b4b;
+  background-color: #f3f3f3;
   border-style: solid;
-  border-width: 2px;
-  border-color: rgb(99, 99, 99);
+  border-width: thin;
+  border-color: white;
   border-radius: 4px;
+}
+
+.igv-ui-color-more-colors:hover {
+  border-color: #737373;
 }
 
 .igv-ui-generic-dialog-container {
