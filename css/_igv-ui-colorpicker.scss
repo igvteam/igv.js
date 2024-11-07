@@ -78,16 +78,20 @@ $igv-color-swatch-border-width: 2px;
   height: $igv-color-swatch-size;
 
   font-family: $igv-default-font-face;
-  font-size: medium;
+  font-size: .90rem;
   font-weight: 400;
 
-  color: black;
-  background-color: rgba(200,200,200);
+  color: $igv-trackgear-font-color;
+  background-color: $igv-navbar-toggle-light-color;
 
   border-style: solid;
-  border-width: $igv-color-swatch-border-width;
-  border-color: rgb(99, 99, 99);
+  border-width: thin;
+  border-color: white;
   border-radius: 4px;
 
+}
+
+.igv-ui-color-more-colors:hover {
+  border-color: $igv-navbar-toggle-dark-dark;
 }
 

@@ -135,19 +135,16 @@ function createAndPresentMoreColorsPicker(parent, colorHandler) {
         colorPickerContainer.remove()
     }
 
-    function dismissPicker() {
-        picker.destroy()
-        colorPickerContainer.remove()
-        document.removeEventListener('click', onOutsideClick);
-    }
-
-    function onOutsideClick(event) {
-        if (!colorPickerContainer.contains(event.target) && parent !== event.target) {
-            dismissPicker();
-        }
-    }
-
-    document.addEventListener('click', onOutsideClick);
+    // function onOutsideClick(event) {
+    //     if (!colorPickerContainer.contains(event.target) && parent !== event.target) {
+    //         picker.destroy()
+    //         picker = null
+    //         colorPickerContainer.remove()
+    //         document.removeEventListener('click', onOutsideClick);
+    //     }
+    // }
+    //
+    // document.addEventListener('click', onOutsideClick);
 
     picker.show()
 }
