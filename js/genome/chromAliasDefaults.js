@@ -50,7 +50,6 @@ class ChromAliasDefaults {
                     continue;
                 }
 
-                let skipRest = false
                 const record = {chr: name}
                 aliasRecords.push(record)
 
@@ -66,38 +65,43 @@ class ChromAliasDefaults {
                         record["ncbi-gi"] = alias
                     }
                 } else {
+
+                    if (name === "chrM") {
+                        record["ncbi"] = "MT"
+                    } else if (name === "MT") {
+                        record["ucsc"] = "chrM"
+                    } else if (name.toLowerCase().startsWith("chr") && Number.isInteger(Number(name.substring(3)))) {
+                        record["ncbi"] = name.substring(3)
+                    } else if (Number.isInteger(Number(name))) {
+                        record["ucsc"] = "chr" + name
+                    }
+
                     // Special cases for human and mouse
                     if (id.startsWith("hg") || id.startsWith("GRCh") || id === "1kg_ref" || id === "b37") {
                         switch (name) {
                             case "23":
                                 record["ucsc"] = "chrX"
                                 record["assembly"] = "X"
-                                skipRest = true
                                 break
                             case "24":
                                 record["ucsc"] = "chrY"
                                 record["assembly"] = "Y"
-                                skipRest = true
                                 break
                             case "chrX":
                                 record["ncbi"] = "23"
                                 record["assembly"] = "X"
-                                skipRest = true
                                 break
                             case "chrY":
                                 record["ncbi"] = "24"
-                                record["assembly"] = "y"
-                                skipRest = true
+                                record["assembly"] = "Y"
                                 break
                             case "X":
                                 record["ucsc"] = "chrX"
                                 record["ncbi"] = "23"
-                                skipRest = true
                                 break
                             case "Y":
                                 record["ucsc"] = "chrY"
                                 record["ncbi"] = "24"
-                                skipRest = true
                                 break
 
                         }
@@ -106,50 +110,30 @@ class ChromAliasDefaults {
                             case "21":
                                 record["ucsc"] = "chrX"
                                 record["assembly"] = "X"
-                                skipRest = true
                                 break
                             case "22":
                                 record["ucsc"] = "chrY"
                                 record["assembly"] = "Y"
-                                skipRest = true
                                 break
                             case "chrX":
                                 record["ncbi"] = "21"
                                 record["assembly"] = "X"
-                                skipRest = true
                                 break
                             case "chrY":
                                 record["ncbi"] = "22"
                                 record["assembly"] = "Y"
-                                skipRest = true
                                 break
                             case "X":
                                 record["ucsc"] = "chrX"
                                 record["ncbi"] = "21"
-                                skipRest = true
                                 break
                             case "Y":
                                 record["ucsc"] = "chrY"
                                 record["ncbi"] = "22"
-                                skipRest = true
                                 break
 
                         }
                     }
-                    if (skipRest) continue
-
-                    //
-                    if (name === "chrM") {
-                        record["ncbi"] = "MT"
-                    } else if (name === "MT") {
-                        record["ucsc"] = "chrM"
-                    } else if (name.toLowerCase().startsWith("chr")) {
-                        record["ncbi"] = name.substring(3)
-                    } else if (Number.isInteger(Number(name))) {
-                        record["ucsc"] = "chr" + name
-                    }
-
-
                 }
             }
 
