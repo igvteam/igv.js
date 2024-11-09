@@ -346,7 +346,7 @@ function getTrackLabelText(track) {
 }
 
 function canShowColorPicker(track) {
-    return undefined === track.type || colorPickerTrackTypeSet.has(track.type)
+    return undefined === track.type || (colorPickerTrackTypeSet.has(track.type) && 'heatmap' !== track.graphType)
 }
 
 function didSelectSingleTrackType(types) {

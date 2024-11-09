@@ -1,10 +1,9 @@
 import * as DOMUtils from "../utils/dom-utils.js"
-import Textbox from "./textbox.js"
 import Picker from "../../../node_modules/vanilla-picker/dist/vanilla-picker.csp.mjs"
 import Dialog from "./dialog.js"
 import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
 import Checkbox from "./checkbox.js"
-import checkbox from "./checkbox.js"
+import {DivergingGradientScale, GradientColorScale} from "../../util/colorScale.js"
 
 
 function paintLegend(legend, newColorScale) {
@@ -33,7 +32,7 @@ class ColorScaleEditor {
 
     static open(colorScale, parent, callback) {
 
-        const newColorScale = colorScale.clone()
+        let newColorScale = colorScale.clone()
 
         const table = document.createElement('table')
 
@@ -43,67 +42,100 @@ class ColorScaleEditor {
         legend.style.marginTop = "10px"
         legend.style.border = "1px solid black"
 
-        const minTextbox = textbox({
-            label: "Min value", value: newColorScale.low.toString(), onchange: (v) => {
+        const minTextbox = new TextBoxRow({
+            label: "Min value",
+            value: newColorScale.low.toString(),
+            onchange: (v) => {
                 newColorScale.low = Number.parseFloat(v)
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(minTextbox)
+        table.append(minTextbox.row)
 
-        const midTextbox = textbox({
-            label: "Mid value", value: newColorScale.mid.toString(), onchange: (v) => {
+        const midTextbox = new TextBoxRow({
+            label: "Mid value",
+            value: (newColorScale.mid || newColorScale.low).toString(),
+            onchange: (v) => {
                 newColorScale.mid = Number.parseFloat(v)
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(midTextbox)
+        table.append(midTextbox.row)
 
-        const maxTextbox = textbox({
-            label: "Max value", value: newColorScale.high.toString(), onchange: (v) => {
+        const maxTextbox = new TextBoxRow({
+            label: "Max value",
+            value: newColorScale.high.toString(),
+            onchange: (v) => {
                 newColorScale.high = Number.parseFloat(v)
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(maxTextbox)
+        table.append(maxTextbox.row)
 
 
-        const colorElem = colorPicker({
-            label: "Min color", value: newColorScale.lowColor, onchange: (v) => {
+        const colorElem = new ColorPickerRow({
+            label: "Min color",
+            value: newColorScale.lowColor,
+            onchange: (v) => {
                 newColorScale.lowColor = v
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(colorElem)
+        table.append(colorElem.row)
 
-        const midColorElem = colorPicker({
-            label: "Mid color", value: newColorScale.midColor, onchange: (v) => {
+        const midColorElem = new ColorPickerRow({
+            label: "Mid color",
+            value: newColorScale.midColor || newColorScale.lowColor,
+            onchange: (v) => {
                 newColorScale.midColor = v
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(midColorElem)
+        table.append(midColorElem.row)
 
-        const highColorElem = colorPicker({
-            label: "Max color", value: newColorScale.highColor, onchange: (v) => {
+        const highColorElem = new ColorPickerRow({
+            label: "Max color",
+            value: newColorScale.highColor,
+            onchange: (v) => {
                 newColorScale.maxColor = v
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(highColorElem)
+        table.append(highColorElem.row)
 
         const divergingCheckbox = new Checkbox({
-            selected: "diverging" === colorScale.type, label: "Diverging Scale", onchange: (diverging) => {
-                if(diverging) {
+            selected: "diverging" === colorScale.type,
+            label: "Diverging Scale",
+            onchange: (diverging) => {
+                if (diverging) {
+                    // Converting from gradient to diverting
+                    newColorScale.mid = newColorScale.low < 0 && newColorScale.high > 0 ? 0 : (newColorScale.low + newColorScale.high) / 2
+                    newColorScale.midColor = "rgb(255,255,255)"
+                    newColorScale = new DivergingGradientScale(newColorScale)
 
+                    midTextbox.value = newColorScale.mid
+                    midTextbox.show()
+
+                    midColorElem.value = newColorScale.midColor
+                    midColorElem.show()
+
+                    paintLegend(legend, newColorScale)
                 } else {
 
+                    // Converting from diverging to gradient
+                    newColorScale = new GradientColorScale(newColorScale)
+                    midTextbox.hide()
+                    midColorElem.hide()
+                    paintLegend(legend, newColorScale)
                 }
             }
         })
         divergingCheckbox.elem.style.marginBottom = "20px"
 
-
+        if('diverging' !== colorScale.type) {
+            midTextbox.hide()
+            midColorElem.hide()
+        }
 
         const panel = document.createElement('div')
         panel.appendChild(divergingCheckbox.elem)
@@ -111,9 +143,8 @@ class ColorScaleEditor {
         panel.appendChild(legend)
 
         const okHandler = () => {
-            colorScale.setProperties(newColorScale)
             if (callback) {
-                callback()
+                callback(newColorScale)
             }
 
         }
@@ -129,65 +160,91 @@ class ColorScaleEditor {
         paintLegend(legend, newColorScale)
 
     }
+
 }
 
+class LabeledButtonRow {
+    constructor({label, value, onchange}) {
 
-function textbox({label, value, onchange}) {
+        this.row = document.createElement('tr')
+        const cell = document.createElement('td')
+        this.row.appendChild(cell)
 
-    const row = document.createElement('tr')
-    const cell = document.createElement('td')
-    row.appendChild(cell)
-
-    const div = document.createElement('div')
-    div.innerHTML = label
-    cell.appendChild(div)
-
-    const cell2 = document.createElement('td')
-    row.appendChild(cell2)
-    const textBox = document.createElement('input')
-    if (value) {
-        textBox.value = DOMPurify.sanitize(value)
-    }
-    cell2.appendChild(textBox)
-
-    if (onchange) {
-        textBox.addEventListener('change', (e) => onchange(textBox.value))
+        const div = document.createElement('div')
+        div.innerHTML = label
+        cell.appendChild(div)
     }
 
-    return row
+    hide() {
+        this.row.style.display = 'none'
+    }
+
+    show() {
+        this.row.style.display = 'table-row'
+    }
 }
 
-function colorPicker({label, value, onchange}) {
+class TextBoxRow extends LabeledButtonRow {
 
-    const row = document.createElement('tr')
-    const cell = document.createElement('td')
-    row.appendChild(cell)
-    cell.append(label)
+    constructor({label, value, onchange}) {
+        super({label, value, onchange})
 
-    const cell2 = document.createElement('td')
-    row.appendChild(cell2)
-    const colorButton = document.createElement('div')
-    cell2.appendChild(colorButton)
-    colorButton.style.width = "20px"
-    colorButton.style.height = "20px"
-    colorButton.style.border = "1px solid black"
-    colorButton.style.background = value
+        const cell2 = document.createElement('td')
+        this.row.appendChild(cell2)
+        this.input = document.createElement('input')
 
-    const picker = new Picker(colorButton)
-    picker.setOptions({
-        alpha: false, color: value
-    })
+        value = value || "0"
+        this.input.value = DOMPurify.sanitize(value)
 
-    picker.onDone = function (color) {
-        colorButton.style.background = color.rgbString
+        cell2.appendChild(this.input)
+
         if (onchange) {
-            onchange(color.rgbString)
+            this.input.addEventListener('change', (e) => onchange(this.input.value))
         }
     }
 
+    get value() {
+        return this.input.value
+    }
 
-    return row
+    set value(v) {
+        this.input.value = v
+    }
+}
 
+class ColorPickerRow extends LabeledButtonRow {
+
+    constructor({label, value, onchange}) {
+        super({label, value, onchange})
+
+        const cell2 = document.createElement('td')
+        this.row.appendChild(cell2)
+        const colorButton = document.createElement('div')
+        cell2.appendChild(colorButton)
+        colorButton.style.width = "20px"
+        colorButton.style.height = "20px"
+        colorButton.style.border = "1px solid black"
+        this.colorButton = colorButton
+
+        value = value || "white"
+        colorButton.style.background = value
+
+        const picker = new Picker(colorButton)
+        picker.setOptions({
+            alpha: false, color: value
+        })
+
+        picker.onDone =  (color) => {
+            colorButton.style.background = color.rgbString
+            if (onchange) {
+                onchange(color.rgbString)
+            }
+        }
+    }
+
+    set value(c) {
+        this.colorButton.style.background = c
+    }
 }
 
 export default ColorScaleEditor

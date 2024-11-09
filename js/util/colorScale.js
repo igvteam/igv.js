@@ -4,7 +4,6 @@ import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 const ColorScaleFactory = {
 
     fromJson: (obj) => {
-
         switch (obj.type) {
             case 'gradient':
                 return new GradientColorScale(obj)
@@ -14,6 +13,29 @@ const ColorScaleFactory = {
             default:
                 throw Error("Unknown color scale type: " + obj)
         }
+    },
+
+    defaultGradientScale: function (low, high) {
+
+        return new GradientColorScale({
+            "type": "doubleGradient",
+            "low": low,
+            "high": high,
+            "lowColor": "rgb(46,56,183)",
+            "highColor": "rgb(164,0,30)"
+        })
+    },
+
+    defaultDivergingScale: function (low, mid, high) {
+        return new DivergingGradientScale({
+            "type": "doubleGradient",
+            "low": 0,
+            "mid": 0.25,
+            "high": 0.5,
+            "lowColor": "rgb(46,56,183)",
+            "midColor": "white",
+            "highColor": "rgb(164,0,30)"
+        })
     }
 }
 
@@ -96,6 +118,7 @@ class GradientColorScale {
      */
     toJson() {
         return {
+            type: this.type,
             low: this.low,
             high: this.high,
             lowColor: this.lowColor,
@@ -117,7 +140,7 @@ class DivergingGradientScale {
     }
 
     setProperties({lowColor, midColor, highColor, low, mid, high}) {
-        this._mid = mid
+
         this.lowGradientScale = new GradientColorScale({
             lowColor: lowColor,
             highColor: midColor,
@@ -133,7 +156,7 @@ class DivergingGradientScale {
     }
 
     getColor(value) {
-        if (value < this._mid) {
+        if (value < this.mid) {
             return this.lowGradientScale.getColor(value)
         } else {
             return this.highGradientScale.getColor(value)
@@ -157,7 +180,7 @@ class DivergingGradientScale {
     }
 
     get mid() {
-        return this._mid
+        return this.lowGradientScale.high
     }
 
     set mid(v) {
@@ -197,6 +220,7 @@ class DivergingGradientScale {
      */
     toJson() {
         return {
+            type: this.type,
             low: this.lowGradientScale.low,
             mid: this.mid,
             high: this.highGradientScale.high,

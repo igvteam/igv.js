@@ -138,19 +138,20 @@
 
     document.getElementById("color-id").addEventListener("click", (ev) => colorPicker.show())
 
+    let colorScale = new DivergingGradientScale({
+        "type": "doubleGradient",
+        "low": 0,
+        "mid": 0.25,
+        "high": 0.5,
+        "lowColor": "rgb(46,56,183)",
+        "midColor": "white",
+        "highColor": "rgb(164,0,30)"
+    })
+
     document.getElementById("form-id").addEventListener("click", e => {
 
-        const colorScale = new DivergingGradientScale({
-            "type": "doubleGradient",
-            "low": 0,
-            "mid": 0.25,
-            "high": 0.5,
-            "lowColor": "rgb(46,56,183)",
-            "midColor": "white",
-            "highColor": "rgb(164,0,30)"
-        })
 
-        ColorScaleEditor.open(colorScale, parent)
+        ColorScaleEditor.open(colorScale, parent, (cs) => colorScale = cs)
 
     })
 

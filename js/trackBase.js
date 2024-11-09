@@ -525,14 +525,7 @@ class TrackBase {
 
         // Data range or color scale
 
-        if ("heatmap" === this.graphType && this.colorScale) {
-
-            menuItems.push({
-                label: 'Set color scale', click: function () {
-                    ColorScaleEditor.open(this.colorScale, this.browser.columnContainer, () =>this.trackView.repaintViews())
-                }
-            })
-        } else {
+        if ("heatmap" !== this.graphType && this.colorScale) {
 
             function dialogPresentationHandler() {
 
