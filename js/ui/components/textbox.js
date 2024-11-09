@@ -1,5 +1,5 @@
 import * as DOMUtils from "../utils/dom-utils.js"
-import DOMPurify from "../../node_modules/dompurify/dist/purify.es.mjs"
+import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
 
 class Textbox {
 
