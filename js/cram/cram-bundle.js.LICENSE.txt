@@ -1,4 +1,10 @@
 /*!
+ * Based on xzwasm (c) Steve Sanderson. License: MIT - https://github.com/SteveSanderson/xzwasm
+ * Contains xz-embedded by Lasse Collin and Igor Pavlov. License: Public domain - https://tukaani.org/xz/embedded.html
+ * and walloc (c) 2020 Igalia, S.L. License: MIT - https://github.com/wingo/walloc
+ */
+
+/*!
  * Determine if an object is a Buffer
  *
  * @author   Feross Aboukhadijeh <https://feross.org>
@@ -11,7 +17,5 @@
  * @author   Feross Aboukhadijeh <https://feross.org>
  * @license  MIT
  */
-
-/*! https://mths.be/punycode v1.3.2 by @mathias */
 
 /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
