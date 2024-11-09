@@ -74,7 +74,8 @@ $igv-color-swatch-border-width: 2px;
   justify-content: center;
   align-items: center;
 
-  width: calc(3 * #{$igv-color-swatch-size});
+  //width: calc(3 * #{$igv-color-swatch-size});
+  width: 104px;
   height: $igv-color-swatch-size;
 
   font-family: $igv-default-font-face;
