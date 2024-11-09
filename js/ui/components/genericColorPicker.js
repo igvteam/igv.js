@@ -1,7 +1,7 @@
 import * as DOMUtils from "../utils/dom-utils.js"
 import Picker from "../../../node_modules/vanilla-picker/dist/vanilla-picker.csp.mjs"
 import GenericContainer from '../genericContainer.js'
-import {appleCrayonPalette} from "../utils/colorPalettes.js"
+import {genericColorPickerPalette} from "../../util/colorPalletes.js"
 
 class GenericColorPicker extends GenericContainer {
 
@@ -28,17 +28,16 @@ class GenericColorPicker extends GenericContainer {
 
         this.container.querySelectorAll('.igv-ui-color-swatch, .igv-ui-color-more-colors').forEach(swatch => swatch.remove())
 
-        const entries = Object.entries(appleCrayonPalette).filter(([ key, value ]) => key !== 'snow')
-        const hexColorStrings = entries.map(([ key, value ]) => value)
+        const hexColorStrings = Object.values(genericColorPickerPalette)
 
-        for (let hexColorString of hexColorStrings) {
+        for (const hexColorString of hexColorStrings) {
             const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
             this.container.appendChild(swatch)
             this.decorateSwatch(swatch, hexColorString)
         }
 
         if (defaultColors) {
-            for (let hexColorString of defaultColors) {
+            for (const hexColorString of defaultColors) {
                 const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
                 this.container.appendChild(swatch)
                 this.decorateSwatch(swatch, hexColorString)
