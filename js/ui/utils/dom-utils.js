@@ -28,11 +28,11 @@ function hide(elem) {
 }
 
 function show(elem) {
-    const currentDisplay = getComputedStyle(elem).display;
-    if (currentDisplay === "none") {
+    //const currentDisplay = getComputedStyle(elem).display;
+    //if (currentDisplay === "none") {
         const d = elem._initialDisplay || "block";
         elem.style.display = d;
-    }
+   // }
 }
 
 function empty(elem) {
