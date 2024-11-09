@@ -22,7 +22,8 @@ class ShoeboxTrack extends TrackBase {
         scale: 1.0,
         visibilityWindow: 10000,
         supportHiDPI: false,
-        rowStepSize: 1        // Stepsize for each row in bp for footprint radius
+        startSize: 4,         // Footprint size for the first column of data (first row in track)
+        stepSize: 2        // Stepsize for each row in bp for footprint radius
     }
 
     constructor(config, browser) {
@@ -235,12 +236,12 @@ class ShoeboxTrack extends TrackBase {
             'strokeStyle': "black"
         }
 
-        const max = 2 * (this.rowCount + 1) //2x for size in diameter, rather than radius
-        const min = 0
+        const max = this.startSize + (this.rowCount * this.stepSize)
+        const min = this.startSize
         const yScale = (max - min) / pixelHeight
 
-        const n = 50
-        for (let p = n; p <= max; p += n) {
+        const tickStep = 50
+        for (let p = tickStep; p <= max; p += tickStep) {
             const yp = Math.max(10, pixelHeight - Math.round((p - min) / yScale))
             IGVGraphics.strokeLine(ctx, 35, yp , 40, yp , font)
             if(p > min ) {

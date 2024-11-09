@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" type="text/css" href="../../css/igv.css">
+</head>
+<body>
+
+<h1>UI classes demo</h1>
+<p>
+    <button id="alert-id"><h2>Alert</h2></button>
+    <button id="slider-id"><h2>Slider</h2></button>
+    <button id="input-id"><h2>Input</h2></button>
+    <button id="menu-id"><h2>Menu</h2></button>
+    <button id="dropdown-id"><h2>Dropdown</h2></button>
+    <button id="color-id"><h2>Color picker</h2></button>
+    <button id="form-id"><h2>Color scale editor</h2></button>
+</p>
+
+<div id="test" style="position: relative;width:500px;height:100px;background-color: rgba(101,211,19,0.37)">
+
+</div>
+
+<script type="module">
+    import $ from "../../js/vendor/jquery-3.3.1.slim.js"
+
+    import AlertDialog from "../../js/ui/components/alertDialog.js"
+    import InputDialog from "../../js/ui/components/inputDialog.js"
+    import SliderDialog from "../../js/ui/components/sliderDialog.js"
+    import Popover from "../../js/ui/popover.js"
+    import Dropdown from "../../js/ui/dropdown.js"
+    import ColorPicker from "../../js/ui/components/colorPicker.js"
+    import Panel from "../../js/ui/components/panel.js"
+    import Textbox from "../../js/ui/components/textbox.js"
+    import Dialog from "../../js/ui/components/dialog.js"
+    import ColorScaleEditor from "../../js/ui/components/colorScaleEditor.js"
+    import * as DOMUtils from "../../js/ui/utils/dom-utils.js"
+    import Picker from "../../node_modules/vanilla-picker/dist/vanilla-picker.mjs"
+    import {DivergingGradientScale} from "../../js/util/colorScale.js"
+
+    const parent = document.getElementById("test")
+
+    // Legacy style components
+    const alertDialog = new AlertDialog(parent)
+    const inputDialog = new InputDialog(parent)
+    const sliderDialog = new SliderDialog(parent)
+
+    let popover
+
+    const menuItems = [
+        {
+            label: "foo",
+            click: e => alertDialog.present("Clicked: " + "foo")
+        },
+        {
+            label: "bar",
+            click: e => alertDialog.present("Clicked: " + "bar")
+        },
+        {
+            type: "color",
+            label: "Pick a color",
+            click: color => alertDialog.present("Color selected: " + color)
+        }
+    ]
+
+    const dropdown = new Dropdown(parent, {top: 48, left: -48})
+    dropdown.configure(menuItems)
+
+
+    const colorPicker = new ColorPicker({
+        parent: parent,
+        width: 364,
+        //defaultColor: 'aqua',
+        colorHandler: (color) => alertDialog.present("Color selected: " + color)
+    })
+
+    document.getElementById("alert-id").addEventListener("click", (ev => alertDialog.present("Alert")))
+
+    document.getElementById("slider-id").addEventListener("click", (ev => {
+
+        const callback = value => {
+            console.log(`slider value ${value}`)
+        }
+
+        const config =
+            {
+                label: "Slider Label",
+                value: 0.125,
+                min: 0,
+                max: 1,
+                scaleFactor: 1000,
+                callback
+            }
+
+        sliderDialog.present(config, ev)
+    }))
+
+    document.getElementById("input-id").addEventListener("click", (ev => {
+        inputDialog.present({
+            label: "Enter a value",
+            value: "foo",
+            callback: function (value) {
+                alertDialog.present("Value entered: " + value)
+            }
+        }, ev)
+    }))
+
+    document.getElementById("menu-id").addEventListener("click", event => {
+
+        if (undefined === popover) {
+            popover = new Popover(parent, true, undefined, () => {
+                popover.dispose()
+                popover = undefined
+            })
+
+            const popoverMenuItems =
+                [
+                    {
+                        label: "foo",
+                        click: e => alertDialog.present("Clicked: " + "foo")
+                    },
+                    {
+                        label: "bar",
+                        click: e => alertDialog.present("Clicked: " + "bar")
+                    },
+                ]
+
+            popover.configure(popoverMenuItems)
+
+        }
+        popover.present(event)
+    })
+
+    document.getElementById("dropdown-id").addEventListener("click", event => {
+        dropdown.present(event)
+    })
+
+    document.getElementById("color-id").addEventListener("click", (ev) => colorPicker.show())
+
+    let colorScale = new DivergingGradientScale({
+        "type": "doubleGradient",
+        "low": 0,
+        "mid": 0.25,
+        "high": 0.5,
+        "lowColor": "rgb(46,56,183)",
+        "midColor": "white",
+        "highColor": "rgb(164,0,30)"
+    })
+
+    document.getElementById("form-id").addEventListener("click", e => {
+
+
+        ColorScaleEditor.open(colorScale, parent, (cs) => colorScale = cs)
+
+    })
+
+
+</script>
+
+</body>
+</html>
