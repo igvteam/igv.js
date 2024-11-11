@@ -62,6 +62,32 @@ $igv-color-swatch-border-width: 2px;
 
 }
 
+.igv-ui-color-swatch-shim {
+
+  cursor: pointer;
+
+  position: relative;
+
+  box-sizing: content-box;
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+
+  width: $igv-color-swatch-size;
+  height: $igv-color-swatch-size;
+
+  background-color: white;
+
+  border-style: solid;
+  border-width: thin;
+  border-color: white;
+  border-radius: 4px;
+
+}
+
 .igv-ui-color-more-colors {
 
   position: relative;
@@ -74,8 +100,7 @@ $igv-color-swatch-border-width: 2px;
   justify-content: center;
   align-items: center;
 
-  //width: calc(3 * #{$igv-color-swatch-size});
-  width: 104px;
+  width: 140px;
   height: $igv-color-swatch-size;
 
   font-family: $igv-default-font-face;
