@@ -463,6 +463,24 @@
   color: #0f0f0f;
 }
 
+.igv-ui-color-swatch-shim {
+  cursor: pointer;
+  position: relative;
+  box-sizing: content-box;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  background-color: white;
+  border-style: solid;
+  border-width: thin;
+  border-color: white;
+  border-radius: 4px;
+}
+
 .igv-ui-color-more-colors {
   position: relative;
   box-sizing: content-box;
@@ -471,7 +489,7 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  width: 104px;
+  width: 140px;
   height: 32px;
   font-family: "Open Sans", sans-serif;
   font-size: 0.9rem;

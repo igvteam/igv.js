@@ -9,22 +9,18 @@ class GenericColorPicker extends GenericContainer {
         super({parent, width, border: '1px solid gray'})
     }
 
-    configure(defaultColors, colorHandlers) {
-
+    configure(trackColors, colorHandlers, colorSelection) {
         this.colorHandlers = colorHandlers
-
-        // active color handler defaults to handler with 'color' as key
-        this.setActiveColorHandler('color')
-
-        this.createSwatches(defaultColors)
-
+        this.setActiveColorHandler(colorSelection)
+        this.createSwatches(trackColors)
     }
 
-    setActiveColorHandler(option) {
-        this.activeColorHandler = this.colorHandlers[option]
+    setActiveColorHandler(activeColorSelection) {
+        this.activeColorSelection = activeColorSelection
+        this.activeColorHandler = this.colorHandlers[activeColorSelection]
     }
 
-    createSwatches(defaultColors) {
+    createSwatches(trackColors) {
 
         this.container.querySelectorAll('.igv-ui-color-swatch, .igv-ui-color-more-colors').forEach(swatch => swatch.remove())
 
@@ -36,12 +32,13 @@ class GenericColorPicker extends GenericContainer {
             this.decorateSwatch(swatch, hexColorString)
         }
 
-        if (defaultColors) {
-            for (const hexColorString of defaultColors) {
-                const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
-                this.container.appendChild(swatch)
-                this.decorateSwatch(swatch, hexColorString)
-            }
+        if (trackColors) {
+            const hexColorString = trackColors[ this.activeColorSelection ]
+            const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
+            this.container.appendChild(swatch)
+            this.decorateSwatch(swatch, hexColorString)
+        } else {
+            this.container.appendChild( DOMUtils.div({class: 'igv-ui-color-swatch-shim'}) )
         }
 
         // present vanilla color picker

@@ -204,19 +204,20 @@ class TrackView {
         }
     }
 
-    presentColorPicker(key) {
+    presentColorPicker(colorSelection) {
 
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
 
-            const trackColors = []
+            const trackColors = {}
             const color = this.track.color || this.track.defaultColor
             if (StringUtils.isString(color)) {
-                trackColors.push(color)
+                trackColors['color'] = color.startsWith("#") ? color : color.startsWith("rgb(") ? IGVColor.rgbToHex(color) : IGVColor.colorNameToHex(color)
             }
             if (this.track.altColor && StringUtils.isString(this.track.altColor)) {
-                trackColors.push(this.track.altColor)
+                const c = this.track.altColor
+                trackColors['altColor'] = c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c)
             }
-            let defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c))
+
             let colorHandlers =
                 {
                     color: hex => {
@@ -237,19 +238,19 @@ class TrackView {
                 colorHandlers =
                     {
                         color: rgbString => {
-                            for (let trackView of selected) {
+                            for (const trackView of selected) {
                                 trackView.track.color = rgbString
                                 trackView.repaintViews()
                             }
                         }
                     }
 
-                this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
+                this.browser.genericColorPicker.configure(trackColors, colorHandlers, colorSelection)
             } else {
-                this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
+                this.browser.genericColorPicker.configure(trackColors, colorHandlers, colorSelection)
             }
 
-            this.browser.genericColorPicker.setActiveColorHandler(key)
+            this.browser.genericColorPicker.setActiveColorHandler(colorSelection)
             this.browser.genericColorPicker.show()
 
         }
