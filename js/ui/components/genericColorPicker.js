@@ -7,12 +7,36 @@ class GenericColorPicker extends GenericContainer {
 
     constructor({parent, width}) {
         super({parent, width, border: '1px solid gray'})
+
+        // nth-child(2) container for color swatch library
+        this.colorSwatchContainer = DOMUtils.div()
+        this.container.appendChild(this.colorSwatchContainer)
+
+        // nth-child(3) container recent colors
+        this.recentColorsContainer = DOMUtils.div()
+        this.container.appendChild(this.recentColorsContainer)
+
+        let div
+
+        // Recent Colors - title
+        div = DOMUtils.div()
+        div.innerText = 'Recent Colors'
+        this.recentColorsContainer.appendChild(div)
+
+        // Recent Colors - swatches
+        this.recentColorsSwatches = DOMUtils.div()
+        this.recentColorsContainer.appendChild(this.recentColorsSwatches)
+
+        // nth-child(4) More colors
+        this.moreColorsContainer = DOMUtils.div()
+        this.container.appendChild(this.moreColorsContainer)
+
     }
 
-    configure(trackColors, colorHandlers, colorSelection) {
+    configure(trackColors, previousColors, colorHandlers, colorSelection) {
         this.colorHandlers = colorHandlers
         this.setActiveColorHandler(colorSelection)
-        this.createSwatches(trackColors)
+        this.createSwatches(trackColors, previousColors)
     }
 
     setActiveColorHandler(activeColorSelection) {
@@ -20,32 +44,29 @@ class GenericColorPicker extends GenericContainer {
         this.activeColorHandler = this.colorHandlers[activeColorSelection]
     }
 
-    createSwatches(trackColors) {
+    createSwatches(trackColors, previousColors) {
 
-        this.container.querySelectorAll('.igv-ui-color-swatch, .igv-ui-color-more-colors').forEach(swatch => swatch.remove())
+        this.colorSwatchContainer.innerHTML = ''
+        this.recentColorsSwatches.innerHTML = ''
 
         const hexColorStrings = Object.values(genericColorPickerPalette)
 
         for (const hexColorString of hexColorStrings) {
             const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
-            this.container.appendChild(swatch)
+            this.colorSwatchContainer.appendChild(swatch)
             this.decorateSwatch(swatch, hexColorString)
         }
 
         if (trackColors) {
-            const hexColorString = trackColors[ this.activeColorSelection ]
             const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
-            this.container.appendChild(swatch)
-            this.decorateSwatch(swatch, hexColorString)
+            this.recentColorsSwatches.appendChild(swatch)
+            this.decorateSwatch(swatch, trackColors[ this.activeColorSelection ])
         } else {
-            this.container.appendChild( DOMUtils.div({class: 'igv-ui-color-swatch-shim'}) )
+            this.recentColorsSwatches.appendChild(DOMUtils.div({class: 'igv-ui-color-swatch-shim'}))
         }
 
-        // present vanilla color picker
-        const moreColorsButton = DOMUtils.div({ class: 'igv-ui-color-more-colors' })
-        this.container.appendChild(moreColorsButton)
-        this.decorateMoreColorsButton(moreColorsButton)
-
+        // present More Colors colorpicker
+        this.decorateMoreColorsButton(this.moreColorsContainer)
 
     }
 
@@ -53,9 +74,9 @@ class GenericColorPicker extends GenericContainer {
 
         swatch.style.backgroundColor = hexColorString
 
-        swatch.addEventListener('mouseenter', () => swatch.style.borderColor = hexColorString)
-
-        swatch.addEventListener('mouseleave', () => swatch.style.borderColor = 'white')
+        // swatch.addEventListener('mouseenter', () => swatch.style.borderColor = hexColorString)
+        //
+        // swatch.addEventListener('mouseleave', () => swatch.style.borderColor = 'white')
 
         swatch.addEventListener('click', event => {
             event.stopPropagation()
@@ -69,35 +90,35 @@ class GenericColorPicker extends GenericContainer {
 
     }
 
-    decorateMoreColorsButton(swatch) {
+    decorateMoreColorsButton(moreColorsContainer) {
 
-        swatch.innerText = 'More Colors'
+        moreColorsContainer.innerText = 'More Colors ...'
 
-        swatch.addEventListener('mouseenter', () => swatch.style.borderColor = 'black')
+        // moreColorsContainer.addEventListener('mouseenter', () => moreColorsContainer.style.borderColor = 'black')
+        //
+        // moreColorsContainer.addEventListener('mouseleave', () => moreColorsContainer.style.borderColor = 'white')
 
-        swatch.addEventListener('mouseleave', () => swatch.style.borderColor = 'white')
-
-        swatch.addEventListener('click', event => {
+        moreColorsContainer.addEventListener('click', event => {
             event.stopPropagation()
-            createAndPresentMoreColorsPicker(event.target, this.activeColorHandler)
+            createAndPresentMoreColorsPicker(moreColorsContainer, this.activeColorHandler)
         })
 
     }
 }
 
-function createAndPresentMoreColorsPicker(parent, colorHandler) {
+function createAndPresentMoreColorsPicker(moreColorsContainer, colorHandler) {
 
     let picker
 
-    parent.innerHTML = ''
-    parent.innerText = 'More Colors'
+    moreColorsContainer.innerHTML = ''
+    moreColorsContainer.innerText = 'More Colors ...'
 
     const colorPickerContainer = document.createElement('div');
     colorPickerContainer.style.position = 'absolute';
-    parent.appendChild(colorPickerContainer);
+    moreColorsContainer.appendChild(colorPickerContainer);
 
-    const { width, height } = parent.getBoundingClientRect()
-    colorPickerContainer.style.left = `${0}px`;
+    const { width, height } = moreColorsContainer.getBoundingClientRect()
+    colorPickerContainer.style.right = `${0}px`;
     colorPickerContainer.style.top = `${0}px`;
     colorPickerContainer.style.width = `${width}px`;
     colorPickerContainer.style.height = `${height}px`;
@@ -109,18 +130,18 @@ function createAndPresentMoreColorsPicker(parent, colorHandler) {
     const config =
         {
             parent: colorPickerContainer,
-            popup: 'bottom',
+            popup: 'top',
             editor: false,
             editorFormat: 'rgb',
             alpha: false,
-            color: parent.style.backgroundColor,
+            color: moreColorsContainer.style.backgroundColor,
         }
 
     picker = new Picker(config)
 
     picker.onChange = (color) => {
         // console.log(`color changes: hex ${ color.hex } rgba ${ color.rgba }`)
-        parent.style.backgroundColor = color.rgba
+        moreColorsContainer.style.backgroundColor = color.rgba
     };
 
     picker.onDone = (color) => {

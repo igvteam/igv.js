@@ -160,6 +160,9 @@ class Browser {
 
         // Region of interest
         this.roiManager = new ROIManager(this)
+
+        // previous colors for colorPicker
+        this.previousColors = []
     }
 
     get doShowROITable() {
