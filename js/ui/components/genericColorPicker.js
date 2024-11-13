@@ -49,58 +49,65 @@ class GenericColorPicker extends GenericContainer {
         this.colorSwatchContainer.innerHTML = ''
         this.recentColorsSwatches.innerHTML = ''
 
+        // Populate ColorSwatches
         const hexColorStrings = Object.values(genericColorPickerPalette)
-
         for (const hexColorString of hexColorStrings) {
             const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
             this.colorSwatchContainer.appendChild(swatch)
-            this.decorateSwatch(swatch, hexColorString)
+            this.decorateSwatch(swatch, hexColorString, previousColors)
         }
 
-        if (trackColors) {
-            const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
-            this.recentColorsSwatches.appendChild(swatch)
-            this.decorateSwatch(swatch, trackColors[ this.activeColorSelection ])
-        } else {
-            this.recentColorsSwatches.appendChild(DOMUtils.div({class: 'igv-ui-color-swatch-shim'}))
+        // Populate RecentColors
+        let recentColors =  Object.values(trackColors).length > 0 ? [ trackColors[ this.activeColorSelection ] ] : []
+        if (previousColors.length > 0) {
+            recentColors.push(...previousColors)
         }
 
-        // present More Colors colorpicker
-        this.decorateMoreColorsButton(this.moreColorsContainer)
+        // Only uniques
+        recentColors = [...new Set(recentColors)]
+
+        if (recentColors.length > 0) {
+            for (const hexColorString of recentColors) {
+                const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
+                this.recentColorsSwatches.appendChild(swatch)
+                this.decorateSwatch(swatch, hexColorString, previousColors)
+            }
+
+        }
+
+        // Present MoreColors Colorpicker
+        this.decorateMoreColorsButton(this.moreColorsContainer, previousColors)
 
     }
 
-    decorateSwatch(swatch, hexColorString) {
+    decorateSwatch(swatch, hexColorString, previousColors) {
 
         swatch.style.backgroundColor = hexColorString
 
-        // swatch.addEventListener('mouseenter', () => swatch.style.borderColor = hexColorString)
-        //
-        // swatch.addEventListener('mouseleave', () => swatch.style.borderColor = 'white')
-
         swatch.addEventListener('click', event => {
             event.stopPropagation()
+            previousColors.push(hexColorString)
             this.activeColorHandler(hexColorString)
         })
 
         swatch.addEventListener('touchend', event => {
             event.stopPropagation()
+            previousColors.push(hexColorString)
             this.activeColorHandler(hexColorString)
         })
 
     }
 
-    decorateMoreColorsButton(moreColorsContainer) {
+    decorateMoreColorsButton(moreColorsContainer, previousColors) {
 
         moreColorsContainer.innerText = 'More Colors ...'
 
-        // moreColorsContainer.addEventListener('mouseenter', () => moreColorsContainer.style.borderColor = 'black')
-        //
-        // moreColorsContainer.addEventListener('mouseleave', () => moreColorsContainer.style.borderColor = 'white')
-
         moreColorsContainer.addEventListener('click', event => {
             event.stopPropagation()
-            createAndPresentMoreColorsPicker(moreColorsContainer, this.activeColorHandler)
+            createAndPresentMoreColorsPicker(moreColorsContainer, hexColorString => {
+                previousColors.push(hexColorString)
+                this.activeColorHandler(hexColorString)
+            })
         })
 
     }

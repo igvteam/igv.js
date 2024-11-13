@@ -447,13 +447,11 @@
   font-weight: 400;
 }
 .igv-ui-generic-container > div:nth-child(3) > div:nth-child(2) {
-  padding-left: 0.25rem;
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
   justify-content: flex-start;
   align-items: center;
-  width: 100%;
 }
 .igv-ui-generic-container > div:nth-child(4) {
   box-sizing: border-box;

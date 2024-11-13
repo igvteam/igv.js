@@ -30,6 +30,7 @@ $igv-color-swatch-border-width: 2px;
     width: 100%;
     padding-bottom: .25rem;
 
+    // Title
     >div:nth-child(1) {
       padding: .35rem;
       font-family: $igv-default-font-face;
@@ -37,14 +38,13 @@ $igv-color-swatch-border-width: 2px;
       font-weight: 400;
     }
 
+    // Swatches
     >div:nth-child(2) {
-      padding-left: .25rem;
       display: flex;
       flex-direction: row;
       flex-wrap: wrap;
       justify-content: flex-start;
       align-items: center;
-      width: 100%;
     }
   }
 
