@@ -59,6 +59,11 @@ class GCNVTrack extends TrackBase {
                 this.config.samplesClickedToHighlight = {}
             }
 
+            // enables onlyHandleClicksForHighlightedSamples to be set from file header
+            if (this.header.hasOwnProperty("onlyHandleClicksForHighlightedSamples")) {
+                this.config.onlyHandleClicksForHighlightedSamples = true
+            }
+
             // Special track line properties
             if (this.header.hasOwnProperty("highlight")) {
                 this.config.highlightSamples = {}
