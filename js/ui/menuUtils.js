@@ -236,7 +236,7 @@ function unsetColorMenuItem({trackView, label}) {
     return {
         object,
         click: () => {
-            trackView.track.color = undefined
+            trackView.track.color = trackView.track.initialTrackColor ? trackView.track.initialTrackColor['color'] : undefined
             trackView.repaintViews()
         }
     }
@@ -250,7 +250,7 @@ function unsetAltColorMenuItem({trackView, label}) {
     return {
         object: $e,
         click: () => {
-            trackView.track.altColor = undefined
+            trackView.track.altColor = trackView.track.initialTrackColor ? trackView.track.initialTrackColor['altColor'] : undefined
             trackView.repaintViews()
         }
     }

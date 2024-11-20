@@ -33,80 +33,71 @@ class GenericColorPicker extends GenericContainer {
 
     }
 
-    configure(trackColors, previousColors, colorHandlers, colorSelection) {
-        this.colorHandlers = colorHandlers
-        this.setActiveColorHandler(colorSelection)
-        this.createSwatches(trackColors, previousColors)
-    }
-
-    setActiveColorHandler(activeColorSelection) {
-        this.activeColorSelection = activeColorSelection
-        this.activeColorHandler = this.colorHandlers[activeColorSelection]
-    }
-
-    createSwatches(trackColors, previousColors) {
+    configure(initialTrackColor, colorHandler) {
 
         this.colorSwatchContainer.innerHTML = ''
+
         this.recentColorsSwatches.innerHTML = ''
+        this.recentColorsContainer.style.display = 'none'
 
         // Populate ColorSwatches
         const hexColorStrings = Object.values(genericColorPickerPalette)
         for (const hexColorString of hexColorStrings) {
             const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
             this.colorSwatchContainer.appendChild(swatch)
-            this.decorateSwatch(swatch, hexColorString, previousColors)
+            this.decorateSwatch(swatch, hexColorString, colorHandler)
         }
 
         // Populate RecentColors
-        let recentColors =  Object.values(trackColors).length > 0 ? [ trackColors[ this.activeColorSelection ] ] : []
-        if (previousColors.length > 0) {
-            recentColors.push(...previousColors)
+        let recentColors = []
+        if (initialTrackColor) {
+            recentColors.push(initialTrackColor)
         }
 
-        // Only uniques
-        recentColors = [...new Set(recentColors)]
-
         if (recentColors.length > 0) {
+
+            // Only unique colors
+            recentColors = [...new Set(recentColors)]
+
+            this.recentColorsContainer.style.display = 'flex'
+
             for (const hexColorString of recentColors) {
                 const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
                 this.recentColorsSwatches.appendChild(swatch)
-                this.decorateSwatch(swatch, hexColorString, previousColors)
+                this.decorateSwatch(swatch, hexColorString, colorHandler)
             }
-
         }
 
         // Present MoreColors Colorpicker
-        this.decorateMoreColorsButton(this.moreColorsContainer, previousColors)
+        this.decorateMoreColorsButton(this.moreColorsContainer, colorHandler)
 
     }
 
-    decorateSwatch(swatch, hexColorString, previousColors) {
+    decorateSwatch(swatch, hexColorString, colorHandler) {
 
         swatch.style.backgroundColor = hexColorString
 
         swatch.addEventListener('click', event => {
             event.stopPropagation()
-            previousColors.push(hexColorString)
-            this.activeColorHandler(hexColorString)
+            colorHandler(hexColorString)
         })
 
         swatch.addEventListener('touchend', event => {
             event.stopPropagation()
-            previousColors.push(hexColorString)
-            this.activeColorHandler(hexColorString)
+            colorHandler(hexColorString)
         })
 
     }
 
-    decorateMoreColorsButton(moreColorsContainer, previousColors) {
+    decorateMoreColorsButton(moreColorsContainer, colorHandler) {
 
         moreColorsContainer.innerText = 'More Colors ...'
 
         moreColorsContainer.addEventListener('click', event => {
             event.stopPropagation()
             createAndPresentMoreColorsPicker(moreColorsContainer, hexColorString => {
-                previousColors.push(hexColorString)
-                this.activeColorHandler(hexColorString)
+                // previousColors.push(hexColorString)
+                colorHandler(hexColorString)
             })
         })
 
