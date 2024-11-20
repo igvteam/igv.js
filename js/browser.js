@@ -161,8 +161,8 @@ class Browser {
         // Region of interest
         this.roiManager = new ROIManager(this)
 
-        // previous colors for colorPicker
-        this.previousColors = []
+        // previous track colors for colorPicker
+        this.previousTrackColors = []
     }
 
     get doShowROITable() {

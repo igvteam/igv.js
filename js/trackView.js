@@ -266,7 +266,7 @@ class TrackView {
                     }
             }
 
-            this.browser.genericColorPicker.configure(initialTrackColor, colorHandlers[colorSelection])
+            this.browser.genericColorPicker.configure(initialTrackColor, this.browser.previousTrackColors, colorHandlers[colorSelection])
             this.browser.genericColorPicker.show()
 
         }

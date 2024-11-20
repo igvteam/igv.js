@@ -433,10 +433,11 @@
   align-items: center;
 }
 .igv-ui-generic-container > div:nth-child(3) {
+  display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
   justify-content: flex-start;
-  align-items: center;
+  align-items: flex-start;
   width: 100%;
   padding-bottom: 0.25rem;
 }

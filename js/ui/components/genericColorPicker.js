@@ -33,7 +33,7 @@ class GenericColorPicker extends GenericContainer {
 
     }
 
-    configure(initialTrackColor, colorHandler) {
+    configure(initialTrackColor, previousTrackColors, colorHandler) {
 
         this.colorSwatchContainer.innerHTML = ''
 
@@ -48,28 +48,20 @@ class GenericColorPicker extends GenericContainer {
             this.decorateSwatch(swatch, hexColorString, colorHandler)
         }
 
-        // Populate RecentColors
-        let recentColors = []
-        if (initialTrackColor) {
-            recentColors.push(initialTrackColor)
-        }
-
-        if (recentColors.length > 0) {
-
-            // Only unique colors
-            recentColors = [...new Set(recentColors)]
+        // Populate Previous Colors
+        if (previousTrackColors.length > 0) {
 
             this.recentColorsContainer.style.display = 'flex'
 
-            for (const hexColorString of recentColors) {
+            for (const hexColorString of previousTrackColors) {
                 const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
                 this.recentColorsSwatches.appendChild(swatch)
                 this.decorateSwatch(swatch, hexColorString, colorHandler)
             }
         }
 
-        // Present MoreColors Colorpicker
-        this.decorateMoreColorsButton(this.moreColorsContainer, colorHandler)
+        // Present MoreColors picker
+        this.decorateMoreColorsButton(this.moreColorsContainer, previousTrackColors, colorHandler)
 
     }
 
@@ -89,14 +81,16 @@ class GenericColorPicker extends GenericContainer {
 
     }
 
-    decorateMoreColorsButton(moreColorsContainer, colorHandler) {
+    decorateMoreColorsButton(moreColorsContainer, previousTrackColors, colorHandler) {
 
         moreColorsContainer.innerText = 'More Colors ...'
 
         moreColorsContainer.addEventListener('click', event => {
             event.stopPropagation()
             createAndPresentMoreColorsPicker(moreColorsContainer, hexColorString => {
-                // previousColors.push(hexColorString)
+                previousTrackColors.push(hexColorString)
+                // const uniques = [...new Set(previousTrackColors)]
+                // previousTrackColors = uniques.slice(0)
                 colorHandler(hexColorString)
             })
         })
