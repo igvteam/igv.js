@@ -20,9 +20,12 @@ class GenericColorPicker extends GenericContainer {
         this.recentColorsSwatches = DOMUtils.div()
         this.container.appendChild(this.recentColorsSwatches)
 
+        this.moreColorsPresentationColor = undefined
     }
 
     configure(initialTrackColor, previousTrackColors, colorHandler, moreColorsPresentationColor) {
+
+        this.moreColorsPresentationColor = moreColorsPresentationColor
 
         this.colorSwatchContainer.innerHTML = ''
 
@@ -46,7 +49,7 @@ class GenericColorPicker extends GenericContainer {
         }
 
         // Present MoreColors picker
-        this.decorateMoreColorsButton(this.moreColorsContainer, previousTrackColors, colorHandler, moreColorsPresentationColor)
+        this.decorateMoreColorsButton(this.moreColorsContainer, previousTrackColors, colorHandler)
 
     }
 
@@ -57,35 +60,38 @@ class GenericColorPicker extends GenericContainer {
         swatch.addEventListener('click', event => {
             event.stopPropagation()
             colorHandler(hexColorString)
+            this.moreColorsPresentationColor = hexColorString
         })
 
         swatch.addEventListener('touchend', event => {
             event.stopPropagation()
             colorHandler(hexColorString)
+            this.moreColorsPresentationColor = hexColorString
         })
 
     }
 
-    decorateMoreColorsButton(moreColorsContainer, previousTrackColors, colorHandler, moreColorsPresentationColor) {
+    decorateMoreColorsButton(moreColorsContainer, previousTrackColors, colorHandler) {
 
         moreColorsContainer.innerText = 'More Colors ...'
 
         moreColorsContainer.addEventListener('click', event => {
             event.stopPropagation()
-            this.createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, moreColorsPresentationColor, hexColorString => {
-                colorHandler(hexColorString)
-            })
+            this.createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, hexColorString => colorHandler(hexColorString))
         })
 
     }
 
-    updateRecentColorsSwatches(hexColorString, colorHandler){
-        const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
-        this.recentColorsSwatches.appendChild(swatch)
-        this.decorateSwatch(swatch, hexColorString, colorHandler)
+    updateRecentColorsSwatches(previousTrackColors, colorHandler){
+        this.recentColorsSwatches.innerHTML = ''
+        for (const hexColorString of previousTrackColors) {
+            const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
+            this.recentColorsSwatches.appendChild(swatch)
+            this.decorateSwatch(swatch, hexColorString, colorHandler)
+        }
     }
 
-    createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, moreColorsPresentationColor, colorHandler) {
+    createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, colorHandler) {
 
         let picker
 
@@ -106,6 +112,9 @@ class GenericColorPicker extends GenericContainer {
             event.stopPropagation()
         })
 
+
+        picker = new Picker()
+
         const config =
             {
                 parent: colorPickerContainer,
@@ -113,12 +122,16 @@ class GenericColorPicker extends GenericContainer {
                 editor: false,
                 editorFormat: 'rgb',
                 alpha: false,
-                // color: moreColorsContainer.style.backgroundColor,
-                color: moreColorsPresentationColor,
+                color: this.moreColorsPresentationColor,
             }
 
-        picker = new Picker(config)
+        picker.setOptions(config)
 
+        picker.setColor(this.moreColorsPresentationColor, true)
+
+        picker.onOpen = () => {
+            console.log(`picker - onOpen`)
+        }
         picker.onChange = color => moreColorsContainer.style.backgroundColor = color.rgba
 
         picker.onDone = color => {
@@ -127,12 +140,14 @@ class GenericColorPicker extends GenericContainer {
             const hexColorString = color.hex.substring(0,7)
 
             previousTrackColors.push(hexColorString)
-            // const uniques = [...new Set(previousTrackColors)]
-            // previousTrackColors = uniques.slice(0)
+            const uniques = [...new Set(previousTrackColors)]
+            previousTrackColors = uniques.slice(0)
 
             colorHandler(hexColorString)
 
-            this.updateRecentColorsSwatches(hexColorString, colorHandler)
+            this.updateRecentColorsSwatches(previousTrackColors, colorHandler)
+
+            this.moreColorsPresentationColor = hexColorString
 
             picker.destroy()
             colorPickerContainer.remove()
