@@ -134,13 +134,9 @@ class GradientColorScale {
 
 class DivergingGradientScale {
 
-    constructor({lowColor, midColor, highColor, low, mid, high}) {
+    constructor(json) {
         this.type = 'diverging'
-        this.setProperties({lowColor, midColor, highColor, low, mid, high})
-    }
-
-    setProperties({lowColor, midColor, highColor, low, mid, high}) {
-
+        const {lowColor, midColor, highColor, low, mid, high} = json
         this.lowGradientScale = new GradientColorScale({
             lowColor: lowColor,
             highColor: midColor,
@@ -221,17 +217,18 @@ class DivergingGradientScale {
     toJson() {
         return {
             type: this.type,
-            low: this.lowGradientScale.low,
+            low: this.low,
             mid: this.mid,
-            high: this.highGradientScale.high,
-            lowColor: this.lowGradientScale.lowColor,
+            high: this.high,
+            lowColor: this.lowColor,
             midColor: this.midColor,
-            highColor: this.highGradientScale.highColor
+            highColor: this.highColor
         }
     }
 
     clone() {
-        return new DivergingGradientScale(this.toJson())
+        const json = this.toJson()
+        return new DivergingGradientScale(json)
     }
 }
 

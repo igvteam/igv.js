@@ -197,7 +197,7 @@ class WigTrack extends TrackBase {
 
             function clickHandler() {
                 this.graphType = gt
-                this.trackView.updateViews()
+                this.trackView.repaintViews()
             }
 
             menuItems.push({object, click: clickHandler})

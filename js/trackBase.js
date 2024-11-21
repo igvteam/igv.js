@@ -521,11 +521,11 @@ class TrackBase {
 
         const menuItems = []
 
-        menuItems.push('<hr/>')
-
         // Data range or color scale
 
         if ("heatmap" !== this.graphType && this.colorScale) {
+
+            menuItems.push('<hr/>')
 
             function dialogPresentationHandler() {
 
