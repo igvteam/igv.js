@@ -10,10 +10,9 @@ import {createCheckbox} from "../igv-icons.js"
 import {ColorScaleFactory} from "../util/colorScale.js"
 import ColorScaleEditor from "../ui/components/colorScaleEditor.js"
 
-const DEFAULT_COLOR = 'rgb(150, 150, 150)'
-
-
 class WigTrack extends TrackBase {
+
+    static defaultColor = 'rgb(150, 150, 150)'
 
     static defaults = {
         height: 50,
@@ -408,7 +407,7 @@ class WigTrack extends TrackBase {
      */
 
     getColorForFeature(f) {
-        let c = (f.value < 0 && this.altColor) ? this.altColor : this.color || DEFAULT_COLOR
+        let c = (f.value < 0 && this.altColor) ? this.altColor : this.color || WigTrack.defaultColor
         return (typeof c === "function") ? c(f.value) : c
     }
 

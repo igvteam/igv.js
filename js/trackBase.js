@@ -28,9 +28,6 @@ import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/sr
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
-import ColorScaleEditor from "./ui/components/colorScaleEditor.js"
-
-const DEFAULT_COLOR = 'rgb(150,150,150)'
 
 const fixColor = (colorString) => {
     if (StringUtils.isString(colorString)) {

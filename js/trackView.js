@@ -274,7 +274,8 @@ class TrackView {
                     };
             }
 
-            this.browser.genericColorPicker.configure(initialTrackColor, this.browser.previousTrackColors, colorHandlers[colorSelection])
+            const moreColorsPresentationColor = 'color' === colorSelection ? (this.track.color || this.track.constructor.defaultColor) : this.track.altColor
+            this.browser.genericColorPicker.configure(initialTrackColor, this.browser.previousTrackColors, colorHandlers[colorSelection], moreColorsPresentationColor)
             this.browser.genericColorPicker.show()
 
         }

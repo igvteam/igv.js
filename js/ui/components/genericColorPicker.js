@@ -33,7 +33,7 @@ class GenericColorPicker extends GenericContainer {
 
     }
 
-    configure(initialTrackColor, previousTrackColors, colorHandler) {
+    configure(initialTrackColor, previousTrackColors, colorHandler, moreColorsPresentationColor) {
 
         this.colorSwatchContainer.innerHTML = ''
 
@@ -61,7 +61,7 @@ class GenericColorPicker extends GenericContainer {
         }
 
         // Present MoreColors picker
-        this.decorateMoreColorsButton(this.moreColorsContainer, previousTrackColors, colorHandler)
+        this.decorateMoreColorsButton(this.moreColorsContainer, previousTrackColors, colorHandler, moreColorsPresentationColor)
 
     }
 
@@ -81,13 +81,13 @@ class GenericColorPicker extends GenericContainer {
 
     }
 
-    decorateMoreColorsButton(moreColorsContainer, previousTrackColors, colorHandler) {
+    decorateMoreColorsButton(moreColorsContainer, previousTrackColors, colorHandler, moreColorsPresentationColor) {
 
         moreColorsContainer.innerText = 'More Colors ...'
 
         moreColorsContainer.addEventListener('click', event => {
             event.stopPropagation()
-            this.createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, hexColorString => {
+            this.createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, moreColorsPresentationColor, hexColorString => {
                 colorHandler(hexColorString)
             })
         })
@@ -105,7 +105,7 @@ class GenericColorPicker extends GenericContainer {
         this.decorateSwatch(swatch, hexColorString, colorHandler)
     }
 
-    createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, colorHandler) {
+    createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, moreColorsPresentationColor, colorHandler) {
 
         let picker
 
@@ -133,21 +133,15 @@ class GenericColorPicker extends GenericContainer {
                 editor: false,
                 editorFormat: 'rgb',
                 alpha: false,
-                color: moreColorsContainer.style.backgroundColor,
+                // color: moreColorsContainer.style.backgroundColor,
+                color: moreColorsPresentationColor,
             }
 
         picker = new Picker(config)
 
-        picker.onChange = (color) => {
-            moreColorsContainer.style.backgroundColor = color.rgba
+        picker.onChange = color => moreColorsContainer.style.backgroundColor = color.rgba
 
-            // Remove alpha from hex color string
-            const hexColorString = color.hex.substring(0,7)
-
-            colorHandler(hexColorString)
-        };
-
-        picker.onDone = (color) => {
+        picker.onDone = color => {
 
             // Remove alpha from hex color string
             const hexColorString = color.hex.substring(0,7)

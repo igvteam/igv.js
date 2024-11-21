@@ -38,11 +38,12 @@ import {doSortByAttributes} from "../sample/sampleUtils.js"
 
 const isString = StringUtils.isString
 
-const DEFAULT_COLOR = "rgb(0,0,150)"
 const DEFAULT_VISIBILITY_WINDOW = 1000000
 const TOP_MARGIN = 10
 
 class VariantTrack extends TrackBase {
+
+    static defaultColor = 'rgb(0,0,150)'
 
     static defaults = {
         displayMode: "EXPANDED",
@@ -175,7 +176,7 @@ class VariantTrack extends TrackBase {
     }
 
     get color() {
-        return this._color || DEFAULT_COLOR
+        return this._color || VariantTrack.defaultColor
     }
 
     set color(c) {
