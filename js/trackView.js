@@ -208,6 +208,7 @@ class TrackView {
 
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
 
+            // TODO: When should the list of previous colors be created/initialized?
             this.browser.previousColors = []
 
             if (undefined === this.track.initialTrackColor) {
@@ -236,18 +237,7 @@ class TrackView {
                 console.warn(`track altColor is not a string!`)
             }
 
-            let colorHandlers =
-                {
-                    color: hex => {
-                        this.track.color = hexToRGB(hex)
-                        this.repaintViews()
-                    },
-                    altColor: hex => {
-                        this.track.altColor = hexToRGB(hex)
-                        this.repaintViews()
-                    }
-
-                }
+            let colorHandlers
 
             const initialTrackColor = 0 === Object.keys(this.track.initialTrackColor).length ? undefined : this.track.initialTrackColor[ colorSelection ]
 
@@ -262,8 +252,26 @@ class TrackView {
                                 trackView.track.color = rgbString
                                 trackView.repaintViews()
                             }
+                        },
+                        altColor: rgbString => {
+                            for (const trackView of selected) {
+                                trackView.track.altColor = rgbString
+                                trackView.repaintViews()
+                            }
+                        },
+                    };
+            } else {
+                colorHandlers =
+                    {
+                        color: hex => {
+                            this.track.color = hexToRGB(hex)
+                            this.repaintViews()
+                        },
+                        altColor: hex => {
+                            this.track.altColor = hexToRGB(hex)
+                            this.repaintViews()
                         }
-                    }
+                    };
             }
 
             this.browser.genericColorPicker.configure(initialTrackColor, this.browser.previousTrackColors, colorHandlers[colorSelection])

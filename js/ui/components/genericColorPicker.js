@@ -87,75 +87,85 @@ class GenericColorPicker extends GenericContainer {
 
         moreColorsContainer.addEventListener('click', event => {
             event.stopPropagation()
-            createAndPresentMoreColorsPicker(moreColorsContainer, hexColorString => {
-                previousTrackColors.push(hexColorString)
-                // const uniques = [...new Set(previousTrackColors)]
-                // previousTrackColors = uniques.slice(0)
+            this.createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, hexColorString => {
                 colorHandler(hexColorString)
             })
         })
 
     }
-}
 
-function createAndPresentMoreColorsPicker(moreColorsContainer, colorHandler) {
+    updateRecentColorsSwatches(hexColorString, colorHandler){
 
-    let picker
-
-    moreColorsContainer.innerHTML = ''
-    moreColorsContainer.innerText = 'More Colors ...'
-
-    const colorPickerContainer = document.createElement('div');
-    colorPickerContainer.style.position = 'absolute';
-    moreColorsContainer.appendChild(colorPickerContainer);
-
-    const { width, height } = moreColorsContainer.getBoundingClientRect()
-    colorPickerContainer.style.right = `${0}px`;
-    colorPickerContainer.style.top = `${0}px`;
-    colorPickerContainer.style.width = `${width}px`;
-    colorPickerContainer.style.height = `${height}px`;
-
-    colorPickerContainer.addEventListener('click', (event) => {
-        event.stopPropagation()
-    })
-
-    const config =
-        {
-            parent: colorPickerContainer,
-            popup: 'top',
-            editor: false,
-            editorFormat: 'rgb',
-            alpha: false,
-            color: moreColorsContainer.style.backgroundColor,
+        if ('none' === this.recentColorsContainer.style.display){
+            this.recentColorsContainer.style.display = 'flex'
         }
 
-    picker = new Picker(config)
-
-    picker.onChange = (color) => {
-        // console.log(`color changes: hex ${ color.hex } rgba ${ color.rgba }`)
-        moreColorsContainer.style.backgroundColor = color.rgba
-    };
-
-    picker.onDone = (color) => {
-
-        // Remove alpha from hex color string
-        colorHandler(color.hex.substring(0,7))
-        picker.destroy()
-        colorPickerContainer.remove()
+        const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
+        this.recentColorsSwatches.appendChild(swatch)
+        this.decorateSwatch(swatch, hexColorString, colorHandler)
     }
 
-    // function onOutsideClick(event) {
-    //     if (!colorPickerContainer.contains(event.target) && parent !== event.target) {
-    //         picker.destroy()
-    //         picker = null
-    //         colorPickerContainer.remove()
-    //         document.removeEventListener('click', onOutsideClick);
-    //     }
-    // }
-    //
-    // document.addEventListener('click', onOutsideClick);
+    createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, colorHandler) {
 
-    picker.show()
+        let picker
+
+        moreColorsContainer.innerHTML = ''
+        moreColorsContainer.innerText = 'More Colors ...'
+
+        const colorPickerContainer = document.createElement('div');
+        colorPickerContainer.style.position = 'absolute';
+        moreColorsContainer.appendChild(colorPickerContainer);
+
+        const { width, height } = moreColorsContainer.getBoundingClientRect()
+        colorPickerContainer.style.right = `${0}px`;
+        colorPickerContainer.style.top = `${0}px`;
+        colorPickerContainer.style.width = `${width}px`;
+        colorPickerContainer.style.height = `${height}px`;
+
+        colorPickerContainer.addEventListener('click', (event) => {
+            event.stopPropagation()
+        })
+
+        const config =
+            {
+                parent: colorPickerContainer,
+                popup: 'top',
+                editor: false,
+                editorFormat: 'rgb',
+                alpha: false,
+                color: moreColorsContainer.style.backgroundColor,
+            }
+
+        picker = new Picker(config)
+
+        picker.onChange = (color) => {
+            moreColorsContainer.style.backgroundColor = color.rgba
+
+            // Remove alpha from hex color string
+            const hexColorString = color.hex.substring(0,7)
+
+            colorHandler(hexColorString)
+        };
+
+        picker.onDone = (color) => {
+
+            // Remove alpha from hex color string
+            const hexColorString = color.hex.substring(0,7)
+
+            previousTrackColors.push(hexColorString)
+            // const uniques = [...new Set(previousTrackColors)]
+            // previousTrackColors = uniques.slice(0)
+
+            colorHandler(hexColorString)
+
+            this.updateRecentColorsSwatches(hexColorString, colorHandler)
+
+            picker.destroy()
+            colorPickerContainer.remove()
+        }
+
+        picker.show()
+    }
 }
 
 export default GenericColorPicker
