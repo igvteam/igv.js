@@ -8,28 +8,17 @@ class GenericColorPicker extends GenericContainer {
     constructor({parent, width}) {
         super({parent, width, border: '1px solid gray'})
 
-        // nth-child(2) container for color swatch library
+        // nth-child(2) - Color Swatches
         this.colorSwatchContainer = DOMUtils.div()
         this.container.appendChild(this.colorSwatchContainer)
 
-        // nth-child(3) container recent colors
-        this.recentColorsContainer = DOMUtils.div()
-        this.container.appendChild(this.recentColorsContainer)
-
-        let div
-
-        // Recent Colors - title
-        div = DOMUtils.div()
-        div.innerText = 'Recent Colors'
-        this.recentColorsContainer.appendChild(div)
-
-        // Recent Colors - swatches
-        this.recentColorsSwatches = DOMUtils.div()
-        this.recentColorsContainer.appendChild(this.recentColorsSwatches)
-
-        // nth-child(4) More colors
+        // nth-child(3) - More Colors interative color picker
         this.moreColorsContainer = DOMUtils.div()
         this.container.appendChild(this.moreColorsContainer)
+
+        // nth-child(4) - Recent Colors - swatches
+        this.recentColorsSwatches = DOMUtils.div()
+        this.container.appendChild(this.recentColorsSwatches)
 
     }
 
@@ -38,7 +27,6 @@ class GenericColorPicker extends GenericContainer {
         this.colorSwatchContainer.innerHTML = ''
 
         this.recentColorsSwatches.innerHTML = ''
-        this.recentColorsContainer.style.display = 'none'
 
         // Populate ColorSwatches
         const hexColorStrings = Object.values(genericColorPickerPalette)
@@ -50,9 +38,6 @@ class GenericColorPicker extends GenericContainer {
 
         // Populate Previous Colors
         if (previousTrackColors.length > 0) {
-
-            this.recentColorsContainer.style.display = 'flex'
-
             for (const hexColorString of previousTrackColors) {
                 const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
                 this.recentColorsSwatches.appendChild(swatch)
@@ -95,11 +80,6 @@ class GenericColorPicker extends GenericContainer {
     }
 
     updateRecentColorsSwatches(hexColorString, colorHandler){
-
-        if ('none' === this.recentColorsContainer.style.display){
-            this.recentColorsContainer.style.display = 'flex'
-        }
-
         const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
         this.recentColorsSwatches.appendChild(swatch)
         this.decorateSwatch(swatch, hexColorString, colorHandler)
