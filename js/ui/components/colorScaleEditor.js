@@ -97,7 +97,7 @@ class ColorScaleEditor {
             label: "Max color",
             value: newColorScale.highColor,
             onchange: (v) => {
-                newColorScale.maxColor = v
+                newColorScale.highColor = v
                 paintLegend(legend, newColorScale)
             }
         })
