@@ -20,6 +20,7 @@ import ChromAliasDefaults from "./chromAliasDefaults.js"
 class Genome {
 
     #wgChromosomeNames
+    #aliasRecordCache = new Map()
 
     static async createGenome(options, browser) {
 
@@ -162,11 +163,9 @@ class Genome {
 
     async loadChromosome(chr) {
 
-        if (this.chromAlias) {
-            const chromAliasRecord = await this.chromAlias.search(chr)
-            if (chromAliasRecord) {
-                chr = chromAliasRecord.chr
-            }
+        const chromAliasRecord = await this.getAliasRecord(chr)
+        if (chromAliasRecord) {
+            chr = chromAliasRecord.chr
         }
 
         if (!this.chromosomes.has(chr)) {
@@ -183,8 +182,16 @@ class Genome {
     }
 
     async getAliasRecord(chr) {
+        if (this.#aliasRecordCache.has(chr)) {
+            return this.#aliasRecordCache.get(chr)
+        }
         if (this.chromAlias) {
-            return this.chromAlias.search(chr)
+            let aliasRecord = await this.chromAlias.search(chr)
+            if (!aliasRecord && chr !== chr.toLowerCase()) {
+                aliasRecord = await this.chromAlias.search(chr.toLowerCase())
+            }
+            this.#aliasRecordCache.set(chr, aliasRecord)  // Set even if undefined to prevent recurrent searches
+            return aliasRecord
         }
     }
 
