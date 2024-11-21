@@ -9,6 +9,9 @@
 
 <body>
 
+<button id="log-state">Log Session</button>
+<button id="bookmark">Bookmark</button>
+
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
 </div>
@@ -19,6 +22,7 @@
 
     const div = document.getElementById("myDiv");
     const options = {
+        queryParametersSupported: true,
         locus: '19:49301000-49305700',
         genome: "hg19",
         tracks: [
@@ -76,6 +80,16 @@
     };
 
     igv.createBrowser(div, options).then(function (browser) {
+
+        document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+
+        document.getElementById('bookmark').addEventListener('click', () => {
+            const path = window.location.href.slice()
+            const idx = path.indexOf("?")
+            const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+            window.history.pushState({}, "IGV", url)
+        })
+
     });
 
 
