@@ -10,9 +10,9 @@ function paintLegend(legend, newColorScale) {
 
     const ctx = legend.getContext("2d")
     const w = legend.width
-    const step = (newColorScale.high - newColorScale.low) / w
+    const step = (newColorScale.max - newColorScale.min) / w
     for (let i = 0; i < w; i++) {
-        const v = newColorScale.low + i * step
+        const v = newColorScale.min + i * step
         const color = newColorScale.getColor(v)
         ctx.fillStyle = color
         ctx.fillRect(i, 0, 1, legend.height)
@@ -22,7 +22,7 @@ function paintLegend(legend, newColorScale) {
 /**
  *   Editor for color scales.  Supported types:
  *
- *   'gradient': {low, high, lowColor, highColor}
+ *   'gradient': {min, max, minColor, maxColor}
  *
  *   'diverging': {mid, midColor, lowGradientScale, highGradientScale}
  *
@@ -44,9 +44,9 @@ class ColorScaleEditor {
 
         const minTextbox = new TextBoxRow({
             label: "Min value",
-            value: newColorScale.low.toString(),
+            value: newColorScale.min.toString(),
             onchange: (v) => {
-                newColorScale.low = Number.parseFloat(v)
+                newColorScale.min = Number.parseFloat(v)
                 paintLegend(legend, newColorScale)
             }
         })
@@ -54,7 +54,7 @@ class ColorScaleEditor {
 
         const midTextbox = new TextBoxRow({
             label: "Mid value",
-            value: (newColorScale.mid || newColorScale.low).toString(),
+            value: (newColorScale.mid || newColorScale.min).toString(),
             onchange: (v) => {
                 newColorScale.mid = Number.parseFloat(v)
                 paintLegend(legend, newColorScale)
@@ -64,9 +64,9 @@ class ColorScaleEditor {
 
         const maxTextbox = new TextBoxRow({
             label: "Max value",
-            value: newColorScale.high.toString(),
+            value: newColorScale.max.toString(),
             onchange: (v) => {
-                newColorScale.high = Number.parseFloat(v)
+                newColorScale.max = Number.parseFloat(v)
                 paintLegend(legend, newColorScale)
             }
         })
@@ -75,9 +75,9 @@ class ColorScaleEditor {
 
         const colorElem = new ColorPickerRow({
             label: "Min color",
-            value: newColorScale.lowColor,
+            value: newColorScale.minColor,
             onchange: (v) => {
-                newColorScale.lowColor = v
+                newColorScale.minColor = v
                 paintLegend(legend, newColorScale)
             }
         })
@@ -85,7 +85,7 @@ class ColorScaleEditor {
 
         const midColorElem = new ColorPickerRow({
             label: "Mid color",
-            value: newColorScale.midColor || newColorScale.lowColor,
+            value: newColorScale.midColor || newColorScale.minColor,
             onchange: (v) => {
                 newColorScale.midColor = v
                 paintLegend(legend, newColorScale)
@@ -95,9 +95,9 @@ class ColorScaleEditor {
 
         const highColorElem = new ColorPickerRow({
             label: "Max color",
-            value: newColorScale.highColor,
+            value: newColorScale.maxColor,
             onchange: (v) => {
-                newColorScale.highColor = v
+                newColorScale.maxColor = v
                 paintLegend(legend, newColorScale)
             }
         })
@@ -109,7 +109,7 @@ class ColorScaleEditor {
             onchange: (diverging) => {
                 if (diverging) {
                     // Converting from gradient to diverting
-                    newColorScale.mid = newColorScale.low < 0 && newColorScale.high > 0 ? 0 : (newColorScale.low + newColorScale.high) / 2
+                    newColorScale.mid = newColorScale.min < 0 && newColorScale.max > 0 ? 0 : (newColorScale.min + newColorScale.max) / 2
                     newColorScale.midColor = "rgb(255,255,255)"
                     newColorScale = new DivergingGradientScale(newColorScale)
 
