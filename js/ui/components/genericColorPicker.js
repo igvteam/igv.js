@@ -5,6 +5,8 @@ import {genericColorPickerPalette} from "../../util/colorPalletes.js"
 
 class GenericColorPicker extends GenericContainer {
 
+    static maxRecentColors = 10
+
     constructor({parent, width}) {
         super({parent, width, border: '1px solid gray'})
 
@@ -20,10 +22,13 @@ class GenericColorPicker extends GenericContainer {
         this.recentColorsSwatches = DOMUtils.div()
         this.container.appendChild(this.recentColorsSwatches)
 
+        this.recentColors = []
+
         this.moreColorsPresentationColor = undefined
+
     }
 
-    configure(initialTrackColor, previousTrackColors, colorHandler, moreColorsPresentationColor) {
+    configure(initialTrackColor, colorHandler, moreColorsPresentationColor) {
 
         this.moreColorsPresentationColor = moreColorsPresentationColor
 
@@ -40,8 +45,8 @@ class GenericColorPicker extends GenericContainer {
         }
 
         // Populate Previous Colors
-        if (previousTrackColors.length > 0) {
-            for (const hexColorString of previousTrackColors) {
+        if (this.recentColors.length > 0) {
+            for (const hexColorString of this.recentColors) {
                 const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
                 this.recentColorsSwatches.appendChild(swatch)
                 this.decorateSwatch(swatch, hexColorString, colorHandler)
@@ -49,7 +54,7 @@ class GenericColorPicker extends GenericContainer {
         }
 
         // Present MoreColors picker
-        this.decorateMoreColorsButton(this.moreColorsContainer, previousTrackColors, colorHandler)
+        this.decorateMoreColorsButton(this.moreColorsContainer, colorHandler)
 
     }
 
@@ -71,27 +76,27 @@ class GenericColorPicker extends GenericContainer {
 
     }
 
-    decorateMoreColorsButton(moreColorsContainer, previousTrackColors, colorHandler) {
+    decorateMoreColorsButton(moreColorsContainer, colorHandler) {
 
         moreColorsContainer.innerText = 'More Colors ...'
 
         moreColorsContainer.addEventListener('click', event => {
             event.stopPropagation()
-            this.createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, hexColorString => colorHandler(hexColorString))
+            this.createAndPresentMoreColorsPicker(moreColorsContainer, hexColorString => colorHandler(hexColorString))
         })
 
     }
 
-    updateRecentColorsSwatches(previousTrackColors, colorHandler){
+    updateRecentColorsSwatches(colorHandler){
         this.recentColorsSwatches.innerHTML = ''
-        for (const hexColorString of previousTrackColors) {
+        for (const hexColorString of this.recentColors) {
             const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
             this.recentColorsSwatches.appendChild(swatch)
             this.decorateSwatch(swatch, hexColorString, colorHandler)
         }
     }
 
-    createAndPresentMoreColorsPicker(moreColorsContainer, previousTrackColors, colorHandler) {
+    createAndPresentMoreColorsPicker(moreColorsContainer, colorHandler) {
 
         let picker
 
@@ -139,13 +144,14 @@ class GenericColorPicker extends GenericContainer {
             // Remove alpha from hex color string
             const hexColorString = color.hex.substring(0,7)
 
-            previousTrackColors.push(hexColorString)
-            const uniques = [...new Set(previousTrackColors)]
-            previousTrackColors = uniques.slice(0)
+            this.recentColors.unshift(hexColorString)
+
+            const src = this.recentColors.slice(0)
+            this.recentColors = [...new Set(src)].slice(0, GenericColorPicker.maxRecentColors)
 
             colorHandler(hexColorString)
 
-            this.updateRecentColorsSwatches(previousTrackColors, colorHandler)
+            this.updateRecentColorsSwatches(colorHandler)
 
             this.moreColorsPresentationColor = hexColorString
 

@@ -208,9 +208,6 @@ class TrackView {
 
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
 
-            // TODO: When should the list of previous colors be created/initialized?
-            this.browser.previousColors = []
-
             if (undefined === this.track.initialTrackColor) {
                 this.track.initialTrackColor = {}
             }
@@ -275,7 +272,7 @@ class TrackView {
             }
 
             const moreColorsPresentationColor = 'color' === colorSelection ? (this.track.color || this.track.constructor.defaultColor) : this.track.altColor
-            this.browser.genericColorPicker.configure(initialTrackColor, this.browser.previousTrackColors, colorHandlers[colorSelection], moreColorsPresentationColor)
+            this.browser.genericColorPicker.configure(initialTrackColor, colorHandlers[colorSelection], moreColorsPresentationColor)
             this.browser.genericColorPicker.show()
 
         }
