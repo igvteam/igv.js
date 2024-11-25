@@ -513,14 +513,14 @@ class Browser {
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
         if (false !== session.showIdeogram) {
             const track = new IdeogramTrack(this)
-            track.id = 'ideogram'
             const trackView = new TrackView(this, this.columnContainer, track)
             this.trackViews.push(trackView)
         }
 
         if (false !== session.showRuler) {
-            const rulerTrackView = new TrackView(this, this.columnContainer, new RulerTrack(this))
-            this.trackViews.push(rulerTrackView)
+            const track = new RulerTrack(this)
+            const trackView = new TrackView(this, this.columnContainer, track)
+            this.trackViews.push(trackView)
         }
 
         if (session.qtlSelections) {

@@ -5,7 +5,7 @@ import {inferFileFormat} from "../util/fileFormatUtils.js"
 import ROIMenu from "./ROIMenu.js"
 import ROITable from "./ROITable.js"
 
-
+let roiRegionMargin = undefined
 class ROIManager {
 
     constructor(browser) {
@@ -16,34 +16,9 @@ class ROIManager {
         this.top = 0
         this.roiSets = []
         this.showOverlays = true
+
         this.boundLocusChangeHandler = locusChangeHandler.bind(this)
         browser.on('locuschange', this.boundLocusChangeHandler)
-
-        const updateROIDimensions = () => {
-
-            const tracks = browser.findTracks(track => new Set(['ideogram', 'ruler']).has(track.type))
-            const [rectA, rectB] = tracks
-                .map(track => track.trackView.viewports[0].$viewport.get(0))
-                .map(element => getElementVerticalDimension(element))
-            
-            //Covers cases in which ruler and/or ideogram are hidden
-            const heightA = rectA ? rectA.height : 0
-            const heightB = rectB ? rectB.height : 0
-            
-            const elements = browser.columnContainer.querySelectorAll('.igv-roi-region')
-
-            const fudge = -0.5
-            if (elements) {
-                for (const element of elements) {
-                    element.style.marginTop = `${heightA + heightB + fudge}px`
-                }
-
-            }
-        }
-
-        this.observer = new MutationObserver(updateROIDimensions)
-        //const [ column ] = browser.columnContainer.querySelectorAll('.igv-column')
-        this.observer.observe(browser.columnContainer, {attributes: true, childList: true, subtree: true})
 
     }
 
@@ -247,6 +222,10 @@ class ROIManager {
         regionElement.style.top = `${pixelTop}px`
         regionElement.style.left = `${pixelX}px`
         regionElement.style.width = `${pixelWidth}px`
+
+        const marginTop = `${ROIManager.getROIRegionTopMargin(this.browser)}px`
+        regionElement.style.marginTop = marginTop
+
         regionElement.dataset.color = roiSet.color
         regionElement.dataset.region = regionKey
 
@@ -271,8 +250,28 @@ class ROIManager {
             this.roiMenu.present(feature, roiSet, event, this, columnContainer, regionElement)
         })
 
-
         return regionElement
+    }
+
+ static getROIRegionTopMargin(browser) {
+
+        if (undefined === roiRegionMargin) {
+            const tracks = browser.findTracks(track => new Set(['ideogram', 'ruler']).has(track.type))
+
+            const [rectA, rectB] = tracks
+                .map(track => track.trackView.viewports[0].$viewport.get(0))
+                .map(element => getElementVerticalDimension(element))
+
+            //Covers cases in which ruler and/or ideogram are hidden
+            const heightA = rectA ? rectA.height : 0
+            const heightB = rectB ? rectB.height : 0
+
+            const fudge = -0.5
+            roiRegionMargin = heightA + heightB + fudge
+
+        }
+
+        return roiRegionMargin
     }
 
     renderSVGContext(columnContainer, context, {deltaX, deltaY}) {
@@ -299,7 +298,7 @@ class ROIManager {
     deleteUserDefinedROISet() {
         this.roiSets = this.roiSets.filter(roiSet => roiSet.isUserDefined !== true)
     }
-    
+
     initializeUserDefinedROISet() {
 
         const config =

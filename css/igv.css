@@ -2105,7 +2105,6 @@
   bottom: 0;
   pointer-events: none;
   overflow: visible;
-  margin-top: 66px;
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
