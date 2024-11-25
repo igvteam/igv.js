@@ -212,7 +212,7 @@ class TrackView {
                 this.track.initialTrackColor = {}
             }
 
-            const color = this.track.color || this.track.defaultColor
+            const color = this.track.color || this.track.constructor.defaultColor
             if (StringUtils.isString(color)) {
 
                 if (undefined === this.track.initialTrackColor['color']) {

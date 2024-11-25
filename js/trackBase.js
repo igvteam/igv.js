@@ -47,6 +47,8 @@ const fixColor = (colorString) => {
  */
 class TrackBase {
 
+    static defaultColor = 'rgb(150,150,150)'
+
     static defaults = {
         height: 50,
         autoHeight: false,
