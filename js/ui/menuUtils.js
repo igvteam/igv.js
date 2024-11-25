@@ -236,8 +236,9 @@ function unsetColorMenuItem({trackView, label}) {
     return {
         object,
         click: () => {
-            trackView.track.color = trackView.track.initialTrackColor ? trackView.track.initialTrackColor['color'] : undefined
-            trackView.repaintViews()
+            // trackView.track.color = trackView.track.initialTrackColor ? trackView.track.initialTrackColor['color'] : undefined;
+            trackView.track.color = trackView.track._initialColor || trackView.track.constructor.defaultColor;
+            trackView.repaintViews();
         }
     }
 }
@@ -250,8 +251,9 @@ function unsetAltColorMenuItem({trackView, label}) {
     return {
         object: $e,
         click: () => {
-            trackView.track.altColor = trackView.track.initialTrackColor ? trackView.track.initialTrackColor['altColor'] : undefined
-            trackView.repaintViews()
+            // trackView.track.altColor = trackView.track.initialTrackColor ? trackView.track.initialTrackColor['altColor'] : undefined;
+            trackView.track.altColor = trackView.track._initialAltColor || trackView.track.constructor.defaultColor;
+            trackView.repaintViews();
         }
     }
 }

@@ -208,38 +208,16 @@ class TrackView {
 
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
 
-            if (undefined === this.track.initialTrackColor) {
-                this.track.initialTrackColor = {}
-            }
+            let initialTrackColor
 
-            const color = this.track.color || this.track.constructor.defaultColor
-            if (StringUtils.isString(color)) {
-
-                if (undefined === this.track.initialTrackColor['color']) {
-                    this.track.initialTrackColor['color'] = color.startsWith("#") ? color : color.startsWith("rgb(") ? IGVColor.rgbToHex(color) : IGVColor.colorNameToHex(color)
-                }
-
+            if (colorSelection === 'color') {
+                initialTrackColor = this.track._initialColor || this.track.constructor.defaultColor
             } else {
-                console.warn(`track color is not a string!`)
-            }
-
-            if (this.track.altColor && StringUtils.isString(this.track.altColor)) {
-
-                if (undefined === this.track.initialTrackColor['altColor']) {
-                    const c = this.track.altColor
-                    this.track.initialTrackColor['altColor'] = c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c)
-                }
-
-            } else {
-                console.warn(`track altColor is not a string!`)
+                initialTrackColor = this.track._initialAltColor || this.track.constructor.defaultColor
             }
 
             let colorHandlers
-
-            const initialTrackColor = 0 === Object.keys(this.track.initialTrackColor).length ? undefined : this.track.initialTrackColor[ colorSelection ]
-
             const selected = this.browser.getSelectedTrackViews()
-
             if (selected.length > 0 && new Set(selected).has(this)) {
 
                 colorHandlers =
@@ -271,7 +249,7 @@ class TrackView {
                     };
             }
 
-            const moreColorsPresentationColor = 'color' === colorSelection ? (this.track.color || this.track.constructor.defaultColor) : this.track.altColor
+            const moreColorsPresentationColor = 'color' === colorSelection ? (this.track.color || this.track.constructor.defaultColor) : (this.track.altColor || this.track.constructor.defaultColor)
             this.browser.genericColorPicker.configure(initialTrackColor, colorHandlers[colorSelection], moreColorsPresentationColor)
             this.browser.genericColorPicker.show()
 
