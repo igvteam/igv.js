@@ -157,30 +157,33 @@ function createMenuElements(itemList, popover) {
 
             if ("checkbox" === item.type) {
                 elem = Icon.createCheckbox("Show all bases", item.value);
-            } else if("color" === item.type) {
-                const colorPicker = new ColorPicker({
-                    parent: popover.parentElement,
-                    width: 364,
-                    //defaultColor: 'aqua',
-                    colorHandler: (color) => item.click(color)
-                })
-                elem = DOMUtils.div();
-                if (typeof item.label === 'string') {
-                    elem.innerHTML = item.label;
-                }
-                const clickHandler =  e => {
-                    colorPicker.show();
-                    DOMUtils.hide(popover);
-                    e.preventDefault();
-                    e.stopPropagation()
-                }
-                elem.addEventListener('click', clickHandler);
-                elem.addEventListener('touchend', clickHandler);
-                elem.addEventListener('mouseup', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                })
             }
+
+            // TODO: I can't find any use of this and should probably be deleted - data
+            // else if("color" === item.type) {
+            //     const colorPicker = new ColorPicker({
+            //         parent: popover.parentElement,
+            //         width: 364,
+            //         //defaultColor: 'aqua',
+            //         colorHandler: (color) => item.click(color)
+            //     })
+            //     elem = DOMUtils.div();
+            //     if (typeof item.label === 'string') {
+            //         elem.innerHTML = item.label;
+            //     }
+            //     const clickHandler =  e => {
+            //         colorPicker.show();
+            //         DOMUtils.hide(popover);
+            //         e.preventDefault();
+            //         e.stopPropagation()
+            //     }
+            //     elem.addEventListener('click', clickHandler);
+            //     elem.addEventListener('touchend', clickHandler);
+            //     elem.addEventListener('mouseup', function (e) {
+            //         e.preventDefault();
+            //         e.stopPropagation();
+            //     })
+            // }
 
             else {
                 elem = DOMUtils.div();

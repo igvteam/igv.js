@@ -224,28 +224,33 @@ function createMenuElements(itemList, popover) {
 
             if ("checkbox" === item.type) {
                 el = createCheckbox("Show all bases", item.value)
-            } else if ("color" === item.type) {
+            }
 
-                const colorPicker = new GenericColorPicker(popover.parentElement)
-                colorPicker.configure({color: 'grey'})
+            // TODO: I can't find any use of this and should probably be deleted - data
+            // else if ("color" === item.type) {
+            //
+            //     const colorPicker = new GenericColorPicker(popover.parentElement)
+            //     colorPicker.configure({color: 'grey'})
+            //
+            //     el = DOMUtils.div({class: 'context-menu'})
+            //     if (typeof item.label === 'string') {
+            //         el.innerHTML = item.label
+            //     }
+            //     const clickHandler = e => {
+            //         colorPicker.show()
+            //         DOMUtils.hide(popover)
+            //         e.preventDefault()
+            //         e.stopPropagation()
+            //     }
+            //     el.addEventListener('click', clickHandler)
+            //     el.addEventListener('touchend', clickHandler)
+            //     el.addEventListener('mouseup', function (e) {
+            //         e.preventDefault()
+            //         e.stopPropagation()
+            //     })
+            // }
 
-                el = DOMUtils.div({class: 'context-menu'})
-                if (typeof item.label === 'string') {
-                    el.innerHTML = item.label
-                }
-                const clickHandler = e => {
-                    colorPicker.show()
-                    DOMUtils.hide(popover)
-                    e.preventDefault()
-                    e.stopPropagation()
-                }
-                el.addEventListener('click', clickHandler)
-                el.addEventListener('touchend', clickHandler)
-                el.addEventListener('mouseup', function (e) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                })
-            } else {
+            else {
                 el = DOMUtils.div({class: 'context-menu'})
                 if (typeof item.label === 'string') {
                     el.innerHTML = item.label

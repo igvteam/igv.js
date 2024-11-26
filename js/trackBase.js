@@ -28,9 +28,6 @@ import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/sr
 import $ from "./vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
-import ColorScaleEditor from "./ui/components/colorScaleEditor.js"
-
-const DEFAULT_COLOR = 'rgb(150,150,150)'
 
 const fixColor = (colorString) => {
     if (StringUtils.isString(colorString)) {
@@ -49,6 +46,8 @@ const fixColor = (colorString) => {
  * @constructor
  */
 class TrackBase {
+
+    static defaultColor = 'rgb(150,150,150)'
 
     static defaults = {
         height: 50,
@@ -96,6 +95,9 @@ class TrackBase {
             }
         }
 
+        // this._initialColor = this.color || this.constructor.defaultColor
+        // this._initialAltColor = this.altColor || this.constructor.defaultColor
+
         if (config.name || config.label) {
             this.name = config.name || config.label
         } else if (FileUtils.isFile(config.url)) {
@@ -134,6 +136,16 @@ class TrackBase {
         } else if (typeof this.config.hoverText === 'function') {
             this.hoverText = this.config.hoverText
         }
+    }
+
+    async postInit(){
+
+        console.log(`TrackBase - track(${ this.type }) - postInit()`)
+
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
+
+        return this
     }
 
     get name() {
