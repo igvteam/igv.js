@@ -95,8 +95,8 @@ class TrackBase {
             }
         }
 
-        this._initialColor = this.color || this.constructor.defaultColor
-        this._initialAltColor = this.altColor || this.constructor.defaultColor
+        // this._initialColor = this.color || this.constructor.defaultColor
+        // this._initialAltColor = this.altColor || this.constructor.defaultColor
 
         if (config.name || config.label) {
             this.name = config.name || config.label
@@ -136,6 +136,16 @@ class TrackBase {
         } else if (typeof this.config.hoverText === 'function') {
             this.hoverText = this.config.hoverText
         }
+    }
+
+    async postInit(){
+
+        console.log(`TrackBase - track(${ this.type }) - postInit()`)
+
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
+
+        return this
     }
 
     get name() {
