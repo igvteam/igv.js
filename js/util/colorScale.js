@@ -66,9 +66,15 @@ class BinnedColorScale {
 
 
 class GradientColorScale {
-    constructor({min, max, minColor, maxColor}) {
+    constructor(config) {
         this.type = 'gradient'
-        this.setProperties({min, max, minColor, maxColor})
+        const fixed = {
+            min: config.min !== undefined ? config.min : config.low,
+            max: config.max !== undefined ? config.max : config.high,
+            minColor: config.minColor || config.lowColor,
+            maxColor: config.maxColor || config.highColor
+        }
+        this.setProperties(fixed)
     }
 
     setProperties({min, max, minColor, maxColor}) {
