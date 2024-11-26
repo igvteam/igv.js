@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="https://igv.org/web/https://igv.org/web/img/favicon.ico" rel="shortcut icon">
+
+    <title>Multiple Track Selection</title>
+
+</head>
+
+<body>
+
+<h1>Multiple Track Selection</h1>
+
+<div id="igvDiv"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const config =
+        {
+            genome: "hg19",
+            locus: "chr1:155,138,124-155,153,715",
+            tracks:
+                [
+                    {
+                        type: "wig",
+                        format: "bigwig",
+                        url: 'https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig',
+                        color: "red",
+                    },
+                    {
+                        type: "wig",
+                        format: "bigwig",
+                        url: "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                        color: "green",
+                    },
+                    //     {
+                    //         type: "wig",
+                    //         format: "bigwig",
+                    //         url : "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                    //         color: "blue",
+                    //     }
+                ]
+        };
+
+    const kitchenSinkConfig =
+        {
+            genome: "hg19",
+            locus: "chr1:155,138,124-155,153,715",
+            tracks:
+                [
+                    {
+                        name: "Phase 3 WGS variants",
+                        url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
+                        indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi",
+                    },
+                    {
+                        name: "ENCODE bigwig",
+                        url: 'https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig'
+                    },
+                    {
+                        url: "https://www.encodeproject.org/files/ENCFF001GBH/@@download/ENCFF001GBH.bigBed",
+                        color: "rgb(0, 150, 0)",
+                        name: "Bigbed with color (green)",
+                    },
+                    {
+                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                        name: 'Group Autoscale 1 of 3',
+                        color: 'rgb(200,0,0)',
+                        // autoscaleGroup: '1'
+                    },
+                    {
+                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSig.bigWig',
+                        name: 'Group Autoscale 2 of 3',
+                        color: 'rgb(0,0,150)',
+                        // autoscaleGroup: '1'
+                    },
+                    {
+                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig',
+                        name: 'Group Autoscale 3 of 3',
+                        color: 'rgb(0,150,0)',
+                        // autoscaleGroup: '1'
+                    },
+                    {
+                        name: "Merged - configuration",
+                        height: 50,
+                        type: "merged",
+                        tracks: [
+                            {
+                                "type": "wig",
+                                "format": "bigwig",
+                                "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                                "color": "red"
+                            },
+                            {
+                                "type": "wig",
+                                "format": "bigwig",
+                                "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                                "color": "green"
+                            }
+                        ]
+                    },
+                    {
+                        url: 'https://s3.amazonaws.com/igv.org.test/data/wgEncodeBroadHistoneGm12878H3k4me3StdSig.wig.tdf',
+                        name: 'tdf file',
+                        color: 'blue'
+                    },
+                    {
+                        name: "CTCF - string url",
+                        type: "wig",
+                        format: "bigwig",
+                        url: "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"
+                    },
+                    {
+                        name: "CTCF - function url ",
+                        type: "wig",
+                        format: "bigwig",
+                        url: function () {
+                            return "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"
+                        }
+                    },
+                    {
+                        name: "CTCF - promise url",
+                        type: "wig",
+                        format: "bigwig",
+                        url: Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                    },
+                    {
+                        name: "CTCF - function that returns promise ",
+                        type: "wig",
+                        format: "bigwig",
+                        url: function () {
+                            return Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                        }
+                    },
+                    {
+                        name: "CTCF - function that returns thenable ",
+                        type: "wig",
+                        format: "bigwig",
+                        url: function () {
+                            return {
+                                then: function (resolve, reject) {
+                                    resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                                }
+                            }
+                        }
+                    },
+                    {
+                        name: "Copy number -- embedded (json) features",
+                        type: "seg",
+                        displayMode: "EXPANDED",
+                        log: true,
+                        features: [
+                            {
+                                "chr": "chr1",
+                                "start": 155141825,
+                                "end": 155150000,
+                                "value": 0.8239,
+                                "sample": "Sample 1"
+                            },
+                            {
+                                "chr": "chr1",
+                                "start": 155149967,
+                                "end": 155150988,
+                                "value": -0.8391,
+                                "sample": "Sample 2"
+                            }
+                        ]
+                    }
+                ]
+
+        };
+
+    const overyTrackConfig =
+        {
+            genome: "hg19",
+            locus: "chr1:155,138,124-155,153,715",
+            tracks:
+                [
+                    {
+                        name: "Merged - configuration",
+                        height: 256,
+                        type: "merged",
+                        tracks: [
+                            {
+                                "type": "wig",
+                                "format": "bigwig",
+                                "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                                "color": "red"
+                            },
+                            {
+                                "type": "wig",
+                                "format": "bigwig",
+                                "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                                "color": "green"
+                            }
+                        ]
+                    },
+                ]
+
+        };
+
+    const TDFConfig =
+        {
+            genome: "hg19",
+            locus: "chr1:155,138,124-155,153,715",
+            tracks:
+                [
+                    {
+                        url: 'https://s3.amazonaws.com/igv.org.test/data/wgEncodeBroadHistoneGm12878H3k4me3StdSig.wig.tdf',
+                        name: 'tdf file',
+                        color: 'blue'
+                    },
+                ]
+        };
+
+    const BigWigConfig =
+        {
+            genome: "hg19",
+            locus: "chr1:155,138,124-155,153,715",
+            tracks:
+                [
+                    {
+                        type: "wig",
+                        format: "bigwig",
+                        url: 'https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig',
+                        color: "red",
+                        height: 128,
+                    },
+                    {
+                        type: "wig",
+                        format: "bigwig",
+                        url: "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                        color: "green",
+                        height: 128,
+                    },
+                    {
+                        type: "wig",
+                        format: "bigwig",
+                        url: "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                        color: "blue",
+                        height: 128,
+                    }
+                ]
+        };
+
+    const GroupAutoScaleConfig = {
+        "genome": "hg19",
+        "locus": "myc",
+        "tracks": [
+            {
+                "type": "sequence",
+                "order": -1.7976931348623157e+308
+            },
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF000ATR/@@download/ENCFF000ATR.bigWig",
+                "color": "#018448",
+                "name": "GM12878 H3K4me3  signal ENCSR000AKA",
+                "format": "bigwig",
+                "type": "wig",
+                "height": 50,
+                "autoscaleGroup": "1",
+                "order": 4
+            },
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF000AST/@@download/ENCFF000AST.bigWig",
+                "color": "#891100",
+                "name": "GM12878 H3K27me3  signal ENCSR000AKD",
+                "format": "bigwig",
+                "type": "wig",
+                "height": 50,
+                "autoscaleGroup": "1",
+                "order": 4
+            },
+            {
+                "url": "https://www.encodeproject.org/files/ENCFF000ATA/@@download/ENCFF000ATA.bigWig",
+                "color": "rgb(150,150,150)",
+                "name": "GM12878 H3K36me3  signal ENCSR000AKE",
+                "format": "bigwig",
+                "type": "wig",
+                "height": 50,
+                "autoscaleGroup": "1",
+                "order": 5
+            }
+        ]
+    }
+
+    igv.createBrowser(document.getElementById("igvDiv"), overyTrackConfig)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+    function download(filename, data) {
+
+        const element = document.createElement('a');
+        element.setAttribute('href', data);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+
+</script>
+
+</body>
+
+</html>

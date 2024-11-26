@@ -135,6 +135,9 @@ class InteractionTrack extends TrackBase {
             this.featureSource.visibilityWindow = this.visibilityWindow  // <- this looks odd
         }
 
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
+
         return this
     }
 

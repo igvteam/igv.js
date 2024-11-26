@@ -22,6 +22,35 @@ function hexToRGB(hex) {
     return `rgb(${r}, ${g}, ${b})`;
 }
 
+const genericColorPickerPalette =
+    {
+        licorice: "#000000",
+        steel: "#6e6e6e",
+        magnesium: "#b8b8b8",
+        mercury: "#e8e8e8",
+        cayenne: "#891100",
+        mocha: "#894800",
+        aspargus: "#888501",
+        fern: "#458401",
+        teal: "#008688",
+        salmon: "#ff726e",
+        tangerine: "#ff8802",
+        cantaloupe: "#ffce6e",
+        lemon: "#fffa03",
+        lime: "#83f902",
+        honeydew: "#cefa6e",
+        ice: "#68fdff",
+        aqua: "#008cff",
+        blueberry: "#002eff",
+        midnight: "#001888",
+        grape: "#8931ff",
+        lavender: "#d278ff",
+        orchid: "#6e76ff",
+        strawberry: "#ff2987",
+        magenta: "#ff39ff",
+        carnation: "#ff7fd3"
+    }
+
 const appleCrayonPalette =
     {
         licorice: "#000000",
@@ -526,6 +555,7 @@ export {
     colorPalettes,
     appleCrayonRGB,
     appleCrayonRGBA,
+    genericColorPickerPalette,
     appleCrayonPalette,
     isValidColorName,
     getColorNameRGBString,

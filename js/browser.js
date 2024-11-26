@@ -160,6 +160,9 @@ class Browser {
 
         // Region of interest
         this.roiManager = new ROIManager(this)
+
+        // previous track colors for colorPicker
+        this.previousTrackColors = []
     }
 
     get doShowROITable() {
@@ -233,7 +236,7 @@ class Browser {
         this.dataRangeDialog = new DataRangeDialog(this, $(this.root))
         this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${DOMUtils.guid()}`
 
-        this.genericColorPicker = new GenericColorPicker({parent: this.columnContainer, width: 432})
+        this.genericColorPicker = new GenericColorPicker({ parent: this.columnContainer, width: 180 })
         this.genericColorPicker.container.id = `igv-track-color-picker-${DOMUtils.guid()}`
 
         this.sliderDialog = new SliderDialog(this.root)
