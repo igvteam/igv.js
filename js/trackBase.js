@@ -535,7 +535,7 @@ class TrackBase {
 
         // Data range or color scale
 
-        if ("heatmap" !== this.graphType && this.colorScale) {
+        if ("heatmap" !== this.graphType) {
 
             menuItems.push('<hr/>')
 
