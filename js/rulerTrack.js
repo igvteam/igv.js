@@ -37,12 +37,12 @@ class RulerTrack {
         this.browser = browser
         this.height = defaultRulerHeight
         this.name = ""
-        this.id = "ruler"
         this.disableButtons = true
         this.ignoreTrackMenu = true
         this.order = Number.MIN_SAFE_INTEGER * 1e-2
         this.removable = false
         this.type = 'ruler'
+        this.id = "ruler"
     }
 
     async getFeatures(chr, start, end) {

@@ -34,6 +34,7 @@ class IdeogramTrack {
     constructor(browser) {
         this.browser = browser
         this.type = 'ideogram'
+        this.id = 'ideogram'
         this.height = 16
         this.order = Number.MIN_SAFE_INTEGER
         this.disableButtons = true
