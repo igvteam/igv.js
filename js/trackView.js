@@ -204,54 +204,55 @@ class TrackView {
         }
     }
 
-
-    presentColorPicker(key) {
+    presentColorPicker(colorSelection) {
 
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
 
-            const trackColors = []
-            const color = this.track.color || this.track.defaultColor
-            if (StringUtils.isString(color)) {
-                trackColors.push(color)
-            }
-            if (this.track.altColor && StringUtils.isString(this.track.altColor)) {
-                trackColors.push(this.track.altColor)
-            }
-            let defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c))
-            let colorHandlers =
-                {
-                    color: hex => {
-                        this.track.color = hexToRGB(hex)
-                        this.repaintViews()
-                    },
-                    altColor: hex => {
-                        this.track.altColor = hexToRGB(hex)
-                        this.repaintViews()
-                    }
+            let initialTrackColor
 
-                }
+            if (colorSelection === 'color') {
+                initialTrackColor = this.track._initialColor || this.track.constructor.defaultColor
+            } else {
+                initialTrackColor = this.track._initialAltColor || this.track.constructor.defaultColor
+            }
 
+            let colorHandlers
             const selected = this.browser.getSelectedTrackViews()
-
             if (selected.length > 0 && new Set(selected).has(this)) {
 
                 colorHandlers =
                     {
                         color: rgbString => {
-                            for (let trackView of selected) {
+                            for (const trackView of selected) {
                                 trackView.track.color = rgbString
                                 trackView.repaintViews()
                             }
-                        }
-                    }
-
-                this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
+                        },
+                        altColor: rgbString => {
+                            for (const trackView of selected) {
+                                trackView.track.altColor = rgbString
+                                trackView.repaintViews()
+                            }
+                        },
+                    };
             } else {
-                this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
+                colorHandlers =
+                    {
+                        color: hex => {
+                            this.track.color = hexToRGB(hex)
+                            this.repaintViews()
+                        },
+                        altColor: hex => {
+                            this.track.altColor = hexToRGB(hex)
+                            this.repaintViews()
+                        }
+                    };
             }
 
-            this.browser.genericColorPicker.setActiveColorHandler(key)
+            const moreColorsPresentationColor = 'color' === colorSelection ? (this.track.color || this.track.constructor.defaultColor) : (this.track.altColor || this.track.constructor.defaultColor)
+            this.browser.genericColorPicker.configure(initialTrackColor, colorHandlers[colorSelection], moreColorsPresentationColor)
             this.browser.genericColorPicker.show()
+
         }
 
     }
@@ -1009,7 +1010,6 @@ class TrackView {
     }
 
 }
-
 
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 

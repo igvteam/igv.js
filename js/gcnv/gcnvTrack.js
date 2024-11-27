@@ -78,6 +78,10 @@ class GCNVTrack extends TrackBase {
                 }
             }
         }
+
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
+
     }
 
     menuItemList() {

@@ -100,7 +100,7 @@ class NavbarButton {
     }
 
     configureIconButton() {
-        console.log(`icon ${this.title}`)
+        // console.log(`icon ${this.title}`)
         this.button.classList.add('igv-navbar-icon-button')
     }
 

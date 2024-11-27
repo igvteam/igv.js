@@ -13,10 +13,9 @@ import {isSecureContext, expandRegion} from "../util/igvUtils.js"
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 import {findFeatureAfterCenter} from "./featureUtils.js"
 
-const DEFAULT_COLOR = 'rgb(0, 0, 150)'
-
-
 class FeatureTrack extends TrackBase {
+
+    static defaultColor = 'rgb(0,0,150)'
 
     static defaults = {
         type: "annotation",
@@ -99,6 +98,9 @@ class FeatureTrack extends TrackBase {
         if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
             this.visibilityWindow = await this.featureSource.defaultVisibilityWindow()
         }
+
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
 
         return this
 
@@ -509,7 +511,7 @@ class FeatureTrack extends TrackBase {
 
         // If no explicit setting use the default
         if (!color) {
-            color = DEFAULT_COLOR   // Track default
+            color = FeatureTrack.defaultColor   // Track default
         }
 
         if (feature.alpha && feature.alpha !== 1) {
