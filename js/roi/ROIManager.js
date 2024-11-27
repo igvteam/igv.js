@@ -5,7 +5,6 @@ import {inferFileFormat} from "../util/fileFormatUtils.js"
 import ROIMenu from "./ROIMenu.js"
 import ROITable from "./ROITable.js"
 
-let roiRegionMargin = undefined
 class ROIManager {
 
     constructor(browser) {
@@ -56,7 +55,7 @@ class ROIManager {
                 el.style.backgroundColor = el.dataset.color
             } else {
                 // Hide overlay by setting its transparency to zero.  A bit of an unusual method to hide an element.
-                el.style.backgroundColor = `rgba(0,0,0,0)`
+                el.style.backgroundColor = `rgba(0, 0, 0, 0)`
             }
         }
         this.roiTable.toggleROIButton.textContent = false === isVisible ? 'Show Overlays' : 'Hide Overlays'
@@ -223,7 +222,7 @@ class ROIManager {
         regionElement.style.left = `${pixelX}px`
         regionElement.style.width = `${pixelWidth}px`
 
-        const marginTop = `${ROIManager.getROIRegionTopMargin(this.browser)}px`
+        const marginTop = `${this.getROIRegionTopMargin()}px`
         regionElement.style.marginTop = marginTop
 
         regionElement.dataset.color = roiSet.color
@@ -234,7 +233,7 @@ class ROIManager {
             regionElement.style.backgroundColor = roiSet.color
         } else {
             // Hide overlay by setting its transparency to zero.  A bit of an unusual method to hide an element.
-            regionElement.style.backgroundColor = `rgba(0,0,0,0)`
+            regionElement.style.backgroundColor = `rgba(0, 0, 0, 0)`
         }
 
         const header = DOMUtils.div()
@@ -253,23 +252,33 @@ class ROIManager {
         return regionElement
     }
 
- static getROIRegionTopMargin(browser) {
-
-        if (undefined === roiRegionMargin) {
-            const tracks = browser.findTracks(track => new Set(['ideogram', 'ruler']).has(track.type))
-
-            const [rectA, rectB] = tracks
-                .map(track => track.trackView.viewports[0].$viewport.get(0))
-                .map(element => getElementVerticalDimension(element))
-
-            //Covers cases in which ruler and/or ideogram are hidden
-            const heightA = rectA ? rectA.height : 0
-            const heightB = rectB ? rectB.height : 0
-
-            const fudge = -0.5
-            roiRegionMargin = heightA + heightB + fudge
-
+    updateROIRegionPositions() {
+        const top = `${this.getROIRegionTopMargin()}px`
+        const columns = this.browser.columnContainer.querySelectorAll('.igv-column')
+        for (let i = 0; i < columns.length; i++) {
+            const elements = columns[i].querySelectorAll('.igv-roi-region')
+            for (let j = 0; j < elements.length; j++) {
+                elements[j].style.marginTop = top
+            }
         }
+    }
+
+    getROIRegionTopMargin() {
+
+        const browser = this.browser
+
+        const tracks = browser.findTracks(track => new Set(['ideogram', 'ruler']).has(track.type))
+
+        const [rectA, rectB] = tracks
+            .map(track => track.trackView.viewports[0].$viewport.get(0))
+            .map(element => getElementVerticalDimension(element))
+
+        //Covers cases in which ruler and/or ideogram are hidden
+        const heightA = rectA ? rectA.height : 0
+        const heightB = rectB ? rectB.height : 0
+
+        const fudge = -0.5
+        const roiRegionMargin = heightA + heightB + fudge
 
         return roiRegionMargin
     }

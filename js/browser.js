@@ -1366,6 +1366,9 @@ class Browser {
         }
 
         resize.call(this)
+
+        this.roiManager.updateROIRegionPositions()
+
         await this.updateViews()
     }
 
