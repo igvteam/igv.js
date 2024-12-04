@@ -51,6 +51,13 @@ class Genome {
             this.chromosomes = this.sequence.chromosomes || new Map()
         }
 
+        // TODO: DUGLA Hack to allow juicebox and igv to play nice together
+        if (this.chromosomes.size > 0 && 1 === this.chromosomes.size) {
+            const [ key ] = [ ...this.chromosomes.keys() ]
+            const value = this.chromosomes.get(key)
+            this.chromosomes.set('all', value);
+        }
+
         if (this.chromosomes.size > 0) {
             this.chromosomeNames = Array.from(this.chromosomes.keys())
         }
