@@ -9,8 +9,9 @@
  * @param config
  * @returns {Promise<*[]>}
  */
-import {isNumber, buildOptions} from "../util/igvUtils.js"
+import {buildOptions} from "../util/igvUtils.js"
 import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import ChromAliasDefaults from "./chromAliasDefaults.js"
 
 class ChromAliasFile {
 
@@ -73,14 +74,16 @@ class ChromAliasFile {
                 }
 
                 const aliasRecord = {chr}
+                ChromAliasDefaults.addCaseAliases(aliasRecord)
                 for (let i = 0; i < tokens.length; i++) {
                     const key = this.headings ? this.headings[i] : i
                     aliasRecord[key] = tokens[i]
-                    this.aliasRecordCache.set(tokens[i], aliasRecord)
                 }
 
-                this.aliasRecordCache.set(chr.toLowerCase(), aliasRecord)
-                this.aliasRecordCache.set(chr.toUpperCase(), aliasRecord)
+                for (let a of Object.values(aliasRecord)) {
+                    this.aliasRecordCache.set(a, aliasRecord)
+                }
+
             }
         }
     }
