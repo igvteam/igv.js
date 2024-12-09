@@ -196,7 +196,7 @@ class TextFeatureSource extends BaseFeatureSource {
         // indicating whole chromosome should be read at once.
         if ((!visibilityWindow || visibilityWindow <= 0) && this.config.expandQuery !== false) {
             // Whole chromosome
-            const chromosome = this.genome ? this.genome.getChromosome(queryChr) : undefined
+            const chromosome = this.genome ? this.genome.getChromosome(chr) : undefined
             intervalStart = 0
             intervalEnd = Math.max(chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER, end)
         } else if (visibilityWindow > (end - start) && this.config.expandQuery !== false) {
