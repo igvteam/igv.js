@@ -1,4 +1,5 @@
 import BWReader from "../bigwig/bwReader.js"
+import ChromAliasDefaults from "./chromAliasDefaults.js"
 
 /**
  * Chromosome alias source backed by a UCSC bigbed file
@@ -62,6 +63,7 @@ class ChromAliasBB {
         if (!this.aliasRecordCache.has(alias)) {
             const aliasRecord = await this.reader.search(alias)
             if (aliasRecord) {
+                ChromAliasDefaults.addCaseAliases(aliasRecord)
                 for (let key of Object.keys(aliasRecord)) {
                     if ("start" !== key && "end" !== key) {
                         this.aliasRecordCache.set(aliasRecord[key], aliasRecord)

@@ -151,7 +151,9 @@ class ChromAliasDefaults {
                 }
             }
 
+
             for (let rec of aliasRecords) {
+                ChromAliasDefaults.addCaseAliases(rec)
                 for (let a of Object.values(rec)) {
                     this.aliasRecordCache.set(a, rec)
                 }
@@ -174,6 +176,24 @@ class ChromAliasDefaults {
     static getNCBIName(name) {
         const tokens = name.split("\\|")
         return tokens[tokens.length - 1]
+    }
+
+    static addCaseAliases(aliasRecord) {
+
+            // Add some aliases for case insensitivy
+            const upper = aliasRecord.chr.toUpperCase()
+            const lower = aliasRecord.chr.toLowerCase()
+            const cap = aliasRecord.chr.charAt(0).toUpperCase() + aliasRecord.chr.slice(1)
+            if(aliasRecord.chr !== upper) {
+                aliasRecord["_uppercase"] = upper
+            }
+            if(aliasRecord.chr !== lower) {
+                aliasRecord["_lowercase"] = lower
+            }
+            if(aliasRecord.chr !== cap) {
+                aliasRecord["_cap"] = cap
+            }
+
     }
 
 }
