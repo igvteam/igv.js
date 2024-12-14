@@ -140,7 +140,7 @@ class VcfParser {
         while ((line = await dataWrapper.nextLine()) !== undefined) {
             if (line && !line.startsWith("#")) {
 
-                const tokens = line.split("\t")
+                const tokens = line.trim().split("\t")
                 if (tokens.length === nExpectedColumns) {
                     const variant = new Variant(tokens)
                     variant.header = this.header       // Keep a pointer to the header to interpret fields for popup text
