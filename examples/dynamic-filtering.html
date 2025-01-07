@@ -68,8 +68,19 @@
       return isFeatureInFrame
     }
 
-    function filterFeatures(dimension) {
-      const trackIndex = 3 // Track index
+    function filterFeatures(trackSelector, dimension) {
+      let trackIndex
+      console.log('typeof trackSelector', typeof trackSelector)
+      if (typeof trackSelector === 'string') {
+        window.igvBrowser.trackViews.find((trackView, i) => {
+          trackIndex = i
+          return trackView.track.config?.name === trackSelector
+        })
+      } else {
+        trackIndex = trackSelector
+      }
+
+      // const trackIndex = 3 // Track index
       const igvBrowser = window.igvBrowser
 
       const scoreSelection = new Set([])
@@ -102,8 +113,8 @@
 <h1>Ad-hoc filtering in IGV</h1>
 <ul class="filters">
   <span>Type</span>
-  <li><label>SNP <input type="checkbox" value="SNP" onChange="filterFeatures('type')" checked/></label></li>
-  <li><label>INDEL <input type="checkbox" value="INDEL" onChange="filterFeatures('type')" checked/></label></li>
+  <li><label>SNP <input type="checkbox" value="SNP" onChange="filterFeatures('Phase 3 WGS variants', 'type', )" checked/></label></li>
+  <li><label>INDEL <input type="checkbox" value="INDEL" onChange="filterFeatures('Phase 3 WGS variants', 'type')" checked/></label></li>
 </ul>
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
