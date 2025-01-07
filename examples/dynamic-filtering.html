@@ -68,7 +68,7 @@
       return isFeatureInFrame
     }
 
-    function filterVariantType() {
+    function filterFeatures(dimension) {
       const trackIndex = 3 // Track index
       const igvBrowser = window.igvBrowser
 
@@ -88,7 +88,7 @@
       }
 
       const filteredFeatures = originalChrFeatures.filter(
-        feature => scoreSelection.has(feature.type) && getIsFeatureInFrame(feature, igvBrowser)
+        feature => scoreSelection.has(feature[dimension]) && getIsFeatureInFrame(feature, igvBrowser)
       )
 
       console.log('filteredFeatures', filteredFeatures)
@@ -102,11 +102,8 @@
 <h1>Ad-hoc filtering in IGV</h1>
 <ul class="filters">
   <span>Type</span>
-  <li><label>SNP <input type="checkbox" value="SNP" onChange="filterVariantType()" checked/></label></li>
-  <li><label>INDEL <input type="checkbox" value="INDEL" onChange="filterVariantType()" checked/></label></li>
-  <li><label>3 <input type="checkbox" value="3" onChange="filterVariantType()" checked/></label></li>
-  <li><label>4 <input type="checkbox" value="4" onChange="filterVariantType()" checked/></label></li>
-  <li><label>5 <input type="checkbox" value="5" onChange="filterVariantType()" checked/></label></li>
+  <li><label>SNP <input type="checkbox" value="SNP" onChange="filterFeatures('type')" checked/></label></li>
+  <li><label>INDEL <input type="checkbox" value="INDEL" onChange="filterFeatures('type')" checked/></label></li>
 </ul>
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
