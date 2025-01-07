@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>igv.js</title>
+    <style>.filters li { display: inline} </style>
+    <script>
+
+    /** Render update to reflect newly-selected features in IGV track */
+    function updateTrack(trackIndex, filteredFeatures, igv, igvBrowser) {
+      igv.FeatureUtils.packFeatures(filteredFeatures)
+      const range = igvBrowser.trackViews[trackIndex].track.featureSource.featureCache.range
+      igvBrowser.trackViews[trackIndex].track.featureSource.featureCache =
+        new igv.FeatureCache(filteredFeatures, igvBrowser.genome, range)
+
+      igvBrowser.trackViews[trackIndex].track.clearCachedFeatures()
+      igvBrowser.trackViews[trackIndex].track.updateViews()
+    }
+
+    /** Get unfiltered genomic features on current chromosome */
+    function getOriginalChrFeatures(trackIndex, igvBrowser) {
+      const chr = Array.from(igvBrowser.tracks[0].trackView.viewports[0].featureCache.features.keys())[0]
+
+      console.log('igvBrowser.tracks[0]', igvBrowser.tracks[0])
+      console.log('igvBrowser.tracks[0]', igvBrowser.tracks[0])
+      console.log('chr', chr)
+
+      if (
+        typeof window.originalFeatures === 'undefined' ||
+        chr in window.originalFeatures === false
+      ) {
+        window.originalFeatures = igvBrowser.trackViews[trackIndex].track.featureSource.featureCache.allFeatures
+      }
+
+      const originalChrFeatures = window.originalFeatures[chr]
+
+      return originalChrFeatures
+    }
+
+    /** Determine if feature is in genomic frame */
+    function getIsFeatureInFrame(feature, igvBrowser) {
+      const frame = igvBrowser.referenceFrameList[0]
+
+      const isFeatureInFrame = (
+        // Contained:
+        // Frame:     --------
+        // Feature:     ----
+        (feature.start >= frame.start && feature.end <= frame.end) ||
+
+        // Overlaps start
+        // Frame:     --------
+        // Feature:  ----
+        (feature.start <= frame.start && feature.end >= frame.start) ||
+
+        // Overlaps end
+        // Frame:     --------
+        // Feature:         ----
+        (feature.start <= frame.end && feature.end >= frame.end) ||
+
+        // Spans
+        // Frame:     --------
+        // Feature: ------------
+        (feature.start <= frame.start && feature.end >= frame.end)
+      )
+
+      return isFeatureInFrame
+    }
+
+    function filterVariantType() {
+      const trackIndex = 3 // Track index
+      const igvBrowser = window.igvBrowser
+
+      const scoreSelection = new Set([])
+
+      const originalChrFeatures = getOriginalChrFeatures(trackIndex, igvBrowser)
+
+      const inputs = document.querySelectorAll('.filters input')
+      inputs.forEach(input => {
+        if (input.checked) {
+          scoreSelection.add(input.value)
+        }
+      })
+
+      if (scoreSelection.size === 0) {
+        return scoreSelection.originalChrFeatures
+      }
+
+      const filteredFeatures = originalChrFeatures.filter(
+        feature => scoreSelection.has(feature.type) && getIsFeatureInFrame(feature, igvBrowser)
+      )
+
+      console.log('filteredFeatures', filteredFeatures)
+      updateTrack(trackIndex, filteredFeatures, igv, igvBrowser)
+    }
+  </script>
+</head>
+
+<body>
+
+<h1>Ad-hoc filtering in IGV</h1>
+<ul class="filters">
+  <span>Type</span>
+  <li><label>SNP <input type="checkbox" value="SNP" onChange="filterVariantType()" checked/></label></li>
+  <li><label>INDEL <input type="checkbox" value="INDEL" onChange="filterVariantType()" checked/></label></li>
+  <li><label>3 <input type="checkbox" value="3" onChange="filterVariantType()" checked/></label></li>
+  <li><label>4 <input type="checkbox" value="4" onChange="filterVariantType()" checked/></label></li>
+  <li><label>5 <input type="checkbox" value="5" onChange="filterVariantType()" checked/></label></li>
+</ul>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js"
+
+    const options =
+        {
+            // Example of fully specifying a reference .  We could alternatively use  "genome: 'hg19'"
+            reference: {
+                "id": "hg19",
+                "name": "Human (CRCh37/hg19)",
+                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
+            },
+            locus: "19:11,199,138-11,245,496",
+            tracks:
+                [
+                    {
+                        name: "Phase 3 WGS variants",
+                        type: "variant",
+                        format: "vcf",
+                        visibilityWindow: 300000,
+                        url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
+                        indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi"
+                    },
+                    {
+                        name: "Genes",
+                        type: "annotation",
+                        format: "bed",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
+                        order: Number.MAX_VALUE,
+                        visibilityWindow: 300000000,
+                        displayMode: "EXPANDED"
+                    }
+                ]
+
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    window.igv = igv
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+            window.igvBrowser = browser
+        })
+
+</script>
+
+</body>
+
+</html>
