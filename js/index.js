@@ -7,7 +7,7 @@ import {createBrowser, createTrack, removeAllBrowsers, removeBrowser, visibility
 import embedCss from "./embedCss.js"
 import version from "./version.js"
 import * as TrackUtils from "./util/trackUtils.js"
-import {igvxhr} from "../node_modules/igv-utils/src/index.js"
+import {igvxhr, FeatureUtils, FeatureCache} from "../node_modules/igv-utils/src/index.js"
 import {registerTrackClass, registerTrackCreatorFunction} from "./trackFactory.js"
 import TrackBase from "./trackBase.js"
 import Hub from "./ucsc/ucscHub.js"
@@ -30,6 +30,8 @@ const oauth = igvxhr.oauth
 
 export default {
     TrackUtils,
+    FeatureUtils,
+    FeatureCache,
     IGVGraphics,
     MenuUtils,
     DataRangeDialog,
