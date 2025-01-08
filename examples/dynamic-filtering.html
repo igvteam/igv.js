@@ -133,12 +133,18 @@
      *     {
      *       "name": <String>, // Name of facet, e.g. "Variant type"
      *
-     *       "type": <String> // "Categorical" or "Numeric"
+     *       "type": <String> // "categorical" or "numeric"
      *
      *       // Names of filters in facet, only for categorical facets.
      *       // The index of these names correspond to the integer value at the
      *       // appropriate position in the `features` array.
      *       "filterNames": [<String>],
+     *
+     *
+     *       // Number of features satisfying this filter (for categorical)
+     *       "countsByFilterName": {
+     *          <String>: <Integer>
+     *       }
      *     }
      *   ]
      * }
@@ -148,19 +154,18 @@
       const trackIndex = getTrackIndex(trackSelector, igvBrowser)
       const featuresInFrame = getFeaturesInFrame(trackIndex, igvBrowser)
 
-      console.log('featuresInFrame', featuresInFrame)
-
       isCategoricalByFacetName = {}
 
       // Populate facets model, except for filterNames array values
       const facets = []
-      const basicInfo = featuresInFrame[0].info
-      const dimensions = Object.keys(basicInfo);
+      const headInfo = featuresInFrame[0].header.INFO
+      const dimensions = Object.keys(headInfo);
       dimensions.forEach(dimension => {
-        const type = isNaN(parseFloat(basicInfo[dimension])) ? 'categorical' : 'numeric'
+        const type = headInfo[dimension].Type === 'String' ? 'categorical' : 'numeric'
         const facet = {'name': dimension, type}
         if (type === 'categorical') {
           facet.filterNames = []
+          facet.countsByFilterName = {}
           isCategoricalByFacetName[facet.name] = true
         } else {
           isCategoricalByFacetName[facet.name] = false
@@ -175,21 +180,27 @@
         const igvFeature = featuresInFrame[i]
         const info = igvFeature.info
         let j = 0
-        for (facetName in info) {
-          const isCategorical = isCategoricalByFacetName[facetName]
-          const rawValue = info[facetName]
+        for (facetName in headInfo) {
           let value
-          if (isCategorical) {
-            if (!facets[j].filterNames.includes(rawValue)) {
-              // Populate filterNames
-              facets[j].filterNames.push(rawValue);
-            }
-
-            // Using index offsets as values, rather than raw strings, helps
-            // make categorical filtering fast.
-            value = facets[j].filterNames.indexOf(rawValue)
+          const isCategorical = isCategoricalByFacetName[facetName]
+          if (facetName in info === false) {
+            value = undefined // Use an "empty" value
           } else {
-            value = rawValue
+            const rawValue = info[facetName]
+            if (isCategorical) {
+              if (!facets[j].filterNames.includes(rawValue)) {
+                // Populate filterNames
+                facets[j].filterNames.push(rawValue);
+                facets[j].countsByFilterName[rawValue] = 0
+              }
+
+              // Using index offsets as values, rather than raw strings, helps
+              // make categorical filtering fast.
+              value = facets[j].filterNames.indexOf(rawValue)
+              facets[j].countsByFilterName[rawValue] += 1
+            } else {
+              value = rawValue
+            }
           }
           feature.push(value)
           j++
@@ -203,6 +214,7 @@
       console.log('Duration (ms):', (t1 - t0))
       return {facets, features}
     }
+
 
   </script>
 </head>
