@@ -68,20 +68,8 @@
       return isFeatureInFrame
     }
 
-    function filterFeatures(trackSelector, dimension) {
-      let trackIndex
-      console.log('typeof trackSelector', typeof trackSelector)
-      if (typeof trackSelector === 'string') {
-        window.igvBrowser.trackViews.find((trackView, i) => {
-          trackIndex = i
-          return trackView.track.config?.name === trackSelector
-        })
-      } else {
-        trackIndex = trackSelector
-      }
-
-      // const trackIndex = 3 // Track index
-      const igvBrowser = window.igvBrowser
+    function filterFeatures(trackSelector, dimension, igvBrowser) {
+      const trackIndex = getTrackIndex(trackSelector, igvBrowser);
 
       const scoreSelection = new Set([])
 
@@ -105,6 +93,67 @@
       console.log('filteredFeatures', filteredFeatures)
       updateTrack(trackIndex, filteredFeatures, igv, igvBrowser)
     }
+
+    function getFeaturesInFrame(trackSelector, igvBrowser) {
+      const trackIndex = getTrackIndex(trackSelector, igvBrowser);
+      const originalChrFeatures = getOriginalChrFeatures(trackIndex, igvBrowser)
+      const featuresInFrame = originalChrFeatures.filter(
+        feature => getIsFeatureInFrame(feature, igvBrowser)
+      )
+      return featuresInFrame
+    }
+
+    /** Get index position of track in IGV browser, given its name or index */
+    function getTrackIndex(trackSelector, igvBrowser) {
+      let trackIndex = null
+      if (typeof trackSelector === 'string') {
+        igvBrowser.trackViews.find((trackView, i) => {
+          trackIndex = i
+          return trackView.track.config?.name === trackSelector
+        })
+      } else {
+        trackIndex = trackSelector
+      }
+      return trackIndex
+    }
+
+    /**
+     * Initialize facets and filters for the current genomic frame
+     *
+     * Output:
+     * {
+     *   "features": [
+     *      // Each "feature" (e.g. variant, read, gene) is represented as an
+     *      // array of numbers.  For categorical facets, each number is a
+     *      // compact representation (e.g. 0) of the filter / value (e.g.
+     *      // "SNP") of a particular facet / dimension (e.g. "Variant type").
+     *      [<Number>]
+     *    ],
+     *   "facets": [
+     *     {
+     *       "name": <String>, // Name of facet, e.g. "Variant type"
+     *
+     *       // Names of filters in facet, for categorical facets.  The index
+     *       // of these names correspond to the integer value at the
+     *       // appropriate position in the `features` array.
+     *       "filters": [<String>],
+     *       "type": either "Categorical" or "Numeric"
+     *     }
+     *   ]
+     * }
+     */
+    function initFacets(trackSelector, igvBrowser) {
+      const trackIndex = getTrackIndex(trackSelector, igvBrowser)
+      const featuresInFrame = getFeaturesInFrame(trackIndex, igvBrowser)
+      const dimensions = Object.keys(featuresInFrame[0].info);
+      const facets = []
+      dimensions.forEach(dimension => {
+        // const facet = {"name": dimension, }facets[dimension] = 0
+      })
+      featuresInFrame =
+      console.log('featuresInFrame', featuresInFrame)
+    }
+
   </script>
 </head>
 
@@ -113,7 +162,7 @@
 <h1>Ad-hoc filtering in IGV</h1>
 <ul class="filters">
   <span>Type</span>
-  <li><label>SNP <input type="checkbox" value="SNP" onChange="filterFeatures('Phase 3 WGS variants', 'type', )" checked/></label></li>
+  <li><label>SNP <input type="checkbox" value="SNP" onChange="filterFeatures('Phase 3 WGS variants', 'type')" checked/></label></li>
   <li><label>INDEL <input type="checkbox" value="INDEL" onChange="filterFeatures('Phase 3 WGS variants', 'type')" checked/></label></li>
 </ul>
 
