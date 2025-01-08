@@ -133,25 +133,75 @@
      *     {
      *       "name": <String>, // Name of facet, e.g. "Variant type"
      *
-     *       // Names of filters in facet, for categorical facets.  The index
-     *       // of these names correspond to the integer value at the
+     *       "type": <String> // "Categorical" or "Numeric"
+     *
+     *       // Names of filters in facet, only for categorical facets.
+     *       // The index of these names correspond to the integer value at the
      *       // appropriate position in the `features` array.
-     *       "filters": [<String>],
-     *       "type": either "Categorical" or "Numeric"
+     *       "filterNames": [<String>],
      *     }
      *   ]
      * }
      */
     function initFacets(trackSelector, igvBrowser) {
+      const t0 = Date.now()
       const trackIndex = getTrackIndex(trackSelector, igvBrowser)
       const featuresInFrame = getFeaturesInFrame(trackIndex, igvBrowser)
-      const dimensions = Object.keys(featuresInFrame[0].info);
-      const facets = []
-      dimensions.forEach(dimension => {
-        // const facet = {"name": dimension, }facets[dimension] = 0
-      })
-      featuresInFrame =
+
       console.log('featuresInFrame', featuresInFrame)
+
+      isCategoricalByFacetName = {}
+
+      // Populate facets model, except for filterNames array values
+      const facets = []
+      const basicInfo = featuresInFrame[0].info
+      const dimensions = Object.keys(basicInfo);
+      dimensions.forEach(dimension => {
+        const type = isNaN(parseFloat(basicInfo[dimension])) ? 'categorical' : 'numeric'
+        const facet = {'name': dimension, type}
+        if (type === 'categorical') {
+          facet.filterNames = []
+          isCategoricalByFacetName[facet.name] = true
+        } else {
+          isCategoricalByFacetName[facet.name] = false
+        }
+        facets.push(facet)
+      })
+
+      // Populate features, and (for each facet) filterNames
+      const features = []
+      for (let i = 0; i < featuresInFrame.length; i++) {
+        const feature = []
+        const igvFeature = featuresInFrame[i]
+        const info = igvFeature.info
+        let j = 0
+        for (facetName in info) {
+          const isCategorical = isCategoricalByFacetName[facetName]
+          const rawValue = info[facetName]
+          let value
+          if (isCategorical) {
+            if (!facets[j].filterNames.includes(rawValue)) {
+              // Populate filterNames
+              facets[j].filterNames.push(rawValue);
+            }
+
+            // Using index offsets as values, rather than raw strings, helps
+            // make categorical filtering fast.
+            value = facets[j].filterNames.indexOf(rawValue)
+          } else {
+            value = rawValue
+          }
+          feature.push(value)
+          j++
+        }
+
+        // Populate features
+        features.push(feature)
+      }
+
+      const t1 = Date.now()
+      console.log('Duration (ms):', (t1 - t0))
+      return {facets, features}
     }
 
   </script>
