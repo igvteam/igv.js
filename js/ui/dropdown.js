@@ -27,8 +27,8 @@ class Dropdown {
 
         const menuElements = createMenuElements(dropdownItems, this.popover)
 
-        for (const { object } of menuElements) {
-            this.popoverContent.appendChild(object)
+        for (const { element } of menuElements) {
+            this.popoverContent.appendChild(element)
         }
 
     }

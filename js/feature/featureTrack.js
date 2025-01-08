@@ -1,4 +1,3 @@
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import FeatureSource from './featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
@@ -11,7 +10,6 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {isSecureContext, expandRegion} from "../util/igvUtils.js"
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
-import {findFeatureAfterCenter} from "./featureUtils.js"
 
 class FeatureTrack extends TrackBase {
 
@@ -364,14 +362,14 @@ class FeatureTrack extends TrackBase {
 
             for (const colorScheme of ["function", "class"]) {
 
-                const object = $(createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy))
+                const element = createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy)
 
                 function colorSchemeHandler() {
                     this.colorBy = colorScheme
                     this.trackView.repaintViews()
                 }
 
-                menuItems.push({object, click: colorSchemeHandler})
+                menuItems.push({element, click: colorSchemeHandler})
             }
         }
 
@@ -386,7 +384,7 @@ class FeatureTrack extends TrackBase {
 
         for (const displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
 
-            const object = $(createCheckbox(lut[displayMode], displayMode === this.displayMode))
+            const element = createCheckbox(lut[displayMode], displayMode === this.displayMode)
 
             function displayModeHandler() {
                 this.displayMode = displayMode
@@ -395,7 +393,7 @@ class FeatureTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
 
-            menuItems.push({object, click: displayModeHandler})
+            menuItems.push({element, click: displayModeHandler})
         }
 
         return menuItems

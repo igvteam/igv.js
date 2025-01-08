@@ -23,11 +23,9 @@
  * THE SOFTWARE.
  */
 
-
-import $ from "./vendor/jquery-3.3.1.slim.js"
 import {doAutoscale} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
-import {FeatureUtils, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js'
+import {FeatureUtils, IGVColor} from '../node_modules/igv-utils/src/index.js'
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {createIcon} from "./ui/utils/icons.js"
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
@@ -179,7 +177,7 @@ class TrackView {
 
         const {width: axisWidth} = this.axis.getBoundingClientRect()
 
-        const {y} = this.viewports[0].$viewport.get(0).getBoundingClientRect()
+        const {y} = this.viewports[0].viewportElement.getBoundingClientRect()
 
         let delta =
             {
@@ -189,7 +187,7 @@ class TrackView {
 
         for (let viewport of this.viewports) {
             viewport.renderSVGContext(context, delta)
-            const {width} = viewport.$viewport.get(0).getBoundingClientRect()
+            const {width} = viewport.viewportElement.getBoundingClientRect()
             delta.deltaX += width
         }
 
@@ -302,7 +300,7 @@ class TrackView {
 
     updateScrollbar() {
 
-        const viewportHeight = this.viewports[0].$viewport.height()
+        const viewportHeight = this.viewports[0].viewportElement.offsetHeight
         this.outerScroll.style.height = `${viewportHeight}px`
 
         if (false === scrollbarExclusionTypes.has(this.track.type)) {
@@ -323,12 +321,12 @@ class TrackView {
 
     moveScroller(delta) {
 
-        const y = $(this.innerScroll).position().top + delta
+        const y = this.innerScroll.getBoundingClientRect().top + delta
         const top = Math.min(Math.max(0, y), this.outerScroll.clientHeight - this.innerScroll.clientHeight)
-        $(this.innerScroll).css('top', `${top}px`)
+        this.innerScroll.style.top = `${top}px`;
 
         const contentHeight = this.maxViewportContentHeight()
-        const contentTop = -Math.round(top * (contentHeight / this.viewports[0].$viewport.height()))
+        const contentTop = -Math.round(top * (contentHeight / this.viewports[0].viewportElement.offsetHeight))
 
         for (let viewport of this.viewports) {
             viewport.setTop(contentTop)
@@ -598,7 +596,7 @@ class TrackView {
 
             // Adjust scrollbar, if needed, to insure content is in view
             const currentTop = this.viewports[0].getContentTop()
-            const viewportHeight = this.viewports[0].$viewport.height()
+            const viewportHeight = this.viewports[0].viewportElement.offsetHeight
             const minTop = Math.min(0, viewportHeight - contentHeight)
             if (currentTop < minTop) {
                 for (let viewport of this.viewports) {
@@ -622,7 +620,7 @@ class TrackView {
                 const referenceFrame = viewport.referenceFrame
                 const chr = viewport.referenceFrame.chr
                 const start = referenceFrame.start
-                const end = start + referenceFrame.toBP($(viewport.contentDiv).width())
+                const end = start + referenceFrame.toBP(viewport.contentDiv.offsetWidth)
                 const bpPerPixel = referenceFrame.bpPerPixel
                 return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel))
             }
@@ -712,7 +710,7 @@ class TrackView {
 
             const {y} = DOMUtils.pageCoordinates(event)
 
-            $(this.innerScroll).data('yDown', y.toString())
+            this.innerScroll.dataset.yDown = y.toString();
 
             this.boundColumnContainerMouseMoveHandler = columnContainerMouseMoveHandler.bind(this)
             browser.columnContainer.addEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
@@ -723,9 +721,10 @@ class TrackView {
 
                 const {y} = DOMUtils.pageCoordinates(event)
 
-                this.moveScroller(y - parseInt($(this.innerScroll).data('yDown')))
+                this.moveScroller(y - parseInt(this.innerScroll.dataset.yDown))
 
-                $(this.innerScroll).data('yDown', y.toString())
+                this.innerScroll.dataset.yDown = y.toString();
+
 
             }
         }
@@ -892,7 +891,7 @@ class TrackView {
     removeViewportsFromColumnContainer() {
         // Track Viewports
         for (let viewport of this.viewports) {
-            viewport.$viewport.remove()
+            viewport.viewportElement.remove()
         }
     }
 

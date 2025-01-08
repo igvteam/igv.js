@@ -9,10 +9,9 @@ import orientationTypes from "./orientationTypes.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import TrackBase from "../trackBase.js"
 import {getChrColor} from "../util/getChrColor.js"
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
-import BaseModificationKey from "./mods/baseModificationKey.js"
 import {modificationName} from "./mods/baseModificationUtils.js"
+import {createElementWithString} from "../ui/utils/dom-utils.js"
 
 
 const alignmentStartGap = 5
@@ -674,9 +673,9 @@ class AlignmentTrack extends TrackBase {
 
         // Color by items //////////////////////////////////////////////////
         menuItems.push('<hr/>')
-        const $e = $('<div class="igv-track-menu-category">')
-        $e.text('Color by:')
-        menuItems.push({name: undefined, object: $e, click: undefined, init: undefined})
+        let element = createElementWithString('<div class="igv-track-menu-category">')
+        element.innerText = 'Color by:'
+        menuItems.push({name: undefined, element, click: undefined, init: undefined})
 
         const colorByMenuItems = []
         colorByMenuItems.push({key: 'none', label: 'none'})
@@ -728,9 +727,10 @@ class AlignmentTrack extends TrackBase {
 
         // Group by items //////////////////////////////////////////////////
         menuItems.push('<hr/>')
-        const $e2 = $('<div class="igv-track-menu-category">')
-        $e2.text('Group by:')
-        menuItems.push({name: undefined, object: $e2, click: undefined, init: undefined})
+        element = document.createElement('div');
+        element.className = 'igv-track-menu-category';
+        element.textContent = 'Group by:';
+        menuItems.push({name: undefined, element, click: undefined, init: undefined});
 
         const groupByMenuItems = []
         groupByMenuItems.push({key: 'none', label: 'none'})
@@ -762,7 +762,7 @@ class AlignmentTrack extends TrackBase {
         // Show all bases
         menuItems.push('<hr/>')
         menuItems.push({
-            object: $(createCheckbox("Show all bases", this.showAllBases)),
+            element: createCheckbox("Show all bases", this.showAllBases),
             click: function showAllBasesHandler() {
                 this.alignmentTrack.showAllBases = !this.alignmentTrack.showAllBases
                 this.trackView.repaintViews()
@@ -771,7 +771,7 @@ class AlignmentTrack extends TrackBase {
 
         // Show mismatches
         menuItems.push({
-            object: $(createCheckbox("Show mismatches", this.showMismatches)),
+            element: createCheckbox("Show mismatches", this.showMismatches),
             click: function showMismatchesHandler() {
                 this.alignmentTrack.showMismatches = !this.alignmentTrack.showMismatches
                 this.trackView.repaintViews()
@@ -780,7 +780,7 @@ class AlignmentTrack extends TrackBase {
 
         // Insertions
         menuItems.push({
-            object: $(createCheckbox("Show insertions", this.showInsertions)),
+            element: createCheckbox("Show insertions", this.showInsertions),
             click: function showInsertionsHandler() {
                 this.alignmentTrack.showInsertions = !this.alignmentTrack.showInsertions
                 this.trackView.repaintViews()
@@ -789,7 +789,7 @@ class AlignmentTrack extends TrackBase {
 
         // Soft clips
         menuItems.push({
-            object: $(createCheckbox("Show soft clips", this.showSoftClips)),
+            element: createCheckbox("Show soft clips", this.showSoftClips),
             click: function showSoftClipsHandler() {
                 this.alignmentTrack.showSoftClips = !this.alignmentTrack.showSoftClips
                 const alignmentContainers = this.getCachedAlignmentContainers()
@@ -804,7 +804,7 @@ class AlignmentTrack extends TrackBase {
         if (this.hasPairs) {
             menuItems.push('<hr/>')
             menuItems.push({
-                object: $(createCheckbox("View as pairs", this.viewAsPairs)),
+                element: createCheckbox("View as pairs", this.viewAsPairs),
                 click: function viewAsPairsHandler() {
                     const b = !this.alignmentTrack.viewAsPairs
                     if (b && this.groupBy && !pairCompatibleGroupOptions.has(this.groupBy)) {
@@ -851,13 +851,15 @@ class AlignmentTrack extends TrackBase {
 
         // Display mode
         menuItems.push('<hr/>')
-        const $dml = $('<div class="igv-track-menu-category">')
-        $dml.text('Display mode:')
-        menuItems.push({name: undefined, object: $dml, click: undefined, init: undefined})
+
+        element = document.createElement('div');
+        element.className = 'igv-track-menu-category';
+        element.textContent = 'Display mode:';
+        menuItems.push({name: undefined, element, click: undefined, init: undefined});
 
         for (let mode of ["EXPANDED", "SQUISHED", "FULL"])
             menuItems.push({
-                object: $(createCheckbox(mode.toLowerCase(), this.displayMode === mode)),
+                element: createCheckbox(mode.toLowerCase(), this.displayMode === mode),
                 click: function expandHandler() {
                     this.alignmentTrack.setDisplayMode(mode)
                 }
@@ -887,11 +889,11 @@ class AlignmentTrack extends TrackBase {
      *
      * @param menuItem
      * @param showCheck
-     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
+     * @returns {{init: undefined, name: undefined, click: clickHandler, element: (jQuery|HTMLElement|jQuery.fn.init)}}
      */
     colorByCB(menuItem, showCheck) {
 
-        const $e = $(createCheckbox(menuItem.label, showCheck))
+        const element = createCheckbox(menuItem.label, showCheck)
 
         if (menuItem.key !== 'tag') {
 
@@ -900,7 +902,7 @@ class AlignmentTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
 
-            return {name: undefined, object: $e, click: clickHandler, init: undefined}
+            return {name: undefined, element, click: clickHandler, init: undefined}
         } else {
 
             function dialogPresentationHandler(ev) {
@@ -925,7 +927,7 @@ class AlignmentTrack extends TrackBase {
                 }, ev)
             }
 
-            return {name: undefined, object: $e, dialog: dialogPresentationHandler, init: undefined}
+            return {name: undefined, element, dialog: dialogPresentationHandler, init: undefined}
 
         }
     }
@@ -934,14 +936,12 @@ class AlignmentTrack extends TrackBase {
 
         const showCheck = this.colorBy === menuItem.key
 
-        const $e = $(createCheckbox(menuItem.label, showCheck))
-
         function clickHandler() {
             this.alignmentTrack.colorBy = menuItem.key
             this.trackView.repaintViews()
         }
 
-        return {name: undefined, object: $e, click: clickHandler, init: undefined}
+        return {name: undefined, element: createCheckbox(menuItem.label, showCheck), click: clickHandler, init: undefined}
     }
 
 
@@ -953,11 +953,9 @@ class AlignmentTrack extends TrackBase {
      *
      * @param menuItem
      * @param showCheck
-     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
+     * @returns {{init: undefined, name: undefined, click: clickHandler, element: (jQuery|HTMLElement|jQuery.fn.init)}}
      */
     groupByCB(menuItem, showCheck) {
-
-        const $e = $(createCheckbox(menuItem.label, showCheck))
 
         function clickHandler(ev) {
 
@@ -991,7 +989,7 @@ class AlignmentTrack extends TrackBase {
             }
         }
 
-        return {name: undefined, object: $e, dialog: clickHandler, init: undefined}
+        return {name: undefined, element: createCheckbox(menuItem.label, showCheck), dialog: clickHandler, init: undefined}
 
     }
 

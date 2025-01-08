@@ -25,7 +25,6 @@
 
 import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
-import $ from "./vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
 
@@ -546,7 +545,7 @@ class TrackBase {
                 } else {
                     this.browser.dataRangeDialog.configure(this.trackView)
                 }
-                this.browser.dataRangeDialog.present($(this.browser.columnContainer))
+                this.browser.dataRangeDialog.present(this.browser.columnContainer)
             }
 
             menuItems.push({label: 'Set data range', dialog: dialogPresentationHandler})
@@ -558,7 +557,7 @@ class TrackBase {
                     this.trackView.repaintViews()
                 }
 
-                menuItems.push({object: $(createCheckbox("Log scale", this.logScale)), click: logScaleHandler})
+                menuItems.push({element: createCheckbox("Log scale", this.logScale), click: logScaleHandler})
             }
 
             function autoScaleHandler() {
@@ -567,7 +566,7 @@ class TrackBase {
                 this.browser.updateViews()
             }
 
-            menuItems.push({object: $(createCheckbox("Autoscale", this.autoscale)), click: autoScaleHandler})
+            menuItems.push({element: createCheckbox("Log scale", this.logScale), click: autoScaleHandler})
         }
 
         return menuItems
