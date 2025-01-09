@@ -126,12 +126,14 @@
      *      // Each "feature" (e.g. variant, read, gene) is represented as an
      *      // array of numbers.  For categorical facets, each number is a
      *      // compact representation (e.g. 0) of the filter / value (e.g.
-     *      // "SNP") of a particular facet / dimension (e.g. "Variant type").
+     *      // "SNP") of a particular facet / dimension (e.g. "VT").
      *      [<Number>]
      *    ],
      *   "facets": [
      *     {
-     *       "name": <String>, // Name of facet, e.g. "Variant type"
+     *       "name": <String>, // Internal name of facet, e.g. "VT"
+     *
+     *       "displayName": <String>, // e.g. "Variant type"
      *
      *       "type": <String> // "categorical" or "numeric"
      *
@@ -139,7 +141,6 @@
      *       // The index of these names correspond to the integer value at the
      *       // appropriate position in the `features` array.
      *       "filterNames": [<String>],
-     *
      *
      *       // Number of features satisfying this filter (for categorical)
      *       "countsByFilterName": {
@@ -189,7 +190,9 @@
           let value
           const isCategorical = isCategoricalByFacetName[facetName]
           if (facetName in info === false) {
-            value = undefined // Use an "empty" value
+            // Use an "empty" value if the feature lacks a value
+            // for this dimension, which is pretty common.
+            value = undefined
           } else {
             const rawValue = info[facetName]
             if (isCategorical) {
@@ -220,17 +223,66 @@
       console.log('initFacets duration (ms):', (t1 - t0))
       return {facets, features}
     }
+
+    function getCategoricalFacetHtml(facet) {
+      const filtersHtml = facet.filterNames.map(filterName => {
+        const fullName = `${facet.name}:${filterName}`
+        const attrs = `value="${filterName}" name="${fullName}"`
+        const count = facet.countsByFilterName[filterName]
+        const filterHtml = `
+          <label class="igv-filter-label">
+            <div>
+              <input type="checkbox" ${attrs} />
+              <span class="igv-filter-label-text">${filterName}</span>
+              <span class="igv-filter-label-quantities">
+                <span class="igv-filter-count">${count}</span>
+              </span>
+            </div>
+          </label>`
+        console.log('filterHtml', filterHtml)
+        return filterHtml
+      }).join('')
+      const facetHtml = `
+        <div class="igv-facet">
+          <span class="igv-facet-header">${facet.name}</span>
+          ${filtersHtml}
+        </div>`
+      console.log('facetHtml', facetHtml)
+      return facetHtml
+    }
+
+    function getFacetsHtml(trackSelector, browser) {
+      let facetsHtml = ''
+      const facetContainers = initFacets(trackSelector, browser)
+      console.log('facetContainers', facetContainers)
+      facetContainers.facets.forEach(facetContainer => {
+        let facetHtml
+        if (facetContainer.type === 'categorical') {
+          facetHtml = getCategoricalFacetHtml(facetContainer)
+        } else {
+          facetHtml = '' // TODO: Support numeric facets
+        }
+        facetsHtml += facetHtml
+      })
+      return facetsHtml
+    }
+
   </script>
 </head>
 
 <body>
 
 <h1>Ad-hoc filtering in IGV</h1>
-<ul class="filters">
+
+<!-- <ul class="filters">
   <span>Type</span>
   <li><label>SNP <input type="checkbox" value="SNP" onChange="filterFeatures('Phase 3 WGS variants', 'type')" checked/></label></li>
   <li><label>INDEL <input type="checkbox" value="INDEL" onChange="filterFeatures('Phase 3 WGS variants', 'type')" checked/></label></li>
+</ul> -->
+
+<ul class="filters">
 </ul>
+
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
@@ -281,8 +333,9 @@
     window.igvBrowser = browser
 
     browser.on('locuschange', referenceFrameList => {
-      const facets = initFacets('Phase 3 WGS variants', browser)
-      console.log('facets', facets)
+      const facetsHtml = getFacetsHtml('Phase 3 WGS variants', browser)
+      const filtersDom = document.querySelector('.filters')
+      filtersDom.insertAdjacentHTML('beforeend', facetsHtml)
     })
 
 </script>
