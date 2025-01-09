@@ -341,20 +341,27 @@
       return facetHtml
     }
 
-    function getNumericQueryInput(value, facet, filterName) {
+    function getNumericQueryInput(value, facet, filterName, style) {
       return `
         <input
           type="text"
           className="igv-numeric-query-input"
           name="${facet.name}:${filterName}"
           value="${value}"
+          style="width: ${style.width}; font-size: ${style.fontSize};"
           onChange=updateInputValue(event)
         />`
     }
 
     function getNumericQueryBuilder(facet, filterNumbers, statistics) {
-      const input = getNumericQueryInput(statistics.min, facet, 'value')
-      const input2 = getNumericQueryInput(statistics.max, facet, 'value2')
+      const inputValue = statistics.min
+      const inputValue2 = statistics.max
+      const operator = 'and'
+      const precision = 2
+      const styles = getResponsiveStyles(inputValue, inputValue2, operator, precision)
+
+      const input = getNumericQueryInput(statistics.min, facet, 'value', styles.input)
+      const input2 = getNumericQueryInput(statistics.max, facet, 'value2', styles.input2)
 
       return `<div className="cell-facet-numeric-query-builder">
         <div className="igv-facet-numeric-inputs-container">
@@ -365,7 +372,76 @@
 
     }
 
+    /**
+     * Round, source: https://stackoverflow.com/a/18358056
+     *
+     * @param {number} val
+     * @param {number} [precision]
+     * @return {number}
+     */
+    function round(val, precision = 0) {
+      return +(`${Math.round(`${val}e+${precision}`)}e-${precision}`)
+    }
+
+    /**
+     * Get width and font size for input, to help keep full value glanceable
+     */
+    function getInputStyle(inputValue, operator, precision) {
+      let width = 37
+      let fontSize = 13
+
+      const roundedNumber = round(inputValue, precision)
+      const stringValue = roundedNumber.toString()
+      let numDigits = stringValue.length
+      if (stringValue.includes('.')) {numDigits -= 0.75}
+
+      if (
+        numDigits > 4 &&
+            (!['between', 'not between'].includes(operator) || numDigits <= 7)
+      ) {
+        fontSize = 12
+        width += 6 * (numDigits - 4)
+      } else if (numDigits > 7) {
+        fontSize = 11
+        width += 5.5 * (numDigits - 4)
+      }
+
+      const style = {
+        width: `${width}px`,
+        fontSize: `${fontSize}px`,
+        numDigits // Not a standard style, but a helpful prop
+      }
+
+      return style
+    }
+
+    /** Make big input numbers fit on one more more often */
+    function getResponsiveStyles(inputValue, inputValue2, operator, precision) {
+      const inputStyle = getInputStyle(inputValue, operator, precision)
+      const inputStyle2 = getInputStyle(inputValue2, operator, precision)
+      const andStyle = { marginLeft: '4px' }
+      const totalDigits = inputStyle.numDigits + inputStyle2.numDigits
+      if (totalDigits > 14) {
+        andStyle.marginLeft = '2px'
+        andStyle.marginRight = '-2px'
+        if (totalDigits > 16) {andStyle.fontSize = 11.5}
+      }
+      const styles = {
+        input: inputStyle,
+        input2: inputStyle2,
+        and: andStyle
+      }
+      return styles
+    }
+
     function getNumericFacetHtml(facet) {
+      if (
+        facet.filterNumbers.length === 0 ||
+        facet.statistics.min === facet.statistics.max
+      ) {
+        return ''
+      }
+
       const filterNumbers = facet.filterNumbers
       const statistics = facet.statistics
 
