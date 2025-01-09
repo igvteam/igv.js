@@ -341,8 +341,44 @@
       return facetHtml
     }
 
-    function getNumericFacetHtml(facetContainer) {
+    function getNumericQueryInput(value, facet, filterName) {
+      return `
+        <input
+          type="text"
+          className="igv-numeric-query-input"
+          name="${facet.name}:${filterName}"
+          value="${value}"
+          onChange=updateInputValue(event)
+        />`
+    }
 
+    function getNumericQueryBuilder(facet, filterNumbers, statistics) {
+      const input = getNumericQueryInput(statistics.min, facet, 'value')
+      const input2 = getNumericQueryInput(statistics.max, facet, 'value2')
+
+      return `<div className="cell-facet-numeric-query-builder">
+        <div className="igv-facet-numeric-inputs-container">
+          ${input}
+          ${input2}
+        </div>
+      </div>`;
+
+    }
+
+    function getNumericFacetHtml(facet) {
+      const filterNumbers = facet.filterNumbers
+      const statistics = facet.statistics
+
+      const filtersHtml = getNumericQueryBuilder(facet, filterNumbers, statistics)
+
+      const facetSel = `igv-facet-${facet.name}`
+      const facetHtml = `
+        <div class="igv-facet ${facetSel}" style="width: 250px; float: left;">
+          <span class="igv-facet-header">${facet.name}</span>
+          ${filtersHtml}
+        </div>`
+
+      return facetHtml
     }
 
     function getFacetsHtml(trackSelector, browser) {
@@ -353,7 +389,7 @@
         if (facetContainer.type === 'categorical') {
           facetHtml = getCategoricalFacetHtml(facetContainer)
         } else {
-          facetHtml = '' // TODO: Support numeric facets
+          facetHtml = getNumericFacetHtml(facetContainer)
         }
         return facetHtml
       }).join('')
