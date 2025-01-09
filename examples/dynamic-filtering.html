@@ -24,7 +24,6 @@
       const chr = Array.from(igvBrowser.tracks[0].trackView.viewports[0].featureCache.features.keys())[0]
 
       console.log('igvBrowser.tracks[0]', igvBrowser.tracks[0])
-      console.log('igvBrowser.tracks[0]', igvBrowser.tracks[0])
       console.log('chr', chr)
 
       if (
@@ -68,26 +67,28 @@
       return isFeatureInFrame
     }
 
-    function filterFeatures(trackSelector, dimension, igvBrowser) {
+    function filterFeatures(trackSelector, dimension) {
       const trackIndex = getTrackIndex(trackSelector, igvBrowser);
 
-      const scoreSelection = new Set([])
+      const selection = new Set([])
 
       const originalChrFeatures = getOriginalChrFeatures(trackIndex, igvBrowser)
 
-      const inputs = document.querySelectorAll('.filters input')
+      const facetSel = `.igv-facet-${dimension}`
+      const inputs = document.querySelectorAll(`.filters ${facetSel} input`)
+      console.log('in filterFeatures, inputs', inputs)
       inputs.forEach(input => {
         if (input.checked) {
-          scoreSelection.add(input.value)
+          selection.add(input.value)
         }
       })
 
-      if (scoreSelection.size === 0) {
-        return scoreSelection.originalChrFeatures
+      if (selection.size === 0) {
+        return selection.originalChrFeatures
       }
 
       const filteredFeatures = originalChrFeatures.filter(
-        feature => scoreSelection.has(feature[dimension]) && getIsFeatureInFrame(feature, igvBrowser)
+        feature => selection.has(feature.info[dimension]) && getIsFeatureInFrame(feature, igvBrowser)
       )
 
       console.log('filteredFeatures', filteredFeatures)
@@ -224,46 +225,75 @@
       return {facets, features}
     }
 
-    function getCategoricalFacetHtml(facet) {
-      const filtersHtml = facet.filterNames.map(filterName => {
+    function getCategoricalFacetHtml(facet, isPartlyCollapsed=true) {
+      // Categorical facets need > 1 filter to be useful
+      const numFilters = facet.filterNames.length
+      if (numFilters < 2) return ''
+
+      let filters = facet.filterNames;
+      if (isPartlyCollapsed) filters = filters.slice(0, 5)
+
+      // Get list of filter checkboxes
+      const filtersHtml = filters.map(filterName => {
         const fullName = `${facet.name}:${filterName}`
-        const attrs = `value="${filterName}" name="${fullName}"`
+        const attrs = `
+          value="${filterName}"
+          name="${fullName}"
+          onChange="filterFeatures('Phase 3 WGS variants', '${facet.name}')"
+        `
         const count = facet.countsByFilterName[filterName]
         const filterHtml = `
           <label class="igv-filter-label">
             <div>
-              <input type="checkbox" ${attrs} />
+              <input type="checkbox" ${attrs} checked />
               <span class="igv-filter-label-text">${filterName}</span>
               <span class="igv-filter-label-quantities">
                 <span class="igv-filter-count">${count}</span>
               </span>
             </div>
           </label>`
-        console.log('filterHtml', filterHtml)
         return filterHtml
       }).join('')
+
+
+      let moreOrLess = ''
+      if (numFilters > 5) {
+        moreOrLess = `
+          <a
+            className="igv-facet-toggle"
+            onClick=""
+          >
+            ${isPartlyCollapsed ? 'More...' : 'Less...'}
+          </a>`
+        }
+
+      const facetSel = `igv-facet-${facet.name}`
+      // Add a facet header to the filters
       const facetHtml = `
-        <div class="igv-facet">
+        <div class="igv-facet ${facetSel}" style="width: 250px; float: left;">
           <span class="igv-facet-header">${facet.name}</span>
           ${filtersHtml}
+          ${moreOrLess}
         </div>`
-      console.log('facetHtml', facetHtml)
+
+      // console.log('facetHtml', facetHtml)
       return facetHtml
     }
 
     function getFacetsHtml(trackSelector, browser) {
-      let facetsHtml = ''
       const facetContainers = initFacets(trackSelector, browser)
-      console.log('facetContainers', facetContainers)
-      facetContainers.facets.forEach(facetContainer => {
+      // console.log('facetContainers', facetContainers)
+      const facetList = facetContainers.facets.map(facetContainer => {
         let facetHtml
         if (facetContainer.type === 'categorical') {
           facetHtml = getCategoricalFacetHtml(facetContainer)
         } else {
           facetHtml = '' // TODO: Support numeric facets
         }
-        facetsHtml += facetHtml
-      })
+        return facetHtml
+      }).join('')
+
+      const facetsHtml = `<div>${facetList}</div>`
       return facetsHtml
     }
 
@@ -280,11 +310,11 @@
   <li><label>INDEL <input type="checkbox" value="INDEL" onChange="filterFeatures('Phase 3 WGS variants', 'type')" checked/></label></li>
 </ul> -->
 
-<ul class="filters">
+<ul class="filters" style="float: left;">
 </ul>
 
 
-<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray; clear: both;"></div>
 
 <script type="module">
 
@@ -335,6 +365,7 @@
     browser.on('locuschange', referenceFrameList => {
       const facetsHtml = getFacetsHtml('Phase 3 WGS variants', browser)
       const filtersDom = document.querySelector('.filters')
+      filtersDom.innerHTML = ''
       filtersDom.insertAdjacentHTML('beforeend', facetsHtml)
     })
 
