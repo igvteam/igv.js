@@ -118,6 +118,46 @@
       return trackIndex
     }
 
+    function getStatistics(numbers) {
+      // Sort the array in ascending order
+      numbers.sort((a, b) => a - b);
+
+      // Compute the sum using a loop for faster mean calculation
+      let sum = 0;
+      for (let i = 0; i < numbers.length; i++) {
+          sum += numbers[i];
+      }
+      const mean = sum / numbers.length;
+
+      const max = numbers[numbers.length - 1];
+      const min = numbers[0];
+      const median = getMedian(numbers);
+
+      // Divide the array into two halves
+      const midIndex = Math.floor(numbers.length / 2);
+      const lowerHalf = numbers.slice(0, midIndex);
+      const upperHalf = numbers.length % 2 === 0
+          ? numbers.slice(midIndex)
+          : numbers.slice(midIndex + 1);
+
+      const q1 = getMedian(lowerHalf);
+      const q3 = getMedian(upperHalf);
+
+      return { min, q1, median, q3, max, mean };
+    }
+
+    function getMedian(numbers) {
+      const midIndex = Math.floor(numbers.length / 2);
+
+      // If the array has an odd length, return the middle number
+      if (numbers.length % 2 !== 0) {
+        return numbers[midIndex];
+      }
+
+      // If the array has an even length, return the average of the two middle numbers
+      return (numbers[midIndex - 1] + numbers[midIndex]) / 2;
+    }
+
     /**
      * Initialize facets and filters for the current genomic frame
      *
@@ -136,17 +176,28 @@
      *
      *       "displayName": <String>, // e.g. "Variant type"
      *
-     *       "type": <String> // "categorical" or "numeric"
+     *       "type": <String> // "categorical" or "integer" or "float"
      *
-     *       // Names of filters in facet, only for categorical facets.
+     *       // For categorical: names of filters in facet
      *       // The index of these names correspond to the integer value at the
      *       // appropriate position in the `features` array.
      *       "filterNames": [<String>],
      *
-     *       // Number of features satisfying this filter (for categorical)
+     *       // For categorical: number of features satisfying each filter
      *       "countsByFilterName": {
      *          <String>: <Integer>
      *       }
+     *
+     *      // For integer or float: numeric values observed for this facet
+     *      "filterNumbers": [<Number>],
+     *
+     *      "statistics": {
+     *        "min": <Number>,
+     *        "q1": <Number>,
+     *        "median": <Number>,
+     *        "q3": <Number>,
+     *        "max": <Number>
+     *      }
      *     }
      *   ]
      * }
@@ -156,10 +207,8 @@
       const trackIndex = getTrackIndex(trackSelector, igvBrowser)
       const featuresInFrame = getFeaturesInFrame(trackIndex, igvBrowser)
 
-      isCategoricalByFacetName = {}
-
       // Populate facets model, except for filterNames array values
-      const facets = []
+      let facets = []
       const headInfo = featuresInFrame[0].header.INFO
       console.log('headInfo', headInfo)
       const dimensions = Object.keys(headInfo);
@@ -173,9 +222,9 @@
         if (type === 'categorical') {
           facet.filterNames = []
           facet.countsByFilterName = {}
-          isCategoricalByFacetName[facet.name] = true
         } else {
-          isCategoricalByFacetName[facet.name] = false
+          facet.filterNumbers = []
+          facet.statistics = {}
         }
         facets.push(facet)
       })
@@ -189,28 +238,30 @@
         let j = 0
         for (facetName in headInfo) {
           let value
-          const isCategorical = isCategoricalByFacetName[facetName]
           if (facetName in info === false) {
             // Use an "empty" value if the feature lacks a value
             // for this dimension, which is pretty common.
             value = undefined
           } else {
             const rawValue = info[facetName]
-            if (isCategorical) {
-              if (!facets[j].filterNames.includes(rawValue)) {
+            const facet = facets[j]
+            if (facet.type === 'categorical') {
+              if (!facet.filterNames.includes(rawValue)) {
                 // Populate filterNames
-                facets[j].filterNames.push(rawValue);
-                facets[j].countsByFilterName[rawValue] = 0
+                facet.filterNames.push(rawValue);
+                facet.countsByFilterName[rawValue] = 0
               }
 
               // Using index offsets as values, rather than raw strings, helps
               // make categorical filtering fast.
-              value = facets[j].filterNames.indexOf(rawValue)
-              facets[j].countsByFilterName[rawValue] += 1
+              value = facet.filterNames.indexOf(rawValue)
+              facet.countsByFilterName[rawValue] += 1
             } else {
-              const isFloat = facets[j].type === 'float'
+              const isFloat = facet.type === 'float'
               value = isFloat ? parseFloat(rawValue) : parseInt(rawValue)
+              facet.filterNumbers.push(value)
             }
+            facets[j] = facet
           }
           feature.push(value)
           j++
@@ -219,6 +270,16 @@
         // Populate features
         features.push(feature)
       }
+
+      // Populate statistics for numeric facets
+      facets = facets.map(facet => {
+        if (facet.type === 'categorical') return facet
+
+        const {min, q1, median, q3, max, mean} = getStatistics(facet.filterNumbers)
+        facet.statistics = {min, q1, median, q3, max, mean}
+
+        return facet
+      })
 
       const t1 = Date.now()
       console.log('initFacets duration (ms):', (t1 - t0))
@@ -278,6 +339,10 @@
 
       // console.log('facetHtml', facetHtml)
       return facetHtml
+    }
+
+    function getNumericFacetHtml(facetContainer) {
+
     }
 
     function getFacetsHtml(trackSelector, browser) {
