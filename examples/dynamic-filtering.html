@@ -159,10 +159,15 @@
       // Populate facets model, except for filterNames array values
       const facets = []
       const headInfo = featuresInFrame[0].header.INFO
+      console.log('headInfo', headInfo)
       const dimensions = Object.keys(headInfo);
       dimensions.forEach(dimension => {
-        const type = headInfo[dimension].Type === 'String' ? 'categorical' : 'numeric'
-        const facet = {'name': dimension, type}
+        const igvFacet = headInfo[dimension]
+        // string, flag, integer, or float
+        const igvType = igvFacet.Type.toLowerCase()
+        const type = ['string', 'flag'].includes(igvType) ? 'categorical' : igvType
+        const description = igvFacet.Description
+        const facet = {'name': dimension, type, description}
         if (type === 'categorical') {
           facet.filterNames = []
           facet.countsByFilterName = {}
@@ -199,7 +204,8 @@
               value = facets[j].filterNames.indexOf(rawValue)
               facets[j].countsByFilterName[rawValue] += 1
             } else {
-              value = rawValue
+              const isFloat = facets[j].type === 'float'
+              value = isFloat ? parseFloat(rawValue) : parseInt(rawValue)
             }
           }
           feature.push(value)
@@ -211,11 +217,9 @@
       }
 
       const t1 = Date.now()
-      console.log('Duration (ms):', (t1 - t0))
+      console.log('initFacets duration (ms):', (t1 - t0))
       return {facets, features}
     }
-
-
   </script>
 </head>
 
@@ -251,7 +255,7 @@
                         name: "Phase 3 WGS variants",
                         type: "variant",
                         format: "vcf",
-                        visibilityWindow: 300000,
+                        visibilityWindow: 3000000,
                         url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
                         indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi"
                     },
@@ -273,11 +277,13 @@
 
     window.igv = igv
 
-    igv.createBrowser(igvDiv, options)
-        .then(function (browser) {
-            console.log("Created IGV browser")
-            window.igvBrowser = browser
-        })
+    const browser = await igv.createBrowser(igvDiv, options)
+    window.igvBrowser = browser
+
+    browser.on('locuschange', referenceFrameList => {
+      const facets = initFacets('Phase 3 WGS variants', browser)
+      console.log('facets', facets)
+    })
 
 </script>
 
