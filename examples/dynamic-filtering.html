@@ -217,7 +217,10 @@
 
     /** Get crossfilter-initialized features by facet */
     function getFeaturesByFacet(features, facetNames) {
+      console.log('in getFeaturesByFacet, features', features)
       const featureCrossfilter = crossfilter(features)
+      window.featureCrossfilter = featureCrossfilter
+      console.log('in getFeaturesByFacet, featureCrossfilter', featureCrossfilter)
       const featuresByFacet = {}
       for (let i = 0; i < facetNames.length; i++) {
         const facetName = facetNames[i]
@@ -232,10 +235,9 @@
       selection, featuresByFacet, initFacets, filterableFeatures, rawFacets
     ) {
       const t0 = Date.now()
-      const facets =
-      initFacets
-        .filter(facet => facet.isLoaded)
-        .map(facet => facet.name)
+      const facets = initFacets
+
+      console.log('in filterFeaturesNew, featuresByFacet', featuresByFacet)
 
       let fn; let facet; let results
 
@@ -357,7 +359,7 @@
         // For categorical facets, we have an array of integers, e.g. [6, 0, 7, 0, 0].
         // Each element in the array is the index-offset of the feature's category assignment
         // for the facet at that index.
-        const facetIndex = features[i]
+        const facetIndex = rawFeatures[i]
         feature.facetIndex = facetIndex
         features.push(feature)
       }
@@ -388,7 +390,7 @@
      *     {
      *       "name": <String>, // Internal name of facet, e.g. "VT"
      *
-     *       "displayName": <String>, // e.g. "Variant type"
+     *       "displayName": <String>, // e.g. "Variant type" TODO
      *
      *       "type": <String> // "categorical" or "integer" or "float"
      *
@@ -444,7 +446,7 @@
       })
 
       // Populate features, and (for each facet) filterNames
-      const features = []
+      let features = []
       for (let i = 0; i < featuresInFrame.length; i++) {
         const feature = []
         const igvFeature = featuresInFrame[i]
@@ -485,6 +487,37 @@
         features.push(feature)
       }
 
+      const undefinedIndexes = new Set()
+
+      // Trim unused facets
+      facets = facets.filter((facet, i) => {
+        if (
+          (facet.type === 'categorical' && facet.filterNames.length < 2) ||
+          (facet.type !== 'categorical' && facet.filterNumbers.length < 2)
+        ) {
+          undefinedIndexes.add(i)
+          return false
+        } else {
+          return true
+        }
+      })
+
+      // Trim undefined indexes from features
+      if (undefinedIndexes.length > 0) {
+        const trimmedFeatures = []
+        for (let i = 0; i < features.length; i++) {
+          const feature = features[i];
+          const trimmedFeature = []
+          for (let j = 0; j < features.length; j++) {
+            if (!undefinedIndexes.has(j)) {
+              trimmedFeature.push(feature[j])
+            }
+          }
+          trimmedFeatures.push(trimmedFeature)
+        }
+        features = trimmedFeatures
+      }
+
       // Populate statistics for numeric facets
       facets = facets.map(facet => {
         if (facet.type === 'categorical') return facet
@@ -497,6 +530,8 @@
 
       const t1 = Date.now()
       console.log('initFacets duration (ms):', (t1 - t0))
+      console.log('in initFacets, facets', facets)
+      console.log('in initFacets, features', features)
       return {facets, features}
     }
 
@@ -570,7 +605,7 @@
       return `
         <input
           type="text"
-          class="igv-numeric-query-input igv-numeric-query-input-${filterName}"
+          class="igv-filter igv-numeric-query-input igv-numeric-query-input-${filterName}"
           name="${facet.name}:${filterName}"
           value="${value}"
           style="width: ${style.width}; font-size: ${style.fontSize};"
@@ -776,9 +811,11 @@
 
       const filtersDom = document.querySelectorAll('.igv-filter')
       filtersDom.forEach(filterDom => {
+        const selection = getSelection()
+        console.log('filterDom', filterDom)
         filterDom.addEventListener('change', (event) => {
+          console.log('in filterDom change')
           const facetName = filterDom.getAttribute('data-facet-name');
-          const selection = getSelection()
           filterFeaturesNew(selection, featuresByFacet, facets, features, facets)
           // filterFeatures(trackSelector, facetName)
         })
