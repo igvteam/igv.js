@@ -24,6 +24,9 @@
     function getOriginalChrFeatures(trackIndex, igvBrowser) {
       const chr = Array.from(igvBrowser.tracks[0].trackView.viewports[0].featureCache.features.keys())[0]
 
+      console.log('igvBrowser.tracks[0]', igvBrowser.tracks[0])
+      console.log('chr', chr)
+
       if (
         typeof window.originalFeatures === 'undefined' ||
         chr in window.originalFeatures === false
@@ -100,47 +103,18 @@
       return selection
     }
 
-    function filterFeatures(trackSelector, facetName) {
+    function filterFeatures(trackSelector, filteredFeatures, counts, igvBrowser) {
       const trackIndex = getTrackIndex(trackSelector, igvBrowser);
+      const featuresInFrame = getFeaturesInFrame(trackSelector, igvBrowser)
 
-      const selection = {}
-
-      const originalChrFeatures = getOriginalChrFeatures(trackIndex, igvBrowser)
-
-      const facetSel = `.igv-facet-${facetName}`
-      const inputs = document.querySelectorAll(`.filters ${facetSel} input`)
-
-      const facets = {}
-
-      inputs.forEach(input => {
-        if (input.checked) {
-          const filter = input.value
-          if (!facets[facetName]?.includes(filter)) {
-            if (facet in selection) {
-              selection[facetName].push(filter)
-            } else {
-              selection[facetName] = [filter]
-            }
-          }
-        } else if (input.type === 'text') {
-
-        }
-      })
-
-      if (selection.size === 0) {
-        return selection.originalChrFeatures
+      const featuresToPlot = []
+      for (let i = 0; i < filteredFeatures.length; i++) {
+        const rawIndex = filteredFeatures[i].rawIndex
+        const featureToPlot = featuresInFrame[rawIndex]
+        featuresToPlot.push(featureToPlot)
       }
 
-      // Filter features by selection (i.e., selected facets and filters)
-      const [newFilteredFeatures, newFilterCounts] = filterFeaturesNew(
-        selection, featuresByFacet, initFacets, originalChrFeatures, rawFacets
-      )
-
-      const filteredFeatures = originalChrFeatures.filter(
-        feature => selection.has(feature.info[dimension]) && getIsFeatureInFrame(feature, igvBrowser)
-      )
-
-      updateTrack(trackIndex, filteredFeatures, igv, igvBrowser)
+      updateTrack(trackIndex, featuresToPlot, igv, igvBrowser)
     }
 
     function getFeaturesInFrame(trackSelector, igvBrowser) {
@@ -209,7 +183,7 @@
     /** Get crossfilter-initialized features by facet */
     function getFeaturesByFacet(features, facetNames) {
       const featureCrossfilter = crossfilter(features)
-      // window.featureCrossfilter = featureCrossfilter
+      window.featureCrossfilter = featureCrossfilter
       const featuresByFacet = {}
       for (let i = 0; i < facetNames.length; i++) {
         const facetName = facetNames[i]
@@ -219,8 +193,8 @@
       return featuresByFacet
     }
 
-    /** Get filtered feature results */
-    function filterFeaturesNew(
+    /** Get filtered feature results, and counts */
+    function getFilteredFeatures(
       selection, featuresByFacet, facets, filterableFeatures
     ) {
       const t0 = Date.now()
@@ -264,13 +238,13 @@
             featuresByFacet[facetName].filter(fn)
           }
         }
-
         results = featuresByFacet[facet.name].top(Infinity)
       }
 
       const facetNames = facets.map(facet => facet.name)
       const t0Counts = Date.now()
       const counts = {} //getFilterCounts(facetNames, featuresByFacet, initFacets, selection)
+
 
       console.log('in filterFeaturesNew, results', results)
       return [results, counts]
@@ -341,7 +315,7 @@
       const features = []
 
       for (let i = 0; i < rawFeatures.length; i++) {
-        const feature = {}
+        const feature = { 'rawIndex': i }
 
         // For categorical facets, we have an array of integers, e.g. [6, 0, 7, 0, 0].
         // Each element in the array is the index-offset of the feature's category assignment
@@ -409,6 +383,7 @@
       const t0 = Date.now()
       const trackIndex = getTrackIndex(trackSelector, igvBrowser)
       const featuresInFrame = getFeaturesInFrame(trackIndex, igvBrowser)
+      console.log('featuresInFrame[0]', featuresInFrame[0])
 
       // Populate facets model, except for filterNames array values
       let facets = []
@@ -535,8 +510,6 @@
 
       const t1 = Date.now()
       console.log('initFacets duration (ms):', (t1 - t0))
-      console.log('in initFacets, facets', facets)
-      console.log('in initFacets, features', features)
       return {facets, features}
     }
 
@@ -549,7 +522,10 @@
       // if (isPartlyCollapsed) filters = filters.slice(0, 5)
 
       // Get list of filter checkboxes
-      const filtersHtml = filters.map(filterName => {
+      const filtersHtml = filters.map((filterName, i) => {
+        let style = ''
+        if (isPartlyCollapsed && i >= 5) style = 'display: none;'
+
         const fullName = `${facet.name}:${filterName}`
         const attrs = `
           value="${filterName}"
@@ -560,7 +536,7 @@
         `
         const count = facet.countsByFilterName[filterName]
         const filterHtml = `
-          <label class="igv-filter-label">
+          <label class="igv-filter-label" style="${style}">
             <div>
               <input type="checkbox" ${attrs} checked />
               <span class="igv-filter-label-text">${filterName}</span>
@@ -817,9 +793,13 @@
       const filtersDom = document.querySelectorAll('.igv-filter')
       filtersDom.forEach(filterDom => {
         filterDom.addEventListener('change', (event) => {
+
           const selection = getSelection()
           const facetName = filterDom.getAttribute('data-facet-name')
-          filterFeaturesNew(selection, featuresByFacet, facets, features)
+          const [filteredFeatures, counts] =
+            getFilteredFeatures(selection, featuresByFacet, facets, features)
+          filterFeatures(trackSelector, filteredFeatures, counts, igvBrowser)
+
           // filterFeatures(trackSelector, facetName)
         })
       })
