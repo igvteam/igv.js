@@ -24,9 +24,6 @@
     function getOriginalChrFeatures(trackIndex, igvBrowser) {
       const chr = Array.from(igvBrowser.tracks[0].trackView.viewports[0].featureCache.features.keys())[0]
 
-      console.log('igvBrowser.tracks[0]', igvBrowser.tracks[0])
-      console.log('chr', chr)
-
       if (
         typeof window.originalFeatures === 'undefined' ||
         chr in window.originalFeatures === false
@@ -73,7 +70,6 @@
       const selection = {}
 
       const categoricalFilters = document.querySelectorAll('.igv-filter-categorical')
-      // console.log('categoricalFilters', categoricalFilters)
       categoricalFilters.forEach(input => {
         if (input.checked) {
           const facetName = input.getAttribute('data-facet-name')
@@ -101,7 +97,6 @@
         // }
       })
 
-      // console.log('in getSelection, selection', selection)
       return selection
     }
 
@@ -114,7 +109,6 @@
 
       const facetSel = `.igv-facet-${facetName}`
       const inputs = document.querySelectorAll(`.filters ${facetSel} input`)
-      console.log('in filterFeatures, inputs', inputs)
 
       const facets = {}
 
@@ -133,8 +127,6 @@
         }
       })
 
-      console.log('in filterFeatures, facets', facets)
-
       if (selection.size === 0) {
         return selection.originalChrFeatures
       }
@@ -148,7 +140,6 @@
         feature => selection.has(feature.info[dimension]) && getIsFeatureInFrame(feature, igvBrowser)
       )
 
-      console.log('filteredFeatures', filteredFeatures)
       updateTrack(trackIndex, filteredFeatures, igv, igvBrowser)
     }
 
@@ -217,10 +208,8 @@
 
     /** Get crossfilter-initialized features by facet */
     function getFeaturesByFacet(features, facetNames) {
-      console.log('in getFeaturesByFacet, features', features)
       const featureCrossfilter = crossfilter(features)
-      window.featureCrossfilter = featureCrossfilter
-      console.log('in getFeaturesByFacet, featureCrossfilter', featureCrossfilter)
+      // window.featureCrossfilter = featureCrossfilter
       const featuresByFacet = {}
       for (let i = 0; i < facetNames.length; i++) {
         const facetName = facetNames[i]
@@ -236,12 +225,6 @@
     ) {
       const t0 = Date.now()
 
-      // facets = structuredClone(facets)
-      console.log('in filterFeaturesNew, facets', facets)
-      console.log('in filterFeaturesNew, selection', selection)
-      console.log('in filterFeaturesNew, featuresByFacet', featuresByFacet)
-      console.log('in filterFeaturesNew, featuresByFacet[facets[0].name].top(Infinity)', featuresByFacet[facets[0].name].top(Infinity))
-
       let fn; let facet; let results
 
       if (Object.keys(selection).length === 0) {
@@ -250,7 +233,6 @@
         for (let i = 0; i < facets.length; i++) {
           facet = facets[i]
           const facetName = facet.name
-          console.log('facet.name', facet.name)
           if (facetName in selection) {
             if (facet.type === 'categorical') {
               // e.g. 'infant_sick_YN'
@@ -262,13 +244,8 @@
                 filter.add(filterIndex)
               })
 
-              console.log('in filterFeaturesNew, friendlyFilters', friendlyFilters)
-              console.log('in filterFeaturesNew, filter', filter)
-
               fn = function(d, i) {
-                console.log('i, d, filter, filter.has(d)', i, d, filter, filter.has(d))
                 return filter.has(d)
-                // return true
               }
 
               // Apply the actual crossfilter method
@@ -283,21 +260,17 @@
             }
           } else {
             fn = null
-            console.log('fn = null')
             // Apply the actual crossfilter method
             featuresByFacet[facetName].filter(fn)
           }
         }
-        console.log('before results, featuresByFacet', featuresByFacet)
-        console.log('before results, facet.name', facet.name)
-        // results = featuresByFacet[facet.name].top(Infinity)
-        results = featuresByFacet['VT'].top(Infinity)
+
+        results = featuresByFacet[facet.name].top(Infinity)
       }
 
       const facetNames = facets.map(facet => facet.name)
       const t0Counts = Date.now()
       const counts = {} //getFilterCounts(facetNames, featuresByFacet, initFacets, selection)
-
 
       console.log('in filterFeaturesNew, results', results)
       return [results, counts]
@@ -527,9 +500,10 @@
           for (let j = 0; j < feature.length; j++) {
             if (!undefinedIndexes.has(j)) {
               let featureValue = feature[j]
+
+              // Handle facets where _some but not all_ values are not available
               if (featureValue === undefined) {
-                featureValue = null
-                console.log('k, facets', k, facets)
+                featureValue = k-1
                 if (facets[k].type === 'categorical') {
                   if (!facets[k-1].filterNames.includes(null)) {
                     facets[k-1].filterNames.push(null)
@@ -619,15 +593,11 @@
           ${moreOrLess}
         </div>`
 
-      // console.log('facetHtml', facetHtml)
       return facetHtml
     }
 
     function updateInputValue(event) {
-      console.log('updateInputValue, event', event)
       const target = event.target
-      console.log('target', target)
-      console.log('target.value', target.value)
       const facetName = target.name.split(':')[0]
       filterFeatures('Phase 3 WGS variants', facetName)
     }
@@ -753,7 +723,6 @@
     }
 
     function getFacetsHtml(facetsContainer) {
-      // console.log('facetsContainer', facetsContainer)
       const facetList = facetsContainer.facets.map(facetContainer => {
         let facetHtml
         if (facetContainer.type === 'categorical') {
@@ -847,10 +816,7 @@
 
       const filtersDom = document.querySelectorAll('.igv-filter')
       filtersDom.forEach(filterDom => {
-        // console.log('filterDom', filterDom)
         filterDom.addEventListener('change', (event) => {
-          console.log('in filterDom change')
-
           const selection = getSelection()
           const facetName = filterDom.getAttribute('data-facet-name')
           filterFeaturesNew(selection, featuresByFacet, facets, features)
