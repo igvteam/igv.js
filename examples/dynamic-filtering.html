@@ -103,7 +103,8 @@
       return selection
     }
 
-    function filterFeatures(trackSelector, filteredFeatures, counts, igvBrowser) {
+    function filterFeatures(trackSelector, filterResults, facets, igvBrowser) {
+      const [filteredFeatures, filterCounts] = filterResults
       const trackIndex = getTrackIndex(trackSelector, igvBrowser);
       const featuresInFrame = getFeaturesInFrame(trackSelector, igvBrowser)
 
@@ -115,6 +116,20 @@
       }
 
       updateTrack(trackIndex, featuresToPlot, igv, igvBrowser)
+
+      Object.entries(filterCounts).forEach(([facetName, countsByFilter], i) => {
+        const facet = facets[i]
+        Object.entries(countsByFilter).forEach(([filterName, count]) => {
+          if (facet.type === 'categorical') {
+            const filterSel =
+              `.igv-filter-label[data-facet-name="${facet.name}"][data-filter-name="${filterName}"] ` +
+              `.igv-filter-count`
+            console.log('filterSel', filterSel)
+            const countDom = document.querySelector(filterSel)
+            countDom.textContent = count
+          }
+        })
+      })
     }
 
     function getFeaturesInFrame(trackSelector, igvBrowser) {
@@ -243,10 +258,10 @@
 
       const facetNames = facets.map(facet => facet.name)
       const t0Counts = Date.now()
-      const counts = {} //getFilterCounts(facetNames, featuresByFacet, initFacets, selection)
-
+      const counts = getFilterCounts(facetNames, featuresByFacet, facets, selection)
 
       console.log('in filterFeaturesNew, results', results)
+      console.log('in filterFeaturesNew, counts', counts)
       return [results, counts]
     }
 
@@ -254,25 +269,26 @@
     function getFilterCounts(facetNames, featuresByFacet, facets, selection) {
       const filterCounts = {}
 
-      for (let i = 0; i < facetNames.length; i++) {
-        const facet = facetNames[i]
-        const facetCrossfilter = featuresByFacet[facet]
+      for (let i = 0; i < facets.length; i++) {
+        const facet = facets[i]
+        const facetName = facet.name
+        const facetCrossfilter = featuresByFacet[facetName]
         // Set counts for each filter in facet
         const rawFilterCounts = facetCrossfilter.group().top(Infinity)
         let countsByFilter
 
         if (facet.type === 'categorical') {
           countsByFilter = {}
-          facets[i].filterNames?.forEach((filterName, j) => {
+          facet.filterNames.forEach((filterName, j) => {
             let count = null
             // check for originalGroups array first, if present
-            const originalGroups = facets[i].originalGroups || facets[i].filterNames
-            const groupIdx = originalGroups.indexOf(group)
-            const rawFilterKeyAndValue = rawFilterCounts.find(rfc => rfc.key === groupIdx)
+            const originalFilterNames = facets[i].originalFilterNames || facets[i].filterNames
+            const filterNameIdx = originalFilterNames.indexOf(filterName)
+            const rawFilterKeyAndValue = rawFilterCounts.find(rfc => rfc.key === filterNameIdx)
             if (rawFilterKeyAndValue) {
               count = rawFilterKeyAndValue.value
             }
-            countsByFilter[group] = count
+            countsByFilter[filterName] = count
           })
         } else {
           countsByFilter = []
@@ -289,18 +305,18 @@
           // Sort array by numeric value, to aid later histogram, etc.
           countsByFilter = countsByFilter.sort((a, b) => a[0] - b[0])
         }
-        filterCounts[facet] = countsByFilter
+        filterCounts[facet.name] = countsByFilter
       }
 
       // If a filter has been deselected, set its count to 0
       if (selection) {
-        Object.entries(filterCounts).forEach(([facet, countsByFilter]) => {
-          Object.entries(countsByFilter).forEach(([filter, count]) => {
+        Object.entries(filterCounts).forEach(([facetName, countsByFilter]) => {
+          Object.entries(countsByFilter).forEach(([filterName, count]) => {
             let newCount = count
-            if (!(facet in selection && selection[facet]?.includes(filter))) {
+            if (!(facetName in selection && selection[facetName]?.includes(filterName))) {
               newCount = 0
             }
-            filterCounts[facet][filter] = newCount
+            filterCounts[facetName][filterName] = newCount
           })
         })
       }
@@ -526,17 +542,20 @@
         let style = ''
         if (isPartlyCollapsed && i >= 5) style = 'display: none;'
 
+        const facetFilterAttrs = `
+          data-facet-name="${facet.name}"
+          data-filter-name="${filterName}"`
+
         const fullName = `${facet.name}:${filterName}`
         const attrs = `
           value="${filterName}"
           name="${fullName}"
           class="igv-filter igv-filter-categorical"
-          data-facet-name="${facet.name}"
-          data-filter-name="${filterName}"
+          ${facetFilterAttrs}
         `
         const count = facet.countsByFilterName[filterName]
         const filterHtml = `
-          <label class="igv-filter-label" style="${style}">
+          <label class="igv-filter-label" style="${style}" ${facetFilterAttrs}>
             <div>
               <input type="checkbox" ${attrs} checked />
               <span class="igv-filter-label-text">${filterName}</span>
@@ -796,9 +815,9 @@
 
           const selection = getSelection()
           const facetName = filterDom.getAttribute('data-facet-name')
-          const [filteredFeatures, counts] =
+          const filterResults =
             getFilteredFeatures(selection, featuresByFacet, facets, features)
-          filterFeatures(trackSelector, filteredFeatures, counts, igvBrowser)
+          filterFeatures(trackSelector, filterResults, facets, igvBrowser)
 
           // filterFeatures(trackSelector, facetName)
         })
