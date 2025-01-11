@@ -73,7 +73,7 @@
       const selection = {}
 
       const categoricalFilters = document.querySelectorAll('.igv-filter-categorical')
-      console.log('categoricalFilters', categoricalFilters)
+      // console.log('categoricalFilters', categoricalFilters)
       categoricalFilters.forEach(input => {
         if (input.checked) {
           const facetName = input.getAttribute('data-facet-name')
@@ -101,7 +101,7 @@
         // }
       })
 
-      console.log('in getSelection, selection', selection)
+      // console.log('in getSelection, selection', selection)
       return selection
     }
 
@@ -232,12 +232,15 @@
 
     /** Get filtered feature results */
     function filterFeaturesNew(
-      selection, featuresByFacet, initFacets, filterableFeatures, rawFacets
+      selection, featuresByFacet, facets, filterableFeatures
     ) {
       const t0 = Date.now()
-      const facets = initFacets
 
+      // facets = structuredClone(facets)
+      console.log('in filterFeaturesNew, facets', facets)
+      console.log('in filterFeaturesNew, selection', selection)
       console.log('in filterFeaturesNew, featuresByFacet', featuresByFacet)
+      console.log('in filterFeaturesNew, featuresByFacet[facets[0].name].top(Infinity)', featuresByFacet[facets[0].name].top(Infinity))
 
       let fn; let facet; let results
 
@@ -246,46 +249,57 @@
       } else {
         for (let i = 0; i < facets.length; i++) {
           facet = facets[i]
-          if (facet in selection) {
+          const facetName = facet.name
+          console.log('facet.name', facet.name)
+          if (facetName in selection) {
             if (facet.type === 'categorical') {
               // e.g. 'infant_sick_YN'
-              const friendlyFilters = selection[facet] // e.g. ['yes', 'NA']
+              const friendlyFilters = selection[facetName] // e.g. ['yes', 'NA']
 
               const filter = new Set()
               friendlyFilters.forEach(friendlyFilter => {
-                // find the original index of the filter in the source facet as the list here may be trimmed already
-                const sourceFacet = rawFacets.find(f => f.name === facet)
-                const filterIndex = sourceFacet.groups.indexOf(friendlyFilter)
+                const filterIndex = facet.filterNames.indexOf(friendlyFilter)
                 filter.add(filterIndex)
               })
 
-              fn = function(d) {
+              console.log('in filterFeaturesNew, friendlyFilters', friendlyFilters)
+              console.log('in filterFeaturesNew, filter', filter)
+
+              fn = function(d, i) {
+                console.log('i, d, filter, filter.has(d)', i, d, filter, filter.has(d))
                 return filter.has(d)
+                // return true
               }
 
               // Apply the actual crossfilter method
-              featuresByFacet[facet].filterFunction(fn)
+              featuresByFacet[facetName].filterFunction(fn)
             } else {
-              const numericFilters = selection[facet] // e.g. [0, 20]
+              const numericFilters = selection[facetName] // e.g. [0, 20]
 
               fn = function(d) {
-                return applyNumericFilters(d, numericFilters)
+                return true // applyNumericFilters(d, numericFilters)
               }
-              featuresByFacet[facet].filterFunction(fn)
+              featuresByFacet[facetName].filterFunction(fn)
             }
           } else {
             fn = null
+            console.log('fn = null')
             // Apply the actual crossfilter method
-            featuresByFacet[facet].filter(fn)
+            featuresByFacet[facetName].filter(fn)
           }
         }
-        results = featuresByFacet[facet].top(Infinity)
+        console.log('before results, featuresByFacet', featuresByFacet)
+        console.log('before results, facet.name', facet.name)
+        // results = featuresByFacet[facet.name].top(Infinity)
+        results = featuresByFacet['VT'].top(Infinity)
       }
 
-      const facetNames = initFacets.map(facet => facet.name)
+      const facetNames = facets.map(facet => facet.name)
       const t0Counts = Date.now()
-      const counts = getFilterCounts(facetNames, featuresByFacet, initFacets, selection)
+      const counts = {} //getFilterCounts(facetNames, featuresByFacet, initFacets, selection)
 
+
+      console.log('in filterFeaturesNew, results', results)
       return [results, counts]
     }
 
@@ -300,12 +314,12 @@
         const rawFilterCounts = facetCrossfilter.group().top(Infinity)
         let countsByFilter
 
-        if (facet.includes('--group--')) {
+        if (facet.type === 'categorical') {
           countsByFilter = {}
-          facets[i].groups?.forEach((group, j) => {
+          facets[i].filterNames?.forEach((filterName, j) => {
             let count = null
             // check for originalGroups array first, if present
-            const originalGroups = facets[i].originalGroups || facets[i].groups
+            const originalGroups = facets[i].originalGroups || facets[i].filterNames
             const groupIdx = originalGroups.indexOf(group)
             const rawFilterKeyAndValue = rawFilterCounts.find(rfc => rfc.key === groupIdx)
             if (rawFilterKeyAndValue) {
@@ -366,10 +380,10 @@
 
       const featuresByFacet = getFeaturesByFacet(features, facetNames)
 
-      const filterCounts = getFilterCounts(facetNames, featuresByFacet, facets, null)
+      const filterCounts = {} // getFilterCounts(facetNames, featuresByFacet, facets, null)
 
       return {
-        features, featuresByFacet, loadedFacets: facets,
+        features, featuresByFacet, facets,
         filterCounts
       }
     }
@@ -502,15 +516,32 @@
         }
       })
 
+      console.log('undefinedIndexes', undefinedIndexes)
       // Trim undefined indexes from features
-      if (undefinedIndexes.length > 0) {
+      if (undefinedIndexes.size > 0) {
         const trimmedFeatures = []
         for (let i = 0; i < features.length; i++) {
           const feature = features[i];
           const trimmedFeature = []
-          for (let j = 0; j < features.length; j++) {
+          let k = -2
+          for (let j = 0; j < feature.length; j++) {
             if (!undefinedIndexes.has(j)) {
-              trimmedFeature.push(feature[j])
+              let featureValue = feature[j]
+              if (featureValue === undefined) {
+                featureValue = null
+                console.log('k, facets', k, facets)
+                if (facets[k].type === 'categorical') {
+                  if (!facets[k-1].filterNames.includes(null)) {
+                    facets[k-1].filterNames.push(null)
+                    facets[k-1].countsByFilterName[null] = 1
+                  } else {
+                    facets[k-1].countsByFilterName[null] += 1
+                  }
+                }
+              }
+              trimmedFeature.push(featureValue)
+            } else {
+              k++
             }
           }
           trimmedFeatures.push(trimmedFeature)
@@ -541,7 +572,7 @@
       if (numFilters < 2) return ''
 
       let filters = facet.filterNames;
-      if (isPartlyCollapsed) filters = filters.slice(0, 5)
+      // if (isPartlyCollapsed) filters = filters.slice(0, 5)
 
       // Get list of filter checkboxes
       const filtersHtml = filters.map(filterName => {
@@ -805,18 +836,24 @@
       filterContainerDom.insertAdjacentHTML('beforeend', facetsHtml)
 
       const {
-        features, featuresByFacet, loadedFacets: facets,
+        features, featuresByFacet, facets,
         filterCounts
       } = initCrossfilter(facetsContainer)
 
+      window.facets = facets
+
+      window.features = features
+      window.featuresByFacet = featuresByFacet
+
       const filtersDom = document.querySelectorAll('.igv-filter')
       filtersDom.forEach(filterDom => {
-        const selection = getSelection()
-        console.log('filterDom', filterDom)
+        // console.log('filterDom', filterDom)
         filterDom.addEventListener('change', (event) => {
           console.log('in filterDom change')
-          const facetName = filterDom.getAttribute('data-facet-name');
-          filterFeaturesNew(selection, featuresByFacet, facets, features, facets)
+
+          const selection = getSelection()
+          const facetName = filterDom.getAttribute('data-facet-name')
+          filterFeaturesNew(selection, featuresByFacet, facets, features)
           // filterFeatures(trackSelector, facetName)
         })
       })
