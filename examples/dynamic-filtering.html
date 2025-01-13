@@ -215,6 +215,24 @@
       return trackIndex
     }
 
+    function getQuantiles(sortedNumbers, max, min, numBins=20) {
+      const size = (max - min) / numBins
+      const quantiles = new Array(numBins).fill(0)
+
+      for (let i = 1; i < numBins + 1; i++) {
+        const prevBinNum = min + (i - 1) * size
+        const binNum = min + i * size
+        for (let j = 0; j < sortedNumbers.length; j++) {
+          const num = sortedNumbers[j]
+          if (prevBinNum < num && num <= binNum) {
+            quantiles[i - 1] += 1
+          }
+        }
+      }
+
+      return quantiles
+    }
+
     function getStatistics(numbers) {
       // Sort the array in ascending order
       numbers.sort((a, b) => a - b);
@@ -240,7 +258,9 @@
       const q1 = getMedian(lowerHalf);
       const q3 = getMedian(upperHalf);
 
-      return { min, q1, median, q3, max, mean };
+      const quantiles = getQuantiles(numbers, max, min)
+
+      return { min, q1, median, q3, max, mean, quantiles };
     }
 
     function getMedian(numbers) {
@@ -591,8 +611,9 @@
       facets = facets.map(facet => {
         if (facet.type === 'categorical') return facet
 
-        const {min, q1, median, q3, max, mean} = getStatistics(facet.filterNumbers)
-        facet.statistics = {min, q1, median, q3, max, mean}
+        const {min, q1, median, q3, max, mean, quantiles} =
+          getStatistics(facet.filterNumbers)
+        facet.statistics = {min, q1, median, q3, max, mean, quantiles}
 
         return facet
       })
