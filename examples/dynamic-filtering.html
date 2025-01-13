@@ -467,6 +467,7 @@
 
       const undefinedIndexes = new Set()
 
+      const untrimmedFacets = facets
       // Trim unused facets
       facets = facets.filter((facet, i) => {
         if (
@@ -480,39 +481,53 @@
         }
       })
 
+      const untrimmedToTrimmedFacetIndexMap = {}
+      untrimmedFacets.forEach((untrimmedFacet, i) => {
+        facets.forEach((facet, j) => {
+          if (untrimmedFacet.name === facet.name) {
+            untrimmedToTrimmedFacetIndexMap[i] = j
+          }
+        })
+      })
+
       console.log('undefinedIndexes', undefinedIndexes)
+
+
       // Trim undefined indexes from features
       if (undefinedIndexes.size > 0) {
         const trimmedFeatures = []
         for (let i = 0; i < features.length; i++) {
           const feature = features[i];
           const trimmedFeature = []
-          let k = -2
           for (let j = 0; j < feature.length; j++) {
-            if (!undefinedIndexes.has(j)) {
+            if (!undefinedIndexes.has(j)) { // If this facet isn't totally empty
               let featureValue = feature[j]
 
               // Handle facets where _some but not all_ values are not available
               if (featureValue === undefined) {
-                featureValue = k-1
+                featureValue = null
+                const k = untrimmedToTrimmedFacetIndexMap[j]
+                // console.log('j, k, facets[k], facets, feature, i', j, k, facets[k], facets, feature, i)
                 if (facets[k].type === 'categorical') {
-                  if (!facets[k-1].filterNames.includes(null)) {
-                    facets[k-1].filterNames.push(null)
-                    facets[k-1].countsByFilterName[null] = 1
+                  if (!facets[k].filterNames.includes(null)) {
+                    facets[k].filterNames.push(null)
+                    facets[k].countsByFilterName[null] = 1
                   } else {
-                    facets[k-1].countsByFilterName[null] += 1
+                    facets[k].countsByFilterName[null] += 1
                   }
                 }
               }
               trimmedFeature.push(featureValue)
-            } else {
-              k++
             }
           }
           trimmedFeatures.push(trimmedFeature)
         }
         features = trimmedFeatures
       }
+
+      console.log('facets', facets)
+      console.log('features[814]', features[814])
+      console.log('features[815]', features[815])
 
       // Populate statistics for numeric facets
       facets = facets.map(facet => {
@@ -535,12 +550,11 @@
       if (numFilters < 2) return ''
 
       let filters = facet.filterNames;
-      // if (isPartlyCollapsed) filters = filters.slice(0, 5)
 
       // Get list of filter checkboxes
       const filtersHtml = filters.map((filterName, i) => {
         let style = ''
-        if (isPartlyCollapsed && i >= 5) style = 'display: none;'
+        // if (isPartlyCollapsed && i >= 5) style = 'display: none;'
 
         const facetFilterAttrs = `
           data-facet-name="${facet.name}"
