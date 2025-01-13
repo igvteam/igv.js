@@ -254,6 +254,7 @@ class TrackViewport extends Viewport {
                 this.loading = false
                 this.hideMessage()
                 this.stopSpinner()
+                this.browser.fireEvent('featuresloaded', [this])
                 return this.featureCache
             }
         } catch (error) {

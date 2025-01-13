@@ -490,9 +490,6 @@
         })
       })
 
-      console.log('undefinedIndexes', undefinedIndexes)
-
-
       // Trim undefined indexes from features
       if (undefinedIndexes.size > 0) {
         const trimmedFeatures = []
@@ -746,6 +743,41 @@
       return facetsHtml
     }
 
+    function initIgvFacets(browser) {
+      const trackSelector = 'Phase 3 WGS variants'
+      const facetsContainer = initFacets(trackSelector, browser)
+      const facetsHtml = getFacetsHtml(facetsContainer)
+
+      const filterContainerDom = document.querySelector('.filters')
+      filterContainerDom.innerHTML = ''
+      filterContainerDom.insertAdjacentHTML('beforeend', facetsHtml)
+
+      const {
+        features, featuresByFacet, facets,
+        filterCounts
+      } = initCrossfilter(facetsContainer)
+
+      window.facets = facets
+
+      window.features = features
+      window.featuresByFacet = featuresByFacet
+
+      const filtersDom = document.querySelectorAll('.igv-filter')
+      filtersDom.forEach(filterDom => {
+        filterDom.addEventListener('change', (event) => {
+
+          const selection = getSelection()
+          const facetName = filterDom.getAttribute('data-facet-name')
+          const filterResults =
+            getFilteredFeatures(selection, featuresByFacet, facets, features)
+
+          filterFeatures(trackSelector, filterResults, facets, igvBrowser)
+
+          // filterFeatures(trackSelector, facetName)
+        })
+      })
+    }
+
   </script>
 </head>
 
@@ -804,38 +836,14 @@
     const browser = await igv.createBrowser(igvDiv, options)
     window.igvBrowser = browser
 
+    browser.on('featuresloaded', (track) => {
+      console.log('featuresloaded, track', track)
+      console.log('featuresloaded, this', this)
+      initIgvFacets(browser)
+    })
+
     browser.on('locuschange', referenceFrameList => {
-      const trackSelector = 'Phase 3 WGS variants'
-      const facetsContainer = initFacets(trackSelector, browser)
-      const facetsHtml = getFacetsHtml(facetsContainer)
-
-      const filterContainerDom = document.querySelector('.filters')
-      filterContainerDom.innerHTML = ''
-      filterContainerDom.insertAdjacentHTML('beforeend', facetsHtml)
-
-      const {
-        features, featuresByFacet, facets,
-        filterCounts
-      } = initCrossfilter(facetsContainer)
-
-      window.facets = facets
-
-      window.features = features
-      window.featuresByFacet = featuresByFacet
-
-      const filtersDom = document.querySelectorAll('.igv-filter')
-      filtersDom.forEach(filterDom => {
-        filterDom.addEventListener('change', (event) => {
-
-          const selection = getSelection()
-          const facetName = filterDom.getAttribute('data-facet-name')
-          const filterResults =
-            getFilteredFeatures(selection, featuresByFacet, facets, features)
-          filterFeatures(trackSelector, filterResults, facets, igvBrowser)
-
-          // filterFeatures(trackSelector, facetName)
-        })
-      })
+      initIgvFacets(browser)
     })
 
 </script>
