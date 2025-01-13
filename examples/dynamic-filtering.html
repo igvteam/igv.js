@@ -24,9 +24,6 @@
     function getOriginalChrFeatures(trackIndex, igvBrowser) {
       const chr = Array.from(igvBrowser.tracks[0].trackView.viewports[0].featureCache.features.keys())[0]
 
-      console.log('igvBrowser.tracks[0]', igvBrowser.tracks[0])
-      console.log('chr', chr)
-
       if (
         typeof window.originalFeatures === 'undefined' ||
         chr in window.originalFeatures === false
@@ -101,6 +98,69 @@
       })
 
       return selection
+    }
+
+    /**
+     * Determine if a feature satisfies any numeric filters
+     *
+     * @param {Number} d - A numeric datum; a numeric value for a feature
+     * @param {Array<Array<String, *>>} numericFilters Filters for a numeric
+     *   facet. Each filter has an operator and a value.  Values can be a number
+     *   or an array of two numbers.
+     *
+     *   Example simple numeric filters:
+     *   - ["=", 1.3]
+     *   - ["!=", 1.3]
+     *   - [">", 6]
+     *   - [">=", 6]
+     *   - ["<", 6]
+     *   - ["<=", 6]
+     *   - ["between", [5, 42]] -- inclusive, i.e. 5 <= d <= 42
+     *   - ["not between", [5, 42]] -- inclusive, i.e. !(5 <= d <= 42)
+     *
+     *   Example compound numeric filters:
+     *   - [["between", [95, 100]], ["between", [1200, 1300]] -- (95 <= d <= 100) or (1200 <= d <= 1300)
+     *
+     *   Compound numeric filters could be used to e.g.:
+     *     - isolate the peaks of multimodal distributions (as in above concrete example)
+     *     - isolate the tails of distributions
+     *
+     *   TODO:
+     *   - Enable percentile filtering, i.e. beyond raw values.  Requires 1-time full sort, then trivial.
+     *
+     * @returns {Boolean} Whether cell datum passed any filters
+     */
+    function applyNumericFilters(d, rawFilters) {
+      // const [numericFilters, includeNa] = rawFilters
+      const numericFilters = rawFilters
+      const includeNa = true
+
+      if (includeNa && d === null) {return true}
+
+      for (let i = 0; i < numericFilters.length; i++) {
+        const [operator, value] = numericFilters[i]
+        if (operator === '=') {
+          // for fastest querying, exit function immediately upon _any_ condition
+          // evaluating to true
+          if (d === value) {return true}
+        } else if (operator === '!=') {
+          if (d !== value) {return true}
+        } else if (operator === '>') {
+          if (d > value) {return true}
+        } else if (operator === '>=') {
+          if (d >= value) {return true}
+        } else if (operator === '<') {
+          if (d < value) {return true}
+        } else if (operator === '<=') {
+          if (d <= value) {return true}
+        } else if (operator === 'between') {
+          if (value[0] <= d && d <= value[1]) {return true}
+        } else if (operator === 'not between') {
+          if (!(value[0] <= d && d <= value[1])) {return true}
+        }
+      }
+
+      return false
     }
 
     function filterFeatures(trackSelector, filterResults, facets, igvBrowser) {
@@ -243,7 +303,8 @@
               const numericFilters = selection[facetName] // e.g. [0, 20]
 
               fn = function(d) {
-                return true // applyNumericFilters(d, numericFilters)
+                // return true
+                return applyNumericFilters(d, numericFilters)
               }
               featuresByFacet[facetName].filterFunction(fn)
             }
@@ -551,7 +612,7 @@
       // Get list of filter checkboxes
       const filtersHtml = filters.map((filterName, i) => {
         let style = ''
-        // if (isPartlyCollapsed && i >= 5) style = 'display: none;'
+        if (isPartlyCollapsed && i >= 5) style = 'display: none;'
 
         const facetFilterAttrs = `
           data-facet-name="${facet.name}"
@@ -616,7 +677,6 @@
           name="${facet.name}:${filterName}"
           value="${value}"
           style="width: ${style.width}; font-size: ${style.fontSize};"
-          onChange=updateInputValue(event)
         />`
     }
 
@@ -841,10 +901,9 @@
       browser.off('featuresloaded', handleFirstFeaturesLoaded) // Remove event listener
     }
 
-    console.log('browser.on', browser.on)
     browser.on('featuresloaded', handleFirstFeaturesLoaded)
 
-    browser.on('locuschange', referenceFrameList => {
+    browser.on('locuschange', () => {
       initIgvFacets(browser)
     })
 
