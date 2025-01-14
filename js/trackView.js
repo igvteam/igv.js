@@ -321,7 +321,7 @@ class TrackView {
 
     moveScroller(delta) {
 
-        const y = this.innerScroll.getBoundingClientRect().top + delta
+        const y = this.innerScroll.offsetTop + delta
         const top = Math.min(Math.max(0, y), this.outerScroll.clientHeight - this.innerScroll.clientHeight)
         this.innerScroll.style.top = `${top}px`;
 
