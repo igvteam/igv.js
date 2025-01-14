@@ -223,24 +223,24 @@ class TrackViewport extends Viewport {
 
     async loadFeatures() {
 
-        const referenceFrame = this.referenceFrame
-        const chr = referenceFrame.chr
-
-        // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
-        const chromosome = await this.browser.genome.loadChromosome(chr)
-        const chrLength = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER
-        const pixelWidth = this.viewportElement.offsetWidth// * 3;
-        const bpWidth = pixelWidth * referenceFrame.bpPerPixel
-        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth))
-        const bpEnd = Math.ceil(Math.min(chrLength, referenceFrame.start + bpWidth + bpWidth))  // Add one screen width to end
-
-        if (this.loading && this.loading.start === bpStart && this.loading.end === bpEnd) {
-            return undefined
-        }
-        this.loading = {start: bpStart, end: bpEnd}
-        this.startSpinner()
-
         try {
+            const referenceFrame = this.referenceFrame
+            const chr = referenceFrame.chr
+
+            // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
+            const chromosome = await this.browser.genome.loadChromosome(chr)
+            const chrLength = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER
+            const pixelWidth = this.viewportElement.offsetWidth// * 3;
+            const bpWidth = pixelWidth * referenceFrame.bpPerPixel
+            const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth))
+            const bpEnd = Math.ceil(Math.min(chrLength, referenceFrame.start + bpWidth + bpWidth))  // Add one screen width to end
+
+            if (this.loading && this.loading.start === bpStart && this.loading.end === bpEnd) {
+                return undefined
+            }
+            this.loading = {start: bpStart, end: bpEnd}
+            this.startSpinner()
+            
             const track = this.trackView.track
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
             if (features) {
