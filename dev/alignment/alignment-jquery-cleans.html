@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dev - alignment - jquery cleanse</title>
+</head>
+
+<body>
+
+<div id="igv-container" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config =
+        {
+            "genome": "hg19",
+            "locus": "chr1:155155389",
+            "tracks":
+                [
+                    {
+                        "type": "alignment",
+                        "url": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam",
+                        "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam.bai",
+                        "name": "NA12878",
+                        "format": "bam",
+                        "sort":
+                            {
+                                "chr": "chr1",
+                                "position": 155155389,
+                                "option": "BASE",
+                                "direction": "ASC"
+                            },
+                        groupBy: "strand",
+                        height: 256,
+                        filter:
+                            {
+                                mq: 30
+                            }
+                    }
+                ]
+        }
+
+    igv.createBrowser(document.getElementById('igv-container'), config).then(browser => {
+        console.log(`browser ${ browser.guid } is good to go`)
+    })
+
+
+</script>
+
+</body>
+
+</html>
