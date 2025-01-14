@@ -7,6 +7,10 @@
     <title>igv.js</title>
     <style>.filters li { display: inline} </style>
     <script src="https://cdn.jsdelivr.net/npm/crossfilter2@1.5.4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-brush@3.0.0"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-array@3.2.4/dist/d3-array.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3.0.1/dist/d3-interpolate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-scale@4.0.2/dist/d3-scale.js"></script>
     <script>
 
     const HISTOGRAM_BAR_MAX_HEIGHT = 20
@@ -125,7 +129,7 @@
      *   - [["between", [95, 100]], ["between", [1200, 1300]] -- (95 <= d <= 100) or (1200 <= d <= 1300)
      *
      *   Compound numeric filters could be used to e.g.:
-     *     - isolate the peaks of multimodal distributions (as in above concrete example)
+     *     - isolate the peaks of multimodal distributions (as in concrete example above)
      *     - isolate the tails of distributions
      *
      *   TODO:
@@ -220,7 +224,7 @@
 
     /** Get D3 scale to convert between numeric facet values and pixels */
     function getXScale(bars, histogramWidth, hasNull) {
-      hasNull = true
+      hasNull = false
       console.log('bars', bars)
       const barStartIndex = hasNull ? 2 : 0
       const valueDomain = []
@@ -238,7 +242,7 @@
       console.log('valueDomain', valueDomain)
       console.log('pxRange', pxRange)
 
-      const xScale = scaleLinear(valueDomain, pxRange)
+      const xScale = d3.scaleLinear(valueDomain, pxRange)
       return xScale
     }
 
@@ -268,39 +272,41 @@
       facet, bars, histogramWidth, histogramHeight, brushSelection
     ) {
 
-      const sliderId = `numeric-filter-histogram-slider___${facet.name}`
+      const sliderId = `igv-numeric-filter-histogram-slider___${facet.name}`
       const [sliderLeft, sliderWidth, extentStartX, extentWidth] = getSliderStyle(bars, histogramWidth)
-      const handlebarY = -1 * (HISTOGRAM_BAR_MAX_HEIGHT - 1)
+      const handlebarY = -1 * (HISTOGRAM_BAR_MAX_HEIGHT)
 
       return (
         `<div>
           <svg
             height=${histogramHeight}
             width=${sliderWidth}
-            style="position: 'absolute', top: 0, left: ${sliderLeft}"
-            class="numeric-filter-histogram-slider"
+            style="position: absolute; top: 0; left: ${sliderLeft}"
+            class="igv-numeric-filter-histogram-slider"
             id=${sliderId}
           >
             <path
-              className="handlebar"
+              class="handlebar"
               fill="#EEE"
-              fillOpacity="0.8"
+              opacity="0.8"
               stroke="#000"
-              strokeWidth="0.5"
+              stroke-width="0.5"
               cursor="ew-resize"
-              d=${getHandlebarPath({ type: 'w' })}
-              transform=${`translate(${ brushSelection[0] }, ${handlebarY})`}
+              d="${getHandlebarPath({ type: 'w' })}"
+              transform="translate(${ brushSelection[0] }, ${handlebarY})"
             />
             <path
-              className="handlebar"
+              class="handlebar"
               fill="#EEE"
-              fillOpacity="0.8"
+              opacity="0.8"
               stroke="#000"
-              strokeWidth="0.5"
+              stroke-width="0.5"
               cursor="ew-resize"
-              d=${getHandlebarPath({ type: 'e' })}
+              d="${getHandlebarPath({ type: 'e' })}"
               transform="translate(${ brushSelection[1] }, ${handlebarY})"
             />
+            <g class="brush igv-facet-slider">
+            </g>
           </svg>
         </div>`
       )
@@ -326,6 +332,7 @@
       )
 
       return (`
+        <div style="position: relative;">
           <svg
             height=${histogramHeight}
             width=${histogramWidth}
@@ -343,7 +350,10 @@
                 />`
               )
             }).join('')}
-          </svg>`)
+            ${slider}
+          </svg>
+        </div>`
+        )
 
     }
 
@@ -467,7 +477,7 @@ function getHandlebarPath(d) {
 
     /** Get histogram to show with numeric filter */
     function getHistogramBars(facet) {
-      const hasNull = true; // TODO: move up
+      const hasNull = false; // TODO: move up
 
       let bars = facet.statistics.quantiles
 
@@ -1123,7 +1133,7 @@ function getHandlebarPath(d) {
 
 <body>
 
-<h1>Ad-hoc filtering in IGV</h1>
+<h1>Dynamic filtering in IGV</h1>
 <ul class="filters" style="float: left;">
 </ul>
 
@@ -1133,9 +1143,6 @@ function getHandlebarPath(d) {
 <script type="module">
 
     import igv from "../js/index.js"
-
-    import {scaleLinear} from './scale-linear.js'
-    window.scaleLinear = scaleLinear
 
     const options =
         {
