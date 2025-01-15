@@ -12,7 +12,6 @@ class DataRangeDialog {
         this.container.className = 'igv-generic-dialog-container';
         parent.appendChild(this.container);
 
-        this.container.style.position = 'absolute';
         this.container.style.left = '0px';
         this.container.style.top = '0px';
 

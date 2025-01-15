@@ -607,27 +607,6 @@ class TrackView {
         }
     }
 
-    viewportsToReload(force) {
-
-        // List of viewports that need reloading
-        const viewports = this.viewports.filter(viewport => {
-            if (!viewport.isVisible()) {
-                return false
-            }
-            if (!viewport.checkZoomIn()) {
-                return false
-            } else {
-                const referenceFrame = viewport.referenceFrame
-                const chr = viewport.referenceFrame.chr
-                const start = referenceFrame.start
-                const end = start + referenceFrame.toBP(viewport.contentDiv.offsetWidth)
-                const bpPerPixel = referenceFrame.bpPerPixel
-                return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel))
-            }
-        })
-        return viewports
-    }
-
     createTrackScrollbar(browser) {
 
         const outerScroll = DOMUtils.div()
