@@ -33,8 +33,11 @@ $igv-button-width: 75px;
 .igv-generic-dialog-container {
 
   position: absolute;
-  top: 0;
-  left:0;
+
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
   width:300px;
   height:200px;
 

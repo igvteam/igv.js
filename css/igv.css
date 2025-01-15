@@ -200,9 +200,10 @@
 
 .igv-ui-generic-dialog-container {
   box-sizing: content-box;
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 300px;
   height: fit-content;
   padding-bottom: 16px;
@@ -1403,8 +1404,9 @@
 
 .igv-generic-dialog-container {
   position: absolute;
-  top: 0;
-  left: 0;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 300px;
   height: 200px;
   border-color: #7F7F7F;

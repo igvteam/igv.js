@@ -12,9 +12,6 @@ class DataRangeDialog {
         this.container.className = 'igv-generic-dialog-container';
         parent.appendChild(this.container);
 
-        this.container.style.left = '0px';
-        this.container.style.top = '0px';
-
         // Create dialog header
         const header = document.createElement('div');
         header.className = 'igv-generic-dialog-header';
@@ -23,8 +20,6 @@ class DataRangeDialog {
         attachDialogCloseHandlerWithParent(header, () => {
             this.minimumInput.value = '';
             this.maximumInput.value = '';
-            this.container.style.left = '0px';
-            this.container.style.top = '0px';
             this.container.style.display = 'none';
         })
 
@@ -162,12 +157,6 @@ class DataRangeDialog {
     }
 
     present(parent) {
-        const parentRect = parent.getBoundingClientRect();
-        const bodyScrollTop = document.body.scrollTop || document.documentElement.scrollTop;
-
-        // Position the container
-        this.container.style.left = `${parent.offsetWidth - this.container.offsetWidth}px`;
-        this.container.style.top = `${parentRect.top + bodyScrollTop}px`;
         this.container.style.display = 'flex';
     }
 

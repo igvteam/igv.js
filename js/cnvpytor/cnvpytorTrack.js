@@ -1,5 +1,4 @@
 import TrackBase from "../trackBase.js"
-import MenuUtils from "../ui/menuUtils.js"
 import HDF5IndexedReader from "./HDF5IndexedReader.js"
 import {CNVpytorVCF} from "./cnvpytorVCF.js"
 import FeatureSource from '../feature/featureSource.js'

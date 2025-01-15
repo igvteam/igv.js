@@ -1,7 +1,6 @@
 import NavbarButton from "./navbarButton.js"
 import {multiSelectImage, multiSelectImageHover} from "./navbarIcons/multiSelect.js"
 import {buttonLabel} from "./navbarIcons/buttonLabel.js"
-import {multiTrackSelectExclusionTypes} from './menuUtils.js'
 
 class MultiTrackSelectButton extends NavbarButton {
 
