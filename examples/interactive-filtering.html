@@ -2,15 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta content="Jim Robinson" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
-    <title>igv.js</title>
+    <title>Interactive filtering in igv.js</title>
     <style>.filters li { display: inline} </style>
     <script src="https://cdn.jsdelivr.net/npm/crossfilter2@1.5.4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3-brush@3.0.0"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/d3-selection@3.0.0/dist/d3-selection.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-dispatch@3.0.1/dist/d3-dispatch.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-brush@3.0.0/dist/d3-brush.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-array@3.2.4/dist/d3-array.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3.0.1/dist/d3-interpolate.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/d3-scale@4.0.2/dist/d3-scale.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-scale@4.0.2/dist/d3-scale.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.js"></script>
     <script>
 
     const HISTOGRAM_BAR_MAX_HEIGHT = 20
@@ -268,20 +270,91 @@
       return [sliderLeft, sliderWidth, extentStartX, extentWidth]
     }
 
+    /** Return new values from D3 brush selection */
+    function parseValuesFromBrushSelection(brushSelection, xScale, precision) {
+      const extent = brushSelection.map(xScale.invert)
+      const newValue1 = round(extent[0], precision)
+      const newValue2 = round(extent[1], precision)
+      return [newValue1, newValue2]
+    }
+
+    /** Handle slider move event (i.e., drag or resize) */
+    function handleBrushMove(event, xScale, precision) {
+      const brushSelection = get1DBrushSelection(event)
+      if (!brushSelection) {return}
+
+      const [newValue, newValue2] =
+        parseValuesFromBrushSelection(brushSelection, xScale, precision)
+
+      // if (
+      //   newValue > max || newValue < min || newValue2 > max || newValue2 < min ||
+      //   Number.isNaN(newValue) || Number.isNaN(newValue2)
+      // ) {
+      //   // Prevent handlebar misdisplay if crosshair-select moves out-of-bounds
+      //   // See "overshot_slider.mov"
+      //   // in https://github.com/broadinstitute/single_cell_portal_core/pull/1988#pullrequestreview-1920037002
+      //   return
+      // }
+
+      // if (setBrushSelection) {
+      //   // Update slider position but not filter while moving slider
+      //   setBrushSelection(brushSelection)
+      // }
+
+      // if (setInputValue) {
+      //   // Update UI input fields but not filter while moving slider
+      //   setInputValue(newValue)
+      //   setInputValue2(newValue2)
+      // }
+    }
+
+    function getBrush(brushSelection, xOffset, length, width) {
+
+      const defaultSelection = [
+        [brushSelection[0], 0],
+        [brushSelection[1], histogramHeight]
+      ]
+
+      const brush = d3.brushX()
+        .extent([
+          [extentStartX, 0],
+          [extentWidth, histogramHeight]
+        ])
+        .on('brush', (event) => handleBrushMove(event, xScale, precision))
+        // .on('end', _onBrushEnd);
+
+      return brush
+    }
+
     function getHistogramSlider(
-      facet, bars, histogramWidth, histogramHeight, brushSelection
+      facet, bars, histogramWidth, histogramHeight, brushSelection, xScale
     ) {
+      const precision = 2 // TODO: Parameterize
 
       const sliderId = `igv-numeric-filter-histogram-slider___${facet.name}`
       const [sliderLeft, sliderWidth, extentStartX, extentWidth] = getSliderStyle(bars, histogramWidth)
       const handlebarY = -1 * (HISTOGRAM_BAR_MAX_HEIGHT)
 
-      return (
+
+      const defaultSelection = [
+        [brushSelection[0], 0],
+        [brushSelection[1], histogramHeight]
+      ]
+
+      const brush = d3.brushX()
+        .extent([
+          [extentStartX, 0],
+          [extentWidth, histogramHeight]
+        ])
+        .on('brush', (event) => handleBrushMove(event, xScale, precision))
+        // .on('end', _onBrushEnd);
+
+      const histogramSliderHtml =
         `<div>
           <svg
             height=${histogramHeight}
             width=${sliderWidth}
-            style="position: absolute; top: 0; left: ${sliderLeft}"
+            style="position: absolute; top: 0; left: ${sliderLeft}px"
             class="igv-numeric-filter-histogram-slider"
             id=${sliderId}
           >
@@ -305,11 +378,15 @@
               d="${getHandlebarPath({ type: 'e' })}"
               transform="translate(${ brushSelection[1] }, ${handlebarY})"
             />
-            <g class="brush igv-facet-slider">
+            <g
+              class="brush igv-facet-slider"
+              data-facet-name="${facet.name}"
+            >
             </g>
           </svg>
         </div>`
-      )
+
+      return [histogramSliderHtml, brush]
     }
 
     /** Convert SVGBrush event's 2D selection array to D3's 1D selection array */
@@ -321,17 +398,17 @@
     /** Histogram for distribution of numeric facet values, with tooltips or slider */
     function getHistogram(
       facet, bars, histogramWidth, histogramHeight, operator,
-      brushSelection, handleBrushMove, handleBrushEnd
+      brushSelection, xScale, handleBrushMove, handleBrushEnd
     ) {
       const sliderId = `numeric-filter-histogram-slider___${facet.name}`
       // const [sliderLeft, sliderWidth, extentStartX, extentWidth] = getSliderStyle(bars, histogramWidth)
       const handlebarY = -1 * (HISTOGRAM_BAR_MAX_HEIGHT - 1)
 
-      const slider = getHistogramSlider(
-        facet, bars, histogramWidth, histogramHeight, brushSelection
+      const [sliderHtml, brush] = getHistogramSlider(
+        facet, bars, histogramWidth, histogramHeight, brushSelection, xScale
       )
 
-      return (`
+      const histogramHtml = `
         <div style="position: relative;">
           <svg
             height=${histogramHeight}
@@ -350,11 +427,11 @@
                 />`
               )
             }).join('')}
-            ${slider}
+            ${sliderHtml}
           </svg>
         </div>`
-        )
 
+      return [histogramHtml, brush]
     }
 
     function getQuantiles(sortedNumbers, max, min, numBins=15) {
@@ -974,12 +1051,14 @@ function getHandlebarPath(d) {
       const brushSelection = [inputValue, inputValue2].map(xScale)
       console.log('brushSelection', brushSelection)
 
-      const histogram = getHistogram(facet, bars, histogramWidth, 20, 'between', brushSelection)
+      const [histogram, brush] = getHistogram(
+        facet, bars, histogramWidth, 20, 'between', brushSelection, xScale
+      )
 
       const input = getNumericQueryInput(statistics.min, facet, 'value', styles.input)
       const input2 = getNumericQueryInput(statistics.max, facet, 'value2', styles.input2)
 
-      return `
+      const numericQueryBuilderHtml = `
         <div
           class="igv-facet-numeric-query-builder"
           data-facet-name="${facet.name}"
@@ -990,6 +1069,8 @@ function getHandlebarPath(d) {
             ${input2}
           </div>
         </div>`
+
+      return [numericQueryBuilderHtml, brush]
 
     }
 
@@ -1066,7 +1147,7 @@ function getHandlebarPath(d) {
       const filterNumbers = facet.filterNumbers
       const statistics = facet.statistics
 
-      const filtersHtml = getNumericQueryBuilder(facet, filterNumbers, statistics)
+      const [filtersHtml, brush] = getNumericQueryBuilder(facet, filterNumbers, statistics)
 
       const facetSel = `igv-facet-${facet.name}`
       const facetHtml = `
@@ -1075,28 +1156,53 @@ function getHandlebarPath(d) {
           ${filtersHtml}
         </div>`
 
-      return facetHtml
+      return [facetHtml, brush]
     }
 
     function getFacetsHtml(facetsContainer) {
-      const facetList = facetsContainer.facets.map(facetContainer => {
+
+      const brushesByNumericFacetName = {}
+
+      const facetList = facetsContainer.facets.map(facet => {
         let facetHtml
-        if (facetContainer.type === 'categorical') {
-          facetHtml = getCategoricalFacetHtml(facetContainer)
+        let brush
+        if (facet.type === 'categorical') {
+          facetHtml = getCategoricalFacetHtml(facet)
         } else {
-          facetHtml = getNumericFacetHtml(facetContainer)
+          [facetHtml, brush] = getNumericFacetHtml(facet)
+          if (brush) {
+            brushesByNumericFacetName[facet.name] = brush
+          }
         }
         return facetHtml
       }).join('')
 
       const facetsHtml = `<div>${facetList}</div>`
-      return facetsHtml
+      return [facetsHtml, brushesByNumericFacetName]
+    }
+
+    function writeNumericFacetSliderBrushes(facets, brushesByNumericFacetName) {
+      console.log('brushesByNumericFacetName', brushesByNumericFacetName)
+      facets.forEach(facet => {
+        if (facet.name in brushesByNumericFacetName) {
+          console.log('facet.name', facet.name)
+          console.log('facet.filterNumbers', facet.filterNumbers)
+          const brush = brushesByNumericFacetName[facet.name]
+          const selector = `.igv-facet-slider[data-facet-name="${facet.name}"]`
+          const brushDom = document.querySelector(selector)
+          console.log('in write, brush', brush)
+          console.log('in write, brushDom', brushDom)
+          d3.select(selector)
+            .call(brush)
+          // brushDom.dispatchEvent(brush.move)
+        }
+      })
     }
 
     function initIgvFacets(browser) {
       const trackSelector = 'Phase 3 WGS variants'
       const facetsContainer = initFacets(trackSelector, browser)
-      const facetsHtml = getFacetsHtml(facetsContainer)
+      const [facetsHtml, brushesByNumericFacetName] = getFacetsHtml(facetsContainer)
 
       const filterContainerDom = document.querySelector('.filters')
       filterContainerDom.innerHTML = ''
@@ -1112,6 +1218,8 @@ function getHandlebarPath(d) {
       window.features = features
       window.featuresByFacet = featuresByFacet
 
+      writeNumericFacetSliderBrushes(facets, brushesByNumericFacetName)
+
       const filtersDom = document.querySelectorAll('.igv-filter')
       filtersDom.forEach(filterDom => {
         filterDom.addEventListener('change', (event) => {
@@ -1122,8 +1230,6 @@ function getHandlebarPath(d) {
             getFilteredFeatures(selection, featuresByFacet, facets, features)
 
           filterFeatures(trackSelector, filterResults, facets, igvBrowser)
-
-          // filterFeatures(trackSelector, facetName)
         })
       })
     }
@@ -1133,7 +1239,7 @@ function getHandlebarPath(d) {
 
 <body>
 
-<h1>Dynamic filtering in IGV</h1>
+<h1>Interactive filtering in IGV</h1>
 <ul class="filters" style="float: left;">
 </ul>
 
