@@ -50,7 +50,7 @@ class Viewport {
         }
 
         this.contentTop = 0;
-        this.contentHeight = this.viewportElement.offsetHeight;
+        this.contentHeight = this.viewportElement.clientHeight;
 
         this.setWidth(width);
 
@@ -89,11 +89,6 @@ class Viewport {
 
     setTop(contentTop) {
         this.contentTop = contentTop;
-        const viewportHeight = this.viewportElement.offsetHeight;
-        const viewTop = -contentTop;
-        const viewBottom = viewTop + viewportHeight;
-
-        // Additional repaint logic could go here
     }
 
     async loadFeatures() {
@@ -112,7 +107,7 @@ class Viewport {
         const track = this.trackView.track;
         features = features || this.cachedFeatures;
         if (track.displayMode === 'FILL') {
-            this.setContentHeight(this.viewportElement.offsetHeight);
+            this.setContentHeight(this.viewportElement.clientHeight);
         } else if (typeof track.computePixelHeight === 'function') {
             if (features && features.length > 0) {
                 const requiredContentHeight = track.computePixelHeight(features);
@@ -138,7 +133,7 @@ class Viewport {
     saveSVG() {}
 
     isVisible() {
-        return this.viewportElement.offsetWidth > 0;
+        return this.viewportElement.clientWidth > 0;
     }
 
     setWidth(width) {
@@ -146,7 +141,7 @@ class Viewport {
     }
 
     getWidth() {
-        return this.viewportElement.offsetWidth;
+        return this.viewportElement.clientWidth;
     }
 
     setHeight(height) {
@@ -162,8 +157,6 @@ class Viewport {
     }
 
     addMouseHandlers() {}
-
-    removeMouseHandlers() {}
 
     dispose() {
         this.viewportElement.remove();

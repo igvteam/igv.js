@@ -49,7 +49,7 @@ class RulerViewport extends TrackViewport {
         // Create the tooltip
         this.tooltip = document.createElement('div');
         this.tooltip.className = 'igv-ruler-tooltip';
-        this.tooltip.style.height = `${this.viewportElement.offsetHeight}px`;
+        this.tooltip.style.height = `${this.viewportElement.clientHeight}px`;
         this.viewportElement.appendChild(this.tooltip);
 
         this.tooltipContent = document.createElement('div');

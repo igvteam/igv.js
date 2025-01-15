@@ -99,7 +99,7 @@ class TrackViewport extends Viewport {
                 const visibilityWindow = this.trackView.track.visibilityWindow
                 return (
                     visibilityWindow !== undefined && visibilityWindow > 0 &&
-                    (this.referenceFrame.bpPerPixel * this.viewportElement.offsetWidth > visibilityWindow))
+                    (this.referenceFrame.bpPerPixel * this.viewportElement.clientWidth > visibilityWindow))
             }
         }
 
@@ -158,7 +158,7 @@ class TrackViewport extends Viewport {
     genomicRange() {
         return {
             start: this.referenceFrame.start,
-            end: this.referenceFrame.start + this.referenceFrame.bpPerPixel * this.viewportElement.offsetWidth
+            end: this.referenceFrame.start + this.referenceFrame.bpPerPixel * this.viewportElement.clientWidth
         }
     }
 
@@ -178,7 +178,7 @@ class TrackViewport extends Viewport {
             this.repaint()
         } else {
             // See if currently painted canvas covers the vertical range of the viewport.  If not repaint
-            const h = this.viewportElement.offsetHeight
+            const h = this.viewportElement.clientHeight
             const vt = contentTop + this.canvas._data.pixelTop
             const vb = vt + this.canvas._data.pixelHeight
             if (vt > 0 || vb < h) {
@@ -230,7 +230,7 @@ class TrackViewport extends Viewport {
             // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
             const chromosome = await this.browser.genome.loadChromosome(chr)
             const chrLength = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER
-            const pixelWidth = this.viewportElement.offsetWidth// * 3;
+            const pixelWidth = this.viewportElement.clientWidth// * 3;
             const bpWidth = pixelWidth * referenceFrame.bpPerPixel
             const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth))
             const bpEnd = Math.ceil(Math.min(chrLength, referenceFrame.start + bpWidth + bpWidth))  // Add one screen width to end
@@ -289,10 +289,10 @@ class TrackViewport extends Viewport {
      */
     repaintDimensions() {
         const isWGV = GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
-        const pixelWidth = isWGV ? this.viewportElement.offsetWidth : 3 * this.viewportElement.offsetWidth
+        const pixelWidth = isWGV ? this.viewportElement.clientWidth : 3 * this.viewportElement.clientWidth
         const bpPerPixel = this.referenceFrame.bpPerPixel
-        const bpStart = this.referenceFrame.start - (isWGV ? 0 : this.viewportElement.offsetWidth * bpPerPixel)
-        const bpEnd = isWGV ? Number.MAX_SAFE_INTEGER : this.referenceFrame.start +  2 * this.viewportElement.offsetWidth * bpPerPixel + 1
+        const bpStart = this.referenceFrame.start - (isWGV ? 0 : this.viewportElement.clientWidth * bpPerPixel)
+        const bpEnd = isWGV ? Number.MAX_SAFE_INTEGER : this.referenceFrame.start +  2 * this.viewportElement.clientWidth * bpPerPixel + 1
         return {
             bpStart, bpEnd, pixelWidth
         }
@@ -313,7 +313,7 @@ class TrackViewport extends Viewport {
         // Canvas dimensions.
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
         const {bpStart, bpEnd, pixelWidth} = this.repaintDimensions()
-        const viewportHeight = this.viewportElement.offsetHeight
+        const viewportHeight = this.viewportElement.clientHeight
         const contentHeight = this.getContentHeight()
         const maxHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight  // Need to fill viewport for ROIs.
         const pixelHeight = Math.min(maxHeight, 3 * viewportHeight)
@@ -361,7 +361,7 @@ class TrackViewport extends Viewport {
                 referenceFrame: this.referenceFrame,
                 selection: this.selection,
                 viewport: this,
-                viewportWidth: this.viewportElement.offsetWidth
+                viewportWidth: this.viewportElement.clientWidth
             }
 
         this.draw(drawConfiguration, features, roiFeatures)
@@ -424,8 +424,8 @@ class TrackViewport extends Viewport {
         const canvasMetadata = this.canvas._data
         const canvasTop = canvasMetadata ? canvasMetadata.pixelTop : 0
         const devicePixelRatio = window.devicePixelRatio
-        const w = this.viewportElement.offsetWidth * devicePixelRatio;
-        const h = this.viewportElement.offsetHeight * devicePixelRatio;
+        const w = this.viewportElement.clientWidth * devicePixelRatio;
+        const h = this.viewportElement.clientHeight * devicePixelRatio;
         const x = -this.canvas.getBoundingClientRect().left * devicePixelRatio;
         const y = (-this.contentTop - canvasTop) * devicePixelRatio;
 

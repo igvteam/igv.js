@@ -2329,7 +2329,7 @@ function handleMouseMove(e) {
                     Math.abs(y - this.vpMouseDown.mouseDownY) > this.constants.scrollThreshold) {
                     // Scrolling => dragging track vertically
                     this.isScrolling = true
-                    const viewportHeight = viewport.viewportElement.offsetHeight
+                    const viewportHeight = viewport.viewportElement.clientHeight
                     const contentHeight = viewport.trackView.maxViewportContentHeight()
                     this.vpMouseDown.r = viewportHeight / contentHeight
                 }
@@ -2339,7 +2339,7 @@ function handleMouseMove(e) {
         if (this.dragObject) {
             const clampDrag = !this.isSoftclipped()
             let deltaX = this.vpMouseDown.lastMouseX - x
-            const viewChanged = referenceFrame.shiftPixels(deltaX, viewport.viewportElement.offsetWidth, clampDrag)
+            const viewChanged = referenceFrame.shiftPixels(deltaX, viewport.viewportElement.clientWidth, clampDrag)
             if (viewChanged) {
                 this.updateViews()
             }
