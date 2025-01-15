@@ -85,7 +85,12 @@ class InputDialog {
     }
 
 
-    present(parent) {
+    present(options, e) {
+
+        this.label.textContent = options.label
+        this._input.value = options.value
+        this.callback = options.callback || options.click
+
         this.container.style.display = 'flex';
     }
 
