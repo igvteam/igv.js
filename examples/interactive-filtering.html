@@ -293,6 +293,8 @@
     function getHistogramSlider(
       facet, bars, histogramWidth, histogramHeight, brushSelection, xScale
     ) {
+      return ['', null]
+
       const precision = 2 // TODO: Parameterize
 
       const sliderId = `igv-numeric-filter-histogram-slider___${facet.name}`
