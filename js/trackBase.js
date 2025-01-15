@@ -538,7 +538,7 @@ class TrackBase {
 
             menuItems.push('<hr/>')
 
-            function dialogPresentationHandler() {
+            const dialogPresentationHandler = () => {
 
                 if (this.trackView.track.selected) {
                     this.browser.dataRangeDialog.configure(this.trackView.browser.getSelectedTrackViews())
@@ -552,7 +552,7 @@ class TrackBase {
 
             if (this.logScale !== undefined) {
 
-                function logScaleHandler() {
+                const logScaleHandler = () => {
                     this.logScale = !this.logScale
                     this.trackView.repaintViews()
                 }
@@ -560,13 +560,13 @@ class TrackBase {
                 menuItems.push({element: createCheckbox("Log scale", this.logScale), click: logScaleHandler})
             }
 
-            function autoScaleHandler() {
+            const autoScaleHandler = () => {
                 this.autoscaleGroup = undefined
                 this.autoscale = !this.autoscale
                 this.browser.updateViews()
             }
 
-            menuItems.push({element: createCheckbox("Log scale", this.logScale), click: autoScaleHandler})
+            menuItems.push({element: createCheckbox("Log scale", this.autoscale), click: autoScaleHandler})
         }
 
         return menuItems
@@ -584,6 +584,7 @@ class TrackBase {
      * Return the first feature in this track whose start position is > position
      * @param chr
      * @param position
+     * @param direction
      * @returns {Promise<void>}
      */
     async nextFeatureAfter(chr, position, direction) {
