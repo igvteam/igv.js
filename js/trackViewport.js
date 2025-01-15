@@ -37,7 +37,7 @@ class TrackViewport extends Viewport {
 
         const track = this.trackView.track;
         if ('sequence' !== track.type) {
-            this.zoomInNoticeElement = this.createZoomInNotice(this.viewportElement);
+            this.zoomInNoticeElement = TrackViewport.createZoomInNotice(this.viewportElement);
         }
 
         if ("sequence" !== track.id) {
@@ -74,7 +74,9 @@ class TrackViewport extends Viewport {
     }
 
     startSpinner() {
-        this.spinnerElement.style.display = 'block';
+        if (this.spinnerElement){
+            this.spinnerElement.style.display = 'flex';
+        }
     }
 
     stopSpinner() {
@@ -129,7 +131,7 @@ class TrackViewport extends Viewport {
                 this.setContentHeight(minHeight)
             }
             if (this.zoomInNoticeElement) {
-                this.zoomInNoticeElement.style.display = 'block';
+                this.zoomInNoticeElement.style.display = 'flex';
             }
             return false
         } else {
@@ -240,7 +242,7 @@ class TrackViewport extends Viewport {
             }
             this.loading = {start: bpStart, end: bpEnd}
             this.startSpinner()
-            
+
             const track = this.trackView.track
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
             if (features) {
@@ -421,13 +423,14 @@ class TrackViewport extends Viewport {
 
         if (!this.canvas) return
 
+        const w = this.viewportElement.clientWidth * window.devicePixelRatio;
+        const h = this.viewportElement.clientHeight * window.devicePixelRatio;
+
+        const x = -this.canvas.offsetLeft * window.devicePixelRatio
+
         const canvasMetadata = this.canvas._data
         const canvasTop = canvasMetadata ? canvasMetadata.pixelTop : 0
-        const devicePixelRatio = window.devicePixelRatio
-        const w = this.viewportElement.clientWidth * devicePixelRatio;
-        const h = this.viewportElement.clientHeight * devicePixelRatio;
-        const x = -this.canvas.getBoundingClientRect().left * devicePixelRatio;
-        const y = (-this.contentTop - canvasTop) * devicePixelRatio;
+        const y = (-this.contentTop - canvasTop) * window.devicePixelRatio;
 
         const ctx = this.canvas.getContext("2d")
         const imageData = ctx.getImageData(x, y, w, h)
@@ -494,7 +497,7 @@ class TrackViewport extends Viewport {
 
     renderSVGContext(context, {deltaX, deltaY}, includeLabel = true) {
 
-        const zoomInNotice = this.zoomInNoticeElement && this.zoomInNoticeElement.is(":visible")
+        const zoomInNotice = this.zoomInNoticeElement && this.zoomInNoticeElement.style.display !== 'flex'
 
         if (!zoomInNotice) {
 
@@ -617,20 +620,19 @@ class TrackViewport extends Viewport {
         return (!this.featureCache.containsRange(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction))
     }
 
-    createZoomInNotice(parentElement) {
+    static createZoomInNotice(parentElement) {
+
+        const container = document.createElement('div');
+        container.className = 'igv-zoom-in-notice-container';
+        parentElement.appendChild(container);
 
         const element = document.createElement('div');
-        element.className = 'igv-zoom-in-notice-container';
-        parentElement.appendChild(element);
+        container.appendChild(element);
+        element.textContent = 'Zoom in to see features';
 
-        const $e = document.createElement('div');
-        element.appendChild($e);
+        container.style.display = 'none';
 
-        $e.textContent = 'Zoom in to see features';
-
-        element.style.display = 'none';
-
-        return element;
+        return container;
     }
 
     viewIsReady() {
