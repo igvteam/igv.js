@@ -88,7 +88,7 @@
       const categoricalFilters = document.querySelectorAll('.igv-filter-categorical')
       categoricalFilters.forEach(input => {
         if (input.checked) {
-          const facetName = input.getAttribute('data-facet-name')
+          const facetName = input.getAttribute('data-igv-facet-name')
           const filter = input.value
           if (facetName in selection) {
             selection[facetName].push(filter)
@@ -100,7 +100,7 @@
 
       const numericFacets = document.querySelectorAll('.igv-facet-numeric-query-builder')
       numericFacets.forEach(facet => {
-        const facetName = facet.getAttribute('data-facet-name')
+        const facetName = facet.getAttribute('data-igv-facet-name')
         const value = facet.querySelector('.igv-numeric-query-input-value').value
         const value2 = facet.querySelector('.igv-numeric-query-input-value2').value
 
@@ -198,9 +198,8 @@
         Object.entries(countsByFilter).forEach(([filterName, count]) => {
           if (facet.type === 'categorical') {
             const filterSel =
-              `.igv-filter-label[data-facet-name="${facet.name}"][data-filter-name="${filterName}"] ` +
+              `.igv-filter-label[data-igv-facet-name="${facet.name}"][data-igv-filter-name="${filterName}"] ` +
               `.igv-filter-count`
-            console.log('filterSel', filterSel)
             const countDom = document.querySelector(filterSel)
             countDom.textContent = count
           }
@@ -233,8 +232,8 @@
 
     /** Get D3 scale to convert between numeric facet values and pixels */
     function getXScale(bars, histogramWidth, hasNull) {
-      hasNull = false
-      console.log('bars', bars)
+      hasNull = false // TODO: Parameterize
+
       const barStartIndex = hasNull ? 2 : 0
       const valueDomain = []
       const pxRange = []
@@ -247,9 +246,6 @@
       const lastBar = bars.slice(-1)[0]
       valueDomain.push(lastBar.end)
       pxRange.push(histogramWidth + (hasNull ? 0 : SLIDER_HANDLEBAR_WIDTH))
-
-      console.log('valueDomain', valueDomain)
-      console.log('pxRange', pxRange)
 
       const xScale = d3.scaleLinear(valueDomain, pxRange)
       return xScale
@@ -290,30 +286,8 @@
       const brushSelection = event.selection
       if (!brushSelection) {return}
 
-      console.log('in handleBrushMove, event, brushSelection, xScale', event, brushSelection, xScale)
       const [newValue, newValue2] =
         parseValuesFromBrushSelection(brushSelection, xScale, precision)
-
-      // if (
-      //   newValue > max || newValue < min || newValue2 > max || newValue2 < min ||
-      //   Number.isNaN(newValue) || Number.isNaN(newValue2)
-      // ) {
-      //   // Prevent handlebar misdisplay if crosshair-select moves out-of-bounds
-      //   // See "overshot_slider.mov"
-      //   // in https://github.com/broadinstitute/single_cell_portal_core/pull/1988#pullrequestreview-1920037002
-      //   return
-      // }
-
-      // if (setBrushSelection) {
-      //   // Update slider position but not filter while moving slider
-      //   setBrushSelection(brushSelection)
-      // }
-
-      // if (setInputValue) {
-      //   // Update UI input fields but not filter while moving slider
-      //   setInputValue(newValue)
-      //   setInputValue2(newValue2)
-      // }
     }
 
     function getHistogramSlider(
@@ -372,7 +346,7 @@
             />
             <g
               class="brush igv-facet-slider"
-              data-facet-name="${facet.name}"
+              data-igv-facet-name="${facet.name}"
             >
             </g>
           </svg>
@@ -658,8 +632,6 @@ function getHandlebarPath(d) {
       const t0Counts = Date.now()
       const counts = getFilterCounts(facetNames, featuresByFacet, facets, selection)
 
-      console.log('in filterFeaturesNew, results', results)
-      console.log('in filterFeaturesNew, counts', counts)
       return [results, counts]
     }
 
@@ -794,15 +766,12 @@ function getHandlebarPath(d) {
      * }
      */
     function initFacets(trackSelector, igvBrowser) {
-      const t0 = Date.now()
       const trackIndex = getTrackIndex(trackSelector, igvBrowser)
       const featuresInFrame = getFeaturesInFrame(trackIndex, igvBrowser)
-      console.log('featuresInFrame[0]', featuresInFrame[0])
 
       // Populate facets model, except for filterNames array values
       let facets = []
       const headInfo = featuresInFrame[0].header.INFO
-      console.log('headInfo', headInfo)
       const dimensions = Object.keys(headInfo);
       dimensions.forEach(dimension => {
         const igvFacet = headInfo[dimension]
@@ -902,7 +871,6 @@ function getHandlebarPath(d) {
               if (featureValue === undefined) {
                 featureValue = null
                 const k = untrimmedToTrimmedFacetIndexMap[j]
-                // console.log('j, k, facets[k], facets, feature, i', j, k, facets[k], facets, feature, i)
                 if (facets[k].type === 'categorical') {
                   if (!facets[k].filterNames.includes(null)) {
                     facets[k].filterNames.push(null)
@@ -920,10 +888,6 @@ function getHandlebarPath(d) {
         features = trimmedFeatures
       }
 
-      console.log('facets', facets)
-      console.log('features[814]', features[814])
-      console.log('features[815]', features[815])
-
       // Populate statistics for numeric facets
       facets = facets.map(facet => {
         if (facet.type === 'categorical') return facet
@@ -935,11 +899,34 @@ function getHandlebarPath(d) {
         return facet
       })
 
-      const t1 = Date.now()
-      console.log('initFacets duration (ms):', (t1 - t0))
       return {facets, features}
     }
 
+
+    function togglePartialCollapse(event) {
+        const target = event.target
+        const attrName = 'data-igv-is-partly-collapsed'
+        const oldIsPartlyCollapsed = target.getAttribute(attrName) === 'true'
+        const newIsPartlyCollapsed = !oldIsPartlyCollapsed
+        const facetName = target.getAttribute('data-igv-facet-name')
+
+        const filterSel = `.igv-filter[data-igv-facet-name="${facetName}"]`
+        document.querySelectorAll(filterSel).forEach((checkbox, i) => {
+          const filterDom = checkbox.parentElement.parentElement
+          if (newIsPartlyCollapsed && i >= 5) {
+            // TODO: Consider optimizing by batching DOM writes
+            filterDom.style = 'display: none;'
+          } else {
+            filterDom.style = ''
+          }
+        })
+
+        document.querySelector('.igv-facet-toggle').setAttribute(attrName, newIsPartlyCollapsed)
+      }
+
+    /**
+     * Get checkboxes with filter name and count for categorical feature metadata
+     */
     function getCategoricalFacetHtml(facet, isPartlyCollapsed=true) {
       // Categorical facets need > 1 filter to be useful
       const numFilters = facet.filterNames.length
@@ -953,16 +940,16 @@ function getHandlebarPath(d) {
         if (isPartlyCollapsed && i >= 5) style = 'display: none;'
 
         const facetFilterAttrs = `
-          data-facet-name="${facet.name}"
-          data-filter-name="${filterName}"`
+          data-igv-facet-name="${facet.name}"
+          data-igv-filter-name="${filterName}"`
 
         const fullName = `${facet.name}:${filterName}`
         const attrs = `
           value="${filterName}"
           name="${fullName}"
           class="igv-filter igv-filter-categorical"
-          ${facetFilterAttrs}
-        `
+          ${facetFilterAttrs}`
+
         const count = facet.countsByFilterName[filterName]
         const filterHtml = `
           <label class="igv-filter-label" style="${style}" ${facetFilterAttrs}>
@@ -977,13 +964,14 @@ function getHandlebarPath(d) {
         return filterHtml
       }).join('')
 
-
       let moreOrLess = ''
       if (numFilters > 5) {
         moreOrLess = `
           <a
             class="igv-facet-toggle"
-            onClick=""
+            data-igv-facet-name="${facet.name}"
+            data-igv-is-partly-collapsed="${isPartlyCollapsed}"
+            onClick="togglePartialCollapse(event)"
           >
             ${isPartlyCollapsed ? 'More...' : 'Less...'}
           </a>`
@@ -999,12 +987,6 @@ function getHandlebarPath(d) {
         </div>`
 
       return facetHtml
-    }
-
-    function updateInputValue(event) {
-      const target = event.target
-      const facetName = target.name.split(':')[0]
-      filterFeatures('Phase 3 WGS variants', facetName)
     }
 
     function getNumericQueryInput(value, facet, filterName, style) {
@@ -1033,9 +1015,7 @@ function getHandlebarPath(d) {
 
       // Enables converting numeric facet values to pixels, and vice versa
       const xScale = getXScale(bars, histogramWidth, hasNull)
-      console.log('xScale', xScale)
       const brushSelection = [inputValue, inputValue2].map(xScale)
-      console.log('brushSelection', brushSelection)
 
       const [histogram, brushConf] = getHistogram(
         facet, bars, histogramWidth, 20, 'between', brushSelection, xScale
@@ -1047,7 +1027,7 @@ function getHandlebarPath(d) {
       const numericQueryBuilderHtml = `
         <div
           class="igv-facet-numeric-query-builder"
-          data-facet-name="${facet.name}"
+          data-igv-facet-name="${facet.name}"
         >
           ${histogram}
           <div class="igv-facet-numeric-inputs-container">
@@ -1167,27 +1147,26 @@ function getHandlebarPath(d) {
     }
 
     function writeNumericFacetSliderBrushes(facets, brushesByNumericFacetName) {
-      console.log('brushesByNumericFacetName', brushesByNumericFacetName)
       facets.forEach(facet => {
         if (facet.name in brushesByNumericFacetName) {
           const [xScale, brush] = brushesByNumericFacetName[facet.name]
-          const selector = `.igv-facet-slider[data-facet-name="${facet.name}"]`
+          const selector = `.igv-facet-slider[data-igv-facet-name="${facet.name}"]`
           const brushDom = document.querySelector(selector)
-          console.log('in write, brush', brush)
-          console.log('in write, brushDom', brushDom)
           const min = facet.statistics.min
           const max = facet.statistics.max
-          console.log('facet.name, facet.statistics.max', facet.name, facet.statistics.max)
           d3.select(selector)
             .call(brush)
             .call(brush.move, [min, max].map(xScale))
-          // brushDom.dispatchEvent(brush.move)
         }
       })
     }
 
-    function initIgvFacets(browser) {
-      const trackSelector = 'Phase 3 WGS variants'
+    /**
+     * Initialize interactive filtering in IGV, for the given track
+     *
+     * This sets up crossfilters, and writes facet range inputs or checkboxes.
+    */
+    function initIgvFacets(trackSelector, browser) {
       const facetsContainer = initFacets(trackSelector, browser)
       const [facetsHtml, brushesByNumericFacetName] = getFacetsHtml(facetsContainer)
 
@@ -1212,7 +1191,7 @@ function getHandlebarPath(d) {
         filterDom.addEventListener('change', (event) => {
 
           const selection = getSelection()
-          const facetName = filterDom.getAttribute('data-facet-name')
+          const facetName = filterDom.getAttribute('data-igv-facet-name')
           const filterResults =
             getFilteredFeatures(selection, featuresByFacet, facets, features)
 
@@ -1279,15 +1258,21 @@ function getHandlebarPath(d) {
     const browser = await igv.createBrowser(igvDiv, options)
     window.igvBrowser = browser
 
-    function handleFirstFeaturesLoaded(track) {
-      initIgvFacets(browser)
-      browser.off('featuresloaded', handleFirstFeaturesLoaded) // Remove event listener
-    }
+    // This can be a track name (like here) or track positional index (e.g. 3)
+    const trackToFilter = 'Phase 3 WGS variants'
 
+    function handleFirstFeaturesLoaded(track) {
+      initIgvFacets(trackToFilter, browser)
+
+      // Remove event listener, so this only fires when the track is
+      // initialized.  Without removal, this handler fires every time features
+      // are updated; it would infinitely loop.
+      browser.off('featuresloaded', handleFirstFeaturesLoaded)
+    }
     browser.on('featuresloaded', handleFirstFeaturesLoaded)
 
     browser.on('locuschange', () => {
-      initIgvFacets(browser)
+      initIgvFacets(trackToFilter, browser)
     })
 
 </script>
