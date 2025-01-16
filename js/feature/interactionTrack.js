@@ -139,7 +139,7 @@ class InteractionTrack extends TrackBase {
     }
 
     get supportsWholeGenome() {
-        return true
+        return typeof this.featureSource.supportsWholeGenome === 'function' ? this.featureSource.supportsWholeGenome() : true;
     }
 
     async getFeatures(chr, start, end) {
