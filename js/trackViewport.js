@@ -90,8 +90,8 @@ class TrackViewport extends Viewport {
     checkZoomIn() {
 
         const zoomedOutOfWindow = () => {
-            if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome) {
-                return true
+            if (this.referenceFrame.chr.toLowerCase() === "all") {
+                return !this.trackView.track.supportsWholeGenome
             } else {
                 const visibilityWindow = this.trackView.track.visibilityWindow
                 return (
