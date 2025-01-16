@@ -532,7 +532,7 @@ class BWReader {
         if (this.type === "bigwig") {
             return "wig"
         } else {
-            return this.autoSql && this.autoSql.table === "chromatinInteract" ? "interact" : "annotation"
+            return this.autoSql && ("interact" === this.autoSql.table || "chromatinInteract" === this.autoSql.table) ? "interact" : "annotation"
         }
     }
 
