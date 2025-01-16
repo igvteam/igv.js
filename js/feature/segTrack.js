@@ -166,10 +166,10 @@ class SegTrack extends TrackBase {
         menuItems.push("DisplayMode:")
         const displayOptions = this.type === 'seg' || this.type === 'shoebox' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"]
         for (let displayMode of displayOptions) {
-            const checkBox = createCheckbox(lut[displayMode], displayMode === this.displayMode)
+
             menuItems.push(
                 {
-                    element: checkBox,
+                    element: createCheckbox(lut[displayMode], displayMode === this.displayMode),
                     click: function displayModeHandler() {
                         this.displayMode = displayMode
                         this.config.displayMode = displayMode

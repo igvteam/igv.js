@@ -362,14 +362,12 @@ class FeatureTrack extends TrackBase {
 
             for (const colorScheme of ["function", "class"]) {
 
-                const element = createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy)
-
                 function colorSchemeHandler() {
                     this.colorBy = colorScheme
                     this.trackView.repaintViews()
                 }
 
-                menuItems.push({element, click: colorSchemeHandler})
+                menuItems.push({element:createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy), click: colorSchemeHandler})
             }
         }
 
@@ -384,8 +382,6 @@ class FeatureTrack extends TrackBase {
 
         for (const displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
 
-            const element = createCheckbox(lut[displayMode], displayMode === this.displayMode)
-
             function displayModeHandler() {
                 this.displayMode = displayMode
                 this.config.displayMode = displayMode
@@ -393,7 +389,7 @@ class FeatureTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
 
-            menuItems.push({element, click: displayModeHandler})
+            menuItems.push({element:createCheckbox(lut[displayMode], displayMode === this.displayMode), click: displayModeHandler})
         }
 
         return menuItems

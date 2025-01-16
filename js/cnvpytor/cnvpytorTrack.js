@@ -262,9 +262,9 @@ class CNVPytorTrack extends TrackBase {
         items.push('<hr/>')
         items.push("Bin Sizes")
         for (let rd_bin of this.available_bins) {
-            const checkBox = createCheckbox(rd_bin, rd_bin === this.bin_size)
+
             items.push({
-                element: checkBox,
+                element: createCheckbox(rd_bin, rd_bin === this.bin_size),
                 click: async function binSizesHandler() {
                     this.bin_size = rd_bin
                     // data loader image
@@ -282,9 +282,9 @@ class CNVPytorTrack extends TrackBase {
 
         let signal_dct = {"rd_snp": "RD and BAF Likelihood", "rd": "RD Signal", "snp": "BAF Likelihood"}
         for (let signal_name in signal_dct) {
-            const checkBox = createCheckbox(signal_dct[signal_name], signal_name === this.signal_name)
+
             items.push({
-                element: checkBox,
+                element: createCheckbox(signal_dct[signal_name], signal_name === this.signal_name),
                 click: async function signalTypeHandler() {
                     this.signal_name = signal_name
                     await this.recreate_tracks(this.bin_size)
@@ -300,9 +300,9 @@ class CNVPytorTrack extends TrackBase {
         items.push('<hr/>')
         items.push("CNV caller")
         for (let cnv_caller of this.available_callers) {
-            const checkBox = createCheckbox(cnv_caller, cnv_caller === this.cnv_caller)
+
             items.push({
-                element: checkBox,
+                element: createCheckbox(cnv_caller, cnv_caller === this.cnv_caller),
                 click: async function cnvCallerHandler() {
                     this.cnv_caller = cnv_caller
                     // data loader image

@@ -889,7 +889,6 @@ class AlignmentTrack extends TrackBase {
      *
      * @param menuItem
      * @param showCheck
-     * @returns {{init: undefined, name: undefined, click: clickHandler, element: (jQuery|HTMLElement|jQuery.fn.init)}}
      */
     colorByCB(menuItem, showCheck) {
 
@@ -953,7 +952,6 @@ class AlignmentTrack extends TrackBase {
      *
      * @param menuItem
      * @param showCheck
-     * @returns {{init: undefined, name: undefined, click: clickHandler, element: (jQuery|HTMLElement|jQuery.fn.init)}}
      */
     groupByCB(menuItem, showCheck) {
 
