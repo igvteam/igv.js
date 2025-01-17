@@ -24,6 +24,7 @@
 
     const HISTOGRAM_BAR_MAX_HEIGHT = 20
     const SLIDER_HANDLEBAR_WIDTH = 6
+    const HANDLEBAR_Y = -1 * (HISTOGRAM_BAR_MAX_HEIGHT - 1)
 
     /** Render update to reflect newly-selected features in IGV track */
     function updateTrack(trackIndex, filteredFeatures, igv, igvBrowser) {
@@ -305,8 +306,20 @@
 
     input.value = newValue
     input2.value = newValue2
+
+    const [handlebar, handlebar2] = Array.from(document.querySelectorAll(`.${facetSel} .handlebar`))
+
+    const newTranslate = getHandlebarTranslate(brushSelection[0])
+    const newTranslate2 = getHandlebarTranslate(brushSelection[1])
+
+    handlebar.setAttribute('transform', newTranslate)
+    handlebar2.setAttribute('transform', newTranslate2)
   }
 
+
+  function getHandlebarTranslate(x) {
+    return `translate(${x}, ${HANDLEBAR_Y})`
+  }
 
     function getHistogramSlider(
       facet, bars, histogramWidth, histogramHeight, brushSelection, xScale
@@ -317,7 +330,6 @@
 
       const sliderId = `igv-numeric-filter-histogram-slider___${facet.name}`
       const [sliderLeft, sliderWidth, extentStartX, extentWidth] = getSliderStyle(bars, histogramWidth)
-      const handlebarY = -1 * (HISTOGRAM_BAR_MAX_HEIGHT)
 
       const defaultSelection = [
         [brushSelection[0], 0],
@@ -351,7 +363,7 @@
               stroke-width="0.5"
               cursor="ew-resize"
               d="${getHandlebarPath({ type: 'w' })}"
-              transform="translate(${ brushSelection[0] }, ${handlebarY})"
+              transform="${getHandlebarTranslate(brushSelection[0])}"
             />
             <path
               class="handlebar"
@@ -361,7 +373,7 @@
               stroke-width="0.5"
               cursor="ew-resize"
               d="${getHandlebarPath({ type: 'e' })}"
-              transform="translate(${ brushSelection[1] }, ${handlebarY})"
+              transform="${getHandlebarTranslate(brushSelection[1])}"
             />
             <g
               class="brush igv-facet-slider"
@@ -381,7 +393,6 @@
     ) {
       const sliderId = `numeric-filter-histogram-slider___${facet.name}`
       // const [sliderLeft, sliderWidth, extentStartX, extentWidth] = getSliderStyle(bars, histogramWidth)
-      const handlebarY = -1 * (HISTOGRAM_BAR_MAX_HEIGHT - 1)
 
       const [sliderHtml, brushConf] = getHistogramSlider(
         facet, bars, histogramWidth, histogramHeight, brushSelection, xScale
