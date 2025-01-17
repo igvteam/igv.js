@@ -27,6 +27,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import TrackViewport from "./trackViewport.js"
+import { IGVMath } from "../node_modules/igv-utils/src/index.js"
 
 class IdeogramViewport extends TrackViewport {
 
@@ -45,6 +46,17 @@ class IdeogramViewport extends TrackViewport {
         this.ideogram_ctx = this.canvas.getContext('2d')
 
         this.addMouseHandlers()
+
+        if (this.trackView.track.showCytobandNames) {
+            this.$tooltip = $('<div>', {class: 'igv-ruler-tooltip'})
+            this.$tooltip.height(this.$viewport.height())
+            this.$viewport.append(this.$tooltip)
+
+            this.$tooltipContent = $('<div>')
+            this.$tooltip.append(this.$tooltipContent)          
+            
+            this.$tooltip.hide();
+        }
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
@@ -84,12 +96,58 @@ class IdeogramViewport extends TrackViewport {
             }
 
         this.trackView.track.draw(config)
-
     }
 
 
     addMouseHandlers() {
         this.addViewportClickHandler(this.$viewport.get(0))
+
+        // Add tooltip when showing contig name
+        if (this.trackView.track.showCytobandNames) {
+            this.$viewport.get(0).addEventListener('mousemove', this.mouseMove.bind(this))
+            this.$viewport.get(0).addEventListener('mouseleave', this.mouseLeave.bind(this))
+        }
+    }
+
+    mouseMove(event) {
+        const {x} = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
+
+        // Get features
+        const features = this.featureCache.get(this.referenceFrame.chr)
+        if (features) {
+            const {width: ww} = this.$tooltipContent.get(0).getBoundingClientRect()
+            const {width: w} = this.$viewport.get(0).getBoundingClientRect()
+
+            const chrLength = features[features.length - 1].end
+            const scale = w / chrLength
+
+            let found = false;
+            // Find cytoband that the mouse is over
+            for (let i = 0; i < features.length; i++) {
+                const cytoband = features[i]
+                const start = cytoband.start * scale
+                const end = cytoband.end * scale
+
+                // If the mouse is over the cytoband, show the tooltip
+                if (x >= start && x <= end) {
+                    this.$tooltipContent.text(cytoband.name)
+                    let center = (start + end) / 2 - ww / 2
+                    this.$tooltip.css({left: `${IGVMath.clamp(center, 0, w - ww)}px`})
+                    this.$tooltip.show()
+                    found = true
+                    break
+                }
+            }
+            if (found)
+                return;
+        }
+
+        // If the mouse is not over a cytoband, or there are no features, hide the tooltip
+        this.$tooltip.hide()
+    }
+
+    mouseLeave(event) {
+        this.$tooltip.hide()
     }
 
     addViewportClickHandler(viewport) {
