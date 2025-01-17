@@ -283,9 +283,11 @@
     }
 
   /** Handle slider move event (i.e., drag or resize) */
-  function handleBrushMove(event, xScale, precision, facet) {
+  function handleBrushMove(event, xScale, facet) {
     const brushSelection = event.selection
     if (!brushSelection) {return}
+
+    const precision = facet.type === 'integer' ? 0 : 2
 
     const [newValue, newValue2] =
       parseValuesFromBrushSelection(brushSelection, xScale, precision)
@@ -316,6 +318,19 @@
     handlebar2.setAttribute('transform', newTranslate2)
   }
 
+  /** Handle slider move event (i.e., drag or resize) */
+  function handleBrushEnd(event, facet) {
+    const brushSelection = event.selection
+    if (!brushSelection) {return}
+
+    const facetSel = getFacetSelector(facet)
+    const input = document.querySelector(`.${facetSel} input`)
+    if (!input) return
+
+    const changeEvent = new Event('change')
+    input.dispatchEvent(changeEvent)
+  }
+
 
   function getHandlebarTranslate(x) {
     return `translate(${x}, ${HANDLEBAR_Y})`
@@ -325,8 +340,6 @@
       facet, bars, histogramWidth, histogramHeight, brushSelection, xScale
     ) {
       // return ['', null]
-
-      const precision = 2 // TODO: Parameterize
 
       const sliderId = `igv-numeric-filter-histogram-slider___${facet.name}`
       const [sliderLeft, sliderWidth, extentStartX, extentWidth] = getSliderStyle(bars, histogramWidth)
@@ -341,8 +354,8 @@
           [extentStartX, 0],
           [extentWidth, histogramHeight]
         ])
-        .on('brush', (event) => handleBrushMove(event, xScale, precision, facet))
-        // .on('end', _onBrushEnd);
+        .on('brush', (event) => handleBrushMove(event, xScale, facet))
+        .on('end', (event) => handleBrushEnd(event, facet));
 
       const brushConf = [xScale, brush]
 
