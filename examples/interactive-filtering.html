@@ -281,26 +281,43 @@
       return [newValue1, newValue2]
     }
 
-    /** Handle slider move event (i.e., drag or resize) */
-    function handleBrushMove(event, xScale, precision) {
-      const brushSelection = event.selection
-      if (!brushSelection) {return}
+  /** Handle slider move event (i.e., drag or resize) */
+  function handleBrushMove(event, xScale, precision, facet) {
+    const brushSelection = event.selection
+    if (!brushSelection) {return}
 
-      const [newValue, newValue2] =
-        parseValuesFromBrushSelection(brushSelection, xScale, precision)
+    const [newValue, newValue2] =
+      parseValuesFromBrushSelection(brushSelection, xScale, precision)
+
+    const max = facet.statistics.max
+    const min = facet.statistics.min
+
+    if (
+      newValue > max || newValue < min || newValue2 > max || newValue2 < min ||
+      Number.isNaN(newValue) || Number.isNaN(newValue2)
+    ) {
+      // Prevent handlebar misdisplay if crosshair-select moves out-of-bounds
+      return
     }
+
+    const facetSel = getFacetSelector(facet)
+    const [input, input2] = Array.from(document.querySelectorAll(`.${facetSel} input`))
+
+    input.value = newValue
+    input2.value = newValue2
+  }
+
 
     function getHistogramSlider(
       facet, bars, histogramWidth, histogramHeight, brushSelection, xScale
     ) {
-      return ['', null]
+      // return ['', null]
 
       const precision = 2 // TODO: Parameterize
 
       const sliderId = `igv-numeric-filter-histogram-slider___${facet.name}`
       const [sliderLeft, sliderWidth, extentStartX, extentWidth] = getSliderStyle(bars, histogramWidth)
       const handlebarY = -1 * (HISTOGRAM_BAR_MAX_HEIGHT)
-
 
       const defaultSelection = [
         [brushSelection[0], 0],
@@ -312,7 +329,7 @@
           [extentStartX, 0],
           [extentWidth, histogramHeight]
         ])
-        .on('brush', (event) => handleBrushMove(event, xScale, precision))
+        .on('brush', (event) => handleBrushMove(event, xScale, precision, facet))
         // .on('end', _onBrushEnd);
 
       const brushConf = [xScale, brush]
@@ -926,6 +943,10 @@ function getHandlebarPath(d) {
         document.querySelector('.igv-facet-toggle').setAttribute(attrName, newIsPartlyCollapsed)
       }
 
+    function getFacetSelector(facet) {
+      return `igv-facet-${facet.name}`
+    }
+
     /**
      * Get checkboxes with filter name and count for categorical feature metadata
      */
@@ -979,7 +1000,7 @@ function getHandlebarPath(d) {
           </a>`
         }
 
-      const facetSel = `igv-facet-${facet.name}`
+      const facetSel = getFacetSelector(facet)
       // Add a facet header to the filters
       const facetHtml = `
         <div class="igv-facet ${facetSel}" style="width: 250px; float: left;">
