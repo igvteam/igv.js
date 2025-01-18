@@ -955,6 +955,19 @@ function getHandlebarPath(d) {
         return facet
       })
 
+      const facetOrder = [
+        'VT',
+        'AF','AFR_AF', 'AMR_AF', 'EAS_AF', 'EUR_AF', 'SAS_AF',
+        'DP',
+        'AA',
+        'AC'
+      ]
+      facets = facets.sort((a, b) => {
+        const indexA = facetOrder.indexOf(a.name)
+        const indexB = facetOrder.indexOf(b.name)
+        return indexA - indexB
+      })
+
       return {facets, features}
     }
 
@@ -1319,7 +1332,7 @@ function getHandlebarPath(d) {
 </ul>
 
 
-<div id="igvDiv" style=""></div>
+<div id="igvDiv"></div>
 
 <script type="module">
 
