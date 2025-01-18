@@ -828,7 +828,25 @@ function getHandlebarPath(d) {
       // Populate facets model, except for filterNames array values
       let facets = []
       const headInfo = featuresInFrame[0].header.INFO
-      const dimensions = Object.keys(headInfo);
+      const rawDimensions = Object.keys(headInfo);
+
+      const facetOrder = [
+        'VT',
+        'AF','AFR_AF', 'AMR_AF', 'EAS_AF', 'EUR_AF', 'SAS_AF',
+        'DP',
+        'AA',
+        'AC'
+      ]
+      dimensions = rawDimensions.sort((a, b) => {
+        const indexA = facetOrder.indexOf(a)
+        const indexB = facetOrder.indexOf(b)
+        if (indexA === -1) return 100000
+        if (indexB === -1) return -100000
+        return indexA - indexB
+      })
+
+      console.log('dimensions', dimensions)
+
       dimensions.forEach(dimension => {
         const igvFacet = headInfo[dimension]
         // string, flag, integer, or float
@@ -852,8 +870,8 @@ function getHandlebarPath(d) {
         const feature = []
         const igvFeature = featuresInFrame[i]
         const info = igvFeature.info
-        let j = 0
-        for (facetName in headInfo) {
+        for (let j = 0; j < dimensions.length; j++) {
+          const facetName = dimensions[j]
           let value
           if (facetName in info === false) {
             // Use an "empty" value if the feature lacks a value
@@ -881,7 +899,6 @@ function getHandlebarPath(d) {
             facets[j] = facet
           }
           feature.push(value)
-          j++
         }
 
         // Populate features
@@ -953,19 +970,6 @@ function getHandlebarPath(d) {
         facet.statistics = {min, q1, median, q3, max, mean, quantiles}
 
         return facet
-      })
-
-      const facetOrder = [
-        'VT',
-        'AF','AFR_AF', 'AMR_AF', 'EAS_AF', 'EUR_AF', 'SAS_AF',
-        'DP',
-        'AA',
-        'AC'
-      ]
-      facets = facets.sort((a, b) => {
-        const indexA = facetOrder.indexOf(a.name)
-        const indexB = facetOrder.indexOf(b.name)
-        return indexA - indexB
       })
 
       return {facets, features}
