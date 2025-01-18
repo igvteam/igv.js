@@ -975,27 +975,26 @@ function getHandlebarPath(d) {
       return {facets, features}
     }
 
-
     function togglePartialCollapse(event) {
-        const target = event.target
-        const attrName = 'data-igv-is-partly-collapsed'
-        const oldIsPartlyCollapsed = target.getAttribute(attrName) === 'true'
-        const newIsPartlyCollapsed = !oldIsPartlyCollapsed
-        const facetName = target.getAttribute('data-igv-facet-name')
+      const target = event.target
+      const attrName = 'data-igv-is-partly-collapsed'
+      const oldIsPartlyCollapsed = target.getAttribute(attrName) === 'true'
+      const newIsPartlyCollapsed = !oldIsPartlyCollapsed
+      const facetName = target.getAttribute('data-igv-facet-name')
 
-        const filterSel = `.igv-filter[data-igv-facet-name="${facetName}"]`
-        document.querySelectorAll(filterSel).forEach((checkbox, i) => {
-          const filterDom = checkbox.parentElement.parentElement
-          if (newIsPartlyCollapsed && i >= 5) {
-            // TODO: Consider optimizing by batching DOM writes
-            filterDom.style = 'display: none;'
-          } else {
-            filterDom.style = ''
-          }
-        })
+      const filterSel = `.igv-filter[data-igv-facet-name="${facetName}"]`
+      document.querySelectorAll(filterSel).forEach((checkbox, i) => {
+        const filterDom = checkbox.parentElement.parentElement
+        if (newIsPartlyCollapsed && i >= 5) {
+          // TODO: Consider optimizing by batching DOM writes
+          filterDom.style = 'display: none;'
+        } else {
+          filterDom.style = ''
+        }
+      })
 
-        document.querySelector('.igv-facet-toggle').setAttribute(attrName, newIsPartlyCollapsed)
-      }
+      document.querySelector('.igv-facet-toggle').setAttribute(attrName, newIsPartlyCollapsed)
+    }
 
     function getFacetClass(facet) {
       return `igv-facet-${facet.name}`
@@ -1208,6 +1207,25 @@ function getHandlebarPath(d) {
       return styles
     }
 
+    function toggleAfCollapse(event) {
+      const target = event.target
+      const attrName = 'data-igv-is-af-collapsed'
+      const oldIsAfCollapsed = target.getAttribute(attrName) === 'true'
+      const newIsAfCollapsed = !oldIsAfCollapsed
+
+      const facetSel = `.igv-facet-population-af`
+      document.querySelectorAll(facetSel).forEach(facetDom => {
+        if (newIsAfCollapsed) {
+          // TODO: Consider optimizing by batching DOM writes
+          facetDom.style = 'display: none;'
+        } else {
+          facetDom.style = ''
+        }
+      })
+
+      document.querySelector('.igv-population-af-toggle').setAttribute(attrName, newIsAfCollapsed)
+    }
+
     function getNumericFacetHtml(facet) {
       if (
         facet.filterNumbers.length === 0 ||
@@ -1227,12 +1245,29 @@ function getHandlebarPath(d) {
       const isPopulationAf = facet.name.endsWith('_AF')
       const display = isPopulationAf ? 'display: none;' : ''
 
+      const isGeneralAf = facet.name === 'AF'
+      let populationAfToggle = ''
+      if (isGeneralAf) {
+        populationAfToggle = `
+          <div
+            class="igv-population-af-toggle"
+            data-igv-is-af-collapsed="true"
+            onClick="toggleAfCollapse(event)"
+          >
+            Show by population
+          </div>`
+      }
+
       let facetClass= `igv-facet-${facet.name}`
+      if (isPopulationAf) {
+        facetClass += ' igv-facet-population-af'
+      }
 
       const facetHtml = `
         <div class="igv-facet ${facetClass}" style="width: 250px; ${display}">
           <span class="igv-facet-header">${friendlyName}</span>
           ${filtersHtml}
+          ${populationAfToggle}
         </div>`
 
       return [facetHtml, brushConf]
