@@ -1064,7 +1064,7 @@ function getHandlebarPath(d) {
       const facetSel = getFacetSelector(facet)
       // Add a facet header to the filters
       const facetHtml = `
-        <div class="igv-facet ${facetSel}" style="width: 250px; float: left;">
+        <div class="igv-facet ${facetSel}" style="width: 250px;">
           <span class="igv-facet-header">${friendlyName}</span>
           ${filtersHtml}
           ${moreOrLess}
@@ -1208,7 +1208,7 @@ function getHandlebarPath(d) {
 
       const facetSel = `igv-facet-${facet.name}`
       const facetHtml = `
-        <div class="igv-facet ${facetSel}" style="width: 250px; float: left;">
+        <div class="igv-facet ${facetSel}" style="width: 250px;">
           <span class="igv-facet-header">${friendlyName}</span>
           ${filtersHtml}
         </div>`
@@ -1319,7 +1319,7 @@ function getHandlebarPath(d) {
 </ul>
 
 
-<div id="igvDiv" style="padding-top: 10px; padding-bottom: 10px; border:1px solid lightgray; clear: both;"></div>
+<div id="igvDiv" style=""></div>
 
 <script type="module">
 
