@@ -287,7 +287,7 @@
     const brushSelection = event.selection
     if (!brushSelection) {return}
 
-    const precision = facet.type === 'integer' ? 0 : 2
+    const precision = getPrecision(facet)
 
     const [newValue, newValue2] =
       parseValuesFromBrushSelection(brushSelection, xScale, precision)
@@ -1041,17 +1041,22 @@ function getHandlebarPath(d) {
         <input
           type="text"
           class="igv-filter igv-numeric-query-input igv-numeric-query-input-${filterName}"
+          data-igv-facet-name="${facet.name}"
           name="${facet.name}:${filterName}"
           value="${value}"
           style="width: ${style.width}; font-size: ${style.fontSize};"
         />`
     }
 
+    function getPrecision(numericFacet) {
+      return numericFacet.type === 'integer' ? 0 : 2
+    }
+
     function getNumericQueryBuilder(facet, filterNumbers, statistics) {
       const inputValue = statistics.min
       const inputValue2 = statistics.max
       const operator = 'and'
-      const precision = 2
+      const precision = getPrecision(facet)
       const styles = getResponsiveStyles(inputValue, inputValue2, operator, precision)
 
       const hasNull = false // TODO: Move upstream
@@ -1208,6 +1213,18 @@ function getHandlebarPath(d) {
       })
     }
 
+    /** Helper to move brush when input values change (by user, not programmatic trigger) */
+    function updateBrushSelection(facet, brushesByNumericFacetName, facetSelections) {
+      const facetName = facet.name
+      const [xScale, brush] = brushesByNumericFacetName[facetName]
+      const selector = `.igv-facet-slider[data-igv-facet-name="${facetName}"]`
+      const rawBrushSelection = facetSelections[facetName][0][1]
+      const parseNumber = facet.type === 'integer' ? parseInteger : parseFloat
+      const brushSelection = rawBrushSelection.map(n => parseNumber(n))
+      d3.select(selector)
+        .call(brush.move, brushSelection.map(xScale))
+    }
+
     /**
      * Initialize interactive filtering in IGV, for the given track
      *
@@ -1236,9 +1253,15 @@ function getHandlebarPath(d) {
       const filtersDom = document.querySelectorAll('.igv-filter')
       filtersDom.forEach(filterDom => {
         filterDom.addEventListener('change', (event) => {
-
           const selection = getSelection()
           const facetName = filterDom.getAttribute('data-igv-facet-name')
+
+          const facet = facets.find(facet => facet.name === facetName)
+
+          if (event.isTrusted && facetName in brushesByNumericFacetName) {
+            updateBrushSelection(facet, brushesByNumericFacetName, selection)
+          }
+
           const filterResults =
             getFilteredFeatures(selection, featuresByFacet, facets, features)
 
