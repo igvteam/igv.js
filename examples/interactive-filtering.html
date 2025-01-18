@@ -95,6 +95,43 @@
       return isFeatureInFrame
     }
 
+    /** Get options for numeric filter operators */
+    function getOperatorMenu(operator) {
+      const operators = [
+        'between', 'not between', '=', '!=',
+        '<', '<=',
+        '>', '>='
+      ]
+
+      const widthsByOperator = {
+        'between': 75,
+        'not between': 100,
+        '=': 50,
+        '!=': 50,
+        '<': 50,
+        '<=': 50,
+        '>': 50,
+        '>=': 50
+      }
+
+      const menuWidth = `${widthsByOperator[operator] }px`
+      const operatorMenu =
+        `<select
+          className="igv-facet-numeric-operator-menu"
+          style="width: ${menuWidth}"
+          value=${operator}
+          onChange=${event => {updateOperator(event)}}
+        >
+          ${operators.map(operator => {
+            return (
+              `<option value=${operator}>${operator}</option>`
+            )
+          })}
+        </select>`
+
+      return operatorMenu
+    }
+
     function getSelection() {
 
       const selection = {}
@@ -120,11 +157,11 @@
 
         const operator = 'between'
         selection[facetName] = [[operator, [value, value2]]]
-        // if (['between', 'not between'].includes(operator)) {
-        //   numericFilters = [[operator, [value, value2]]]
-        // } else {
-        //   numericFilters = [[operator, value]]
-        // }
+        if (['between', 'not between'].includes(operator)) {
+          numericFilters = [[operator, [value, value2]]]
+        } else {
+          numericFilters = [[operator, value]]
+        }
       })
 
       return selection
@@ -1108,13 +1145,13 @@ function getHandlebarPath(d) {
     function getNumericQueryBuilder(facet, filterNumbers, statistics) {
       const inputValue = statistics.min
       const inputValue2 = statistics.max
-      const operator = 'and'
+      const operator = 'between'
       const precision = getPrecision(facet)
       const styles = getResponsiveStyles(inputValue, inputValue2, operator, precision)
 
       const hasNull = false // TODO: Move upstream
 
-      const histogramWidth = 150
+      const histogramWidth = 180
 
       const bars = getHistogramBars(facet)
 
@@ -1123,11 +1160,19 @@ function getHandlebarPath(d) {
       const brushSelection = [inputValue, inputValue2].map(xScale)
 
       const [histogram, brushConf] = getHistogram(
-        facet, bars, histogramWidth, 20, 'between', brushSelection, xScale
+        facet, bars, histogramWidth, 20, operator, brushSelection, xScale
       )
 
+      const operatorMenu = getOperatorMenu(operator)
       const input = getNumericQueryInput(statistics.min, facet, 'value', styles.input)
       const input2 = getNumericQueryInput(statistics.max, facet, 'value2', styles.input2)
+
+      let andInput2 = ''
+      if (['between', 'not between'].includes(operator)) {
+        andInput2 =
+        `<span style=${styles.and}>and</span>
+          ${input2}`
+      }
 
       const numericQueryBuilderHtml = `
         <div
@@ -1136,8 +1181,9 @@ function getHandlebarPath(d) {
         >
           ${histogram}
           <div class="igv-facet-numeric-inputs-container">
+            ${operatorMenu}
             ${input}
-            ${input2}
+            ${andInput2}
           </div>
         </div>`
 
@@ -1160,7 +1206,7 @@ function getHandlebarPath(d) {
      * Get width and font size for input, to help keep full value glanceable
      */
     function getInputStyle(inputValue, operator, precision) {
-      let width = 37
+      let width = 30
       let fontSize = 13
 
       const roundedNumber = round(inputValue, precision)
@@ -1216,7 +1262,6 @@ function getHandlebarPath(d) {
       const facetSel = `.igv-facet-population-af`
       document.querySelectorAll(facetSel).forEach(facetDom => {
         if (newIsAfCollapsed) {
-          // TODO: Consider optimizing by batching DOM writes
           facetDom.style = 'display: none;'
         } else {
           facetDom.style = ''
@@ -1372,11 +1417,11 @@ function getHandlebarPath(d) {
 <body>
 
 <h1>Interactive filtering in IGV</h1>
-<ul class="igv-filters-container" style="float: left;">
-</ul>
+<div class="igv-filters-container" style="float: left; margin-left: 10px;">
+</div>
 
 
-<div id="igvDiv"></div>
+<div id="igvDiv" style="float: left; width: calc(100% - 260px);"></div>
 
 <script type="module">
 
