@@ -11,6 +11,19 @@
           stroke: #3d5a87;
           shape-rendering: crispEdges;
       }
+
+      .igv-filters-container {
+        font-family: "Open Sans", sans-serif;
+        font-size: 13px;
+      }
+
+      .igv-facet-header {
+        font-weight: bold;
+      }
+
+      .igv-facet {
+        margin-top: 10px;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/crossfilter2@1.5.4"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/d3-selection@3.0.0/dist/d3-selection.js"></script>
@@ -971,6 +984,28 @@ function getHandlebarPath(d) {
       return `igv-facet-${facet.name}`
     }
 
+    function getFriendlyFacetName(facet) {
+      const friendlyNames = {
+        'VT': 'Variant type',
+        'AA': 'Ancestral allele',
+        'AC': 'Allele count',
+        'AF': 'Allele frequency',
+        'AFR_AF': 'AF: African',
+        'AMR_AF': 'AF: Admixed American',
+        'EAS_AF': 'AF: East Asian',
+        'EUR_AF': 'AF: European',
+        'SAS_AF': 'AF: South Asian',
+        'DP': 'Read depth'
+      }
+
+      let friendlyName = facet.name
+      if (facet.name in friendlyNames) {
+        friendlyName = `${friendlyNames[facet.name]}`
+      }
+
+      return friendlyName
+    }
+
     /**
      * Get checkboxes with filter name and count for categorical feature metadata
      */
@@ -1024,11 +1059,13 @@ function getHandlebarPath(d) {
           </a>`
         }
 
+      const friendlyName = getFriendlyFacetName(facet)
+
       const facetSel = getFacetSelector(facet)
       // Add a facet header to the filters
       const facetHtml = `
         <div class="igv-facet ${facetSel}" style="width: 250px; float: left;">
-          <span class="igv-facet-header">${facet.name}</span>
+          <span class="igv-facet-header">${friendlyName}</span>
           ${filtersHtml}
           ${moreOrLess}
         </div>`
@@ -1167,10 +1204,12 @@ function getHandlebarPath(d) {
 
       const [filtersHtml, brushConf] = getNumericQueryBuilder(facet, filterNumbers, statistics)
 
+      const friendlyName = getFriendlyFacetName(facet)
+
       const facetSel = `igv-facet-${facet.name}`
       const facetHtml = `
         <div class="igv-facet ${facetSel}" style="width: 250px; float: left;">
-          <span class="igv-facet-header">${facet.name}</span>
+          <span class="igv-facet-header">${friendlyName}</span>
           ${filtersHtml}
         </div>`
 
@@ -1234,7 +1273,7 @@ function getHandlebarPath(d) {
       const facetsContainer = initFacets(trackSelector, browser)
       const [facetsHtml, brushesByNumericFacetName] = getFacetsHtml(facetsContainer)
 
-      const filterContainerDom = document.querySelector('.filters')
+      const filterContainerDom = document.querySelector('.igv-filters-container')
       filterContainerDom.innerHTML = ''
       filterContainerDom.insertAdjacentHTML('beforeend', facetsHtml)
 
@@ -1276,11 +1315,11 @@ function getHandlebarPath(d) {
 <body>
 
 <h1>Interactive filtering in IGV</h1>
-<ul class="filters" style="float: left;">
+<ul class="igv-filters-container" style="float: left;">
 </ul>
 
 
-<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray; clear: both;"></div>
+<div id="igvDiv" style="padding-top: 10px; padding-bottom: 10px; border:1px solid lightgray; clear: both;"></div>
 
 <script type="module">
 
