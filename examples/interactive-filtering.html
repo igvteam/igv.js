@@ -22,7 +22,7 @@
       }
 
       .igv-facet {
-        margin-top: 10px;
+        margin-top: 15px;
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/crossfilter2@1.5.4"></script>
@@ -316,13 +316,13 @@
       return
     }
 
-    const facetSel = getFacetSelector(facet)
-    const [input, input2] = Array.from(document.querySelectorAll(`.${facetSel} input`))
+    const facetClass= getFacetClass(facet)
+    const [input, input2] = Array.from(document.querySelectorAll(`.${facetClass} input`))
 
     input.value = newValue
     input2.value = newValue2
 
-    const [handlebar, handlebar2] = Array.from(document.querySelectorAll(`.${facetSel} .handlebar`))
+    const [handlebar, handlebar2] = Array.from(document.querySelectorAll(`.${facetClass} .handlebar`))
 
     const newTranslate = getHandlebarTranslate(brushSelection[0])
     const newTranslate2 = getHandlebarTranslate(brushSelection[1])
@@ -336,8 +336,8 @@
     const brushSelection = event.selection
     if (!brushSelection) {return}
 
-    const facetSel = getFacetSelector(facet)
-    const input = document.querySelector(`.${facetSel} input`)
+    const facetClass= getFacetClass(facet)
+    const input = document.querySelector(`.${facetClass} input`)
     if (!input) return
 
     const changeEvent = new Event('change')
@@ -997,7 +997,7 @@ function getHandlebarPath(d) {
         document.querySelector('.igv-facet-toggle').setAttribute(attrName, newIsPartlyCollapsed)
       }
 
-    function getFacetSelector(facet) {
+    function getFacetClass(facet) {
       return `igv-facet-${facet.name}`
     }
 
@@ -1078,10 +1078,10 @@ function getHandlebarPath(d) {
 
       const friendlyName = getFriendlyFacetName(facet)
 
-      const facetSel = getFacetSelector(facet)
+      const facetClass= getFacetClass(facet)
       // Add a facet header to the filters
       const facetHtml = `
-        <div class="igv-facet ${facetSel}" style="width: 250px;">
+        <div class="igv-facet ${facetClass}" style="width: 250px;">
           <span class="igv-facet-header">${friendlyName}</span>
           ${filtersHtml}
           ${moreOrLess}
@@ -1223,9 +1223,14 @@ function getHandlebarPath(d) {
 
       const friendlyName = getFriendlyFacetName(facet)
 
-      const facetSel = `igv-facet-${facet.name}`
+      // Show only general AF, not population AFs, by default
+      const isPopulationAf = facet.name.endsWith('_AF')
+      const display = isPopulationAf ? 'display: none;' : ''
+
+      let facetClass= `igv-facet-${facet.name}`
+
       const facetHtml = `
-        <div class="igv-facet ${facetSel}" style="width: 250px;">
+        <div class="igv-facet ${facetClass}" style="width: 250px; ${display}">
           <span class="igv-facet-header">${friendlyName}</span>
           ${filtersHtml}
         </div>`
