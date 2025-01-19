@@ -15,6 +15,11 @@
       .igv-filters-container {
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
+        float: left;
+        margin-left: 10px;
+        margin-right: 10px;
+        width: 220px;
+        border-right: 1px solid #EEE;
       }
 
       .igv-facet-header {
@@ -23,6 +28,15 @@
 
       .igv-facet {
         margin-top: 15px;
+        width: 200px;
+      }
+
+      .igv-filter-label {
+        cursor: pointer;
+      }
+
+      .igv-filter-label:hover {
+        color: #007;
       }
 
       .igv-population-af-toggle, .igv-facet-toggle {
@@ -32,6 +46,10 @@
 
       .igv-population-af-toggle:hover, .igv-facet-toggle:hover {
         color: #23527c;
+      }
+
+      .igv-filter-count {
+        float: right;
       }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/crossfilter2@1.5.4"></script>
@@ -1151,7 +1169,7 @@ function getHandlebarPath(d) {
       const facetClass= getFacetClass(facet)
       // Add a facet header to the filters
       const facetHtml = `
-        <div class="igv-facet ${facetClass}" style="width: 250px;">
+        <div class="igv-facet ${facetClass}">
           <span class="igv-facet-header">${friendlyName}</span>
           ${filtersHtml}
           ${moreOrLess}
@@ -1193,7 +1211,7 @@ function getHandlebarPath(d) {
 
       const hasNull = false // TODO: Move upstream
 
-      const histogramWidth = 180
+      const histogramWidth = 170
 
       const bars = getHistogramBars(facet)
 
@@ -1462,11 +1480,11 @@ function getHandlebarPath(d) {
 <body>
 
 <h1>Interactive filtering in IGV</h1>
-<div class="igv-filters-container" style="float: left; margin-left: 10px;">
+<div class="igv-filters-container">
 </div>
 
 
-<div id="igvDiv" style="float: left; width: calc(100% - 260px);"></div>
+<div id="igvDiv" style="float: left; width: calc(100% - 300px);"></div>
 
 <script type="module">
 
