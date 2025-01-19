@@ -24,6 +24,15 @@
       .igv-facet {
         margin-top: 15px;
       }
+
+      .igv-population-af-toggle, .igv-facet-toggle {
+        color: #337ab7;
+        cursor: pointer;
+      }
+
+      .igv-population-af-toggle:hover, .igv-facet-toggle:hover {
+        color: #23527c;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/crossfilter2@1.5.4"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/d3-selection@3.0.0/dist/d3-selection.js"></script>
@@ -1051,7 +1060,11 @@ function getHandlebarPath(d) {
         }
       })
 
-      document.querySelector('.igv-facet-toggle').setAttribute(attrName, newIsPartlyCollapsed)
+      const toggler = document.querySelector('.igv-facet-toggle')
+      toggler.setAttribute(attrName, newIsPartlyCollapsed)
+
+      const action = newIsPartlyCollapsed ? 'More...' : 'Less...'
+      toggler.textContent = action
     }
 
     function getFacetClass(facet) {
@@ -1296,7 +1309,11 @@ function getHandlebarPath(d) {
         }
       })
 
-      document.querySelector('.igv-population-af-toggle').setAttribute(attrName, newIsAfCollapsed)
+      const afToggler = document.querySelector('.igv-population-af-toggle')
+      afToggler.setAttribute(attrName, newIsAfCollapsed)
+
+      const action = newIsAfCollapsed ? 'Show' : 'Hide'
+      afToggler.textContent = `${action} by population`
     }
 
     function getNumericFacetHtml(facet) {
