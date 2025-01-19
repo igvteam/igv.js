@@ -95,15 +95,7 @@
       return isFeatureInFrame
     }
 
-    /** Get options for numeric filter operators */
-    function getOperatorMenu(operator) {
-      const operators = [
-        'between', 'not between', '=', '!=',
-        '<', '<=',
-        '>', '>='
-      ]
-
-      const widthsByOperator = {
+    const widthsByOperator = {
         'between': 75,
         'not between': 100,
         '=': 50,
@@ -114,17 +106,46 @@
         '>=': 50
       }
 
+    function updateOperator(event) {
+      const target = event.target
+
+      const facetName = target.getAttribute('data-igv-facet-name')
+      const facetClass= getFacetClass({name: facetName})
+      const input = document.querySelector(`.${facetClass} input`)
+
+      const newOperator = target.value
+
+      target.setAttribute('value', newOperator)
+      const width = widthsByOperator[newOperator]
+      target.style.width = width + 'px'
+
+      const andInput2Style = getAndInput2Style(newOperator)
+      target.parentElement.querySelector('.igv-and-input-2').style = andInput2Style
+
+      const changeEvent = new Event('change')
+      input.dispatchEvent(changeEvent)
+    }
+
+    /** Get options for numeric filter operators */
+    function getOperatorMenu(operator, facet) {
+      const operators = [
+        'between', 'not between', '=', '!=',
+        '<', '<=',
+        '>', '>='
+      ]
+
       const menuWidth = `${widthsByOperator[operator] }px`
       const operatorMenu =
         `<select
-          className="igv-facet-numeric-operator-menu"
+          class="igv-facet-numeric-operator-menu"
           style="width: ${menuWidth}"
-          value=${operator}
-          onChange=${event => {updateOperator(event)}}
+          data-igv-facet-name="${facet.name}"
+          value="${operator}"
+          onChange="updateOperator(event)"
         >
           ${operators.map(operator => {
             return (
-              `<option value=${operator}>${operator}</option>`
+              `<option value="${operator}">${operator}</option>`
             )
           })}
         </select>`
@@ -155,13 +176,15 @@
         const value = facet.querySelector('.igv-numeric-query-input-value').value
         const value2 = facet.querySelector('.igv-numeric-query-input-value2').value
 
-        const operator = 'between'
-        selection[facetName] = [[operator, [value, value2]]]
+        const operatorMenu = facet.querySelector('.igv-facet-numeric-operator-menu')
+        const operator = operatorMenu.value
+        let numericFilters
         if (['between', 'not between'].includes(operator)) {
           numericFilters = [[operator, [value, value2]]]
         } else {
           numericFilters = [[operator, value]]
         }
+        selection[facetName] = numericFilters
       })
 
       return selection
@@ -543,7 +566,7 @@
 function getHandlebarPath(d) {
   const sweepFlag = d.type === 'e' ? 1 : 0
   const x = sweepFlag ? 1 : -1
-  const y = HISTOGRAM_BAR_MAX_HEIGHT
+  const y = HISTOGRAM_BAR_MAX_HEIGHT - 0.5
   const width = SLIDER_HANDLEBAR_WIDTH
 
   // Construct an SVG arc
@@ -882,8 +905,6 @@ function getHandlebarPath(d) {
         return indexA - indexB
       })
 
-      console.log('dimensions', dimensions)
-
       dimensions.forEach(dimension => {
         const igvFacet = headInfo[dimension]
         // string, flag, integer, or float
@@ -1142,6 +1163,14 @@ function getHandlebarPath(d) {
       return numericFacet.type === 'integer' ? 0 : 2
     }
 
+    function getAndInput2Style(operator) {
+      let andInput2Style = ''
+      if (!['between', 'not between'].includes(operator)) {
+        andInput2Style = 'display: none'
+      }
+      return andInput2Style
+    }
+
     function getNumericQueryBuilder(facet, filterNumbers, statistics) {
       const inputValue = statistics.min
       const inputValue2 = statistics.max
@@ -1163,16 +1192,15 @@ function getHandlebarPath(d) {
         facet, bars, histogramWidth, 20, operator, brushSelection, xScale
       )
 
-      const operatorMenu = getOperatorMenu(operator)
+      const operatorMenu = getOperatorMenu(operator, facet)
       const input = getNumericQueryInput(statistics.min, facet, 'value', styles.input)
       const input2 = getNumericQueryInput(statistics.max, facet, 'value2', styles.input2)
 
-      let andInput2 = ''
-      if (['between', 'not between'].includes(operator)) {
-        andInput2 =
-        `<span style=${styles.and}>and</span>
-          ${input2}`
-      }
+      const andInput2Style = getAndInput2Style(operator)
+      andInput2 = `<span class="igv-and-input-2" style="${andInput2Style}">
+          <span>and</span>
+          ${input2}
+        <span>`
 
       const numericQueryBuilderHtml = `
         <div
@@ -1360,7 +1388,7 @@ function getHandlebarPath(d) {
       const [xScale, brush] = brushesByNumericFacetName[facetName]
       const selector = `.igv-facet-slider[data-igv-facet-name="${facetName}"]`
       const rawBrushSelection = facetSelections[facetName][0][1]
-      const parseNumber = facet.type === 'integer' ? parseInteger : parseFloat
+      const parseNumber = facet.type === 'integer' ? parseInt : parseFloat
       const brushSelection = rawBrushSelection.map(n => parseNumber(n))
       d3.select(selector)
         .call(brush.move, brushSelection.map(xScale))
