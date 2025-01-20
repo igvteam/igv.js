@@ -16,7 +16,7 @@
         font-family: "Open Sans", sans-serif;
         font-size: 13px;
         float: left;
-        margin-left: 10px;
+        margin-left: 5px;
         margin-right: 10px;
         width: 240px;
         border-right: 1px solid #EEE;
@@ -24,15 +24,36 @@
 
       .igv-facet-header {
         font-weight: bold;
+        position: relative;
+        top: -1px;
       }
+
+      .igv-facet-header-categorical,
+      .igv-facet-header-checkbox {
+        position: relative;
+        left: -7px;
+      }
+
+      .igv-facet .igv-facet-header-checkbox {visibility: hidden;}
+      .igv-facet:hover .igv-facet-header-checkbox {visibility: visible;}
 
       .igv-facet {
         margin-top: 15px;
         width: 220px;
       }
 
-      .igv-filter-label {
+      .igv-facet-numeric {
+        margin-left: 13px;
+      }
+
+      .igv-filter-label,
+      .igv-filters-container input[type="checkbox"],
+      .igv-filters-container select {
         cursor: pointer;
+      }
+
+      .igv-filter-label > div, .igv-facet-toggle {
+        margin-left: 14px;
       }
 
       .igv-filter-label:hover {
@@ -1111,6 +1132,58 @@ function getHandlebarPath(d) {
       return friendlyName
     }
 
+    function updateFacetCheckbox(facet) {
+      const facetName = facet.name
+      const selector = `.igv-filter[data-igv-facet-name="${facetName}"]:checked`
+      const checkedFilterCheckboxes = document.querySelectorAll(selector)
+      const facetCheckbox = document.querySelector(
+        `.igv-facet-${facetName} .igv-facet-header-checkbox`
+      )
+      const numFilters = facet.filterNames.length
+      if (checkedFilterCheckboxes.length === numFilters) {
+        facetCheckbox.checked = true
+        facetCheckbox.indeterminate = false
+      } else if (checkedFilterCheckboxes.length === 0) {
+        facetCheckbox.checked = false
+        facetCheckbox.indeterminate = false
+      } else {
+        facetCheckbox.checked = false
+        facetCheckbox.indeterminate = true
+      }
+
+    }
+
+    /** Add or remove all checked item from list */
+    function handleFacetCheckboxChange(event) {
+      const target = event.target
+      const facetName = target.getAttribute('data-igv-facet-name')
+      const isChecked = target.checked
+      const selector = `.igv-filter[data-igv-facet-name="${facetName}"]`
+      const filterCheckboxes = document.querySelectorAll(selector)
+      console.log('filterCheckboxes', filterCheckboxes)
+      filterCheckboxes.forEach(filterCheckbox => {
+        filterCheckbox.checked = isChecked
+      })
+      const changeEvent = new Event('change')
+      filterCheckboxes[0].dispatchEvent(changeEvent)
+    }
+
+    function getCategoricalFacetHeader(facet) {
+      const friendlyName = getFriendlyFacetName(facet)
+      const header = `
+        <input
+          type="checkbox"
+          class="igv-facet-header-checkbox"
+          data-igv-facet-name="${facet.name}"
+          name="igv-facet-${facet.name}"
+          onChange="handleFacetCheckboxChange(event)"
+          checked
+        />
+        <span class="igv-facet-header igv-facet-header-categorical">${friendlyName}</span>
+        `
+      return header
+    }
+
     /**
      * Get checkboxes with filter name and count for categorical feature metadata
      */
@@ -1164,13 +1237,13 @@ function getHandlebarPath(d) {
           </a>`
         }
 
-      const friendlyName = getFriendlyFacetName(facet)
+      const header = getCategoricalFacetHeader(facet)
 
       const facetClass= getFacetClass(facet)
       // Add a facet header to the filters
       const facetHtml = `
         <div class="igv-facet ${facetClass}">
-          <span class="igv-facet-header">${friendlyName}</span>
+          ${header}
           ${filtersHtml}
           ${moreOrLess}
         </div>`
@@ -1372,7 +1445,7 @@ function getHandlebarPath(d) {
       }
 
       const facetHtml = `
-        <div class="igv-facet ${facetClass}" style="width: 250px; ${display}">
+        <div class="igv-facet ${facetClass} igv-facet-numeric" style="${display}">
           <span class="igv-facet-header">${friendlyName}</span>
           ${filtersHtml}
           ${populationAfToggle}
@@ -1464,6 +1537,10 @@ function getHandlebarPath(d) {
 
           if (event.isTrusted && facetName in brushesByNumericFacetName) {
             updateBrushSelection(facet, brushesByNumericFacetName, selection)
+          }
+
+          if (facet.type === 'categorical') {
+            updateFacetCheckbox(facet)
           }
 
           const filterResults =
