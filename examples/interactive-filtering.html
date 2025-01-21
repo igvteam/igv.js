@@ -896,6 +896,27 @@ function getHandlebarPath(d) {
       }
     }
 
+    function getRefinedDescription(facet, facetName) {
+      let prose = facet.Description
+      if (facetName === 'VT') {
+        prose = 'Type of variant'
+      } else if (facetName === 'AA') {
+        // Original is unpolished; remove redundant field name; standardize case, spacing
+        // "Ancestral Allele. Format: AA|REF|ALT|IndelType. AA: Ancestral allele, REF:Reference Allele, ALT:Alternate Allele, IndelType:Type of Indel (REF, ALT and IndelType are only defined for indels)"
+        prose = (
+          'Format: AA|REF|ALT|IndelType.  ' +
+          'AA: Ancestral allele, REF: Reference allele, ALT: Alternate allele, IndelType: Type of Indel.  ' +
+          'REF, ALT and IndelType are only defined for indels.'
+        )
+      }
+
+      const description =
+        `INFO field: ${facetName}
+        <br/>
+        ${prose}`
+      return description
+    }
+
     /**
      * Initialize facets and filters for the current genomic frame
      *
@@ -969,7 +990,7 @@ function getHandlebarPath(d) {
         // string, flag, integer, or float
         const igvType = igvFacet.Type.toLowerCase()
         const type = ['string', 'flag'].includes(igvType) ? 'categorical' : igvType
-        const description = igvFacet.Description
+        const description = getRefinedDescription(igvFacet, dimension)
         const facet = {'name': dimension, type, description}
         if (type === 'categorical') {
           facet.filterNames = []
@@ -1532,7 +1553,7 @@ function getHandlebarPath(d) {
       filterContainerDom.innerHTML = ''
       filterContainerDom.insertAdjacentHTML('beforeend', facetsHtml)
 
-      tippy('.igv-facet-header[data-tippy-content]')
+      tippy('.igv-facet-header[data-tippy-content]', {allowHTML: true})
 
       const {
         features, featuresByFacet, facets,
