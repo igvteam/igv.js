@@ -235,7 +235,7 @@ class Browser {
         this.dataRangeDialog = new DataRangeDialog(this, this.root)
         this.dataRangeDialog.container.id = `igv-data-range-dialog-${DOMUtils.guid()}`
 
-        this.genericColorPicker = new GenericColorPicker({ parent: this.columnContainer, width: 180 })
+        this.genericColorPicker = new GenericColorPicker({ parent: this.root, width: 180 })
         this.genericColorPicker.container.id = `igv-track-color-picker-${DOMUtils.guid()}`
 
         this.sliderDialog = new SliderDialog(this.root)
