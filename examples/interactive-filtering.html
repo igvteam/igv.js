@@ -72,6 +72,15 @@
       .igv-filter-count {
         float: right;
       }
+
+      .tippy-box {
+        font-family: "Open Sans", sans-serif;
+        font-size: 13px;
+      }
+
+      .tippy-content {
+        padding: 3px 7px;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/crossfilter2@1.5.4"></script>
     <!-- <script src="https://cdn.jsdelivr.net/npm/d3-selection@3.0.0/dist/d3-selection.js"></script>
@@ -81,6 +90,8 @@
     <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3.0.1/dist/d3-interpolate.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/d3-scale@4.0.2/dist/d3-scale.js"></script> -->
     <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tippy.js@6/dist/tippy-bundle.umd.js"></script>
     <script>
 
     const HISTOGRAM_BAR_MAX_HEIGHT = 20
@@ -1179,7 +1190,10 @@ function getHandlebarPath(d) {
           onChange="handleFacetCheckboxChange(event)"
           checked
         />
-        <span class="igv-facet-header igv-facet-header-categorical">${friendlyName}</span>
+        <span
+          class="igv-facet-header igv-facet-header-categorical"
+          data-tippy-content="${facet.description}"
+        >${friendlyName}</span>
         `
       return header
     }
@@ -1446,7 +1460,10 @@ function getHandlebarPath(d) {
 
       const facetHtml = `
         <div class="igv-facet ${facetClass} igv-facet-numeric" style="${display}">
-          <span class="igv-facet-header">${friendlyName}</span>
+          <span
+            class="igv-facet-header"
+            data-tippy-content="${facet.description}"
+          >${friendlyName}</span>
           ${filtersHtml}
           ${populationAfToggle}
         </div>`
@@ -1514,6 +1531,8 @@ function getHandlebarPath(d) {
       const filterContainerDom = document.querySelector('.igv-filters-container')
       filterContainerDom.innerHTML = ''
       filterContainerDom.insertAdjacentHTML('beforeend', facetsHtml)
+
+      tippy('.igv-facet-header[data-tippy-content]')
 
       const {
         features, featuresByFacet, facets,
