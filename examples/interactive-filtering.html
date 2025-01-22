@@ -34,8 +34,20 @@
         left: -7px;
       }
 
-      .igv-facet .igv-facet-header-checkbox {visibility: hidden;}
-      .igv-facet:hover .igv-facet-header-checkbox {visibility: visible;}
+      .igv-facet .igv-facet-header-checkbox,
+      .igv-facet .facet-toggle-chevron {
+        visibility: hidden;
+      }
+      .igv-facet:hover .igv-facet-header-checkbox,
+      .igv-facet:hover .facet-toggle-chevron {
+        visibility: visible;
+      }
+
+      .facet-tools {
+        float: right;
+        margin-right: 5px;
+        margin-top: -1px;
+      }
 
       .igv-facet {
         margin-top: 15px;
@@ -904,8 +916,8 @@ function getHandlebarPath(d) {
         // Original is unpolished; remove redundant field name; standardize case, spacing
         // "Ancestral Allele. Format: AA|REF|ALT|IndelType. AA: Ancestral allele, REF:Reference Allele, ALT:Alternate Allele, IndelType:Type of Indel (REF, ALT and IndelType are only defined for indels)"
         prose = (
-          'Format: AA|REF|ALT|IndelType.  ' +
-          'AA: Ancestral allele, REF: Reference allele, ALT: Alternate allele, IndelType: Type of Indel.  ' +
+          'Format: AA | REF | ALT | IndelType <br/>' +
+          'AA: Ancestral allele, REF: Reference allele, ALT: Alternate allele, IndelType: Type of Indel. <br/>' +
           'REF, ALT and IndelType are only defined for indels.'
         )
       }
@@ -1113,6 +1125,7 @@ function getHandlebarPath(d) {
       return {facets, features}
     }
 
+    /** Expand or contract a full list of filters within a categorical facet */
     function togglePartialCollapse(event) {
       const target = event.target
       const attrName = 'data-igv-is-partly-collapsed'
@@ -1164,6 +1177,7 @@ function getHandlebarPath(d) {
       return friendlyName
     }
 
+    /** Change "root" checkbox for categorical facets */
     function updateFacetCheckbox(facet) {
       const facetName = facet.name
       const selector = `.igv-filter[data-igv-facet-name="${facetName}"]:checked`
@@ -1185,7 +1199,55 @@ function getHandlebarPath(d) {
 
     }
 
-    /** Add or remove all checked item from list */
+    /** Toggle icon for collapsing a list; for each filter list, and all filter lists */
+    function getFacetTools(
+      isCollapsed, whatToToggle,
+      isLoaded,
+      sortKey,
+      setSortKey,
+      facet=null,
+      isRoot=false, hasNondefaultSelection, handleResetFilters
+    ) {
+      console.log('in getFacetTools')
+      const collapseToggleChevron = getCollapseToggleChevron(isCollapsed, whatToToggle)
+      return `
+        <span class="facet-tools">
+          ${collapseToggleChevron}
+        </span>`
+    }
+
+    const chevronDown = `<svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>`
+    const chevronRight = `<svg xmlns="http://www.w3.org/2000/svg" height="14" width="8.75" viewBox="0 0 320 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>`
+
+    const tooltipAttrs = {
+      'dataToggle': 'tooltip',
+      'dataDelay': '{"show": 150}' // Avoid flurry of tooltips on passing hover
+    }
+
+    /** Toggle icon for collapsing a list; for each filter list, and all filter lists */
+    function getCollapseToggleChevron(isCollapsed, whatToToggle) {
+      let toggleIcon
+      let toggleIconTooltipText
+      if (!isCollapsed) {
+        toggleIcon = chevronDown
+        toggleIconTooltipText = `Hide ${whatToToggle}`
+      } else {
+        toggleIcon = chevronRight
+        toggleIconTooltipText = `Show ${whatToToggle}`
+      }
+
+      return `
+        <span
+          class="facet-toggle-chevron"
+          data-original-title="${toggleIconTooltipText}"
+          data-toggle="${tooltipAttrs.dataToggle}"
+          data-delay="${tooltipAttrs.dataDelay}"
+        >
+          ${toggleIcon}
+        </span>`
+    }
+
+    /** Add or remove all checked items from list */
     function handleFacetCheckboxChange(event) {
       const target = event.target
       const facetName = target.getAttribute('data-igv-facet-name')
@@ -1215,6 +1277,7 @@ function getHandlebarPath(d) {
           class="igv-facet-header igv-facet-header-categorical"
           data-tippy-content="${facet.description}"
         >${friendlyName}</span>
+        ${getFacetTools()}
         `
       return header
     }
@@ -1420,6 +1483,7 @@ function getHandlebarPath(d) {
       return styles
     }
 
+    /** Expand or contract list of population-level allele frequency facets */
     function toggleAfCollapse(event) {
       const target = event.target
       const attrName = 'data-igv-is-af-collapsed'
