@@ -1,10 +1,10 @@
 import {isExon, isTranscript, isTranscriptPart} from "./so.js"
 import {GFFFeature, GFFTranscript} from "./gffFeature.js"
 
-const gffNameFields = ["Name", "transcript_id", "gene_name", "gene", "gene_id", "alias", "locus", "name" ]
 
 class GFFHelper {
 
+    static gffNameFields = new Set(["Name", "transcript_id", "gene_name", "gene", "gene_id", "alias", "locus", "name" ])
     constructor(options) {
         this.format = options.format
         this.nameField = options.nameField
@@ -201,11 +201,10 @@ class GFFHelper {
         // Find name (label) property
         for (let f of features) {
             if(typeof f.getAttributeValue === 'function') {
-
                 if (this.nameField) {
                     f.name = f.getAttributeValue(this.nameField)
                 } else {
-                    for (let nameField of gffNameFields) {
+                    for (let nameField of GFFHelper.gffNameFields) {
                         const v = f.getAttributeValue(nameField)
                         if (v) {
                             f.name = v

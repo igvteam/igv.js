@@ -2,6 +2,7 @@ import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
 import DecodeError from "./decodeError.js"
 
 import {parseAttributeString} from "../gff/parseAttributeString.js"
+import GFFHelper from "../gff/gffHelper.js"
 
 
 /**
@@ -36,12 +37,16 @@ function decodeBed(tokens, header, maxColumnCount = Number.MAX_SAFE_INTEGER) {
                 feature.attributes = {}
                 for (let kv of attributeKVs) {
                     feature.attributes[kv[0]] = kv[1]
-                    if (header.nameField != undefined && kv[0] === header.nameField) {
-                        feature.name = kv[1]
+                    if(gffTags) {
+                        if (header.nameField != undefined && kv[0] === header.nameField) {
+                            feature.name = kv[1]
+                        } else if (!feature.name && GFFHelper.gffNameFields.has(kv[0])) {
+                            feature.name = kv[1];
+                        }
                     }
                 }
             }
-            if (!feature.name) {
+            if (!feature.name && !gffTags) {
                 feature.name = tokens[3] === '.' ? '' : tokens[3]
             }
         }
