@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="author" content="Jim Robinson">
+    <link rel="shortcut icon" href="https://igv.org/web/https://igv.org/web/img/favicon.ico">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>Test of a CSI index with a gtf file</h1>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr1:1000-2000",
+            tracks:
+                [
+                    {
+                        name: "gff tags",
+                        format: "bed",
+                        url: `../../test/data/bed/gfftags.bed`,
+                    }
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
