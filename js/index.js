@@ -10,7 +10,7 @@ import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import {registerTrackClass, registerTrackCreatorFunction} from "./trackFactory.js"
 import TrackBase from "./trackBase.js"
 import Browser from "./browser.js"
-
+import AlertDialog from "./ui/components/alertDialog.js"
 import {registerFileFormats} from "./util/fileFormats.js"
 
 const setApiKey = igvxhr.setApiKey
@@ -27,6 +27,7 @@ function setOauthToken(accessToken, host) {
 const oauth = igvxhr.oauth
 
 export default {
+    AlertDialog,
     TrackUtils,
     IGVGraphics,
     MenuUtils,
