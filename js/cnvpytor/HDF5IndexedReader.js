@@ -36,6 +36,8 @@ class HDF5Reader {
         this.h5_file = h5_file;
         this.bin_size = bin_size;
         this.h5_obj = undefined
+        this.pytorKeys = [];
+        this.availableBins = [];
     }
     
     async fetch(){
@@ -59,100 +61,76 @@ class HDF5Reader {
         return h5_obj.keys
     }
 
-    async get_rd_signal(bin_size=this.bin_size){
-
-        let h5_obj = await this.fetch();
-        
-        this.h5_obj = h5_obj
-        this.pytor_keys = h5_obj.keys
+    async get_rd_signal(bin_size = this.bin_size, chrom=undefined){
+        // Fetch the pytor file and get keys
+        const h5Obj = await this.fetch();
+        this.pytorKeys = h5Obj.keys;
 
         // get available bin sizes
-        let signal_bin = new ParseSignals(this.pytor_keys);
-        let rd_bins = signal_bin.get_rd_bins()
-        let snp_bins = signal_bin.get_snp_bins()
-
-        // merge the bins get from two type of signals
-        this.available_bins = [...new Set(rd_bins, snp_bins)]
-
-        // check if the user provided bin is available, else set the last bin_size
-        if(! this.available_bins.includes(bin_size)){
-            bin_size = this.available_bins.at(-1);    
-        }
-
-        const chr_ds = await h5_obj.get("rd_chromosomes")
-        const type = await chr_ds.dtype
-        const t0 = Date.now()
-        let rd_chromosomes = await chr_ds.value
-        let rd_flag = ""
-
-        // get rd stat
-        let rd_stat = await this.rd_stat(bin_size)
+        const signalBin = new ParseSignals(this.pytorKeys);
+        this.availableBins = signalBin.getAllBins();
         
-        var wigFeatures = []
-        var wigFeatures_gc = []
-        var wigFeatures_rd_call_meanshift = []
-        var wigFeatures_rd_call_combined = []
-        var wigFeatures_baf1 = []
-        var wigFeatures_baf2 = []
-
-        for (let chrom of rd_chromosomes) {
-            let signal_name_obj = new SignalNames(chrom, bin_size)
-
-            // for normal rd signal
-            // var signal_rd = `his_rd_p_${chrom}_${bin_size}${rd_flag}`
-            var signal_rd = signal_name_obj.signals['raw_RD']
-            let chr_wig = await this.get_chr_signal( chrom, bin_size, signal_rd, rd_stat)
-            wigFeatures = wigFeatures.concat(chr_wig)
-            
-            // rd gc corrected
-            // var signal_rd_gc = `his_rd_p_${chrom}_${bin_size}_GC`
-            var signal_rd_gc = signal_name_obj.signals['gc_RD']
-            let chr_wig_gc = await this.get_chr_signal(chrom, bin_size, signal_rd_gc, rd_stat)
-            wigFeatures_gc = wigFeatures_gc.concat(chr_wig_gc)
-
-            // rd call MeanShift
-            
-            // let signal_rd_call = `his_rd_p_${chrom}_${bin_size}_partition_GC_merge`
-            let signal_rd_call = signal_name_obj.signals['gc_partition']
-            let chr_wig_rd_call_meanshift = await this.get_chr_signal(chrom, bin_size, signal_rd_call, rd_stat)
-            wigFeatures_rd_call_meanshift = wigFeatures_rd_call_meanshift.concat(chr_wig_rd_call_meanshift)
-            
-            let chr_wig_rd_call = await this.rd_call_combined(chrom, bin_size, rd_stat, signal_name_obj)
-            wigFeatures_rd_call_combined = wigFeatures_rd_call_combined.concat(chr_wig_rd_call)
-
-            // baf likelihood
-            // let signal_baf_1 = `snp_likelihood_${chrom}_${bin_size}_mask`
-            // let signal_baf_1 = signal_name_obj.signals['baf']
-            // let chr_wig_bafs = await this.get_baf_signals(chrom, bin_size, signal_baf_1)
-            
-            // let signal_baf_1 = `snp_i1_${chrom}_${bin_size}_mask`
-            let signal_baf_1 = signal_name_obj.signals['baf_i1']
-            let chr_wig_bafs = await this.get_baf_signals_v2(chrom, bin_size, signal_baf_1)
-
-
-            wigFeatures_baf1 = wigFeatures_baf1.concat(chr_wig_bafs[0])
-            wigFeatures_baf2 = wigFeatures_baf2.concat(chr_wig_bafs[1])
-            
+        // check if the user provided bin is available, else set the last bin_size
+        if(! this.availableBins.includes(bin_size)){
+            bin_size = this.availableBins.at(-1);    
         }
-        this.callers = []
-        if (wigFeatures_rd_call_combined.length != 0){
-            this.callers.push('ReadDepth')
-        }
-        if (wigFeatures_rd_call_combined.length != 0){
-            this.callers.push('2D')
+        
+        // get rd chromosomes and rd stat
+        const rdChromosomes = await this.getChromosomes(chrom);
+
+        let rd_stat = await this.rd_stat(bin_size)
+
+        // prepare wig formatted file for all chromosome
+        const wigFeatures = await this.getWigFeatures(rdChromosomes, bin_size, rd_stat);
+
+        this.setCallers(wigFeatures);
+        return { [bin_size]: wigFeatures };
+    }
+
+    async getWigFeatures(rdChromosomes, binSize, rdStat) {
+        const wigFeatures = {
+            RD_Raw: [],
+            RD_Raw_gc_coor: [],
+            ReadDepth: [],
+            "2D": [],
+            BAF1: [],
+            BAF2: []
+        };
+
+        for (const chrom of rdChromosomes) {
+            const signalNameObj = new SignalNames(chrom, binSize);
+
+            wigFeatures.RD_Raw.push(...await this.get_chr_signal(chrom, binSize, signalNameObj.signals.raw_RD, rdStat));
+            wigFeatures.RD_Raw_gc_coor.push(...await this.get_chr_signal(chrom, binSize, signalNameObj.signals.gc_RD, rdStat));
+            wigFeatures.ReadDepth.push(...await this.get_chr_signal(chrom, binSize, signalNameObj.signals.gc_partition, rdStat));
+
+            wigFeatures["2D"].push(...await this.rd_call_combined(chrom, binSize, rdStat, signalNameObj));
+
+            const [baf1, baf2] = await this.getBafSignals(chrom, binSize, signalNameObj.signals.baf_i1);
+            wigFeatures.BAF1.push(...baf1);
+            wigFeatures.BAF2.push(...baf2);
         }
 
-        var obj = {}
-        var signal_obj = {
-            "RD_Raw": wigFeatures,
-            "RD_Raw_gc_coor" : wigFeatures_gc,
-            "ReadDepth": wigFeatures_rd_call_meanshift,
-            "2D": wigFeatures_rd_call_combined,
-            "BAF1": wigFeatures_baf1,
-            "BAF2": wigFeatures_baf2
+        return wigFeatures;
+    }
+
+    async getChromosomes(refChroms) {
+        // return chromosome names if they exists in the rd_chromosomes
+        const rdChroms_obj = await this.h5_obj.get("rd_chromosomes");
+        const rdChroms = await rdChroms_obj.value
+        if(!refChroms){
+            return rdChroms 
+        }else{
+            let refChromsSet = new Set(refChroms)
+            return rdChroms.filter(item => refChromsSet.has(item));
+            
         }
-        obj[bin_size] = signal_obj
-        return obj
+    }
+
+    setCallers(wigFeatures) {
+        this.callers = [];
+        if (wigFeatures.ReadDepth.length) this.callers.push('ReadDepth');
+        if (wigFeatures["2D"].length) this.callers.push('2D');
     }
 
     decode_segments(segments_arr){
@@ -174,9 +152,8 @@ class HDF5Reader {
         let chr_wig = [];
         
         let segments
-        // let mosaic_call_segments = `his_rd_p_${chrom}_${bin_size}_partition_GC_mosaic_segments_2d`
         let mosaic_call_segments = signal_name_obj.signals['Mosaic_segments']
-        if (this.pytor_keys.includes(mosaic_call_segments)){
+        if (this.pytorKeys.includes(mosaic_call_segments)){
             const chrom_dataset = await this.h5_obj.get(mosaic_call_segments)
             const t0 = Date.now()
             let chrom_data = await chrom_dataset.value
@@ -184,9 +161,8 @@ class HDF5Reader {
             
         }
 
-        // let mosaic_calls = `his_rd_p_${chrom}_${bin_size}_partition_GC_mosaic_call_2d`
         let mosaic_calls = signal_name_obj.signals['Mosaic_calls']
-        if (this.pytor_keys.includes(mosaic_calls)){
+        if (this.pytorKeys.includes(mosaic_calls)){
             const segments_call_dataset = await this.h5_obj.get(mosaic_calls)
             let segments_call = await segments_call_dataset.to_array() //create_nested_array(value, shape)
             segments.forEach((ind_segment, segment_idx) => {
@@ -209,12 +185,9 @@ class HDF5Reader {
     
         let rd_stat_signal =  `rd_stat_${bin_size}_auto`
         let rd_stat;
-        
-        if (this.pytor_keys.includes(rd_stat_signal)){
+        if (this.pytorKeys.includes(rd_stat_signal)){
             const rd_stat_dataset = await this.h5_obj.get(rd_stat_signal)
-            const t0 = Date.now()
             rd_stat = await rd_stat_dataset.value
-            //console.log(`rd_stat_signal ${rd_stat_signal}  ${Date.now() - t0}`)
         }
         return rd_stat
     }
@@ -224,11 +197,10 @@ class HDF5Reader {
         /* return a list of dictionary for a chromosome */
         let chr_wig = [];
         
-        if (this.pytor_keys.includes(signal_name)){
+        if (this.pytorKeys.includes(signal_name)){
             const chrom_dataset = await this.h5_obj.get(signal_name)
             
             let chrom_data = await chrom_dataset.value
-            //console.log(`chr_signal ${signal_name}  ${Date.now() - t0}`)
             chrom_data.forEach((bin_value, bin_idx) => {
                 chr_wig.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: (bin_value/rd_stat[4]) *2})
             });
@@ -236,89 +208,68 @@ class HDF5Reader {
         return chr_wig
     }
 
-    async get_baf_signals(chrom, bin_size, signal_name, scaling_factor = -1){
-        /* return two list of dictionary*/
-        let chr_wig_1 = [];
-        let chr_wig_2 = [];
-        if (this.pytor_keys.includes(signal_name)){
-            let chrom_dataset = await this.h5_obj.get(signal_name)
-            let chrom_data = await chrom_dataset.to_array() //create_nested_array(value, shape)
-            chrom_data.forEach((bin_value, bin_idx) => {
-                let max_value =  Math.max(...bin_value);
-                const res = bin_value.indexOf(max_value);
-                let lh = Math.max(res / 200, 1 - res / 200);
-                chr_wig_1.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: scaling_factor * lh})
-                if(lh != 0.5){
-                    chr_wig_2.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: scaling_factor *(1-lh)})
-                }
-            });
-        }
-        return [chr_wig_1, chr_wig_2]
-    }
 
-    async get_baf_signals_v2(chrom, bin_size, signal_name, scaling_factor = -1){
+    async getBafSignals(chrom, binSize, signalName, scalingFactor = -1) {
+        const chrWig1 = [];
+        const chrWig2 = [];
         
-        /* return two list of dictionary*/
-        let chr_wig_1 = [];
-        let chr_wig_2 = [];
-        if (this.pytor_keys.includes(signal_name)){
-            let chrom_dataset = await this.h5_obj.get(signal_name)
-            let chrom_data = await chrom_dataset.to_array() //create_nested_array(value, shape)
-            chrom_data.forEach((lh, bin_idx) => {
-                if (!isNaN(lh)){
-                    chr_wig_1.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: scaling_factor * ( 0.5 - lh )})
-                    if(lh != 0.5){
-                        chr_wig_2.push({chr:chrom, start: bin_idx*bin_size, end: (bin_idx+1) * bin_size, value: scaling_factor * ( 0.5 + lh )})
+        if (this.pytorKeys.includes(signalName)) {
+            const chromDataset = await this.h5_obj.get(signalName);
+            const chromData = await chromDataset.to_array();
+
+            chromData.forEach((lh, binIdx) => {
+                if (!isNaN(lh)) {
+                    chrWig1.push({
+                        chr: chrom,
+                        start: binIdx * binSize,
+                        end: (binIdx + 1) * binSize,
+                        value: scalingFactor * (0.5 - lh)
+                    });
+                    if (lh !== 0.5) {
+                        chrWig2.push({
+                            chr: chrom,
+                            start: binIdx * binSize,
+                            end: (binIdx + 1) * binSize,
+                            value: scalingFactor * (0.5 + lh)
+                        });
                     }
                 }
             });
         }
-        //console.log(chrom, chr_wig_1, chr_wig_2)
-        return [chr_wig_1, chr_wig_2]
-
+        return [chrWig1, chrWig2];
     }
+
 }
 
-class ParseSignals{
-
+class ParseSignals {
     /**
-     * Parse a signal names
-     * 
-     * @param {*} signals - List of keys in pytor files 
+     * @param {string[]} signals - List of keys in pytor files.
      */
-    constructor(signals){
-        this.signals = signals
+    constructor(signals) {
+        this.signals = signals;
     }
 
-    /**
-     * 
-     * @returns - return list of rd bins
-     */
-    get_rd_bins(){
-        let rd_keys = [];
-        this.signals.forEach( val => {
-            let match = val.match(/^his_rd_p_(.*)_(\d+)$/);
-            if(match){
-                rd_keys.push({chr:match[1], bin_size:match[2]})
-            }});
-        const rd_bins = [...new Set(rd_keys.map(item => Number(item.bin_size)))];
-        return rd_bins
+    getAllBins() {
+        const rdBins = this.getRdBins();
+        const snpBins = this.getSnpBins();
+        return [...new Set([...rdBins, ...snpBins])].sort((a, b) => a - b);;
     }
 
-    /**
-     * 
-     * @returns - return list of snp bins
-     */
-    get_snp_bins(){
-        
-        let slected_signals = [];
-        this.signals.forEach( val => {
-            let match = val.match(/^snp_likelihood_(.*)_(\d+)_mask$/);
-            if(match){
-                slected_signals.push({chr:match[1], bin_size:match[2]})
-            }});
-        const bins = [...new Set(slected_signals.map(item => Number(item.bin_size)))];
-        return bins
+    getRdBins() {
+        return this.extractBins(/^his_rd_p_(.*)_(\d+)$/);
+    }
+
+    getSnpBins() {
+        return this.extractBins(/^snp_likelihood_(.*)_(\d+)_mask$/);
+    }
+
+    extractBins(regex) {
+        return [...new Set(
+            this.signals
+                .map(val => val.match(regex))
+                .filter(match => match !== null)
+                .map(match => Number(match[2]))
+        )];
     }
 }
 
