@@ -538,14 +538,14 @@ class TrackBase {
 
             menuItems.push('<hr/>')
 
-            const dialogPresentationHandler = () => {
+            const dialogPresentationHandler = e => {
 
                 if (this.trackView.track.selected) {
                     this.browser.dataRangeDialog.configure(this.trackView.browser.getSelectedTrackViews())
                 } else {
                     this.browser.dataRangeDialog.configure(this.trackView)
                 }
-                this.browser.dataRangeDialog.present(this.browser.columnContainer)
+                this.browser.dataRangeDialog.present(e)
             }
 
             menuItems.push({label: 'Set data range', dialog: dialogPresentationHandler})

@@ -91,31 +91,9 @@ class InputDialog {
         this._input.value = options.value
         this.callback = options.callback || options.click
 
+        const { top} = e.currentTarget.parentElement.getBoundingClientRect()
+        this.container.style.top = `${ top }px`;
         this.container.style.display = 'flex';
-    }
-
-    __present(options, e) {
-
-        this.label.textContent = options.label
-        this._input.value = options.value
-        this.callback = options.callback || options.click
-
-        DOMUtils.show(this.container)
-        this.clampLocation(e.clientX, e.clientY)
-
-    }
-
-    clampLocation(clientX, clientY) {
-
-        const {width: w, height: h} = this.container.getBoundingClientRect()
-        const wh = window.innerHeight
-        const ww = window.innerWidth
-
-        const y = Math.min(wh - h, clientY)
-        const x = Math.min(ww - w, clientX)
-        this.container.style.left = `${x}px`
-        this.container.style.top = `${y}px`
-
     }
 }
 

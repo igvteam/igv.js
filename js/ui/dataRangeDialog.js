@@ -156,7 +156,9 @@ class DataRangeDialog {
         this.container.style.display = 'none';
     }
 
-    present(parent) {
+    present(e) {
+        const { top} = e.currentTarget.parentElement.getBoundingClientRect()
+        this.container.style.top = `${ top }px`;
         this.container.style.display = 'flex';
     }
 
