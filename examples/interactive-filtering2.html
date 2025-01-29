@@ -634,7 +634,7 @@
             })
 
             // Populate features, and (for each facet) filterNames
-            const featuresInFrame = trackToFilter.inViewFeatures()
+            const featuresInFrame = trackToFilter.getInViewFeatures()
 
             let features = []
             for (let i = 0; i < featuresInFrame.length; i++) {

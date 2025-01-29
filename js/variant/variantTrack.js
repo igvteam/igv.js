@@ -180,7 +180,7 @@ class VariantTrack extends TrackBase {
         this.trackView.repaintViews()
     }
 
-    inViewFeatures() {
+    getInViewFeatures() {
         const inViewFeatures = []
         for (let viewport of this.trackView.viewports) {
             if (viewport.isVisible()) {
