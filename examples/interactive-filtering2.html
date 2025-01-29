@@ -77,50 +77,6 @@
             igvBrowser.trackViews[trackIndex].track.updateViews()
         }
 
-        /** Get unfiltered genomic features on current chromosome */
-        function getOriginalChrFeatures(trackIndex, igvBrowser) {
-            const chr = Array.from(igvBrowser.tracks[0].trackView.viewports[0].featureCache.features.keys())[0]
-
-            if (
-                typeof window.originalFeatures === 'undefined' ||
-                chr in window.originalFeatures === false
-            ) {
-                window.originalFeatures = igvBrowser.trackViews[trackIndex].track.featureSource.featureCache.allFeatures
-            }
-
-            const originalChrFeatures = window.originalFeatures[chr]
-
-            return originalChrFeatures
-        }
-
-        /** Determine if feature is in genomic frame */
-        function getIsFeatureInFrame(feature, igvBrowser) {
-            const frame = igvBrowser.referenceFrameList[0]
-
-            const isFeatureInFrame = (
-                // Contained:
-                // Frame:     --------
-                // Feature:     ----
-                (feature.start >= frame.start && feature.end <= frame.end) ||
-
-                // Overlaps start
-                // Frame:     --------
-                // Feature:  ----
-                (feature.start <= frame.start && feature.end >= frame.start) ||
-
-                // Overlaps end
-                // Frame:     --------
-                // Feature:         ----
-                (feature.start <= frame.end && feature.end >= frame.end) ||
-
-                // Spans
-                // Frame:     --------
-                // Feature: ------------
-                (feature.start <= frame.start && feature.end >= frame.end)
-            )
-
-            return isFeatureInFrame
-        }
 
         const widthsByOperator = {
             'between': 75,
@@ -217,138 +173,6 @@
             return selection
         }
 
-        /**
-         * Determine if a feature satisfies any numeric filters
-         *
-         * @param {Number} d - A numeric datum; a numeric value for a feature
-         * @param {Array<Array<String, *>>} numericFilters Filters for a numeric
-         *   facet. Each filter has an operator and a value.  Values can be a number
-         *   or an array of two numbers.
-         *
-         *   Example simple numeric filters:
-         *   - ["=", 1.3]
-         *   - ["!=", 1.3]
-         *   - [">", 6]
-         *   - [">=", 6]
-         *   - ["<", 6]
-         *   - ["<=", 6]
-         *   - ["between", [5, 42]] -- inclusive, i.e. 5 <= d <= 42
-         *   - ["not between", [5, 42]] -- inclusive, i.e. !(5 <= d <= 42)
-         *
-         *   Example compound numeric filters:
-         *   - [["between", [95, 100]], ["between", [1200, 1300]] -- (95 <= d <= 100) or (1200 <= d <= 1300)
-         *
-         *   Compound numeric filters could be used to e.g.:
-         *     - isolate the peaks of multimodal distributions (as in concrete example above)
-         *     - isolate the tails of distributions
-         *
-         *   TODO:
-         *   - Enable percentile filtering, i.e. beyond raw values.  Requires 1-time full sort, then trivial.
-         *
-         * @returns {Boolean} Whether feature datum passed any filters
-         */
-        function applyNumericFilters(d, rawFilters) {
-            // const [numericFilters, includeNa] = rawFilters
-            const numericFilters = rawFilters
-            const includeNa = true
-
-            if (includeNa && d === null) {
-                return true
-            }
-
-            for (let i = 0; i < numericFilters.length; i++) {
-                const [operator, value] = numericFilters[i]
-                if (operator === '=') {
-                    // for fastest querying, exit function immediately upon _any_ condition
-                    // evaluating to true
-                    if (d === value) {
-                        return true
-                    }
-                } else if (operator === '!=') {
-                    if (d !== value) {
-                        return true
-                    }
-                } else if (operator === '>') {
-                    if (d > value) {
-                        return true
-                    }
-                } else if (operator === '>=') {
-                    if (d >= value) {
-                        return true
-                    }
-                } else if (operator === '<') {
-                    if (d < value) {
-                        return true
-                    }
-                } else if (operator === '<=') {
-                    if (d <= value) {
-                        return true
-                    }
-                } else if (operator === 'between') {
-                    if (value[0] <= d && d <= value[1]) {
-                        return true
-                    }
-                } else if (operator === 'not between') {
-                    if (!(value[0] <= d && d <= value[1])) {
-                        return true
-                    }
-                }
-            }
-
-            return false
-        }
-
-        function filterFeatures(trackSelector, filterResults, facets, igvBrowser) {
-            const [filteredFeatures, filterCounts] = filterResults
-            const trackIndex = getTrackIndex(trackSelector, igvBrowser)
-            const featuresInFrame = getFeaturesInFrame(trackSelector, igvBrowser)
-
-            const featuresToPlot = []
-            for (let i = 0; i < filteredFeatures.length; i++) {
-                const rawIndex = filteredFeatures[i].rawIndex
-                const featureToPlot = featuresInFrame[rawIndex]
-                featuresToPlot.push(featureToPlot)
-            }
-
-            updateTrack(trackIndex, featuresToPlot, igv, igvBrowser)
-
-            Object.entries(filterCounts).forEach(([facetName, countsByFilter], i) => {
-                const facet = facets[i]
-                Object.entries(countsByFilter).forEach(([filterName, count]) => {
-                    if (facet.type === 'categorical') {
-                        const filterSel =
-                            `.igv-filter-label[data-igv-facet-name="${facet.name}"][data-igv-filter-name="${filterName}"] ` +
-                            `.igv-filter-count`
-                        const countDom = document.querySelector(filterSel)
-                        countDom.textContent = count
-                    }
-                })
-            })
-        }
-
-        function getFeaturesInFrame(trackSelector, igvBrowser) {
-            const trackIndex = getTrackIndex(trackSelector, igvBrowser)
-            const originalChrFeatures = getOriginalChrFeatures(trackIndex, igvBrowser)
-            const featuresInFrame = originalChrFeatures.filter(
-                feature => getIsFeatureInFrame(feature, igvBrowser)
-            )
-            return featuresInFrame
-        }
-
-        /** Get index position of track in IGV browser, given its name or index */
-        function getTrackIndex(trackSelector, igvBrowser) {
-            let trackIndex = null
-            if (typeof trackSelector === 'string') {
-                igvBrowser.trackViews.find((trackView, i) => {
-                    trackIndex = i
-                    return trackView.track.config?.name === trackSelector
-                })
-            } else {
-                trackIndex = trackSelector
-            }
-            return trackIndex
-        }
-
         /** Get D3 scale to convert between numeric facet values and pixels */
         function getXScale(bars, histogramWidth, hasNull) {
             hasNull = false // TODO: Parameterize
@@ -368,14 +192,6 @@
 
             const xScale = d3.scaleLinear(valueDomain, pxRange)
             return xScale
-        }
-
-        /** Get width and height for SVG elements for histogram */
-        function getHistogramSvgDimensions(bars) {
-            const lastBar = bars.slice(-1)[0]
-            const histogramWidth = lastBar.x + lastBar.width
-            const histogramHeight = HISTOGRAM_BAR_MAX_HEIGHT + 2
-            return [histogramWidth, histogramHeight]
         }
 
         /** Get container offsets for brush */
@@ -733,164 +549,6 @@
             return (numbers[midIndex - 1] + numbers[midIndex]) / 2
         }
 
-        /** Get crossfilter-initialized features by facet */
-        function getFeaturesByFacet(features, facetNames) {
-            const featureCrossfilter = crossfilter(features)
-            window.featureCrossfilter = featureCrossfilter
-            const featuresByFacet = {}
-            for (let i = 0; i < facetNames.length; i++) {
-                const facetName = facetNames[i]
-                const facetCrossfilter = featureCrossfilter.dimension(d => d.facetIndex[i])
-                featuresByFacet[facetName] = facetCrossfilter
-            }
-            return featuresByFacet
-        }
-
-
-        /** Get filtered feature results, and counts */
-        function getFilteredFeatures(
-            selection, featuresByFacet, facets, filterableFeatures
-        ) {
-            const t0 = Date.now()
-
-            let fn
-            let facet
-            let results
-
-            if (Object.keys(selection).length === 0) {
-                results = filterableFeatures
-            } else {
-                for (let i = 0; i < facets.length; i++) {
-                    facet = facets[i]
-                    const facetName = facet.name
-                    if (facetName in selection) {
-                        if (facet.type === 'categorical') {
-                            // e.g. 'infant_sick_YN'
-                            const friendlyFilters = selection[facetName] // e.g. ['yes', 'NA']
-
-                            const filter = new Set()
-                            friendlyFilters.forEach(friendlyFilter => {
-                                const filterIndex = facet.filterNames.indexOf(friendlyFilter)
-                                filter.add(filterIndex)
-                            })
-
-                            fn = function (d, i) {
-                                return filter.has(d)
-                            }
-
-                            // Apply the actual crossfilter method
-                            featuresByFacet[facetName].filterFunction(fn)
-                        } else {
-                            const numericFilters = selection[facetName] // e.g. [0, 20]
-
-                            fn = function (d) {
-                                // return true
-                                return applyNumericFilters(d, numericFilters)
-                            }
-                            featuresByFacet[facetName].filterFunction(fn)
-                        }
-                    } else {
-                        fn = null
-                        // Apply the actual crossfilter method
-                        featuresByFacet[facetName].filter(fn)
-                    }
-                }
-                results = featuresByFacet[facet.name].top(Infinity)
-            }
-
-            const facetNames = facets.map(facet => facet.name)
-            const t0Counts = Date.now()
-            const counts = getFilterCounts(facetNames, featuresByFacet, facets, selection)
-
-            return [results, counts]
-        }
-
-        /** Get counts for each filter, in each facet */
-        function getFilterCounts(facetNames, featuresByFacet, facets, selection) {
-            const filterCounts = {}
-
-            for (let i = 0; i < facets.length; i++) {
-                const facet = facets[i]
-                const facetName = facet.name
-                const facetCrossfilter = featuresByFacet[facetName]
-                // Set counts for each filter in facet
-                const rawFilterCounts = facetCrossfilter.group().top(Infinity)
-                let countsByFilter
-
-                if (facet.type === 'categorical') {
-                    countsByFilter = {}
-                    facet.filterNames.forEach((filterName, j) => {
-                        let count = null
-                        // check for originalGroups array first, if present
-                        const originalFilterNames = facets[i].originalFilterNames || facets[i].filterNames
-                        const filterNameIdx = originalFilterNames.indexOf(filterName)
-                        const rawFilterKeyAndValue = rawFilterCounts.find(rfc => rfc.key === filterNameIdx)
-                        if (rawFilterKeyAndValue) {
-                            count = rawFilterKeyAndValue.value
-                        }
-                        countsByFilter[filterName] = count
-                    })
-                } else {
-                    countsByFilter = []
-                    for (let j = 0; j < rawFilterCounts.length; j++) {
-                        // For numeric facets, `rawFilterCounts` is an array of objects, where
-                        // each object is a distinct numeric value observed in the facet;
-                        // the `key` of this object is the numeric value, and the `value` is
-                        // how many features were observed with that numeric value.
-                        const countObject = rawFilterCounts[j]
-                        const filterValueAndCount = [countObject.key, countObject.value]
-                        countsByFilter.push(filterValueAndCount)
-                    }
-
-                    // Sort array by numeric value, to aid later histogram, etc.
-                    countsByFilter = countsByFilter.sort((a, b) => a[0] - b[0])
-                }
-                filterCounts[facet.name] = countsByFilter
-            }
-
-            // If a filter has been deselected, set its count to 0
-            if (selection) {
-                Object.entries(filterCounts).forEach(([facetName, countsByFilter]) => {
-                    Object.entries(countsByFilter).forEach(([filterName, count]) => {
-                        let newCount = count
-                        if (!(facetName in selection && selection[facetName]?.includes(filterName))) {
-                            newCount = 0
-                        }
-                        filterCounts[facetName][filterName] = newCount
-                    })
-                })
-            }
-
-            return filterCounts
-        }
-
-        function initCrossfilter(facetsContainer) {
-            const facets = facetsContainer.facets
-            const rawFeatures = facetsContainer.features
-            const facetNames = facets.map(facet => facet.name)
-            const features = []
-
-            for (let i = 0; i < rawFeatures.length; i++) {
-                const feature = {'rawIndex': i}
-
-                // For categorical facets, we have an array of integers, e.g. [6, 0, 7, 0, 0].
-                // Each element in the array is the index-offset of the feature's category assignment
-                // for the facet at that index.
-                const facetIndex = rawFeatures[i]
-                feature.facetIndex = facetIndex
-                features.push(feature)
-            }
-
-            const featuresByFacet = getFeaturesByFacet(features, facetNames)
-
-            const filterCounts = {} // getFilterCounts(facetNames, featuresByFacet, facets, null)
-
-            return {
-                features, featuresByFacet, facets,
-                filterCounts
-            }
-        }
-
         /**
          * Initialize facets and filters for the current genomic frame
          *
@@ -935,13 +593,12 @@
          *   ]
          * }
          */
-        function initFacets(trackSelector, igvBrowser) {
-            const trackIndex = getTrackIndex(trackSelector, igvBrowser)
-            const featuresInFrame = getFeaturesInFrame(trackIndex, igvBrowser)
+        function initFacets(trackToFilter) {
+
 
             // Populate facets model, except for filterNames array values
             let facets = []
-            const headInfo = featuresInFrame[0].header.INFO
+            const headInfo = trackToFilter.getFilterableAttributes()
             const rawDimensions = Object.keys(headInfo)
 
             const facetOrder = [
@@ -977,6 +634,8 @@
             })
 
             // Populate features, and (for each facet) filterNames
+            const featuresInFrame = trackToFilter.inViewFeatures()
+
             let features = []
             for (let i = 0; i < featuresInFrame.length; i++) {
                 const feature = []
@@ -1461,30 +1120,23 @@
         }
 
         /**
-         * Initialize interactive filtering in IGV, for the given track
+         * Initialize interactive filtering in IGV, for the given track(s)
          *
          * This sets up crossfilters, and writes facet range inputs or checkboxes.
          */
-        function initIgvFacets(trackSelector, browser) {
+        function initIgvFacets(trackToFilter) {
 
             console.log("init facets")
 
-            const facetsContainer = initFacets(trackSelector, browser)
+            const facetsContainer = initFacets(trackToFilter)
+
             const [facetsHtml, brushesByNumericFacetName] = getFacetsHtml(facetsContainer)
 
             const filterContainerDom = document.querySelector('.igv-filters-container')
             filterContainerDom.innerHTML = ''
             filterContainerDom.insertAdjacentHTML('beforeend', facetsHtml)
 
-            const {
-                features, featuresByFacet, facets,
-                filterCounts
-            } = initCrossfilter(facetsContainer)
-
-            window.facets = facets
-
-            window.features = features
-            window.featuresByFacet = featuresByFacet
+            const facets = facetsContainer.facets
 
             writeNumericFacetSliderBrushes(facets, brushesByNumericFacetName)
 
@@ -1500,11 +1152,8 @@
                         updateBrushSelection(facet, brushesByNumericFacetName, selection)
                     }
 
-                    applyFilter(selection, featuresByFacet, facets, features)
+                    applyFilter(selection, facets)
 
-                    //   const filterResults =
-                    //     getFilteredFeatures(selection, featuresByFacet, facets, features)
-                    //   filterFeatures(trackSelector, filterResults, facets, igvBrowser)
                 })
             })
         }
@@ -1514,7 +1163,7 @@
         // J robinson additions
 
         function applyFilter(
-            selection, featuresByFacet, facets, filterableFeatures
+            selection, facets
         ) {
 
             const filterFunction = buildFilter(selection, facets)
@@ -1594,129 +1243,6 @@
             }
         }
 
-        function updateCounts(trackSelector, igvBrowser) {
-
-            const tracks = window.igvBrowser.findTracks('name', trackSelector)
-
-            // TODO -- supporting only a single track
-            const track = tracks[0]
-
-            const featuresInFrame = track.inViewFeatures()
-
-            // Populate facets model, except for filterNames array values
-
-
-            // Count features, and (for each facet) filterNames
-            let features = []
-            for (let i = 0; i < featuresInFrame.length; i++) {
-                const feature = []
-                const igvFeature = featuresInFrame[i]
-                const info = igvFeature.info
-                for (let j = 0; j < dimensions.length; j++) {
-                    const facetName = dimensions[j]
-                    let value
-                    if (facetName in info === false) {
-                        // Use an "empty" value if the feature lacks a value
-                        // for this dimension, which is pretty common.
-                        value = undefined
-                    } else {
-                        const rawValue = info[facetName]
-                        const facet = facets[j]
-                        if (facet.type === 'categorical') {
-                            if (!facet.filterNames.includes(rawValue)) {
-                                // Populate filterNames
-                                facet.filterNames.push(rawValue)
-                                facet.countsByFilterName[rawValue] = 0
-                            }
-
-                            // Using index offsets as values, rather than raw strings, helps
-                            // make categorical filtering fast.
-                            value = facet.filterNames.indexOf(rawValue)
-                            facet.countsByFilterName[rawValue] += 1
-                        } else {
-                            const isFloat = facet.type === 'float'
-                            value = isFloat ? parseFloat(rawValue) : parseInt(rawValue)
-                            facet.filterNumbers.push(value)
-                        }
-                        facets[j] = facet
-                    }
-                    feature.push(value)
-                }
-
-                // Populate features
-                features.push(feature)
-            }
-
-            const undefinedIndexes = new Set()
-
-            const untrimmedFacets = facets
-            // Trim unused facets
-            facets = facets.filter((facet, i) => {
-                if (
-                    (facet.type === 'categorical' && facet.filterNames.length < 2) ||
-                    (facet.type !== 'categorical' && facet.filterNumbers.length < 2)
-                ) {
-                    undefinedIndexes.add(i)
-                    return false
-                } else {
-                    return true
-                }
-            })
-
-            const untrimmedToTrimmedFacetIndexMap = {}
-            untrimmedFacets.forEach((untrimmedFacet, i) => {
-                facets.forEach((facet, j) => {
-                    if (untrimmedFacet.name === facet.name) {
-                        untrimmedToTrimmedFacetIndexMap[i] = j
-                    }
-                })
-            })
-
-            // Trim undefined indexes from features
-            if (undefinedIndexes.size > 0) {
-
-                for (let i = 0; i < features.length; i++) {
-                    const feature = features[i]
-                    const trimmedFeature = []
-                    for (let j = 0; j < feature.length; j++) {
-                        if (!undefinedIndexes.has(j)) { // If this facet isn't totally empty
-                            let featureValue = feature[j]
-
-                            // Handle facets where _some but not all_ values are not available
-                            if (featureValue === undefined) {
-                                featureValue = null
-                                const k = untrimmedToTrimmedFacetIndexMap[j]
-                                if (facets[k].type === 'categorical') {
-                                    if (!facets[k].filterNames.includes(null)) {
-                                        facets[k].filterNames.push(null)
-                                        facets[k].countsByFilterName[null] = 1
-                                    } else {
-                                        facets[k].countsByFilterName[null] += 1
-                                    }
-                                }
-                            }
-
-                        }
-                    }
-                }
-
-            }
-
-            // Populate statistics for numeric facets
-            facets = facets.map(facet => {
-                if (facet.type === 'categorical') return facet
-
-                const {min, q1, median, q3, max, mean, quantiles} =
-                    getStatistics(facet.filterNumbers)
-                facet.statistics = {min, q1, median, q3, max, mean, quantiles}
-
-                return facet
-            })
-
-            return {facets, features}
-        }
-
-
 
     </script>
 </head>
@@ -1776,14 +1302,26 @@
     const browser = await igv.createBrowser(igvDiv, options)
     window.igvBrowser = browser
 
-    // This can be a track name (like here) or track positional index (e.g. 3)
-    const trackToFilter = 'Phase 3 WGS variants'
+    // Specify track(s) to filter, this could be a specific track or, for example, all tracks of type variant.
+    // The current demo supports a single track only
 
-    initIgvFacets(trackToFilter, browser)
+    const trackToFilter = window.igvBrowser.findTracks('name', 'Phase 3 WGS variants')[0]
 
+    // To fetch all variant tracks
+    //const tracksToFilter = window.igvBrowser.findTracks('type', 'variant')
 
+    // Update the facet widgets on new data load.  This is relatively infrequent
+    browser.on('featuresloaded', ({track}) => {
+        if(track === trackToFilter) {
+            initIgvFacets(trackToFilter)
+        }
+    })
+
+    // Update the facet widgets no locus change.  Changing the locus changes the features in view.  This can be
+    // relatively frequent,  many times a second if dragging the track.
     browser.on('locuschange', () => {
         // Update counts
+        initIgvFacets(trackToFilter)
     })
 
 </script>

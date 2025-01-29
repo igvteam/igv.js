@@ -127,7 +127,7 @@ class VariantTrack extends TrackBase {
         this.header = await this.getHeader()
 
         // Set colorBy, if not explicitly set default to allele frequency, if available, otherwise default to none (undefined)
-        if(this.header.INFO) {
+        if (this.header.INFO) {
             const infoFields = new Set(Object.keys(this.header.INFO))
             if (this.config.colorBy) {
                 this.colorBy = this.config.colorBy
@@ -176,24 +176,34 @@ class VariantTrack extends TrackBase {
 
     set filter(f) {
         this._filter = f
-       // this._repackCachedFeatures()
+        // this._repackCachedFeatures()
         this.trackView.repaintViews()
     }
 
     inViewFeatures() {
         const inViewFeatures = []
         for (let viewport of this.trackView.viewports) {
-            if (viewport.isVisible() && viewport.featureCache) {
+            if (viewport.isVisible()) {
                 const referenceFrame = viewport.referenceFrame
+                const chr = referenceFrame.chr
                 const start = referenceFrame.start
                 const end = start + referenceFrame.toBP(viewport.getWidth())
-                const viewFeatures = FeatureUtils.findOverlapping(viewport.featureCache.features, start, end)
-                for (let f of viewFeatures) {
-                    inViewFeatures.push(f)
+
+                // We use the cached features  to avoid async load.  If the
+                // feature is not already loaded it is by definition not in view.
+                if (viewport.cachedFeatures) {
+                    const viewFeatures = FeatureUtils.findOverlapping(viewport.cachedFeatures, start, end)
+                    for (let f of viewFeatures) {
+                        inViewFeatures.push(f)
+                    }
                 }
             }
         }
         return inViewFeatures
+    }
+
+    getFilterableAttributes() {
+        return this.header.INFO
     }
 
     /**
@@ -339,7 +349,7 @@ class VariantTrack extends TrackBase {
             // Loop through variants.  A variant == a row in a VCF file
             for (let v of features) {
 
-                if(this._filter && !this._filter(v)) continue;
+                if (this._filter && !this._filter(v)) continue
                 if (v.end < bpStart) continue
                 if (v.start > bpEnd) break
 
