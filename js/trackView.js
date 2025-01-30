@@ -742,7 +742,7 @@ class TrackView {
                 event.preventDefault()
 
                 currentDragHandle = event.target
-                if (false === this.track.selected) {
+                if (false === this.track.selected || 'sequence' === this.track.type) {
                     currentDragHandle.classList.remove('igv-track-drag-handle-color')
                     currentDragHandle.classList.add('igv-track-drag-handle-hover-color')
                 }
@@ -761,7 +761,7 @@ class TrackView {
 
                 if (currentDragHandle && event.target !== currentDragHandle) {
 
-                    if (false === this.track.selected) {
+                    if (false === this.track.selected || 'sequence' === this.track.type) {
                         currentDragHandle.classList.remove('igv-track-drag-handle-hover-color')
                         currentDragHandle.classList.add('igv-track-drag-handle-color')
                     }
@@ -779,7 +779,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if (false === this.track.selected) {
+                    if (false === this.track.selected || 'sequence' === this.track.type) {
                         event.target.classList.remove('igv-track-drag-handle-color')
                         event.target.classList.add('igv-track-drag-handle-hover-color')
                     }
@@ -794,7 +794,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if (false === this.track.selected) {
+                    if (false === this.track.selected || 'sequence' === this.track.type) {
                         event.target.classList.remove('igv-track-drag-handle-hover-color')
                         event.target.classList.add('igv-track-drag-handle-color')
                     }
@@ -808,7 +808,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if (false === this.track.selected) {
+                    if (false === this.track.selected || 'sequence' === this.track.type) {
                         event.target.classList.remove('igv-track-drag-handle-hover-color')
                         event.target.classList.add('igv-track-drag-handle-color')
                     }
@@ -1007,10 +1007,6 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
 }
 
-function maxViewportContentHeight(viewports) {
-    const heights = viewports.map(viewport => viewport.getContentHeight())
-    return Math.max(...heights)
-}
+export {igv_axis_column_width}
 
-export {igv_axis_column_width, maxViewportContentHeight}
 export default TrackView
