@@ -1,25 +1,33 @@
 import t_dist from './t_dist.js'
-import g_utils from './GeneralUtil.js'
+import gUtils from './GeneralUtil.js'
+import baseCNVpytorVCF from './baseCNVpytorVCF.js'
+ 
 
-
-class CombinedCaller{
-    constructor(wigFeatures, binSize) {
-        this.wigFeatures = wigFeatures
-        this.binSize = binSize
+class CombinedCaller extends baseCNVpytorVCF {
+    /**
+     * Creates an instance of CombinedCaller.
+     * 
+     * @param {Array} wigFeatures - An array of arrays containing wig formatted data for each chromosome and bin.
+     * @param {number} binSize - The size of the bins used in the wig data.
+     * @param {string} refGenome - GC content data indexed by chromosome and bin.
+     */
+    constructor(wigFeatures, binSize, refGenome) {
+        super(wigFeatures, binSize, refGenome)
     }
-    get_fit(){
-        var fit_info = new g_utils.GetFit(this.wigFeatures)
-        var [globalMean, globalStd] = fit_info.fit_data()
 
-        return {globalMean:globalMean, globalStd:globalStd}
-       
-    }
     async call_2d(omin=null, mcount=null, event_type="both", max_distance=0.1, baf_threshold=0, max_copy_number=10, min_cell_fraction=0.0){
         
-        let fit_obj = this.get_fit()
-        this.globalMean = fit_obj.globalMean
-        this.globalStd = fit_obj.globalStd
+        // let fit_obj = this.get_fit_v2()
+        // this.globalMean = fit_obj.globalMean
+        // this.globalStd = fit_obj.globalStd
         
+        // this.getGcCorrectionSignal(this.globalMean)
+
+        // applying gc correction
+        await this.apply_gcCorrection()
+
+        let binScoreField = this.gcFlag ? "gcCorrectedBinScore": "binScore" ;
+
         let overlap_min = omin==null ?  0.05 * this.binSize / 3e9: omin ;
         let min_count = mcount == null ? parseInt(this.binSize / 10000) : mcount ;
 
@@ -41,11 +49,14 @@ class CombinedCaller{
                 if (bin.hets_count > 4 ){
                     
                     if( bin.dp_count > min_count ){
-                        segments.push([bin_idx])
-                        levels.push(bin.binScore)
-                        likelihoods.push(bin.likelihood_score)
-                        delete bin.likelihood_score
-                        
+                        if(bin[binScoreField]){
+                            segments.push([bin_idx])
+                            levels.push(bin[binScoreField])
+                            likelihoods.push(bin.likelihood_score)
+                            delete bin.likelihood_score
+
+                        }
+
                     }
                 }
             })
@@ -234,7 +245,7 @@ class CombinedCaller{
         if(points == 0){
             points = 1
         }
-        let x = g_utils.linspace(min_cell_fraction, 1, points)
+        let x = gUtils.linspace(min_cell_fraction, 1, points)
         let master_lh = {}
         let germline_lh = {}
         for(let cn=10; cn > -1; cn--){
@@ -330,12 +341,17 @@ class CombinedCaller{
         }
         
         var rawbinScore = this.formatDataStructure(this.wigFeatures, 'binScore', this.globalMean)
+
+        let gcCorrectedBinScore = [];
+        if (this.gcFlag) {
+            gcCorrectedBinScore = this.formatDataStructure(this.wigFeatures, 'gcCorrectedBinScore', this.globalMean);
+        }
         var callScore = this.formatDataStructure(this.wigFeatures, 'segment_score', this.globalMean)
         
-        return {binScore: rawbinScore, segment_score: callScore}
+        return {binScore: rawbinScore, gcCorrectedBinScore: gcCorrectedBinScore, segmentScore: callScore}
         
     }
-
+    
     formatDataStructure(wigFeatures, feature_column, scaling_factor = 1) {
         const results = []
         for (const [chr, wig] of Object.entries(wigFeatures)) {
@@ -351,7 +367,7 @@ class CombinedCaller{
 
         return results
     }
-
+    /*
     formatDataStructure_BAF(feature_column, scaling_factor = -1) {
         const baf1 = []
         const baf2 = []
@@ -375,7 +391,7 @@ class CombinedCaller{
         
 
         return [baf1, baf2]
-    }
+    }*/
 }
 
 function arrayMax(arr) {
@@ -424,6 +440,7 @@ function normal_overlap_approx(m1, s1, m2, s2){
  * @returns {float}  - Overlap area.
  */
 function likelihood_overlap(likelihood_1, likelihood_2){
+    // console.log(likelihood_1, likelihood_2)
     let sum;
     try{
         sum = likelihood_1.reduce((accumulator, currentValue, currentIndex) => {return accumulator + Math.min(currentValue, likelihood_2[currentIndex])});
