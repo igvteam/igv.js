@@ -1,6 +1,6 @@
-import * as UIUtils from "./utils/ui-utils.js"
-import * as DOMUtils from "./utils/dom-utils.js"
-import makeDraggable from "./utils/draggable.js"
+import * as UIUtils from "../utils/ui-utils.js"
+import * as DOMUtils from "../utils/dom-utils.js"
+import makeDraggable from "../utils/draggable.js"
 
 
 class GenericContainer {

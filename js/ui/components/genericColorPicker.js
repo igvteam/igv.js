@@ -1,6 +1,6 @@
 import * as DOMUtils from "../utils/dom-utils.js"
 import Picker from "../../../node_modules/vanilla-picker/dist/vanilla-picker.csp.mjs"
-import GenericContainer from '../genericContainer.js'
+import GenericContainer from './genericContainer.js'
 import {genericColorPickerPalette} from "../../util/colorPalletes.js"
 
 class GenericColorPicker extends GenericContainer {

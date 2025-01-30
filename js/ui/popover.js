@@ -1,7 +1,6 @@
 import * as Icon from './utils/icons.js'
 import * as DOMUtils from "./utils/dom-utils.js"
 import makeDraggable from "./utils/draggable.js"
-import ColorPicker from "./components/colorPicker.js"
 import {createIcon} from "./utils/icons.js"
 
 class Popover {
