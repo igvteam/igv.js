@@ -219,8 +219,8 @@ function colorPickerMenuItem({trackView, label, option}) {
     const element = document.createElement('div');
     element.textContent = label;
 
-    const click = () => {
-        trackView.presentColorPicker(option);
+    const click = event => {
+        trackView.presentColorPicker(option, event);
     };
 
     return {element, click};

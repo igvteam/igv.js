@@ -18,7 +18,7 @@ import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
 import ResponsiveNavbar from "./responsiveNavbar.js"
-import DataRangeDialog from "./ui/dataRangeDialog.js"
+import DataRangeDialog from "./ui/components/dataRangeDialog.js"
 import HtsgetReader from "./htsget/htsgetReader.js"
 import MenuPopup from "./ui/menuPopup.js"
 import {viewportColumnManager} from './viewportColumnManager.js'

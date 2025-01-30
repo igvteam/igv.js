@@ -161,6 +161,13 @@ class GenericColorPicker extends GenericContainer {
 
         picker.show()
     }
+
+    present(event){
+        const { top} = event.currentTarget.parentElement.getBoundingClientRect()
+        this.container.style.top = `${ top }px`
+        this.show()
+    }
+
 }
 
 export default GenericColorPicker

@@ -202,7 +202,7 @@ class TrackView {
         }
     }
 
-    presentColorPicker(colorSelection) {
+    presentColorPicker(colorSelection, event) {
 
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
 
@@ -249,7 +249,7 @@ class TrackView {
 
             const moreColorsPresentationColor = 'color' === colorSelection ? (this.track.color || this.track.constructor.defaultColor) : (this.track.altColor || this.track.constructor.defaultColor)
             this.browser.genericColorPicker.configure(initialTrackColor, colorHandlers[colorSelection], moreColorsPresentationColor)
-            this.browser.genericColorPicker.show()
+            this.browser.genericColorPicker.present(event)
 
         }
 

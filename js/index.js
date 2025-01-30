@@ -1,7 +1,7 @@
 // Defines the top-level API for the igv module
 
 import MenuUtils from "./ui/menuUtils.js"
-import DataRangeDialog from "./ui/dataRangeDialog.js"
+import DataRangeDialog from "./ui/components/dataRangeDialog.js"
 import IGVGraphics from "./igv-canvas.js"
 import {createBrowser, createTrack, removeAllBrowsers, removeBrowser, visibilityChange} from './igv-create.js'
 import version from "./version.js"

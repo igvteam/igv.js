@@ -259,7 +259,7 @@
             ]
         };
 
-    igv.createBrowser(document.getElementById("igv-container"), config).then(browser => {
+    igv.createBrowser(document.getElementById("igv-container"), config_offscreen_scroll).then(browser => {
         console.log(`browser ${ browser.guid } is good to go`)
     });
 
