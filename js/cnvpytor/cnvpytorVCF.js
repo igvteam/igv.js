@@ -14,13 +14,14 @@ class CNVpytorVCF {
      * 
      * @param {Array} allVariants - An array containing all variants
      * @param {number} binSize - The bin size for processing variants.
+     * @param {string} refGenome - Reference genome name
      */
-    constructor(allVariants, binSize) {
+    constructor(allVariants, binSize, refGenome) {
         this.allVariants = allVariants
         this.rowBinSize = 10000
         this.binSize = binSize
         this.binFactor = parseInt(binSize / this.rowBinSize)
-
+        this.refGenome = refGenome
     }
 
     /**
@@ -81,43 +82,41 @@ class CNVpytorVCF {
         // get the chromosome names
         this.chromosomes = Object.keys(wigFeatures)
 
-        // Step2: Update the binsize according to user provided bin size
-        var avgbin = this.adjust_bin_size(wigFeatures)
+        let delete_likelihood_scores = caller == 'ReadDepth' ? true : false;
 
+        // Step2: Update the binsize according to user provided bin size
+        var avgbin = this.adjust_bin_size(wigFeatures, delete_likelihood_scores=delete_likelihood_scores)
+
+        // this is to save objects
+        // console.log("avgbin: ", avgbin)
+        
         // Step3: Run the CNV caller
         var finalFeatureSet
         if(caller == 'ReadDepth'){
-            let caller_obj = new MeanShiftCaller(avgbin,  this.binSize)  
-            finalFeatureSet = caller_obj.ReadDepth_caller()
+            // ------------ new code
+            // console.log("setting up meanShift CNV calling")
+            let callerObj = new read_depth_caller.MeanShiftCaller(avgbin,  this.binSize, this.refGenome)
+            
+            let processedBins = await callerObj.callMeanshift()
+            
+            // finalFeatureSet = [processedBins.binScore, processedBins.gcCorrectedBinScore, processedBins.segmentsCNV]
+            finalFeatureSet = [processedBins.binScore, processedBins.gcCorrectedBinScore, processedBins.segmentsCNV]
+            // var baf = this.formatDataStructure_BAF(avgbin, 'max_likelihood')
+            // var baf = callerObj.format_BAF_likelihood(avgbin)
+            var baf = callerObj.formatDataStructure_BAF('max_likelihood', -1)
 
-            // finalFeatureSet = this.readDepthMeanshift(avgbin)
-            var baf = this.formatDataStructure_BAF(avgbin, 'max_likelihood')
+
         }else if(caller=='2D'){
-            let caller_obj = new combined_caller.CombinedCaller(avgbin,  this.binSize)        
+            
+            let caller_obj = new combined_caller.CombinedCaller(avgbin,  this.binSize, this.refGenome)        
             let processed_bins = await caller_obj.call_2d()
             
-            finalFeatureSet = [processed_bins.binScore, [], processed_bins.segment_score]
+            finalFeatureSet = [processed_bins.binScore, processed_bins.gcCorrectedBinScore, processed_bins.segmentScore]
             var baf = caller_obj.formatDataStructure_BAF('max_likelihood', -1)
+            
         }
         
         return [finalFeatureSet, baf]
-    }
-
-    
-    formatDataStructure(wigFeatures, feature_column, scaling_factor = 1) {
-        const results = []
-        for (const [chr, wig] of Object.entries(wigFeatures)) {
-
-            for(let sample of wig){
-                var new_sample = { ...sample }
-                if (scaling_factor != 1) {
-                    new_sample.value = sample[feature_column] / scaling_factor * 2
-                }
-                results.push(new_sample)
-            }
-        }
-
-        return results
     }
 
     format_BAF_likelihood(wigFeatures) {
@@ -149,51 +148,24 @@ class CNVpytorVCF {
 
         return sample
     }
-
+    /*
     async getAllbins() {
         const bins = await this.computeDepthFeatures()
         const fitter = new g_utils.GetFit(bins)
         const distParams = fitter.fit_data()
         
-
         return bins
-    }
-
-    formatDataStructure_BAF(wigFeatures, feature_column, scaling_factor=-1) {
-        /* Rescale the BAF level from 0:1 to scaling_factpr:0*/
-        const baf1 = []
-        const baf2 = []
-        for (const [chr, wig] of Object.entries(wigFeatures)) {
-
-            for(let sample of wig) {
-                //delete sample.likelihood_score;
-                var baf1_value = { ...sample }
-                var baf2_value = { ...sample }
-                
-                let value = sample[feature_column]
-                if (value != 0.5){
-                    baf2_value.value = scaling_factor * (1 - value)
-                    baf2.push(baf2_value)
-                }
-                baf1_value.value = scaling_factor * value
-                baf1.push(baf1_value)
-                    
-            }
-        }
-        
-
-        return [baf1, baf2]
-    }
-    
+    }*/
     
     /**
      * Adjust the bin values to actual bin size
      * @param {*} wigFeatures - wig features after processing the varaints
      * @returns 
      */
-    adjust_bin_size(wigFeatures){
+    adjust_bin_size(wigFeatures, delete_likelihood_scores=false){
         
         var avgbin = {}
+        const scale = this.binSize/150
         for (let chr of this.chromosomes) {
             if (!avgbin[chr]) { avgbin[chr] = [] }
             for (let k = 0; k < wigFeatures[chr].length / this.binFactor; k++) {
@@ -205,7 +177,7 @@ class CNVpytorVCF {
                         end: (featureBin + 1) * this.binSize,
                         dp_count: 0,
                         hets_count: 0,
-                        binScore: 0,
+                        binScore: null,
                         likelihood_score: [],
                         dp_sum_score: 0
                     }
@@ -246,9 +218,18 @@ class CNVpytorVCF {
                         }
                     }
                 }
-                avgbin[chr][k].binScore = parseInt(avgbin[chr][k].dp_sum_score / avgbin[chr][k].dp_count) * 100;
+                if (avgbin[chr][k].dp_count > 0) {
+                    // avgbin[chr][k].binScore = parseInt(avgbin[chr][k].dp_sum_score / avgbin[chr][k].dp_count) * scale;
+                    avgbin[chr][k].binScore = avgbin[chr][k].dp_sum_score / avgbin[chr][k].dp_count * scale;
+                }
                 const updated_bin = this.get_max_min_score(avgbin[chr][k])
                 avgbin[chr][k].max_likelihood = updated_bin.value
+
+                // delete the likelihood_score array; otherwise it takes too much memory
+                // this is used in the combined caller; so it can be deleted depending on the caller i.e., ReadDepth caller 
+                if (delete_likelihood_scores) {
+                    delete avgbin[chr][k].likelihood_score
+                }
             }
         }
         return avgbin
@@ -258,56 +239,6 @@ class CNVpytorVCF {
 
 function beta(a, b, p, phased = true) { 
     return Math.pow(p, a) * Math.pow(1-p, b) + Math.pow(p, b) * Math.pow(1-p, a)
-}
-
-class MeanShiftCaller{
-    constructor(wigFeatures, binSize) {
-        this.wigFeatures = wigFeatures
-        this.binSize = binSize
-    }
-
-    ReadDepth_caller(){
-         // Get global mean and standrad deviation
-         var fit_info = new g_utils.GetFit(this.wigFeatures)
-         var [globamMean, globalStd] = fit_info.fit_data();
- 
-         // Apply partition method
-         var partition = new read_depth_caller.Partition(this.wigFeatures, globamMean, globalStd);
-         var partition_array = partition.meanShiftCaller(this.binSize)
-         var caller_array = partition.cnv_calling()
- 
-         // Assign the partition values to each bin
-         Object.entries(this.wigFeatures).forEach(([chr, chr_rd]) => {
-             chr_rd.forEach((bin, index) => {
-                 bin.partition_level = parseInt(partition_array[chr][index])
-                 bin.partition_call = parseInt(caller_array[0][chr][index])
-             });
-         })
- 
-         var rawbinScore = this.formatDataStructure('binScore', globamMean)
-         var partition_levels = this.formatDataStructure('partition_level', globamMean)
-         var partition_call = this.formatDataStructure('partition_call', globamMean)
- 
-         return [rawbinScore, partition_levels, partition_call, caller_array[1]]
-    }
-
-    formatDataStructure(feature_column, scaling_factor = 1) {
-        const results = []
-        for (const [chr, wig] of Object.entries(this.wigFeatures)) {
-
-            for(let sample of wig){
-                var new_sample = { ...sample }
-                if (scaling_factor != 1) {
-                    new_sample.value = sample[feature_column] / scaling_factor * 2
-                }
-                results.push(new_sample)
-            }
-        }
-
-        return results
-    }
-
-
 }
 
 
