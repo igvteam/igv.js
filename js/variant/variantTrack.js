@@ -35,6 +35,7 @@ import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, StringUtils, IGVColor, FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
 import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
+import {packFeatures} from "../feature/featureUtils.js"
 
 const isString = StringUtils.isString
 
@@ -991,7 +992,8 @@ class VariantTrack extends TrackBase {
     // Methods to support filtering api
     set filter(f) {
         this._filter = f
-        // this._repackCachedFeatures()
+        // TODO - repack?  Repacking will cause features to move vertically, which might be unexpected
+        //this._repackCachedFeatures()
         this.trackView.repaintViews()
     }
 
