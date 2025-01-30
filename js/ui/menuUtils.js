@@ -290,38 +290,40 @@ function trackHeightMenuItem() {
 
         const callback = () => {
 
-            const number = parseInt(this.browser.inputDialog.value, 10);
+            if (this.browser.inputDialog.value !== undefined) {
 
-            if (undefined !== number) {
+                const number = parseInt(this.browser.inputDialog.value, 10)
 
-                const tracks = [];
-                if (this.trackView.track.selected) {
-                    tracks.push(...(this.trackView.browser.getSelectedTrackViews().map(({track}) => track)));
-                } else {
-                    tracks.push(this);
-                }
+                if (number > 0){
 
-                for (const track of tracks) {
-                    // Explicitly setting track height turns off autoHeight
-                    track.trackView.autoHeight = false;
-
-                    // If explicitly setting the height adjust min or max, if necessary
-                    if (track.minHeight !== undefined && track.minHeight > number) {
-                        track.minHeight = number;
+                    const tracks = [];
+                    if (this.trackView.track.selected) {
+                        tracks.push(...(this.trackView.browser.getSelectedTrackViews().map(({track}) => track)));
+                    } else {
+                        tracks.push(this);
                     }
-                    if (track.maxHeight !== undefined && track.maxHeight < number) {
-                        track.minHeight = number;
-                    }
-                    track.trackView.setTrackHeight(number, true);
 
-                    track.trackView.checkContentHeight();
-                    track.trackView.repaintViews();
+                    for (const track of tracks) {
+                        // Explicitly setting track height turns off autoHeight
+                        track.trackView.autoHeight = false;
 
-                } // for (tracks)
+                        // If explicitly setting the height adjust min or max, if necessary
+                        if (track.minHeight !== undefined && track.minHeight > number) {
+                            track.minHeight = number;
+                        }
+                        if (track.maxHeight !== undefined && track.maxHeight < number) {
+                            track.minHeight = number;
+                        }
+                        track.trackView.setTrackHeight(number, true);
 
-            } // if (undefined !== number)
+                        track.trackView.checkContentHeight();
+                        track.trackView.repaintViews();
+                    } // for (tracks)
 
-        }; // callback
+                } // if ()
+
+            } // if ()
+        }
 
         const config =
             {
