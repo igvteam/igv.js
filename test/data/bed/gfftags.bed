@@ -1,6 +1,6 @@
 #gffTags
 track name="chr1" description="chr1 Annotations" itemRgb="On"
-chr1	1088	1128	Key1=INS230;Key2=Foo	0	+	1088	1088	65,105,225
+chr1	1088	1128	Key1=INS230;Key2=Foo;Name=INS230	0	+	1088	1088	65,105,225
 chr1	133	2809	Key2=Bar;Key1=terminator	0	+	133	133	65,105,225
 chr1	1301	1746	Key1=M13 origin;Key2=Baz	0	+	1301	1301	65,105,225
 chr1	1301	1746	Key1=M13 origin;Key2=Baz	0	+	1301	1301	65,105,225
