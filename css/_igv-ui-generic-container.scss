@@ -1,14 +1,19 @@
 
 .igv-ui-generic-container {
 
-  box-sizing: content-box;
+  position: fixed;
 
-  position: absolute;
+  top: 20%;
+  left: 75%;
+  transform: translateX(-50%);
+
   z-index: 2048;
 
   background-color: white;
 
   cursor: pointer;
+
+  box-sizing: content-box;
 
   display: flex;
   flex-direction: row;
