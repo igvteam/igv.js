@@ -5,8 +5,17 @@
   box-sizing: content-box;
 
   position: fixed;
-  top: 0;
-  left:0;
+
+  top: 20%;
+  left: 75%;
+  transform: translateX(-50%);
+
+  z-index: 2048;
+
+  background-color: white;
+
+  cursor: pointer;
+
   width:300px;
   height:fit-content;
   padding-bottom: 16px;
@@ -19,10 +28,6 @@
   font-family: $igv-default-font-face;
   font-size: medium;
   font-weight: 400;
-
-  z-index: 2048;
-
-  background-color: white;
 
   display: flex;
   flex-flow: column;

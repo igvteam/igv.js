@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import TrackViewport from "./trackViewport.js"
@@ -41,7 +40,7 @@ class IdeogramViewport extends TrackViewport {
         this.canvas = document.createElement('canvas')
 
         this.canvas.className = 'igv-ideogram-canvas'
-        this.$viewport.append($(this.canvas))
+        this.viewportElement.appendChild(this.canvas);
         this.ideogram_ctx = this.canvas.getContext('2d')
 
         this.addMouseHandlers()
@@ -68,7 +67,7 @@ class IdeogramViewport extends TrackViewport {
             return
         }
 
-        const {width, height} = this.$viewport[0].getBoundingClientRect()
+        const {width, height} = this.viewportElement.getBoundingClientRect()
         IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, width, height)
 
         const chr = this.referenceFrame.chr
@@ -89,7 +88,7 @@ class IdeogramViewport extends TrackViewport {
 
 
     addMouseHandlers() {
-        this.addViewportClickHandler(this.$viewport.get(0))
+        this.addViewportClickHandler(this.viewportElement)
     }
 
     addViewportClickHandler(viewport) {
@@ -127,12 +126,12 @@ class IdeogramViewport extends TrackViewport {
     }
 
     setWidth(width) {
-        this.$viewport.width(width)
+        this.viewportElement.style.width = width + 'px';
     }
 
     renderSVGContext(context, {deltaX, deltaY}, includeLabel = true) {
 
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect()
+        const {width, height} = this.viewportElement.getBoundingClientRect()
 
         const str = 'ideogram'
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)

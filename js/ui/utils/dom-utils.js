@@ -1,4 +1,10 @@
 
+function createElementWithString(htmlString){
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = htmlString;
+    return tempDiv.firstElementChild;
+}
+
 function div(options) {
     return create("div", options);
 }
@@ -109,5 +115,5 @@ function translateMouseCoordinates(event, domElement) {
 
 }
 
-export { create, div, hide, show, offset, empty, pageCoordinates, relativeDOMBBox,
+export { createElementWithString, create, div, hide, show, offset, empty, pageCoordinates, relativeDOMBBox,
     applyStyle, guid, translateMouseCoordinates }

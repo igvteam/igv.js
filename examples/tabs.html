@@ -8,10 +8,10 @@
     <link href=img/favicon.ico rel="shortcut icon">
     <title>igv.js</title>
 
-    <style type="text/css">
+    <style>
         body {
-            font-size: 80%;
-            font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+            font-size: 0.8rem; /* More scalable than percentage */
+            font-family: 'Lucida Grande', Verdana, Arial, sans-serif;
         }
 
         ul#tabs {
@@ -29,8 +29,9 @@
             background-color: #dedbde;
             border: 1px solid #c9c3ba;
             border-bottom: none;
-            padding: 0.3em;
+            padding: 0.3em 0.5em; /* Added uniform padding */
             text-decoration: none;
+            display: inline-block; /* Helps maintain padding consistency */
         }
 
         ul#tabs li a:hover {
@@ -41,7 +42,7 @@
             color: #000;
             background-color: #f1f0ee;
             font-weight: bold;
-            padding: 0.7em 0.3em 0.38em 0.3em;
+            padding: 0.5em 0.5em; /* Adjusted to match other links */
         }
 
         div.tabContent {
@@ -80,7 +81,7 @@
 
 <script type="module">
 
-    import igv from "../dist/igv.esm.min.js"
+    import igv from "../dist/igv.esm.js"
 
     document.addEventListener("DOMContentLoaded", function () {
         initTabs()

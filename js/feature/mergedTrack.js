@@ -28,9 +28,7 @@ import TrackBase from "../trackBase.js"
 import paintAxis from "../util/paintAxis.js"
 import {FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "../ui/utils/dom-utils.js"
-
 import {doAutoscale} from "../util/igvUtils.js"
-import $ from "../vendor/jquery-3.3.1.slim.js"
 
 /**
  * Represents 2 or more  tracks overlaid on a common viewport.
@@ -240,7 +238,7 @@ class MergedTrack extends TrackBase {
 
         const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
         const featureArrays = await Promise.all(promises)
-        
+
         if (featureArrays.every((arr) => arr.length === 0)){
             return new MergedFeatureCollection([], [])
         }
@@ -407,8 +405,8 @@ class MergedTrack extends TrackBase {
 
     overlayTrackAlphaAdjustmentMenuItem() {
 
-        const container = DOMUtils.div()
-        container.innerText = 'Set transparency'
+        const element = DOMUtils.div()
+        element.innerText = 'Set transparency'
 
         function dialogPresentationHandler(e) {
             const callback = alpha => {
@@ -429,13 +427,13 @@ class MergedTrack extends TrackBase {
             this.browser.sliderDialog.present(config, e)
         }
 
-        return {object: $(container), dialog: dialogPresentationHandler}
+        return {element, dialog: dialogPresentationHandler}
     }
 
     trackSeparationMenuItem() {
 
-        const object = $('<div>')
-        object.text('Separate tracks')
+        let element = document.createElement('div');
+        element.textContent = 'Separate tracks';
 
         function click(e) {
 
@@ -458,7 +456,7 @@ class MergedTrack extends TrackBase {
             browser.updateViews()
         }
 
-        return {object, click}
+        return {element, click}
     }
 
 }
@@ -468,7 +466,7 @@ class MergedFeatureCollection {
 
     constructor(featureArrays,trackNames) {
         this.featureArrays = featureArrays
-        //trackNames is needed for the popup data to populate track names 
+        //trackNames is needed for the popup data to populate track names
         //preserving the order of the actual tracks
         this.trackNames = trackNames
     }

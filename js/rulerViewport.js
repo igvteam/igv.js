@@ -1,5 +1,4 @@
 import TrackViewport from "./trackViewport.js"
-import $ from "./vendor/jquery-3.3.1.slim.js"
 import RulerSweeper from "./rulerSweeper.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import {IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js"
@@ -18,107 +17,90 @@ class RulerViewport extends TrackViewport {
     }
 
     get contentDiv() {
-        return this.$viewport.get(0)
+        return this.viewportElement
     }
 
     initializationHelper() {
+        // Create the multi-locus close button
+        this.multiLocusCloseButton = document.createElement('div');
+        this.multiLocusCloseButton.className = 'igv-multi-locus-close-button';
+        this.viewportElement.appendChild(this.multiLocusCloseButton);
 
-        this.$multiLocusCloseButton = $('<div>', {class: 'igv-multi-locus-close-button'})
-        this.$viewport.append(this.$multiLocusCloseButton)
-        this.$multiLocusCloseButton.get(0).appendChild(createIcon("times-circle"))
+        const closeIcon = createIcon("times-circle");
+        this.multiLocusCloseButton.appendChild(closeIcon);
 
-        this.$multiLocusCloseButton.click(() => {
-            this.browser.removeMultiLocusPanel(this.referenceFrame)
-        })
+        this.multiLocusCloseButton.addEventListener('click', () => {
+            this.browser.removeMultiLocusPanel(this.referenceFrame);
+        });
 
-        this.$rulerLabel = $('<div>', {class: 'igv-multi-locus-ruler-label'})
-        this.$viewport.append(this.$rulerLabel)
+        // Create the ruler label
+        this.rulerLabel = document.createElement('div');
+        this.rulerLabel.className = 'igv-multi-locus-ruler-label';
+        this.viewportElement.appendChild(this.rulerLabel);
 
-        const labelToggleHandler = e => {
+        const rulerLabelDiv = document.createElement('div');
+        this.rulerLabel.appendChild(rulerLabelDiv);
 
-            e.stopPropagation()
+        this.rulerLabel.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            await this.browser.gotoMultilocusPanel(this.referenceFrame);
+        });
 
-            const el = e.target
-            const [ a, b ] = this.$rulerLabel.get(0).querySelectorAll('div')
+        // Create the tooltip
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'igv-ruler-tooltip';
+        this.tooltip.style.height = `${this.viewportElement.clientHeight}px`;
+        this.viewportElement.appendChild(this.tooltip);
 
-            if (el.isEqualNode(a)) {
-                a.style.display = 'none'
-                b.style.display = 'block'
-            } else {
-                b.style.display = 'none'
-                a.style.display = 'block'
-            }
+        this.tooltipContent = document.createElement('div');
+        this.tooltip.appendChild(this.tooltipContent);
 
-        }
+        // Instantiate RulerSweeper
+        this.rulerSweeper = new RulerSweeper(this, this.viewportElement.parentElement, this.browser, this.referenceFrame);
 
-        let div
-        div = document.createElement('div')
-        this.$rulerLabel.append($(div))
+        // Attach mouse handlers
+        this.attachMouseHandlers(GenomeUtils.isWholeGenomeView(this.referenceFrame.chr));
 
-        this.$rulerLabel.get(0).addEventListener('click', async event => {
-            event.stopPropagation()
-            await this.browser.gotoMultilocusPanel(this.referenceFrame)
-        })
+        // Initially hide the tooltip
+        this.tooltip.style.display = 'none';
 
-        this.$tooltip = $('<div>', {class: 'igv-ruler-tooltip'})
-        this.$tooltip.height(this.$viewport.height())
-
-        this.$viewport.append(this.$tooltip)
-
-        this.$tooltipContent = $('<div>')
-        this.$tooltip.append(this.$tooltipContent)
-
-        this.rulerSweeper = new RulerSweeper(this, this.$viewport.get(0).parentElement, this.browser, this.referenceFrame)
-
-        this.attachMouseHandlers(GenomeUtils.isWholeGenomeView(this.referenceFrame.chr))
-
-        this.$tooltip.hide()
-
-        this.dismissLocusLabel()
+        // Dismiss locus label
+        this.dismissLocusLabel();
     }
 
     presentLocusLabel(viewportWidth) {
+        this.multiLocusCloseButton.style.display = 'block';
 
-        this.$multiLocusCloseButton.show()
+        this.rulerLabel.style.display = 'block';
+        this.rulerLabel.style.backgroundColor = getChrColor(this.referenceFrame.chr);
 
-        this.$rulerLabel.show()
-        this.$rulerLabel.get(0).style.backgroundColor = getChrColor(this.referenceFrame.chr)
+        const textDiv = this.rulerLabel.querySelector('div');
 
-        const textDiv = this.$rulerLabel.get(0).querySelector('div')
+        const { width } = this.rulerLabel.getBoundingClientRect();
 
-        const { width } = this.$rulerLabel.get(0).getBoundingClientRect()
+        textDiv.innerHTML = `${this.referenceFrame.getMultiLocusLabel(viewportWidth)}`;
+        const { width: textDivWidth } = textDiv.getBoundingClientRect();
 
-        textDiv.innerHTML = `${ this.referenceFrame.getMultiLocusLabel(viewportWidth) }`
-        const { width:textDivWidth } = textDiv.getBoundingClientRect()
-
-        if (textDivWidth/width > 0.5) {
-            textDiv.innerHTML = `${ this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth) }`
+        if (textDivWidth / width > 0.5) {
+            textDiv.innerHTML = `${this.referenceFrame.getMultiLocusLabelBPLengthOnly(viewportWidth)}`;
         }
 
-        //console.log(`${ Date.now() } textDiv ${ StringUtils.numberFormatter(Math.floor(textDivWidth)) }`)
-
+        //console.log(`${Date.now()} textDiv ${StringUtils.numberFormatter(Math.floor(textDivWidth))}`);
     }
 
-    // Use in conjuction with .igv-multi-locus-ruler-label-square-dot css class (_dom-misc.scss)
+// Use in conjunction with .igv-multi-locus-ruler-label-square-dot css class (_dom-misc.scss)
     dismissLocusLabel() {
-        this.$rulerLabel.hide()
-        this.$multiLocusCloseButton.hide()
+        this.rulerLabel.style.display = 'none';
+        this.multiLocusCloseButton.style.display = 'none';
     }
 
     attachMouseHandlers(isWholeGenomeView) {
 
-        this.namespace = `.ruler_track_viewport_${this.browser.referenceFrameList.indexOf(this.referenceFrame)}`
-
-        this.$viewport.off(this.namespace)
-
         if (true === isWholeGenomeView) {
 
-            const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
+            this.viewportElement.addEventListener('click', (e) => {
 
-            const click = `click${this.namespace}`
-            this.$viewport.on(click, (e) => {
-
-                const {x: pixel} = DOMUtils.translateMouseCoordinates(e, this.$viewport.get(0))
+                const {x: pixel} = DOMUtils.translateMouseCoordinates(e, this.viewportElement)
                 const bp = Math.round(this.referenceFrame.start + this.referenceFrame.toBP(pixel))
 
                 let searchString
@@ -128,68 +110,68 @@ class RulerViewport extends TrackViewport {
                 if (1 === this.browser.referenceFrameList.length) {
                     searchString = chr
                 } else {
-
-                    let loci = this.browser.referenceFrameList.map(({locusSearchString}) => locusSearchString)
-
+                    const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
+                    const loci = this.browser.referenceFrameList.map(({locusSearchString}) => locusSearchString)
                     loci[index] = chr
-
                     searchString = loci.join(' ')
                 }
 
                 this.browser.search(searchString)
+
             })
 
-            this.$viewport.get(0).style.cursor = 'pointer'
+            this.viewportElement.style.cursor = 'pointer'
         } else {
-            this.$viewport.get(0).style.cursor = 'default'
+            this.viewportElement.style.cursor = 'default'
         }
 
     }
 
     mouseMove(event) {
-
-        if (true === this.browser.doShowCursorGuide) {
-
-            if (undefined === currentViewport) {
-                currentViewport = this
-                this.$tooltip.show()
+        if (this.browser.doShowCursorGuide) {
+            if (currentViewport === undefined) {
+                currentViewport = this;
+                this.tooltip.style.display = "block";
             } else if (currentViewport.guid !== this.guid) {
-                if (currentViewport.$tooltip) {
-                    currentViewport.$tooltip.hide()
+                if (currentViewport.tooltip) {
+                    currentViewport.tooltip.style.display = "none";
                 }
-                this.$tooltip.show()
-                currentViewport = this
+                this.tooltip.style.display = "block";
+                currentViewport = this;
             } else {
-                this.$tooltip.show()
+                this.tooltip.style.display = "block";
             }
 
-            const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrame.chr))
+            const isWholeGenome = (
+                this.browser.isMultiLocusWholeGenomeView() ||
+                GenomeUtils.isWholeGenomeView(this.referenceFrame.chr)
+            );
 
             if (isWholeGenome) {
-                this.$tooltip.hide()
-                return undefined
+                this.tooltip.style.display = "none";
+                return undefined;
             }
 
-            const {x} = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
-            const {start, end, bpPerPixel} = this.referenceFrame
-            const bp = Math.round(0.5 + start + Math.max(0, x) * bpPerPixel)
+            const { x } = DOMUtils.translateMouseCoordinates(event, this.viewportElement);
+            const { start, end, bpPerPixel } = this.referenceFrame;
+            const bp = Math.round(0.5 + start + Math.max(0, x) * bpPerPixel);
 
-            this.$tooltipContent.text(StringUtils.numberFormatter(bp))
+            this.tooltipContent.textContent = StringUtils.numberFormatter(bp);
 
-            const {width: ww} = this.$tooltipContent.get(0).getBoundingClientRect()
-            const {width: w} = this.$viewport.get(0).getBoundingClientRect()
+            const tooltipRect = this.tooltipContent.getBoundingClientRect();
+            const viewportRect = this.viewportElement.getBoundingClientRect();
 
-            this.$tooltip.css({left: `${IGVMath.clamp(x, 0, w - ww)}px`})
+            const tooltipLeft = IGVMath.clamp(x, 0, viewportRect.width - tooltipRect.width);
+            this.tooltip.style.left = `${tooltipLeft}px`;
 
             // hide tooltip when movement stops
-            clearTimeout(timer)
+            clearTimeout(timer);
             timer = setTimeout(() => {
-                if (this.$tooltip) this.$tooltip.hide()
-            }, toolTipTimeout)
+                if (this.tooltip) this.tooltip.style.display = "none";
+            }, toolTipTimeout);
 
-            return { start, bp, end }
+            return { start, bp, end };
         }
-
     }
 
     startSpinner() {

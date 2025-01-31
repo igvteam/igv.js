@@ -5,7 +5,6 @@ import BWSource from "../bigwig/bwSource.js"
 import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorScaleFactory} from "../util/colorScale.js"
 import ColorScaleEditor from "../ui/components/colorScaleEditor.js"
@@ -174,14 +173,13 @@ class WigTrack extends TrackBase {
         menuItems.push('<hr/>')
         menuItems.push("<div>Windowing function</div>")
         for (const wf of windowFunctions) {
-            const object = $(createCheckbox(wf, this.windowFunction === wf))
 
             function clickHandler() {
                 this.windowFunction = wf
                 this.trackView.updateViews()
             }
 
-            menuItems.push({object, click: clickHandler})
+            menuItems.push({element:createCheckbox(wf, this.windowFunction === wf), click: clickHandler})
         }
 
         return menuItems
@@ -196,14 +194,13 @@ class WigTrack extends TrackBase {
         menuItems.push("<div>Graph type</div>")
 
         for (const gt of graphType) {
-            const object = $(createCheckbox(gt, this.graphType === gt))
 
             function clickHandler() {
                 this.graphType = gt
                 this.trackView.repaintViews()
             }
 
-            menuItems.push({object, click: clickHandler})
+            menuItems.push({element:createCheckbox(gt, this.graphType === gt), click: clickHandler})
         }
 
         return menuItems

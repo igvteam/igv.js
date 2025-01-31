@@ -1,7 +1,6 @@
 import * as Icon from './utils/icons.js'
 import * as DOMUtils from "./utils/dom-utils.js"
 import makeDraggable from "./utils/draggable.js"
-import ColorPicker from "./components/colorPicker.js"
 import {createIcon} from "./utils/icons.js"
 
 class Popover {
@@ -52,8 +51,8 @@ class Popover {
 
         const menuElements = createMenuElements(menuItems, this.popover)
 
-        for (const { object } of menuElements) {
-            this.popoverContent.appendChild(object)
+        for (const { element } of menuElements) {
+            this.popoverContent.appendChild(element)
         }
 
     }
@@ -95,7 +94,7 @@ class Popover {
 
         const menuElements = createMenuElements(menuItems, this.popover)
         for (let item of menuElements) {
-            this.popoverContent.appendChild(item.object)
+            this.popoverContent.appendChild(item.element)
         }
 
         present(e, this.popover, this.popoverContent)
@@ -143,59 +142,33 @@ function present(e, popover, popoverContent) {
 function createMenuElements(itemList, popover) {
 
     const list  = itemList.map(function (item, i) {
-        let elem;
+        let element;
 
         if (typeof item === 'string') {
-            elem = DOMUtils.div();
-            elem.innerHTML = item;
+            element = DOMUtils.div();
+            element.innerHTML = item;
         } else if (typeof item === 'Node') {
-            elem = item;
+            element = item;
         } else {
             if (typeof item.init === 'function') {
                 item.init();
             }
 
             if ("checkbox" === item.type) {
-                elem = Icon.createCheckbox("Show all bases", item.value);
+                element = Icon.createCheckbox("Show all bases", item.value);
             }
 
-            // TODO: I can't find any use of this and should probably be deleted - data
-            // else if("color" === item.type) {
-            //     const colorPicker = new ColorPicker({
-            //         parent: popover.parentElement,
-            //         width: 364,
-            //         //defaultColor: 'aqua',
-            //         colorHandler: (color) => item.click(color)
-            //     })
-            //     elem = DOMUtils.div();
-            //     if (typeof item.label === 'string') {
-            //         elem.innerHTML = item.label;
-            //     }
-            //     const clickHandler =  e => {
-            //         colorPicker.show();
-            //         DOMUtils.hide(popover);
-            //         e.preventDefault();
-            //         e.stopPropagation()
-            //     }
-            //     elem.addEventListener('click', clickHandler);
-            //     elem.addEventListener('touchend', clickHandler);
-            //     elem.addEventListener('mouseup', function (e) {
-            //         e.preventDefault();
-            //         e.stopPropagation();
-            //     })
-            // }
-
             else {
-                elem = DOMUtils.div();
+                element = DOMUtils.div();
                 if (typeof item.label === 'string') {
-                    elem.innerHTML = item.label;
+                    element.innerHTML = item.label;
                 }
             }
 
             if (item.click && "color" !== item.type) {
-                elem.addEventListener('click', handleClick);
-                elem.addEventListener('touchend', handleClick);
-                elem.addEventListener('mouseup', function (e) {
+                element.addEventListener('click', handleClick);
+                element.addEventListener('touchend', handleClick);
+                element.addEventListener('mouseup', function (e) {
                     e.preventDefault();
                     e.stopPropagation();
                 })
@@ -211,7 +184,7 @@ function createMenuElements(itemList, popover) {
         }
 
 
-        return { object: elem, init: item.init };
+        return { element, init: item.init };
     })
 
     return list;

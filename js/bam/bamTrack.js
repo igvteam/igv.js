@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import BamSource from "./bamSource.js"
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
@@ -285,7 +284,7 @@ class BAMTrack extends TrackBase {
         }
 
         menuItems.push({
-            object: $(createCheckbox("Show Coverage", this.showCoverage)),
+            element: createCheckbox("Show Coverage", this.showCoverage),
             click: showCoverageHandler
         })
 
@@ -297,7 +296,7 @@ class BAMTrack extends TrackBase {
         }
 
         menuItems.push({
-            object: $(createCheckbox("Show Alignments", this.showAlignments)),
+            element: createCheckbox("Show Alignments", this.showAlignments),
             click: showAlignmentHandler
         })
 

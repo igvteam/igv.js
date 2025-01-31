@@ -9,7 +9,7 @@ class Dialog {
         this.parent = parent
 
         const cancel = () => {
-            DOMUtils.hide(this.elem);
+            this.elem.style.display = 'none'
             if (typeof cancelHandler === 'function') {
                 cancelHandler(this);
             }
@@ -55,7 +55,7 @@ class Dialog {
         this.callback = undefined
 
         this.ok.addEventListener('click',  e => {
-            DOMUtils.hide(this.elem);
+            this.elem.style.display = 'none'
             if (typeof okHandler === 'function') {
                 okHandler(this);
             } else if (this.callback && typeof this.callback === 'function') {
@@ -99,20 +99,10 @@ class Dialog {
             this.callback = options.callback;
         }
 
-        // const page = DOMUtils.pageCoordinates(e);
-        // this.clampLocation(page.x, page.y);
+        const { top} = e.currentTarget.parentElement.getBoundingClientRect()
+        this.elem.style.top = `${ top }px`;
 
-        DOMUtils.show(this.elem);
-    }
-
-    clampLocation(pageX, pageY) {
-
-        let popoverRect = this.elem.getBoundingClientRect();
-        let parentRect = this.parent.getBoundingClientRect();
-        const y = Math.min(Math.max(pageY, parentRect.y), parentRect.y + parentRect.height - popoverRect.height);
-        const x = Math.min(Math.max(pageX, parentRect.x), parentRect.x + parentRect.width - popoverRect.width);
-        this.elem.style.left = x + "px";
-        this.elem.style.top = y + "px";
+        this.elem.style.display = 'flex'
     }
 }
 

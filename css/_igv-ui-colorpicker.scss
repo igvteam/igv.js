@@ -4,9 +4,11 @@ $igv-color-swatch-border-width: 2px;
 
 .igv-ui-generic-container {
 
-  left: 50%;
-  top: 75%;
-  transform: translate(-50%, -25%);
+  position: fixed;
+
+  top: 20%;
+  left: 75%;
+  transform: translateX(-50%);
 
   flex-direction: column;
   flex-wrap: nowrap;

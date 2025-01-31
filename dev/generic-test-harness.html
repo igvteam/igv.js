@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="igv-container" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    const config =
+        {
+        queryParametersSupported: true,
+        locus: '19:49301000-49305700',
+        genome: "hg19",
+        tracks:
+            [
+            {
+                name: 'All pos bars',
+                url: '../../test/data/wig/allPositive.bedgraph',
+                // color: '#0f0',
+                indexed: false
+            },
+            {
+                name: 'All negative bars',
+                url: '../../test/data/wig/allNegativewig.bedgraph',
+                // color: '#f00',
+                indexed: false
+            },
+        ]
+    };
+
+    const config_offscreen_scroll =
+        {
+            "version": "3.1.2",
+            "showSampleNames": false,
+            "reference": {
+                "id": "hg38",
+                "name": "Human (GRCh38/hg38)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa.fai",
+                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/hg38/cytoBandIdeo.txt.gz",
+                "aliasURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/hg38/hg38_alias.tab",
+                "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+                "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+                "chromosomeOrder": "chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY"
+            },
+            "locus": "chr6:152,982,998-152,983,765",
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NK.bed.gz",
+                    "filename": "NK.bed.gz",
+                    "indexURL": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NK.bed.gz.tbi",
+                    "name": "NK",
+                    "order": -9,
+                    "format": "bed",
+                    "type": "shoebox",
+                    "color": "rgb(137, 30, 136)",
+                    "min": 0,
+                    "max": 3,
+                    "colorScale": {
+                        "min": 0,
+                        "max": 3,
+                        "color": "rgb(137,30,136)"
+                    }
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NK_lora_TFBS.bigwig",
+                    "filename": "NK_lora_TFBS.bigwig",
+                    "name": "NK_lora_TFBS.bigwig",
+                    "order": -8,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "rgb(137, 30, 136)",
+                    "colorScale": {
+                        "type": "diverging",
+                        "min": 0,
+                        "mid": 0.25,
+                        "max": 0.5,
+                        "minColor": "rgb(46,56,183)",
+                        "midColor": "white",
+                        "maxColor": "rgb(164,0,30)"
+                    },
+                    "graphType": "heatmap",
+                    "height": 25
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CLP.bed.gz",
+                    "filename": "CLP.bed.gz",
+                    "indexURL": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CLP.bed.gz.tbi",
+                    "name": "CLP",
+                    "order": -7,
+                    "format": "bed",
+                    "type": "shoebox",
+                    "color": "rgb(106, 207, 255)",
+                    "min": 0,
+                    "max": 3,
+                    "colorScale": {
+                        "min": 0,
+                        "max": 3,
+                        "color": "rgb(106,207,255)"
+                    }
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CLP_lora_TFBS.bigwig",
+                    "filename": "CLP_lora_TFBS.bigwig",
+                    "name": "CLP_lora_TFBS.bigwig",
+                    "order": -6,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "rgb(106, 207, 255)",
+                    "colorScale": {
+                        "type": "diverging",
+                        "min": 0,
+                        "mid": 0.25,
+                        "max": 0.5,
+                        "minColor": "rgb(46,56,183)",
+                        "midColor": "white",
+                        "maxColor": "rgb(164,0,30)"
+                    },
+                    "graphType": "heatmap",
+                    "height": 25
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/late-Ery.bed.gz",
+                    "filename": "late-Ery.bed.gz",
+                    "indexURL": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/late-Ery.bed.gz.tbi",
+                    "name": "late-Ery",
+                    "order": -5,
+                    "format": "bed",
+                    "type": "shoebox",
+                    "color": "rgb(137, 17, 0)",
+                    "min": 0,
+                    "max": 3,
+                    "colorScale": {
+                        "min": 0,
+                        "max": 3,
+                        "color": "rgb(137,17,0)"
+                    }
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/late-Ery_lora_TFBS.bigwig",
+                    "filename": "late-Ery_lora_TFBS.bigwig",
+                    "name": "late-Ery_lora_TFBS.bigwig",
+                    "order": -4,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "rgb(137, 17, 0)",
+                    "colorScale": {
+                        "type": "diverging",
+                        "min": 0,
+                        "mid": 0.25,
+                        "max": 0.5,
+                        "minColor": "rgb(46,56,183)",
+                        "midColor": "white",
+                        "maxColor": "rgb(164,0,30)"
+                    },
+                    "graphType": "heatmap",
+                    "height": 25
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CD16mono.bed.gz",
+                    "filename": "CD16mono.bed.gz",
+                    "indexURL": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CD16mono.bed.gz.tbi",
+                    "name": "CD16mono",
+                    "order": -3,
+                    "format": "bed",
+                    "type": "shoebox",
+                    "color": "rgb(255, 136, 2)",
+                    "min": 0,
+                    "max": 3,
+                    "colorScale": {
+                        "min": 0,
+                        "max": 3,
+                        "color": "rgb(255,136,2)"
+                    }
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CD16mono_lora_TFBS.bigwig",
+                    "filename": "CD16mono_lora_TFBS.bigwig",
+                    "name": "CD16mono_lora_TFBS.bigwig",
+                    "order": -2,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "rgb(255, 136, 2)",
+                    "colorScale": {
+                        "type": "diverging",
+                        "min": 0,
+                        "mid": 0.25,
+                        "max": 0.5,
+                        "minColor": "rgb(46,56,183)",
+                        "midColor": "white",
+                        "maxColor": "rgb(164,0,30)"
+                    },
+                    "graphType": "heatmap",
+                    "height": 25
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NaiveB.bed.gz",
+                    "filename": "NaiveB.bed.gz",
+                    "indexURL": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NaiveB.bed.gz.tbi",
+                    "name": "NaiveB",
+                    "order": -1,
+                    "format": "bed",
+                    "type": "shoebox",
+                    "color": "rgb(210, 120, 255)",
+                    "min": 0,
+                    "max": 3,
+                    "colorScale": {
+                        "min": 0,
+                        "max": 3,
+                        "color": "rgb(210,120,255)"
+                    }
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NaiveB_lora_TFBS.bigwig",
+                    "filename": "NaiveB_lora_TFBS.bigwig",
+                    "name": "NaiveB_lora_TFBS.bigwig",
+                    "order": 0,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "rgb(210, 120, 255)",
+                    "colorScale": {
+                        "type": "diverging",
+                        "min": 0,
+                        "mid": 0.25,
+                        "max": 0.5,
+                        "minColor": "rgb(46,56,183)",
+                        "midColor": "white",
+                        "maxColor": "rgb(164,0,30)"
+                    },
+                    "graphType": "heatmap",
+                    "height": 25
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "order": 1000001,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
+            ]
+        };
+
+    igv.createBrowser(document.getElementById("igv-container"), config).then(browser => {
+        console.log(`browser ${ browser.guid } is good to go`)
+    });
+
+
+</script>
+
+</body>
+
+</html>
+

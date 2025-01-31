@@ -24,7 +24,6 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
@@ -497,7 +496,7 @@ class InteractionTrack extends TrackBase {
             for (let arcType of ["nested", "proportional", "inView", "partialInView"]) {
                 items.push(
                     {
-                        object: $(createCheckbox(lut[arcType], arcType === this.arcType)),
+                        element: createCheckbox(lut[arcType], arcType === this.arcType),
                         click: function arcTypeHandler() {
                             this.arcType = arcType
                             this.trackView.repaintViews()

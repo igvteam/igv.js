@@ -1,6 +1,5 @@
 
 import * as DOMUtils from "../ui/utils/dom-utils.js"
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 class CursorGuide {
 
@@ -98,7 +97,7 @@ class CursorGuide {
 
         if (this.browser.getRulerTrackView()) {
             for (let viewport of this.browser.getRulerTrackView().viewports) {
-                viewport.$tooltip.hide()
+                viewport.tooltip.style.display = 'none'
             }
         }
 
