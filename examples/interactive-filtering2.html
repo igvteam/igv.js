@@ -942,7 +942,7 @@
 
             writeNumericFacetSliderBrushes(facets, brushesByNumericFacetName)
 
-            const filterChange =  () => {
+            const filterChange = () => {
                 const selection = getSelection()
                 const filterFunction = buildFilter(selection, facets)
 
@@ -968,7 +968,7 @@
                     if (event.isTrusted && facetName in brushesByNumericFacetName) {
                         updateBrushSelection(facet, brushesByNumericFacetName, selection)
                     }
-                   filterChange()
+                    filterChange()
                 })
             })
         }
@@ -1161,9 +1161,9 @@
         /** Get counts for each filter, in each facet */
         function updateFilterCounts(trackToFilter, facets) {
 
-            const t0 = Date.now();
+            const t0 = Date.now()
 
-            const featuresInView =  trackToFilter.getInViewFeatures()
+            const featuresInView = trackToFilter.getInViewFeatures()
 
             const t1 = Date.now()
             console.log(`   getInViewFeatures: ${t1 - t0}`)
@@ -1186,7 +1186,7 @@
             const t3 = Date.now()
             console.log(`   reset counts: ${t3 - t2}`)
 
-            const t4 = Date.now();
+            const t4 = Date.now()
             // Loop through features counting by filter
             for (let igvFeature of featuresInView) {
 
@@ -1206,16 +1206,17 @@
                         }
                     }
                 }
+            }
 
-                // Populate statistics for numeric facets
-                for (let facet of facets) {
-                    if (facet.type !== 'categorical') {
-                        const {min, q1, median, q3, max, mean, quantiles} = getStatistics(facet.filterNumbers)
-                        facet.statistics = {min, q1, median, q3, max, mean, quantiles}
-                    }
+            // Populate statistics for numeric facets
+            for (let facet of facets) {
+                if (facet.type !== 'categorical') {
+                    const {min, q1, median, q3, max, mean, quantiles} = getStatistics(facet.filterNumbers)
+                    facet.statistics = {min, q1, median, q3, max, mean, quantiles}
                 }
             }
-            const t5 = Date.now();
+            
+            const t5 = Date.now()
             console.log(`   count by filter: ${t5 - t4}`)
 
             const t6 = Date.now()
