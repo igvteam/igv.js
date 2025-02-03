@@ -35,10 +35,13 @@ class IdeogramTrack {
         this.browser = browser
         this.type = 'ideogram'
         this.id = 'ideogram'
-        this.height = 16
+        this.height = browser.config.showCytobandNames ? 20 : 16
         this.order = Number.MIN_SAFE_INTEGER
         this.disableButtons = true
         this.ignoreTrackMenu = true
+
+        // Check whether we should show the cytoband names in the ideogram
+        this.showCytobandNames = browser.config.showCytobandNames
     }
 
     computePixelHeight(ignore) {
@@ -64,7 +67,8 @@ class IdeogramTrack {
             genome: referenceFrame.genome,
             width: pixelWidth,
             height: pixelHeight,
-            stainColors
+            stainColors,
+            showCytobandNames: this.showCytobandNames
         })
 
         const widthBP = Math.round(referenceFrame.bpPerPixel * pixelWidth)
@@ -107,7 +111,6 @@ class IdeogramTrack {
             // Pop current context
             context.restore()
         }
-
     }
 
     dispose() {
@@ -115,8 +118,7 @@ class IdeogramTrack {
     }
 }
 
-function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors, features}) {
-
+function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors, features, showCytobandNames}) {
     const shim = 1
     const shim2 = 0.5 * shim
     const ideogramTop = 0
@@ -178,10 +180,15 @@ function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainCol
                 ctx.fillStyle = "rgb(150, 0, 0)"
                 ctx.strokeStyle = "rgb(150, 0, 0)"
                 IGVGraphics.polygon(ctx, xC, yC, 1, 0)
-            } else {
-
-                ctx.fillStyle = getCytobandColor(stainColors, cytoband)
+            } 
+            else {
+                const backgroundColor = getCytobandColor(stainColors, cytoband);
+                ctx.fillStyle = backgroundColor.color;
                 IGVGraphics.fillRect(ctx, start, shim + ideogramTop, (end - start), height - 2 * shim)
+
+                if (showCytobandNames) {
+                   drawIdeogramCytobandName(ctx, cytoband.name, start, end, ideogramTop, height, backgroundColor.shade)
+                }
             }
         }
     }
@@ -191,24 +198,73 @@ function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainCol
     IGVGraphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2 * shim2, (height - 2 * shim2) / 2, 0, 1)
 }
 
-function getCytobandColor(colors, data) {
+function drawIdeogramCytobandName(ctx, name, start, end, ideogramTop, height, shade) {
+    const padding = 2; // Padding between the rect and the sides of the ideogram
 
-    if (data.type === 'c') { // centermere: "acen"
-        return "rgb(150, 10, 10)"
+    // Calculate font size to fit the rectangle height and width
+    const rectHeight = height - 2 * padding;
+    const rectWidth = end - start;
+
+    const maxFontSize = rectHeight - 2 * padding; // Leave some padding for text
+    let fontSize = maxFontSize;
+    do {
+        ctx.font = `${fontSize}px sans-serif`;
+        const textWidth = ctx.measureText(name).width;
+        if (textWidth <= rectWidth) break;
+        fontSize -= 1;
+    } while (fontSize > 4); // Minimum font size to avoid infinite loop
+
+    // For safety, we're going to clip the text to the rectangle bounds
+    ctx.save(); // Save the current state of the context
+    ctx.beginPath();
+    ctx.rect(start, padding + ideogramTop, rectWidth, rectHeight);
+    ctx.clip();
+
+    // Draw the name of the cytoband, centered within the rectangle
+    const centerX = start + rectWidth / 2.0;
+    const centerY = padding + ideogramTop + rectHeight / 2.0 + 1;
+
+    // Determine the luminance
+    let luminance;
+    if (shade !== null) {
+        luminance = 0.2126 * shade + 0.7152 * shade + 0.0722 * shade; // Simplified since R=G=B=shade
     } else {
-        var stain = data.stain // + 4;
+        luminance = 0.2126 * 150 + 0.7152 * 10 + 0.0722 * 10; // Hardcoded for "acen"
+    }
 
-        var shade = 230
+    // Choose text color based on luminance
+    const textColor = luminance < 128 ? "white" : "black";
+
+    IGVGraphics.fillText(ctx, name, centerX, centerY, {
+        fillStyle: textColor,
+        textAlign: "center",
+        textBaseline: "middle",
+        font: `${fontSize}px sans-serif` // Ensure proper font size
+    });
+
+    ctx.restore(); // Restore the context to remove clipping
+}
+
+function getCytobandColor(colors, data) {
+    if (data.type === 'c') { // centromere: "acen"
+        return { color: "rgb(150, 10, 10)", shade: null }; // Shade is not relevant here
+    } 
+    else {
+        let stain = data.stain; // Stain value
+        let shade = 230; // Default shade for 'g'
+
         if (data.type === 'p') {
-            shade = Math.floor(230 - stain / 100.0 * 230)
+            shade = Math.floor(230 - stain / 100.0 * 230);
         }
+
+        // Cache the color if not already stored
         var c = colors[shade]
         if (!c) {
             c = "rgb(" + shade + "," + shade + "," + shade + ")"
             colors[shade] = c
         }
-        return c
 
+        return { color: c, shade }; // Return both the color and shade
     }
 }
 
