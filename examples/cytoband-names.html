@@ -1,0 +1,25 @@
+<html>
+<head>
+    <title>igv.js embedding example</title>
+</head>
+
+<body>
+
+<div id="igvDiv"></div>
+
+<script type="module">
+    import igv from "../dist/igv.esm.min.js"
+
+    var config = {
+        genome: 'hg38',
+        locus: 'chr14:58,972,030-61,596,605',
+        showCytobandNames: true,
+        queryParametersSupported: true
+    };
+    
+    const browser = await igv.createBrowser(document.getElementById("igvDiv"), config)
+</script>
+
+</body>
+
+</html>

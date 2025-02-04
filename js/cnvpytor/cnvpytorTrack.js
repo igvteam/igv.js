@@ -1,9 +1,7 @@
 import TrackBase from "../trackBase.js"
-import MenuUtils from "../ui/menuUtils.js"
 import HDF5IndexedReader from "./HDF5IndexedReader.js"
 import {CNVpytorVCF} from "./cnvpytorVCF.js"
 import FeatureSource from '../feature/featureSource.js'
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
 import IGVGraphics from "../igv-canvas.js"
 import VariantTrack from "../variant/variantTrack.js"
@@ -33,6 +31,7 @@ class CNVPytorTrack extends TrackBase {
         this.signal_name = config.signal_name || "rd_snp"
         this.cnv_caller = config.cnv_caller || '2D'
         this.colors = config.colors || ['gray', 'black', 'green', 'blue']
+        this.hasChroms = {}
         super.init(config)
 
     }
@@ -85,7 +84,10 @@ class CNVPytorTrack extends TrackBase {
                 allVariants = this.featureSource.reader.features
             }
 
-            const cnvpytor_obj = new CNVpytorVCF(allVariants, this.bin_size)
+            const refGenome = this.browser.config.genome
+            
+            // Initializing CNVpytorVCF class
+            const cnvpytor_obj = new CNVpytorVCF(allVariants, this.bin_size, refGenome)
             let wigFeatures
             let bafFeatures
             this.wigFeatures_obj = {}
@@ -121,8 +123,21 @@ class CNVPytorTrack extends TrackBase {
 
         } else {
             this.cnvpytor_obj = new HDF5IndexedReader(this.config.url, this.bin_size)
-            this.wigFeatures_obj = await this.cnvpytor_obj.get_rd_signal(this.bin_size)
-            this.available_bins = this.cnvpytor_obj.available_bins
+            // get chrom list that currently user viewing
+            let chroms = [ ...new Set(this.browser.referenceFrameList.map(val => val.chr))]
+            
+            let aliasRecord = this.getAliasChromsList(chroms)
+            this.wigFeatures_obj = await this.cnvpytor_obj.get_rd_signal(this.bin_size, aliasRecord)
+
+            // Save the processed chroms names to check later for the availability
+            this.update_hasChroms(this.wigFeatures_obj, chroms)
+
+            this.available_bins = this.cnvpytor_obj.availableBins
+            // reset the bin size if its not exits
+            if(! this.available_bins.includes(this.bin_size)){
+                this.bin_size = this.available_bins.at(-1);    
+            }
+
             this.available_callers = this.cnvpytor_obj.callers
             this.set_available_callers()
         }
@@ -135,18 +150,17 @@ class CNVPytorTrack extends TrackBase {
 
         for (let bin_size in this.wigFeatures_obj) {
             let i = 0
-
             for (const [signal_name, wig] of Object.entries(this.wigFeatures_obj[bin_size])) {
 
                 if (this.signals.includes(signal_name)) {
                     let tconf = {}
                     tconf.type = "wig"
+                    tconf.isMergedTrack = true
                     tconf.features = wig
                     tconf.name = signal_name
                     tconf.color = this.signal_colors.filter(x => x.singal_name === signal_name).map(x => x.color)
                     const t = await this.browser.createTrack(tconf)
                     if (t) {
-                        t.isMergedTrack = true
                         t.autoscale = false     // Scaling done from merged track
                         this.tracks.push(t)
                     } else {
@@ -180,6 +194,15 @@ class CNVPytorTrack extends TrackBase {
         return Promise.all(p)
     }
 
+    getAliasChromsList(chroms){
+        let aliasRecord = chroms.map(chr => {
+            let records = this.browser.genome.chromAlias.aliasRecordCache.get(chr)
+            return Object.values(records)
+        })
+        aliasRecord = aliasRecord.flat()
+        return aliasRecord
+    }
+    
     set_available_callers() {
         if (!this.available_callers.includes(this.cnv_caller)) {
             if (this.available_callers.length > 0) {
@@ -239,9 +262,9 @@ class CNVPytorTrack extends TrackBase {
         items.push('<hr/>')
         items.push("Bin Sizes")
         for (let rd_bin of this.available_bins) {
-            const checkBox = createCheckbox(rd_bin, rd_bin === this.bin_size)
+
             items.push({
-                object: $(checkBox),
+                element: createCheckbox(rd_bin, rd_bin === this.bin_size),
                 click: async function binSizesHandler() {
                     this.bin_size = rd_bin
                     // data loader image
@@ -259,9 +282,9 @@ class CNVPytorTrack extends TrackBase {
 
         let signal_dct = {"rd_snp": "RD and BAF Likelihood", "rd": "RD Signal", "snp": "BAF Likelihood"}
         for (let signal_name in signal_dct) {
-            const checkBox = createCheckbox(signal_dct[signal_name], signal_name === this.signal_name)
+
             items.push({
-                object: $(checkBox),
+                element: createCheckbox(signal_dct[signal_name], signal_name === this.signal_name),
                 click: async function signalTypeHandler() {
                     this.signal_name = signal_name
                     await this.recreate_tracks(this.bin_size)
@@ -277,9 +300,9 @@ class CNVPytorTrack extends TrackBase {
         items.push('<hr/>')
         items.push("CNV caller")
         for (let cnv_caller of this.available_callers) {
-            const checkBox = createCheckbox(cnv_caller, cnv_caller === this.cnv_caller)
+
             items.push({
-                object: $(checkBox),
+                element: createCheckbox(cnv_caller, cnv_caller === this.cnv_caller),
                 click: async function cnvCallerHandler() {
                     this.cnv_caller = cnv_caller
                     // data loader image
@@ -316,7 +339,18 @@ class CNVPytorTrack extends TrackBase {
         const p = []
 
         if (!(bin_size in this.wigFeatures_obj)) {
-            this.wigFeatures_obj = {...this.wigFeatures_obj, ...await this.cnvpytor_obj.get_rd_signal(bin_size)}
+            if(Object.keys(this.hasChroms).length > 0) {
+                let chroms = [ ...new Set(this.browser.referenceFrameList.map(val => val.chr))]
+                if(chroms[0] == "all"){
+                    chroms = this.browser.genome.chromosomeNames
+                }
+
+                this.wigFeatures_obj = {...this.wigFeatures_obj, ...await this.cnvpytor_obj.get_rd_signal(bin_size, chroms)}
+                this.update_hasChroms(this.wigFeatures_obj, chroms)
+            } else{
+                this.wigFeatures_obj = {...this.wigFeatures_obj, ...await this.cnvpytor_obj.get_rd_signal(bin_size)}
+            }
+            
         }
 
         this.signals = this.get_signals()
@@ -328,12 +362,12 @@ class CNVPytorTrack extends TrackBase {
             if (this.signals.includes(signal_name)) {
                 let tconf = {}
                 tconf.type = "wig"
+                tconf.isMergedTrack = true
                 tconf.features = wig
                 tconf.name = signal_name
                 tconf.color = this.signal_colors.filter(x => x.singal_name === signal_name).map(x => x.color)
                 const t = await this.browser.createTrack(tconf)
                 if (t) {
-                    t.isMergedTrack = true
                     t.autoscale = false     // Scaling done from merged track
                     this.tracks.push(t)
                 } else {
@@ -365,7 +399,54 @@ class CNVPytorTrack extends TrackBase {
         return Promise.all(p)
     }
 
+    update_hasChroms(wigFeatures, chroms){
+        for (let binSize in wigFeatures){
+            if (!this.hasChroms[binSize]) {
+                this.hasChroms[binSize] = new Set();
+            }
+            chroms.forEach(item => this.hasChroms[binSize].add(item))
+
+        }
+        return this.hasChroms
+
+    }
+
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
+        
+        if(Object.keys(this.hasChroms).length > 0) {
+            
+            // Need to find the current binSize
+            if (this.hasChroms[this.bin_size].size != 0){
+                let chroms = [ ...new Set(this.browser.referenceFrameList.map(val => val.chr))]
+                if(chroms[0] == "all"){
+                    chroms = this.browser.genome.chromosomeNames
+                }
+                let newChroms = chroms.filter(val => !this.hasChroms[this.bin_size].has(val))
+
+                if(newChroms.length != 0){
+
+                    let aliasRecords = this.getAliasChromsList(newChroms)
+                    // update the hasChroms list
+                    let tmp_wig = await this.cnvpytor_obj.get_rd_signal(this.bin_size, aliasRecords)
+
+                    this.update_hasChroms(tmp_wig, newChroms)
+
+                    // here we need to update the wig
+                    // this part is probaby not required; code improve required
+                    
+                    for (let bin_size in tmp_wig){
+                        for (const [signal_name, wig] of Object.entries(tmp_wig[bin_size])) {
+                            await this.wigFeatures_obj[bin_size][signal_name].push(...wig)
+                        }
+                    }
+
+                    for (let wig of this.tracks){
+                        await wig.featureSource.updateFeatures(this.wigFeatures_obj[this.bin_size][wig.name] )
+                    }
+                }
+            }
+
+        }
 
         if (this.tracks) {
             const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel))
@@ -522,12 +603,12 @@ class CNVPytorTrack extends TrackBase {
             // if number >= 100, show whole number
             // if >= 1 show 1 significant digits
             // if <  1 show 2 significant digits
-            
+
             // change the label for negative number to positive; For BAF likelihood section
             if(number < 0){
                 return Math.abs(number)
             }
-            
+
             if (number === 0) {
                 return "0"
             } else if (Math.abs(number) >= 10) {

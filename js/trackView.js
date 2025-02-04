@@ -23,11 +23,9 @@
  * THE SOFTWARE.
  */
 
-
-import $ from "./vendor/jquery-3.3.1.slim.js"
 import {doAutoscale} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
-import {FeatureUtils, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js'
+import {FeatureUtils, IGVColor} from '../node_modules/igv-utils/src/index.js'
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {createIcon} from "./ui/utils/icons.js"
 import SampleInfoViewport from "./sample/sampleInfoViewport.js"
@@ -179,7 +177,7 @@ class TrackView {
 
         const {width: axisWidth} = this.axis.getBoundingClientRect()
 
-        const {y} = this.viewports[0].$viewport.get(0).getBoundingClientRect()
+        const {y} = this.viewports[0].viewportElement.getBoundingClientRect()
 
         let delta =
             {
@@ -189,7 +187,7 @@ class TrackView {
 
         for (let viewport of this.viewports) {
             viewport.renderSVGContext(context, delta)
-            const {width} = viewport.$viewport.get(0).getBoundingClientRect()
+            const {width} = viewport.viewportElement.getBoundingClientRect()
             delta.deltaX += width
         }
 
@@ -204,7 +202,7 @@ class TrackView {
         }
     }
 
-    presentColorPicker(colorSelection) {
+    presentColorPicker(colorSelection, event) {
 
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
 
@@ -251,7 +249,7 @@ class TrackView {
 
             const moreColorsPresentationColor = 'color' === colorSelection ? (this.track.color || this.track.constructor.defaultColor) : (this.track.altColor || this.track.constructor.defaultColor)
             this.browser.genericColorPicker.configure(initialTrackColor, colorHandlers[colorSelection], moreColorsPresentationColor)
-            this.browser.genericColorPicker.show()
+            this.browser.genericColorPicker.present(event)
 
         }
 
@@ -302,7 +300,7 @@ class TrackView {
 
     updateScrollbar() {
 
-        const viewportHeight = this.viewports[0].$viewport.height()
+        const viewportHeight = this.viewports[0].viewportElement.clientHeight
         this.outerScroll.style.height = `${viewportHeight}px`
 
         if (false === scrollbarExclusionTypes.has(this.track.type)) {
@@ -323,12 +321,12 @@ class TrackView {
 
     moveScroller(delta) {
 
-        const y = $(this.innerScroll).position().top + delta
+        const y = this.innerScroll.offsetTop + delta
         const top = Math.min(Math.max(0, y), this.outerScroll.clientHeight - this.innerScroll.clientHeight)
-        $(this.innerScroll).css('top', `${top}px`)
+        this.innerScroll.style.top = `${top}px`;
 
         const contentHeight = this.maxViewportContentHeight()
-        const contentTop = -Math.round(top * (contentHeight / this.viewports[0].$viewport.height()))
+        const contentTop = -Math.round(top * (contentHeight / this.viewports[0].viewportElement.clientHeight))
 
         for (let viewport of this.viewports) {
             viewport.setTop(contentTop)
@@ -598,7 +596,7 @@ class TrackView {
 
             // Adjust scrollbar, if needed, to insure content is in view
             const currentTop = this.viewports[0].getContentTop()
-            const viewportHeight = this.viewports[0].$viewport.height()
+            const viewportHeight = this.viewports[0].viewportElement.clientHeight
             const minTop = Math.min(0, viewportHeight - contentHeight)
             if (currentTop < minTop) {
                 for (let viewport of this.viewports) {
@@ -607,27 +605,6 @@ class TrackView {
             }
             this.updateScrollbar()
         }
-    }
-
-    viewportsToReload(force) {
-
-        // List of viewports that need reloading
-        const viewports = this.viewports.filter(viewport => {
-            if (!viewport.isVisible()) {
-                return false
-            }
-            if (!viewport.checkZoomIn()) {
-                return false
-            } else {
-                const referenceFrame = viewport.referenceFrame
-                const chr = viewport.referenceFrame.chr
-                const start = referenceFrame.start
-                const end = start + referenceFrame.toBP($(viewport.contentDiv).width())
-                const bpPerPixel = referenceFrame.bpPerPixel
-                return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel))
-            }
-        })
-        return viewports
     }
 
     createTrackScrollbar(browser) {
@@ -712,7 +689,7 @@ class TrackView {
 
             const {y} = DOMUtils.pageCoordinates(event)
 
-            $(this.innerScroll).data('yDown', y.toString())
+            this.innerScroll.dataset.yDown = y.toString();
 
             this.boundColumnContainerMouseMoveHandler = columnContainerMouseMoveHandler.bind(this)
             browser.columnContainer.addEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
@@ -723,9 +700,10 @@ class TrackView {
 
                 const {y} = DOMUtils.pageCoordinates(event)
 
-                this.moveScroller(y - parseInt($(this.innerScroll).data('yDown')))
+                this.moveScroller(y - parseInt(this.innerScroll.dataset.yDown))
 
-                $(this.innerScroll).data('yDown', y.toString())
+                this.innerScroll.dataset.yDown = y.toString();
+
 
             }
         }
@@ -764,7 +742,7 @@ class TrackView {
                 event.preventDefault()
 
                 currentDragHandle = event.target
-                if (false === this.track.selected) {
+                if (false === this.track.selected || 'sequence' === this.track.type) {
                     currentDragHandle.classList.remove('igv-track-drag-handle-color')
                     currentDragHandle.classList.add('igv-track-drag-handle-hover-color')
                 }
@@ -783,7 +761,7 @@ class TrackView {
 
                 if (currentDragHandle && event.target !== currentDragHandle) {
 
-                    if (false === this.track.selected) {
+                    if (false === this.track.selected || 'sequence' === this.track.type) {
                         currentDragHandle.classList.remove('igv-track-drag-handle-hover-color')
                         currentDragHandle.classList.add('igv-track-drag-handle-color')
                     }
@@ -801,7 +779,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if (false === this.track.selected) {
+                    if (false === this.track.selected || 'sequence' === this.track.type) {
                         event.target.classList.remove('igv-track-drag-handle-color')
                         event.target.classList.add('igv-track-drag-handle-hover-color')
                     }
@@ -816,7 +794,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if (false === this.track.selected) {
+                    if (false === this.track.selected || 'sequence' === this.track.type) {
                         event.target.classList.remove('igv-track-drag-handle-hover-color')
                         event.target.classList.add('igv-track-drag-handle-color')
                     }
@@ -830,7 +808,7 @@ class TrackView {
                 event.preventDefault()
 
                 if (undefined === currentDragHandle) {
-                    if (false === this.track.selected) {
+                    if (false === this.track.selected || 'sequence' === this.track.type) {
                         event.target.classList.remove('igv-track-drag-handle-hover-color')
                         event.target.classList.add('igv-track-drag-handle-color')
                     }
@@ -892,7 +870,7 @@ class TrackView {
     removeViewportsFromColumnContainer() {
         // Track Viewports
         for (let viewport of this.viewports) {
-            viewport.$viewport.remove()
+            viewport.viewportElement.remove()
         }
     }
 
@@ -1029,10 +1007,6 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
 }
 
-function maxViewportContentHeight(viewports) {
-    const heights = viewports.map(viewport => viewport.getContentHeight())
-    return Math.max(...heights)
-}
+export {igv_axis_column_width}
 
-export {igv_axis_column_width, maxViewportContentHeight}
 export default TrackView

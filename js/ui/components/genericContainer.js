@@ -1,23 +1,17 @@
-import * as UIUtils from "./utils/ui-utils.js"
-import * as DOMUtils from "./utils/dom-utils.js"
-import makeDraggable from "./utils/draggable.js"
+import * as UIUtils from "../utils/ui-utils.js"
+import * as DOMUtils from "../utils/dom-utils.js"
+import makeDraggable from "../utils/draggable.js"
 
 
 class GenericContainer {
 
     constructor({parent,  top, left, width, height, border, closeHandler}) {
 
-        let container = DOMUtils.div({class: 'igv-ui-generic-container'});
+        const container = DOMUtils.div({class: 'igv-ui-generic-container'});
         parent.appendChild(container);
-        DOMUtils.hide(container);
+
         this.container = container;
 
-        if(top !== undefined) {
-            this.container.style.top = `${ top }px`
-        }
-        if(left !== undefined) {
-            this.container.style.left = `${ left }px`
-        }
         if (width !== undefined) {
             this.container.style.width = `${ width }px`
         }
@@ -27,10 +21,6 @@ class GenericContainer {
         if(border) {
             this.container.style.border = border;
         }
-        //
-        // let bbox = parent.getBoundingClientRect();
-        // this.origin = {x: bbox.x, y: bbox.y};
-        // this.container.offset({left: this.origin.x, top: this.origin.y});
 
         // header
         const header = DOMUtils.div();
@@ -38,21 +28,23 @@ class GenericContainer {
 
         // close button
         UIUtils.attachDialogCloseHandlerWithParent(header, (e) => {
-            DOMUtils.hide(this.container);
             if(typeof closeHandler === "function") {
                 closeHandler(e);
             }
+            this.hide()
         });
 
         makeDraggable(this.container, header);
+
+        this.hide()
     }
 
     show() {
-        DOMUtils.show(this.container);
+        this.container.style.display = 'flex'
     }
 
     hide() {
-        DOMUtils.hide(this.container)
+        this.container.style.display = 'none'
     }
 
     dispose() {

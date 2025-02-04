@@ -13,9 +13,6 @@ class InputDialog {
         this.container = DOMUtils.div({class: 'igv-ui-generic-dialog-container'})
         parent.appendChild(this.container)
 
-        // const { x, y, width, height } = this.container.getBoundingClientRect();
-        // console.log(`InputDialog - x ${ x } y ${ y } width ${ width } height ${ height }`)
-
         // dialog header
         const header = DOMUtils.div({class: 'igv-ui-generic-dialog-header'})
         this.container.appendChild(header)
@@ -87,28 +84,16 @@ class InputDialog {
         return DOMPurify.sanitize(this._input.value)
     }
 
+
     present(options, e) {
 
         this.label.textContent = options.label
         this._input.value = options.value
         this.callback = options.callback || options.click
 
-        DOMUtils.show(this.container)
-        this.clampLocation(e.clientX, e.clientY)
-
-    }
-
-    clampLocation(clientX, clientY) {
-
-        const {width: w, height: h} = this.container.getBoundingClientRect()
-        const wh = window.innerHeight
-        const ww = window.innerWidth
-
-        const y = Math.min(wh - h, clientY)
-        const x = Math.min(ww - w, clientX)
-        this.container.style.left = `${x}px`
-        this.container.style.top = `${y}px`
-
+        const { top} = e.currentTarget.parentElement.getBoundingClientRect()
+        this.container.style.top = `${ top }px`;
+        this.container.style.display = 'flex';
     }
 }
 

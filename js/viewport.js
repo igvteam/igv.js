@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import AlertDialog from "./ui/components/alertDialog.js"
 import SequenceTrack from "./sequenceTrack.js"
@@ -31,184 +30,144 @@ import SequenceTrack from "./sequenceTrack.js"
 class Viewport {
 
     constructor(trackView, viewportColumn, referenceFrame, width) {
-
         this.guid = DOMUtils.guid()
-        this.trackView = trackView
-        this.referenceFrame = referenceFrame
+        this.trackView = trackView;
+        this.referenceFrame = referenceFrame;
 
-        this.browser = trackView.browser
+        this.browser = trackView.browser;
 
-        this.$viewport = $('<div class="igv-viewport">')
-        viewportColumn.appendChild(this.$viewport.get(0))
+        this.viewportElement = document.createElement('div');
+        this.viewportElement.className = 'igv-viewport';
+        viewportColumn.appendChild(this.viewportElement);
 
         if (trackView.track.height) {
-            this.setHeight(trackView.track.height)
+            this.setHeight(trackView.track.height);
         }
 
         // Create an alert dialog for the sequence track to copy ref sequence to.
         if (trackView.track instanceof SequenceTrack) {
-            this.alert = new AlertDialog(this.$viewport.get(0))
+            this.alert = new AlertDialog(this.viewportElement);
         }
 
-        this.contentTop = 0
-        this.contentHeight = this.$viewport.height()
+        this.contentTop = 0;
+        this.contentHeight = this.viewportElement.clientHeight;
 
+        this.setWidth(width);
 
-        this.$viewport.width(width)
-
-        this.initializationHelper()
-
+        this.initializationHelper();
     }
 
-    initializationHelper() {
-
-    }
+    initializationHelper() {}
 
     showMessage(message) {
         if (!this.messageDiv) {
-            this.messageDiv = document.createElement('div')
-            this.messageDiv.className = 'igv-viewport-message'
-            //this.contentDiv.append(this.messageDiv)
-            this.$viewport.append($(this.messageDiv))
+            this.messageDiv = document.createElement('div');
+            this.messageDiv.className = 'igv-viewport-message';
+            this.viewportElement.appendChild(this.messageDiv);
         }
-        this.messageDiv.textContent = message
-        this.messageDiv.style.display = 'inline-block'
+        this.messageDiv.textContent = message;
+        this.messageDiv.style.display = 'inline-block';
     }
 
-    hideMessage(message) {
-        if (this.messageDiv)
-            this.messageDiv.style.display = 'none'
+    hideMessage() {
+        if (this.messageDiv) {
+            this.messageDiv.style.display = 'none';
+        }
     }
 
-    setTrackLabel(label) {
-    }
+    setTrackLabel(label) {}
 
-    startSpinner() {
-    }
+    startSpinner() {}
 
-    stopSpinner() {
-    }
+    stopSpinner() {}
 
     checkZoomIn() {
-        return true
+        return true;
     }
 
-    shift() {
-    }
+    shift() {}
 
     setTop(contentTop) {
-
-        this.contentTop = contentTop
-        const viewportHeight = this.$viewport.height()
-        const viewTop = -contentTop
-        const viewBottom = viewTop + viewportHeight
-
-        //this.$content.css('top', `${contentTop}px`)
-        //
-        // if (undefined === this.canvasVerticalRange || this.canvasVerticalRange.bottom < viewBottom || this.canvasVerticalRange.top > viewTop) {
-        //     console.log("Repaint " + this.canvasVerticalRange)
-        //    this.repaint()
-        // }
-
+        this.contentTop = contentTop;
     }
 
     async loadFeatures() {
-        return undefined
+        return undefined;
     }
 
-    clearCache() {
+    clearCache() {}
 
-    }
-
-    /**
-     * Force a repaint.  Implementations provided by subclasses.
-     */
-    repaint() {
-    }
+    repaint() {}
 
     draw(drawConfiguration, features, roiFeatures) {
-        console.log('Viewport - draw(drawConfiguration, features, roiFeatures)')
+        console.log('Viewport - draw(drawConfiguration, features, roiFeatures)');
     }
 
     checkContentHeight(features) {
-
-        let track = this.trackView.track
-        features = features || this.cachedFeatures
-        if ("FILL" === track.displayMode) {
-            this.setContentHeight(this.$viewport.height())
+        const track = this.trackView.track;
+        features = features || this.cachedFeatures;
+        if (track.displayMode === 'FILL') {
+            this.setContentHeight(this.viewportElement.clientHeight);
         } else if (typeof track.computePixelHeight === 'function') {
             if (features && features.length > 0) {
-                let requiredContentHeight = track.computePixelHeight(features)
-                //let currentContentHeight = this.$content.height()
-                let currentContentHeight = this.contentHeight
-                if (requiredContentHeight !== currentContentHeight) {
-                    this.setContentHeight(requiredContentHeight)
+                const requiredContentHeight = track.computePixelHeight(features);
+                if (requiredContentHeight !== this.contentHeight) {
+                    this.setContentHeight(requiredContentHeight);
                 }
             }
         }
     }
 
     getContentHeight() {
-        //return this.$content.height()
-        return this.contentHeight
+        return this.contentHeight;
     }
 
     setContentHeight(contentHeight) {
-       this.contentHeight = contentHeight
+        this.contentHeight = contentHeight;
     }
 
     isLoading() {
-        return false
+        return false;
     }
 
-    saveSVG() {
-
-    }
+    saveSVG() {}
 
     isVisible() {
-        return this.$viewport.width()
+        return this.viewportElement.clientWidth > 0;
     }
 
     setWidth(width) {
-        this.$viewport.width(width)
+        this.viewportElement.style.width = `${width}px`;
     }
 
     getWidth() {
-        return this.$viewport.width()
+        return this.viewportElement.clientWidth;
     }
 
-    setHeight(h) {
-        this.$viewport.height(h)
+    setHeight(height) {
+        this.viewportElement.style.height = `${height}px`;
     }
 
     getContentTop() {
-        return this.contentTop
+        return this.contentTop;
     }
 
     containsPosition(chr, position) {
-        console.log('Viewport - containsPosition(chr, position)')
+        console.log('Viewport - containsPosition(chr, position)');
     }
 
-    addMouseHandlers() {
-    }
+    addMouseHandlers() {}
 
-    removeMouseHandlers() {
-    }
-
-    /**
-     * Called when the associated track is removed.  Do any needed cleanup here.
-     */
     dispose() {
+        this.viewportElement.remove();
 
-        this.$viewport.get(0).remove()
-
-        // Null out all properties -- this should not be neccessary, but just in case there is a
-        // reference to self somewhere we want to free memory.
-        for (let key of Object.keys(this)) {
-            this[key] = undefined
+        // Nullify all properties to free memory
+        for (const key in this) {
+            if (this.hasOwnProperty(key)) {
+                this[key] = undefined;
+            }
         }
     }
-
 }
 
-export default Viewport
+export default Viewport;

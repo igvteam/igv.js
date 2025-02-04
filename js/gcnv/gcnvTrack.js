@@ -3,7 +3,6 @@ import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {isSimpleType} from "../util/igvUtils.js"
 import paintAxis from "../util/paintAxis.js"
-import MenuUtils from "../ui/menuUtils.js"
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 const X_PIXEL_DIFF_THRESHOLD = 1

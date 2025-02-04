@@ -24,7 +24,6 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import FeatureSource from '../feature/featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
@@ -36,6 +35,7 @@ import {FileUtils, StringUtils, IGVColor, FeatureUtils} from "../../node_modules
 import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {packFeatures} from "../feature/featureUtils.js"
+import {createElementWithString} from "../ui/utils/dom-utils.js"
 
 const isString = StringUtils.isString
 
@@ -623,12 +623,12 @@ class VariantTrack extends TrackBase {
                 //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => this.header.INFO[key].Type === "String")
                 const colorByItems = this._colorByItems
                 menuItems.push('<hr/>')
-                const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">')
-                $e.text('Color by:')
-                menuItems.push({name: undefined, object: $e, click: undefined, init: undefined})
+                const element = createElementWithString('<div class="igv-track-menu-category igv-track-menu-border-top">')
+                element.text('Color by:')
+                menuItems.push({name: undefined, element, click: undefined, init: undefined})
                 for (let key of colorByItems.keys()) {
                     const selected = (this.colorBy === key)
-                    menuItems.push(this.colorByCB({key: key, label: colorByItems.get(key)}, selected))
+                    menuItems.push(this.colorByCB({key, label: colorByItems.get(key)}, selected))
                 }
 
                 menuItems.push(this.colorByCB({key: 'info', label: 'Info field...'}))
@@ -649,10 +649,10 @@ class VariantTrack extends TrackBase {
                 })) {
 
 
-                    const object = $('<div>')
-                    object.html(`&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`)
+                    const element = document.createElement('div');
+                    element.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`;
 
-                    function attributeSort() {
+                    const attributeSort = () => {
                         const sortDirection = this._sortDirections.get(attribute) || 1
                         this.sortByAttribute(attribute, sortDirection)
                         this.config.sort = {
@@ -663,7 +663,7 @@ class VariantTrack extends TrackBase {
                         this._sortDirections.set(attribute, sortDirection * -1)
                     }
 
-                    menuItems.push({object, click: attributeSort})
+                    menuItems.push({element, click: attributeSort})
                 }
             }
         }
@@ -671,9 +671,9 @@ class VariantTrack extends TrackBase {
         menuItems.push('<hr/>')
 
         if (this.getSampleCount() > 0) {
-            menuItems.push({object: $('<div class="igv-track-menu-border-top">')})
+            menuItems.push({ element: createElementWithString('<div class="igv-track-menu-border-top">') })
             menuItems.push({
-                object: $(createCheckbox("Show Genotypes", this.showGenotypes)),
+                element: createCheckbox("Show Genotypes", this.showGenotypes),
                 click: function showGenotypesHandler() {
                     this.showGenotypes = !this.showGenotypes
                     this.trackView.checkContentHeight()
@@ -684,7 +684,7 @@ class VariantTrack extends TrackBase {
             })
         }
 
-        menuItems.push({object: $('<div class="igv-track-menu-border-top">')})
+        menuItems.push({element: createElementWithString('<div class="igv-track-menu-border-top">')})
         for (let displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
             var lut =
                 {
@@ -695,7 +695,7 @@ class VariantTrack extends TrackBase {
 
             menuItems.push(
                 {
-                    object: $(createCheckbox(lut[displayMode], displayMode === this.displayMode)),
+                    element: createCheckbox(lut[displayMode], displayMode === this.displayMode),
                     click: function displayModeHandler() {
                         this.displayMode = displayMode
                         this.trackView.checkContentHeight()
@@ -858,11 +858,11 @@ class VariantTrack extends TrackBase {
      * Create a "color by" checkbox menu item, optionally initially checked
      * @param menuItem
      * @param showCheck
-     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
+     * @returns {{init: undefined, name: undefined, click: clickHandler, element: (jQuery|HTMLElement|jQuery.fn.init)}}
      */
     colorByCB(menuItem, showCheck) {
 
-        const $e = $(createCheckbox(menuItem.label, showCheck))
+        const element = createCheckbox(menuItem.label, showCheck)
 
         if (menuItem.key !== 'info') {
             function clickHandler() {
@@ -872,7 +872,7 @@ class VariantTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
 
-            return {name: undefined, object: $e, click: clickHandler, init: undefined}
+            return {name: undefined, element, click: clickHandler, init: undefined}
         } else {
             function dialogPresentationHandler(ev) {
                 this.browser.inputDialog.present({
@@ -890,7 +890,7 @@ class VariantTrack extends TrackBase {
                 }, ev)
             }
 
-            return {name: undefined, object: $e, dialog: dialogPresentationHandler, init: undefined}
+            return {name: undefined, element, dialog: dialogPresentationHandler, init: undefined}
         }
     }
 
