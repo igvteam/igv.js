@@ -6,7 +6,7 @@ import IGVGraphics from "./igv-canvas.js"
 import {createBrowser, createTrack, removeAllBrowsers, removeBrowser, visibilityChange} from './igv-create.js'
 import version from "./version.js"
 import * as TrackUtils from "./util/trackUtils.js"
-import {igvxhr, FeatureUtils, FeatureCache} from "../node_modules/igv-utils/src/index.js"
+import {igvxhr} from "../node_modules/igv-utils/src/index.js"
 import {registerTrackClass, registerTrackCreatorFunction} from "./trackFactory.js"
 import TrackBase from "./trackBase.js"
 import Browser from "./browser.js"
@@ -29,8 +29,6 @@ const oauth = igvxhr.oauth
 export default {
     AlertDialog,
     TrackUtils,
-    FeatureUtils,
-    FeatureCache,
     IGVGraphics,
     MenuUtils,
     DataRangeDialog,
