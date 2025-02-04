@@ -125,6 +125,10 @@ function setDefaults(config) {
         config.showIdeogram = true
     }
 
+    if (undefined == config.showCytobandNames) {
+        config.showCytobandNames = false
+    }    
+
     if (undefined === config.showCircularView) {
         config.showCircularView = false
     }
