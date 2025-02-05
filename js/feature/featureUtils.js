@@ -71,7 +71,14 @@ async function computeWGFeatures(allFeatures, genome, maxWGCount) {
     return wgFeatures
 }
 
-function packFeatures(features, maxRows) {
+/**
+ * Assigns a row to each feature such that features do not overlap.
+ *
+ * @param features
+ * @param maxRows
+ * @param filter Function thta takes a feature and returns a boolean indicating visibility
+ */
+function packFeatures(features, maxRows, filter) {
 
     maxRows = maxRows || 1000
     if (features == null || features.length === 0) {
@@ -81,14 +88,18 @@ function packFeatures(features, maxRows) {
     const chrFeatureMap = {}
     const chrs = []
     for (let feature of features) {
-        const chr = feature.chr
-        let flist = chrFeatureMap[chr]
-        if (!flist) {
-            flist = []
-            chrFeatureMap[chr] = flist
-            chrs.push(chr)
+        if(filter && !filter(feature)) {
+            feature.row = undefined;
+        } else {
+            const chr = feature.chr
+            let flist = chrFeatureMap[chr]
+            if (!flist) {
+                flist = []
+                chrFeatureMap[chr] = flist
+                chrs.push(chr)
+            }
+            flist.push(feature)
         }
-        flist.push(feature)
     }
 
     // Loop through chrosomosomes and pack features;

@@ -1,0 +1,1514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>Interactive filtering in igv.js</title>
+    <style>
+        .igv-facet .brush .selection {
+            fill-opacity: .1;
+            fill: #3d5a87;
+            stroke: #3d5a87;
+            shape-rendering: crispEdges;
+        }
+
+        .igv-filters-container {
+            font-family: "Open Sans", sans-serif;
+            font-size: 13px;
+            float: left;
+            margin-left: 5px;
+            margin-right: 10px;
+            width: 240px;
+            border-right: 1px solid #EEE;
+        }
+
+        .igv-facet-header {
+            font-weight: bold;
+            position: relative;
+            top: -1px;
+        }
+
+        .igv-facet-header-categorical,
+        .igv-facet-header-checkbox {
+            position: relative;
+            left: -7px;
+        }
+
+        .igv-facet .igv-facet-header-checkbox,
+        .igv-facet .facet-toggle-chevron {
+            visibility: hidden;
+        }
+        .igv-facet:hover .igv-facet-header-checkbox,
+        .igv-facet:hover .facet-toggle-chevron {
+            visibility: visible;
+        }
+
+        .facet-tools {
+            float: right;
+            margin-right: 5px;
+            margin-top: -1px;
+        }
+
+        .igv-facet {
+            margin-top: 15px;
+            width: 220px;
+        }
+
+        .igv-facet-numeric {
+            margin-left: 13px;
+        }
+
+        .igv-filter-label,
+        .igv-filters-container input[type="checkbox"],
+        .igv-filters-container select {
+            cursor: pointer;
+        }
+
+        .igv-filter-label > div, .igv-facet-toggle {
+            margin-left: 14px;
+        }
+
+
+        .igv-filter-label:hover {
+            color: #007;
+        }
+
+        .igv-population-af-toggle, .igv-facet-toggle {
+            color: #337ab7;
+            cursor: pointer;
+        }
+
+        .igv-population-af-toggle:hover, .igv-facet-toggle:hover {
+            color: #23527c;
+        }
+
+        .igv-filter-count {
+            float: right;
+        }
+
+        .tippy-box {
+            font-family: "Open Sans", sans-serif;
+            font-size: 13px;
+        }
+
+        .tippy-content {
+            padding: 3px 7px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/crossfilter2@1.5.4"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/d3-selection@3.0.0/dist/d3-selection.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-dispatch@3.0.1/dist/d3-dispatch.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-brush@3.0.0/dist/d3-brush.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-array@3.2.4/dist/d3-array.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-interpolate@3.0.1/dist/d3-interpolate.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-scale@4.0.2/dist/d3-scale.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tippy.js@6/dist/tippy-bundle.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.js"></script>
+    <script>
+
+        const HISTOGRAM_BAR_MAX_HEIGHT = 20
+        const SLIDER_HANDLEBAR_WIDTH = 6
+        const HANDLEBAR_Y = -1 * (HISTOGRAM_BAR_MAX_HEIGHT - 1)
+
+        /** Render update to reflect newly-selected features in IGV track */
+        function updateTrack(trackIndex, filteredFeatures, igv, igvBrowser) {
+            igv.FeatureUtils.packFeatures(filteredFeatures)
+            const range = igvBrowser.trackViews[trackIndex].track.featureSource.featureCache.range
+            igvBrowser.trackViews[trackIndex].track.featureSource.featureCache =
+                new igv.FeatureCache(filteredFeatures, igvBrowser.genome, range)
+
+            igvBrowser.trackViews[trackIndex].track.clearCachedFeatures()
+            igvBrowser.trackViews[trackIndex].track.updateViews()
+        }
+
+
+        const widthsByOperator = {
+            'between': 75,
+            'not between': 100,
+            '=': 50,
+            '!=': 50,
+            '<': 50,
+            '<=': 50,
+            '>': 50,
+            '>=': 50
+        }
+
+        function updateOperator(event) {
+            const target = event.target
+
+            const facetName = target.getAttribute('data-igv-facet-name')
+            const facetClass = getFacetClass({name: facetName})
+            const input = document.querySelector(`.${facetClass} input`)
+
+            const newOperator = target.value
+
+            target.setAttribute('value', newOperator)
+            const width = widthsByOperator[newOperator]
+            target.style.width = width + 'px'
+
+            const andInput2Style = getAndInput2Style(newOperator)
+            target.parentElement.querySelector('.igv-and-input-2').style = andInput2Style
+
+            const changeEvent = new Event('change')
+            input.dispatchEvent(changeEvent)
+        }
+
+        /** Get options for numeric filter operators */
+        function getOperatorMenu(operator, facet) {
+            const operators = [
+                'between', 'not between', '=', '!=',
+                '<', '<=',
+                '>', '>='
+            ]
+
+            const menuWidth = `${widthsByOperator[operator]}px`
+            const operatorMenu =
+                `<select
+          class="igv-facet-numeric-operator-menu"
+          style="width: ${menuWidth}"
+          data-igv-facet-name="${facet.name}"
+          value="${operator}"
+          onChange="updateOperator(event)"
+        >
+          ${operators.map(operator => {
+                    return (
+                        `<option value="${operator}">${operator}</option>`
+                    )
+                })}
+        </select>`
+
+            return operatorMenu
+        }
+
+        function getSelection() {
+
+            const selection = {}
+
+            const categoricalFilters = document.querySelectorAll('.igv-filter-categorical')
+            categoricalFilters.forEach(input => {
+                if (input.checked) {
+                    const facetName = input.getAttribute('data-igv-facet-name')
+                    const filter = input.value
+                    if (facetName in selection) {
+                        selection[facetName].push(filter)
+                    } else {
+                        selection[facetName] = [filter]
+                    }
+                }
+            })
+
+            const numericFacets = document.querySelectorAll('.igv-facet-numeric-query-builder')
+            numericFacets.forEach(facet => {
+                const facetName = facet.getAttribute('data-igv-facet-name')
+                const value = facet.querySelector('.igv-numeric-query-input-value').value
+                const value2 = facet.querySelector('.igv-numeric-query-input-value2').value
+
+                const operatorMenu = facet.querySelector('.igv-facet-numeric-operator-menu')
+                const operator = operatorMenu.value
+                let numericFilters
+                if (['between', 'not between'].includes(operator)) {
+                    numericFilters = [[operator, [value, value2]]]
+                } else {
+                    numericFilters = [[operator, value]]
+                }
+                selection[facetName] = numericFilters
+            })
+
+            return selection
+        }
+
+        /** Get D3 scale to convert between numeric facet values and pixels */
+        function getXScale(bars, histogramWidth, hasNull) {
+            hasNull = false // TODO: Parameterize
+
+            const barStartIndex = hasNull ? 2 : 0
+            const valueDomain = []
+            const pxRange = []
+            for (let i = barStartIndex; i < bars.length; i++) {
+                const bar = bars[i]
+                valueDomain.push(bar.start)
+                const x = bar.x + (hasNull ? 0 : SLIDER_HANDLEBAR_WIDTH + 2)
+                pxRange.push(x)
+            }
+            const lastBar = bars.slice(-1)[0]
+            valueDomain.push(lastBar.end)
+            pxRange.push(histogramWidth + (hasNull ? 0 : SLIDER_HANDLEBAR_WIDTH))
+
+            const xScale = d3.scaleLinear(valueDomain, pxRange)
+            return xScale
+        }
+
+        /** Get container offsets for brush */
+        function getSliderStyle(bars, histogramWidth) {
+            const barWidth = bars[0].width
+            const hasNull = bars[0].isNull
+
+            const sliderLeft = hasNull ? 0 : -1 * (SLIDER_HANDLEBAR_WIDTH + 1)
+            const sliderWidth = histogramWidth + (hasNull ? barWidth : 2 * SLIDER_HANDLEBAR_WIDTH + 2)
+
+            const extentStartX = hasNull ? 2 * barWidth + 2 : SLIDER_HANDLEBAR_WIDTH + 2
+            const extentWidth = hasNull ? histogramWidth : histogramWidth + SLIDER_HANDLEBAR_WIDTH
+
+            return [sliderLeft, sliderWidth, extentStartX, extentWidth]
+        }
+
+        /** Return new values from D3 brush selection */
+        function parseValuesFromBrushSelection(brushSelection, xScale, precision) {
+            const extent = brushSelection.map(xScale.invert)
+            const newValue1 = round(extent[0], precision)
+            const newValue2 = round(extent[1], precision)
+            return [newValue1, newValue2]
+        }
+
+        /** Handle slider move event (i.e., drag or resize) */
+        function handleBrushMove(event, xScale, facet) {
+            const brushSelection = event.selection
+
+            if (!brushSelection) {
+                return
+            }
+
+            const precision = getPrecision(facet)
+
+            const [newValue, newValue2] =
+                parseValuesFromBrushSelection(brushSelection, xScale, precision)
+
+            const max = facet.statistics.max
+            const min = facet.statistics.min
+
+            if (
+                newValue > max || newValue < min || newValue2 > max || newValue2 < min ||
+                Number.isNaN(newValue) || Number.isNaN(newValue2)
+            ) {
+                // Prevent handlebar misdisplay if crosshair-select moves out-of-bounds
+                return
+            }
+
+            const facetClass = getFacetClass(facet)
+            const [input, input2] = Array.from(document.querySelectorAll(`.${facetClass} input`))
+
+            input.value = newValue
+            input2.value = newValue2
+
+            const [handlebar, handlebar2] = Array.from(document.querySelectorAll(`.${facetClass} .handlebar`))
+
+            const newTranslate = getHandlebarTranslate(brushSelection[0])
+            const newTranslate2 = getHandlebarTranslate(brushSelection[1])
+
+            handlebar.setAttribute('transform', newTranslate)
+            handlebar2.setAttribute('transform', newTranslate2)
+        }
+
+        /** Handle slider move event (i.e., drag or resize) */
+        function handleBrushEnd(event, facet) {
+            const brushSelection = event.selection
+            if (!brushSelection) {
+                return
+            }
+
+            const facetClass = getFacetClass(facet)
+            const input = document.querySelector(`.${facetClass} input`)
+            if (!input) return
+
+            const changeEvent = new Event('change')
+            input.dispatchEvent(changeEvent)
+        }
+
+
+        function getHandlebarTranslate(x) {
+            return `translate(${x}, ${HANDLEBAR_Y})`
+        }
+
+        function getHistogramSlider(
+            facet, bars, histogramWidth, histogramHeight, brushSelection, xScale
+        ) {
+            // return ['', null]
+
+            const sliderId = `igv-numeric-filter-histogram-slider___${facet.name}`
+            const [sliderLeft, sliderWidth, extentStartX, extentWidth] = getSliderStyle(bars, histogramWidth)
+
+            const defaultSelection = [
+                [brushSelection[0], 0],
+                [brushSelection[1], histogramHeight]
+            ]
+
+            const brush = d3.brushX()
+                .extent([
+                    [extentStartX, 0],
+                    [extentWidth, histogramHeight]
+                ])
+                .on('brush', (event) => handleBrushMove(event, xScale, facet))
+                .on('end', (event) => handleBrushEnd(event, facet))
+
+            const brushConf = [xScale, brush]
+
+            const histogramSliderHtml =
+                `<div>
+          <svg
+            height=${histogramHeight}
+            width=${sliderWidth}
+            style="position: absolute; top: 0; left: ${sliderLeft}px"
+            class="igv-numeric-filter-histogram-slider"
+            id=${sliderId}
+          >
+            <path
+              class="handlebar"
+              fill="#EEE"
+              opacity="0.8"
+              stroke="#000"
+              stroke-width="0.5"
+              cursor="ew-resize"
+              d="${getHandlebarPath({type: 'w'})}"
+              transform="${getHandlebarTranslate(brushSelection[0])}"
+            />
+            <path
+              class="handlebar"
+              fill="#EEE"
+              opacity="0.8"
+              stroke="#000"
+              stroke-width="0.5"
+              cursor="ew-resize"
+              d="${getHandlebarPath({type: 'e'})}"
+              transform="${getHandlebarTranslate(brushSelection[1])}"
+            />
+            <g
+              class="brush igv-facet-slider"
+              data-igv-facet-name="${facet.name}"
+            >
+            </g>
+          </svg>
+        </div>`
+
+            return [histogramSliderHtml, brushConf]
+        }
+
+        /** Histogram for distribution of numeric facet values, with tooltips or slider */
+        function getHistogram(
+            facet, bars, histogramWidth, histogramHeight, operator,
+            brushSelection, xScale, handleBrushMove, handleBrushEnd
+        ) {
+            const sliderId = `numeric-filter-histogram-slider___${facet.name}`
+            // const [sliderLeft, sliderWidth, extentStartX, extentWidth] = getSliderStyle(bars, histogramWidth)
+
+            const [sliderHtml, brushConf] = getHistogramSlider(
+                facet, bars, histogramWidth, histogramHeight, brushSelection, xScale
+            )
+
+            const histogramHtml = `
+        <div style="position: relative;">
+          <svg
+            height=${histogramHeight}
+            width=${histogramWidth}
+            style="border-bottom: 1px solid #AAA;"
+            class="numeric-filter-histogram"
+          >
+            ${bars.map((bar, i) => {
+                return (`
+                <rect
+                  fill=${bar.color}
+                  x=${bar.x}
+                  y=${bar.y}
+                  width=${bar.width}
+                  height=${bar.height}
+                />`
+                )
+            }).join('')}
+            ${sliderHtml}
+          </svg>
+        </div>`
+
+            return [histogramHtml, brushConf]
+        }
+
+        function getQuantiles(sortedNumbers, max, min, numBins = 15) {
+            const size = (max - min) / numBins
+            const quantiles = new Array(numBins).fill(0)
+
+            for (let i = 1; i < numBins + 1; i++) {
+                const prevBinNum = min + (i - 1) * size
+                const binNum = min + i * size
+                for (let j = 0; j < sortedNumbers.length; j++) {
+                    const num = sortedNumbers[j]
+                    if (prevBinNum < num && num <= binNum) {
+                        quantiles[i - 1] += 1
+                    }
+                }
+            }
+
+            return quantiles
+        }
+
+        function getStatistics(numbers) {
+            // Sort the array in ascending order
+            numbers.sort((a, b) => a - b)
+
+            // Compute the sum using a loop for faster mean calculation
+            let sum = 0
+            for (let i = 0; i < numbers.length; i++) {
+                sum += numbers[i]
+            }
+            const mean = sum / numbers.length
+
+            const max = numbers[numbers.length - 1]
+            const min = numbers[0]
+            const median = getMedian(numbers)
+
+            // Divide the array into two halves
+            const midIndex = Math.floor(numbers.length / 2)
+            const lowerHalf = numbers.slice(0, midIndex)
+            const upperHalf = numbers.length % 2 === 0
+                ? numbers.slice(midIndex)
+                : numbers.slice(midIndex + 1)
+
+            const q1 = getMedian(lowerHalf)
+            const q3 = getMedian(upperHalf)
+
+            const quantiles = getQuantiles(numbers, max, min)
+
+            return {min, q1, median, q3, max, mean, quantiles}
+        }
+
+        /**
+         * Get SVG for handlebar UI, as an affordance for resizing
+         *
+         * Inspired by https://crossfilter.github.io/crossfilter
+         */
+        function getHandlebarPath(d) {
+            const sweepFlag = d.type === 'e' ? 1 : 0
+            const x = sweepFlag ? 1 : -1
+            const y = HISTOGRAM_BAR_MAX_HEIGHT - 0.5
+            const width = SLIDER_HANDLEBAR_WIDTH
+
+            // Construct an SVG arc
+            // Docs: https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths#arcs
+            const start = `M${.5 * x},${y}`
+            const rx = width
+            const ry = width
+            const xAxisRotation = 0
+            const largeArcFlag = 0
+            const arc1X = ((width + 0.5) * x)
+            const arc1Y = y + 6
+            const arc1EndLine = `V${2 * y - width}`
+            const arc2X = 0.5 * x
+            const arc2Y = 2 * y
+            const arc1 = `A${rx},${ry} ${xAxisRotation} ${largeArcFlag} ${sweepFlag} ${arc1X},${arc1Y}`
+            const arc2 = `A${rx},${ry} ${xAxisRotation} ${largeArcFlag} ${sweepFlag} ${arc2X},${arc2Y}`
+
+            /* eslint-disable */
+            // Each handlebar has two vertical lines in it, resembling notched grooves
+            const notches = (
+                "M" + (2.5 * x) + "," + (y + (width + 2)) +
+                "V" + (2 * y - (width + 2)) +
+                "M" + (4.5 * x) + "," + (y + (width + 2)) +
+                "V" + (2 * y - (width + 2))
+            )
+            /* eslint-enable */
+
+            /* eslint-disable */
+            return (
+                start +
+                arc1 +
+                arc1EndLine +
+                arc2 +
+                "Z" +
+                notches
+            )
+            /* eslint-enable */
+        }
+
+        /** Get display attributes for histogram bars */
+        function getHistogramBarDisplayAttrs(bars, maxCount) {
+            const barRectAttrs = []
+            const maxHeight = HISTOGRAM_BAR_MAX_HEIGHT
+            bars.forEach((bar, i) => {
+                const height = maxHeight * (bar.count / maxCount)
+                const width = 11
+                const attrs = Object.assign({
+                    x: (width + 1) * i,
+                    y: maxHeight - height + 1,
+                    width,
+                    height,
+                    // color: (bar.isNull) ? '#888' : '#3D5A87'
+                    color: '#3D5A87',
+                    isNull: false // TODO: Move this upstream
+                }, bar)
+                barRectAttrs.push(attrs)
+            })
+            return barRectAttrs
+        }
+
+
+        /** Get histogram to show with numeric filter */
+        function getHistogramBars(facet) {
+            const hasNull = false // TODO: move up
+
+            let bars = facet.statistics.quantiles
+
+            let maxCount = 0
+            for (let i = 0; i < bars.length; i++) {
+                const count = bars[i]
+                if (count > maxCount) {
+                    maxCount = count
+                }
+            }
+
+            const maxValue = facet.statistics.max
+            const minValue = facet.statistics.min
+            const numBins = bars.length
+            const numBinsNullTrimmed = hasNull ? numBins - 2 : numBins
+            const binSize = (maxValue - minValue) / numBinsNullTrimmed
+
+            for (let i = 0; i < numBins; i++) {
+                const isNull = hasNull && i < 2
+                let start
+                let end
+                const indexNullTrimmed = hasNull ? i - 2 : i
+                if (isNull) {
+                    start = null
+                    end = null
+                } else {
+                    start = minValue + (binSize * indexNullTrimmed)
+                    end = minValue + (binSize * (indexNullTrimmed + 1))
+                }
+                bars[i] = {
+                    count: bars[i],
+                    start,
+                    end
+                }
+            }
+
+            bars = getHistogramBarDisplayAttrs(bars, maxCount)
+
+            return bars
+        }
+
+        function getMedian(numbers) {
+            const midIndex = Math.floor(numbers.length / 2)
+
+            // If the array has an odd length, return the middle number
+            if (numbers.length % 2 !== 0) {
+                return numbers[midIndex]
+            }
+
+            // If the array has an even length, return the average of the two middle numbers
+            return (numbers[midIndex - 1] + numbers[midIndex]) / 2
+        }
+
+        /** Expand or contract a full list of filters within a categorical facet */
+        function togglePartialCollapse(event) {
+            const target = event.target
+            const attrName = 'data-igv-is-partly-collapsed'
+            const oldIsPartlyCollapsed = target.getAttribute(attrName) === 'true'
+            const newIsPartlyCollapsed = !oldIsPartlyCollapsed
+            const facetName = target.getAttribute('data-igv-facet-name')
+
+            const filterSel = `.igv-filter[data-igv-facet-name="${facetName}"]`
+            document.querySelectorAll(filterSel).forEach((checkbox, i) => {
+                const filterDom = checkbox.parentElement.parentElement
+                if (newIsPartlyCollapsed && i >= 5) {
+                    // TODO: Consider optimizing by batching DOM writes
+                    filterDom.style = 'display: none;'
+                } else {
+                    filterDom.style = ''
+                }
+            })
+
+            const toggler = document.querySelector('.igv-facet-toggle')
+            toggler.setAttribute(attrName, newIsPartlyCollapsed)
+
+            const action = newIsPartlyCollapsed ? 'More...' : 'Less...'
+            toggler.textContent = action
+        }
+
+        function getFacetClass(facet) {
+            return `igv-facet-${facet.name}`
+        }
+
+        function getFriendlyFacetName(facet) {
+            const friendlyNames = {
+                'VT': 'Variant type',
+                'AA': 'Ancestral allele',
+                'AC': 'Allele count',
+                'AF': 'Allele frequency',
+                'AFR_AF': 'AF: African',
+                'AMR_AF': 'AF: Admixed American',
+                'EAS_AF': 'AF: East Asian',
+                'EUR_AF': 'AF: European',
+                'SAS_AF': 'AF: South Asian',
+                'DP': 'Read depth'
+            }
+
+            let friendlyName = facet.name
+            if (facet.name in friendlyNames) {
+                friendlyName = `${friendlyNames[facet.name]}`
+            }
+
+            return friendlyName
+        }
+
+        /** Change "root" checkbox for categorical facets */
+        function updateFacetCheckbox(facet) {
+            const facetName = facet.name
+            const selector = `.igv-filter[data-igv-facet-name="${facetName}"]:checked`
+            const checkedFilterCheckboxes = document.querySelectorAll(selector)
+            const facetCheckbox = document.querySelector(
+                `.igv-facet-${facetName} .igv-facet-header-checkbox`
+            )
+            const numFilters = facet.filterNames.length
+            if (checkedFilterCheckboxes.length === numFilters) {
+                facetCheckbox.checked = true
+                facetCheckbox.indeterminate = false
+            } else if (checkedFilterCheckboxes.length === 0) {
+                facetCheckbox.checked = false
+                facetCheckbox.indeterminate = false
+            } else {
+                facetCheckbox.checked = false
+                facetCheckbox.indeterminate = true
+            }
+        }
+
+            /** Toggle icon for collapsing a list; for each filter list, and all filter lists */
+        function getFacetTools(
+            isCollapsed, whatToToggle,
+            isLoaded,
+            sortKey,
+            setSortKey,
+            facet=null,
+            isRoot=false, hasNondefaultSelection, handleResetFilters
+        ) {
+            const collapseToggleChevron = getCollapseToggleChevron(isCollapsed, whatToToggle)
+            return `
+                <span class="facet-tools">
+                ${collapseToggleChevron}
+                </span>`
+        }
+
+        const chevronDown = `<svg xmlns="http://www.w3.org/2000/svg" height="14" width="14" viewBox="0 0 512 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M233.4 406.6c12.5 12.5 32.8 12.5 45.3 0l192-192c12.5-12.5 12.5-32.8 0-45.3s-32.8-12.5-45.3 0L256 338.7 86.6 169.4c-12.5-12.5-32.8-12.5-45.3 0s-12.5 32.8 0 45.3l192 192z"/></svg>`
+        const chevronRight = `<svg xmlns="http://www.w3.org/2000/svg" height="14" width="8.75" viewBox="0 0 320 512"><!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.--><path d="M310.6 233.4c12.5 12.5 12.5 32.8 0 45.3l-192 192c-12.5 12.5-32.8 12.5-45.3 0s-12.5-32.8 0-45.3L242.7 256 73.4 86.6c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0l192 192z"/></svg>`
+
+        const tooltipAttrs = {
+            'dataToggle': 'tooltip',
+            'dataDelay': '{"show": 150}' // Avoid flurry of tooltips on passing hover
+        }
+
+        /** Toggle icon for collapsing a list; for each filter list, and all filter lists */
+        function getCollapseToggleChevron(isCollapsed, whatToToggle) {
+            let toggleIcon
+            let toggleIconTooltipText
+            if (!isCollapsed) {
+                toggleIcon = chevronDown
+                toggleIconTooltipText = `Hide ${whatToToggle}`
+            } else {
+                toggleIcon = chevronRight
+                toggleIconTooltipText = `Show ${whatToToggle}`
+            }
+
+            return `
+                <span
+                class="facet-toggle-chevron"
+                data-original-title="${toggleIconTooltipText}"
+                data-toggle="${tooltipAttrs.dataToggle}"
+                data-delay="${tooltipAttrs.dataDelay}"
+                >
+                ${toggleIcon}
+                </span>`
+        }
+
+        /** Add or remove all checked item from list */
+        function handleFacetCheckboxChange(event) {
+          const target = event.target
+          const facetName = target.getAttribute('data-igv-facet-name')
+          const isChecked = target.checked
+          const selector = `.igv-filter[data-igv-facet-name="${facetName}"]`
+          const filterCheckboxes = document.querySelectorAll(selector)
+          console.log('filterCheckboxes', filterCheckboxes)
+          filterCheckboxes.forEach(filterCheckbox => {
+            filterCheckbox.checked = isChecked
+          })
+          const changeEvent = new Event('change')
+          filterCheckboxes[0].dispatchEvent(changeEvent)
+        }
+
+        function getCategoricalFacetHeader(facet) {
+          const friendlyName = getFriendlyFacetName(facet)
+          const header = `
+            <input
+                type="checkbox"
+                class="igv-facet-header-checkbox"
+                data-igv-facet-name="${facet.name}"
+                name="igv-facet-${facet.name}"
+                onChange="handleFacetCheckboxChange(event)"
+                checked
+            />
+            <span
+                class="igv-facet-header igv-facet-header-categorical"
+                data-tippy-content="${facet.description}"
+            >${friendlyName}</span>
+            ${getFacetTools()}`
+
+          return header
+        }
+
+        /**
+         * Get checkboxes with filter name and count for categorical feature metadata
+         */
+        function getCategoricalFacetHtml(facet, isPartlyCollapsed = true) {
+            // Categorical facets need > 1 filter to be useful
+            const numFilters = facet.filterNames.length
+            if (numFilters < 2) return ''
+
+            let filters = facet.filterNames
+
+            // Get list of filter checkboxes
+            const filtersHtml = filters.map((filterName, i) => {
+                let style = ''
+                if (isPartlyCollapsed && i >= 5) style = 'display: none;'
+
+                const facetFilterAttrs = `
+          data-igv-facet-name="${facet.name}"
+          data-igv-filter-name="${filterName}"`
+
+                const fullName = `${facet.name}:${filterName}`
+                const attrs = `
+          value="${filterName}"
+          name="${fullName}"
+          class="igv-filter igv-filter-categorical"
+          ${facetFilterAttrs}`
+
+                const count = facet.countsByFilterName[filterName]
+                const filterHtml = `
+          <label class="igv-filter-label" style="${style}" ${facetFilterAttrs}>
+            <div>
+              <input type="checkbox" ${attrs} checked />
+              <span class="igv-filter-label-text">${filterName}</span>
+              <span class="igv-filter-label-quantities">
+                <span class="igv-filter-count">${count}</span>
+              </span>
+            </div>
+          </label>`
+                return filterHtml
+            }).join('')
+
+            let moreOrLess = ''
+            if (numFilters > 5) {
+                moreOrLess = `
+          <a
+            class="igv-facet-toggle"
+            data-igv-facet-name="${facet.name}"
+            data-igv-is-partly-collapsed="${isPartlyCollapsed}"
+            onClick="togglePartialCollapse(event)"
+          >
+            ${isPartlyCollapsed ? 'More...' : 'Less...'}
+          </a>`
+            }
+
+            const header = getCategoricalFacetHeader(facet)
+
+            const facetClass = getFacetClass(facet)
+            // Add a facet header to the filters
+            const facetHtml = `
+                <div class="igv-facet ${facetClass}">
+                ${header}
+                ${filtersHtml}
+                ${moreOrLess}
+                </div>`
+
+            return facetHtml
+        }
+
+        function getNumericQueryInput(value, facet, filterName, style) {
+            return `
+        <input
+          type="text"
+          class="igv-filter igv-numeric-query-input igv-numeric-query-input-${filterName}"
+          data-igv-facet-name="${facet.name}"
+          name="${facet.name}:${filterName}"
+          value="${value}"
+          style="width: ${style.width}; font-size: ${style.fontSize};"
+        />`
+        }
+
+        function getPrecision(numericFacet) {
+            return numericFacet.type === 'integer' ? 0 : 2
+        }
+
+        function getAndInput2Style(operator) {
+            let andInput2Style = ''
+            if (!['between', 'not between'].includes(operator)) {
+                andInput2Style = 'display: none'
+            }
+            return andInput2Style
+        }
+
+        function getNumericQueryBuilder(facet, filterNumbers, statistics) {
+            const inputValue = statistics.min
+            const inputValue2 = statistics.max
+            const operator = 'between'
+            const precision = getPrecision(facet)
+            const styles = getResponsiveStyles(inputValue, inputValue2, operator, precision)
+
+            const hasNull = false // TODO: Move upstream
+
+            const histogramWidth = 170
+
+            const bars = getHistogramBars(facet)
+
+            // Enables converting numeric facet values to pixels, and vice versa
+            const xScale = getXScale(bars, histogramWidth, hasNull)
+            const brushSelection = [inputValue, inputValue2].map(xScale)
+
+            const [histogram, brushConf] = getHistogram(
+                facet, bars, histogramWidth, 20, operator, brushSelection, xScale
+            )
+
+            const operatorMenu = getOperatorMenu(operator, facet)
+            const input = getNumericQueryInput(statistics.min, facet, 'value', styles.input)
+            const input2 = getNumericQueryInput(statistics.max, facet, 'value2', styles.input2)
+
+            const andInput2Style = getAndInput2Style(operator)
+            andInput2 = `<span class="igv-and-input-2" style="${andInput2Style}">
+          <span>and</span>
+          ${input2}
+        <span>`
+
+            const numericQueryBuilderHtml = `
+        <div
+          class="igv-facet-numeric-query-builder"
+          data-igv-facet-name="${facet.name}"
+        >
+          ${histogram}
+          <div class="igv-facet-numeric-inputs-container">
+            ${operatorMenu}
+            ${input}
+            ${andInput2}
+          </div>
+        </div>`
+
+            return [numericQueryBuilderHtml, brushConf]
+
+        }
+
+        /**
+         * Round, source: https://stackoverflow.com/a/18358056
+         *
+         * @param {number} val
+         * @param {number} [precision]
+         * @return {number}
+         */
+        function round(val, precision = 0) {
+            return +(`${Math.round(`${val}e+${precision}`)}e-${precision}`)
+        }
+
+        /**
+         * Get width and font size for input, to help keep full value glanceable
+         */
+        function getInputStyle(inputValue, operator, precision) {
+            let width = 32
+            let fontSize = 13
+
+            const roundedNumber = round(inputValue, precision)
+            const stringValue = roundedNumber.toString()
+            let numDigits = stringValue.length
+            if (stringValue.includes('.')) {
+                numDigits -= 0.75
+            }
+
+            if (
+                numDigits > 4 &&
+                (!['between', 'not between'].includes(operator) || numDigits <= 7)
+            ) {
+                fontSize = 12
+                width += 6 * (numDigits - 4)
+            } else if (numDigits > 7) {
+                fontSize = 11
+                width += 5.5 * (numDigits - 4)
+            }
+
+            const style = {
+                width: `${width}px`,
+                fontSize: `${fontSize}px`,
+                numDigits // Not a standard style, but a helpful prop
+            }
+
+            return style
+        }
+
+        /** Make big input numbers fit on one more more often */
+        function getResponsiveStyles(inputValue, inputValue2, operator, precision) {
+            const inputStyle = getInputStyle(inputValue, operator, precision)
+            const inputStyle2 = getInputStyle(inputValue2, operator, precision)
+            const andStyle = {marginLeft: '4px'}
+            const totalDigits = inputStyle.numDigits + inputStyle2.numDigits
+            if (totalDigits > 14) {
+                andStyle.marginLeft = '2px'
+                andStyle.marginRight = '-2px'
+                if (totalDigits > 16) {
+                    andStyle.fontSize = 11.5
+                }
+            }
+            const styles = {
+                input: inputStyle,
+                input2: inputStyle2,
+                and: andStyle
+            }
+            return styles
+        }
+
+        /** Expand or contract list of population-level allele frequency facets */
+        function toggleAfCollapse(event) {
+            const target = event.target
+            const attrName = 'data-igv-is-af-collapsed'
+            const oldIsAfCollapsed = target.getAttribute(attrName) === 'true'
+            const newIsAfCollapsed = !oldIsAfCollapsed
+
+            const facetSel = `.igv-facet-population-af`
+            document.querySelectorAll(facetSel).forEach(facetDom => {
+                if (newIsAfCollapsed) {
+                    facetDom.style = 'display: none;'
+                } else {
+                    facetDom.style = ''
+                }
+            })
+
+            const afToggler = document.querySelector('.igv-population-af-toggle')
+            afToggler.setAttribute(attrName, newIsAfCollapsed)
+
+            const action = newIsAfCollapsed ? 'Show' : 'Hide'
+            afToggler.textContent = `${action} by population`
+        }
+
+        function getNumericFacetHtml(facet) {
+            if (
+                facet.filterNumbers.length === 0 ||
+                facet.statistics.min === facet.statistics.max
+            ) {
+                return ''
+            }
+
+            const filterNumbers = facet.filterNumbers
+            const statistics = facet.statistics
+
+            const [filtersHtml, brushConf] = getNumericQueryBuilder(facet, filterNumbers, statistics)
+
+            const friendlyName = getFriendlyFacetName(facet)
+
+            // Show only general AF, not population AFs, by default
+            const isPopulationAf = facet.name.endsWith('_AF')
+            const display = isPopulationAf ? 'display: none;' : ''
+
+            const isGeneralAf = facet.name === 'AF'
+            let populationAfToggle = ''
+            if (isGeneralAf) {
+                populationAfToggle = `
+          <div
+            class="igv-population-af-toggle"
+            data-igv-is-af-collapsed="true"
+            onClick="toggleAfCollapse(event)"
+          >
+            Show by population
+          </div>`
+            }
+
+            let facetClass = `igv-facet-${facet.name}`
+            if (isPopulationAf) {
+                facetClass += ' igv-facet-population-af'
+            }
+
+            const facetHtml = `
+        <div class="igv-facet ${facetClass} igv-facet-numeric" style="${display}">
+            <span
+                class="igv-facet-header"
+                data-tippy-content="${facet.description}"
+            >${friendlyName}</span>
+            ${filtersHtml}
+            ${populationAfToggle}
+        </div>`
+
+            return [facetHtml, brushConf]
+        }
+
+        function getFacetsHtml(facets) {
+
+            const brushesByNumericFacetName = {}
+
+            const facetList = facets.map(facet => {
+                let facetHtml
+                if (facet.type === 'categorical') {
+                    facetHtml = getCategoricalFacetHtml(facet)
+                } else {
+                    [facetHtml, brushConf] = getNumericFacetHtml(facet)
+                    if (brushConf) {
+                        brushesByNumericFacetName[facet.name] = brushConf
+                    }
+                }
+                return facetHtml
+            }).join('')
+
+            const facetsHtml = `<div>${facetList}</div>`
+            return [facetsHtml, brushesByNumericFacetName]
+        }
+
+        function writeNumericFacetSliderBrushes(facets, brushesByNumericFacetName) {
+            facets.forEach(facet => {
+                if (facet.name in brushesByNumericFacetName) {
+                    const [xScale, brush] = brushesByNumericFacetName[facet.name]
+                    const selector = `.igv-facet-slider[data-igv-facet-name="${facet.name}"]`
+                    const brushDom = document.querySelector(selector)
+                    const min = facet.statistics.min
+                    const max = facet.statistics.max
+                    d3.select(selector)
+                        .call(brush)
+                        .call(brush.move, [min, max].map(xScale))
+                }
+            })
+        }
+
+        /** Helper to move brush when input values change (by user, not programmatic trigger) */
+        function updateBrushSelection(facet, brushesByNumericFacetName, facetSelections) {
+            const facetName = facet.name
+            const [xScale, brush] = brushesByNumericFacetName[facetName]
+            const selector = `.igv-facet-slider[data-igv-facet-name="${facetName}"]`
+            const rawBrushSelection = facetSelections[facetName][0][1]
+            const parseNumber = facet.type === 'integer' ? parseInt : parseFloat
+            const brushSelection = rawBrushSelection.map(n => parseNumber(n))
+            d3.select(selector)
+                .call(brush.move, brushSelection.map(xScale))
+        }
+
+
+        /*********************************************************************************************************/
+        // J robinson changes and additions
+
+        /**
+         * Initialize interactive filtering in IGV, for the given track
+         * @param trackToFilter - an IGV track object
+         */
+        function initIgvFacets(trackToFilter) {
+
+            const facets = initFacets(trackToFilter)
+
+            const [facetsHtml, brushesByNumericFacetName] = getFacetsHtml(facets)
+
+            const filterContainerDom = document.querySelector('.igv-filters-container')
+            filterContainerDom.innerHTML = ''
+            filterContainerDom.insertAdjacentHTML('beforeend', facetsHtml)
+
+            // Initialize tooltips
+            tippy('.igv-facet-header[data-tippy-content]', {allowHTML: true})
+
+            writeNumericFacetSliderBrushes(facets, brushesByNumericFacetName)
+
+            const filterChange = () => {
+                const selection = getSelection()
+                const filterFunction = buildFilter(selection, facets)
+
+                const t1 = Date.now()
+                trackToFilter.filter = filterFunction
+                const t2 = Date.now()
+                console.log(`Apply filter: ${t2 - t1}`)
+
+                const t3 = Date.now()
+                updateFilterCounts(trackToFilter, facets)
+                const t4 = Date.now()
+                console.log(`Update filter counts: ${t4 - t3}`)
+            }
+
+            // Apply initial filter, which might filter a few features
+            filterChange()
+
+            const filtersDom = document.querySelectorAll('.igv-filter')
+            filtersDom.forEach(filterDom => {
+                filterDom.addEventListener('change', (event) => {
+                    const facetName = filterDom.getAttribute('data-igv-facet-name')
+                    const facet = facets.find(facet => facet.name === facetName)
+                    if (event.isTrusted && facetName in brushesByNumericFacetName) {
+                        updateBrushSelection(facet, brushesByNumericFacetName, selection)
+                    }
+                    if (facet.type === 'categorical') {
+                        updateFacetCheckbox(facet)
+                    }
+                    filterChange()
+                })
+            })
+        }
+
+        function getRefinedDescription(facet, facetName) {
+            let prose = facet.Description
+            if (facetName === 'VT') {
+                prose = 'Type of variant'
+            } else if (facetName === 'AA') {
+                // Original is unpolished; remove redundant field name; standardize case, spacing
+                // "Ancestral Allele. Format: AA|REF|ALT|IndelType. AA: Ancestral allele, REF:Reference Allele, ALT:Alternate Allele, IndelType:Type of Indel (REF, ALT and IndelType are only defined for indels)"
+                prose = (
+                'Format: AA | REF | ALT | IndelType <br/>' +
+                'AA: Ancestral allele, REF: Reference allele, ALT: Alternate allele, IndelType: Type of Indel. <br/>' +
+                'REF, ALT and IndelType are only defined for indels.'
+                )
+            }
+
+            const description =
+                `INFO field: ${facetName}
+                <br/>
+                ${prose}`
+
+            return description
+        }
+
+        /**
+         * Initialize facets and filters for the current genomic frame
+         *
+         * Output:
+         *  [
+         *     {
+         *       "name": <String>, // Internal name of facet, e.g. "VT"
+         *
+         *       "displayName": <String>, // e.g. "Variant type" TODO
+         *
+         *       "type": <String> // "categorical" or "integer" or "float"
+         *
+         *       // For categorical: names of filters in facet
+         *       // The index of these names correspond to the integer value at the
+         *       // appropriate position in the `features` array.
+         *       "filterNames": [<String>],
+         *
+         *       // For categorical: number of features satisfying each filter
+         *       "countsByFilterName": {
+         *          <String>: <Integer>
+         *       }
+         *
+         *      // For integer or float: numeric values observed for this facet
+         *      "filterNumbers": [<Number>],
+         *
+         *      "statistics": {
+         *        "min": <Number>,
+         *        "q1": <Number>,
+         *        "median": <Number>,
+         *        "q3": <Number>,
+         *        "max": <Number>
+         *      }
+         *     }
+         *  ]
+         *
+         */
+        function initFacets(trackToFilter) {
+
+            // Populate facets model, except for filterNames array values
+
+            const headInfo = trackToFilter.getFilterableAttributes()
+            const rawDimensions = Object.keys(headInfo)
+
+            const facetOrder = [
+                'VT',
+                'AF', 'AFR_AF', 'AMR_AF', 'EAS_AF', 'EUR_AF', 'SAS_AF',
+                'DP',
+                'AA',
+                'AC'
+            ]
+
+            const dimensions = rawDimensions.sort((a, b) => {
+                const indexA = facetOrder.indexOf(a)
+                const indexB = facetOrder.indexOf(b)
+                if (indexA === -1) return 100000
+                if (indexB === -1) return -100000
+                return indexA - indexB
+            })
+
+            const facets = []
+            dimensions.forEach(dimension => {
+                const igvFacet = headInfo[dimension]
+                // string, flag, integer, or float
+                const igvType = igvFacet.Type.toLowerCase()
+                const type = ['string', 'flag'].includes(igvType) ? 'categorical' : igvType
+                const description = getRefinedDescription(igvFacet, dimension)
+                const facet = {'name': dimension, type, description}
+                if (type === 'categorical') {
+                    facet.filterNames = []         // e.g SNP, INDEL
+                    facet.countsByFilterName = {}
+                } else {
+                    facet.filterNumbers = []
+                    facet.statistics = {}
+                }
+                facets.push(facet)
+            })
+
+            // Populate features, and (for each facet) filterNames
+            const featuresInFrame = trackToFilter.getInViewFeatures()
+
+            for (let igvFeature of featuresInFrame) {
+
+                const info = igvFeature.info
+
+                for (let facet of facets) {
+
+                    const facetName = facet.name
+
+                    // Not all features will have all facets
+                    if (facetName in info) {
+                        const rawValue = info[facetName]
+                        if (facet.type === 'categorical') {
+                            if (!facet.filterNames.includes(rawValue)) {
+                                // Populate filterNames
+                                facet.filterNames.push(rawValue)
+                                facet.countsByFilterName[rawValue] = 0
+                            }
+                            facet.countsByFilterName[rawValue] += 1
+                        } else {
+                            const isFloat = facet.type === 'float'
+                            const value = isFloat ? parseFloat(rawValue) : parseInt(rawValue)
+                            facet.filterNumbers.push(value)
+                        }
+                    }
+                }
+            }
+
+            // Populate statistics for numeric facets
+            for (let facet of facets) {
+                if (facet.type !== 'categorical') {
+                    const {min, q1, median, q3, max, mean, quantiles} =
+                        getStatistics(facet.filterNumbers)
+                    facet.statistics = {min, q1, median, q3, max, mean, quantiles}
+                }
+            }
+
+            return facets
+        }
+
+        /**
+         * Build a filter function taking an igvFeature as an argument and returning true for "pass" (show feature),
+         * or false for fail (hide feature)
+         *
+         * @param selection - The currently selected values for all filter facets
+         * @param facets - List of objects describing filter facets
+         *
+         * @returns {(function(*): (boolean))|*}
+         */
+        function buildFilter(selection, facets) {
+
+            return (igvFeature) => {
+
+                const info = igvFeature.info
+
+                for (let facet of facets) {
+
+                    const facetName = facet.name
+                    if (facetName in selection) {
+
+                        const rawValue = info[facetName]
+                        const facetSelection = selection[facetName]
+
+                        if (facet.type === 'categorical') {
+                            //const filter = new Set(facetSelection)
+                            if (!facetSelection.includes(rawValue)) {
+                                return false
+                            }
+
+                        } else {
+                            const parser = facet.type === 'float' ? parseFloat : parseInt
+                            const value = parser(rawValue)
+
+                            // TODO -- only between and not-between currently supported, fill out for other operators
+                            const op = facetSelection[0][0]    // JTR - I don't really understand this structure
+                            const selectionValues = facetSelection[0][1]
+                            let v1
+                            let v2
+                            switch (op) {
+                                case 'between':
+                                    v1 = parser(selectionValues[0])
+                                    v2 = parser(selectionValues[1])
+                                    if (value < v1 || value > v2) {
+                                        return false
+                                    }
+                                    break
+                                case 'not between':
+                                    v1 = parser(selectionValues[0])
+                                    v2 = parser(selectionValues[1])
+                                    if (value > v1 || value < v2) {
+                                        return false
+                                    }
+                                    break
+
+                                default:
+                                // Do nothing (pass by default)
+                            }
+                        }
+                    }
+                }
+                return true  // All filters passed
+            }
+        }
+
+
+        /** Get counts for each filter, in each facet */
+        function updateFilterCounts(trackToFilter, facets) {
+
+            const t0 = Date.now()
+
+            const featuresInView = trackToFilter.getInViewFeatures()
+
+            const t1 = Date.now()
+            console.log(`   getInViewFeatures: ${t1 - t0}`)
+
+            const t2 = Date.now()
+
+            // Reset counts
+            for (let facet of facets) {
+                if (facet.type === 'categorical') {
+                    facet.countsByFilterName = {}
+                    for (let filterName of facet.filterNames) {
+                        facet.countsByFilterName[filterName] = 0
+                    }
+                } else {
+                    facet.filterNumbers = []
+                    facet.statistics = {}
+                }
+            }
+
+            const t3 = Date.now()
+            console.log(`   reset counts: ${t3 - t2}`)
+
+            const t4 = Date.now()
+            // Loop through features counting by filter
+            for (let igvFeature of featuresInView) {
+
+                const info = igvFeature.info
+                for (let facet of facets) {
+
+                    const facetName = facet.name
+                    // Not all features will have all facets
+                    if (facetName in info) {
+                        const rawValue = info[facetName]
+                        if (facet.type === 'categorical') {
+                            facet.countsByFilterName[rawValue] += 1
+                        } else {
+                            const isFloat = facet.type === 'float'
+                            const value = isFloat ? parseFloat(rawValue) : parseInt(rawValue)
+                            facet.filterNumbers.push(value)
+                        }
+                    }
+                }
+            }
+
+            // Populate statistics for numeric facets
+            for (let facet of facets) {
+                if (facet.type !== 'categorical') {
+                    const {min, q1, median, q3, max, mean, quantiles} = getStatistics(facet.filterNumbers)
+                    facet.statistics = {min, q1, median, q3, max, mean, quantiles}
+                }
+            }
+
+            const t5 = Date.now()
+            console.log(`   count by filter: ${t5 - t4}`)
+
+            const t6 = Date.now()
+            // Update dom
+            for (let facet of facets) {
+
+                //  Object.entries(filterCounts).forEach(([facetName, countsByFilter], i) => {
+                //       const facet = facets[i]
+                if (facet.type === 'categorical') {
+                    Object.entries(facet.countsByFilterName).forEach(([filterName, count]) => {
+                        const filterSel =
+                            `.igv-filter-label[data-igv-facet-name="${facet.name}"][data-igv-filter-name="${filterName}"] ` +
+                            `.igv-filter-count`
+                        const countDom = document.querySelector(filterSel)
+                        if (countDom) {
+                            countDom.textContent = count
+                        } else {
+                            //console.info(`Missing dom element for ${facet.name} : ${filterName}`)
+                        }
+                    })
+                }
+            }
+
+            const t7 = Date.now()
+            console.log(`   updateDom: ${t7 - t6}`)
+
+        }
+
+
+    </script>
+</head>
+
+<body>
+
+<h1>Interactive filtering in IGV</h1>
+<div class="igv-filters-container">
+</div>
+
+
+<div id="igvDiv" style="float: left; width: calc(100% - 300px);"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js"
+
+    const options =
+        {
+            // Example of fully specifying a reference .  We could alternatively use  "genome: 'hg19'"
+            reference: {
+                "id": "hg19",
+                "name": "Human (CRCh37/hg19)",
+                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
+            },
+            locus: "19:11,199,138-11,245,496",
+            tracks:
+                [
+                    {
+                        name: "Phase 3 WGS variants",
+                        type: "variant",
+                        format: "vcf",
+                        visibilityWindow: 3000000,
+                        url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
+                        indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi"
+                    },
+                    {
+                        name: "Genes",
+                        type: "annotation",
+                        format: "bed",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
+                        order: Number.MAX_VALUE,
+                        visibilityWindow: 300000000,
+                        displayMode: "EXPANDED"
+                    }
+                ]
+
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    window.igv = igv
+
+    const browser = await igv.createBrowser(igvDiv, options)
+    window.igvBrowser = browser
+
+    // Specify track(s) to filter, this could be a specific track or, for example, all tracks of type variant.
+    // The current demo supports a single track only
+
+    const trackToFilter = window.igvBrowser.findTracks('name', 'Phase 3 WGS variants')[0]
+
+    // To fetch all variant tracks
+    //const tracksToFilter = window.igvBrowser.findTracks('type', 'variant')
+
+    // Update the facet widgets on new data load.  This is relatively infrequent
+    browser.on('featuresloaded', ({track}) => {
+        if (track === trackToFilter) {
+            initIgvFacets(trackToFilter)
+        }
+    })
+
+    // Update the facet widgets no locus change.  Changing the locus changes the features in view.  This can be
+    // relatively frequent,  many times a second if dragging the track.
+    browser.on('locuschange', () => {
+        // Update counts
+        initIgvFacets(trackToFilter)
+    })
+
+</script>
+
+</body>
+
+</html>
