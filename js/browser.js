@@ -85,15 +85,6 @@ class Browser {
         this.root = DOMUtils.div({class: 'igv-container'})
         shadowRoot.appendChild(this.root)
 
-        // spinner
-        this.spinner = DOMUtils.div({class: 'igv-loading-spinner-container'})
-        this.root.appendChild(this.spinner)
-
-        this.spinner.appendChild(DOMUtils.div())
-        this.spinner.style.width = '64px'
-        this.spinner.style.height = '64px'
-        this.stopSpinner()
-
         this.alert = new Alert(this.root)
 
         this.columnContainer = DOMUtils.div({class: 'igv-column-container'})
@@ -167,14 +158,6 @@ class Browser {
 
     get doShowROITable() {
         return this.roiManager.roiTableIsVisible()
-    }
-
-    startSpinner() {
-        this.spinner.style.display = 'flex'
-    }
-
-    stopSpinner() {
-        this.spinner.style.display = 'none'
     }
 
     initialize(config) {
