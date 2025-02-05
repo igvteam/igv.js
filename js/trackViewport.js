@@ -260,6 +260,11 @@ class TrackViewport extends Viewport {
                 this.loading = false
                 this.hideMessage()
                 this.stopSpinner()
+
+                // Notify listeners, like any interactive filtering handlers,
+                // that data is ready for this track.
+                this.browser.fireEvent('featuresloaded', [this])
+
                 return this.featureCache
             }
         } catch (error) {

@@ -55,6 +55,7 @@ class Variant {
         this.init()
     }
 
+
     getAttributeValue(key) {
         if (STANDARD_FIELDS.has(key)) {
             key = STANDARD_FIELDS.get(key)
