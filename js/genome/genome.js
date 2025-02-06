@@ -69,19 +69,18 @@ class Genome {
 
         if (config.cytobandBbURL) {
             this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
-            if (!this.chromosomeNames) {
-                this.chromosomeNames = await this.cytobandSource.getChromosomeNames()
-            }
         } else if (config.cytobandURL) {
             this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
-            if (!this.chromosomeNames) {
-                this.chromosomeNames = await this.cytobandSource.getChromosomeNames()
-            }
-            if (this.chromosomes.size === 0) {
-                const c = await this.cytobandSource.getChromosomes()
-                for (let chromosome of c) {
-                    this.chromosomes.set(c.name, c)
-                }
+        }
+
+        // Last resort for chromosome information -- retrieve it from the cytoband source if supported
+        if (!this.chromosomeNames && typeof this.cytobandSource.getChromosomeNames === 'function') {
+            this.chromosomeNames = await this.cytobandSource.getChromosomeNames()
+        }
+        if (this.chromosomes.size === 0 && typeof this.cytobandSource.getChromosomes === 'function') {
+            const c = await this.cytobandSource.getChromosomes()
+            for (let chromosome of c) {
+                this.chromosomes.set(c.name, c)
             }
         }
 
