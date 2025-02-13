@@ -624,7 +624,7 @@ class VariantTrack extends TrackBase {
                 const colorByItems = this._colorByItems
                 menuItems.push('<hr/>')
                 const element = createElementWithString('<div class="igv-track-menu-category igv-track-menu-border-top">')
-                element.text('Color by:')
+                element.textContent = 'Color by:'
                 menuItems.push({name: undefined, element, click: undefined, init: undefined})
                 for (let key of colorByItems.keys()) {
                     const selected = (this.colorBy === key)
