@@ -61,7 +61,6 @@ class InteractionTrack extends TrackBase {
         showBlocks: true,
         blockHeight: 3,
         thickness: 1,
-        color: "rgb(180,25,137)",
         alpha: 0.02,
         logScale: true,
     }
@@ -75,11 +74,11 @@ class InteractionTrack extends TrackBase {
         super.init(config)
 
         // Backward compatibility hack, arcOrientation was previously a boolean, now a string
-        if(config.arcOrientation === false) {
+        if (config.arcOrientation === false) {
             this.arcOrientation = "DOWN"
-        } else if(config.arcOrientation === true) {
+        } else if (config.arcOrientation === true) {
             this.arcOrientation = "UP"
-        } else if(config.arcOrientation) {
+        } else if (config.arcOrientation) {
             this.arcOrientation = config.arcOrientation.toUpperCase()
         } else {
             this.arcOrientation = "UP"
@@ -142,7 +141,7 @@ class InteractionTrack extends TrackBase {
     }
 
     get supportsWholeGenome() {
-        return typeof this.featureSource.supportsWholeGenome === 'function' ? this.featureSource.supportsWholeGenome() : true;
+        return typeof this.featureSource.supportsWholeGenome === 'function' ? this.featureSource.supportsWholeGenome() : true
     }
 
     async getFeatures(chr, start, end) {
@@ -395,8 +394,17 @@ class InteractionTrack extends TrackBase {
                     // }
 
                     const counterClockwise = direction
-                    const color = feature.color || this.color
-                    ctx.strokeStyle = color
+
+                    let color
+                    if (typeof this.color === 'function') {
+                        color = this.color(feature)
+                    } else {
+                        color = this.color || feature.color || DEFAULT_ARC_COLOR
+                    }
+
+                    const strokeColor = this.config.useScore ? getAlphaColor(color, scoreShade(feature.score)) : color
+
+                    ctx.strokeStyle = strokeColor
                     ctx.lineWidth = feature.thickness || this.thickness || 1
 
                     if (true === ctx.isSVG) {
