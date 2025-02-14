@@ -324,7 +324,6 @@ class Browser {
         if (container) {
             const svg = document.createElement("svg")
             svg.innerHTML = svgString
-            container.append(svg)
             container.appendChild(svg)
         }
 
@@ -2062,7 +2061,6 @@ class Browser {
      */
     endTrackDrag() {
         if (this.dragTrack) {
-            // this.dragTrack.$trackDragScrim.hide();
             this.dragTrack = undefined
             this.fireEvent('trackorderchanged', [this.getTrackOrder()])
         } else {
