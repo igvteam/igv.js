@@ -20,7 +20,7 @@ class SliderDialog {
         // dialog label
         this.label = DOMUtils.div({class: 'igv-ui-generic-dialog-one-liner'})
         this.container.appendChild(this.label)
-        this.label.text = 'Unlabeled'
+        this.label.textContent = 'Unlabeled'
 
         // input container
         this.input_container = DOMUtils.div({class: 'igv-ui-generic-dialog-input'})

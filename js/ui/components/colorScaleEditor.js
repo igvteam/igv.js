@@ -50,7 +50,7 @@ class ColorScaleEditor {
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(minTextbox.row)
+        table.appendChild(minTextbox.row)
 
         const midTextbox = new TextBoxRow({
             label: "Mid value",
@@ -60,7 +60,7 @@ class ColorScaleEditor {
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(midTextbox.row)
+        table.appendChild(midTextbox.row)
 
         const maxTextbox = new TextBoxRow({
             label: "Max value",
@@ -70,7 +70,7 @@ class ColorScaleEditor {
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(maxTextbox.row)
+        table.appendChild(maxTextbox.row)
 
 
         const colorElem = new ColorPickerRow({
@@ -81,7 +81,7 @@ class ColorScaleEditor {
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(colorElem.row)
+        table.appendChild(colorElem.row)
 
         const midColorElem = new ColorPickerRow({
             label: "Mid color",
@@ -91,7 +91,7 @@ class ColorScaleEditor {
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(midColorElem.row)
+        table.appendChild(midColorElem.row)
 
         const highColorElem = new ColorPickerRow({
             label: "Max color",
@@ -101,7 +101,7 @@ class ColorScaleEditor {
                 paintLegend(legend, newColorScale)
             }
         })
-        table.append(highColorElem.row)
+        table.appendChild(highColorElem.row)
 
         const divergingCheckbox = new Checkbox({
             selected: "diverging" === colorScale.type,
@@ -154,7 +154,7 @@ class ColorScaleEditor {
             content: {elem: panel}, okHandler
         }
         const dialog = new Dialog(config)
-        parent.append(dialog.elem)
+        parent.appendChild(dialog.elem)
         DOMUtils.show(dialog.elem)
 
         paintLegend(legend, newColorScale)
