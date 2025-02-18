@@ -18,18 +18,15 @@
 
     var options =
         {
-            //blatServerURL: "http://localhost:8000/blat.php",
-            genome: "hg19",
-            locus: "myc",
+            genome: "hg38",
+            locus: "chr9:113,290,871-113,291,035",
             tracks:
                 [
                     {
                         type: 'alignment',
                         format: 'cram',
-                        url: 'https://s3.amazonaws.com/1000genomes/phase3/data/HG00096/exome_alignment/HG00096.mapped.ILLUMINA.bwa.GBR.exome.20120522.bam.cram',
-                        indexURL: 'https://s3.amazonaws.com/1000genomes/phase3/data/HG00096/exome_alignment/HG00096.mapped.ILLUMINA.bwa.GBR.exome.20120522.bam.cram.crai',
-                        //url: '../../downloads/igv-js-bug/normal.cram',
-                        //indexURL: '../../downloads/igv-js-bug/normal.cram.crai',
+                        url: '../../test/data/cram/archived.cram',
+                        indexURL: '../../test/data/cram/archived.cram.crai',
                         name: 'HG00096',
                         displayMode: 'SQUISHED',
                         height: 300,
