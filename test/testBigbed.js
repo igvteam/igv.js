@@ -161,7 +161,7 @@ table chromatinInteract
 
     test("clinvar", async function () {
 
-        this.timeout(10000)
+        this.timeout(20000)
 
         const url = "https://hgdownload.soe.ucsc.edu/gbdb/hg38/bbi/clinvar/clinvarMain.bb",
             chr = "chr22",
