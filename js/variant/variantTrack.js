@@ -31,7 +31,7 @@ import {createCheckbox} from "../igv-icons.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import SampleInfo from "../sample/sampleInfo.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
-import {FileUtils, StringUtils, IGVColor, FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
+import {FileUtils, IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {packFeatures} from "../feature/featureUtils.js"
@@ -987,38 +987,6 @@ class VariantTrack extends TrackBase {
                 this.trackView.stopSpinner()
             }
         }, 100)
-    }
-
-    // Methods to support filtering api
-    set filter(f) {
-        this._filter = f
-        // TODO - repack?  Repacking will cause features to move vertically, which might be unexpected
-        //this._repackCachedFeatures()
-        this.trackView.repaintViews()
-    }
-
-    getInViewFeatures() {
-        const inViewFeatures = []
-        for (let viewport of this.trackView.viewports) {
-            if (viewport.isVisible()) {
-                const referenceFrame = viewport.referenceFrame
-                const chr = referenceFrame.chr
-                const start = referenceFrame.start
-                const end = start + referenceFrame.toBP(viewport.getWidth())
-
-                // We use the cached features  to avoid async load.  If the
-                // feature is not already loaded it is by definition not in view.
-                if (viewport.cachedFeatures) {
-                    const viewFeatures = FeatureUtils.findOverlapping(viewport.cachedFeatures, start, end)
-                    for (let f of viewFeatures) {
-                        if(!this._filter || this._filter(f)) {
-                            inViewFeatures.push(f)
-                        }
-                    }
-                }
-            }
-        }
-        return inViewFeatures
     }
 
     getFilterableAttributes() {

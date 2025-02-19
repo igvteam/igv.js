@@ -166,6 +166,14 @@ suite("testVariant", function () {
         const features = await track.getFeatures(chr, start, end)
 
         assert.equal(features.length, 3)
+
+        const attrs = track.getFilterableAttributes();
+        assert.ok(attrs);
+        assert.equal(Object.keys(attrs).length, 11)
+        const strObj = attrs["STR"]
+        assert.equal(strObj["Number"], "0")
+        assert.equal(strObj["Type"], "Flag")
+
     })
 
     test("tabix indexed - large header", async function () {
