@@ -105,30 +105,6 @@ class FeatureTrack extends TrackBase {
 
     }
 
-    set filter(f) {
-        this._filter = f
-        this._repackCachedFeatures()
-        this.trackView.repaintViews()
-    }
-
-
-    inViewFeatures() {
-        const inViewFeatures = []
-        for (let viewport of this.trackView.viewports) {
-            if (viewport.isVisible() && viewport.featureCache) {
-                const referenceFrame = viewport.referenceFrame
-                const start = referenceFrame.start
-                const end = start + referenceFrame.toBP(viewport.getWidth())
-                const viewFeatures = FeatureUtils.findOverlapping(viewport.featureCache.features, start, end)
-                for (let f of viewFeatures) {
-                    inViewFeatures.push(f)
-                }
-            }
-        }
-        return inViewFeatures
-    }
-
-
     /**
      * Return true if this track can be searched for genome location by feature property.
      * This track is searchable if its featureSource is searchable.
