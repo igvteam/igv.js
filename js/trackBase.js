@@ -658,7 +658,7 @@ class TrackBase {
     }
 
     /**
-     * Return features visible in current viewports. 
+     * Return features visible in current viewports.
      *
      * @returns {*[]}
      */
