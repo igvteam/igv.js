@@ -20,7 +20,7 @@ class DataRangeDialog {
         attachDialogCloseHandlerWithParent(header, () => {
             this.minimumInput.value = '';
             this.maximumInput.value = '';
-            this.container.style.display = 'none';
+            this.hide()
         })
 
         // Create minimum input
@@ -66,9 +66,7 @@ class DataRangeDialog {
         this.cancelButton.addEventListener('click', () => {
             this.minimumInput.value = '';
             this.maximumInput.value = '';
-            this.container.style.left = '0px';
-            this.container.style.top = '0px';
-            this.container.style.display = 'none';
+            this.hide()
         });
 
         // Make the container draggable
@@ -150,9 +148,12 @@ class DataRangeDialog {
             this.maximumInput.value = '';
         }
 
-        // Reset the dialog position and hide it
-        this.container.style.left = '0px';
-        this.container.style.top = '0px';
+        this.hide()
+    }
+
+    hide(){
+        this.container.style.top = '20%';
+        this.container.style.left = '75%';
         this.container.style.display = 'none';
     }
 
