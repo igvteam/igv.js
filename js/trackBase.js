@@ -535,7 +535,7 @@ class TrackBase {
 
             menuItems.push('<hr/>')
 
-            const dialogPresentationHandler = e => {
+            function dialogPresentationHandler(e) {
 
                 if (this.trackView.track.selected) {
                     this.browser.dataRangeDialog.configure(this.trackView.browser.getSelectedTrackViews())
@@ -549,7 +549,7 @@ class TrackBase {
 
             if (this.logScale !== undefined) {
 
-                const logScaleHandler = () => {
+                function logScaleHandler() {
                     this.logScale = !this.logScale
                     this.trackView.repaintViews()
                 }
@@ -557,13 +557,13 @@ class TrackBase {
                 menuItems.push({element: createCheckbox("Log scale", this.logScale), click: logScaleHandler})
             }
 
-            const autoScaleHandler = () => {
+            function autoScaleHandler() {
                 this.autoscaleGroup = undefined
                 this.autoscale = !this.autoscale
                 this.browser.updateViews()
             }
 
-            menuItems.push({element: createCheckbox("Log scale", this.autoscale), click: autoScaleHandler})
+            menuItems.push({element: createCheckbox("Autoscale", this.autoscale), click: autoScaleHandler})
         }
 
         return menuItems
