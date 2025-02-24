@@ -59,17 +59,15 @@ class TrackViewport extends Viewport {
 
     }
 
-    isZoomLevelRenderable() {
+    didPresentZoomInNotice() {
 
         const a = !(undefined === this.zoomInNoticeElement)
-        let b
-        if (true === a) {
-            b = 'none' === this.zoomInNoticeElement.style.display
-        } else {
-            b = false
+
+        if (false === a) {
+            return a
         }
 
-        return a === true && b === true
+        return 'flex' === this.zoomInNoticeElement.style.display
     }
 
     setContentHeight(contentHeight) {
@@ -515,7 +513,7 @@ class TrackViewport extends Viewport {
 
     renderSVGContext(context, {deltaX, deltaY}, includeLabel = true) {
 
-        if (true === this.isZoomLevelRenderable()) {
+        if (false === this.didPresentZoomInNotice()) {
 
             const {width, height} = this.viewportElement.getBoundingClientRect()
 
