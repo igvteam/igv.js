@@ -98,29 +98,26 @@ class DataRangeDialog {
             this.maximumInput.value = dataRange.max;
         }
 
-        // Remove existing event listeners from minimum input
         this.minimumInput.onkeyup = null;
-        this.minimumInput.addEventListener('keyup', (e) => {
+        this.minimumInput.onkeyup = e => {
             if (e.keyCode === 13) { // Enter key
                 this.processResults(trackViewOrTrackViewList);
             }
             e.stopImmediatePropagation();
-        });
+        }
 
-        // Remove existing event listeners from maximum input
         this.maximumInput.onkeyup = null;
-        this.maximumInput.addEventListener('keyup', (e) => {
+        this.maximumInput.onkeyup = e=> {
             if (e.keyCode === 13) { // Enter key
                 e.stopImmediatePropagation();
                 this.processResults(trackViewOrTrackViewList);
             }
-        });
+        }
 
-        // Remove existing event listeners from OK button
-        this.okButton.onclick = null;
-        this.okButton.addEventListener('click', () => {
-            this.processResults(trackViewOrTrackViewList);
-        });
+        this.okButton.onclick = null
+        this.okButton.onclick = () => {
+            this.processResults(trackViewOrTrackViewList)
+        }
     }
 
     processResults(trackViewOrTrackViewList) {
