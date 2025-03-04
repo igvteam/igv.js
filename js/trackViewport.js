@@ -529,7 +529,6 @@ class TrackViewport extends Viewport {
 
             const {start, bpPerPixel} = this.referenceFrame
             const pixelXOffset = Math.round((start - this.referenceFrame.start) / bpPerPixel)
-
             const config =
                 {
                     context,
