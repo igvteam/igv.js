@@ -283,7 +283,9 @@ class Browser {
     toSVG() {
 
         const {x, y, width, height} = this.columnContainer.getBoundingClientRect()
-        const h_render = height
+
+        const h_render = 8000      // <= DO NOT USE 'height' here
+
         const config =
             {
                 width,
@@ -310,8 +312,8 @@ class Browser {
         // ROI -> SVG
         delta.deltaX = x
 
-        this.roiManager.renderSVGContext(this.columnContainer, context, delta)
-
+        // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
+        context.setHeight(height)
 
         return context.getSerializedSvg(true)
     }
