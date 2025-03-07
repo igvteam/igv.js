@@ -2,6 +2,7 @@ import * as DOMUtils from "./utils/dom-utils.js"
 import Panel from "./components/panel.js"
 import Dialog from "./components/dialog.js"
 import {colorPalettes} from "../util/colorPalletes.js"
+import TrackView from "../trackView.js"
 
 const colorPickerTrackTypeSet = new Set(['bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact', 'shoebox'])
 
@@ -66,12 +67,12 @@ class MenuUtils {
         if (canShowColorPicker(trackView.track)) {
 
             list.push('<hr/>')
-            list.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}))
-            list.push(unsetColorMenuItem({trackView, label: "Unset track color"}))
+            list.push(colorPickerMenuItem(trackView, "Set track color", "color"))
+            list.push(unsetColorMenuItem(trackView, "Unset track color"))
 
             if (trackView.track.config.type === 'wig' || trackView.track.config.type === 'annotation') {
-                list.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
-                list.push(unsetAltColorMenuItem({trackView, label: "Unset alt color"}))
+                list.push(colorPickerMenuItem(trackView, "Set alt color", "altColor"))
+                list.push(unsetAltColorMenuItem(trackView, "Unset alt color"))
             }
 
         }
@@ -110,12 +111,12 @@ class MenuUtils {
             if (canShowColorPicker(trackView.track)) {
 
                 list.push('<hr/>')
-                list.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}))
-                list.push(unsetColorMenuItem({trackView, label: "Unset track color"}))
+                list.push(colorPickerMenuItem(trackView, "Set track color", "color"))
+                list.push(unsetColorMenuItem(trackView, "Unset track color"))
 
                 if (trackView.track.config.type === 'wig' || trackView.track.config.type === 'annotation') {
-                    list.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}))
-                    list.push(unsetAltColorMenuItem({trackView, label: "Unset alt color"}))
+                    list.push(colorPickerMenuItem(trackView, "Set alt color", "altColor"))
+                    list.push(unsetAltColorMenuItem(trackView, "Unset alt color"))
                 }
 
             }
@@ -214,7 +215,7 @@ function trackRemovalMenuItem(trackView) {
 
 }
 
-function colorPickerMenuItem({trackView, label, option}) {
+function colorPickerMenuItem(trackView, label, option) {
 
     const element = document.createElement('div');
     element.textContent = label;
@@ -226,7 +227,7 @@ function colorPickerMenuItem({trackView, label, option}) {
     return {element, click};
 }
 
-function unsetColorMenuItem({trackView, label}) {
+function unsetColorMenuItem(trackView, label) {
 
     const element = document.createElement('div');
     element.textContent = label;
@@ -240,7 +241,7 @@ function unsetColorMenuItem({trackView, label}) {
     };
 }
 
-function unsetAltColorMenuItem({trackView, label}) {
+function unsetAltColorMenuItem(trackView, label) {
 
     const element = document.createElement('div');
     element.textContent = label;

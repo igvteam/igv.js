@@ -10,6 +10,8 @@ class GenericColorPicker extends GenericContainer {
     constructor({parent, width}) {
         super({parent, width, border: '1px solid gray'})
 
+        this.container.classList.add('igv-ui-colorpicker-container');
+
         // nth-child(2) - Color Swatches
         this.colorSwatchContainer = DOMUtils.div()
         this.container.appendChild(this.colorSwatchContainer)
