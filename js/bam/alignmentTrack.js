@@ -13,7 +13,6 @@ import {createCheckbox} from "../igv-icons.js"
 import {modificationName} from "./mods/baseModificationUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
 import BAMTrack from "./bamTrack.js"
-import "./types.js"
 
 
 const alignmentStartGap = 5
