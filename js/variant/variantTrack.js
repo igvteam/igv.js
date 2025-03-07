@@ -32,10 +32,10 @@ import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import SampleInfo from "../sample/sampleInfo.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {packFeatures} from "../feature/featureUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
+import {convertToPytor, canConvertToPytor} from "./variantUtils.js"
 
 const isString = StringUtils.isString
 
@@ -720,12 +720,15 @@ class VariantTrack extends TrackBase {
         }
 
         // Experimental CNVPytor support
-        if (this.canCovertToPytor()) {
-            menuItems.push('<hr>')
+        if (canConvertToPytor(this)) {
             menuItems.push({
-                label: 'Convert to CNVpytor track',
-                click: function cnvPytorHandler() {
-                    this.convertToPytor()
+                label: 'Convert to CNVpytor',
+                click: async () => {
+                    const track = await convertToPytor(this, this.browser)
+                    if (track) {
+                        this.browser.removeTrack(this)
+                        this.browser.addTrack(track)
+                    }
                 }
             })
         }

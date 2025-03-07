@@ -3,15 +3,7 @@ import Panel from "./components/panel.js"
 import Dialog from "./components/dialog.js"
 import {colorPalettes} from "../util/colorPalletes.js"
 import TrackView from "../trackView.js"
-
-const colorPickerTrackTypeSet = new Set(['bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact', 'shoebox'])
-
-const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'qtl', 'snp', 'shoebox', 'wig'])
-
-const multiTrackSelectExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
-
-const autoScaleGroupColorHash =
-    {}
+import {colorPickerTrackTypeSet, vizWindowTypes, multiTrackSelectExclusionTypes, autoScaleGroupColorHash} from "./trackMenuConstants.js"
 
 class MenuUtils {
     constructor(browser) {
