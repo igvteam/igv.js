@@ -1,6 +1,6 @@
 import IGVGraphics from "../../igv-canvas.js"
 import {getEonStart, getExonEnd, getExonPhase} from "../exonUtils.js"
-import {translationDict} from "../../sequenceTrack.js"
+import {translationDict} from "../../util/translationUtils.js"
 import {complementSequence} from "../../util/sequenceUtils.js"
 
 const aminoAcidSequenceRenderThreshold = 0.25
