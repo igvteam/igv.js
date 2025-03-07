@@ -2,7 +2,7 @@ import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
-import {summarizeData} from "../js/feature/wigTrack.js"
+import {summarizeData} from "../js/feature/summarizeUtils.js"
 
 const genome = createGenome()
 
