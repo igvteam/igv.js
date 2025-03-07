@@ -8,7 +8,7 @@ import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 import {computeWGFeatures, findFeatureAfterCenter, packFeatures} from "./featureUtils.js"
 import ChromAliasManager from "./chromAliasManager.js"
 import BaseFeatureSource from "./baseFeatureSource.js"
-import {summarizeData} from "./summarizeUtils.js"
+import {summarizeData} from "./wigTrack.js"
 
 const DEFAULT_MAX_WG_COUNT = 10000
 
