@@ -1,4 +1,4 @@
-import {translationDict} from "../sequenceTrack.js"
+import {translationDict} from "../util/translationUtils.js"
 import {complementSequence} from "../util/sequenceUtils.js"
 
 function getExonPhase(exon) {
