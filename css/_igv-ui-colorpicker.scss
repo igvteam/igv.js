@@ -1,21 +1,13 @@
-
 $igv-color-swatch-size: 32px;
 $igv-color-swatch-border-width: 2px;
 
-.igv-ui-generic-container {
+.igv-ui-colorpicker-container {
 
-  position: fixed;
-
-  top: 20%;
-  left: 75%;
-  transform: translateX(-50%);
+  background-color: #eee;
+  height: fit-content;
 
   flex-direction: column;
   flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: center;
-
-  background-color: #eee;
 
   // color swatches
   >div:nth-child(2) {
