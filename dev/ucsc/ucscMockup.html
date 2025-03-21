@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>UCSC Local File Mockup</title>
+  <style>
+    .bgimg {
+      background-image: url("images/ucscBrowser.png");
+      width: 2654px;
+      height: 1652px;
+      background-size: 50%;
+      background-repeat: no-repeat;
+      position: fixed;
+    }
+
+    .load-button {
+      position: absolute;
+      left: 945px;
+      top: 443px;
+      background-color: cyan;
+      padding: 2px 6px 2px 6px;
+      border-top: 1px solid #CCCCCC;
+      border-right: 1px solid #CCCCCC;
+      border-bottom: 1px solid #CCCCCC;
+      border-left: 1px solid #CCCCCC;
+    }
+
+    .igv-container {
+      background: rgba(0, 0, 0, 0.5);
+      border-style: inset;
+      border: #1e1e1e;
+      width: 1327px;
+      height: 1000px;
+      position: relative;
+      display: none
+    }
+
+    .igv-div {
+      background: white;
+      margin: 20px;
+      position: relative;
+      outline: solid;
+    }
+  </style>
+</head>
+<body>
+
+<!-- pop-up dialog box, containing a form -->
+
+<div class="bgimg">
+  <!--default html file upload button-->
+  <input type="file" id="local-file" multiple hidden/>
+  <label for="local-file" class="load-button">Local File</label>
+</div>
+
+<div id="igv-container" class="igv-container">
+  <button id="back-button">Back to UCSC Browser</button>
+  <div id="igv-div" class="igv-div"></div>
+</div>
+
+
+<script type="module">
+
+  import igv from "../../js/index.js"
+
+  let browser
+  const igvConfig = {
+    genome: "hg19",
+    locus: 'SLC25A3',
+    showChromosomeWidget: false,
+    showSVGButton: false,
+    showControls: false,
+    showCytobandNames: true,
+    tracks: [
+      {
+        name: 'UCSC track',
+        type: 'image',
+        images: [
+          {chr: "chr12", start: 98986101, end: 99005123, src: "images/res1.png"},
+          {chr: "chr12", start: 98986420, end: 98992760, src: "images/res2.png"},
+          {chr: "chr12", start: 98988533, end: 98990646, src: "images/res3.png"},
+          {chr: "chr12", start: 98989109, end: 98989813, src: "images/res4.png"}
+        ],
+        height: 250
+      }
+    ]
+  }
+
+  const updateButton = document.getElementById("local-file")
+  updateButton.onclick = () => {
+    if(browser) {
+      document.getElementById("igv-container").style.display = 'block'
+      browser.visibilityChange()
+    }
+  }
+  updateButton.onchange = async () => {
+    const knownFileExtensions = ["bam", "cram", "vcf.gz"]
+    const knownIndexExtensions = ["bai", "crai", "tbi"]
+    let file, index
+    for (let f of document.getElementById("local-file").files) {
+      for (let e of knownFileExtensions) {
+        if (f.name.endsWith(e)) {
+          file = f
+          break
+        }
+      }
+      for (let e of knownIndexExtensions) {
+        if (f.name.endsWith(e)) {
+          index = f
+          break
+        }
+      }
+    }
+
+    const track = {
+      url: file,
+      indexURL: index
+    }
+    if (browser) {
+      browser.loadTrack(track)
+    } else {
+      igvConfig.tracks.push({
+        url: file,
+        indexURL: index
+      })
+      browser = await igv.createBrowser(document.getElementById('igv-div'), igvConfig)
+    }
+    document.getElementById("igv-container").style.display = 'block'
+    browser.visibilityChange()
+  }
+
+  document.getElementById("back-button").onclick = () => document.getElementById("igv-container").style.display = 'none'
+
+  async function processFile() {
+
+
+  }
+
+</script>
+
+<pre id="log"></pre>
+
+
+</body>
+</html>
