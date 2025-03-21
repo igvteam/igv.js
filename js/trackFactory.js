@@ -15,6 +15,7 @@ import SpliceJunctionTrack from "./feature/spliceJunctionTrack.js"
 import BlatTrack from "./blat/blatTrack.js"
 import CNVPytorTrack from "./cnvpytor/cnvpytorTrack.js"
 import ShoeboxTrack from "./shoebox/shoeboxTrack.js"
+import ImageTrack from "./ucsc/imageTrack.js"
 //import CNVPytorTrack from "./CNVpytor/cnvpytorTrack.js"
 
 
@@ -40,7 +41,8 @@ const trackFunctions =
         ['gcnv', (config, browser) => new GCNVTrack(config, browser)],
         ['junction', (config, browser) => new SpliceJunctionTrack(config, browser)],
         ['blat', (config, browser) => new BlatTrack(config, browser)],
-        ['cnvpytor', (config, browser) => new CNVPytorTrack(config, browser)]
+        ['cnvpytor', (config, browser) => new CNVPytorTrack(config, browser)],
+        ['image', (config, browser) => new ImageTrack(config, browser)]
     ])
 
 
