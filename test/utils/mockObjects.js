@@ -10,31 +10,29 @@ import {DOMParser} from "./DOMParser.js"
 import atob from 'atob'
 import btoa from 'btoa'
 
-global.document = new Document()
-
-global.document.implementation = new DOMImplementation()    // For jQUery
-
-global.window = {
-    document: global.document,
-    setTimeout: function () {
-    },
-    location : {
+// Create a mock window object
+const mockWindow = {
+    document: new Document(),
+    setTimeout: function () {},
+    location: {
         href: ""
+    },
+    navigator: {
+        userAgent: "Node",
+        vendor: "Node"
     }
 }
 
+// Set up global objects
+global.document = mockWindow.document
+global.document.implementation = new DOMImplementation()    // For jQuery
+global.window = mockWindow
 global.File = File
-
 global.XMLHttpRequest = XMLHttpRequestMock
-
-global.navigator = {
-    userAgent: "Node",
-    vendor: "Node"
-}
-
 global.DOMParser = DOMParser
-
 global.atob = atob
-
 global.btoa = btoa
+
+// Export for use in tests
+export {mockWindow}
 

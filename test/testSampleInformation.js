@@ -7,7 +7,10 @@ suite("test sample info", function () {
 
     // Mock browser object
     const browser = {
-        tracks: [{getSamples: function (){}}]
+        tracks: [{getSamples: function (){}}],
+        sampleInfoControl: {
+            setButtonVisibility: function(visible) {}
+        }
     }
 
     test('Sample Info', async function () {
