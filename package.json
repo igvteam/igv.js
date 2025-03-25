@@ -6,10 +6,6 @@
   "module": "dist/igv.esm.js",
   "type": "module",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
-  "engines": {
-    "node": "18.19.0",
-    "npm": "10.2.4"
-  },
   "files": [
     "dist/**"
   ],
