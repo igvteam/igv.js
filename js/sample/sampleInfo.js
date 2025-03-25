@@ -25,11 +25,13 @@ class SampleInfo {
     attributeRangeLUT = {}
 
     constructor(browser) {
+
         const found = browser.tracks.some(t => typeof t.getSamples === 'function')
-        if (found && found.length > 0) {
+        if (found.length > 0) {
             browser.sampleInfoControl.setButtonVisibility(true)
         }
         this.initialize()
+
     }
 
     initialize() {
@@ -72,7 +74,7 @@ class SampleInfo {
 
     #processSampleInfoFileAsString(string) {
 
-        const sectionDictionary = createSectionDictionary(string)
+        const sectionDictionary = this.#createSectionDictionary(string)
 
         for (const [header, value] of Object.entries(sectionDictionary)) {
             switch (header) {
@@ -91,6 +93,32 @@ class SampleInfo {
 
         this.initialized = true
 
+    }
+
+    #createSectionDictionary(string) {
+        const dictionary = {}
+
+        const lines = string.split(/\r?\n|\r/).map(line => line.trim()).filter(line => '' !== line)
+
+        let currentHeader
+
+        // If the first line does not start with a section header an initial #sampleTable is implied
+        if (!this.sampleInfoFileHeaders.includes(lines[0])) {
+            currentHeader = '#sampleTable'
+            dictionary[currentHeader] = []
+        }
+
+        for (const line of lines) {
+
+            if (this.sampleInfoFileHeaders.includes(line)) {
+                currentHeader = line
+                dictionary[currentHeader] = []
+            } else if (currentHeader && false === line.startsWith('#')) {
+                dictionary[currentHeader].push(line)
+            }
+        }
+
+        return dictionary
     }
 
     getAttributeColor(attribute, value) {
@@ -187,6 +215,7 @@ class SampleInfo {
     }
 
     #accumulateSampleTableDictionary(lines) {
+
         // shift array with first item that is 'sample' or 'Linking_id'. Remaining items are attribute names
         const scratch = lines.shift().split('\t').filter(line => line.length > 0)
 
@@ -194,7 +223,6 @@ class SampleInfo {
         scratch.shift()
 
         const attributes = scratch.map(label => label.split(' ').join(SampleInfo.emptySpaceReplacement))
-        this.attributeNames = attributes
 
         const cooked = lines.filter(line => line.length > 0)
 
@@ -363,32 +391,6 @@ class SampleInfo {
 
 }
 
-
-function createSectionDictionary(string) {
-    const dictionary = {}
-    const sampleInfoFileHeaders = ['#sampleTable', '#sampleMapping', '#colors']
-    const lines = string.split(/\r?\n|\r/).map(line => line.trim()).filter(line => '' !== line)
-
-    let currentHeader
-
-    // If the first line does not start with a section header an initial #sampleTable is implied
-    if (!sampleInfoFileHeaders.includes(lines[0])) {
-        currentHeader = '#sampleTable'
-        dictionary[currentHeader] = []
-    }
-
-    for (const line of lines) {
-        if (sampleInfoFileHeaders.includes(line)) {
-            currentHeader = line
-            dictionary[currentHeader] = []
-        } else if (currentHeader && false === line.startsWith('#')) {
-            dictionary[currentHeader].push(line)
-        }
-    }
-
-    return dictionary
-}
-
 function accumulateDictionary(accumulator, dictionary) {
     for (const [key, value] of Object.entries(dictionary)) {
         if (!(key in accumulator) || accumulator[key] !== value) {
@@ -396,7 +398,6 @@ function accumulateDictionary(accumulator, dictionary) {
         }
     }
 }
-
 
 function createAttributeRangeLUT(names, dictionary) {
 
