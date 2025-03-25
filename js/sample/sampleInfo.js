@@ -8,15 +8,12 @@ import {
 import {distinctColorsPalette} from './sampleInfoPaletteLibrary.js'
 import TrackBase from "../trackBase.js"
 
-/**
- * A singleton manager class for sample metadata.  Each browser will have an instance of this class.
- */
+const colorForNA = appleCrayonRGB('magnesium')
+const sampleInfoFileHeaders = ['#sampleTable', '#sampleMapping', '#colors']
+
 class SampleInfo {
 
     static emptySpaceReplacement = '|'
-
-    colorForNA = appleCrayonRGB('magnesium')
-    sampleInfoFileHeaders = ['#sampleTable', '#sampleMapping', '#colors']
 
     sampleDictionary = {}
     attributeNames = []
@@ -120,7 +117,7 @@ class SampleInfo {
 
         } else if (typeof value === "string") {
 
-            color = 'NA' === value ? this.colorForNA : stringToRGBString(value)
+            color = 'NA' === value ? colorForNA : stringToRGBString(value)
 
         } else {
 
@@ -343,7 +340,7 @@ class SampleInfo {
                 this.colorDictionary[attribute] = attributeValue => {
 
                     if ('NA' === attributeValue) {
-                        return this.colorForNA
+                        return colorForNA
                     } else {
                         const [min, max] = this.attributeRangeLUT[attribute]
                         const interpolant = (attributeValue - min) / (max - min)
@@ -375,14 +372,14 @@ function createSectionDictionary(string) {
     let currentHeader
 
     // If the first line does not start with a section header an initial #sampleTable is implied
-    if (!this.sampleInfoFileHeaders.includes(lines[0])) {
+    if (!sampleInfoFileHeaders.includes(lines[0])) {
         currentHeader = '#sampleTable'
         dictionary[currentHeader] = []
     }
 
     for (const line of lines) {
 
-        if (this.sampleInfoFileHeaders.includes(line)) {
+        if (sampleInfoFileHeaders.includes(line)) {
             currentHeader = line
             dictionary[currentHeader] = []
         } else if (currentHeader && false === line.startsWith('#')) {
