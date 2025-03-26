@@ -15,20 +15,12 @@ class SampleInfo {
 
     static emptySpaceReplacement = '|'
 
-    sampleDictionary = {}
-    attributeNames = []
-    sampleMappingDictionary = {}
-    colorDictionary = {}
-    attributeRangeLUT = {}
-
     constructor(browser) {
-
         const found = browser.tracks.some(t => typeof t.getSamples === 'function')
         if (found.length > 0) {
             browser.sampleInfoControl.setButtonVisibility(true)
         }
         this.initialize()
-
     }
 
     initialize() {
