@@ -20,17 +20,22 @@ global.window = {
     },
     location : {
         href: ""
+    },
+    navigator: {
+        userAgent: "Node",
+        vendor: "Node",
+        clipboard: {
+            writeText: async function(text) {
+                // Mock implementation
+                return Promise.resolve();
+            }
+        }
     }
 }
 
 global.File = File
 
 global.XMLHttpRequest = XMLHttpRequestMock
-
-global.navigator = {
-    userAgent: "Node",
-    vendor: "Node"
-}
 
 global.DOMParser = DOMParser
 
