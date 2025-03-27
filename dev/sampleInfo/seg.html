@@ -20,23 +20,26 @@
 
     const config =
         {
-            "queryParametersSupported": true,
-            "genome": "hg38",
-            "sampleinfo": [
-                {
-                    "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBM-sampletable-samplemapping-colors.txt"
-                }
-            ],
-            "tracks": [
-                {
-                    "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBMCopyNumber.seg.gz",
-                    "name": "GBMCopyNumber.seg.gz",
-                    "order": 1,
-                    "format": "seg",
-                    "type": "seg",
-                    "height": 700
-                }
-            ]
+            queryParametersSupported: true,
+            genome: "hg38",
+            sampleinfo:
+                [
+                    {
+                        // "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBM-sampletable-samplemapping-colors.txt",
+                        "url": "../../test/data/sample/sampletable_chr_17_only_names.txt",
+                    }
+                ],
+            tracks:
+                [
+                    {
+                        // "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBMCopyNumber.seg.gz",
+                        "url": "../../test/data/seg/chr_17_only.seg",
+                        "name": "chr_17_only.seg",
+                        "format": "seg",
+                        "type": "seg",
+                        "height": 700
+                    }
+                ]
         }
 
     const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
