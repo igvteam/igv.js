@@ -49,6 +49,28 @@ class SampleInfo {
         return this.sampleDictionary[key]
     }
 
+    async loadSampleInfo(config) {
+
+        if (config.url) {
+            await this.loadSampleInfoFile(config.url)
+        } else {
+            console.log('TODO: load sample info object from config')
+            this.sampleDictionary = { ...config }
+            delete this.sampleDictionary['ID']
+
+            // Ensure unique attribute names list
+            const currentAttributeNameSet = new Set(this.attributeNames)
+            for (const name of Object.keys(this.sampleDictionary)) {
+                if (!currentAttributeNameSet.has(name)) {
+                    this.attributeNames.push(name)
+                }
+            }
+
+            this.initialized = true
+        }
+
+    }
+
     async loadSampleInfoFile(path) {
         try {
             const string = await igvxhr.loadString(path)

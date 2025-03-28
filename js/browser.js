@@ -1707,7 +1707,7 @@ class Browser {
 
     async loadSampleInfo(config) {
 
-        await this.sampleInfo.loadSampleInfoFile(config.url)
+        await this.sampleInfo.loadSampleInfo(config)
 
         for (const {sampleInfoViewport} of this.trackViews) {
             sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
