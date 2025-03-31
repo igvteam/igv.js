@@ -45,6 +45,15 @@ class SampleInfo {
 
     getAttributes(sampleName) {
 
+        const sampleDictionaryKeySet = new Set(Object.keys(this.sampleDictionary))
+
+        if (sampleDictionaryKeySet.has(sampleName)) {
+            // cool
+        } else {
+            console.warn(`Uh on. sampleDictionary does not have ${ sampleName} as a key`)
+        }
+
+
         const key = 0 === Object.keys(this.sampleMappingDictionary) ? sampleName : (this.sampleMappingDictionary[sampleName] || sampleName)
         return this.sampleDictionary[key]
     }
@@ -54,17 +63,28 @@ class SampleInfo {
         if (config.url) {
             await this.loadSampleInfoFile(config.url)
         } else {
-            console.log('TODO: load sample info object from config')
-            this.sampleDictionary = { ...config }
-            delete this.sampleDictionary['ID']
+
+            const samples = { ...config }
+            for (const [key, record] of Object.entries(samples)) {
+                samples[key] = SampleInfo.toNumericalRepresentation(record)
+            }
+
+            const [ value ] = Object.values(samples)
+            const attributes = Object.keys(value)
+
+            // Establish the range of values for each attribute
+            const lut = createAttributeRangeLUT(attributes, samples)
+            accumulateDictionary(this.attributeRangeLUT, lut)
 
             // Ensure unique attribute names list
             const currentAttributeNameSet = new Set(this.attributeNames)
-            for (const name of Object.keys(this.sampleDictionary)) {
+            for (const name of attributes) {
                 if (!currentAttributeNameSet.has(name)) {
                     this.attributeNames.push(name)
                 }
             }
+
+            accumulateDictionary(this.sampleDictionary, samples)
 
             this.initialized = true
         }

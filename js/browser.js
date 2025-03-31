@@ -529,12 +529,12 @@ class Browser {
         // Sample info
         const localSampleInfoFiles = []
         if (session.sampleinfo) {
-            for (const config of session.sampleinfo) {
+            for (const sampleInfoConfig of session.sampleinfo) {
 
-                if (config.file) {
-                    localSampleInfoFiles.push(config.file)
+                if (sampleInfoConfig.file) {
+                    localSampleInfoFiles.push(sampleInfoConfig.file)
                 } else {
-                    this.loadSampleInfo(config)
+                    this.loadSampleInfo(sampleInfoConfig)
                 }
 
             }
@@ -1705,9 +1705,9 @@ class Browser {
         }
     }
 
-    async loadSampleInfo(config) {
+    async loadSampleInfo(sampleInfoConfig) {
 
-        await this.sampleInfo.loadSampleInfo(config)
+        await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
 
         for (const {sampleInfoViewport} of this.trackViews) {
             sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
