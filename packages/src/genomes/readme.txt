@@ -1,1 +1,0 @@
-Temporary genomes.json file to workaround release (3.2.5) with incorrect URL.  To be removed at a later date.
