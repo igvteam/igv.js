@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<h1>bedgraph file</h1>
+
+<strong>Example of using a custom decoder</strong>
+
+<div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+
+    function decodeBedGraph2(tokens, header) {
+        var chr, start, end, value
+
+        //if (tokens.length <= 3) return undefined
+
+        chr = tokens[0]
+        start = parseInt(tokens[1])
+        end = parseInt(tokens[2])
+        value = Number(tokens[3])
+        const feature = {chr: chr, start: start, end: end, value: value}
+
+        // Optional extra columns
+        if (header) {
+            let colorColumn = header.colorColumn
+            if (colorColumn && colorColumn < tokens.length) {
+                feature.color = IGVColor.createColorString(tokens[colorColumn])
+            }
+        }
+
+        return feature
+    }
+
+
+    var igvDiv = document.getElementById("igv-div")
+
+   // const ontBedGraph = ['chr', 'start', 'end', 'value',]
+   // igv.registerFileFormats("ontbedgraph", ontBedGraph)
+
+    var options =
+        {
+            genome: "hg19",
+            showChromosomeWidget: false,
+            locus: "chr1:80-300",
+            tracks: [
+                {
+                    name: "positive",
+                    type: "wig",
+                    url: "custom.bedgraph",
+                    decode: decodeBedGraph2,
+//        decodeCustom: decodeBedGraph2,
+//        format: "ontbedgraph",
+//        delimiter: "\t",
+//        min: "0",
+//        max: "1",
+//        format: "wig",
+                }
+            ]
+        }
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+
+        })
+
+
+</script>
+</body>
+</html>
