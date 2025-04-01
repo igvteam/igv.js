@@ -830,7 +830,7 @@ class Browser {
     async loadTrackList(configList) {
 
         // Impose an order if not specified
-        let order = 0
+        let order = this.trackViews.length + 1
         for (let c of configList) {
             if (c.order === undefined) {
                 c.order = order++
