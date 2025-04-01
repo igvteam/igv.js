@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": "3.2.4",
+  "version": "3.2.5",
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
@@ -54,7 +54,7 @@
     "dompurify": "^3.0.9",
     "eslint": "^6.4.0",
     "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v0.5.6",
-    "igv-utils": "github:igvteam/igv-utils#v1.5.9",
+    "igv-utils": "github:igvteam/igv-utils#v1.5.10",
     "mocha": "^10.2.0",
     "rollup": "^2.66.0",
     "rollup-plugin-copy": "^3.3.0",

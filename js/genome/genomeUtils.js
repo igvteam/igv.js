@@ -3,6 +3,7 @@ import {convertToHubURL} from "../ucsc/ucscUtils.js"
 import Hub from "../ucsc/ucscHub.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json"
+const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv.js/main/packages/igv/src/genomes/genomes.json"
 
 const GenomeUtils = {
 
@@ -10,35 +11,41 @@ const GenomeUtils = {
 
         if (!GenomeUtils.KNOWN_GENOMES) {
 
-            const table = {}
 
-            // Get default genomes
-            if (config.loadDefaultGenomes !== false) {
-                const url = DEFAULT_GENOMES_URL
-                const jsonArray = await igvxhr.loadJson(url, {timeout: 5000})
-                processJson(jsonArray)
-            }
-
-            // Add user-defined genomes
-            const genomeList = config.genomeList || config.genomes
-            if (genomeList) {
-                if (typeof genomeList === 'string') {
-                    const jsonArray = await igvxhr.loadJson(genomeList, {})
-                    processJson(jsonArray)
-                } else {
-                    processJson(genomeList)
-                }
-            } else {
-
-            }
-
-            GenomeUtils.KNOWN_GENOMES = table
-
-            function processJson(jsonArray) {
+            const processJson = (jsonArray, table) => {
+                table = table || {}
                 jsonArray.forEach(function (json) {
                     table[json.id] = json
                 })
                 return table
+            }
+
+            // Get default genomes
+            if (config.loadDefaultGenomes !== false) {
+                try {
+                    const jsonArray = await igvxhr.loadJson(DEFAULT_GENOMES_URL, {timeout: 2000})
+                    GenomeUtils.KNOWN_GENOMES = processJson(jsonArray)
+                } catch (error) {
+                    try {
+                        console.error("Error initializing default genomes:", error)
+                        const jsonArray = await igvxhr.loadJson(BACKUP_GENOMES_URL, {timeout: 2000})
+                        GenomeUtils.KNOWN_GENOMES = processJson(jsonArray)
+                    } catch (e) {
+                        console.error("Error initializing backup genomes:", error)
+                        GenomeUtils.KNOWN_GENOMES = {}
+                    }
+                }
+            }
+
+            // Append user-defined genomes, which might override defaults
+            const genomeList = config.genomeList || config.genomes
+            if (genomeList) {
+                if (typeof genomeList === 'string') {
+                    const jsonArray = await igvxhr.loadJson(genomeList, {})
+                     processJson(jsonArray, GenomeUtils.KNOWN_GENOMES)
+                } else {
+                     processJson(genomeList, GenomeUtils.KNOWN_GENOMES)
+                }
             }
         }
     },
@@ -65,7 +72,7 @@ const GenomeUtils = {
         } else if (idOrConfig.genome) {
             genomeID = idOrConfig.genome
         } else if (idOrConfig.id !== undefined && !(idOrConfig.fastaURL || idOrConfig.twobitURL)) {
-            // Backward compatibilityz
+            // Backward compatibility
             genomeID = idOrConfig.id
         }
 
@@ -93,6 +100,5 @@ const GenomeUtils = {
         }
     }
 }
-
 
 export default GenomeUtils
