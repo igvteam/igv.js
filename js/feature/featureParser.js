@@ -121,7 +121,10 @@ class FeatureParser {
                 }
             } else {
                 // All directives that could change the format, and thus decoder, should have been read by now.
-                this.setDecoder(header.format)
+                // Set the decoder, unless it is explicitly set in the track configuration (not common)
+                if(!this.config.decode) {
+                    this.setDecoder(header.format)
+                }
 
                 // If the line can be parsed as a feature assume we are beyond the header, if any
                 const tokens = line.split(this.delimiter || "\t")
