@@ -460,7 +460,7 @@
 
     const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
 
-    // await browser.layoutChange()
+    await browser.layoutChange()
 
     document.getElementById('bookmark').addEventListener('click', () => {
         const path = window.location.href.slice()
