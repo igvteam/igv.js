@@ -45,13 +45,13 @@ class SampleInfo {
 
     getAttributes(sampleName) {
 
-        const sampleDictionaryKeySet = new Set(Object.keys(this.sampleDictionary))
-
-        if (sampleDictionaryKeySet.has(sampleName)) {
-            // cool
-        } else {
-            console.warn(`Uh on. sampleDictionary does not have ${ sampleName} as a key`)
-        }
+        // const sampleDictionaryKeySet = new Set(Object.keys(this.sampleDictionary))
+        //
+        // if (sampleDictionaryKeySet.has(sampleName)) {
+        //     // cool
+        // } else {
+        //     console.warn(`Uh on. sampleDictionary does not have ${ sampleName} as a key`)
+        // }
 
 
         const key = 0 === Object.keys(this.sampleMappingDictionary) ? sampleName : (this.sampleMappingDictionary[sampleName] || sampleName)
@@ -72,22 +72,28 @@ class SampleInfo {
             const [ value ] = Object.values(samples)
             const attributes = Object.keys(value)
 
-            // Establish the range of values for each attribute
-            const lut = createAttributeRangeLUT(attributes, samples)
-            accumulateDictionary(this.attributeRangeLUT, lut)
+            this.loadSampleInfoHelper(attributes, samples)
 
-            // Ensure unique attribute names list
-            const currentAttributeNameSet = new Set(this.attributeNames)
-            for (const name of attributes) {
-                if (!currentAttributeNameSet.has(name)) {
-                    this.attributeNames.push(name)
-                }
-            }
-
-            accumulateDictionary(this.sampleDictionary, samples)
-
-            this.initialized = true
         }
+
+        this.initialized = true
+    }
+
+    loadSampleInfoHelper(attributes, samples){
+
+        // Establish the range of values for each attribute
+        const lut = createAttributeRangeLUT(attributes, samples)
+        accumulateDictionary(this.attributeRangeLUT, lut)
+
+        // Ensure unique attribute names list
+        const currentAttributeNameSet = new Set(this.attributeNames)
+        for (const name of attributes) {
+            if (!currentAttributeNameSet.has(name)) {
+                this.attributeNames.push(name)
+            }
+        }
+
+        accumulateDictionary(this.sampleDictionary, samples)
 
     }
 
@@ -206,8 +212,6 @@ class SampleInfo {
             }
         }
 
-        this.initialized = true
-
     }
 
     #accumulateSampleTableDictionary(lines) {
@@ -252,19 +256,8 @@ class SampleInfo {
             samples[key] = SampleInfo.toNumericalRepresentation(record)
         }
 
-        // Establish the range of values for each attribute
-        const lut = createAttributeRangeLUT(attributes, samples)
-        accumulateDictionary(this.attributeRangeLUT, lut)
+        this.loadSampleInfoHelper(attributes, samples)
 
-        // Ensure unique attribute names list
-        const currentAttributeNameSet = new Set(this.attributeNames)
-        for (const name of attributes) {
-            if (!currentAttributeNameSet.has(name)) {
-                this.attributeNames.push(name)
-            }
-        }
-
-        accumulateDictionary(this.sampleDictionary, samples)
     }
 
     #accumulateSampleMappingDictionary(lines) {
