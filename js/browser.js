@@ -575,26 +575,25 @@ class Browser {
             }
         }
 
-        await this.loadTrackList(nonLocalTrackConfigurations)
-
-        this.reorderTracks()
-        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
-
-        await this.updateViews()
-
-        // If any tracks are selected show the selection buttons
-        if (this.trackViews.some(({ track }) => track.selected)) {
-            this.navbar.setEnableTrackSelection(true)
-        }
-
-        this.updateUIWithReferenceFrameList()
-
         // Load a hidden track -- used to populate searchable database without creating a track
         const configHidden = nonLocalTrackConfigurations.filter(config => true === config.hidden)
         for (const config of configHidden) {
             const featureSource = FeatureSource(config, this.genome)
             await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
         }
+
+        await this.loadTrackList(nonLocalTrackConfigurations)
+
+        // If any tracks are selected show the selection buttons
+        if (this.trackViews.some(({ track }) => track.selected)) {
+            this.navbar.setEnableTrackSelection(true)
+        }
+
+        this.reorderTracks()
+
+        await resize.call(this)
+
+        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
 
     }
 
@@ -2190,7 +2189,7 @@ function getFileExtension(input) {
 }
 
 /**
- * Function called win window is resized, or visibility changed (e.g. "show" from a tab).  This is a function rather
+ * Called when window is resized, or visibility changed (e.g. "show" from a tab).  This is a function rather
  * than class method because it needs to be copied and bound to specific instances of browser to support listener
  * removal
  *
@@ -2202,7 +2201,7 @@ async function resize() {
 
     const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
-    for (let referenceFrame of this.referenceFrameList) {
+    for (const referenceFrame of this.referenceFrameList) {
 
         const index = this.referenceFrameList.indexOf(referenceFrame)
 
@@ -2214,22 +2213,19 @@ async function resize() {
 
         // viewportWidthBP > bpLength occurs when locus is full chromosome and user widens browser
         if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
-            // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) bpp. viewport ${ StringUtils.numberFormatter(viewportWidthBP) } > ${ StringUtils.numberFormatter(bpLength) }.`)
             referenceFrame.bpPerPixel = bpLength / viewportWidth
         } else {
             // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) end.`)
             referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
         }
 
-        for (let {viewports} of this.trackViews) {
+        for (const {viewports} of this.trackViews) {
             viewports[index].setWidth(viewportWidth)
         }
 
     }
 
     this.updateUIWithReferenceFrameList()
-
-    //TODO -- update view only if needed.  Reducing size never needed.  Increasing size maybe
 
     await this.updateViews(true)
 }
