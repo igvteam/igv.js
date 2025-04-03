@@ -34,15 +34,15 @@
 
             const tracks = [];
 
-            browser.loadTrack({
+            browser.loadTrackList([{
                 name: "Phase 3 WGS variants",
                 type: "variant",
                 format: "vcf",
                 url: "../../test/data/vcf/S4.vcf.gz",
                 indexURL: "../../test/data/vcf/S4.vcf.gz.tbi"
-            })
-                .then(newTrack => {
-                    tracks.push(newTrack);
+            }])
+                .then(newTracks => {
+                    tracks.push(...newTracks);
                 })
                 .catch(error => {
                     console.error(error);

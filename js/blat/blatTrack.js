@@ -136,7 +136,7 @@ async function createBlatTrack({sequence, browser, name, title}) {
             features
         }
 
-        const track = await browser.loadTrack(trackConfig)
+        const track = await browser.loadTrackList([trackConfig])
         track.openTableView()
 
     } catch (e) {

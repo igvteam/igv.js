@@ -451,7 +451,7 @@ class MergedTrack extends TrackBase {
                     track.autoscaleGroup = name
                 }
                 track.isMergedTrack = false
-                browser.addTrack(track.config, track)
+                browser.addTrack(track)
             }
             browser.updateViews()
         }
