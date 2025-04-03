@@ -1398,6 +1398,38 @@ class Browser {
         return Math.floor(width / columnCount)
     }
 
+    /**
+     * Update reference frames based on new viewport width
+     * @param {number} viewportWidth - The calculated viewport width
+     */
+    updateReferenceFrames(viewportWidth) {
+
+        for (const referenceFrame of this.referenceFrameList) {
+            referenceFrame.updateForViewportWidth(viewportWidth)
+        }
+    }
+
+    /**
+     * Update DOM viewport elements with new width
+     * @param {number} viewportWidth - The calculated viewport width
+     */
+    updateViewportElements(viewportWidth) {
+        for (let i = 0; i < this.referenceFrameList.length; i++) {
+            for (const {viewports} of this.trackViews) {
+                viewports[i].setWidth(viewportWidth)
+            }
+        }
+    }
+
+    /**
+     * Synchronize UI state after viewport updates
+     * @returns {Promise<void>}
+     */
+    async syncUIState() {
+        this.updateUIWithReferenceFrameList()
+        await this.updateViews(true)
+    }
+
     minimumBases() {
         return this.config.minimumBases
     }
@@ -2141,8 +2173,6 @@ class Browser {
         }
     }
 
-
-
     // Navbar delegates
     get sampleInfoControl() {
         return this.navbar.sampleInfoControl
@@ -2197,37 +2227,14 @@ function getFileExtension(input) {
  */
 async function resize() {
 
-    if (!this.referenceFrameList) return
-
-    const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
-
-    for (const referenceFrame of this.referenceFrameList) {
-
-        const index = this.referenceFrameList.indexOf(referenceFrame)
-
-        const {chr, genome} = referenceFrame
-
-        const {bpLength} = genome.getChromosome(referenceFrame.chr)
-
-        const viewportWidthBP = referenceFrame.toBP(viewportWidth)
-
-        // viewportWidthBP > bpLength occurs when locus is full chromosome and user widens browser
-        if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
-            referenceFrame.bpPerPixel = bpLength / viewportWidth
-        } else {
-            // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) end.`)
-            referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
-        }
-
-        for (const {viewports} of this.trackViews) {
-            viewports[index].setWidth(viewportWidth)
-        }
-
+    if (undefined === this.referenceFrameList || 0 === this.referenceFrameList.length) {
+        return
     }
 
-    this.updateUIWithReferenceFrameList()
-
-    await this.updateViews(true)
+    const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
+    this.updateReferenceFrames(viewportWidth)
+    this.updateViewportElements(viewportWidth)
+    await this.syncUIState()
 }
 
 
