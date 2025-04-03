@@ -393,7 +393,8 @@ class Browser {
         } else {
             session = options
         }
-        return this.loadSessionObject(session)
+
+        await this.loadSessionObject(session)
     }
 
     /**
@@ -576,21 +577,24 @@ class Browser {
 
         await this.loadTrackList(nonLocalTrackConfigurations)
 
-        // The ruler and ideogram tracks are not explicitly loaded, but needs updated nonetheless.
-        for (let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler' || tv.track.type === 'ideogram')) {
-            await rtv.updateViews()
-        }
+        this.reorderTracks()
+        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+
+        await this.updateViews()
 
         // If any tracks are selected show the selection buttons
-        if (this.trackViews.some(tv => tv.track.selected)) {
+        if (this.trackViews.some(({ track }) => track.selected)) {
             this.navbar.setEnableTrackSelection(true)
         }
 
         this.updateUIWithReferenceFrameList()
 
-        this.updateLocusSearchWidget()
-
-        return trackConfigurations
+        // Load a hidden track -- used to populate searchable database without creating a track
+        const configHidden = nonLocalTrackConfigurations.filter(config => true === config.hidden)
+        for (const config of configHidden) {
+            const featureSource = FeatureSource(config, this.genome)
+            await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
+        }
 
     }
 
@@ -838,79 +842,31 @@ class Browser {
         }
 
         const promises = []
-        for (let config of configList) {
-            promises.push(this._loadTrack(config))
+        for (const config of configList) {
+            promises.push(this.#loadTrackHelper(config))
         }
 
         const loadedTracks = await Promise.all(promises)
-
-        const groupAutoscaleViews = this.trackViews.filter(function (trackView) {
-            return trackView.track.autoscaleGroup
-        })
-        if (groupAutoscaleViews.length > 0) {
-            this.updateViews()
-        }
         return loadedTracks
     }
 
     /**
-     * Public API function
-     *
-     * Load an individual track.  If part of an autoscale group force a general update
-     *
-     * @param config  A track configuration
-     * @returns {Promise<*>}  Promise for track object
-     */
-    async loadTrack(config) {
-
-        // Default configuration sync option to true.  This is the expected behavior for public API calls
-        config.sync = (config.sync !== false)
-
-        const newTrack = this._loadTrack(config)
-
-        if (newTrack && config.autoscaleGroup) {
-            // Await newTrack load and update all views
-            await newTrack
-            this.updateViews()
-        }
-
-        return newTrack
-    }
-
-    /**
-     * Return a promise to load a track.   Private function used by loadTrack() and loadTrackList()
+     * Return a promise to load a track.   Private function used by loadTrackList()
      *
      * @param config
      * @returns {*}
      */
 
-    async _loadTrack(config) {
+    async #loadTrackHelper(config) {
 
         // config might be json
         if (StringUtils.isString(config)) {
             config = JSON.parse(config)
         }
 
+        let track
         try {
-
-            // Load a hidden track -- used to populate searchable database without creating a track
-            if (config.hidden) {
-                const featureSource = FeatureSource(config, this.genome)
-                await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
-                return
-            }
-
-            const newTrack = await this.createTrack(config)
-
-            if ('sampleinfo' === config.type) {
-                this.layoutChange()
-                return
-            } else if (undefined === newTrack) {
-                return
-            }
-
-            return this.addTrack(config, newTrack)
-
+            track = await this.createTrack(config)
         } catch (error) {
 
             let msg = error.message || error.error || error.toString()
@@ -927,62 +883,53 @@ class Browser {
             }
 
             msg = `${msg} : ${FileUtils.isFile(config.url) ? config.url.name : config.url}`
-            // msg += (": " + FileUtils.isFile(config.url) ? config.url.name : config.url)
             const err = new Error(msg)
             console.error(err)
             throw err
-            // this.alert.present(new Error(msg), undefined)
         }
+
+        if (track) {
+            await this.addTrack(track)
+        } else {
+            return undefined
+        }
+
     }
 
-    async addTrack(config, newTrack) {
-
+    async addTrack(track) {
 
         // Set order field of track here, otherwise track order might get shuffled during asynchronous load
-        if (undefined === newTrack.order) {
-            newTrack.order = this.trackViews.length
+        if (undefined === track.order) {
+            track.order = this.trackViews.length
         }
 
-        const trackView = new TrackView(this, this.columnContainer, newTrack)
+        const trackView = new TrackView(this, this.columnContainer, track)
         this.trackViews.push(trackView)
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
-        if (typeof newTrack.postInit === 'function') {
+        if (typeof track.postInit === 'function') {
             try {
                 trackView.startSpinner()
-                await newTrack.postInit()
+                await track.postInit()
             } finally {
                 trackView.stopSpinner()
             }
         }
 
-        if (!newTrack.autoscaleGroup) {
-            // Group autoscale will get updated later (as a group)
-            if (config.sync) {
-                await trackView.updateViews()
-            } else {
-                trackView.updateViews()
-            }
-        }
-
-        if (typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
+        if (typeof track.hasSamples === 'function' && track.hasSamples()) {
 
             if (this.sampleInfo.hasAttributes()) {
                 this.sampleInfoControl.setButtonVisibility(true)
             }
 
             if (this.config.showSampleNameButton !== false) {
-                this.sampleNameControl.show()   // If not explicitly set
+                this.sampleNameControl.show()
             }
         }
 
-        // repositioned here to solve layout issue.
-        this.reorderTracks()
-        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+        track.trackView.enableTrackSelection(this.navbar.getEnableTrackSelection())
 
-        newTrack.trackView.enableTrackSelection(this.navbar.getEnableTrackSelection())
-
-        return newTrack
+        return track
 
     }
 
@@ -1126,7 +1073,6 @@ class Browser {
             return track
         }
     }
-
 
     reorderTracks() {
 
@@ -1364,19 +1310,19 @@ class Browser {
 
         this.updateLocusSearchWidget()
 
-        for (let frame of this.referenceFrameList) {
-            if (frame.bpPerPixel <= bppSequenceThreshold) {
-                await this.genome.getSequence(frame.chr, frame.start, frame.start + 1)
+        for (const { bpPerPixel, chr, start } of this.referenceFrameList) {
+            if (bpPerPixel <= bppSequenceThreshold) {
+                await this.genome.getSequence(chr, start, start + 1)
             }
         }
 
-        for (let centerGuide of this.centerLineList) {
+        for (const centerGuide of this.centerLineList) {
             centerGuide.repaint()
         }
 
         // Don't autoscale while dragging.
         if (this.dragObject) {
-            for (let trackView of trackViews) {
+            for (const trackView of trackViews) {
                 await trackView.updateViews()
             }
         } else {
@@ -1400,8 +1346,8 @@ class Browser {
             // Calculate group autoscale dataRange
             if (Object.entries(groupAutoscaleTrackViews).length > 0) {
                 for (const [group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
-                    const featureArray = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
-                    const dataRange = doAutoscale(featureArray.flat())
+                    const inViewFeatures = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
+                    const dataRange = doAutoscale(inViewFeatures.flat())
                     for (const trackView of trackViews) {
                         trackView.track.dataRange = Object.assign({}, dataRange)
                         trackView.track.autoscale = false
@@ -1410,7 +1356,7 @@ class Browser {
                 }
             }
 
-            await Promise.all(otherTrackViews.map(tv => tv.updateViews()))
+            await Promise.all(otherTrackViews.map(trackView => trackView.updateViews()))
         }
 
     }

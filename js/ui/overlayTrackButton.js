@@ -63,7 +63,7 @@ function trackOverlayClickHandler(e) {
             track.trackView.dispose()
         }
 
-        this.browser.addTrack(config, mergedTrack)
+        this.browser.addTrack(mergedTrack)
         mergedTrack.trackView.updateViews()
 
     }

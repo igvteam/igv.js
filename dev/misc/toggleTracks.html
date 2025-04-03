@@ -28,12 +28,13 @@
             let track
 
             document.getElementById("load_track_button").addEventListener("click", async () => {
-                track = await browser.loadTrack({
+                const tracks = await browser.loadTrackList([{
                     type: "wig",
                     format: "bigwig",
                     url: "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
                     name: "Encode bigwig"
-                })
+                }])
+                track = tracks[0]
             })
 
             document.getElementById("unload_track_button").addEventListener("click", async () => {

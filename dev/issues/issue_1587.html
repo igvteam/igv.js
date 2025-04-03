@@ -34,15 +34,14 @@ Click the "Load" button to load the test file
         .then(function (browser) {
             console.log("Created IGV browser")
             document.getElementById("loadButton").addEventListener("click", () => {
-                browser.loadTrack({
+                browser.loadTrackList([{
                     "name": "BAM",
                     "url": "https://www.dropbox.com/s/ga5d4audgvopv5d/ptprc.bam?dl=0",
                     "indexURL": "https://www.dropbox.com/s/9kjwo1ukkpwetrx/ptprc.bam.bai?dl=0",
                     "format": "bam",
                     "type": "alignment",
                     "height": "900",
-                })
-
+                }])
             })
         })
 
