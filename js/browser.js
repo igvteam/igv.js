@@ -850,11 +850,29 @@ class Browser {
     }
 
     /**
-     * Return a promise to load a track.   Private function used by loadTrackList()
+     * Public API function
      *
-     * @param config
-     * @returns {*}
+     * Load an individual track.  If part of an autoscale group force a general update
+     *
+     * @param config  A track configuration
+     * @returns {Promise<*>}  Promise for track object
      */
+    async loadTrack(config) {
+
+        // Default configuration sync option to true.  This is the expected behavior for public API calls
+        config.sync = (config.sync !== false)
+
+        // Refer to returned Promise
+        const newTrack = this.#loadTrackHelper(config)
+
+        if (newTrack && config.autoscaleGroup) {
+            // Await newTrack load and update all views
+            await newTrack
+            this.updateViews()
+        }
+
+        return newTrack
+    }
 
     async #loadTrackHelper(config) {
 
@@ -888,7 +906,7 @@ class Browser {
         }
 
         if (track) {
-            await this.addTrack(track)
+            return await this.addTrack(track)
         } else {
             return undefined
         }
