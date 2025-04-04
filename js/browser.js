@@ -584,17 +584,6 @@ class Browser {
 
         await this.loadTrackList(nonLocalTrackConfigurations)
 
-        // If any tracks are selected show the selection buttons
-        if (this.trackViews.some(({ track }) => track.selected)) {
-            this.navbar.setEnableTrackSelection(true)
-        }
-
-        this.reorderTracks()
-
-        await resize.call(this)
-
-        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
-
     }
 
     cleanHouseForSession() {
@@ -729,8 +718,6 @@ class Browser {
 
         await this.loadTrackList(tracks)
 
-        await this.updateViews()
-
         return this.genome
     }
 
@@ -846,6 +833,18 @@ class Browser {
         }
 
         const loadedTracks = await Promise.all(promises)
+
+        // If any tracks are selected show the selection buttons
+        if (this.trackViews.some(({ track }) => track.selected)) {
+            this.navbar.setEnableTrackSelection(true)
+        }
+
+        this.reorderTracks()
+
+        await resize.call(this)
+
+        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+
         return loadedTracks
     }
 
