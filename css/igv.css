@@ -1649,7 +1649,7 @@
   left: 0;
   width: max-content;
   max-width: 400px;
-  z-index: 512;
+  z-index: 2048;
   cursor: pointer;
   font-family: "Open Sans", sans-serif;
   font-size: small;
