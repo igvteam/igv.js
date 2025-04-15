@@ -47,7 +47,8 @@ class BWSource extends BaseFeatureSource {
 
         let features
         if ("all" === chr.toLowerCase()) {
-            features = isBigWig ? await this.getWGValues(windowFunction, bpPerPixel) : []
+            const wgChromosomeNames = this.genome.wgChromosomeNames
+            features = isBigWig && wgChromosomeNames? await this.getWGValues(wgChromosomeNames, windowFunction, bpPerPixel) : []
         } else {
             features = await this.reader.readFeatures(chr, start, chr, end, bpPerPixel, windowFunction)
         }
@@ -71,15 +72,14 @@ class BWSource extends BaseFeatureSource {
 
     }
 
-    async getWGValues(windowFunction, bpPerPixel) {
+    async getWGValues(wgChromosomeNames, windowFunction, bpPerPixel) {
 
         const genome = this.genome
         const cached = this.#wgValues[windowFunction]
         if (cached && cached.bpPerPixel > 0.8 * bpPerPixel && cached.bpPerPixel < 1.2 * bpPerPixel) {
             return cached.values
         } else {
-
-            const features = await this.reader.readWGFeatures(bpPerPixel, windowFunction)
+            const features = await this.reader.readWGFeatures(wgChromosomeNames, bpPerPixel, windowFunction)
             let wgValues = []
             for (let f of features) {
                 const chr = f.chr
