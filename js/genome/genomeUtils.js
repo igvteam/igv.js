@@ -11,7 +11,7 @@ const GenomeUtils = {
 
         if (!GenomeUtils.KNOWN_GENOMES) {
 
-            GenomeUtils.KNOWN_GENOMES = {}
+            let table = {}
 
             const processJson = (jsonArray, table) => {
                 jsonArray.forEach(function (json) {
@@ -24,12 +24,12 @@ const GenomeUtils = {
             if (config.loadDefaultGenomes !== false) {
                 try {
                     const jsonArray = await igvxhr.loadJson(DEFAULT_GENOMES_URL, {timeout: 2000})
-                    processJson(jsonArray, GenomeUtils.KNOWN_GENOMES)
+                    processJson(jsonArray, table)
                 } catch (error) {
                     try {
                         console.error("Error initializing default genomes:", error)
                         const jsonArray = await igvxhr.loadJson(BACKUP_GENOMES_URL, {timeout: 2000})
-                        processJson(jsonArray, GenomeUtils.KNOWN_GENOMES)
+                        processJson(jsonArray, table)
                     } catch (e) {
                         console.error("Error initializing backup genomes:", error)
                     }
@@ -41,11 +41,12 @@ const GenomeUtils = {
             if (genomeList) {
                 if (typeof genomeList === 'string') {
                     const jsonArray = await igvxhr.loadJson(genomeList, {})
-                     processJson(jsonArray, GenomeUtils.KNOWN_GENOMES)
+                     processJson(jsonArray, table)
                 } else {
-                     processJson(genomeList, GenomeUtils.KNOWN_GENOMES)
+                     processJson(genomeList, table)
                 }
             }
+            GenomeUtils.KNOWN_GENOMES = table
         }
     },
 
