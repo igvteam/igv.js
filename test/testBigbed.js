@@ -172,9 +172,9 @@ table chromatinInteract
 
     test("clinvar", async function () {
 
-        this.timeout(20000000)
+        this.timeout(20000)
 
-        const url = "/Users/jrobinso/igv-team Dropbox/James Robinson/projects/igv.js/clinvarMain.bb",
+        const url = "https://hgdownload.soe.ucsc.edu/gbdb/hg38/bbi/clinvar/clinvarMain.bb",
             chr = "chr22",
             start = 23786974,
             end = 23787050
