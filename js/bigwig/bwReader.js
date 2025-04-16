@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import ChromTree from "./chromTree.js"
 import RPTree from "./rpTree.js"
 import BinaryParser from "../binary.js"
 import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
