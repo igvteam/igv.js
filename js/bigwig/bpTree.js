@@ -12,6 +12,7 @@ export default class BPTree {
 
     static magic = 2026540177
     littleEndian = true
+    type = 'BPTree'          // Either BPTree or BPChromTree
     nodeCache = new Map()
 
     static async loadBpTree(path, config, startOffset) {
@@ -19,10 +20,13 @@ export default class BPTree {
         return bpTree.init()
     }
 
-    constructor(path, config, startOffset) {
+    constructor(path, config, startOffset, type) {
         this.path = path
         this.config = config
         this.startOffset = startOffset
+        if(type) {
+            this.type = type
+        }
     }
 
     async init() {
@@ -48,69 +52,22 @@ export default class BPTree {
         return this
     }
 
+    getItemCount() {
+        if(!this.header) {
+            throw Error("Header not initialized")
+        }
+        return this.header.itemCount
+    }
+
     async search(term) {
 
         if(!this.header) {
             await this.init();
         }
 
-        const {keySize, valSize} = this.header
-
-        if (!(valSize === 16 || valSize === 8)) {
-            throw Error(`Unexpected valSize ${valSize}`)
-        }
-
-        const readTreeNode = async (offset) => {
-
-            if (this.nodeCache.has(offset)) {
-                return this.nodeCache.get(offset)
-            } else {
-
-                let binaryParser = await this.#getParserFor(offset, 4)
-                const type = binaryParser.getByte()
-                const reserved = binaryParser.getByte()
-                const count = binaryParser.getUShort()
-                const items = []
-
-                if (type === 1) {
-                    // Leaf node
-                    const size = count * (keySize + valSize)
-                    binaryParser = await this.#getParserFor(offset + 4, size)
-                    for (let i = 0; i < count; i++) {
-                        const key = binaryParser.getFixedLengthString(keySize)
-                        const offset = binaryParser.getLong()
-
-                        let value
-                        if (valSize === 16) {
-                            const length = binaryParser.getInt()
-                            binaryParser.getInt()
-                            value = {offset, length}
-                        } else {
-                            value = {offset}
-                        }
-                        items.push({key, value})
-                    }
-                } else {
-                    // Non leaf node
-                    const size = count * (keySize + 8)
-                    binaryParser = await this.#getParserFor(offset + 4, size)
-
-                    for (let i = 0; i < count; i++) {
-                        const key = binaryParser.getFixedLengthString(keySize)
-                        const offset = binaryParser.getLong()
-                        items.push({key, offset})
-                    }
-                }
-
-                const node = {type, count, items}
-                this.nodeCache.set(offset, node)
-                return node
-            }
-        }
-
         const walkTreeNode = async (offset) => {
 
-            const node = await readTreeNode(offset)
+            const node = await this.readTreeNode(offset)
 
             if (node.type === 1) {
                 // Leaf node
@@ -141,9 +98,66 @@ export default class BPTree {
         return walkTreeNode(this.header.nodeOffset)
     }
 
+    async readTreeNode (offset)  {
+
+        if (this.nodeCache.has(offset)) {
+            return this.nodeCache.get(offset)
+        } else {
+            let binaryParser = await this.#getParserFor(offset, 4)
+            const type = binaryParser.getByte()
+            const reserved = binaryParser.getByte()
+            const count = binaryParser.getUShort()
+            const items = []
+
+            const {keySize, valSize} = this.header
+
+            if (type === 1) {
+                // Leaf node
+                const size = count * (keySize + valSize)
+                binaryParser = await this.#getParserFor(offset + 4, size)
+                for (let i = 0; i < count; i++) {
+                    const key = binaryParser.getFixedLengthString(keySize)
+                    let value
+                    if(this.type === 'BPChromTree') {
+                        const id = binaryParser.getInt()
+                        const size = binaryParser.getInt()
+                        value = {id, size}
+                    } else {
+                        const offset = binaryParser.getLong()
+                        if (valSize === 16) {
+                            const length = binaryParser.getLong()
+                            value = {offset, length}
+                        } else {
+                            value = {offset}
+                        }
+                    }
+                    items.push({key, value})
+                }
+            } else {
+                // Non leaf node
+                const size = count * (keySize + 8)
+                binaryParser = await this.#getParserFor(offset + 4, size)
+
+                for (let i = 0; i < count; i++) {
+                    const key = binaryParser.getFixedLengthString(keySize)
+                    const offset = binaryParser.getLong()
+                    items.push({key, offset})
+                }
+            }
+
+            const node = {type, count, items}
+            this.nodeCache.set(offset, node)
+            return node
+        }
+    }
+
     async #getParserFor(start, size) {
-        const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
-        return new BinaryParser(new DataView(data), this.littleEndian)
+        try {
+            const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
+            return new BinaryParser(new DataView(data), this.littleEndian)
+        } catch (e) {
+            console.error(e)
+        }
     }
 
 }

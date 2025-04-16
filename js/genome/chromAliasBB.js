@@ -73,12 +73,6 @@ class ChromAliasBB {
         }
         return this.aliasRecordCache.get(alias)
     }
-
-    async getChromosomeNames() {
-        await this.reader.loadHeader()
-        return Array.from(this.reader.chrNames)
-    }
-
 }
 
 export default ChromAliasBB

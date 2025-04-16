@@ -34,7 +34,6 @@ suite("testBigWig", function () {
         const bwReader = new BWReader({url: url})
         const header = await bwReader.loadHeader()
         assert.ok(header)
-        assert.equal(bwReader.chrNames.size, 6)
     })
 
     test("bigwig", async function () {
