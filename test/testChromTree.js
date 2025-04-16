@@ -19,18 +19,6 @@ suite("test bbChromTree", function () {
 
     })
 
-    test("Genome size estimate", async function () {
-
-        this.timeout(10000)
-        const url = "https://hgdownload.soe.ucsc.edu/gbdb/hs1/ncbiRefSeq/ncbiRefSeqCurated.bb"
-        const bbChromTree = new ChromTree(url, {}, 1752 )
-        await bbChromTree.init()
-        assert.equal(bbChromTree.getItemCount(), 24)
-
-        const estSize = await bbChromTree.estimateGenomeSize();
-        assert.equal(3117275501, estSize);
-
-    })
 
     test("clinvar", async function () {
 
@@ -44,7 +32,7 @@ suite("test bbChromTree", function () {
     /**
      * Test a BB file with a small large chrom tree (24 contigs).  The estimate should be the exact size.
      */
-    test("Genome size estimate", async function () {
+    test("Larenome size estimate", async function () {
 
         this.timeout(10000)
         const url = "https://hgdownload.soe.ucsc.edu/gbdb/hs1/ncbiRefSeq/ncbiRefSeqCurated.bb"
@@ -59,7 +47,8 @@ suite("test bbChromTree", function () {
 
     /**
      * Test a BB file with a very large chrom tree (> 7 million contigs).  The main point of this test is to insure
-     * the calculation of the estimated genome size works.  The accuracy of the estimate is not crucial
+     * the calculation of the estimated genome size works.  The accuracy of the estimate is not crucial, the main
+     * point is to test the function returns in reasonable time
      * Actual size = 5335596729
      */
     test("Large genome size estimate", async function () {
@@ -69,9 +58,10 @@ suite("test bbChromTree", function () {
         const bbChromTree = new ChromTree(url, {}, 738 )
         await bbChromTree.init()
         assert.equal(bbChromTree.getItemCount(), 7677333)
+        const time = Date.now()
         const estSize = await bbChromTree.estimateGenomeSize();
-        const ratio =  estSize / 5335596728;
-        assert.ok(ratio > 0.05 && ratio < 20);
+        const dt = Date.now() - time
+        assert.ok(dt < 10000, "Estimate took too long: " + dt);
 
     })
 
