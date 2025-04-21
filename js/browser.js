@@ -46,6 +46,7 @@ import {inferFileFormat} from "./util/fileFormatUtils.js"
 import {convertToHubURL} from "./ucsc/ucscUtils.js"
 import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
+import {createBlatTrack} from "./blat/blatTrack.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -2219,6 +2220,9 @@ class Browser {
         return this.navbar.sampleNameControl
     }
 
+    async blat(sequence) {
+        return createBlatTrack({sequence, browser: this, name: 'Blat', title: 'Blat' })
+    }
 }
 
 function getFileExtension(input) {
