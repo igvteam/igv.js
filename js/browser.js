@@ -534,7 +534,9 @@ class Browser {
                 if (sampleInfoConfig.file) {
                     localSampleInfoFiles.push(sampleInfoConfig.file)
                 } else {
-                    this.loadSampleInfo(sampleInfoConfig)
+                    // this.loadSampleInfo(sampleInfoConfig)
+                    await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
+
                 }
 
             }
@@ -1431,10 +1433,18 @@ class Browser {
      * @param {number} viewportWidth - The calculated viewport width
      */
     updateViewportElements(viewportWidth) {
+
         for (let i = 0; i < this.referenceFrameList.length; i++) {
+
             for (const {viewports} of this.trackViews) {
                 viewports[i].setWidth(viewportWidth)
             }
+
+            for (const {sampleInfoViewport} of this.trackViews) {
+                sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
+                sampleInfoViewport.repaint()
+            }
+
         }
     }
 
@@ -1705,7 +1715,7 @@ class Browser {
         }
     }
 
-    async loadSampleInfo(sampleInfoConfig) {
+    async DEPRICATED_loadSampleInfo(sampleInfoConfig) {
 
         await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
 
