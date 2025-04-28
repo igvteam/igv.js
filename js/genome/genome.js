@@ -74,10 +74,10 @@ class Genome {
         }
 
         // Last resort for chromosome information -- retrieve it from the cytoband source if supported
-        if (!this.chromosomeNames && typeof this.cytobandSource.getChromosomeNames === 'function') {
+        if (!this.chromosomeNames && this.cytobandSource && typeof this.cytobandSource.getChromosomeNames === 'function') {
             this.chromosomeNames = await this.cytobandSource.getChromosomeNames()
         }
-        if (this.chromosomes.size === 0 && typeof this.cytobandSource.getChromosomes === 'function') {
+        if (this.chromosomes.size === 0 && this.cytobandSource && typeof this.cytobandSource.getChromosomes === 'function') {
             const c = await this.cytobandSource.getChromosomes()
             for (let chromosome of c) {
                 this.chromosomes.set(c.name, c)
