@@ -178,6 +178,9 @@ class ChromAliasDefaults {
                 aliasRecord["_cap"] = cap
             }
 
+            const chrPrefixAlias = aliasRecord.chr.startsWith("chr") ? aliasRecord.chr.substring(3) : "chr" + aliasRecord.chr;
+            aliasRecord["_chrprefix_"] = chrPrefixAlias;
+
     }
 
 }
