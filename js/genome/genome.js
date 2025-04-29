@@ -54,6 +54,8 @@ class Genome {
 
         if (this.chromosomes.size > 0) {
             this.chromosomeNames = Array.from(this.chromosomes.keys())
+        } else if(this.sequence.chromosomeNames) {
+            this.chromosomeNames = this.sequence.chromosomeNames    // Twobit files can supply chromosome names unless they use an external index
         }
 
         if (config.chromAliasBbURL) {
@@ -136,8 +138,10 @@ class Genome {
     getHomeChromosomeName() {
         if (this.showWholeGenomeView() && this.chromosomes.has("all")) {
             return "all"
-        } else {
+        } else if (this.chromosomeNames) {
             return this.chromosomeNames[0]
+        } else {
+
         }
     }
 
