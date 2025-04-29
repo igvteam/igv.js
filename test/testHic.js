@@ -57,9 +57,9 @@ suite('HicFile', function () {
     })
 
     test('remote file read header', async function () {
-
+        this.timeout(100000)
         const hicFile = new HicFile({
-            "url": "https://s3.amazonaws.com/igv.broadinstitute.org/data/hic/intra_nofrag_30.hic",
+            "url": "https://www.dropbox.com/scl/fi/eqppb40khtk61262czfsn/HCT-116_Untreated.hic?rlkey=1ho9ojun138lwahi5xvs7usyx&dl=0",
             "loadFragData": false
         })
 
