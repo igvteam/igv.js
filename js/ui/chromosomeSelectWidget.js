@@ -67,7 +67,9 @@ class ChromosomeSelectWidget {
         this.genome = genome
 
         // Start with explicit chromosome name list
-        const list = genome.wgChromosomeNames.map(nm => genome.getChromosomeDisplayName(nm)) || []
+        const list = (genome.wgChromosomeNames) ?
+            genome.wgChromosomeNames.map(nm => genome.getChromosomeDisplayName(nm)) :
+            []
 
         if (this.showAllChromosomes && genome.chromosomeNames.length > 1) {
             const exclude = new Set(list)

@@ -24,6 +24,7 @@ class TwobitSequence {
 
     littleEndian
     metaIndex = new Map()
+    chromosomeNames
 
     constructor(config) {
         this.url = config.twoBitURL || config.fastaURL
@@ -116,9 +117,16 @@ class TwobitSequence {
         return sequenceBases
     }
 
+    /**
+     * Read the internal index of the 2bit file.  This is a list of sequence names and their offsets in the file.
+     *
+     * @returns {Promise<Map<any, any>>}
+     * @private
+     */
     async _readIndex() {
 
         const index = new Map()
+        this.chromosomeNames = []
 
         const loadRange = {start: 0, size: 64}
         let arrayBuffer = await igvxhr.loadArrayBuffer(this.url, {range: loadRange})
@@ -171,6 +179,8 @@ class TwobitSequence {
             index.set(name, offset)
 
             estNameLength = Math.floor(estNameLength * (i / (i + 1)) + name.length / (i + 1))
+
+            this.chromosomeNames.push(name)
         }
         return index
     }
