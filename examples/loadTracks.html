@@ -39,9 +39,9 @@
         menu. Selecting 'GBM Copy # (TCGA Broad GDAC)' in the menu above results in the following call.
         <p>
         <pre>
-                browser.loadTrackList([{
+                browser.loadTrack({
                     url: 'https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz',
-                    name: 'GBM Copy # (TCGA Broad GDAC)'}])
+                    name: 'GBM Copy # (TCGA Broad GDAC)'})
                 </pre>
         </p>
         See the <a href="https://igv.org/doc/igvjs">developer documentation for more details.</a>
@@ -98,7 +98,7 @@
         const a = document.createElement("a")
         a.setAttribute("href", "#")
         a.classList.add("dropdown-item")
-        a.addEventListener('click', () => browser.loadTrackList([config]))
+        a.addEventListener('click', () => browser.loadTrack(config))
         a.innerText = config.name
         menu.appendChild(a)
     }

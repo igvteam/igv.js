@@ -27,14 +27,12 @@
             {
                 name: 'All pos bars',
                 url: '../../test/data/wig/allPositive.bedgraph',
-                // url: 'https://www.dropbox.com/scl/fi/2e94qlpg3ozdbzcbpxdmp/allPositive.bedgraph?rlkey=yjy40ow1iwos5jsu8pr4sfsll&st=xj55w4e4&dl=0',
                 // color: '#0f0',
                 indexed: false
             },
             {
                 name: 'All negative bars',
                 url: '../../test/data/wig/allNegativewig.bedgraph',
-                // url: 'https://www.dropbox.com/scl/fi/70ox04jx7ufkbutuqfpwp/allNegativewig.bedgraph?rlkey=37s0oi8boywr859k81ozcb5pq&st=fa3mbmej&dl=0',
                 // color: '#f00',
                 indexed: false
             },
@@ -572,7 +570,7 @@
             ]
         };
 
-    igv.createBrowser(document.getElementById("igv-container"), config).then(browser => {
+    igv.createBrowser(document.getElementById("igv-container"), config_whole_lotta_wigs).then(browser => {
         console.log(`browser ${ browser.guid } is good to go`)
     });
 

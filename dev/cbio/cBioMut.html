@@ -70,7 +70,7 @@
 
             const features = await fetchMutationData(sampleIds);
 
-            browser.loadTrackList([{
+            browser.loadTrack({
                 name: "cBIO mut example",
                 type: "mut",
                 features: features,
@@ -83,7 +83,8 @@
                 //         return "blue"
                 //     }
                 // }
-            }])
+
+            })
 
         })
 

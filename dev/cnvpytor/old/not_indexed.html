@@ -52,23 +52,21 @@
         .then(async function (browser) {
 
             // Non-indexed VCF track.  The entire VCF file is read on initial load
-            const vcfTracks = await browser.loadTrackList([{
+            const vcfTrack = await browser.loadTrack({
                 id: "vcf_track",
                 type: "variant",
                 name: "1KG Snps - chr22",
                 url: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz",
                 indexed: false
-            }])
-            const vcfTrack = vcfTracks[0]
+            })
 
             // Wig track with explicit features, initially set to an empty array.
-            const wigTracks = await browser.loadTrackList([{
+            const wigTrack = await browser.loadTrack({
                 id: "wig_track",
                 type: "wig",
                 name: "Depth",
                 features: []     // !important -- signals track that features will be exlicitly defined
-            }])
-            const wigTrack = wigTracks[0]
+            })
 
             // Grab the feature source to perform feature updates.
             const wigFeatureSource = wigTrack.featureSource     // TODO -- a little ugly this

@@ -50,26 +50,24 @@
         .then(async function (browser) {
 
             // Indexed VCF track with a visibility window of 1 MB
-            const vcfTracks = await browser.loadTrackList([{
+            const vcfTrack = await browser.loadTrack({
                 id: "vcf_track",
                 type: "variant",
                 name: "1KG Snps - chr22",
                 url: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz",
                 indexURL: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz.tbi",
                 visibilityWindow: 1000000
-            }])
-            const vcfTrack = vcfTracks[0]
+            })
 
             // Wig track for coverage depth with custom data source
-            const wigTracks = await browser.loadTrackList([{
+            const wigTrack = await browser.loadTrack({
                 id: "wig_track",
                 type: "wig",
                 name: "Depth",
                 graphType: "points",
                 visibilityWindow: vcfTrack.visibilityWindow,
                 featureSource: new DepthFeatureSource(vcfTrack)
-            }])
-            const wigTrack = wigTracks[0]
+            })
         })
 
     // Custom data source class, the getFeatures method is called automatically by igv.js as needed to paint track

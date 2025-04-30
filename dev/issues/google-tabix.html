@@ -42,12 +42,12 @@
     igv.createBrowser(document.getElementById('igvDiv'), options)
         .then(async function (browser) {
             document.getElementById("loadButton").onclick = () => {
-                browser.loadTrackList([{
+                browser.loadTrack({
                     format: "gtf",
                     url: "https://drive.google.com/file/d/10Ngursz8WoOKDak-5dZ5M_mdiWN9LixJ/view?usp=drive_web",
                     indexURL: "https://drive.google.com/file/d/1dHy-DoAEHIs2evfP2vc4-iPJ7v4vuG_a/view?usp=drive_web",
                     name: "genes.gtf.gz"
-                }])
+                })
             }
         })
 

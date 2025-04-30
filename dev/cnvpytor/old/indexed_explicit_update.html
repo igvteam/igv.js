@@ -52,25 +52,24 @@
         .then(async function (browser) {
 
             // Indexed VCF track with a visibility window of 1 MB
-            const vcfTracks = await browser.loadTrackList([{
+            const vcfTrack = await browser.loadTrack({
                 id: "vcf_track",
                 type: "variant",
                 name: "1KG Snps - chr22",
                 url: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz",
                 indexURL: "https://s3.amazonaws.com/igv.org.demo/1kg_wgs_snps_chr22.vcf.gz.tbi",
                 visibilityWindow: 1000000
-            }])
-            const vcfTrack = vcfTracks[0]
+            })
+
 
             // Wig track with explicit features, initially set to an empty array.
-            const coverageTracks = await browser.loadTrackList([{
+            const coverageTrack = await browser.loadTrack({
                 id: "wig_track",
                 type: "wig",
                 name: "Depth",
                 visibilityWindow: vcfTrack.visibilityWindow,
                 features: []    // ! Important, signals track that features will be supplied explicitly
-            }])
-            const coverageTrack = coverageTracks[0]
+            })
 
             // Grab the feature source to perform feature updates.
             const coverageFeatureSource = coverageTrack.featureSource
