@@ -530,7 +530,9 @@ class Browser {
         const localSampleInfoFiles = []
         if (session.sampleinfo) {
             for (const sampleInfoConfig of session.sampleinfo) {
-
+                // The "file" property is recorded in the session when a local file is referenced. It can't be used
+                // on reloading, its only purpose is to present an alert to the user.  This could also be used
+                // to prompt the user to load the file manually, but we don't currently do that.
                 if (sampleInfoConfig.file) {
                     localSampleInfoFiles.push(sampleInfoConfig.file)
                 } else {
