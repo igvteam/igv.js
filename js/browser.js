@@ -394,7 +394,8 @@ class Browser {
         } else {
             session = options
         }
-        return this.loadSessionObject(session)
+
+        await this.loadSessionObject(session)
     }
 
     /**
@@ -529,12 +530,16 @@ class Browser {
         // Sample info
         const localSampleInfoFiles = []
         if (session.sampleinfo) {
-            for (const config of session.sampleinfo) {
-
-                if (config.file) {
-                    localSampleInfoFiles.push(config.file)
+            for (const sampleInfoConfig of session.sampleinfo) {
+                // The "file" property is recorded in the session when a local file is referenced. It can't be used
+                // on reloading, its only purpose is to present an alert to the user.  This could also be used
+                // to prompt the user to load the file manually, but we don't currently do that.
+                if (sampleInfoConfig.file) {
+                    localSampleInfoFiles.push(sampleInfoConfig.file)
                 } else {
-                    this.loadSampleInfo(config)
+                    // this.loadSampleInfo(sampleInfoConfig)
+                    await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
+
                 }
 
             }
@@ -575,23 +580,14 @@ class Browser {
             }
         }
 
+        // Load a hidden track -- used to populate searchable database without creating a track
+        const configHidden = nonLocalTrackConfigurations.filter(config => true === config.hidden)
+        for (const config of configHidden) {
+            const featureSource = FeatureSource(config, this.genome)
+            await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
+        }
+
         await this.loadTrackList(nonLocalTrackConfigurations)
-
-        // The ruler and ideogram tracks are not explicitly loaded, but needs updated nonetheless.
-        for (let rtv of this.trackViews.filter((tv) => tv.track.type === 'ruler' || tv.track.type === 'ideogram')) {
-            await rtv.updateViews()
-        }
-
-        // If any tracks are selected show the selection buttons
-        if (this.trackViews.some(tv => tv.track.selected)) {
-            this.navbar.setEnableTrackSelection(true)
-        }
-
-        this.updateUIWithReferenceFrameList()
-
-        this.updateLocusSearchWidget()
-
-        return trackConfigurations
 
     }
 
@@ -727,8 +723,6 @@ class Browser {
 
         await this.loadTrackList(tracks)
 
-        await this.updateViews()
-
         return this.genome
     }
 
@@ -839,18 +833,23 @@ class Browser {
         }
 
         const promises = []
-        for (let config of configList) {
-            promises.push(this._loadTrack(config))
+        for (const config of configList) {
+            promises.push(this.#loadTrackHelper(config))
         }
 
         const loadedTracks = await Promise.all(promises)
 
-        const groupAutoscaleViews = this.trackViews.filter(function (trackView) {
-            return trackView.track.autoscaleGroup
-        })
-        if (groupAutoscaleViews.length > 0) {
-            this.updateViews()
+        // If any tracks are selected show the selection buttons
+        if (this.trackViews.some(({ track }) => track.selected)) {
+            this.navbar.setEnableTrackSelection(true)
         }
+
+        this.reorderTracks()
+
+        await resize.call(this)
+
+        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+
         return loadedTracks
     }
 
@@ -864,54 +863,23 @@ class Browser {
      */
     async loadTrack(config) {
 
-        // Default configuration sync option to true.  This is the expected behavior for public API calls
-        config.sync = (config.sync !== false)
-
-        const newTrack = this._loadTrack(config)
-
-        if (newTrack && config.autoscaleGroup) {
-            // Await newTrack load and update all views
-            await newTrack
+        const loadedTracks = await this.loadTrackList([config])
+        if(config.autoscaleGroup) {
             this.updateViews()
         }
-
-        return newTrack
+        return loadedTracks[0]
     }
 
-    /**
-     * Return a promise to load a track.   Private function used by loadTrack() and loadTrackList()
-     *
-     * @param config
-     * @returns {*}
-     */
-
-    async _loadTrack(config) {
+    async #loadTrackHelper(config) {
 
         // config might be json
         if (StringUtils.isString(config)) {
             config = JSON.parse(config)
         }
 
+        let track
         try {
-
-            // Load a hidden track -- used to populate searchable database without creating a track
-            if (config.hidden) {
-                const featureSource = FeatureSource(config, this.genome)
-                await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
-                return
-            }
-
-            const newTrack = await this.createTrack(config)
-
-            if ('sampleinfo' === config.type) {
-                this.layoutChange()
-                return
-            } else if (undefined === newTrack) {
-                return
-            }
-
-            return this.addTrack(config, newTrack)
-
+            track = await this.createTrack(config)
         } catch (error) {
 
             let msg = error.message || error.error || error.toString()
@@ -928,62 +896,53 @@ class Browser {
             }
 
             msg = `${msg} : ${FileUtils.isFile(config.url) ? config.url.name : config.url}`
-            // msg += (": " + FileUtils.isFile(config.url) ? config.url.name : config.url)
             const err = new Error(msg)
             console.error(err)
             throw err
-            // this.alert.present(new Error(msg), undefined)
         }
+
+        if (track) {
+            return await this.addTrack(track)
+        } else {
+            return undefined
+        }
+
     }
 
-    async addTrack(config, newTrack) {
-
+    async addTrack(track) {
 
         // Set order field of track here, otherwise track order might get shuffled during asynchronous load
-        if (undefined === newTrack.order) {
-            newTrack.order = this.trackViews.length
+        if (undefined === track.order) {
+            track.order = this.trackViews.length
         }
 
-        const trackView = new TrackView(this, this.columnContainer, newTrack)
+        const trackView = new TrackView(this, this.columnContainer, track)
         this.trackViews.push(trackView)
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
-        if (typeof newTrack.postInit === 'function') {
+        if (typeof track.postInit === 'function') {
             try {
                 trackView.startSpinner()
-                await newTrack.postInit()
+                await track.postInit()
             } finally {
                 trackView.stopSpinner()
             }
         }
 
-        if (!newTrack.autoscaleGroup) {
-            // Group autoscale will get updated later (as a group)
-            if (config.sync) {
-                await trackView.updateViews()
-            } else {
-                trackView.updateViews()
-            }
-        }
-
-        if (typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
+        if (typeof track.hasSamples === 'function' && track.hasSamples()) {
 
             if (this.sampleInfo.hasAttributes()) {
                 this.sampleInfoControl.setButtonVisibility(true)
             }
 
             if (this.config.showSampleNameButton !== false) {
-                this.sampleNameControl.show()   // If not explicitly set
+                this.sampleNameControl.show()
             }
         }
 
-        // repositioned here to solve layout issue.
-        this.reorderTracks()
-        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+        track.trackView.enableTrackSelection(this.navbar.getEnableTrackSelection())
 
-        newTrack.trackView.enableTrackSelection(this.navbar.getEnableTrackSelection())
-
-        return newTrack
+        return track
 
     }
 
@@ -1127,7 +1086,6 @@ class Browser {
             return track
         }
     }
-
 
     reorderTracks() {
 
@@ -1365,19 +1323,19 @@ class Browser {
 
         this.updateLocusSearchWidget()
 
-        for (let frame of this.referenceFrameList) {
-            if (frame.bpPerPixel <= bppSequenceThreshold) {
-                await this.genome.getSequence(frame.chr, frame.start, frame.start + 1)
+        for (const { bpPerPixel, chr, start } of this.referenceFrameList) {
+            if (bpPerPixel <= bppSequenceThreshold) {
+                await this.genome.getSequence(chr, start, start + 1)
             }
         }
 
-        for (let centerGuide of this.centerLineList) {
+        for (const centerGuide of this.centerLineList) {
             centerGuide.repaint()
         }
 
         // Don't autoscale while dragging.
         if (this.dragObject) {
-            for (let trackView of trackViews) {
+            for (const trackView of trackViews) {
                 await trackView.updateViews()
             }
         } else {
@@ -1401,8 +1359,8 @@ class Browser {
             // Calculate group autoscale dataRange
             if (Object.entries(groupAutoscaleTrackViews).length > 0) {
                 for (const [group, trackViews] of Object.entries(groupAutoscaleTrackViews)) {
-                    const featureArray = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
-                    const dataRange = doAutoscale(featureArray.flat())
+                    const inViewFeatures = await Promise.all(trackViews.map(trackView => trackView.getInViewFeatures()))
+                    const dataRange = doAutoscale(inViewFeatures.flat())
                     for (const trackView of trackViews) {
                         trackView.track.dataRange = Object.assign({}, dataRange)
                         trackView.track.autoscale = false
@@ -1411,7 +1369,7 @@ class Browser {
                 }
             }
 
-            await Promise.all(otherTrackViews.map(tv => tv.updateViews()))
+            await Promise.all(otherTrackViews.map(trackView => trackView.updateViews()))
         }
 
     }
@@ -1452,6 +1410,46 @@ class Browser {
         width -= column_multi_locus_shim_width * (columnCount - 1)
 
         return Math.floor(width / columnCount)
+    }
+
+    /**
+     * Update reference frames based on new viewport width
+     * @param {number} viewportWidth - The calculated viewport width
+     */
+    updateReferenceFrames(viewportWidth) {
+
+        for (const referenceFrame of this.referenceFrameList) {
+            referenceFrame.updateForViewportWidth(viewportWidth)
+        }
+    }
+
+    /**
+     * Update DOM viewport elements with new width
+     * @param {number} viewportWidth - The calculated viewport width
+     */
+    updateViewportElements(viewportWidth) {
+
+        for (let i = 0; i < this.referenceFrameList.length; i++) {
+
+            for (const {viewports} of this.trackViews) {
+                viewports[i].setWidth(viewportWidth)
+            }
+
+            for (const {sampleInfoViewport} of this.trackViews) {
+                sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
+                sampleInfoViewport.repaint()
+            }
+
+        }
+    }
+
+    /**
+     * Synchronize UI state after viewport updates
+     * @returns {Promise<void>}
+     */
+    async syncUIState() {
+        this.updateUIWithReferenceFrameList()
+        await this.updateViews(true)
     }
 
     minimumBases() {
@@ -1712,9 +1710,9 @@ class Browser {
         }
     }
 
-    async loadSampleInfo(config) {
+    async DEPRECATED_loadSampleInfo(sampleInfoConfig) {
 
-        await this.sampleInfo.loadSampleInfoFile(config.url)
+        await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
 
         for (const {sampleInfoViewport} of this.trackViews) {
             sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
@@ -2197,8 +2195,6 @@ class Browser {
         }
     }
 
-
-
     // Navbar delegates
     get sampleInfoControl() {
         return this.navbar.sampleInfoControl
@@ -2248,7 +2244,7 @@ function getFileExtension(input) {
 }
 
 /**
- * Function called win window is resized, or visibility changed (e.g. "show" from a tab).  This is a function rather
+ * Called when window is resized, or visibility changed (e.g. "show" from a tab).  This is a function rather
  * than class method because it needs to be copied and bound to specific instances of browser to support listener
  * removal
  *
@@ -2256,40 +2252,14 @@ function getFileExtension(input) {
  */
 async function resize() {
 
-    if (!this.referenceFrameList) return
-
-    const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
-
-    for (let referenceFrame of this.referenceFrameList) {
-
-        const index = this.referenceFrameList.indexOf(referenceFrame)
-
-        const {chr, genome} = referenceFrame
-
-        const {bpLength} = genome.getChromosome(referenceFrame.chr)
-
-        const viewportWidthBP = referenceFrame.toBP(viewportWidth)
-
-        // viewportWidthBP > bpLength occurs when locus is full chromosome and user widens browser
-        if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
-            // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) bpp. viewport ${ StringUtils.numberFormatter(viewportWidthBP) } > ${ StringUtils.numberFormatter(bpLength) }.`)
-            referenceFrame.bpPerPixel = bpLength / viewportWidth
-        } else {
-            // console.log(`${ Date.now() } Recalc referenceFrame(${ index }) end.`)
-            referenceFrame.end = referenceFrame.start + referenceFrame.toBP(viewportWidth)
-        }
-
-        for (let {viewports} of this.trackViews) {
-            viewports[index].setWidth(viewportWidth)
-        }
-
+    if (undefined === this.referenceFrameList || 0 === this.referenceFrameList.length) {
+        return
     }
 
-    this.updateUIWithReferenceFrameList()
-
-    //TODO -- update view only if needed.  Reducing size never needed.  Increasing size maybe
-
-    await this.updateViews(true)
+    const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
+    this.updateReferenceFrames(viewportWidth)
+    this.updateViewportElements(viewportWidth)
+    await this.syncUIState()
 }
 
 
