@@ -20,14 +20,7 @@
 
     const options =
         {
-            // Example of fully specifying a reference .  We could alternatively use  "genome: 'hg19'"
-            reference: {
-                "id": "hg19",
-                "name": "Human (CRCh37/hg19)",
-                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
-                "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
-            },
+            genome: "hg19",
             locus: "8:128,750,948-128,751,025",
             tracks:
                 [
