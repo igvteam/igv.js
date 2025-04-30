@@ -860,19 +860,11 @@ class Browser {
      */
     async loadTrack(config) {
 
-        // Default configuration sync option to true.  This is the expected behavior for public API calls
-        config.sync = (config.sync !== false)
-
-        // Refer to returned Promise
-        const newTrack = this.#loadTrackHelper(config)
-
-        if (newTrack && config.autoscaleGroup) {
-            // Await newTrack load and update all views
-            await newTrack
+        const loadedTracks = await this.loadTrackList([config])
+        if(config.autoscaleGroup) {
             this.updateViews()
         }
-
-        return newTrack
+        return loadedTracks[0]
     }
 
     async #loadTrackHelper(config) {
