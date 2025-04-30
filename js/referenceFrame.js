@@ -1,6 +1,7 @@
 import {StringUtils} from "../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {prettyBasePairNumber, validateGenomicExtent} from "./util/igvUtils.js"
+import GenomeUtils from "./genome/genomeUtils.js"
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
 
@@ -144,6 +145,23 @@ class ReferenceFrame {
 
     getChromosome() {
         return this.genome.getChromosome(this.chr)
+    }
+
+    /**
+     * Update reference frame based on new viewport width
+     * @param {number} viewportWidth - The calculated viewport width
+     */
+    updateForViewportWidth(viewportWidth) {
+        const {chr} = this
+        const {bpLength} = this.getChromosome()
+        const viewportWidthBP = this.toBP(viewportWidth)
+
+        // viewportWidthBP > bpLength occurs when locus is full chromosome and user widens browser
+        if (GenomeUtils.isWholeGenomeView(chr) || viewportWidthBP > bpLength) {
+            this.bpPerPixel = bpLength / viewportWidth
+        } else {
+            this.end = this.start + this.toBP(viewportWidth)
+        }
     }
 
     getMultiLocusLabelBPLengthOnly(pixels) {

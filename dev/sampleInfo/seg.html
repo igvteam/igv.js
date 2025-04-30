@@ -20,26 +20,33 @@
 
     const config =
         {
-            "queryParametersSupported": true,
-            "genome": "hg38",
+            "genome": "hg18",
             "sampleinfo": [
                 {
-                    "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBM-sampletable-samplemapping-colors.txt"
+                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/gbm/GBM-sampletable-samplemapping-colors.txt"
                 }
             ],
             "tracks": [
                 {
-                    "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBMCopyNumber.seg.gz",
-                    "name": "GBMCopyNumber.seg.gz",
+                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/gbm/Broad.080528.subtypes.seg.gz",
+                    "name": "GBM Copy Number",
                     "order": 1,
                     "format": "seg",
                     "type": "seg",
-                    "height": 700
+                    "height": 250,
+                    "displayMode": "SQUISHED",
+                    "sort": {
+                        "option": "ATTRIBUTE",
+                        "attribute": "Subtype",
+                        "direction": "ASC"
+                    }
                 }
             ]
         }
 
     const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
+
+    await browser.layoutChange()
 
     document.getElementById('bookmark').addEventListener('click', () => {
         const path = window.location.href.slice()
