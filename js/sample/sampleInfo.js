@@ -45,16 +45,7 @@ class SampleInfo {
 
     getAttributes(sampleName) {
 
-        // const sampleDictionaryKeySet = new Set(Object.keys(this.sampleDictionary))
-        //
-        // if (sampleDictionaryKeySet.has(sampleName)) {
-        //     // cool
-        // } else {
-        //     console.warn(`Uh on. sampleDictionary does not have ${ sampleName} as a key`)
-        // }
-
-
-        const key = 0 === Object.keys(this.sampleMappingDictionary) ? sampleName : (this.sampleMappingDictionary[sampleName] || sampleName)
+        const key = this.sampleMappingDictionary[sampleName] || sampleName
         return this.sampleDictionary[key]
     }
 
