@@ -1710,7 +1710,7 @@ class Browser {
         }
     }
 
-    async DEPRECATED_loadSampleInfo(sampleInfoConfig) {
+    async loadSampleInfo(sampleInfoConfig) {
 
         await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
 
