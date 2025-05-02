@@ -435,7 +435,7 @@ class MergedTrack extends TrackBase {
         let element = document.createElement('div');
         element.textContent = 'Separate tracks';
 
-        function click(e) {
+        async function click(e) {
 
             // Capture state which will be nulled when track is removed
             const groupAutoscale = this.autoscale
@@ -453,7 +453,8 @@ class MergedTrack extends TrackBase {
                 track.isMergedTrack = false
                 browser.addTrack(track)
             }
-            browser.updateViews()
+            await browser.updateViews()
+            browser.reorderTracks()
         }
 
         return {element, click}
