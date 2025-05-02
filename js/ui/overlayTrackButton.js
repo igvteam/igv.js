@@ -64,8 +64,8 @@ async function trackOverlayClickHandler(e) {
         }
 
         this.browser.addTrack(mergedTrack)
-        mergedTrack.trackView.updateViews()
-        await this.browser.reorderTracks()
+        await mergedTrack.trackView.updateViews()
+        this.browser.reorderTracks()
     }
 
 }

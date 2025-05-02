@@ -454,7 +454,7 @@ class MergedTrack extends TrackBase {
                 browser.addTrack(track)
             }
             await browser.updateViews()
-            await browser.reorderTracks()
+            browser.reorderTracks()
         }
 
         return {element, click}
