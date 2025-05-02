@@ -26,7 +26,7 @@ class OverlayTrackButton extends NavbarButton {
     }
 }
 
-function trackOverlayClickHandler(e) {
+async function trackOverlayClickHandler(e) {
 
     if (true === isOverlayTrackCriteriaMet(this.browser)) {
 
@@ -65,7 +65,7 @@ function trackOverlayClickHandler(e) {
 
         this.browser.addTrack(mergedTrack)
         mergedTrack.trackView.updateViews()
-
+        await this.browser.reorderTracks()
     }
 
 }
