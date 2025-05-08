@@ -28,7 +28,7 @@ async function loadHub(url) {
     }
 
     const hubStanza = stanzas[0]
-    if (!"hub" === hubStanza.type) {
+    if (hubStanza.type !== "hub") {
         throw new Error("First stanza must be a hub stanza")
     }
 
