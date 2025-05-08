@@ -263,7 +263,7 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
                 max = Number.parseInt(tokens[1])
             }
             if (Number.isNaN(max) || Number.isNaN(min)) {
-                console.warn(`Unexpected viewLimits value in track line: ${properties["viewLimits"]}`)
+                console.warn(`Unexpected viewLimits value in track line: ${t.getProperty("viewLimits")}`)
             } else {
                 config.min = min
                 config.max = max
