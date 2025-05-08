@@ -288,11 +288,11 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         }
 
         if (t.hasProperty("group")) {
-            config.group = t.getProperty("group")
-            if (this.groupPriorityMap && this.groupPriorityMap.has(config.group)) {
-                const nextPriority = this.groupPriorityMap.get(config.group) + 1
+            config._group = t.getProperty("group")
+            if (this.groupPriorityMap && this.groupPriorityMap.has(config._group)) {
+                const nextPriority = this.groupPriorityMap.get(config._group) + 1
                 config.order = nextPriority
-                this.groupPriorityMap.set(config.group, nextPriority)
+                this.groupPriorityMap.set(config._group, nextPriority)
             }
         }
 
