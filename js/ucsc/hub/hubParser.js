@@ -73,10 +73,12 @@ async function loadHub(url) {
 
     })
     const groupStanzas = []
-    uniqGroupURLs.forEach(async url => {
+    const groupPromises = Array.from(uniqGroupURLs).map(async url => {
         const stanza = await loadStanzas(url)
-        groupStanzas.push(...stanza)
+        return stanza
     })
+    const groupResults = await Promise.all(groupPromises)
+    groupResults.forEach(stanza => groupStanzas.push(...stanza))
 
     const hub = new Hub(url, hubStanza, genomeStanzas, trackStanzas, groupStanzas)
 
