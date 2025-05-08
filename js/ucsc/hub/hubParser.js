@@ -47,10 +47,15 @@ async function loadHub(url) {
         // is not enabled.  Remove it if > 100 kb
         if (genomeStanza.hasOwnProperty("chromSizes")) {
             const chromSizes = genomeStanza.getProperty("chromSizes")
-            const contentLength = await igvxhr.getContentLength(chromSizes)
-            if (contentLength > 100000) {
-                genomeStanza.removeProperty("chromSizes")
+            try {
+                const contentLength = await igvxhr.getContentLength(chromSizes)
+                if (contentLength > 100000) {
+                    genomeStanza.removeProperty("chromSizes")
+                }
+            } catch (e) {
+                console.error(`Error getting content length for chromSizes ${chromSizes}`, e)
             }
+
         }
 
     } else {

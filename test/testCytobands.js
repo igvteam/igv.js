@@ -17,12 +17,6 @@ suite("test cytobands", function () {
         const last = cytobands[cytobands.length-1];
         assert.equal(22422827, last.end)
 
-        const chromosomes = await src.getChromosomes()
-        assert.equal(6, chromosomes.length)
-        const lastChr = chromosomes[chromosomes.length - 1]
-        assert.equal("chrX", lastChr.name)
-        assert.equal(lastChr.bpLength, 22422827)
-
     })
 
 

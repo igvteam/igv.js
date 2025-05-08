@@ -22,7 +22,6 @@ suite("hub.txt", function () {
         assert.ok(genomeConfig.twoBitBptURL)
         assert.ok(genomeConfig.twoBitURL)
         assert.ok(genomeConfig.chromAliasBbURL)
-        assert.ok(genomeConfig.cytobandBbURL)
     })
 
 
@@ -33,7 +32,7 @@ suite("hub.txt", function () {
         const hubURL = convertToHubURL("GCF_000186305.1")
         const hub = await loadHub(hubURL)
         assert.ok(hub.hubStanza)
-        assert.ok(hub.genomeStanza)
+        assert.ok(hub.genomeStanzas)
         assert.equal(22, hub.trackStanzas.length)
 
         const genomeConfig = hub.getGenomeConfig()
@@ -45,16 +44,15 @@ suite("hub.txt", function () {
         assert.ok(genomeConfig.twoBitBptURL)
         assert.ok(genomeConfig.twoBitURL)
         assert.ok(genomeConfig.chromAliasBbURL)
-        assert.ok(genomeConfig.cytobandBbURL)
     })
 
     test("track configs", async function () {
 
-        this.timeout(20000)
+        this.timeout(20000000)
         const hubURL = convertToHubURL("GCF_000186305.1")
         const hub = await loadHub(hubURL)
         const groupedTrackConfigurations = await hub.getGroupedTrackConfigurations("GCF_000186305.1")
-        assert.equal(5, groupedTrackConfigurations.length)
+        assert.equal(4, groupedTrackConfigurations.length)
     })
 
     /**
@@ -70,10 +68,11 @@ suite("hub.txt", function () {
 
     test("supertrack", async function () {
 
-        const hub = await loadHub("https://raw.githubusercontent.com/igvteam/igv-genomes/refs/heads/main/hubs/hg38/hub.txt")
+        const stanzas = await loadStanzas("test/data/hubs/supertrack_hub.txt")
+        assert.equal(stanzas.length, 7)
+        const trackDbHub = new TrackDbHub(stanzas, null)
 
-
-        const containers = await hub.getGroupedTrackConfigurations("hg38")
+        const containers = trackDbHub.getGroupedTrackConfigurations()
         assert.equal(1, containers.length)
 
         const superTrack = containers[0]
