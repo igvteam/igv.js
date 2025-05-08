@@ -12,6 +12,7 @@ import TrackBase from "./trackBase.js"
 import Browser from "./browser.js"
 import AlertDialog from "./ui/components/alertDialog.js"
 import {registerFileFormats} from "./util/fileFormats.js"
+import {loadHub} from "./ucsc/hub/hubParser.js"
 
 const setApiKey = igvxhr.setApiKey
 
@@ -46,6 +47,7 @@ export default {
     registerTrackClass,
     registerTrackCreatorFunction,
     registerFileFormats,
-    loadSessionFile: Browser.loadSessionFile
+    loadSessionFile: Browser.loadSessionFile,
+    loadHub
 }
 
