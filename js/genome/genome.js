@@ -8,6 +8,14 @@ import CytobandFile from "./cytobandFile.js"
 
 import {loadChromSizes} from "./chromSizes.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {loadHub} from "../ucsc/hub/hubParser.js"
+
+const ucsdIDMap = new Map([
+    ["1kg_ref", "hg18"],
+    ["1kg_v37", "hg19"],
+    ["b37", "hg19"]
+])
 
 /**
  * The Genome class represents an assembly and consists of the following elements
@@ -33,8 +41,10 @@ class Genome {
         this.config = config
         this.browser = browser
         this.id = config.id || generateGenomeID(config)
+        this.ucscID = config.ucscID || ucsdIDMap.get(this.id) || this.id
+        this.blatDB = config.blatDB || this.ucscID
         this.name = config.name
-        this.nameSet = config.nameSet
+        this.nameSet = config.nameSet || 'ucsc'
     }
 
 
@@ -42,50 +52,45 @@ class Genome {
 
         const config = this.config
 
+        // Load sequence
         this.sequence = await loadSequence(config, this.browser)
 
-        if (config.chromSizesURL) {
-            // a chromSizes file is neccessary for 2bit sequences for whole-genome view
+        // Load cytoband data.  Cytoband files can be very large for some assemblies with enormous numbers of contigs.
+        // So size is checked before loading.  If the file is too large, it is not loaded.
+        if (config.cytobandBbURL) {
+            const contentLength = await igvxhr.getContentLength(config.cytobandBbURL, {})
+            if (contentLength > 0 && contentLength < 1000000) {
+                this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
+            }
+        } else if (config.cytobandURL) {
+            this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
+        }
+
+        // Search for chromosomes, that is an array of chromosome objects containing name and length.  This is
+        // optional but required to support whole genome view.
+        if (this.sequence.chromosomes) {
+            this.chromosomes = this.sequence.chromosomes
+        } else if (config.chromSizesURL) {
             this.chromosomes = await loadChromSizes(config.chromSizesURL)
         } else {
-            // if the sequence defines chromosomes use them (fasta does, 2bit does not)
-            this.chromosomes = this.sequence.chromosomes || new Map()
+            this.chromosomes = new Map()   // Cache, chromosome are added as they are loaded
         }
 
-        if (this.chromosomes.size > 0) {
-            this.chromosomeNames = Array.from(this.chromosomes.keys())
-        } else if(this.sequence.chromosomeNames) {
+        // Search for chromosome names.  This is optional but required to support the chromosome pulldown
+        if (this.sequence.chromosomeNames) {
             this.chromosomeNames = this.sequence.chromosomeNames    // Twobit files can supply chromosome names unless they use an external index
+        } else if (this.chromosomes.size > 0) {
+            this.chromosomeNames = Array.from(this.chromosomes.keys())
         }
 
+        // Chromosome alias
         if (config.chromAliasBbURL) {
             this.chromAlias = new ChromAliasBB(config.chromAliasBbURL, Object.assign({}, config), this)
-            if (!this.chromosomeNames) {
-                this.chromosomeNames = await this.chromAlias.getChromosomeNames()
-            }
         } else if (config.aliasURL) {
             this.chromAlias = new ChromAliasFile(config.aliasURL, Object.assign({}, config), this)
         } else if (this.chromosomeNames) {
             this.chromAlias = new ChromAliasDefaults(this.id, this.chromosomeNames)
         }
-
-        if (config.cytobandBbURL) {
-            this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
-        } else if (config.cytobandURL) {
-            this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
-        }
-
-        // Last resort for chromosome information -- retrieve it from the cytoband source if supported
-        if (!this.chromosomeNames && this.cytobandSource && typeof this.cytobandSource.getChromosomeNames === 'function') {
-            this.chromosomeNames = await this.cytobandSource.getChromosomeNames()
-        }
-        if (this.chromosomes.size === 0 && this.cytobandSource && typeof this.cytobandSource.getChromosomes === 'function') {
-            const c = await this.cytobandSource.getChromosomes()
-            for (let chromosome of c) {
-                this.chromosomes.set(c.name, c)
-            }
-        }
-
 
         if (false !== config.wholeGenomeView && this.chromosomes.size > 0) {
             // Set chromosome order for WG view and chromosome pulldown.  If chromosome order is not specified sort
@@ -193,18 +198,18 @@ class Genome {
             if (!aliasRecord && chr !== chr.toLowerCase()) {
                 aliasRecord = await this.chromAlias.search(chr.toLowerCase())
             }
-            if(aliasRecord) {
+            if (aliasRecord) {
                 // Add some aliases for case insensitivy
                 const upper = aliasRecord.chr.toUpperCase()
                 const lower = aliasRecord.chr.toLowerCase()
                 const cap = aliasRecord.chr.charAt(0).toUpperCase() + aliasRecord.chr.slice(1)
-                if(aliasRecord.chr !== upper) {
+                if (aliasRecord.chr !== upper) {
                     aliasRecord["_uppercase"] = upper
                 }
-                if(aliasRecord.chr !== lower) {
+                if (aliasRecord.chr !== lower) {
                     aliasRecord["_lowercase"] = lower
                 }
-                if(aliasRecord.chr !== cap) {
+                if (aliasRecord.chr !== cap) {
                     aliasRecord["_cap"] = cap
                 }
             }
@@ -335,6 +340,10 @@ class Genome {
         } else {
             return undefined
         }
+    }
+
+    getHubURLs() {
+        return this.config.hubs
     }
 }
 

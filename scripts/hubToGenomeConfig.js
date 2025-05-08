@@ -7,8 +7,8 @@
  * node hubToGenomeConfig.js https://hgdownload.soe.ucsc.edu/hubs/GCF/002/006/095/GCF_002006095.1/hub.txt
  */
 
-import Hub from "../js/ucsc/ucscHub.js"
 import {convertToHubURL} from "../js/ucsc/ucscUtils.js"
+import {loadHub} from "../js/ucsc/hub/hubParser.js"
 
 if (process.argv.length !== 3) {
     console.log("Usage: node hubToGenomeConfig.js <hub accession or url to hub.text>")
@@ -28,7 +28,7 @@ if (!url) {
 
 }
 
-const hub = await Hub.loadHub(url)
+const hub = await loadHub(url)
 
 const config = hub.getGenomeConfig({includeChromSizes: true})
 
