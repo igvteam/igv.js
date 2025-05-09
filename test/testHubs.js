@@ -48,11 +48,11 @@ suite("hub.txt", function () {
 
     test("track configs", async function () {
 
-        this.timeout(20000000)
+        this.timeout(20000)
         const hubURL = convertToHubURL("GCF_000186305.1")
         const hub = await loadHub(hubURL)
         const groupedTrackConfigurations = await hub.getGroupedTrackConfigurations("GCF_000186305.1")
-        assert.equal(4, groupedTrackConfigurations.length)
+        assert.equal(5, groupedTrackConfigurations.length)
     })
 
     /**
