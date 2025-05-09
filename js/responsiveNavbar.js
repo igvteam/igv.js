@@ -270,14 +270,14 @@ class ResponsiveNavbar {
      * Search for the locus string -- this function is called from the navbar search box, and is not part of the API.
      * Wraps ```search``` and presents an error dialog if false.
      *
-     * @param string
+     * @param locus
      * @param init
      * @returns {Promise<void>}
      */
-    async doSearch(string) {
-        const success = await browser.search(string)
+    async doSearch(locus) {
+        const success = await browser.search(locus)
         if (!success) {
-            browser.alert.present(new Error(`Unrecognized locus: <b> ${string} </b>`))
+            browser.alert.present(new Error(`Unrecognized locus: <b> ${locus} </b>`))
         }
     }
 
