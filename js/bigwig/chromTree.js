@@ -6,12 +6,12 @@ export default class ChromTree {
     nameToId = new Map()
     idToName = new Map()
 
-    constructor(path, config, startOffset) {
+    constructor(path, config, startOffset, loader) {
         this.path = path
         this.config = config
         this.startOffset = startOffset
 
-        this.bpTree = new BPTree(path, config, startOffset, 'BPChromTree')
+        this.bpTree = new BPTree(path, config, startOffset, 'BPChromTree', loader)
     }
 
     async init() {

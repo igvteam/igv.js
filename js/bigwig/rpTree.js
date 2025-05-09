@@ -12,11 +12,12 @@ export default class RPTree {
     littleEndian = true
     nodeCache = new Map()
 
-    constructor(path, config, startOffset) {
+    constructor(path, config, startOffset, loader) {
 
         this.path = path
         this.config = config
         this.startOffset = startOffset
+        this.loader = loader || igvxhr
     }
 
 
@@ -60,7 +61,7 @@ export default class RPTree {
     }
 
     async #getParserFor(start, size) {
-        const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
+        const data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
         return new BinaryParser(new DataView(data), this.littleEndian)
     }
 

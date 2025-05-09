@@ -106,7 +106,7 @@ class ResponsiveNavbar {
         });
 
         this.searchInput.addEventListener('change', () => {
-            browser.doSearch(this.searchInput.value);
+            this.doSearch(this.searchInput.value);
         });
 
         const searchIconContainer = document.createElement('div');
@@ -117,7 +117,7 @@ class ResponsiveNavbar {
         searchIconContainer.appendChild(searchIcon);
 
         searchIconContainer.addEventListener('click', () => {
-            browser.doSearch(this.searchInput.value);
+            this.doSearch(this.searchInput.value);
         });
 
         this.windowSizePanel = new WindowSizePanel(locusSizeGroup, browser);
@@ -263,6 +263,22 @@ class ResponsiveNavbar {
 
     show() {
         this.navigation.style.display = 'flex';
+    }
+
+    /**
+
+     * Search for the locus string -- this function is called from the navbar search box, and is not part of the API.
+     * Wraps ```search``` and presents an error dialog if false.
+     *
+     * @param locus
+     * @param init
+     * @returns {Promise<void>}
+     */
+    async doSearch(locus) {
+        const success = await browser.search(locus)
+        if (!success) {
+            browser.alert.present(new Error(`Unrecognized locus: <b> ${locus} </b>`))
+        }
     }
 
 }

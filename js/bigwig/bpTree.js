@@ -15,18 +15,19 @@ export default class BPTree {
     type = 'BPTree'          // Either BPTree or BPChromTree
     nodeCache = new Map()
 
-    static async loadBpTree(path, config, startOffset) {
-        const bpTree = new BPTree(path, config, startOffset)
+    static async loadBpTree(path, config, startOffset, type, loader) {
+        const bpTree = new BPTree(path, config, startOffset, type, loader)
         return bpTree.init()
     }
 
-    constructor(path, config, startOffset, type) {
+    constructor(path, config, startOffset, type, loader) {
         this.path = path
         this.config = config
         this.startOffset = startOffset
         if(type) {
             this.type = type
         }
+        this.loader = loader || igvxhr
     }
 
     async init() {
@@ -153,7 +154,7 @@ export default class BPTree {
 
     async #getParserFor(start, size) {
         try {
-            const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
+            const data = await this.loader.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start, size}}))
             return new BinaryParser(new DataView(data), this.littleEndian)
         } catch (e) {
             console.error(e)
