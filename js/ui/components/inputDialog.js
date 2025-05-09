@@ -91,8 +91,8 @@ class InputDialog {
         this._input.value = options.value
         this.callback = options.callback || options.click
 
-        const { top} = e.currentTarget.parentElement.getBoundingClientRect()
-        this.container.style.top = `${ top }px`;
+        // const { top} = e.currentTarget.parentElement.getBoundingClientRect()
+        // this.container.style.top = `${ top }px`;
         this.container.style.display = 'flex';
     }
 }
