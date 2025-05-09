@@ -55,19 +55,18 @@ class Genome {
         // Load sequence
         this.sequence = await loadSequence(config, this.browser)
 
-        // Load cytoband data.  Cytoband files can be very large for some assemblies with enormous numbers of contigs.
-        // So size is checked before loading.  If the file is too large, it is not loaded.
-        if (config.cytobandBbURL) {
-            const contentLength = await igvxhr.getContentLength(config.cytobandBbURL, {})
-            if (contentLength > 0 && contentLength < 1000000) {
+
+        // Load cytobands.  This is optional but required to support the ideogram.  Only needed for whole genome view
+        if(false !== config.showIdeogram && false !== config.wholeGenomeView) {
+            if (config.cytobandURL) {
+                this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
+            } else if (config.cytobandBbURL) {
                 this.cytobandSource = new CytobandFileBB(config.cytobandBbURL, Object.assign({}, config), this)
             }
-        } else if (config.cytobandURL) {
-            this.cytobandSource = new CytobandFile(config.cytobandURL, Object.assign({}, config))
         }
 
-        // Search for chromosomes, that is an array of chromosome objects containing name and length.  This is
-        // optional but required to support whole genome view.
+            // Search for chromosomes, that is an array of chromosome objects containing name and length.  This is
+            // optional but required to support whole genome view.
         if (this.sequence.chromosomes) {
             this.chromosomes = this.sequence.chromosomes
         } else if (config.chromSizesURL) {

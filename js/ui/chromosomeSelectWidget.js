@@ -39,10 +39,24 @@ class ChromosomeSelectWidget {
         this.select.setAttribute('name', 'chromosome-select-widget')
         this.container.appendChild(this.select)
 
-        this.select.addEventListener('change', () => {
+        this.select.addEventListener('change', async () => {
             this.select.blur()
             if (this.select.value !== '' && maximumSequenceCountExceeded !== this.select.value) {
-                browser.search(this.select.value)
+
+                if (this.select.value.trim().toLowerCase() === "all" || this.select.value === "*") {
+                    if (browser.genome.wholeGenomeView) {
+                        const wgChr = browser.genome.getChromosome("all")
+                        return {chr: "all", start: 0, end: wgChr.bpLength}
+                    }
+                } else {
+                    const chromosome = await browser.genome.loadChromosome(this.select.value)
+                    const locusObject = {chr: chromosome.name}
+                    if (locusObject.start === undefined && locusObject.end === undefined) {
+                        locusObject.start = 0
+                        locusObject.end = chromosome.bpLength
+                    }
+                    browser.updateLoci([locusObject])
+                }
             }
         })
 

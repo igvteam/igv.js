@@ -1375,9 +1375,9 @@ class Browser {
             referenceFrame.end = referenceFrame.start + referenceFrame.bpPerPixel * width
         }
 
-        const chrName = referenceFrameList.length === 1 ? this.referenceFrameList[0].chr : ''
-
         const loc = this.referenceFrameList.map(rf => rf.getLocusString()).join(' ')
+
+        const chrName = referenceFrameList.length === 1 ? this.genome.getChromosomeDisplayName(this.referenceFrameList[0].chr) : ''
 
         this.navbar.updateLocus(loc, chrName)
 
@@ -1622,27 +1622,10 @@ class Browser {
     }
 
     /**
-     * @deprecated  This is a deprecated method with no known usages.  To be removed in a future release.
+     * @deprecated  This is a deprecated method with no known usages.
      */
     async goto(chr, start, end) {
         await this.search(chr + ":" + start + "-" + end)
-    }
-
-    /**
-
-     * Search for the locus string -- this function is called from various igv.js GUI elements, and is not part of the
-     * API.  Wraps ```search``` and presents an error dialog if false.
-     *
-     * @param string
-     * @param init
-     * @returns {Promise<void>}
-     */
-    async doSearch(string, init) {
-        const success = await this.search(string, init)
-        if (!success) {
-            this.alert.present(new Error(`Unrecognized locus: <b> ${string} </b>`))
-        }
-        return success
     }
 
 
@@ -1657,6 +1640,10 @@ class Browser {
     async search(stringOrArray, init) {
 
         const loci = await search(this, stringOrArray)
+        return this.updateLoci(loci, init)
+    }
+
+    async updateLoci(loci, init) {
 
         if (loci && loci.length > 0) {
 

@@ -71,6 +71,14 @@ class BWReader {
     async preload() {
         const data = await igvxhr.loadArrayBuffer(this.path)
         this.loader = new DataBuffer(data)
+        for (let rpTree of this.rpTreeCache.values()) {
+            rpTree.loader = this.loader
+        }
+        if (this._searchTrees) {
+            for (let bpTree of this._searchTrees) {
+                bpTree.loader = this.loader
+            }
+        }
     }
 
     async readWGFeatures(wgChromosomeNames, bpPerPixel, windowFunction) {
@@ -203,7 +211,7 @@ class BWReader {
                 for (let k of Object.keys(aliasRecord)) {
                     if (k === "start" || k === "end") continue
                     alias = aliasRecord[k]
-                    if(alias === chr) continue   // Already tried this
+                    if (alias === chr) continue   // Already tried this
                     chrIdx = await this.chromTree.getIdForName(alias)
                     if (chrIdx !== undefined) {
                         break
@@ -294,7 +302,8 @@ class BWReader {
             this.header.extraIndexOffsets.length > 0) {
             this._searchTrees = []
             for (let offset of this.header.extraIndexOffsets) {
-                const bpTree = await BPTree.loadBpTree(this.path, this.config, offset)
+                const type = undefined
+                const bpTree = await BPTree.loadBpTree(this.path, this.config, offset, type, this.loader)
                 this._searchTrees.push(bpTree)
             }
         }
@@ -413,7 +422,7 @@ class BWReader {
                 this.totalSummary = new BWTotalSummary(extHeaderParser)
             }
 
-            this.chromTree = new ChromTree(this.path, this.config, header.chromTreeOffset)
+            this.chromTree = new ChromTree(this.path, this.config, header.chromTreeOffset, this.loader)
             await this.chromTree.init()
 
             // Estimate feature density from dataCount (bigbed only)
@@ -500,7 +509,7 @@ class BWReader {
         if (rpTree) {
             return rpTree
         } else {
-            rpTree = new RPTree(this.path, this.config, offset)
+            rpTree = new RPTree(this.path, this.config, offset, this.loader)
             await rpTree.init()
             this.rpTreeCache.set(offset, rpTree)
             return rpTree
