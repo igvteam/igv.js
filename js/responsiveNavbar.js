@@ -275,7 +275,7 @@ class ResponsiveNavbar {
      * @returns {Promise<void>}
      */
     async doSearch(locus) {
-        const success = await browser.search(locus)
+        const success = await this.browser.search(locus)
         if (!success) {
             this.browser.alert.present(new Error(`Unrecognized locus: <b> ${locus} </b>`))
         }
