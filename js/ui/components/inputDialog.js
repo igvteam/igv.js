@@ -86,14 +86,45 @@ class InputDialog {
 
 
     present(options, e) {
-
         this.label.textContent = options.label
         this._input.value = options.value
         this.callback = options.callback || options.click
 
-        const { top} = e.currentTarget.parentElement.getBoundingClientRect()
-        this.container.style.top = `${ top }px`;
-        this.container.style.display = 'flex';
+        this.container.style.display = ''
+        
+        // Get click coordinates
+        const clickX = e.clientX
+        const clickY = e.clientY
+        
+        // Get dialog dimensions
+        const dialogWidth = this.container.offsetWidth
+        const dialogHeight = this.container.offsetHeight
+        
+        // Calculate available space
+        const windowWidth = window.innerWidth
+        const windowHeight = window.innerHeight
+        
+        // Calculate position to keep dialog on screen
+        let left = clickX
+        let top = clickY
+        
+        // Adjust horizontal position if dialog would go off screen
+        if (left + dialogWidth > windowWidth) {
+            left = windowWidth - dialogWidth - 10 // 10px padding from edge
+        }
+        
+        // Adjust vertical position if dialog would go off screen
+        if (top + dialogHeight > windowHeight) {
+            top = windowHeight - dialogHeight - 10 // 10px padding from edge
+        }
+        
+        // Ensure minimum distance from edges
+        left = Math.max(10, left)
+        top = Math.max(10, top)
+        
+        // Apply positions
+        this.container.style.left = `${left}px`
+        this.container.style.top = `${top}px`
     }
 }
 
