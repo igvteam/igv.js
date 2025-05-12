@@ -9,6 +9,31 @@
 import TrackDbHub from "./trackDbHub.js"
 import {loadStanzas} from "./hubParser.js"
 
+const idMappings = new Map([
+    ["hg38", "GCF_000001405.40"],
+    ["mm39", "GCF_000001635.27"],
+    ["mm10", "GCF_000001635.26"],
+    ["bosTau9", "GCF_002263795.1"],
+    ["canFam4", "GCF_011100685.1"],
+    ["canFam6", "GCF_000002285.5"],
+    ["ce11", "GCF_000002985.6"],
+    ["dm6", "GCF_000001215.4"],
+    ["galGal6", "GCF_000002315.6"],
+    ["gorGor6", "GCF_008122165.1"],
+    ["macFas5", "GCA_000364345.1"],
+    ["panTro6", "GCA_002880755.3"],
+    ["rn6", "GCF_000001895.5"],
+    ["rn7", "GCF_015227675.2"],
+    ["sacCer3", "GCF_000146045.2"],
+    ["sacCer2", "GCF_000146045.2"],
+    ["susScr11", "GCF_000003025.6"],
+    ["taeGut1", "GCF_000002275.3"],
+    ["tetNig2", "GCF_000002275.3"],
+    ["xenTro10", "GCF_000002035.6"],
+    ["xenTro9", "GCF_000002035.6"],
+    ["tair10", "GCF_000001735.4"],
+])
+
 class Hub {
 
     static supportedTypes = new Set(["bigBed", "bigWig", "bigGenePred", "vcfTabix"])
@@ -156,10 +181,14 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
     }
 
     async getGroupedTrackConfigurations(genomeId) {
-        const trackHub = await this.#getTrackDbHub(genomeId)
-        const longLabel = this.getLongLabel()
-        const hubLabel = longLabel && longLabel.length < 50 ? longLabel : this.getShortLabel()
-        return trackHub.getGroupedTrackConfigurations()
+        let trackHub = await this.#getTrackDbHub(genomeId)
+        if (!trackHub && idMappings.has(genomeId)) {
+            trackHub = await this.#getTrackDbHub(idMappings.get(genomeId))
+        }
+        if (!trackHub) {
+            console.log(`Warning: no trackDB found for genomeId ${genomeId}.`)
+        }
+        return trackHub ? trackHub.getGroupedTrackConfigurations() : []
     }
 
     async #getTrackDbHub(genomeId) {
