@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+</head>
+
+<body>
+
+<p>
+
+<h1>Bigbed file</h1>
+
+Demonstration of Bigbed with custom fields. Also demonstrates use of "hoverTextFields" and custom "hoverText" function.
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    var options =
+        {
+            genome: "hg38",
+            tracks:
+                [
+                    {
+                        "id": "jaspar2024",
+                        "name": "JASPAR 2024 TFBS",
+                        "format": "bigbed",
+                        "url": "https://hgdownload.soe.ucsc.edu/gbdb/hg38/jaspar/JASPAR2024.bb",
+                        "description": "JASPAR CORE 2024 - Predicted Transcription Factor Binding Sites",
+                        "type": "annotation",
+
+                    }
+                ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    const browser = await igv.createBrowser(igvDiv, options)
+
+    const jasparTrack = browser.findTracks("id", "jaspar2024")[0]
+
+    console.log(jasparTrack.visibilityWindow)
+
+</script>
+
+</body>
+
+</html>

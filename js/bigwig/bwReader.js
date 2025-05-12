@@ -428,7 +428,7 @@ class BWReader {
             // Estimate feature density from dataCount (bigbed only)
             if ("bigbed" === this.type) {
                 const dataCount = await this.#readDataCount(header.fullDataOffset)
-                this.featureDensity = dataCount / this.chromTree.estimateGenomeSize()
+                this.featureDensity = dataCount / await this.chromTree.estimateGenomeSize()
             }
 
             this.header = header
