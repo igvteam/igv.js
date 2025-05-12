@@ -123,7 +123,7 @@ class TrackDbHub {
                     }
                 } else if (!filterTracks.has(s.name) &&
                     s.hasProperty("bigDataUrl") &&
-                    s.format  &&
+                    s.format &&
                     supportedTypes.has(s.format.toLowerCase())) {
 
                     const trackConfig = this.#getTrackConfig(s)
@@ -249,7 +249,7 @@ class TrackDbHub {
         if (t.hasProperty("searchTrix")) {
             config.trixURL = t.getProperty("searchTrix")
         }
-        if(t.hasProperty("html")) {
+        if (t.hasProperty("html")) {
             config.html = t.getProperty("html")
         }
 
@@ -264,6 +264,23 @@ class TrackDbHub {
 
         if (t.hasProperty("metadata")) {
             config.attributes = parseMetadata(t.getProperty("metadata"))
+        }
+
+        if (t.hasProperty("maxWindowToDraw")) {
+            let maxWindowToDraw = parseInt(t.getProperty("maxWindowToDraw"), 10)
+            if (maxWindowToDraw > Number.MAX_SAFE_INTEGER) {
+                maxWindowToDraw = Number.MAX_SAFE_INTEGER
+            }
+            config.visibilityWindow = maxWindowToDraw
+        }
+
+        // IGV does not support "maxWindowCoverage" in the same way as UCSC. Use to limit visibility window
+        if (t.hasProperty("maxWindowCoverage")) {
+            let maxWindowToDraw = parseInt(t.getProperty("maxWindowCoverage"), 10)
+            if (maxWindowToDraw > Number.MAX_SAFE_INTEGER) {
+                maxWindowToDraw = Number.MAX_SAFE_INTEGER
+            }
+            config.visibilityWindow = maxWindowToDraw
         }
 
         return config

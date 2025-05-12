@@ -1,11 +1,8 @@
 const parentOverrideProperties = new Set(["visibility", "priority", "group"])
-const inheritableProperties = new Set([
-    "group", "priority", "color", "altColor", "autoscale", "autoScale", "viewLimits",
-    "negativeValues", "maxWindowToQuery", "transformFun", "windowingFunction",
-    "yLineMark", "yLineOnOff", "graphTypeDefault", "interactUp", "interactMultiRegion",
-    "endsVisible", "maxHeightPixels", "scoreMin", "scoreFilter", "scoreFilterLimits",
-    "minAliQual", "bamColorTag", "bamColorMode", "bamGrayMode", "colorByStrand",
-    "itemRgb", "html"
+
+const nonInheritableProperties = new Set([
+    "track", "type", "shortLabel", "longLabel", "bigDataUrl", "html",
+    "parent", "superTrack", "priority"
 ])
 
 
@@ -25,11 +22,11 @@ class Stanza {
     getProperty(key) {
         if (this.properties.has("noInherit")) {
             return this.properties.get(key)
-        } else if (this.parent && parentOverrideProperties.has(key) &&  this.parent.hasProperty(key)) {
+        } else if (this.parent && parentOverrideProperties.has(key) && this.parent.hasProperty(key)) {
             return this.parent.getProperty(key)
         } else if (this.properties.has(key)) {
             return this.properties.get(key)
-        } else if (this.parent && inheritableProperties.has(key)) {
+        } else if (this.parent && !nonInheritableProperties.has(key)) {
             return this.parent.getProperty(key)
         } else {
             return undefined
