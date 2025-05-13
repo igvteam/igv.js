@@ -1,8 +1,8 @@
 const parentOverrideProperties = new Set(["visibility", "priority", "group"])
 
 const nonInheritableProperties = new Set([
-    "track", "type", "shortLabel", "longLabel", "bigDataUrl", "html",
-    "parent", "superTrack", "priority"
+    "track", "type", "shortLabel", "longLabel", "bigDataUrl",
+    "parent", "superTrack", "priority", "view", "compositeContainer", "compositeTrack"
 ])
 
 

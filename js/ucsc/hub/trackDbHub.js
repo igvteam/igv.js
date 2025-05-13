@@ -5,7 +5,7 @@ const supportedTypes = new Set([
     "bigbed", "bigwig", "biggenepred", "vcftabix", "refgene",
     "bam", "sampleinfo", "vcf.list", "ucscsnp", "bed", "tdf", "gff", "gff3", "gtf", "vcf", "vcfphasedtrio",
     "bigdbsnp", "rmask", "genepred", "wig", "bedgraph", "interact", "broadpeak", "narrowpeak", "gappedpeak",
-    "gistic", "seg", "mut"
+    "gistic", "seg", "mut, bigrmsk"
 ])
 
 const filterTracks = new Set(["cytoBandIdeo", "assembly", "gap", "gapOverlap", "allGaps",
