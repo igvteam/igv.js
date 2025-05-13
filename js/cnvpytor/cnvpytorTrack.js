@@ -122,7 +122,7 @@ class CNVPytorTrack extends TrackBase {
             this.set_available_callers()
 
         } else {
-            this.cnvpytor_obj = new HDF5IndexedReader(this.config.url, this.bin_size)
+            this.cnvpytor_obj = new HDF5IndexedReader(this.config, this.bin_size)
             // get chrom list that currently user viewing
             let chroms = [ ...new Set(this.browser.referenceFrameList.map(val => val.chr))]
             
