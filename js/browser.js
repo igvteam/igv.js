@@ -229,10 +229,10 @@ class Browser {
 
     getSampleNameViewportWidth() {
 
-        if (undefined === this.sampleNameViewportWidth) {
+        if (false === this.showSampleNames || undefined === this.sampleNameViewportWidth) {
             return 0
         } else {
-            return false === this.showSampleNames ? 0 : this.sampleNameViewportWidth
+            return this.sampleNameViewportWidth
         }
 
     }
