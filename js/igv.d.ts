@@ -263,7 +263,7 @@ export namespace Tracks {
         supportsWholeGenome?: boolean;
         showGenotypes?: boolean;
         strokecolor?: (variant: VCFItem) => string | void;
-        context_hook?: (variant: VCFItem, ctx: Draw.CanvasContext, x: number, y: number, w: number, h: number) => void;
+        context_hook?: unknown;
     };
 
     export type CnvPyTorFormat = "pytor" | "vcf";
@@ -658,79 +658,6 @@ export type IGV = {
     */
     readonly visibilityChange: () => Promise<void>;
     readonly version: () => string;
-}
-
-declare namespace Draw {
-    // ref: canvas2svg.js
-    export class CanvasContext {
-        public readonly canvas: this;
-        public readonly isSVG: boolean;
-
-        public strokeStyle: string;
-        public lineWidth: number;
-
-        private constructor(config: {
-            ctx?: any;
-            width?: number;
-            height?: number;
-            enableMirroring?: boolean;
-            viewBox?: {
-                x: number;
-                y: number;
-                width: number;
-                height: number;
-            };
-            multiLocusGap?: any;
-            backdropColor?: string;
-            document?: Document;
-        });
-        setWidth(width: number): void;
-        setHeight(height: number): void;
-        getSerializedSvg(fixNamedEntitles?: boolean): string;
-        getSvg(): SVGSVGElement;
-        saveWithTranslationAndClipRect(id: string, tx: number, ty: number, width: number, height: number, clipYOffset: number): void;
-        save(): void;
-        restore(): void;
-        addTrackGroupWithTranslationAndClipRect(
-            id: string,
-            tx: number,
-            ty: number,
-            width: number,
-            height: number,
-            clipYOffset: number,
-        )
-        scale(x: number, y: number): void;
-        rotate(angle: number): void;
-        translate(x: number, y: number): void;
-        transform(a: number, b: number, c: number, d: number, e: number, f: number): void;
-        beginPath(): void;
-        moveTo(x: number, y: number): void;
-        closePath(): void;
-        lineTo(x: number, y: number): void;
-        bezierCurveTo(cp1x: number, cp1y: number, cp2x: number, cp2y: number, x: number, y: number): void;
-        quadraticCurveTo(cp1x: number, cp1y: number, x: number, y: number): void;
-        arcTo(x1: number, y1: number, x2: number, y2: number, radius: number): void;
-        stroke(): void;
-        fill(): void;
-        rect(x: number, y: number, w: number, h: number): void;
-        fillRect(x: number, y: number, w: number, h: number): void;
-        strokeRect(x: number, y: number, w: number, h: number): void;
-        strokeEllipse(cx: number, cy: number, rx: number, ry: number,
-            rotation: number, startAngle: number, endAngle: number,
-            isCCW: boolean): void;
-        fillEllipse(cx: number, cy: number, rx: number, ry: number,
-            rotation: number, startAngle: number, endAngle: number,
-            isCCW: boolean): void;
-        clearRect(x: number, y: number, w: number, h: number): void;
-        createLinearGradient(x0: number, y0: number, x1: number, y1: number): CanvasGradient;
-        createRadialGradient(x0: number, y0: number, r0: number, x1: number, y1: number, r1: number): CanvasGradient;
-        strokeText(text: string, x: number, y: number): void;
-        measureText(text: string): TextMetrics;
-        arc(x: number, y: number, radius: number, startAngle: number, endAngle: number, anticlockwise?: boolean): void;
-        clip(): void;
-        drawImage();
-        createPattern(image: CanvasImageSource, repetition?: string): CanvasPattern;
-    }
 }
 
 declare const igv: IGV;
