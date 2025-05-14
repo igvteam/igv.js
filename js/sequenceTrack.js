@@ -26,7 +26,7 @@
 import IGVGraphics from "./igv-canvas.js"
 import {isSecureContext} from "./util/igvUtils.js"
 import {reverseComplementSequence} from "./util/sequenceUtils.js"
-import {loadSequence} from "./genome/fasta.js"
+import {loadSequence} from "./genome/loadSequence.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
 

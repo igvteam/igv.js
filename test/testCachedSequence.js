@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import {loadSequence} from "../js/genome/fasta.js"
+import {loadSequence} from "../js/genome/loadSequence.js"
 import {assert} from 'chai'
 
 suite("testCachedSequence", function () {

@@ -1,6 +1,6 @@
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import Chromosome from "./chromosome.js"
-import {loadSequence} from "./fasta.js"
+import {loadSequence} from "./loadSequence.js"
 import ChromAliasBB from "./chromAliasBB.js"
 import ChromAliasFile from "./chromAliasFile.js"
 import CytobandFileBB from "./cytobandFileBB.js"
