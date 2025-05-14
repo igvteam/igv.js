@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>hg38 test</title>
+
+</head>
+
+<body>
+
+<h1>bigPsl Uniprot Track from UCSC -- with amino acid level alignment details</h1>
+
+<p>
+    <b>Look for console errors and compare with
+        <a target="_blank" href="https://drive.google.com/file/d/1ELE5sjbM3e2M2L5OjXI3vPnFYwZEkcnQ/view?usp=sharing">tracks-hg38.png</a>
+    </b>
+</p>
+
+<p>
+    <button id="bookmarkButton">Bookmark</button>
+    <button id="sessionButton">Session JSON</button>
+    <button id="svgButton">Save SVG</button>
+</p>
+
+<div id="igvDiv" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from '../dist/igv.esm.js'
+
+    var options =
+        {
+            queryParametersSupported: true,
+            genome: "hg38",
+            locus: "chr22:23,767,847-23,844,164",
+            tracks: [
+                { 
+                  name: "UCSC Uniprot (bigPsl)", 
+                  type: 'annotation',
+                  format: 'bigpsl',
+                  url: "https://hgdownload.soe.ucsc.edu/gbdb/hg38/uniprot/unipAliSwissprot.bb",
+                  visibilityWindow: -1, 
+                  order: 1000000 
+                }
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+
+            document.getElementById("sessionButton").addEventListener("click", () => {
+                try {
+                    const json = browser.toJSON();
+                    console.log(json);
+                    const jsonString = JSON.stringify(json, null, '\t');
+                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}));
+                    download("session.json", data);
+                } catch (e) {
+                    alert(e);
+                }
+            })
+
+            document.getElementById("bookmarkButton").addEventListener("click",
+                () => window.history.pushState({}, "IGV", browser.sessionURL()))
+
+            document.getElementById("svgButton").addEventListener("click", () => {
+                let svg = browser.toSVG();
+                const path = 'tracks-hg38.svg';
+                const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
+                download(path, data);
+            })
+        })
+
+    function download(filename, data) {
+
+        const element = document.createElement('a');
+        element.setAttribute('href', data);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
+
+
+</script>
+
+</body>
+
+</html>

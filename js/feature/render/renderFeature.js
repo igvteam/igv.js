@@ -157,6 +157,18 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
                             renderAminoAcidSequence.call(this, ctx, feature.strand, leftExon, exon, riteExon, bpStart, options.bpPerPixel, py, h, options.sequenceInterval)
                         }
+
+                    // Handle bigPsl files containing translated alignments
+                    }else if ( feature.oSequence !== undefined ) {
+                      if (options.bpPerPixel < aminoAcidSequenceRenderThreshold &&
+                            options.sequenceInterval) {
+
+                            const leftExon = i > 0 && feature.exons[i - 1].readingFrame !== undefined ? feature.exons[i - 1] : undefined
+                            const riteExon = i < feature.exons.length - 1 && feature.exons[i + 1].readingFrame !== undefined ? feature.exons[i + 1] : undefined
+
+                            renderAminoAcidSequenceAligned.call(this, ctx, feature, feature.strand, bpStart, options.bpPerPixel, py, h, options.sequenceInterval)
+                        }
+ 
                     }
 
                     // Arrows
@@ -183,6 +195,108 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         ctx.restore()
     }
 }
+
+
+function renderAminoAcidSequenceAligned(
+    ctx, feature, strand, bpStart, bpPerPixel, y, height, sequenceInterval
+) {
+    const aaColors = ['rgb(124,124,204)', 'rgb(12, 12, 120)'];
+    const oChromStarts = feature.oChromStarts.split(',').map(s => parseInt(s, 10));
+    const oSequence = feature.oSequence;
+
+    ctx.save();
+
+    const renderAminoAcidLetter = (width, xs, y, aminoAcidLetter) => {
+        if (aminoAcidLetter === 'STOP') aminoAcidLetter = '*';
+        const aminoAcidLetterWidth = ctx.measureText(aminoAcidLetter).width;
+        IGVGraphics.fillText(ctx, aminoAcidLetter, xs + (width - aminoAcidLetterWidth) / 2, y - 4, { fillStyle: '#ffffff' });
+    };
+
+    const doPaint = (start, end, aminoAcidLetter, colorToggle, isMismatch, isRedundant) => {
+        const xs = Math.round((start - bpStart) / bpPerPixel);
+        const xe = Math.round((end - bpStart) / bpPerPixel);
+        const width = xe - xs;
+
+        ctx.fillStyle = isRedundant
+            ? 'rgba(180,180,180,0.5)'
+            : (aminoAcidLetter === 'M' && proteinOffset === 0 ) ? '#83f902'
+            : (aminoAcidLetter === 'STOP') ? '#ff2101'
+            : isMismatch ? '#ffcc00'
+            : aaColors[colorToggle];
+
+        ctx.fillRect(xs, y, width, height);
+
+        if (aminoAcidLetter) {
+            ctx.save();
+            if (isMismatch) {
+                ctx.strokeStyle = '#ff0000';
+                ctx.strokeRect(xs, y, width, height);
+            }
+            renderAminoAcidLetter(width, xs, y + height, aminoAcidLetter);
+            ctx.restore();
+        }
+    };
+
+    let codonBaseRemainder = 0; // How many bases we already accumulated toward current codon
+    let proteinOffset = 0;
+
+    for (let i = 0; i < feature.exons.length; i++) {
+        const exon = feature.exons[i];
+        const exonStart = exon.start;
+        const exonEnd = exon.end;
+
+        const seqStartOffset = Math.floor(oChromStarts[i] / 3);
+        const seqEndOffset = (i + 1 < oChromStarts.length)
+            ? Math.floor(oChromStarts[i + 1] / 3)
+            : oSequence.length;
+
+        let proteinSubsequence = oSequence.substring(seqStartOffset, seqEndOffset);
+        if (strand === '-') {
+            proteinSubsequence = proteinSubsequence.split('').reverse().join('');
+        }
+
+        let bpPos = exonStart;
+        const exonLimit = exonEnd;
+        let aminoAcidBackdropColorCounter = 1;
+
+        while (bpPos < exonLimit) {
+            const neededBases = 3 - codonBaseRemainder;
+            const availableBases = exonLimit - bpPos;
+            const drawBases = Math.min(neededBases, availableBases);
+
+            const bpEnd = bpPos + drawBases;
+            const colorToggle = aminoAcidBackdropColorCounter % 2;
+            const aaLetter = oSequence[proteinOffset] || undefined;
+
+            const isRedundant = codonBaseRemainder > 0;
+
+            doPaint(bpPos, bpEnd, aaLetter, colorToggle, false, isRedundant);
+
+            codonBaseRemainder += drawBases;
+            bpPos = bpEnd;
+            aminoAcidBackdropColorCounter++;
+
+            if (codonBaseRemainder === 3) {
+                // Only now advance to the next amino acid
+                proteinOffset++;
+                codonBaseRemainder = 0;
+            }
+        }
+
+        // Handle codons that span a boundary
+        if (codonBaseRemainder > 0 && i + 1 < feature.exons.length) {
+            const nextExon = feature.exons[i + 1];
+            const redundantBases = 3 - codonBaseRemainder;
+            const redundantEnd = nextExon.start + redundantBases;
+            const aaLetter = oSequence[proteinOffset] || undefined;
+
+            doPaint(nextExon.start, redundantEnd, aaLetter, 0, false, true);
+        }
+    }
+
+    ctx.restore();
+}
+
 
 function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart, bpPerPixel, y, height, sequenceInterval) {
 

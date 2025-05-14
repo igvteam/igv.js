@@ -30,7 +30,7 @@ import StaticFeatureSource from "./staticFeatureSource.js"
 import {loadGenbank} from "../gbk/genbankParser.js"
 import GenbankFeatureSource from "../gbk/genbankFeatureSource.js"
 
-const bbFormats = new Set(['bigwig', 'bw', 'bigbed', 'bb', 'biginteract', 'biggenepred', 'bignarrowpeak'])
+const bbFormats = new Set(['bigwig', 'bw', 'bigbed', 'bb', 'biginteract', 'biggenepred', 'bignarrowpeak', 'bigpsl'])
 
 function FeatureSource(config, genome) {
 
