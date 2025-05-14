@@ -112,6 +112,9 @@ suite("hub.txt", function () {
     })
 
     test("NCBI Hosted Hub", async function () {
+
+        this.timeout(20000)
+
         const hubFile = "https://ftp.ncbi.nlm.nih.gov/snp/population_frequency/TrackHub/latest/hub.txt"
         const hub = await loadHub(hubFile)
         const groupedTrackConfigurations = await hub.getGroupedTrackConfigurations("hg38")
