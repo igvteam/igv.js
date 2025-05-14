@@ -1,13 +1,8 @@
 // either uppercase or lowercase
 type AnyCase<T extends string> = Uppercase<T> | Lowercase<T>;
 
-// any action that can be deferred as a promise or a thenable
-type Deferrable<T> = T | Promise<T> | Thenable<T, any> | (() => T | Promise<T> | Thenable<T, any>);
-
-// a custom future implementation supported by igv.js
-export interface Thenable<T, E> {
-    then(resolve: (value: T) => void, reject: (error: E) => void): void;
-}
+// any action that can be deferred as a promise
+type Deferrable<T> = T | Promise<T> | (() => T | Promise<T>);
 
 // simply prevents the type from being inferred
 declare class Opaque<N extends string> {
