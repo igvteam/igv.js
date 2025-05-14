@@ -88,6 +88,20 @@ class NonIndexedFasta {
 
     async loadAll() {
 
+
+        const pushChromosome = (current, order) => {
+            const length = current.length || (current.offset + current.seq.length)
+            if (!chrNameSet.has(current.chr)) {
+                this.sequences.set(current.chr, [])
+                this.chromosomes.set(current.chr, new Chromosome(current.chr, order, length))
+                chrNameSet.add(current.chr)
+            } else {
+                const c = this.chromosomes.get(current.chr)
+                c.bpLength = Math.max(c.bpLength, length)
+            }
+            this.sequences.get(current.chr).push(new SequenceSlice(current.offset, current.seq))
+        }
+
         let data
         if (isDataURL(this.fastaURL)) {
             let bytes = BGZip.decodeDataURI(this.fastaURL)
@@ -101,73 +115,65 @@ class NonIndexedFasta {
 
         const chrNameSet = new Set()
         const lines = splitLines(data)
-        const len = lines.length
-        let lineNo = 0
         let order = 0
-        let nextLine
         let current = {}
-        while (lineNo < len) {
-            nextLine = lines[lineNo++].trim()
+        for (let nextLine of lines) {
             if (nextLine.startsWith("#") || nextLine.length === 0) {
                 // skip
             } else if (nextLine.startsWith(">")) {
                 // Start the next sequence
-                if (current && current.seq) {
-                    pushChromosome.call(this, current, order++)
+                if (current.seq && current.seq.length > 0) {
+                    pushChromosome(current, order++)
                 }
+                current.seq = ""
 
                 const parts = nextLine.substr(1).split(/\s+/)
 
-                // Check for samtools style locus string.   This is not perfect, and could fail on weird sequence names
-                const nameParts = parts[0].split(':')
-                current.chr = nameParts[0]
-                current.seq = ""
-                current.offset = 0
-                if (nameParts.length > 1 && nameParts[1].indexOf('-') > 0) {
-                    const locusParts = nameParts[1].split('-')
-                    if (locusParts.length === 2 &&
-                        /^[0-9]+$/.test(locusParts[0]) &&
-                        /^[0-9]+$/.test(locusParts[1])) {
-                    }
-                    const from = Number.parseInt(locusParts[0])
-                    const to = Number.parseInt(locusParts[1])
-                    if (to > from) {   // TODO this should be an error
-                        current.offset = from - 1
-                    }
 
-                    // Check for chromosome length token
-                    if (parts.length > 1 && parts[1].startsWith("@len=")) {
-                        try {
-                            current.length = parseInt(parts[1].trim().substring(5))
-                        } catch (e) {
-                            current.length = undefined
-                            console.error(`Error parsing sequence length for ${nextLine}`)
+                // Check for @len= token, which is a non-standard extension supporting igv-reports.
+                if (nextLine.includes("@len=")) {
+                    const nameParts = parts[0].split(':')
+                    current.chr = nameParts[0]
+                    if (nameParts.length > 1 && nameParts[1].indexOf('-') > 0) {
+
+                        const locusParts = nameParts[1].split('-')
+                        if (locusParts.length === 2 &&
+                            /^[0-9]+$/.test(locusParts[0]) &&
+                            /^[0-9]+$/.test(locusParts[1])) {
                         }
-                    } else {
-                        current.length = undefined
+                        const from = Number.parseInt(locusParts[0])
+                        const to = Number.parseInt(locusParts[1])
+                        current.offset = from - 1
+
+                        // Check for chromosome length token
+                        if (parts.length > 1 && parts[1].startsWith("@len=")) {
+                            try {
+                                current.length = parseInt(parts[1].trim().substring(5))
+                            } catch (e) {
+                                current.length = undefined
+                                console.error(`Error parsing sequence length for ${nextLine}`)
+                            }
+                        } else {
+                            current.length = undefined
+                        }
                     }
+                } else {
+                    // No special tokens, a standard FASTA header
+                    current.chr = parts[0]
+                    current.offset = 0
                 }
+
             } else {
+                // Not a header or comment, so it must be sequence data
                 current.seq += nextLine
             }
-            // add last seq
-            if (current && current.seq) {
-                pushChromosome.call(this, current, order)
-            }
         }
 
-        function pushChromosome(current, order) {
-            const length = current.length || (current.offset + current.seq.length)
-            if (!chrNameSet.has(current.chr)) {
-                this.sequences.set(current.chr, [])
-                this.chromosomes.set(current.chr, new Chromosome(current.chr, order, length))
-                chrNameSet.add(current.chr)
-            } else {
-                const c = this.chromosomes.get(current.chr)
-                c.bpLength = Math.max(c.bpLength, length)
-            }
-            this.sequences.get(current.chr).push(new SequenceSlice(current.offset, current.seq))
+        // Handle the last sequence
+        if (current.seq && current.seq.length > 0) {
+            pushChromosome(current, order)
         }
+
     }
 
     /**
