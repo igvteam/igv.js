@@ -42,22 +42,12 @@ export type TypeFormatPair<T extends TrackType> = {
     format: TrackFormatOf<T>;
     // in this case URL can be anything
     url: Deferrable<string>;
-} | {
-    type?: T;
-    format?: TrackFormatOf<T>;
-    // if we can infer the URL, we do not need type or format
-    url: TrackFormatOf<T> extends string ? Deferrable<URLInference.URLWithExtension<TrackFormatOf<T>>> : never;
 } | ({
     // an explicit type and manual reader is allowed, however format and url will not make sense in this context
     type: T;
     format?: never;
     url?: never;
-} & (CustomReaderOf<T> | ManualFeatureOf<T>)) | {
-    type: T;
-    format?: TrackFormatOf<T>;
-    // if there is only one possible format, we permit format to be omitted
-    url: TrackFormatOf<T> extends string ? (string extends TrackFormatOf<T> ? never : Deferrable<URLInference.URLWithExtension<TrackFormatOf<T>>>) : never;
-};
+} & (CustomReaderOf<T> | ManualFeatureOf<T>));
 
 // converts a track type into the file formats that it can accept
 export type TrackFormatOf<T extends TrackType> =
@@ -147,25 +137,6 @@ export type StaticFeatureConfig<T extends Record<string, any>> = {
     mappings: Record<keyof T, string>;
 }
 
-// ref: https://github.com/igvteam/igv-utils/blob/master/src/fileUtils.js
-export namespace URLInference {
-    type StripLast<S extends string, SEP extends string> = S extends `${infer _}${SEP}${infer P}` ? StripLast<P, SEP> : S;
-    type StripQuery<S extends string> = S extends `${infer P}?${infer _}` ? P : S;
-    type StripSuffix<S extends string, T extends string> = S extends `${infer P}.${T}` ? P : S;
-
-    export type FilenameOfURL<U extends string> = StripLast<StripQuery<U>, '/'>
-
-    type AuxExtensions = ".gz" | ".tab" | ".txt" | ".bgz";
-
-    // infer the extension of a URL, with auxillary extensions stripped
-    export type InferExtension<F extends string> = Lowercase<F> extends `${infer B}${AuxExtensions}` ? StripLast<B, '.'> : StripLast<Lowercase<F>, '.'>
-
-    type Query = `?${string}`;
-
-    // matches a URL with an extension
-    export type URLWithExtension<E extends string> =
-        `${string}.${E}${AuxExtensions | ''}${Query | ''}`;
-}
 
 export namespace Tracks {
     export class Track {

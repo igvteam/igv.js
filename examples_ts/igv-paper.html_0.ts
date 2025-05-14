@@ -1,0 +1,53 @@
+import type { CreateOpt, TrackLoad, TrackType } from '../js/igv';
+
+
+import igv from '../js/igv'
+
+const igvDivA = (document.getElementById("igv-panelA") as HTMLElement);
+const optionsA =
+    {
+        queryParametersSupported: true,
+        sessionURL: "blob:rVNvb9M.EP4qyK9ApE7TkP7Ju60MhjRAWjvx4qcKOck1sXDszHa6dlW_..6ydFAhJn5iVRO1vrvn7p7n8Z5ZWIMFnQNL90wWLGVVGc1YwLSo8YxdtrXQr17Pr.dVPAkp9gaDa.G8uLm.onTvG5eGoYu5qMW90eLO8dzUoSw3PLNGFFI7L33rgRtbhiVoU4MLHdx2cN2Ld4AILHUB2xcHxrdE8HznTSZ08UL4BHeOcNxvPTsETJm8dSz9j.WVjdIoSQJ64tFo8PR7NmKrgJUetgtQkHtpNFbsn6_AOPYmMT7fzCPcw.mGpbpV6oBdvRX5D2q7Z37XUBYO2HaKBszYAixLBxGfzCbjWRzF76bjURwlE3gbD6eoslk0UmtK8raFQ7BnzrQ2h.UjVpk7hOmBhZKlrkF7PGqtojAR2BEjczdo2kzJfFAIL8JGCS91Ww.OtGWiDr.cRaPpZPp9EXH8eyr3P0HhQwL3nu1j5FOp4PTwZ.8KZFl5lo6HQ7SG2YAVJSyJzcs.kmCgZzChFGXs.Y4IRs51Qf1O2QuQIYW6frBwu6wsuMoovFFDPkLNjEVEFKl3yZPk.I0TmtU0ZAea9GZ.dfF1.en9BZ4W0j76BANnizk7rEijfqePaAvSZ21sLRCebnNnlaM.z3ocTc2PlHaGxmpC5DQrdLbm5f3_uJR_B8h9RlptpJOZVNLvviG.uSOXBrhAbTYiU7jdWiiHlPYCRMPucyLpn.Y9cTDl_2JhrY1HOyGfAavF9trcoRgJAf8mJlZ6sARzvNWmNg63w9KO5dVhdXgA"
+    };
+igv.createBrowser(igvDivA, optionsA)
+    .then(function (browser) {
+        console.log("Created IGV browser");
+    })
+
+const igvDivB = (document.getElementById("igv-panelB") as HTMLElement);
+const optionsB =
+    {
+        queryParametersSupported: true,
+        sessionURL: "blob:tZRLT9wwEMe_SuUTVY3zIuRxLFLLgdOWqodqVTnJbGLVj8V2loXVfnfGYal4Fqi2h0TJzPgfz..f8YZYWIAF3QKpN0R0pCZDn1SEEs0VxsjpqLj.cHAyOxmyIgq5j5hccOf599lZKPd.6eoochnjil8bzS8da42KRL9ijTW8E9p54UcPzNg.6kEbBS5ycDHJTTc2CaKw0B2s9y6Md4Hi7ZU3DdfdnvSD3GeUY37tyZYSadrRkfonaQebpHVV0qos6FGVHE6PFS3jhMwp8Za3v0PhhvirZYCMkuPkASXGdmBJfZiwoiqOqyzJjsrjNEvyAj5lcYm.mG9LoXUo8naELd38sQq49cEcIWEXGkLol5NtmvOMNVyFtLGKe0zevo5WvgYDu2cdKBM9J_dWx14WwSu448xoWzi_JRJ6wNiOD5ei1wp06G4A0Q.4_SyO0VGzAst7OA9IT3eZHBM7jEkokQafiO2bg5gmRRmu8A8_AknxKxIkfLFwcT5YcIOROA4xS.8hPhP4vYeIZQjtD_Fzcu9G_ETkPyJOHyOuEprm.b8S_goa3H2EeEDh5IWdvhHj3ZxOM4qrgyJzxnqYJpX11.9E.rog803AuxJONEIKf_UD9c1lGGOKDSiz4g3CrhdcOsSwI5c9.I9e2unfPNPaeO6F0RhTfD0zl3is5MG1J.hxpQcbZO6OKKOMw75w6cR3vp1vbwA-"
+                };
+igv.createBrowser(igvDivB, optionsB)
+    .then(function (browser) {
+        console.log("Created IGV browser");
+    })
+
+
+const igvDivC = (document.getElementById("igv-panelC") as HTMLElement);
+const optionsC =
+    {
+        queryParametersSupported: true,
+        sessionURL: "blob:rZXdb.I4FMX_FeSnjtbNJ8GBp86gYdG26mih3T6MqpWTmOBpYlPbKbSo_3uvQxjx1W3pVkJBXOzje37HXJZIsQlTTKQM9ZaIZ6iHprnfRRgJWkINDauSitZJf9SfhsS1332BLydUG3o9urDLjZnpnuvq0KElfZKCzrWTytLl.YOTKEkzLrThpjLMkSp3cyZkybSr2X0tVz.cWhCEucjY4tOF4clBPH00MqEi.yR9K_cN5ByzMOgZo0KmlUa9nyidqqDnkwh34jYOw.jUJzGO4hh7hKBbjIyi6Z1duUTmcWYpg2ZVh4CRVBlTqHfqO6RLOt3QD9txJwj9iLA_Qi.GYOR4xoWwi4yq2DNerrP6kwmmbTpSldRAAcKFrq1qpYq3LINHZ.2x9ge7raKjpTKsdunkT0dk9D5BxyQ2mweuecILbh5vQF_OLQEMBkr5QJMC3E1oodlvPCG45AVrjL_WqZaVStnVirFdD7WGOBVCGmq4FFAr6WIk55BI5Hl7gOuTDFNWZh2vLKUGX7C15ntrQ9hGPJ_PHUhUZmym5C.WmvoO2R60._2yPxh4nj8aX7hnZ2BWFHDbNstOwvMbnts7KwsJjSCVJychbvl.Bx4ktj_Cxvzo8uvpmN1v5g675_Xuxuzqwwawg0cdojVlPJ.CZARcSi5Qz77TRUOKVkaOU7oRj63orUoTWPvgxT2SGYnaV38N95ityoeZeYALmm95G8SG4Xm7ZOHxxHYPOoqYfxyw6DOAtUl8PTrfA7YqHwbmh5YWbrW3gQXkQ8R2T3qL2Ks4Ojs0YQDsw_z_wLpRMPj7nz1gq_IrwDq4fm3w6l_1B8ez2j3kw6zI7m_1nayaZi6knOnWBIZca8j7243mpR_EJP63sGuchGXQ3KbRpvDOv5sMxrt7WPI_RjcXMI1p2szuNZGgRqLSH4oz0Uz2tVcz5ekd_DfC.A52wos9HETYD4mNr.HX3adz._wC"
+    };
+igv.createBrowser(igvDivC, optionsC)
+    .then(function (browser) {
+        console.log("Created IGV browser");
+    })
+
+
+
+    const igvDivD = (document.getElementById("igv-panelD") as HTMLElement);
+const optionsD =
+    {
+        queryParametersSupported: true,
+        sessionURL: "blob:tVNNb9pAEP0r0Z5ayVmbAErwre2BVuoJWuVQRdVgD2ZV7w7dneUjiP.eWdc0ikI_lKoIYXlmeW_mvbcH5XGJHl2FqjwoU6tSrZrhjcqUAys19T5acBevprN3q.FNnnqvpbmEwPB59jEdZ16HMs_DUNcRWqlX33QMlyhHLgcaLNyTg23QFdncNBu98AS1cYENR0ZNvskbdGQx5AG_dxTdj16CMBlX4.7_M8nXCFu1Z1qAq19IKAz6xNChg3PEwIZcyBP2W8H.UCNp3rFu7tUxUy1VMajyi4K2VXeZYi8sqXBQvF8nC2TW2DmUKfI1elVeToriejCZXI1H16NiMhmIXTRfG.dSl33EY_bz780WQrKMvAV.fO_9nd6.mctb9O3Thc8vV6OlPAF8DWDXLWoOm7RH7xNKfpYiFD6bR_hNiz3nWYBA0Vf46cfM6XCa2bSMPtU6haqVJ0tB5JWe6IxJrxWaZiV7jYoiU9Y4VY7lCTt5SgEi07wCQTsN1kt4lRTq55nhUjS.mAriE6XkbnQsZ.R5YR4EMbHoQJ6xPqXg31L.dySaFyngGxPMwrSG97fCSVvJkoTHi60bWDxXaVB0n9_b.aulzjnaZ_LxXkhNzJrRVhweJ6Y_e368Oz4A"
+    };
+igv.createBrowser(igvDivD, optionsD)
+    .then(function (browser) {
+        console.log("Created IGV browser");
+    })
+
+

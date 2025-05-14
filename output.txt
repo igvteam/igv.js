@@ -1,0 +1,60 @@
+You can use Python's built-in `argparse` module to handle command line arguments and `bs4` (BeautifulSoup) to parse HTML files. To write your `.ts` files, you can use Python's built-in file I/O functions. Here's an example:
+
+```Python
+import argparse
+import os
+from bs4 import BeautifulSoup
+
+def process_html(html_path, dest_path):
+    with open(html_path, 'r') as fp:
+        soup = BeautifulSoup(fp, 'html.parser')
+    
+    script_tags = soup.find_all('script', {'type': 'module'})
+    
+    for i, script in enumerate(script_tags):
+        if script.string:
+            content = script.string
+            content = content.replace("../../dist/igv.esm.min.js", "js/igv")
+            
+            ts_path = os.path.join(dest_path, f"{os.path.basename(html_path)}_{i}.ts")
+            with open(ts_path, 'w') as fp:
+                fp.write(content)
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('html_files', nargs='+', help='HTML files to process')
+    args = parser.parse_args()
+    
+    dest_path = "examples_ts"
+    os.makedirs(dest_path, exist_ok=True)
+    
+    for html_path in args.html_files:
+        process_html(html_path, dest_path)
+
+if __name__ == "__main__":
+    main()
+```
+
+This script will take one or more HTML file paths as command line arguments, find any `<script>` tags in each, copy their contents into a new `.ts` file in `examples_ts/`, and replace any references to `"../../dist/igv.esm.min.js"` with `"js/igv"`. Each `.ts` file is named after the corresponding HTML file (e.g., `example.html` -> `example_0.ts`, `example_1.ts`, etc.). If a `<script>` tag is not found in an HTML file, it won't generate a corresponding `.ts` file. 
+
+Run this script in your terminal command line as:
+```bash
+python script_name.py html_file1 html_file2 html_file3 ...
+``` 
+
+Assuming you have your html files in the same level as your python script. 
+
+Please replace `script_name.py` by the name of this python file.
+
+This script assumes a lot of things (e.g., the HTML and TS files already exist, their directories are writable, etc.), so it might not be complete enough for your real use case.
+
+Remember to install `beautifulsoup4` using pip before running this code:
+```bash
+pip install beautifulsoup4
+```
+
+If lxml parser is not installed, you can install it with:
+```bash
+pip install lxml
+```
+

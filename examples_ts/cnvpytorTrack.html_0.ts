@@ -1,0 +1,19 @@
+import type { CreateOpt, TrackLoad, TrackType } from '../js/igv';
+
+
+import igv from "../js/igv"
+
+const options: CreateOpt =
+    {
+        genome: "hg19",
+        locus: "chr16",
+        tracks: [
+            {
+                type: "cnvpytor",
+                name: "HepG2 Pytor",
+                url: "https://storage.googleapis.com/cnvpytor_data/HepG2_WGS.pytor",
+            }
+        ]
+    }
+
+igv.createBrowser((document.getElementById('igvDiv') as HTMLElement), options)

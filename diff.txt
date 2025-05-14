@@ -1,0 +1,65 @@
+examples_ts/custom-reader.html_0.ts -> examples_ts_fixed/custom-reader.html_0.ts
+40a41,42
+> 
+>     const igvDiv = document.getElementById("igvDiv");
+
+===========
+examples_ts/custom-track-click.html_0.ts -> examples_ts_fixed/custom-track-click.html_0.ts
+14d13
+< var igv_custom_track_click = $('#igv-custom-track-click')
+16c15
+< igv.createBrowser(igv_custom_track_click.get(0), options)
+---
+> igv.createBrowser(document.getElementById("igvDiv"), options)
+20c19
+<         var genesInList = {}
+---
+>         var genesInList: { [key: string]: boolean } = {}
+32d30
+<                 $("#geneList").append('<li><a href="https://uswest.ensembl.org/Multi/Search/Results?q=' + symbol + '">' + symbol + '</a></li>')
+
+===========
+examples_ts/custom-webservice.html_0.ts -> examples_ts_fixed/custom-webservice.html_0.ts
+7c7
+< const cytobands = {
+---
+> const cytobands: TrackLoad<TrackType> = {
+36c36
+< const cbio1 = {
+---
+> const cbio1: TrackLoad<TrackType> = {
+
+===========
+examples_ts/roi-api.html_0.ts -> examples_ts_fixed/roi-api.html_0.ts
+6c6
+< const browser_config =
+---
+> const browser_config: CreateOpt =
+42,44c42,44
+<     const browser = await igv.createBrowser((document.getElementById('myDiv') as HTMLElement), browser_config)
+<     (document.getElementById("roi-load-button") as HTMLElement).addEventListener('click', () => browser.loadROI(roi_configs))
+<     (document.getElementById("roi-clear-button") as HTMLElement).addEventListener('click', () => browser.clearROIs())
+---
+>     const browser = await igv.createBrowser((document.getElementById('myDiv') as HTMLElement), browser_config);
+>     (document.getElementById("roi-load-button") as HTMLElement).addEventListener('click', () => browser.loadROI(roi_configs));
+>     (document.getElementById("roi-clear-button") as HTMLElement).addEventListener('click', () => browser.clearROIs());
+
+===========
+examples_ts/spliceJunctions.html_0.ts -> examples_ts_fixed/spliceJunctions.html_0.ts
+30c30
+<                 labelIsAnnotatedJunction: " [A]",
+---
+>                 // labelIsAnnotatedJunction: " [A]",
+
+===========
+examples_ts/tracks-hg38.html_0.ts -> examples_ts_fixed/tracks-hg38.html_0.ts
+109c109
+<         })
+---
+>         });
+112c112
+<             () => (window as any).history.pushState({}, "IGV", browser.sessionURL()))
+---
+>             () => (window as any).history.pushState({}, "IGV", browser.sessionURL()));
+
+===========

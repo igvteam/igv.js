@@ -1,0 +1,108 @@
+import type { CreateOpt, TrackLoad, TrackType } from '../js/igv';
+
+
+import igv from "../dist/igv.esm.min.js"
+
+const options: CreateOpt =
+    {
+        genome: "hg38",
+        locus: "chr22:21,913,513-22,216,565",
+        tracks:
+            [
+                {
+                    name: "Color by attribute \"biotype\"",
+                    format: "gff3",
+                    displayMode: "expanded",
+                    height: 300,
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                    visibilityWindow: 1000000,
+                    colorBy: "biotype",
+                    // Uncomment to explicitly set a colorTable
+                    colorTable: {
+                        "antisense": "blueviolet",
+                        "protein_coding": "blue",
+                        "retained_intron": "rgb(0, 150, 150)",
+                        "processed_transcript": "purple",
+                        "processed_pseudogene": "#7fff00",
+                        "unprocessed_pseudogene": "#d2691e",
+                        "*": "black"
+                    }
+                },
+                {
+                    name: "Color by function",
+                    format: "gff3",
+                    displayMode: "expanded",
+                    height: 300,
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                    visibilityWindow: 1000000,
+                    color: (feature) => {
+                        switch (feature.getAttributeValue("biotype")) {
+                            case "antisense":
+                                return "blueviolet"
+                            case "protein_coding":
+                                return "blue"
+                            case "retained_intron":
+                                return "rgb(0, 150, 150)"
+                            case "processed_transcript":
+                                return "purple"
+                            case "processed_pseudogene":
+                                return "#7fff00"
+                            case "unprocessed_pseudogene":
+                                return "#d2691e"
+                            default:
+                                return "black"
+                        }
+                    }
+                },
+
+                {
+                    name: "Color by \"source\"",
+                    format: "gff3",
+                    displayMode: "expanded",
+                    height: 300,
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                    visibilityWindow: 1000000,
+                    colorBy: "source",
+                    colorTable: {
+                        "Ensembl": "blueviolet",
+                        "ensembl": "blueviolet",
+                        "ensembl_havana": "purple",
+                        "havana": "blue",
+                        "insdc": "#7fff00",
+                        "mirbase": "#d2691e",
+                        "*": "black"
+                    }
+                },
+                {
+                    name: "Color by \"source\" - default color table",
+                    format: "gff3",
+                    displayMode: "expanded",
+                    height: 300,
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                    visibilityWindow: 1000000,
+                    colorBy: "source",
+                },
+                {
+                    name: "Color by strand",
+                    format: "gff3",
+                    displayMode: "expanded",
+                    height: 300,
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                    visibilityWindow: 1000000,
+                    color: "blue",
+                    altColor: "red"
+                }
+            ]
+    }
+
+var igvDiv = (document.getElementById("igvDiv") as HTMLElement)
+
+igv.createBrowser(igvDiv, options)
+    .then(function (browser) {
+    })
+
