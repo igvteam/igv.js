@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": "3.2.6",
+  "version": "3.3.0",
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
