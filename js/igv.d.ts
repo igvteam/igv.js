@@ -47,7 +47,7 @@ export type TypeFormatPair<T extends TrackType> = {
     type: T;
     format?: never;
     url?: never;
-} & (CustomReaderOf<T> | ManualFeatureOf<T>));
+} & (CustomReaderOf<T> | FeatureOf<T>));
 
 // converts a track type into the file formats that it can accept
 export type TrackFormatOf<T extends TrackType> =
@@ -69,12 +69,12 @@ export type TrackFormatOf<T extends TrackType> =
                                                             never;
 
 // converts a track type into the manual features that it can accept
-export type ManualFeatureOf<T extends TrackType> =
+export type FeatureOf<T extends TrackType> =
     T extends "annotation" ? {
             features: Record<string, any>[];
         } :
         T extends "wig" ? {
-                features: Tracks.WigTrackManualFeatures;
+                features: Tracks.WigTrackFeatures;
             } :
             T extends "seg" ? {
                 features: {
@@ -225,7 +225,7 @@ export namespace Tracks {
         displayMode?: AnyCase<"EXPANDED" | "SQUISHED" | "COLLAPSED">;
     }
 
-    export type WigTrackManualFeatures = {
+    export type WigTrackFeatures = {
         chr: string;
         start: number;
         end: number;
@@ -465,10 +465,9 @@ type SuggestedGenomeIDs = "hs1" | "chm13v1.1" | "hg38" | "hg38_1kg" | "hg19" |
     "rn6" | "gorGor6" | "gorGor4" | "panTro6" | "panTro5" |
     "panTro4" | "macFas5" | "GCA_011100615.1" | "panPan2" | "canFam3" |
     "canFam4" | "canFam5" | "bosTau9" | "bosTau8" | "susScr11" |
-    "galGal6" | "GCF_016699485.2" | "danRer11" | "danRer10" | "ce11" |
+    "galGal6" | "danRer11" | "danRer10" | "ce11" |
     "dm6" | "dm3" | "dmel_r5.9" | "sacCer3" | "ASM294v2" |
-    "ASM985889v3" | "tair10" | "GCA_003086295.2" | "GCF_001433935.1" | "NC_016856.1" |
-    "GCA_000182895.1"
+    "ASM985889v3" | "tair10"
 
 export type GenomeDef = SuggestedGenomeIDs | (string & {}) | ReferenceGenome;
 
