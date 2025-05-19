@@ -2,21 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
-    <link href="https://igv.org/web/https://igv.org/web/img/favicon.ico" rel="shortcut icon">
-
-    <title>Multiple Track Selection</title>
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>Multi Select Dev</title>
 
 </head>
 
 <body>
 
-<h1>Multiple Track Selection</h1>
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
-<div id="igvDiv"></div>
+</div>
 
 <script type="module">
 
@@ -24,291 +19,373 @@
 
     const config =
         {
-            genome: "hg19",
-            locus: "chr1:155,138,124-155,153,715",
-            tracks:
-                [
-                    {
-                        type: "wig",
-                        format: "bigwig",
-                        url: 'https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig',
-                        color: "red",
-                    },
-                    {
-                        type: "wig",
-                        format: "bigwig",
-                        url: "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
-                        color: "green",
-                    },
-                    //     {
-                    //         type: "wig",
-                    //         format: "bigwig",
-                    //         url : "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
-                    //         color: "blue",
-                    //     }
-                ]
-        };
-
-    const kitchenSinkConfig =
-        {
-            genome: "hg19",
-            locus: "chr1:155,138,124-155,153,715",
-            tracks:
-                [
-                    {
-                        name: "Phase 3 WGS variants",
-                        url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
-                        indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi",
-                    },
-                    {
-                        name: "ENCODE bigwig",
-                        url: 'https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig'
-                    },
-                    {
-                        url: "https://www.encodeproject.org/files/ENCFF001GBH/@@download/ENCFF001GBH.bigBed",
-                        color: "rgb(0, 150, 0)",
-                        name: "Bigbed with color (green)",
-                    },
-                    {
-                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
-                        name: 'Group Autoscale 1 of 3',
-                        color: 'rgb(200,0,0)',
-                        // autoscaleGroup: '1'
-                    },
-                    {
-                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSig.bigWig',
-                        name: 'Group Autoscale 2 of 3',
-                        color: 'rgb(0,0,150)',
-                        // autoscaleGroup: '1'
-                    },
-                    {
-                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig',
-                        name: 'Group Autoscale 3 of 3',
-                        color: 'rgb(0,150,0)',
-                        // autoscaleGroup: '1'
-                    },
-                    {
-                        name: "Merged - configuration",
-                        height: 50,
-                        type: "merged",
-                        tracks: [
-                            {
-                                "type": "wig",
-                                "format": "bigwig",
-                                "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
-                                "color": "red"
-                            },
-                            {
-                                "type": "wig",
-                                "format": "bigwig",
-                                "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
-                                "color": "green"
-                            }
-                        ]
-                    },
-                    {
-                        url: 'https://s3.amazonaws.com/igv.org.test/data/wgEncodeBroadHistoneGm12878H3k4me3StdSig.wig.tdf',
-                        name: 'tdf file',
-                        color: 'blue'
-                    },
-                    {
-                        name: "CTCF - string url",
-                        type: "wig",
-                        format: "bigwig",
-                        url: "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"
-                    },
-                    {
-                        name: "CTCF - function url ",
-                        type: "wig",
-                        format: "bigwig",
-                        url: function () {
-                            return "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"
-                        }
-                    },
-                    {
-                        name: "CTCF - promise url",
-                        type: "wig",
-                        format: "bigwig",
-                        url: Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
-                    },
-                    {
-                        name: "CTCF - function that returns promise ",
-                        type: "wig",
-                        format: "bigwig",
-                        url: function () {
-                            return Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
-                        }
-                    },
-                    {
-                        name: "CTCF - function that returns thenable ",
-                        type: "wig",
-                        format: "bigwig",
-                        url: function () {
-                            return {
-                                then: function (resolve, reject) {
-                                    resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
-                                }
-                            }
-                        }
-                    },
-                    {
-                        name: "Copy number -- embedded (json) features",
-                        type: "seg",
-                        displayMode: "EXPANDED",
-                        log: true,
-                        features: [
-                            {
-                                "chr": "chr1",
-                                "start": 155141825,
-                                "end": 155150000,
-                                "value": 0.8239,
-                                "sample": "Sample 1"
-                            },
-                            {
-                                "chr": "chr1",
-                                "start": 155149967,
-                                "end": 155150988,
-                                "value": -0.8391,
-                                "sample": "Sample 2"
-                            }
-                        ]
-                    }
-                ]
-
-        };
-
-    const overyTrackConfig =
-        {
-            genome: "hg19",
-            locus: "chr1:155,138,124-155,153,715",
-            tracks:
-                [
-                    {
-                        name: "Merged - configuration",
-                        height: 256,
-                        type: "merged",
-                        tracks: [
-                            {
-                                "type": "wig",
-                                "format": "bigwig",
-                                "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
-                                "color": "red"
-                            },
-                            {
-                                "type": "wig",
-                                "format": "bigwig",
-                                "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
-                                "color": "green"
-                            }
-                        ]
-                    },
-                ]
-
-        };
-
-    const TDFConfig =
-        {
-            genome: "hg19",
-            locus: "chr1:155,138,124-155,153,715",
-            tracks:
-                [
-                    {
-                        url: 'https://s3.amazonaws.com/igv.org.test/data/wgEncodeBroadHistoneGm12878H3k4me3StdSig.wig.tdf',
-                        name: 'tdf file',
-                        color: 'blue'
-                    },
-                ]
-        };
-
-    const BigWigConfig =
-        {
-            genome: "hg19",
-            locus: "chr1:155,138,124-155,153,715",
-            tracks:
-                [
-                    {
-                        type: "wig",
-                        format: "bigwig",
-                        url: 'https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig',
-                        color: "red",
-                        height: 128,
-                    },
-                    {
-                        type: "wig",
-                        format: "bigwig",
-                        url: "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
-                        color: "green",
-                        height: 128,
-                    },
-                    {
-                        type: "wig",
-                        format: "bigwig",
-                        url: "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
-                        color: "blue",
-                        height: 128,
-                    }
-                ]
-        };
-
-    const GroupAutoScaleConfig = {
-        "genome": "hg19",
-        "locus": "myc",
-        "tracks": [
-            {
-                "type": "sequence",
-                "order": -1.7976931348623157e+308
+            "version": "2.16.0",
+            "showSampleNames": false,
+            "reference": {
+                "id": "hg19",
+                "name": "Human (GRCh37/hg19)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
             },
-            {
-                "url": "https://www.encodeproject.org/files/ENCFF000ATR/@@download/ENCFF000ATR.bigWig",
-                "color": "#018448",
-                "name": "GM12878 H3K4me3  signal ENCSR000AKA",
-                "format": "bigwig",
-                "type": "wig",
-                "height": 50,
-                "autoscaleGroup": "1",
-                "order": 4
+            "locus": "chr8:128,746,680-128,756,197",
+            "gtexSelections": {
+                "chr8:128,746,680-128,756,197": {
+                    "gene": "MYC",
+                    "snp": null
+                }
             },
-            {
-                "url": "https://www.encodeproject.org/files/ENCFF000AST/@@download/ENCFF000AST.bigWig",
-                "color": "#891100",
-                "name": "GM12878 H3K27me3  signal ENCSR000AKD",
-                "format": "bigwig",
-                "type": "wig",
-                "height": 50,
-                "autoscaleGroup": "1",
-                "order": 4
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "name": "Common SNPs (150)",
+                    "type": "snp",
+                    "format": "snp",
+                    "visibilityWindow": 10000,
+                    "height": 30,
+                    "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/snp150Common.txt.gz",
+                    "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/snp150Common.txt.gz.tbi",
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/snp/?term=$$",
+                    "order": 4
+                },
+                {
+                    "type": "variant",
+                    "format": "vcf",
+                    "url": "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz",
+                    "indexURL": "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz.tbi",
+                    "name": "1KG Phase 3 SVs",
+                    "visibilityWindow": 1666435,
+                    "color": "rgb(0,0,150)",
+                    "order": 5
+                },
+                {
+                    "name": "Homo sapiens A549 treated with 0.02% ethanol for 1 hour EP300 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF000NDX/@@download/ENCFF000NDX.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549 treated with 0.02% ethanol for 1 hour",
+                        "AssayType": "ChIP-seq",
+                        "Target": "EP300 ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "raw signal",
+                        "Format": "bigWig",
+                        "Lab": "Richard Myers, HAIB",
+                        "Accession": "ENCFF000NDX",
+                        "Experiment": "ENCSR000BPW"
+                    },
+                    "format": "bigwig",
+                    "type": "wig",
+                    "order": 6
+                },
+                {
+                    "name": "Homo sapiens A549 treated with 100 nM dexamethasone (agonist) for 1 hour H3K4me1 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF049AFK/@@download/ENCFF049AFK.bigWig",
+                    "color": "rgb(0,150,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549 treated with 100 nM dexamethasone (agonist) for 1 hour",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K4me1 ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Bradley Bernstein, Broad",
+                        "Accession": "ENCFF049AFK",
+                        "Experiment": "ENCSR000AVH"
+                    },
+                    "format": "bigwig",
+                    "type": "wig",
+                    "order": 7
+                },
+                {
+                    "name": "Homo sapiens adrenal gland tissue female adult (53 years) H3K27ac ",
+                    "url": "https://www.encodeproject.org/files/ENCFF256CHZ/@@download/ENCFF256CHZ.bigWig",
+                    "color": "rgb(200,0,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens adrenal gland tissue female adult (53 years)",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K27ac ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "signal p-value",
+                        "Format": "bigWig",
+                        "Lab": "Bradley Bernstein, Broad",
+                        "Accession": "ENCFF256CHZ",
+                        "Experiment": "ENCSR189QAD"
+                    },
+                    "format": "bigwig",
+                    "type": "wig",
+                    "order": 8
+                },
+                {
+                    "url": "https://www.dropbox.com/s/lka7ixgin5ne5xl/Breast.seg?dl=0",
+                    "filename": "Breast.seg",
+                    "name": "Breast.seg",
+                    "format": "seg",
+                    "type": "seg",
+                    "height": 300,
+                    "order": 9
+                },
+                {
+                    "url": "https://www.dropbox.com/s/4jufc6dbedpk3qz/GBMCopyNumber.seg.gz?dl=0",
+                    "filename": "GBMCopyNumber.seg.gz",
+                    "name": "GBMCopyNumber.seg.gz",
+                    "format": "seg",
+                    "type": "seg",
+                    "height": 300,
+                    "order": 10
+                },
+                {
+                    "sourceType": "gcs",
+                    "type": "alignment",
+                    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam",
+                    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam.bai",
+                    "name": "NA12877",
+                    "format": "bam",
+                    "order": 11
+                },
+                {
+                    "sourceType": "gcs",
+                    "type": "alignment",
+                    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12892_S1.bam",
+                    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12892_S1.bam.bai",
+                    "name": "NA12892",
+                    "format": "bam",
+                    "order": 12
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "id": "hg19_genes",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "removable": false,
+                    "order": 1000000,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
+            ]
+        };
+
+    const group_autoscale_config =
+        {
+            "version": "2.16.0",
+            "showSampleNames": false,
+            "reference": {
+                "id": "hg19",
+                "name": "Human (GRCh37/hg19)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
             },
-            {
-                "url": "https://www.encodeproject.org/files/ENCFF000ATA/@@download/ENCFF000ATA.bigWig",
-                "color": "rgb(150,150,150)",
-                "name": "GM12878 H3K36me3  signal ENCSR000AKE",
-                "format": "bigwig",
-                "type": "wig",
-                "height": 50,
-                "autoscaleGroup": "1",
-                "order": 5
-            }
-        ]
-    }
+            "locus": "chr8:128,746,680-128,756,197",
+            "gtexSelections": {
+                "chr8:128,746,680-128,756,197": {
+                    "gene": "MYC",
+                    "snp": null
+                }
+            },
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "name": "Homo sapiens angular gyrus tissue male adult (81 years) H3K36me3 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF202ZTM/@@download/ENCFF202ZTM.bigWig",
+                    "color": "#008cff",
+                    "metadata": {
+                        "Biosample": "Homo sapiens angular gyrus tissue male adult (81 years)",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K36me3 ",
+                        "BioRep": "1",
+                        "TechRep": "1_3",
+                        "OutputType": "signal p-value",
+                        "Format": "bigWig",
+                        "Lab": "Bradley Bernstein, Broad",
+                        "Accession": "ENCFF202ZTM",
+                        "Experiment": "ENCSR340DBD"
+                    },
+                    "order": 1,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    // "autoscaleGroup": 'annaBirna'
+                },
+                {
+                    name: "ENCODE bigwig",
+                    url: 'https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig',
+                    // autoscaleGroup: 'annaBirna'
+                },
+                {
+                    "name": "Homo sapiens A549 SIN3A ",
+                    "url": "https://www.encodeproject.org/files/ENCFF582HJY/@@download/ENCFF582HJY.bigWig",
+                    "color": "#ff2987",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549",
+                        "AssayType": "ChIP-seq",
+                        "Target": "SIN3A ",
+                        "BioRep": "3",
+                        "TechRep": "3_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Michael Snyder, Stanford",
+                        "Accession": "ENCFF582HJY",
+                        "Experiment": "ENCSR513XQX"
+                    },
+                    "order": 1,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "autoscaleGroup": 'billyBobThornton'
+                },
+                {
+                    "name": "Homo sapiens A549 treated with 0.02% ethanol for 1 hour YY1 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF085ITE/@@download/ENCFF085ITE.bigWig",
+                    "color": "#83f902",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549 treated with 0.02% ethanol for 1 hour",
+                        "AssayType": "ChIP-seq",
+                        "Target": "YY1 ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Richard Myers, HAIB",
+                        "Accession": "ENCFF085ITE",
+                        "Experiment": "ENCSR000BPM"
+                    },
+                    "order": 1,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "autoscaleGroup": 'billyBobThornton'
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "id": "hg19_genes",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "removable": false,
+                    "order": 1000000,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
+            ]
+        };
 
-    igv.createBrowser(document.getElementById("igvDiv"), overyTrackConfig)
-        .then(function (browser) {
-            console.log("Created IGV browser");
-        })
+    const whole_lotta_wigs_config =
+        {
+            "reference": {
+                "id": "hg19",
+                "name": "Human (GRCh37/hg19)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+            },
+            "locus": "chr10:1-120,250,001",
+            "tracks": [
+                {
+                    "url": "https://www.dropbox.com/scl/fi/yczvlb961oh77sgv9syc6/MP_skin_CRUSH_Loxafr3.0_HiC.bedgraph?rlkey=e2j6wm62gxoiiyhh0m3bems7q&dl=0",
+                    "name": "MP_skin_CRUSH_Loxafr3.0_HiC.bedgraph",
+                    "format": "bedgraph",
+                    "type": "wig",
+                    "color": "rgb(255, 114, 110)",
+                    "altColor": "rgb(106, 207, 255)",
+                    "min": -100,
+                    "max": 100
+                },
+                {
+                    "name": "Homo sapiens A549 treated with 0.02% ethanol for 1 hour EP300 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF000NDX/@@download/ENCFF000NDX.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549 treated with 0.02% ethanol for 1 hour",
+                        "AssayType": "ChIP-seq",
+                        "Target": "EP300 ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "raw signal",
+                        "Format": "bigWig",
+                        "Lab": "Richard Myers, HAIB",
+                        "Accession": "ENCFF000NDX",
+                        "Experiment": "ENCSR000BPW"
+                    },
+                    "format": "bigwig",
+                    "type": "wig",
+                },
+                {
+                    "name": "Homo sapiens A549 treated with 100 nM dexamethasone (agonist) for 1 hour H3K4me1 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF049AFK/@@download/ENCFF049AFK.bigWig",
+                    "color": "rgb(0,150,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549 treated with 100 nM dexamethasone (agonist) for 1 hour",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K4me1 ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Bradley Bernstein, Broad",
+                        "Accession": "ENCFF049AFK",
+                        "Experiment": "ENCSR000AVH"
+                    },
+                    "format": "bigwig",
+                    "type": "wig",
+                },
+                {
+                    "name": "Homo sapiens adrenal gland tissue female adult (53 years) H3K27ac ",
+                    "url": "https://www.encodeproject.org/files/ENCFF256CHZ/@@download/ENCFF256CHZ.bigWig",
+                    "color": "rgb(200,0,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens adrenal gland tissue female adult (53 years)",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K27ac ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "signal p-value",
+                        "Format": "bigWig",
+                        "Lab": "Bradley Bernstein, Broad",
+                        "Accession": "ENCFF256CHZ",
+                        "Experiment": "ENCSR189QAD"
+                    },
+                    "format": "bigwig",
+                    "type": "wig",
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "id": "hg19_genes",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "removable": false,
+                    "order": 1000000,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
+            ]
+        };
 
-    function download(filename, data) {
+    igv.createBrowser(document.getElementById("myDiv"), whole_lotta_wigs_config).then(function (browser) {})
 
-        const element = document.createElement('a');
-        element.setAttribute('href', data);
-        element.setAttribute('download', filename);
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-    }
 
 </script>
 
 </body>
 
 </html>
+

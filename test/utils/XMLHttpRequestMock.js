@@ -39,7 +39,7 @@ class XMLHttpRequestMock {
 
     send() {
         const self = this;
-        this.impl.responseType = this.responseType;
+        if(this.responseType) this.impl.responseType = this.responseType;
         this.impl.onerror = this.onerror;
         this.impl.ontimeout = this.ontimeout;
         this.impl.onabort = this.onabort;

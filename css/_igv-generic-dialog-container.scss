@@ -32,9 +32,12 @@ $igv-button-width: 75px;
 // generic dialog
 .igv-generic-dialog-container {
 
-  position: absolute;
-  top: 0;
-  left:0;
+  position: fixed;
+
+  top: 20%;
+  left: 75%;
+  transform: translateX(-50%);
+
   width:300px;
   height:200px;
 

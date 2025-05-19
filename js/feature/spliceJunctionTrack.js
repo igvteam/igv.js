@@ -84,6 +84,9 @@ class SpliceJunctionTrack extends TrackBase {
             this.visibilityWindow = await this.featureSource.defaultVisibilityWindow()
         }
 
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
+
         return this
 
     }

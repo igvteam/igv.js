@@ -15,26 +15,26 @@ const ColorScaleFactory = {
         }
     },
 
-    defaultGradientScale: function (low, high) {
+    defaultGradientScale: function (min, max) {
 
         return new GradientColorScale({
             "type": "doubleGradient",
-            "low": low,
-            "high": high,
-            "lowColor": "rgb(46,56,183)",
-            "highColor": "rgb(164,0,30)"
+            "min": min,
+            "max": max,
+            "minColor": "rgb(46,56,183)",
+            "maxColor": "rgb(164,0,30)"
         })
     },
 
-    defaultDivergingScale: function (low, mid, high) {
+    defaultDivergingScale: function (min, mid, max) {
         return new DivergingGradientScale({
             "type": "doubleGradient",
-            "low": 0,
+            "min": 0,
             "mid": 0.25,
-            "high": 0.5,
-            "lowColor": "rgb(46,56,183)",
+            "max": 0.5,
+            "minColor": "rgb(46,56,183)",
             "midColor": "white",
-            "highColor": "rgb(164,0,30)"
+            "maxColor": "rgb(164,0,30)"
         })
     }
 }
@@ -66,45 +66,51 @@ class BinnedColorScale {
 
 
 class GradientColorScale {
-    constructor({low, high, lowColor, highColor}) {
+    constructor(config) {
         this.type = 'gradient'
-        this.setProperties({low, high, lowColor, highColor})
+        const fixed = {
+            min: config.min !== undefined ? config.min : config.low,
+            max: config.max !== undefined ? config.max : config.high,
+            minColor: config.minColor || config.lowColor,
+            maxColor: config.maxColor || config.highColor
+        }
+        this.setProperties(fixed)
     }
 
-    setProperties({low, high, lowColor, highColor}) {
+    setProperties({min, max, minColor, maxColor}) {
         this.type = 'gradient'
-        this.low = low
-        this.high = high
-        this._lowColor = lowColor
-        this._highColor = highColor
-        this.lowComponents = IGVColor.rgbComponents(lowColor)
-        this.highComponents = IGVColor.rgbComponents(highColor)
+        this.min = min
+        this.max = max
+        this._lowColor = minColor
+        this._highColor = maxColor
+        this.lowComponents = IGVColor.rgbComponents(minColor)
+        this.highComponents = IGVColor.rgbComponents(maxColor)
     }
 
-    get lowColor() {
+    get minColor() {
         return this._lowColor
     }
 
-    set lowColor(c) {
+    set minColor(c) {
         this._lowColor = c
         this.lowComponents = IGVColor.rgbComponents(c)
     }
 
-    get highColor() {
+    get maxColor() {
         return this._highColor
     }
 
-    set highColor(c) {
+    set maxColor(c) {
         this._highColor = c
         this.highComponents = IGVColor.rgbComponents(c)
     }
 
     getColor(value) {
 
-        if (value <= this.low) return this.lowColor
-        else if (value >= this.high) return this.highColor
+        if (value <= this.min) return this.minColor
+        else if (value >= this.max) return this.maxColor
 
-        const frac = (value - this.low) / (this.high - this.low)
+        const frac = (value - this.min) / (this.max - this.min)
         const r = Math.floor(this.lowComponents[0] + frac * (this.highComponents[0] - this.lowComponents[0]))
         const g = Math.floor(this.lowComponents[1] + frac * (this.highComponents[1] - this.lowComponents[1]))
         const b = Math.floor(this.lowComponents[2] + frac * (this.highComponents[2] - this.lowComponents[2]))
@@ -114,15 +120,15 @@ class GradientColorScale {
 
     /**
      * Return a simple json-like object, not a literaly json string
-     * @returns {{high, low, highColor, lowColor}}
+     * @returns {{max, min, maxColor, minColor}}
      */
     toJson() {
         return {
             type: this.type,
-            low: this.low,
-            high: this.high,
-            lowColor: this.lowColor,
-            highColor: this.highColor
+            min: this.min,
+            max: this.max,
+            minColor: this.minColor,
+            maxColor: this.maxColor
         }
     }
 
@@ -136,18 +142,17 @@ class DivergingGradientScale {
 
     constructor(json) {
         this.type = 'diverging'
-        const {lowColor, midColor, highColor, low, mid, high} = json
         this.lowGradientScale = new GradientColorScale({
-            lowColor: lowColor,
-            highColor: midColor,
-            low: low,
-            high: mid
+            minColor: json.minColor || json.lowColor,
+            maxColor: json.midColor,
+            min: json.min !== undefined ? json.min : json.low,
+            max: json.mid
         })
         this.highGradientScale = new GradientColorScale({
-            lowColor: midColor,
-            highColor: highColor,
-            low: mid,
-            high: high
+            minColor: json.midColor,
+            maxColor: json.maxColor || json.highColor,
+            min: json.mid,
+            max: json.max !== undefined ? json.max : json.high
         })
     }
 
@@ -159,70 +164,70 @@ class DivergingGradientScale {
         }
     }
 
-    get low() {
-        return this.lowGradientScale.low
+    get min() {
+        return this.lowGradientScale.min
     }
 
-    set low(v) {
-        this.lowGradientScale.low = v
+    set min(v) {
+        this.lowGradientScale.min = v
     }
 
-    get high() {
-        return this.highGradientScale.high
+    get max() {
+        return this.highGradientScale.max
     }
 
-    set high(v) {
-        this.highGradientScale.high = v
+    set max(v) {
+        this.highGradientScale.max = v
     }
 
     get mid() {
-        return this.lowGradientScale.high
+        return this.lowGradientScale.max
     }
 
     set mid(v) {
-        this.lowGradientScale.high = v
-        this.highGradientScale.low = v
+        this.lowGradientScale.max = v
+        this.highGradientScale.min = v
     }
 
-    get lowColor() {
-        return this.lowGradientScale.lowColor
+    get minColor() {
+        return this.lowGradientScale.minColor
     }
 
-    set lowColor(c) {
-        this.lowGradientScale.lowColor = c
+    set minColor(c) {
+        this.lowGradientScale.minColor = c
     }
 
-    get highColor() {
-        return this.highGradientScale.highColor
+    get maxColor() {
+        return this.highGradientScale.maxColor
     }
 
-    set highColor(c) {
-        this.highGradientScale.highColor = c
+    set maxColor(c) {
+        this.highGradientScale.maxColor = c
     }
 
     get midColor() {
-        return this.lowGradientScale.highColor
+        return this.lowGradientScale.maxColor
     }
 
     set midColor(c) {
-        this.lowGradientScale.highColor = c
-        this.highGradientScale.lowColor = c
+        this.lowGradientScale.maxColor = c
+        this.highGradientScale.minColor = c
     }
 
 
     /**
      * Return a simple json-like object, not a literaly json string
-     * @returns {{high, mid, low, highColor, midColor, lowColor}}
+     * @returns {{max, mid, min, maxColor, midColor, minColor}}
      */
     toJson() {
         return {
             type: this.type,
-            low: this.low,
+            min: this.min,
             mid: this.mid,
-            high: this.high,
-            lowColor: this.lowColor,
+            max: this.max,
+            minColor: this.minColor,
             midColor: this.midColor,
-            highColor: this.highColor
+            maxColor: this.maxColor
         }
     }
 

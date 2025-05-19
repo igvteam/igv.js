@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+    <style>
+        .button-container {
+            margin-bottom: 10px;
+            padding: 10px;
+        }
+        .load-button {
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .load-button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="button-container">
+    <button id="loadSampleInfoButton" class="load-button">Load Sample Information</button>
+    <button id="loadTrackButton" class="load-button">Load Track</button>
+</div>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from '../../js/index.js'
+
+    const config =
+        {
+            queryParametersSupported: true,
+            genome: "hg38",
+            locus: 'chr17',
+
+            // For comparison, compare to sampleinfo: object below
+            ____sampleinfo:
+                [
+                    {
+                        "url": "../../test/data/sample/sampletable_chr_17_no_dupes.txt",
+                    }
+                ],
+
+            // object corresponding to test/data/sample/sampletable_chr_17_only_names.txt
+            sampleinfo:
+                [
+                    {
+                        "BRISK_p_STY37_Mapping250K_Sty_A09_147618": {
+                            "Subtype": "Neural",
+                            "sil_width": -0.069669747,
+                            "GENDER": "MALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": null,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": null,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 97.5,
+                            "%|Necrosis": 5.0
+                        },
+                        "BRISK_p_STY37_Mapping250K_Sty_B12_147668": {
+                            "Subtype": "Proneural",
+                            "sil_width": 0.01155373,
+                            "GENDER": "FEMALE",
+                            "KarnScore": 90.0,
+                            "AgeAtFirstDiagnosis": 42.0,
+                            "Secondary|or|Recurrent": "Rec",
+                            "Survival|(days)": 187.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 7.5
+                        },
+                        "BRISK_p_STY37_Mapping250K_Sty_D02_147512": {
+                            "Subtype": "Classical",
+                            "sil_width": 0.071235193,
+                            "GENDER": "MALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 50.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 859.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "Methylated",
+                            "%|Tumor|Nuclei": 87.5,
+                            "%|Necrosis": 0.0
+                        },
+                        "BRISK_p_STY37_Mapping250K_Sty_E08_147610": {
+                            "Subtype": "Mesenchymal",
+                            "sil_width": 0.333325009,
+                            "GENDER": "MALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 45.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 46.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 20.0
+                        },
+                        "BRISK_p_STY37_Mapping250K_Sty_F07_147596": {
+                            "Subtype": "Mesenchymal",
+                            "sil_width": 0.063750538,
+                            "GENDER": "FEMALE",
+                            "KarnScore": 90.0,
+                            "AgeAtFirstDiagnosis": 44.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 199.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "Methylated",
+                            "%|Tumor|Nuclei": 95.0,
+                            "%|Necrosis": 2.5
+                        },
+                        "BRISK_p_STY37_Mapping250K_Sty_G10_147646": {
+                            "Subtype": "Classical",
+                            "sil_width": 0.053903275,
+                            "GENDER": "MALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 71.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 498.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 2.5
+                        },
+                        "CYMAR_p_STY38_Mapping250K_Sty_A10_187100": {
+                            "Subtype": "Proneural",
+                            "sil_width": 0.215391741,
+                            "GENDER": "MALE",
+                            "KarnScore": 90.0,
+                            "AgeAtFirstDiagnosis": 35.0,
+                            "Secondary|or|Recurrent": "Rec",
+                            "Survival|(days)": 362.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 13.5
+                        },
+                        "CYMAR_p_STY38_Mapping250K_Sty_C02_183332": {
+                            "Subtype": "Neural",
+                            "sil_width": -0.03796757,
+                            "GENDER": "FEMALE",
+                            "KarnScore": 90.0,
+                            "AgeAtFirstDiagnosis": 60.0,
+                            "Secondary|or|Recurrent": "Rec",
+                            "Survival|(days)": 277.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "Methylated",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 20.0
+                        },
+                        "CYMAR_p_STY38_Mapping250K_Sty_F03_187110": {
+                            "Subtype": "Mesenchymal",
+                            "sil_width": 0.144296922,
+                            "GENDER": "MALE",
+                            "KarnScore": 80.0,
+                            "AgeAtFirstDiagnosis": 47.0,
+                            "Secondary|or|Recurrent": "Rec",
+                            "Survival|(days)": 103.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "Methylated",
+                            "%|Tumor|Nuclei": 97.5,
+                            "%|Necrosis": 7.5
+                        },
+                        "CYMAR_p_STY38_Mapping250K_Sty_H06_187088": {
+                            "Subtype": "Proneural",
+                            "sil_width": 0.265926124,
+                            "GENDER": "FEMALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 33.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 520.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 5.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_A03_131076": {
+                            "Subtype": "Mesenchymal",
+                            "sil_width": -0.05255352,
+                            "GENDER": "FEMALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 51.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 484.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 97.0,
+                            "%|Necrosis": 2.5
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_A07_131140": {
+                            "Subtype": "Proneural",
+                            "sil_width": 0.358227502,
+                            "GENDER": "MALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 42.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 322.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 5.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_A09_131172": {
+                            "Subtype": "Classical",
+                            "sil_width": 0.238915417,
+                            "GENDER": "FEMALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 67.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 321.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 7.5
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_A11_131204": {
+                            "Subtype": "Classical",
+                            "sil_width": 0.09755071,
+                            "GENDER": "MALE",
+                            "KarnScore": 70.0,
+                            "AgeAtFirstDiagnosis": 87.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 211.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 0.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_B01_131046": {
+                            "Subtype": "Mesenchymal",
+                            "sil_width": 0.406666929,
+                            "GENDER": "MALE",
+                            "KarnScore": 60.0,
+                            "AgeAtFirstDiagnosis": 40.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 362.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 95.0,
+                            "%|Necrosis": 0.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_B03_131078": {
+                            "Subtype": "Classical",
+                            "sil_width": 0.064330558,
+                            "GENDER": "MALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 76.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 307.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 15.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_B05_131110": {
+                            "Subtype": "Proneural",
+                            "sil_width": 0.14576367,
+                            "GENDER": "MALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 57.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 148.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 97.5,
+                            "%|Necrosis": 5.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_B09_131174": {
+                            "Subtype": "Neural",
+                            "sil_width": 0.033366097,
+                            "GENDER": null,
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": null,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": null,
+                            "VITALSTATUS": null,
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 0.0,
+                            "%|Necrosis": 0.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_C01_131048": {
+                            "Subtype": "Neural",
+                            "sil_width": 0.120704077,
+                            "GENDER": "MALE",
+                            "KarnScore": 100.0,
+                            "AgeAtFirstDiagnosis": 66.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 399.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 92.5,
+                            "%|Necrosis": 5.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_C03_131080": {
+                            "Subtype": "Neural",
+                            "sil_width": -0.064188114,
+                            "GENDER": "MALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 39.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 1168.0,
+                            "VITALSTATUS": "ALIVE",
+                            "Censured": 1.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 0.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_C07_131144": {
+                            "Subtype": "Mesenchymal",
+                            "sil_width": 0.353060608,
+                            "GENDER": "MALE",
+                            "KarnScore": 80.0,
+                            "AgeAtFirstDiagnosis": 63.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 317.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 40.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_C09_131176": {
+                            "Subtype": "Neural",
+                            "sil_width": 0.051247652,
+                            "GENDER": "MALE",
+                            "KarnScore": 40.0,
+                            "AgeAtFirstDiagnosis": 31.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 603.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "Methylated",
+                            "%|Tumor|Nuclei": 90.0,
+                            "%|Necrosis": 5.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_C11_131208": {
+                            "Subtype": "Mesenchymal",
+                            "sil_width": 0.113365202,
+                            "GENDER": "FEMALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 56.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 291.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 85.0,
+                            "%|Necrosis": 17.5
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_D02_131066": {
+                            "Subtype": "Proneural",
+                            "sil_width": 0.311537938,
+                            "GENDER": "MALE",
+                            "KarnScore": 100.0,
+                            "AgeAtFirstDiagnosis": 64.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 1068.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "Methylated",
+                            "%|Tumor|Nuclei": 87.5,
+                            "%|Necrosis": 7.5
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_D05_131114": {
+                            "Subtype": "Classical",
+                            "sil_width": -0.010220033,
+                            "GENDER": "MALE",
+                            "KarnScore": 90.0,
+                            "AgeAtFirstDiagnosis": 62.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 690.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 90.0,
+                            "%|Necrosis": 1.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_D10_131194": {
+                            "Subtype": "Classical",
+                            "sil_width": 0.108519913,
+                            "GENDER": "MALE",
+                            "KarnScore": 90.0,
+                            "AgeAtFirstDiagnosis": 50.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 678.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 95.0,
+                            "%|Necrosis": 7.5
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_E04_131100": {
+                            "Subtype": "Mesenchymal",
+                            "sil_width": 0.243920082,
+                            "GENDER": "MALE",
+                            "KarnScore": null,
+                            "AgeAtFirstDiagnosis": 60.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 14.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 15.0
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_E07_131148": {
+                            "Subtype": "Mesenchymal",
+                            "sil_width": 0.35072954,
+                            "GENDER": "MALE",
+                            "KarnScore": 90.0,
+                            "AgeAtFirstDiagnosis": 49.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 1282.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 37.5
+                        },
+                        "DECAY_p_STY34_Mapping250K_Sty_E09_131180": {
+                            "Subtype": "Mesenchymal",
+                            "sil_width": 0.145715364,
+                            "GENDER": "MALE",
+                            "KarnScore": 100.0,
+                            "AgeAtFirstDiagnosis": 58.0,
+                            "Secondary|or|Recurrent": "No",
+                            "Survival|(days)": 318.0,
+                            "VITALSTATUS": "DEAD",
+                            "Censured": 0.0,
+                            "MGMT_methylated": "-",
+                            "%|Tumor|Nuclei": 100.0,
+                            "%|Necrosis": 7.5
+                        }
+                    }
+                ],
+
+            __tracks:
+                [
+                    {
+                        "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBMCopyNumber.seg.gz",
+                        // "url": "../../test/data/seg/chr_17_only.seg",
+                        "name": "chr_17_only.seg",
+                        "format": "seg",
+                        "type": "seg",
+                        "height": 700
+                    }
+                ]
+        }
+
+    const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
+
+    document.getElementById('loadSampleInfoButton').addEventListener('click', () => {
+
+        const sampleinfoConfig =
+            {
+                // url: "https://igv-genepattern-org.s3.amazonaws.com/demo/GBM-sampletable-samplemapping-colors.txt",
+                url: "../../test/data/sample/sampletable_chr_17_no_dupes.txt",
+            };
+
+        const sampleInfoLiteralConfig =
+        {
+            "BRISK_p_STY37_Mapping250K_Sty_A09_147618": {
+            "Subtype": "Neural",
+                "sil_width": -0.069669747,
+                "GENDER": "MALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": null,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": null,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 97.5,
+                "%|Necrosis": 5.0
+        },
+            "BRISK_p_STY37_Mapping250K_Sty_B12_147668": {
+            "Subtype": "Proneural",
+                "sil_width": 0.01155373,
+                "GENDER": "FEMALE",
+                "KarnScore": 90.0,
+                "AgeAtFirstDiagnosis": 42.0,
+                "Secondary|or|Recurrent": "Rec",
+                "Survival|(days)": 187.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 7.5
+        },
+            "BRISK_p_STY37_Mapping250K_Sty_D02_147512": {
+            "Subtype": "Classical",
+                "sil_width": 0.071235193,
+                "GENDER": "MALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 50.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 859.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "Methylated",
+                "%|Tumor|Nuclei": 87.5,
+                "%|Necrosis": 0.0
+        },
+            "BRISK_p_STY37_Mapping250K_Sty_E08_147610": {
+            "Subtype": "Mesenchymal",
+                "sil_width": 0.333325009,
+                "GENDER": "MALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 45.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 46.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 20.0
+        },
+            "BRISK_p_STY37_Mapping250K_Sty_F07_147596": {
+            "Subtype": "Mesenchymal",
+                "sil_width": 0.063750538,
+                "GENDER": "FEMALE",
+                "KarnScore": 90.0,
+                "AgeAtFirstDiagnosis": 44.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 199.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "Methylated",
+                "%|Tumor|Nuclei": 95.0,
+                "%|Necrosis": 2.5
+        },
+            "BRISK_p_STY37_Mapping250K_Sty_G10_147646": {
+            "Subtype": "Classical",
+                "sil_width": 0.053903275,
+                "GENDER": "MALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 71.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 498.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 2.5
+        },
+            "CYMAR_p_STY38_Mapping250K_Sty_A10_187100": {
+            "Subtype": "Proneural",
+                "sil_width": 0.215391741,
+                "GENDER": "MALE",
+                "KarnScore": 90.0,
+                "AgeAtFirstDiagnosis": 35.0,
+                "Secondary|or|Recurrent": "Rec",
+                "Survival|(days)": 362.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 13.5
+        },
+            "CYMAR_p_STY38_Mapping250K_Sty_C02_183332": {
+            "Subtype": "Neural",
+                "sil_width": -0.03796757,
+                "GENDER": "FEMALE",
+                "KarnScore": 90.0,
+                "AgeAtFirstDiagnosis": 60.0,
+                "Secondary|or|Recurrent": "Rec",
+                "Survival|(days)": 277.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "Methylated",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 20.0
+        },
+            "CYMAR_p_STY38_Mapping250K_Sty_F03_187110": {
+            "Subtype": "Mesenchymal",
+                "sil_width": 0.144296922,
+                "GENDER": "MALE",
+                "KarnScore": 80.0,
+                "AgeAtFirstDiagnosis": 47.0,
+                "Secondary|or|Recurrent": "Rec",
+                "Survival|(days)": 103.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "Methylated",
+                "%|Tumor|Nuclei": 97.5,
+                "%|Necrosis": 7.5
+        },
+            "CYMAR_p_STY38_Mapping250K_Sty_H06_187088": {
+            "Subtype": "Proneural",
+                "sil_width": 0.265926124,
+                "GENDER": "FEMALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 33.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 520.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 5.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_A03_131076": {
+            "Subtype": "Mesenchymal",
+                "sil_width": -0.05255352,
+                "GENDER": "FEMALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 51.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 484.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 97.0,
+                "%|Necrosis": 2.5
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_A07_131140": {
+            "Subtype": "Proneural",
+                "sil_width": 0.358227502,
+                "GENDER": "MALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 42.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 322.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 5.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_A09_131172": {
+            "Subtype": "Classical",
+                "sil_width": 0.238915417,
+                "GENDER": "FEMALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 67.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 321.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 7.5
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_A11_131204": {
+            "Subtype": "Classical",
+                "sil_width": 0.09755071,
+                "GENDER": "MALE",
+                "KarnScore": 70.0,
+                "AgeAtFirstDiagnosis": 87.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 211.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 0.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_B01_131046": {
+            "Subtype": "Mesenchymal",
+                "sil_width": 0.406666929,
+                "GENDER": "MALE",
+                "KarnScore": 60.0,
+                "AgeAtFirstDiagnosis": 40.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 362.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 95.0,
+                "%|Necrosis": 0.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_B03_131078": {
+            "Subtype": "Classical",
+                "sil_width": 0.064330558,
+                "GENDER": "MALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 76.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 307.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 15.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_B05_131110": {
+            "Subtype": "Proneural",
+                "sil_width": 0.14576367,
+                "GENDER": "MALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 57.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 148.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 97.5,
+                "%|Necrosis": 5.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_B09_131174": {
+            "Subtype": "Neural",
+                "sil_width": 0.033366097,
+                "GENDER": null,
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": null,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": null,
+                "VITALSTATUS": null,
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 0.0,
+                "%|Necrosis": 0.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_C01_131048": {
+            "Subtype": "Neural",
+                "sil_width": 0.120704077,
+                "GENDER": "MALE",
+                "KarnScore": 100.0,
+                "AgeAtFirstDiagnosis": 66.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 399.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 92.5,
+                "%|Necrosis": 5.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_C03_131080": {
+            "Subtype": "Neural",
+                "sil_width": -0.064188114,
+                "GENDER": "MALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 39.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 1168.0,
+                "VITALSTATUS": "ALIVE",
+                "Censured": 1.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 0.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_C07_131144": {
+            "Subtype": "Mesenchymal",
+                "sil_width": 0.353060608,
+                "GENDER": "MALE",
+                "KarnScore": 80.0,
+                "AgeAtFirstDiagnosis": 63.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 317.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 40.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_C09_131176": {
+            "Subtype": "Neural",
+                "sil_width": 0.051247652,
+                "GENDER": "MALE",
+                "KarnScore": 40.0,
+                "AgeAtFirstDiagnosis": 31.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 603.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "Methylated",
+                "%|Tumor|Nuclei": 90.0,
+                "%|Necrosis": 5.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_C11_131208": {
+            "Subtype": "Mesenchymal",
+                "sil_width": 0.113365202,
+                "GENDER": "FEMALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 56.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 291.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 85.0,
+                "%|Necrosis": 17.5
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_D02_131066": {
+            "Subtype": "Proneural",
+                "sil_width": 0.311537938,
+                "GENDER": "MALE",
+                "KarnScore": 100.0,
+                "AgeAtFirstDiagnosis": 64.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 1068.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "Methylated",
+                "%|Tumor|Nuclei": 87.5,
+                "%|Necrosis": 7.5
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_D05_131114": {
+            "Subtype": "Classical",
+                "sil_width": -0.010220033,
+                "GENDER": "MALE",
+                "KarnScore": 90.0,
+                "AgeAtFirstDiagnosis": 62.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 690.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 90.0,
+                "%|Necrosis": 1.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_D10_131194": {
+            "Subtype": "Classical",
+                "sil_width": 0.108519913,
+                "GENDER": "MALE",
+                "KarnScore": 90.0,
+                "AgeAtFirstDiagnosis": 50.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 678.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 95.0,
+                "%|Necrosis": 7.5
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_E04_131100": {
+            "Subtype": "Mesenchymal",
+                "sil_width": 0.243920082,
+                "GENDER": "MALE",
+                "KarnScore": null,
+                "AgeAtFirstDiagnosis": 60.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 14.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 15.0
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_E07_131148": {
+            "Subtype": "Mesenchymal",
+                "sil_width": 0.35072954,
+                "GENDER": "MALE",
+                "KarnScore": 90.0,
+                "AgeAtFirstDiagnosis": 49.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 1282.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 37.5
+        },
+            "DECAY_p_STY34_Mapping250K_Sty_E09_131180": {
+            "Subtype": "Mesenchymal",
+                "sil_width": 0.145715364,
+                "GENDER": "MALE",
+                "KarnScore": 100.0,
+                "AgeAtFirstDiagnosis": 58.0,
+                "Secondary|or|Recurrent": "No",
+                "Survival|(days)": 318.0,
+                "VITALSTATUS": "DEAD",
+                "Censured": 0.0,
+                "MGMT_methylated": "-",
+                "%|Tumor|Nuclei": 100.0,
+                "%|Necrosis": 7.5
+        }
+        }
+
+        browser.loadSampleInfo(sampleInfoLiteralConfig);
+    })
+
+    document.getElementById('loadTrackButton').addEventListener('click', () => {
+
+        const trackConfig =
+            {
+                // "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBMCopyNumber.seg.gz",
+                url: "../../test/data/seg/chr_17_only.seg",
+                "name": "chr_17_only.seg",
+                "format": "seg",
+                "type": "seg",
+                "height": 700
+            }
+        browser.loadTrack(trackConfig);
+    })
+
+</script>
+
+</body>
+
+</html>

@@ -17,15 +17,15 @@ Demonstration of Bigbed with feature colors
 
     var options =
         {
-            genome: "hg19",
-            locus: "chrM",
+            genome: "hg38",
+            locus: "chr22:23786974-23787050",
             tracks:
                 [
                     {
                         name: "ClinVar",
                         type: "annotation",
                         format: "bigBed",
-                        url: "https://hgdownload.soe.ucsc.edu/gbdb/hg19/bbi/clinvar/clinvarMain.bb",
+                        url: "https://hgdownload.soe.ucsc.edu/gbdb/hg38/bbi/clinvar/clinvarMain.bb",
                         displayMode: "EXPANDED",
                         visibilityWindow: -1,
                         order: Number.MIN_VALUE,

@@ -1,22 +1,9 @@
 <head>
 
-    <link rel="stylesheet" href="https://unpkg.com/@reservoirgenomics/resglass@1.20.5/dist/hglib.css">
-    <script crossorigin src="https://unpkg.com/higlass-plugins@0.2.1/dist/higlass-plugins.min.js">
-
-    </script>
-    <script crossorigin src="https://unpkg.com/@reservoirgenomics/resglass@1.20.5/dist/hglib.js">
-
-    </script>
-
     <meta charset="UTF-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
-    <title>Juicebox</title>
+    <title>IGV</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-
-    <!-- IGV JS -->
-    <script src="../../dist/igv.min.js"></script>
-
-
 
 </head>
 <body>
@@ -24,23 +11,14 @@
 <div id="igv-container" style="width: auto; margin-left: 10px; border: 1px solid black;">
 </div>
 
-<script>
+<script type="module">
+
+    import igv from "../../js/index.js"
+
     const igvConfig ={
-        "reference": {
-            "id": "hg19",
-            "name": "Human (CRCh37/hg19)",
-            "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-            "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
-            "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
-        },
-        "locus": [
-            "chr8:128,746,315-128,755,680"
-        ],
+        "genome": "hg19",
+        "locus": "chr8:128,746,315-128,755,680",
         "tracks": [
-            {
-                "type": "sequence",
-                "order": -1.7976931348623157e+308
-            },
             {
                 "url": "https://www.encodeproject.org/files/ENCFF000ATR/@@download/ENCFF000ATR.bigWig",
                 "color": "#018448",
@@ -76,23 +54,6 @@
                 "height": 50,
                 "autoscale": true,
                 "order": 5
-            },
-            {
-                "name": "Refseq Genes",
-                "format": "refgene",
-                "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz",
-                "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz.tbi",
-                "visibilityWindow": -1,
-                "removable": false,
-                "order": 1000000,
-                "filename": "refGene.sorted.txt.gz",
-                "sourceType": "file",
-                "type": "annotation",
-                "maxRows": 500,
-                "filterTypes": [
-                    "chromosome",
-                    "gene"
-                ]
             }
         ]
     }

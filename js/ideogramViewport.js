@@ -23,10 +23,13 @@
  * THE SOFTWARE.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js"
 import IGVGraphics from './igv-canvas.js'
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import TrackViewport from "./trackViewport.js"
+import { IGVMath } from "../node_modules/igv-utils/src/index.js"
+
+let timer
+const toolTipTimeout = 1e4
 
 class IdeogramViewport extends TrackViewport {
 
@@ -41,8 +44,21 @@ class IdeogramViewport extends TrackViewport {
         this.canvas = document.createElement('canvas')
 
         this.canvas.className = 'igv-ideogram-canvas'
-        this.$viewport.append($(this.canvas))
+        this.viewportElement.appendChild(this.canvas);
         this.ideogram_ctx = this.canvas.getContext('2d')
+
+        // Create the tooltip
+        this.tooltip = document.createElement('div');
+        this.tooltip.className = 'igv-cytoband-tooltip';
+        this.tooltip.style.height = `${this.viewportElement.clientHeight}px`;
+        this.viewportElement.appendChild(this.tooltip);
+
+        // Add tooltip for cytoband names
+        this.tooltipContent = document.createElement('div');
+        this.tooltip.appendChild(this.tooltipContent);
+        
+        // Initially hide the tooltip
+        this.tooltip.style.display = 'none';
 
         this.addMouseHandlers()
     }
@@ -68,7 +84,7 @@ class IdeogramViewport extends TrackViewport {
             return
         }
 
-        const {width, height} = this.$viewport[0].getBoundingClientRect()
+        const {width, height} = this.viewportElement.getBoundingClientRect()
         IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, width, height)
 
         const chr = this.referenceFrame.chr
@@ -89,7 +105,64 @@ class IdeogramViewport extends TrackViewport {
 
 
     addMouseHandlers() {
-        this.addViewportClickHandler(this.$viewport.get(0))
+        this.addViewportClickHandler(this.viewportElement)
+
+        // Add tooltip when showing contig name
+        if (this.trackView.track.showCytobandNames) {
+            this.viewportElement.addEventListener('mousemove', this.mouseMove.bind(this))
+            this.viewportElement.addEventListener('mouseleave', this.mouseLeave.bind(this))
+        }
+    }
+
+    mouseMove(event) {
+        const {x} = DOMUtils.translateMouseCoordinates(event, this.viewportElement)
+
+        // Get features
+        const features = this.featureCache.get(this.referenceFrame.chr)
+        if (features) {
+            const {width: w} = this.viewportElement.getBoundingClientRect()
+
+            const chrLength = features[features.length - 1].end
+            const scale = w / chrLength
+
+            let found = false;
+            // Find cytoband that the mouse is over
+            for (let i = 0; i < features.length; i++) {
+                const cytoband = features[i]
+                const start = cytoband.start * scale
+                const end = cytoband.end * scale
+
+                // If the mouse is over the cytoband, show the tooltip
+                if (x >= start && x <= end) {
+                    this.tooltipContent.textContent = cytoband.name;
+                    const {width: ww} = this.tooltipContent.getBoundingClientRect()
+                    let center = (start + end) / 2 - ww / 2
+
+                    const tooltipLeft = IGVMath.clamp(center, 0, w - ww);
+                    this.tooltip.style.left = `${tooltipLeft}px`;
+
+                    // hide tooltip when movement stops
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        if (this.tooltip) this.tooltip.style.display = "none";
+                    }, toolTipTimeout);
+
+                    this.tooltip.style.display = "block";
+
+                    found = true
+                    break
+                }
+            }
+            if (found)
+                return;
+        }
+
+        // If the mouse is not over a cytoband, or there are no features, hide the tooltip
+        this.tooltip.style.display = 'none';
+    }
+
+    mouseLeave(event) {
+        this.tooltip.style.display = 'none';
     }
 
     addViewportClickHandler(viewport) {
@@ -127,12 +200,12 @@ class IdeogramViewport extends TrackViewport {
     }
 
     setWidth(width) {
-        this.$viewport.width(width)
+        this.viewportElement.style.width = width + 'px';
     }
 
     renderSVGContext(context, {deltaX, deltaY}, includeLabel = true) {
 
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect()
+        const {width, height} = this.viewportElement.getBoundingClientRect()
 
         const str = 'ideogram'
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)

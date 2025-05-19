@@ -1,4 +1,5 @@
 import {openH5File} from "../../node_modules/hdf5-indexed-reader/dist/hdf5-indexed-reader.esm.js"
+import {buildOptions} from "../util/igvUtils.js"
 
 
 class SignalNames{
@@ -31,9 +32,9 @@ class HDF5Reader {
      * @param {string} h5_file - path for the pytor file
      * @param {integer} bin_size - bin size
      */
-    constructor(h5_file, bin_size=100000){
+    constructor(config, bin_size=100000){
 
-        this.h5_file = h5_file;
+        this.config = config;
         this.bin_size = bin_size;
         this.h5_obj = undefined
         this.pytorKeys = [];
@@ -43,11 +44,8 @@ class HDF5Reader {
     async fetch(){
 
         if(!this.h5_obj) {
-            this.h5_obj = await openH5File({
-                url: this.h5_file,
-                fetchSize: 1000000,
-                maxSize: 200000000
-            })
+            const options = Object.assign(this.config,  {fetchSize: 1000000, maxSize: 200000000})
+            this.h5_obj = await openH5File(options)
         }
         return this.h5_obj
     }

@@ -13,9 +13,6 @@ class InputDialog {
         this.container = DOMUtils.div({class: 'igv-ui-generic-dialog-container'})
         parent.appendChild(this.container)
 
-        // const { x, y, width, height } = this.container.getBoundingClientRect();
-        // console.log(`InputDialog - x ${ x } y ${ y } width ${ width } height ${ height }`)
-
         // dialog header
         const header = DOMUtils.div({class: 'igv-ui-generic-dialog-header'})
         this.container.appendChild(header)
@@ -23,7 +20,7 @@ class InputDialog {
         // dialog label
         this.label = DOMUtils.div({class: 'igv-ui-generic-dialog-one-liner'})
         this.container.appendChild(this.label)
-        this.label.text = 'Unlabeled'
+        this.label.textContent = 'Unlabeled'
 
         // input container
         this.input_container = DOMUtils.div({class: 'igv-ui-generic-dialog-input'})
@@ -87,28 +84,47 @@ class InputDialog {
         return DOMPurify.sanitize(this._input.value)
     }
 
-    present(options, e) {
 
+    present(options, e) {
         this.label.textContent = options.label
         this._input.value = options.value
         this.callback = options.callback || options.click
 
-        DOMUtils.show(this.container)
-        this.clampLocation(e.clientX, e.clientY)
-
-    }
-
-    clampLocation(clientX, clientY) {
-
-        const {width: w, height: h} = this.container.getBoundingClientRect()
-        const wh = window.innerHeight
-        const ww = window.innerWidth
-
-        const y = Math.min(wh - h, clientY)
-        const x = Math.min(ww - w, clientX)
-        this.container.style.left = `${x}px`
-        this.container.style.top = `${y}px`
-
+        this.container.style.display = ''
+        
+        // Get click coordinates
+        const clickX = e.clientX
+        const clickY = e.clientY
+        
+        // Get dialog dimensions
+        const dialogWidth = this.container.offsetWidth
+        const dialogHeight = this.container.offsetHeight
+        
+        // Calculate available space
+        const windowWidth = window.innerWidth
+        const windowHeight = window.innerHeight
+        
+        // Calculate position to keep dialog on screen
+        let left = clickX
+        let top = clickY
+        
+        // Adjust horizontal position if dialog would go off screen
+        if (left + dialogWidth > windowWidth) {
+            left = windowWidth - dialogWidth - 10 // 10px padding from edge
+        }
+        
+        // Adjust vertical position if dialog would go off screen
+        if (top + dialogHeight > windowHeight) {
+            top = windowHeight - dialogHeight - 10 // 10px padding from edge
+        }
+        
+        // Ensure minimum distance from edges
+        left = Math.max(10, left)
+        top = Math.max(10, top)
+        
+        // Apply positions
+        this.container.style.left = `${left}px`
+        this.container.style.top = `${top}px`
     }
 }
 

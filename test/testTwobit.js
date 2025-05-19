@@ -12,7 +12,7 @@ suite("testTwobit", function () {
             "CCCCCCGGGGGGagagagagactc tagcatcctcctacctcacNNacCNctTGGACNCcCaGGGatttcNNNcccNNCCNCgN"
 
         const url = "test/data/twobit/foo.2bit"
-        const twobit = new TwobitSequence({fastaURL: url})
+        const twobit = new TwobitSequence({twoBitURL: url})
         const start = 5
         const end = 100
         const seqString = await twobit.readSequence("chr1", start, end)

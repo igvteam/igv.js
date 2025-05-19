@@ -23,10 +23,9 @@ class ChromAliasFile {
         this.genome = genome
     }
 
-    async preload() {
-        return this.loadAliases();
+    async preload(chrNames) {
+        // A no-op, this is a text file, no need to preload
     }
-
     /**
      * Return the canonical chromosome name for the alias.  If none found return the alias
      *

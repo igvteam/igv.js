@@ -1,4 +1,3 @@
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import FeatureSource from './featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
@@ -7,16 +6,15 @@ import {reverseComplementSequence} from "../util/sequenceUtils.js"
 import {aminoAcidSequenceRenderThreshold, renderFeature} from "./render/renderFeature.js"
 import {renderSnp} from "./render/renderSnp.js"
 import {renderFusionJuncSpan} from "./render/renderFusionJunction.js"
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {StringUtils, FeatureUtils} from "../../node_modules/igv-utils/src/index.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
-import {isSecureContext, expandRegion} from "../util/igvUtils.js"
+import {isSecureContext} from "../util/igvUtils.js"
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
-import {findFeatureAfterCenter} from "./featureUtils.js"
-
-const DEFAULT_COLOR = 'rgb(0, 0, 150)'
 
 
 class FeatureTrack extends TrackBase {
+
+    static defaultColor = 'rgb(0,0,150)'
 
     static defaults = {
         type: "annotation",
@@ -99,6 +97,9 @@ class FeatureTrack extends TrackBase {
         if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
             this.visibilityWindow = await this.featureSource.defaultVisibilityWindow()
         }
+
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
 
         return this
 
@@ -208,6 +209,7 @@ class FeatureTrack extends TrackBase {
             options.rowLastX = []
             options.rowLastLabelX = []
             for (let feature of features) {
+                if (this._filter && !this._filter(feature)) continue
                 if (feature.start > bpStart && feature.end < bpEnd) {
                     const row = this.displayMode === "COLLAPSED" ? 0 : feature.row || 0
                     if (!rowFeatureCount[row]) {
@@ -225,6 +227,8 @@ class FeatureTrack extends TrackBase {
             let lastPxEnd = []
             const selectedFeatures = []
             for (let feature of features) {
+
+                if (this._filter && !this._filter(feature)) continue
                 if (feature.end < bpStart) continue
                 if (feature.start > bpEnd) break
 
@@ -362,14 +366,12 @@ class FeatureTrack extends TrackBase {
 
             for (const colorScheme of ["function", "class"]) {
 
-                const object = $(createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy))
-
                 function colorSchemeHandler() {
                     this.colorBy = colorScheme
                     this.trackView.repaintViews()
                 }
 
-                menuItems.push({object, click: colorSchemeHandler})
+                menuItems.push({element:createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy), click: colorSchemeHandler})
             }
         }
 
@@ -384,8 +386,6 @@ class FeatureTrack extends TrackBase {
 
         for (const displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
 
-            const object = $(createCheckbox(lut[displayMode], displayMode === this.displayMode))
-
             function displayModeHandler() {
                 this.displayMode = displayMode
                 this.config.displayMode = displayMode
@@ -393,7 +393,7 @@ class FeatureTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
 
-            menuItems.push({object, click: displayModeHandler})
+            menuItems.push({element:createCheckbox(lut[displayMode], displayMode === this.displayMode), click: displayModeHandler})
         }
 
         return menuItems
@@ -509,7 +509,7 @@ class FeatureTrack extends TrackBase {
 
         // If no explicit setting use the default
         if (!color) {
-            color = DEFAULT_COLOR   // Track default
+            color = FeatureTrack.defaultColor   // Track default
         }
 
         if (feature.alpha && feature.alpha !== 1) {
@@ -555,7 +555,8 @@ function monitorTrackDrag(track) {
 
     function onDragEnd() {
         if (track.trackView && track.displayMode !== "SQUISHED") {
-            track.trackView.updateViews()      // TODO -- refine this to the viewport that was dragged after DOM refactor
+            // Repaint views to adjust feature name if center is moved out of view
+            track.trackView.repaintViews()
         }
     }
 

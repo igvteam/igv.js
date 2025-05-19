@@ -68,9 +68,6 @@ async function createBrowser(parentDiv, config) {
     const browser = new Browser(config, parentDiv)
     allBrowsers.push(browser)
 
-    // Lod initial sessio
-    browser.startSpinner()
-
     const sessionURL = config.sessionURL || config.session || config.hubURL
     if (sessionURL) {
         await browser.loadSession({
@@ -80,7 +77,6 @@ async function createBrowser(parentDiv, config) {
         await browser.loadSessionObject(config)
     }
 
-    browser.stopSpinner()
     browser.navbar.navbarDidResize()
 
     return browser
@@ -123,6 +119,10 @@ function setDefaults(config) {
 
     if (undefined === config.showIdeogram) {
         config.showIdeogram = true
+    }
+
+    if (undefined == config.showCytobandNames) {
+        config.showCytobandNames = false
     }
 
     if (undefined === config.showCircularView) {

@@ -35,6 +35,10 @@ class BlatTrack extends FeatureTrack {
             this._features = features;
             this.featureSource = new StaticFeatureSource({features}, this.browser.genome)
         }
+
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
+
     }
 
     openTableView() {
@@ -132,7 +136,7 @@ async function createBlatTrack({sequence, browser, name, title}) {
             features
         }
 
-        const track = await browser.loadTrack(trackConfig)
+        const track = (await browser.loadTrackList([trackConfig]))[0]
         track.openTableView()
 
     } catch (e) {

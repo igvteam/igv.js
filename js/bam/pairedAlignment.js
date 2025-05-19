@@ -92,13 +92,13 @@ class PairedAlignment {
         }
     }
 
-    popupData(genomicLocation) {
+    popupData(genomicLocation, hiddenTags, showTags) {
 
-        let nameValues = this.firstAlignment.popupData(genomicLocation)
+        let nameValues = this.firstAlignment.popupData(genomicLocation, hiddenTags, showTags)
 
         if (this.secondAlignment) {
             nameValues.push("-------------------------------")
-            nameValues = nameValues.concat(this.secondAlignment.popupData(genomicLocation))
+            nameValues = nameValues.concat(this.secondAlignment.popupData(genomicLocation, hiddenTags, showTags))
         }
         return nameValues
     }

@@ -91,7 +91,7 @@ class BamAlignment {
     isNegativeStrand() {
         return (this.flags & READ_STRAND_FLAG) !== 0
     }
-    
+
     isMateNegativeStrand() {
         return (this.flags & MATE_STRAND_FLAG) !== 0
     }
@@ -139,7 +139,7 @@ class BamAlignment {
         return (genomicLocation >= s && genomicLocation <= (s + l))
     }
 
-    popupData(genomicLocation) {
+    popupData(genomicLocation, hiddenTags, showTags) {
 
         // if the user clicks on a base next to an insertion, show just the
         // inserted bases in a popup (like in desktop IGV).
@@ -222,15 +222,20 @@ class BamAlignment {
             }
         }
 
-        const hiddenTags = new Set(['SA', 'MD'])
         nameValues.push('<hr/>')
         for (let key in tagDict) {
-            if (!hiddenTags.has(key)) {
+            if (showTags?.has(key)) {
+                nameValues.push({name: key, value: tagDict[key]})
+            } else if (showTags) {
+                hiddenTags.add(key)
+            } else if (!hiddenTags.has(key)) {
                 nameValues.push({name: key, value: tagDict[key]})
             }
         }
 
-        nameValues.push({name: 'Hidden Tags', value: 'SA, MD'})
+        if (hiddenTags && hiddenTags.size > 0) {
+            nameValues.push({name: 'Hidden Tags', value: Array.from(hiddenTags).join(", ")})
+        }
 
         nameValues.push('<hr/>')
         nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)})
@@ -238,18 +243,18 @@ class BamAlignment {
         nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)})
 
         const bmSets = this.getBaseModificationSets()
-        if(bmSets) {
+        if (bmSets) {
             const i = this.positionToReadIndex(genomicLocation)
-            if(undefined !== i) {
+            if (undefined !== i) {
                 let found = false
                 for (let bmSet of bmSets) {
                     if (bmSet.containsPosition(i)) {
-                        if(!found) {
+                        if (!found) {
                             nameValues.push('<hr/>')
                             nameValues.push('<b>Base modifications:</b>')
                             found = true
                         }
-                        const lh = Math.round((100/255) * byteToUnsignedInt(bmSet.likelihoods.get(i)))
+                        const lh = Math.round((100 / 255) * byteToUnsignedInt(bmSet.likelihoods.get(i)))
                         nameValues.push(`${bmSet.fullName()} @ likelihood =  ${lh}%`)
                     }
                 }
@@ -352,7 +357,7 @@ class BamAlignment {
         return this.baseModificationSets
     }
 
-     getGroupValue( groupBy, tag, expectedPairOrientation) {
+    getGroupValue(groupBy, tag, expectedPairOrientation) {
 
         const al = this
         switch (groupBy) {
@@ -389,7 +394,7 @@ class BamAlignment {
         }
     }
 
-    positionToReadIndex( position) {
+    positionToReadIndex(position) {
         const block = blockAtGenomicLocation(this.blocks, position)
         if (block) {
             return (position - block.start) + block.seqOffset

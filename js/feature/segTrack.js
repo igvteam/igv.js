@@ -1,4 +1,3 @@
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import FeatureSource from './featureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
@@ -10,6 +9,7 @@ import SampleInfo from "../sample/sampleInfo.js"
 import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
+import {createElementWithString} from "../ui/utils/dom-utils.js"
 
 
 class SegTrack extends TrackBase {
@@ -93,6 +93,10 @@ class SegTrack extends TrackBase {
         if (this.header) {
             this.setTrackProperties(this.header)
         }
+
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
+
     }
 
 
@@ -111,8 +115,8 @@ class SegTrack extends TrackBase {
                     return attrs && attrs[attribute]
                 })) {
 
-                    const object = $('<div>')
-                    object.html(`&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`)
+                    const element = document.createElement('div');
+                    element.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`;
 
                     function attributeSort() {
                         const sortDirection = this.#sortDirections.get(attribute) || 1
@@ -126,7 +130,7 @@ class SegTrack extends TrackBase {
                         }
                     }
 
-                    menuItems.push({object, click: attributeSort})
+                    menuItems.push({element, click: attributeSort})
                 }
             }
         }
@@ -155,17 +159,17 @@ class SegTrack extends TrackBase {
                 }, e)
             }
 
-            menuItems.push({object: $('<div>Set color scale threshold</div>'), dialog: dialogPresentationHandler})
+            menuItems.push({ element: createElementWithString('<div>Set color scale threshold</div>'), dialog: dialogPresentationHandler})
         }
 
         menuItems.push('<hr/>')
         menuItems.push("DisplayMode:")
         const displayOptions = this.type === 'seg' || this.type === 'shoebox' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"]
         for (let displayMode of displayOptions) {
-            const checkBox = createCheckbox(lut[displayMode], displayMode === this.displayMode)
+
             menuItems.push(
                 {
-                    object: $(checkBox),
+                    element: createCheckbox(lut[displayMode], displayMode === this.displayMode),
                     click: function displayModeHandler() {
                         this.displayMode = displayMode
                         this.config.displayMode = displayMode
@@ -520,7 +524,7 @@ class SegTrack extends TrackBase {
         }
 
         // We can't know genomic location intended with precision, define a buffer 5 "pixels" wide in genomic coordinates
-        const bpWidth = referenceFrame.toBP(2.5)
+        const bpWidth = clickState.referenceFrame.toBP(2.5)
 
         return ["DESC", "ASC"].map(direction => {
             const dirLabel = direction === "DESC" ? "descending" : "ascending"
@@ -533,7 +537,7 @@ class SegTrack extends TrackBase {
                     const sort = {
                         option: "VALUE",   // Either VALUE or ATTRIBUTE
                         direction,
-                        chr: clickState.viewport.referenceFrame.chr,
+                        chr: clickState.referenceFrame.chr,
                         start: Math.floor(genomicLocation - bpWidth),
                         end: Math.floor(genomicLocation + bpWidth)
                     }

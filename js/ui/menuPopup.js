@@ -1,15 +1,14 @@
 import makeDraggable from "./utils/draggable.js"
 import {attachDialogCloseHandlerWithParent} from "./utils/ui-utils.js"
 import * as DOMUtils from "./utils/dom-utils.js"
-import GenericColorPicker from "./components/genericColorPicker.js"
 import {createCheckbox} from "../igv-icons.js"
-import $ from "../vendor/jquery-3.3.1.slim.js"
 
 class MenuPopup {
     constructor(parent) {
         this.popover = DOMUtils.div({class: 'igv-menu-popup'})
 
         parent.appendChild(this.popover)
+        this.parent = parent
 
         const header = DOMUtils.div({class: 'igv-menu-popup-header'})
         this.popover.appendChild(header)
@@ -33,43 +32,42 @@ class MenuPopup {
 
     presentMenuList(trackView, menuList) {
 
-        hideAllMenuPopups()
+        hideAllMenuPopups(this.parent);
 
         if (menuList.length > 0) {
 
-            this.popoverContent.innerHTML = ''
+            this.popoverContent.innerHTML = '';
 
-            const parsedList = this.parseMenuList(trackView, menuList)
+            const parsedList = this.parseMenuList(trackView, menuList);
 
             for (let item of parsedList) {
 
                 if (item.init) {
-                    item.init()
+                    item.init();
                 }
 
-                let $e = item.object
                 if (0 === parsedList.indexOf(item)) {
-                    $e.removeClass('igv-track-menu-border-top')
+                    item.element.classList.remove('igv-track-menu-border-top');
                 }
 
-                if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-menu-popup-check-container')) {
-                    // do nothing
-                } else if ($e.is('div')) {
-                    $e.addClass('igv-menu-popup-shim')
+                if (item.element.classList.contains('igv-track-menu-border-top') || item.element.classList.contains('igv-menu-popup-check-container')) {
+                    // Do nothing
+                } else if (item.element.tagName.toLowerCase() === 'div') {
+                    item.element.classList.add('igv-menu-popup-shim');
                 }
 
-                this.popoverContent.appendChild($e.get(0))
+                this.popoverContent.appendChild(item.element)
 
             }
 
-            // NOTE: style.display most NOT be 'none' when calculating width. a display = 'none' will always
+            // NOTE: style.display must NOT be 'none' when calculating width. A display = 'none' will always
             //       yield a width of zero (0).
-            this.popover.style.display = 'flex'
+            this.popover.style.display = 'flex';
 
-            const {width} = this.popover.getBoundingClientRect()
+            const { width } = this.popover.getBoundingClientRect();
 
-            this.popover.style.left = `${-width}px`
-            this.popover.style.top = `${0}px`
+            this.popover.style.left = `${-width}px`;
+            this.popover.style.top = `${0}px`;
 
         }
     }
@@ -78,100 +76,105 @@ class MenuPopup {
 
         return menuList.map((item, i) => {
 
-            let $e
+            let element;
 
-            // name and object fields checked for backward compatibility
+            // name and element fields checked for backward compatibility
             if (item.name) {
-                $e = $('<div>')
-                $e.text(item.name)
-            } else if (item.object) {
-                $e = item.object
+                element = document.createElement('div');
+                element.textContent = item.name;
+            } else if (item.element) {
+                element = item.element;
             } else if (typeof item.label === 'string') {
-                $e = $('<div>')
-                $e.html(item.label)
+                element = document.createElement('div');
+                element.innerHTML = item.label;
             } else if (typeof item === 'string') {
 
                 if (item.startsWith("<")) {
-                    $e = $(item)
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = item;
+                    element = tempDiv.firstChild;
                 } else {
-                    $e = $("<div>" + item + "</div>")
+                    element = document.createElement('div');
+                    element.textContent = item;
                 }
             }
 
             if (0 === i) {
-                $e.addClass('igv-track-menu-border-top')
+                element.classList.add('igv-track-menu-border-top');
             }
 
             if (item.click || item.dialog) {
 
                 const handleClick = e => {
-                    e.preventDefault()
-                    e.stopPropagation()
+                    e.preventDefault();
+                    e.stopPropagation();
 
                     if (item.click) {
 
                         if (trackView.track.selected) {
 
-                            const multiSelectedTrackViews = trackView.browser.getSelectedTrackViews()
+                            const multiSelectedTrackViews = trackView.browser.getSelectedTrackViews();
 
                             if (true === item.doAllMultiSelectedTracks) {
-                                item.click.call(trackView.track, e)
+                                item.click.call(trackView.track, e);
                             } else {
 
                                 if ('removeTrack' === item.menuItemType) {
 
                                     const callback = () => {
 
-                                        trackView.browser.overlayTrackButton.setVisibility(false)
+                                        trackView.browser.overlayTrackButton.setVisibility(false);
 
                                         for (const { track } of multiSelectedTrackViews) {
-                                            item.click.call(track, e)
+                                            item.click.call(track, e);
                                         }
-                                    }
+                                    };
 
-                                    const count = multiSelectedTrackViews.length
+                                    const count = multiSelectedTrackViews.length;
 
                                     const config =
                                         {
-                                            html: `Are you sure you want to delete ${ count } tracks?`,
+                                            html: `Are you sure you want to delete ${count} tracks?`,
                                             callback
-                                        }
+                                        };
 
-                                    trackView.browser.menuUtils.dialog.present(config, e)
+                                    trackView.browser.menuUtils.dialog.present(config, e);
 
                                 } else {
 
                                     for (const { track } of multiSelectedTrackViews) {
-                                        item.click.call(track, e)
+                                        item.click.call(track, e);
                                     }
 
                                 }
                             }
 
                         } else {
-                            item.click.call(trackView.track, e)
+                            item.click.call(trackView.track, e);
                         }
 
                     } else if (item.dialog) {
-                        item.dialog.call(trackView.track, e)
+                        item.dialog.call(trackView.track, e);
                     }
 
-                    this.popover.style.display = 'none'
+                    this.popover.style.display = 'none';
+                };
+
+                if (undefined === element) {
+                    console.log('element is undefined')
                 }
 
-                $e.on('click', handleClick)
-
-                $e.on('touchend', e => handleClick(e))
-
-                $e.on('mouseup', function (e) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                })
+                element.addEventListener('click', handleClick);
+                element.addEventListener('touchend', e => handleClick(e));
+                element.addEventListener('mouseup', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
 
             }
 
-            return {object: $e, init: (item.init || undefined)}
-        })
+            return {element, init: (item.init || undefined)};
+        });
 
     }
 
@@ -223,28 +226,33 @@ function createMenuElements(itemList, popover) {
 
             if ("checkbox" === item.type) {
                 el = createCheckbox("Show all bases", item.value)
-            } else if ("color" === item.type) {
+            }
 
-                const colorPicker = new GenericColorPicker(popover.parentElement)
-                colorPicker.configure({color: 'grey'})
+            // TODO: I can't find any use of this and should probably be deleted - data
+            // else if ("color" === item.type) {
+            //
+            //     const colorPicker = new GenericColorPicker(popover.parentElement)
+            //     colorPicker.configure({color: 'grey'})
+            //
+            //     el = DOMUtils.div({class: 'context-menu'})
+            //     if (typeof item.label === 'string') {
+            //         el.innerHTML = item.label
+            //     }
+            //     const clickHandler = e => {
+            //         colorPicker.show()
+            //         DOMUtils.hide(popover)
+            //         e.preventDefault()
+            //         e.stopPropagation()
+            //     }
+            //     el.addEventListener('click', clickHandler)
+            //     el.addEventListener('touchend', clickHandler)
+            //     el.addEventListener('mouseup', function (e) {
+            //         e.preventDefault()
+            //         e.stopPropagation()
+            //     })
+            // }
 
-                el = DOMUtils.div({class: 'context-menu'})
-                if (typeof item.label === 'string') {
-                    el.innerHTML = item.label
-                }
-                const clickHandler = e => {
-                    colorPicker.show()
-                    DOMUtils.hide(popover)
-                    e.preventDefault()
-                    e.stopPropagation()
-                }
-                el.addEventListener('click', clickHandler)
-                el.addEventListener('touchend', clickHandler)
-                el.addEventListener('mouseup', function (e) {
-                    e.preventDefault()
-                    e.stopPropagation()
-                })
-            } else {
+            else {
                 el = DOMUtils.div({class: 'context-menu'})
                 if (typeof item.label === 'string') {
                     el.innerHTML = item.label
@@ -291,11 +299,11 @@ function present(e, popover) {
 
 }
 
-const hideAllMenuPopups = () => {
+const hideAllMenuPopups = parent => {
 
-    const menus = document.querySelectorAll('.igv-menu-popup')
-    for (let i = 0; i < menus.length; i++) {
-        menus[i].style.display = 'none'
+    const menus = parent.querySelectorAll('.igv-menu-popup')
+    for (const menu of menus) {
+        menu.style.display = 'none'
     }
 
 }

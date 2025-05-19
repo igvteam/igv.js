@@ -30,16 +30,16 @@ class Panel {
     add(component) {
 
         if(component instanceof Node) {
-            this.elem.append(component);
+            this.elem.appendChild(component);
         }
         else if(typeof component === 'object') {
-            this.elem.append(component.elem);
+            this.elem.appendChild(component.elem);
         }
         else {
             // Assuming a string, possibly html
             const wrapper = DOMUtils.div();
             wrapper.innerHTML = component;
-            this.elem.append(wrapper);
+            this.elem.appendChild(wrapper);
             this.html = wrapper
         }
     }

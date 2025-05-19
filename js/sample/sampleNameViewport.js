@@ -41,7 +41,11 @@ class SampleNameViewport {
 
     checkCanvas() {
 
-        const width = this.browser.sampleNameViewportWidth || 0
+        let width = 0
+        if (true === this.browser.showSampleNames) {
+            width = undefined === this.browser.sampleNameViewportWidth ? 0 : this.browser.sampleNameViewportWidth
+        }
+
         this.ctx.canvas.width = width * window.devicePixelRatio
         this.ctx.canvas.style.width = `${width}px`
 

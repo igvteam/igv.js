@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="igv-container" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    const config =
+        {
+        queryParametersSupported: true,
+        locus: '19:49301000-49305700',
+        genome: "hg19",
+        tracks:
+            [
+            {
+                name: 'All pos bars',
+                url: '../../test/data/wig/allPositive.bedgraph',
+                // color: '#0f0',
+                indexed: false
+            },
+            {
+                name: 'All negative bars',
+                url: '../../test/data/wig/allNegativewig.bedgraph',
+                // color: '#f00',
+                indexed: false
+            },
+        ]
+    };
+
+    const config_offscreen_scroll =
+        {
+            "version": "3.1.2",
+            "showSampleNames": false,
+            "reference": {
+                "id": "hg38",
+                "name": "Human (GRCh38/hg38)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa.fai",
+                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/hg38/cytoBandIdeo.txt.gz",
+                "aliasURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/hg38/hg38_alias.tab",
+                "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+                "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+                "chromosomeOrder": "chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY"
+            },
+            "locus": "chr6:152,982,998-152,983,765",
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NK.bed.gz",
+                    "filename": "NK.bed.gz",
+                    "indexURL": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NK.bed.gz.tbi",
+                    "name": "NK",
+                    "order": -9,
+                    "format": "bed",
+                    "type": "shoebox",
+                    "color": "rgb(137, 30, 136)",
+                    "min": 0,
+                    "max": 3,
+                    "colorScale": {
+                        "min": 0,
+                        "max": 3,
+                        "color": "rgb(137,30,136)"
+                    }
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NK_lora_TFBS.bigwig",
+                    "filename": "NK_lora_TFBS.bigwig",
+                    "name": "NK_lora_TFBS.bigwig",
+                    "order": -8,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "rgb(137, 30, 136)",
+                    "colorScale": {
+                        "type": "diverging",
+                        "min": 0,
+                        "mid": 0.25,
+                        "max": 0.5,
+                        "minColor": "rgb(46,56,183)",
+                        "midColor": "white",
+                        "maxColor": "rgb(164,0,30)"
+                    },
+                    "graphType": "heatmap",
+                    "height": 25
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CLP.bed.gz",
+                    "filename": "CLP.bed.gz",
+                    "indexURL": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CLP.bed.gz.tbi",
+                    "name": "CLP",
+                    "order": -7,
+                    "format": "bed",
+                    "type": "shoebox",
+                    "color": "rgb(106, 207, 255)",
+                    "min": 0,
+                    "max": 3,
+                    "colorScale": {
+                        "min": 0,
+                        "max": 3,
+                        "color": "rgb(106,207,255)"
+                    }
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CLP_lora_TFBS.bigwig",
+                    "filename": "CLP_lora_TFBS.bigwig",
+                    "name": "CLP_lora_TFBS.bigwig",
+                    "order": -6,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "rgb(106, 207, 255)",
+                    "colorScale": {
+                        "type": "diverging",
+                        "min": 0,
+                        "mid": 0.25,
+                        "max": 0.5,
+                        "minColor": "rgb(46,56,183)",
+                        "midColor": "white",
+                        "maxColor": "rgb(164,0,30)"
+                    },
+                    "graphType": "heatmap",
+                    "height": 25
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/late-Ery.bed.gz",
+                    "filename": "late-Ery.bed.gz",
+                    "indexURL": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/late-Ery.bed.gz.tbi",
+                    "name": "late-Ery",
+                    "order": -5,
+                    "format": "bed",
+                    "type": "shoebox",
+                    "color": "rgb(137, 17, 0)",
+                    "min": 0,
+                    "max": 3,
+                    "colorScale": {
+                        "min": 0,
+                        "max": 3,
+                        "color": "rgb(137,17,0)"
+                    }
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/late-Ery_lora_TFBS.bigwig",
+                    "filename": "late-Ery_lora_TFBS.bigwig",
+                    "name": "late-Ery_lora_TFBS.bigwig",
+                    "order": -4,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "rgb(137, 17, 0)",
+                    "colorScale": {
+                        "type": "diverging",
+                        "min": 0,
+                        "mid": 0.25,
+                        "max": 0.5,
+                        "minColor": "rgb(46,56,183)",
+                        "midColor": "white",
+                        "maxColor": "rgb(164,0,30)"
+                    },
+                    "graphType": "heatmap",
+                    "height": 25
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CD16mono.bed.gz",
+                    "filename": "CD16mono.bed.gz",
+                    "indexURL": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CD16mono.bed.gz.tbi",
+                    "name": "CD16mono",
+                    "order": -3,
+                    "format": "bed",
+                    "type": "shoebox",
+                    "color": "rgb(255, 136, 2)",
+                    "min": 0,
+                    "max": 3,
+                    "colorScale": {
+                        "min": 0,
+                        "max": 3,
+                        "color": "rgb(255,136,2)"
+                    }
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/CD16mono_lora_TFBS.bigwig",
+                    "filename": "CD16mono_lora_TFBS.bigwig",
+                    "name": "CD16mono_lora_TFBS.bigwig",
+                    "order": -2,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "rgb(255, 136, 2)",
+                    "colorScale": {
+                        "type": "diverging",
+                        "min": 0,
+                        "mid": 0.25,
+                        "max": 0.5,
+                        "minColor": "rgb(46,56,183)",
+                        "midColor": "white",
+                        "maxColor": "rgb(164,0,30)"
+                    },
+                    "graphType": "heatmap",
+                    "height": 25
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NaiveB.bed.gz",
+                    "filename": "NaiveB.bed.gz",
+                    "indexURL": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NaiveB.bed.gz.tbi",
+                    "name": "NaiveB",
+                    "order": -1,
+                    "format": "bed",
+                    "type": "shoebox",
+                    "color": "rgb(210, 120, 255)",
+                    "min": 0,
+                    "max": 3,
+                    "colorScale": {
+                        "min": 0,
+                        "max": 3,
+                        "color": "rgb(210,120,255)"
+                    }
+                },
+                {
+                    "url": "https://storage.googleapis.com/broad-buenrostro-pipeline-genome-annotations/neva/BMMC_roi/NaiveB_lora_TFBS.bigwig",
+                    "filename": "NaiveB_lora_TFBS.bigwig",
+                    "name": "NaiveB_lora_TFBS.bigwig",
+                    "order": 0,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "color": "rgb(210, 120, 255)",
+                    "colorScale": {
+                        "type": "diverging",
+                        "min": 0,
+                        "mid": 0.25,
+                        "max": 0.5,
+                        "minColor": "rgb(46,56,183)",
+                        "midColor": "white",
+                        "maxColor": "rgb(164,0,30)"
+                    },
+                    "graphType": "heatmap",
+                    "height": 25
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "order": 1000001,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
+            ]
+        };
+
+    const config_tracks_palooza =
+        {
+            "version": "3.1.2",
+            "showSampleNames": false,
+            "reference": {
+                "id": "hg38",
+                "name": "Human (GRCh38/hg38)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg38/hg38.fa.fai",
+                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/hg38/cytoBandIdeo.txt.gz",
+                "aliasURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/hg38/hg38_alias.tab",
+                "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+                "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+                "chromosomeOrder": "chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY"
+            },
+            "locus": "chr22:23,814,767-23,891,085",
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "type": "qtl",
+                    "sourceType": "gtex-ws",
+                    "url": "https://gtexportal.org/api/v2/association/singleTissueEqtlByLocation",
+                    "tissueSiteDetailId": "Muscle_Skeletal",
+                    "name": "Muscle Skeletal",
+                    "visibilityWindow": 100000,
+                    "order": 3,
+                    "height": 150
+                },
+                {
+                    "name": "Indexed GTF (Gencode)",
+                    "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz",
+                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz.tbi",
+                    "order": 4,
+                    "format": "gtf",
+                    "type": "annotation",
+                    "height": 150,
+                    "visibilityWindow": 1005724
+                },
+                {
+                    "name": "Indexed GFF (Ensemble Genes)",
+                    "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                    "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.csi",
+                    "color": "blue",
+                    "altColor": "red",
+                    "order": 5,
+                    "format": "gff3",
+                    "type": "annotation",
+                    "height": 150,
+                    "visibilityWindow": 739358
+                },
+                {
+                    "name": "Repeat Masker",
+                    "type": "annotation",
+                    "format": "rmsk",
+                    "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz",
+                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz.tbi",
+                    "visibilityWindow": 100000,
+                    "order": 7,
+                    "height": 70
+                },
+                {
+                    "name": "Conservation phyloP 100 way",
+                    "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/hg38.phyloP100way.bw",
+                    "color": "blue",
+                    "altColor": "red",
+                    "order": 9,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 150
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "order": 1000001,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
+            ]
+        };
+
+    const config_whole_lotta_wigs =
+        {
+            "version": "3.1.0",
+            "showSampleNames": false,
+            "reference": {
+                "id": "hg19",
+                "name": "Human (GRCh37/hg19)",
+                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
+                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
+                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+            },
+            "locus": "chr10:1-120,250,001",
+            "roi": [],
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "name": "Homo sapiens HepG2 PRPF4 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens HepG2",
+                        "AssayType": "ChIP-seq",
+                        "Target": "PRPF4 ",
+                        "BioRep": "1,2",
+                        "TechRep": "1_1,2_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Xiang-Dong Fu, UCSD",
+                        "Accession": "ENCFF059CKF",
+                        "Experiment": "ENCSR243LNQ"
+                    },
+                    "order": 0,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(255, 41, 135)"
+                },
+                {
+                    "url": "https://www.dropbox.com/scl/fi/yczvlb961oh77sgv9syc6/MP_skin_CRUSH_Loxafr3.0_HiC.bedgraph?rlkey=e2j6wm62gxoiiyhh0m3bems7q&dl=0",
+                    "filename": "MP_skin_CRUSH_Loxafr3.0_HiC.bedgraph",
+                    "name": "MP_skin_CRUSH_Loxafr3.0_HiC.bedgraph",
+                    "order": 0,
+                    "format": "bedgraph",
+                    "type": "wig",
+                    "height": 128,
+                    "color": "rgb(204,0,0)",
+                    "altColor": "rgb(0,0,0)",
+                    "min": -100,
+                    "max": 100
+                },
+                {
+                    "name": "Homo sapiens GM13977 CTCF ",
+                    "url": "https://www.encodeproject.org/files/ENCFF000RQI/@@download/ENCFF000RQI.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens GM13977",
+                        "AssayType": "ChIP-seq",
+                        "Target": "CTCF ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "base overlap signal",
+                        "Format": "bigWig",
+                        "Lab": "Vishwanath Iyer, UTA",
+                        "Accession": "ENCFF000RQI",
+                        "Experiment": "ENCSR000DLB"
+                    },
+                    "order": 1,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(5, 248, 2)"
+                },
+                {
+                    "name": "Homo sapiens GM12878 BCLAF1 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF036IRJ/@@download/ENCFF036IRJ.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens GM12878",
+                        "AssayType": "ChIP-seq",
+                        "Target": "BCLAF1 ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Richard Myers, HAIB",
+                        "Accession": "ENCFF036IRJ",
+                        "Experiment": "ENCSR000BJZ"
+                    },
+                    "order": 2,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(0, 46, 255)"
+                },
+                {
+                    "name": "Homo sapiens K562 ZNF274 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF555CQE/@@download/ENCFF555CQE.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens K562",
+                        "AssayType": "ChIP-seq",
+                        "Target": "ZNF274 ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Peggy Farnham, USC",
+                        "Accession": "ENCFF555CQE",
+                        "Experiment": "ENCSR000EWE"
+                    },
+                    "order": 3,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(106, 207, 255)"
+                },
+                {
+                    "name": "Homo sapiens 22Rv1 ZFX ",
+                    "url": "https://www.encodeproject.org/files/ENCFF420XMW/@@download/ENCFF420XMW.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens 22Rv1",
+                        "AssayType": "ChIP-seq",
+                        "Target": "ZFX ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "signal p-value",
+                        "Format": "bigWig",
+                        "Lab": "Michael Snyder, Stanford",
+                        "Accession": "ENCFF420XMW",
+                        "Experiment": "ENCSR246MLJ"
+                    },
+                    "order": 4,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(137, 30, 136)"
+                },
+                {
+                    "name": "Homo sapiens A549 CHD4 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF725AXM/@@download/ENCFF725AXM.bigWig",
+                    "metadata": {
+                        "Biosample": "Homo sapiens A549",
+                        "AssayType": "ChIP-seq",
+                        "Target": "CHD4 ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Bradley Bernstein, Broad",
+                        "Accession": "ENCFF725AXM",
+                        "Experiment": "ENCSR550SCU"
+                    },
+                    "order": 5,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean",
+                    "color": "rgb(255, 114, 110)"
+                },
+                {
+                    "name": "Homo sapiens aorta tissue male adult (34 years) H3K27ac ",
+                    "url": "https://www.encodeproject.org/files/ENCFF162CIW/@@download/ENCFF162CIW.bigWig",
+                    "color": "rgb(200,0,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens aorta tissue male adult (34 years)",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K27ac ",
+                        "BioRep": "2",
+                        "TechRep": "2_1",
+                        "OutputType": "signal p-value",
+                        "Format": "bigWig",
+                        "Lab": "Bing Ren, UCSD",
+                        "Accession": "ENCFF162CIW",
+                        "Experiment": "ENCSR519CFV"
+                    },
+                    "order": 6,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean"
+                },
+                {
+                    "name": "Homo sapiens with nonobstructive coronary artery disease; liver tissue male adult (32 years) H3K9me3 ",
+                    "url": "https://www.encodeproject.org/files/ENCFF566FON/@@download/ENCFF566FON.bigWig",
+                    "color": "rgb(100,0,0)",
+                    "metadata": {
+                        "Biosample": "Homo sapiens with nonobstructive coronary artery disease; liver tissue male adult (32 years)",
+                        "AssayType": "ChIP-seq",
+                        "Target": "H3K9me3 ",
+                        "BioRep": "1",
+                        "TechRep": "1_1",
+                        "OutputType": "fold change over control",
+                        "Format": "bigWig",
+                        "Lab": "Bing Ren, UCSD",
+                        "Accession": "ENCFF566FON",
+                        "Experiment": "ENCSR563YGF"
+                    },
+                    "order": 8,
+                    "format": "bigwig",
+                    "type": "wig",
+                    "height": 128,
+                    "windowFunction": "mean"
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "id": "hg19_genes",
+                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz",
+                    "indexed": false,
+                    "removable": false,
+                    "order": 1000000,
+                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                    "type": "annotation",
+                    "height": 70
+                }
+            ]
+        };
+
+    igv.createBrowser(document.getElementById("igv-container"), config_whole_lotta_wigs).then(browser => {
+        console.log(`browser ${ browser.guid } is good to go`)
+    });
+
+
+</script>
+
+</body>
+
+</html>
+

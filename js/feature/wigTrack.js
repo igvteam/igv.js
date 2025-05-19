@@ -5,15 +5,13 @@ import BWSource from "../bigwig/bwSource.js"
 import IGVGraphics from "../igv-canvas.js"
 import paintAxis from "../util/paintAxis.js"
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
 import {ColorScaleFactory} from "../util/colorScale.js"
 import ColorScaleEditor from "../ui/components/colorScaleEditor.js"
 
-const DEFAULT_COLOR = 'rgb(150, 150, 150)'
-
-
 class WigTrack extends TrackBase {
+
+    static defaultColor = 'rgb(150, 150, 150)'
 
     static defaults = {
         height: 50,
@@ -78,6 +76,10 @@ class WigTrack extends TrackBase {
         const header = await this.getHeader()
         if (this.disposed) return   // This track was removed during async load
         if (header) this.setTrackProperties(header)
+
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
+
     }
 
     get supportsWholeGenome() {
@@ -171,14 +173,13 @@ class WigTrack extends TrackBase {
         menuItems.push('<hr/>')
         menuItems.push("<div>Windowing function</div>")
         for (const wf of windowFunctions) {
-            const object = $(createCheckbox(wf, this.windowFunction === wf))
 
             function clickHandler() {
                 this.windowFunction = wf
                 this.trackView.updateViews()
             }
 
-            menuItems.push({object, click: clickHandler})
+            menuItems.push({element:createCheckbox(wf, this.windowFunction === wf), click: clickHandler})
         }
 
         return menuItems
@@ -193,14 +194,13 @@ class WigTrack extends TrackBase {
         menuItems.push("<div>Graph type</div>")
 
         for (const gt of graphType) {
-            const object = $(createCheckbox(gt, this.graphType === gt))
 
             function clickHandler() {
                 this.graphType = gt
                 this.trackView.repaintViews()
             }
 
-            menuItems.push({object, click: clickHandler})
+            menuItems.push({element:createCheckbox(gt, this.graphType === gt), click: clickHandler})
         }
 
         return menuItems
@@ -408,7 +408,7 @@ class WigTrack extends TrackBase {
      */
 
     getColorForFeature(f) {
-        let c = (f.value < 0 && this.altColor) ? this.altColor : this.color || DEFAULT_COLOR
+        let c = (f.value < 0 && this.altColor) ? this.altColor : this.color || WigTrack.defaultColor
         return (typeof c === "function") ? c(f.value) : c
     }
 

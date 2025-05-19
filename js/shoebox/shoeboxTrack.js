@@ -1,9 +1,7 @@
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import FeatureSource from "../feature/featureSource.js"
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import ShoeboxColorScale from "./shoeboxColorScale.js"
-import paintAxis from "../util/paintAxis.js"
 
 /**
  * Configurable properties
@@ -77,6 +75,9 @@ class ShoeboxTrack extends TrackBase {
         // This shouldn't be neccessary
         if (!this.scale) this.scale = 1.0
 
+        this._initialColor = this.color || this.constructor.defaultColor
+        this._initialAltColor = this.altColor || this.constructor.defaultColor
+
     }
 
     get color() {
@@ -96,8 +97,9 @@ class ShoeboxTrack extends TrackBase {
         const menuItems = []
 
         menuItems.push('<hr/>')
-        let object = $('<div>')
-        object.text('Set row height')
+
+        let element = document.createElement('div');
+        element.textContent = 'Set row height';
 
         const browser = this.browser
 
@@ -139,25 +141,25 @@ class ShoeboxTrack extends TrackBase {
             this.browser.inputDialog.present(config, e)
         }
 
-        menuItems.push({object, dialog: dialogHandler})
+        menuItems.push({element, dialog: dialogHandler})
 
         menuItems.push('<hr/>')
 
         // Data range
-        object = $('<div>')
-        object.text('Set data range')
+        element = document.createElement('div');
+        element.textContent = 'Set data range';
 
         // Note -- menu item handlers must be functions, not arrow functions
-        function dataRangeHandler() {
+        function dataRangeHandler(e) {
             if (this.trackView.track.selected) {
                 this.browser.dataRangeDialog.configure(this.trackView.browser.getSelectedTrackViews())
             } else {
                 this.browser.dataRangeDialog.configure(this.trackView)
             }
-            this.browser.dataRangeDialog.present($(this.browser.columnContainer))
+            this.browser.dataRangeDialog.present(e)
         }
 
-        menuItems.push({object, dialog: dataRangeHandler})
+        menuItems.push({element, dialog: dataRangeHandler})
 
         return menuItems
     }

@@ -21,7 +21,7 @@ class ChromAliasBB {
     }
 
     async preload(chrNames) {
-        await this.reader.preload();
+       await this.reader.preload()
         for(let nm of chrNames) {
             await this.search(nm)
         }
@@ -73,12 +73,6 @@ class ChromAliasBB {
         }
         return this.aliasRecordCache.get(alias)
     }
-
-    async getChromosomeNames() {
-        await this.reader.loadHeader()
-        return Array.from(this.reader.chrNames)
-    }
-
 }
 
 export default ChromAliasBB

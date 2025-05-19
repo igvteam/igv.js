@@ -63,8 +63,6 @@ suite("chromAlias", function () {
         assert.equal(chromAliasRecord.ucsc, "chr1")
         assert.equal(chromAlias.getChromosomeAlias("NC_007194.1", "genbank"), "CM000169.1")
 
-        const chromosomeNames = await chromAlias.getChromosomeNames()
-        assert.equal(chromosomeNames.length, 8)
     })
 
     test("test chromalias bb extra index search", async function () {
@@ -119,8 +117,9 @@ suite("chromAlias", function () {
         assert.equal(chromAlias.getChromosomeName("23"), "chrX")
         assert.equal(chromAlias.getChromosomeName("MT"), "chrM")
 
-        // Defaults don't support name sets,
-        assert.equal(chromAlias.getChromosomeAlias("NC_007194.1", "genbank"), "NC_007194.1")
+        // Other
+        assert.equal(chromAlias.getChromosomeName("X"), "chrX")
+        assert.equal(chromAlias.getChromosomeName("Y"), "chrY")
 
     })
 })

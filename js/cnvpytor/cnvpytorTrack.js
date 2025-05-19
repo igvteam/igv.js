@@ -1,9 +1,7 @@
 import TrackBase from "../trackBase.js"
-import MenuUtils from "../ui/menuUtils.js"
 import HDF5IndexedReader from "./HDF5IndexedReader.js"
 import {CNVpytorVCF} from "./cnvpytorVCF.js"
 import FeatureSource from '../feature/featureSource.js'
-import $ from "../vendor/jquery-3.3.1.slim.js"
 import {createCheckbox} from "../igv-icons.js"
 import IGVGraphics from "../igv-canvas.js"
 import VariantTrack from "../variant/variantTrack.js"
@@ -124,7 +122,7 @@ class CNVPytorTrack extends TrackBase {
             this.set_available_callers()
 
         } else {
-            this.cnvpytor_obj = new HDF5IndexedReader(this.config.url, this.bin_size)
+            this.cnvpytor_obj = new HDF5IndexedReader(this.config, this.bin_size)
             // get chrom list that currently user viewing
             let chroms = [ ...new Set(this.browser.referenceFrameList.map(val => val.chr))]
             
@@ -264,9 +262,9 @@ class CNVPytorTrack extends TrackBase {
         items.push('<hr/>')
         items.push("Bin Sizes")
         for (let rd_bin of this.available_bins) {
-            const checkBox = createCheckbox(rd_bin, rd_bin === this.bin_size)
+
             items.push({
-                object: $(checkBox),
+                element: createCheckbox(rd_bin, rd_bin === this.bin_size),
                 click: async function binSizesHandler() {
                     this.bin_size = rd_bin
                     // data loader image
@@ -284,9 +282,9 @@ class CNVPytorTrack extends TrackBase {
 
         let signal_dct = {"rd_snp": "RD and BAF Likelihood", "rd": "RD Signal", "snp": "BAF Likelihood"}
         for (let signal_name in signal_dct) {
-            const checkBox = createCheckbox(signal_dct[signal_name], signal_name === this.signal_name)
+
             items.push({
-                object: $(checkBox),
+                element: createCheckbox(signal_dct[signal_name], signal_name === this.signal_name),
                 click: async function signalTypeHandler() {
                     this.signal_name = signal_name
                     await this.recreate_tracks(this.bin_size)
@@ -302,9 +300,9 @@ class CNVPytorTrack extends TrackBase {
         items.push('<hr/>')
         items.push("CNV caller")
         for (let cnv_caller of this.available_callers) {
-            const checkBox = createCheckbox(cnv_caller, cnv_caller === this.cnv_caller)
+
             items.push({
-                object: $(checkBox),
+                element: createCheckbox(cnv_caller, cnv_caller === this.cnv_caller),
                 click: async function cnvCallerHandler() {
                     this.cnv_caller = cnv_caller
                     // data loader image
@@ -605,12 +603,12 @@ class CNVPytorTrack extends TrackBase {
             // if number >= 100, show whole number
             // if >= 1 show 1 significant digits
             // if <  1 show 2 significant digits
-            
+
             // change the label for negative number to positive; For BAF likelihood section
             if(number < 0){
                 return Math.abs(number)
             }
-            
+
             if (number === 0) {
                 return "0"
             } else if (Math.abs(number) >= 10) {

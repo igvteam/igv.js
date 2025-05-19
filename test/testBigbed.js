@@ -5,6 +5,17 @@ import {assert} from 'chai'
 import {fileToDataURL} from "./utils/URLUtils.js"
 import BWReader from "../js/bigwig/bwReader.js"
 import {createGenome} from "./utils/MockGenome.js"
+import ChromAliasBB from "../js/genome/chromAliasBB.js"
+
+function getWGChromosomeNames() {
+    const chromosomeNames = []
+    for (let i = 1; i <= 22; i++) {
+        chromosomeNames.push(`chr${i}`)
+    }
+    chromosomeNames.push("chrX")
+    chromosomeNames.push("chrY")
+    return chromosomeNames
+}
 
 suite("testBigBed", function () {
 
@@ -161,14 +172,15 @@ table chromatinInteract
 
     test("clinvar", async function () {
 
-        this.timeout(10000)
+        this.timeout(20000)
 
         const url = "https://hgdownload.soe.ucsc.edu/gbdb/hg38/bbi/clinvar/clinvarMain.bb",
             chr = "chr22",
             start = 23786974,
             end = 23787050
 
-        const bwReader = new BWReader({url: url})
+        const bwReader = new BWReader({url: url, format:"bigbed"})
+        await bwReader.loadHeader();
         const features = await bwReader.readFeatures(chr, start, chr, end)
         assert.equal(features.length, 4)
 
@@ -177,16 +189,22 @@ table chromatinInteract
     /**
      * Test parsing a aliasBbURL file from the T2T hub
      */
-    test("test chromAlias", async function () {
+    test("test whole genome with alias", async function () {
 
         const url = "test/data/bb/GCA_009914755.4.chromAlias.bb"  //T2T
 
-        const bbReader = new BWReader({url: url, format: "bigbed"})
-        const features = await bbReader.readWGFeatures()
-        assert.equal(25, features.length)
+        const chromAliasSource = new ChromAliasBB(url)
+        const genome = {
+            getAliasRecord: async(term) => chromAliasSource.search(term)
+        }
+        const chromosomeNames = getWGChromosomeNames()
+
+        const bbReader = new BWReader({url: url, format: "bigbed"}, genome)
+        const features = await bbReader.readWGFeatures(chromosomeNames)
+        assert.equal(24, features.length)
 
         const f = features[0]
-        assert.equal("chrM", f["ucsc"])
+        assert.equal("chrX", f["ucsc"])
     })
 
 
@@ -205,8 +223,7 @@ table chromatinInteract
 
         const url = "test/data/bb/cytoBandMapped.bb"
         const bbReader = new BWReader({url: url, format: "bigbed"})
-        const features = await bbReader.readWGFeatures()
-
+        const features = await bbReader.readWGFeatures(getWGChromosomeNames())
 
         // Collect distinct chromosomes
         const uniqueChromosomes = new Set()
@@ -215,9 +232,6 @@ table chromatinInteract
         }
 
         assert.equal(24, uniqueChromosomes.size)
-
-
     })
-
 })
 

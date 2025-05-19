@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>dev - alignment - bam</title>
+</head>
+
+<body>
+
+<button id="log-state">Log Session</button>
+<button id="bookmark">Bookmark</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    const config =
+        {
+            "genome": "hg19",
+            "locus": "chr12:98,987,491-98,989,801",
+            "roi": [],
+            "tracks": [
+                {
+                    "name": "Heart",
+                    "filename": "heart_slc25a3.bam",
+                    "format": "bam",
+                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/tutorials/rna/heart_slc25a3.bam",
+                    "indexURL": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/tutorials/rna/heart_slc25a3.bam.bai",
+                    "colorBy": "strand"
+                },
+                {
+                    "name": "Liver",
+                    "filename": "liver_slc25a3.bam",
+                    "format": "bam",
+                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/tutorials/rna/liver_slc25a3.bam",
+                    "indexURL": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/tutorials/rna/liver_slc25a3.bam.bai",
+                    "colorBy": "strand"
+                }
+            ]
+        }
+
+    igv.createBrowser(document.getElementById('igvDiv'), config)
+        .then(browser => {
+            document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
+
+            document.getElementById('bookmark').addEventListener('click', () => {
+                const path = window.location.href.slice()
+                const idx = path.indexOf("?")
+                const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+                window.history.pushState({}, "IGV", url)
+            })
+        })
+
+
+</script>
+
+</body>
+
+</html>
