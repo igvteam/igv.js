@@ -6,7 +6,7 @@ import Alert from './ui/alert.js'
 import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width} from "./trackView.js"
 import C2S from "./canvas2svg.js"
-import {getTrack} from "./trackFactory.js"
+import {getTrack, knownTrackTypes} from "./trackFactory.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
@@ -1034,7 +1034,7 @@ class Browser {
                     const featureSource = FeatureSource(config, this.genome)
                     config._featureSource = featureSource    // This is a temp variable, bit of a hack
                     const trackType = await featureSource.trackType()
-                    if (trackType) {
+                    if (trackType && knownTrackTypes().has(trackType)) {
                         type = trackType
                     } else {
                         type = "annotation"
