@@ -139,7 +139,7 @@ class BamAlignment {
         return (genomicLocation >= s && genomicLocation <= (s + l))
     }
 
-    popupData(genomicLocation) {
+    popupData(genomicLocation, hiddenTags) {
 
         // if the user clicks on a base next to an insertion, show just the
         // inserted bases in a popup (like in desktop IGV).
@@ -222,7 +222,6 @@ class BamAlignment {
             }
         }
 
-        const hiddenTags = new Set(['SA', 'MD'])
         nameValues.push('<hr/>')
         for (let key in tagDict) {
             if (!hiddenTags.has(key)) {
@@ -230,7 +229,9 @@ class BamAlignment {
             }
         }
 
-        nameValues.push({name: 'Hidden Tags', value: 'SA, MD'})
+        if(hiddenTags && hiddenTags.size > 0) {
+            nameValues.push({name: 'Hidden Tags', value: Array.from(hiddenTags).join(", ")})
+        }
 
         nameValues.push('<hr/>')
         nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)})
