@@ -20,21 +20,21 @@ export type TrackLoad<T extends TrackType> =
     Tracks.TrackCommonOptions &
     (T extends "annotation" ? Tracks.AnnotationTrackOptions & TypeFormatPair<'annotation'> :
         T extends "wig" ? Tracks.WigTrackOptions & TypeFormatPair<'wig'> :
-        T extends "alignment" ? Tracks.AlignmentTrackOptions & TypeFormatPair<'alignment'> :
-        T extends "variant" ? Tracks.VariantTrackOptions & TypeFormatPair<'variant'> :
-        T extends "mut" ? Tracks.MutationTrackOptions & TypeFormatPair<'mut'> :
-        T extends "seg" ? Tracks.SegTrackOptions & TypeFormatPair<'seg'> :
-        T extends "gwas" ? Tracks.GWASTrackOptions<Tracks.GWASFormat> & TypeFormatPair<'gwas'> :
-        T extends "interact" | "interaction" ? Tracks.InteractTrackOptions & TypeFormatPair<'interact' | 'interaction'> :
-        T extends "qtl" ? Tracks.QTLTrackOptions & TypeFormatPair<'qtl'> :
-        T extends "junction" ? Tracks.JunctionTrackOptions & TypeFormatPair<'junction'> :
-        T extends "cnvpytor" ? Tracks.CnvPyTorTrackOptions & TypeFormatPair<'cnvpytor'> :
-        T extends "merged" ? Tracks.WigMergedTrackOptions & { type: 'merged' } :
-        T extends "arc" ? Tracks.ArcTrackOptions & TypeFormatPair<'arc'> :
-        /* undocumented options */
-        T extends "snp" ? Tracks.SNPTrackOptions & TypeFormatPair<'snp'> :
-        T extends "eqtl" ? Tracks.EQTLTrackOptions & TypeFormatPair<'eqtl'> :
-        never);
+            T extends "alignment" ? Tracks.AlignmentTrackOptions & TypeFormatPair<'alignment'> :
+                T extends "variant" ? Tracks.VariantTrackOptions & TypeFormatPair<'variant'> :
+                    T extends "mut" ? Tracks.MutationTrackOptions & TypeFormatPair<'mut'> :
+                        T extends "seg" ? Tracks.SegTrackOptions & TypeFormatPair<'seg'> :
+                            T extends "gwas" ? Tracks.GWASTrackOptions<Tracks.GWASFormat> & TypeFormatPair<'gwas'> :
+                                T extends "interact" | "interaction" ? Tracks.InteractTrackOptions & TypeFormatPair<'interact' | 'interaction'> :
+                                    T extends "qtl" ? Tracks.QTLTrackOptions & TypeFormatPair<'qtl'> :
+                                        T extends "junction" ? Tracks.JunctionTrackOptions & TypeFormatPair<'junction'> :
+                                            T extends "cnvpytor" ? Tracks.CnvPyTorTrackOptions & TypeFormatPair<'cnvpytor'> :
+                                                T extends "merged" ? Tracks.WigMergedTrackOptions & { type: 'merged' } :
+                                                    T extends "arc" ? Tracks.ArcTrackOptions & TypeFormatPair<'arc'> :
+                                                        /* undocumented options */
+                                                        T extends "snp" ? Tracks.SNPTrackOptions & TypeFormatPair<'snp'> :
+                                                            T extends "eqtl" ? Tracks.EQTLTrackOptions & TypeFormatPair<'eqtl'> :
+                                                                never);
 
 export type TypeFormatPair<T extends TrackType> = {
     type?: T;
@@ -52,81 +52,81 @@ export type TypeFormatPair<T extends TrackType> = {
 // converts a track type into the file formats that it can accept
 export type TrackFormatOf<T extends TrackType> =
     T extends "annotation" ? Tracks.AnnotationFormat :
-    T extends "wig" ? Tracks.WigFormat :
-    T extends "alignment" ? Tracks.AlignmentFormat :
-    T extends "variant" ? Tracks.VariantFormat :
-    T extends "mut" ? Tracks.MutationFormat :
-    T extends "seg" ? Tracks.SegFormat :
-    T extends "gwas" ? Tracks.GWASFormat :
-    T extends "interact" | 'interaction' ? Tracks.InteractFormat :
-    T extends "qtl" ? Tracks.QTLFormat :
-    T extends "junction" ? Tracks.JunctionFormat :
-    T extends "cnvpytor" ? Tracks.CnvPyTorFormat :
-    T extends "arc" ? Tracks.ArcFormat :
-    /* undocumented options */
-    T extends "snp" ? Tracks.SNPFormat :
-    T extends "eqtl" ? Tracks.EQTLFormat :
-    never;
+        T extends "wig" ? Tracks.WigFormat :
+            T extends "alignment" ? Tracks.AlignmentFormat :
+                T extends "variant" ? Tracks.VariantFormat :
+                    T extends "mut" ? Tracks.MutationFormat :
+                        T extends "seg" ? Tracks.SegFormat :
+                            T extends "gwas" ? Tracks.GWASFormat :
+                                T extends "interact" | 'interaction' ? Tracks.InteractFormat :
+                                    T extends "qtl" ? Tracks.QTLFormat :
+                                        T extends "junction" ? Tracks.JunctionFormat :
+                                            T extends "cnvpytor" ? Tracks.CnvPyTorFormat :
+                                                T extends "arc" ? Tracks.ArcFormat :
+                                                    /* undocumented options */
+                                                    T extends "snp" ? Tracks.SNPFormat :
+                                                        T extends "eqtl" ? Tracks.EQTLFormat :
+                                                            never;
 
 // converts a track type into the manual features that it can accept
 export type ManualFeatureOf<T extends TrackType> =
     T extends "annotation" ? {
-        features: Record<string, any>[];
-    } :
-    T extends "wig" ? {
-        features: Tracks.WigTrackManualFeatures;
-    } :
-    T extends "seg" ? {
-        features: {
-            chr: string;
-            start: number;
-            end: number;
-            value: number;
-            sample: string;
-        }[];
-    } : never;
+            features: Record<string, any>[];
+        } :
+        T extends "wig" ? {
+                features: Tracks.WigTrackManualFeatures;
+            } :
+            T extends "seg" ? {
+                features: {
+                    chr: string;
+                    start: number;
+                    end: number;
+                    value: number;
+                    sample: string;
+                }[];
+            } : never;
 
 // some tracks can support a custom reader that polls data based on options
 export type CustomReaderOf<T extends TrackType> =
     T extends "annotation" ? { reader: Tracks.AnnotationCustomReader } |
-    {
-        source: {
-            url: string;
-            method?: "GET" | "POST";
-            contentType?: string;
-            body?: string;
-        }
-    } :
-    T extends "seg" ? {
-        source: {
-            url: (options: { chr: string }) => string;
-            method?: "GET" | "POST";
-            contentType?: string;
-            body?: string;
-            mappings: Record<string, string>;
-        }
-    } :
-    never;
+        {
+            source: {
+                url: string;
+                method?: "GET" | "POST";
+                contentType?: string;
+                body?: string;
+            }
+        } :
+        T extends "seg" ? {
+                source: {
+                    url: (options: { chr: string }) => string;
+                    method?: "GET" | "POST";
+                    contentType?: string;
+                    body?: string;
+                    mappings: Record<string, string>;
+                }
+            } :
+            never;
 
 // converts a track type into the actual track class
 export type TrackOf<T extends TrackType> =
     T extends "annotation" ? Tracks.Track :
-    T extends "wig" ? Tracks.Track :
-    T extends "alignment" ? Tracks.AlignmentTrack :
-    T extends "variant" ? Tracks.Track :
-    T extends "mut" ? Tracks.Track :
-    T extends "seg" ? Tracks.Track :
-    T extends "gwas" ? Tracks.Track :
-    T extends "interact" | 'interaction' ? Tracks.Track :
-    T extends "qtl" ? Tracks.Track :
-    T extends "junction" ? Tracks.Track :
-    T extends "cnvpytor" ? Tracks.Track :
-    T extends "merged" ? Tracks.Track :
-    T extends "arc" ? Tracks.Track :
-    /* undocumented options */
-    T extends "snp" ? Tracks.Track :
-    T extends "eqtl" ? Tracks.Track :
-    never;
+        T extends "wig" ? Tracks.Track :
+            T extends "alignment" ? Tracks.AlignmentTrack :
+                T extends "variant" ? Tracks.Track :
+                    T extends "mut" ? Tracks.Track :
+                        T extends "seg" ? Tracks.Track :
+                            T extends "gwas" ? Tracks.Track :
+                                T extends "interact" | 'interaction' ? Tracks.Track :
+                                    T extends "qtl" ? Tracks.Track :
+                                        T extends "junction" ? Tracks.Track :
+                                            T extends "cnvpytor" ? Tracks.Track :
+                                                T extends "merged" ? Tracks.Track :
+                                                    T extends "arc" ? Tracks.Track :
+                                                        /* undocumented options */
+                                                        T extends "snp" ? Tracks.Track :
+                                                            T extends "eqtl" ? Tracks.Track :
+                                                                never;
 
 
 export type StaticFeatureConfig<T extends Record<string, any>> = {
@@ -300,7 +300,7 @@ export namespace Tracks {
         deletionColor?: string;
         displayMode?: AnyCase<"FULL" | "EXPANDED" | "SQUISHED">;
         groupBy?:
-        "strand" | "firstOfPairStrand" | "pairOrientation" | "mateChr" | "chimeric" | "supplementary" | "readOrder" | AlignmentBy;
+            "strand" | "firstOfPairStrand" | "pairOrientation" | "mateChr" | "chimeric" | "supplementary" | "readOrder" | AlignmentBy;
         samplingWindowSize?: number;
         samplingDepth?: number;
         readGroup?: string;
@@ -321,20 +321,20 @@ export namespace Tracks {
         alignmentRowHeight?: number;
         squishedRowHeight?: number;
     } & (
-            {
-                colorBy: "strand" | "firstOfPairStrand";
-                insertionColor?: string;
-                negStrandColor?: string;
-            } |
-            {
-                colorBy: "pairOrientation" | "tlen"
+        {
+            colorBy: "strand" | "firstOfPairStrand";
+            insertionColor?: string;
+            negStrandColor?: string;
+        } |
+        {
+            colorBy: "pairOrientation" | "tlen"
                 | "unexpectedPair"
                 | "basemod" | "basemod2"
                 | AlignmentBy;
-            } |
-            {
-                colorBy?: "fragmentLength";
-            });
+        } |
+        {
+            colorBy?: "fragmentLength";
+        });
 
 
     class AlignmentTrack extends Track {
@@ -375,13 +375,13 @@ export namespace Tracks {
         });
         samples?: string[];
     } & (
-            {
-                isLog?: boolean;
-                log?: never;
-            } | {
-                log?: boolean;
-                isLog?: never;
-            });
+        {
+            isLog?: boolean;
+            log?: never;
+        } | {
+        log?: boolean;
+        isLog?: never;
+    });
 
 
     export type InteractFormat = "interact" | "bedpe" | "bigInteract" | "bb";
@@ -520,22 +520,22 @@ export namespace BrowserEvents {
     // returns the type of the event handler based on the event type
     export type EventHandler<T extends EventType> =
         T extends "trackremoved" ? (tracks: Tracks.Track[]) => EventReturn<T> :
-        T extends "locusChange" ? (loci: {
-            chr: string;
-            start: number;
-            end: number;
-            getLocusString: () => string;
-        }[]) => EventReturn<T> :
-        T extends "trackclick" ? (
-            track: Tracks.Track,
-            popoverData?: Record<string, string>,
-        ) => EventReturn<T> :
-        T extends "trackorderchanged" ? (trackNames: string[]) => EventReturn<T> :
-        (payload: any) => EventReturn<T>;
+            T extends "locusChange" ? (loci: {
+                    chr: string;
+                    start: number;
+                    end: number;
+                    getLocusString: () => string;
+                }[]) => EventReturn<T> :
+                T extends "trackclick" ? (
+                        track: Tracks.Track,
+                        popoverData?: Record<string, string>,
+                    ) => EventReturn<T> :
+                    T extends "trackorderchanged" ? (trackNames: string[]) => EventReturn<T> :
+                        (payload: any) => EventReturn<T>;
 
     export type EventReturn<T extends EventType> =
         T extends "trackclick" ? boolean :
-        void;
+            void;
 }
 
 export type CreateOpt = (GenomeOpt & CreateOptExtras) | (
@@ -543,7 +543,7 @@ export type CreateOpt = (GenomeOpt & CreateOptExtras) | (
     {
         sessionURL: string;
     } & Partial<CreateOptExtras>
-)
+    )
 
 export interface ROISet {
     url: string;
@@ -653,9 +653,9 @@ export type IGV = {
     readonly setOauthToken: (token: string, host: string) => void;
     readonly getAllBrowsers: () => Browser[];
     /**
-    * This function provided so clients can inform igv of a visibility change, typically when an igv instance is
-    * made visible from a tab, accordion, or similar widget.
-    */
+     * This function provided so clients can inform igv of a visibility change, typically when an igv instance is
+     * made visible from a tab, accordion, or similar widget.
+     */
     readonly visibilityChange: () => Promise<void>;
     readonly version: () => string;
 }
