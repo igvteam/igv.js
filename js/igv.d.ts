@@ -460,7 +460,7 @@ export namespace Tracks {
 
 type Nucleotide = 'A' | 'C' | 'G' | 'T' | 'N';
 
-type HostedGenomes = "hs1" | "chm13v1.1" | "hg38" | "hg38_1kg" | "hg19" |
+type SuggestedGenArk = "hs1" | "chm13v1.1" | "hg38" | "hg38_1kg" | "hg19" |
     "hg18" | "mm39" | "mm10" | "mm9" | "rn7" |
     "rn6" | "gorGor6" | "gorGor4" | "panTro6" | "panTro5" |
     "panTro4" | "macFas5" | "GCA_011100615.1" | "panPan2" | "canFam3" |
@@ -470,7 +470,7 @@ type HostedGenomes = "hs1" | "chm13v1.1" | "hg38" | "hg38_1kg" | "hg19" |
     "ASM985889v3" | "tair10" | "GCA_003086295.2" | "GCF_001433935.1" | "NC_016856.1" |
     "GCA_000182895.1"
 
-export type GenomeDef = (HostedGenomes | (string & {})) | ReferenceGenome;
+export type GenomeDef = SuggestedGenArk | (string & {}) | ReferenceGenome;
 
 export type GenomeOpt = { reference: GenomeDef, genome?: never } | { genome: GenomeDef, reference?: never };
 
