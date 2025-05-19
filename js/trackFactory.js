@@ -45,6 +45,9 @@ const trackFunctions =
         ['image', (config, browser) => new ImageTrack(config, browser)]
     ])
 
+function knownTrackTypes () {
+    return new Set(trackFunctions.keys())
+}
 
 /**
  * Return a track of the given type, passing configuration and a point to the IGV "Browser" object to its constructor function*
@@ -101,5 +104,6 @@ export {
     getTrack,
     trackFunctions,
     registerTrackClass,
-    registerTrackCreatorFunction
+    registerTrackCreatorFunction,
+    knownTrackTypes
 }
