@@ -62,7 +62,7 @@ class AlignmentTrack extends TrackBase {
         highlightColor: undefined,
         minTLEN: undefined,
         maxTLEN: undefined,
-        tagColorPallete: "Set1"
+        tagColorPallete: "Set1",
     }
 
     _colorTables = new Map()
@@ -76,6 +76,8 @@ class AlignmentTrack extends TrackBase {
         if (config.colorTable || config.tagColorTable) {
             this.colorTable = new ColorTable(config.tagColorTable)
         }
+
+        this.hiddenTags = new Set(config.hideTags || ["SA", "MD"])
 
         // Backward compatibility overrides
         if (config.largeFragmentLengthColor) this.largeTLENColor = config.largeFragmentLengthColor
@@ -656,7 +658,7 @@ class AlignmentTrack extends TrackBase {
 
     popupData(clickState) {
         const clickedObject = this.getClickedObject(clickState)
-        return clickedObject ? clickedObject.popupData(clickState.genomicLocation) : undefined
+        return clickedObject ? clickedObject.popupData(clickState.genomicLocation, this.hiddenTags) : undefined
     };
 
     /**
