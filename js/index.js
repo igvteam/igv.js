@@ -14,8 +14,6 @@ import AlertDialog from "./ui/components/alertDialog.js"
 import {registerFileFormats} from "./util/fileFormats.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
 
-import {registerFileFormats} from "./util/fileFormats.js"
-
 const setApiKey = igvxhr.setApiKey
 
 function setGoogleOauthToken(accessToken) {
