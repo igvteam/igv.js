@@ -77,7 +77,17 @@ class AlignmentTrack extends TrackBase {
             this.colorTable = new ColorTable(config.tagColorTable)
         }
 
-        this.hiddenTags = new Set(config.hideTags || ["SA", "MD"])
+        // Only one of showTags / hideTags should be specified.  If both are specified showTags takes precedence.
+        if (config.showTags && config.hideTags) {
+            console.warn("Both showTags and hideTags specified.  showTags will be used.")
+        }
+        if (config.showTags) {
+            this.showTags = new Set(config.showTags)
+            this.hiddenTags = new Set()
+        } else {
+            this.hiddenTags = new Set(config.hideTags || ["SA", "MD"])
+        }
+
 
         // Backward compatibility overrides
         if (config.largeFragmentLengthColor) this.largeTLENColor = config.largeFragmentLengthColor
@@ -658,7 +668,7 @@ class AlignmentTrack extends TrackBase {
 
     popupData(clickState) {
         const clickedObject = this.getClickedObject(clickState)
-        return clickedObject ? clickedObject.popupData(clickState.genomicLocation, this.hiddenTags) : undefined
+        return clickedObject?.popupData(clickState.genomicLocation, this.hiddenTags, this.showTags)
     };
 
     /**
