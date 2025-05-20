@@ -458,6 +458,8 @@ class SegTrack extends TrackBase {
             sortSeg()
         }
 
+        this.config.sort = sort
+
         this.trackView.repaintViews()
 
     }
@@ -542,7 +544,6 @@ class SegTrack extends TrackBase {
                         end: Math.floor(genomicLocation + bpWidth)
                     }
                     sortHandler(sort)
-                    this.config.sort = sort
                 }
             }
         })
