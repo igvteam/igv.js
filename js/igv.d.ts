@@ -533,7 +533,7 @@ export namespace BrowserEvents {
                         (payload: any) => EventReturn<T>;
 
     export type EventReturn<T extends EventType> =
-        T extends "trackclick" ? boolean :
+        T extends "trackclick" ? string | boolean | undefined :
             void;
 }
 
