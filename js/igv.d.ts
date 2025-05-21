@@ -528,6 +528,7 @@ export namespace BrowserEvents {
                 T extends "trackclick" ? (
                         track: Tracks.Track,
                         popoverData?: Record<string, string>,
+                        genomicLocation?: number
                     ) => EventReturn<T> :
                     T extends "trackorderchanged" ? (trackNames: string[]) => EventReturn<T> :
                         (payload: any) => EventReturn<T>;
