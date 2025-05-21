@@ -502,7 +502,7 @@ class SegTrack extends TrackBase {
         const scores = {}
         const bpLength = end - start + 1
 
-        const mutationTypes = filterObject.values ? new Set(filterObject.values) : undefined
+        const mutationTypes = filterObject.value ? new Set(filterObject.value) : undefined
 
         for (let segment of featureList) {
             if (segment.end < start) continue
