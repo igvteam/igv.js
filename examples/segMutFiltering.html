@@ -10,6 +10,13 @@
 
 <body>
 
+<h1>Sample Filtering</h1>
+
+<p style="margin-bottom: 20px;">
+    Demonstration of filtering samples in a segmented copy number track and a mutation track. The filter is applied based
+    on the region in view. Zoom in before applying filters.
+</p>
+
 <div style="margin-bottom: 16px;">
     <button id="filter-button"
             style="margin-right: 10px; padding: 6px 16px; background-color: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
@@ -28,7 +35,7 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js"
+    import igv from "../dist/igv.esm.min.js"
 
 
     const igvDiv = document.getElementById("igv-div")
@@ -89,7 +96,7 @@
             filterMutButton.addEventListener("click", function () {
 
                 // Show a popup dialog with a multi-select list of mutation types
-              const mutationTypes = [
+                const mutationTypes = [
                     "Frame_Shift_Del", "Frame_Shift_Ins", "In_Frame_Del", "In_Frame_Ins", "Missense_Mutation",
                     "Nonsense_Mutation", "Silent", "Splice_Site", "Translation_Start_Site", "Nonstop_Mutation",
                     "3'UTR", "3'Flank", "5'UTR", "5'Flank", "IGR", "Intron", "RNA", "Targeted_Region",

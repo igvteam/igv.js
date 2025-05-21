@@ -11,7 +11,9 @@ import ShoeboxSource from "../hic/shoeboxSource.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
 
-
+/**
+ * Track for segmented copy number, mut, maf and shoebox files.
+ */
 class SegTrack extends TrackBase {
 
     #sortDirections = new Map()
@@ -63,10 +65,6 @@ class SegTrack extends TrackBase {
             }
         }
 
-        // Override sample filter
-        if (config.filter) {
-            this.filter = config.filter
-        }
 
         // Create featureSource
         // Disable whole genome downsampling unless explicitly.
@@ -204,8 +202,38 @@ class SegTrack extends TrackBase {
     }
 
     /**
-     * Filter function for sample keys.  If this.filterObject is defined, then only samples that match the filter.
-     * This function can be overriden in the configuration
+     * Set the sample filter object.  This is used to filter samples from the set based on values over a specified
+     * genomic region.   The values compared depend on the track data type:
+     *   - "seg" and "shoebox" -- average value over the region
+     *   - "mut" and "maf" -- count of features overlapping the region
+     *
+     * The method is asynchronous because it may need to fetch data from the server to compute the scores.
+     * Computed scores are stored and used to filter the sample keys on demand.
+     *
+     * @param filterObject
+     * @returns {Promise<void>}
+     */
+    async setSampleFilter(filterObject) {
+        if (!filterObject) {
+            this.config.filterObject = undefined
+            this.filterObject = undefined
+            this.trackView.repaintViews()
+        } else {
+            const filterObjectCopy = Object.assign({}, filterObject)
+            this.config.filterObject = filterObjectCopy
+
+            filterObject.scores = await this.computeRegionScores(filterObject)
+            this.filterObject = filterObject
+            this.trackView.checkContentHeight()
+            this.trackView.repaintViews()
+        }
+        // TODO - store filter object in session
+    }
+
+
+    /**
+     * Filter function for sample keys.
+     *
      * @param sampleKey
      * @returns {boolean}
      */
@@ -214,18 +242,27 @@ class SegTrack extends TrackBase {
             const filterObject = this.filterObject
             const scores = filterObject.scores
             const score = scores[sampleKey]
-            if (filterObject.op === '>') {
-                return score > filterObject.value
-            } else if (filterObject.op === '<') {
-                return score < filterObject.value
+
+            if (this.type === 'seg') {
+                if (filterObject.op === '>') {
+                    return score > filterObject.value
+                } else if (filterObject.op === '<') {
+                    return score < filterObject.value
+                }
+            } else if (this.type === 'mut' || this.type === 'maf') {
+                return 'HAS' === filterObject.op ? score : !score
             }
         }
+        // else if (this.config.sampleFilter) {
+        //     return this.config.sampleFilter(sampleKey)
+        // }
         return true
     }
 
     get filteredSampleKeys() {
         return this.sampleKeys.filter(sampleKey => this.filter(sampleKey))
     }
+
 
     async getFeatures(chr, start, end) {
         const features = await this.featureSource.getFeatures({chr, start, end})
@@ -442,33 +479,17 @@ class SegTrack extends TrackBase {
         this.trackView.repaintViews()
     }
 
-    async setFilter(filterObject) {
-        if (!filterObject) {
-            this.filterObject = undefined
-            this.trackView.repaintViews()
-        } else {
-            const {type, op, attribute, value, chr, start, end} = filterObject
-            if (type === "VALUE") {
-                filterObject.scores = await this.computeRegionScores(filterObject)
-                this.filterObject = filterObject
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-            }
-        }
-        // TODO - store filter object in session
-    }
 
+    async computeRegionScores(filterObject, featureList) {
 
-    async computeRegionScores(region, featureList) {
-
-        const chr = region.chr
+        const chr = filterObject.chr
         let start, end
-        if (region.position) {
-            start = region.position - 1
+        if (filterObject.position) {
+            start = filterObject.position - 1
             end = start + 1
         } else {
-            start = region.start
-            end = region.end
+            start = filterObject.start
+            end = filterObject.end
         }
 
         if (!featureList) {
@@ -480,14 +501,25 @@ class SegTrack extends TrackBase {
 
         const scores = {}
         const bpLength = end - start + 1
+
+        const mutationTypes = filterObject.values ? new Set(filterObject.values) : undefined
+
         for (let segment of featureList) {
             if (segment.end < start) continue
             if (segment.start > end) break
             const sampleKey = segment.sampleKey || segment.sample
 
             if ("mut" === this.type) {
-                // Just count features overlapping region per sample
-                scores[sampleKey] = (scores[sampleKey] || 0) + 1
+                if (mutationTypes) {
+                    const mutationType = segment.getAttribute("Variant_Classification")
+                    if (mutationTypes.has(mutationType)) {
+                        // Just count features overlapping region per sample
+                        scores[sampleKey] = (scores[sampleKey] || 0) + 1
+                    }
+                } else {
+                    // Just count features overlapping region per sample
+                    scores[sampleKey] = (scores[sampleKey] || 0) + 1
+                }
             } else {
 
                 const min = Math.max(start, segment.start)
