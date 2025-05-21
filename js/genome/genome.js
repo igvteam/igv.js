@@ -99,6 +99,8 @@ class Genome {
                 } else {
                     this.#wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
                 }
+                // Trim to remove non-existent chromosomes
+                this.#wgChromosomeNames = this.#wgChromosomeNames.filter(c => this.chromosomes.has(c))
             } else {
                 this.#wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
             }
