@@ -77,7 +77,6 @@
                     const [start, end] = range.split("-").map(Number)
                     const segTrack = browser.findTracks("type", "seg")[0]
                     segTrack.setSampleFilter({
-                        type: "VALUE",
                         op: ">",
                         value: threshold,
                         chr, start, end
@@ -136,7 +135,6 @@
 
                             const mutTrack = browser.findTracks("type", "mut")[0]
                             mutTrack.setSampleFilter({
-                                type: "MUTATION_TYPE",
                                 value: selected,
                                 op,
                                 chr, start, end
