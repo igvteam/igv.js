@@ -234,8 +234,10 @@ class SegTrack extends TrackBase {
 
         if (this.initialSort) {
             const sort = this.initialSort
+
             if (sort.option === undefined || sort.option.toUpperCase() === "VALUE") {
-                this.sortByValue(sort, features)
+                const sortFeatures = (sort.chr === chr && sort.start >= start && sort.end <= end) ? features : undefined
+                this.sortByValue(sort, sortFeatures)
             } else if ("ATTRIBUTE" === sort.option.toUpperCase() && sort.attribute) {
                 const sortDirection = "DESC" === sort.direction ? 1 : -1
                 this.sortByAttribute(sort.attribute, sortDirection)

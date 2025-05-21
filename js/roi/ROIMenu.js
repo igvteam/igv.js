@@ -104,6 +104,26 @@ class ROIMenu {
         }
 
 
+        const found = this.browser.findTracks(track => typeof track.sortByValue === 'function')
+        if (found.length > 0) {
+            const { chr, start, end } = feature
+            items.push(
+                '<hr/>',
+                {
+                    label: 'Sort by value (ascending)',
+                    click: () => Promise.all(found.map(track => track.sortByValue({ option: 'VALUE', direction: 'ASC', chr, start, end })))
+                })
+
+            items.push(
+                '<hr/>',
+                {
+                    label: 'Sort by value (descending)',
+                    click: () => Promise.all(found.map(track => track.sortByValue({ option: 'VALUE', direction: 'DESC', chr, start, end })))
+                })
+
+        }
+
+
         if (roiSet.isUserDefined) {
             items.push(
                 '<hr/>',
@@ -112,7 +132,7 @@ class ROIMenu {
                     click: async () => {
                         roiSet.removeFeature(feature)
                         const userDefinedFeatures = await roiSet.getAllFeatures()
-                        
+
                         // Delete user defined ROI Set if it is empty
                         if (Object.keys(userDefinedFeatures).length === 0) {
                             roiManager.deleteUserDefinedROISet()
