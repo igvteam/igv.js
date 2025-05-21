@@ -2,6 +2,7 @@ import * as DOMUtils from "../ui/utils/dom-utils.js"
 import * as UIUtils from "../ui/utils/ui-utils.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import {createBlatTrack} from "../blat/blatTrack.js"
+import ROISEGFilterDialog from "../ui/components/roiSegFilterDialog.js"
 
 const maxSequenceSize = 1000000
 const maxBlatSize = 25000
@@ -27,6 +28,8 @@ class ROIMenu {
         this.container.appendChild(this.body)
 
         this.container.style.display = 'none'
+
+        this.roiSEGFilterDialog = new ROISEGFilterDialog(browser.columnContainer)
 
     }
 
@@ -59,7 +62,7 @@ class ROIMenu {
         this.#addSortMenuItems(items, feature)
 
         // Add filter menu items
-        this.#addFilterMenuItems(items, feature)
+        this.#addFilterMenuItems(items, feature, event)
 
         // ROI driven filter
 
@@ -149,15 +152,28 @@ class ROIMenu {
         }
     }
 
-    #addFilterMenuItems(items, feature) {
+    #addFilterMenuItems(items, feature, event) {
+
         let found
+
         found = this.browser.findTracks("type", "seg")
         if (found.length > 0) {
             items.push(
                 '<hr/>',
-                {   
+                {
                     label: 'Filter Seg Samples',
-                    click: () => alert("Filter Seg Samples")
+                    click: () => {
+
+                        const config =
+                            {
+                            label: 'Enter filter threshold (e.g., 0.5):',
+                            value: 1234321,
+                            callback: () => {
+                                console.log('ROI SEG Filter: callback')
+                            }
+                        }
+                        this.roiSEGFilterDialog.present(config, event)
+                    }
                 }
             )
         }
@@ -167,13 +183,15 @@ class ROIMenu {
             items.push(
                 '<hr/>',
                 {
-                    label: 'Filter Mut Samples',    
-                    click: () => alert("Filter Mut Samples")
+                    label: 'Filter Mut Samples',
+                    click: () => {
+                        alert("Filter Mut Samples")
+                    }
                 }
             )
         }
     }
-        
+
 
     #addBlatMenuItem(items, feature) {
         items.push({
