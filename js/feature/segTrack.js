@@ -11,7 +11,9 @@ import ShoeboxSource from "../hic/shoeboxSource.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
 
-
+/**
+ * Track for segmented copy number, mut, maf and shoebox files.
+ */
 class SegTrack extends TrackBase {
 
     #sortDirections = new Map()
@@ -115,8 +117,8 @@ class SegTrack extends TrackBase {
                     return attrs && attrs[attribute]
                 })) {
 
-                    const element = document.createElement('div');
-                    element.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`;
+                    const element = document.createElement('div')
+                    element.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`
 
                     function attributeSort() {
                         const sortDirection = this.#sortDirections.get(attribute) || 1
@@ -159,7 +161,10 @@ class SegTrack extends TrackBase {
                 }, e)
             }
 
-            menuItems.push({ element: createElementWithString('<div>Set color scale threshold</div>'), dialog: dialogPresentationHandler})
+            menuItems.push({
+                element: createElementWithString('<div>Set color scale threshold</div>'),
+                dialog: dialogPresentationHandler
+            })
         }
 
         menuItems.push('<hr/>')
@@ -190,11 +195,74 @@ class SegTrack extends TrackBase {
 
     getSamples() {
         return {
-            names: this.sampleKeys,
+            names: this.filteredSampleKeys,
             height: this.sampleHeight,
             yOffset: 0
         }
     }
+
+    /**
+     * Set the sample filter object.  This is used to filter samples from the set based on values over a specified
+     * genomic region.   The values compared depend on the track data type:
+     *   - "seg" and "shoebox" -- average value over the region
+     *   - "mut" and "maf" -- count of features overlapping the region
+     *
+     * The method is asynchronous because it may need to fetch data from the server to compute the scores.
+     * Computed scores are stored and used to filter the sample keys on demand.
+     *
+     * @param filterObject
+     * @returns {Promise<void>}
+     */
+    async setSampleFilter(filterObject) {
+        if (!filterObject) {
+            this.config.filterObject = undefined
+            this.filterObject = undefined
+            this.trackView.repaintViews()
+        } else {
+            const filterObjectCopy = Object.assign({}, filterObject)
+            this.config.filterObject = filterObjectCopy
+
+            filterObject.scores = await this.computeRegionScores(filterObject)
+            this.filterObject = filterObject
+            this.trackView.checkContentHeight()
+            this.trackView.repaintViews()
+        }
+        // TODO - store filter object in session
+    }
+
+
+    /**
+     * Filter function for sample keys.
+     *
+     * @param sampleKey
+     * @returns {boolean}
+     */
+    filter(sampleKey) {
+        if (this.filterObject) {
+            const filterObject = this.filterObject
+            const scores = filterObject.scores
+            const score = scores[sampleKey]
+
+            if (this.type === 'seg') {
+                if (filterObject.op === '>') {
+                    return score > filterObject.value
+                } else if (filterObject.op === '<') {
+                    return score < filterObject.value
+                }
+            } else if (this.type === 'mut' || this.type === 'maf') {
+                return 'HAS' === filterObject.op ? score : !score
+            }
+        }
+        // else if (this.config.sampleFilter) {
+        //     return this.config.sampleFilter(sampleKey)
+        // }
+        return true
+    }
+
+    get filteredSampleKeys() {
+        return this.sampleKeys.filter(sampleKey => this.filter(sampleKey))
+    }
+
 
     async getFeatures(chr, start, end) {
         const features = await this.featureSource.getFeatures({chr, start, end})
@@ -221,6 +289,7 @@ class SegTrack extends TrackBase {
 
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
+
         if (features && features.length > 0) {
 
             this.checkForLog(features)
@@ -232,14 +301,15 @@ class SegTrack extends TrackBase {
 
             // Create a map for fast id -> row lookup
             const samples = {}
-            this.sampleKeys.forEach(function (id, index) {
+            const filteredKeys = this.filteredSampleKeys
+            filteredKeys.forEach(function (id, index) {
                 samples[id] = index
             })
 
             let border
             switch (this.displayMode) {
                 case "FILL":
-                    this.sampleHeight = pixelHeight / this.sampleKeys.length
+                    this.sampleHeight = pixelHeight / filteredKeys.length
                     border = 0
                     break
 
@@ -381,7 +451,7 @@ class SegTrack extends TrackBase {
         if (!features) return 0
         const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight
         this.updateSampleKeys(features)
-        return this.sampleKeys.length * sampleHeight
+        return this.filteredSampleKeys.length * sampleHeight
     }
 
     /**
@@ -390,15 +460,37 @@ class SegTrack extends TrackBase {
     async sortByValue(sort, featureList) {
 
         const chr = sort.chr
+        const start = sort.position !== undefined ? sort.position - 1 : sort.start
+        const end = sort.end === undefined ? start + 1 : sort.end
+        const scores = await this.computeRegionScores({chr, start, end}, featureList)
+        const d2 = (sort.direction === "ASC" ? 1 : -1)
+
+        this.sampleKeys.sort(function (a, b) {
+            let s1 = scores[a]
+            let s2 = scores[b]
+            if (!s1) s1 = d2 * Number.MAX_VALUE
+            if (!s2) s2 = d2 * Number.MAX_VALUE
+            if (s1 === s2) return 0
+            else if (s1 > s2) return d2
+            else return d2 * -1
+        })
+
+        this.config.sort = sort
+        this.trackView.repaintViews()
+    }
+
+
+    async computeRegionScores(filterObject, featureList) {
+
+        const chr = filterObject.chr
         let start, end
-        if (sort.position) {
-            start = sort.position - 1
+        if (filterObject.position) {
+            start = filterObject.position - 1
             end = start + 1
         } else {
-            start = sort.start
-            end = sort.end
+            start = filterObject.start
+            end = filterObject.end
         }
-
 
         if (!featureList) {
             featureList = await this.featureSource.getFeatures({chr, start, end})
@@ -408,63 +500,39 @@ class SegTrack extends TrackBase {
         this.updateSampleKeys(featureList)
 
         const scores = {}
-        const d2 = (sort.direction === "ASC" ? 1 : -1)
+        const bpLength = end - start + 1
 
-        const sortSeg = () => {
-            // Compute weighted average score for each sample
-            const bpLength = end - start + 1
-            for (let segment of featureList) {
-                if (segment.end < start) continue
-                if (segment.start > end) break
+        const mutationTypes = filterObject.value ? new Set(filterObject.value) : undefined
+
+        for (let segment of featureList) {
+            if (segment.end < start) continue
+            if (segment.start > end) break
+            const sampleKey = segment.sampleKey || segment.sample
+
+            if ("mut" === this.type) {
+                if (mutationTypes) {
+                    const mutationType = segment.getAttribute("Variant_Classification")
+                    if (mutationTypes.has(mutationType)) {
+                        // Just count features overlapping region per sample
+                        scores[sampleKey] = (scores[sampleKey] || 0) + 1
+                    }
+                } else {
+                    // Just count features overlapping region per sample
+                    scores[sampleKey] = (scores[sampleKey] || 0) + 1
+                }
+            } else {
+
                 const min = Math.max(start, segment.start)
                 const max = Math.min(end, segment.end)
                 const f = (max - min) / bpLength
-                const sampleKey = segment.sampleKey || segment.sample
-                const s = scores[sampleKey] || 0
-                scores[sampleKey] = s + f * segment.value
+                scores[sampleKey] = (scores[sampleKey] || 0) + f * segment.value
             }
-
-            // Now sort sample names by score
-            this.sampleKeys.sort(function (a, b) {
-                let s1 = scores[a]
-                let s2 = scores[b]
-                if (!s1) s1 = d2 * Number.MAX_VALUE
-                if (!s2) s2 = d2 * Number.MAX_VALUE
-                if (s1 === s2) return 0
-                else if (s1 > s2) return d2
-                else return d2 * -1
-            })
         }
 
-        const sortMut = () => {
-            // Compute weighted average score for each sample
-            for (let segment of featureList) {
-                if (segment.end < start) continue
-                if (segment.start > end) break
-                const sampleKey = segment.sampleKey || segment.sample
-                if (!scores.hasOwnProperty(sampleKey) || segment.value.localeCompare(scores[sampleKey]) > 0) {
-                    scores[sampleKey] = segment.value
-                }
-            }
-            // Now sort sample names by score
-            this.sampleKeys.sort(function (a, b) {
-                let sa = scores[a] || ""
-                let sb = scores[b] || ""
-                return d2 * (sa.localeCompare(sb))
-            })
-        }
-
-        if ("mut" === this.type) {
-            sortMut()
-        } else {
-            sortSeg()
-        }
-
-        this.config.sort = sort
-
-        this.trackView.repaintViews()
+        return scores
 
     }
+
 
     sortByAttribute(attribute, sortDirection) {
 
@@ -534,7 +602,7 @@ class SegTrack extends TrackBase {
             const dirLabel = direction === "DESC" ? "descending" : "ascending"
             const sortLabel = this.type === 'seg' || this.type === 'shoebox' ?
                 `Sort by value (${dirLabel})` :
-                `Sort by type (${dirLabel})`
+                `Sort by count (${dirLabel})`
             return {
                 label: sortLabel,
                 click: () => {
