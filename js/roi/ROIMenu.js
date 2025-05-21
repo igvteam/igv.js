@@ -58,6 +58,9 @@ class ROIMenu {
         // Add sort menu items
         this.#addSortMenuItems(items, feature)
 
+        // Add filter menu items
+        this.#addFilterMenuItems(items, feature)
+
         // ROI driven filter
 
         if (roiSet.isUserDefined) {
@@ -145,6 +148,32 @@ class ROIMenu {
                 })
         }
     }
+
+    #addFilterMenuItems(items, feature) {
+        let found
+        found = this.browser.findTracks("type", "seg")
+        if (found.length > 0) {
+            items.push(
+                '<hr/>',
+                {   
+                    label: 'Filter Seg Samples',
+                    click: () => alert("Filter Seg Samples")
+                }
+            )
+        }
+
+        found = this.browser.findTracks("type", "mut")
+        if (found.length > 0) {
+            items.push(
+                '<hr/>',
+                {
+                    label: 'Filter Mut Samples',    
+                    click: () => alert("Filter Mut Samples")
+                }
+            )
+        }
+    }
+        
 
     #addBlatMenuItem(items, feature) {
         items.push({
