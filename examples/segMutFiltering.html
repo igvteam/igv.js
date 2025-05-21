@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>igv.js</title>
+
+</head>
+
+<body>
+
+<h1>Sample Filtering</h1>
+
+<p style="margin-bottom: 20px;">
+    Demonstration of filtering samples in a segmented copy number track and a mutation track. The filter is applied based
+    on the region in view. Zoom in before applying filters.
+</p>
+
+<div style="margin-bottom: 16px;">
+    <button id="filter-button"
+            style="margin-right: 10px; padding: 6px 16px; background-color: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Filter Seg Samples
+    </button>
+    <button id="filter-mut-button"
+            style="margin-right: 10px; padding: 6px 16px; background-color: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Filter Mutation Samples
+    </button>
+    <button id="clear-button"
+            style="padding: 6px 16px; background-color: #e0e0e0; color: #333; border: none; border-radius: 4px; cursor: pointer;">
+        Clear Filters
+    </button>
+</div>
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../dist/igv.esm.min.js"
+
+
+    const igvDiv = document.getElementById("igv-div")
+    const options =
+        {
+            genome: "hg19",
+            showSampleNames: true,
+            tracks: [
+                {
+                    name: "Filtered Samples",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/Broad.080528.subtypes.seg.gz",
+                    maxHeight: 300,
+                    autoHeight: true
+                    // filter: (sampleKey) => {
+                    //     return sampleKey.startsWith("TRIBE")
+                    // }
+                },
+                {
+                    name: "Somatic Mutations",
+                    type: "mut",
+                    format: "maf",
+                    url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/TCGA_GBM_Level3_Somatic_Mutations_08.28.2008.maf.gz"
+                }
+            ],
+            sampleinfo: [
+                {
+                    url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/sampleTable.txt.gz",
+                    name: "Sample Information"
+                }
+            ]
+        }
+
+
+    igv.createBrowser(igvDiv, options)
+
+        .then(function (browser) {
+
+            const filterButton = document.getElementById("filter-button")
+            filterButton.addEventListener("click", function () {
+                const threshold = prompt("Enter filter threshold (e.g., 0.5):", "0.5")
+                if (threshold != null) {
+                    const locus = browser.currentLoci()
+                    const [chr, range] = locus.split(":")
+                    const [start, end] = range.split("-").map(Number)
+                    const segTrack = browser.findTracks("type", "seg")[0]
+                    segTrack.setSampleFilter({
+                        type: "VALUE",
+                        op: ">",
+                        value: threshold,
+                        chr, start, end
+                    })
+                }
+            })
+
+            const filterMutButton = document.getElementById("filter-mut-button")
+            filterMutButton.addEventListener("click", function () {
+
+                // Show a popup dialog with a multi-select list of mutation types
+                const mutationTypes = [
+                    "Frame_Shift_Del", "Frame_Shift_Ins", "In_Frame_Del", "In_Frame_Ins", "Missense_Mutation",
+                    "Nonsense_Mutation", "Silent", "Splice_Site", "Translation_Start_Site", "Nonstop_Mutation",
+                    "3'UTR", "3'Flank", "5'UTR", "5'Flank", "IGR", "Intron", "RNA", "Targeted_Region",
+                    "De_novo_Start_InFrame", "De_novo_Start_OutOfFrame", "Splice_Region", "Unknown"
+                ]
+
+                // Create dialog elements
+                const dialog = document.createElement("dialog")
+                dialog.style.padding = "20px"
+                dialog.innerHTML = `
+                    <form method="dialog" style="display:flex; flex-direction:column; gap:10px;">
+                        <label for="mutation-multiselect">Select mutation types:</label>
+                        <select id="mutation-multiselect" multiple size="8" style="width:300px;">
+                            ${mutationTypes.map(type => `<option value="${type}">${type}</option>`).join("")}
+                        </select>
+                        <div style="margin-top:8px;">
+                            <label>
+                                <input type="radio" name="op" value="HAS" checked>
+                                Has
+                            </label>
+                            <label style="margin-left:16px;">
+                                <input type="radio" name="op" value="NOT_HAS">
+                                Does Not Have
+                            </label>
+                        </div>
+                        <menu style="display:flex; gap:10px; justify-content:flex-end;">
+                            <button value="cancel" type="submit">Cancel</button>
+                            <button value="ok" type="submit">OK</button>
+                        </menu>
+                    </form>
+                `
+                document.body.appendChild(dialog)
+
+                dialog.addEventListener("close", function () {
+                    if (dialog.returnValue === "ok") {
+                        const select = dialog.querySelector("#mutation-multiselect")
+                        const selected = Array.from(select.selectedOptions).map(opt => opt.value)
+                        const op = dialog.querySelector('input[name="op"]:checked').value
+                        if (selected.length > 0) {
+
+                            const locus = browser.currentLoci()
+                            const [chr, range] = locus.split(":")
+                            const [start, end] = range.split("-").map(Number)
+
+                            const mutTrack = browser.findTracks("type", "mut")[0]
+                            mutTrack.setSampleFilter({
+                                type: "MUTATION_TYPE",
+                                value: selected,
+                                op,
+                                chr, start, end
+                            })
+                        }
+                    }
+                    dialog.remove()
+                })
+
+                dialog.showModal()
+
+            })
+
+            const clearButton = document.getElementById("clear-button")
+            clearButton.addEventListener("click", function () {
+                const segTrack = browser.findTracks("type", "seg")[0]
+                segTrack.setFilter(undefined)
+            })
+        })
+
+</script>
+
+</body>
+
+</html>
