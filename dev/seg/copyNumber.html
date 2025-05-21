@@ -24,7 +24,8 @@
         <li>Index with visibility window of 100 MB</li>
     </ul>
 
-    <p>This demo tests chromosome aliasing for non-indexed and indexed files.  Chromosome names in seg file are 1,2,3,...</p>
+    <p>This demo tests chromosome aliasing for non-indexed and indexed files. Chromosome names in seg file are
+        1,2,3,...</p>
 
 </div>
 
@@ -33,7 +34,7 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     const version = igv.version()
     console.log("Using IGV version: " + version)
@@ -41,14 +42,11 @@
     const igvDiv = document.getElementById("igv-div")
     const options =
         {
-           // genome: "hg19",
-            reference: {
-                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
-                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
-                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
-                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab"
-            },
+            genome: "hg19",
             showSampleNames: true,
+            sampleinfo: [
+                "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/sampleTable.txt.gz"
+            ],
             tracks: [
                 {
                     name: "Explicit Samples",
@@ -59,31 +57,37 @@
                         "TCGA-02-0115-01A-01D-0193-01",
                         "TCGA-02-2485-01A-01D-0784-01",
                         "TCGA-06-0151-01A-01D-0236-01"],
-                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz",
                     height: 100
                 },
                 {
-                    name: "Segmented Copy Number",
+                    name: "Filtered Samples",
                     type: "seg",
                     format: "seg",
-                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz",
+                    filter: (sampleKey) => {
+                        return sampleKey === "TCGA-06-0168-01A-02D-0236-01" ||
+                            sampleKey === "TCGA-02-0115-01A-01D-0193-01" ||
+                            sampleKey === "TCGA-02-2485-01A-01D-0784-01" ||
+                            sampleKey === "TCGA-06-0151-01A-01D-0236-01"
+                    },
                 },
                 {
                     name: "Indexed",
                     type: "seg",
                     format: "seg",
-                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz",
+                    indexURL: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz.tbi"
                 },
                 {
                     name: "Indexed with visibility window",
                     type: "seg",
                     format: "seg",
-                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz",
+                    indexURL: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz.tbi",
                     visibilityWindow: "100000000"
                 },
-             ]
+            ]
         }
 
 

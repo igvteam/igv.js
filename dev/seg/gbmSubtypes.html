@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>igv.js</title>
+
+</head>
+
+<body>
+
+<div style="margin-bottom: 16px;">
+    <button id="filter-button"
+            style="margin-right: 10px; padding: 6px 16px; background-color: #1976d2; color: white; border: none; border-radius: 4px; cursor: pointer;">
+        Filter
+    </button>
+    <button id="clear-button"
+            style="padding: 6px 16px; background-color: #e0e0e0; color: #333; border: none; border-radius: 4px; cursor: pointer;">
+        Clear Filters
+    </button>
+</div>
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+
+    const igvDiv = document.getElementById("igv-div")
+    const options =
+        {
+            genome: "hg19",
+            showSampleNames: true,
+            tracks: [
+                {
+                    name: "Filtered Samples",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/Broad.080528.subtypes.seg.gz",
+                    maxHeight: 300,
+                    autoHeight: true
+                    // filter: (sampleKey) => {
+                    //     return sampleKey.startsWith("TRIBE")
+                    // }
+                },
+                {
+                    name: "Somatic Mutations",
+                    type: "mut",
+                    format: "maf",
+                    url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/TCGA_GBM_Level3_Somatic_Mutations_08.28.2008.maf.gz"
+                }
+            ],
+            sampleinfo: [
+                {
+                    url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/sampleTable.txt.gz",
+                    name: "Sample Information"
+                }
+            ]
+        }
+
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            const filterButton = document.getElementById("filter-button")
+            filterButton.addEventListener("click", function () {
+                const threshold = prompt("Enter filter threshold (e.g., 0.5):", "0.5")
+                if (threshold != null) {
+                    const locus = browser.currentLoci()
+                    const [chr, range] = locus.split(":")
+                    const [start, end] = range.split("-").map(Number)
+
+                    const segTrack = browser.findTracks("type", "seg")[0]
+                    segTrack.setFilter({
+                        type: "VALUE",
+                        op: ">",
+                        value: threshold,
+                        chr, start, end
+                    })
+                }
+            })
+
+            const clearButton = document.getElementById("clear-button")
+            clearButton.addEventListener("click", function () {
+                const segTrack = browser.findTracks("type", "seg")[0]
+                segTrack.setFilter(undefined)
+            })
+        })
+
+</script>
+
+</body>
+
+</html>
