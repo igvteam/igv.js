@@ -3,6 +3,8 @@ import * as UIUtils from "../ui/utils/ui-utils.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import {createBlatTrack} from "../blat/blatTrack.js"
 import ROISEGFilterDialog from "../ui/components/roiSegFilterDialog.js"
+import ROIMutFilterDialog from "../ui/components/roiMutFilterDialog.js"
+import SegTrack from "../feature/segTrack.js"
 
 const maxSequenceSize = 1000000
 const maxBlatSize = 25000
@@ -30,7 +32,7 @@ class ROIMenu {
         this.container.style.display = 'none'
 
         this.roiSEGFilterDialog = new ROISEGFilterDialog(browser.columnContainer)
-
+        this.roiMutFilterDialog = new ROIMutFilterDialog(browser.columnContainer, SegTrack.getMutationTypes())
     }
 
     async present(feature, roiSet, event, roiManager, columnContainer, regionElement) {
@@ -156,6 +158,7 @@ class ROIMenu {
 
         const st = this.browser.findTracks("type", "seg")
         if (st.length > 0) {
+
             items.push(
                 '<hr/>',
                 {
@@ -175,19 +178,30 @@ class ROIMenu {
                     }
                 }
             )
+
         }
 
         const mt = this.browser.findTracks("type", "mut")
         if (mt.length > 0) {
+
             items.push(
                 '<hr/>',
                 {
-                    label: 'Filter Mut Samples',
+                    label: 'Select Mutation Types',
                     click: () => {
-                        alert("Filter Mut Samples")
+
+                        const config =
+                            {
+                                callback: selected => {
+                                    const {chr, start, end} = feature
+                                    Promise.all(mt.map(track => track.setSampleFilter({ type: "MUTATION_TYPE", op: ">", value: selected, chr, start, end })))
+                                }
+                            }
+                        this.roiMutFilterDialog.present(config, event)
                     }
                 }
             )
+
         }
     }
 
