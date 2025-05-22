@@ -154,10 +154,8 @@ class ROIMenu {
 
     #addFilterMenuItems(items, feature, event) {
 
-        let found
-
-        found = this.browser.findTracks("type", "seg")
-        if (found.length > 0) {
+        const st = this.browser.findTracks("type", "seg")
+        if (st.length > 0) {
             items.push(
                 '<hr/>',
                 {
@@ -166,20 +164,21 @@ class ROIMenu {
 
                         const config =
                             {
-                            label: 'Enter filter threshold (e.g., 0.5):',
-                            value: 1234321,
-                            callback: () => {
-                                console.log('ROI SEG Filter: callback')
+                                label: 'Enter filter threshold (e.g., 0.5):',
+                                value: 0.5,
+                                callback: thresholdString => {
+                                    const {chr, start, end} = feature
+                                    Promise.all(st.map(track => track.setSampleFilter({ type: "VALUE", op: ">", value: thresholdString, chr, start, end })))
+                                }
                             }
-                        }
                         this.roiSEGFilterDialog.present(config, event)
                     }
                 }
             )
         }
 
-        found = this.browser.findTracks("type", "mut")
-        if (found.length > 0) {
+        const mt = this.browser.findTracks("type", "mut")
+        if (mt.length > 0) {
             items.push(
                 '<hr/>',
                 {
@@ -213,14 +212,6 @@ class ROIMenu {
         this.container.innerHTML = ''
     }
 
-}
-
-function
-
-removeAllChildNodes(parent) {
-    while (parent.firstChild) {
-        parent.removeChild(parent.firstChild)
-    }
 }
 
 export default ROIMenu
