@@ -192,9 +192,10 @@ class ROIMenu {
 
                         const config =
                             {
-                                callback: selected => {
+                                value: "Missense_Mutation",
+                                callback: (value, op) => {
                                     const {chr, start, end} = feature
-                                    Promise.all(mt.map(track => track.setSampleFilter({ type: "MUTATION_TYPE", op: ">", value: selected, chr, start, end })))
+                                    Promise.all(mt.map(track => track.setSampleFilter({ type: "MUTATION_TYPE", op, value, chr, start, end })))
                                 }
                             }
                         this.roiMutFilterDialog.present(config, event)
