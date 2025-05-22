@@ -17,10 +17,48 @@ class ROISEGFilterDialog {
         const header = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__header'})
         this.container.appendChild(header)
 
-        // dialog label
-        this.label = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__one-liner'})
-        this.container.appendChild(this.label)
-        this.label.textContent = 'Unlabeled'
+        // radio group container
+        this.radio_container = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__radio-group'})
+        this.container.appendChild(this.radio_container)
+
+        // Less Than radio button
+        const ltContainer = DOMUtils.div({class: 'op'})
+        this.radio_container.appendChild(ltContainer)
+
+        const ltRadio = document.createElement("input")
+        ltContainer.appendChild(ltRadio)
+
+        ltRadio.type = "radio"
+        ltRadio.name = "op"
+        ltRadio.value = "<"
+        ltRadio.id = "lt-radio"
+
+        const ltLabel = document.createElement("label")
+        ltContainer.appendChild(ltLabel)
+
+        ltLabel.textContent = "Less than"
+        ltLabel.htmlFor = "lt-radio"
+
+
+        // Greater Than radio button
+        const gtContainer = DOMUtils.div({class: 'op'})
+        this.radio_container.appendChild(gtContainer)
+
+        const gtRadio = document.createElement("input")
+        gtContainer.appendChild(gtRadio)
+
+        gtRadio.type = "radio"
+        gtRadio.name = "op"
+        gtRadio.value = ">"
+        gtRadio.id = "gt-radio"
+        // gtRadio.checked = true
+
+        const gtLabel = document.createElement("label")
+        gtContainer.appendChild(gtLabel)
+
+        gtLabel.textContent = "Greater than"
+        gtLabel.htmlFor = "gt-radio"
+
 
         // input container
         this.input_container = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__input'})
@@ -29,35 +67,8 @@ class ROISEGFilterDialog {
         // input element.
         this._input = document.createElement("input")
         this.input_container.appendChild(this._input)
-
-        // radio group container
-        this.radio_container = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__radio-group'})
-        this.container.appendChild(this.radio_container)
-
-        // Less Than radio button
-        const ltContainer = DOMUtils.div({class: 'op'})
-        this.radio_container.appendChild(ltContainer)
-        const ltRadio = document.createElement("input")
-        ltRadio.type = "radio"
-        ltRadio.name = "op"
-        ltRadio.value = "<"
-        ltRadio.checked = true
-        ltContainer.appendChild(ltRadio)
-        const ltLabel = document.createElement("label")
-        ltLabel.textContent = "Less than"
-        ltContainer.appendChild(ltLabel)
-
-        // Greater Than radio button
-        const gtContainer = DOMUtils.div({class: 'op'})
-        this.radio_container.appendChild(gtContainer)
-        const gtRadio = document.createElement("input")
-        gtRadio.type = "radio"
-        gtRadio.name = "op"
-        gtRadio.value = ">"
-        gtContainer.appendChild(gtRadio)
-        const gtLabel = document.createElement("label")
-        gtLabel.textContent = "Greater than"
-        gtContainer.appendChild(gtLabel)
+        this._input.placeholder="Enter filter threshold (e.g., 0.5)"
+        this._input.value = ''
 
         // ok | cancel
         const buttons = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__ok-cancel'})
@@ -123,11 +134,18 @@ class ROISEGFilterDialog {
     }
 
     present(options, e) {
-        this.label.textContent = options.label
-        this._input.value = options.value
+        if (options.value) this._input.value = options.value
         this.callback = options.callback || options.click
 
         this.container.style.display = ''
+
+        // Explicitly set the radio button state
+        const ltRadio = this.radio_container.querySelector('#lt-radio')
+        const gtRadio = this.radio_container.querySelector('#gt-radio')
+        ltRadio.checked = true
+        gtRadio.checked = false
+
+        this._input.value = ''
 
         // Get click coordinates
         const clickX = e.clientX

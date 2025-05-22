@@ -167,8 +167,8 @@ class ROIMenu {
 
                         const config =
                             {
-                                label: 'Enter filter threshold (e.g., 0.5):',
-                                value: 0.5,
+                                // label: 'Enter filter threshold (e.g., 0.5):',
+                                // value: 0.5,
                                 callback: (threshold, op) => {
                                     const {chr, start, end} = feature
                                     Promise.all(st.map(track => track.setSampleFilter({ type: "VALUE", op, value: threshold, chr, start, end })))

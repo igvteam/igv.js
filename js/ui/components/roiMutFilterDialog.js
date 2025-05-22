@@ -8,7 +8,7 @@ class ROIMUTFilterDialog {
     constructor(parent, mutationTypes) {
 
         this.parent = parent
-        this.mutationTypes = mutationTypes
+
 
         // dialog container
         this.container = DOMUtils.div({class: 'igv-roi-mut-filter-dialog'})
@@ -25,27 +25,38 @@ class ROIMUTFilterDialog {
         // Has radio button
         const hasContainer = DOMUtils.div({class: 'op'})
         this.radio_container.appendChild(hasContainer)
+
         const hasRadio = document.createElement("input")
+        hasContainer.appendChild(hasRadio)
+
         hasRadio.type = "radio"
         hasRadio.name = "op"
         hasRadio.value = "HAS"
-        hasRadio.checked = true
-        hasContainer.appendChild(hasRadio)
+        hasRadio.id = "has-radio"
+
         const hasLabel = document.createElement("label")
-        hasLabel.textContent = "Has"
         hasContainer.appendChild(hasLabel)
+
+        hasLabel.textContent = "Has"
+        hasLabel.htmlFor = "has-radio"
 
         // Does Not Have radio button
         const notHasContainer = DOMUtils.div({class: 'op'})
         this.radio_container.appendChild(notHasContainer)
+
         const notHasRadio = document.createElement("input")
+        notHasContainer.appendChild(notHasRadio)
+
         notHasRadio.type = "radio"
         notHasRadio.name = "op"
         notHasRadio.value = "NOT_HAS"
-        notHasContainer.appendChild(notHasRadio)
+        notHasRadio.id = "not-has-radio"
+
         const notHasLabel = document.createElement("label")
-        notHasLabel.textContent = "Does not have"
         notHasContainer.appendChild(notHasLabel)
+
+        notHasLabel.textContent = "Does not have"
+        notHasLabel.htmlFor = "not-has-radio"
 
         // select container
         this.select_container = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__select'})
@@ -56,7 +67,7 @@ class ROIMUTFilterDialog {
         this.select_container.appendChild(this._select)
 
         // Add options based on mutation types
-        for (const type of this.mutationTypes) {
+        for (const type of mutationTypes) {
             const option = document.createElement("option")
             option.value = type
             option.textContent = type
@@ -136,6 +147,14 @@ class ROIMUTFilterDialog {
         }
 
         this.callback = options.callback || options.click
+
+
+        // Explicitly set the radio button state
+        const hasRadio = this.radio_container.querySelector('#has-radio')
+        const notHasRadio = this.radio_container.querySelector('#not-has-radio')
+        hasRadio.checked = true
+        notHasRadio.checked = false
+
 
         this.container.style.display = ''
 
