@@ -23,14 +23,50 @@ class ROIMUTFilterDialog {
         this.container.appendChild(this.label)
         this.label.textContent = 'Unlabeled'
 
-        // input container
-        this.input_container = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__input'})
-        this.container.appendChild(this.input_container)
+        // select container
+        this.select_container = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__select'})
+        this.container.appendChild(this.select_container)
 
-        // input element.  DO NOT ACCESS THIS OUTSIDE OF THIS CLASS
-        this._input = document.createElement("input")
-        this.input_container.appendChild(this._input)
+        // select element.
+        this._select = document.createElement("select")
+        this.select_container.appendChild(this._select)
 
+        // Add options based on mutation types
+        for (const type of this.mutationTypes) {
+            const option = document.createElement("option")
+            option.value = type
+            option.textContent = type
+            this._select.appendChild(option)
+        }
+
+        // radio group container
+        this.radio_container = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__radio-group'})
+        this.container.appendChild(this.radio_container)
+
+        // Has radio button
+        const hasContainer = DOMUtils.div({class: 'op'})
+        this.radio_container.appendChild(hasContainer)
+        const hasRadio = document.createElement("input")
+        hasRadio.type = "radio"
+        hasRadio.name = "op"
+        hasRadio.value = "HAS"
+        hasRadio.checked = true
+        hasContainer.appendChild(hasRadio)
+        const hasLabel = document.createElement("label")
+        hasLabel.textContent = "Has"
+        hasContainer.appendChild(hasLabel)
+
+        // Does Not Have radio button
+        const notHasContainer = DOMUtils.div({class: 'op'})
+        this.radio_container.appendChild(notHasContainer)
+        const notHasRadio = document.createElement("input")
+        notHasRadio.type = "radio"
+        notHasRadio.name = "op"
+        notHasRadio.value = "NOT_HAS"
+        notHasContainer.appendChild(notHasRadio)
+        const notHasLabel = document.createElement("label")
+        notHasLabel.textContent = "Does Not Have"
+        notHasContainer.appendChild(notHasLabel)
 
         // ok | cancel
         const buttons = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__ok-cancel'})
@@ -46,29 +82,29 @@ class ROIMUTFilterDialog {
         buttons.appendChild(this.cancel)
         this.cancel.textContent = 'Cancel'
 
-        this._input.addEventListener('keyup', e => {
-            if ('Enter' === e.code) {
-                if (typeof this.callback === 'function') {
-                    this.callback(this._input.value)
-                    this.callback = undefined
-                }
-                this._input.value = undefined
-                DOMUtils.hide(this.container)
+        this._select.addEventListener('change', e => {
+            if (typeof this.callback === 'function') {
+                const {mutationType, op} = this.value
+                this.callback(mutationType, op)
+                this.callback = undefined
             }
-            e.stopImmediatePropagation()   // Prevent key event to cause track keyboard navigation ("next feature")
+            this._select.value = undefined
+            DOMUtils.hide(this.container)
+            e.stopImmediatePropagation()
         })
 
         this.ok.addEventListener('click', () => {
             if (typeof this.callback === 'function') {
-                this.callback(this._input.value)
+                const {mutationType, op} = this.value
+                this.callback(mutationType, op)
                 this.callback = undefined
             }
-            this._input.value = undefined
+            this._select.value = undefined
             DOMUtils.hide(this.container)
         })
 
         const cancel = () => {
-            this._input.value = ''
+            this._select.value = ''
             DOMUtils.hide(this.container)
         }
 
@@ -82,13 +118,29 @@ class ROIMUTFilterDialog {
     }
 
     get value() {
-        return DOMPurify.sanitize(this._input.value)
+        return {
+            mutationType: DOMPurify.sanitize(this._select.value),
+            op: this.#getSelectedOp()
+        }
     }
 
+    #getSelectedOp() {
+        const selectedRadio = this.radio_container.querySelector('input[name="op"]:checked')
+        return selectedRadio ? selectedRadio.value : "HAS"  // Default to HAS if somehow no radio is selected
+    }
 
     present(options, e) {
         this.label.textContent = options.label
-        this._input.value = options.value
+        
+        // Set the value and ensure it's selected
+        if (options.value) {
+            this._select.value = options.value
+            // Force the select to update its display
+            this._select.selectedIndex = Array.from(this._select.options).findIndex(option => option.value === options.value)
+        } else {
+            this._select.selectedIndex = 0  // Select first option if no value provided
+        }
+        
         this.callback = options.callback || options.click
 
         this.container.style.display = ''
