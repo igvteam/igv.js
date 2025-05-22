@@ -187,7 +187,7 @@ class ROIMenu {
             items.push(
                 '<hr/>',
                 {
-                    label: 'Select Mutation Types',
+                    label: 'Filter Mutation Samples',
                     click: () => {
 
                         const config =
