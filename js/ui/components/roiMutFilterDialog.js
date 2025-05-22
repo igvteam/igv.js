@@ -18,27 +18,6 @@ class ROIMUTFilterDialog {
         const header = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__header'})
         this.container.appendChild(header)
 
-        // dialog label
-        this.label = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__one-liner'})
-        this.container.appendChild(this.label)
-        this.label.textContent = 'Unlabeled'
-
-        // select container
-        this.select_container = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__select'})
-        this.container.appendChild(this.select_container)
-
-        // select element.
-        this._select = document.createElement("select")
-        this.select_container.appendChild(this._select)
-
-        // Add options based on mutation types
-        for (const type of this.mutationTypes) {
-            const option = document.createElement("option")
-            option.value = type
-            option.textContent = type
-            this._select.appendChild(option)
-        }
-
         // radio group container
         this.radio_container = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__radio-group'})
         this.container.appendChild(this.radio_container)
@@ -65,8 +44,24 @@ class ROIMUTFilterDialog {
         notHasRadio.value = "NOT_HAS"
         notHasContainer.appendChild(notHasRadio)
         const notHasLabel = document.createElement("label")
-        notHasLabel.textContent = "Does Not Have"
+        notHasLabel.textContent = "Does not have"
         notHasContainer.appendChild(notHasLabel)
+
+        // select container
+        this.select_container = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__select'})
+        this.container.appendChild(this.select_container)
+
+        // select element
+        this._select = document.createElement("select")
+        this.select_container.appendChild(this._select)
+
+        // Add options based on mutation types
+        for (const type of this.mutationTypes) {
+            const option = document.createElement("option")
+            option.value = type
+            option.textContent = type
+            this._select.appendChild(option)
+        }
 
         // ok | cancel
         const buttons = DOMUtils.div({class: 'igv-roi-mut-filter-dialog__ok-cancel'})
@@ -130,8 +125,7 @@ class ROIMUTFilterDialog {
     }
 
     present(options, e) {
-        this.label.textContent = options.label
-        
+
         // Set the value and ensure it's selected
         if (options.value) {
             this._select.value = options.value
@@ -140,7 +134,7 @@ class ROIMUTFilterDialog {
         } else {
             this._select.selectedIndex = 0  // Select first option if no value provided
         }
-        
+
         this.callback = options.callback || options.click
 
         this.container.style.display = ''
@@ -181,4 +175,4 @@ class ROIMUTFilterDialog {
     }
 }
 
-export default ROIMUTFilterDialog 
+export default ROIMUTFilterDialog
