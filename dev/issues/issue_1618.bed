@@ -1,3 +1,0 @@
-#gffTags
-track name="Test" useScore=1 viewLimits=0:50 color=32,74,135 altColor=164,0,0
-chr1	10000	11000	Transcript=ABC;Read counts=A:4 B:5	25	+	10000	11000	255,0,0	1	1000	0
