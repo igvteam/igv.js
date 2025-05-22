@@ -26,10 +26,38 @@ class ROISEGFilterDialog {
         this.input_container = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__input'})
         this.container.appendChild(this.input_container)
 
-        // input element.  DO NOT ACCESS THIS OUTSIDE OF THIS CLASS
+        // input element.
         this._input = document.createElement("input")
         this.input_container.appendChild(this._input)
 
+        // radio group container
+        this.radio_container = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__radio-group'})
+        this.container.appendChild(this.radio_container)
+
+        // Less Than radio button
+        const ltContainer = DOMUtils.div({class: 'op'})
+        this.radio_container.appendChild(ltContainer)
+        const ltRadio = document.createElement("input")
+        ltRadio.type = "radio"
+        ltRadio.name = "op"
+        ltRadio.value = "<"
+        ltRadio.checked = true
+        ltContainer.appendChild(ltRadio)
+        const ltLabel = document.createElement("label")
+        ltLabel.textContent = "Less than"
+        ltContainer.appendChild(ltLabel)
+
+        // Greater Than radio button
+        const gtContainer = DOMUtils.div({class: 'op'})
+        this.radio_container.appendChild(gtContainer)
+        const gtRadio = document.createElement("input")
+        gtRadio.type = "radio"
+        gtRadio.name = "op"
+        gtRadio.value = ">"
+        gtContainer.appendChild(gtRadio)
+        const gtLabel = document.createElement("label")
+        gtLabel.textContent = "Greater than"
+        gtContainer.appendChild(gtLabel)
 
         // ok | cancel
         const buttons = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__ok-cancel'})
@@ -48,7 +76,8 @@ class ROISEGFilterDialog {
         this._input.addEventListener('keyup', e => {
             if ('Enter' === e.code) {
                 if (typeof this.callback === 'function') {
-                    this.callback(this._input.value)
+                    const {threshold, op} = this.value
+                    this.callback(threshold, op)
                     this.callback = undefined
                 }
                 this._input.value = undefined
@@ -59,7 +88,8 @@ class ROISEGFilterDialog {
 
         this.ok.addEventListener('click', () => {
             if (typeof this.callback === 'function') {
-                this.callback(this._input.value)
+                const {threshold, op} = this.value
+                this.callback(threshold, op)
                 this.callback = undefined
             }
             this._input.value = undefined
@@ -81,9 +111,16 @@ class ROISEGFilterDialog {
     }
 
     get value() {
-        return DOMPurify.sanitize(this._input.value)
+        return {
+            threshold: DOMPurify.sanitize(this._input.value),
+            op: this.#getSelectedOp()
+        }
     }
 
+    #getSelectedOp() {
+        const selectedRadio = this.radio_container.querySelector('input[name="op"]:checked')
+        return selectedRadio ? selectedRadio.value : "<"  // Default to < if somehow no radio is selected
+    }
 
     present(options, e) {
         this.label.textContent = options.label
