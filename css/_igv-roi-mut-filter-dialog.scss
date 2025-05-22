@@ -149,21 +149,6 @@
       font-size: 16px;
     }
 
-    input[type="range"] {
-      width: 70%;
-      -webkit-appearance: none;
-      background: linear-gradient(90deg, white, black);
-      outline: none;
-      margin: 0;
-    }
-
-    output {
-      display: block;
-      height: 100%;
-      width: 20%;
-      font-size: 16px;
-    }
-
   }
 
   // ok | cancel - container
@@ -222,4 +207,4 @@
 
   }
 
-} 
+}
