@@ -70,67 +70,48 @@
 
   }
 
-  // one-liner
-  &__one-liner {
-
-    color: $igv-dark-grey-color;
-
-    width: 95%;
-    line-height: 24px;
-
-    text-align: left;
+  &__radio-group {
     margin-top: 8px;
-    padding-left: 8px;
-
-    overflow-wrap: break-word;
-
-    background-color: white;
-  }
-
-  // labeled input
-  &__label-input {
-    margin-top: 8px;
-
-    width: 95%;
-    height: 24px;
-
-    color: $igv-dark-grey-color;
-
-    line-height: 24px;
-    padding-left: 8px;
-
-    background-color: white;
-
     display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
+    flex-direction: row;
+    justify-content: space-around;
     align-items: center;
-
-    >div {
-      width: fit-content;
-      height: 100%;
-
-      font-size: 16px;
-      text-align: right;
-      padding-right: 8px;
-
-      background-color: white;
+    label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      gap: 4px;
     }
 
-    @include generic-input;
-    input {
-      width: 50%;
-      font-size: 16px;
+    input[type="radio"] {
+      cursor: pointer;
     }
 
+    .op {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      margin-left: 16px;
+      gap: 2px;
+
+      input[type="radio"] {
+        display: block;
+        margin: 0;
+      }
+
+      label {
+        display: block;
+        margin-left: 4px;
+      }
+    }
   }
 
   // select
   &__select {
     margin-top: 8px;
 
-    width: 100%;
+    width: 80%;
     height: 24px;
 
     color: $igv-dark-grey-color;
@@ -147,47 +128,15 @@
       width: 100%;
       height: 100%;
       font-size: 16px;
-      padding: 0 8px;
+      //padding: 0 8px;
       border: 1px solid $igv-trackgear-grey-color;
       border-radius: 4px;
       background-color: white;
       cursor: pointer;
-      
+
       &:focus {
         outline: none;
         border-color: $igv-button-ok-color;
-      }
-    }
-  }
-
-  &__radio-group {
-    margin-top: 8px;
-    display: flex;
-    flex-direction: row;
-    gap: 16px;
-
-    label {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      cursor: pointer;
-    }
-
-    input[type="radio"] {
-      cursor: pointer;
-    }
-
-    .op {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-
-      input[type="radio"] {
-        margin: 0;
-      }
-
-      label {
-        margin-left: 4px;
       }
     }
   }
