@@ -65,6 +65,8 @@ class ROIMUTFilterDialog {
         // select element
         this._select = document.createElement("select")
         this.select_container.appendChild(this._select)
+        this._select.multiple = true
+        this._select.size = 8
 
         // Add options based on mutation types
         for (const type of mutationTypes) {
@@ -88,21 +90,21 @@ class ROIMUTFilterDialog {
         buttons.appendChild(this.cancel)
         this.cancel.textContent = 'Cancel'
 
-        this._select.addEventListener('change', e => {
-            if (typeof this.callback === 'function') {
-                const {mutationType, op} = this.value
-                this.callback(mutationType, op)
-                this.callback = undefined
-            }
-            this._select.value = undefined
-            DOMUtils.hide(this.container)
-            e.stopImmediatePropagation()
-        })
+        // this._select.addEventListener('change', e => {
+        //     if (typeof this.callback === 'function') {
+        //         const {mutationType, op} = this.value
+        //         this.callback(mutationType, op)
+        //         this.callback = undefined
+        //     }
+        //     this._select.value = undefined
+        //     DOMUtils.hide(this.container)
+        //     e.stopImmediatePropagation()
+        // })
 
         this.ok.addEventListener('click', () => {
             if (typeof this.callback === 'function') {
-                const {mutationType, op} = this.value
-                this.callback(mutationType, op)
+                const { selected, op} = this.value
+                this.callback(selected, op)
                 this.callback = undefined
             }
             this._select.value = undefined
@@ -124,8 +126,9 @@ class ROIMUTFilterDialog {
     }
 
     get value() {
+        const selected = Array.from(this._select.selectedOptions).map(opt => opt.value)
         return {
-            mutationType: DOMPurify.sanitize(this._select.value),
+            selected,
             op: this.#getSelectedOp()
         }
     }
@@ -138,13 +141,13 @@ class ROIMUTFilterDialog {
     present(options, e) {
 
         // Set the value and ensure it's selected
-        if (options.value) {
-            this._select.value = options.value
-            // Force the select to update its display
-            this._select.selectedIndex = Array.from(this._select.options).findIndex(option => option.value === options.value)
-        } else {
-            this._select.selectedIndex = 0  // Select first option if no value provided
-        }
+        // if (options.value) {
+        //     this._select.value = options.value
+        //     // Force the select to update its display
+        //     this._select.selectedIndex = Array.from(this._select.options).findIndex(option => option.value === options.value)
+        // } else {
+        //     this._select.selectedIndex = 0  // Select first option if no value provided
+        // }
 
         this.callback = options.callback || options.click
 

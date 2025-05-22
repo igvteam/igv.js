@@ -167,8 +167,6 @@ class ROIMenu {
 
                         const config =
                             {
-                                // label: 'Enter filter threshold (e.g., 0.5):',
-                                // value: 0.5,
                                 callback: (threshold, op) => {
                                     const {chr, start, end} = feature
                                     Promise.all(st.map(track => track.setSampleFilter({ type: "VALUE", op, value: threshold, chr, start, end })))
@@ -192,10 +190,9 @@ class ROIMenu {
 
                         const config =
                             {
-                                value: "Missense_Mutation",
-                                callback: (value, op) => {
+                                callback: (selected, op) => {
                                     const {chr, start, end} = feature
-                                    Promise.all(mt.map(track => track.setSampleFilter({ type: "MUTATION_TYPE", op, value, chr, start, end })))
+                                    Promise.all(mt.map(track => track.setSampleFilter({ type: "MUTATION_TYPE", op, value: selected, chr, start, end })))
                                 }
                             }
                         this.roiMutFilterDialog.present(config, event)
