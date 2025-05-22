@@ -920,7 +920,7 @@ class TrackViewport extends Viewport {
         let track = this.trackView.track
         const dataList = track.popupData(clickState)
 
-        const popupClickHandlerResult = this.browser.fireEvent('trackclick', [track, dataList])
+        const popupClickHandlerResult = this.browser.fireEvent('trackclick', [track, dataList, clickState.genomicLocation])
 
         let content
         if (undefined === popupClickHandlerResult || true === popupClickHandlerResult) {
