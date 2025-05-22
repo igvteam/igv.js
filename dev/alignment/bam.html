@@ -7,7 +7,12 @@
 <body>
 
 <h2>
-    BAM file, grouped by strand, sorted by base @chr1:155,155,389, filtered by mapping quality
+    BAM file <ul>
+        <li>Grouped by strand</li>
+        <li>Sorted by base @chr1:155,155,405</li>
+        <li>Filtered by mapping quality >= 60</li>
+        <li>Show tags: MD, RG, XC</li>
+    </ul>
 </h2>
 
 <button id="log-state">Log Session</button>
@@ -23,7 +28,7 @@
         {
             "queryParametersSupported": true,
             "genome": "hg19",
-            "locus": "chr1:155155389",
+            "locus": "chr1:155,155,405",
             "roi": [],
             "tracks": [
                 {
@@ -34,13 +39,13 @@
                     "format": "bam",
                     "sort": {
                         "chr": "chr1",
-                        "position": 155155389,
+                        "position": 155155405,
                         "option": "BASE",
                         "direction": "ASC"
                     },
                     groupBy: "strand",
                     height: 800,
-                    filter: {mq: 30},
+                    filter: {mq: 60},
                     //hideTags: [ "MD", "RG", "XC"],
                     showTags: ["MD", "RG", "XC"]
                 }

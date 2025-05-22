@@ -59,10 +59,7 @@
     import igv from "../../js/index.js";
 
 //https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai
-    igv.createBrowser(igvDiv, {        reference: {
-            fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai"
-        }, showSampleNames: true})
+    igv.createBrowser(igvDiv, {genome: "hg19", showSampleNames: true})
 
         .then(async function (browser) {
 
