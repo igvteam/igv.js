@@ -159,8 +159,10 @@
 
             const clearButton = document.getElementById("clear-button")
             clearButton.addEventListener("click", function () {
-                const segTrack = browser.findTracks("type", "seg")[0]
-                segTrack.setFilter(undefined)
+                const [segTrack] = browser.findTracks("type", "seg")
+                const [mutTrack] = browser.findTracks("type", "mut")
+                segTrack.setSampleFilter(undefined)
+                mutTrack.setSampleFilter(undefined)
             })
         })
 
