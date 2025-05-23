@@ -46,7 +46,7 @@ class ChromosomeSelectWidget {
                 if (this.select.value.trim().toLowerCase() === "all" || this.select.value === "*") {
                     if (browser.genome.wholeGenomeView) {
                         const wgChr = browser.genome.getChromosome("all")
-                        return {chr: "all", start: 0, end: wgChr.bpLength}
+                        browser.updateLoci([{chr: "all", start: 0, end: wgChr.bpLength}])
                     }
                 } else {
                     const chromosome = await browser.genome.loadChromosome(this.select.value)
