@@ -105,19 +105,21 @@ class ClearFiltersButton extends NavbarButton {
             const checkboxes = document.querySelectorAll('.igv-clear-filters__row input:checked')
             const trackTypes = Array.from(checkboxes).map(({ dataset }) => dataset.value)
             for (const type of trackTypes) {
-                if ('seg' === type) {
-                    const st = this.browser.findTracks("type", "seg")
-                    if (st.length > 0) {
-                        await Promise.all(st.map(track => track.setSampleFilter(undefined)))
-                    }
-                } else if ('mut' === trackType) {
-                    const mt = this.browser.findTracks("type", "mut")
-                    if (mt.length > 0) {
-                        await Promise.all(mt.map(track => track.setSampleFilter(undefined)))
-                    }
+
+                const track = this.browser.findTracks("type", type)
+                if (track.length > 0) {
+                    await Promise.all(track.map(track => track.setSampleFilter(undefined)))
                 }
+ 
             }
-            panel.remove()
+
+            for (const checkbox of checkboxes) {
+                const parent = checkbox.parentElement
+                parent.remove()
+                tableRowContent.delete(checkbox.dataset.value)
+            }
+
+            panel.style.display = 'none'
         })
 
     }
