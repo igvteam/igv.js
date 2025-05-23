@@ -100,11 +100,14 @@ class Genome {
                     this.#wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
                 }
                 // Trim to remove non-existent chromosomes
-                this.#wgChromosomeNames = this.#wgChromosomeNames.filter(c => this.chromosomes.has(c))
+                await this.chromAlias.preload(this.#wgChromosomeNames)
+                this.#wgChromosomeNames =
+                    this.#wgChromosomeNames.map(c =>  this.getChromosomeName(c)).filter(c => this.chromosomes.has(c))
             } else {
                 this.#wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
+                await this.chromAlias.preload(this.#wgChromosomeNames)
             }
-            await this.chromAlias.preload(this.#wgChromosomeNames)
+
         }
 
         // Optionally create the psuedo chromosome "all" to support whole genome view
