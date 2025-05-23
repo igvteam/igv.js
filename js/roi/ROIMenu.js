@@ -172,6 +172,7 @@ class ROIMenu {
                             {
                                 callback: (threshold, op) => {
                                     const {chr, start, end} = feature
+                                    this.browser.navbar.clearFiltersButton.setTableRowContent(`seg#Copy number ${ '>' === op ? 'greater than' : 'less than' } ${threshold} in region ${chr}:${start}-${end}`)
                                     Promise.all(st.map(track => track.setSampleFilter({ type: "VALUE", op, value: threshold, chr, start, end })))
                                 }
                             }
@@ -196,6 +197,7 @@ class ROIMenu {
                             {
                                 callback: (selected, op) => {
                                     const {chr, start, end} = feature
+                                    this.browser.navbar.clearFiltersButton.setTableRowContent(`mut#Mutations that ${ op === 'HAS' ? 'include' : 'do not include' } ${ selected } in region ${chr}:${start}-${end}`) 
                                     Promise.all(mt.map(track => track.setSampleFilter({ type: "MUTATION_TYPE", op, value: selected, chr, start, end })))
                                 }
                             }
