@@ -47,12 +47,16 @@ class Hub {
         this.genomeStanzas = genomeStanzas
         this.trackStanzas = trackStanzas
         this.groupStanzas = groupStanzas
+        this.cytobandStanza = null
         this.trackHubMap = new Map()
 
         // trackStanzas will not be null if this is a "onefile" hub
         if (trackStanzas) {
             const genomeId = genomeStanzas[0].getProperty("genome") // Assumption here this is a single genome hub
             this.trackHubMap.set(genomeId, new TrackDbHub(trackStanzas, groupStanzas))
+
+            // Search for cytoband track.  This supports a special but important case -- Genark assembly hubs
+            this.cytobandStanza = this.trackStanzas.find(t => t.name === "cytoBandIdeo" && t.hasProperty("bigDataUrl")) || null
         }
     }
 
@@ -152,6 +156,10 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
 
         if (genomeStanza.hasProperty("twoBitBptUrl")) {
             config.twoBitBptURL = genomeStanza.getProperty("twoBitBptUrl")
+        }
+
+        if(this.cytobandStanza){
+            config.cytobandBbURL = this.cytobandStanza.getProperty("bigDataUrl")
         }
 
         if (this.hubStanza.hasProperty("longLabel")) {

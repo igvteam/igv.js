@@ -32,13 +32,6 @@ class TrackDbHub {
         this.trackStanzas = trackStanzas
     }
 
-    findCytobandURL() {
-        for (const t of this.trackStanzas) {
-            if (t.name === "cytoBandIdeo" && t.hasProperty("bigDataUrl")) {
-                return t.getProperty("bigDataUrl")
-            }
-        }
-    }
 
     getSupportedTrackCount() {
         let count = 0
