@@ -60,8 +60,12 @@ class ROIMenu {
             this.#addBlatMenuItem(items, feature)
         }
 
+        items.push(`<hr/>`)
+
         // Add sort menu items
         this.#addSortMenuItems(items, feature)
+
+        items.push(`<hr/>`)
 
         // Add filter menu items
         this.#addFilterMenuItems(items, feature, event)
@@ -77,7 +81,7 @@ class ROIMenu {
 
     #addDeleteMenuItem(items, feature, roiSet, roiManager, columnContainer, regionElement) {
         items.push(
-            '<hr/>',
+            '<hr style="border-color: white;"/>',
             {
                 label: 'Delete',
                 click: async () => {
@@ -140,14 +144,14 @@ class ROIMenu {
         const found = this.browser.findTracks(track => typeof track.sortByValue === 'function')
         if (found.length > 0) {
             const { chr, start, end } = feature
-            items.push(
-                '<hr/>',
-                {
+            items.push({
                     label: 'Sort by value (ascending)',
                     click: () => Promise.all(found.map(track => track.sortByValue({ option: 'VALUE', direction: 'ASC', chr, start, end })))
-                },
-                '<hr/>',
-                {
+                })
+
+            items.push('<hr style="border: none; height: 1px; background-color: white; margin-top: 1px; margin-bottom: 1px;" />')
+
+            items.push({
                     label: 'Sort by value (descending)',
                     click: () => Promise.all(found.map(track => track.sortByValue({ option: 'VALUE', direction: 'DESC', chr, start, end })))
                 })
@@ -160,9 +164,8 @@ class ROIMenu {
         if (st.length > 0) {
 
             items.push(
-                '<hr/>',
                 {
-                    label: 'Filter Seg Samples',
+                    label: 'Filter copy number samples',
                     click: () => {
 
                         const config =
@@ -177,15 +180,16 @@ class ROIMenu {
                 }
             )
 
+            items.push('<hr style="border: none; height: 1px; background-color: white; margin-top: 1px; margin-bottom: 1px;" />')
+
         }
 
         const mt = this.browser.findTracks("type", "mut")
         if (mt.length > 0) {
 
             items.push(
-                '<hr/>',
                 {
-                    label: 'Filter Mutation Samples',
+                    label: 'Filter mutation samples',
                     click: () => {
 
                         const config =
