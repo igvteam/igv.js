@@ -1431,7 +1431,7 @@ class AlignmentTrack extends TrackBase {
                 const tagValue = alignment.tags()[tag]
                 if (tagValue !== undefined) {
 
-                    // If the tag value can be intrepreted as a color, use it
+                    // If the tag value can be interpreted as a color, use it
                     if(typeof tagValue.startsWith === 'function') {
                         color = IGVColor.createColorStringSafe(tagValue)
                     }
