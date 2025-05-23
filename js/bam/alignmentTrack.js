@@ -699,7 +699,11 @@ class AlignmentTrack extends TrackBase {
             colorByMenuItems.push({key: 'tlen', label: 'insert size (TLEN)'})
             colorByMenuItems.push({key: 'unexpectedPair', label: 'pair orientation & insert size (TLEN)'})
         }
-        colorByMenuItems.push({key: 'tag', label: 'tag'})
+        if(this.colorBy && this.colorBy.startsWith("tag:")) {
+            const tag = this.colorBy.substring(4)
+            colorByMenuItems.push({key: this.colorBy, label: this.colorBy})
+        }
+        colorByMenuItems.push({key: 'tag', label: 'tag...'})
         for (let item of colorByMenuItems) {
             const selected = (this.colorBy === undefined && item.key === 'none') || this.colorBy === item.key
             menuItems.push(this.colorByCB(item, selected))
@@ -1427,14 +1431,19 @@ class AlignmentTrack extends TrackBase {
             case "tag":
                 const tagValue = alignment.tags()[tag]
                 if (tagValue !== undefined) {
-                    if (this.bamColorTag === tag) {
+
+                    // If the tag value can be intrepreted as a color, use it
+                    if(typeof tagValue.startsWith === 'function') {
                         color = IGVColor.createColorStringSafe(tagValue)
                     }
-                    if (!this.colorTable) {
-                        this.colorTable = new PaletteColorTable(this.tagColorPallete)
-                    }
-                    color = this.colorTable.getColor(tagValue)
 
+                    // Tag value is not a color, use a color table
+                    if (!color) {
+                        if (!this.colorTable) {
+                            this.colorTable = new PaletteColorTable(this.tagColorPallete)
+                        }
+                        color = this.colorTable.getColor(tagValue)
+                    }
                 }
                 break
         }
