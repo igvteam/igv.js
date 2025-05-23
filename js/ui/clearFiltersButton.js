@@ -35,28 +35,90 @@ class ClearFiltersButton extends NavbarButton {
         super(parent, browser, 'Clear Filters', buttonLabel, clearFiltersImage, clearFiltersImageHover, false)
 
         this.button.addEventListener('mouseenter', () => {
-            // if (false === browser.doShowClearFilters) {
-                this.setState(true)
-            // }
+            this.setState(true)
         })
 
         this.button.addEventListener('mouseleave', () => {
-            // if (false === browser.doShowClearFilters) {
-                this.setState(false)
-            // }
+            this.setState(false)
         })
 
+
+        this.tableRowContent = new Map()
+
         const mouseClickHandler = () => {
-            // browser.doShowClearFilters = !browser.doShowClearFilters
-            // this.setState(browser.doShowClearFilters)
-            browser.clearFilters()
+            this.presentTable(this.tableRowContent)
         }
 
         this.boundMouseClickHandler = mouseClickHandler.bind(this)
-
         this.button.addEventListener('click', this.boundMouseClickHandler)
 
         this.setVisibility(true)
+    }
+
+    setTableRowContent(string) {
+        const [ key, value ] = string.split('#')
+        this.tableRowContent.set(key, value)
+    }
+
+    presentTable(tableRowContent) {
+
+        const existingPanel = document.querySelector('.igv-clear-filters__container')
+        if (existingPanel) {
+            existingPanel.remove()
+        }
+
+        const panel = document.createElement('div')
+        document.body.appendChild(panel)
+        panel.className = 'igv-clear-filters__container'
+        panel.style.position = 'fixed'
+        panel.style.top = '50%'
+        panel.style.left = '50%'
+        panel.style.transform = 'translate(-50%, -50%)'
+        panel.style.zIndex = '1000'
+
+        for (const [key, value] of tableRowContent) {
+            const row = document.createElement('div')
+            row.className = 'igv-clear-filters__row'
+            panel.appendChild(row)
+
+            const checkbox = document.createElement('input')
+            row.appendChild(checkbox)
+            checkbox.type = 'checkbox'
+            checkbox.className = 'igv-clear-filters__checkbox'
+            checkbox.dataset.key = 'trackType'
+            checkbox.dataset.value = key
+
+            const content = document.createElement('div')
+            row.appendChild(content)
+            content.className = 'igv-clear-filters__content'
+            content.textContent = value
+
+        }
+
+        // Add apply button
+        const applyButton = document.createElement('button')
+        panel.appendChild(applyButton)
+
+        applyButton.className = 'igv-clear-filters__button'
+        applyButton.textContent = 'Apply'
+        applyButton.addEventListener('click', async () => {
+            const checkboxes = document.querySelectorAll('.igv-clear-filters__row input:checked')
+            const trackTypes = Array.from(checkboxes).map(({ dataset }) => dataset.value)
+            for (const type of trackTypes) {
+                if ('seg' === type) {
+                    const st = this.browser.findTracks("type", "seg")
+                    if (st.length > 0) {
+                        await Promise.all(st.map(track => track.setSampleFilter(undefined)))
+                    }
+                } else if ('mut' === trackType) {
+                    const mt = this.browser.findTracks("type", "mut")
+                    if (mt.length > 0) {
+                        await Promise.all(mt.map(track => track.setSampleFilter(undefined)))
+                    }
+                }
+            }
+            panel.remove()
+        })
 
     }
 
