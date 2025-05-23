@@ -55,7 +55,6 @@ class Genome {
         // Load sequence
         this.sequence = await loadSequence(config, this.browser)
 
-
         // Load cytobands.  This is optional but required to support the ideogram.  Only needed for whole genome view
         if(false !== config.showIdeogram && false !== config.wholeGenomeView) {
             if (config.cytobandURL) {
@@ -107,7 +106,6 @@ class Genome {
                 this.#wgChromosomeNames = trimSmallChromosomes(this.chromosomes)
                 await this.chromAlias.preload(this.#wgChromosomeNames)
             }
-
         }
 
         // Optionally create the psuedo chromosome "all" to support whole genome view
