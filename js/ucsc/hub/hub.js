@@ -11,6 +11,7 @@ import {loadStanzas} from "./hubParser.js"
 
 const idMappings = new Map([
     ["hg38", "GCF_000001405.40"],
+    ["hg38_1kg", "GCF_000001405.40"],
     ["mm39", "GCF_000001635.27"],
     ["mm10", "GCF_000001635.26"],
     ["bosTau9", "GCF_002263795.1"],
