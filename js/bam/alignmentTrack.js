@@ -700,7 +700,6 @@ class AlignmentTrack extends TrackBase {
             colorByMenuItems.push({key: 'unexpectedPair', label: 'pair orientation & insert size (TLEN)'})
         }
         if(this.colorBy && this.colorBy.startsWith("tag:")) {
-            const tag = this.colorBy.substring(4)
             colorByMenuItems.push({key: this.colorBy, label: this.colorBy})
         }
         colorByMenuItems.push({key: 'tag', label: 'tag...'})
