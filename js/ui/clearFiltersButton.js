@@ -52,7 +52,7 @@ class ClearFiltersButton extends NavbarButton {
         this.boundMouseClickHandler = mouseClickHandler.bind(this)
         this.button.addEventListener('click', this.boundMouseClickHandler)
 
-        this.setVisibility(true)
+        this.setVisibility(false)
     }
 
     setTableRowContent(string) {
@@ -124,6 +124,7 @@ class ClearFiltersButton extends NavbarButton {
             }
 
             panel.remove()
+            this.setVisibility(false)
         })
 
         // Add cancel button
