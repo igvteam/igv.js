@@ -29,7 +29,7 @@ class BlatTrack extends FeatureTrack {
     async postInit() {
         if(!this.featureSource) {
             // This will be the case when restoring from a session
-            const db = this.browser.genome.id   // TODO -- blat specific property
+            const db = this.browser.genome.ucscID   // TODO -- blat specific property
             const url = this.browser.config["blatServerURL"]
             const features = await blat({url, userSeq: this.sequence, db})
             this._features = features;
@@ -46,7 +46,7 @@ class BlatTrack extends FeatureTrack {
         if (undefined === this.table) {
 
             const rows = this._features.map(f => [
-                f.chr,
+                this.browser.genome.getChromosomeDisplayName(f.chr),
                 (f.start + 1),
                 f.end,
                 f.strand,
@@ -121,7 +121,7 @@ async function createBlatTrack({sequence, browser, name, title}) {
 
     try {
 
-        const db = browser.genome.id   // TODO -- blat specific property
+        const db = browser.genome.ucscID   // TODO -- blat specific property
         const url = browser.config["blatServerURL"] || defaultBlatServer
         const features = await blat({url, userSeq: sequence, db})
 
