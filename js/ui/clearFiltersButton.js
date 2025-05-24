@@ -32,7 +32,7 @@ class ClearFiltersButton extends NavbarButton {
 
     constructor(parent, browser) {
 
-        super(parent, browser, 'Clear Filters', buttonLabel, clearFiltersImage, clearFiltersImageHover, false)
+        super(parent, browser, 'Filters', buttonLabel, clearFiltersImage, clearFiltersImageHover, false)
 
         this.button.addEventListener('mouseenter', () => {
             this.setState(true)
@@ -95,22 +95,26 @@ class ClearFiltersButton extends NavbarButton {
 
         }
 
+        // Add button container
+        const buttonContainer = document.createElement('div')
+        panel.appendChild(buttonContainer)
+        buttonContainer.className = 'igv-clear-filters__button-container'
+
         // Add apply button
         const applyButton = document.createElement('button')
-        panel.appendChild(applyButton)
-
+        buttonContainer.appendChild(applyButton)
         applyButton.className = 'igv-clear-filters__button'
-        applyButton.textContent = 'Apply'
+        applyButton.textContent = 'Remove filters'
         applyButton.addEventListener('click', async () => {
             const checkboxes = document.querySelectorAll('.igv-clear-filters__row input:checked')
-            const trackTypes = Array.from(checkboxes).map(({ dataset }) => dataset.value)
+            const trackTypes = Array.from(checkboxes).map(({ dataset }) => {
+                return dataset.value
+            })
             for (const type of trackTypes) {
-
                 const track = this.browser.findTracks("type", type)
                 if (track.length > 0) {
                     await Promise.all(track.map(track => track.setSampleFilter(undefined)))
                 }
- 
             }
 
             for (const checkbox of checkboxes) {
@@ -119,7 +123,16 @@ class ClearFiltersButton extends NavbarButton {
                 tableRowContent.delete(checkbox.dataset.value)
             }
 
-            panel.style.display = 'none'
+            panel.remove()
+        })
+
+        // Add cancel button
+        const cancelButton = document.createElement('button')
+        buttonContainer.appendChild(cancelButton)
+        cancelButton.className = 'igv-clear-filters__button igv-clear-filters__button--cancel'
+        cancelButton.textContent = 'Cancel'
+        cancelButton.addEventListener('click', () => {
+            panel.remove()
         })
 
     }
