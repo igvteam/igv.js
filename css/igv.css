@@ -995,20 +995,26 @@
 
 .igv-clear-filters__container {
   font-family: "Open Sans", sans-serif;
+  font-size: medium;
+  font-weight: 400;
   display: flex;
   flex-direction: column;
-  min-width: 400px;
+  max-width: 300px;
   background-color: white;
-  border: 1px solid #ccc;
-  border-radius: 4px;
   padding: 12px;
   gap: 8px;
+  border-color: #7F7F7F;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: thin;
 }
 .igv-clear-filters__row {
   display: flex;
   align-items: flex-start;
   padding: 12px;
-  border-bottom: 1px solid #eee;
+  border-bottom-color: #7F7F7F;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
   gap: 12px;
   cursor: pointer;
   transition: background-color 0.2s ease;
@@ -1054,23 +1060,25 @@
   justify-content: center;
   flex: 1;
   padding: 10px;
-  background-color: #007bff;
+  background-color: #5ea4e0;
   color: white;
-  border: none;
-  border-radius: 4px;
+  border-color: transparent;
+  border-style: solid;
+  border-width: thin;
+  border-radius: 2px;
   cursor: pointer;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 400;
   transition: background-color 0.2s ease;
 }
 .igv-clear-filters__button:hover {
-  background-color: #0056b3;
+  background-color: #3b5c7f;
 }
 .igv-clear-filters__button--cancel {
-  background-color: #6c757d;
+  background-color: #c4c4c4;
 }
 .igv-clear-filters__button--cancel:hover {
-  background-color: #5a6268;
+  background-color: #7f7f7f;
 }
 
 .igv-ui-center-fixed {
