@@ -1001,7 +1001,6 @@
   background-color: white;
   border: 1px solid #ccc;
   border-radius: 4px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 12px;
   gap: 8px;
 }
@@ -1044,13 +1043,17 @@
   font-size: 12px;
   line-height: 1.4;
 }
+.igv-clear-filters__button-container {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
 .igv-clear-filters__button {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
+  flex: 1;
   padding: 10px;
-  margin-top: 8px;
   background-color: #007bff;
   color: white;
   border: none;
@@ -1062,6 +1065,12 @@
 }
 .igv-clear-filters__button:hover {
   background-color: #0056b3;
+}
+.igv-clear-filters__button--cancel {
+  background-color: #6c757d;
+}
+.igv-clear-filters__button--cancel:hover {
+  background-color: #5a6268;
 }
 
 .igv-ui-center-fixed {
