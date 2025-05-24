@@ -10,6 +10,10 @@ import {StringUtils, FeatureUtils} from "../../node_modules/igv-utils/src/index.
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
+import FeatureRenderer from './render/FeatureRenderer.js'
+import FeatureColorManager from './color/FeatureColorManager.js'
+import FeaturePopupManager from './popup/FeaturePopupManager.js'
+import FeatureMenuManager from './menu/FeatureMenuManager.js'
 
 
 class FeatureTrack extends TrackBase {
@@ -43,6 +47,12 @@ class FeatureTrack extends TrackBase {
                 config.featureSource :
                 FeatureSource(config, this.browser.genome)
         }
+
+        // Initialize managers
+        this.renderer = new FeatureRenderer(config)
+        this.colorManager = new FeatureColorManager(config)
+        this.popupManager = new FeaturePopupManager(config)
+        this.menuManager = new FeatureMenuManager(config)
 
         if ("FusionJuncSpan" === config.type) {
             this.render = config.render || renderFusionJuncSpan
@@ -153,24 +163,8 @@ class FeatureTrack extends TrackBase {
      * @returns {*}
      */
     computePixelHeight(features) {
-
-        if (this.displayMode === "COLLAPSED") {
-            return this.margin + this.expandedRowHeight
-        } else {
-            let maxRow = 0
-            if (features && (typeof features.forEach === "function")) {
-                for (let feature of features) {
-                    if (feature.row && feature.row > maxRow) {
-                        maxRow = feature.row
-                    }
-                }
-            }
-
-            const height = this.margin + (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight)
-            return height
-
-        }
-    };
+        return this.renderer.computePixelHeight(features)
+    }
 
     /**
      *                 context: ctx,
@@ -189,86 +183,10 @@ class FeatureTrack extends TrackBase {
      * @param options
      */
     draw(options) {
-
-        const {features, context, bpPerPixel, bpStart, bpEnd, pixelWidth, pixelHeight, referenceFrame} = options
-
-        // If drawing amino acids fetch cached sequence interval.  It is not needed if track does not support AA, but
-        // costs nothing since only a reference to a cached object is fetched.
-        if (bpPerPixel < aminoAcidSequenceRenderThreshold) {
-            options.sequenceInterval = this.browser.genome.getSequenceInterval(referenceFrame.chr, bpStart, bpEnd)
-        }
-
-
-        if (!this.isMergedTrack) {
-            IGVGraphics.fillRect(context, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
-        }
-
-        if (features) {
-
-            const rowFeatureCount = []
-            options.rowLastX = []
-            options.rowLastLabelX = []
-            for (let feature of features) {
-                if (this._filter && !this._filter(feature)) continue
-                if (feature.start > bpStart && feature.end < bpEnd) {
-                    const row = this.displayMode === "COLLAPSED" ? 0 : feature.row || 0
-                    if (!rowFeatureCount[row]) {
-                        rowFeatureCount[row] = 1
-                    } else {
-                        rowFeatureCount[row]++
-                    }
-                    options.rowLastX[row] = -Number.MAX_SAFE_INTEGER
-                    options.rowLastLabelX[row] = -Number.MAX_SAFE_INTEGER
-                }
-            }
-            const maxFeatureCount = Math.max(1, Math.max(...(rowFeatureCount.filter(c => !isNaN(c)))))
-            const pixelsPerFeature = pixelWidth / maxFeatureCount
-
-            let lastPxEnd = []
-            const selectedFeatures = []
-            for (let feature of features) {
-
-                if (this._filter && !this._filter(feature)) continue
-                if (feature.end < bpStart) continue
-                if (feature.start > bpEnd) break
-
-                if (this.displayMode === 'COLLAPSED' && this.browser.qtlSelections.hasPhenotype(feature.name)) {
-                    selectedFeatures.push(feature)
-                }
-
-                const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row
-                options.drawLabel = options.labelAllFeatures || pixelsPerFeature > 10
-                const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel)
-                const last = lastPxEnd[row]
-                if (!last || pxEnd > last) {
-
-                    this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, context, options)
-
-                    // Ensure a visible gap between features
-                    const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
-                    if (last && pxStart - last <= 0) {
-                        context.globalAlpha = 0.5
-                        IGVGraphics.strokeLine(context, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
-                        context.globalAlpha = 1.0
-                    }
-                    lastPxEnd[row] = pxEnd
-                }
-            }
-
-            // If any features are selected redraw them here.  This insures selected features are visible in collapsed mode
-            for (let feature of selectedFeatures) {
-                options.drawLabel = true
-                this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, context, options)
-            }
-
-        } else {
-            console.log("No feature list")
-        }
-
-    };
+        this.renderer.draw(options)
+    }
 
     clickedFeatures(clickState) {
-
         const y = clickState.y - this.margin
         const allFeatures = super.clickedFeatures(clickState)
 
@@ -293,168 +211,15 @@ class FeatureTrack extends TrackBase {
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
     popupData(clickState, features) {
-
-        if (features === undefined) features = this.clickedFeatures(clickState)
-        const genomicLocation = clickState.genomicLocation
-        const data = []
-        for (let feature of features) {
-
-            // Whole genome hack, whole-genome psuedo features store the "real" feature in an _f field
-            const f = feature._f || feature
-
-            const featureData = (typeof f.popupData === "function") ?
-                f.popupData(genomicLocation) :
-                this.extractPopupData(f)
-
-            if (featureData) {
-
-                if (data.length > 0) {
-                    data.push("<hr/><hr/>")
-                }
-
-                // If we have an infoURL, find the name property and create the link.  We do this at this level
-                // to catch name properties in both custom popupData functions and the generic extractPopupData function
-
-                const infoURL = this.infoURL || this.config.infoURL
-                for (let fd of featureData) {
-                    data.push(fd)
-                    if (infoURL &&
-                        fd.name &&
-                        fd.name.toLowerCase() === "name" &&
-                        fd.value &&
-                        StringUtils.isString(fd.value) &&
-                        !fd.value.startsWith("<")) {
-                        const href = infoURL.replace("$$", feature.name)
-                        fd.value = `<a target=_blank href=${href}>${fd.value}</a>`
-                    }
-                }
-
-
-                //Array.prototype.push.apply(data, featureData);
-
-                // If we have clicked over an exon number it.
-                // Disabled for GFF and GTF files if the visibility window is < the feature length since we don't know if we have all exons
-                const isGFF = "gff" === this.config.format || "gff3" === this.config.format || "gtf" === this.config.format
-                if (f.exons && f.exons.length > 1) {
-                    for (let i = 0; i < f.exons.length; i++) {
-                        const exon = f.exons[i]
-                        if (genomicLocation >= exon.start && genomicLocation <= exon.end) {
-                            const exonNumber = isGFF ?
-                                exon.number :
-                                f.strand === "-" ? f.exons.length - i : i + 1
-                            if (exonNumber) {
-                                data.push('<hr/>')
-                                data.push({name: "Exon Number", value: exonNumber})
-                            }
-                            break
-                        }
-                    }
-                }
-            }
-        }
-
-        return data
-
+        return this.popupManager.getPopupData(clickState, features)
     }
 
     menuItemList() {
-
-        const menuItems = []
-
-        if (this.render === renderSnp) {
-            menuItems.push('<hr/>')
-
-            for (const colorScheme of ["function", "class"]) {
-
-                function colorSchemeHandler() {
-                    this.colorBy = colorScheme
-                    this.trackView.repaintViews()
-                }
-
-                menuItems.push({element:createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy), click: colorSchemeHandler})
-            }
-        }
-
-        menuItems.push('<hr/>')
-
-        const lut =
-            {
-                "COLLAPSED": "Collapse",
-                "SQUISHED": "Squish",
-                "EXPANDED": "Expand"
-            }
-
-        for (const displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
-
-            function displayModeHandler() {
-                this.displayMode = displayMode
-                this.config.displayMode = displayMode
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-            }
-
-            menuItems.push({element:createCheckbox(lut[displayMode], displayMode === this.displayMode), click: displayModeHandler})
-        }
-
-        return menuItems
-
-    };
-
+        return this.menuManager.getMenuItemList()
+    }
 
     contextMenuItemList(clickState) {
-
-        const features = this.clickedFeatures(clickState)
-
-        if (undefined === features || 0 === features.length) {
-            return undefined
-        }
-
-        if (features.length > 1) {
-            features.sort((a, b) => (b.end - b.start) - (a.end - a.start))
-        }
-        const f = features[0]   // The shortest clicked feature
-
-        if ((f.end - f.start) <= 1000000) {
-            const list = [{
-                label: 'View feature sequence',
-                click: async () => {
-                    let seq = await this.browser.genome.getSequence(f.chr, f.start, f.end)
-                    if (!seq) {
-                        seq = "Unknown sequence"
-                    } else if (f.strand === '-') {
-                        seq = reverseComplementSequence(seq)
-                    }
-                    this.browser.alert.present(seq)
-
-                }
-            }]
-
-            if (isSecureContext() && navigator.clipboard !== undefined) {
-                list.push(
-                    {
-                        label: 'Copy feature sequence',
-                        click: async () => {
-                            let seq = await this.browser.genome.getSequence(f.chr, f.start, f.end)
-                            if (!seq) {
-                                seq = "Unknown sequence"
-                            } else if (f.strand === '-') {
-                                seq = reverseComplementSequence(seq)
-                            }
-                            try {
-                                await navigator.clipboard.writeText(seq)
-                            } catch (e) {
-                                console.error(e)
-                                this.browser.alert.present(`error copying sequence to clipboard ${e}`)
-                            }
-                        }
-                    }
-                )
-            }
-            list.push('<hr/>')
-            return list
-        } else {
-            return undefined
-        }
+        return this.menuManager.getContextMenuItemList(clickState)
     }
 
     description() {
@@ -486,53 +251,9 @@ class FeatureTrack extends TrackBase {
      * @returns {string}
      */
 
-    getColorForFeature(f) {
-
-        const feature = f._f || f    // f might be a "whole genome" wrapper
-
-        let color
-
-        if (f.name && this.browser.qtlSelections.hasPhenotype(f.name)) {
-            color = this.browser.qtlSelections.colorForGene(f.name)
-        } else if (this.altColor && "-" === feature.strand) {
-            color = (typeof this.altColor === "function") ? this.altColor(feature) : this.altColor
-        } else if (this.color) {
-            color = (typeof this.color === "function") ? this.color(feature) : this.color  // Explicit setting via menu, or possibly track line if !config.color
-        } else if (this.colorBy) {
-            const value = feature.getAttributeValue ?
-                feature.getAttributeValue(this.colorBy) :
-                feature[this.colorBy]
-            color = this.colorTable.getColor(value)
-        } else if (feature.color) {
-            color = feature.color   // Explicit color for feature
-        }
-
-        // If no explicit setting use the default
-        if (!color) {
-            color = FeatureTrack.defaultColor   // Track default
-        }
-
-        if (feature.alpha && feature.alpha !== 1) {
-            color = IGVColor.addAlpha(color, feature.alpha)
-        } else if (this.useScore && feature.score && !Number.isNaN(feature.score)) {
-            // UCSC useScore option, for scores between 0-1000.  See https://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK
-            const min = this.config.min ? this.config.min : this.viewLimitMin ? this.viewLimitMin : 0
-            const max = this.config.max ? this.config.max : this.viewLimitMax ? this.viewLimitMax : 1000
-            const alpha = getAlpha(min, max, feature.score)
-            feature.alpha = alpha    // Avoid computing again
-            color = IGVColor.addAlpha(color, alpha)
-        }
-
-
-        function getAlpha(min, max, score) {
-            const binWidth = (max - min) / 9
-            const binNumber = Math.floor((score - min) / binWidth)
-            return Math.min(1.0, 0.2 + (binNumber * 0.8) / 9)
-        }
-
-        return color
+    getColorForFeature(feature) {
+        return this.colorManager.getColorForFeature(feature)
     }
-
 
     /**
      * Called when the track is removed.  Do any needed cleanup here
@@ -547,7 +268,6 @@ class FeatureTrack extends TrackBase {
  * @param track
  */
 function monitorTrackDrag(track) {
-
     if (track.browser.on) {
         track.browser.on('trackdragend', onDragEnd)
         track.browser.on('trackremoved', unSubscribe)
@@ -555,7 +275,6 @@ function monitorTrackDrag(track) {
 
     function onDragEnd() {
         if (track.trackView && track.displayMode !== "SQUISHED") {
-            // Repaint views to adjust feature name if center is moved out of view
             track.trackView.repaintViews()
         }
     }
@@ -566,8 +285,6 @@ function monitorTrackDrag(track) {
             track.browser.un('trackremoved', unSubscribe)
         }
     }
-
 }
-
 
 export default FeatureTrack

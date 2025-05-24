@@ -488,9 +488,16 @@ class Browser {
             return
         }
 
-        const genomeConfig = StringUtils.isString(genomeOrReference) ?
-            await GenomeUtils.expandReference(this.alert, genomeOrReference) :
-            genomeOrReference
+        let genomeConfig
+        if (StringUtils.isString(genomeOrReference)) {
+            genomeConfig = await GenomeUtils.expandReference(this.alert, genomeOrReference)
+        } else {
+            genomeConfig = genomeOrReference
+        }
+
+        // const genomeConfig = StringUtils.isString(genomeOrReference) ?
+        //     await GenomeUtils.expandReference(this.alert, genomeOrReference) :
+        //     genomeOrReference
 
         await this.loadReference(genomeConfig, genomeConfig.locus || session.locus)
 
