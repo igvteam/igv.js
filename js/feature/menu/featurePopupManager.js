@@ -1,4 +1,4 @@
-import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
+import {StringUtils} from "igv-utils"
 
 export default class FeaturePopupManager {
     constructor(config) {
@@ -65,4 +65,4 @@ export default class FeaturePopupManager {
         // This method should be implemented by the specific feature type
         return []
     }
-} 
+}

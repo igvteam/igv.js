@@ -1,5 +1,8 @@
-import IGVGraphics from "../../igv-canvas.js"
 import {aminoAcidSequenceRenderThreshold} from "./renderFeature.js"
+import {renderFeature} from "./renderFeature.js"
+import {renderSnp} from "./renderSnp.js"
+import {renderFusionJuncSpan} from "./renderFusionJunction.js"
+import IGVGraphics from "../../igv-canvas.js"
 
 export default class FeatureRenderer {
     constructor(config) {
@@ -8,6 +11,13 @@ export default class FeatureRenderer {
         this.expandedRowHeight = config.expandedRowHeight || 30
         this.squishedRowHeight = config.squishedRowHeight || 15
         this.arrowSpacing = 30
+        this.featureHeight = config.featureHeight || 14
+        this.labelDisplayMode = config.labelDisplayMode
+        this.type = config.type
+        this.snpColors = config.type === "SNP" ? ['rgb(0,0,0)', 'rgb(0,0,255)', 'rgb(0,255,0)', 'rgb(255,0,0)'] : undefined
+        this.colorBy = config.colorBy
+        this.color = config.color
+        this.browser = config.browser
     }
 
     draw(options) {
@@ -18,9 +28,9 @@ export default class FeatureRenderer {
             options.sequenceInterval = this.browser.genome.getSequenceInterval(referenceFrame.chr, bpStart, bpEnd)
         }
 
-        if (!this.isMergedTrack) {
-            IGVGraphics.fillRect(context, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
-        }
+        // Replace IGVGraphics.fillRect with native canvas methods
+        context.fillStyle = "rgb(255, 255, 255)"
+        context.fillRect(0, options.pixelTop, pixelWidth, pixelHeight)
 
         if (features) {
             const rowFeatureCount = []
@@ -62,13 +72,17 @@ export default class FeatureRenderer {
                 const last = lastPxEnd[row]
                 
                 if (!last || pxEnd > last) {
-                    this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, context, options)
+                    this.renderFeature(feature, bpStart, bpPerPixel, pixelHeight, context, options)
 
                     // Ensure a visible gap between features
                     const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
                     if (last && pxStart - last <= 0) {
                         context.globalAlpha = 0.5
-                        IGVGraphics.strokeLine(context, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
+                        context.strokeStyle = "rgb(255, 255, 255)"
+                        context.beginPath()
+                        context.moveTo(pxStart, 0)
+                        context.lineTo(pxStart, pixelHeight)
+                        context.stroke()
                         context.globalAlpha = 1.0
                     }
                     lastPxEnd[row] = pxEnd
@@ -78,8 +92,21 @@ export default class FeatureRenderer {
             // Redraw selected features to ensure visibility in collapsed mode
             for (let feature of selectedFeatures) {
                 options.drawLabel = true
-                this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, context, options)
+                this.renderFeature(feature, bpStart, bpPerPixel, pixelHeight, context, options)
             }
+        }
+    }
+
+    renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
+        switch(this.type) {
+            case "SNP":
+                renderSnp.call(this, feature, bpStart, xScale, pixelHeight, ctx)
+                break
+            case "FusionJuncSpan":
+                renderFusionJuncSpan.call(this, feature, bpStart, xScale, pixelHeight, ctx)
+                break
+            default:
+                renderFeature.call(this, feature, bpStart, xScale, pixelHeight, ctx, options)
         }
     }
 
@@ -100,4 +127,52 @@ export default class FeatureRenderer {
             return height
         }
     }
-} 
+
+    getColorForFeature(feature) {
+        if (this.colorBy === 'function') {
+            return this.getColorByFunction(feature)
+        } else if (this.colorBy === 'class') {
+            return this.getColorByClass(feature)
+        } else {
+            return this.color || 'rgb(0,0,150)'
+        }
+    }
+
+    getColorByFunction(feature) {
+        const codingNonSynonSet = new Set(['nonsense', 'missense', 'stop-loss', 'frameshift', 'cds-indel'])
+        const codingSynonSet = new Set(['coding-synon'])
+        const spliceSiteSet = new Set(['splice-3', 'splice-5'])
+        const untranslatedSet = new Set(['untranslated-5', 'untranslated-3'])
+        const locusSet = new Set(['near-gene-3', 'near-gene-5'])
+        const intronSet = new Set(['intron'])
+
+        const funcArray = feature.func.split(',')
+        const priorities = funcArray.map(func => {
+            if (codingNonSynonSet.has(func) || spliceSiteSet.has(func)) {
+                return 3
+            } else if (codingSynonSet.has(func)) {
+                return 2
+            } else if (untranslatedSet.has(func)) {
+                return 1
+            } else {
+                return 0
+            }
+        })
+
+        const priority = Math.max(...priorities)
+        return this.snpColors[priority]
+    }
+
+    getColorByClass(feature) {
+        const cls = feature['class']
+        if (cls === 'deletion') {
+            return this.snpColors[3]
+        } else if (cls === 'mnp') {
+            return this.snpColors[2]
+        } else if (cls === 'microsatellite' || cls === 'named') {
+            return this.snpColors[1]
+        } else {
+            return this.snpColors[0]
+        }
+    }
+}

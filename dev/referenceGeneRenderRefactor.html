@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
+    <title>Gene Render Refactor</title>
 
 </head>
 
@@ -15,12 +15,12 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../js/index.js";
 
     document.addEventListener('DOMContentLoaded', async () => {
 
         const config = {
-        // locus: '19:49301000-49305700',
+        locus: '19:49301000-49305700',
         genome: "hg19",
         showTrackLabels: false,
         showIdeogram: false,

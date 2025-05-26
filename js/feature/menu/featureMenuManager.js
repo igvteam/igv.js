@@ -1,55 +1,66 @@
-import {createCheckbox} from "../../igv-icons.js"
-import {renderSnp} from "../render/renderSnp.js"
-
-export default class FeatureMenuManager {
+import { reverseComplementSequence } from "../../util/sequenceUtils.js"
+class FeatureMenuManager {
     constructor(config) {
         this.displayMode = config.displayMode || "EXPANDED"
         this.colorBy = config.colorBy
-        this.render = config.render
     }
 
     getMenuItemList() {
-        const menuItems = []
+        const items = []
 
-        if (this.render === renderSnp) {
-            menuItems.push('<hr/>')
-
-            for (const colorScheme of ["function", "class"]) {
-                function colorSchemeHandler() {
-                    this.colorBy = colorScheme
-                    this.trackView.repaintViews()
+        // Add display mode options
+        items.push({
+            label: "Display Mode",
+            submenu: [
+                {
+                    label: "Collapsed",
+                    click: () => this.setDisplayMode("COLLAPSED")
+                },
+                {
+                    label: "Expanded",
+                    click: () => this.setDisplayMode("EXPANDED")
+                },
+                {
+                    label: "Squished",
+                    click: () => this.setDisplayMode("SQUISHED")
                 }
+            ]
+        })
 
-                menuItems.push({
-                    element: createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy),
-                    click: colorSchemeHandler
-                })
-            }
-        }
-
-        menuItems.push('<hr/>')
-
-        const displayModeLabels = {
-            "COLLAPSED": "Collapse",
-            "SQUISHED": "Squish",
-            "EXPANDED": "Expand"
-        }
-
-        for (const displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
-            function displayModeHandler() {
-                this.displayMode = displayMode
-                this.config.displayMode = displayMode
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-            }
-
-            menuItems.push({
-                element: createCheckbox(displayModeLabels[displayMode], displayMode === this.displayMode),
-                click: displayModeHandler
+        // Add color by options if applicable
+        if (this.colorBy) {
+            items.push({
+                label: "Color By",
+                submenu: [
+                    {
+                        label: "Function",
+                        click: () => this.setColorBy("function")
+                    },
+                    {
+                        label: "Class",
+                        click: () => this.setColorBy("class")
+                    }
+                ]
             })
         }
 
-        return menuItems
+        return items
+    }
+
+    setDisplayMode(mode) {
+        this.displayMode = mode
+        // Notify track to redraw
+        if (this.track) {
+            this.track.trackView.repaint()
+        }
+    }
+
+    setColorBy(mode) {
+        this.colorBy = mode
+        // Notify track to redraw
+        if (this.track) {
+            this.track.trackView.repaint()
+        }
     }
 
     getContextMenuItemList(clickState) {
@@ -103,4 +114,6 @@ export default class FeatureMenuManager {
             return undefined
         }
     }
-} 
+}
+
+export default FeatureMenuManager
