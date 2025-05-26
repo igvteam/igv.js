@@ -3,7 +3,7 @@ import {convertToHubURL} from "../ucsc/ucscUtils.js"
 import {loadHub} from "../ucsc/hub/hubParser.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json"
-const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv-genomes/refs/heads/main/dist/genomes.json"
+const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv-data/main/genomes/web/genomes.json"
 
 const GenomeUtils = {
 
