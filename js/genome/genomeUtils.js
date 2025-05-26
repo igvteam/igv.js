@@ -2,8 +2,8 @@ import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import {convertToHubURL} from "../ucsc/ucscUtils.js"
 import {loadHub} from "../ucsc/hub/hubParser.js"
 
-const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json"
-const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv-data/main/genomes/web/genomes.json"
+const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes3.json"
+const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/web/genomes.json"
 
 const GenomeUtils = {
 
@@ -28,7 +28,7 @@ const GenomeUtils = {
                 } catch (error) {
                     try {
                         console.error("Error initializing default genomes:", error)
-                        const jsonArray = await igvxhr.loadJson(BACKUP_GENOMES_URL, {timeout: 2000})
+                        const jsonArray = await igvxhr.loadJson(BACKUP_GENOMES_URL, {timeout: 10000})
                         processJson(jsonArray, table)
                     } catch (e) {
                         console.error("Error initializing backup genomes:", error)
