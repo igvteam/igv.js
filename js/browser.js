@@ -557,7 +557,7 @@ class Browser {
 
         // Ensure that we always have a sequence track with no explicit URL (=> the reference genome sequence track)
         const pushSequenceTrack = trackConfigurations.filter(track => 'sequence' === track.type && !track.url && !track.fastaURL).length === 0
-        if (pushSequenceTrack /*&& false !== this.config.showSequence*/) {
+        if (true === session.showSequence && pushSequenceTrack) {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder, removable: false})
         }
 

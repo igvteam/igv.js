@@ -1,8 +1,7 @@
-import {aminoAcidSequenceRenderThreshold} from "./renderFeature.js"
-import {renderFeature} from "./renderFeature.js"
+import {aminoAcidSequenceRenderThreshold} from "./featureRendererUtils.js"
+import {renderFeature} from "./featureRendererUtils.js"
 import {renderSnp} from "./renderSnp.js"
 import {renderFusionJuncSpan} from "./renderFusionJunction.js"
-import IGVGraphics from "../../igv-canvas.js"
 
 export default class FeatureRenderer {
     constructor(config) {
@@ -36,7 +35,7 @@ export default class FeatureRenderer {
             const rowFeatureCount = []
             options.rowLastX = []
             options.rowLastLabelX = []
-            
+
             for (let feature of features) {
                 if (this._filter && !this._filter(feature)) continue
                 if (feature.start > bpStart && feature.end < bpEnd) {
@@ -56,7 +55,7 @@ export default class FeatureRenderer {
 
             let lastPxEnd = []
             const selectedFeatures = []
-            
+
             for (let feature of features) {
                 if (this._filter && !this._filter(feature)) continue
                 if (feature.end < bpStart) continue
@@ -70,7 +69,7 @@ export default class FeatureRenderer {
                 options.drawLabel = options.labelAllFeatures || pixelsPerFeature > 10
                 const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel)
                 const last = lastPxEnd[row]
-                
+
                 if (!last || pxEnd > last) {
                     this.renderFeature(feature, bpStart, bpPerPixel, pixelHeight, context, options)
 

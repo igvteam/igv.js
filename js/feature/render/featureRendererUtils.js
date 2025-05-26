@@ -23,11 +23,7 @@ function calculateFeatureCoordinates(feature, bpStart, xScale) {
         px -= 1.5
     }
 
-    return {
-        px: px,
-        px1: px1,
-        pw: pw
-    }
+    return { px, px1, pw }
 }
 
 /**

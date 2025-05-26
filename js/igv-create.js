@@ -117,11 +117,15 @@ function setDefaults(config) {
         config.minimumBases = 40
     }
 
+    if (undefined === config.showSequence) {
+        config.showSequence = true
+    }
+
     if (undefined === config.showIdeogram) {
         config.showIdeogram = true
     }
 
-    if (undefined == config.showCytobandNames) {
+    if (undefined === config.showCytobandNames) {
         config.showCytobandNames = false
     }
 
@@ -165,27 +169,27 @@ function setDefaults(config) {
         config.showSVGButton = true
     }
 
-    if (config.showControls === undefined) {
+    if (undefined === config.showControls) {
         config.showControls = true
     }
 
-    if (config.showNavigation === undefined) {
+    if (undefined === config.showNavigation) {
         config.showNavigation = true
     }
 
-    if (config.showRuler === undefined) {
+    if (undefined === config.showRuler) {
         config.showRuler = true
     }
 
-    if (config.flanking === undefined) {
+    if (undefined === config.flanking) {
         config.flanking = 1000
     }
 
-    if (config.pairsSupported === undefined) {
+    if (undefined === config.pairsSupported) {
         config.pairsSupported = true
     }
 
-    if (!config.tracks) {
+    if (undefined === config.tracks) {
         config.tracks = []
     }
 

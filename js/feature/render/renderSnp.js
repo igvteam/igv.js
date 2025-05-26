@@ -1,5 +1,5 @@
 // SNP constants
-import {calculateFeatureCoordinates} from "./renderFeature.js"
+import {calculateFeatureCoordinates} from "./featureRendererUtils.js"
 
 const codingNonSynonSet = new Set(['nonsense', 'missense', 'stop-loss', 'frameshift', 'cds-indel'])
 const codingSynonSet = new Set(['coding-synon'])
