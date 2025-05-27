@@ -8,8 +8,6 @@ import CytobandFile from "./cytobandFile.js"
 
 import {loadChromSizes} from "./chromSizes.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
-import {loadHub} from "../ucsc/hub/hubParser.js"
 
 const ucsdIDMap = new Map([
     ["1kg_ref", "hg18"],

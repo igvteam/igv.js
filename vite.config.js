@@ -12,24 +12,26 @@ export default defineConfig({
         sourcemap: true,
         commonjsOptions: {
             include: [/node_modules/]
+        },
+        rollupOptions: {
+            external: [
+                'igv-utils'
+            ],
+            output: {
+                globals: {
+                    'igv-utils': 'igvUtils'
+                }
+            }
         }
     },
     resolve: {
         alias: {
-            'igv-utils': path.resolve(__dirname, 'node_modules/igv-utils/src/index.js'),
-            'dompurify': path.resolve(__dirname, 'node_modules/dompurify/dist/purify.es.mjs'),
-            'vanilla-picker': path.resolve(__dirname, 'node_modules/vanilla-picker/dist/vanilla-picker.csp.mjs'),
-            'circular-view': path.resolve(__dirname, 'node_modules/circular-view/dist/circular-view.js'),
-            'igv-ui': path.resolve(__dirname, 'node_modules/igv-ui/dist/igv-ui.js')
+            'igv-utils': path.resolve(__dirname, 'node_modules/igv-utils/src/index.js')
         }
     },
     optimizeDeps: {
         include: [
-            'igv-utils',
-            'dompurify',
-            'vanilla-picker',
-            'circular-view',
-            'igv-ui'
+            'igv-utils'
         ],
         esbuildOptions: {
             target: 'es2020'

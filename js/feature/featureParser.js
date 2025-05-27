@@ -24,7 +24,6 @@
  */
 
 import {decodeBedpe, decodeBedpeDomain, fixBedPE} from './decode/bedpe.js'
-import {decodeInteract} from "./decode/interact.js"
 import {
     decodeBed,
     decodeBedGraph,
@@ -44,7 +43,6 @@ import {decodeFusionJuncSpan} from "./decode/fusionJuncSpan.js"
 import {decodeGtexGWAS} from "./decode/gtexGWAS.js"
 import {decodeCustom} from "./decode/custom.js"
 import {decodeGcnv} from "../gcnv/gcnvDecoder.js"
-import decodeShoebox from "../shoebox/decodeShoebox.js"
 import DecodeError from "./decode/decodeError.js"
 import GFFHelper from "./gff/gffHelper.js"
 
@@ -309,10 +307,6 @@ class FeatureParser {
                 this.delimiter = this.config.delimiter || "\t"
                 this.header = {colorColumn: 7}
                 break
-            case "interact":
-                this.decode = decodeInteract
-                this.delimiter = this.config.delimiter || /\s+/
-                break
             case "snp":
                 this.decode = decodeSNP
                 this.delimiter = "\t"
@@ -323,10 +317,6 @@ class FeatureParser {
                 break
             case "gcnv":
                 this.decode = decodeGcnv
-                this.delimiter = "\t"
-                break
-            case "shoebox":
-                this.decode = decodeShoebox
                 this.delimiter = "\t"
                 break
             default:
@@ -382,9 +372,7 @@ function parseTrackLine(line) {
             }
         }
     }
-    if ("interact" == properties["type"]) {
-        properties["format"] = "interact"
-    } else if ("gcnv" === properties["type"]) {
+    if ("gcnv" === properties["type"]) {
         properties["format"] = "gcnv"
     }
     return properties

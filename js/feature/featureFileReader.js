@@ -25,15 +25,12 @@
 
 import FeatureParser from "./featureParser.js"
 import SegParser from "./segParser.js"
-import VcfParser from "../variant/vcfParser.js"
 import {BGZip, FileUtils, igvxhr, URIUtils} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import GWASParser from "../gwas/gwasParser.js"
 import AEDParser from "../aed/AEDParser.js"
-import {loadIndex} from "../bam/indexFactory.js"
 import getDataWrapper from "./dataWrapper.js"
 import BGZLineReader from "../util/bgzLineReader.js"
-import BGZBlockLoader from "../bam/bgzBlockLoader.js"
 import QTLParser from "../qtl/qtlParser.js"
 
 // Conservative estimate of the maximum allowed string length

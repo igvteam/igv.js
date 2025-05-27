@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import {GoogleAuth, igvxhr} from '../node_modules/igv-utils/src/index.js'
 import Browser from "./browser.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 
@@ -46,23 +45,6 @@ async function createBrowser(parentDiv, config) {
     }
 
     setDefaults(config)
-
-    if (config.queryParametersSupported) {
-        extractQuery(config)
-    }
-    if (config.apiKey) {
-        igvxhr.setApiKey(config.apiKey)
-    }
-    if (config.oauthToken) {
-        igvxhr.setOauthToken(config.oauthToken)
-    }
-    if (config.clientId && (!GoogleAuth.isInitialized())) {
-        await GoogleAuth.init({
-            client_id: config.clientId,
-            apiKey: config.apiKey,
-            scope: 'https://www.googleapis.com/auth/userinfo.profile'
-        })
-    }
 
     // Create browser
     const browser = new Browser(config, parentDiv)
@@ -127,14 +109,6 @@ function setDefaults(config) {
 
     if (undefined === config.showCytobandNames) {
         config.showCytobandNames = false
-    }
-
-    if (undefined === config.showCircularView) {
-        config.showCircularView = false
-    }
-
-    if (undefined === config.showCircularViewButton) {
-        config.showCircularViewButton = false
     }
 
     if (undefined === config.showTrackLabelButton) {

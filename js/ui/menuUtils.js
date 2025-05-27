@@ -4,9 +4,9 @@ import Dialog from "./components/dialog.js"
 import {colorPalettes} from "../util/colorPalletes.js"
 import TrackView from "../trackView.js"
 
-const colorPickerTrackTypeSet = new Set(['bedtype', 'alignment', 'annotation', 'variant', 'wig', 'interact', 'shoebox'])
+const colorPickerTrackTypeSet = new Set(['bedtype', 'alignment', 'annotation', 'wig'])
 
-const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'qtl', 'snp', 'shoebox', 'wig'])
+const vizWindowTypes = new Set(['alignment', 'annotation', 'eqtl', 'qtl', 'snp', 'wig'])
 
 const multiTrackSelectExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
 

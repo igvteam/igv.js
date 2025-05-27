@@ -4,7 +4,6 @@ import CustomServiceReader from "./customServiceReader.js"
 import UCSCServiceReader from "./ucscServiceReader.js"
 import GtexReader from "../qtl/gtexReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
-import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
 import {computeWGFeatures, findFeatureAfterCenter, packFeatures} from "./featureUtils.js"
 import ChromAliasManager from "./chromAliasManager.js"
 import BaseFeatureSource from "./baseFeatureSource.js"
@@ -30,7 +29,7 @@ class TextFeatureSource extends BaseFeatureSource {
         this.maxWGCount = config.maxWGCount || DEFAULT_MAX_WG_COUNT
         this.windowFunctions = ["mean", "min", "max", "none"]
 
-        const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "biginteract", "biggenepred", "bignarrowpeak", "tdf"])
+        const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "biggenepred", "bignarrowpeak", "tdf"])
 
         this.queryable = config.indexURL || config.queryable === true   // False by default, unless explicitly set
         if (config.reader) {
@@ -42,9 +41,6 @@ class TextFeatureSource extends BaseFeatureSource {
         } else if ((config.type === "eqtl" || config.type === "qtl") && config.sourceType === "gtex-ws") {
             this.reader = new GtexReader(config)
             this.queryable = true
-        } else if ("htsget" === config.sourceType) {
-            this.reader = new HtsgetVariantReader(config, genome)
-            this.queryable = true
         } else if (config.sourceType === 'ucscservice') {
             this.reader = new UCSCServiceReader(config.source)
             this.queryable = true
@@ -54,6 +50,10 @@ class TextFeatureSource extends BaseFeatureSource {
         } else if ('service' === config.sourceType) {
             this.reader = new FeatureFileReader(config, genome)
             this.queryable = true
+        } else if ("text" === config.sourceType) {
+            this.reader = new TextReader(config, genome)
+        } else if ("json" === config.sourceType) {
+            this.reader = new JsonReader(config, genome)
         } else {
             // File of some type (i.e. not a webservice)
             this.reader = new FeatureFileReader(config, genome)

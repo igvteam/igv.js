@@ -1,6 +1,4 @@
 import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import {convertToHubURL} from "../ucsc/ucscUtils.js"
-import {loadHub} from "../ucsc/hub/hubParser.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes3.json"
 const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/web/genomes.json"
@@ -80,19 +78,7 @@ const GenomeUtils = {
             const knownGenomes = GenomeUtils.KNOWN_GENOMES
             let reference = knownGenomes[genomeID]
             if (!reference) {
-                if ((genomeID.startsWith("GCA_") || genomeID.startsWith("GCF_")) && genomeID.length >= 13) {
-                    try {
-                        const hubURL = convertToHubURL(genomeID)
-                        const hub = await loadHub(hubURL)
-                        reference = hub.getGenomeConfig(genomeID)
-                    } catch (e) {
-                        console.error(e)
-                    }
-                }
-
-                if (!reference) {
-                    alert.present(new Error(`Unknown genome id: ${genomeID}`), undefined)
-                }
+                alert.present(new Error(`Unknown genome id: ${genomeID}`), undefined)
             }
             return reference
         } else {

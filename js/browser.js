@@ -19,19 +19,14 @@ import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
 import ResponsiveNavbar from "./responsiveNavbar.js"
 import DataRangeDialog from "./ui/components/dataRangeDialog.js"
-import HtsgetReader from "./htsget/htsgetReader.js"
 import MenuPopup from "./ui/menuPopup.js"
 import {viewportColumnManager} from './viewportColumnManager.js'
 import ViewportCenterLine from './ui/viewportCenterLine.js'
 import IdeogramTrack from "./ideogramTrack.js"
 import RulerTrack from "./rulerTrack.js"
-import CircularViewControl from "./ui/circularViewControl.js"
-import {createCircularView, makeCircViewChromosomes} from "./jbrowse/circularViewUtils.js"
 import ROIManager from './roi/ROIManager.js'
 import TrackROISet from "./roi/trackROISet.js"
 import SampleInfo from "./sample/sampleInfo.js"
-import HicFile from "./hic/straw/hicFile.js"
-import {translateSession} from "./hic/shoeboxUtils.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
@@ -42,11 +37,9 @@ import igvCss from "./embedCss.js"
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConstants.js"
 import QTLSelections from "./qtl/qtlSelections.js"
 import {inferFileFormat} from "./util/fileFormatUtils.js"
-import {convertToHubURL} from "./ucsc/ucscUtils.js"
 import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
-import {loadHub} from "./ucsc/hub/hubParser.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -419,16 +412,7 @@ class Browser {
             }
 
             if (filename.endsWith(".xml")) {
-                const knownGenomes = GenomeUtils.KNOWN_GENOMES
-                const string = await igvxhr.loadString(urlOrFile)
-                config = new XMLSession(string, knownGenomes)
-
             } else if (filename.endsWith("hub.txt")) {
-                const hub = await loadHub(urlOrFile, options)
-                const genomeConfig = hub.getGenomeConfig()
-                config = {
-                    reference: genomeConfig
-                }
             } else if (filename.endsWith(".json")) {
                 config = await igvxhr.loadJson(urlOrFile)
             } else {
@@ -665,66 +649,6 @@ class Browser {
                 })
             }
         }
-    }
-
-    /**
-     * Load a genome, defined by a string ID or a json-like configuration object. This includes a fasta reference
-     * as well as optional cytoband and annotation tracks.
-     *
-     * @param idOrConfig
-     * @returns genome
-     */
-    async loadGenome(idOrConfig) {
-
-        if (idOrConfig.genarkAccession) {
-            idOrConfig.url = convertToHubURL(idOrConfig.genarkAccession)
-        }
-
-        // Translate the generic "url" field, used by clients such as igv-webapp
-        if (idOrConfig.url) {
-            if (StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt")) {
-                idOrConfig.hubURL = idOrConfig.url
-                delete idOrConfig.url
-            } else if ("gbk" === getFileExtension(idOrConfig.url)) {
-                idOrConfig.gbkURL = idOrConfig.url
-                delete idOrConfig.url
-            }
-        }
-
-        let genomeConfig
-        const isHubGenome = idOrConfig.hubURL || (idOrConfig.url && StringUtils.isString(idOrConfig.url) && idOrConfig.url.endsWith("/hub.txt"))
-        if (isHubGenome) {
-            const hub = await loadHub(idOrConfig.hubURL || idOrConfig.url, idOrConfig)
-            genomeConfig = hub.getGenomeConfig()
-        } else if (StringUtils.isString(idOrConfig) || !(idOrConfig.url || idOrConfig.fastaURL || idOrConfig.twoBitURL || idOrConfig.gbkURL)) {
-            // Either an ID, a json string, or an object missing required properties.
-            genomeConfig = await GenomeUtils.expandReference(this.alert, idOrConfig)
-        } else {
-            genomeConfig = idOrConfig
-        }
-
-        await this.loadReference(genomeConfig)
-
-        let tracks
-        if (genomeConfig.gbkURL || "gbk" === genomeConfig.format) {
-            tracks = [{
-                name: "Annotations",
-                format: "gbk",
-                url: genomeConfig.gbkURL
-            }]
-        } else {
-            tracks = genomeConfig.tracks || []
-        }
-
-        // Insure that we always have a sequence track
-        const pushSequenceTrack = tracks.filter(track => track.type === 'sequence').length === 0
-        if (pushSequenceTrack) {
-            tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
-        }
-
-        await this.loadTrackList(tracks)
-
-        return this.genome
     }
 
     /**
@@ -1008,9 +932,6 @@ class Browser {
                 if (format) {
                     config.format = format
                 }
-            } else if (config.sourceType === "htsget") {
-                // Finally check for htsget URL.  This is a longshot
-                await HtsgetReader.inferFormat(config)
             }
         }
 
@@ -1026,14 +947,7 @@ class Browser {
             if (!config.format) {
                 throw Error(`Unrecognized track:  ${JSON.stringify(config)}`)
             } else if (config.format === "hic") {
-                const hicFile = new HicFile(config)
-                await hicFile.readHeaderAndFooter()
-                if (hicFile.chromosomeIndexMap.celltype) {
-                    type = "shoebox"
-                    config._hicFile = hicFile
-                } else {
-                    throw Error("'.hic' files not supported")
-                }
+                throw Error("'.hic' files not supported")
             } else {
                 type = TrackUtils.inferTrackType(config.format)
                 if ("bedtype" === type) {
@@ -2145,30 +2059,6 @@ class Browser {
 
             let enc = url.substring(5)
             return BGZip.uncompressString(enc)
-        }
-    }
-
-    createCircularView(container, show) {
-        show = show === true   // convert undefined to boolean
-        this.circularView = createCircularView(container, this)
-        this.circularViewControl = new CircularViewControl(this.navbar.toggleButtonContainer, this)
-        this.circularView.setAssembly({
-            name: this.genome.id,
-            id: this.genome.id,
-            chromosomes: makeCircViewChromosomes(this.genome)
-        })
-        this.circularViewVisible = show
-        return this.circularView
-    }
-
-    get circularViewVisible() {
-        return this.circularView !== undefined && this.circularView.visible
-    }
-
-    set circularViewVisible(isVisible) {
-        if (this.circularView) {
-            this.circularView.visible = isVisible
-            this.circularViewControl.setState(isVisible)
         }
     }
 

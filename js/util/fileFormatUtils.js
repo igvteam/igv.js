@@ -37,7 +37,6 @@ const knownFileExtensions = new Set([
     "vcf",
     "bb",
     "bigbed",
-    "biginteract",
     "biggenepred",
     "bignarrowpeak",
     "bw",

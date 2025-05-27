@@ -10,12 +10,9 @@
     "postinstall": "npm run build"
   },
   "dependencies": {
-    "igv": "file:.",
     "igv-utils": "github:igvteam/igv-utils#v1.5.10",
     "dompurify": "^3.0.9",
-    "vanilla-picker": "^2.12.3",
-    "circular-view": "github:igvteam/circular-view#v0.2.4",
-    "igv-ui": "github:igvteam/igv-ui#master"
+    "vanilla-picker": "^2.12.3"
   },
   "devDependencies": {
     "vite": "^5.0.0"

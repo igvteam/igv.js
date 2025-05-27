@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {FileUtils, GoogleAuth, GoogleDrive, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 
 const extend = function (parent, child) {
@@ -159,16 +159,7 @@ function isInteger(str) {
 }
 
 async function getFilename(url) {
-    if (StringUtils.isString(url) && url.startsWith("https://drive.google.com")) {
-        // This will fail if Google API key is not defined
-        if (GoogleAuth.getApiKey() === undefined) {
-            throw Error("Google drive is referenced, but API key is not defined.  An API key is required for Google Drive access")
-        }
-        const json = await GoogleDrive.getDriveFileInfo(url)
-        return json.originalFileName || json.name
-    } else {
-        return FileUtils.getFilename(url)
-    }
+    return FileUtils.getFilename(url)
 }
 
 function prettyBasePairNumber(raw) {
