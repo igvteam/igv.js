@@ -10,4 +10,3 @@ igv.css.map
 /deploy/
 /dev/oauth/oauthConfigPrivate.js
 /js/bigwig/bwReader_nochromtree.js
-/yarn.lock
