@@ -236,7 +236,7 @@ suite("testVariant", function () {
         // chr14	105246530	.	GC	G	.	.	Gene=AKT1;MutationCDS=c.100GC>G;MutationAA=p.B2C
         // chr14	105246530	.	G	C	.	.	Gene=AKT1;MutationCDS=c.100G>C;MutationAA=p.D4E
 
-        const url = "dev/issues/1714/targeted_variants.vcf"
+        const url = "test/data/vcf/targeted_variants.vcf"
 
         // Example from 4.2 spec
         const data = await igvxhr.loadString(url, {})
