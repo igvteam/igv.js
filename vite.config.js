@@ -20,7 +20,6 @@ export default defineConfig({
             'dompurify': path.resolve(__dirname, 'node_modules/dompurify/dist/purify.es.mjs'),
             'vanilla-picker': path.resolve(__dirname, 'node_modules/vanilla-picker/dist/vanilla-picker.csp.mjs'),
             'circular-view': path.resolve(__dirname, 'node_modules/circular-view/dist/circular-view.js'),
-            'hdf5-indexed-reader': path.resolve(__dirname, 'node_modules/hdf5-indexed-reader/dist/hdf5-indexed-reader.esm.js'),
             'igv-ui': path.resolve(__dirname, 'node_modules/igv-ui/dist/igv-ui.js')
         }
     },
@@ -30,7 +29,6 @@ export default defineConfig({
             'dompurify',
             'vanilla-picker',
             'circular-view',
-            'hdf5-indexed-reader',
             'igv-ui'
         ],
         esbuildOptions: {

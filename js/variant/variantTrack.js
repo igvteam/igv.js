@@ -32,7 +32,6 @@ import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import SampleInfo from "../sample/sampleInfo.js"
 import {makeVCFChords, sendChords} from "../jbrowse/circularViewUtils.js"
 import {FileUtils, IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import CNVPytorTrack from "../cnvpytor/cnvpytorTrack.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {packFeatures} from "../feature/featureUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
@@ -719,17 +718,6 @@ class VariantTrack extends TrackBase {
             })
         }
 
-        // Experimental CNVPytor support
-        if (this.canCovertToPytor()) {
-            menuItems.push('<hr>')
-            menuItems.push({
-                label: 'Convert to CNVpytor track',
-                click: function cnvPytorHandler() {
-                    this.convertToPytor()
-                }
-            })
-        }
-
         return menuItems
     }
 
@@ -926,82 +914,6 @@ class VariantTrack extends TrackBase {
             }
             this.colorTables.set(key, tbl)
             return tbl
-        }
-    }
-
-    ///////////// CNVPytor converstion support follows ////////////////////////////////////////////////////////////
-
-    /**
-     * This do-nothing method is neccessary to allow conversion to a CNVPytor track, which needs dom elements for an
-     *     // axis.  The dom elements are created as a side effect of this function being defined
-     */
-    paintAxis() {
-    }
-
-    /**
-     * Check conditions for pytor track
-     * (1) 1 and only 1 genotype (callset)
-     * (2) DP info field
-     * (3) AD info field
-     * (4) Not indexed -- must read entire file
-     */
-    canCovertToPytor() {
-
-        if (this.config.indexURL) {
-            return false
-        }
-        if (this.header) {
-            return Object.keys(this.sampleKeys).length === 1 &&
-                this.header.FORMAT &&
-                this.header.FORMAT.AD &&
-                this.header.FORMAT.DP
-        } else {
-            // Cant know until header is read
-            return false
-        }
-    }
-
-    async convertToPytor() {
-
-        // Store state in case track is reverted
-        this.variantState = {...this.config, ...this.getState()}
-        this.variantState.trackHeight = this.height
-
-
-        this.trackView.startSpinner()
-        // The timeout is neccessary to give the spinner time to start.
-        setTimeout(async () => {
-            try {
-                const newConfig = Object.assign({}, this.config)
-                Object.setPrototypeOf(this, CNVPytorTrack.prototype)
-
-                this.init(newConfig)
-                await this.postInit()
-
-                this.trackView.clearCachedFeatures()
-                this.trackView.setTrackHeight(this.config.height || CNVPytorTrack.DEFAULT_TRACK_HEIGHT)
-                this.trackView.checkContentHeight()
-                this.trackView.updateViews()
-
-            } finally {
-                this.trackView.stopSpinner()
-            }
-        }, 100)
-    }
-
-    getFilterableAttributes() {
-        return this.header.INFO
-    }
-
-    /**
-     * Repack cached features, if any, for all viewports on this track
-     */
-    _repackCachedFeatures() {
-        for (let viewport of this.trackView.viewports) {
-            if (viewport.cachedFeatures) {
-                const maxRows = this.config.maxRows || Number.MAX_SAFE_INTEGER
-                packFeatures(viewport.cachedFeatures, maxRows, this._filter)
-            }
         }
     }
 

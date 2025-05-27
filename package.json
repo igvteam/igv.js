@@ -15,7 +15,6 @@
     "dompurify": "^3.0.9",
     "vanilla-picker": "^2.12.3",
     "circular-view": "github:igvteam/circular-view#v0.2.4",
-    "hdf5-indexed-reader": "github:jrobinso/hdf5-indexed-reader#v1.0.2",
     "igv-ui": "github:igvteam/igv-ui#master"
   },
   "devDependencies": {
