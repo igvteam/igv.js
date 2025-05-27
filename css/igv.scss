@@ -1,4 +1,32 @@
-@import "variables";
+@use "sass:math";
+@use "variables" as *;
+@use "apple_crayon_color" as *;
+@use "igv-ui-dropdown";
+@use "igv-ui-popover";
+@use "igv-ui-alert-dialog";
+@use "igv-ui-generic-dialog-container";
+@use "igv-ui-generic-container";
+@use "igv-ui-colorpicker";
+@use "igv-ui-dialog";
+@use "igv-ui-panel";
+@use "igv-ui-textbox";
+@use "igv-ui-table";
+@use "igv-roi-seg-filter-dialog";
+@use "igv-roi-mut-filter-dialog";
+@use "igv-clear-filters-widget";
+@use "color";
+@use "font";
+@use "navbar";
+@use "dom-misc";
+@use "igv-center-line";
+@use "igv-cursor-guide";
+@use "igv-user-feedback";
+@use "igv-generic-dialog-container";
+@use "igv-generic-container";
+@use "igv-menu-popup";
+@use "spinner";
+@use "roi";
+@use "vanilla-picker.csp";
 
 @mixin generic-input {
   input {
@@ -23,41 +51,11 @@
   }
 }
 
-@import "igv-ui-dropdown";
-@import "igv-ui-popover";
-@import "igv-ui-alert-dialog";
-@import "igv-ui-generic-dialog-container";
-@import "igv-ui-generic-container";
-@import "igv-ui-colorpicker";
-@import "igv-ui-dialog";
-@import "igv-ui-panel";
-@import "igv-ui-textbox";
-@import "igv-ui-table";
-@import "igv-roi-seg-filter-dialog";
-@import "igv-roi-mut-filter-dialog";
-@import "igv-clear-filters-widget";
-
 .igv-ui-center-fixed {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
 }
-
-
-@import "color";
-@import "font";
-@import "navbar";
-@import "dom-misc";
-@import "igv-center-line";
-@import "igv-cursor-guide";
-@import "igv-user-feedback";
-@import "igv-generic-dialog-container";
-@import "igv-generic-container";
-@import "igv-menu-popup";
-@import "igv-user-feedback";
-@import "spinner";
-@import "roi";
-@import "vanilla-picker.csp";
 
 @mixin igv-column-base {
   position: relative;
@@ -127,7 +125,7 @@
   width: $igv-column-shim-width;
   margin-left: $igv-column-shim-margin;
   margin-right: $igv-column-shim-margin;
-  background-color: $igv-apple_crayon_iron;
+  background-color: $igv_apple_crayon_iron;
 }
 
 .igv-axis-column {

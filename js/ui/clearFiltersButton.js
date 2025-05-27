@@ -68,7 +68,7 @@ class ClearFiltersButton extends NavbarButton {
         }
 
         const panel = document.createElement('div')
-        document.body.appendChild(panel)
+        this.browser.root.appendChild(panel)
         panel.className = 'igv-clear-filters__container'
         panel.style.position = 'fixed'
         panel.style.top = '50%'
