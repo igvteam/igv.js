@@ -7,12 +7,10 @@ import * as TrackUtils from './util/trackUtils.js'
 import TrackView, {igv_axis_column_width} from "./trackView.js"
 import C2S from "./canvas2svg.js"
 import {getTrack, knownTrackTypes} from "./trackFactory.js"
-import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
 import {createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
-import {bppSequenceThreshold, defaultSequenceTrackOrder} from './sequenceTrack.js'
 import version from "./version.js"
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
@@ -39,8 +37,6 @@ import QTLSelections from "./qtl/qtlSelections.js"
 import {inferFileFormat} from "./util/fileFormatUtils.js"
 import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
-import {createBlatTrack} from "./blat/blatTrack.js"
-
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -538,12 +534,6 @@ class Browser {
         // Tracks.  Start with genome tracks, if any, then append session tracks
         const genomeTracks = genomeConfig.tracks || []
         const trackConfigurations = session.tracks ? genomeTracks.concat(session.tracks) : genomeTracks
-
-        // Ensure that we always have a sequence track with no explicit URL (=> the reference genome sequence track)
-        const pushSequenceTrack = trackConfigurations.filter(track => 'sequence' === track.type && !track.url && !track.fastaURL).length === 0
-        if (true === session.showSequence && pushSequenceTrack) {
-            trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder, removable: false})
-        }
 
         const localTrackFileNames = trackConfigurations.filter((config) => undefined !== config.file).map(({file}) => file)
 
@@ -1226,12 +1216,6 @@ class Browser {
         const trackViews = this.trackViews
 
         this.updateLocusSearchWidget()
-
-        for (const {bpPerPixel, chr, start} of this.referenceFrameList) {
-            if (bpPerPixel <= bppSequenceThreshold) {
-                await this.genome.getSequence(chr, start, start + 1)
-            }
-        }
 
         for (const centerGuide of this.centerLineList) {
             centerGuide.repaint()
@@ -2083,9 +2067,6 @@ class Browser {
         return this.navbar.sampleNameControl
     }
 
-    async blat(sequence) {
-        return createBlatTrack({sequence, browser: this, name: 'Blat', title: 'Blat'})
-    }
 }
 
 function getFileExtension(input) {

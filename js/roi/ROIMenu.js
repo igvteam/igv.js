@@ -1,11 +1,8 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import * as UIUtils from "../ui/utils/ui-utils.js"
 import {isSecureContext} from "../util/igvUtils.js"
-import {createBlatTrack} from "../blat/blatTrack.js"
 
 const maxSequenceSize = 1000000
-const maxBlatSize = 25000
-
 
 class ROIMenu {
     constructor(browser, parent) {
@@ -85,24 +82,6 @@ class ROIMenu {
                 }
             })
         }
-
-        if (feature.end - feature.start <= maxBlatSize) {
-            // blat
-            items.push({
-                label: 'BLAT reference sequence',
-                click: async () => {
-                    this.container.style.display = 'none'
-                    const {chr, start, end} = feature
-                    let sequence = await this.browser.genome.getSequence(chr, start, end)
-                    if (sequence) {
-                        const name = `blat: ${chr}:${start + 1}-${end}`
-                        const title = `blat: ${chr}:${start + 1}-${end}`
-                        createBlatTrack({sequence, browser: this.browser, name, title})
-                    }
-                }
-            })
-        }
-
 
         const found = this.browser.findTracks(track => typeof track.sortByValue === 'function')
         if (found.length > 0) {

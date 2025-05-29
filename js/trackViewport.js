@@ -8,7 +8,6 @@ import {FileUtils} from "../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genomeUtils.js"
-import {bppSequenceThreshold} from "./sequenceTrack.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
@@ -114,15 +113,6 @@ class TrackViewport extends Viewport {
                     visibilityWindow !== undefined && visibilityWindow > 0 &&
                     (this.referenceFrame.bpPerPixel * this.viewportElement.clientWidth > visibilityWindow))
             }
-        }
-
-        if (this.trackView.track && "sequence" === this.trackView.track.type && this.referenceFrame.bpPerPixel > bppSequenceThreshold) {
-
-            if (this.canvas && this.canvas.parentNode) {
-                this.canvas.parentNode.removeChild(this.canvas)
-            }
-            this.canvas = undefined
-            return false
         }
 
         if (!(this.viewIsReady())) {

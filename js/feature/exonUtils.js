@@ -1,5 +1,3 @@
-import {translationDict} from "../sequenceTrack.js"
-import {complementSequence} from "../util/sequenceUtils.js"
 
 function getExonPhase(exon) {
     return (3 - exon.readingFrame) % 3

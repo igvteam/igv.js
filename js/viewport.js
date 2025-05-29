@@ -24,8 +24,6 @@
  */
 
 import * as DOMUtils from "./ui/utils/dom-utils.js"
-import AlertDialog from "./ui/components/alertDialog.js"
-import SequenceTrack from "./sequenceTrack.js"
 
 class Viewport {
 
@@ -42,11 +40,6 @@ class Viewport {
 
         if (trackView.track.height) {
             this.setHeight(trackView.track.height);
-        }
-
-        // Create an alert dialog for the sequence track to copy ref sequence to.
-        if (trackView.track instanceof SequenceTrack) {
-            this.alert = new AlertDialog(this.viewportElement);
         }
 
         this.contentTop = 0;

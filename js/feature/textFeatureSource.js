@@ -1,13 +1,9 @@
 import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
 import FeatureFileReader from "./featureFileReader.js"
-import CustomServiceReader from "./customServiceReader.js"
-import UCSCServiceReader from "./ucscServiceReader.js"
-import GtexReader from "../qtl/gtexReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
-import {computeWGFeatures, findFeatureAfterCenter, packFeatures} from "./featureUtils.js"
+import {packFeatures} from "./featureUtils.js"
 import ChromAliasManager from "./chromAliasManager.js"
 import BaseFeatureSource from "./baseFeatureSource.js"
-import {summarizeData} from "./wigTrack.js"
 
 const DEFAULT_MAX_WG_COUNT = 10000
 
@@ -29,45 +25,9 @@ class TextFeatureSource extends BaseFeatureSource {
         this.maxWGCount = config.maxWGCount || DEFAULT_MAX_WG_COUNT
         this.windowFunctions = ["mean", "min", "max", "none"]
 
-        const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "biggenepred", "bignarrowpeak", "tdf"])
-
         this.queryable = config.indexURL || config.queryable === true   // False by default, unless explicitly set
-        if (config.reader) {
-            // Explicit reader implementation
-            this.reader = config.reader
-            this.queryable = config.queryable !== false
-        } else if (config.sourceType === "ga4gh") {
-            throw Error("Unsupported source type 'ga4gh'")
-        } else if ((config.type === "eqtl" || config.type === "qtl") && config.sourceType === "gtex-ws") {
-            this.reader = new GtexReader(config)
-            this.queryable = true
-        } else if (config.sourceType === 'ucscservice') {
-            this.reader = new UCSCServiceReader(config.source)
-            this.queryable = true
-        } else if (config.sourceType === 'custom') {
-            this.reader = new CustomServiceReader(config.source)
-            this.queryable = false !== config.source.queryable
-        } else if ('service' === config.sourceType) {
-            this.reader = new FeatureFileReader(config, genome)
-            this.queryable = true
-        } else if ("text" === config.sourceType) {
-            this.reader = new TextReader(config, genome)
-        } else if ("json" === config.sourceType) {
-            this.reader = new JsonReader(config, genome)
-        } else {
-            // File of some type (i.e. not a webservice)
-            this.reader = new FeatureFileReader(config, genome)
-            if (config.queryable !== undefined) {
-                this.queryable = config.queryable
-            } else if (queryableFormats.has(config.format) || this.reader.indexed) {
-                this.queryable = true
-            } else {
-                // Leav undefined -- will defer until we know if reader has an index
-            }
-        }
 
-        // Flag indicating if features loaded by this source can be searched for by name or attribute, true by default
-        this.searchable = config.searchable !== false
+        this.reader = new FeatureFileReader(config, genome)
 
     }
 
@@ -125,35 +85,9 @@ class TextFeatureSource extends BaseFeatureSource {
         start = start || 0
         end = end || Number.MAX_SAFE_INTEGER
 
-        // Various conditions that can require a feature load
-        //   * view is "whole genome" but no features are loaded
-        //   * cache is disabled
-        //   * cache does not contain requested range
-        // const containsRange = this.featureCache.containsRange(new GenomicInterval(queryChr, start, end))
-        if ((isWholeGenome && !this.wgFeatures && this.supportsWholeGenome()) ||
-            this.config.disableCache ||
-            !this.featureCache ||
-            !this.featureCache.containsRange(new GenomicInterval(chr, start, end))) {
-            await this.loadFeatures(chr, start, end, visibilityWindow)
-        }
+        await this.loadFeatures(chr, start, end, visibilityWindow)
 
-        if (isWholeGenome) {
-            if (!this.wgFeatures) {
-                if (this.supportsWholeGenome()) {
-                    if("wig" === this.config.type) {
-                        const allWgFeatures = await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, 1000000)
-                        this.wgFeatures = summarizeData(allWgFeatures, 0, bpPerPixel, windowFunction)
-                    } else {
-                        this.wgFeatures = await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.maxWGCount)
-                    }
-                } else {
-                    this.wgFeatures = []
-                }
-            }
-            return this.wgFeatures
-        } else {
-            return this.featureCache.queryFeatures(chr, start, end)
-        }
+        return this.featureCache.queryFeatures(chr, start, end)
     }
 
     async findFeatures(fn) {
@@ -228,12 +162,6 @@ class TextFeatureSource extends BaseFeatureSource {
             // Note - replacing previous cache with new one.  genomicInterval is optional (might be undefined => includes all features)
             this.featureCache = new FeatureCache(features, this.genome, genomicInterval)
 
-            // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-            if (this.searchable) {
-                this.addFeaturesToDB(features, this.config)
-            }
-        } else {
-            this.featureCache = new FeatureCache([], genomicInterval)     // Empty cache
         }
     }
 
