@@ -13,7 +13,6 @@ import {createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import version from "./version.js"
 import FeatureSource from "./feature/featureSource.js"
-import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
 import ResponsiveNavbar from "./responsiveNavbar.js"
 import DataRangeDialog from "./ui/components/dataRangeDialog.js"
@@ -121,10 +120,6 @@ class Browser {
         this.crossDomainProxy = config.crossDomainProxy
         this.formats = config.formats
         this.trackDefaults = config.trackDefaults
-        this.nucleotideColors = config.nucleotideColors || defaultNucleotideColors
-        for (let key of Object.keys(this.nucleotideColors)) {
-            this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key]
-        }
 
         this.doShowTrackLabels = config.showTrackLabels
 
