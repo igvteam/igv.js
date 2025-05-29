@@ -28,8 +28,6 @@ import {createViewport} from "./util/viewportUtils.js"
 import {FeatureUtils, IGVColor} from '../node_modules/igv-utils/src/index.js'
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import {createIcon} from "./ui/utils/icons.js"
-import SampleInfoViewport from "./sample/sampleInfoViewport.js"
-import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import {autoScaleGroupColorHash, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
 import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
@@ -74,12 +72,6 @@ class TrackView {
         this.axis = this.createAxis(browser, this.track)
 
         this.createViewports(browser, columnContainer, referenceFrameList)
-
-        // Sample Info
-        this.sampleInfoViewport = new SampleInfoViewport(this, browser.columnContainer.querySelector('.igv-sample-info-column'), browser.getSampleInfoViewportWidth())
-
-        // SampleName Viewport
-        this.sampleNameViewport = new SampleNameViewport(this, browser.columnContainer.querySelector('.igv-sample-name-column'), undefined, browser.getSampleNameViewportWidth())
 
         // Track Scrollbar
         this.createTrackScrollbar(browser)
@@ -182,15 +174,6 @@ class TrackView {
             delta.deltaX += width
         }
 
-        if (true === this.browser.sampleInfo.isInitialized() && true === this.browser.sampleInfoControl.showSampleInfo) {
-            this.sampleInfoViewport.renderSVGContext(context, delta)
-            const {width} = this.sampleInfoViewport.viewport.getBoundingClientRect()
-            delta.deltaX += width
-        }
-
-        if (true === this.browser.showSampleNames) {
-            this.sampleNameViewport.renderSVGContext(context, delta)
-        }
     }
 
     presentColorPicker(colorSelection, event) {
@@ -269,10 +252,6 @@ class TrackView {
             vp.setHeight(newHeight)
         }
 
-        this.sampleInfoViewport.setHeight(newHeight)
-
-        this.sampleNameViewport.viewport.style.height = `${newHeight}px`
-
         // If the track does not manage its own content height set it equal to the viewport height here
         if (typeof this.track.computePixelHeight !== "function") {
             for (let vp of this.viewports) {
@@ -323,11 +302,6 @@ class TrackView {
             viewport.setTop(contentTop)
         }
 
-        this.sampleInfoViewport.setTop(contentTop)
-
-        this.sampleNameViewport.trackScrollDelta = delta
-        this.sampleNameViewport.setTop(contentTop)
-
     }
 
     isLoading() {
@@ -358,8 +332,6 @@ class TrackView {
     }
 
     repaintSampleInfo() {
-
-        this.sampleInfoViewport.repaint()
     }
 
     repaintSamples() {
@@ -838,12 +810,6 @@ class TrackView {
         this.axis.remove()
         this.removeViewportsFromColumnContainer()
 
-        // Sample Info Viewport
-        this.sampleInfoViewport.dispose()
-
-        // SampleName Viewport
-        this.sampleNameViewport.dispose()
-
         // empty trackScrollbar Column
         this.removeTrackScrollMouseHandlers()
         this.outerScroll.remove()
@@ -875,10 +841,6 @@ class TrackView {
         for (let viewport of this.viewports) {
             viewport.dispose()
         }
-
-        this.sampleInfoViewport.dispose()
-
-        this.sampleNameViewport.dispose()
 
         this.removeTrackScrollMouseHandlers()
         this.outerScroll.remove()

@@ -29,8 +29,6 @@ import WindowSizePanel from "./windowSizePanel.js"
 import CursorGuideButton from "./ui/cursorGuideButton.js"
 import CenterLineButton from "./ui/centerLineButton.js"
 import TrackLabelControl from "./ui/trackLabelControl.js"
-import SampleInfoControl from "./sample/sampleInfoControl.js"
-import SampleNameControl from "./sample/sampleNameControl.js"
 import SaveImageControl from "./ui/saveImageControl.js"
 import CustomButton from "./ui/customButton.js"
 import ZoomWidget from "./ui/zoomWidget.js"
@@ -132,8 +130,6 @@ class ResponsiveNavbar {
         this.cursorGuideButton = new CursorGuideButton(toggleButtonContainer, browser);
         this.centerLineButton = new CenterLineButton(toggleButtonContainer, browser);
         this.trackLabelControl = new TrackLabelControl(toggleButtonContainer, browser);
-        this.sampleInfoControl = new SampleInfoControl(toggleButtonContainer, browser);
-        this.sampleNameControl = new SampleNameControl(toggleButtonContainer, browser);
 
         if (config.showSVGButton === true) {
             this.saveImageControl = new SaveImageControl(toggleButtonContainer, browser);

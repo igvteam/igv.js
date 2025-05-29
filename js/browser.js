@@ -21,7 +21,6 @@ import MenuPopup from "./ui/menuPopup.js"
 import {viewportColumnManager} from './viewportColumnManager.js'
 import ViewportCenterLine from './ui/viewportCenterLine.js'
 import RulerTrack from "./rulerTrack.js"
-import SampleInfo from "./sample/sampleInfo.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
 import {setDefaults} from "./igv-create.js"
@@ -29,7 +28,6 @@ import {trackViewportPopoverList} from './trackViewport.js'
 import TrackBase from "./trackBase.js"
 import {loadGenbank} from "./gbk/genbankParser.js"
 import igvCss from "./embedCss.js"
-import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sample/sampleInfoConstants.js"
 import QTLSelections from "./qtl/qtlSelections.js"
 import {inferFileFormat} from "./util/fileFormatUtils.js"
 import CursorGuide from "./ui/cursorGuide.js"
@@ -100,25 +98,6 @@ class Browser {
             }
         }
 
-        this.on('trackremoved', () => {
-
-            const found = this.findTracks(track => typeof track.getSamples === 'function')
-
-            if (0 === found.length) {
-
-                // sample info
-                this.sampleInfoControl.setButtonVisibility(false)
-
-                // sample names
-                this.sampleNameViewportWidth = undefined
-                this.showSampleNames = false
-                this.sampleNameControl.setState(this.showSampleNames)
-                this.sampleNameControl.hide()
-
-                this.layoutChange()
-            }
-        })
-
         this.on('didchangecolumnlayout', () => {
             if (trackViewportPopoverList.length > 0) {
                 const len = trackViewportPopoverList.length
@@ -130,8 +109,6 @@ class Browser {
         })
 
         this.addEventHandlers()
-
-        this.sampleInfo = new SampleInfo(this)
 
         this.createStandardControls(config)
 
@@ -425,14 +402,6 @@ class Browser {
             session = await translateSession(session)
         }
 
-        this.navbar.sampleInfoControl.setButtonVisibility(false)
-
-        this.showSampleNames = session.showSampleNames || false
-        this.navbar.sampleNameControl.setState(this.showSampleNames === true)
-
-        if (session.sampleNameViewportWidth) {
-            this.sampleNameViewportWidth = session.sampleNameViewportWidth
-        }
 
         // axis column
         createColumn(this.columnContainer, 'igv-axis-column')
@@ -792,17 +761,6 @@ class Browser {
             }
         }
 
-        if (typeof track.hasSamples === 'function' && track.hasSamples()) {
-
-            if (this.sampleInfo.hasAttributes()) {
-                this.sampleInfoControl.setButtonVisibility(true)
-            }
-
-            if (this.config.showSampleNameButton !== false) {
-                this.sampleNameControl.show()
-            }
-        }
-
         return track
 
     }
@@ -915,8 +873,6 @@ class Browser {
         for (let {
             axis,
             viewports,
-            sampleInfoViewport,
-            sampleNameViewport,
             outerScroll,
             dragHandle,
             gearContainer
@@ -927,10 +883,6 @@ class Browser {
             for (let {viewportElement} of viewports) {
                 viewportElement.parentNode.removeChild(viewportElement)
             }
-
-            sampleInfoViewport.viewport.remove()
-
-            sampleNameViewport.viewport.remove()
 
             outerScroll.remove()
             dragHandle.remove()
@@ -943,8 +895,6 @@ class Browser {
         for (let {
             axis,
             viewports,
-            sampleInfoViewport,
-            sampleNameViewport,
             outerScroll,
             dragHandle,
             gearContainer
@@ -956,10 +906,6 @@ class Browser {
                 const {viewportElement} = viewports[i]
                 viewportColumns[i].appendChild(viewportElement)
             }
-
-            this.columnContainer.querySelector('.igv-sample-info-column').appendChild(sampleInfoViewport.viewport)
-
-            this.columnContainer.querySelector('.igv-sample-name-column').appendChild(sampleNameViewport.viewport)
 
             this.columnContainer.querySelector('.igv-scrollbar-column').appendChild(outerScroll)
 
@@ -1230,11 +1176,6 @@ class Browser {
                 viewports[i].setWidth(viewportWidth)
             }
 
-            for (const {sampleInfoViewport} of this.trackViews) {
-                sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
-                sampleInfoViewport.repaint()
-            }
-
         }
     }
 
@@ -1494,43 +1435,10 @@ class Browser {
 
     async loadSampleInfo(sampleInfoConfig) {
 
-        await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
-
-        for (const {sampleInfoViewport} of this.trackViews) {
-            sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
-        }
-
-        const found = this.findTracks(t => typeof t.getSamples === 'function')
-        if (found.length > 0) {
-            this.sampleInfoControl.performClickWithState(this, true)
-            this.sampleInfoControl.setButtonVisibility(true)
-        }
-
-        for (const {sampleInfoViewport} of this.trackViews) {
-            sampleInfoViewport.repaint()
-        }
-
-        // await this.layoutChange()
     }
 
     getSampleInfoColumnWidth() {
-
-        if (!this.sampleInfo.attributeCount) {
-            return 0
-        } else {
-
-            const found = this.findTracks(t => typeof t.getSamples === 'function')
-            const isFound = found.length > 0
-            const hasAttributes = this.sampleInfo.hasAttributes()
-            const doShowSampleInfo = this.sampleInfoControl.showSampleInfo
-            const status = isFound && hasAttributes && doShowSampleInfo
-
-            if (status) {
-                return this.sampleInfo.attributeCount * sampleInfoTileWidth + sampleInfoTileXShim
-            } else {
-                return 0
-            }
-        }
+        return 0
     }
 
 
@@ -1943,27 +1851,9 @@ class Browser {
         }
     }
 
-    // Navbar delegates
-    get sampleInfoControl() {
-        return this.navbar.sampleInfoControl
-    }
-
     get overlayTrackButton() {
         return this.navbar.overlayTrackButton
     }
-
-    get roiTableControl() {
-        return this.navbar.roiTableControl
-    }
-
-    get sampleInfoControl() {
-        return this.navbar.sampleInfoControl
-    }
-
-    get sampleNameControl() {
-        return this.navbar.sampleNameControl
-    }
-
 }
 
 function getFileExtension(input) {
