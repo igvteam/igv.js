@@ -8,6 +8,7 @@ import {FileUtils} from "../node_modules/igv-utils/src/index.js"
 import * as DOMUtils from "./ui/utils/dom-utils.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genomeUtils.js"
+import FeatureCache from "./featureCache.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
@@ -248,13 +249,6 @@ class TrackViewport extends Viewport {
             const features = await this.getFeatures(track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
             if (features) {
                 let roiFeatures = []
-                if (track.roiSets && track.roiSets.length > 0) {
-                    for (let roiSet of track.roiSets) {
-                        const features = await roiSet.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
-                        roiFeatures.push({track: roiSet, features})
-                    }
-                }
-
                 const mr = track && (track.resolutionAware)   //
                 const windowFunction = this.windowFunction
                 this.featureCache = new FeatureCache(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures, mr, windowFunction)
@@ -316,14 +310,14 @@ class TrackViewport extends Viewport {
             return
         }
 
-        const {features, roiFeatures} = this.featureCache
+        const {features} = this.featureCache
+
 
         // Canvas dimensions.
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
         const {bpStart, bpEnd, pixelWidth} = this.repaintDimensions()
         const viewportHeight = this.viewportElement.clientHeight
-        const contentHeight = this.getContentHeight()
-        const maxHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight  // Need to fill viewport for ROIs.
+        const maxHeight = this.getContentHeight()
         const pixelHeight = Math.min(maxHeight, 3 * viewportHeight)
         if (0 === pixelWidth || 0 === pixelHeight) {
             if (this.canvas && this.canvas.parentNode) {
@@ -354,30 +348,23 @@ class TrackViewport extends Viewport {
         ctx.scale(devicePixelRatio, devicePixelRatio)
         ctx.translate(0, -pixelTop)
 
-        const drawConfiguration =
+        const dc =
             {
                 context: ctx,
-                pixelXOffset,
-                pixelWidth,
-                pixelHeight,
-                pixelTop,
+                bpPerPixel,
                 bpStart,
                 bpEnd,
-                bpPerPixel,
-                pixelShift: pixelXOffset,              // Initial value, changes with track pan (drag)
-                windowFunction: this.windowFunction,
+                pixelWidth,
+                pixelHeight,
                 referenceFrame: this.referenceFrame,
-                selection: this.selection,
-                viewport: this,
-                viewportWidth: this.viewportElement.clientWidth
-            }
-
-        this.draw(drawConfiguration, features, roiFeatures)
+                features
+            };
+        this.trackView.track.draw(dc)
 
         if (this.canvas && this.canvas.parentNode) {
             this.canvas.parentNode.removeChild(this.canvas);
         }
-        newCanvas._data = drawConfiguration
+        newCanvas._data = dc
         this.canvas = newCanvas
         this.viewportElement.appendChild(newCanvas)
 
@@ -388,8 +375,9 @@ class TrackViewport extends Viewport {
 
         const drawConfiguration = this.canvas._data
         drawConfiguration.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-        const {features, roiFeatures} = this.featureCache
-        this.draw(drawConfiguration, features, roiFeatures)
+        const {features} = this.featureCache
+        drawConfiguration.features = features
+        this.draw(drawConfiguration)
     }
 
     /**
@@ -399,18 +387,8 @@ class TrackViewport extends Viewport {
      * @param features
      * @param roiFeatures
      */
-    draw(drawConfiguration, features, roiFeatures) {
-
-        if (features) {
-            drawConfiguration.features = features
-            this.trackView.track.draw(drawConfiguration)
-        }
-        if (roiFeatures && roiFeatures.length > 0) {
-            for (let r of roiFeatures) {
-                drawConfiguration.features = r.features
-                r.track.draw(drawConfiguration)
-            }
-        }
+    draw(drawConfiguration) {
+        this.trackView.track.draw(drawConfiguration)
     }
 
     containsPosition(chr, position) {
@@ -503,85 +481,9 @@ class TrackViewport extends Viewport {
 
     renderSVGContext(context, {deltaX, deltaY}, includeLabel = true) {
 
-        if (false === this.didPresentZoomInNotice()) {
-
-            const {width, height} = this.viewportElement.getBoundingClientRect()
-
-            const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
-            const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
-            const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
-
-            const x = deltaX
-            const y = deltaY + this.contentTop
-            const yClipOffset = -this.contentTop
-
-            context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
-
-            const {start, bpPerPixel} = this.referenceFrame
-            const pixelXOffset = Math.round((start - this.referenceFrame.start) / bpPerPixel)
-            const config =
-                {
-                    context,
-                    viewport: this,
-                    referenceFrame: this.referenceFrame,
-                    top: yClipOffset,
-                    pixelTop: yClipOffset,
-                    pixelWidth: width,
-                    pixelHeight: height,
-                    pixelXOffset,
-                    pixelShift: pixelXOffset,
-                    bpStart: start,
-                    bpEnd: start + (width * bpPerPixel),
-                    bpPerPixel,
-                    viewportWidth: width,
-                    selection: this.selection
-                }
-
-            const features = this.featureCache ? this.featureCache.features : undefined
-            const roiFeatures = this.featureCache ? this.featureCache.roiFeatures : undefined
-            this.draw(config, features, roiFeatures)
-
-            context.restore()
-        }
-
-
-        if (includeLabel && this.trackLabelElement && this.browser.doShowTrackLabels) {
-            const {x: x_p, y: y_p, width: width_p, height: height_p} = this.viewportElement.getBoundingClientRect();
-            const {x: x_c, y: y_c, width: width_c, height: height_c} = this.trackLabelElement.getBoundingClientRect();
-            const x = x_c - x_p;
-            const y = y_c - y_p;
-            const width = width_c;
-            const height = height_c;
-            this.renderTrackLabelSVG(context, deltaX + x, deltaY + y, width, height);
-        }
     }
 
     // render track label element called from renderSVGContext()
-    renderTrackLabelSVG(context, tx, ty, width, height) {
-
-        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
-        const id = `${str}_track_label_guid_${DOMUtils.guid()}`
-
-        context.saveWithTranslationAndClipRect(id, tx, ty, width, height, 0)
-
-        context.fillStyle = "white"
-        context.fillRect(0, 0, width, height)
-
-        context.font = "12px Arial"
-        context.fillStyle = 'rgb(68, 68, 68)'
-
-        const stringWidth = context.measureText(this.trackLabelElement.textContent).width;
-        const dx = 0.25 * (width - stringWidth);
-        const dy = 0.7 * (height - 12);
-        context.fillText(this.trackLabelElement.textContent, dx, height - dy);
-
-        context.strokeStyle = 'rgb(68, 68, 68)'
-        context.strokeRect(0, 0, width, height)
-
-        context.restore()
-
-    }
-
     get cachedFeatures() {
         return this.featureCache ? this.featureCache.features : []
     }
@@ -592,14 +494,10 @@ class TrackViewport extends Viewport {
     }
 
     async getFeatures(track, chr, start, end, bpPerPixel) {
-        if (this.featureCache && this.featureCache.containsRange(chr, start, end, bpPerPixel, this.windowFunction)) {
-            return this.featureCache.features
-        } else if (typeof track.getFeatures === "function") {
+        if (typeof track.getFeatures === "function") {
             const features = await track.getFeatures(chr, start, end, bpPerPixel, this)
             this.checkContentHeight(features)
             return features
-        } else {
-            return undefined
         }
     }
 
@@ -955,34 +853,6 @@ function formatPopoverText(nameValues) {
     })
 
     return rows.join('')
-}
-
-class FeatureCache {
-
-    constructor(chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures, multiresolution, windowFunction) {
-        this.chr = chr
-        this.bpStart = tileStart
-        this.bpEnd = tileEnd
-        this.bpPerPixel = bpPerPixel
-        this.features = features
-        this.roiFeatures = roiFeatures
-        this.multiresolution = multiresolution
-        this.windowFunction = windowFunction
-    }
-
-    containsRange(chr, start, end, bpPerPixel, windowFunction) {
-
-        if (windowFunction && windowFunction !== this.windowFunction) return false
-
-        // For multi-resolution tracks allow for a 2X change in bpPerPixel
-        const r = this.multiresolution ? this.bpPerPixel / bpPerPixel : 1
-
-        return start >= this.bpStart && end <= this.bpEnd && chr === this.chr && r > 0.5 && r < 2
-    }
-
-    overlapsRange(chr, start, end) {
-        return this.chr === chr && end >= this.bpStart && start <= this.bpEnd
-    }
 }
 
 export {trackViewportPopoverList}
