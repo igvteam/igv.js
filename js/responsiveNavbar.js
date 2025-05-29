@@ -25,12 +25,6 @@
 
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js"
 import {createIcon} from "./ui/utils/icons.js"
-import WindowSizePanel from "./windowSizePanel.js"
-import CursorGuideButton from "./ui/cursorGuideButton.js"
-import CenterLineButton from "./ui/centerLineButton.js"
-import TrackLabelControl from "./ui/trackLabelControl.js"
-import SaveImageControl from "./ui/saveImageControl.js"
-import CustomButton from "./ui/customButton.js"
 import ZoomWidget from "./ui/zoomWidget.js"
 
 class ResponsiveNavbar {
@@ -114,8 +108,6 @@ class ResponsiveNavbar {
             this.doSearch(this.searchInput.value);
         });
 
-        this.windowSizePanel = new WindowSizePanel(locusSizeGroup, browser);
-
         // Right container
         const navbarRightContainer = document.createElement('div');
         navbarRightContainer.className = 'igv-navbar-right-container';
@@ -125,21 +117,6 @@ class ResponsiveNavbar {
         const toggleButtonContainer = document.createElement('div');
         toggleButtonContainer.className = 'igv-navbar-toggle-button-container';
         navbarRightContainer.appendChild(toggleButtonContainer);
-        this.toggleButtonContainer = toggleButtonContainer;
-
-        this.cursorGuideButton = new CursorGuideButton(toggleButtonContainer, browser);
-        this.centerLineButton = new CenterLineButton(toggleButtonContainer, browser);
-        this.trackLabelControl = new TrackLabelControl(toggleButtonContainer, browser);
-
-        if (config.showSVGButton === true) {
-            this.saveImageControl = new SaveImageControl(toggleButtonContainer, browser);
-        }
-
-        if (config.customButtons) {
-            for (let b of config.customButtons) {
-                new CustomButton(toggleButtonContainer, browser, b);
-            }
-        }
 
         this.zoomWidget = new ZoomWidget(config, browser, navbarRightContainer);
 

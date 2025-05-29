@@ -30,7 +30,6 @@ import {loadGenbank} from "./gbk/genbankParser.js"
 import igvCss from "./embedCss.js"
 import QTLSelections from "./qtl/qtlSelections.js"
 import {inferFileFormat} from "./util/fileFormatUtils.js"
-import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -129,10 +128,6 @@ class Browser {
 
         this.doShowTrackLabels = config.showTrackLabels
 
-        this.doShowCenterLine = config.showCenterGuide
-
-        this.doShowCursorGuide = config.showCursorGuide
-
         this.showSampleNames = config.showSampleNames
 
         this.sampleNameViewportWidth = undefined
@@ -167,7 +162,6 @@ class Browser {
         if (false === config.showControls) {
             this.navbar.hide()
         }
-        this.cursorGuide = new CursorGuide(this.columnContainer, this)
 
         this.inputDialog = new InputDialog(this.root)
         this.inputDialog.container.id = `igv-input-dialog-${DOMUtils.guid()}`
@@ -440,9 +434,6 @@ class Browser {
 
         await this.loadReference(genomeConfig, genomeConfig.locus || session.locus)
 
-        this.centerLineList = this.createCenterLineList(this.columnContainer)
-
-
         if (false !== session.showRuler) {
             const track = new RulerTrack(this)
             const trackView = new TrackView(this, this.columnContainer, track)
@@ -593,64 +584,9 @@ class Browser {
 
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
-        if (this.doShowCenterLine && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
-            this.navbar.centerLineButton.boundMouseClickHandler()
-        }
-
-        if (this.doShowCursorGuide && GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr)) {
-            this.navbar.cursorGuideButton.boundMouseClickHandler()
-        }
-
-        this.setCenterLineAndCenterLineButtonVisibility(GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr))
-
     }
-
-    setCenterLineAndCenterLineButtonVisibility(isWholeGenomeView) {
-
-        if (isWholeGenomeView) {
-            this.navbar.centerLineButton.setVisibility(false)
-        } else {
-            this.navbar.centerLineButton.setVisibility(this.config.showCenterGuideButton)
-        }
-
-        for (let centerLine of this.centerLineList) {
-            if (isWholeGenomeView) {
-                this.setCenterLineVisibility(!isWholeGenomeView)
-            } else {
-                this.setCenterLineVisibility(this.doShowCenterLine)
-            }
-        }
-
-    }
-
     setTrackLabelVisibility(isVisible) {
         toggleTrackLabels(this.trackViews, isVisible)
-    }
-
-    // cursor guide
-    setCursorGuideVisibility(doShowCursorGuide) {
-
-        if (doShowCursorGuide) {
-            this.cursorGuide.show()
-        } else {
-            this.cursorGuide.hide()
-        }
-    }
-
-    setCustomCursorGuideMouseHandler(mouseHandler) {
-        this.cursorGuide.customMouseHandler = mouseHandler
-    }
-
-    // center line
-    setCenterLineVisibility(doShowCenterLine) {
-        for (let centerLine of this.centerLineList) {
-            if (true === doShowCenterLine) {
-                centerLine.show()
-                centerLine.repaint()
-            } else {
-                centerLine.hide()
-            }
-        }
     }
 
     /**
@@ -1070,10 +1006,6 @@ class Browser {
 
         this.updateLocusSearchWidget()
 
-        for (const centerGuide of this.centerLineList) {
-            centerGuide.repaint()
-        }
-
         // Don't autoscale while dragging.
         if (this.dragObject) {
             for (const trackView of trackViews) {
@@ -1256,9 +1188,6 @@ class Browser {
                 trackView.viewports.splice(indexRight, 0, viewport)
             }
         }
-
-
-        this.centerLineList = this.createCenterLineList(this.columnContainer)
 
         resize.call(this)
         await this.updateViews(true)
