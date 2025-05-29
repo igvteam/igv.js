@@ -1,9 +1,6 @@
 import {buildOptions, getFilename} from "./igvUtils.js"
 import BinaryParser from "../binary.js"
 import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import QTLParser from "../qtl/qtlParser.js"
-import {isHiccups} from "../feature/decode/bedpe.js"
-import GWASParser from "../gwas/gwasParser.js"
 
 const BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
 const BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low
@@ -236,20 +233,6 @@ async function inferFileFormatFromContents(config) {
     }
     if(firstLine.startsWith("##fileformat=")) {
         return firstLine.substring(13).toLowerCase();   // Non standard extension of VCF convention
-    }
-
-
-    // QTL test must preceed GWAS test as GWAS files will also pass the QTL test
-    if (QTLParser.isQTL(firstLine)) {
-        return "qtl"
-    }
-    if (GWASParser.isGWAS(firstLine)) {
-        return"gwas"
-    }
-
-    const columnNames = firstLine.split('\t')
-    if (isHiccups(columnNames)) {
-        return "hiccups"
     }
 
     // Format unknown

@@ -22,7 +22,6 @@ import {viewportColumnManager} from './viewportColumnManager.js'
 import ViewportCenterLine from './ui/viewportCenterLine.js'
 import IdeogramTrack from "./ideogramTrack.js"
 import RulerTrack from "./rulerTrack.js"
-import ROIManager from './roi/ROIManager.js'
 import TrackROISet from "./roi/trackROISet.js"
 import SampleInfo from "./sample/sampleInfo.js"
 import MenuUtils from "./ui/menuUtils.js"
@@ -138,15 +137,8 @@ class Browser {
 
         this.createStandardControls(config)
 
-        // Region of interest
-        this.roiManager = new ROIManager(this)
-
         // previous track colors for colorPicker
         this.previousTrackColors = []
-    }
-
-    get doShowROITable() {
-        return this.roiManager.roiTableIsVisible()
     }
 
     initialize(config) {
@@ -501,18 +493,6 @@ class Browser {
             this.qtlSelections = QTLSelections.fromJSON(session.qtlSelections)
         }
 
-        // ROIs
-        if (session.showROIOverlays !== undefined) {
-            this.roiManager.showOverlays = session.showROIOverlays
-        }
-        this.roiManager.clearROIs()
-        if (session.roi) {
-            this.roiManager.loadROI(session.roi)
-        } else {
-            // Reset is called by loadROI, if no ROIs are loaded we need to call it explicitly
-            await this.roiManager.reset()
-        }
-
         // Sample info
         const localSampleInfoFiles = []
         if (session.sampleinfo) {
@@ -600,7 +580,6 @@ class Browser {
     async loadReference(genomeConfig, initialLocus) {
 
         this.removeAllTracks()   // Do this first, before new genome is set
-        this.roiManager.clearROIs()
 
         this.navbar.setEnableTrackSelection(false)
 
@@ -688,10 +667,6 @@ class Browser {
 
     setTrackLabelVisibility(isVisible) {
         toggleTrackLabels(this.trackViews, isVisible)
-    }
-
-    setROITableVisibility(isVisible) {
-        true === isVisible ? this.roiManager.presentTable() : this.roiManager.dismissTable()
     }
 
     // cursor guide
@@ -848,49 +823,6 @@ class Browser {
 
         return track
 
-    }
-
-    /**
-     * Public API function - load a region of interest
-     *
-     * @param config  A "track" configuration object, or array of objects,  of type == "annotation" (bed, gff, etc)
-     *
-     * @returns {Promise<void>}
-     */
-    async loadROI(config) {
-        return this.roiManager.loadROI(config, this.genome)
-    }
-
-    /**
-     * Public API function - clear all regions of interest (ROI), including preloaded and user-defined ROIs
-     */
-    clearROIs() {
-        this.roiManager.clearROIs()
-    }
-
-    /**
-     * Public API function. Return a promise for the list of user-defined regions-of-interest
-     */
-    async getUserDefinedROIs() {
-
-        if (this.roiManager) {
-
-            const set = this.roiManager.getUserDefinedROISet()
-            if (undefined === set) {
-                return []
-            }
-
-            const featureHash = await set.getAllFeatures()
-            const featureList = []
-            for (let value of Object.values(featureHash)) {
-                featureList.push(...value)
-            }
-
-            return featureList
-
-        } else {
-            return []
-        }
     }
 
     getRulerTrackView() {
@@ -1205,8 +1137,6 @@ class Browser {
         }
 
         resize.call(this)
-
-        this.roiManager.updateROIRegionPositions()
 
         await this.updateViews()
     }
@@ -1685,9 +1615,6 @@ class Browser {
         for (let trackView of this.trackViews) {
             trackView.dispose()
         }
-        if (this.roiManager) {
-            this.roiManager.dispose()
-        }
     }
 
     /**
@@ -1724,13 +1651,6 @@ class Browser {
         }
         json["locus"] = locus.length === 1 ? locus[0] : locus
 
-        const roiSets = this.roiManager.toJSON()
-        if (roiSets) {
-            json["roi"] = roiSets
-            if (!this.roiManager.showOverlays) {
-                json["showROIOverlays"] = false   // true is the default
-            }
-        }
 
         if (!this.qtlSelections.isEmpty()) {
             json["qtlSelections"] = this.qtlSelections.toJSON()

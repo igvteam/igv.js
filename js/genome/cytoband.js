@@ -1,8 +1,3 @@
-import {buildOptions, isDataURL} from "../util/igvUtils.js"
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import BWReader from "../bigwig/bwReader.js"
-import Chromosome from "./chromosome.js"
-
 class Cytoband {
     constructor(start, end, name, typestain) {
         this.start = start
