@@ -53,7 +53,7 @@ const GenomeUtils = {
     },
 
     // Expand a genome id to a reference object, if needed
-    expandReference: async function (alert, idOrConfig) {
+    expandReference: async function (idOrConfig) {
 
         // idOrConfig might be a json string?  I'm actually not sure how this arises.
         if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
@@ -75,12 +75,7 @@ const GenomeUtils = {
         }
 
         if (genomeID) {
-            const knownGenomes = GenomeUtils.KNOWN_GENOMES
-            let reference = knownGenomes[genomeID]
-            if (!reference) {
-                alert.present(new Error(`Unknown genome id: ${genomeID}`), undefined)
-            }
-            return reference
+            return GenomeUtils.KNOWN_GENOMES[genomeID]
         } else {
             return idOrConfig
         }

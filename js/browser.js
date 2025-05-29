@@ -323,7 +323,7 @@ class Browser {
      * @param options
      * @returns {*}
      */
-    async loadSession(options) {
+    async loadSession(options, genome) {
 
         this.sampleInfo.initialize()
 
@@ -340,7 +340,7 @@ class Browser {
             session = options
         }
 
-        await this.loadSessionObject(session)
+        await this.loadSessionObject(session, genome)
     }
 
     /**
@@ -380,11 +380,12 @@ class Browser {
      * @param session
      * @returns {Promise<void>}
      */
-    async loadSessionObject(session) {
+    async loadSessionObject(session, genome) {
 
         // prepare to load a new session, discarding DOM and state
         this.cleanHouseForSession()
         this.config = session
+        this.genome = genome
 
         // Check for juicebox session
         if (session.browsers) {
@@ -416,18 +417,7 @@ class Browser {
             return
         }
 
-        let genomeConfig
-        if (StringUtils.isString(genomeOrReference)) {
-            genomeConfig = await GenomeUtils.expandReference(this.alert, genomeOrReference)
-        } else {
-            genomeConfig = genomeOrReference
-        }
-
-        // const genomeConfig = StringUtils.isString(genomeOrReference) ?
-        //     await GenomeUtils.expandReference(this.alert, genomeOrReference) :
-        //     genomeOrReference
-
-        await this.loadReference(genomeConfig, genomeConfig.locus || session.locus)
+        await this.loadReference(genome, session.locus)
 
         if (false !== session.showRuler) {
             const track = new RulerTrack(this)
@@ -441,24 +431,9 @@ class Browser {
 
         // Sample info
         const localSampleInfoFiles = []
-        if (session.sampleinfo) {
-            for (const sampleInfoConfig of session.sampleinfo) {
-                // The "file" property is recorded in the session when a local file is referenced. It can't be used
-                // on reloading, its only purpose is to present an alert to the user.  This could also be used
-                // to prompt the user to load the file manually, but we don't currently do that.
-                if (sampleInfoConfig.file) {
-                    localSampleInfoFiles.push(sampleInfoConfig.file)
-                } else {
-                    // this.loadSampleInfo(sampleInfoConfig)
-                    await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
-
-                }
-
-            }
-        }
 
         // Tracks.  Start with genome tracks, if any, then append session tracks
-        const genomeTracks = genomeConfig.tracks || []
+        const genomeTracks = genome.config.tracks || []
         const trackConfigurations = session.tracks ? genomeTracks.concat(session.tracks) : genomeTracks
 
         const localTrackFileNames = trackConfigurations.filter((config) => undefined !== config.file).map(({file}) => file)
@@ -520,23 +495,12 @@ class Browser {
      * Load a reference genome object.  This includes the fasta, and optional cytoband, but no tracks.  This method
      * is used by loadGenome and loadSession.
      *
-     * @param genomeConfig
+     * @param genome
      * @param initialLocus
      */
-    async loadReference(genomeConfig, initialLocus) {
+    async loadReference(genome, initialLocus) {
 
-        this.removeAllTracks()   // Do this first, before new genome is set
-
-        let genome
-        if (genomeConfig.gbkURL) {
-            genome = await loadGenbank(genomeConfig.gbkURL)
-        } else {
-            genome = await Genome.createGenome(genomeConfig, this)
-        }
-
-        const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
-
-        this.genome = genome
+        this.removeAllTracks()
 
         this.navbar.updateGenome(genome)
 
@@ -550,18 +514,6 @@ class Browser {
             throw new Error(`Cannot set initial locus ${locus}`)
         }
 
-        if (genomeChange) {
-
-            this.fireEvent('genomechange', [{genome}])
-
-            if (this.circularView) {
-                this.circularView.setAssembly({
-                    name: this.genome.id,
-                    id: this.genome.id,
-                    chromosomes: makeCircViewChromosomes(this.genome)
-                })
-            }
-        }
     }
 
     /**

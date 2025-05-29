@@ -24,7 +24,6 @@
  */
 
 import Browser from "./browser.js"
-import GenomeUtils from "./genome/genomeUtils.js"
 
 let allBrowsers = []
 
@@ -35,29 +34,14 @@ let allBrowsers = []
  * @param config - configuration options.
  *
  */
-async function createBrowser(parentDiv, config) {
-
-    if (undefined === config) config = {}
-
-    // Initialize pre-defined genomes.  The genome list is shared among all browser instances
-    if (!GenomeUtils.KNOWN_GENOMES) {
-        await GenomeUtils.initializeGenomes(config)
-    }
+async function createBrowser(parentDiv, config, genome) {
 
     setDefaults(config)
 
-    // Create browser
     const browser = new Browser(config, parentDiv)
     allBrowsers.push(browser)
 
-    const sessionURL = config.sessionURL || config.session || config.hubURL
-    if (sessionURL) {
-        await browser.loadSession({
-            url: sessionURL
-        })
-    } else {
-        await browser.loadSessionObject(config)
-    }
+    await browser.loadSessionObject(config, genome)
 
     browser.navbar.navbarDidResize()
 
