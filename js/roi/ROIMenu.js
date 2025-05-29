@@ -9,7 +9,6 @@ import SegTrack from "../feature/segTrack.js"
 const maxSequenceSize = 1000000
 const maxBlatSize = 25000
 
-
 class ROIMenu {
     constructor(browser, parent) {
 
@@ -60,12 +59,8 @@ class ROIMenu {
             this.#addBlatMenuItem(items, feature)
         }
 
-        items.push(`<hr/>`)
-
         // Add sort menu items
         this.#addSortMenuItems(items, feature)
-
-        items.push(`<hr/>`)
 
         // Add filter menu items
         this.#addFilterMenuItems(items, feature, event)
@@ -73,6 +68,7 @@ class ROIMenu {
         // ROI driven filter
 
         if (roiSet.isUserDefined) {
+
             this.#addDeleteMenuItem(items, feature, roiSet, roiManager, columnContainer, regionElement)
         }
 
@@ -80,8 +76,9 @@ class ROIMenu {
     }
 
     #addDeleteMenuItem(items, feature, roiSet, roiManager, columnContainer, regionElement) {
+
+        items.push('<hr/>')
         items.push(
-            '<hr style="border-color: white;"/>',
             {
                 label: 'Delete',
                 click: async () => {
@@ -141,8 +138,12 @@ class ROIMenu {
     }
 
     #addSortMenuItems(items, feature) {
+
         const found = this.browser.findTracks(track => typeof track.sortByValue === 'function')
         if (found.length > 0) {
+
+            items.push(`<hr/>`)
+
             const { chr, start, end } = feature
             items.push({
                     label: 'Sort by value (ascending)',
@@ -161,6 +162,12 @@ class ROIMenu {
     #addFilterMenuItems(items, feature, event) {
 
         const st = this.browser.findTracks("type", "seg")
+        const mt = this.browser.findTracks("type", "mut")
+
+        if (st.length > 0 || mt.length > 0) {
+            items.push(`<hr/>`)
+        }
+
         if (st.length > 0) {
 
             items.push(
@@ -186,7 +193,6 @@ class ROIMenu {
 
         }
 
-        const mt = this.browser.findTracks("type", "mut")
         if (mt.length > 0) {
 
             items.push(
@@ -211,7 +217,6 @@ class ROIMenu {
 
         }
     }
-
 
     #addBlatMenuItem(items, feature) {
         items.push({
