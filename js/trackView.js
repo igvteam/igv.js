@@ -33,7 +33,6 @@ import SampleNameViewport from './sample/sampleNameViewport.js'
 import MenuPopup from "./ui/menuPopup.js"
 import {autoScaleGroupColorHash, multiTrackSelectExclusionTypes} from "./ui/menuUtils.js"
 import {colorPalettes, hexToRGB} from "./util/colorPalletes.js"
-import {isOverlayTrackCriteriaMet} from "./ui/overlayTrackButton.js"
 
 const igv_axis_column_width = 50
 const scrollbarExclusionTypes = new Set(['sequence', 'ruler', 'ideogram'])
@@ -141,14 +140,6 @@ class TrackView {
             const input = document.createRange().createContextualFragment(html).firstChild
             this.trackSelectionContainer.appendChild(input)
             input.checked = this.track.selected || false
-
-            input.addEventListener('change', event => {
-                event.preventDefault()
-                event.stopPropagation()
-                this.track.selected = event.target.checked
-                this.setDragHandleSelectionState(event.target.checked)
-                this.browser.overlayTrackButton.setVisibility(isOverlayTrackCriteriaMet(this.browser))
-            })
 
             this.enableTrackSelection(false)
 

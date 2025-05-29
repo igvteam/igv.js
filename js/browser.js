@@ -20,9 +20,7 @@ import DataRangeDialog from "./ui/components/dataRangeDialog.js"
 import MenuPopup from "./ui/menuPopup.js"
 import {viewportColumnManager} from './viewportColumnManager.js'
 import ViewportCenterLine from './ui/viewportCenterLine.js'
-import IdeogramTrack from "./ideogramTrack.js"
 import RulerTrack from "./rulerTrack.js"
-import TrackROISet from "./roi/trackROISet.js"
 import SampleInfo from "./sample/sampleInfo.js"
 import MenuUtils from "./ui/menuUtils.js"
 import Genome from "./genome/genome.js"
@@ -475,13 +473,6 @@ class Browser {
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
-        // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
-        // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
-        if (false !== session.showIdeogram) {
-            const track = new IdeogramTrack(this)
-            const trackView = new TrackView(this, this.columnContainer, track)
-            this.trackViews.push(trackView)
-        }
 
         if (false !== session.showRuler) {
             const track = new RulerTrack(this)
@@ -580,8 +571,6 @@ class Browser {
     async loadReference(genomeConfig, initialLocus) {
 
         this.removeAllTracks()   // Do this first, before new genome is set
-
-        this.navbar.setEnableTrackSelection(false)
 
         let genome
         if (genomeConfig.gbkURL) {
@@ -718,11 +707,6 @@ class Browser {
 
         const loadedTracks = await Promise.all(promises)
 
-        // If any tracks are selected show the selection buttons
-        if (this.trackViews.some(({track}) => track.selected)) {
-            this.navbar.setEnableTrackSelection(true)
-        }
-
         this.reorderTracks()
 
         await resize.call(this)
@@ -819,8 +803,6 @@ class Browser {
             }
         }
 
-        track.trackView.enableTrackSelection(this.navbar.getEnableTrackSelection())
-
         return track
 
     }
@@ -904,11 +886,6 @@ class Browser {
         if (undefined === track) {
             this.alert.present(new Error(`Error creating track.  Could not determine track type for file: ${config.url || config}`), undefined)
         } else {
-
-            if (config.roi && config.roi.length > 0) {
-                track.roiSets = config.roi.map(r => new TrackROISet(r, this.genome))
-            }
-
             return track
         }
     }

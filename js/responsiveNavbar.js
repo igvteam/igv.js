@@ -23,16 +23,12 @@
  * THE SOFTWARE.
  */
 
-import GenomeUtils from "./genome/genomeUtils.js"
 import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js"
 import {createIcon} from "./ui/utils/icons.js"
 import WindowSizePanel from "./windowSizePanel.js"
-import OverlayTrackButton from "./ui/overlayTrackButton.js"
-import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import CursorGuideButton from "./ui/cursorGuideButton.js"
 import CenterLineButton from "./ui/centerLineButton.js"
 import TrackLabelControl from "./ui/trackLabelControl.js"
-import ROITableControl from "./roi/roiTableControl.js"
 import SampleInfoControl from "./sample/sampleInfoControl.js"
 import SampleNameControl from "./sample/sampleNameControl.js"
 import SaveImageControl from "./ui/saveImageControl.js"
@@ -133,16 +129,9 @@ class ResponsiveNavbar {
         navbarRightContainer.appendChild(toggleButtonContainer);
         this.toggleButtonContainer = toggleButtonContainer;
 
-        this.overlayTrackButton = new OverlayTrackButton(toggleButtonContainer, browser);
-        this.overlayTrackButton.setVisibility(false);
-
-        const showMultiSelect = config.showMultiSelectButton !== false;
-        this.multiTrackSelectButton = new MultiTrackSelectButton(toggleButtonContainer, browser, this, showMultiSelect);
-
         this.cursorGuideButton = new CursorGuideButton(toggleButtonContainer, browser);
         this.centerLineButton = new CenterLineButton(toggleButtonContainer, browser);
         this.trackLabelControl = new TrackLabelControl(toggleButtonContainer, browser);
-        this.roiTableControl = new ROITableControl(toggleButtonContainer, browser);
         this.sampleInfoControl = new SampleInfoControl(toggleButtonContainer, browser);
         this.sampleNameControl = new SampleNameControl(toggleButtonContainer, browser);
 
@@ -170,11 +159,6 @@ class ResponsiveNavbar {
             this.textButtonContainerWidth = this.navbarRightContainer.getBoundingClientRect().width
         }
         const browser = this.browser
-        const isWGV =
-            (browser.isMultiLocusWholeGenomeView()) ||
-            (browser.referenceFrameList && GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr))
-
-        isWGV ? this.windowSizePanel.hide() : this.windowSizePanel.show()
 
         const {
             x: leftContainerX,
@@ -202,11 +186,7 @@ class ResponsiveNavbar {
         }
 
         let zoomContainerClass
-        if (isWGV) {
-            zoomContainerClass = 'igv-zoom-widget-hidden'
-        } else {
-            zoomContainerClass = this.navigation.offsetWidth > 860 ? 'igv-zoom-widget' : 'igv-zoom-widget-900'
-        }
+        zoomContainerClass = this.navigation.offsetWidth > 860 ? 'igv-zoom-widget' : 'igv-zoom-widget-900'
         this.zoomWidget.zoomContainer.className = '';
         this.zoomWidget.zoomContainer.classList.add(zoomContainerClass);
     }
@@ -247,14 +227,6 @@ class ResponsiveNavbar {
 
     currentNavbarButtonClass() {
         return this.currentClass
-    }
-
-    setEnableTrackSelection(b) {
-        this.multiTrackSelectButton.setMultiTrackSelection(b)
-    }
-
-    getEnableTrackSelection() {
-        return this.multiTrackSelectButton.enableMultiTrackSelection
     }
 
     hide() {
