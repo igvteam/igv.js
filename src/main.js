@@ -5,29 +5,39 @@ import search from "../js/search.js"
 
 document.addEventListener('DOMContentLoaded', async () => {
 
+    await GenomeUtils.initializeGenomes({})
+
     const genomeName = 'hg19'
-
-    const config =
-        {
-            locus: '19:49301000-49305700',
-            genome: genomeName,
-            showTrackLabels: false,
-            showIdeogram: false,
-            showRuler: true,
-            showSequence: false,
-        };
-
-    await GenomeUtils.initializeGenomes(config)
 
     const genomeConfig = await GenomeUtils.expandReference(genomeName)
 
     const genome = await Genome.createGenome(genomeConfig, this)
 
-    // const result = await search({ genome }, config.locus)
     const result = await search({ genome }, 'myc')
     console.log(result)
 
-    const browser = await igv.createBrowser(document.getElementById('igv-container'), config, genome)
-
-    console.log(`browser ${browser.guid} is good to go`);
+    const canvas = document.querySelector('#dat-gene-render-container canvas');
+    renderGenes(canvas);
+    
 });
+
+function renderGenes(canvas) {
+    const ctx = canvas.getContext('2d');
+    
+    // Get device pixel ratio
+    const dpr = window.devicePixelRatio || 1;
+    
+    // Get the canvas container dimensions
+    const rect = canvas.getBoundingClientRect();
+    
+    // Set canvas size accounting for device pixel ratio
+    canvas.width = rect.width * dpr;
+    canvas.height = rect.height * dpr;
+    
+    // Scale the context to ensure correct drawing
+    ctx.scale(dpr, dpr);
+    
+    // Paint the canvas red
+    ctx.fillStyle = 'red';
+    ctx.fillRect(0, 0, rect.width, rect.height);
+}

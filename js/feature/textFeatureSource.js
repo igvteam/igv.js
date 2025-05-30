@@ -202,5 +202,4 @@ class TextFeatureSource extends BaseFeatureSource {
     }
 }
 
-
 export default TextFeatureSource
