@@ -87,23 +87,30 @@ suite("testBigWig", function () {
         }
     })
 
-    //
-    // test("Compressed bigwig", async function () {
-    //
-    //     this.timeout(10000)
-    //
-    //     //chr21:19,146,376-19,193,466
-    //     const url = "https://hgdownload.soe.ucsc.edu/hubs/GCA/009/914/755/GCA_009914755.4/bbi/GCA_009914755.4_T2T-CHM13v2.0.gc5Base.bw",
-    //         chr = "CP068275.2",
-    //         start = 26490012,
-    //         end = 26490012 + 1,
-    //         bpPerPixel = 1
-    //
-    //     const bwReader = new BWReader({url: url})
-    //     const features = await bwReader.readFeatures(chr, start, chr, end, bpPerPixel)
-    //     assert.equal(features.length, 1)   // Verified in iPad app
-    //
-    // })
+    /**
+     * Test a bigwig with a very large reduction level value.  This value overflows a 32-bit signed integer,
+     */
+    test("bigwig - big reductionLevel", async function () {
 
+        const genome = createGenome("ncbi")
+        const url = "test/data/bb/bigtools.bigWig"
+        const bwReader = new BWReader({url: url}, genome)
+        const zoomLevelHeaders = await bwReader.getZoomHeaders()
+        assert.equal(zoomLevelHeaders[0].reductionLevel, 2684354560)
+    })
+
+    /**
+     * Test a bigwig with no zoom levels.,
+     */
+    test("bigwig - no zooms", async function () {
+
+        this.timeout(10000)
+
+        const genome = createGenome("ncbi")
+        const url = "test/data/bb/nozooms.bw"
+        const bwReader = new BWReader({url: url}, genome)
+        const zoomLevelHeaders = await bwReader.getZoomHeaders()
+        assert.equal(zoomLevelHeaders.length, 0)
+    })
 
 })
