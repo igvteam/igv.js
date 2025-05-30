@@ -559,7 +559,7 @@ class BWReader {
 class ZoomLevelHeader {
     constructor(index, byteBuffer) {
         this.index = index
-        this.reductionLevel = byteBuffer.getInt()
+        this.reductionLevel = byteBuffer.getUInt()
         this.reserved = byteBuffer.getInt()
         this.dataOffset = byteBuffer.getLong()
         this.indexOffset = byteBuffer.getLong()

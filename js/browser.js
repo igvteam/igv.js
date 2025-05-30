@@ -610,7 +610,7 @@ class Browser {
     }
 
     /**
-     * Load a reference genome object.  This includes the fasta, and optional cytoband, but no tracks.  This method
+     * Load a reference genome object.  This includes the sequence, and optional cytoband, but no tracks.  This method
      * is used by loadGenome and loadSession.
      *
      * @param genomeConfig
