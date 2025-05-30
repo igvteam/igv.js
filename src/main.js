@@ -23,8 +23,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const genome = await Genome.createGenome(genomeConfig, this)
 
-    const result = await search({ genome }, config.locus)
-    // const result = await search({ genome }, 'myc')
+    // const result = await search({ genome }, config.locus)
+    const result = await search({ genome }, 'myc')
     console.log(result)
 
     const browser = await igv.createBrowser(document.getElementById('igv-container'), config, genome)

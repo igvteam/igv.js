@@ -10,26 +10,15 @@ const DEFAULT_SEARCH_CONFIG = {
 
 async function searchFeatures(browser, name) {
 
-    const searchConfig = browser.searchConfig || DEFAULT_SEARCH_CONFIG
     let feature
 
     name = name.toUpperCase()
-    const searchableTracks = browser.tracks.filter(t => t.searchable)
-    for (let track of searchableTracks) {
-        const feature = await track.search(name)
-        if (feature) {
-            return feature
-        }
-    }
 
-    // If still not found try webservice, if enabled
-    if (browser.config && false !== browser.config.search) {
-        try {
-            feature = await searchWebService(browser, name, searchConfig)
-            return feature    // Might be undefined
-        } catch (error) {
-            console.log("Search service not available " + error)
-        }
+    try {
+        feature = await searchWebService(browser, name, DEFAULT_SEARCH_CONFIG)
+        return feature
+    } catch (error) {
+        console.log("Search service not available " + error)
     }
 
 }
