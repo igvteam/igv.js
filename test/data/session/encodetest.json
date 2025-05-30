@@ -1,0 +1,110 @@
+{
+  "reference": {
+    "id": "hg19",
+    "name": "Human (CRCh37/hg19)",
+    "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+    "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
+  },
+  "locus": [
+    "chr11:4,725,246-6,061,261"
+  ],
+  "gtexSelections": {
+    "chr11:4,725,246-6,061,261": {
+      "gene": "IGF2",
+      "snp": null
+    }
+  },
+  "tracks": [
+    {
+      "type": "sequence",
+      "order": -1.7976931348623157e+308
+    },
+    {
+      "name": "Genes",
+      "format": "refgene",
+      "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz",
+      "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz.tbi",
+      "visibilityWindow": -1,
+      "removable": false,
+      "order": 3,
+      "filename": "refGene.sorted.txt.gz",
+      "sourceType": "file",
+      "type": "annotation",
+      "maxRows": 500
+    },
+    {
+      "url": "https://www.encodeproject.org/files/ENCFF001RSL/@@download/ENCFF001RSL.bigWig",
+      "color": "rgb(3, 116, 178)",
+      "name": "RNA-Seq",
+      "format": "bigwig",
+      "type": "wig",
+      "filename": "ENCFF001RSL.bigWig",
+      "sourceType": "file",
+      "height": 50,
+      "min": 0,
+      "max": 500,
+      "autoScale": false,
+      "autoscale": false,
+      "order": 4
+    },
+    {
+      "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+      "color": "rgb(0, 150, 0)",
+      "name": "H3K4me3",
+      "format": "bigwig",
+      "type": "wig",
+      "filename": "ENCFF754TJH.bigWig",
+      "sourceType": "file",
+      "height": 50,
+      "min": 0,
+      "max": 10,
+      "autoScale": false,
+      "autoscale": false,
+      "order": 5
+    },
+    {
+      "url": "https://www.encodeproject.org/files/ENCFF478URK/@@download/ENCFF478URK.bigWig",
+      "color": "rgb(130, 0, 4)",
+      "name": "H3K27me3",
+      "format": "bigwig",
+      "type": "wig",
+      "filename": "ENCFF478URK.bigWig",
+      "sourceType": "file",
+      "height": 50,
+      "autoscale": false,
+      "order": 6,
+      "min": 0,
+      "max": 3,
+      "autoScale": false
+    },
+    {
+      "url": "https://www.encodeproject.org/files/ENCFF000ARJ/@@download/ENCFF000ARJ.bigWig",
+      "color": "rgb(16,16,16)",
+      "name": "GM12878 CTCF",
+      "format": "bigwig",
+      "type": "wig",
+      "filename": "ENCFF000ARJ.bigWig",
+      "sourceType": "file",
+      "height": 50,
+      "min": 0,
+      "max": 25,
+      "autoScale": false,
+      "autoscale": false,
+      "order": 7
+    },
+    {
+      "name": "Loops from HiC",
+      "filename": "gm12878_loops.bedpe",
+      "format": "bedpe",
+      "url": "https://www.dropbox.com/s/vpqm0qb32hohm03/gm12878_loops.bedpe?dl=0",
+      "sourceType": "file",
+      "type": "interaction",
+      "height": 250,
+      "arcOrientation": false,
+      "thickness": 2,
+      "color": "rgb(180,25,137)",
+      "order": 9
+    }
+  ]
+}

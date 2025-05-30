@@ -1,0 +1,5 @@
+##fileformat=VCFv4.2
+#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO
+chr6	63498622	<a href='https://www.ncbi.nlm.nih.gov/snp/rs1779765' target='_blank'>rs1779765</a>	T	A	.	.	.
+chr6	63498633	<a href='https://www.ncbi.nlm.nih.gov/snp/rs1779766' target='_blank'>rs1779766</a>	G	A	.	.	.
+chr6	63498639	<a href='https://www.ncbi.nlm.nih.gov/snp/rs1779767' target='_blank'>rs1779767</a>	G	A	.	.	.
