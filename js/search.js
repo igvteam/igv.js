@@ -72,7 +72,7 @@ async function search(browser, string) {
         let locusObject
         let chromosome
         if (locus.includes(":")) {
-            locusObject = parseLocusString(locus, browser.isSoftclipped())
+            locusObject = parseLocusString(locus, false)
             if (locusObject) {
                 chromosome = await browser.genome.loadChromosome(locusObject.chr)
             }
