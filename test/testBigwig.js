@@ -102,7 +102,7 @@ suite("testBigWig", function () {
     /**
      * Test a bigwig with no zoom levels.,
      */
-    test("bigwig - big reductionLevel", async function () {
+    test("bigwig - no zooms", async function () {
 
         this.timeout(10000)
 
