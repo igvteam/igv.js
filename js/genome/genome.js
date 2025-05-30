@@ -10,6 +10,7 @@ import {loadChromSizes} from "./chromSizes.js"
 import ChromAliasDefaults from "./chromAliasDefaults.js"
 import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {loadHub} from "../ucsc/hub/hubParser.js"
+import {updateReference} from "./updateReference.js"
 
 const ucsdIDMap = new Map([
     ["1kg_ref", "hg18"],
@@ -32,6 +33,7 @@ class Genome {
 
     static async createGenome(options, browser) {
 
+        updateReference(options)
         const genome = new Genome(options, browser)
         await genome.init()
         return genome
