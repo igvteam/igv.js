@@ -3,7 +3,7 @@
  */
 
 const isString = (x) => {
-    return x && typeof x === "string" || x instanceof String
+    return (x && typeof x === "string") || x instanceof String
 }
 
 /**
