@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import {createFile} from "./utils/File.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 
@@ -13,7 +13,7 @@ suite("testAED", function () {
         var chr = "chr2",
             start = 0,
             end = Number.MAX_VALUE,
-            featureSource = FeatureSource({
+            featureSource = new TextFeatureSource({
                     format: 'aed',
                     indexed: false,
                     url: createFile('test/data/aed/utf8-bom.aed')

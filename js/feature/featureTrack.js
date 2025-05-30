@@ -1,4 +1,4 @@
-import FeatureSource from './featureSource.js'
+import TextFeatureSource from './textFeatureSource.js'
 import TrackBase from "../trackBase.js"
 import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import FeatureRenderer from './render/featureRenderer.js'
@@ -35,7 +35,7 @@ class FeatureTrack extends TrackBase {
         } else if ('blat' !== config.type) {
             this.featureSource = config.featureSource ?
                 config.featureSource :
-                FeatureSource(config, this.browser.genome)
+                new TextFeatureSource(config, this.browser.genome)
         }
 
         // Initialize managers

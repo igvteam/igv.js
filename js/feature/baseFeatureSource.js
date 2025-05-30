@@ -1,5 +1,3 @@
-import {findFeatureAfterCenter} from "./featureUtils.js"
-
 class BaseFeatureSource {
 
     constructor(genome) {

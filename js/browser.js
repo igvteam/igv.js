@@ -12,7 +12,7 @@ import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
 import {createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import version from "./version.js"
-import FeatureSource from "./feature/featureSource.js"
+import TextFeatureSource from "./feature/textFeatureSource.js"
 import search from "./search.js"
 import ResponsiveNavbar from "./responsiveNavbar.js"
 import DataRangeDialog from "./ui/components/dataRangeDialog.js"
@@ -464,7 +464,7 @@ class Browser {
         // Load a hidden track -- used to populate searchable database without creating a track
         const configHidden = nonLocalTrackConfigurations.filter(config => true === config.hidden)
         for (const config of configHidden) {
-            const featureSource = FeatureSource(config, this.genome)
+            const featureSource = new TextFeatureSource(config, this.genome)
             await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
         }
 
@@ -697,7 +697,7 @@ class Browser {
                 type = TrackUtils.inferTrackType(config.format)
                 if ("bedtype" === type) {
                     // Bed files must be read to determine track type
-                    const featureSource = FeatureSource(config, this.genome)
+                    const featureSource = new TextFeatureSource(config, this.genome)
                     config._featureSource = featureSource    // This is a temp variable, bit of a hack
                     const trackType = await featureSource.trackType()
                     if (trackType && knownTrackTypes().has(trackType)) {

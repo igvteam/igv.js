@@ -5,7 +5,7 @@ import {createGenome} from "./utils/MockGenome.js"
 const genome = createGenome()
 import {parseLocusString, searchWebService} from "../js/search.js"
 import search from "../js/search.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 
 suite("testSearch", function () {
 
@@ -110,7 +110,7 @@ suite("testSearch", function () {
             indexed: false,
             searchable: true,
         }
-        const featureSource = FeatureSource(config)
+        const featureSource = new TextFeatureSource(config)
         await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
 
         const mockBrowser = {

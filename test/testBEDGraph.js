@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 
@@ -13,7 +13,7 @@ suite("testBedGraph", function () {
         var chr = "chr19",
             start = 49302001,
             end = 49304701,
-            featureSource = FeatureSource({
+            featureSource = new TextFeatureSource({
                     format: 'bedgraph',
                     url: 'test/data/wig/bedgraph-example-uscs.bedgraph'
                 },
@@ -39,7 +39,7 @@ suite("testBedGraph", function () {
         var chr = "19",
             start = 49302001,
             end = 49304701,
-            featureSource = FeatureSource({
+            featureSource = new TextFeatureSource({
                     format: 'bedgraph',
                     url: 'test/data/wig/bedgraph-example-uscs.bedgraph'
                 },

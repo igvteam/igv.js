@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 import {summarizeData} from "../js/feature/wigTrack.js"
@@ -12,7 +12,7 @@ suite("testWig", function () {
 
         const path = "test/data/wig/fixedStep-example.wig"
 
-        const featureSource = FeatureSource(
+        const featureSource = new TextFeatureSource(
                 {format: 'wig', url: path},
                 genome),
             chr = "chr19",
@@ -32,7 +32,7 @@ suite("testWig", function () {
 
         const url = "test/data/wig/variableStep-example.wig"
 
-        const wigFeatureSource = FeatureSource(
+        const wigFeatureSource = new TextFeatureSource(
             {format: 'wig', url: url},
             genome)
         //variableStep chrom=chr19 span=150
@@ -62,7 +62,7 @@ suite("testWig", function () {
 
         const url = "test/data/wig/ENCFF000ARZ.wig"
 
-        const wigFeatureSource = FeatureSource({format: 'wig', url: url}, genome)
+        const wigFeatureSource = new TextFeatureSource({format: 'wig', url: url}, genome)
 
         const chr = "chr8"
         const allFeatures = await wigFeatureSource.getFeatures({chr})
@@ -79,7 +79,7 @@ suite("testWig", function () {
 
         const url = "test/data/wig/ENCFF000ARZ.wig"
 
-        const wigFeatureSource = FeatureSource({format: 'wig', url: url}, genome)
+        const wigFeatureSource = new TextFeatureSource({format: 'wig', url: url}, genome)
 
 
         //chr8:61,424,086-62,080,568

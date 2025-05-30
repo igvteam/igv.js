@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 import Genome from "../js/genome/genome.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
@@ -18,7 +18,7 @@ suite("testSeg", function () {
         await genome.loadChromosome("chr1")
 
         const url = "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
-        const featureSource = FeatureSource(
+        const featureSource = new TextFeatureSource(
             {format: 'seg', url: url, indexURL: url + ".tbi"},
             genome)
         const chr = "chr1"
@@ -42,7 +42,7 @@ suite("testSeg", function () {
         const genome = createGenome("ucsc")
 
         const url = "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
-        const featureSource = FeatureSource(
+        const featureSource = new TextFeatureSource(
             {format: 'seg', url: url, indexed: false},
             genome)
         const chr = "chr1"
@@ -66,7 +66,7 @@ suite("testSeg", function () {
 
         const genome = createGenome("ucsc")
         const url = "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
             format: 'seg',
             url: url,
             indexed: false,

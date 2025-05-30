@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
@@ -12,7 +12,7 @@ suite("testBedpe", function () {
         const chr = "chr12"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: 'test/data/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt',
                 format: 'bedpe'
             },
@@ -33,7 +33,7 @@ suite("testBedpe", function () {
         const chr = "chr9"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: 'test/data/bedpe/hiccups_loops.bedpe',
                 format: 'bedpe'
             },
@@ -54,7 +54,7 @@ suite("testBedpe", function () {
         const chr = "chr1"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: 'test/data/bedpe/inter_chr_simulated.bedpe',
                 format: 'bedpe'
             },
@@ -76,7 +76,7 @@ suite("testBedpe", function () {
         const chr = "chr1"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: 'test/data/bedpe/sv_calls.10X.bedpe',
                 format: 'bedpe'
             },
@@ -98,7 +98,7 @@ suite("testBedpe", function () {
         const chr = "chr1"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: 'test/data/bedpe/large_sv_calls.10X.bedpe',
                 format: 'bedpe'
             },
@@ -140,7 +140,7 @@ suite("testBedpe", function () {
         const chr = "chr12"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: 'test/data/bedpe/interactExample1.txt',
                 format: 'interact'
             },
@@ -163,7 +163,7 @@ suite("testBedpe", function () {
         const chr = "chr1"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: 'test/data/bedpe/sv_calls.10X.bedpe',
                 format: 'bedpe'
             },
@@ -184,7 +184,7 @@ suite("testBedpe", function () {
         const chr = "chr9"
         const start = 1
         const end = Number.MAX_SAFE_INTEGER
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 format: 'bedpe',
                 url: 'test/data/bedpe/hiccups_encode.tsv'
             },

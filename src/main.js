@@ -5,21 +5,21 @@ import search from "../js/search.js"
 
 document.addEventListener('DOMContentLoaded', async () => {
 
+    const genomeName = 'hg19'
+
     const config =
         {
             locus: '19:49301000-49305700',
-            genome: "hg19",
+            genome: genomeName,
             showTrackLabels: false,
             showIdeogram: false,
             showRuler: true,
             showSequence: false,
         };
 
-    if (!GenomeUtils.KNOWN_GENOMES) {
-        await GenomeUtils.initializeGenomes(config)
-    }
+    await GenomeUtils.initializeGenomes(config)
 
-    const genomeConfig = await GenomeUtils.expandReference(config.genome)
+    const genomeConfig = await GenomeUtils.expandReference(genomeName)
 
     const genome = await Genome.createGenome(genomeConfig, this)
 

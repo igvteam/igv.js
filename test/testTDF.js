@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import TDFReader from "../js/tdf/tdfReader.js"
 import TDFSource from "../js/tdf/tdfSource.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 
@@ -20,7 +20,7 @@ suite("testTDF", function () {
             end = 24375399,
             bpPerPixel = 51304566 / (Math.pow(2, 6) * 700)
 
-        const tdfSource = FeatureSource({format: 'tdf', url: url}, genome)
+        const tdfSource = new TextFeatureSource({format: 'tdf', url: url}, genome)
         const features = await tdfSource.getFeatures({chr, start, end, bpPerPixel})
         assert.ok(features)
     })

@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 
@@ -10,7 +10,7 @@ suite("testGCNV", function () {
 
     test("gcnv", async function () {
 
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: "test/data/gcnv/gcnv_track_example_data.chr22.bed"
             },
             genome
@@ -32,7 +32,7 @@ suite("testGCNV", function () {
 
     test("long lines", async function () {
 
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: "test/data/gcnv/gcnv_large.bed.gz",
                 indexURL: "test/data/gcnv/gcnv_large.bed.gz.tbi",
                 format: 'gcnv',

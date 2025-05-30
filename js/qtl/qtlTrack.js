@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import FeatureSource from '../feature/featureSource.js'
+import TextFeatureSource from '../feature/textFeatureSource.js'
 import TrackBase from "../trackBase.js"
 import IGVGraphics from "../igv-canvas.js"
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js"
@@ -62,7 +62,7 @@ class QTLTrack extends TrackBase {
         this.height = config.height || 100
         this.disableButtons = config.disableButtons
 
-        this.featureSource = FeatureSource(config, this.browser.genome)
+        this.featureSource = new TextFeatureSource(config, this.browser.genome)
     }
 
     paintAxis(ctx, pixelWidth, pixelHeight) {

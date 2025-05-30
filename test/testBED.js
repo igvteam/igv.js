@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 import Genome from "../js/genome/genome.js"
@@ -14,7 +14,7 @@ suite("testBed", function () {
             format: "bed",
             url: "test/data/bed/space_delimited.bed",
         }
-        const reader = FeatureSource(config, genome)
+        const reader = new TextFeatureSource(config, genome)
         const features = await reader.getFeatures({chr: "chr2", start: 0, end: 128756129})
         assert.equal(features.length, 5)
     })
@@ -24,7 +24,7 @@ suite("testBed", function () {
             format: "bed",
             url: "test/data/bed/basic_feature_3_columns_empty_lines.bed",
         }
-        const reader = FeatureSource(config, genome)
+        const reader = new TextFeatureSource(config, genome)
         const features = await reader.getFeatures({chr: "chr1", start: 0, end: 128756129})
         assert.ok(features)
         assert.equal(features.length, 6)
@@ -35,7 +35,7 @@ suite("testBed", function () {
             format: "bed",
             url: "test/data/bed/basic_feature_3_columns_empty_lines.bed.gz",
         }
-        const reader = FeatureSource(config, genome)
+        const reader = new TextFeatureSource(config, genome)
         const features = await reader.getFeatures({chr: "chr1", start: 0, end: 128756129})
         assert.ok(features)
         assert.equal(features.length, 6)
@@ -159,7 +159,7 @@ suite("testBed", function () {
         var chr = "chr1",
             start = 67655271,
             end = 67684468,
-            featureSource = FeatureSource({
+            featureSource = new TextFeatureSource({
                     format: 'bed',
                     indexed: false,
                     url: 'test/data/bed/basic_feature_3_columns.bed'
@@ -180,7 +180,7 @@ suite("testBed", function () {
         var chr = "1",
             start = 67655271,
             end = 67684468,
-            featureSource = FeatureSource({
+            featureSource = new TextFeatureSource({
                     format: 'bed',
                     indexed: false,
                     url: 'test/data/bed/basic_feature_3_columns.bed'
@@ -195,7 +195,7 @@ suite("testBed", function () {
 
     test("BED track line", async function () {
 
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 format: 'bed',
                 indexed: false,
                 url: 'test/data/bed/basic_feature_3_columns.bed'
@@ -213,7 +213,7 @@ suite("testBed", function () {
         const chr = "chr1",
             start = 67655271,
             end = 67684468,
-            featureSource = FeatureSource({
+            featureSource = new TextFeatureSource({
                     format: 'bed',
                     url: 'test/data/bed/basic_feature_3_columns.bed.gzipped'
                 },
@@ -227,7 +227,7 @@ suite("testBed", function () {
 
     test("broadPeak parsing ", async function () {
 
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
             format: 'broadPeak',
             url: "test/data/peak/test.broadPeak",
         }, genome)
@@ -247,7 +247,7 @@ suite("testBed", function () {
 
     test("refflat parsing ", async function () {
 
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 format: 'refflat',
                 url: "test/data/bed/myc_refFlat.txt"
             },
@@ -270,7 +270,7 @@ suite("testBed", function () {
 
     test("genepred parsing ", async function () {
 
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 format: 'genePred',
                 url: "test/data/bed/genePred_myc_hg38.txt"
             },
@@ -293,7 +293,7 @@ suite("testBed", function () {
 
     test("refgene parsing ", async function () {
 
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 format: 'refgene',
                 url: "test/data/bed/myc_refGene_genePredExt.txt"
             },
@@ -316,7 +316,7 @@ suite("testBed", function () {
 
     test("ucsc interact", async function () {
 
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
             url: "test/data/bed/ucsc_interact_1.bed"
         })
 
@@ -333,7 +333,7 @@ suite("testBed", function () {
             format: "bed",
             url: "test/data/bed/basic_feature_3_columns.alias.bed",
         }
-        const featureSource = FeatureSource(config, genome)
+        const featureSource = new TextFeatureSource(config, genome)
         const features = await featureSource.getFeatures({chr: "chr1", start: 67658429, end: 67659549})
         assert.ok(features)
         assert.equal(features.length, 4)
@@ -352,7 +352,7 @@ suite("testBed", function () {
             indexURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai"
         })
 
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 format: 'refgene',
                 url: "test/data/bed/myc_refGene_genePredExt.txt"
             },

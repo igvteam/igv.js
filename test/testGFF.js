@@ -3,6 +3,7 @@ import FeatureSource from "../js/feature/featureSource.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 
 const genome = createGenome()
 import GFFHelper from "../js/feature/gff/gffHelper.js"
@@ -278,7 +279,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
         const chr = "chr1"
         const start = 0
         const end = Number.MAX_SAFE_INTEGER
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: 'test/data/gff/eden.gff',
                 format: 'gff3',
                 filterTypes: []
@@ -296,7 +297,7 @@ CDS	    7000	7600	.	+	1	ID=cds00003;Parent=mRNA00003;Name=edenprotein.3
 
     test("Multiline feature", async function () {
 
-        const featureSource = FeatureSource({
+        const featureSource = new TextFeatureSource({
                 url: 'test/data/gff/multi_line_feature.gff3',
                 format: 'gff3'
             },
