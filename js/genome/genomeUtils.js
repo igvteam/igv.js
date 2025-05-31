@@ -1,4 +1,4 @@
-import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes3.json"
 const BACKUP_GENOMES_URL = "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/web/genomes.json"
@@ -35,50 +35,12 @@ const GenomeUtils = {
             }
 
             // Append user-defined genomes, which might override defaults
-            const genomeList = config.genomeList || config.genomes
-            if (genomeList) {
-                if (typeof genomeList === 'string') {
-                    const jsonArray = await igvxhr.loadJson(genomeList, {})
-                     processJson(jsonArray, table)
-                } else {
-                     processJson(genomeList, table)
-                }
-            }
             GenomeUtils.KNOWN_GENOMES = table
         }
     },
 
     isWholeGenomeView: function (chr) {
         return 'all' === chr.toLowerCase()
-    },
-
-    // Expand a genome id to a reference object, if needed
-    expandReference: async function (idOrConfig) {
-
-        // idOrConfig might be a json string?  I'm actually not sure how this arises.
-        if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
-            try {
-                idOrConfig = JSON.parse(idOrConfig)
-            } catch (e) {
-                // Apparently its not json,  could be an ID starting with "{".  Unusual but legal.
-            }
-        }
-
-        let genomeID
-        if (StringUtils.isString(idOrConfig)) {
-            genomeID = idOrConfig
-        } else if (idOrConfig.genome) {
-            genomeID = idOrConfig.genome
-        } else if (idOrConfig.id !== undefined && !(idOrConfig.fastaURL || idOrConfig.twobitURL)) {
-            // Backward compatibility
-            genomeID = idOrConfig.id
-        }
-
-        if (genomeID) {
-            return GenomeUtils.KNOWN_GENOMES[genomeID]
-        } else {
-            return idOrConfig
-        }
     }
 }
 
