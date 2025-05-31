@@ -799,6 +799,16 @@ class Browser {
         }
     }
 
+    async clearFilters() {
+        const st = this.findTracks("type", "seg")
+        if (st.length > 0) {
+            await Promise.all(st.map(track => track.setSampleFilter(undefined)))
+        }
+        const mt = this.findTracks("type", "mut")
+        if (mt.length > 0) {
+            await Promise.all(mt.map(track => track.setSampleFilter(undefined)))
+        }
+    }
     /**
      * Public API function. Load a list of tracks.
      *

@@ -28,22 +28,23 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js"
+    // import igv from "../../js/index.js"
+    import igv from "../../dist/igv.esm.js"
 
 
     const igvDiv = document.getElementById("igv-div")
     const options =
         {
             genome: "hg19",
-            showSampleNames: true,
+            // showSampleNames: true,
             tracks: [
                 {
                     name: "Filtered Samples",
                     type: "seg",
                     format: "seg",
                     url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/Broad.080528.subtypes.seg.gz",
-                    maxHeight: 300,
-                    autoHeight: true
+                    // maxHeight: 300,
+                    // autoHeight: true
                     // filter: (sampleKey) => {
                     //     return sampleKey.startsWith("TRIBE")
                     // }
