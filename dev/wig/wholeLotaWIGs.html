@@ -19,227 +19,723 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "https://cdn.jsdelivr.net/npm/igv@3.3.0/dist/igv.esm.js";
 
     document.addEventListener("DOMContentLoaded", () => {
 
         const config = {
-            "reference": {
-                "id": "hg19",
-                "name": "Human (GRCh37/hg19)",
-                "fastaURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta",
-                "indexURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/hg19.fasta.fai",
-                "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/seq/hg19/cytoBand.txt",
-                "aliasURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/hg19_alias.tab",
-                "chromosomeOrder": "chr1, chr2, chr3, chr4, chr5, chr6, chr7, chr8, chr9, chr10, chr11, chr12, chr13, chr14, chr15, chr16, chr17, chr18, chr19, chr20, chr21, chr22, chrX, chrY"
+            "genome": "hg38",
+            "tracks":  [
+            {
+                "type": "sequence",
+                "order": -9007199254740991
             },
-            "locus": "chr10:1-120,250,001",
-            "tracks": [
-                {
-                    "type": "sequence",
-                    "order": -9007199254740991
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF539QXW/@@download/ENCFF539QXW.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "1,2",
+                    "TechRep": "1_1,2_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF539QXW",
+                    "Experiment": "ENCSR857PBV"
                 },
-                {
-                    "name": "Homo sapiens HepG2 PRPF4 ",
-                    "url": "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
-                    "metadata": {
-                        "Biosample": "Homo sapiens HepG2",
-                        "AssayType": "ChIP-seq",
-                        "Target": "PRPF4 ",
-                        "BioRep": "1,2",
-                        "TechRep": "1_1,2_1",
-                        "OutputType": "fold change over control",
-                        "Format": "bigWig",
-                        "Lab": "Xiang-Dong Fu, UCSD",
-                        "Accession": "ENCFF059CKF",
-                        "Experiment": "ENCSR243LNQ"
-                    },
-                    "order": 0,
-                    "format": "bigwig",
-                    "type": "wig",
-                    "height": 128,
-                    "windowFunction": "mean",
-                    "color": "rgb(255, 41, 135)"
+                "order": 5,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF809PHW/@@download/ENCFF809PHW.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "1,2",
+                    "TechRep": "1_1,2_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF809PHW",
+                    "Experiment": "ENCSR857PBV"
                 },
-                {
-                    "url": "https://www.dropbox.com/scl/fi/yczvlb961oh77sgv9syc6/MP_skin_CRUSH_Loxafr3.0_HiC.bedgraph?rlkey=e2j6wm62gxoiiyhh0m3bems7q&dl=0",
-                    "filename": "MP_skin_CRUSH_Loxafr3.0_HiC.bedgraph",
-                    "name": "MP_skin_CRUSH_Loxafr3.0_HiC.bedgraph",
-                    "order": 0,
-                    "format": "bedgraph",
-                    "type": "wig",
-                    "height": 128,
-                    "color": "rgb(204,0,0)",
-                    "altColor": "rgb(0,0,0)",
-                    "min": -100,
-                    "max": 100
+                "order": 6,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF954YAM/@@download/ENCFF954YAM.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "1",
+                    "TechRep": "1_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF954YAM",
+                    "Experiment": "ENCSR857PBV"
                 },
-                {
-                    "name": "Homo sapiens GM13977 CTCF ",
-                    "url": "https://www.encodeproject.org/files/ENCFF000RQI/@@download/ENCFF000RQI.bigWig",
-                    "metadata": {
-                        "Biosample": "Homo sapiens GM13977",
-                        "AssayType": "ChIP-seq",
-                        "Target": "CTCF ",
-                        "BioRep": "1",
-                        "TechRep": "1_1",
-                        "OutputType": "base overlap signal",
-                        "Format": "bigWig",
-                        "Lab": "Vishwanath Iyer, UTA",
-                        "Accession": "ENCFF000RQI",
-                        "Experiment": "ENCSR000DLB"
-                    },
-                    "order": 1,
-                    "format": "bigwig",
-                    "type": "wig",
-                    "height": 128,
-                    "windowFunction": "mean",
-                    "color": "rgb(5, 248, 2)"
+                "order": 7,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF325VTR/@@download/ENCFF325VTR.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "1",
+                    "TechRep": "1_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF325VTR",
+                    "Experiment": "ENCSR857PBV"
                 },
-                {
-                    "name": "Homo sapiens GM12878 BCLAF1 ",
-                    "url": "https://www.encodeproject.org/files/ENCFF036IRJ/@@download/ENCFF036IRJ.bigWig",
-                    "metadata": {
-                        "Biosample": "Homo sapiens GM12878",
-                        "AssayType": "ChIP-seq",
-                        "Target": "BCLAF1 ",
-                        "BioRep": "2",
-                        "TechRep": "2_1",
-                        "OutputType": "fold change over control",
-                        "Format": "bigWig",
-                        "Lab": "Richard Myers, HAIB",
-                        "Accession": "ENCFF036IRJ",
-                        "Experiment": "ENCSR000BJZ"
-                    },
-                    "order": 2,
-                    "format": "bigwig",
-                    "type": "wig",
-                    "height": 128,
-                    "windowFunction": "mean",
-                    "color": "rgb(0, 46, 255)"
+                "order": 8,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF692MIF/@@download/ENCFF692MIF.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "2",
+                    "TechRep": "2_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF692MIF",
+                    "Experiment": "ENCSR857PBV"
                 },
-                {
-                    "name": "Homo sapiens K562 ZNF274 ",
-                    "url": "https://www.encodeproject.org/files/ENCFF555CQE/@@download/ENCFF555CQE.bigWig",
-                    "metadata": {
-                        "Biosample": "Homo sapiens K562",
-                        "AssayType": "ChIP-seq",
-                        "Target": "ZNF274 ",
-                        "BioRep": "2",
-                        "TechRep": "2_1",
-                        "OutputType": "fold change over control",
-                        "Format": "bigWig",
-                        "Lab": "Peggy Farnham, USC",
-                        "Accession": "ENCFF555CQE",
-                        "Experiment": "ENCSR000EWE"
-                    },
-                    "order": 3,
-                    "format": "bigwig",
-                    "type": "wig",
-                    "height": 128,
-                    "windowFunction": "mean",
-                    "color": "rgb(106, 207, 255)"
+                "order": 9,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF218EPZ/@@download/ENCFF218EPZ.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "2",
+                    "TechRep": "2_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF218EPZ",
+                    "Experiment": "ENCSR857PBV"
                 },
-                {
-                    "name": "Homo sapiens 22Rv1 ZFX ",
-                    "url": "https://www.encodeproject.org/files/ENCFF420XMW/@@download/ENCFF420XMW.bigWig",
-                    "metadata": {
-                        "Biosample": "Homo sapiens 22Rv1",
-                        "AssayType": "ChIP-seq",
-                        "Target": "ZFX ",
-                        "BioRep": "2",
-                        "TechRep": "2_1",
-                        "OutputType": "signal p-value",
-                        "Format": "bigWig",
-                        "Lab": "Michael Snyder, Stanford",
-                        "Accession": "ENCFF420XMW",
-                        "Experiment": "ENCSR246MLJ"
-                    },
-                    "order": 4,
-                    "format": "bigwig",
-                    "type": "wig",
-                    "height": 128,
-                    "windowFunction": "mean",
-                    "color": "rgb(137, 30, 136)"
+                "order": 10,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF169EZR/@@download/ENCFF169EZR.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "1",
+                    "TechRep": "1_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF169EZR",
+                    "Experiment": "ENCSR857PBV"
                 },
-                {
-                    "name": "Homo sapiens A549 CHD4 ",
-                    "url": "https://www.encodeproject.org/files/ENCFF725AXM/@@download/ENCFF725AXM.bigWig",
-                    "metadata": {
-                        "Biosample": "Homo sapiens A549",
-                        "AssayType": "ChIP-seq",
-                        "Target": "CHD4 ",
-                        "BioRep": "1",
-                        "TechRep": "1_1",
-                        "OutputType": "fold change over control",
-                        "Format": "bigWig",
-                        "Lab": "Bradley Bernstein, Broad",
-                        "Accession": "ENCFF725AXM",
-                        "Experiment": "ENCSR550SCU"
-                    },
-                    "order": 5,
-                    "format": "bigwig",
-                    "type": "wig",
-                    "height": 128,
-                    "windowFunction": "mean",
-                    "color": "rgb(255, 114, 110)"
+                "order": 11,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF091XDV/@@download/ENCFF091XDV.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "1",
+                    "TechRep": "1_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF091XDV",
+                    "Experiment": "ENCSR857PBV"
                 },
-                {
-                    "name": "Homo sapiens aorta tissue male adult (34 years) H3K27ac ",
-                    "url": "https://www.encodeproject.org/files/ENCFF162CIW/@@download/ENCFF162CIW.bigWig",
-                    "color": "rgb(200,0,0)",
-                    "metadata": {
-                        "Biosample": "Homo sapiens aorta tissue male adult (34 years)",
-                        "AssayType": "ChIP-seq",
-                        "Target": "H3K27ac ",
-                        "BioRep": "2",
-                        "TechRep": "2_1",
-                        "OutputType": "signal p-value",
-                        "Format": "bigWig",
-                        "Lab": "Bing Ren, UCSD",
-                        "Accession": "ENCFF162CIW",
-                        "Experiment": "ENCSR519CFV"
-                    },
-                    "order": 6,
-                    "format": "bigwig",
-                    "type": "wig",
-                    "height": 128,
-                    "windowFunction": "mean"
+                "order": 12,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF101XPW/@@download/ENCFF101XPW.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "1,2",
+                    "TechRep": "1_1,2_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF101XPW",
+                    "Experiment": "ENCSR857PBV"
                 },
-                {
-                    "name": "Homo sapiens with nonobstructive coronary artery disease; liver tissue male adult (32 years) H3K9me3 ",
-                    "url": "https://www.encodeproject.org/files/ENCFF566FON/@@download/ENCFF566FON.bigWig",
-                    "color": "rgb(100,0,0)",
-                    "metadata": {
-                        "Biosample": "Homo sapiens with nonobstructive coronary artery disease; liver tissue male adult (32 years)",
-                        "AssayType": "ChIP-seq",
-                        "Target": "H3K9me3 ",
-                        "BioRep": "1",
-                        "TechRep": "1_1",
-                        "OutputType": "fold change over control",
-                        "Format": "bigWig",
-                        "Lab": "Bing Ren, UCSD",
-                        "Accession": "ENCFF566FON",
-                        "Experiment": "ENCSR563YGF"
-                    },
-                    "order": 8,
-                    "format": "bigwig",
-                    "type": "wig",
-                    "height": 128,
-                    "windowFunction": "mean"
+                "order": 13,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF071NDH/@@download/ENCFF071NDH.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "2",
+                    "TechRep": "2_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF071NDH",
+                    "Experiment": "ENCSR857PBV"
                 },
-                {
-                    "name": "Refseq Genes",
-                    "format": "refgene",
-                    "id": "hg19_genes",
-                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz",
-                    "indexed": false,
-                    "removable": false,
-                    "order": 1000000,
-                    "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
-                    "type": "annotation",
-                    "height": 70
-                }
+                "order": 14,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF412QSE/@@download/ENCFF412QSE.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "2",
+                    "TechRep": "2_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF412QSE",
+                    "Experiment": "ENCSR857PBV"
+                },
+                "order": 15,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 CTCF ",
+                "url": "https://www.encodeproject.org/files/ENCFF643NXS/@@download/ENCFF643NXS.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "CTCF ",
+                    "BioRep": "1,2",
+                    "TechRep": "1_1,2_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF643NXS",
+                    "Experiment": "ENCSR857PBV"
+                },
+                "order": 16,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 H3K27ac ",
+                "url": "https://www.encodeproject.org/files/ENCFF230CMD/@@download/ENCFF230CMD.bigWig",
+                "color": "rgb(200,0,0)",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "H3K27ac ",
+                    "BioRep": "1",
+                    "TechRep": "1_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF230CMD",
+                    "Experiment": "ENCSR391NPE"
+                },
+                "order": 17,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 H3K27ac ",
+                "url": "https://www.encodeproject.org/files/ENCFF385XPX/@@download/ENCFF385XPX.bigWig",
+                "color": "rgb(200,0,0)",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "H3K27ac ",
+                    "BioRep": "1",
+                    "TechRep": "1_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF385XPX",
+                    "Experiment": "ENCSR391NPE"
+                },
+                "order": 18,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens 22Rv1 H3K27ac ",
+                "url": "https://www.encodeproject.org/files/ENCFF206KON/@@download/ENCFF206KON.bigWig",
+                "color": "rgb(200,0,0)",
+                "metadata": {
+                    "Biosample": "Homo sapiens 22Rv1",
+                    "AssayType": "ChIP-seq",
+                    "Target": "H3K27ac ",
+                    "BioRep": "2",
+                    "TechRep": "2_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF206KON",
+                    "Experiment": "ENCSR391NPE"
+                },
+                "order": 19,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF905ETV/@@download/ENCFF905ETV.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "5",
+                    "TechRep": "5_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF905ETV",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 20,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF187VYR/@@download/ENCFF187VYR.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "6",
+                    "TechRep": "6_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF187VYR",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 21,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF298EUK/@@download/ENCFF298EUK.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "5,6",
+                    "TechRep": "5_1,6_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF298EUK",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 22,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF680CVV/@@download/ENCFF680CVV.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "5",
+                    "TechRep": "5_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF680CVV",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 23,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF290IHY/@@download/ENCFF290IHY.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "6",
+                    "TechRep": "6_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF290IHY",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 24,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF805NTL/@@download/ENCFF805NTL.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "5,6",
+                    "TechRep": "5_1,6_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF805NTL",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 25,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF993KIH/@@download/ENCFF993KIH.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "5",
+                    "TechRep": "5_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF993KIH",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 26,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF848VGL/@@download/ENCFF848VGL.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "5",
+                    "TechRep": "5_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF848VGL",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 27,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF378VIJ/@@download/ENCFF378VIJ.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "6",
+                    "TechRep": "6_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF378VIJ",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 28,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF151CQE/@@download/ENCFF151CQE.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "6",
+                    "TechRep": "6_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF151CQE",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 29,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF503CWF/@@download/ENCFF503CWF.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "5,6",
+                    "TechRep": "5_1,6_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF503CWF",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 30,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARID3A ",
+                "url": "https://www.encodeproject.org/files/ENCFF830CXC/@@download/ENCFF830CXC.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARID3A ",
+                    "BioRep": "5,6",
+                    "TechRep": "5_1,6_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF830CXC",
+                    "Experiment": "ENCSR778UBR"
+                },
+                "order": 31,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARNT ",
+                "url": "https://www.encodeproject.org/files/ENCFF884LYZ/@@download/ENCFF884LYZ.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARNT ",
+                    "BioRep": "2",
+                    "TechRep": "2_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF884LYZ",
+                    "Experiment": "ENCSR590KEQ"
+                },
+                "order": 32,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARNT ",
+                "url": "https://www.encodeproject.org/files/ENCFF172CTG/@@download/ENCFF172CTG.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARNT ",
+                    "BioRep": "3",
+                    "TechRep": "3_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF172CTG",
+                    "Experiment": "ENCSR590KEQ"
+                },
+                "order": 33,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARNT ",
+                "url": "https://www.encodeproject.org/files/ENCFF676GTL/@@download/ENCFF676GTL.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARNT ",
+                    "BioRep": "2",
+                    "TechRep": "2_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF676GTL",
+                    "Experiment": "ENCSR590KEQ"
+                },
+                "order": 34,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARNT ",
+                "url": "https://www.encodeproject.org/files/ENCFF106SXI/@@download/ENCFF106SXI.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARNT ",
+                    "BioRep": "2,3",
+                    "TechRep": "2_1,3_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF106SXI",
+                    "Experiment": "ENCSR590KEQ"
+                },
+                "order": 35,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARNT ",
+                "url": "https://www.encodeproject.org/files/ENCFF804CWU/@@download/ENCFF804CWU.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARNT ",
+                    "BioRep": "3",
+                    "TechRep": "3_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF804CWU",
+                    "Experiment": "ENCSR590KEQ"
+                },
+                "order": 36,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARNT ",
+                "url": "https://www.encodeproject.org/files/ENCFF561TKX/@@download/ENCFF561TKX.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARNT ",
+                    "BioRep": "2,3",
+                    "TechRep": "2_1,3_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF561TKX",
+                    "Experiment": "ENCSR590KEQ"
+                },
+                "order": 37,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARNT ",
+                "url": "https://www.encodeproject.org/files/ENCFF688OIK/@@download/ENCFF688OIK.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARNT ",
+                    "BioRep": "3",
+                    "TechRep": "3_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF688OIK",
+                    "Experiment": "ENCSR590KEQ"
+                },
+                "order": 38,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARNT ",
+                "url": "https://www.encodeproject.org/files/ENCFF774VAY/@@download/ENCFF774VAY.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARNT ",
+                    "BioRep": "2",
+                    "TechRep": "2_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF774VAY",
+                    "Experiment": "ENCSR590KEQ"
+                },
+                "order": 39,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARNT ",
+                "url": "https://www.encodeproject.org/files/ENCFF343TRG/@@download/ENCFF343TRG.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARNT ",
+                    "BioRep": "2,3",
+                    "TechRep": "2_1,3_1",
+                    "OutputType": "fold change over control",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF343TRG",
+                    "Experiment": "ENCSR590KEQ"
+                },
+                "order": 40,
+                "format": "bigwig",
+                "type": "wig"
+            },
+            {
+                "name": "Homo sapiens GM12878 ARNT ",
+                "url": "https://www.encodeproject.org/files/ENCFF247GKM/@@download/ENCFF247GKM.bigWig",
+                "metadata": {
+                    "Biosample": "Homo sapiens GM12878",
+                    "AssayType": "ChIP-seq",
+                    "Target": "ARNT ",
+                    "BioRep": "2",
+                    "TechRep": "2_1",
+                    "OutputType": "signal p-value",
+                    "Format": "bigWig",
+                    "Lab": "Michael Snyder, Stanford",
+                    "Accession": "ENCFF247GKM",
+                    "Experiment": "ENCSR590KEQ"
+                },
+                "order": 41,
+                "format": "bigwig",
+                "type": "wig"
+            }
             ]
         }
 
