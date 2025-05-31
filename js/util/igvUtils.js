@@ -24,7 +24,7 @@
  */
 
 import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js"
-import * as DOMUtils from "../ui/utils/dom-utils.js"
+import * as DOMUtils from "./dom-utils.js"
 
 const extend = function (parent, child) {
 

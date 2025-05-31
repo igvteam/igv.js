@@ -1,4 +1,4 @@
-import {createIcon} from "./icons.js";
+import {createIcon} from "../ui/utils/icons.js";
 
 function attachDialogCloseHandlerWithParent(parent, closeHandler) {
 
