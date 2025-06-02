@@ -23,11 +23,11 @@ class FeatureRenderer {
     }
 
     draw(options) {
-        const {features, context, bpPerPixel, bpStart, bpEnd, pixelWidth, pixelHeight, referenceFrame} = options
+        const {features, context, bpPerPixel, bpStart, bpEnd, pixelWidth, pixelHeight, chr} = options
 
         // If drawing amino acids fetch cached sequence interval
         if (bpPerPixel < aminoAcidSequenceRenderThreshold) {
-            options.sequenceInterval = this.browser.genome.getSequenceInterval(referenceFrame.chr, bpStart, bpEnd)
+            options.sequenceInterval = this.browser.genome.getSequenceInterval(chr, bpStart, bpEnd)
         }
 
         // Replace IGVGraphics.fillRect with native canvas methods
@@ -234,14 +234,14 @@ class FeatureRenderer {
             }
 
             if (options.drawLabel && this.displayMode !== "SQUISHED") {
-                this.renderFeatureLabel(ctx, feature, coord.px, coord.px1, py, options.referenceFrame, options)
+                this.renderFeatureLabel(ctx, feature, coord.px, coord.px1, py, options)
             }
         } finally {
             ctx.restore()
         }
     }
 
-    renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referenceFrame, options) {
+    renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, options) {
 
         try {
             ctx.save()

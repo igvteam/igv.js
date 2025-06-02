@@ -3,9 +3,11 @@ import Genome from '../js/genome/genome.js';
 import search from "../js/search.js"
 import TextFeatureSource from "../js/feature/textFeatureSource.js"
 import QTLSelections from "../js/qtl/qtlSelections.js"
-import featureRenderer from "../js/feature/featureRenderer.js"
 import ReferenceFrame from "../js/referenceFrame.js"
 import FeatureRenderer from "../js/feature/featureRenderer.js"
+import AnnotationRenderService from './annotationRenderService.js'
+
+let annotationRenderService
 
 document.addEventListener('DOMContentLoaded', async () => {
 
@@ -26,16 +28,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const featureSource = new TextFeatureSource(featureSourceConfig)
 
-    const [{ chr, start, end, name }] = await search({ genome }, 'myc')
-    const features = featureSource.getAllFeatures(chr, start, end)
+    const [{ chr, start, end, name }] = await search({ genome }, 'egfr')
+    const features = await featureSource.getFeatures({chr, start, end})
 
-    const canvas = document.querySelector('#dat-gene-render-container canvas')
-    const { width, height } = canvas.getBoundingClientRect()
+    const container = document.querySelector('#dat-gene-render-container')
+    const { width, height } = container.getBoundingClientRect()
     const bpp = (end - start) / width
 
     console.log(`chr = ${chr}, start = ${start}, end = ${end}, name = ${name} bp/pixel = ${bpp}`)
-
-    const referenceFrame = new ReferenceFrame(genome, chr, start, end, bpp)
 
     const browser =
         {
@@ -51,41 +51,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
     const featureRenderer = new FeatureRenderer(featureRendererConfig)
+    annotationRenderService = new AnnotationRenderService(container, featureRenderer)
+
+    const canvas = document.querySelector('#dat-gene-render-container canvas')
 
     const drawConfig =
         {
-            context: canvas.getContext('2d'),
-            bpPerPixel: bpp,
+            chr,
+            features,
             bpStart: start,
             bpEnd: end,
+            
+            context: canvas.getContext('2d'),
+            bpPerPixel: bpp,
             pixelHeight: height,
             pixelWidth: width,
             viewportWidth: width,
-            referenceFrame,
-            features
         };
 
-    renderGenes(featureRenderer, drawConfig)
+    annotationRenderService.render(drawConfig)
 });
-
-function renderGenes(featureRenderer, drawConfig) {
-
-    // Get device pixel ratio
-    const dpr = window.devicePixelRatio || 1;
-
-    const canvas = drawConfig.context.canvas
-    // Get the canvas container dimensions
-    const { width, height } = canvas.getBoundingClientRect();
-
-    // Set canvas size accounting for device pixel ratio
-    canvas.width = width * dpr;
-    canvas.height = height * dpr;
-    drawConfig.context.scale(dpr, dpr);
-
-    // Paint the canvas red
-    drawConfig.context.fillStyle = 'white';
-    drawConfig.context.fillRect(0, 0, width, height);
-
-    featureRenderer.draw(drawConfig)
-
-}
