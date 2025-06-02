@@ -1,4 +1,4 @@
-import {ColorTable, PaletteColorTable} from "../../util/colorPalletes.js"
+import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 import {IGVColor} from 'igv-utils'
 
 export default class FeatureColorManager {
