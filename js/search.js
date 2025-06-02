@@ -1,4 +1,4 @@
-import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {igvxhr, StringUtils} from 'igv-utils'
 
 
 const DEFAULT_SEARCH_CONFIG = {

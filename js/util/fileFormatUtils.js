@@ -1,6 +1,6 @@
 import {buildOptions, getFilename} from "./igvUtils.js"
 import BinaryParser from "../binary.js"
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils} from 'igv-utils'
 
 const BIGWIG_MAGIC_LTH = 0x888FFC26 // BigWig Magic Low to High
 const BIGWIG_MAGIC_HTL = 0x26FC8F66 // BigWig Magic High to Low

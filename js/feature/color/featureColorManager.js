@@ -1,5 +1,5 @@
 import {ColorTable, PaletteColorTable} from "../../util/colorPalletes.js"
-import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
+import {IGVColor} from 'igv-utils'
 
 export default class FeatureColorManager {
     static defaultColor = 'rgb(0,0,150)'
@@ -13,7 +13,7 @@ export default class FeatureColorManager {
         this._initialAltColor = this.altColor || this.constructor.defaultColor
 
         // Set up color table if colorBy is specified
-        if (config.colorBy) {
+        if (config.colorBy)
             if (config.colorBy.field) {
                 config.colorTable = config.colorBy.pallete || config.colorBy.palette
                 config.colorBy = config.colorBy.field
@@ -70,4 +70,4 @@ export default class FeatureColorManager {
         const binNumber = Math.floor((score - min) / binWidth)
         return Math.min(1.0, 0.2 + (binNumber * 0.8) / 9)
     }
-} 
+}

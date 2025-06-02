@@ -2,8 +2,6 @@
  * Default chromosome aliases, mostly 1<->chr1 etc.  Used if chrom alias file is not supplied.
  *
  */
-import {isNumber, buildOptions} from "../util/igvUtils.js"
-import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
 
 class ChromAliasDefaults {
 

@@ -1,4 +1,4 @@
-import {IGVColor} from "../../../node_modules/igv-utils/src/index.js"
+import {IGVColor} from 'igv-utils'
 import {GFFFeature} from "./gffFeature.js"
 import {decodeGFFAttribute, parseAttributeString} from "./parseAttributeString.js"
 

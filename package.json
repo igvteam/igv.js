@@ -9,12 +9,8 @@
     "preview": "vite preview",
     "postinstall": "npm run build"
   },
-  "dependencies": {
-    "igv-utils": "github:igvteam/igv-utils#v1.5.10",
-    "dompurify": "^3.0.9",
-    "vanilla-picker": "^2.12.3"
-  },
   "devDependencies": {
-    "vite": "^5.0.0"
+    "igv-utils": "github:igvteam/igv-utils#v1.5.10",
+    "vite": "^6.3.5"
   }
 }

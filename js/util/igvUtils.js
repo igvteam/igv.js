@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {FileUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {FileUtils, StringUtils} from 'igv-utils'
 import * as DOMUtils from "./dom-utils.js"
 
 const extend = function (parent, child) {

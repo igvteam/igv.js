@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {BGZip, FileUtils, igvxhr, URIUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, FileUtils, igvxhr, URIUtils} from 'igv-utils'
 import FeatureParser from "./featureParser.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import getDataWrapper from "./dataWrapper.js"

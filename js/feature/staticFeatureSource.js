@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
+import {FeatureCache} from 'igv-utils'
 import {computeWGFeatures, findFeatureAfterCenter, packFeatures} from "./featureUtils.js"
 import BaseFeatureSource from "./baseFeatureSource.js"
 

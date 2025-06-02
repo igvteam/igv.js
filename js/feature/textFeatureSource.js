@@ -1,4 +1,4 @@
-import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
+import {FeatureCache} from 'igv-utils'
 import FeatureFileReader from "./featureFileReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
 import {packFeatures} from "./featureUtils.js"

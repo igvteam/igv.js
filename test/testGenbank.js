@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import {igvxhr} from "../node_modules/igv-utils/src/index.js"
+import {igvxhr} from 'igv-utils'
 import {loadGenbank} from "../js/gbk/genbankParser.js"
 import {assert} from 'chai'
 

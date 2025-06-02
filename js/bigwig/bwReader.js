@@ -25,7 +25,7 @@
 
 import RPTree from "./rpTree.js"
 import BinaryParser from "../binary.js"
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils} from 'igv-utils'
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
 import getDecoder from "./bbDecoders.js"
 import {parseAutoSQL} from "../util/ucscUtils.js"

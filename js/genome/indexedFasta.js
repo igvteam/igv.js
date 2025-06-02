@@ -24,7 +24,7 @@
  */
 
 // Indexed fasta files
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils} from 'igv-utils'
 import GenomicInterval from "./genomicInterval.js"
 import Chromosome from "./chromosome.js"
 import {buildOptions} from "../util/igvUtils.js"
@@ -174,7 +174,7 @@ class FastaSequence {
 
     //The Fasta-index gives a byte-position of the chromosomal sequences within the FASTA file.
     //These locations need to be remapped to the locations within the zipped reference genome, using the GZI index
-    //This function provides this functionality by 
+    //This function provides this functionality by
     //1) taking the indicated start/stop byte locations within the UNCOMPRESSED FASTA file
     //2) remapping these byte locations to the correct blocks (and associated positions) within the COMPRESSED FASTA file
     //Subsequently, the calling method can then extract the correct blocks from the compressed FASTA files and uncompressed the data
@@ -249,7 +249,7 @@ class FastaSequence {
 
         //It is possible that the query end position lies AFTER the start of the final block
         //If this is the case, we add a 'fake' negative index which will be interpreted by the loadAndUncompressBlocks method as an indicator
-        //to read until the end of the file 
+        //to read until the end of the file
         const finalRelevantBlock = result[result.length - 1]
         const finalIndexBlock = this.compressedIndex.length - 1
         if (finalRelevantBlock === finalIndexBlock && (this.compressedIndex)[finalRelevantBlock][UNCOMPRESSED_POSITION] < queryPositionEnd) {
@@ -313,7 +313,7 @@ class FastaSequence {
             }
         }
 
-        //postprocess this data: because entire blocks are read we need to remove the first N bases of the first used block, 
+        //postprocess this data: because entire blocks are read we need to remove the first N bases of the first used block,
         //which are not included in the original query positions
         const firstBlockInfo = (this.compressedIndex)[blockIndices[0]]
         const offset = startByte - firstBlockInfo[UNCOMPRESSED_POSITION]

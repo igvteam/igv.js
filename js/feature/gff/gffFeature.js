@@ -1,4 +1,4 @@
-import {StringUtils} from "../../../node_modules/igv-utils/src/index.js"
+import {StringUtils} from 'igv-utils'
 import {isCoding, isIntron, isUTR} from "./so.js"
 
 

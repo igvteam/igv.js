@@ -9,30 +9,9 @@ export default defineConfig({
     build: {
         outDir: 'dist',
         assetsDir: 'assets',
-        sourcemap: true,
-        commonjsOptions: {
-            include: [/node_modules/]
-        },
-        rollupOptions: {
-            external: [
-                'igv-utils'
-            ],
-            output: {
-                globals: {
-                    'igv-utils': 'igvUtils'
-                }
-            }
-        }
-    },
-    resolve: {
-        alias: {
-            'igv-utils': path.resolve(__dirname, 'node_modules/igv-utils/src/index.js')
-        }
+        sourcemap: true
     },
     optimizeDeps: {
-        include: [
-            'igv-utils'
-        ],
         esbuildOptions: {
             target: 'es2020'
         }
