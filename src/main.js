@@ -14,9 +14,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     const featureSourceConfig =
         {
             "id": "refseqSelect",
-            "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeqSelect.txt.gz",
+            // "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeqSelect.txt.gz",
             "format": "refgene",
-            "html": "https://www.ncbi.nlm.nih.gov/refseq/refseq_select/",
+            // "html": "https://www.ncbi.nlm.nih.gov/refseq/refseq_select/",
             "type": "annotation"
         }
 
