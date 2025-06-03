@@ -255,7 +255,6 @@ class FeatureRenderer {
             const t1 = Math.max(featureX, -pixelXOffset)
             const t2 = Math.min(featureX1, -pixelXOffset + options.viewportWidth)
             let centerX = (t1 + t2) / 2
-            //let centerX = (featureX + featureX1) / 2
 
             let transform
             if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
@@ -269,30 +268,24 @@ class FeatureRenderer {
             const geneFontStyle = {
                 textAlign: "SLANT" === this.labelDisplayMode ? undefined : 'center',
                 fillStyle: color,
-                strokeStyle: color
+                strokeStyle: color,
+                font: "12px Helvetica"
             }
 
+            console.log("Current font settings:", ctx.font)
             const textMetrics = ctx.measureText(name)
             const xleft = centerX - textMetrics.width / 2
             const xright = centerX + textMetrics.width / 2
             const lastLabelX = options.rowLastLabelX[feature.row] || -Number.MAX_SAFE_INTEGER
-            if (options.labelAllFeatures || xleft > lastLabelX || selected) {
+            if (xleft > lastLabelX || selected) {
                 options.rowLastLabelX[feature.row] = xright
 
-                if ('y' === options.axis) {
-                    // TODO -- is this ever used?
-                    ctx.save()
-                    IGVGraphics.labelTransformWithContext(ctx, centerX)
-                    IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
-                    ctx.restore()
-                } else {
-                    ctx.clearRect(
-                        centerX - textMetrics.width / 2 - 1,
-                        labelY - textMetrics.actualBoundingBoxAscent - 1,
-                        textMetrics.width + 2,
-                        textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent + 2)
-                    IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
-                }
+                ctx.clearRect(
+                    centerX - textMetrics.width / 2 - 1,
+                    labelY - textMetrics.actualBoundingBoxAscent - 1,
+                    textMetrics.width + 2,
+                    textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent + 2)
+                IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
             }
 
         } finally {

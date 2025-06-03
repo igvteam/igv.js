@@ -1,10 +1,7 @@
 import GenomeUtils from '../js/genome/genomeUtils.js';
 import Genome from '../js/genome/genome.js';
-import search from "../js/search.js"
-import TextFeatureSource from "../js/feature/textFeatureSource.js"
-import QTLSelections from "../js/qtl/qtlSelections.js"
-import FeatureRenderer from "../js/feature/featureRenderer.js"
-import AnnotationRenderService from './annotationRenderService.js'
+import { searchFeatures } from "../js/search.js"
+import { createAnnotationRenderService } from './annotationRenderServiceFactory.js'
 
 let annotationRenderService
 
@@ -16,40 +13,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     const genomeConfig = GenomeUtils.KNOWN_GENOMES[genomeName]
     const genome = await Genome.createGenome(genomeConfig, this)
 
-    const featureSourceConfig =
-        {
-            "id": "refseqSelect",
-            "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeqSelect.txt.gz",
-            "format": "refgene",
-            "html": "https://www.ncbi.nlm.nih.gov/refseq/refseq_select/",
-            "type": "annotation"
-        }
+    annotationRenderService = createAnnotationRenderService(document.querySelector('#dat-gene-render-container'), genome)
 
-    const featureSource = new TextFeatureSource(featureSourceConfig)
+    let { chr, start, end, name } = await searchFeatures({ genome }, 'brca2')
 
-    const [{ chr, start, end, name }] = await search({ genome }, 'brca2')
-    const features = await featureSource.getFeatures({chr, start, end})
+    const features = await annotationRenderService.getFeatures(chr, start, end)
 
-    const canvas = document.querySelector('#dat-gene-render-container canvas')
-    const { width, height } = canvas.getBoundingClientRect()
-    const bpp = (end - start) / width
-
-    console.log(`chr = ${chr}, start = ${start}, end = ${end}, name = ${name} bp/pixel = ${bpp}`)
-
-
-    const featureRendererConfig =
-        {
-            "format": "refgene",
-            "type": "annotation",
-            browser : { genome, qtlSelections: new QTLSelections() }
-        };
-
-    const featureRenderer = new FeatureRenderer(featureRendererConfig)
-
-    const container = document.querySelector('#dat-gene-render-container')
-    annotationRenderService = new AnnotationRenderService(container, featureRenderer)
-
-    const drawConfig =
+    const renderConfig =
         {
             chr,
             features,
@@ -57,5 +27,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             bpEnd: end
         };
 
-    annotationRenderService.render(drawConfig)
+    annotationRenderService.render(renderConfig)
 });

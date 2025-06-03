@@ -1,7 +1,8 @@
 class AnnotationRenderService {
-    constructor(container, featureRenderer) {
+    constructor(container, featureRenderer, featureSource) {
         this.container = container;
         this.featureRenderer = featureRenderer;
+        this.featureSource = featureSource;
 
         // Create canvas element
         this.canvas = container.querySelector('canvas');
@@ -36,6 +37,10 @@ class AnnotationRenderService {
         }
 
     }
+
+    async getFeatures(chr, start, end) {
+        return await this.featureSource.getFeatures({chr, start, end})
+    }   
 
     render(drawConfig) {
 
