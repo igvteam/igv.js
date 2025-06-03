@@ -10,7 +10,7 @@ function createAnnotationRenderService(container, genome) {
     const featureSource = new TextFeatureSource({ ...refseqSelectTrackConfig, type: "annotation" })
 
     const browser = { genome, qtlSelections: new QTLSelections() }
-    const featureRendererConfig = { format: "refgene", type: "annotation", browser }
+    const featureRendererConfig = { format: "refgene", type: "annotation", displayMode: "COLLAPSED", browser }
 
     const featureRenderer = new FeatureRenderer(featureRendererConfig)
 

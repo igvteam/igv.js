@@ -15,7 +15,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     annotationRenderService = createAnnotationRenderService(document.querySelector('#dat-gene-render-container'), genome)
 
-    const { chr, start:bpStart, end:bpEnd, name } = await searchFeatures({ genome }, 'brca2')
+    // const { chr, start:bpStart, end:bpEnd, name } = await searchFeatures({ genome }, 'brca2')
+
+    const chr = 'chr5'
+    const bpStart = 60116410
+    const bpEnd = 71928691
 
     const features = await annotationRenderService.getFeatures(chr, bpStart, bpEnd)
 
