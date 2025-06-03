@@ -28,16 +28,15 @@ class Genome {
     #wgChromosomeNames
     #aliasRecordCache = new Map()
 
-    static async createGenome(options, browser) {
+    static async createGenome(options) {
 
-        const genome = new Genome(options, browser)
+        const genome = new Genome(options)
         await genome.init()
         return genome
     }
 
-    constructor(config, browser) {
+    constructor(config) {
         this.config = config
-        this.browser = browser
         this.id = config.id || generateGenomeID(config)
         this.ucscID = config.ucscID || ucsdIDMap.get(this.id) || this.id
         this.blatDB = config.blatDB || this.ucscID
@@ -51,7 +50,7 @@ class Genome {
         const config = this.config
 
         // Load sequence
-        this.sequence = await loadSequence(config, this.browser)
+        this.sequence = await loadSequence(config)
 
         // Load cytobands.  This is optional but required to support the ideogram.  Only needed for whole genome view
         if(false !== config.showIdeogram && false !== config.wholeGenomeView) {

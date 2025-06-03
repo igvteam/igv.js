@@ -1,5 +1,4 @@
 import NonIndexedFasta from "./nonIndexedFasta.js"
-import FastaSequence from "./indexedFasta.js"
 import {isDataURL} from "../util/igvUtils.js"
 import ChromSizes from "./chromSizes.js"
 import Twobit from "./twobit.js"
@@ -12,22 +11,21 @@ import CachedSequence from "./cachedSequence.js"
  * @param reference
  * @returns {Promise<CachedSequence|ChromSizes|NonIndexedFasta>}
  */
-async function loadSequence(reference, browser) {
+async function loadSequence(reference) {
 
     let fasta
     if ("chromsizes" === reference.format) {
         fasta = new ChromSizes(reference.fastaURL || reference.url)
     } else if ("2bit" === reference.format || reference.twoBitURL) {
-        fasta = new CachedSequence(new Twobit(reference), browser)
+        fasta = new CachedSequence(new Twobit(reference))
     } else if (isDataURL(reference.fastaURL) || !reference.indexURL) {
         fasta = new NonIndexedFasta(reference)
     } else if("gbk" === reference.format || reference.gbkURL) {
         // Genbank files do not crete a fasta object
+    } else {
+        console.warn('loadSequence: Whoops! Should not get here')
     }
 
-    else {
-        fasta = new CachedSequence(new FastaSequence(reference), browser)
-    }
     await fasta.init()
     return fasta
 }

@@ -10,10 +10,9 @@ suite("testCachedSequence", function () {
         this.timeout(100000)
 
         const fasta = await loadSequence({
-                fastaURL: "https://www.dropbox.com/s/bpf7g2ynx8qep73/chr22.fa?dl=0",
-                indexURL: "https://www.dropbox.com/s/1jx9327vjkd87w5/chr22.fa.fai?dl=0"
-            }
-        )
+            fastaURL: "https://www.dropbox.com/s/bpf7g2ynx8qep73/chr22.fa?dl=0",
+            indexURL: "https://www.dropbox.com/s/1jx9327vjkd87w5/chr22.fa.fai?dl=0"
+        })
 
         // Note -- coordinates are UCSC style
         // chr22:29565177-29565216
@@ -33,10 +32,9 @@ suite("testCachedSequence", function () {
         this.timeout(100000)
 
         const fasta = await loadSequence({
-                fastaURL: "https://www.dropbox.com/s/bpf7g2ynx8qep73/chr22.fa?dl=0",
-                indexURL: "https://www.dropbox.com/s/1jx9327vjkd87w5/chr22.fa.fai?dl=0"
-            }
-        )
+            fastaURL: "https://www.dropbox.com/s/bpf7g2ynx8qep73/chr22.fa?dl=0",
+            indexURL: "https://www.dropbox.com/s/1jx9327vjkd87w5/chr22.fa.fai?dl=0"
+        })
         // Note -- coordinates are UCSC style
         // chr22:29565177-29565216
         const start = 29565176

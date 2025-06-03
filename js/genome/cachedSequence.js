@@ -11,9 +11,8 @@ class CachedSequence {
     #cachedIntervals = []
     #maxIntervals = 10   // TODO - this should be >= the number of viewports for multi-locus view
 
-    constructor(sequenceReader, browser) {
+    constructor(sequenceReader) {
         this.sequenceReader = sequenceReader
-        this.browser = browser
     }
 
     get chromosomes() {
@@ -50,16 +49,6 @@ class CachedSequence {
             this.#cachedIntervals.shift()
         }
 
-        // Filter out out-of-view cached intervals.  Don't try this if there are too many frames, inefficient
-        if (this.browser && this.browser.referenceFrameList.length < 100) {
-            this.#cachedIntervals = this.#cachedIntervals.filter(i => {
-                const b = undefined !== this.browser.referenceFrameList.find(frame => frame.overlaps(i))
-                if(!b) {
-                   // console.log("Filtering " + i.locusString)
-                }
-                return b;
-            })
-        }
     }
 
     /**

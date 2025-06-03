@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     await GenomeUtils.initializeGenomes({})
 
     const genomeName = 'hg19'
-    const genome = await Genome.createGenome(GenomeUtils.KNOWN_GENOMES[genomeName], this)
+
+    const genome = await Genome.createGenome(GenomeUtils.KNOWN_GENOMES[genomeName])
 
     annotationRenderService = createAnnotationRenderService(document.querySelector('#dat-gene-render-container'), genome)
 
