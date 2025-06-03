@@ -1,4 +1,4 @@
-import BGZLineReader from "../js/util/bgzLineReader.js"
+import BGZLineReader from "../src/igvCore/util/bgzLineReader.js"
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 

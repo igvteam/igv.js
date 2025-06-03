@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
 import {igvxhr} from 'igv-utils'
-import XMLSession from "../js/session/igvXmlSession.js"
+import XMLSession from "../src/igvCore/session/igvXmlSession.js"
 
 suite("testXMLSession", function () {
 

@@ -1,9 +1,9 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import {convertToHubURL} from "../js/ucsc/ucscUtils.js"
-import {loadStanzas, loadHub} from "../js/ucsc/hub/hubParser.js"
-import TrackDbHub from "../js/ucsc/hub/trackDbHub.js"
-import {parseMetadata} from "../js/ucsc/hub/trackDbHub.js"
+import {convertToHubURL} from "../src/igvCore/ucsc/ucscUtils.js"
+import {loadStanzas, loadHub} from "../src/igvCore/ucsc/hub/hubParser.js"
+import TrackDbHub from "../src/igvCore/ucsc/hub/trackDbHub.js"
+import {parseMetadata} from "../src/igvCore/ucsc/hub/trackDbHub.js"
 
 suite("hub.txt", function () {
 

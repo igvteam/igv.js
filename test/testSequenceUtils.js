@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import {reverseComplementSequence, complementSequence, complementBase} from "../js/util/sequenceUtils.js"
+import {reverseComplementSequence, complementSequence, complementBase} from "../src/igvCore/util/sequenceUtils.js"
 
 suite("testSequenceUtils", function () {
 

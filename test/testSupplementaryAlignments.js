@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import {createSupplementaryAlignments} from "../js/bam/supplementaryAlignment.js"
+import {createSupplementaryAlignments} from "../src/igvCore/bam/supplementaryAlignment.js"
 
 suite("test SA tag", function () {
 

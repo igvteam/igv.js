@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
-import {loadIndex} from "../js/bam/indexFactory.js"
-import FeatureFileReader from "../js/feature/featureFileReader.js"
+import {loadIndex} from "../src/igvCore/bam/indexFactory.js"
+import FeatureFileReader from "../src/igvCore/feature/featureFileReader.js"
 import {assert} from 'chai'
 
 suite("testTabix", function () {

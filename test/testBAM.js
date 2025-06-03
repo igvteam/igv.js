@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
-import BamReader from "../js/bam/bamReader.js"
+import BamReader from "../src/igvCore/bam/bamReader.js"
 import {assert} from 'chai'
-import BamReaderNonIndexed from "../js/bam/bamReaderNonIndexed.js"
+import BamReaderNonIndexed from "../src/igvCore/bam/bamReaderNonIndexed.js"
 import {createGenome} from "./utils/MockGenome.js"
 
 

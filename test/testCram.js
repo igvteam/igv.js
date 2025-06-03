@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import Genome from "../js/genome/genome.js"
-import CramReader from "../js/cram/cramReader.js"
+import Genome from "../src/igvCore/genome/genome.js"
+import CramReader from "../src/igvCore/cram/cramReader.js"
 import LocalFile from "./utils/JBrowseFileHandler.js"
 
 // Hack neccessary for unit testing cram bundle

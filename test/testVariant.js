@@ -1,13 +1,13 @@
 import "./utils/mockObjects.js"
-import VcfParser from "../js/variant/vcfParser.js"
-import FeatureFileReader from "../js/feature/featureFileReader.js"
+import VcfParser from "../src/igvCore/variant/vcfParser.js"
+import FeatureFileReader from "../src/igvCore/feature/featureFileReader.js"
 import {igvxhr} from 'igv-utils'
 import {assert} from 'chai'
-import getDataWrapper from "../js/feature/dataWrapper.js"
+import getDataWrapper from "../src/igvCore/feature/dataWrapper.js"
 import {createGenome} from "./utils/MockGenome.js"
-import pack from "../js/feature/featurePacker.js"
-import Browser from "../js/browser.js"
-import VariantTrack from "../js/variant/variantTrack.js"
+import pack from "../src/igvCore/feature/featurePacker.js"
+import Browser from "../src/igvCore/browser.js"
+import VariantTrack from "../src/igvCore/variant/variantTrack.js"
 
 const genome = createGenome()
 const browser = {genome}

@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {igvxhr} from "igv-utils"
 
 /**
  * EQTL reader for GTEX webservice

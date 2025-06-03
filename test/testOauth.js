@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import _igv from "../js/index.js"
+import _igv from "../src/igvCore/index.js"
 
 const oauth = _igv.oauth
 

@@ -1,8 +1,8 @@
 import "./utils/mockObjects.js"
-import Genome from "../js/genome/genome.js"
-import {updateReference} from "../js/genome/updateReference.js"
+import Genome from "../src/igvCore/genome/genome.js"
+import {updateReference} from "../src/igvCore/genome/updateReference.js"
 import {assert} from 'chai'
-import {shortenChromsomeName} from "../js/rulerTrack.js"
+import {shortenChromsomeName} from "../src/igvCore/rulerTrack.js"
 
 
 suite("testGenome", function () {

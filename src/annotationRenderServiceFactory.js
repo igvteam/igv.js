@@ -1,6 +1,6 @@
-import TextFeatureSource from "../js/feature/textFeatureSource.js"
-import QTLSelections from "../js/qtl/qtlSelections.js"
-import FeatureRenderer from "../js/feature/featureRenderer.js"
+import TextFeatureSource from "./igvCore/feature/textFeatureSource.js"
+import QTLSelections from "./igvCore/qtl/qtlSelections.js"
+import FeatureRenderer from "./igvCore/feature/featureRenderer.js"
 import AnnotationRenderService from './annotationRenderService.js'
 
 function createAnnotationRenderService(container, genome) {

@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
-import loadPlinkFile from "../js/sample/plinkSampleInformation.js"
+import loadPlinkFile from "../src/igvCore/sample/plinkSampleInformation.js"
 import {assert} from 'chai'
-import SampleInfo from "../js/sample/sampleInfo.js"
+import SampleInfo from "../src/igvCore/sample/sampleInfo.js"
 
 suite("test sample info", function () {
 

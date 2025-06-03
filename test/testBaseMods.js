@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import {complementSequence} from "../js/util/sequenceUtils.js"
-import {isChEBI, getBaseModificationSets, byteToUnsignedInt} from "../js/bam/mods/baseModificationUtils.js"
+import {complementSequence} from "../src/igvCore/util/sequenceUtils.js"
+import {isChEBI, getBaseModificationSets, byteToUnsignedInt} from "../src/igvCore/bam/mods/baseModificationUtils.js"
 
 
 suite("test base mods", function () {

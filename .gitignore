@@ -9,4 +9,4 @@ igv.js.iml
 igv.css.map
 /deploy/
 /dev/oauth/oauthConfigPrivate.js
-/js/bigwig/bwReader_nochromtree.js
+/src/igvCore/bigwig/bwReader_nochromtree.js

@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import BufferedReader from "../js/bigwig/bufferedReader.js"
+import BufferedReader from "../src/igvCore/bigwig/bufferedReader.js"
 import {assert} from 'chai'
 
 suite("testBigWig", function () {

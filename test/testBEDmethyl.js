@@ -1,11 +1,11 @@
 import "./utils/mockObjects.js"
-import FeatureFileReader from "../js/feature/featureFileReader.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import FeatureFileReader from "../src/igvCore/feature/featureFileReader.js"
+import FeatureSource from "../src/igvCore/feature/featureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
-import GenomeUtils from "../js/genome/genomeUtils.js"
+import GenomeUtils from "../src/igvCore/genome/genomeUtils.js"
 
 suite("testBed", function () {
 

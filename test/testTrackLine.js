@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import WigTrack from "../js/feature/wigTrack.js"
+import WigTrack from "../src/igvCore/feature/wigTrack.js"
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()

@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import {loadIndex} from "../js/bam/indexFactory.js"
+import {loadIndex} from "../src/igvCore/bam/indexFactory.js"
 import {assert} from 'chai'
 
 

@@ -1,8 +1,8 @@
 import "./utils/mockObjects.js"
-import TextFeatureSource from "../js/feature/textFeatureSource.js"
+import TextFeatureSource from "../src/igvCore/feature/textFeatureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
-import {summarizeData} from "../js/feature/wigTrack.js"
+import {summarizeData} from "../src/igvCore/feature/wigTrack.js"
 
 const genome = createGenome()
 

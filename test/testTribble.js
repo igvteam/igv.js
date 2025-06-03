@@ -3,7 +3,7 @@ import "./utils/mockObjects.js"
 import {createGenome} from "./utils/MockGenome.js"
 
 
-import Browser from "../js/browser.js"
+import Browser from "../src/igvCore/browser.js"
 
 suite("testTribble", function () {
 

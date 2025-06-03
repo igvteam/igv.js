@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
-import SegParser from "../js/feature/segParser.js"
+import SegParser from "../src/igvCore/feature/segParser.js"
 import {assert} from 'chai'
-import getDataWrapper from "../js/feature/dataWrapper.js"
+import getDataWrapper from "../src/igvCore/feature/dataWrapper.js"
 import fs from 'fs'
 
 suite("testMaf", function () {

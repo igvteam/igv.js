@@ -1,10 +1,10 @@
 import "./utils/mockObjects.js"
-import TextFeatureSource from "../js/feature/textFeatureSource.js"
+import TextFeatureSource from "../src/igvCore/feature/textFeatureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
-import Browser from "../js/browser.js"
+import Browser from "../src/igvCore/browser.js"
 
 suite("testGCNV", function () {
 

@@ -1,11 +1,11 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import WigTrack from "../js/feature/wigTrack.js"
-import BAMTrack from "../js/bam/bamTrack.js"
-import VariantTrack from "../js/variant/variantTrack.js"
-import InteractionTrack from "../js/feature/interactionTrack.js"
-import BlatTrack from "../js/blat/blatTrack.js"
-import FeatureTrack from "../js/feature/featureTrack.js"
+import WigTrack from "../src/igvCore/feature/wigTrack.js"
+import BAMTrack from "../src/igvCore/bam/bamTrack.js"
+import VariantTrack from "../src/igvCore/variant/variantTrack.js"
+import InteractionTrack from "../src/igvCore/feature/interactionTrack.js"
+import BlatTrack from "../src/igvCore/blat/blatTrack.js"
+import FeatureTrack from "../src/igvCore/feature/featureTrack.js"
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()

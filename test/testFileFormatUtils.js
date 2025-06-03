@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import {inferFileFormat, inferFileFormatFromContents} from "../js/util/fileFormatUtils.js"
+import {inferFileFormat, inferFileFormatFromContents} from "../src/igvCore/util/fileFormatUtils.js"
 import {assert} from 'chai'
 
 suite("testFileFormatUtils", async function () {

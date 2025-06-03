@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
-import TDFReader from "../js/tdf/tdfReader.js"
-import TDFSource from "../js/tdf/tdfSource.js"
-import TextFeatureSource from "../js/feature/textFeatureSource.js"
+import TDFReader from "../src/igvCore/tdf/tdfReader.js"
+import TDFSource from "../src/igvCore/tdf/tdfSource.js"
+import TextFeatureSource from "../src/igvCore/feature/textFeatureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 

@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import BamReaderNonIndexed from "../js/bam/bamReaderNonIndexed.js"
+import BamReaderNonIndexed from "../src/igvCore/bam/bamReaderNonIndexed.js"
 
 suite("testAlignmentUtils", function () {
 

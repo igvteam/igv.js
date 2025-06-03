@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import ChromTree from "../js/bigwig/chromTree.js"
+import ChromTree from "../src/igvCore/bigwig/chromTree.js"
 
 suite("test bbChromTree", function () {
 

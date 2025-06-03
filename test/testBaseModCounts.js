@@ -1,8 +1,8 @@
 import "./utils/mockObjects.js"
-import BamReader from "../js/bam/bamReader.js"
+import BamReader from "../src/igvCore/bam/bamReader.js"
 import {assert} from 'chai'
-import BaseModificationCounts from "../js/bam/mods/baseModificationCounts.js"
-import BaseModificationKey from "../js/bam/mods/baseModificationKey.js"
+import BaseModificationCounts from "../src/igvCore/bam/mods/baseModificationCounts.js"
+import BaseModificationKey from "../src/igvCore/bam/mods/baseModificationKey.js"
 
 suite("test base-mod counts", function () {
 

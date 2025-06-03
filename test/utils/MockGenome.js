@@ -1,5 +1,5 @@
 // Mock genome object, based on hg38
-import ChromAliasDefaults from "../../js/genome/chromAliasDefaults.js"
+import ChromAliasDefaults from "../../src/igvCore/genome/chromAliasDefaults.js"
 
 // Chromosome sizes for hg38 genome, 1-24 + M
 const sizes = [248956422, 242193529, 198295559, 190214555, 181538259, 170805979, 159345973, 145138636, 138394717,

@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import TwobitSequence from "../js/genome/twobit.js"
-import BPTree from "../js/bigwig/bpTree.js"
+import TwobitSequence from "../src/igvCore/genome/twobit.js"
+import BPTree from "../src/igvCore/bigwig/bpTree.js"
 
 
 suite("testTwobit", function () {

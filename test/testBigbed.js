@@ -1,11 +1,11 @@
 import "./utils/mockObjects.js"
-import BWSource from "../js/bigwig/bwSource.js"
-import {parseAutoSQL} from "../js/util/ucscUtils.js"
+import BWSource from "../src/igvCore/bigwig/bwSource.js"
+import {parseAutoSQL} from "../src/igvCore/util/ucscUtils.js"
 import {assert} from 'chai'
 import {fileToDataURL} from "./utils/URLUtils.js"
-import BWReader from "../js/bigwig/bwReader.js"
+import BWReader from "../src/igvCore/bigwig/bwReader.js"
 import {createGenome} from "./utils/MockGenome.js"
-import ChromAliasBB from "../js/genome/chromAliasBB.js"
+import ChromAliasBB from "../src/igvCore/genome/chromAliasBB.js"
 
 function getWGChromosomeNames() {
     const chromosomeNames = []

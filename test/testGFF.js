@@ -1,13 +1,13 @@
 import "./utils/mockObjects.js"
-import FeatureSource from "../js/feature/featureSource.js"
-import FeatureFileReader from "../js/feature/featureFileReader.js"
+import FeatureSource from "../src/igvCore/feature/featureSource.js"
+import FeatureFileReader from "../src/igvCore/feature/featureFileReader.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
-import TextFeatureSource from "../js/feature/textFeatureSource.js"
+import TextFeatureSource from "../src/igvCore/feature/textFeatureSource.js"
 
 const genome = createGenome()
-import GFFHelper from "../js/feature/gff/gffHelper.js"
-import {decodeGFFAttribute, parseAttributeString} from "../js/feature/gff/parseAttributeString.js"
+import GFFHelper from "../src/igvCore/feature/gff/gffHelper.js"
+import {decodeGFFAttribute, parseAttributeString} from "../src/igvCore/feature/gff/parseAttributeString.js"
 
 suite("testGFF", function () {
 

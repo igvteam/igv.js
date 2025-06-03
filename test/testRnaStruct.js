@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import RnaStructTrack from "../js/rna/rnaStruct.js"
+import RnaStructTrack from "../src/igvCore/rna/rnaStruct.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 

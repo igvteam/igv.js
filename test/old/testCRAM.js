@@ -1,5 +1,5 @@
-import CramReader from "../../js/cram/cramReader.js"
-import FastaSequence from "../../js/genome/indexedFasta.js"
+import CramReader from "../../src/igvCore/cram/cramReader.js"
+import FastaSequence from "../../src/igvCore/genome/indexedFasta.js"
 import {assert} from 'chai'
 import {setup} from "../util/setup.js"
 

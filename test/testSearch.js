@@ -3,9 +3,9 @@ import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 
 const genome = createGenome()
-import {parseLocusString, searchWebService} from "../js/search.js"
-import search from "../js/search.js"
-import TextFeatureSource from "../js/feature/textFeatureSource.js"
+import {parseLocusString, searchWebService} from "../src/igvCore/search.js"
+import search from "../src/igvCore/search.js"
+import TextFeatureSource from "../src/igvCore/feature/textFeatureSource.js"
 
 suite("testSearch", function () {
 

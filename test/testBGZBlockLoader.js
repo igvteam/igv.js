@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import BGZBlockLoader, {inflateBlocks, findBlockBoundaries} from "../js/bam/bgzBlockLoader.js"
+import BGZBlockLoader, {inflateBlocks, findBlockBoundaries} from "../src/igvCore/bam/bgzBlockLoader.js"
 import {assert} from 'chai'
 import fs from 'fs'
 

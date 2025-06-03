@@ -1,8 +1,8 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import CytobandFileBB from "../js/genome/cytobandFileBB.js"
+import CytobandFileBB from "../src/igvCore/genome/cytobandFileBB.js"
 import {createGenome} from "./utils/MockGenome.js"
-import CytobandFile from "../js/genome/cytobandFile.js"
+import CytobandFile from "../src/igvCore/genome/cytobandFile.js"
 
 
 suite("test cytobands", function () {

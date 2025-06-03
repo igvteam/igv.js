@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai'
-import FastaSequence from "../js/genome/indexedFasta.js"
-import NonIndexedFasta from "../js/genome/nonIndexedFasta.js"
+import FastaSequence from "../src/igvCore/genome/indexedFasta.js"
+import NonIndexedFasta from "../src/igvCore/genome/nonIndexedFasta.js"
 
 suite("testFasta", function () {
 

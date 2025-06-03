@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
-import BWSource from "../js/bigwig/bwSource.js"
-import BWReader from "../js/bigwig/bwReader.js"
-import FeatureSource from "../js/feature/featureSource.js"
+import BWSource from "../src/igvCore/bigwig/bwSource.js"
+import BWReader from "../src/igvCore/bigwig/bwReader.js"
+import FeatureSource from "../src/igvCore/feature/featureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 

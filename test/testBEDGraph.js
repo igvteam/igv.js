@@ -1,5 +1,5 @@
 import "./utils/mockObjects.js"
-import TextFeatureSource from "../js/feature/textFeatureSource.js"
+import TextFeatureSource from "../src/igvCore/feature/textFeatureSource.js"
 import {assert} from 'chai'
 import {createGenome} from "./utils/MockGenome.js"
 
