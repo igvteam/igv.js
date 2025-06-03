@@ -32,7 +32,7 @@ class FeatureRenderer {
 
         // Replace IGVGraphics.fillRect with native canvas methods
         context.fillStyle = "rgb(255, 255, 255)"
-        context.fillRect(0, options.pixelTop, pixelWidth, pixelHeight)
+        context.fillRect(0, 0, pixelWidth, pixelHeight)
 
         if (features) {
             const rowFeatureCount = []
@@ -67,7 +67,7 @@ class FeatureRenderer {
                 }
 
                 const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row
-                options.drawLabel = options.labelAllFeatures || pixelsPerFeature > 10
+                options.drawLabel = pixelsPerFeature > 10
                 const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel)
                 const last = lastPxEnd[row]
 

@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const featureSource = new TextFeatureSource(featureSourceConfig)
 
-    const [{ chr, start, end, name }] = await search({ genome }, 'egfr')
+    const [{ chr, start, end, name }] = await search({ genome }, 'brca2')
     const features = await featureSource.getFeatures({chr, start, end})
 
     const canvas = document.querySelector('#dat-gene-render-container canvas')
