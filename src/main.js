@@ -3,7 +3,6 @@ import Genome from '../js/genome/genome.js';
 import search from "../js/search.js"
 import TextFeatureSource from "../js/feature/textFeatureSource.js"
 import QTLSelections from "../js/qtl/qtlSelections.js"
-import ReferenceFrame from "../js/referenceFrame.js"
 import FeatureRenderer from "../js/feature/featureRenderer.js"
 import AnnotationRenderService from './annotationRenderService.js'
 
@@ -31,42 +30,31 @@ document.addEventListener('DOMContentLoaded', async () => {
     const [{ chr, start, end, name }] = await search({ genome }, 'egfr')
     const features = await featureSource.getFeatures({chr, start, end})
 
-    const container = document.querySelector('#dat-gene-render-container')
-    const { width, height } = container.getBoundingClientRect()
+    const canvas = document.querySelector('#dat-gene-render-container canvas')
+    const { width, height } = canvas.getBoundingClientRect()
     const bpp = (end - start) / width
 
     console.log(`chr = ${chr}, start = ${start}, end = ${end}, name = ${name} bp/pixel = ${bpp}`)
 
-    const browser =
-        {
-            genome,
-            qtlSelections: new QTLSelections()
-        };
 
     const featureRendererConfig =
         {
             "format": "refgene",
             "type": "annotation",
-            browser
+            browser : { genome, qtlSelections: new QTLSelections() }
         };
 
     const featureRenderer = new FeatureRenderer(featureRendererConfig)
-    annotationRenderService = new AnnotationRenderService(container, featureRenderer)
 
-    const canvas = document.querySelector('#dat-gene-render-container canvas')
+    const container = document.querySelector('#dat-gene-render-container')
+    annotationRenderService = new AnnotationRenderService(container, featureRenderer)
 
     const drawConfig =
         {
             chr,
             features,
             bpStart: start,
-            bpEnd: end,
-            
-            context: canvas.getContext('2d'),
-            bpPerPixel: bpp,
-            pixelHeight: height,
-            pixelWidth: width,
-            viewportWidth: width,
+            bpEnd: end
         };
 
     annotationRenderService.render(drawConfig)

@@ -2,11 +2,11 @@ class AnnotationRenderService {
     constructor(container, featureRenderer) {
         this.container = container;
         this.featureRenderer = featureRenderer;
-        
+
         // Create canvas element
         this.canvas = container.querySelector('canvas');
         this.ctx = this.canvas.getContext('2d');
-        
+
         this.boundResizeHandler = this.resizeCanvas.bind(this);
         window.addEventListener('resize', this.boundResizeHandler);
 
@@ -38,9 +38,15 @@ class AnnotationRenderService {
     }
 
     render(drawConfig) {
-        this.drawConfig = drawConfig
-        this.featureRenderer.draw(drawConfig)
+
+        const context = this.ctx
+        const { width:pixelWidth, height:pixelHeight } = this.canvas.getBoundingClientRect()
+        const bpPerPixel = (drawConfig.bpEnd - drawConfig.bpStart) / pixelWidth
+        const viewportWidth = pixelWidth
+
+        this.drawConfig = { ...drawConfig, context, bpPerPixel, viewportWidth, pixelWidth, pixelHeight }
+        this.featureRenderer.draw(this.drawConfig)
     }
-} 
+}
 
 export default AnnotationRenderService;
