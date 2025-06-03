@@ -5,20 +5,17 @@ import AnnotationRenderService from './annotationRenderService.js'
 
 function createAnnotationRenderService(container, genome) {
     const featureSourceConfig = {
-        "id": "refseqSelect",
-        "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeqSelect.txt.gz",
-        "format": "refgene",
-        "html": "https://www.ncbi.nlm.nih.gov/refseq/refseq_select/",
-        "type": "annotation"
+        id: "refseqSelect",
+        url: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeqSelect.txt.gz",
+        // html: "https://www.ncbi.nlm.nih.gov/refseq/refseq_select/",
+        format: "refgene",
+        type: "annotation"
     }
 
     const featureSource = new TextFeatureSource(featureSourceConfig)
 
-    const featureRendererConfig = {
-        "format": "refgene",
-        "type": "annotation",
-        browser: { genome, qtlSelections: new QTLSelections() }
-    }
+    const browser = { genome, qtlSelections: new QTLSelections() }
+    const featureRendererConfig = { format: "refgene", type: "annotation", browser }
 
     const featureRenderer = new FeatureRenderer(featureRendererConfig)
 

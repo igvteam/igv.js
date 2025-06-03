@@ -10,22 +10,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     await GenomeUtils.initializeGenomes({})
 
     const genomeName = 'hg19'
-    const genomeConfig = GenomeUtils.KNOWN_GENOMES[genomeName]
-    const genome = await Genome.createGenome(genomeConfig, this)
+    const genome = await Genome.createGenome(GenomeUtils.KNOWN_GENOMES[genomeName], this)
 
     annotationRenderService = createAnnotationRenderService(document.querySelector('#dat-gene-render-container'), genome)
 
-    let { chr, start, end, name } = await searchFeatures({ genome }, 'brca2')
+    const { chr, start:bpStart, end:bpEnd, name } = await searchFeatures({ genome }, 'brca2')
 
-    const features = await annotationRenderService.getFeatures(chr, start, end)
+    const features = await annotationRenderService.getFeatures(chr, bpStart, bpEnd)
 
-    const renderConfig =
-        {
-            chr,
-            features,
-            bpStart: start,
-            bpEnd: end
-        };
-
-    annotationRenderService.render(renderConfig)
+    annotationRenderService.render({ chr, bpStart, bpEnd, features })
 });
