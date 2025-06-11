@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="igv-app-container" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from '../../js/index.js'
+
+    document.addEventListener("DOMContentLoaded", async (event) => {
+
+        const config =
+            {
+                genome: 'hg38',
+                locus: "chr7:52,338,217-56,469,252",
+
+                tracks:
+                    [
+                        {
+                            height: 400,
+                            displayMode: 'FILL',
+                            url: "https://igv-genepattern-org.s3.amazonaws.com/demo/GBMCopyNumber.seg.gz",
+                            name: "GBM Copy Number"
+                        },
+                    ],
+                sampleinfo:
+                    [
+                        {
+                            url: "https://igv-genepattern-org.s3.amazonaws.com/demo/GBM-sampletable-samplemapping-colors.txt"
+                        }
+                    ]
+            }
+
+        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), config)
+
+    })
+
+
+</script>
+
+</body>
+
+</html>
+

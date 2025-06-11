@@ -145,6 +145,13 @@ class SegTrack extends TrackBase {
                 }
             }
         }
+        menuItems.push('<hr/>')
+        menuItems.push("Group by attribute:")
+        for (const attribute of this.browser.sampleInfo.attributeNames) {
+            menuItems.push({element: createCheckbox(attribute, false), click: () => {
+                this.getGroupedSampleKeysByAttribute(attribute)
+            }})
+        }
 
         const lut =
             {
@@ -546,6 +553,12 @@ class SegTrack extends TrackBase {
     sortByAttribute(attribute, sortDirection) {
 
         this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection)
+        this.trackView.repaintViews()
+    }
+
+    getGroupedSampleKeysByAttribute(attribute) {
+
+        this.sampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.sampleKeys, attribute)
         this.trackView.repaintViews()
     }
 

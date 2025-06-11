@@ -174,6 +174,25 @@ class SampleInfo {
 
     }
 
+    getGroupedSampleKeysByAttribute(sampleKeys, attribute) {
+
+        const buckets = new Map()
+
+        for (const key of sampleKeys) {
+            const value = this.getAttributes(key)[attribute]
+            if (!buckets.has(value)) {
+                buckets.set(value, [])
+            }
+        }
+
+        for (const key of sampleKeys) {
+            const value = this.getAttributes(key)[attribute]
+            buckets.get(value).push(key)
+        }
+
+        return Array.from(buckets.values()).flat()
+    }
+
     toJSON() {
         const json = []
         for (const url of this.sampleInfoFiles) {
