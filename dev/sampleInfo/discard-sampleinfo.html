@@ -11,6 +11,7 @@
 
 <button id="bookmark">Bookmark session</button>
 <button id="log-session">Log session</button>
+<button id="discard-sample-info">Discard Sample Info</button>
 
 <div id="igv-app-container" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -33,15 +34,20 @@
                             "height": 400,
                         },
                     ],
-                // "sampleinfo":
-                //     [
-                //         {
-                //             "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBM-sampletable-samplemapping-colors.txt"
-                //         }
-                //     ]
+                "sampleinfo":
+                    [
+                        {
+                            "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBM-sampletable-samplemapping-colors.txt"
+                        }
+                    ]
             }
 
         const browser = await igv.createBrowser(document.getElementById('igv-app-container'), config)
+
+        // Add click handler for discard sample info button
+        document.getElementById('discard-sample-info').addEventListener('click', async () => {
+            await browser.discardSampleInfo()
+        })
 
     })
 
