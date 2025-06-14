@@ -148,7 +148,11 @@ class SegTrack extends TrackBase {
         menuItems.push('<hr/>')
         menuItems.push("Group by attribute:")
         for (const attribute of this.browser.sampleInfo.attributeNames) {
-            menuItems.push({element: createCheckbox(attribute, false), click: () => {
+
+            const element = document.createElement('div')
+            element.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`
+
+            menuItems.push({element, click: () => {
                 this.getGroupedSampleKeysByAttribute(attribute)
             }})
         }
