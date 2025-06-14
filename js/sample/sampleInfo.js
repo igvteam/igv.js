@@ -140,46 +140,7 @@ class SampleInfo {
 
     }
 
-    getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
-        sortDirection = sortDirection || 1
-
-        // If we have buckets for a different attribute, we need to sort within those buckets
-        if (this.bucketedAttribute && this.bucketedAttribute !== attribute) {
-            const result = []
-            // Sort within each bucket
-            for (const bucketKeys of this.buckets.values()) {
-                const numbers = bucketKeys.filter(key => {
-                    const value = this.getAttributes(key)[attribute]
-                    return typeof value === 'number'
-                })
-
-                const strings = bucketKeys.filter(key => {
-                    const value = this.getAttributes(key)[attribute]
-                    return typeof value === 'string'
-                })
-
-                const compare = (a, b) => {
-                    const aa = this.getAttributes(a)[attribute]
-                    const bb = this.getAttributes(b)[attribute]
-
-                    if (typeof aa === 'string' && typeof bb === 'string') {
-                        return sortDirection * aa.localeCompare(bb)
-                    }
-
-                    if (typeof aa === 'number' && typeof bb === 'number') {
-                        return sortDirection * (aa - bb)
-                    }
-                }
-
-                numbers.sort(compare)
-                strings.sort(compare)
-
-                result.push(...(sortDirection === -1 ? [...numbers, ...strings] : [...strings, ...numbers]))
-            }
-            return result
-        }
-
-        // Original sorting logic for when there are no buckets or we're sorting by the bucketed attribute
+    #sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
         const numbers = sampleKeys.filter(key => {
             const value = this.getAttributes(key)[attribute]
             return typeof value === 'number'
@@ -207,6 +168,22 @@ class SampleInfo {
         strings.sort(compare)
 
         return sortDirection === -1 ? [...numbers, ...strings] : [...strings, ...numbers]
+    }
+
+    getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
+        sortDirection = sortDirection || 1
+
+        if (this.bucketedAttribute && this.bucketedAttribute !== attribute) {
+            const result = []
+            // Sort within each bucket
+            for (const bucketKeys of this.buckets.values()) {
+                result.push(...this.#sortSampleKeysByAttribute(bucketKeys, attribute, sortDirection))
+            }
+            return result
+        } else {
+            return this.#sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection)
+        }
+
     }
 
     getGroupedSampleKeysByAttribute(sampleKeys, attribute) {
