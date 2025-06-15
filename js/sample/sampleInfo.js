@@ -30,7 +30,7 @@ class SampleInfo {
         this.attributeRangeLUT = {}
         this.initialized = false
         this.buckets = new Map()
-        this.bucketedAttribute = null
+        this.bucketedAttribute = undefined
     }
 
     get attributeCount() {
@@ -187,6 +187,13 @@ class SampleInfo {
     }
 
     getGroupedSampleKeysByAttribute(sampleKeys, attribute) {
+
+        if ('None' === attribute) {
+            this.buckets.clear()
+            this.bucketedAttribute = undefined
+            return sampleKeys
+        }
+
         // If we already have buckets for this attribute, return the flattened list
         if (this.bucketedAttribute === attribute) {
             return Array.from(this.buckets.values()).flat()
