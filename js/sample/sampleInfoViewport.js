@@ -4,6 +4,7 @@ import SampleInfo from './sampleInfo.js'
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 import IGVGraphics from "../igv-canvas.js"
 import {defaultRulerHeight} from "../rulerTrack.js"
+import SegTrack from "../feature/segTrack.js"
 
 const MaxSampleInfoColumnHeight = 128
 
@@ -159,14 +160,22 @@ class SampleInfoViewport {
 
             let y = this.contentTop + samples.yOffset
 
+            let count = 0
             this.hitList = {}
+            const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
+            const bucketStartRows = this.browser.sampleInfo.getBucketStartRows();
+
             for (const sampleName of samples.names) {
+
 
                 if (y > viewportHeight) {
                     break
                 }
 
                 if (y + tileHeight > 0) {
+
+                    const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(count, bucketStartRows) : 0;
+                    const y = count * tileHeight + bucketMarginCount * bucketMarginHeight;
 
                     const attributes = this.browser.sampleInfo.getAttributes(sampleName)
 
@@ -197,6 +206,7 @@ class SampleInfoViewport {
                 } // if (y + tileHeight > 0)
 
                 y += tileHeight
+                count++
 
             } // for (sample.names)
 

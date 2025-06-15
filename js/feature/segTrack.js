@@ -16,7 +16,7 @@ import {createElementWithString} from "../ui/utils/dom-utils.js"
  */
 class SegTrack extends TrackBase {
 
-    #sortDirections = new Map()
+    static BUCKET_MARGIN_HEIGHT = 16
 
     static getMutationTypes() {
         return [
@@ -35,6 +35,12 @@ class SegTrack extends TrackBase {
         return count;
     }
 
+    static getBucketMarginHeight(buckets) {
+        return buckets ? SegTrack.BUCKET_MARGIN_HEIGHT : 0
+    }
+
+    #sortDirections = new Map()
+
     constructor(config, browser) {
         super(config, browser)
     }
@@ -51,7 +57,6 @@ class SegTrack extends TrackBase {
         this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2
         this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 13
         this.sampleHeight = this.squishedRowHeight      // Initial value, will get overwritten when rendered
-        this.bucketMarginHeight = 16
 
         // Explicitly set samples -- used to select a subset of samples from a dataset
         this.sampleKeys = []
@@ -337,15 +342,17 @@ class SegTrack extends TrackBase {
 
             // Create a map for fast id -> row lookup
             const samples = {}
-            const filteredKeys = this.filteredSampleKeys
-            filteredKeys.forEach(function (id, index) {
+            this.filteredSampleKeys.forEach(function (id, index) {
                 samples[id] = index
             })
+
+            // sort the indices of samples
+            // const sortedSampleIndices = Object.values(samples).sort((a, b) => a - b)
 
             let border
             switch (this.displayMode) {
                 case "FILL":
-                    this.sampleHeight = pixelHeight / filteredKeys.length
+                    this.sampleHeight = pixelHeight / this.filteredSampleKeys.length
                     border = 0
                     break
 
@@ -359,17 +366,6 @@ class SegTrack extends TrackBase {
             }
             const rowHeight = this.sampleHeight
 
-            const bucketMarginHeight = this.browser.sampleInfo.buckets ? this.bucketMarginHeight : 0
-
-            // Build an array of the row indices where each bucket starts
-            let bucketStartRows = [];
-            if (this.browser.sampleInfo.buckets) {
-                let row = 0;
-                for (let [bucketName, samplesArr] of this.browser.sampleInfo.buckets) {
-                    bucketStartRows.push(row);
-                    row += samplesArr.length;
-                }
-            }
 
             for (let segment of features) {
                 segment.pixelRect = undefined   // !important, reset this in case segment is not drawn
@@ -381,19 +377,22 @@ class SegTrack extends TrackBase {
 
             this.sampleYStart = undefined
             let drawCount = 0
-            for (let f of features) {
+
+            const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
+            const bucketStartRows = this.browser.sampleInfo.getBucketStartRows();
+
+            for (const f of features) {
 
                 if (f.end < bpStart || f.start > bpEnd) continue
 
                 const sampleKey = f.sampleKey || f.sample
                 f.row = samples[sampleKey]
-                const rowIndex = f.row;
-                const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? this.#getBucketMarginCount(rowIndex, bucketStartRows) : 0;
-                // console.log(`bucketMarginCount: ${bucketMarginCount}`);
-                const y = rowIndex * rowHeight + border + bucketMarginCount * bucketMarginHeight;
+
+                const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(f.row, bucketStartRows) : 0;
+                const y = f.row * rowHeight + border + bucketMarginCount * bucketMarginHeight;
 
                 // Draw bucket separator if this row is the start of a new bucket (but not the first)
-                if (bucketMarginHeight && bucketStartRows.length > 1 && bucketStartRows.includes(rowIndex) && rowIndex !== 0) {
+                if (bucketMarginHeight && bucketStartRows.length > 1 && bucketStartRows.includes(f.row) && f.row !== 0) {
                     // Draw a horizontal line across the track at y - (bucketMarginHeight / 2)
                     context.save();
 
@@ -522,7 +521,7 @@ class SegTrack extends TrackBase {
         this.updateSampleKeys(features)
 
         if (this.browser.sampleInfo.buckets) {
-            const aggregateBucketMarginHeight = (this.browser.sampleInfo.buckets.size - 1) * this.bucketMarginHeight
+            const aggregateBucketMarginHeight = (this.browser.sampleInfo.buckets.size - 1) * SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
             return aggregateBucketMarginHeight + (this.filteredSampleKeys.length * sampleHeight)
         } else {
             return this.filteredSampleKeys.length * sampleHeight
@@ -619,7 +618,9 @@ class SegTrack extends TrackBase {
     getGroupedSampleKeysByAttribute(attribute) {
 
         this.sampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.sampleKeys, attribute)
+        this.trackView.checkContentHeight()
         this.trackView.repaintViews()
+
     }
 
     clickedFeatures(clickState) {
