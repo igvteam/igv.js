@@ -27,6 +27,14 @@ class SegTrack extends TrackBase {
         ]
     }
 
+    #getBucketMarginCount(rowIndex, bucketStartRows) {
+        let count = 0;
+        for (let i = 1; i < bucketStartRows.length; i++) {
+            if (rowIndex >= bucketStartRows[i]) count++;
+        }
+        return count;
+    }
+
     constructor(config, browser) {
         super(config, browser)
     }
@@ -43,6 +51,7 @@ class SegTrack extends TrackBase {
         this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2
         this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 13
         this.sampleHeight = this.squishedRowHeight      // Initial value, will get overwritten when rendered
+        this.bucketMarginHeight = 16
 
         // Explicitly set samples -- used to select a subset of samples from a dataset
         this.sampleKeys = []
@@ -145,12 +154,19 @@ class SegTrack extends TrackBase {
                 }
             }
         }
+
         menuItems.push('<hr/>')
         menuItems.push("Group by attribute:")
-        for (const attribute of this.browser.sampleInfo.attributeNames) {
 
-            const element = document.createElement('div')
-            element.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`
+        for (const attribute of [ 'None', ...this.browser.sampleInfo.attributeNames]) {
+
+            let initialState = false
+            if ('None' === attribute) {
+                initialState = (undefined === this.browser.sampleInfo.bucketedAttribute)
+            } else {
+                initialState = (attribute === this.browser.sampleInfo.bucketedAttribute)
+            }
+            const element = createCheckbox(attribute, initialState)
 
             menuItems.push({element, click: () => {
                 this.getGroupedSampleKeysByAttribute(attribute)
@@ -343,6 +359,18 @@ class SegTrack extends TrackBase {
             }
             const rowHeight = this.sampleHeight
 
+            const bucketMarginHeight = this.browser.sampleInfo.buckets ? this.bucketMarginHeight : 0
+
+            // Build an array of the row indices where each bucket starts
+            let bucketStartRows = [];
+            if (this.browser.sampleInfo.buckets) {
+                let row = 0;
+                for (let [bucketName, samplesArr] of this.browser.sampleInfo.buckets) {
+                    bucketStartRows.push(row);
+                    row += samplesArr.length;
+                }
+            }
+
             for (let segment of features) {
                 segment.pixelRect = undefined   // !important, reset this in case segment is not drawn
             }
@@ -359,7 +387,28 @@ class SegTrack extends TrackBase {
 
                 const sampleKey = f.sampleKey || f.sample
                 f.row = samples[sampleKey]
-                const y = f.row * rowHeight + border
+                const rowIndex = f.row;
+                const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? this.#getBucketMarginCount(rowIndex, bucketStartRows) : 0;
+                // console.log(`bucketMarginCount: ${bucketMarginCount}`);
+                const y = rowIndex * rowHeight + border + bucketMarginCount * bucketMarginHeight;
+
+                // Draw bucket separator if this row is the start of a new bucket (but not the first)
+                if (bucketMarginHeight && bucketStartRows.length > 1 && bucketStartRows.includes(rowIndex) && rowIndex !== 0) {
+                    // Draw a horizontal line across the track at y - (bucketMarginHeight / 2)
+                    context.save();
+
+                    // context.strokeStyle = '#888';
+                    // context.lineWidth = 1;
+                    // context.beginPath();
+                    // context.moveTo(0, y - (bucketMarginHeight / 2));
+                    // context.lineTo(pixelWidth, y - (bucketMarginHeight / 2));
+                    // context.stroke();
+
+                    const yy = y - 0.25 * bucketMarginHeight
+                    IGVGraphics.dashedLine(context, 0, yy, pixelWidth, yy)
+
+                    context.restore();
+                }
 
                 if (undefined === this.sampleYStart) {
                     this.sampleYStart = y
@@ -471,7 +520,14 @@ class SegTrack extends TrackBase {
         if (!features) return 0
         const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight
         this.updateSampleKeys(features)
-        return this.filteredSampleKeys.length * sampleHeight
+
+        if (this.browser.sampleInfo.buckets) {
+            const aggregateBucketMarginHeight = (this.browser.sampleInfo.buckets.size - 1) * this.bucketMarginHeight
+            return aggregateBucketMarginHeight + (this.filteredSampleKeys.length * sampleHeight)
+        } else {
+            return this.filteredSampleKeys.length * sampleHeight
+        }
+
     }
 
     /**
