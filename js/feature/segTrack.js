@@ -36,7 +36,7 @@ class SegTrack extends TrackBase {
     }
 
     static getBucketMarginHeight(buckets) {
-        return buckets ? SegTrack.BUCKET_MARGIN_HEIGHT : 0
+        return buckets && buckets.size > 0 ? SegTrack.BUCKET_MARGIN_HEIGHT : 0
     }
 
     #sortDirections = new Map()
@@ -520,13 +520,12 @@ class SegTrack extends TrackBase {
         const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight
         this.updateSampleKeys(features)
 
-        if (this.browser.sampleInfo.buckets) {
+        if (this.browser.sampleInfo.buckets && this.browser.sampleInfo.buckets.size > 0) {
             const aggregateBucketMarginHeight = (this.browser.sampleInfo.buckets.size - 1) * SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
             return aggregateBucketMarginHeight + (this.filteredSampleKeys.length * sampleHeight)
         } else {
             return this.filteredSampleKeys.length * sampleHeight
         }
-
     }
 
     /**
