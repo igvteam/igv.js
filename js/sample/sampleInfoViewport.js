@@ -157,6 +157,7 @@ class SampleInfoViewport {
             const tileHeight = samples.height
 
             shim = tileHeight - 2 * shim <= 1 ? 0 : 1
+            // shim = 0
 
             let y = this.contentTop + samples.yOffset
 
@@ -167,33 +168,29 @@ class SampleInfoViewport {
 
             for (const sampleName of samples.names) {
 
-                if (y > viewportHeight) {
-                    break
-                }
+                // if (y > viewportHeight) {
+                //     break
+                // }
 
-                if (y + tileHeight > 0) {
+                // if (y + tileHeight > 0) {
 
                     const attributes = this.browser.sampleInfo.getAttributes(sampleName)
-
                     if (attributes) {
 
                         const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(rowIndex, bucketStartRows) : 0;
+                        const yy = y + shim + (bucketMarginCount * bucketMarginHeight);
+
+                        const hh = tileHeight - (2 * shim)
 
                         const attributeEntries = Object.entries(attributes)
-
                         for (const attributeEntry of attributeEntries) {
 
                             const [attribute, value] = attributeEntry
 
-                            context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
-
                             const index = attributeNames.indexOf(attribute)
                             const x = sampleInfoTileXShim + index * sampleInfoTileWidth
 
-                            const yy = y + shim + bucketMarginCount * bucketMarginHeight;
-
-                            const hh = tileHeight - (2 * shim)
-
+                            context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
                             context.fillRect(x, yy, sampleInfoTileWidth - 1, hh)
 
                             const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
@@ -203,7 +200,7 @@ class SampleInfoViewport {
 
                     } // if (attributes)
 
-                } // if (y + tileHeight > 0)
+                // } // if (y + tileHeight > 0)
 
                 y += tileHeight
                 rowIndex++
