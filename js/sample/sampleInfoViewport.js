@@ -160,13 +160,12 @@ class SampleInfoViewport {
 
             let y = this.contentTop + samples.yOffset
 
-            let count = 0
+            let rowIndex = 0
             this.hitList = {}
             const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
             const bucketStartRows = this.browser.sampleInfo.getBucketStartRows();
 
             for (const sampleName of samples.names) {
-
 
                 if (y > viewportHeight) {
                     break
@@ -174,13 +173,11 @@ class SampleInfoViewport {
 
                 if (y + tileHeight > 0) {
 
-                    const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(count, bucketStartRows) : 0;
-                    const y = count * tileHeight + bucketMarginCount * bucketMarginHeight;
-
                     const attributes = this.browser.sampleInfo.getAttributes(sampleName)
 
-
                     if (attributes) {
+
+                        const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(rowIndex, bucketStartRows) : 0;
 
                         const attributeEntries = Object.entries(attributes)
 
@@ -192,8 +189,11 @@ class SampleInfoViewport {
 
                             const index = attributeNames.indexOf(attribute)
                             const x = sampleInfoTileXShim + index * sampleInfoTileWidth
-                            const yy = y + shim
+
+                            const yy = y + shim + bucketMarginCount * bucketMarginHeight;
+
                             const hh = tileHeight - (2 * shim)
+
                             context.fillRect(x, yy, sampleInfoTileWidth - 1, hh)
 
                             const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
@@ -206,7 +206,7 @@ class SampleInfoViewport {
                 } // if (y + tileHeight > 0)
 
                 y += tileHeight
-                count++
+                rowIndex++
 
             } // for (sample.names)
 
