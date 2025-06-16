@@ -13,26 +13,6 @@ class SampleInfo {
     static colorForNA = appleCrayonRGB('magnesium')
     static sampleInfoFileHeaders = ['#sampleTable', '#sampleMapping', '#colors']
 
-    static getBucketMarginCount(rowIndex, bucketStartRows) {
-        let count = 0;
-        for (let i = 1; i < bucketStartRows.length; i++) {
-            if (rowIndex >= bucketStartRows[i]) count++;
-        }
-        return count;
-    }
-
-    getBucketStartRows() {
-        let bucketStartRows = [];
-        if (this.buckets) {
-            let row = 0;
-            for (let [bucketName, samplesArr] of this.buckets) {
-                bucketStartRows.push(row);
-                row += samplesArr.length;
-            }
-        }
-        return bucketStartRows;
-    }
-
     constructor(browser) {
         const found = browser.tracks.some(t => typeof t.getSamples === 'function')
         if (found.length > 0) {
@@ -250,6 +230,18 @@ class SampleInfo {
         return json
     }
 
+    getBucketStartRows() {
+        let bucketStartRows = [];
+        if (this.buckets) {
+            let row = 0;
+            for (let [bucketName, samplesArr] of this.buckets) {
+                bucketStartRows.push(row);
+                row += samplesArr.length;
+            }
+        }
+        return bucketStartRows;
+    }
+
     #processSampleInfoFileAsString(string) {
 
         const sectionDictionary = createSectionDictionary(string)
@@ -433,6 +425,14 @@ class SampleInfo {
 
         }
 
+    }
+
+    static getBucketMarginCount(rowIndex, bucketStartRows) {
+        let count = 0;
+        for (let i = 1; i < bucketStartRows.length; i++) {
+            if (rowIndex >= bucketStartRows[i]) count++;
+        }
+        return count;
     }
 
     static toNumericalRepresentation(obj) {
