@@ -16,7 +16,10 @@ import {createElementWithString} from "../ui/utils/dom-utils.js"
  */
 class SegTrack extends TrackBase {
 
-    static BUCKET_MARGIN_HEIGHT = 16
+    static defaults =
+        {
+            groupBy: undefined
+        };
 
     static getMutationTypes() {
         return [
@@ -38,6 +41,8 @@ class SegTrack extends TrackBase {
     static getBucketMarginHeight(buckets) {
         return buckets && buckets.size > 0 ? SegTrack.BUCKET_MARGIN_HEIGHT : 0
     }
+
+    static BUCKET_MARGIN_HEIGHT = 16
 
     #sortDirections = new Map()
 
@@ -128,7 +133,6 @@ class SegTrack extends TrackBase {
         this._initialAltColor = this.altColor || this.constructor.defaultColor
 
     }
-
 
     menuItemList() {
 
@@ -277,7 +281,6 @@ class SegTrack extends TrackBase {
         // TODO - store filter object in session
     }
 
-
     /**
      * Filter function for sample keys.
      *
@@ -310,7 +313,6 @@ class SegTrack extends TrackBase {
         return this.sampleKeys.filter(sampleKey => this.filter(sampleKey))
     }
 
-
     async getFeatures(chr, start, end) {
         const features = await this.featureSource.getFeatures({chr, start, end})
         // New segments could conceivably add new samples
@@ -330,7 +332,6 @@ class SegTrack extends TrackBase {
         }
         return features
     }
-
 
     draw({context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
 
@@ -500,7 +501,6 @@ class SegTrack extends TrackBase {
 
     }
 
-
     checkForLog(features) {
         if (this.isLog === undefined) {
             this.isLog = false
@@ -560,7 +560,6 @@ class SegTrack extends TrackBase {
         this.trackView.repaintViews()
     }
 
-
     async computeRegionScores(filterObject, featureList) {
 
         const chr = filterObject.chr
@@ -613,7 +612,6 @@ class SegTrack extends TrackBase {
         return scores
 
     }
-
 
     sortByAttribute(attribute, sortDirection) {
 
@@ -725,6 +723,11 @@ class SegTrack extends TrackBase {
             }
         }
     }
+
+    static getBucketMarginHeight(buckets) {
+        return buckets && buckets.size > 0 ? SegTrack.BUCKET_MARGIN_HEIGHT : 0
+    }
+
 }
 
 // Default copy number scales
