@@ -556,27 +556,35 @@ class SegTrack extends TrackBase {
         }
     }
 
-    /**
-     * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
-     */
-    async sortByValue(sort, featureList) {
-        const chr = sort.chr
-        const start = sort.position !== undefined ? sort.position - 1 : sort.start
-        const end = sort.end === undefined ? start + 1 : sort.end
-        const scores = await this.computeRegionScores({chr, start, end}, featureList)
-        const d2 = (sort.direction === "ASC" ? 1 : -1)
 
-        const keys = this.sampleKeys
-        keys.sort(function (a, b) {
-            let s1 = scores[a]
-            let s2 = scores[b]
-            if (!s1) s1 = d2 * Number.MAX_VALUE
-            if (!s2) s2 = d2 * Number.MAX_VALUE
-            if (s1 === s2) return 0
-            else if (s1 > s2) return d2
-            else return d2 * -1
-        })
-        this.sampleKeys = keys
+    async sortByValue(sort, featureList) {
+
+        const createValueComparator = (scores, direction) => {
+            const d2 = (direction === "ASC" ? 1 : -1)
+            return (a, b) => {
+                let s1 = scores[a]
+                let s2 = scores[b]
+                if (!s1) s1 = d2 * Number.MAX_VALUE
+                if (!s2) s2 = d2 * Number.MAX_VALUE
+                if (s1 === s2) return 0
+                else if (s1 > s2) return d2
+                else return d2 * -1
+            }
+        }
+
+        let {chr, start, end, position, direction} = sort
+
+        if (position !== undefined) {
+            start = position - 1
+        }
+
+        if (end === undefined) {
+            end = start + 1
+        }
+
+        const scores = await this.computeRegionScores({chr, start, end}, featureList)
+
+        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByComparator(this.sampleKeys, createValueComparator(scores, direction))
 
         this.config.sort = sort
         this.trackView.repaintViews()
@@ -693,16 +701,15 @@ class SegTrack extends TrackBase {
 
     contextMenuItemList(clickState) {
 
-        const genomicLocation = clickState.genomicLocation
+        const { genomicLocation, referenceFrame, viewport } = clickState
 
         const sortHandler = (sort) => {
-            const viewport = clickState.viewport
             const features = viewport.cachedFeatures
             this.sortByValue(sort, features)
         }
 
         // We can't know genomic location intended with precision, define a buffer 5 "pixels" wide in genomic coordinates
-        const bpWidth = clickState.referenceFrame.toBP(2.5)
+        const bpWidth = referenceFrame.toBP(2.5)
 
         return ["DESC", "ASC"].map(direction => {
             const dirLabel = direction === "DESC" ? "descending" : "ascending"
@@ -715,7 +722,7 @@ class SegTrack extends TrackBase {
                     const sort = {
                         option: "VALUE",   // Either VALUE or ATTRIBUTE
                         direction,
-                        chr: clickState.referenceFrame.chr,
+                        chr: referenceFrame.chr,
                         start: Math.floor(genomicLocation - bpWidth),
                         end: Math.floor(genomicLocation + bpWidth)
                     }

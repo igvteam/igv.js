@@ -140,6 +140,24 @@ class SampleInfo {
 
     }
 
+    #sortSampleKeysWithComparator(sampleKeys, comparator) {
+        return sampleKeys.sort(comparator)
+    }
+
+    getSortedSampleKeysByComparator(sampleKeys, comparator) {
+
+        if (this.bucketedAttribute && this.buckets.size > 1) {
+            const result = []
+            for (const bucketKeys of this.buckets.values()) {
+                result.push(...this.#sortSampleKeysWithComparator(bucketKeys, comparator))
+            }
+            return result
+        } else {
+            return this.#sortSampleKeysWithComparator(sampleKeys, comparator)
+        }
+
+    }
+
     #sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
         const numbers = sampleKeys.filter(key => {
             const value = this.getAttributes(key)[attribute]
