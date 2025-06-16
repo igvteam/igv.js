@@ -107,6 +107,11 @@ class SegTrack extends TrackBase {
         }
 
         this.initialSort = config.sort
+
+        if (config.groupBy){
+            this.groupBy = config.groupBy
+        }
+
     }
 
     async postInit() {
@@ -174,6 +179,7 @@ class SegTrack extends TrackBase {
             const element = createCheckbox(attribute, initialState)
 
             menuItems.push({element, click: () => {
+                this.groupBy = 'None' === attribute ? undefined : attribute
                 this.getGroupedSampleKeysByAttribute(attribute)
             }})
         }
@@ -340,14 +346,15 @@ class SegTrack extends TrackBase {
                 this.sbColorScale = new HicColorScale({threshold, r: 0, g: 0, b: 255})
             }
 
+            if (this.groupBy) {
+                this.sampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.sampleKeys, this.groupBy)
+            }
+
             // Create a map for fast id -> row lookup
             const samples = {}
             this.filteredSampleKeys.forEach(function (id, index) {
                 samples[id] = index
             })
-
-            // sort the indices of samples
-            // const sortedSampleIndices = Object.values(samples).sort((a, b) => a - b)
 
             let border
             switch (this.displayMode) {
