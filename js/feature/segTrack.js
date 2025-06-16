@@ -45,6 +45,7 @@ class SegTrack extends TrackBase {
     static BUCKET_MARGIN_HEIGHT = 16
 
     #sortDirections = new Map()
+    _sampleKeys = []
 
     constructor(config, browser) {
         super(config, browser)
@@ -68,7 +69,9 @@ class SegTrack extends TrackBase {
         if (config.samples) {
             // Explicit setting, keys == names
             for (let s of config.samples) {
-                this.sampleKeys.push(s)
+                const currentKeys = this.sampleKeys
+                currentKeys.push(s)
+                this.sampleKeys = currentKeys
             }
             this.explicitSamples = true
         }
@@ -113,8 +116,10 @@ class SegTrack extends TrackBase {
 
         this.initialSort = config.sort
 
+        this.runOnce = false
         if (config.groupBy){
             this.groupBy = config.groupBy
+            this.runOnce = true
         }
 
     }
@@ -134,6 +139,18 @@ class SegTrack extends TrackBase {
 
     }
 
+    get sampleKeys() {
+        return [...this._sampleKeys]
+    }
+
+    set sampleKeys(keys) {
+        if (Array.isArray(keys)) {
+            this._sampleKeys = [...keys]
+        } else {
+            this._sampleKeys = []
+        }
+    }
+
     menuItemList() {
 
         const menuItems = []
@@ -143,8 +160,7 @@ class SegTrack extends TrackBase {
             menuItems.push("Sort by attribute:")
             for (const attribute of this.browser.sampleInfo.attributeNames) {
 
-                const sampleNames = this.sampleKeys
-                if (sampleNames.some(s => {
+                if (this.sampleKeys.some(s => {
                     const attrs = this.browser.sampleInfo.getAttributes(s)
                     return attrs && attrs[attribute]
                 })) {
@@ -176,16 +192,20 @@ class SegTrack extends TrackBase {
 
             let initialState = false
             if ('None' === attribute) {
-                initialState = (undefined === this.browser.sampleInfo.bucketedAttribute)
+                initialState = (undefined === this.groupBy)
             } else {
-                initialState = (attribute === this.browser.sampleInfo.bucketedAttribute)
+                initialState = (attribute === this.groupBy)
             }
             const element = createCheckbox(attribute, initialState)
 
-            menuItems.push({element, click: () => {
-                this.groupBy = 'None' === attribute ? undefined : attribute
+            const click = () =>{
+                this.groupBy = 'None' === attribute ? undefined : attribute;
+                this.trackView.checkContentHeight()
+                this.trackView.repaintViews()
                 this.getGroupedSampleKeysByAttribute(attribute)
-            }})
+            }
+
+            menuItems.push({element, click })
         }
 
         const lut =
@@ -310,7 +330,8 @@ class SegTrack extends TrackBase {
     }
 
     get filteredSampleKeys() {
-        return this.sampleKeys.filter(sampleKey => this.filter(sampleKey))
+        const keys = this.sampleKeys
+        return keys.filter(sampleKey => this.filter(sampleKey))
     }
 
     async getFeatures(chr, start, end) {
@@ -337,7 +358,6 @@ class SegTrack extends TrackBase {
 
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
-
         if (features && features.length > 0) {
 
             this.checkForLog(features)
@@ -347,8 +367,9 @@ class SegTrack extends TrackBase {
                 this.sbColorScale = new HicColorScale({threshold, r: 0, g: 0, b: 255})
             }
 
-            if (this.groupBy) {
+            if (this.groupBy && true === this.runOnce) {
                 this.sampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.sampleKeys, this.groupBy)
+                this.runOnce = false
             }
 
             // Create a map for fast id -> row lookup
@@ -539,14 +560,14 @@ class SegTrack extends TrackBase {
      * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
      */
     async sortByValue(sort, featureList) {
-
         const chr = sort.chr
         const start = sort.position !== undefined ? sort.position - 1 : sort.start
         const end = sort.end === undefined ? start + 1 : sort.end
         const scores = await this.computeRegionScores({chr, start, end}, featureList)
         const d2 = (sort.direction === "ASC" ? 1 : -1)
 
-        this.sampleKeys.sort(function (a, b) {
+        const keys = this.sampleKeys
+        keys.sort(function (a, b) {
             let s1 = scores[a]
             let s2 = scores[b]
             if (!s1) s1 = d2 * Number.MAX_VALUE
@@ -555,6 +576,7 @@ class SegTrack extends TrackBase {
             else if (s1 > s2) return d2
             else return d2 * -1
         })
+        this.sampleKeys = keys
 
         this.config.sort = sort
         this.trackView.repaintViews()
@@ -614,17 +636,14 @@ class SegTrack extends TrackBase {
     }
 
     sortByAttribute(attribute, sortDirection) {
-
         this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection)
         this.trackView.repaintViews()
     }
 
     getGroupedSampleKeysByAttribute(attribute) {
-
         this.sampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.sampleKeys, attribute)
         this.trackView.checkContentHeight()
         this.trackView.repaintViews()
-
     }
 
     clickedFeatures(clickState) {
@@ -711,14 +730,15 @@ class SegTrack extends TrackBase {
     }
 
     updateSampleKeys(featureList) {
-
         if (this.explicitSamples) return
 
         const sampleKeySet = new Set(this.sampleKeys)
         for (let feature of featureList) {
             const sampleKey = feature.sampleKey || feature.sample
             if (!sampleKeySet.has(sampleKey)) {
-                this.sampleKeys.push(sampleKey)
+                const keys = this.sampleKeys
+                keys.push(sampleKey)
+                this.sampleKeys = keys
                 sampleKeySet.add(sampleKey)
             }
         }
