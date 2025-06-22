@@ -223,7 +223,7 @@ class SequenceTrack {
             }
 
             items.push({
-                label: 'BLAT read sequence',
+                label: 'BLAT visible sequence',
                 click: async () => {
                     let sequence = await this.browser.genome.getSequence(chr, start, end)
                     if (sequence) {
