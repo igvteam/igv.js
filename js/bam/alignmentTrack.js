@@ -1219,7 +1219,7 @@ class AlignmentTrack extends TrackBase {
 
                     if (seqstring.length < maxSequenceSize) {
                         list.push({
-                            label: 'BLAT read sequence',
+                            label: 'BLAT visible sequence',
                             click: () => {
                                 const sequence = clickedAlignment.isNegativeStrand() ? reverseComplementSequence(seqstring) : seqstring
                                 const name = `${clickedAlignment.readName} - blat`
