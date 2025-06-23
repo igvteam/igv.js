@@ -136,9 +136,9 @@ async function loadStanzas(url) {
             }
 
 
-            const i = line.indexOf(' ')
-            const key = line.substring(0, i).trim()
-            let value = line.substring(i + 1).trim()
+            const index = line.indexOf(' ')
+            const key = line.substring(0, index).trim()
+            let value = line.substring(index + 1).trim()
 
             if (key === "type") {
                 // The "type" property contains format and sometimes other information. For example, data range
