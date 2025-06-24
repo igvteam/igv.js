@@ -160,12 +160,22 @@ class SampleInfo {
 
     #sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
         const numbers = sampleKeys.filter(key => {
-            const value = this.getAttributes(key)[attribute]
+            const attributes = this.getAttributes(key)
+            if (undefined === attributes) {
+                console.log(`No attributes for key: ${key}`)
+                return false
+            }
+            const value = attributes[attribute]
             return typeof value === 'number'
         })
 
         const strings = sampleKeys.filter(key => {
-            const value = this.getAttributes(key)[attribute]
+            const attributes = this.getAttributes(key)
+            if (undefined === attributes) {
+                console.log(`No attributes for key: ${key}`)
+                return false
+            }
+            const value = attributes[attribute]
             return typeof value === 'string'
         })
 
@@ -223,7 +233,12 @@ class SampleInfo {
 
         // First pass: collect all unique values and initialize buckets
         for (const key of sampleKeys) {
-            const value = this.getAttributes(key)[attribute]
+            const attributes = this.getAttributes(key)
+            if (undefined === attributes) {
+                console.log(`No attributes for key: ${key}`)
+                continue
+            }
+            const value = attributes[attribute]
             if (!this.buckets.has(value)) {
                 this.buckets.set(value, [])
             }
@@ -231,7 +246,12 @@ class SampleInfo {
 
         // Second pass: assign sample keys to their respective buckets
         for (const key of sampleKeys) {
-            const value = this.getAttributes(key)[attribute]
+            const attributes = this.getAttributes(key)  
+            if (undefined === attributes) {
+                console.log(`No attributes for key: ${key}`)
+                continue
+            }
+            const value = attributes[attribute]
             this.buckets.get(value).push(key)
         }
 
