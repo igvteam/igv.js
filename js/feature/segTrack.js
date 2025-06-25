@@ -198,14 +198,16 @@ class SegTrack extends TrackBase {
             }
             const element = createCheckbox(attribute, initialState)
 
-            function groupByFunction(){
-                this.groupBy = 'None' === attribute ? undefined : attribute;
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-                this.getGroupedSampleKeysByAttribute(attribute)
-            }
-
-            menuItems.push({element, click: groupByFunction })
+            menuItems.push(
+                {
+                    element,
+                    click: function groupByFunction(){
+                        this.groupBy = 'None' === attribute ? undefined : attribute;
+                        this.trackView.checkContentHeight()
+                        this.trackView.repaintViews()
+                        this.getGroupedSampleKeysByAttribute(attribute)
+                    }
+                })
         }
 
         const lut =
@@ -243,18 +245,17 @@ class SegTrack extends TrackBase {
         const displayOptions = this.type === 'seg' || this.type === 'shoebox' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"]
         for (let displayMode of displayOptions) {
 
-            function displayModeHandler() {
-                this.displayMode = displayMode
-                this.config.displayMode = displayMode
-                this.trackView.checkContentHeight()
-                this.trackView.repaintViews()
-                this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta)
-            }
-
             menuItems.push(
                 {
                     element: createCheckbox(lut[displayMode], displayMode === this.displayMode),
-                    click: displayModeHandler
+                    click: function displayModeHandler() {
+                        this.displayMode = displayMode
+                        this.config.displayMode = displayMode
+                        this.trackView.checkContentHeight()
+                        this.trackView.repaintViews()
+                        this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta)
+                    }
+
                 })
         }
 
