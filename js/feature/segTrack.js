@@ -242,7 +242,7 @@ class SegTrack extends TrackBase {
 
         menuItems.push('<hr/>')
         menuItems.push("DisplayMode:")
-        const displayOptions = this.type === 'seg' || this.type === 'shoebox' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"]
+        const displayOptions = new Set([ 'mut', 'seg', 'shoebox' ] ).has(this.type)  ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"]
         for (let displayMode of displayOptions) {
 
             menuItems.push(
@@ -377,7 +377,8 @@ class SegTrack extends TrackBase {
 
             // Create a map for fast id -> row lookup
             const samples = {}
-            this.filteredSampleKeys.forEach(function (id, index) {
+            const filtered = this.filteredSampleKeys
+            filtered.forEach(function (id, index) {
                 samples[id] = index
             })
 
