@@ -16,6 +16,10 @@ import {createElementWithString} from "../ui/utils/dom-utils.js"
  */
 class SegTrack extends TrackBase {
 
+    constructor(config, browser) {
+        super(config, browser)
+    }
+
     static defaults =
         {
             groupBy: undefined
@@ -38,18 +42,10 @@ class SegTrack extends TrackBase {
         return count;
     }
 
-    static getBucketMarginHeight(buckets) {
-        return buckets && buckets.size > 0 ? SegTrack.BUCKET_MARGIN_HEIGHT : 0
-    }
-
     static BUCKET_MARGIN_HEIGHT = 16
 
     #sortDirections = new Map()
     _sampleKeys = []
-
-    constructor(config, browser) {
-        super(config, browser)
-    }
 
     init(config) {
         super.init(config)
@@ -75,6 +71,7 @@ class SegTrack extends TrackBase {
             }
             this.explicitSamples = true
         }
+
 
         // Color settings
         if (config.color) {
@@ -137,6 +134,9 @@ class SegTrack extends TrackBase {
         this._initialColor = this.color || this.constructor.defaultColor
         this._initialAltColor = this.altColor || this.constructor.defaultColor
 
+        if (this.config.filterObject){
+            await this.setSampleFilter(this.config.filterObject)
+        }
     }
 
     get sampleKeys() {
@@ -205,7 +205,7 @@ class SegTrack extends TrackBase {
                         this.groupBy = 'None' === attribute ? undefined : attribute;
                         this.trackView.checkContentHeight()
                         this.trackView.repaintViews()
-                        this.getGroupedSampleKeysByAttribute(attribute)
+                        // this.getGroupedSampleKeysByAttribute(attribute)
                     }
                 })
         }
@@ -333,8 +333,13 @@ class SegTrack extends TrackBase {
     }
 
     get filteredSampleKeys() {
-        const keys = this.sampleKeys
-        return keys.filter(sampleKey => this.filter(sampleKey))
+
+        const filteredKeys = this.sampleKeys.filter(key => this.filter(key))
+        if (this.groupBy){
+            return this.browser.sampleInfo.getGroupedSampleKeysByAttribute(filteredKeys, this.groupBy)
+        } else {
+            return filteredKeys
+        }
     }
 
     async getFeatures(chr, start, end) {
@@ -370,22 +375,14 @@ class SegTrack extends TrackBase {
                 this.sbColorScale = new HicColorScale({threshold, r: 0, g: 0, b: 255})
             }
 
-            if (this.groupBy && true === this.runOnce) {
-                this.sampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.sampleKeys, this.groupBy)
-                this.runOnce = false
-            }
-
-            // Create a map for fast id -> row lookup
             const samples = {}
             const filtered = this.filteredSampleKeys
-            filtered.forEach(function (id, index) {
-                samples[id] = index
-            })
+            filtered.forEach((id, index)  => samples[id] = index)
 
             let border
             switch (this.displayMode) {
                 case "FILL":
-                    this.sampleHeight = pixelHeight / this.filteredSampleKeys.length
+                    this.sampleHeight = pixelHeight / filtered.length
                     border = 0
                     break
 
