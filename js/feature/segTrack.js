@@ -175,7 +175,7 @@ class SegTrack extends TrackBase {
 
                         this.config.sort = {
                             option: "ATTRIBUTE",
-                            attribute: attribute,
+                            attribute,
                             direction: sortDirection === 1 ? "ASC" : "DESC"
                         }
                     }
@@ -203,6 +203,10 @@ class SegTrack extends TrackBase {
                     element,
                     click: function groupByFunction(){
                         this.groupBy = 'None' === attribute ? undefined : attribute;
+                        if (undefined === this.groupBy){
+                            this.browser.sampleInfo.buckets.clear()
+                            this.browser.sampleInfo.bucketedAttribute = undefined
+                        }
                         this.trackView.checkContentHeight()
                         this.trackView.repaintViews()
                         // this.getGroupedSampleKeysByAttribute(attribute)
@@ -269,7 +273,7 @@ class SegTrack extends TrackBase {
 
     getSamples() {
         return {
-            names: this.filteredSampleKeys,
+            names: this.metadataSampleKeys,
             height: this.sampleHeight,
             yOffset: 0
         }
@@ -326,20 +330,11 @@ class SegTrack extends TrackBase {
                 return 'HAS' === filterObject.op ? score : !score
             }
         }
-        // else if (this.config.sampleFilter) {
-        //     return this.config.sampleFilter(sampleKey)
-        // }
         return true
     }
 
     get filteredSampleKeys() {
-
-        const filteredKeys = this.sampleKeys.filter(key => this.filter(key))
-        if (this.groupBy){
-            return this.browser.sampleInfo.getGroupedSampleKeysByAttribute(filteredKeys, this.groupBy)
-        } else {
-            return filteredKeys
-        }
+        return this.sampleKeys.filter(key => this.filter(key))
     }
 
     async getFeatures(chr, start, end) {
@@ -375,14 +370,29 @@ class SegTrack extends TrackBase {
                 this.sbColorScale = new HicColorScale({threshold, r: 0, g: 0, b: 255})
             }
 
-            const samples = {}
-            const filtered = this.filteredSampleKeys
-            filtered.forEach((id, index)  => samples[id] = index)
+            this.metadataSampleKeys = undefined
+            if (this.groupBy) {
+                this.metadataSampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.filteredSampleKeys, this.groupBy)
+            } else {
+                this.metadataSampleKeys = this.filteredSampleKeys
+            }
+
+            const sampleIndexLUT = {}
+            this.metadataSampleKeys.forEach((key, index)  => {
+
+                // if (this.groupBy) {
+                //     const result = this.browser.sampleInfo.getAttributes(key)[ this.groupBy ]
+                //     console.log(`${this.groupBy} is ${ result }`)
+                // }
+
+                sampleIndexLUT[key] = index
+            })
+
 
             let border
             switch (this.displayMode) {
                 case "FILL":
-                    this.sampleHeight = pixelHeight / filtered.length
+                    this.sampleHeight = pixelHeight / this.filteredSampleKeys.length
                     border = 0
                     break
 
@@ -395,7 +405,6 @@ class SegTrack extends TrackBase {
                     border = 1
             }
             const rowHeight = this.sampleHeight
-
 
             for (let segment of features) {
                 segment.pixelRect = undefined   // !important, reset this in case segment is not drawn
@@ -416,7 +425,7 @@ class SegTrack extends TrackBase {
                 if (f.end < bpStart || f.start > bpEnd) continue
 
                 const sampleKey = f.sampleKey || f.sample
-                f.row = samples[sampleKey]
+                f.row = sampleIndexLUT[sampleKey]
 
                 const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(f.row, bucketStartRows) : 0;
                 const y = f.row * rowHeight + border + bucketMarginCount * bucketMarginHeight;
