@@ -155,12 +155,12 @@ class SegTrack extends TrackBase {
 
         const menuItems = []
 
-        if (true === doSortByAttributes(this.browser.sampleInfo, this.sampleKeys)) {
+        if (true === doSortByAttributes(this.browser.sampleInfo, this.filteredSampleKeys)) {
             menuItems.push('<hr/>')
             menuItems.push("Sort by attribute:")
             for (const attribute of this.browser.sampleInfo.attributeNames) {
 
-                if (this.sampleKeys.some(s => {
+                if (this.filteredSampleKeys.some(s => {
                     const attrs = this.browser.sampleInfo.getAttributes(s)
                     return attrs && attrs[attribute]
                 })) {
@@ -169,15 +169,7 @@ class SegTrack extends TrackBase {
                     element.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`
 
                     function attributeSort() {
-                        const sortDirection = this.#sortDirections.get(attribute) || 1
-                        this.sortByAttribute(attribute, sortDirection)
-                        this.#sortDirections.set(attribute, sortDirection * -1)
-
-                        this.config.sort = {
-                            option: "ATTRIBUTE",
-                            attribute,
-                            direction: sortDirection === 1 ? "ASC" : "DESC"
-                        }
+                        this.sortByAttribute(attribute, (this.#sortDirections.get(attribute) || 1))
                     }
 
                     menuItems.push({element, click: attributeSort})
@@ -209,7 +201,6 @@ class SegTrack extends TrackBase {
                         }
                         this.trackView.checkContentHeight()
                         this.trackView.repaintViews()
-                        // this.getGroupedSampleKeysByAttribute(attribute)
                     }
                 })
         }
@@ -349,8 +340,7 @@ class SegTrack extends TrackBase {
                 const sortFeatures = (sort.chr === chr && sort.start >= start && sort.end <= end) ? features : undefined
                 this.sortByValue(sort, sortFeatures)
             } else if ("ATTRIBUTE" === sort.option.toUpperCase() && sort.attribute) {
-                const sortDirection = "DESC" === sort.direction ? 1 : -1
-                this.sortByAttribute(sort.attribute, sortDirection)
+                this.sortByAttribute(sort.attribute, ("DESC" === sort.direction ? 1 : -1))
             }
             this.initialSort = undefined  // Sample order is sorted,
         }
@@ -373,8 +363,19 @@ class SegTrack extends TrackBase {
             this.metadataSampleKeys = undefined
             if (this.groupBy) {
                 this.metadataSampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.filteredSampleKeys, this.groupBy)
+
+                if (this.config.sort && this.config.sort.doSort) {
+                    this.metadataSampleKeys = this.config.sort.doSort([ ...this.metadataSampleKeys ])
+                }
+
             } else {
+
                 this.metadataSampleKeys = this.filteredSampleKeys
+
+                if (this.config.sort && this.config.sort.doSort) {
+                    this.metadataSampleKeys = this.config.sort.doSort([ ...this.metadataSampleKeys ])
+                }
+
             }
 
             const sampleIndexLUT = {}
@@ -594,9 +595,9 @@ class SegTrack extends TrackBase {
 
         const scores = await this.computeRegionScores({chr, start, end}, featureList)
 
-        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByComparator(this.sampleKeys, createValueComparator(scores, direction))
+        this.config.sort = { ...sort }
+        this.config.sort.doSort = sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByComparator(sampleKeys, createValueComparator(scores, direction))
 
-        this.config.sort = sort
         this.trackView.repaintViews()
     }
 
@@ -654,13 +655,16 @@ class SegTrack extends TrackBase {
     }
 
     sortByAttribute(attribute, sortDirection) {
-        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection)
-        this.trackView.repaintViews()
-    }
 
-    getGroupedSampleKeysByAttribute(attribute) {
-        this.sampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.sampleKeys, attribute)
-        this.trackView.checkContentHeight()
+        this.config.sort =
+            {
+                doSort: sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection),
+                option: "ATTRIBUTE",
+                attribute,
+                direction: sortDirection === 1 ? "ASC" : "DESC"
+            }
+
+        this.#sortDirections.set(attribute, sortDirection * -1)
         this.trackView.repaintViews()
     }
 
