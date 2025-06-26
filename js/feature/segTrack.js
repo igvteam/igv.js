@@ -113,10 +113,8 @@ class SegTrack extends TrackBase {
 
         this.initialSort = config.sort
 
-        this.runOnce = false
         if (config.groupBy){
             this.groupBy = config.groupBy
-            this.runOnce = true
         }
 
     }
@@ -136,7 +134,15 @@ class SegTrack extends TrackBase {
 
         if (this.config.filterObject){
             await this.setSampleFilter(this.config.filterObject)
+            this.browser.navbar.clearFiltersButton.setTableRowContent(this.parseFilterObject(this.config.filterObject))
+            this.browser.navbar.clearFiltersButton.setVisibility(true)
         }
+    }
+
+    parseFilterObject(filterObject) {
+        let { type, op, value, chr, start, end } = filterObject
+        return `seg#Copy number: ${ type.charAt(0) }${ type.slice(1).toLowerCase() } ${ op } ${ value } in region ${chr}:${start}-${end}`
+
     }
 
     get sampleKeys() {
