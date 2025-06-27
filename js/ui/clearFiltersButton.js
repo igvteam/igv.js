@@ -45,6 +45,9 @@ class ClearFiltersButton extends NavbarButton {
 
         this.tableRowContent = new Map()
 
+        // Add list to track checked checkboxes
+        this.checkedCheckboxes = []
+
         const mouseClickHandler = () => {
             this.presentTable(this.tableRowContent)
         }
@@ -88,6 +91,25 @@ class ClearFiltersButton extends NavbarButton {
             checkbox.dataset.key = 'trackType'
             checkbox.dataset.value = key
 
+            // Add event handler to checkbox
+            checkbox.addEventListener('change', (event) => {
+                // console.log('Checkbox changed:', {
+                //     checked: event.target.checked,
+                //     value: event.target.dataset.value,
+                //     element: event.target
+                // })
+
+                // Track checked checkboxes
+                if (event.target.checked) {
+                    this.checkedCheckboxes.push(event.target)
+                } else {
+                    const index = this.checkedCheckboxes.indexOf(event.target)
+                    if (index > -1) {
+                        this.checkedCheckboxes.splice(index, 1)
+                    }
+                }
+            })
+
             const content = document.createElement('div')
             row.appendChild(content)
             content.className = 'igv-clear-filters__content'
@@ -106,10 +128,8 @@ class ClearFiltersButton extends NavbarButton {
         applyButton.className = 'igv-clear-filters__button'
         applyButton.textContent = 'Remove filters'
         applyButton.addEventListener('click', async () => {
-            const checkboxes = document.querySelectorAll('.igv-clear-filters__row input:checked')
-            const trackTypes = Array.from(checkboxes).map(({ dataset }) => {
-                return dataset.value
-            })
+
+            const trackTypes = Array.from(this.checkedCheckboxes).map(({ dataset }) => dataset.value)
             for (const type of trackTypes) {
                 const track = this.browser.findTracks("type", type)
                 if (track.length > 0) {
@@ -117,14 +137,21 @@ class ClearFiltersButton extends NavbarButton {
                 }
             }
 
-            for (const checkbox of checkboxes) {
+            // Remove checked checkboxes and their corresponding tableRowContent entries
+            for (const checkbox of this.checkedCheckboxes) {
                 const parent = checkbox.parentElement
                 parent.remove()
-                tableRowContent.delete(checkbox.dataset.value)
+                this.tableRowContent.delete(checkbox.dataset.value)
             }
 
+            // Clear the checked checkboxes array
+            this.checkedCheckboxes = []
+
             panel.remove()
-            this.setVisibility(false)
+
+            if (this.tableRowContent.size === 0) {
+                this.setVisibility(false)
+            }
         })
 
         // Add cancel button
