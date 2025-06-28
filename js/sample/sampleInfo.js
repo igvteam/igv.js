@@ -223,9 +223,9 @@ class SampleInfo {
         }
 
         // If we already have buckets for this attribute, return the flattened list
-        if (this.bucketedAttribute === attribute) {
-            return Array.from(this.buckets.values()).flat()
-        }
+        // if (this.bucketedAttribute === attribute) {
+        //     return Array.from(this.buckets.values()).flat()
+        // }
 
         // Reset buckets for new attribute
         this.buckets.clear()
@@ -246,7 +246,7 @@ class SampleInfo {
 
         // Second pass: assign sample keys to their respective buckets
         for (const key of sampleKeys) {
-            const attributes = this.getAttributes(key)  
+            const attributes = this.getAttributes(key)
             if (undefined === attributes) {
                 console.log(`No attributes for key: ${key}`)
                 continue
