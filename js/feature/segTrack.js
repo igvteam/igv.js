@@ -386,20 +386,19 @@ class SegTrack extends TrackBase {
 
             const sampleIndexLUT = {}
             this.metadataSampleKeys.forEach((key, index)  => {
-
-                // if (this.groupBy) {
-                //     const result = this.browser.sampleInfo.getAttributes(key)[ this.groupBy ]
-                //     console.log(`${this.groupBy} is ${ result }`)
-                // }
-
                 sampleIndexLUT[key] = index
             })
 
+            const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
+            const bucketStartRows = this.browser.sampleInfo.getBucketStartRows();
 
             let border
             switch (this.displayMode) {
                 case "FILL":
-                    this.sampleHeight = pixelHeight / this.filteredSampleKeys.length
+                    const marginPixelsTotalHeight = (bucketStartRows.length > 1 ? bucketMarginHeight * bucketStartRows.length - 1 : 0)
+                    const samplePixelsTotalHeight = pixelHeight - marginPixelsTotalHeight
+                    console.log(`filteredSampleKeys: ${ this.filteredSampleKeys.length } pixelHeight: ${pixelHeight}, marginPixelsTotalHeight: ${marginPixelsTotalHeight}, samplePixelsTotalHeight: ${samplePixelsTotalHeight}`)
+                    this.sampleHeight = samplePixelsTotalHeight / this.filteredSampleKeys.length
                     border = 0
                     break
 
@@ -421,55 +420,43 @@ class SegTrack extends TrackBase {
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
             const xScale = bpPerPixel
 
-            this.sampleYStart = undefined
             let drawCount = 0
 
-            const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
-            const bucketStartRows = this.browser.sampleInfo.getBucketStartRows();
+            for (const feature of features) {
 
-            for (const f of features) {
+                if (feature.end < bpStart || feature.start > bpEnd) continue
 
-                if (f.end < bpStart || f.start > bpEnd) continue
+                const sampleKey = feature.sampleKey || feature.sample
+                feature.row = sampleIndexLUT[sampleKey]
 
-                const sampleKey = f.sampleKey || f.sample
-                f.row = sampleIndexLUT[sampleKey]
+                const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(feature.row, bucketStartRows) : 0;
 
-                const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(f.row, bucketStartRows) : 0;
-                const y = f.row * rowHeight + border + bucketMarginCount * bucketMarginHeight;
+                const y = (feature.row * rowHeight) + (bucketMarginCount * bucketMarginHeight) + border
 
                 // Draw bucket separator if this row is the start of a new bucket (but not the first)
-                if (bucketMarginHeight && bucketStartRows.length > 1 && bucketStartRows.includes(f.row) && f.row !== 0) {
-                    // Draw a horizontal line across the track at y - (bucketMarginHeight / 2)
-                    context.save();
-
-                    // context.strokeStyle = '#888';
-                    // context.lineWidth = 1;
-                    // context.beginPath();
-                    // context.moveTo(0, y - (bucketMarginHeight / 2));
-                    // context.lineTo(pixelWidth, y - (bucketMarginHeight / 2));
-                    // context.stroke();
-
-                    const yy = y - 0.25 * bucketMarginHeight
-                    IGVGraphics.dashedLine(context, 0, yy, pixelWidth, yy)
-
-                    context.restore();
-                }
-
-                if (undefined === this.sampleYStart) {
-                    this.sampleYStart = y
-                }
+                // if (bucketMarginHeight && bucketStartRows.length > 1 && bucketStartRows.includes(feature.row) && feature.row !== 0) {
+                //     // Draw a horizontal line across the track at y - (bucketMarginHeight / 2)
+                //     context.save();
+                //     const yy = y - 0.25 * bucketMarginHeight
+                //     IGVGraphics.dashedLine(context, 0, yy, pixelWidth, yy)
+                //     context.restore();
+                // }
 
                 const bottom = y + rowHeight
 
-                if (bottom < pixelTop || y > pixelBottom) {
+                if (bottom < pixelTop) {
                     continue
                 }
 
-                const segmentStart = Math.max(f.start, bpStart)
+                if (y > pixelBottom) {
+                    continue
+                }
+
+                const segmentStart = Math.max(feature.start, bpStart)
                 // const segmentStart = segment.start;
                 let x = Math.round((segmentStart - bpStart) / xScale)
 
-                const segmentEnd = Math.min(f.end, bpEnd)
+                const segmentEnd = Math.min(feature.end, bpEnd)
                 // const segmentEnd = segment.end;
                 const x1 = Math.round((segmentEnd - bpStart) / xScale)
                 let w = Math.max(1, x1 - x)
@@ -477,12 +464,12 @@ class SegTrack extends TrackBase {
                 let color
                 if (this.color) {
                     if (typeof this.color === "function") {
-                        color = this.color(f)
+                        color = this.color(feature)
                     } else {
                         color = this.color
                     }
                 } else if (this.colorTable) {
-                    color = this.colorTable.getColor(f.value.toLowerCase())
+                    color = this.colorTable.getColor(feature.value.toLowerCase())
                 }
 
                 let h
@@ -493,7 +480,7 @@ class SegTrack extends TrackBase {
                         x -= 1
                     }
                 } else if ("shoebox" === this.type) {
-                    color = this.sbColorScale.getColor(f.value)
+                    color = this.sbColorScale.getColor(feature.value)
                     let sh = rowHeight
                     if (rowHeight < 0.25) {
                         const f = 0.1 + 2 * Math.abs(f.value)
@@ -502,7 +489,7 @@ class SegTrack extends TrackBase {
                     h = sh - 2 * border
                 } else {
                     // Assume seg track
-                    let value = f.value
+                    let value = feature.value
                     if (!this.isLog) {
                         value = IGVMath.log2(value / 2)
                     }
@@ -522,19 +509,14 @@ class SegTrack extends TrackBase {
                     h = sh - 2 * border
                 }
 
+                feature.pixelRect = {x, y, w, h}
 
-                f.pixelRect = {x, y, w, h}
-
-                // Use for diagnostic rendering
-                // context.fillStyle = randomRGB(180, 240)
                 context.fillStyle = color
-
-                // console.log(`${ this.type } render. y(${ y }) height(${ h })`)
                 context.fillRect(x, y, w, h)
+
                 drawCount++
             }
-        } else {
-            //console.log("No feature list");
+
         }
 
     }
