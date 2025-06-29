@@ -222,12 +222,6 @@ class SampleInfo {
             return sampleKeys
         }
 
-        // If we already have buckets for this attribute, return the flattened list
-        // if (this.bucketedAttribute === attribute) {
-        //     return Array.from(this.buckets.values()).flat()
-        // }
-
-        // Reset buckets for new attribute
         this.buckets.clear()
         this.bucketedAttribute = attribute
 
