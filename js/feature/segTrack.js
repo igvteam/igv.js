@@ -392,6 +392,11 @@ class SegTrack extends TrackBase {
             const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
             const bucketStartRows = this.browser.sampleInfo.getBucketStartRows();
 
+            // console log the list of bucketStartRows in a single line separated by commas
+            if (bucketStartRows.length > 0) {
+                console.log(`bucketStartRows: ${bucketStartRows.join(', ')}`)
+            }
+
             let border
             switch (this.displayMode) {
                 case "FILL":
