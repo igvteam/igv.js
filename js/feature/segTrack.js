@@ -11,6 +11,7 @@ import ShoeboxSource from "../hic/shoeboxSource.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
 
+
 /**
  * Track for segmented copy number, mut, maf and shoebox files.
  */
@@ -353,7 +354,9 @@ class SegTrack extends TrackBase {
         return features
     }
 
-    draw({context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
+    draw(config) {
+
+        const {context, pixelXOffset, viewportWidth, pixelWidth, pixelHeight, pixelTop, features, bpPerPixel, bpStart} = config
 
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
@@ -402,7 +405,7 @@ class SegTrack extends TrackBase {
                 case "FILL":
                     const marginPixelsTotalHeight = (bucketStartRows.length > 1 ? bucketMarginHeight * bucketStartRows.length - 1 : 0)
                     const samplePixelsTotalHeight = pixelHeight - marginPixelsTotalHeight
-                    console.log(`filteredSampleKeys: ${ this.filteredSampleKeys.length } pixelHeight: ${pixelHeight}, marginPixelsTotalHeight: ${marginPixelsTotalHeight}, samplePixelsTotalHeight: ${samplePixelsTotalHeight}`)
+                    // console.log(`filteredSampleKeys: ${ this.filteredSampleKeys.length } pixelHeight: ${pixelHeight}, marginPixelsTotalHeight: ${marginPixelsTotalHeight}, samplePixelsTotalHeight: ${samplePixelsTotalHeight}`)
                     this.sampleHeight = samplePixelsTotalHeight / this.filteredSampleKeys.length
                     border = 0
                     break
@@ -423,104 +426,22 @@ class SegTrack extends TrackBase {
 
             const pixelBottom = pixelTop + pixelHeight
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-            const xScale = bpPerPixel
-
-            let drawCount = 0
 
             for (const feature of features) {
 
-                if (feature.end < bpStart || feature.start > bpEnd) continue
-
-                const sampleKey = feature.sampleKey || feature.sample
-                feature.row = sampleIndexLUT[sampleKey]
-
-                const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(feature.row, bucketStartRows) : 0;
-
-                const y = (feature.row * rowHeight) + (bucketMarginCount * bucketMarginHeight) + border
-
-                // Draw bucket separator if this row is the start of a new bucket (but not the first)
-                // if (bucketMarginHeight && bucketStartRows.length > 1 && bucketStartRows.includes(feature.row) && feature.row !== 0) {
-                //     // Draw a horizontal line across the track at y - (bucketMarginHeight / 2)
-                //     context.save();
-                //     const yy = y - 0.25 * bucketMarginHeight
-                //     IGVGraphics.dashedLine(context, 0, yy, pixelWidth, yy)
-                //     context.restore();
-                // }
-
-                const bottom = y + rowHeight
-
-                if (bottom < pixelTop) {
-                    continue
+                if (this.isFeatureVisible(feature, bpStart, bpEnd, pixelTop, pixelBottom, rowHeight, sampleIndexLUT, bucketMarginHeight, bucketStartRows, border)) {
+                    this.renderFeature(feature, bpStart, bpEnd, bpPerPixel, rowHeight, border, sampleIndexLUT, bucketMarginHeight, bucketStartRows, context)
                 }
-
-                if (y > pixelBottom) {
-                    continue
-                }
-
-                const segmentStart = Math.max(feature.start, bpStart)
-                // const segmentStart = segment.start;
-                let x = Math.round((segmentStart - bpStart) / xScale)
-
-                const segmentEnd = Math.min(feature.end, bpEnd)
-                // const segmentEnd = segment.end;
-                const x1 = Math.round((segmentEnd - bpStart) / xScale)
-                let w = Math.max(1, x1 - x)
-
-                let color
-                if (this.color) {
-                    if (typeof this.color === "function") {
-                        color = this.color(feature)
-                    } else {
-                        color = this.color
-                    }
-                } else if (this.colorTable) {
-                    color = this.colorTable.getColor(feature.value.toLowerCase())
-                }
-
-                let h
-                if ("mut" === this.type) {
-                    h = rowHeight - 2 * border
-                    if (w < 3) {
-                        w = 3
-                        x -= 1
-                    }
-                } else if ("shoebox" === this.type) {
-                    color = this.sbColorScale.getColor(feature.value)
-                    let sh = rowHeight
-                    if (rowHeight < 0.25) {
-                        const f = 0.1 + 2 * Math.abs(f.value)
-                        sh = Math.min(1, f * rowHeight)
-                    }
-                    h = sh - 2 * border
-                } else {
-                    // Assume seg track
-                    let value = feature.value
-                    if (!this.isLog) {
-                        value = IGVMath.log2(value / 2)
-                    }
-                    if (value < -0.1) {
-                        color = this.negColorScale.getColor(value)
-                    } else if (value > 0.1) {
-                        color = this.posColorScale.getColor(value)
-                    } else {
-                        color = "white"
-                    }
-
-                    let sh = rowHeight
-                    if (rowHeight < 0.25) {
-                        const f = 0.1 + 2 * Math.abs(value)
-                        sh = Math.min(1, f * rowHeight)
-                    }
-                    h = sh - 2 * border
-                }
-
-                feature.pixelRect = {x, y, w, h}
-
-                context.fillStyle = color
-                context.fillRect(x, y, w, h)
-
-                drawCount++
             }
+
+            // Debug: Draw a red border around the track's visible area using canvas position
+            // console.log(`Canvas border left: ${pixelXOffset}, top: ${pixelTop}, width: ${viewportWidth}, height: ${pixelHeight}`)
+            // context.strokeStyle = 'red'
+            // context.lineWidth = 8
+            // context.strokeRect(-pixelXOffset, pixelTop, viewportWidth, pixelHeight)
+
+            // Draw bucket labels
+            this.drawBucketLabels(context, pixelXOffset, viewportWidth, rowHeight, bucketMarginHeight, bucketStartRows, border)
 
         }
 
@@ -619,27 +540,27 @@ class SegTrack extends TrackBase {
         const mutationTypes = filterObject.value ? new Set(filterObject.value) : undefined
 
         for (let segment of featureList) {
-            if (segment.end < start) continue
-            if (segment.start > end) break
-            const sampleKey = segment.sampleKey || segment.sample
+            if (segment.end >= start && segment.start <= end) {
+                const sampleKey = segment.sampleKey || segment.sample
 
-            if ("mut" === this.type) {
-                if (mutationTypes) {
-                    const mutationType = segment.getAttribute("Variant_Classification")
-                    if (mutationTypes.has(mutationType)) {
+                if ("mut" === this.type) {
+                    if (mutationTypes) {
+                        const mutationType = segment.getAttribute("Variant_Classification")
+                        if (mutationTypes.has(mutationType)) {
+                            // Just count features overlapping region per sample
+                            scores[sampleKey] = (scores[sampleKey] || 0) + 1
+                        }
+                    } else {
                         // Just count features overlapping region per sample
                         scores[sampleKey] = (scores[sampleKey] || 0) + 1
                     }
                 } else {
-                    // Just count features overlapping region per sample
-                    scores[sampleKey] = (scores[sampleKey] || 0) + 1
-                }
-            } else {
 
-                const min = Math.max(start, segment.start)
-                const max = Math.min(end, segment.end)
-                const f = (max - min) / bpLength
-                scores[sampleKey] = (scores[sampleKey] || 0) + f * segment.value
+                    const min = Math.max(start, segment.start)
+                    const max = Math.min(end, segment.end)
+                    const f = (max - min) / bpLength
+                    scores[sampleKey] = (scores[sampleKey] || 0) + f * segment.value
+                }
             }
         }
 
@@ -760,6 +681,198 @@ class SegTrack extends TrackBase {
 
     static getBucketMarginHeight(buckets) {
         return buckets && buckets.size > 0 ? SegTrack.BUCKET_MARGIN_HEIGHT : 0
+    }
+
+    /**
+     * Calculate the position and bounds for a feature
+     * @param {Object} feature - The feature to calculate position for
+     * @param {Object} sampleIndexLUT - Lookup table for sample indices
+     * @param {number} rowHeight - Height of each row
+     * @param {number} bucketMarginHeight - Height of bucket margins
+     * @param {Array} bucketStartRows - Array of bucket start row indices
+     * @param {number} border - Border width
+     * @returns {Object} - Object containing row, y, bottom properties
+     */
+    calculateFeaturePosition(feature, sampleIndexLUT, rowHeight, bucketMarginHeight, bucketStartRows, border) {
+
+        const sampleKey = feature.sampleKey || feature.sample
+        const row = sampleIndexLUT[sampleKey]
+
+        const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(row, bucketStartRows) : 0
+
+        const y = (row * rowHeight) + (bucketMarginCount * bucketMarginHeight) + border
+        const bottom = y + rowHeight
+        return { row, y, bottom }
+    }
+
+    /**
+     * Check if a feature should be rendered based on genomic and pixel bounds
+     * @param {Object} feature - The feature to check
+     * @param {number} bpStart - Start position in base pairs
+     * @param {number} bpEnd - End position in base pairs
+     * @param {number} pixelTop - Top pixel position
+     * @param {number} pixelBottom - Bottom pixel position
+     * @param {number} rowHeight - Height of each row
+     * @param {Object} sampleIndexLUT - Lookup table for sample indices
+     * @param {number} bucketMarginHeight - Height of bucket margins
+     * @param {Array} bucketStartRows - Array of bucket start row indices
+     * @param {number} border - Border width
+     * @returns {boolean} - True if feature should be rendered
+     */
+    isFeatureVisible(feature, bpStart, bpEnd, pixelTop, pixelBottom, rowHeight, sampleIndexLUT, bucketMarginHeight, bucketStartRows, border) {
+        // Check genomic bounds
+        if (feature.end < bpStart || feature.start > bpEnd) {
+            return false
+        }
+
+        // Calculate position
+        const { bottom, y } = this.calculateFeaturePosition(feature, sampleIndexLUT, rowHeight, bucketMarginHeight, bucketStartRows, border)
+
+        // Check pixel bounds
+        if (bottom < pixelTop || y > pixelBottom) {
+            return false
+        }
+
+        return true
+    }
+
+    /**
+     * Calculate the style properties (color, height, width, x position) for a feature
+     * @param {Object} feature - The feature to style
+     * @param {number} rowHeight - Height of each row
+     * @param {number} border - Border width
+     * @param {number} w - Width of the feature
+     * @param {number} x - X position of the feature
+     * @returns {Object} - Object containing color, h, w, x properties
+     */
+    calculateFeatureStyle(feature, rowHeight, border, w, x) {
+        let color, h
+
+        if (this.color) {
+            color = typeof this.color === "function" ? this.color(feature) : this.color
+        } else if (this.colorTable) {
+            color = this.colorTable.getColor(feature.value.toLowerCase())
+        }
+
+        if ("mut" === this.type) {
+            h = rowHeight - 2 * border
+            if (w < 3) {
+                w = 3
+                x -= 1
+            }
+        } else if ("shoebox" === this.type) {
+            color = this.sbColorScale.getColor(feature.value)
+            let sh = rowHeight
+            if (rowHeight < 0.25) {
+                const f = 0.1 + 2 * Math.abs(feature.value)
+                sh = Math.min(1, f * rowHeight)
+            }
+            h = sh - 2 * border
+        } else {
+            // Assume seg track
+            let value = feature.value
+            if (!this.isLog) {
+                value = IGVMath.log2(value / 2)
+            }
+            if (value < -0.1) {
+                color = this.negColorScale.getColor(value)
+            } else if (value > 0.1) {
+                color = this.posColorScale.getColor(value)
+            } else {
+                color = "white"
+            }
+
+            let sh = rowHeight
+            if (rowHeight < 0.25) {
+                const f = 0.1 + 2 * Math.abs(value)
+                sh = Math.min(1, f * rowHeight)
+            }
+            h = sh - 2 * border
+        }
+
+        return { color, h, w, x }
+    }
+
+    /**
+     * Render a single feature
+     * @param {Object} feature - The feature to render
+     * @param {number} bpStart - Start position in base pairs
+     * @param {number} bpEnd - End position in base pairs
+     * @param {number} bpPerPixel - Scale factor for x coordinates
+     * @param {number} rowHeight - Height of each row
+     * @param {number} border - Border width
+     * @param {Object} sampleIndexLUT - Lookup table for sample indices
+     * @param {number} bucketMarginHeight - Height of bucket margins
+     * @param {Array} bucketStartRows - Array of bucket start row indices
+     * @param {CanvasRenderingContext2D} context - Canvas context for drawing
+     */
+    renderFeature(feature, bpStart, bpEnd, bpPerPixel, rowHeight, border, sampleIndexLUT, bucketMarginHeight, bucketStartRows, context) {
+
+        const { y } = this.calculateFeaturePosition(feature, sampleIndexLUT, rowHeight, bucketMarginHeight, bucketStartRows, border)
+
+        // Calculate geometry
+        const segmentStart = Math.max(feature.start, bpStart)
+        let x = Math.round((segmentStart - bpStart) / bpPerPixel)
+        const segmentEnd = Math.min(feature.end, bpEnd)
+        const x1 = Math.round((segmentEnd - bpStart) / bpPerPixel)
+        let w = Math.max(1, x1 - x)
+
+        // Determine color and height based on track type
+        const { color, h, w: finalW, x: finalX } = this.calculateFeatureStyle(feature, rowHeight, border, w, x)
+
+        // Store pixel rect and draw
+        feature.pixelRect = {x: finalX, y, w: finalW, h}
+        context.fillStyle = color
+        context.fillRect(finalX, y, finalW, h)
+    }
+
+    /**
+     * Draw bucket labels on the track
+     * @param {CanvasRenderingContext2D} context - Canvas context for drawing
+     * @param {number} pixelXOffset - X offset for pixel coordinates
+     * @param {number} viewportWidth - Width of the viewport
+     * @param {number} rowHeight - Height of each row
+     * @param {number} bucketMarginHeight - Height of bucket margins
+     * @param {Array} bucketStartRows - Array of bucket start row indices
+     * @param {number} border - Border width
+     */
+    drawBucketLabels(context, pixelXOffset, viewportWidth, rowHeight, bucketMarginHeight, bucketStartRows, border) {
+        let bucketIndex = 0
+        const bucketKeys = Array.from(this.browser.sampleInfo.buckets.keys())
+
+        context.save()
+
+        context.textAlign = "center"
+        context.font = '400 12px sans-serif'
+
+        for (const key of bucketKeys) {
+
+            const textMetrics = context.measureText(key)
+            const { width, actualBoundingBoxAscent, actualBoundingBoxDescent} = textMetrics
+            const w = width + 10
+
+
+            const h = actualBoundingBoxAscent + actualBoundingBoxDescent + 10
+
+            const bucketStartRow = bucketStartRows[bucketIndex]
+            const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(bucketStartRow, bucketStartRows) : 0
+            const y = (bucketStartRow * rowHeight) + (bucketMarginCount * bucketMarginHeight) + border + 8
+
+            context.fillStyle = 'white'
+            context.strokeStyle = 'grey'
+
+            let x = -pixelXOffset + viewportWidth -w - 10
+            IGVGraphics.roundRect(context, x, y, w, h, 2, 1, 1)
+
+            context.fillStyle = 'grey'
+            context.strokeStyle = 'white'
+            x = -pixelXOffset + viewportWidth - w * .9
+            context.fillText(key, x, y + 12)
+
+            bucketIndex++
+        }
+
+        context.restore()
     }
 
 }
