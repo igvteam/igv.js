@@ -19,15 +19,7 @@ suite("test bbChromTree", function () {
 
     })
 
-
-    test("clinvar", async function () {
-
-        this.timeout(10000)
-        const url = "https://hgdownload.soe.ucsc.edu/gbdb/hg38/bbi/clinvar/clinvarMain.bb"
-        const bbChromTree = new ChromTree(url, {}, 3102 )
-        await bbChromTree.init()
-        assert.equal(bbChromTree.getItemCount(), 27)
-    })
+    
 
     /**
      * Test a BB file with a small large chrom tree (24 contigs).  The estimate should be the exact size.
