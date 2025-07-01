@@ -242,7 +242,7 @@ class SampleInfo {
         for (const key of sampleKeys) {
             const attributes = this.getAttributes(key)
             if (undefined === attributes) {
-                console.log(`No attributes for key: ${key}`)
+                console.warn(`No attributes for key: ${key}`)
                 continue
             }
             const value = attributes[attribute]
