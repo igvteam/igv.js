@@ -348,7 +348,7 @@ class SegTrack extends TrackBase {
 
     draw(config) {
 
-        const {context, pixelXOffset, viewport, viewportWidth, pixelWidth, pixelHeight, pixelTop, features, bpPerPixel, bpStart} = config
+        const {context, contentTop, pixelXOffset, viewport, viewportWidth, pixelWidth, pixelHeight, pixelTop, features, bpPerPixel, bpStart} = config
 
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
@@ -387,29 +387,14 @@ class SegTrack extends TrackBase {
             const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
             const bucketStartRows = this.browser.sampleInfo.getBucketStartRows();
 
-            // if (bucketStartRows.length > 0) {
-            //     console.log(`bucketStartRows: ${bucketStartRows.join(', ')}`)
-            // }
-
-            let border
-            switch (this.displayMode) {
-                case "FILL":
-                    const marginPixelsTotalHeight = (bucketStartRows.length > 1 ? bucketMarginHeight * bucketStartRows.length - 1 : 0)
-                    const samplePixelsTotalHeight = pixelHeight - marginPixelsTotalHeight
-                    // console.log(`filteredSampleKeys: ${ this.filteredSampleKeys.length } pixelHeight: ${pixelHeight}, marginPixelsTotalHeight: ${marginPixelsTotalHeight}, samplePixelsTotalHeight: ${samplePixelsTotalHeight}`)
-                    this.sampleHeight = samplePixelsTotalHeight / this.filteredSampleKeys.length
-                    border = 0
-                    break
-
-                case "SQUISHED":
-                    this.sampleHeight = this.squishedRowHeight
-                    border = 0
-                    break
-                default:   // EXPANDED
-                    this.sampleHeight = this.expandedRowHeight
-                    border = 1
-            }
-            const rowHeight = this.sampleHeight
+            const { sampleHeight, border } = this.calculateDisplayProperties(
+                this.displayMode,
+                pixelHeight,
+                bucketStartRows,
+                bucketMarginHeight,
+                this.filteredSampleKeys.length
+            )
+            this.sampleHeight = sampleHeight
 
             for (let segment of features) {
                 segment.pixelRect = undefined   // !important, reset this in case segment is not drawn
@@ -420,19 +405,21 @@ class SegTrack extends TrackBase {
 
             for (const feature of features) {
 
-                if (this.isFeatureVisible(feature, bpStart, bpEnd, pixelTop, pixelBottom, rowHeight, sampleIndexLUT, bucketMarginHeight, bucketStartRows, border)) {
-                    this.renderFeature(feature, bpStart, bpEnd, bpPerPixel, rowHeight, border, sampleIndexLUT, bucketMarginHeight, bucketStartRows, context)
+                if (this.isFeatureVisible(feature, bpStart, bpEnd, pixelTop, pixelBottom, this.sampleHeight, sampleIndexLUT, bucketMarginHeight, bucketStartRows, border)) {
+                    this.renderFeature(feature, bpStart, bpEnd, bpPerPixel, this.sampleHeight, border, sampleIndexLUT, bucketMarginHeight, bucketStartRows, context)
                 }
             }
 
             // Draw a red border around visible canvas real estate
             // const { width, height } = viewport.viewportElement.getBoundingClientRect()
-            // console.log(`Canvas border left: ${-pixelXOffset}, top: ${pixelTop}, width: ${width}, height: ${height}`)
+            // console.log(`Canvas border left: ${-pixelXOffset}, contentTop: ${-contentTop}, width: ${width}, height: ${height}`)
             // context.strokeStyle = 'red'
             // context.lineWidth = 8
-            // context.strokeRect(-pixelXOffset, pixelTop, width, height)
+            // context.strokeRect(-pixelXOffset, -contentTop, width, height)
 
-            this.drawBucketLabels(context, pixelXOffset, viewportWidth, rowHeight, bucketMarginHeight, bucketStartRows, border)
+            if (this.groupBy && viewport.doRenderBucketLabels) {
+                this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
+            }
 
         }
 
@@ -816,54 +803,75 @@ class SegTrack extends TrackBase {
         context.fillRect(finalX, y, finalW, h)
     }
 
-    /**
-     * Draw bucket labels on the track
-     * @param {CanvasRenderingContext2D} context - Canvas context for drawing
-     * @param {number} pixelXOffset - X offset for pixel coordinates
-     * @param {number} viewportWidth - Width of the viewport
-     * @param {number} rowHeight - Height of each row
-     * @param {number} bucketMarginHeight - Height of bucket margins
-     * @param {Array} bucketStartRows - Array of bucket start row indices
-     * @param {number} border - Border width
-     */
-    drawBucketLabels(context, pixelXOffset, viewportWidth, rowHeight, bucketMarginHeight, bucketStartRows, border) {
+    renderBucketLabels(viewport, rowHeight, bucketMarginHeight, bucketStartRows, top) {
+
+        // discard all pre-existing bucket labels`
+        const bucketLabels = viewport.viewportElement.querySelectorAll('.igv-attribute-group-label')
+        for (const label of bucketLabels) {
+            label.remove()
+        }
+
         let bucketIndex = 0
         const bucketKeys = Array.from(this.browser.sampleInfo.buckets.keys())
 
-        context.save()
-
-        context.textAlign = "center"
-        context.font = '400 12px sans-serif'
-
+        const fudge = 4
         for (const key of bucketKeys) {
-
-            const textMetrics = context.measureText(key)
-            const { width, actualBoundingBoxAscent, actualBoundingBoxDescent} = textMetrics
-            const w = width + 10
-
-
-            const h = actualBoundingBoxAscent + actualBoundingBoxDescent + 10
 
             const bucketStartRow = bucketStartRows[bucketIndex]
             const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(bucketStartRow, bucketStartRows) : 0
-            const y = (bucketStartRow * rowHeight) + (bucketMarginCount * bucketMarginHeight) + border + 8
+            const y = top + (bucketStartRow * rowHeight) + (bucketMarginCount * bucketMarginHeight) + fudge
 
-            context.fillStyle = 'white'
-            context.strokeStyle = 'grey'
-            context.lineWidth = 2
-
-            let x = -pixelXOffset + viewportWidth -w - 10
-            IGVGraphics.roundRect(context, x, y, w, h, 2, 1, 1)
-
-            context.fillStyle = 'grey'
-            context.strokeStyle = 'white'
-            x = -pixelXOffset + viewportWidth - w * .9
-            context.fillText(key, x, y + 12)
+            const attributeGroupLabel = document.createElement('div')
+            viewport.viewportElement.appendChild(attributeGroupLabel)
+            attributeGroupLabel.className = 'igv-attribute-group-label'
+            attributeGroupLabel.style.top = `${y}px`
+            attributeGroupLabel.textContent = key
+            attributeGroupLabel.style.display = 'block'
 
             bucketIndex++
         }
 
-        context.restore()
+    }
+
+    /**
+     * Calculate display properties based on display mode
+     * @param {string} displayMode - The display mode (FILL, SQUISHED, EXPANDED)
+     * @param {number} pixelHeight - Total pixel height available
+     * @param {number} bucketStartRows - Array of bucket start row indices
+     * @param {number} bucketMarginHeight - Height of bucket margins
+     * @param {number} filteredSampleKeysLength - Number of filtered sample keys
+     * @returns {Object} - Object containing sampleHeight and border properties
+     */
+    calculateDisplayProperties(displayMode, pixelHeight, bucketStartRows, bucketMarginHeight, filteredSampleKeysLength) {
+        let sampleHeight, border
+
+        switch (displayMode) {
+            case "FILL":
+                const marginPixelsTotalHeight = (bucketStartRows.length > 1 ? bucketMarginHeight * bucketStartRows.length - 1 : 0)
+                const samplePixelsTotalHeight = pixelHeight - marginPixelsTotalHeight
+                // console.log(`filteredSampleKeys: ${ filteredSampleKeysLength } pixelHeight: ${pixelHeight}, marginPixelsTotalHeight: ${marginPixelsTotalHeight}, samplePixelsTotalHeight: ${samplePixelsTotalHeight}`)
+                sampleHeight = samplePixelsTotalHeight / filteredSampleKeysLength
+                border = 0
+                break
+
+            case "SQUISHED":
+                sampleHeight = this.squishedRowHeight
+                border = 0
+                break
+            default:   // EXPANDED
+                sampleHeight = this.expandedRowHeight
+                border = 1
+        }
+
+        return { sampleHeight, border }
+    }
+
+    setTopHelper(viewport, contentTop) {
+        if (this.groupBy && viewport.doRenderBucketLabels) {
+            const bucketStartRows = this.browser.sampleInfo.getBucketStartRows()
+            const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
+            this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
+        }
     }
 
 }

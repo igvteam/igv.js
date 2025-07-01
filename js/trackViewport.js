@@ -54,6 +54,18 @@ class TrackViewport extends Viewport {
             }
         }
 
+        // Check if this viewport element meets the criteria for seg or mut track types
+        this.doRenderBucketLabels = this.viewportElement.matches('.igv-viewport[data-track-type="seg"], .igv-viewport[data-track-type="mut"]');
+
+        // if (isSegOrMutViewport) {
+        //     this.attributeGroupLabel = document.createElement('div');
+        //     this.viewportElement.appendChild(this.attributeGroupLabel);
+        //     this.attributeGroupLabel.className = 'igv-attribute-group-label';
+        //     this.attributeGroupLabel.style.display = 'none';
+        //     this.attributeGroupLabel.textContent = 'Attribute Group';
+        // }
+
+
         this.stopSpinner()
         this.addMouseHandlers()
 
@@ -204,6 +216,10 @@ class TrackViewport extends Viewport {
         if(this.canvas && this.canvas._data) {
             let offset = contentTop + this.canvas._data.pixelTop
             this.canvas.style.top = `${offset}px`
+        }
+
+        if (typeof this.trackView.track.setTopHelper === 'function'){
+            this.trackView.track.setTopHelper(this, contentTop)
         }
     }
 
@@ -367,6 +383,7 @@ class TrackViewport extends Viewport {
         const drawConfiguration =
             {
                 context: ctx,
+                contentTop: this.contentTop,
                 pixelXOffset,
                 pixelWidth,
                 pixelHeight,
