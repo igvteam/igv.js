@@ -35,14 +35,6 @@ class SegTrack extends TrackBase {
         ]
     }
 
-    #getBucketMarginCount(rowIndex, bucketStartRows) {
-        let count = 0;
-        for (let i = 1; i < bucketStartRows.length; i++) {
-            if (rowIndex >= bucketStartRows[i]) count++;
-        }
-        return count;
-    }
-
     static BUCKET_MARGIN_HEIGHT = 16
 
     #sortDirections = new Map()
@@ -356,7 +348,7 @@ class SegTrack extends TrackBase {
 
     draw(config) {
 
-        const {context, pixelXOffset, viewportWidth, pixelWidth, pixelHeight, pixelTop, features, bpPerPixel, bpStart} = config
+        const {context, pixelXOffset, viewport, viewportWidth, pixelWidth, pixelHeight, pixelTop, features, bpPerPixel, bpStart} = config
 
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
@@ -395,10 +387,9 @@ class SegTrack extends TrackBase {
             const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
             const bucketStartRows = this.browser.sampleInfo.getBucketStartRows();
 
-            // console log the list of bucketStartRows in a single line separated by commas
-            if (bucketStartRows.length > 0) {
-                console.log(`bucketStartRows: ${bucketStartRows.join(', ')}`)
-            }
+            // if (bucketStartRows.length > 0) {
+            //     console.log(`bucketStartRows: ${bucketStartRows.join(', ')}`)
+            // }
 
             let border
             switch (this.displayMode) {
@@ -434,13 +425,13 @@ class SegTrack extends TrackBase {
                 }
             }
 
-            // Debug: Draw a red border around the track's visible area using canvas position
-            // console.log(`Canvas border left: ${pixelXOffset}, top: ${pixelTop}, width: ${viewportWidth}, height: ${pixelHeight}`)
+            // Draw a red border around visible canvas real estate
+            // const { width, height } = viewport.viewportElement.getBoundingClientRect()
+            // console.log(`Canvas border left: ${-pixelXOffset}, top: ${pixelTop}, width: ${width}, height: ${height}`)
             // context.strokeStyle = 'red'
             // context.lineWidth = 8
-            // context.strokeRect(-pixelXOffset, pixelTop, viewportWidth, pixelHeight)
+            // context.strokeRect(-pixelXOffset, pixelTop, width, height)
 
-            // Draw bucket labels
             this.drawBucketLabels(context, pixelXOffset, viewportWidth, rowHeight, bucketMarginHeight, bucketStartRows, border)
 
         }
@@ -480,7 +471,6 @@ class SegTrack extends TrackBase {
             return this.filteredSampleKeys.length * sampleHeight
         }
     }
-
 
     async sortByValue(sort, featureList) {
 
@@ -860,6 +850,7 @@ class SegTrack extends TrackBase {
 
             context.fillStyle = 'white'
             context.strokeStyle = 'grey'
+            context.lineWidth = 2
 
             let x = -pixelXOffset + viewportWidth -w - 10
             IGVGraphics.roundRect(context, x, y, w, h, 2, 1, 1)
