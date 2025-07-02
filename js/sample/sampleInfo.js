@@ -29,8 +29,6 @@ class SampleInfo {
         this.colorDictionary = {}
         this.attributeRangeLUT = {}
         this.initialized = false
-        this.buckets = new Map()
-        this.bucketedAttribute = undefined
     }
 
     get attributeCount() {
@@ -144,20 +142,6 @@ class SampleInfo {
         return sampleKeys.sort(comparator)
     }
 
-    getSortedSampleKeysByComparator(sampleKeys, comparator) {
-
-        if (this.bucketedAttribute && this.buckets.size > 1) {
-            const result = []
-            for (const bucketKeys of this.buckets.values()) {
-                result.push(...this.#sortSampleKeysWithComparator(bucketKeys, comparator))
-            }
-            return result
-        } else {
-            return this.#sortSampleKeysWithComparator(sampleKeys, comparator)
-        }
-
-    }
-
     #sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
         const numbers = sampleKeys.filter(key => {
             const attributes = this.getAttributes(key)
@@ -198,13 +182,27 @@ class SampleInfo {
         return sortDirection === -1 ? [...numbers, ...strings] : [...strings, ...numbers]
     }
 
-    getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
+    getSortedSampleKeysByComparator(sampleKeys, comparator, buckets, bucketedAttribute) {
+
+        if (bucketedAttribute && buckets.size > 1) {
+            const result = []
+            for (const bucketKeys of buckets.values()) {
+                result.push(...this.#sortSampleKeysWithComparator(bucketKeys, comparator))
+            }
+            return result
+        } else {
+            return this.#sortSampleKeysWithComparator(sampleKeys, comparator)
+        }
+
+    }
+
+    getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection, buckets, bucketedAttribute) {
         sortDirection = sortDirection || 1
 
-        if (this.bucketedAttribute && this.bucketedAttribute !== attribute) {
+        if (bucketedAttribute && bucketedAttribute !== attribute) {
             const result = []
             // Sort within each bucket
-            for (const bucketKeys of this.buckets.values()) {
+            for (const bucketKeys of buckets.values()) {
                 result.push(...this.#sortSampleKeysByAttribute(bucketKeys, attribute, sortDirection))
             }
             return result
@@ -214,16 +212,11 @@ class SampleInfo {
 
     }
 
-    getGroupedSampleKeysByAttribute(sampleKeys, attribute) {
+    getGroupedSampleKeysByAttribute(sampleKeys, buckets, bucketedAttribute) {
 
-        if ('None' === attribute) {
-            this.buckets.clear()
-            this.bucketedAttribute = undefined
+        if ('None' === bucketedAttribute) {
             return sampleKeys
         }
-
-        this.buckets.clear()
-        this.bucketedAttribute = attribute
 
         // First pass: collect all unique values and initialize buckets
         for (const key of sampleKeys) {
@@ -232,9 +225,9 @@ class SampleInfo {
                 console.log(`No attributes for key: ${key}`)
                 continue
             }
-            const value = attributes[attribute]
-            if (!this.buckets.has(value)) {
-                this.buckets.set(value, [])
+            const value = attributes[bucketedAttribute]
+            if (!buckets.has(value)) {
+                buckets.set(value, [])
             }
         }
 
@@ -245,11 +238,11 @@ class SampleInfo {
                 console.warn(`No attributes for key: ${key}`)
                 continue
             }
-            const value = attributes[attribute]
-            this.buckets.get(value).push(key)
+            const value = attributes[bucketedAttribute]
+            buckets.get(value).push(key)
         }
 
-        return Array.from(this.buckets.values()).flat()
+        return Array.from(buckets.values()).flat()
     }
 
     toJSON() {
@@ -260,18 +253,6 @@ class SampleInfo {
             json.push(cooked)
         }
         return json
-    }
-
-    getBucketStartRows() {
-        let bucketStartRows = [];
-        if (this.buckets) {
-            let row = 0;
-            for (let [bucketName, samplesArr] of this.buckets) {
-                bucketStartRows.push(row);
-                row += samplesArr.length;
-            }
-        }
-        return bucketStartRows;
     }
 
     #processSampleInfoFileAsString(string) {
@@ -457,14 +438,6 @@ class SampleInfo {
 
         }
 
-    }
-
-    static getBucketMarginCount(rowIndex, bucketStartRows) {
-        let count = 0;
-        for (let i = 1; i < bucketStartRows.length; i++) {
-            if (rowIndex >= bucketStartRows[i]) count++;
-        }
-        return count;
     }
 
     static toNumericalRepresentation(obj) {

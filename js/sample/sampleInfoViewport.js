@@ -160,15 +160,15 @@ class SampleInfoViewport {
 
             let rowIndex = 0
             this.hitList = {}
-            const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
-            const bucketStartRows = this.browser.sampleInfo.getBucketStartRows();
+            const bucketMarginHeight = this.trackView.track.getBucketMarginHeight()
+            const bucketStartRows = this.trackView.track.getBucketStartRows();
 
             for (const sampleName of samples.names) {
 
                 const attributes = this.browser.sampleInfo.getAttributes(sampleName)
                 if (attributes) {
 
-                    const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(rowIndex, bucketStartRows) : 0;
+                    const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(rowIndex, bucketStartRows) : 0;
                     const yy = y + shim + (bucketMarginCount * bucketMarginHeight);
 
                     const hh = tileHeight - (2 * shim)
