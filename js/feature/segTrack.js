@@ -17,10 +17,6 @@ import {createElementWithString} from "../ui/utils/dom-utils.js"
  */
 class SegTrack extends TrackBase {
 
-    constructor(config, browser) {
-        super(config, browser)
-    }
-
     static defaults =
         {
             groupBy: undefined
@@ -37,8 +33,15 @@ class SegTrack extends TrackBase {
 
     static BUCKET_MARGIN_HEIGHT = 16
 
+    constructor(config, browser) {
+        super(config, browser)
+        this._sampleKeys = []
+        this.buckets = new Map()
+        this.bucketedAttribute = undefined
+
+    }
+
     #sortDirections = new Map()
-    _sampleKeys = []
 
     init(config) {
         super.init(config)
@@ -194,10 +197,8 @@ class SegTrack extends TrackBase {
                     element,
                     click: function groupByFunction(){
                         this.groupBy = 'None' === attribute ? undefined : attribute;
-                        if (undefined === this.groupBy){
-                            this.browser.sampleInfo.buckets.clear()
-                            this.browser.sampleInfo.bucketedAttribute = undefined
-                        }
+                        this.buckets.clear()
+                        this.bucketedAttribute = this.groupBy
                         this.trackView.checkContentHeight()
                         this.trackView.repaintViews()
                     }
@@ -363,20 +364,17 @@ class SegTrack extends TrackBase {
 
             this.metadataSampleKeys = undefined
             if (this.groupBy) {
-                this.metadataSampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.filteredSampleKeys, this.groupBy)
-
+                this.buckets.clear()
+                this.bucketedAttribute = this.groupBy
+                this.metadataSampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.filteredSampleKeys, this.buckets, this.bucketedAttribute)
                 if (this.config.sort && this.config.sort.doSort) {
                     this.metadataSampleKeys = this.config.sort.doSort([ ...this.metadataSampleKeys ])
                 }
-
             } else {
-
                 this.metadataSampleKeys = this.filteredSampleKeys
-
                 if (this.config.sort && this.config.sort.doSort) {
                     this.metadataSampleKeys = this.config.sort.doSort([ ...this.metadataSampleKeys ])
                 }
-
             }
 
             const sampleIndexLUT = {}
@@ -384,8 +382,8 @@ class SegTrack extends TrackBase {
                 sampleIndexLUT[key] = index
             })
 
-            const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
-            const bucketStartRows = this.browser.sampleInfo.getBucketStartRows();
+            const bucketMarginHeight = this.getBucketMarginHeight()
+            const bucketStartRows = this.getBucketStartRows();
 
             const { sampleHeight, border } = this.calculateDisplayProperties(
                 this.displayMode,
@@ -404,18 +402,10 @@ class SegTrack extends TrackBase {
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
 
             for (const feature of features) {
-
                 if (this.isFeatureVisible(feature, bpStart, bpEnd, pixelTop, pixelBottom, this.sampleHeight, sampleIndexLUT, bucketMarginHeight, bucketStartRows, border)) {
                     this.renderFeature(feature, bpStart, bpEnd, bpPerPixel, this.sampleHeight, border, sampleIndexLUT, bucketMarginHeight, bucketStartRows, context)
                 }
             }
-
-            // Draw a red border around visible canvas real estate
-            // const { width, height } = viewport.viewportElement.getBoundingClientRect()
-            // console.log(`Canvas border left: ${-pixelXOffset}, contentTop: ${-contentTop}, width: ${width}, height: ${height}`)
-            // context.strokeStyle = 'red'
-            // context.lineWidth = 8
-            // context.strokeRect(-pixelXOffset, -contentTop, width, height)
 
             if (this.groupBy && viewport.doRenderBucketLabels) {
                 this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
@@ -451,8 +441,8 @@ class SegTrack extends TrackBase {
         const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight
         this.updateSampleKeys(features)
 
-        if (this.browser.sampleInfo.buckets && this.browser.sampleInfo.buckets.size > 0) {
-            const aggregateBucketMarginHeight = (this.browser.sampleInfo.buckets.size - 1) * SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
+        if (this.buckets && this.buckets.size > 0) {
+            const aggregateBucketMarginHeight = (this.buckets.size - 1) * this.getBucketMarginHeight()
             return aggregateBucketMarginHeight + (this.filteredSampleKeys.length * sampleHeight)
         } else {
             return this.filteredSampleKeys.length * sampleHeight
@@ -487,7 +477,7 @@ class SegTrack extends TrackBase {
         const scores = await this.computeRegionScores({chr, start, end}, featureList)
 
         this.config.sort = { ...sort }
-        this.config.sort.doSort = sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByComparator(sampleKeys, createValueComparator(scores, direction))
+        this.config.sort.doSort = sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByComparator(sampleKeys, createValueComparator(scores, direction), this.buckets, this.bucketedAttribute)
 
         this.trackView.repaintViews()
     }
@@ -549,7 +539,7 @@ class SegTrack extends TrackBase {
 
         this.config.sort =
             {
-                doSort: sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection),
+                doSort: sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection, this.buckets, this.bucketedAttribute),
                 option: "ATTRIBUTE",
                 attribute,
                 direction: sortDirection === 1 ? "ASC" : "DESC"
@@ -656,10 +646,6 @@ class SegTrack extends TrackBase {
         }
     }
 
-    static getBucketMarginHeight(buckets) {
-        return buckets && buckets.size > 0 ? SegTrack.BUCKET_MARGIN_HEIGHT : 0
-    }
-
     /**
      * Calculate the position and bounds for a feature
      * @param {Object} feature - The feature to calculate position for
@@ -675,7 +661,7 @@ class SegTrack extends TrackBase {
         const sampleKey = feature.sampleKey || feature.sample
         const row = sampleIndexLUT[sampleKey]
 
-        const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(row, bucketStartRows) : 0
+        const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(row, bucketStartRows) : 0
 
         const y = (row * rowHeight) + (bucketMarginCount * bucketMarginHeight) + border
         const bottom = y + rowHeight
@@ -812,13 +798,13 @@ class SegTrack extends TrackBase {
         }
 
         let bucketIndex = 0
-        const bucketKeys = Array.from(this.browser.sampleInfo.buckets.keys())
+        const bucketKeys = Array.from(this.buckets.keys())
 
         const fudge = 4
         for (const key of bucketKeys) {
 
             const bucketStartRow = bucketStartRows[bucketIndex]
-            const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SampleInfo.getBucketMarginCount(bucketStartRow, bucketStartRows) : 0
+            const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(bucketStartRow, bucketStartRows) : 0
             const y = top + (bucketStartRow * rowHeight) + (bucketMarginCount * bucketMarginHeight) + fudge
 
             const attributeGroupLabel = document.createElement('div')
@@ -868,10 +854,34 @@ class SegTrack extends TrackBase {
 
     setTopHelper(viewport, contentTop) {
         if (this.groupBy && viewport.doRenderBucketLabels) {
-            const bucketStartRows = this.browser.sampleInfo.getBucketStartRows()
-            const bucketMarginHeight = SegTrack.getBucketMarginHeight(this.browser.sampleInfo.buckets)
+            const bucketStartRows = this.getBucketStartRows()
+            const bucketMarginHeight = this.getBucketMarginHeight()
             this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
         }
+    }
+
+    getBucketStartRows() {
+        let bucketStartRows = [];
+        if (this.buckets) {
+            let row = 0;
+            for (let [bucketName, samplesArr] of this.buckets) {
+                bucketStartRows.push(row);
+                row += samplesArr.length;
+            }
+        }
+        return bucketStartRows;
+    }
+
+    getBucketMarginHeight() {
+        return this.buckets && this.buckets.size > 0 ? SegTrack.BUCKET_MARGIN_HEIGHT : 0
+    }
+
+    static getBucketMarginCount(rowIndex, bucketStartRows) {
+        let count = 0;
+        for (let i = 1; i < bucketStartRows.length; i++) {
+            if (rowIndex >= bucketStartRows[i]) count++;
+        }
+        return count;
     }
 
 }
