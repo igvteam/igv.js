@@ -791,26 +791,41 @@ class SegTrack extends TrackBase {
 
     renderBucketLabels(viewport, rowHeight, bucketMarginHeight, bucketStartRows, top) {
 
-        // discard all pre-existing bucket labels`
+        // discard all pre-existing bucket labels and lines
         const bucketLabels = viewport.viewportElement.querySelectorAll('.igv-attribute-group-label')
         for (const label of bucketLabels) {
             label.remove()
+        }
+        const bucketLines = viewport.viewportElement.querySelectorAll('.igv-attribute-group-line')
+        for (const line of bucketLines) {
+            line.remove()
         }
 
         let bucketIndex = 0
         const bucketKeys = Array.from(this.buckets.keys())
 
         const fudge = 4
+        const lineOffset = bucketMarginHeight/2  // Offset above the label text
         for (const key of bucketKeys) {
 
             const bucketStartRow = bucketStartRows[bucketIndex]
             const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(bucketStartRow, bucketStartRows) : 0
-            const y = top + (bucketStartRow * rowHeight) + (bucketMarginCount * bucketMarginHeight) + fudge
+            const y = top + (bucketStartRow * rowHeight) + (bucketMarginCount * bucketMarginHeight)
 
+            // Create horizontal line above the label (skip for first group)
+            if (bucketIndex > 0) {
+                const horizontalLine = document.createElement('div')
+                viewport.viewportElement.appendChild(horizontalLine)
+                horizontalLine.className = 'igv-attribute-group-line'
+                horizontalLine.style.top = `${y - lineOffset}px`
+                horizontalLine.style.display = 'block'
+            }
+
+            // Create the label
             const attributeGroupLabel = document.createElement('div')
             viewport.viewportElement.appendChild(attributeGroupLabel)
             attributeGroupLabel.className = 'igv-attribute-group-label'
-            attributeGroupLabel.style.top = `${y}px`
+            attributeGroupLabel.style.top = `${y + fudge}px`
             attributeGroupLabel.textContent = key
             attributeGroupLabel.style.display = 'block'
 
