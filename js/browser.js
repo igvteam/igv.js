@@ -643,7 +643,10 @@ class Browser {
 
         const locusFound = await this.search(locus, true)
         if (!locusFound) {
-            throw new Error(`Cannot set initial locus ${locus}`)
+            console.error(`Cannot set initial locus ${locus}`)
+            if(locus !== genome.initialLocus) {
+                await this.search(genome.initialLocus)
+            }
         }
 
         if (genomeChange) {
