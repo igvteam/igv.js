@@ -182,9 +182,9 @@ class SampleInfo {
         return sortDirection === -1 ? [...numbers, ...strings] : [...strings, ...numbers]
     }
 
-    getSortedSampleKeysByComparator(sampleKeys, comparator, buckets, bucketedAttribute) {
+    getSortedSampleKeysByComparator(sampleKeys, comparator, buckets) {
 
-        if (bucketedAttribute && buckets.size > 1) {
+        if (buckets.size > 1) {
             const result = []
             for (const bucketKeys of buckets.values()) {
                 result.push(...this.#sortSampleKeysWithComparator(bucketKeys, comparator))
@@ -196,10 +196,10 @@ class SampleInfo {
 
     }
 
-    getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection, buckets, bucketedAttribute) {
+    getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection, buckets) {
         sortDirection = sortDirection || 1
 
-        if (bucketedAttribute && bucketedAttribute !== attribute) {
+        if (buckets.size > 0) {
             const result = []
             // Sort within each bucket
             for (const bucketKeys of buckets.values()) {

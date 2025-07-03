@@ -832,7 +832,7 @@ class VariantTrack extends TrackBase {
             direction: sortDirection === 1 ? "ASC" : "DESC"
         }
 
-        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection, undefined, undefined)
+        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection, undefined)
         this.trackView.repaintViews()
 
     }

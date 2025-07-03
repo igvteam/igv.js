@@ -57,15 +57,6 @@ class TrackViewport extends Viewport {
         // Check if this viewport element meets the criteria for seg or mut track types
         this.doRenderBucketLabels = this.viewportElement.matches('.igv-viewport[data-track-type="seg"], .igv-viewport[data-track-type="mut"]');
 
-        // if (isSegOrMutViewport) {
-        //     this.attributeGroupLabel = document.createElement('div');
-        //     this.viewportElement.appendChild(this.attributeGroupLabel);
-        //     this.attributeGroupLabel.className = 'igv-attribute-group-label';
-        //     this.attributeGroupLabel.style.display = 'none';
-        //     this.attributeGroupLabel.textContent = 'Attribute Group';
-        // }
-
-
         this.stopSpinner()
         this.addMouseHandlers()
 
