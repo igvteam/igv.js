@@ -477,7 +477,7 @@ class SegTrack extends TrackBase {
         const scores = await this.computeRegionScores({chr, start, end}, featureList)
 
         this.config.sort = { ...sort }
-        this.config.sort.doSort = sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByComparator(sampleKeys, createValueComparator(scores, direction), this.buckets, this.bucketedAttribute)
+        this.config.sort.doSort = sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByComparator(sampleKeys, createValueComparator(scores, direction), this.buckets)
 
         this.trackView.repaintViews()
     }
@@ -539,7 +539,7 @@ class SegTrack extends TrackBase {
 
         this.config.sort =
             {
-                doSort: sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection, this.buckets, this.bucketedAttribute),
+                doSort: sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection, this.buckets),
                 option: "ATTRIBUTE",
                 attribute,
                 direction: sortDirection === 1 ? "ASC" : "DESC"
