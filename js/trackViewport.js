@@ -527,7 +527,6 @@ class TrackViewport extends Viewport {
 
     }
 
-
     renderSVGContext(context, {deltaX, deltaY}, includeLabel = true) {
 
         if (false === this.didPresentZoomInNotice()) {
@@ -546,23 +545,42 @@ class TrackViewport extends Viewport {
 
             const {start, bpPerPixel} = this.referenceFrame
             const pixelXOffset = Math.round((start - this.referenceFrame.start) / bpPerPixel)
+            // const config =
+            //     {
+            //         context,
+            //         viewport: this,
+            //         referenceFrame: this.referenceFrame,
+            //         top: yClipOffset,
+            //         pixelTop: yClipOffset,
+            //         pixelWidth: width,
+            //         pixelHeight: height,
+            //         pixelXOffset,
+            //         pixelShift: pixelXOffset,
+            //         bpStart: start,
+            //         bpEnd: start + (width * bpPerPixel),
+            //         bpPerPixel,
+            //         viewportWidth: width,
+            //         selection: this.selection
+            //     }
+
+
             const config =
                 {
                     context,
-                    viewport: this,
-                    referenceFrame: this.referenceFrame,
-                    top: yClipOffset,
-                    pixelTop: yClipOffset,
+                    contentTop: this.contentTop,
+                    pixelXOffset,
                     pixelWidth: width,
                     pixelHeight: height,
-                    pixelXOffset,
-                    pixelShift: pixelXOffset,
+                    pixelTop: yClipOffset,
                     bpStart: start,
                     bpEnd: start + (width * bpPerPixel),
                     bpPerPixel,
-                    viewportWidth: width,
-                    selection: this.selection
-                }
+                    pixelShift: pixelXOffset,              // Initial value, changes with track pan (drag)
+                    referenceFrame: this.referenceFrame,
+                    selection: this.selection,
+                    viewport: this,
+                    viewportWidth: this.viewportElement.clientWidth
+                };
 
             const features = this.featureCache ? this.featureCache.features : undefined
             const roiFeatures = this.featureCache ? this.featureCache.roiFeatures : undefined
@@ -570,7 +588,6 @@ class TrackViewport extends Viewport {
 
             context.restore()
         }
-
 
         if (includeLabel && this.trackLabelElement && this.browser.doShowTrackLabels) {
             const {x: x_p, y: y_p, width: width_p, height: height_p} = this.viewportElement.getBoundingClientRect();
@@ -581,13 +598,34 @@ class TrackViewport extends Viewport {
             const height = height_c;
             this.renderTrackLabelSVG(context, deltaX + x, deltaY + y, width, height);
         }
+
+        // if (true === this.doRenderBucketLabels){
+        //     this.renderAttributeGroupElements(context)
+        // }
     }
 
-    // render track label element called from renderSVGContext()
     renderTrackLabelSVG(context, tx, ty, width, height) {
 
         const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
         const id = `${str}_track_label_guid_${DOMUtils.guid()}`
+
+        const text = this.trackLabelElement.textContent
+        const {width: stringWidth} = context.measureText(text)
+
+        const dx = 0.25 * (width - stringWidth);
+        const dy = 0.7 * (height - 12);
+
+        this.renderElementSVG(context, id, tx, ty, width, height, text, dx, dy)
+    }
+
+    renderAttributeGroupElements(context, tx, ty, width, height){
+        const bucketLabels = this.viewportElement.querySelectorAll('.igv-attribute-group-label')
+        const bucketLines = this.viewportElement.querySelectorAll('.igv-attribute-group-line')
+        console.log(`viewport ${ this.guid } renderAttributeGroupElements. labels ${ bucketLabels.length } lines ${ bucketLines.length }`)
+    }
+
+    // render track label element called from renderSVGContext()
+    renderElementSVG(context, id, tx, ty, width, height, text, dx, dy) {
 
         context.saveWithTranslationAndClipRect(id, tx, ty, width, height, 0)
 
@@ -597,10 +635,7 @@ class TrackViewport extends Viewport {
         context.font = "12px Arial"
         context.fillStyle = 'rgb(68, 68, 68)'
 
-        const stringWidth = context.measureText(this.trackLabelElement.textContent).width;
-        const dx = 0.25 * (width - stringWidth);
-        const dy = 0.7 * (height - 12);
-        context.fillText(this.trackLabelElement.textContent, dx, height - dy);
+        context.fillText(text, dx, height - dy);
 
         context.strokeStyle = 'rgb(68, 68, 68)'
         context.strokeRect(0, 0, width, height)
