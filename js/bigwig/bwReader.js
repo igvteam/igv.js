@@ -264,7 +264,7 @@ class BWReader {
                     return false
                 })
                 if (matching.length > 0) {
-                    return matching.reduce((l, f) => (l.end - l.start) > (f.end - f.start) ? l : f, features[0])
+                    return matching.reduce((l, f) => (l.end - l.start) > (f.end - f.start) ? l : f, matching[0])
                 } else {
                     return undefined
                 }
