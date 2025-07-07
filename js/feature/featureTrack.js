@@ -195,7 +195,11 @@ class FeatureTrack extends TrackBase {
         // If drawing amino acids fetch cached sequence interval.  It is not needed if track does not support AA, but
         // costs nothing since only a reference to a cached object is fetched.
         if (bpPerPixel < aminoAcidSequenceRenderThreshold) {
-            options.sequenceInterval = this.browser.genome.getSequenceInterval(referenceFrame.chr, bpStart, bpEnd)
+            // Restrict the range requested to the limits: 1-chromosome.bpLength
+            const chromosome = this.browser.genome.getChromosome(referenceFrame.chr)
+            const chromosomeEnd = chromosome.bpLength
+            options.sequenceInterval = this.browser.genome.getSequenceInterval(referenceFrame.chr,
+                bpStart > 0 ? bpStart : 0, bpEnd > chromosomeEnd ? chromosomeEnd : bpEnd)
         }
 
 
