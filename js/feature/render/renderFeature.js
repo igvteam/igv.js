@@ -215,7 +215,7 @@ function renderAminoAcidSequence(ctx, strand, leftExon, exon, riteExon, bpStart,
         let aaLetter
         if (undefined === aminoAcidLetter) {
 
-            if(sequenceInterval.hasSequence(start, end)) {
+            if (sequenceInterval.hasSequence(start, end)) {
 
                 const sequence = sequenceInterval.getSequence(start, end)
                 if (sequence && 3 === sequence.length) {
@@ -351,7 +351,8 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
     try {
         ctx.save()
 
-        let name = feature.name
+        const labelField = this.config.labelField ? this.config.labelField : 'name'
+        let name = feature[labelField]
         if (name === undefined && feature.gene) name = feature.gene.name
         if (name === undefined) name = feature.id || feature.ID
         if (!name || name === '.') return
@@ -384,20 +385,13 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         if (options.labelAllFeatures || xleft > lastLabelX || selected) {
             options.rowLastLabelX[feature.row] = xright
 
-            if ('y' === options.axis) {
-                // TODO -- is this ever used?
-                ctx.save()
-                IGVGraphics.labelTransformWithContext(ctx, centerX)
-                IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
-                ctx.restore()
-            } else {
-                ctx.clearRect(
-                    centerX - textMetrics.width / 2 - 1,
-                    labelY - textMetrics.actualBoundingBoxAscent - 1,
-                    textMetrics.width + 2,
-                    textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent + 2)
-                IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
-            }
+            ctx.clearRect(
+                centerX - textMetrics.width / 2 - 1,
+                labelY - textMetrics.actualBoundingBoxAscent - 1,
+                textMetrics.width + 2,
+                textMetrics.actualBoundingBoxAscent + textMetrics.actualBoundingBoxDescent + 2)
+            IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform)
+
         }
 
     } finally {

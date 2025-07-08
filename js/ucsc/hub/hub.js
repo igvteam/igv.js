@@ -324,7 +324,6 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
         if (t.hasProperty("searchTrix")) {
             config.trixURL = t.getProperty("searchTrix")
         }
-
         if (t.hasProperty("group")) {
             config._group = t.getProperty("group")
             if (this.groupPriorityMap && this.groupPriorityMap.has(config._group)) {
@@ -332,6 +331,12 @@ isPcr dynablat-01.soe.ucsc.edu 4040 dynamic GCF/000/186/305/GCF_000186305.1
                 config.order = nextPriority
                 this.groupPriorityMap.set(config._group, nextPriority)
             }
+        }
+        const labelFields = t.hasProperty("defaultLabelFields") ?
+            t.getProperty("defaultLabelFields") :
+            t.getProperty("labelFields")
+        if (labelFields) {
+            config.labelField = labelFields.split(",")[0];
         }
 
         return config
