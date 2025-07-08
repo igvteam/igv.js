@@ -179,9 +179,12 @@ class ROIMenu {
                             {
                                 callback: (threshold, op) => {
                                     const {chr, start, end} = feature
-                                    this.browser.navbar.clearFiltersButton.setTableRowContent(`seg#Copy number: Value ${ '>' === op ? 'greater than' : 'less than' } ${threshold} in region ${chr}:${start}-${end}`)
+                                    const filterDescription = `Copy number: Value ${ '>' === op ? 'greater than' : 'less than' } ${threshold} in region ${chr}:${start}-${end}`
+                                    this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'seg')
                                     this.browser.navbar.clearFiltersButton.setVisibility(true)
-                                    Promise.all(st.map(track => track.setSampleFilter({ type: "VALUE", op, value: threshold, chr, start, end })))
+                                    Promise.all(st.map(track => {
+                                        track.setSampleFilter({ type: "VALUE", op, value: threshold, chr, start, end })
+                                    }))
                                 }
                             }
                         this.roiSEGFilterDialog.present(config, event)
@@ -205,7 +208,8 @@ class ROIMenu {
                                 callback: (selected, op) => {
                                     const {chr, start, end} = feature
                                     const cooked = selected.join(', ')
-                                    this.browser.navbar.clearFiltersButton.setTableRowContent(`mut#Mutations: that ${ op === 'HAS' ? 'have' : 'do not have' } ${ cooked } in region ${chr}:${start}-${end}`)
+                                    const filterDescription = `Mutations: that ${ op === 'HAS' ? 'have' : 'do not have' } ${ cooked } in region ${chr}:${start}-${end}`
+                                    this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'mut')
                                     this.browser.navbar.clearFiltersButton.setVisibility(true)
                                     Promise.all(mt.map(track => track.setSampleFilter({ type: "MUTATION_TYPE", op, value: selected, chr, start, end })))
                                 }

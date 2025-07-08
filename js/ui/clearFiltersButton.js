@@ -42,14 +42,15 @@ class ClearFiltersButton extends NavbarButton {
             this.setState(false)
         })
 
-
-        this.tableRowContent = new Map()
+        // Map of track types to their filter specifications
+        // Each track type can have multiple filters
+        this.trackFilters = new Map()
 
         // Add list to track checked checkboxes
         this.checkedCheckboxes = []
 
         const mouseClickHandler = () => {
-            this.presentTable(this.tableRowContent)
+            this.presentTable(this.trackFilters)
         }
 
         this.boundMouseClickHandler = mouseClickHandler.bind(this)
@@ -58,12 +59,21 @@ class ClearFiltersButton extends NavbarButton {
         this.setVisibility(false)
     }
 
-    setTableRowContent(string) {
-        const [ key, value ] = string.split('#')
-        this.tableRowContent.set(key, value)
+    /**
+     * Set the filter content for a track type. Filters are accumulated by track type.
+     * @param {string} filterDescription - Description of the filter being added
+     * @param {string} trackType - The track type (e.g., 'seg', 'mut', 'maf')
+     */
+    setTableRowContent(filterDescription, trackType) {
+        if (!this.trackFilters.has(trackType)) {
+            this.trackFilters.set(trackType, [])
+        }
+        
+        // Add the new filter description to the list for this track type
+        this.trackFilters.get(trackType).push(filterDescription)
     }
 
-    presentTable(tableRowContent) {
+    presentTable(trackFilters) {
 
         const existingPanel = document.querySelector('.igv-clear-filters__container')
         if (existingPanel) {
@@ -79,42 +89,79 @@ class ClearFiltersButton extends NavbarButton {
         panel.style.transform = 'translate(-50%, -50%)'
         panel.style.zIndex = '1000'
 
-        for (const [key, value] of tableRowContent) {
-            const row = document.createElement('div')
-            row.className = 'igv-clear-filters__row'
-            panel.appendChild(row)
+        for (const [trackType, filterDescriptions] of trackFilters) {
+            // Create a container for this track type's filters
+            const trackContainer = document.createElement('div')
+            trackContainer.className = 'igv-clear-filters__track-container'
+            panel.appendChild(trackContainer)
 
-            const checkbox = document.createElement('input')
-            row.appendChild(checkbox)
-            checkbox.type = 'checkbox'
-            checkbox.className = 'igv-clear-filters__checkbox'
-            checkbox.dataset.key = 'trackType'
-            checkbox.dataset.value = key
+            // Add track type header
+            const trackHeader = document.createElement('div')
+            trackHeader.className = 'igv-clear-filters__track-header'
+            trackContainer.appendChild(trackHeader)
 
-            // Add event handler to checkbox
-            checkbox.addEventListener('change', (event) => {
-                // console.log('Checkbox changed:', {
-                //     checked: event.target.checked,
-                //     value: event.target.dataset.value,
-                //     element: event.target
-                // })
+            const trackCheckbox = document.createElement('input')
+            trackHeader.appendChild(trackCheckbox)
+            trackCheckbox.type = 'checkbox'
+            trackCheckbox.className = 'igv-clear-filters__checkbox'
+            trackCheckbox.dataset.trackType = trackType
 
-                // Track checked checkboxes
-                if (event.target.checked) {
-                    this.checkedCheckboxes.push(event.target)
-                } else {
-                    const index = this.checkedCheckboxes.indexOf(event.target)
-                    if (index > -1) {
-                        this.checkedCheckboxes.splice(index, 1)
+            // Add event handler to track type checkbox
+            trackCheckbox.addEventListener('change', (event) => {
+                const isChecked = event.target.checked
+                const filterCheckboxes = trackContainer.querySelectorAll('.igv-clear-filters__filter-checkbox')
+                
+                // Check/uncheck all filter checkboxes for this track type
+                filterCheckboxes.forEach(checkbox => {
+                    checkbox.checked = isChecked
+                    if (isChecked) {
+                        if (!this.checkedCheckboxes.includes(checkbox)) {
+                            this.checkedCheckboxes.push(checkbox)
+                        }
+                    } else {
+                        const index = this.checkedCheckboxes.indexOf(checkbox)
+                        if (index > -1) {
+                            this.checkedCheckboxes.splice(index, 1)
+                        }
                     }
-                }
+                })
             })
 
-            const content = document.createElement('div')
-            row.appendChild(content)
-            content.className = 'igv-clear-filters__content'
-            content.textContent = value
+            const trackName = document.createElement('span')
+            trackHeader.appendChild(trackName)
+            trackName.className = 'igv-clear-filters__track-name'
+            trackName.textContent = this.getTrackTypeDisplayName(trackType)
 
+            // Add individual filter rows
+            filterDescriptions.forEach((description, index) => {
+                const row = document.createElement('div')
+                row.className = 'igv-clear-filters__row'
+                trackContainer.appendChild(row)
+
+                const checkbox = document.createElement('input')
+                row.appendChild(checkbox)
+                checkbox.type = 'checkbox'
+                checkbox.className = 'igv-clear-filters__filter-checkbox'
+                checkbox.dataset.trackType = trackType
+                checkbox.dataset.filterIndex = index
+
+                // Add event handler to filter checkbox
+                checkbox.addEventListener('change', (event) => {
+                    if (event.target.checked) {
+                        this.checkedCheckboxes.push(event.target)
+                    } else {
+                        const index = this.checkedCheckboxes.indexOf(event.target)
+                        if (index > -1) {
+                            this.checkedCheckboxes.splice(index, 1)
+                        }
+                    }
+                })
+
+                const content = document.createElement('div')
+                row.appendChild(content)
+                content.className = 'igv-clear-filters__content'
+                content.innerHTML = description
+            })
         }
 
         // Add button container
@@ -126,22 +173,50 @@ class ClearFiltersButton extends NavbarButton {
         const applyButton = document.createElement('button')
         buttonContainer.appendChild(applyButton)
         applyButton.className = 'igv-clear-filters__button'
-        applyButton.textContent = 'Remove filters'
+        applyButton.textContent = 'Remove selected filters'
         applyButton.addEventListener('click', async () => {
-
-            const trackTypes = Array.from(this.checkedCheckboxes).map(({ dataset }) => dataset.value)
-            for (const type of trackTypes) {
-                const track = this.browser.findTracks("type", type)
-                if (track.length > 0) {
-                    await Promise.all(track.map(track => track.setSampleFilter(undefined)))
+            // Group checked checkboxes by track type
+            const trackTypeFilterMap = new Map()
+            
+            for (const checkbox of this.checkedCheckboxes) {
+                const trackType = checkbox.dataset.trackType
+                if (!trackTypeFilterMap.has(trackType)) {
+                    trackTypeFilterMap.set(trackType, [])
                 }
+                trackTypeFilterMap.get(trackType).push(parseInt(checkbox.dataset.filterIndex))
             }
 
-            // Remove checked checkboxes and their corresponding tableRowContent entries
-            for (const checkbox of this.checkedCheckboxes) {
-                const parent = checkbox.parentElement
-                parent.remove()
-                this.tableRowContent.delete(checkbox.dataset.value)
+            // Remove filters from each track type
+            for (const [trackType, filterDescriptions] of trackFilters) {
+                const filterIndicesToRemove = trackTypeFilterMap.get(trackType)
+                
+                if (filterIndicesToRemove && filterIndicesToRemove.length > 0) {
+                    // Find all tracks of this type
+                    const tracks = this.browser.findTracks("type", trackType)
+                    
+                    if (tracks.length > 0) {
+                        // Remove filters by index from all tracks of this type
+                        const sortedIndices = filterIndicesToRemove.sort((a, b) => b - a)
+                        
+                        for (const track of tracks) {
+                            for (const index of sortedIndices) {
+                                await track.removeFilter(index)
+                            }
+                        }
+                        
+                        // Update the track type's filter descriptions in our map
+                        const remainingFilters = tracks[0].getFilters() // Use first track as reference
+                        if (remainingFilters.length > 0) {
+                            const remainingDescriptions = remainingFilters.map(filter => {
+                                const trackTypeDisplay = this.getTrackTypeDisplayName(trackType)
+                                return `${trackTypeDisplay}: ${filter.type.charAt(0)}${filter.type.slice(1).toLowerCase()} ${filter.op} ${filter.value} in region ${filter.chr}:${filter.start}-${filter.end}`
+                            })
+                            this.trackFilters.set(trackType, remainingDescriptions)
+                        } else {
+                            this.trackFilters.delete(trackType)
+                        }
+                    }
+                }
             }
 
             // Clear the checked checkboxes array
@@ -149,7 +224,7 @@ class ClearFiltersButton extends NavbarButton {
 
             panel.remove()
 
-            if (this.tableRowContent.size === 0) {
+            if (this.trackFilters.size === 0) {
                 this.setVisibility(false)
             }
         })
@@ -162,7 +237,26 @@ class ClearFiltersButton extends NavbarButton {
         cancelButton.addEventListener('click', () => {
             panel.remove()
         })
+    }
 
+    /**
+     * Get a display name for a track type
+     * @param {string} trackType - The track type
+     * @returns {string} - Display name for the track type
+     */
+    getTrackTypeDisplayName(trackType) {
+        switch (trackType) {
+            case 'seg':
+                return 'Copy Number'
+            case 'mut':
+                return 'Mutation'
+            case 'maf':
+                return 'Mutation'
+            case 'shoebox':
+                return 'Shoebox'
+            default:
+                return trackType.charAt(0).toUpperCase() + trackType.slice(1)
+        }
     }
 
 }
