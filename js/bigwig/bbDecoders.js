@@ -1,7 +1,7 @@
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
-
+//biggenepred
     if ("biginteract" === format || (autoSql && ('chromatinInteract' === autoSql.table || 'interact' === autoSql.table))) {
         return decodeInteract
     } else {
@@ -48,9 +48,20 @@ function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
                 const extraStart = definedFieldCount
                 for (let i = extraStart; i < fieldCount; i++) {
                     if (i < autoSql.fields.length) {
+
                         const name = autoSql.fields[i].name
-                        const value = tokens[i - 3]
-                        feature[name] = value
+
+                        if (name === "exonFrames") {
+                            const frameOffsets = tokens[i - 3].replace(/,$/, '').split(',')
+                            for (let i = 0; i < feature.exons.length; i++) {
+                                const exon = feature.exons[i]
+                                const fo = parseInt(frameOffsets[i])
+                                if (fo != -1) exon.readingFrame = fo
+                            }
+                        } else {
+                            const value = tokens[i - 3]
+                            feature[name] = value
+                        }
                     }
                 }
             }
@@ -96,6 +107,7 @@ function getDecoder(definedFieldCount, fieldCount, autoSql, format) {
 
         return feature
     }
+
 }
 
 function findUTRs(exons, cdStart, cdEnd) {
