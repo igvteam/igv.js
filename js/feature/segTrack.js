@@ -11,10 +11,6 @@ import ShoeboxSource from "../hic/shoeboxSource.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
 
-
-/**
- * Track for segmented copy number, mut, maf and shoebox files.
- */
 class SegTrack extends TrackBase {
 
     static defaults =
@@ -128,17 +124,29 @@ class SegTrack extends TrackBase {
         this._initialColor = this.color || this.constructor.defaultColor
         this._initialAltColor = this.altColor || this.constructor.defaultColor
 
-        if (this.config.filterObject){
+        // Handle both old single filterObject and new filterObjects array for backward compatibility
+        if (this.config.filterObjects){
+            await this.setSampleFilter(this.config.filterObjects)
+        } else if (this.config.filterObject) {
+            // Backward compatibility: convert single filterObject to array
             await this.setSampleFilter(this.config.filterObject)
-            this.browser.navbar.clearFiltersButton.setTableRowContent(this.parseFilterObject(this.config.filterObject))
-            this.browser.navbar.clearFiltersButton.setVisibility(true)
         }
     }
 
-    parseFilterObject(filterObject) {
-        let { type, op, value, chr, start, end } = filterObject
-        return `seg#Copy number: ${ type.charAt(0) }${ type.slice(1).toLowerCase() } ${ op } ${ value } in region ${chr}:${start}-${end}`
-
+    parseFilterObjects(filterObjects) {
+        if (!filterObjects || filterObjects.length === 0) {
+            return "No filters applied"
+        }
+        
+        let items = []
+        for (let filterObject of filterObjects) {
+            let { type, op, value, chr, start, end } = filterObject
+            const trackType = this.type === 'seg' ? 'Copy number' : 
+                             this.type === 'mut' ? 'Mutation count' : 
+                             this.type === 'shoebox' ? 'Shoebox value' : 'Value'
+            items.push(`${trackType}: ${ type.charAt(0) }${ type.slice(1).toLowerCase() } ${ op } ${ value } in region ${chr}:${start}-${end}`)
+        }
+        return items.join('<br/>')
     }
 
     get sampleKeys() {
@@ -271,61 +279,170 @@ class SegTrack extends TrackBase {
     }
 
     /**
-     * Set the sample filter object.  This is used to filter samples from the set based on values over a specified
-     * genomic region.   The values compared depend on the track data type:
+     * Set the sample filter objects.  This is used to filter samples from the set based on values over specified
+     * genomic regions.   The values compared depend on the track data type:
      *   - "seg" and "shoebox" -- average value over the region
      *   - "mut" and "maf" -- count of features overlapping the region
      *
+     * Multiple filters work in a pipeline fashion - each filter's output becomes the input for the next filter.
      * The method is asynchronous because it may need to fetch data from the server to compute the scores.
      * Computed scores are stored and used to filter the sample keys on demand.
      *
-     * @param filterObject
+     * @param filterObjects - Single filter object or array of filter objects
      * @returns {Promise<void>}
      */
-    async setSampleFilter(filterObject) {
-        if (!filterObject) {
-            this.config.filterObject = undefined
-            this.filterObject = undefined
+    async setSampleFilter(filterObjects) {
+        if (!filterObjects) {
+            this.config.filterObjects = undefined
+            this.filterObjects = undefined
             this.trackView.repaintViews()
         } else {
-            const filterObjectCopy = Object.assign({}, filterObject)
-            this.config.filterObject = filterObjectCopy
-
-            filterObject.scores = await this.computeRegionScores(filterObject)
-            this.filterObject = filterObject
+            // Normalize to array
+            const filterObjectsArray = Array.isArray(filterObjects) ? filterObjects : [filterObjects]
+            
+            // Accumulate with existing filters (pipeline behavior)
+            const existingFilters = this.filterObjects || []
+            const allFilters = [...existingFilters, ...filterObjectsArray]
+            
+            // Store copy in config
+            this.config.filterObjects = allFilters.map(obj => Object.assign({}, obj))
+            
+            // Compute scores for new filters only (existing ones already have scores)
+            const newFilterPromises = filterObjectsArray.map(filterObject => 
+                this.computeRegionScores(filterObject)
+            )
+            const newScores = await Promise.all(newFilterPromises)
+            
+            // Assign scores back to new filter objects
+            filterObjectsArray.forEach((filterObject, index) => {
+                filterObject.scores = newScores[index]
+            })
+            
+            this.filterObjects = allFilters
             this.trackView.checkContentHeight()
             this.trackView.repaintViews()
         }
-        // TODO - store filter object in session
+        // TODO - store filter objects in session
     }
 
     /**
-     * Filter function for sample keys.
+     * Filter function for sample keys. Applies multiple filters in pipeline fashion.
+     * Each filter must pass for a sample to be included.
      *
      * @param sampleKey
      * @returns {boolean}
      */
     filter(sampleKey) {
-        if (this.filterObject) {
-            const filterObject = this.filterObject
+        if (!this.filterObjects || this.filterObjects.length === 0) {
+            return true
+        }
+        
+        // Apply each filter in sequence - all must pass
+        for (const filterObject of this.filterObjects) {
             const scores = filterObject.scores
             const score = scores[sampleKey]
 
             if (this.type === 'seg') {
                 if (filterObject.op === '>') {
-                    return score > filterObject.value
+                    if (!(score > filterObject.value)) return false
                 } else if (filterObject.op === '<') {
-                    return score < filterObject.value
+                    if (!(score < filterObject.value)) return false
                 }
             } else if (this.type === 'mut' || this.type === 'maf') {
-                return 'HAS' === filterObject.op ? score : !score
+                const hasMutations = 'HAS' === filterObject.op ? score : !score
+                if (!hasMutations) return false
             }
         }
+        
         return true
     }
 
     get filteredSampleKeys() {
         return this.sampleKeys.filter(key => this.filter(key))
+    }
+
+    /**
+     * Remove a filter from the pipeline by index
+     * @param {number} index - Index of the filter to remove
+     * @returns {Promise<void>}
+     */
+    async removeFilter(index) {
+        if (!this.filterObjects || index < 0 || index >= this.filterObjects.length) {
+            return
+        }
+        
+        const newFilters = this.filterObjects.filter((_, i) => i !== index)
+        await this.replaceFilters(newFilters.length > 0 ? newFilters : null)
+    }
+
+    /**
+     * Replace all filters with a new set (does not accumulate)
+     * @param {Array|null} filterObjects - New filter objects or null to clear all
+     * @returns {Promise<void>}
+     */
+    async replaceFilters(filterObjects) {
+        if (!filterObjects) {
+            this.config.filterObjects = undefined
+            this.filterObjects = undefined
+            this.trackView.repaintViews()
+        } else {
+            // Normalize to array
+            const filterObjectsArray = Array.isArray(filterObjects) ? filterObjects : [filterObjects]
+            
+            // Store copy in config
+            this.config.filterObjects = filterObjectsArray.map(obj => Object.assign({}, obj))
+            
+            // Compute scores for all filters in parallel
+            const scorePromises = filterObjectsArray.map(filterObject => 
+                this.computeRegionScores(filterObject)
+            )
+            const scores = await Promise.all(scorePromises)
+            
+            // Assign scores back to filter objects
+            filterObjectsArray.forEach((filterObject, index) => {
+                filterObject.scores = scores[index]
+            })
+            
+            this.filterObjects = filterObjectsArray
+            this.trackView.checkContentHeight()
+            this.trackView.repaintViews()
+        }
+    }
+
+    /**
+     * Clear all filters
+     * @returns {Promise<void>}
+     */
+    async clearFilters() {
+        await this.replaceFilters(null)
+    }
+
+    /**
+     * Get the current number of active filters
+     * @returns {number}
+     */
+    get filterCount() {
+        return this.filterObjects ? this.filterObjects.length : 0
+    }
+
+    /**
+     * Get a specific filter by index
+     * @param {number} index - Index of the filter to get
+     * @returns {Object|null} - The filter object or null if not found
+     */
+    getFilter(index) {
+        if (!this.filterObjects || index < 0 || index >= this.filterObjects.length) {
+            return null
+        }
+        return this.filterObjects[index]
+    }
+
+    /**
+     * Get all current filters
+     * @returns {Array} - Array of filter objects
+     */
+    getFilters() {
+        return this.filterObjects ? [...this.filterObjects] : []
     }
 
     async getFeatures(chr, start, end) {
