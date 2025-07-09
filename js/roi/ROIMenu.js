@@ -182,9 +182,10 @@ class ROIMenu {
                                     const filterDescription = `Copy number: Value ${ '>' === op ? 'greater than' : 'less than' } ${threshold} in region ${chr}:${start}-${end}`
                                     this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'seg')
                                     this.browser.navbar.clearFiltersButton.setVisibility(true)
-                                    Promise.all(st.map(track => {
-                                        track.setSampleFilter({ type: "VALUE", op, value: threshold, chr, start, end })
-                                    }))
+                                    
+                                    // Apply filter to all seg tracks via browser
+                                    const filterConfig = { type: "VALUE", op, value: threshold, chr, start, end }
+                                    this.browser.applyFilterToTrackType('seg', filterConfig)
                                 }
                             }
                         this.roiSEGFilterDialog.present(config, event)
@@ -211,7 +212,10 @@ class ROIMenu {
                                     const filterDescription = `Mutations: that ${ op === 'HAS' ? 'have' : 'do not have' } ${ cooked } in region ${chr}:${start}-${end}`
                                     this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'mut')
                                     this.browser.navbar.clearFiltersButton.setVisibility(true)
-                                    Promise.all(mt.map(track => track.setSampleFilter({ type: "MUTATION_TYPE", op, value: selected, chr, start, end })))
+                                    
+                                    // Apply filter to all mut tracks via browser
+                                    const filterConfig = { type: "MUTATION_TYPE", op, value: selected, chr, start, end }
+                                    this.browser.applyFilterToTrackType('mut', filterConfig)
                                 }
                             }
                         this.roiMutFilterDialog.present(config, event)
