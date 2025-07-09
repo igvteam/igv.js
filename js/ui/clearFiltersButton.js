@@ -186,35 +186,26 @@ class ClearFiltersButton extends NavbarButton {
                 trackTypeFilterMap.get(trackType).push(parseInt(checkbox.dataset.filterIndex))
             }
 
-            // Remove filters from each track type
+            // Remove filters from each track type using browser API
             for (const [trackType, filterDescriptions] of trackFilters) {
                 const filterIndicesToRemove = trackTypeFilterMap.get(trackType)
                 
                 if (filterIndicesToRemove && filterIndicesToRemove.length > 0) {
-                    // Find all tracks of this type
-                    const tracks = this.browser.findTracks("type", trackType)
+                    // Remove filters by index from the browser (affects all tracks of this type)
+                    const sortedIndices = filterIndicesToRemove.sort((a, b) => b - a)
                     
-                    if (tracks.length > 0) {
-                        // Remove filters by index from all tracks of this type
-                        const sortedIndices = filterIndicesToRemove.sort((a, b) => b - a)
-                        
-                        for (const track of tracks) {
-                            for (const index of sortedIndices) {
-                                await track.removeFilter(index)
-                            }
-                        }
-                        
-                        // Update the track type's filter descriptions in our map
-                        const remainingFilters = tracks[0].getFilters() // Use first track as reference
-                        if (remainingFilters.length > 0) {
-                            const remainingDescriptions = remainingFilters.map(filter => {
-                                const trackTypeDisplay = this.getTrackTypeDisplayName(trackType)
-                                return `${trackTypeDisplay}: ${filter.type.charAt(0)}${filter.type.slice(1).toLowerCase()} ${filter.op} ${filter.value} in region ${filter.chr}:${filter.start}-${filter.end}`
-                            })
-                            this.trackFilters.set(trackType, remainingDescriptions)
-                        } else {
-                            this.trackFilters.delete(trackType)
-                        }
+                    for (const index of sortedIndices) {
+                        this.browser.removeTrackTypeFilter(trackType, index)
+                    }
+                    
+                    // Remove the corresponding filter descriptions from our map
+                    const currentDescriptions = this.trackFilters.get(trackType) || []
+                    const updatedDescriptions = currentDescriptions.filter((_, index) => !filterIndicesToRemove.includes(index))
+                    
+                    if (updatedDescriptions.length > 0) {
+                        this.trackFilters.set(trackType, updatedDescriptions)
+                    } else {
+                        this.trackFilters.delete(trackType)
                     }
                 }
             }
