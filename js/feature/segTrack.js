@@ -124,13 +124,9 @@ class SegTrack extends TrackBase {
         this._initialColor = this.color || this.constructor.defaultColor
         this._initialAltColor = this.altColor || this.constructor.defaultColor
 
-        // Handle both old single filterObject and new filterObjects array for backward compatibility
-        // if (this.config.filterObjects){
-        //     this.browser.replaceTrackTypeFilters(this.type, this.config.filterObjects)
-        // } else if (this.config.filterObject) {
-        //     // Backward compatibility: convert single filterObject to array
-        //     this.browser.replaceTrackTypeFilters(this.type, [this.config.filterObject])
-        // }
+        if (this.config.filterConfigurations){
+            this._trackFilterObjects = await this.createFilterObjects(this.config.filterConfigurations)
+        }
     }
 
     get sampleKeys() {
@@ -301,6 +297,28 @@ class SegTrack extends TrackBase {
     }
 
     /**
+     * Create filter objects with computed scores from filter specifications.
+     * This method computes scores for each filter and returns the complete filter objects.
+     *
+     * @param filterSpecs - Array of filter specification objects
+     * @returns {Promise<Array>} - Array of filter objects with computed scores
+     */
+    async createFilterObjects(filterSpecs) {
+        const list = filterSpecs.map(filterSpec => { return { ...filterSpec } })
+
+        // Compute scores for all filter objects
+        const promises = list.map(filterSpec => this.computeRegionScores(filterSpec))
+        const scores = await Promise.all(promises)
+
+        // Assign scores back to filter objects
+        list.forEach((filterSpec, index) => {
+            filterSpec.scores = scores[index]
+        })
+
+        return list
+    }
+
+    /**
      * Set the sample filter objects.  This is used to filter samples from the set based on values over specified
      * genomic regions.   The values compared depend on the track data type:
      *   - "seg" and "shoebox" -- average value over the region
@@ -310,25 +328,14 @@ class SegTrack extends TrackBase {
      * The method is asynchronous because it may need to fetch data from the server to compute the scores.
      * Computed scores are stored and used to filter the sample keys on demand.
      *
-     * @param filterObjects - Single filter object or array of filter objects
+     * @param filterSpecs - Single filter object or array of filter objects
      * @returns {Promise<void>}
      */
-    async setSampleFilter(filterObjects) {
-        if (!filterObjects) {
+    async setSampleFilter(filterSpecs) {
+        if (!filterSpecs) {
             this._trackFilterObjects = undefined
         } else {
-            const filterObjectsArray = Array.isArray(filterObjects) ? filterObjects : [filterObjects]
-
-            // Compute scores for all filter objects
-            const scorePromises = filterObjectsArray.map(filterObject => this.computeRegionScores(filterObject))
-            const scores = await Promise.all(scorePromises)
-
-            // Assign scores back to filter objects
-            filterObjectsArray.forEach((filterObject, index) => {
-                filterObject.scores = scores[index]
-            })
-
-            this._trackFilterObjects = filterObjectsArray
+            this._trackFilterObjects = await this.createFilterObjects(filterSpecs)
             this.trackView.checkContentHeight()
         }
 

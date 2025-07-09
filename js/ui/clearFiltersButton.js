@@ -250,6 +250,38 @@ class ClearFiltersButton extends NavbarButton {
         }
     }
 
+    /**
+     * Generate a filter description from a filter configuration
+     * @param {Object} filterConfig - The filter configuration object
+     * @param {string} trackType - The track type
+     * @returns {string} - Human-readable description of the filter
+     */
+    static generateFilterDescription(filterConfig, trackType) {
+        const { type, op, value, chr, start, end } = filterConfig
+        const region = `${chr}:${start}-${end}`
+        
+        switch (trackType) {
+            case 'seg':
+                if (type === 'VALUE') {
+                    const comparison = op === '>' ? 'greater than' : 'less than'
+                    return `Copy number: Value ${comparison} ${value} in region ${region}`
+                }
+                break
+            case 'mut':
+            case 'maf':
+                if (type === 'MUTATION_TYPE') {
+                    const mutationTypes = Array.isArray(value) ? value.join(', ') : value
+                    const hasNot = op === 'HAS' ? 'have' : 'do not have'
+                    return `Mutations: that ${hasNot} ${mutationTypes} in region ${region}`
+                }
+                break
+            default:
+                return `Filter: ${type} ${op} ${value} in region ${region}`
+        }
+        
+        return `Filter: ${type} ${op} ${value} in region ${region}`
+    }
+
 }
 
 export default ClearFiltersButton

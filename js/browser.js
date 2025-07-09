@@ -47,6 +47,7 @@ import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
+import ClearFiltersButton from "./ui/clearFiltersButton.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -517,6 +518,26 @@ class Browser {
             this.qtlSelections = QTLSelections.fromJSON(session.qtlSelections)
         }
 
+        // Filter configurations
+        if (session.filterConfigurations) {
+            this.filterConfigurations.clear()
+            for (const [trackType, filters] of Object.entries(session.filterConfigurations)) {
+
+                // set filter configurations
+                this.filterConfigurations.set(trackType, filters)
+
+                // configure filters widget
+                for (const filter of filters){
+                    const filterDescription = ClearFiltersButton.generateFilterDescription(filter, trackType)
+                    this.navbar.clearFiltersButton.setTableRowContent(filterDescription, trackType)
+                }
+
+                this.navbar.clearFiltersButton.setVisibility(true)
+
+            }
+
+        }
+
         // ROIs
         if (session.showROIOverlays !== undefined) {
             this.roiManager.showOverlays = session.showROIOverlays
@@ -914,6 +935,11 @@ class Browser {
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
         if (typeof track.postInit === 'function') {
+
+            if (this.filterConfigurations.has(track.type)) {
+                track.config.filterConfigurations = this.filterConfigurations.get(track.type)
+            }
+
             try {
                 trackView.startSpinner()
                 await track.postInit()
@@ -1841,6 +1867,15 @@ class Browser {
             json["qtlSelections"] = this.qtlSelections.toJSON()
         }
 
+        // Filter configurations
+        if (this.filterConfigurations.size > 0) {
+            const filterConfigs = {}
+            for (const [trackType, filters] of this.filterConfigurations) {
+                filterConfigs[trackType] = filters
+            }
+            json["filterConfigurations"] = filterConfigs
+        }
+
         // Tracks
         const trackJson = []
         const errors = []
@@ -2176,10 +2211,6 @@ class Browser {
     }
 
     // Navbar delegates
-    get sampleInfoControl() {
-        return this.navbar.sampleInfoControl
-    }
-
     get overlayTrackButton() {
         return this.navbar.overlayTrackButton
     }
@@ -2188,12 +2219,12 @@ class Browser {
         return this.navbar.roiTableControl
     }
 
-    get sampleInfoControl() {
-        return this.navbar.sampleInfoControl
-    }
-
     get sampleNameControl() {
         return this.navbar.sampleNameControl
+    }
+
+    get sampleInfoControl() {
+        return this.navbar.sampleInfoControl
     }
 
     async blat(sequence) {
@@ -2209,29 +2240,10 @@ class Browser {
         const currentFilters = this.filterConfigurations.get(trackType) || []
         const updatedFilters = [...currentFilters, filterConfig]
         this.filterConfigurations.set(trackType, updatedFilters)
-        
+
         // Apply all type-specific filters to each track
         const tracks = this.findTracks("type", trackType)
         tracks.forEach(track => track.setSampleFilter(updatedFilters))
-    }
-
-    /**
-     * Get filter configurations for a specific track type
-     * @param {string} trackType - The track type ('seg', 'mut', etc.)
-     * @returns {Array} - Array of filter configuration objects
-     */
-    getTrackTypeFilters(trackType) {
-        return this.filterConfigurations.get(trackType) || []
-    }
-
-    /**
-     * Clear all filters for a specific track type
-     * @param {string} trackType - The track type ('seg', 'mut', etc.)
-     */
-    clearTrackTypeFilters(trackType) {
-        this.filterConfigurations.delete(trackType)
-        const tracks = this.findTracks("type", trackType)
-        tracks.forEach(track => track.setSampleFilter(undefined))
     }
 
     /**
@@ -2254,18 +2266,13 @@ class Browser {
     }
 
     /**
-     * Replace all filters for a track type with a new set
+     * Clear all filters for a specific track type
      * @param {string} trackType - The track type ('seg', 'mut', etc.)
-     * @param {Array|null} filterConfigs - New filter configurations or null to clear all
      */
-    replaceTrackTypeFilters(trackType, filterConfigs) {
-        if (!filterConfigs) {
-            this.filterConfigurations.delete(trackType)
-        } else {
-            this.filterConfigurations.set(trackType, filterConfigs)
-        }
+    clearTrackTypeFilters(trackType) {
+        this.filterConfigurations.delete(trackType)
         const tracks = this.findTracks("type", trackType)
-        tracks.forEach(track => track.setSampleFilter(filterConfigs))
+        tracks.forEach(track => track.setSampleFilter(undefined))
     }
 }
 
