@@ -5,6 +5,7 @@ import {createBlatTrack} from "../blat/blatTrack.js"
 import ROISEGFilterDialog from "../ui/components/roiSegFilterDialog.js"
 import ROIMutFilterDialog from "../ui/components/roiMutFilterDialog.js"
 import SegTrack from "../feature/segTrack.js"
+import ClearFiltersButton from "../ui/clearFiltersButton.js"
 
 const maxSequenceSize = 1000000
 const maxBlatSize = 25000
@@ -179,13 +180,15 @@ class ROIMenu {
                             {
                                 callback: (threshold, op) => {
                                     const {chr, start, end} = feature
-                                    const filterDescription = `Copy number: Value ${ '>' === op ? 'greater than' : 'less than' } ${threshold} in region ${chr}:${start}-${end}`
-                                    this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'seg')
-                                    this.browser.navbar.clearFiltersButton.setVisibility(true)
                                     
                                     // Apply filter to all seg tracks via browser
                                     const filterConfig = { type: "VALUE", op, value: threshold, chr, start, end }
                                     this.browser.applyFilterToTrackType('seg', filterConfig)
+                                    
+                                    // Generate description and update UI
+                                    const filterDescription = ClearFiltersButton.generateFilterDescription(filterConfig, 'seg')
+                                    this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'seg')
+                                    this.browser.navbar.clearFiltersButton.setVisibility(true)
                                 }
                             }
                         this.roiSEGFilterDialog.present(config, event)
@@ -208,14 +211,15 @@ class ROIMenu {
                             {
                                 callback: (selected, op) => {
                                     const {chr, start, end} = feature
-                                    const cooked = selected.join(', ')
-                                    const filterDescription = `Mutations: that ${ op === 'HAS' ? 'have' : 'do not have' } ${ cooked } in region ${chr}:${start}-${end}`
-                                    this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'mut')
-                                    this.browser.navbar.clearFiltersButton.setVisibility(true)
                                     
                                     // Apply filter to all mut tracks via browser
                                     const filterConfig = { type: "MUTATION_TYPE", op, value: selected, chr, start, end }
                                     this.browser.applyFilterToTrackType('mut', filterConfig)
+                                    
+                                    // Generate description and update UI
+                                    const filterDescription = ClearFiltersButton.generateFilterDescription(filterConfig, 'mut')
+                                    this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'mut')
+                                    this.browser.navbar.clearFiltersButton.setVisibility(true)
                                 }
                             }
                         this.roiMutFilterDialog.present(config, event)
