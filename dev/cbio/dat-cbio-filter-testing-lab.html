@@ -70,21 +70,21 @@
                         "order": -9007199254740991
                     },
                     {
-                        "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBMCopyNumber.seg.gz",
-                        "name": "GBM Copy Number",
-                        "order": 1,
-                        "format": "seg",
-                        "type": "seg",
-                        "height": 640,
+                        name: "Filtered Samples",
+                        type: "seg",
+                        format: "seg",
+                        url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/Broad.080528.subtypes.seg.gz",
+                        "height": 300,
                         "displayMode": "FILL",
-                        "sort": {
-                            "option": "VALUE",
-                            "direction": "DESC",
-                            "chr": "chr7",
-                            "start": 53242017,
-                            "end": 54247221
-                        },
                         "groupBy": "Subtype"
+                    },
+                    {
+                        name: "Somatic Mutations",
+                        type: "mut",
+                        format: "maf",
+                        "height": 300,
+                        "displayMode": "FILL",
+                        url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/TCGA_GBM_Level3_Somatic_Mutations_08.28.2008.maf.gz"
                     },
                     {
                         "name": "Refseq Genes",
@@ -94,7 +94,7 @@
                         "order": 1000001,
                         "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
                         "type": "annotation",
-                        "height": 70
+                        "height": 64
                     }
                 ],
                 "sampleinfo": [

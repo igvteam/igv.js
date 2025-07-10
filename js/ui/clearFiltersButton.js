@@ -68,7 +68,7 @@ class ClearFiltersButton extends NavbarButton {
         if (!this.trackFilters.has(trackType)) {
             this.trackFilters.set(trackType, [])
         }
-        
+
         // Add the new filter description to the list for this track type
         this.trackFilters.get(trackType).push(filterDescription)
     }
@@ -110,7 +110,7 @@ class ClearFiltersButton extends NavbarButton {
             trackCheckbox.addEventListener('change', (event) => {
                 const isChecked = event.target.checked
                 const filterCheckboxes = trackContainer.querySelectorAll('.igv-clear-filters__filter-checkbox')
-                
+
                 // Check/uncheck all filter checkboxes for this track type
                 filterCheckboxes.forEach(checkbox => {
                     checkbox.checked = isChecked
@@ -177,7 +177,7 @@ class ClearFiltersButton extends NavbarButton {
         applyButton.addEventListener('click', async () => {
             // Group checked checkboxes by track type
             const trackTypeFilterMap = new Map()
-            
+
             for (const checkbox of this.checkedCheckboxes) {
                 const trackType = checkbox.dataset.trackType
                 if (!trackTypeFilterMap.has(trackType)) {
@@ -189,19 +189,19 @@ class ClearFiltersButton extends NavbarButton {
             // Remove filters from each track type using browser API
             for (const [trackType, filterDescriptions] of trackFilters) {
                 const filterIndicesToRemove = trackTypeFilterMap.get(trackType)
-                
+
                 if (filterIndicesToRemove && filterIndicesToRemove.length > 0) {
                     // Remove filters by index from the browser (affects all tracks of this type)
                     const sortedIndices = filterIndicesToRemove.sort((a, b) => b - a)
-                    
+
                     for (const index of sortedIndices) {
                         this.browser.removeTrackTypeFilter(trackType, index)
                     }
-                    
+
                     // Remove the corresponding filter descriptions from our map
                     const currentDescriptions = this.trackFilters.get(trackType) || []
                     const updatedDescriptions = currentDescriptions.filter((_, index) => !filterIndicesToRemove.includes(index))
-                    
+
                     if (updatedDescriptions.length > 0) {
                         this.trackFilters.set(trackType, updatedDescriptions)
                     } else {
@@ -243,8 +243,6 @@ class ClearFiltersButton extends NavbarButton {
                 return 'Mutation'
             case 'maf':
                 return 'Mutation'
-            case 'shoebox':
-                return 'Shoebox'
             default:
                 return trackType.charAt(0).toUpperCase() + trackType.slice(1)
         }
@@ -259,7 +257,7 @@ class ClearFiltersButton extends NavbarButton {
     static generateFilterDescription(filterConfig, trackType) {
         const { type, op, value, chr, start, end } = filterConfig
         const region = `${chr}:${start}-${end}`
-        
+
         switch (trackType) {
             case 'seg':
                 if (type === 'VALUE') {
@@ -278,7 +276,7 @@ class ClearFiltersButton extends NavbarButton {
             default:
                 return `Filter: ${type} ${op} ${value} in region ${region}`
         }
-        
+
         return `Filter: ${type} ${op} ${value} in region ${region}`
     }
 

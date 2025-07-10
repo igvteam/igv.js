@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>igv.js</title>
+
+</head>
+
+<body>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    document.addEventListener("DOMContentLoaded", async (event) => {
+        const config =
+            {
+                "version": "3.2.6",
+                "genome": "hg19",
+                "tracks": [
+                    {
+                        "name": "SEG Track",
+                        "type": "seg",
+                        "format": "seg",
+                        "url": "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/Broad.080528.subtypes.seg.gz",
+                        "displayMode": "FILL",
+                        "height": 300,
+                    },
+                    {
+                        "name": "MUT Track",
+                        "type": "mut",
+                        "format": "maf",
+                        "url": "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/TCGA_GBM_Level3_Somatic_Mutations_08.28.2008.maf.gz",
+                        "displayMode": "FILL",
+                        "height": 300,
+                    }
+                ],
+                "sampleinfo": [
+                    {
+                        "name": "Sample Information",
+                        "url": "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/sampleTable.txt.gz"
+                    }
+                ]
+            }
+
+        const browser = igv.createBrowser(document.getElementById("igv-div"), config)
+
+    })
+
+</script>
+
+</body>
+
+</html>
