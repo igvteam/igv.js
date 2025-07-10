@@ -423,6 +423,11 @@ class SegTrack extends TrackBase {
 
             if (this.groupBy && viewport.doRenderBucketLabels) {
                 this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
+            } else {
+                const bucketLabels = viewport.viewportElement.querySelectorAll('.igv-attribute-group-label')
+                for (const label of bucketLabels) {
+                    label.remove()
+                }
             }
 
         }
