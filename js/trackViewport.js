@@ -10,6 +10,7 @@ import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
 import makeDraggable from "./ui/utils/draggable.js"
+import {createIcon} from "./ui/utils/icons.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
@@ -950,7 +951,7 @@ class TrackViewport extends Viewport {
         closeBtn.className = 'igv-track-label-popover__close';
         closeBtn.setAttribute('tabindex', '0');
         closeBtn.setAttribute('aria-label', 'Close');
-        closeBtn.innerHTML = '&times;';
+        closeBtn.appendChild(createIcon('times'));
         closeBtn.addEventListener('click', () => this.removeTrackLabelPopover());
 
         header.appendChild(titleDiv);

@@ -39,16 +39,21 @@ $igv-track-label-popover-content-height: calc(100% - #{$igv-track-label-popover-
   }
 
   &__close {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     color: $igv-trackgear-grey-color;
-    text-align: center;
-    line-height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     border-radius: 2px;
     cursor: pointer;
     transition: background 0.2s, color 0.2s;
-    font-size: 1.2em;
     margin-left: 8px;
+
+    svg {
+      width: 14px;
+      height: 14px;
+    }
 
     &:hover,
     &:focus {
