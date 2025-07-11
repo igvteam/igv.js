@@ -9,6 +9,7 @@ import * as DOMUtils from "./ui/utils/dom-utils.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
+import makeDraggable from "./ui/utils/draggable.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
@@ -908,27 +909,99 @@ class TrackViewport extends Viewport {
     }
 
     addTrackLabelClickHandler(trackLabel) {
-
         trackLabel.addEventListener('click', (event) => {
+            event.stopPropagation();
 
-            event.stopPropagation()
+            // Remove any existing popover
+            this.removeTrackLabelPopover();
 
-            const {track} = this.trackView
-
-            let str
+            const { track } = this.trackView;
+            let content;
             if (typeof track.description === 'function') {
-                str = track.description()
+                content = track.description(); // Should return a DOM node or fragment
             } else if (track.description) {
-                str = `<div>${track.description}</div>`
+                // Fallback: wrap string in a row
+                const row = document.createElement('div');
+                row.className = 'igv-track-label-popover__row';
+                row.textContent = track.description;
+                content = row;
             }
 
-            if (str) {
-                if (undefined === this.popover) {
-                    this.popover = new Popover(this.browser.columnContainer, true, (track.name || ''), undefined)
-                }
-                this.popover.presentContentWithEvent(event, str)
+            if (content) {
+                this.showTrackLabelPopover(event, content, track.name || '');
             }
-        })
+        });
+    }
+
+    showTrackLabelPopover(event, content, title) {
+        // Create popover container
+        const popover = document.createElement('div');
+        popover.className = 'igv-track-label-popover';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'igv-track-label-popover__header';
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'igv-track-label-popover__title';
+        titleDiv.textContent = title;
+
+        const closeBtn = document.createElement('div');
+        closeBtn.className = 'igv-track-label-popover__close';
+        closeBtn.setAttribute('tabindex', '0');
+        closeBtn.setAttribute('aria-label', 'Close');
+        closeBtn.innerHTML = '&times;';
+        closeBtn.addEventListener('click', () => this.removeTrackLabelPopover());
+
+        header.appendChild(titleDiv);
+        header.appendChild(closeBtn);
+
+        // Body
+        const body = document.createElement('div');
+        body.className = 'igv-track-label-popover__body';
+        body.appendChild(content);
+
+        // Assemble popover
+        popover.appendChild(header);
+        popover.appendChild(body);
+
+        // Position popover near the track label
+        const labelRect = this.trackLabelElement.getBoundingClientRect();
+        const containerRect = this.browser.columnContainer.getBoundingClientRect();
+        const offsetX = labelRect.left - containerRect.left;
+        const offsetY = labelRect.bottom - containerRect.top + 5;
+        
+        popover.style.left = `${offsetX}px`;
+        popover.style.top = `${offsetY}px`;
+        popover.style.position = 'absolute';
+
+        // Store reference for later removal
+        this._trackLabelPopover = popover;
+
+        // Add to DOM
+        this.browser.columnContainer.appendChild(popover);
+
+        makeDraggable(popover, header, { minX:0, minY:0 })
+
+        // Remove on outside click
+        // setTimeout(() => {
+        //     document.addEventListener('mousedown', this._trackLabelPopoverListener = (evt) => {
+        //         if (!popover.contains(evt.target)) {
+        //             this.removeTrackLabelPopover();
+        //         }
+        //     });
+        // }, 0);
+    }
+
+    removeTrackLabelPopover() {
+        if (this._trackLabelPopover) {
+            this._trackLabelPopover.remove();
+            this._trackLabelPopover = null;
+            if (this._trackLabelPopoverListener) {
+                document.removeEventListener('mousedown', this._trackLabelPopoverListener);
+                this._trackLabelPopoverListener = null;
+            }
+        }
     }
 
     createClickState(event) {

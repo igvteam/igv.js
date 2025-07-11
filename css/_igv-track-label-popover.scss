@@ -1,0 +1,98 @@
+@use "variables" as *;
+
+$igv-track-label-popover-border-width: 1px;
+$igv-track-label-popover-header-height: 24px;
+$igv-track-label-popover-content-height: calc(100% - #{$igv-track-label-popover-header-height} - 2 * #{$igv-track-label-popover-border-width});
+
+// popover
+.igv-track-label-popover {
+  position: absolute;
+  z-index: 2048;
+  border: 1px solid $igv-trackgear-grey-color;
+  border-radius: $igv-trackgear-popover-border-radius;
+  background: #fff;
+  font-family: $igv-default-font-face;
+  font-size: small;
+  min-width: 260px;
+  max-width: 800px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 24px;
+    background: #eee;
+    border-top-left-radius: $igv-trackgear-popover-border-radius;
+    border-top-right-radius: $igv-trackgear-popover-border-radius;
+    border-bottom: 1px solid $igv-trackgear-grey-color;
+    padding: 0 8px;
+    cursor: move;
+  }
+
+  &__title {
+    font-weight: bold;
+    font-size: 1em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__close {
+    width: 16px;
+    height: 16px;
+    color: $igv-trackgear-grey-color;
+    text-align: center;
+    line-height: 16px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    font-size: 1.2em;
+    margin-left: 8px;
+
+    &:hover,
+    &:focus {
+      background: #ddd;
+      color: #444;
+      outline: none;
+    }
+  }
+
+  &__body {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 8px 0;
+    background: #fff;
+    border-bottom-left-radius: $igv-trackgear-popover-border-radius;
+    border-bottom-right-radius: $igv-trackgear-popover-border-radius;
+  }
+
+  &__row {
+    display: flex;
+    align-items: baseline;
+    margin: 0 12px 4px 12px;
+    min-width: 220px;
+    white-space: nowrap;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+  }
+
+  &__key {
+    font-weight: bold;
+    margin-right: 0.5em;
+  }
+
+  &__value {
+    font-weight: normal;
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+  }
+
+  hr {
+    width: 100%;
+    border: none;
+    border-top: 1px solid $igv-trackgear-grey-color;
+    margin: 8px 0;
+  }
+}
