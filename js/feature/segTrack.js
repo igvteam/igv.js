@@ -428,6 +428,10 @@ class SegTrack extends TrackBase {
                 for (const label of bucketLabels) {
                     label.remove()
                 }
+                const bucketLines = viewport.viewportElement.querySelectorAll('.igv-attribute-group-line')
+                for (const line of bucketLines) {
+                    line.remove()
+                }
             }
 
         }
