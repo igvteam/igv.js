@@ -98,6 +98,10 @@ class SampleInfo {
         }
     }
 
+    discard() {
+        this.initialize()
+    }
+
     getAttributeColor(attribute, value) {
 
         let color

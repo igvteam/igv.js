@@ -1737,6 +1737,27 @@ class Browser {
         // await this.layoutChange()
     }
 
+    async discardSampleInfo() {
+
+        this.sampleInfo.discard()
+
+        for (const {sampleInfoViewport} of this.trackViews) {
+            sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
+        }
+
+        const found = this.findTracks(t => typeof t.getSamples === 'function')
+        if (found.length > 0) {
+            this.sampleInfoControl.performClickWithState(this, false)
+            this.sampleInfoControl.setButtonVisibility(false)
+        }
+
+        for (const {sampleInfoViewport} of this.trackViews) {
+            sampleInfoViewport.repaint()
+        }
+
+        await this.layoutChange()
+    }
+
     getSampleInfoColumnWidth() {
 
         if (!this.sampleInfo.attributeCount) {
