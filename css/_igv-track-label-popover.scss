@@ -17,6 +17,8 @@ $igv-track-label-popover-content-height: calc(100% - #{$igv-track-label-popover-
   max-width: 800px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
 
+  user-select: text;
+
   &__header {
     display: flex;
     align-items: center;
