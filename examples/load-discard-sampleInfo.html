@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
+    <title>IGVJS Example - Discard Sample Info</title>
     <style>
         .button-container {
             margin-bottom: 10px;
@@ -27,15 +27,16 @@
 <body>
 
 <div class="button-container">
-    <button id="loadSampleInfoButton" class="load-button">Load Sample Information</button>
     <button id="loadTrackButton" class="load-button">Load Track</button>
+    <button id="loadSampleInfoButton" class="load-button">Load Sample Information</button>
+    <button id="discardSampleInfo" class="load-button">Discard Sample Info</button>
 </div>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import igv from '../../js/index.js'
+    import igv from "../dist/igv.esm.min.js"
 
     const config =
         {
@@ -898,6 +899,10 @@
         }
 
         browser.loadSampleInfo(sampleInfoLiteralConfig);
+    })
+
+    document.getElementById('discardSampleInfo').addEventListener('click', async () => {
+        await browser.discardSampleInfo()
     })
 
     document.getElementById('loadTrackButton').addEventListener('click', () => {
