@@ -34,6 +34,7 @@ import FeatureSource from "./featureSource.js"
 import {makeBedPEChords, sendChords} from "../jbrowse/circularViewUtils.js"
 
 import {getChrColor} from "../util/getChrColor.js"
+import {ColorTable, PaletteColorTable} from "../util/colorPalletes.js"
 
 function getArcType(config) {
     if (!config.arcType) {
@@ -62,6 +63,7 @@ class InteractionTrack extends TrackBase {
         thickness: 1,
         alpha: 0.02,
         logScale: true,
+        colorBy: undefined
     }
 
     constructor(config, browser) {
@@ -106,11 +108,20 @@ class InteractionTrack extends TrackBase {
             this.autoscale = true
         }
 
+        if (config.colorTable) {
+            this.colorTable = new ColorTable(config.colorTable)
+        } else if (config.colorBy) {
+            this.colorTable = new PaletteColorTable("Set1")
+        }
+
         // Create the FeatureSource and override the default whole genome method
         if (config.featureSource) {
             this.featureSource = config.featureSource
             delete config._featureSource
         } else {
+            if (config.features) {
+                fixFeatures(config.features)
+            }
             this.featureSource = FeatureSource(config, this.browser.genome)
             this.featureSource.getWGFeatures = getWGFeatures
         }
@@ -194,17 +205,9 @@ class InteractionTrack extends TrackBase {
 
                 // Reset transient property drawState.  An undefined value => feature has not been drawn.
                 feature.drawState = undefined
-
-                let color
-                if (typeof this.color === 'function') {
-                    color = this.color(feature)
-                } else {
-                    color = this.color || feature.color || DEFAULT_ARC_COLOR
-                    if (color && this.config.useScore) {
-                        color = getAlphaColor(color, scoreShade(feature.score))
-                    }
-                }
-
+                let color = this.getColor(feature)
+                ctx.strokeStyle = color
+                ctx.fillStyle = color
                 ctx.lineWidth = feature.thickness || this.thickness || 1
 
                 if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
@@ -250,9 +253,9 @@ class InteractionTrack extends TrackBase {
                     // Alpha shade (de-emphasize) arcs that extend beyond viewport, unless alpha shading is used for score.
                     if (color && !this.config.useScore && w > viewportWidth) {
                         color = getAlphaColor(color, this.alpha)
+                        ctx.strokeStyle = color
+                        ctx.fillStyle = color
                     }
-                    ctx.strokeStyle = color
-                    ctx.fillStyle = color
                     ctx.beginPath()
                     ctx.arc(xc, yc, r, startAngle, endAngle, false)
                     ctx.stroke()
@@ -305,6 +308,24 @@ class InteractionTrack extends TrackBase {
                 this.cosTheta = Math.cos(this.theta)
             }
         }
+    }
+
+    getColor(feature) {
+        let color
+        if (this.colorBy) {
+            const value = feature.getAttributeValue ?
+                feature.getAttributeValue(this.colorBy) :
+                feature[this.colorBy]
+            color = this.colorTable.getColor(value)
+        } else if (typeof this.color === 'function') {
+            color = this.color(feature)
+        } else {
+            color = this.color || feature.color || DEFAULT_ARC_COLOR
+            if (color && this.config.useScore) {
+                color = getAlphaColor(color, scoreShade(feature.score))
+            }
+        }
+        return color
     }
 
     getScaleFactor(min, max, height, logScale) {
@@ -394,12 +415,7 @@ class InteractionTrack extends TrackBase {
 
                     const counterClockwise = direction
 
-                    let color
-                    if (typeof this.color === 'function') {
-                        color = this.color(feature)
-                    } else {
-                        color = this.color || feature.color || DEFAULT_ARC_COLOR
-                    }
+                    let color = this.getColor(feature)
 
                     const strokeColor = this.config.useScore ? getAlphaColor(color, scoreShade(feature.score)) : color
 
@@ -639,6 +655,9 @@ class InteractionTrack extends TrackBase {
             }
             if (f.score !== undefined) {
                 data.push({name: "Score", value: f.score})
+            }
+            if(f.type !== undefined) {
+                data.push({name: "Type", value: f.type})
             }
 
 
@@ -882,6 +901,21 @@ function extractInfoColumn(data, str) {
         }
     }
 
+}
+
+/**
+ * Set the total chr extent -- provided for embedded features.
+ *
+ * @param features
+ */
+function fixFeatures(features) {
+    for (let feature of features) {
+        if (!feature.chr && feature.chr1 === feature.chr2) {
+            feature.chr = feature.chr1
+            feature.start = Math.min(feature.start1, feature.start2)
+            feature.end = Math.max(feature.end1, feature.end2)
+        }
+    }
 }
 
 export default InteractionTrack
