@@ -73,11 +73,11 @@ class FeatureTrack extends TrackBase {
                     config.colorBy = config.colorBy.field
                 }
                 this.colorBy = config.colorBy   // Can be undefined => default
-                if (config.colorTable) {
-                    this.colorTable = new ColorTable(config.colorTable)
-                } else {
-                    this.colorTable = new PaletteColorTable("Set1")
-                }
+            }
+            if (config.colorTable) {
+                this.colorTable = new ColorTable(config.colorTable)
+            } else {
+                this.colorTable = new PaletteColorTable("Set1")
             }
         }
     }
@@ -375,7 +375,10 @@ class FeatureTrack extends TrackBase {
                     this.trackView.repaintViews()
                 }
 
-                menuItems.push({element:createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy), click: colorSchemeHandler})
+                menuItems.push({
+                    element: createCheckbox(`Color by ${colorScheme}`, colorScheme === this.colorBy),
+                    click: colorSchemeHandler
+                })
             }
         }
 
@@ -397,7 +400,10 @@ class FeatureTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
 
-            menuItems.push({element:createCheckbox(lut[displayMode], displayMode === this.displayMode), click: displayModeHandler})
+            menuItems.push({
+                element: createCheckbox(lut[displayMode], displayMode === this.displayMode),
+                click: displayModeHandler
+            })
         }
 
         return menuItems
