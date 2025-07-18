@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>IGV.js - Dynamic Sequence Track Example</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/igv@2.15.8/dist/igv.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      #igv-div {
+        border: 1px solid #ccc;
+        margin: 20px 0;
+      }
+      .description {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .code-block {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 0.9em;
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>IGV.js - Dynamic Sequence Track Example</h1>
+
+      <div class="description">
+        <h3>Dynamic Sequence (DynSeq) Track</h3>
+        <p>
+          This example demonstrates the new <strong>dynseq</strong> graph type
+          for WIG tracks. The dynseq option renders genome bases as colored
+          glyphs with heights proportional to the WIG values, combining sequence
+          information with quantitative data.
+        </p>
+
+        <h4>Features:</h4>
+        <ul>
+          <li>
+            Genome bases are rendered as colored rectangles (A=green, T=red,
+            G=orange, C=blue)
+          </li>
+          <li>
+            Height of each base glyph corresponds to the WIG value at that
+            position
+          </li>
+          <li>Base letters are displayed when zoomed in sufficiently</li>
+          <li>Overflow indicators show when values exceed the data range</li>
+          <li>
+            Compatible with all existing WIG track options (autoscale, data
+            range, etc.)
+          </li>
+        </ul>
+
+        <h4>Usage:</h4>
+        <div class="code-block">
+          Set <code>graphType: "dynseq"</code> in your WIG track configuration,
+          or select "dynseq" from the track's context menu.
+        </div>
+      </div>
+
+      <div id="igv-div"></div>
+
+      <div class="description">
+        <h4>Track Configuration Example:</h4>
+        <pre class="code-block">
+{
+  "name": "Sample DynSeq Track",
+  "type": "wig",
+  "format": "bedgraph",
+  "url": "path/to/your/data.bedgraph",
+  "graphType": "dynseq",
+  "height": 100,
+  "color": "blue",
+  "altColor": "red"
+}</pre
+        >
+      </div>
+    </div>
+
+    <script src="../dist/igv.min.js"></script>
+    <script type="module">
+      //   import igv from "../dist/igv.esm.min.js";
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var igvDiv = document.getElementById("igv-div");
+
+        // Create a simple BedGraph data URL for demonstration (including negative values)
+        var sampleBedGraphData = `track type=bedGraph name="Sample DynSeq Data" description="Dynamic sequence track example"
+chr1	1000	1010	2.5
+chr1	1010	1020	4.2
+chr1	1020	1030	-1.8
+chr1	1030	1040	3.7
+chr1	1040	1050	5.1
+chr1	1050	1060	-2.3
+chr1	1060	1070	4.8
+chr1	1070	1080	-1.9
+chr1	1080	1090	3.4
+chr1	1090	1100	4.6
+chr1	1100	1110	-2.1
+chr1	1110	1120	3.9
+chr1	1120	1130	5.3
+chr1	1130	1140	-1.7
+chr1	1140	1150	4.4
+chr1	1150	1160	-2.8
+chr1	1160	1170	3.2
+chr1	1170	1180	4.9
+chr1	1180	1190	-1.5
+chr1	1190	1200	3.8`;
+
+        var bedGraphDataUri =
+          "data:text/plain;base64," + btoa(sampleBedGraphData);
+
+        var options = {
+          genome: "hg38",
+          locus: "chr1:119,734-119,809",
+          tracks: [
+            {
+              name: "Standard Bar Chart",
+              type: "wig",
+              url: "https://www.encodeproject.org/files/ENCFF105JTF/@@download/ENCFF105JTF.bigWig",
+              graphType: "bar",
+              height: 60,
+              color: "blue",
+              altColor: "red",
+            },
+            {
+              name: "Dynamic Sequence Track",
+              type: "wig",
+              url: "https://www.encodeproject.org/files/ENCFF105JTF/@@download/ENCFF105JTF.bigWig",
+              graphType: "dynseq",
+              height: 80,
+              color: "blue",
+              altColor: "red",
+            },
+          ],
+        };
+
+        igv
+          .createBrowser(igvDiv, options)
+          .then(function (browser) {
+            console.log("IGV browser created successfully");
+            console.log(
+              "Try right-clicking on the DynSeq track to switch between graph types"
+            );
+          })
+          .catch(function (error) {
+            console.error("Error creating IGV browser:", error);
+          });
+      });
+    </script>
+  </body>
+</html>
