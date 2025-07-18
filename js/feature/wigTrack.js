@@ -121,6 +121,18 @@ class WigTrack extends TrackBase {
             }
         }
 
+        // For dynseq rendering, attach sequence data to features
+        if (this.graphType === "dynseq" && features && features.length > 0) {
+            for (let f of features) {
+                try {
+                    f.sequence = await this.browser.genome.getSequence(f.chr, Math.floor(f.start), Math.floor(f.end))
+                } catch (error) {
+                    console.warn('Failed to get sequence for feature:', error)
+                    f.sequence = null
+                }
+            }
+        }
+
         // Summarize features to current resolution.  This needs to be done here, rather than in the "draw" function,
         // for group autoscale to work.
         if (this.summarize && ("mean" === windowFunction || "min" === windowFunction || "max" === windowFunction)) {
@@ -187,7 +199,7 @@ class WigTrack extends TrackBase {
 
     graphTypeItems() {
 
-        const graphType = ['bar', 'line', 'points', 'heatmap']
+        const graphType = ['bar', 'line', 'points', 'heatmap', 'dynseq']
 
         const menuItems = []
         menuItems.push('<hr/>')
@@ -307,6 +319,9 @@ class WigTrack extends TrackBase {
                         }
                         const color = this._colorScale.getColor(f.value)
                         IGVGraphics.fillRect(ctx, x, 0, width, pixelHeight, {fillStyle: color})
+                    } else if (this.graphType === "dynseq") {
+                        // Dynamic sequence rendering - render bases as glyphs with heights based on wig values
+                        this.renderDynSeq(ctx, f, x, width, y, y0, pixelHeight)
                     } else {
                         // Default graph type (bar)
                         const height = Math.min(pixelHeight, y - y0)
@@ -349,6 +364,128 @@ class WigTrack extends TrackBase {
                 }
             }
         }
+    }
+
+    renderDynSeq(ctx, feature, x, width, y, y0, pixelHeight) {
+        // Use pre-cached sequence data from the feature
+        const sequence = feature.sequence
+        
+        if (!sequence) {
+            // Fall back to regular bar rendering if no sequence data
+            const height = Math.min(pixelHeight, y - y0)
+            const color = this.getColorForFeature(feature)
+            IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color})
+            return
+        }
+        
+        // Calculate rectangle position and height based on the wig value
+        const rectY = Math.min(y, y0)
+        const rectHeight = Math.max(1, Math.abs(y - y0)) // Ensure minimum height of 1px
+        
+        // Render each base in the sequence
+        const baseWidth = width / sequence.length
+        const isNegative = feature.value < 0
+        
+        for (let i = 0; i < sequence.length; i++) {
+            const baseX = x + (i * baseWidth)
+            const base = sequence[i].toUpperCase()
+            
+            // Get nucleotide color from browser's color scheme
+            const nucleotideColor = this.browser.nucleotideColors[base] || 'gray'
+            
+            // Draw the base as a letter-shaped glyph
+            this.drawLetterGlyph(ctx, base, baseX, rectY, baseWidth, rectHeight, nucleotideColor, isNegative)
+        }
+        
+        // Draw overflow indicators if needed
+        if (feature.value > this.dataRange.max) {
+            IGVGraphics.fillRect(ctx, x, 0, width, 3, {fillStyle: this.overflowColor})
+        } else if (feature.value < this.dataRange.min) {
+            IGVGraphics.fillRect(ctx, x, pixelHeight - 2, width, 3, {fillStyle: this.overflowColor})
+        }
+    }
+
+    drawLetterGlyph(ctx, base, x, y, width, height, color, flipVertical = false) {
+        // Define letter path data as SVG path strings (100x100 coordinate system)
+        const letterPaths = {
+            'A': {
+                main: `M 0 100 L 33 0 L 66 0 L 100 100 L 75 100 L 66 75 L 33 75 L 25 100 L 0 100`,
+                overlay: `M 41 55 L 50 25 L 58 55 L 41 55`
+            },
+            'C': {
+                main: `M 100 28 C 100 -13 0 -13 0 50 C 0 113 100 113 100 72 L 75 72 C 75 90 30 90 30 50 C 30 10 75 10 75 28 L 100 28`
+            },
+            'G': {
+                main: `M 100 28 C 100 -13 0 -13 0 50 C 0 113 100 113 100 72 L 100 48 L 55 48 L 55 72 L 75 72 C 75 90 30 90 30 50 C 30 10 75 5 75 28 L 100 28`
+            },
+            'T': {
+                main: `M 0 0 L 0 20 L 35 20 L 35 100 L 65 100 L 65 20 L 100 20 L 100 0 L 0 0`
+            },
+            'N': {
+                main: `M 0 100 L 0 0 L 20 0 L 80 75 L 80 0 L 100 0 L 100 100 L 80 100 L 20 25 L 20 100 L 0 100`
+            }
+        }
+
+        const pathData = letterPaths[base] || letterPaths['N']
+        
+        ctx.save()
+        ctx.fillStyle = color
+        
+        // Apply vertical flip transformation if needed
+        if (flipVertical) {
+            ctx.translate(x + width/2, y + height/2)
+            ctx.scale(1, -1)
+            ctx.translate(-(x + width/2), -(y + height/2))
+        }
+        
+        // Draw main path
+        this.drawSVGPath(ctx, pathData.main, x, y, width, height)
+        
+        // Draw overlay path (if exists) - typically a cutout or highlight
+        if (pathData.overlay) {
+            ctx.fillStyle = '#ffffff'
+            this.drawSVGPath(ctx, pathData.overlay, x, y, width, height)
+        }
+        
+        ctx.restore()
+    }
+
+    drawSVGPath(ctx, pathString, x, y, width, height) {
+        // Parse SVG path string and draw it scaled to the given dimensions
+        // Path is defined in 100x100 coordinate system
+        const scaleX = width / 100
+        const scaleY = height / 100
+        
+        ctx.beginPath()
+        
+        // Enhanced SVG path parser for M (move), L (line), and C (cubic Bézier curve) commands
+        const commands = pathString.match(/[MLC][^MLC]*/g) || []
+        
+        for (let command of commands) {
+            const type = command[0]
+            const coords = command.slice(1).trim().split(/[\s,]+/).map(Number)
+            
+            if (type === 'M') {
+                // Move to
+                ctx.moveTo(x + coords[0] * scaleX, y + coords[1] * scaleY)
+            } else if (type === 'L') {
+                // Line to
+                ctx.lineTo(x + coords[0] * scaleX, y + coords[1] * scaleY)
+            } else if (type === 'C') {
+                // Cubic Bézier curve
+                // C x1 y1 x2 y2 x y (control point 1, control point 2, end point)
+                if (coords.length >= 6) {
+                    ctx.bezierCurveTo(
+                        x + coords[0] * scaleX, y + coords[1] * scaleY, // control point 1
+                        x + coords[2] * scaleX, y + coords[3] * scaleY, // control point 2
+                        x + coords[4] * scaleX, y + coords[5] * scaleY  // end point
+                    )
+                }
+            }
+        }
+        
+        ctx.closePath()
+        ctx.fill()
     }
 
     popupData(clickState, features) {
