@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, shrink-to-fit=no"
     />
-    <title>IGV.js - Dynamic Sequence Track Example</title>
+    <title>IGV.js - DynSeq Track Example</title>
     <link
       rel="stylesheet"
       type="text/css"
@@ -49,14 +49,14 @@
 
   <body>
     <div class="container">
-      <h1>IGV.js - Dynamic Sequence Track Example</h1>
+      <h1>IGV.js - DynSeq Track Example</h1>
 
       <div class="description">
         <h3>Dynamic Sequence (DynSeq) Track</h3>
         <p>
-          This example demonstrates the new <strong>dynseq</strong> graph type
-          for WIG tracks. The dynseq option renders genome bases as colored
-          glyphs with heights proportional to the WIG values, combining sequence
+          This example demonstrates the <strong>dynseq</strong> graph type for
+          WIG tracks. The dynseq option renders genome bases as colored glyphs
+          with heights proportional to the WIG values, combining sequence
           information with quantitative data.
         </p>
 
@@ -93,8 +93,7 @@
 {
   "name": "Sample DynSeq Track",
   "type": "wig",
-  "format": "bedgraph",
-  "url": "path/to/your/data.bedgraph",
+  "url": "path/to/your/data.bigWig",
   "graphType": "dynseq",
   "height": 100,
   "color": "blue",
