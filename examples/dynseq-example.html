@@ -104,38 +104,11 @@
       </div>
     </div>
 
-    <script src="../dist/igv.min.js"></script>
     <script type="module">
-      //   import igv from "../dist/igv.esm.min.js";
+      import igv from "../dist/igv.esm.min.js";
 
       document.addEventListener("DOMContentLoaded", function () {
         var igvDiv = document.getElementById("igv-div");
-
-        // Create a simple BedGraph data URL for demonstration (including negative values)
-        var sampleBedGraphData = `track type=bedGraph name="Sample DynSeq Data" description="Dynamic sequence track example"
-chr1	1000	1010	2.5
-chr1	1010	1020	4.2
-chr1	1020	1030	-1.8
-chr1	1030	1040	3.7
-chr1	1040	1050	5.1
-chr1	1050	1060	-2.3
-chr1	1060	1070	4.8
-chr1	1070	1080	-1.9
-chr1	1080	1090	3.4
-chr1	1090	1100	4.6
-chr1	1100	1110	-2.1
-chr1	1110	1120	3.9
-chr1	1120	1130	5.3
-chr1	1130	1140	-1.7
-chr1	1140	1150	4.4
-chr1	1150	1160	-2.8
-chr1	1160	1170	3.2
-chr1	1170	1180	4.9
-chr1	1180	1190	-1.5
-chr1	1190	1200	3.8`;
-
-        var bedGraphDataUri =
-          "data:text/plain;base64," + btoa(sampleBedGraphData);
 
         var options = {
           genome: "hg38",
@@ -145,7 +118,6 @@ chr1	1190	1200	3.8`;
               name: "Standard Bar Chart",
               type: "wig",
               url: "https://www.encodeproject.org/files/ENCFF105JTF/@@download/ENCFF105JTF.bigWig",
-              graphType: "bar",
               height: 60,
               color: "blue",
               altColor: "red",
