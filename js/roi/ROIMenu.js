@@ -173,18 +173,18 @@ class ROIMenu {
 
             items.push(
                 {
-                    label: 'Filter copy number samples',
+                    label: 'Filter samples by copy number',
                     click: () => {
 
                         const config =
                             {
                                 callback: (threshold, op) => {
                                     const {chr, start, end} = feature
-                                    
+
                                     // Apply filter to all seg tracks via browser
                                     const filterConfig = { type: "VALUE", op, value: threshold, chr, start, end }
                                     this.browser.applyFilterToTrackType('seg', filterConfig)
-                                    
+
                                     // Generate description and update UI
                                     const filterDescription = ClearFiltersButton.generateFilterDescription(filterConfig, 'seg')
                                     this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'seg')
@@ -204,18 +204,18 @@ class ROIMenu {
 
             items.push(
                 {
-                    label: 'Filter mutation samples',
+                    label: 'Filter samples by mutation',
                     click: () => {
 
                         const config =
                             {
                                 callback: (selected, op) => {
                                     const {chr, start, end} = feature
-                                    
+
                                     // Apply filter to all mut tracks via browser
                                     const filterConfig = { type: "MUTATION_TYPE", op, value: selected, chr, start, end }
                                     this.browser.applyFilterToTrackType('mut', filterConfig)
-                                    
+
                                     // Generate description and update UI
                                     const filterDescription = ClearFiltersButton.generateFilterDescription(filterConfig, 'mut')
                                     this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'mut')
