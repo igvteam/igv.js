@@ -10,6 +10,9 @@ import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
+import ROISEGFilterDialog from "../ui/components/roiSegFilterDialog.js"
+import ROIMutFilterDialog from "../ui/components/roiMutFilterDialog.js"
+import ClearFiltersButton from "../ui/clearFiltersButton.js"
 
 class SegTrack extends TrackBase {
 
@@ -35,6 +38,9 @@ class SegTrack extends TrackBase {
         this.buckets = new Map()
         this.bucketedAttribute = undefined
 
+        // Initialize filter dialogs for context menu
+        this.segFilterDialog = new ROISEGFilterDialog(browser.columnContainer)
+        this.mutFilterDialog = new ROIMutFilterDialog(browser.columnContainer, SegTrack.getMutationTypes())
     }
 
     #sortDirections = new Map()
@@ -124,7 +130,12 @@ class SegTrack extends TrackBase {
         this._initialColor = this.color || this.constructor.defaultColor
         this._initialAltColor = this.altColor || this.constructor.defaultColor
 
-        if (this.config.filterConfigurations){
+        // Initialize filters from track config (individual track filtering)
+        if (this.config.filters){
+            this._trackFilterObjects = await this.createFilterObjects(this.config.filters)
+        }
+        // Legacy support for filterConfigurations (for backward compatibility)
+        else if (this.config.filterConfigurations){
             this._trackFilterObjects = await this.createFilterObjects(this.config.filterConfigurations)
         }
     }
@@ -340,6 +351,66 @@ class SegTrack extends TrackBase {
         }
 
         this.trackView.repaintViews()
+    }
+
+    /**
+     * Add a filter to this track's filter list
+     * @param {Object} filterConfig - The filter configuration object
+     * @returns {Promise<void>}
+     */
+    async addFilter(filterConfig) {
+        const currentFilters = this._trackFilterObjects || []
+        const updatedFilters = [...currentFilters, filterConfig]
+        await this.setSampleFilter(updatedFilters)
+    }
+
+    /**
+     * Remove a specific filter from this track by index
+     * @param {number} index - Index of the filter to remove
+     * @returns {Promise<void>}
+     */
+    async removeFilter(index) {
+        const currentFilters = this._trackFilterObjects || []
+        if (index >= 0 && index < currentFilters.length) {
+            const newFilters = currentFilters.filter((_, i) => i !== index)
+            await this.setSampleFilter(newFilters.length > 0 ? newFilters : undefined)
+        }
+    }
+
+    /**
+     * Clear all filters for this track
+     * @returns {Promise<void>}
+     */
+    async clearFilters() {
+        await this.setSampleFilter(undefined)
+    }
+
+    /**
+     * Get the current filters for this track
+     * @returns {Array} - Array of filter objects
+     */
+    getFilters() {
+        return this._trackFilterObjects || []
+    }
+
+    /**
+     * Return the current state of the track. Used to create sessions and bookmarks.
+     * @returns {Object} - Track state including filters
+     */
+    getState() {
+        const state = super.getState()
+
+        // Save current filters as part of track state
+        if (this._trackFilterObjects && this._trackFilterObjects.length > 0) {
+            // Convert filter objects to filter specs (remove computed scores)
+            const filterSpecs = this._trackFilterObjects.map(filterObj => {
+                const { scores, ...filterSpec } = filterObj
+                return filterSpec
+            })
+            state.filters = filterSpecs
+        }
+
+        return state
     }
 
     async getFeatures(chr, start, end) {
@@ -619,7 +690,7 @@ class SegTrack extends TrackBase {
 
     contextMenuItemList(clickState) {
 
-        const { genomicLocation, referenceFrame, viewport } = clickState
+        const { genomicLocation, referenceFrame, viewport, event } = clickState
 
         const sortHandler = (sort) => {
             const features = viewport.cachedFeatures
@@ -629,7 +700,7 @@ class SegTrack extends TrackBase {
         // We can't know genomic location intended with precision, define a buffer 5 "pixels" wide in genomic coordinates
         const bpWidth = referenceFrame.toBP(2.5)
 
-        return ["DESC", "ASC"].map(direction => {
+        const menuItems = ["DESC", "ASC"].map(direction => {
             const dirLabel = direction === "DESC" ? "descending" : "ascending"
             const sortLabel = this.type === 'seg' || this.type === 'shoebox' ?
                 `Sort by value (${dirLabel})` :
@@ -648,6 +719,59 @@ class SegTrack extends TrackBase {
                 }
             }
         })
+
+        // Add filter menu items based on track type
+        if (this.type === 'seg') {
+            menuItems.push('<hr/>')
+            menuItems.push({
+                label: 'Filter samples by copy number',
+                click: () => {
+                    const config = {
+                        callback: async (threshold, op) => {
+                            const chr = referenceFrame.chr
+                            const start = Math.floor(genomicLocation - bpWidth)
+                            const end = Math.floor(genomicLocation + bpWidth)
+
+                            // Apply filter to this specific track
+                            const filterConfig = { type: "VALUE", op, value: threshold, chr, start, end }
+                            await this.addFilter(filterConfig)
+
+                            // Generate description and update UI
+                            const filterDescription = ClearFiltersButton.generateFilterDescription(filterConfig, 'seg')
+                            this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'seg')
+                            this.browser.navbar.clearFiltersButton.setVisibility(true)
+                        }
+                    }
+                    this.segFilterDialog.present(config, event)
+                }
+            })
+        } else if (this.type === 'mut' || this.type === 'maf') {
+            menuItems.push('<hr/>')
+            menuItems.push({
+                label: 'Filter samples by mutation',
+                click: () => {
+                    const config = {
+                        callback: async (selected, op) => {
+                            const chr = referenceFrame.chr
+                            const start = Math.floor(genomicLocation - bpWidth)
+                            const end = Math.floor(genomicLocation + bpWidth)
+
+                            // Apply filter to this specific track
+                            const filterConfig = { type: "MUTATION_TYPE", op, value: selected, chr, start, end }
+                            await this.addFilter(filterConfig)
+
+                            // Generate description and update UI
+                            const filterDescription = ClearFiltersButton.generateFilterDescription(filterConfig, 'mut')
+                            this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'mut')
+                            this.browser.navbar.clearFiltersButton.setVisibility(true)
+                        }
+                    }
+                    this.mutFilterDialog.present(config, event)
+                }
+            })
+        }
+
+        return menuItems
     }
 
     get supportsWholeGenome() {

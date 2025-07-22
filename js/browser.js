@@ -157,7 +157,7 @@ class Browser {
         this.previousTrackColors = []
 
         // Filter configurations by track type (seg, mut, etc.)
-        this.filterConfigurations = new Map() // trackType -> filterConfigs[]
+        // REMOVED: this.filterConfigurations = new Map() // trackType -> filterConfigs[]
     }
 
     get doShowROITable() {
@@ -518,26 +518,6 @@ class Browser {
             this.qtlSelections = QTLSelections.fromJSON(session.qtlSelections)
         }
 
-        // Filter configurations
-        if (session.filterConfigurations) {
-            this.filterConfigurations.clear()
-            for (const [trackType, filters] of Object.entries(session.filterConfigurations)) {
-
-                // set filter configurations
-                this.filterConfigurations.set(trackType, filters)
-
-                // configure filters widget
-                for (const filter of filters){
-                    const filterDescription = ClearFiltersButton.generateFilterDescription(filter, trackType)
-                    this.navbar.clearFiltersButton.setTableRowContent(filterDescription, trackType)
-                }
-
-                this.navbar.clearFiltersButton.setVisibility(true)
-
-            }
-
-        }
-
         // ROIs
         if (session.showROIOverlays !== undefined) {
             this.roiManager.showOverlays = session.showROIOverlays
@@ -826,10 +806,6 @@ class Browser {
         }
     }
 
-    async clearFilters() {
-        this.clearTrackTypeFilters('seg')
-        this.clearTrackTypeFilters('mut')
-    }
     /**
      * Public API function. Load a list of tracks.
      *
@@ -935,10 +911,6 @@ class Browser {
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
         if (typeof track.postInit === 'function') {
-
-            if (this.filterConfigurations.has(track.type)) {
-                track.config.filterConfigurations = this.filterConfigurations.get(track.type)
-            }
 
             try {
                 trackView.startSpinner()
@@ -1889,13 +1861,14 @@ class Browser {
         }
 
         // Filter configurations
-        if (this.filterConfigurations.size > 0) {
-            const filterConfigs = {}
-            for (const [trackType, filters] of this.filterConfigurations) {
-                filterConfigs[trackType] = filters
-            }
-            json["filterConfigurations"] = filterConfigs
-        }
+        // REMOVED: Filter configurations are now saved as part of individual track configurations
+        // if (this.filterConfigurations.size > 0) {
+        //     const filterConfigs = {}
+        //     for (const [trackType, filters] of this.filterConfigurations) {
+        //         filterConfigs[trackType] = filters
+        //     }
+        //     json["filterConfigurations"] = filterConfigs
+        // }
 
         // Tracks
         const trackJson = []
@@ -2250,50 +2223,6 @@ class Browser {
 
     async blat(sequence) {
         return createBlatTrack({sequence, browser: this, name: 'Blat', title: 'Blat'})
-    }
-
-    /**
-     * Apply a filter to all tracks of a specific type
-     * @param {string} trackType - The track type ('seg', 'mut', etc.)
-     * @param {Object} filterConfig - The filter configuration object
-     */
-    applyFilterToTrackType(trackType, filterConfig) {
-        const currentFilters = this.filterConfigurations.get(trackType) || []
-        const updatedFilters = [...currentFilters, filterConfig]
-        this.filterConfigurations.set(trackType, updatedFilters)
-
-        // Apply all type-specific filters to each track
-        const tracks = this.findTracks("type", trackType)
-        tracks.forEach(track => track.setSampleFilter(updatedFilters))
-    }
-
-    /**
-     * Remove a specific filter from a track type by index
-     * @param {string} trackType - The track type ('seg', 'mut', etc.)
-     * @param {number} index - Index of the filter to remove
-     */
-    removeTrackTypeFilter(trackType, index) {
-        const currentFilters = this.filterConfigurations.get(trackType) || []
-        if (index >= 0 && index < currentFilters.length) {
-            const newFilters = currentFilters.filter((_, i) => i !== index)
-            if (newFilters.length > 0) {
-                this.filterConfigurations.set(trackType, newFilters)
-            } else {
-                this.filterConfigurations.delete(trackType)
-            }
-            const tracks = this.findTracks("type", trackType)
-            tracks.forEach(track => track.setSampleFilter(newFilters.length > 0 ? newFilters : undefined))
-        }
-    }
-
-    /**
-     * Clear all filters for a specific track type
-     * @param {string} trackType - The track type ('seg', 'mut', etc.)
-     */
-    clearTrackTypeFilters(trackType) {
-        this.filterConfigurations.delete(trackType)
-        const tracks = this.findTracks("type", trackType)
-        tracks.forEach(track => track.setSampleFilter(undefined))
     }
 }
 

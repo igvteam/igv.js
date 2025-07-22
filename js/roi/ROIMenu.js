@@ -2,10 +2,11 @@ import * as DOMUtils from "../ui/utils/dom-utils.js"
 import * as UIUtils from "../ui/utils/ui-utils.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import {createBlatTrack} from "../blat/blatTrack.js"
-import ROISEGFilterDialog from "../ui/components/roiSegFilterDialog.js"
-import ROIMutFilterDialog from "../ui/components/roiMutFilterDialog.js"
-import SegTrack from "../feature/segTrack.js"
-import ClearFiltersButton from "../ui/clearFiltersButton.js"
+// REMOVED: Filter dialog imports - now handled by individual tracks
+// import ROISEGFilterDialog from "../ui/components/roiSegFilterDialog.js"
+// import ROIMutFilterDialog from "../ui/components/roiMutFilterDialog.js"
+// import SegTrack from "../feature/segTrack.js"
+// import ClearFiltersButton from "../ui/clearFiltersButton.js"
 
 const maxSequenceSize = 1000000
 const maxBlatSize = 25000
@@ -31,8 +32,9 @@ class ROIMenu {
 
         this.container.style.display = 'none'
 
-        this.roiSEGFilterDialog = new ROISEGFilterDialog(browser.columnContainer)
-        this.roiMutFilterDialog = new ROIMutFilterDialog(browser.columnContainer, SegTrack.getMutationTypes())
+        // REMOVED: Filter dialog instances - now handled by individual tracks
+        // this.roiSEGFilterDialog = new ROISEGFilterDialog(browser.columnContainer)
+        // this.roiMutFilterDialog = new ROIMutFilterDialog(browser.columnContainer, SegTrack.getMutationTypes())
     }
 
     async present(feature, roiSet, event, roiManager, columnContainer, regionElement) {
@@ -63,8 +65,8 @@ class ROIMenu {
         // Add sort menu items
         this.#addSortMenuItems(items, feature)
 
-        // Add filter menu items
-        this.#addFilterMenuItems(items, feature, event)
+        // REMOVED: Add filter menu items - now handled by individual tracks
+        // this.#addFilterMenuItems(items, feature, event)
 
         // ROI driven filter
 
@@ -161,73 +163,8 @@ class ROIMenu {
     }
 
     #addFilterMenuItems(items, feature, event) {
-
-        const st = this.browser.findTracks("type", "seg")
-        const mt = this.browser.findTracks("type", "mut")
-
-        if (st.length > 0 || mt.length > 0) {
-            items.push(`<hr/>`)
-        }
-
-        if (st.length > 0) {
-
-            items.push(
-                {
-                    label: 'Filter samples by copy number',
-                    click: () => {
-
-                        const config =
-                            {
-                                callback: (threshold, op) => {
-                                    const {chr, start, end} = feature
-
-                                    // Apply filter to all seg tracks via browser
-                                    const filterConfig = { type: "VALUE", op, value: threshold, chr, start, end }
-                                    this.browser.applyFilterToTrackType('seg', filterConfig)
-
-                                    // Generate description and update UI
-                                    const filterDescription = ClearFiltersButton.generateFilterDescription(filterConfig, 'seg')
-                                    this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'seg')
-                                    this.browser.navbar.clearFiltersButton.setVisibility(true)
-                                }
-                            }
-                        this.roiSEGFilterDialog.present(config, event)
-                    }
-                }
-            )
-
-            items.push('<hr style="border: none; height: 1px; background-color: white; margin-top: 1px; margin-bottom: 1px;" />')
-
-        }
-
-        if (mt.length > 0) {
-
-            items.push(
-                {
-                    label: 'Filter samples by mutation',
-                    click: () => {
-
-                        const config =
-                            {
-                                callback: (selected, op) => {
-                                    const {chr, start, end} = feature
-
-                                    // Apply filter to all mut tracks via browser
-                                    const filterConfig = { type: "MUTATION_TYPE", op, value: selected, chr, start, end }
-                                    this.browser.applyFilterToTrackType('mut', filterConfig)
-
-                                    // Generate description and update UI
-                                    const filterDescription = ClearFiltersButton.generateFilterDescription(filterConfig, 'mut')
-                                    this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'mut')
-                                    this.browser.navbar.clearFiltersButton.setVisibility(true)
-                                }
-                            }
-                        this.roiMutFilterDialog.present(config, event)
-                    }
-                }
-            )
-
-        }
+        // REMOVED: Filter menu items are now available in SegTrack context menu
+        // Filtering is now done on individual tracks rather than globally
     }
 
     #addBlatMenuItem(items, feature) {

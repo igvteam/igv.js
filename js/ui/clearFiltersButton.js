@@ -186,16 +186,19 @@ class ClearFiltersButton extends NavbarButton {
                 trackTypeFilterMap.get(trackType).push(parseInt(checkbox.dataset.filterIndex))
             }
 
-            // Remove filters from each track type using browser API
+            // Remove filters from individual tracks
             for (const [trackType, filterDescriptions] of trackFilters) {
                 const filterIndicesToRemove = trackTypeFilterMap.get(trackType)
 
                 if (filterIndicesToRemove && filterIndicesToRemove.length > 0) {
-                    // Remove filters by index from the browser (affects all tracks of this type)
+                    // Get all tracks of this type and remove filters from each
+                    const tracks = this.browser.findTracks("type", trackType)
                     const sortedIndices = filterIndicesToRemove.sort((a, b) => b - a)
 
-                    for (const index of sortedIndices) {
-                        this.browser.removeTrackTypeFilter(trackType, index)
+                    for (const track of tracks) {
+                        for (const index of sortedIndices) {
+                            await track.removeFilter(index)
+                        }
                     }
 
                     // Remove the corresponding filter descriptions from our map
