@@ -156,8 +156,6 @@ class Browser {
         // previous track colors for colorPicker
         this.previousTrackColors = []
 
-        // Filter configurations by track type (seg, mut, etc.)
-        // REMOVED: this.filterConfigurations = new Map() // trackType -> filterConfigs[]
     }
 
     get doShowROITable() {

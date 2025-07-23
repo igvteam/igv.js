@@ -1,9 +1,8 @@
 import * as UIUtils from "../utils/ui-utils.js"
 import * as DOMUtils from "../utils/dom-utils.js"
 import makeDraggable from "../utils/draggable.js"
-import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
 
-class ROIMUTFilterDialog {
+class MUTFilterDialog {
 
     constructor(parent, mutationTypes) {
 
@@ -197,4 +196,4 @@ class ROIMUTFilterDialog {
     }
 }
 
-export default ROIMUTFilterDialog
+export default MUTFilterDialog

@@ -3,7 +3,7 @@ import * as DOMUtils from "../utils/dom-utils.js"
 import makeDraggable from "../utils/draggable.js"
 import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
 
-class ROISEGFilterDialog {
+class SEGFilterDialog {
 
     constructor(parent) {
 
@@ -183,4 +183,4 @@ class ROISEGFilterDialog {
     }
 }
 
-export default ROISEGFilterDialog
+export default SEGFilterDialog

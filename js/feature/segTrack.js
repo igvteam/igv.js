@@ -10,9 +10,9 @@ import HicColorScale from "../hic/hicColorScale.js"
 import ShoeboxSource from "../hic/shoeboxSource.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
-import ROISEGFilterDialog from "../ui/components/roiSegFilterDialog.js"
-import ROIMutFilterDialog from "../ui/components/roiMutFilterDialog.js"
-import ClearFiltersButton from "../ui/clearFiltersButton.js"
+import SEGFilterDialog from "../ui/components/segFilterDialog.js"
+import MutFilterDialog from "../ui/components/mutFilterDialog.js"
+import FilterManagerDialog from "../ui/components/filterManagerDialog.js"
 
 class SegTrack extends TrackBase {
 
@@ -39,8 +39,9 @@ class SegTrack extends TrackBase {
         this.bucketedAttribute = undefined
 
         // Initialize filter dialogs for context menu
-        this.segFilterDialog = new ROISEGFilterDialog(browser.columnContainer)
-        this.mutFilterDialog = new ROIMutFilterDialog(browser.columnContainer, SegTrack.getMutationTypes())
+        this.segFilterDialog = new SEGFilterDialog(browser.columnContainer)
+        this.mutFilterDialog = new MutFilterDialog(browser.columnContainer, SegTrack.getMutationTypes())
+        this.filterManagerDialog = new FilterManagerDialog(browser.columnContainer)
     }
 
     #sortDirections = new Map()
@@ -720,9 +721,9 @@ class SegTrack extends TrackBase {
             }
         })
 
+        menuItems.push('<hr/>')
         // Add filter menu items based on track type
         if (this.type === 'seg') {
-            menuItems.push('<hr/>')
             menuItems.push({
                 label: 'Filter samples by copy number',
                 click: () => {
@@ -735,18 +736,12 @@ class SegTrack extends TrackBase {
                             // Apply filter to this specific track
                             const filterConfig = { type: "VALUE", op, value: threshold, chr, start, end }
                             await this.addFilter(filterConfig)
-
-                            // Generate description and update UI
-                            const filterDescription = ClearFiltersButton.generateFilterDescription(filterConfig, 'seg')
-                            this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'seg')
-                            this.browser.navbar.clearFiltersButton.setVisibility(true)
                         }
                     }
                     this.segFilterDialog.present(config, event)
                 }
             })
         } else if (this.type === 'mut' || this.type === 'maf') {
-            menuItems.push('<hr/>')
             menuItems.push({
                 label: 'Filter samples by mutation',
                 click: () => {
@@ -759,16 +754,23 @@ class SegTrack extends TrackBase {
                             // Apply filter to this specific track
                             const filterConfig = { type: "MUTATION_TYPE", op, value: selected, chr, start, end }
                             await this.addFilter(filterConfig)
-
-                            // Generate description and update UI
-                            const filterDescription = ClearFiltersButton.generateFilterDescription(filterConfig, 'mut')
-                            this.browser.navbar.clearFiltersButton.setTableRowContent(filterDescription, 'mut')
-                            this.browser.navbar.clearFiltersButton.setVisibility(true)
                         }
                     }
                     this.mutFilterDialog.present(config, event)
                 }
             })
+        }
+        menuItems.push('<hr/>')
+
+        // Add filter management menu item if track has filters
+        if (this._trackFilterObjects && this._trackFilterObjects.length > 0) {
+            menuItems.push({
+                label: 'Manage filters...',
+                click: () => {
+                    this.filterManagerDialog.present(this, event)
+                }
+            })
+            menuItems.push('<hr/>')
         }
 
         return menuItems

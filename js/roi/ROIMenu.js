@@ -2,11 +2,6 @@ import * as DOMUtils from "../ui/utils/dom-utils.js"
 import * as UIUtils from "../ui/utils/ui-utils.js"
 import {isSecureContext} from "../util/igvUtils.js"
 import {createBlatTrack} from "../blat/blatTrack.js"
-// REMOVED: Filter dialog imports - now handled by individual tracks
-// import ROISEGFilterDialog from "../ui/components/roiSegFilterDialog.js"
-// import ROIMutFilterDialog from "../ui/components/roiMutFilterDialog.js"
-// import SegTrack from "../feature/segTrack.js"
-// import ClearFiltersButton from "../ui/clearFiltersButton.js"
 
 const maxSequenceSize = 1000000
 const maxBlatSize = 25000
@@ -31,10 +26,6 @@ class ROIMenu {
         this.container.appendChild(this.body)
 
         this.container.style.display = 'none'
-
-        // REMOVED: Filter dialog instances - now handled by individual tracks
-        // this.roiSEGFilterDialog = new ROISEGFilterDialog(browser.columnContainer)
-        // this.roiMutFilterDialog = new ROIMutFilterDialog(browser.columnContainer, SegTrack.getMutationTypes())
     }
 
     async present(feature, roiSet, event, roiManager, columnContainer, regionElement) {

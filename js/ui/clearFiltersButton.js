@@ -196,7 +196,7 @@ class ClearFiltersButton extends NavbarButton {
                     const sortedIndices = filterIndicesToRemove.sort((a, b) => b - a)
 
                     for (const track of tracks) {
-                        for (const index of sortedIndices) {
+                    for (const index of sortedIndices) {
                             await track.removeFilter(index)
                         }
                     }
