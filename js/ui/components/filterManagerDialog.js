@@ -44,7 +44,7 @@ class FilterManagerDialog {
         const container = document.createElement('div')
         container.className = 'igv-clear-filters__container'
         container.style.cssText = `
-            max-width: 400px;
+            max-width: 600px;
             max-height: 80vh;
             overflow-y: auto;
             position: fixed;
@@ -175,19 +175,30 @@ class FilterManagerDialog {
     }
 
     generateFilterDescription(filter, trackType) {
+        let description = ''
+        
+        // Add genomic region information if available
+        if (filter.chr && filter.start !== undefined && filter.end !== undefined) {
+            description += `${filter.chr}:${filter.start.toLocaleString()}-${filter.end.toLocaleString()} | `
+        }
+        
+        // Add filter-specific description
         if (trackType === 'seg') {
             const op = filter.op === '>' ? 'Greater than' : 'Less than'
-            return `${op} ${filter.value}`
+            description += `${op} ${filter.value}`
         } else if (trackType === 'mut' || trackType === 'maf') {
             if (filter.op === 'HAS') {
                 const mutationTypes = Array.isArray(filter.value) ? filter.value.join(', ') : filter.value
-                return `Has mutation type: ${mutationTypes}`
+                description += `Has mutation type: ${mutationTypes}`
             } else {
                 const mutationTypes = Array.isArray(filter.value) ? filter.value.join(', ') : filter.value
-                return `No mutation type: ${mutationTypes}`
+                description += `No mutation type: ${mutationTypes}`
             }
+        } else {
+            description += 'Unknown filter type'
         }
-        return 'Unknown filter type'
+        
+        return description
     }
 }
 
