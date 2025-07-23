@@ -31,7 +31,6 @@ import OverlayTrackButton from "./ui/overlayTrackButton.js"
 import MultiTrackSelectButton from "./ui/multiTrackSelectButton.js"
 import CursorGuideButton from "./ui/cursorGuideButton.js"
 import CenterLineButton from "./ui/centerLineButton.js"
-import ClearFiltersButton from "./ui/clearFiltersButton.js"
 import TrackLabelControl from "./ui/trackLabelControl.js"
 import ROITableControl from "./roi/roiTableControl.js"
 import SampleInfoControl from "./sample/sampleInfoControl.js"
@@ -147,8 +146,6 @@ class ResponsiveNavbar {
         this.roiTableControl = new ROITableControl(toggleButtonContainer, browser);
         this.sampleInfoControl = new SampleInfoControl(toggleButtonContainer, browser);
         this.sampleNameControl = new SampleNameControl(toggleButtonContainer, browser);
-
-        this.clearFiltersButton = new ClearFiltersButton(toggleButtonContainer, browser);
 
         if (config.showSVGButton === true) {
             this.saveImageControl = new SaveImageControl(toggleButtonContainer, browser);

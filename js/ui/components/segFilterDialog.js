@@ -78,15 +78,27 @@ class SEGFilterDialog {
         this.ok = DOMUtils.div()
         buttons.appendChild(this.ok)
         this.ok.textContent = 'OK'
+        this.ok.classList.add('disabled') // Start with disabled state
 
         // cancel
         this.cancel = DOMUtils.div()
         buttons.appendChild(this.cancel)
         this.cancel.textContent = 'Cancel'
 
+        // Input validation and OK button state management
+        const updateOkButtonState = () => {
+            const hasValue = this._input.value.trim() !== ''
+            if (hasValue) {
+                this.ok.classList.remove('disabled')
+            } else {
+                this.ok.classList.add('disabled')
+            }
+        }
+
+        this._input.addEventListener('input', updateOkButtonState)
         this._input.addEventListener('keyup', e => {
             if ('Enter' === e.code) {
-                if (typeof this.callback === 'function') {
+                if (this._input.value.trim() !== '' && typeof this.callback === 'function') {
                     const {threshold, op} = this.value
                     this.callback(threshold, op)
                     this.callback = undefined
@@ -98,7 +110,7 @@ class SEGFilterDialog {
         })
 
         this.ok.addEventListener('click', () => {
-            if (typeof this.callback === 'function') {
+            if (this._input.value.trim() !== '' && typeof this.callback === 'function') {
                 const {threshold, op} = this.value
                 this.callback(threshold, op)
                 this.callback = undefined
@@ -133,9 +145,9 @@ class SEGFilterDialog {
         return selectedRadio ? selectedRadio.value : "<"  // Default to < if somehow no radio is selected
     }
 
-    present(options, e) {
-        if (options.value) this._input.value = options.value
-        this.callback = options.callback || options.click
+    present(event, config) {
+        if (config.value) this._input.value = config.value
+        this.callback = config.callback || config.click
 
         this.container.style.display = ''
 
@@ -146,10 +158,13 @@ class SEGFilterDialog {
         gtRadio.checked = false
 
         this._input.value = ''
+        
+        // Reset OK button to disabled state
+        this.ok.classList.add('disabled')
 
         // Get click coordinates
-        const clickX = e.clientX
-        const clickY = e.clientY
+        const clickX = event.clientX
+        const clickY = event.clientY
 
         // Get dialog dimensions
         const dialogWidth = this.container.offsetWidth

@@ -82,15 +82,13 @@ class FilterManagerDialog {
 
         // Create content wrapper with proper padding
         const contentWrapper = document.createElement('div')
-        contentWrapper.style.cssText = `
-            padding: 12px;
-        `
+        contentWrapper.style.cssText = `padding: 12px;`
 
         // Create filter list
         const filterList = document.createElement('div')
         filterList.className = 'igv-clear-filters__track-container'
 
-        filters.forEach((filter, index) => {
+        for (const filter of filters) {
             const filterRow = document.createElement('div')
             filterRow.className = 'igv-clear-filters__row'
 
@@ -118,12 +116,19 @@ class FilterManagerDialog {
             `
             removeButton.addEventListener('click', async (e) => {
                 e.stopPropagation()
-                await track.removeFilter(index)
-                filterRow.remove()
+                
+                // Find the current index of this filter in the track's filter list
+                const currentFilters = track.getFilters()
+                const currentIndex = currentFilters.findIndex(f => f.op === filter.op && f.value === filter.value)
+                
+                if (currentIndex !== -1) {
+                    await track.removeFilter(currentIndex)
+                    filterRow.remove()
 
-                // If no more filters, close dialog
-                if (filterList.children.length === 0) {
-                    this.close()
+                    // If no more filters, close dialog
+                    if (filterList.children.length === 0) {
+                        this.close()
+                    }
                 }
             })
 
@@ -132,7 +137,7 @@ class FilterManagerDialog {
 
             filterRow.appendChild(content)
             filterList.appendChild(filterRow)
-        })
+        }
 
         contentWrapper.appendChild(filterList)
 

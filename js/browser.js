@@ -47,7 +47,6 @@ import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
-import ClearFiltersButton from "./ui/clearFiltersButton.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;

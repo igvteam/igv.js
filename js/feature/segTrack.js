@@ -725,7 +725,7 @@ class SegTrack extends TrackBase {
         if (this.type === 'seg') {
             menuItems.push('<hr/>')
             menuItems.push({
-                label: 'Filter by value',
+                label: 'Filter by value ...',
                 click: () => {
                     const config = {
                         callback: async (threshold, op) => {
@@ -738,7 +738,7 @@ class SegTrack extends TrackBase {
                             await this.addFilter(filterConfig)
                         }
                     }
-                    this.segFilterDialog.present(config, event)
+                    this.segFilterDialog.present(event, config)
                 }
             })
 
@@ -764,7 +764,7 @@ class SegTrack extends TrackBase {
 
         if (this._trackFilterObjects && this._trackFilterObjects.length > 0) {
             menuItems.push({
-                label: 'Manage filters...',
+                label: 'Filters...',
                 click: () => {
                     this.filterManagerDialog.present(this, event)
                 }

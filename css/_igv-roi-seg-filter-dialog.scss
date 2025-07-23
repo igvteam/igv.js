@@ -204,6 +204,17 @@
       background-color: $igv-button-ok-hover-color;
     }
 
+    >div:first-child.disabled {
+      cursor: not-allowed;
+      background-color: #ccc;
+      opacity: 0.6;
+    }
+
+    >div:first-child.disabled:hover {
+      cursor: not-allowed;
+      background-color: #ccc;
+    }
+
     >div:last-child:hover {
       cursor: pointer;
       background-color: $igv-button-cancel-hover-color;
