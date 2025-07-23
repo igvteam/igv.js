@@ -95,11 +95,28 @@ class FilterManagerDialog {
             // Create content container
             const content = document.createElement('div')
             content.className = 'igv-clear-filters__content'
+            content.style.cssText = 'display: flex; align-items: flex-start; gap: 8px;'
 
-            // Create description
-            const description = document.createElement('div')
-            description.className = 'igv-clear-filters__description'
-            description.textContent = this.generateFilterDescription(filter, track.type)
+            // Create text container for the two-line layout
+            const textContainer = document.createElement('div')
+            textContainer.style.cssText = 'flex: 1; display: flex; flex-direction: column; gap: 2px;'
+
+            // Create first line - filter condition
+            const conditionLine = document.createElement('div')
+            conditionLine.className = 'igv-clear-filters__description'
+            conditionLine.textContent = this.generateFilterCondition(filter, track.type)
+
+            // Create second line - genomic region
+            const regionLine = document.createElement('div')
+            regionLine.style.cssText = `
+                font-size: 12px;
+                color: #666;
+                margin-left: 0;
+            `
+            regionLine.textContent = this.generateGenomicRegion(filter)
+
+            textContainer.appendChild(conditionLine)
+            textContainer.appendChild(regionLine)
 
             // Create remove button
             const removeButton = document.createElement('button')
@@ -112,15 +129,16 @@ class FilterManagerDialog {
                 border-radius: 4px;
                 cursor: pointer;
                 font-size: 12px;
-                margin-left: 8px;
+                flex-shrink: 0;
+                align-self: flex-start;
             `
             removeButton.addEventListener('click', async (e) => {
                 e.stopPropagation()
-                
+
                 // Find the current index of this filter in the track's filter list
                 const currentFilters = track.getFilters()
                 const currentIndex = currentFilters.findIndex(f => f.op === filter.op && f.value === filter.value)
-                
+
                 if (currentIndex !== -1) {
                     await track.removeFilter(currentIndex)
                     filterRow.remove()
@@ -132,7 +150,7 @@ class FilterManagerDialog {
                 }
             })
 
-            content.appendChild(description)
+            content.appendChild(textContainer)
             content.appendChild(removeButton)
 
             filterRow.appendChild(content)
@@ -174,17 +192,40 @@ class FilterManagerDialog {
         }
     }
 
+    generateFilterCondition(filter, trackType) {
+        if (trackType === 'seg') {
+            const op = filter.op === '>' ? 'Value greater than' : 'Value less than'
+            return `${op} ${filter.value}`
+        } else if (trackType === 'mut' || trackType === 'maf') {
+            if (filter.op === 'HAS') {
+                const mutationTypes = Array.isArray(filter.value) ? filter.value.join(', ') : filter.value
+                return `Has mutation type: ${mutationTypes}`
+            } else {
+                const mutationTypes = Array.isArray(filter.value) ? filter.value.join(', ') : filter.value
+                return `No mutation type: ${mutationTypes}`
+            }
+        }
+        return 'Unknown filter type'
+    }
+
+    generateGenomicRegion(filter) {
+        if (filter.chr && filter.start !== undefined && filter.end !== undefined) {
+            return `${filter.chr}:${filter.start.toLocaleString()}-${filter.end.toLocaleString()}`
+        }
+        return ''
+    }
+
     generateFilterDescription(filter, trackType) {
         let description = ''
-        
+
         // Add genomic region information if available
         if (filter.chr && filter.start !== undefined && filter.end !== undefined) {
             description += `${filter.chr}:${filter.start.toLocaleString()}-${filter.end.toLocaleString()} | `
         }
-        
+
         // Add filter-specific description
         if (trackType === 'seg') {
-            const op = filter.op === '>' ? 'Greater than' : 'Less than'
+            const op = filter.op === '>' ? 'Value greater than' : 'Value less than'
             description += `${op} ${filter.value}`
         } else if (trackType === 'mut' || trackType === 'maf') {
             if (filter.op === 'HAS') {
@@ -197,7 +238,7 @@ class FilterManagerDialog {
         } else {
             description += 'Unknown filter type'
         }
-        
+
         return description
     }
 }
