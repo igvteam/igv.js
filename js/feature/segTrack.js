@@ -38,9 +38,8 @@ class SegTrack extends TrackBase {
         this.buckets = new Map()
         this.bucketedAttribute = undefined
 
-        // Initialize filter dialogs for context menu
         this.segFilterDialog = new SEGFilterDialog(browser.columnContainer)
-        this.mutFilterDialog = new MutFilterDialog(browser.columnContainer, SegTrack.getMutationTypes())
+        // this.mutFilterDialog = new MutFilterDialog(browser.columnContainer, SegTrack.getMutationTypes())
         this.filterManagerDialog = new FilterManagerDialog(browser.columnContainer)
     }
 
@@ -721,11 +720,12 @@ class SegTrack extends TrackBase {
             }
         })
 
-        menuItems.push('<hr/>')
+
         // Add filter menu items based on track type
         if (this.type === 'seg') {
+            menuItems.push('<hr/>')
             menuItems.push({
-                label: 'Filter samples by copy number',
+                label: 'Filter by value',
                 click: () => {
                     const config = {
                         callback: async (threshold, op) => {
@@ -741,7 +741,8 @@ class SegTrack extends TrackBase {
                     this.segFilterDialog.present(config, event)
                 }
             })
-        } else if (this.type === 'mut' || this.type === 'maf') {
+
+        } /*else if (this.type === 'mut' || this.type === 'maf') {
             menuItems.push({
                 label: 'Filter samples by mutation',
                 click: () => {
@@ -759,10 +760,8 @@ class SegTrack extends TrackBase {
                     this.mutFilterDialog.present(config, event)
                 }
             })
-        }
-        menuItems.push('<hr/>')
+        }*/
 
-        // Add filter management menu item if track has filters
         if (this._trackFilterObjects && this._trackFilterObjects.length > 0) {
             menuItems.push({
                 label: 'Manage filters...',
@@ -770,8 +769,10 @@ class SegTrack extends TrackBase {
                     this.filterManagerDialog.present(this, event)
                 }
             })
-            menuItems.push('<hr/>')
+
         }
+
+        menuItems.push('<hr/>')
 
         return menuItems
     }

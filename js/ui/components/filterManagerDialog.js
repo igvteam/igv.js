@@ -24,57 +24,67 @@
  * THE SOFTWARE.
  */
 
+import makeDraggable from "../utils/draggable.js"
+import {attachDialogCloseHandlerWithParent} from "../utils/ui-utils.js"
+
 class FilterManagerDialog {
 
     constructor(parent) {
         this.parent = parent
-        this.currentTrack = null
     }
 
-    /**
-     * Present the filter management dialog for a specific track
-     * @param {Object} track - The track instance to manage filters for
-     * @param {Event} event - The event that triggered the dialog
-     */
     present(track, event) {
+
         const filters = track.getFilters()
         if (!filters || filters.length === 0) {
             return
         }
 
-        // Create modal container
-        const modal = document.createElement('div')
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        `
-
         // Create dialog container using existing SCSS classes
         const container = document.createElement('div')
         container.className = 'igv-clear-filters__container'
-        container.style.maxWidth = '400px'
-        container.style.maxHeight = '80vh'
-        container.style.overflowY = 'auto'
-
-        // Create header
-        const header = document.createElement('div')
-        header.style.cssText = `
-            font-weight: 600;
-            font-size: 16px;
-            margin-bottom: 12px;
-            color: #333;
+        container.style.cssText = `
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 5px;
+            z-index: 10001;
+            padding: 0;
         `
-        header.textContent = `Manage Filters - ${track.name || track.type} Track`
+
+        // Create header with title and X button using proper SCSS classes
+        const header = document.createElement('div')
+        header.className = 'igv-roi-seg-filter-dialog__header'
+
+        // Create title in header (left-justified)
+        const title = document.createElement('div')
+        title.style.cssText = `
+            font-weight: 400;
+            font-size: 16px;
+            color: #333;
+            margin-left: 12px;
+            flex: 1;
+        `
+        title.textContent = 'Filters'
+        header.appendChild(title)
+
+        // Add X button using the same utility as other dialogs
+        attachDialogCloseHandlerWithParent(header, () => {
+            this.close()
+        })
 
         container.appendChild(header)
+
+        // Create content wrapper with proper padding
+        const contentWrapper = document.createElement('div')
+        contentWrapper.style.cssText = `
+            padding: 12px;
+        `
 
         // Create filter list
         const filterList = document.createElement('div')
@@ -124,37 +134,18 @@ class FilterManagerDialog {
             filterList.appendChild(filterRow)
         })
 
-        container.appendChild(filterList)
+        contentWrapper.appendChild(filterList)
 
-        // Create button container
-        const buttonContainer = document.createElement('div')
-        buttonContainer.className = 'igv-clear-filters__button-container'
+        // Add content wrapper to container
+        container.appendChild(contentWrapper)
 
-        // Create close button
-        const closeButton = document.createElement('button')
-        closeButton.className = 'igv-clear-filters__button igv-clear-filters__button--cancel'
-        closeButton.textContent = 'Close'
-        closeButton.addEventListener('click', () => {
-            this.close()
-        })
+        // Add to parent and show
+        this.parent.appendChild(container)
 
-        buttonContainer.appendChild(closeButton)
-        container.appendChild(buttonContainer)
-
-        // Add to modal and show
-        modal.appendChild(container)
-        document.body.appendChild(modal)
+        makeDraggable(container, header)
 
         // Store references for cleanup
-        this.modal = modal
         this.container = container
-
-        // Close on outside click
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                this.close()
-            }
-        })
 
         // Close on escape key
         const escapeHandler = (e) => {
@@ -167,9 +158,8 @@ class FilterManagerDialog {
     }
 
     close() {
-        if (this.modal) {
-            this.modal.remove()
-            this.modal = null
+        if (this.container) {
+            this.container.remove()
             this.container = null
         }
 
@@ -179,16 +169,10 @@ class FilterManagerDialog {
         }
     }
 
-    /**
-     * Generate a human-readable description of a filter
-     * @param {Object} filter - The filter object
-     * @param {string} trackType - The track type ('seg', 'mut', etc.)
-     * @returns {string} - Human-readable filter description
-     */
     generateFilterDescription(filter, trackType) {
         if (trackType === 'seg') {
-            const op = filter.op === '>' ? 'greater than' : 'less than'
-            return `Copy number ${op} ${filter.value}`
+            const op = filter.op === '>' ? 'Greater than' : 'Less than'
+            return `${op} ${filter.value}`
         } else if (trackType === 'mut' || trackType === 'maf') {
             if (filter.op === 'HAS') {
                 const mutationTypes = Array.isArray(filter.value) ? filter.value.join(', ') : filter.value

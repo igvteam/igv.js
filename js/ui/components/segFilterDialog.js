@@ -36,7 +36,7 @@ class SEGFilterDialog {
         const ltLabel = document.createElement("label")
         ltContainer.appendChild(ltLabel)
 
-        ltLabel.textContent = "Less than"
+        ltLabel.textContent = "Keep samples with value less than"
         ltLabel.htmlFor = "lt-radio"
 
 
@@ -56,7 +56,7 @@ class SEGFilterDialog {
         const gtLabel = document.createElement("label")
         gtContainer.appendChild(gtLabel)
 
-        gtLabel.textContent = "Greater than"
+        gtLabel.textContent = "Keep samples with value greater than"
         gtLabel.htmlFor = "gt-radio"
 
 

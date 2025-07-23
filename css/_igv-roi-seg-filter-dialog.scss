@@ -18,7 +18,7 @@
 
   cursor: pointer;
 
-  width:300px;
+  width:350px;
   height:fit-content;
   padding-bottom: 16px;
 
@@ -77,9 +77,9 @@
   &__radio-group {
     margin-top: 8px;
     display: flex;
-    flex-direction: row;
-    justify-content: space-around;
-    align-items: center;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
 
     label {
       display: flex;
@@ -95,9 +95,10 @@
     .op {
       display: flex;
       flex-direction: row;
-      justify-content: space-around;
+      justify-content: flex-start;
       align-items: center;
       margin-left: 16px;
+      margin-bottom: 8px;
       gap: 2px;
 
       input[type="radio"] {

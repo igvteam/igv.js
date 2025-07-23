@@ -27,16 +27,8 @@
         align-items: flex-start;
         padding: 12px;
 
-        //border-bottom-color: $igv-trackgear-grey-color;
-        //border-bottom-style: solid;
-        //border-bottom-width: thin;
         gap: 12px;
         cursor: pointer;
-        transition: background-color 0.2s ease;
-
-        &:hover {
-            background-color: #f8f9fa;
-        }
 
         &:last-of-type {
             border-bottom: none;
