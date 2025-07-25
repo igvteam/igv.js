@@ -106,7 +106,7 @@ class MUTFilterDialog {
                 this.callback(selected, op)
                 this.callback = undefined
             }
-            this._select.value = undefined
+            this._select.value = ''
             DOMUtils.hide(this.container)
         })
 
