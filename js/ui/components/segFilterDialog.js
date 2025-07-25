@@ -115,7 +115,7 @@ class SEGFilterDialog {
                 this.callback(threshold, op)
                 this.callback = undefined
             }
-            this._input.value = undefined
+            this._input.value = ''
             DOMUtils.hide(this.container)
         })
 
