@@ -11,7 +11,6 @@ import ShoeboxSource from "../hic/shoeboxSource.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
 import SEGFilterDialog from "../ui/components/segFilterDialog.js"
-import MutFilterDialog from "../ui/components/mutFilterDialog.js"
 import FilterManagerDialog from "../ui/components/filterManagerDialog.js"
 
 class SegTrack extends TrackBase {
@@ -39,7 +38,6 @@ class SegTrack extends TrackBase {
         this.bucketedAttribute = undefined
 
         this.segFilterDialog = new SEGFilterDialog(browser.columnContainer)
-        // this.mutFilterDialog = new MutFilterDialog(browser.columnContainer, SegTrack.getMutationTypes())
         this.filterManagerDialog = new FilterManagerDialog(browser.columnContainer)
     }
 
@@ -742,25 +740,7 @@ class SegTrack extends TrackBase {
                 }
             })
 
-        } /*else if (this.type === 'mut' || this.type === 'maf') {
-            menuItems.push({
-                label: 'Filter samples by mutation',
-                click: () => {
-                    const config = {
-                        callback: async (selected, op) => {
-                            const chr = referenceFrame.chr
-                            const start = Math.floor(genomicLocation - bpWidth)
-                            const end = Math.floor(genomicLocation + bpWidth)
-
-                            // Apply filter to this specific track
-                            const filterConfig = { type: "MUTATION_TYPE", op, value: selected, chr, start, end }
-                            await this.addFilter(filterConfig)
-                        }
-                    }
-                    this.mutFilterDialog.present(config, event)
-                }
-            })
-        }*/
+        }
 
         if (this._trackFilterObjects && this._trackFilterObjects.length > 0) {
             menuItems.push({
