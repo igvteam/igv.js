@@ -103,7 +103,7 @@ class SEGFilterDialog {
                     this.callback(threshold, op)
                     this.callback = undefined
                 }
-                this._input.value = undefined
+                this._input.value = ''
                 DOMUtils.hide(this.container)
             }
             e.stopImmediatePropagation()   // Prevent key event to cause track keyboard navigation ("next feature")
