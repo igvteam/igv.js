@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>IGV.js - DynSeq Track Example</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/css/bootstrap.min.css"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://cdn.jsdelivr.net/npm/igv@2.15.8/dist/igv.min.css"
+    />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      #igv-div {
+        border: 1px solid #ccc;
+        margin: 20px 0;
+      }
+      .description {
+        background-color: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+      }
+      .code-block {
+        background-color: #f8f9fa;
+        padding: 10px;
+        border-radius: 5px;
+        font-family: monospace;
+        font-size: 0.9em;
+        margin: 10px 0;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="container">
+      <h1>IGV.js - DynSeq Track Example</h1>
+
+      <div class="description">
+        <h3>Dynamic Sequence (DynSeq) Track</h3>
+        <p>
+          This example demonstrates the <strong>dynseq</strong> graph type for
+          WIG tracks. The dynseq option renders genome bases as colored glyphs
+          with heights proportional to the WIG values, combining sequence
+          information with quantitative data.
+        </p>
+
+        <h4>Features:</h4>
+        <ul>
+          <li>
+            Genome bases are rendered as colored rectangles (A=green, T=red,
+            G=orange, C=blue)
+          </li>
+          <li>
+            Height of each base glyph corresponds to the WIG value at that
+            position
+          </li>
+          <li>Base letters are displayed when zoomed in sufficiently</li>
+        </ul>
+
+        <h4>Usage:</h4>
+        <div class="code-block">
+          Set <code>graphType: "dynseq"</code> in your WIG track configuration,
+          or select "dynseq" from the track's context menu.
+        </div>
+      </div>
+
+      <div id="igv-div"></div>
+
+      <div class="description">
+        <h4>Track Configuration Example:</h4>
+        <pre class="code-block">
+{
+  "name": "Sample DynSeq Track",
+  "type": "wig",
+  "url": "path/to/your/data.bigWig",
+  "graphType": "dynseq",
+  "height": 100,
+  "color": "blue",
+  "altColor": "red"
+}</pre
+        >
+      </div>
+    </div>
+
+    <script type="module">
+      import igv from "../dist/igv.esm.min.js";
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var igvDiv = document.getElementById("igv-div");
+
+        var options = {
+          genome: "hg38",
+          locus: "chr1:119,734-119,809",
+          tracks: [
+            {
+              name: "Standard Bar Chart",
+              type: "wig",
+              url: "https://www.encodeproject.org/files/ENCFF105JTF/@@download/ENCFF105JTF.bigWig",
+              height: 60,
+              color: "blue",
+              altColor: "red",
+            },
+            {
+              name: "Dynamic Sequence Track",
+              type: "wig",
+              url: "https://www.encodeproject.org/files/ENCFF105JTF/@@download/ENCFF105JTF.bigWig",
+              graphType: "dynseq",
+              height: 80,
+              color: "blue",
+              altColor: "red",
+            },
+          ],
+        };
+
+        igv
+          .createBrowser(igvDiv, options)
+          .then(function (browser) {
+            console.log("IGV browser created successfully");
+            console.log(
+              "Try right-clicking on the DynSeq track to switch between graph types"
+            );
+          })
+          .catch(function (error) {
+            console.error("Error creating IGV browser:", error);
+          });
+      });
+    </script>
+  </body>
+</html>
