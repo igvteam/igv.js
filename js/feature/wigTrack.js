@@ -127,7 +127,7 @@ class WigTrack extends TrackBase {
                 try {
                     f.sequence = await this.browser.genome.getSequence(f.chr, Math.floor(f.start), Math.floor(f.end))
                 } catch (error) {
-                    console.warn('Failed to get sequence for feature:', error)
+                    console.warn(`Failed to get sequence for feature at chr: ${f.chr}, start: ${f.start}, end: ${f.end}. Error:`, error)
                     f.sequence = null
                 }
             }
