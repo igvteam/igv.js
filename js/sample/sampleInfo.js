@@ -150,7 +150,7 @@ class SampleInfo {
         const numbers = sampleKeys.filter(key => {
             const attributes = this.getAttributes(key)
             if (undefined === attributes) {
-                console.log(`No attributes for key: ${key}`)
+                console.warn(`No attributes for key: ${key}`)
                 return false
             }
             const value = attributes[attribute]
