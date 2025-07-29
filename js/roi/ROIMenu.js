@@ -103,7 +103,7 @@ class ROIMenu {
                     await navigator.clipboard.writeText(sequence)
                 } catch (e) {
                     console.error(e)
-                    this.browser.alert.present(undefined, `error copying sequence to clipboard ${e}`)
+                    this.browser.alert.present(undefined, `Failed to copy the sequence to the clipboard. (${e.message})`)
                 }
             }
         })
