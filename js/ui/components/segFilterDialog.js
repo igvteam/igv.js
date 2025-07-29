@@ -51,7 +51,7 @@ class SEGFilterDialog {
         gtRadio.name = "op"
         gtRadio.value = ">"
         gtRadio.id = "gt-radio"
-        // gtRadio.checked = true
+        // gtRadio.checked = true // Uncomment this line to set the "Greater Than" radio button as the default selection.
 
         const gtLabel = document.createElement("label")
         gtContainer.appendChild(gtLabel)
