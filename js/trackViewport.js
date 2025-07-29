@@ -610,7 +610,7 @@ class TrackViewport extends Viewport {
     renderAttributeGroupElements(context, tx, ty, width, height){
         const bucketLabels = this.viewportElement.querySelectorAll('.igv-attribute-group-label')
         const bucketLines = this.viewportElement.querySelectorAll('.igv-attribute-group-line')
-        console.log(`viewport ${ this.guid } renderAttributeGroupElements. labels ${ bucketLabels.length } lines ${ bucketLines.length }`)
+        // Debug statement removed: console.log(`viewport ${ this.guid } renderAttributeGroupElements. labels ${ bucketLabels.length } lines ${ bucketLines.length }`)
     }
 
     // render track label element called from renderSVGContext()
