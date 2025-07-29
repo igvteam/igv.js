@@ -56,8 +56,7 @@ class TrackViewport extends Viewport {
             }
         }
 
-        // Check if this viewport element meets the criteria for seg or mut track types
-        this.doRenderBucketLabels = this.viewportElement.matches('.igv-viewport[data-track-type="seg"], .igv-viewport[data-track-type="mut"]');
+        this.doRenderBucketLabels = (new Set(['seg', 'mut']).has(this.trackView.track.type))
 
         this.stopSpinner()
         this.addMouseHandlers()
@@ -592,9 +591,6 @@ class TrackViewport extends Viewport {
             this.renderTrackLabelSVG(context, deltaX + x, deltaY + y, width, height);
         }
 
-        // if (true === this.doRenderBucketLabels){
-        //     this.renderAttributeGroupElements(context)
-        // }
     }
 
     renderTrackLabelSVG(context, tx, ty, width, height) {
@@ -971,7 +967,7 @@ class TrackViewport extends Viewport {
         const containerRect = this.browser.columnContainer.getBoundingClientRect();
         const offsetX = labelRect.left - containerRect.left;
         const offsetY = labelRect.bottom - containerRect.top + 5;
-        
+
         popover.style.left = `${offsetX}px`;
         popover.style.top = `${offsetY}px`;
         popover.style.position = 'absolute';
