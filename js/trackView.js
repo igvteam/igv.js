@@ -49,9 +49,6 @@ class TrackView {
         this.track = track
         track.trackView = this
 
-        if (new Set(['seg', 'mut']).has(track.type)) {
-            console.log(`adding dom for ${ track.type } track`)
-        }
         this.addDOMToColumnContainer(browser, columnContainer, browser.referenceFrameList)
 
     }

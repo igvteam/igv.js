@@ -20,15 +20,6 @@ class SegTrack extends TrackBase {
             groupBy: undefined
         };
 
-    static getMutationTypes() {
-        return [
-            "Frame_Shift_Del", "Frame_Shift_Ins", "In_Frame_Del", "In_Frame_Ins", "Missense_Mutation",
-            "Nonsense_Mutation", "Silent", "Splice_Site", "Translation_Start_Site", "Nonstop_Mutation",
-            "3'UTR", "3'Flank", "5'UTR", "5'Flank", "IGR", "Intron", "RNA", "Targeted_Region",
-            "De_novo_Start_InFrame", "De_novo_Start_OutOfFrame", "Splice_Region", "Unknown"
-        ]
-    }
-
     static BUCKET_MARGIN_HEIGHT = 16
 
     constructor(config, browser) {
