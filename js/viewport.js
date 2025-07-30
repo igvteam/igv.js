@@ -44,6 +44,10 @@ class Viewport {
             this.setHeight(trackView.track.height);
         }
 
+        // Associate the track type with the viewport element using data attribute
+        const trackType = trackView.track.type || 'untyped';
+        this.viewportElement.setAttribute('data-track-type', trackType);
+
         // Create an alert dialog for the sequence track to copy ref sequence to.
         if (trackView.track instanceof SequenceTrack) {
             this.alert = new AlertDialog(this.viewportElement);

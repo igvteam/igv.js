@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
+    <title>IGVJS Example - Discard Sample Info</title>
     <style>
         .button-container {
             margin-bottom: 10px;
@@ -27,15 +27,16 @@
 <body>
 
 <div class="button-container">
-    <button id="loadSampleInfoButton" class="load-button">Load Sample Information</button>
     <button id="loadTrackButton" class="load-button">Load Track</button>
+    <button id="loadSampleInfoButton" class="load-button">Load Sample Information</button>
+    <button id="discardSampleInfo" class="load-button">Discard Sample Info</button>
 </div>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import igv from '../../js/index.js'
+    import igv from "../../js/index.js"
 
     const config =
         {
@@ -44,7 +45,7 @@
             locus: 'chr17',
 
             // For comparison, compare to sampleinfo: object below
-            ____sampleinfo:
+            _sampleinfo_:
                 [
                     {
                         "url": "../../test/data/sample/sampletable_chr_17_no_dupes.txt",
@@ -52,7 +53,7 @@
                 ],
 
             // object corresponding to test/data/sample/sampletable_chr_17_only_names.txt
-            sampleinfo:
+            __sampleinfo__:
                 [
                     {
                         "BRISK_p_STY37_Mapping250K_Sty_A09_147618": {
@@ -898,6 +899,10 @@
         }
 
         browser.loadSampleInfo(sampleInfoLiteralConfig);
+    })
+
+    document.getElementById('discardSampleInfo').addEventListener('click', async () => {
+        await browser.discardSampleInfo()
     })
 
     document.getElementById('loadTrackButton').addEventListener('click', () => {

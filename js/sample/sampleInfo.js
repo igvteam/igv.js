@@ -98,6 +98,10 @@ class SampleInfo {
         }
     }
 
+    discard() {
+        this.initialize()
+    }
+
     getAttributeColor(attribute, value) {
 
         let color
@@ -138,22 +142,32 @@ class SampleInfo {
 
     }
 
-    getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
+    #sortSampleKeysWithComparator(sampleKeys, comparator) {
+        return sampleKeys.sort(comparator)
+    }
 
-        sortDirection = sortDirection || 1
-
+    #sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
         const numbers = sampleKeys.filter(key => {
-            const value = this.getAttributes(key)[attribute]
+            const attributes = this.getAttributes(key)
+            if (undefined === attributes) {
+                console.warn(`No attributes for key: ${key}`)
+                return false
+            }
+            const value = attributes[attribute]
             return typeof value === 'number'
         })
 
         const strings = sampleKeys.filter(key => {
-            const value = this.getAttributes(key)[attribute]
+            const attributes = this.getAttributes(key)
+            if (undefined === attributes) {
+                console.log(`No attributes for key: ${key}`)
+                return false
+            }
+            const value = attributes[attribute]
             return typeof value === 'string'
         })
 
         const compare = (a, b) => {
-
             const aa = this.getAttributes(a)[attribute]
             const bb = this.getAttributes(b)[attribute]
 
@@ -164,14 +178,75 @@ class SampleInfo {
             if (typeof aa === 'number' && typeof bb === 'number') {
                 return sortDirection * (aa - bb)
             }
-
         }
 
         numbers.sort(compare)
         strings.sort(compare)
 
-        return -1 === sortDirection ? [...numbers, ...strings] : [...strings, ...numbers]
+        return sortDirection === -1 ? [...numbers, ...strings] : [...strings, ...numbers]
+    }
 
+    getSortedSampleKeysByComparator(sampleKeys, comparator, buckets) {
+
+        if (buckets.size > 1) {
+            const result = []
+            for (const bucketKeys of buckets.values()) {
+                result.push(...this.#sortSampleKeysWithComparator(bucketKeys, comparator))
+            }
+            return result
+        } else {
+            return this.#sortSampleKeysWithComparator(sampleKeys, comparator)
+        }
+
+    }
+
+    getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection, buckets) {
+        sortDirection = sortDirection || 1
+
+        if (buckets.size > 0) {
+            const result = []
+            // Sort within each bucket
+            for (const bucketKeys of buckets.values()) {
+                result.push(...this.#sortSampleKeysByAttribute(bucketKeys, attribute, sortDirection))
+            }
+            return result
+        } else {
+            return this.#sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection)
+        }
+
+    }
+
+    getGroupedSampleKeysByAttribute(sampleKeys, buckets, bucketedAttribute) {
+
+        if ('None' === bucketedAttribute) {
+            return sampleKeys
+        }
+
+        // First pass: collect all unique values and initialize buckets
+        for (const key of sampleKeys) {
+            const attributes = this.getAttributes(key)
+            if (undefined === attributes) {
+                console.log(`No attributes for key: ${key}`)
+                continue
+            }
+            const value = attributes[bucketedAttribute]
+            if (!buckets.has(value)) {
+                buckets.set(value, [])
+            }
+        }
+
+        // Second pass: assign sample keys to their respective buckets
+        for (const key of sampleKeys) {
+            const attributes = this.getAttributes(key)
+            if (undefined === attributes) {
+                console.warn(`No attributes for key: ${key}`)
+                continue
+            }
+            const value = attributes[bucketedAttribute]
+            buckets.get(value).push(key)
+        }
+
+        return Array.from(buckets.values()).flat()
     }
 
     toJSON() {

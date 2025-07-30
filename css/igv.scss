@@ -1,69 +1,31 @@
-$igv-axis-column-width: 50px;
-
-$igv-scrollbar-outer-width: 14px;
-$igv-scrollbar-inner-border-width: 1px;
-$igv-scrollbar-inner-left: 2px;
-$igv-scrollbar-inner-width: $igv-scrollbar-outer-width - 2 * ($igv-scrollbar-inner-left + $igv-scrollbar-inner-border-width);
-
-$igv-track-drag-column-width: 12px;
-
-$igv-track-gear-menu-column-width: 28px;
-
-$igv-trackgear-grey-color: #7F7F7F;
-$igv-trackgear-popover-border-radius: 4px;
-$igv-trackgear-font-color: #4b4b4b;
-$igv-trackgear-default-font-face: 'Open Sans', sans-serif;
-
-$igv-column-item-margin-top: 5px;
-
-$igv-column-shim-width: 1px;
-$igv-column-shim-margin: 2px;
-
-$igv-zoom-in-notice-width: 128px;
-$igv-zoom-in-notice-height: 16px;
-
-$igv-default-font-face: 'Open Sans', sans-serif;
-
-$igv-navbar-font-size: 12px;
-$igv-navbar-height: 32px;
-$igv-navbar-toggle-light-color: #f3f3f3;
-$igv-navbar-toggle-dark-dark: #737373;
-$igv-navbar-button-height: 18px;
-$igv-navbar-button-width: 96px;
-$igv-navbar-button-font-size: 11px;
-$igv-navbar-button-border-radius: 6px;
-$igv-button-width: 75px;
-$igv-button-height: 28px;
-
-$igv-button-border-radius: 2px;
-
-$igv-button-ok-color: #5ea4e0;
-$igv-button-ok-hover-color: #3b5c7f;
-
-$igv-button-cancel-color: #c4c4c4;
-$igv-button-cancel-hover-color: #7f7f7f;
-
-$igv-border-color: #bfbfbf;
-
-$igv-ideogram-height: 16px;
-
-$igv-panel-border-width: 1px;
-$igv-panel-border-color: #292929;
-
-$igv-ruler-sweeper-color: rgba(68, 134, 247, 0.25);
-$igv-ruler-blue-color: rgb(0, 102, 255);
-
-$igv-light-grey-color: #bfbfbf;
-$igv-grey-color: #7F7F7F;
-$igv-dark-grey-color: #373737;
-
-$igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
-
-$igv-trackgear-grey-color: #7F7F7F;
-$igv-trackgear-popover-border-radius: 4px;
-$igv-trackgear-font-color: #4b4b4b;
-$igv-trackgear-default-font-face: 'Open Sans', sans-serif;
-
+@use "variables" as *;
+@use "apple_crayon_color" as *;
+@use "igv-ui-dropdown";
+@use "igv-ui-popover";
+@use "igv-track-label-popover";
+@use "igv-ui-alert-dialog";
+@use "igv-ui-generic-dialog-container";
+@use "igv-ui-generic-container";
+@use "igv-ui-colorpicker";
+@use "igv-ui-dialog";
+@use "igv-ui-panel";
+@use "igv-ui-textbox";
+@use "igv-ui-table";
+@use "igv-roi-seg-filter-dialog";
+@use "igv-clear-filters-widget";
+@use "color";
+@use "font";
+@use "navbar";
+@use "dom-misc";
+@use "igv-center-line";
+@use "igv-cursor-guide";
+@use "igv-user-feedback";
+@use "igv-generic-dialog-container";
+@use "igv-generic-container";
+@use "igv-menu-popup";
+@use "spinner";
+@use "roi";
+@use "vanilla-picker.csp";
 
 @mixin generic-input {
   input {
@@ -88,38 +50,11 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   }
 }
 
-@import "igv-ui-dropdown";
-@import "igv-ui-popover";
-@import "igv-ui-alert-dialog";
-@import "igv-ui-generic-dialog-container";
-@import "igv-ui-generic-container";
-@import "igv-ui-colorpicker";
-@import "igv-ui-dialog";
-@import "igv-ui-panel";
-@import "igv-ui-textbox";
-@import "igv-ui-table";
-
 .igv-ui-center-fixed {
   left: 50%;
   top: 50%;
   transform: translate(-50%, -50%);
 }
-
-
-@import "color";
-@import "font";
-@import "navbar";
-@import "dom-misc";
-@import "igv-center-line";
-@import "igv-cursor-guide";
-@import "igv-user-feedback";
-@import "igv-generic-dialog-container";
-@import "igv-generic-container";
-@import "igv-menu-popup";
-@import "igv-user-feedback";
-@import "spinner";
-@import "roi";
-@import "vanilla-picker.csp";
 
 @mixin igv-column-base {
   position: relative;
@@ -189,7 +124,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   width: $igv-column-shim-width;
   margin-left: $igv-column-shim-margin;
   margin-right: $igv-column-shim-margin;
-  background-color: $igv-apple_crayon_iron;
+  background-color: $igv_apple_crayon_iron;
 }
 
 .igv-axis-column {

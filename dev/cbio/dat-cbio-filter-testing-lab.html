@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Whole Lotta cBio</title>
+
+</head>
+
+<body>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    document.addEventListener("DOMContentLoaded", async (event) => {
+
+        const config =
+            {
+                "version": "3.4.1",
+                "showSampleNames": false,
+                "reference": {
+                    "id": "hg38",
+                    "name": "Human (GRCh38/hg38)",
+                    "cytobandURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/hg38/cytoBandIdeo.txt.gz",
+                    "aliasURL": "https://igv-genepattern-org.s3.amazonaws.com/genomes/hg38/hg38_alias.tab",
+                    "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes",
+                    "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+                    "chromosomeOrder": "chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY"
+                },
+                "locus": "chr7:52,494,708-54,765,233",
+                "roi": [
+                    {
+                        "name": "user defined",
+                        "color": "rgba(136,135,135,0.0625)",
+                        "features": [
+                            {
+                                "chr": "chr7",
+                                "start": 53242017,
+                                "end": 54247221
+                            }
+                        ],
+                        "isUserDefined": true
+                    }
+                ],
+                "filterConfigurations": {
+                    "seg": [
+                        {
+                            "type": "VALUE",
+                            "op": "<",
+                            "value": ".5",
+                            "chr": "chr7",
+                            "start": 53242017,
+                            "end": 54247221
+                        },
+                        {
+                            "type": "VALUE",
+                            "op": ">",
+                            "value": ".3",
+                            "chr": "chr7",
+                            "start": 53242017,
+                            "end": 54247221
+                        }
+                    ]
+                },
+                "tracks": [
+                    {
+                        "type": "sequence",
+                        "order": -9007199254740991
+                    },
+                    {
+                        name: "Filtered Samples",
+                        type: "seg",
+                        format: "seg",
+                        url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/Broad.080528.subtypes.seg.gz",
+                        "height": 300,
+                        "displayMode": "FILL",
+                        "groupBy": "Subtype"
+                    },
+                    {
+                        name: "Somatic Mutations",
+                        type: "mut",
+                        format: "maf",
+                        "height": 300,
+                        "displayMode": "FILL",
+                        url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/TCGA_GBM_Level3_Somatic_Mutations_08.28.2008.maf.gz"
+                    },
+                    {
+                        "name": "Refseq Genes",
+                        "format": "refgene",
+                        "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/database/ncbiRefSeq.txt.gz",
+                        "indexed": false,
+                        "order": 1000001,
+                        "infoURL": "https://www.ncbi.nlm.nih.gov/gene/?term=$$",
+                        "type": "annotation",
+                        "height": 64
+                    }
+                ],
+                "sampleinfo": [
+                    {
+                        "url": "https://igv-genepattern-org.s3.amazonaws.com/demo/GBM-sampletable-samplemapping-colors.txt"
+                    }
+                ]
+            }
+
+        const browser = await igv.createBrowser(document.getElementById("igv-div"), config)
+    })
+
+
+</script>
+
+</body>
+
+</html>

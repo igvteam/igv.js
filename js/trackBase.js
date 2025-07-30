@@ -479,41 +479,62 @@ class TrackBase {
      */
     description() {
 
-        const wrapKeyValue = (k, v) => `<div class="igv-track-label-popup-shim"><b>${k}: </b>${v}</div>`
+        const createKeyValueRow = (key, value) => {
+            const row = document.createElement('div');
+            row.className = 'igv-track-label-popover__row';
+            
+            const keySpan = document.createElement('span');
+            keySpan.className = 'igv-track-label-popover__key';
+            keySpan.textContent = key + ':';
+            
+            const valueSpan = document.createElement('span');
+            valueSpan.className = 'igv-track-label-popover__value';
+            valueSpan.textContent = value;
+            
+            row.appendChild(keySpan);
+            row.appendChild(valueSpan);
+            return row;
+        };
 
-        let str = '<div class="igv-track-label-popup">'
+        const fragment = document.createDocumentFragment();
+        
         if (this.url) {
             if (FileUtils.isFile(this.url)) {
-                str += wrapKeyValue('Filename', this.url.name)
+                fragment.appendChild(createKeyValueRow('Filename', this.url.name));
             } else {
-                str += wrapKeyValue('URL', this.url)
+                fragment.appendChild(createKeyValueRow('URL', this.url));
             }
         } else {
-            str = this.name
+            // If no URL, just return the name as a simple text node
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'igv-track-label-popover__row';
+            nameDiv.textContent = this.name;
+            fragment.appendChild(nameDiv);
+            return fragment;
         }
+        
         if (this.config) {
             if (this.config.metadata) {
                 for (let key of Object.keys(this.config.metadata)) {
-                    const value = this.config.metadata[key]
-                    str += wrapKeyValue(key, value)
+                    const value = this.config.metadata[key];
+                    fragment.appendChild(createKeyValueRow(key, value));
                 }
             }
 
             // Add any config properties that are capitalized
             for (let key of Object.keys(this.config)) {
-                if (key.startsWith("_")) continue   // transient property
-                let first = key.substr(0, 1)
+                if (key.startsWith("_")) continue;   // transient property
+                let first = key.substr(0, 1);
                 if (first !== first.toLowerCase()) {
-                    const value = this.config[key]
+                    const value = this.config[key];
                     if (value && isSimpleType(value)) {
-                        str += wrapKeyValue(key, value)
+                        fragment.appendChild(createKeyValueRow(key, value));
                     }
                 }
             }
-
         }
-        str += '</div>'
-        return str
+        
+        return fragment;
     }
 
     /**

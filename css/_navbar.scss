@@ -1,3 +1,6 @@
+@use "sass:math";
+@use "variables" as *;
+
 $igv-navbar-toggle-light-color: #f3f3f3;
 $igv-navbar-toggle-dark-dark: #737373;
 
@@ -15,8 +18,8 @@ $igv-navbar-locus-search-height: $igv-navbar-height - 10px;
 $igv-navbar-icon-button-size: 24px;
 
 $igv-save-image-y-origin: 1.5 * $igv-navbar-icon-button-size;
-$igv-save-svg-image-x-origin: -3*$igv-navbar-icon-button-size/4;
-$igv-save-png-image-x-origin:  3*$igv-navbar-icon-button-size/4;
+$igv-save-svg-image-x-origin: math.div(-3 * $igv-navbar-icon-button-size, 4);
+$igv-save-png-image-x-origin: math.div(3 * $igv-navbar-icon-button-size, 4);
 
 .igv-navbar {
 
