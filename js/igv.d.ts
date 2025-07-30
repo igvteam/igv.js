@@ -216,7 +216,7 @@ export namespace Tracks {
         color?: string,
         altColor?: string,
         guidelines?: { color: string, y: number, dotted: boolean }[];
-        graphType?: "points" | "bar";
+        graphType?: "points" | "bar" | "line" | "heatmap" | "dynseq"
         flipAxis?: boolean;
         windowFunction?: "mean" | "max" | "min";
 
