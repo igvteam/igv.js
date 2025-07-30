@@ -139,6 +139,7 @@ class ResponsiveNavbar {
         const showMultiSelect = config.showMultiSelectButton !== false;
         this.multiTrackSelectButton = new MultiTrackSelectButton(toggleButtonContainer, browser, this, showMultiSelect);
 
+
         this.cursorGuideButton = new CursorGuideButton(toggleButtonContainer, browser);
         this.centerLineButton = new CenterLineButton(toggleButtonContainer, browser);
         this.trackLabelControl = new TrackLabelControl(toggleButtonContainer, browser);

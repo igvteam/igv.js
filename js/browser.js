@@ -154,6 +154,7 @@ class Browser {
 
         // previous track colors for colorPicker
         this.previousTrackColors = []
+
     }
 
     get doShowROITable() {
@@ -907,6 +908,7 @@ class Browser {
         toggleTrackLabels(this.trackViews, this.doShowTrackLabels)
 
         if (typeof track.postInit === 'function') {
+
             try {
                 trackView.startSpinner()
                 await track.postInit()
@@ -1704,6 +1706,27 @@ class Browser {
         // await this.layoutChange()
     }
 
+    async discardSampleInfo() {
+
+        this.sampleInfo.discard()
+
+        for (const {sampleInfoViewport} of this.trackViews) {
+            sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
+        }
+
+        const found = this.findTracks(t => typeof t.getSamples === 'function')
+        if (found.length > 0) {
+            this.sampleInfoControl.performClickWithState(this, false)
+            this.sampleInfoControl.setButtonVisibility(false)
+        }
+
+        for (const {sampleInfoViewport} of this.trackViews) {
+            sampleInfoViewport.repaint()
+        }
+
+        await this.layoutChange()
+    }
+
     getSampleInfoColumnWidth() {
 
         if (!this.sampleInfo.attributeCount) {
@@ -1833,6 +1856,16 @@ class Browser {
         if (!this.qtlSelections.isEmpty()) {
             json["qtlSelections"] = this.qtlSelections.toJSON()
         }
+
+        // Filter configurations
+        // REMOVED: Filter configurations are now saved as part of individual track configurations
+        // if (this.filterConfigurations.size > 0) {
+        //     const filterConfigs = {}
+        //     for (const [trackType, filters] of this.filterConfigurations) {
+        //         filterConfigs[trackType] = filters
+        //     }
+        //     json["filterConfigurations"] = filterConfigs
+        // }
 
         // Tracks
         const trackJson = []
@@ -2169,10 +2202,6 @@ class Browser {
     }
 
     // Navbar delegates
-    get sampleInfoControl() {
-        return this.navbar.sampleInfoControl
-    }
-
     get overlayTrackButton() {
         return this.navbar.overlayTrackButton
     }
@@ -2181,12 +2210,12 @@ class Browser {
         return this.navbar.roiTableControl
     }
 
-    get sampleInfoControl() {
-        return this.navbar.sampleInfoControl
-    }
-
     get sampleNameControl() {
         return this.navbar.sampleNameControl
+    }
+
+    get sampleInfoControl() {
+        return this.navbar.sampleInfoControl
     }
 
     async blat(sequence) {

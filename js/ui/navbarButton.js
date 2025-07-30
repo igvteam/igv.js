@@ -125,8 +125,7 @@ class NavbarButton {
     }
 
     show() {
-        // this.button.style.display = 'block'
-        this.button.style.display = 'flex'
+        this.button.style.display = ''
     }
 
     hide() {

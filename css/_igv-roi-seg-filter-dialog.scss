@@ -1,7 +1,8 @@
 @use "variables" as *;
 @use "mixins" as *;
+
 // generic dialog
-.igv-ui-generic-dialog-container {
+.igv-roi-seg-filter-dialog {
 
   box-sizing: content-box;
 
@@ -17,7 +18,7 @@
 
   cursor: pointer;
 
-  width:300px;
+  width:350px;
   height:fit-content;
   padding-bottom: 16px;
 
@@ -37,7 +38,7 @@
   align-items: center;
 
   // header
-  .igv-ui-generic-dialog-header {
+  &__header {
 
     display: flex;
     flex-flow: row;
@@ -72,8 +73,48 @@
 
   }
 
+  // radio group
+  &__radio-group {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+
+    label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+
+    input[type="radio"] {
+      cursor: pointer;
+    }
+
+    .op {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      margin-left: 16px;
+      margin-bottom: 8px;
+      gap: 2px;
+
+      input[type="radio"] {
+        display: block;
+        margin: 0;
+      }
+
+      label {
+        display: block;
+        margin-left: 4px;
+      }
+    }
+  }
+
   // one-liner
-  .igv-ui-generic-dialog-one-liner {
+  &__one-liner {
 
     color: $igv-dark-grey-color;
 
@@ -89,50 +130,11 @@
     background-color: white;
   }
 
-  // labeled input
-  .igv-ui-generic-dialog-label-input {
-    margin-top: 8px;
-
-    width: 95%;
-    height: 24px;
-
-    color: $igv-dark-grey-color;
-
-    line-height: 24px;
-    padding-left: 8px;
-
-    background-color: white;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-
-    >div {
-      width: fit-content;
-      height: 100%;
-
-      font-size: 16px;
-      text-align: right;
-      padding-right: 8px;
-
-      background-color: white;
-    }
-
-    @include generic-input;
-    input {
-      width: 50%;
-      font-size: 16px;
-    }
-
-  }
-
   // input
-  .igv-ui-generic-dialog-input {
+  &__input {
     margin-top: 8px;
 
-    width: calc(100% - 16px);
+    width: 80%;
     height: 24px;
 
     color: $igv-dark-grey-color;
@@ -151,25 +153,10 @@
       font-size: 16px;
     }
 
-    input[type="range"] {
-      width: 70%;
-      -webkit-appearance: none;
-      background: linear-gradient(90deg, white, black);
-      outline: none;
-      margin: 0;
-    }
-
-    output {
-      display: block;
-      height: 100%;
-      width: 20%;
-      font-size: 16px;
-    }
-
   }
 
   // ok | cancel - container
-  .igv-ui-generic-dialog-ok-cancel {
+  &__ok-cancel {
 
     width: 100%;
     height: $igv-button-height;
@@ -215,6 +202,17 @@
     >div:first-child:hover {
       cursor: pointer;
       background-color: $igv-button-ok-hover-color;
+    }
+
+    >div:first-child.disabled {
+      cursor: not-allowed;
+      background-color: #ccc;
+      opacity: 0.6;
+    }
+
+    >div:first-child.disabled:hover {
+      cursor: not-allowed;
+      background-color: #ccc;
     }
 
     >div:last-child:hover {

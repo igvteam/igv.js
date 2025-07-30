@@ -4,6 +4,7 @@ import SampleInfo from './sampleInfo.js'
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 import IGVGraphics from "../igv-canvas.js"
 import {defaultRulerHeight} from "../rulerTrack.js"
+import SegTrack from "../feature/segTrack.js"
 
 const MaxSampleInfoColumnHeight = 128
 
@@ -149,54 +150,49 @@ class SampleInfoViewport {
         if (samples && samples.names.length > 0) {
 
             const attributeNames = this.browser.sampleInfo.attributeNames
-            const viewportHeight = this.viewport.getBoundingClientRect().height
 
             let shim = 1
 
             const tileHeight = samples.height
-
             shim = tileHeight - 2 * shim <= 1 ? 0 : 1
 
             let y = this.contentTop + samples.yOffset
 
+            let rowIndex = 0
             this.hitList = {}
+            const bucketMarginHeight = typeof this.trackView.track.getBucketMarginHeight === 'function' ? this.trackView.track.getBucketMarginHeight() : 0
+            const bucketStartRows = typeof this.trackView.track.getBucketStartRows === 'function' ? this.trackView.track.getBucketStartRows() : []
+
             for (const sampleName of samples.names) {
 
-                if (y > viewportHeight) {
-                    break
-                }
+                const attributes = this.browser.sampleInfo.getAttributes(sampleName)
+                if (attributes) {
+                    
+                    const bucketMarginCount = bucketMarginHeight > 0 && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(rowIndex, bucketStartRows) : 0;
+                    const yy = y + shim + (bucketMarginCount * bucketMarginHeight);
 
-                if (y + tileHeight > 0) {
+                    const hh = tileHeight - (2 * shim)
 
-                    const attributes = this.browser.sampleInfo.getAttributes(sampleName)
+                    const attributeEntries = Object.entries(attributes)
+                    for (const attributeEntry of attributeEntries) {
 
+                        const [attribute, value] = attributeEntry
 
-                    if (attributes) {
+                        const index = attributeNames.indexOf(attribute)
+                        const x = sampleInfoTileXShim + index * sampleInfoTileWidth
 
-                        const attributeEntries = Object.entries(attributes)
+                        context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
+                        context.fillRect(x, yy, sampleInfoTileWidth - 1, hh)
 
-                        for (const attributeEntry of attributeEntries) {
+                        const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
+                        this.hitList[key] = `${attribute}#${value}`
 
-                            const [attribute, value] = attributeEntry
+                    } // for (attributeEntries)
 
-                            context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
-
-                            const index = attributeNames.indexOf(attribute)
-                            const x = sampleInfoTileXShim + index * sampleInfoTileWidth
-                            const yy = y + shim
-                            const hh = tileHeight - (2 * shim)
-                            context.fillRect(x, yy, sampleInfoTileWidth - 1, hh)
-
-                            const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
-                            this.hitList[key] = `${attribute}#${value}`
-
-                        } // for (attributeEntries)
-
-                    } // if (attributes)
-
-                } // if (y + tileHeight > 0)
+                } // if (attributes)
 
                 y += tileHeight
+                rowIndex++
 
             } // for (sample.names)
 

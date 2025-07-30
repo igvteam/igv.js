@@ -9,6 +9,8 @@ import * as DOMUtils from "./ui/utils/dom-utils.js"
 import C2S from "./canvas2svg.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import {bppSequenceThreshold} from "./sequenceTrack.js"
+import makeDraggable from "./ui/utils/draggable.js"
+import {createIcon} from "./ui/utils/icons.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data'
 
@@ -53,6 +55,8 @@ class TrackViewport extends Viewport {
                 this.setHeight(this.trackView.track.height);
             }
         }
+
+        this.doRenderBucketLabels = (new Set(['seg', 'mut']).has(this.trackView.track.type))
 
         this.stopSpinner()
         this.addMouseHandlers()
@@ -204,6 +208,10 @@ class TrackViewport extends Viewport {
         if(this.canvas && this.canvas._data) {
             let offset = contentTop + this.canvas._data.pixelTop
             this.canvas.style.top = `${offset}px`
+        }
+
+        if (typeof this.trackView.track.setTopHelper === 'function'){
+            this.trackView.track.setTopHelper(this, contentTop)
         }
     }
 
@@ -367,6 +375,7 @@ class TrackViewport extends Viewport {
         const drawConfiguration =
             {
                 context: ctx,
+                contentTop: this.contentTop,
                 pixelXOffset,
                 pixelWidth,
                 pixelHeight,
@@ -510,7 +519,6 @@ class TrackViewport extends Viewport {
 
     }
 
-
     renderSVGContext(context, {deltaX, deltaY}, includeLabel = true) {
 
         if (false === this.didPresentZoomInNotice()) {
@@ -529,23 +537,42 @@ class TrackViewport extends Viewport {
 
             const {start, bpPerPixel} = this.referenceFrame
             const pixelXOffset = Math.round((start - this.referenceFrame.start) / bpPerPixel)
+            // const config =
+            //     {
+            //         context,
+            //         viewport: this,
+            //         referenceFrame: this.referenceFrame,
+            //         top: yClipOffset,
+            //         pixelTop: yClipOffset,
+            //         pixelWidth: width,
+            //         pixelHeight: height,
+            //         pixelXOffset,
+            //         pixelShift: pixelXOffset,
+            //         bpStart: start,
+            //         bpEnd: start + (width * bpPerPixel),
+            //         bpPerPixel,
+            //         viewportWidth: width,
+            //         selection: this.selection
+            //     }
+
+
             const config =
                 {
                     context,
-                    viewport: this,
-                    referenceFrame: this.referenceFrame,
-                    top: yClipOffset,
-                    pixelTop: yClipOffset,
+                    contentTop: this.contentTop,
+                    pixelXOffset,
                     pixelWidth: width,
                     pixelHeight: height,
-                    pixelXOffset,
-                    pixelShift: pixelXOffset,
+                    pixelTop: yClipOffset,
                     bpStart: start,
                     bpEnd: start + (width * bpPerPixel),
                     bpPerPixel,
-                    viewportWidth: width,
-                    selection: this.selection
-                }
+                    pixelShift: pixelXOffset,              // Initial value, changes with track pan (drag)
+                    referenceFrame: this.referenceFrame,
+                    selection: this.selection,
+                    viewport: this,
+                    viewportWidth: this.viewportElement.clientWidth
+                };
 
             const features = this.featureCache ? this.featureCache.features : undefined
             const roiFeatures = this.featureCache ? this.featureCache.roiFeatures : undefined
@@ -553,7 +580,6 @@ class TrackViewport extends Viewport {
 
             context.restore()
         }
-
 
         if (includeLabel && this.trackLabelElement && this.browser.doShowTrackLabels) {
             const {x: x_p, y: y_p, width: width_p, height: height_p} = this.viewportElement.getBoundingClientRect();
@@ -564,13 +590,31 @@ class TrackViewport extends Viewport {
             const height = height_c;
             this.renderTrackLabelSVG(context, deltaX + x, deltaY + y, width, height);
         }
+
     }
 
-    // render track label element called from renderSVGContext()
     renderTrackLabelSVG(context, tx, ty, width, height) {
 
         const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
         const id = `${str}_track_label_guid_${DOMUtils.guid()}`
+
+        const text = this.trackLabelElement.textContent
+        const {width: stringWidth} = context.measureText(text)
+
+        const dx = 0.25 * (width - stringWidth);
+        const dy = 0.7 * (height - 12);
+
+        this.renderElementSVG(context, id, tx, ty, width, height, text, dx, dy)
+    }
+
+    renderAttributeGroupElements(context, tx, ty, width, height){
+        const bucketLabels = this.viewportElement.querySelectorAll('.igv-attribute-group-label')
+        const bucketLines = this.viewportElement.querySelectorAll('.igv-attribute-group-line')
+        // Debug statement removed: console.log(`viewport ${ this.guid } renderAttributeGroupElements. labels ${ bucketLabels.length } lines ${ bucketLines.length }`)
+    }
+
+    // render track label element called from renderSVGContext()
+    renderElementSVG(context, id, tx, ty, width, height, text, dx, dy) {
 
         context.saveWithTranslationAndClipRect(id, tx, ty, width, height, 0)
 
@@ -580,10 +624,7 @@ class TrackViewport extends Viewport {
         context.font = "12px Arial"
         context.fillStyle = 'rgb(68, 68, 68)'
 
-        const stringWidth = context.measureText(this.trackLabelElement.textContent).width;
-        const dx = 0.25 * (width - stringWidth);
-        const dy = 0.7 * (height - 12);
-        context.fillText(this.trackLabelElement.textContent, dx, height - dy);
+        context.fillText(text, dx, height - dy);
 
         context.strokeStyle = 'rgb(68, 68, 68)'
         context.strokeRect(0, 0, width, height)
@@ -865,27 +906,99 @@ class TrackViewport extends Viewport {
     }
 
     addTrackLabelClickHandler(trackLabel) {
-
         trackLabel.addEventListener('click', (event) => {
+            event.stopPropagation();
 
-            event.stopPropagation()
+            // Remove any existing popover
+            this.removeTrackLabelPopover();
 
-            const {track} = this.trackView
-
-            let str
+            const { track } = this.trackView;
+            let content;
             if (typeof track.description === 'function') {
-                str = track.description()
+                content = track.description(); // Should return a DOM node or fragment
             } else if (track.description) {
-                str = `<div>${track.description}</div>`
+                // Fallback: wrap string in a row
+                const row = document.createElement('div');
+                row.className = 'igv-track-label-popover__row';
+                row.textContent = track.description;
+                content = row;
             }
 
-            if (str) {
-                if (undefined === this.popover) {
-                    this.popover = new Popover(this.browser.columnContainer, true, (track.name || ''), undefined)
-                }
-                this.popover.presentContentWithEvent(event, str)
+            if (content) {
+                this.showTrackLabelPopover(event, content, track.name || '');
             }
-        })
+        });
+    }
+
+    showTrackLabelPopover(event, content, title) {
+        // Create popover container
+        const popover = document.createElement('div');
+        popover.className = 'igv-track-label-popover';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'igv-track-label-popover__header';
+
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'igv-track-label-popover__title';
+        titleDiv.textContent = title;
+
+        const closeBtn = document.createElement('div');
+        closeBtn.className = 'igv-track-label-popover__close';
+        closeBtn.setAttribute('tabindex', '0');
+        closeBtn.setAttribute('aria-label', 'Close');
+        closeBtn.appendChild(createIcon('times'));
+        closeBtn.addEventListener('click', () => this.removeTrackLabelPopover());
+
+        header.appendChild(titleDiv);
+        header.appendChild(closeBtn);
+
+        // Body
+        const body = document.createElement('div');
+        body.className = 'igv-track-label-popover__body';
+        body.appendChild(content);
+
+        // Assemble popover
+        popover.appendChild(header);
+        popover.appendChild(body);
+
+        // Position popover near the track label
+        const labelRect = this.trackLabelElement.getBoundingClientRect();
+        const containerRect = this.browser.columnContainer.getBoundingClientRect();
+        const offsetX = labelRect.left - containerRect.left;
+        const offsetY = labelRect.bottom - containerRect.top + 5;
+
+        popover.style.left = `${offsetX}px`;
+        popover.style.top = `${offsetY}px`;
+        popover.style.position = 'absolute';
+
+        // Store reference for later removal
+        this._trackLabelPopover = popover;
+
+        // Add to DOM
+        this.browser.columnContainer.appendChild(popover);
+
+        makeDraggable(popover, header, { minX:0, minY:0 })
+
+        // Remove on outside click
+        // setTimeout(() => {
+        //     document.addEventListener('mousedown', this._trackLabelPopoverListener = (evt) => {
+        //         if (!popover.contains(evt.target)) {
+        //             this.removeTrackLabelPopover();
+        //         }
+        //     });
+        // }, 0);
+    }
+
+    removeTrackLabelPopover() {
+        if (this._trackLabelPopover) {
+            this._trackLabelPopover.remove();
+            this._trackLabelPopover = null;
+            if (this._trackLabelPopoverListener) {
+                document.removeEventListener('mousedown', this._trackLabelPopoverListener);
+                this._trackLabelPopoverListener = null;
+            }
+        }
     }
 
     createClickState(event) {

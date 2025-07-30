@@ -1,3 +1,5 @@
+@use "variables" as *;
+
 .picker_wrapper.no_alpha .picker_alpha {
     display: none
 }

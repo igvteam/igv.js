@@ -1,6 +1,8 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import IGVGraphics from "../igv-canvas.js"
+import SegTrack from "../feature/segTrack.js"
+import SampleInfo from "./sampleInfo.js"
 
 const maxSampleNameViewportWidth = 200
 const fudgeTextMetricWidth = 4
@@ -94,28 +96,30 @@ class SampleNameViewport {
         IGVGraphics.fillRect(context, 0, 0, context.canvas.width, samples.height, { fillStyle: appleCrayonRGB('snow') })
 
         if (samples && samples.names.length > 0) {
-            const viewportHeight = this.viewport.getBoundingClientRect().height
 
             const tileHeight = samples.height
             const shim = tileHeight - 2 <= 1 ? 0 : 1
 
             let y = this.contentTop + samples.yOffset
+
+            let rowIndex = 0
             this.hitList = {}
+            const bucketMarginHeight = typeof this.trackView.track.getBucketMarginHeight === 'function' ? this.trackView.track.getBucketMarginHeight() : 0
+            const bucketStartRows = typeof this.trackView.track.getBucketStartRows === 'function' ? this.trackView.track.getBucketStartRows() : []
+
             for (const sampleName of samples.names) {
 
-                if (y > viewportHeight) {
-                    break
-                }
-                if (y + tileHeight > 0) {
-                    const x = 0
-                    const yy = y + shim
-                    const hh = tileHeight - (2 * shim)
-                    // IGVGraphics.fillRect(context, x, yy, context.canvas.width, hh, { fillStyle: randomRGB(100, 250) })
+                const x = 0
 
-                    drawTextInRect(context, sampleName, x + 2, yy, context.canvas.width, hh);
-                }
+                const bucketMarginCount = bucketMarginHeight > 0 && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(rowIndex, bucketStartRows) : 0;
+                const yy = y + shim + (bucketMarginCount * bucketMarginHeight);
+
+                const hh = tileHeight - (2 * shim)
+
+                drawTextInRect(context, sampleName, x + 2, yy, context.canvas.width, hh);
 
                 y += tileHeight
+                rowIndex++
             }
         }
     }
