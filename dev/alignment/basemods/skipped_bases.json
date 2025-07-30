@@ -5,8 +5,8 @@
     {
       "type": "alignment",
       "format": "bam",
-      "url":      "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/bam/basemods/skipped/HG002-SRF.m84011_220902_175841_s1.GRCh38.dmode.bam",
-      "indexURL": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/bam/basemods/skipped/HG002-SRF.m84011_220902_175841_s1.GRCh38.dmode.bam.bai",
+      "url":      "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/skipped/HG002-SRF.m84011_220902_175841_s1.GRCh38.dmode.bam",
+      "indexURL": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/skipped/HG002-SRF.m84011_220902_175841_s1.GRCh38.dmode.bam.bai",
       "height": 500,
       "name": "Skipped bases '.'",
       "colorBy": "basemod2"

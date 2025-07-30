@@ -1,4 +1,4 @@
-To run the examples you must first build from the project root the dist directory from the project root
+To run the examples you must first build from the project from the root directory:
 
 > npm run build
 
