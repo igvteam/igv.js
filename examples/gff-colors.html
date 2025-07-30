@@ -28,7 +28,7 @@
     const options =
         {
             genome: "hg38",
-            locus: "chr22:21,913,513-22,216,565",
+            locus: "chr20:13,076,994-14,580,459",
             tracks:
                 [
                     {
@@ -36,8 +36,8 @@
                         format: "gff3",
                         displayMode: "expanded",
                         height: 300,
-                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/gff/Homo_sapiens.GRCh38.94.chr.gff3",
-                        visibilityWindow: 1000000,
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gff/Homo_sapiens.GRCh38.94.chr.gff3",
+                        visibilityWindow: 0,
                         colorBy: "biotype",
                         // Uncomment to explicitly set a colorTable
                         colorTable: {
@@ -55,8 +55,8 @@
                         format: "gff3",
                         displayMode: "expanded",
                         height: 300,
-                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/gff/Homo_sapiens.GRCh38.94.chr.gff3",
-                        visibilityWindow: 1000000,
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gff/Homo_sapiens.GRCh38.94.chr.gff3",
+                        visibilityWindow: 0,
                         color: (feature) => {
                             switch (feature.getAttributeValue("biotype")) {
                                 case "antisense":
@@ -82,8 +82,8 @@
                         format: "gff3",
                         displayMode: "expanded",
                         height: 300,
-                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/gff/Homo_sapiens.GRCh38.94.chr.gff3",
-                        visibilityWindow: 1000000,
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gff/Homo_sapiens.GRCh38.94.chr.gff3",
+                        visibilityWindow: 0,
                         colorBy: "source",
                         colorTable: {
                             "Ensembl": "blueviolet",
@@ -100,8 +100,8 @@
                         format: "gff3",
                         displayMode: "expanded",
                         height: 300,
-                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/gff/Homo_sapiens.GRCh38.94.chr.gff3",
-                        visibilityWindow: 1000000,
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gff/Homo_sapiens.GRCh38.94.chr.gff3",
+                        visibilityWindow: 0,
                         colorBy: "source",
                     },
                     {
@@ -109,8 +109,8 @@
                         format: "gff3",
                         displayMode: "expanded",
                         height: 300,
-                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/gff/Homo_sapiens.GRCh38.94.chr.gff3",
-                        visibilityWindow: 1000000,
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gff/Homo_sapiens.GRCh38.94.chr.gff3",
+                        visibilityWindow: 0,
                         color: "blue",
                         altColor: "red"
                     }
@@ -128,10 +128,12 @@
 
 <p>
 <pre>
-        var options =
+
+
+     const options =
         {
             genome: "hg38",
-            locus: "chr22:21,913,513-22,216,565",
+            locus: "chr20:13,076,994-14,580,459",
             tracks:
                 [
                     {
@@ -139,9 +141,8 @@
                         format: "gff3",
                         displayMode: "expanded",
                         height: 300,
-                        url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
-                        visibilityWindow: 1000000,
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gff/Homo_sapiens.GRCh38.94.chr.gff3",
+                        visibilityWindow: 0,
                         colorBy: "biotype",
                         // Uncomment to explicitly set a colorTable
                         colorTable: {
@@ -159,9 +160,8 @@
                         format: "gff3",
                         displayMode: "expanded",
                         height: 300,
-                        url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
-                        visibilityWindow: 1000000,
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gff/Homo_sapiens.GRCh38.94.chr.gff3",
+                        visibilityWindow: 0,
                         color: (feature) => {
                             switch (feature.getAttributeValue("biotype")) {
                                 case "antisense":
@@ -187,9 +187,8 @@
                         format: "gff3",
                         displayMode: "expanded",
                         height: 300,
-                        url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
-                        visibilityWindow: 1000000,
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gff/Homo_sapiens.GRCh38.94.chr.gff3",
+                        visibilityWindow: 0,
                         colorBy: "source",
                         colorTable: {
                             "Ensembl": "blueviolet",
@@ -206,9 +205,8 @@
                         format: "gff3",
                         displayMode: "expanded",
                         height: 300,
-                        url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
-                        visibilityWindow: 1000000,
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gff/Homo_sapiens.GRCh38.94.chr.gff3",
+                        visibilityWindow: 0,
                         colorBy: "source",
                     },
                     {
@@ -216,14 +214,20 @@
                         format: "gff3",
                         displayMode: "expanded",
                         height: 300,
-                        url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
-                        visibilityWindow: 1000000,
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gff/Homo_sapiens.GRCh38.94.chr.gff3",
+                        visibilityWindow: 0,
                         color: "blue",
                         altColor: "red"
                     }
                 ]
         }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+        })
+
 </pre>
 </p>
 
