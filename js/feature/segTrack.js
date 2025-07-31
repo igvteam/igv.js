@@ -127,6 +127,10 @@ class SegTrack extends TrackBase {
         else if (this.config.filterConfigurations){
             this._trackFilterObjects = await this.createFilterObjects(this.config.filterConfigurations)
         }
+
+        this.ignoreBucketLabelRendering = undefined
+        this.browser.on('trackdragend', () => this.ignoreBucketLabelRendering = true)
+
     }
 
     get sampleKeys() {
@@ -912,6 +916,11 @@ class SegTrack extends TrackBase {
     }
 
     renderBucketLabels(viewport, rowHeight, bucketMarginHeight, bucketStartRows, top) {
+
+        if (true === this.ignoreBucketLabelRendering) {
+            this.ignoreBucketLabelRendering = undefined
+            return
+        }
 
         // discard all pre-existing bucket labels and lines
         const bucketLabels = viewport.viewportElement.querySelectorAll('.igv-attribute-group-label')
