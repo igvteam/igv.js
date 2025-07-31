@@ -48,6 +48,7 @@ import SliderDialog from "./ui/components/sliderDialog.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
 
+let resizeTimer = null
 
 // css - $igv-scrollbar-outer-width: 14px;
 const igv_scrollbar_outer_width = 14
@@ -104,6 +105,8 @@ class Browser {
             defaultColor: "rgb(0,0,150)",
             doubleClickDelay: config.doubleClickDelay || 500
         }
+
+        this.isResizingWindow = undefined
 
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = {}
@@ -2258,10 +2261,24 @@ async function resize() {
         return
     }
 
+    if (undefined === this.isResizingWindow) {
+        this.isResizingWindow = true
+        console.log(`${ Date.now() } browser.resize - isResizingWindow = TRUE`)
+    }
+
+    clearTimeout(resizeTimer)
+
+    resizeTimer = setTimeout(() => {
+        this.isResizingWindow = undefined
+        console.log(`${ Date.now() } browser.resize - isResizingWindow = undefined`)
+    }, 500); // adjust debounce delay as needed
+
+
     const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
     this.updateReferenceFrames(viewportWidth)
     this.updateViewportElements(viewportWidth)
     await this.syncUIState()
+
 }
 
 

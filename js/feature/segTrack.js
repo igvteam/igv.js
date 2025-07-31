@@ -13,8 +13,6 @@ import {createElementWithString} from "../ui/utils/dom-utils.js"
 import SEGFilterDialog from "../ui/components/segFilterDialog.js"
 import FilterManagerDialog from "../ui/components/filterManagerDialog.js"
 
-let resizeTimer = null
-
 class SegTrack extends TrackBase {
 
     static defaults =
@@ -132,21 +130,6 @@ class SegTrack extends TrackBase {
 
         this.didTrackDragEnd = undefined
         this.browser.on('trackdragend', () => this.didTrackDragEnd = true)
-
-        this.isResizingWindow = undefined
-        window.addEventListener('resize', () => {
-
-            if (undefined === this.isResizingWindow) {
-                this.isResizingWindow = true
-            }
-
-            clearTimeout(resizeTimer)
-
-            resizeTimer = setTimeout(() => {
-                this.isResizingWindow = undefined
-            }, 250); // adjust debounce delay as needed
-
-        })
     }
 
     get sampleKeys() {
@@ -934,12 +917,18 @@ class SegTrack extends TrackBase {
     renderBucketLabels(viewport, rowHeight, bucketMarginHeight, bucketStartRows, top) {
 
         if (true === this.didTrackDragEnd) {
+            console.log(`${ Date.now() } renderBucketLabels didTrackDragEnd(true) - Skip renderBucketLabels`)
             this.didTrackDragEnd = undefined
             return
+        } else {
+            console.log(`${ Date.now() } renderBucketLabels didTrackDragEnd(undefined)- DO renderBucketLabels`)
         }
 
-        if (true === this.isResizingWindow) {
+        if (true === this.browser.isResizingWindow) {
+            console.log(`${ Date.now() } renderBucketLabels isResizingWindow(true) - Skip renderBucketLabels`)
             return
+        } else {
+            console.log(`${ Date.now() } renderBucketLabels isResizingWindow(undefined) - DO renderBucketLabels`)
         }
 
         // discard all pre-existing bucket labels and lines
