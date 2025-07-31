@@ -49,6 +49,21 @@ class SampleInfo {
         return this.sampleDictionary[key]
     }
 
+    export() {
+        const sampleInfoObject = {}
+        const reverseSampleMappingDictionary = Object.fromEntries(
+            Object.entries(this.sampleMappingDictionary).map(([key, value]) => [value, key])
+        )
+        for(const sampleName of Object.keys(this.sampleDictionary)) {
+            const key = reverseSampleMappingDictionary[sampleName] || sampleName
+            const attributes = this.getAttributes(sampleName)
+            if (attributes) {
+                sampleInfoObject[key] = attributes
+            }
+        }
+        console.log(JSON.stringify(sampleInfoObject, null, 2))
+    }
+
     async loadSampleInfo(config) {
 
         if (config.url) {

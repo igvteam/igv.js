@@ -23,16 +23,14 @@ To test this file, click the link below (or copy-paste it into your browser):
 
         const config =
             {
-                genome: 'hg38',
+                genome: 'hg19',
                 locus: "chr7:52,338,217-56,469,252",
-                // showRuler: false,
-                // showIdeogram: false,
                 tracks:
                     [
                         {
                             height: 512,
-                            displayMode: 'SQUISHED',
-                            url: "https://igv-genepattern-org.s3.amazonaws.com/demo/GBMCopyNumber.seg.gz",
+                            displayMode: 'EXPANDED',
+                            url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/Broad.080528.subtypes.seg.gz",
                             name: "GBM Copy Number",
                             groupBy: "KarnScore"
                         },
@@ -40,7 +38,7 @@ To test this file, click the link below (or copy-paste it into your browser):
                 sampleinfo:
                     [
                         {
-                            url: "https://igv-genepattern-org.s3.amazonaws.com/demo/GBM-sampletable-samplemapping-colors.txt"
+                            url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-sampletable-samplemapping-colors.txt"
                         }
                     ]
             }
