@@ -11,6 +11,7 @@
 
 <button id="bookmark">Bookmark session</button>
 <button id="log-session">Log session</button>
+<button id="export-sampleinfo">Export sample info</button>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -23,12 +24,12 @@
             "genome": "hg18",
             "sampleinfo": [
                 {
-                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/gbm/GBM-sampletable-samplemapping-colors.txt"
+                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-sampletable-samplemapping-colors.txt"
                 }
             ],
             "tracks": [
                 {
-                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/gbm/Broad.080528.subtypes.seg.gz",
+                    "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/Broad.080528.subtypes.seg.gz",
                     "name": "GBM Copy Number",
                     "order": 1,
                     "format": "seg",
@@ -57,6 +58,8 @@
     })
 
     document.getElementById("log-session").addEventListener('click', () => console.log(browser.toJSON()))
+
+    document.getElementById("export-sampleinfo").addEventListener('click', () => {browser.sampleInfo.export()})
 
 
 </script>
