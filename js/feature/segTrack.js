@@ -917,18 +917,18 @@ class SegTrack extends TrackBase {
     renderBucketLabels(viewport, rowHeight, bucketMarginHeight, bucketStartRows, top) {
 
         if (true === this.didTrackDragEnd) {
-            console.log(`${ Date.now() } renderBucketLabels didTrackDragEnd(true) - Skip renderBucketLabels`)
+            // console.log(`${ Date.now() } renderBucketLabels didTrackDragEnd(true) - Skip renderBucketLabels`)
             this.didTrackDragEnd = undefined
             return
         } else {
-            console.log(`${ Date.now() } renderBucketLabels didTrackDragEnd(undefined)- DO renderBucketLabels`)
+            // console.log(`${ Date.now() } renderBucketLabels didTrackDragEnd(undefined)- DO renderBucketLabels`)
         }
 
         if (true === this.browser.isResizingWindow) {
-            console.log(`${ Date.now() } renderBucketLabels isResizingWindow(true) - Skip renderBucketLabels`)
+            // console.log(`${ Date.now() } renderBucketLabels isResizingWindow(true) - Skip renderBucketLabels`)
             return
         } else {
-            console.log(`${ Date.now() } renderBucketLabels isResizingWindow(undefined) - DO renderBucketLabels`)
+            // console.log(`${ Date.now() } renderBucketLabels isResizingWindow(undefined) - DO renderBucketLabels`)
         }
 
         // discard all pre-existing bucket labels and lines

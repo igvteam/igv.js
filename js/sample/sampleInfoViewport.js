@@ -167,7 +167,7 @@ class SampleInfoViewport {
 
                 const attributes = this.browser.sampleInfo.getAttributes(sampleName)
                 if (attributes) {
-                    
+
                     const bucketMarginCount = bucketMarginHeight > 0 && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(rowIndex, bucketStartRows) : 0;
                     const yy = y + shim + (bucketMarginCount * bucketMarginHeight);
 
@@ -295,6 +295,7 @@ class SampleInfoViewport {
                         if (x < xx || x > xx + width || y < yy || y > yy + height) {
                             // do nothing
                         } else {
+                            console.log(`sort by ${ value }`)
                             column.setAttribute('title', `${value}`)
                             break
                         }

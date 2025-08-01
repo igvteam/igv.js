@@ -2263,14 +2263,14 @@ async function resize() {
 
     if (undefined === this.isResizingWindow) {
         this.isResizingWindow = true
-        console.log(`${ Date.now() } browser.resize - isResizingWindow = TRUE`)
+        // console.log(`${ Date.now() } browser.resize - isResizingWindow = TRUE`)
     }
 
     clearTimeout(resizeTimer)
 
     resizeTimer = setTimeout(() => {
         this.isResizingWindow = undefined
-        console.log(`${ Date.now() } browser.resize - isResizingWindow = undefined`)
+        // console.log(`${ Date.now() } browser.resize - isResizingWindow = undefined`)
     }, 500); // adjust debounce delay as needed
 
 
