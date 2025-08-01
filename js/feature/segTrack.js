@@ -17,7 +17,7 @@ class SegTrack extends TrackBase {
 
     static defaults =
         {
-            groupBy: undefined
+            groupBy: 'None'
         };
 
     static BUCKET_MARGIN_HEIGHT = 16
@@ -179,7 +179,7 @@ class SegTrack extends TrackBase {
 
             let initialState = false
             if ('None' === attribute) {
-                initialState = (undefined === this.groupBy)
+                initialState = ('None' === this.groupBy)
             } else {
                 initialState = (attribute === this.groupBy)
             }
@@ -189,7 +189,7 @@ class SegTrack extends TrackBase {
                 {
                     element,
                     click: function groupByFunction(){
-                        this.groupBy = 'None' === attribute ? undefined : attribute;
+                        this.groupBy = attribute;
                         this.buckets.clear()
                         this.bucketedAttribute = this.groupBy
                         this.trackView.checkContentHeight()
@@ -443,7 +443,7 @@ class SegTrack extends TrackBase {
             }
 
             this.metadataSampleKeys = undefined
-            if (this.groupBy) {
+            if (this.groupBy && this.groupBy !== 'None') {
                 this.buckets.clear()
                 this.bucketedAttribute = this.groupBy
                 this.metadataSampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.filteredSampleKeys, this.buckets, this.bucketedAttribute)
@@ -487,7 +487,7 @@ class SegTrack extends TrackBase {
                 }
             }
 
-            if (this.groupBy && viewport.doRenderBucketLabels) {
+            if (this.groupBy && this.groupBy !== 'None' && viewport.doRenderBucketLabels) {
                 this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
             } else {
                 const bucketLabels = viewport.viewportElement.querySelectorAll('.igv-attribute-group-label')
@@ -1010,7 +1010,7 @@ class SegTrack extends TrackBase {
     }
 
     setTopHelper(viewport, contentTop) {
-        if (this.groupBy && viewport.doRenderBucketLabels) {
+        if (this.groupBy && this.groupBy !== 'None' && viewport.doRenderBucketLabels) {
             const bucketStartRows = this.getBucketStartRows()
             const bucketMarginHeight = this.getBucketMarginHeight()
             this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
