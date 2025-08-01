@@ -2255,23 +2255,27 @@ function getFileExtension(input) {
  *
  * @returns {Promise<void>}
  */
-async function resize() {
+async function resize(event) {
 
     if (undefined === this.referenceFrameList || 0 === this.referenceFrameList.length) {
         return
     }
 
-    if (undefined === this.isResizingWindow) {
-        this.isResizingWindow = true
-        // console.log(`${ Date.now() } browser.resize - isResizingWindow = TRUE`)
+    if (event) {
+
+        if (undefined === this.isResizingWindow) {
+            this.isResizingWindow = true
+            // console.log(`${ Date.now() } browser.resize - isResizingWindow = TRUE`)
+        }
+
+        clearTimeout(resizeTimer)
+
+        resizeTimer = setTimeout(() => {
+            this.isResizingWindow = undefined
+            // console.log(`${ Date.now() } browser.resize - isResizingWindow = undefined`)
+        }, 500); // adjust debounce delay as needed
+
     }
-
-    clearTimeout(resizeTimer)
-
-    resizeTimer = setTimeout(() => {
-        this.isResizingWindow = undefined
-        // console.log(`${ Date.now() } browser.resize - isResizingWindow = undefined`)
-    }, 500); // adjust debounce delay as needed
 
 
     const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)

@@ -36,7 +36,7 @@
                         "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/hubs/hg19/tutorials/hub.txt"
                     ]
                 },
-                "locus": "chr2:1-148,018,208",
+                "locus": "chr10:244,980-107,182,397",
                 "roi": [],
                 "tracks": [
                     {
@@ -44,14 +44,21 @@
                         "order": -9007199254740991
                     },
                     {
-                        "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/Broad.080528.subtypes.seg.gz",
-                        "filename": "Broad.080528.subtypes.seg.gz",
-                        "name": "Broad.080528.subtypes.seg.gz",
-                        "order": 5,
-                        "format": "seg",
+                        "name": "SEG Track",
                         "type": "seg",
+                        "format": "seg",
+                        "url": "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/Broad.080528.subtypes.seg.gz",
+                        "displayMode": "FILL",
                         "height": 600,
-                        "groupBy": "Subtype"
+                        "order": 1,
+                        "sort": {
+                            "option": "VALUE",
+                            "direction": "DESC",
+                            "chr": "chr10",
+                            "start": 75334037,
+                            "end": 109758200
+                        },
+                        "groupBy": "GENDER"
                     },
                     {
                         "id": "refseqAll",
@@ -66,11 +73,12 @@
                 ],
                 "sampleinfo": [
                     {
-                        "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-sampletable-samplemapping-colors.txt"
+                        "url": "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/sampleTable.txt.gz"
                     }
                 ]
             }
-        const browser = await igv.createBrowser(document.getElementById("igv-div"), config)
+
+            const browser = await igv.createBrowser(document.getElementById("igv-div"), config)
     })
 
 
