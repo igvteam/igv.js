@@ -17,7 +17,7 @@ class SegTrack extends TrackBase {
 
     static defaults =
         {
-            groupBy: undefined
+            groupBy: 'None'
         };
 
     static BUCKET_MARGIN_HEIGHT = 16
@@ -32,7 +32,7 @@ class SegTrack extends TrackBase {
         this.filterManagerDialog = new FilterManagerDialog(browser.columnContainer)
     }
 
-    #sortDirections = new Map()
+
 
     init(config) {
         super.init(config)
@@ -98,6 +98,8 @@ class SegTrack extends TrackBase {
             this.featureSource = FeatureSource(configCopy, this.browser.genome)
         }
 
+        this.sortDirections = new Map()
+
         this.initialSort = config.sort
 
         if (config.groupBy){
@@ -127,6 +129,9 @@ class SegTrack extends TrackBase {
         else if (this.config.filterConfigurations){
             this._trackFilterObjects = await this.createFilterObjects(this.config.filterConfigurations)
         }
+
+        this.didTrackDragEnd = undefined
+        this.browser.on('trackdragend', () => this.didTrackDragEnd = true)
     }
 
     get sampleKeys() {
@@ -159,7 +164,7 @@ class SegTrack extends TrackBase {
                     element.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`
 
                     function attributeSort() {
-                        this.sortByAttribute(attribute, (this.#sortDirections.get(attribute) || 1))
+                        this.sortByAttribute(attribute, (this.sortDirections.get(attribute) || 1))
                     }
 
                     menuItems.push({element, click: attributeSort})
@@ -174,7 +179,7 @@ class SegTrack extends TrackBase {
 
             let initialState = false
             if ('None' === attribute) {
-                initialState = (undefined === this.groupBy)
+                initialState = ('None' === this.groupBy)
             } else {
                 initialState = (attribute === this.groupBy)
             }
@@ -184,7 +189,7 @@ class SegTrack extends TrackBase {
                 {
                     element,
                     click: function groupByFunction(){
-                        this.groupBy = 'None' === attribute ? undefined : attribute;
+                        this.groupBy = attribute;
                         this.buckets.clear()
                         this.bucketedAttribute = this.groupBy
                         this.trackView.checkContentHeight()
@@ -438,7 +443,7 @@ class SegTrack extends TrackBase {
             }
 
             this.metadataSampleKeys = undefined
-            if (this.groupBy) {
+            if (this.groupBy && this.groupBy !== 'None') {
                 this.buckets.clear()
                 this.bucketedAttribute = this.groupBy
                 this.metadataSampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.filteredSampleKeys, this.buckets, this.bucketedAttribute)
@@ -482,7 +487,7 @@ class SegTrack extends TrackBase {
                 }
             }
 
-            if (this.groupBy && viewport.doRenderBucketLabels) {
+            if (this.groupBy && this.groupBy !== 'None' && viewport.doRenderBucketLabels) {
                 this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
             } else {
                 const bucketLabels = viewport.viewportElement.querySelectorAll('.igv-attribute-group-label')
@@ -629,7 +634,7 @@ class SegTrack extends TrackBase {
                 direction: sortDirection === 1 ? "ASC" : "DESC"
             }
 
-        this.#sortDirections.set(attribute, sortDirection * -1)
+        this.sortDirections.set(attribute, sortDirection * -1)
         this.trackView.repaintViews()
     }
 
@@ -913,6 +918,21 @@ class SegTrack extends TrackBase {
 
     renderBucketLabels(viewport, rowHeight, bucketMarginHeight, bucketStartRows, top) {
 
+        if (true === this.didTrackDragEnd) {
+            // console.log(`${ Date.now() } renderBucketLabels didTrackDragEnd(true) - Skip renderBucketLabels`)
+            this.didTrackDragEnd = undefined
+            return
+        } else {
+            // console.log(`${ Date.now() } renderBucketLabels didTrackDragEnd(undefined)- DO renderBucketLabels`)
+        }
+
+        if (true === this.browser.isResizingWindow) {
+            // console.log(`${ Date.now() } renderBucketLabels isResizingWindow(true) - Skip renderBucketLabels`)
+            return
+        } else {
+            // console.log(`${ Date.now() } renderBucketLabels isResizingWindow(undefined) - DO renderBucketLabels`)
+        }
+
         // discard all pre-existing bucket labels and lines
         const bucketLabels = viewport.viewportElement.querySelectorAll('.igv-attribute-group-label')
         for (const label of bucketLabels) {
@@ -990,7 +1010,7 @@ class SegTrack extends TrackBase {
     }
 
     setTopHelper(viewport, contentTop) {
-        if (this.groupBy && viewport.doRenderBucketLabels) {
+        if (this.groupBy && this.groupBy !== 'None' && viewport.doRenderBucketLabels) {
             const bucketStartRows = this.getBucketStartRows()
             const bucketMarginHeight = this.getBucketMarginHeight()
             this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
