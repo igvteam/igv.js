@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=https://igv.org/web/img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<h1>Bedpe (SV) features colored by "type"</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../dist/igv.esm.js"
+
+    const options =
+        {
+            genome: "hg19",
+        }
+
+    var igvDiv = document.getElementById("igvDiv")
+
+    const browser = await igv.createBrowser(igvDiv, options)
+
+    browser.loadTrack(
+        {
+            name: "SVs",
+            type: "interact",
+            colorBy: "type",
+            colorTable: {
+                "TRA": "blue",
+                "DEL": "red"
+            },
+            features: [
+                {
+                    "chr1": "chr1",
+                    "start1": 9121445,
+                    "end1": 9121446,
+                    "chr2": "chr14",
+                    "start2": 93713078,
+                    "end2": 93713278,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 59096803,
+                    "end1": 59096804,
+                    "chr2": "chr2",
+                    "start2": 32048379,
+                    "end2": 32048579,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 88972809,
+                    "end1": 88972810,
+                    "chr2": "chr17",
+                    "start2": 32063754,
+                    "end2": 32063954,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 142539842,
+                    "end1": 142539843,
+                    "chr2": "chr21",
+                    "start2": 10084821,
+                    "end2": 10085021,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 144531648,
+                    "end1": 144531649,
+                    "chr2": "chrGL000192.1",
+                    "start2": 547397,
+                    "end2": 547597,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 145137030,
+                    "end1": 145137031,
+                    "chr2": "chr12",
+                    "start2": 93795047,
+                    "end2": 93795247,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 145958227,
+                    "end1": 145958228,
+                    "chr2": "chr9",
+                    "start2": 140785578,
+                    "end2": 140785778,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 147499946,
+                    "end1": 147499947,
+                    "chr2": "chr9",
+                    "start2": 140785579,
+                    "end2": 140785779,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 148953135,
+                    "end1": 148953136,
+                    "chr2": "chr2",
+                    "start2": 91823083,
+                    "end2": 91823283,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 148954460,
+                    "end1": 148954461,
+                    "chr2": "chr2",
+                    "start2": 91821772,
+                    "end2": 91821972,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 168420927,
+                    "end1": 168420928,
+                    "chr2": "chr8",
+                    "start2": 30105791,
+                    "end2": 30105991,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 168420939,
+                    "end1": 168420940,
+                    "chr2": "chr8",
+                    "start2": 30103964,
+                    "end2": 30104164,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 229354403,
+                    "end1": 229354404,
+                    "chr2": "chr5",
+                    "start2": 137884849,
+                    "end2": 137885049,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr2",
+                    "start1": 42051403,
+                    "end1": 42051404,
+                    "chr2": "chr4",
+                    "start2": 66413837,
+                    "end2": 66414037,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr2",
+                    "start1": 42052610,
+                    "end1": 42052611,
+                    "chr2": "chr4",
+                    "start2": 66413830,
+                    "end2": 66414030,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr2",
+                    "start1": 132134997,
+                    "end1": 132134998,
+                    "chr2": "chr6",
+                    "start2": 120516910,
+                    "end2": 120517110,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr3",
+                    "start1": 13551534,
+                    "end1": 13551535,
+                    "chr2": "chr8",
+                    "start2": 88652774,
+                    "end2": 88652974,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr3",
+                    "start1": 111275065,
+                    "end1": 111275066,
+                    "chr2": "chr8",
+                    "start2": 128533751,
+                    "end2": 128533951,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr3",
+                    "start1": 141362872,
+                    "end1": 141362873,
+                    "chr2": "chr8",
+                    "start2": 89804799,
+                    "end2": 89804999,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr3",
+                    "start1": 155027217,
+                    "end1": 155027218,
+                    "chr2": "chr13",
+                    "start2": 25670618,
+                    "end2": 25670818,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr3",
+                    "start1": 172729126,
+                    "end1": 172729127,
+                    "chr2": "chr8",
+                    "start2": 123452720,
+                    "end2": 123452920,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr3",
+                    "start1": 187728894,
+                    "end1": 187728895,
+                    "chr2": "chr6",
+                    "start2": 93097109,
+                    "end2": 93097309,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr4",
+                    "start1": 68715,
+                    "end1": 68716,
+                    "chr2": "chrGL000214.1",
+                    "start2": 122517,
+                    "end2": 122717,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr4",
+                    "start1": 120799560,
+                    "end1": 120799561,
+                    "chr2": "chr8",
+                    "start2": 43698897,
+                    "end2": 43699097,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr4",
+                    "start1": 170280993,
+                    "end1": 170280994,
+                    "chr2": "chr14",
+                    "start2": 52667668,
+                    "end2": 52667868,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 43086352,
+                    "end1": 43086353,
+                    "chr2": "chr7",
+                    "start2": 80543635,
+                    "end2": 80543835,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 147796407,
+                    "end1": 147796408,
+                    "chr2": "chr8",
+                    "start2": 132779526,
+                    "end2": 132779726,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 147797273,
+                    "end1": 147797274,
+                    "chr2": "chr8",
+                    "start2": 137096938,
+                    "end2": 137097138,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 147831565,
+                    "end1": 147831566,
+                    "chr2": "chr8",
+                    "start2": 133497576,
+                    "end2": 133497776,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 147831841,
+                    "end1": 147831842,
+                    "chr2": "chr8",
+                    "start2": 108045041,
+                    "end2": 108045241,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 147963802,
+                    "end1": 147963803,
+                    "chr2": "chr8",
+                    "start2": 137116750,
+                    "end2": 137116950,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 148005639,
+                    "end1": 148005640,
+                    "chr2": "chr8",
+                    "start2": 92562193,
+                    "end2": 92562393,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 148006754,
+                    "end1": 148006755,
+                    "chr2": "chr8",
+                    "start2": 137141959,
+                    "end2": 137142159,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 148118352,
+                    "end1": 148118353,
+                    "chr2": "chr8",
+                    "start2": 137103096,
+                    "end2": 137103296,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 148135459,
+                    "end1": 148135460,
+                    "chr2": "chr8",
+                    "start2": 133435993,
+                    "end2": 133436193,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 154292929,
+                    "end1": 154292930,
+                    "chr2": "chr8",
+                    "start2": 98642034,
+                    "end2": 98642234,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 154452832,
+                    "end1": 154452833,
+                    "chr2": "chr8",
+                    "start2": 104658326,
+                    "end2": 104658526,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 154748361,
+                    "end1": 154748362,
+                    "chr2": "chr8",
+                    "start2": 133440482,
+                    "end2": 133440682,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 157705033,
+                    "end1": 157705034,
+                    "chr2": "chr8",
+                    "start2": 109779751,
+                    "end2": 109779951,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 157708810,
+                    "end1": 157708811,
+                    "chr2": "chr8",
+                    "start2": 104706612,
+                    "end2": 104706812,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 157758034,
+                    "end1": 157758035,
+                    "chr2": "chr8",
+                    "start2": 104704038,
+                    "end2": 104704238,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 157890483,
+                    "end1": 157890484,
+                    "chr2": "chr8",
+                    "start2": 137102853,
+                    "end2": 137103053,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 158292718,
+                    "end1": 158292719,
+                    "chr2": "chr8",
+                    "start2": 108890025,
+                    "end2": 108890225,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 158323255,
+                    "end1": 158323256,
+                    "chr2": "chr8",
+                    "start2": 104706131,
+                    "end2": 104706331,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 158440320,
+                    "end1": 158440321,
+                    "chr2": "chr8",
+                    "start2": 133456317,
+                    "end2": 133456517,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 158451316,
+                    "end1": 158451317,
+                    "chr2": "chr8",
+                    "start2": 137330893,
+                    "end2": 137331093,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 159349716,
+                    "end1": 159349717,
+                    "chr2": "chrX",
+                    "start2": 66982672,
+                    "end2": 66982872,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr5",
+                    "start1": 159351199,
+                    "end1": 159351200,
+                    "chr2": "chrX",
+                    "start2": 66982654,
+                    "end2": 66982854,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr6",
+                    "start1": 382458,
+                    "end1": 382459,
+                    "chr2": "chr16",
+                    "start2": 33428431,
+                    "end2": 33428631,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr6",
+                    "start1": 24684003,
+                    "end1": 24684004,
+                    "chr2": "chr22",
+                    "start2": 32927790,
+                    "end2": 32927990,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr6",
+                    "start1": 116774303,
+                    "end1": 116774304,
+                    "chr2": "chr7",
+                    "start2": 26251601,
+                    "end2": 26251801,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr6",
+                    "start1": 116774818,
+                    "end1": 116774819,
+                    "chr2": "chr15",
+                    "start2": 40854080,
+                    "end2": 40854280,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr7",
+                    "start1": 1916575,
+                    "end1": 1916576,
+                    "chr2": "chr22",
+                    "start2": 23774114,
+                    "end2": 23774314,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr7",
+                    "start1": 1916572,
+                    "end1": 1916573,
+                    "chr2": "chr22",
+                    "start2": 23771610,
+                    "end2": 23771810,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr7",
+                    "start1": 6206530,
+                    "end1": 6206531,
+                    "chr2": "chr10",
+                    "start2": 58374783,
+                    "end2": 58374983,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr7",
+                    "start1": 26251701,
+                    "end1": 26251702,
+                    "chr2": "chr15",
+                    "start2": 40854080,
+                    "end2": 40854280,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr7",
+                    "start1": 26252971,
+                    "end1": 26252972,
+                    "chr2": "chr15",
+                    "start2": 40854095,
+                    "end2": 40854295,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr7",
+                    "start1": 61846558,
+                    "end1": 61846559,
+                    "chr2": "chr16",
+                    "start2": 32515292,
+                    "end2": 32515492,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr7",
+                    "start1": 81789147,
+                    "end1": 81789148,
+                    "chr2": "chr10",
+                    "start2": 60902309,
+                    "end2": 60902509,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr7",
+                    "start1": 132848764,
+                    "end1": 132848765,
+                    "chr2": "chr10",
+                    "start2": 66518275,
+                    "end2": 66518475,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 52730142,
+                    "end1": 52730143,
+                    "chr2": "chr11",
+                    "start2": 38812570,
+                    "end2": 38812770,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 52731479,
+                    "end1": 52731480,
+                    "chr2": "chr11",
+                    "start2": 38812557,
+                    "end2": 38812757,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 77264211,
+                    "end1": 77264212,
+                    "chr2": "chr19",
+                    "start2": 14771236,
+                    "end2": 14771436,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 77706276,
+                    "end1": 77706277,
+                    "chr2": "chr14",
+                    "start2": 57040914,
+                    "end2": 57041114,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 78454700,
+                    "end1": 78454701,
+                    "chr2": "chr17",
+                    "start2": 78165981,
+                    "end2": 78166181,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 79165475,
+                    "end1": 79165476,
+                    "chr2": "chr14",
+                    "start2": 52222751,
+                    "end2": 52222951,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 79475425,
+                    "end1": 79475426,
+                    "chr2": "chr17",
+                    "start2": 38474291,
+                    "end2": 38474491,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 80012980,
+                    "end1": 80012981,
+                    "chr2": "chrX",
+                    "start2": 93874249,
+                    "end2": 93874449,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 80084494,
+                    "end1": 80084495,
+                    "chr2": "chr17",
+                    "start2": 39542094,
+                    "end2": 39542294,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 80086762,
+                    "end1": 80086763,
+                    "chr2": "chr17",
+                    "start2": 39542093,
+                    "end2": 39542293,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 83499056,
+                    "end1": 83499057,
+                    "chr2": "chr14",
+                    "start2": 57066826,
+                    "end2": 57067026,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 87386931,
+                    "end1": 87386932,
+                    "chr2": "chrX",
+                    "start2": 102225814,
+                    "end2": 102226014,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 87627081,
+                    "end1": 87627082,
+                    "chr2": "chrX",
+                    "start2": 104471367,
+                    "end2": 104471567,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 90190190,
+                    "end1": 90190191,
+                    "chr2": "chrX",
+                    "start2": 104469641,
+                    "end2": 104469841,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 91704094,
+                    "end1": 91704095,
+                    "chr2": "chr14",
+                    "start2": 64434687,
+                    "end2": 64434887,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 91944008,
+                    "end1": 91944009,
+                    "chr2": "chr14",
+                    "start2": 58569778,
+                    "end2": 58569978,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 92418021,
+                    "end1": 92418022,
+                    "chr2": "chr14",
+                    "start2": 51282773,
+                    "end2": 51282973,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 92439342,
+                    "end1": 92439343,
+                    "chr2": "chr17",
+                    "start2": 65757812,
+                    "end2": 65758012,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 112373017,
+                    "end1": 112373018,
+                    "chr2": "chrX",
+                    "start2": 78701618,
+                    "end2": 78701818,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 112376648,
+                    "end1": 112376649,
+                    "chr2": "chrX",
+                    "start2": 76792624,
+                    "end2": 76792824,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 112924519,
+                    "end1": 112924520,
+                    "chr2": "chr14",
+                    "start2": 64163464,
+                    "end2": 64163664,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 115501742,
+                    "end1": 115501743,
+                    "chr2": "chr14",
+                    "start2": 84882450,
+                    "end2": 84882650,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 115851295,
+                    "end1": 115851296,
+                    "chr2": "chr14",
+                    "start2": 45993747,
+                    "end2": 45993947,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 115856576,
+                    "end1": 115856577,
+                    "chr2": "chr14",
+                    "start2": 57046228,
+                    "end2": 57046428,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 115856621,
+                    "end1": 115856622,
+                    "chr2": "chr14",
+                    "start2": 85492800,
+                    "end2": 85493000,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 117989049,
+                    "end1": 117989050,
+                    "chr2": "chr17",
+                    "start2": 40572072,
+                    "end2": 40572272,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 119611753,
+                    "end1": 119611754,
+                    "chr2": "chr13",
+                    "start2": 95081031,
+                    "end2": 95081231,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 121542259,
+                    "end1": 121542260,
+                    "chr2": "chr17",
+                    "start2": 76745714,
+                    "end2": 76745914,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 121550937,
+                    "end1": 121550938,
+                    "chr2": "chr17",
+                    "start2": 37276912,
+                    "end2": 37277112,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 121677136,
+                    "end1": 121677137,
+                    "chr2": "chr14",
+                    "start2": 58502740,
+                    "end2": 58502940,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 123492232,
+                    "end1": 123492233,
+                    "chr2": "chr15",
+                    "start2": 88059547,
+                    "end2": 88059747,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 123534797,
+                    "end1": 123534798,
+                    "chr2": "chr21",
+                    "start2": 21812595,
+                    "end2": 21812795,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 123536375,
+                    "end1": 123536376,
+                    "chr2": "chr21",
+                    "start2": 21812420,
+                    "end2": 21812620,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 123907488,
+                    "end1": 123907489,
+                    "chr2": "chr17",
+                    "start2": 64043665,
+                    "end2": 64043865,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 124084322,
+                    "end1": 124084323,
+                    "chr2": "chr17",
+                    "start2": 74797239,
+                    "end2": 74797439,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 124819449,
+                    "end1": 124819450,
+                    "chr2": "chr17",
+                    "start2": 65286082,
+                    "end2": 65286282,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 125549098,
+                    "end1": 125549099,
+                    "chr2": "chr17",
+                    "start2": 38067574,
+                    "end2": 38067774,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 126480842,
+                    "end1": 126480843,
+                    "chr2": "chr17",
+                    "start2": 64043665,
+                    "end2": 64043865,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 128353288,
+                    "end1": 128353289,
+                    "chr2": "chr17",
+                    "start2": 66249950,
+                    "end2": 66250150,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 130560517,
+                    "end1": 130560518,
+                    "chr2": "chr19",
+                    "start2": 20019894,
+                    "end2": 20020094,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 131390648,
+                    "end1": 131390649,
+                    "chr2": "chr14",
+                    "start2": 57066736,
+                    "end2": 57066936,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 146301390,
+                    "end1": 146301391,
+                    "chr2": "chr19",
+                    "start2": 20358050,
+                    "end2": 20358250,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr9",
+                    "start1": 35884433,
+                    "end1": 35884434,
+                    "chr2": "chr11",
+                    "start2": 81872447,
+                    "end2": 81872647,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr9",
+                    "start1": 90373006,
+                    "end1": 90373007,
+                    "chr2": "chr20",
+                    "start2": 4082731,
+                    "end2": 4082931,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr9",
+                    "start1": 90375036,
+                    "end1": 90375037,
+                    "chr2": "chr20",
+                    "start2": 4082747,
+                    "end2": 4082947,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr9",
+                    "start1": 97911308,
+                    "end1": 97911309,
+                    "chr2": "chr11",
+                    "start2": 92876264,
+                    "end2": 92876464,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr10",
+                    "start1": 80478197,
+                    "end1": 80478198,
+                    "chr2": "chr16",
+                    "start2": 61536223,
+                    "end2": 61536423,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr12",
+                    "start1": 169851,
+                    "end1": 169852,
+                    "chr2": "chr20",
+                    "start2": 62965413,
+                    "end2": 62965613,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr12",
+                    "start1": 56990096,
+                    "end1": 56990097,
+                    "chr2": "chr15",
+                    "start2": 39994525,
+                    "end2": 39994725,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr13",
+                    "start1": 44069838,
+                    "end1": 44069839,
+                    "chr2": "chr15",
+                    "start2": 41871437,
+                    "end2": 41871637,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr14",
+                    "start1": 50256581,
+                    "end1": 50256582,
+                    "chr2": "chr17",
+                    "start2": 64042166,
+                    "end2": 64042366,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr14",
+                    "start1": 57212495,
+                    "end1": 57212496,
+                    "chr2": "chr17",
+                    "start2": 74808516,
+                    "end2": 74808716,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr14",
+                    "start1": 68974332,
+                    "end1": 68974333,
+                    "chr2": "chr15",
+                    "start2": 47698294,
+                    "end2": 47698494,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr18",
+                    "start1": 52209136,
+                    "end1": 52209137,
+                    "chr2": "chrGL000207.1",
+                    "start2": 311,
+                    "end2": 511,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr20",
+                    "start1": 23968763,
+                    "end1": 23968764,
+                    "chr2": "chr22",
+                    "start2": 21483867,
+                    "end2": 21484067,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr21",
+                    "start1": 9825437,
+                    "end1": 9825438,
+                    "chr2": "chrGL000220.1",
+                    "start2": 151357,
+                    "end2": 151557,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr21",
+                    "start1": 9826544,
+                    "end1": 9826545,
+                    "chr2": "chrGL000220.1",
+                    "start2": 108519,
+                    "end2": 108719,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr21",
+                    "start1": 9826314,
+                    "end1": 9826315,
+                    "chr2": "chrGL000220.1",
+                    "start2": 152234,
+                    "end2": 152434,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr21",
+                    "start1": 9827573,
+                    "end1": 9827574,
+                    "chr2": "chrGL000220.1",
+                    "start2": 153524,
+                    "end2": 153724,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chrGL000229.1",
+                    "start1": 1,
+                    "end1": 2,
+                    "chr2": "chrGL000231.1",
+                    "start2": 25286,
+                    "end2": 25486,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chrGL000229.1",
+                    "start1": 1999,
+                    "end1": 2000,
+                    "chr2": "chrGL000231.1",
+                    "start2": 27284,
+                    "end2": 27484,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chrGL000231.1",
+                    "start1": 1921,
+                    "end1": 1922,
+                    "chr2": "chrGL000232.1",
+                    "start2": 40474,
+                    "end2": 40674,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chrGL000216.1",
+                    "start1": 70399,
+                    "end1": 70400,
+                    "chr2": "chrGL000225.1",
+                    "start2": 200534,
+                    "end2": 200734,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chrGL000216.1",
+                    "start1": 172293,
+                    "end1": 172294,
+                    "chr2": "chrGL000225.1",
+                    "start2": 99328,
+                    "end2": 99528,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chrGL000205.1",
+                    "start1": 28772,
+                    "end1": 28773,
+                    "chr2": "chrGL000195.1",
+                    "start2": 91661,
+                    "end2": 91861,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chrGL000219.1",
+                    "start1": -1,
+                    "end1": 0,
+                    "chr2": "chrGL000224.1",
+                    "start2": 176060,
+                    "end2": 176260,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chrGL000219.1",
+                    "start1": 3549,
+                    "end1": 3550,
+                    "chr2": "chrGL000224.1",
+                    "start2": 179594,
+                    "end2": 179794,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr1",
+                    "start1": 9121449,
+                    "end1": 9121450,
+                    "chr2": "chr14",
+                    "start2": 93712386,
+                    "end2": 93712586,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr3",
+                    "start1": 111274085,
+                    "end1": 111274086,
+                    "chr2": "chr8",
+                    "start2": 128533730,
+                    "end2": 128533930,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr3",
+                    "start1": 187728889,
+                    "end1": 187728890,
+                    "chr2": "chr6",
+                    "start2": 93096569,
+                    "end2": 93096769,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr6",
+                    "start1": 24683987,
+                    "end1": 24683988,
+                    "chr2": "chr22",
+                    "start2": 32928461,
+                    "end2": 32928661,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr7",
+                    "start1": 81789167,
+                    "end1": 81789168,
+                    "chr2": "chr10",
+                    "start2": 60902827,
+                    "end2": 60903027,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                },
+                {
+                    "chr1": "chr8",
+                    "start1": 80012225,
+                    "end1": 80012226,
+                    "chr2": "chrX",
+                    "start2": 93874457,
+                    "end2": 93874657,
+                    "type": "TRA",
+                    "method": "Snifflesv1.0.2"
+                }
+            ]
+        }
+    )
+
+
+</script>
+
+</body>
+
+</html>
+

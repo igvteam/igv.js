@@ -16,8 +16,15 @@ async function computeWGFeatures(allFeatures, genome, maxWGCount) {
     const makeWGFeature = (f) => {
         const wg = Object.assign({}, f)
         wg.chr = "all"
-        wg.start = genome.getGenomeCoordinate(f.chr, f.start)
-        wg.end = genome.getGenomeCoordinate(f.chr, f.end)
+
+
+        if(f.chr2 && f.end2) {
+            wg.start = genome.getGenomeCoordinate(f.chr1, f.start1)
+            wg.end = genome.getGenomeCoordinate(f.chr2, f.end2)
+        } else {
+            wg.start = genome.getGenomeCoordinate(f.chr, f.start)
+            wg.end = genome.getGenomeCoordinate(f.chr, f.end)
+        }
         wg._f = f
         // Don't draw exons in whole genome view
         if (wg["exons"]) delete wg["exons"]
@@ -46,8 +53,10 @@ async function computeWGFeatures(allFeatures, genome, maxWGCount) {
         if (features) {
             const max = maxWGCount || DEFAULT_MAX_WG_COUNT
             for (let f of features) {
-                let queryChr = genome.getChromosomeName(f.chr)
-                if (wgChromosomeNames.has(queryChr)) {
+                if(f.dup) continue  // Skip duplicates, these are pseudo features for inter-chromosomal features
+                const queryChr = genome.getChromosomeName(f.chr)
+                const queryChr2 = f.chr2 ? genome.getChromosomeName(f.chr2) : queryChr
+                if (wgChromosomeNames.has(queryChr) && wgChromosomeNames.has(queryChr2)) {
                     if (wgFeatures.length < max) {
                         wgFeatures.push(makeWGFeature(f))
                     } else {

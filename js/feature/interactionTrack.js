@@ -656,7 +656,7 @@ class InteractionTrack extends TrackBase {
             if (f.score !== undefined) {
                 data.push({name: "Score", value: f.score})
             }
-            if(f.type !== undefined) {
+            if (f.type !== undefined) {
                 data.push({name: "Type", value: f.type})
             }
 
@@ -909,12 +909,30 @@ function extractInfoColumn(data, str) {
  * @param features
  */
 function fixFeatures(features) {
+    const interChrDups = []
     for (let feature of features) {
-        if (!feature.chr && feature.chr1 === feature.chr2) {
+        if (feature.chr1 === feature.chr2) {
             feature.chr = feature.chr1
             feature.start = Math.min(feature.start1, feature.start2)
             feature.end = Math.max(feature.end1, feature.end2)
+        } else {
+            feature.chr = feature.chr1
+            feature.start = Math.min(feature.start1, feature.start2)
+            feature.end = Math.max(feature.end1, feature.end2)
+
+            // Make copies of inter-chr features, one for each chromosome
+            const f2 = Object.assign({}, feature)
+            f2.dup = true
+            f2.chr = f2.chr2
+            f2.start = f2.start2
+            f2.end = f2.end2
+            interChrDups.push(f2)
         }
+    }
+
+    // Add inter-chr dups to the original features
+    for (const dup of interChrDups) {
+        features.push(dup)
     }
 }
 
