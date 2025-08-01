@@ -28,17 +28,11 @@
     // BEDPE examples
     const options =
         {
-            reference: {
-                "id": "hg19",
-                "name": "Human (CRCh37/hg19)",
-                "fastaURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-                "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
-                "cytobandURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
-            },
+            genome: "hg19",
             locus: "chr2:65,222,853-65,826,902",
             tracks: [
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
                     type: "interact",
                     format: "bedpe",
                     name: "bedpe - proportional",
@@ -60,7 +54,7 @@
                     "height": 50,
                 },
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
                     type: "interact",
                     format: "bedpe",
                     name: "bedpe - nested",
@@ -83,7 +77,7 @@
             locus: "chr3:63,712,533-64,693,448",
             tracks: [
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/interactExample2.txt",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bedpe/interactExample2.txt",
                     type: "interact",
                     format: "interact",
                     name: "UCSC Example 2 - nested arcs, useScore",
@@ -93,7 +87,7 @@
                     height: 75
                 },
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/interactExample2.txt",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bedpe/interactExample2.txt",
                     type: "interaction",
                     format: "interact",
                     name: "UCSC Example 2 - proportional arcs",
@@ -102,7 +96,7 @@
                     height: 75
                 },
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/interactExample3.inter.bb",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bedpe/interactExample3.inter.bb",
                     type: "interact",
                     format: "bb",
                     name: "UCSC Example 3 - bigInteract",
