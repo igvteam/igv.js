@@ -260,6 +260,7 @@ class SampleInfoViewport {
 
     addMouseHandlers() {
         this.addMouseMoveHandler()
+        this.addMouseClickHandler()
     }
 
     addMouseMoveHandler() {
@@ -295,7 +296,6 @@ class SampleInfoViewport {
                         if (x < xx || x > xx + width || y < yy || y > yy + height) {
                             // do nothing
                         } else {
-                            console.log(`sort by ${ value }`)
                             column.setAttribute('title', `${value}`)
                             break
                         }
@@ -323,8 +323,71 @@ class SampleInfoViewport {
         }
     }
 
+    addMouseClickHandler() {
+
+        this.boundMouseClickHandler = mouseClick.bind(this)
+        this.viewport.addEventListener('click', this.boundMouseClickHandler)
+
+        function mouseClick(event) {
+            // event.stopPropagation()
+
+            if (this.hitList) {
+
+                const entries = Object.entries(this.hitList)
+
+                if (null === this.viewport.previousElementSibling) {
+
+                    const getXY = (column, viewport) => {
+                        const {marginTop} = window.getComputedStyle(viewport)
+                        const {
+                            x,
+                            y
+                        } = DOMUtils.translateMouseCoordinates(event, this.browser.columnContainer.querySelector('.igv-sample-info-column'))
+                        return {x: Math.floor(x), y: Math.floor(y - parseInt(marginTop, 10))}
+                    }
+
+                    const column = this.browser.columnContainer.querySelector('.igv-sample-info-column')
+                    const {x, y} = getXY(column, this.viewport)
+
+                    for (const [bbox, value] of entries) {
+
+                        const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                        if (x < xx || x > xx + width || y < yy || y > yy + height) {
+                            // do nothing
+                        } else {
+
+                            const tracks = this.browser.findTracks(track => 'seg' === track.type)
+                            for (const track of tracks) {
+                                track.sortByAttribute(value, (track.sortDirections.get(value) || 1))
+                            }
+
+                            break
+                        }
+                    }
+
+                } else {
+
+                    const {x, y} = DOMUtils.translateMouseCoordinates(event, this.viewport)
+
+                    for (const [bbox, value] of entries) {
+                        const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                        if (x < xx || x > xx + width || y < yy || y > yy + height) {
+                            // do nothing
+                        } else {
+                            const [a, b] = value.split('#')
+                            console.log(`clicked: ${a.split(SampleInfo.emptySpaceReplacement).join(' ')}: ${'-' === b ? '' : b}`)
+                            break
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
     removeMouseHandlers() {
         this.viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
+        this.viewport.removeEventListener('click', this.boundMouseClickHandler)
     }
 
     dispose() {

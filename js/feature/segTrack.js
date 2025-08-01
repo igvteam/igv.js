@@ -32,7 +32,7 @@ class SegTrack extends TrackBase {
         this.filterManagerDialog = new FilterManagerDialog(browser.columnContainer)
     }
 
-    #sortDirections = new Map()
+
 
     init(config) {
         super.init(config)
@@ -98,6 +98,8 @@ class SegTrack extends TrackBase {
             this.featureSource = FeatureSource(configCopy, this.browser.genome)
         }
 
+        this.sortDirections = new Map()
+
         this.initialSort = config.sort
 
         if (config.groupBy){
@@ -162,7 +164,7 @@ class SegTrack extends TrackBase {
                     element.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`
 
                     function attributeSort() {
-                        this.sortByAttribute(attribute, (this.#sortDirections.get(attribute) || 1))
+                        this.sortByAttribute(attribute, (this.sortDirections.get(attribute) || 1))
                     }
 
                     menuItems.push({element, click: attributeSort})
@@ -632,7 +634,7 @@ class SegTrack extends TrackBase {
                 direction: sortDirection === 1 ? "ASC" : "DESC"
             }
 
-        this.#sortDirections.set(attribute, sortDirection * -1)
+        this.sortDirections.set(attribute, sortDirection * -1)
         this.trackView.repaintViews()
     }
 
