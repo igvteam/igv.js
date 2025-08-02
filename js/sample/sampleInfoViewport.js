@@ -358,7 +358,7 @@ class SampleInfoViewport {
 
                             const tracks = this.browser.findTracks(track => 'seg' === track.type)
                             for (const track of tracks) {
-                                track.sortByAttribute(value, (track.sortDirections.get(value) || 1))
+                                track.sortByAttribute(value)
                             }
 
                             break

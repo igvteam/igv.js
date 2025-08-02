@@ -209,10 +209,6 @@ class TrackViewport extends Viewport {
             let offset = contentTop + this.canvas._data.pixelTop
             this.canvas.style.top = `${offset}px`
         }
-
-        if (typeof this.trackView.track.setTopHelper === 'function'){
-            this.trackView.track.setTopHelper(this, contentTop)
-        }
     }
 
     setHeight(h) {
@@ -605,12 +601,6 @@ class TrackViewport extends Viewport {
         const dy = 0.7 * (height - 12);
 
         this.renderElementSVG(context, id, tx, ty, width, height, text, dx, dy)
-    }
-
-    renderAttributeGroupElements(context, tx, ty, width, height){
-        const bucketLabels = this.viewportElement.querySelectorAll('.igv-attribute-group-label')
-        const bucketLines = this.viewportElement.querySelectorAll('.igv-attribute-group-line')
-        // Debug statement removed: console.log(`viewport ${ this.guid } renderAttributeGroupElements. labels ${ bucketLabels.length } lines ${ bucketLines.length }`)
     }
 
     // render track label element called from renderSVGContext()

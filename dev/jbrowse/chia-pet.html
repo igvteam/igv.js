@@ -31,14 +31,14 @@
 </p>
 
 <button id="button-open">Open</button>
+<div id="jbrowse_circular_genome_view" style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
 <div id="igvDiv">
-    <div id="jbrowse_circular_genome_view" style="z-index: 2048; position: absolute; top:200px; left:20px; width: 450px; height: 450px;"></div>
 
 </div>
 <script type="module">
 
-    import igv from "../../js"
-    import {makeDraggable} from '../../node_modules/igv-ui/dist/igv-ui.js'
+    import igv from "../../js/index.js"
+    import makeDraggable from "../../js/ui/utils/draggable.js"
 
     const options =
         {

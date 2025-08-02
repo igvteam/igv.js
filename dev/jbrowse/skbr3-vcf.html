@@ -39,9 +39,9 @@
 </div>
 
 <script type="module">
-    https://igv-genepattern-org.s3.amazonaws.com/demo/skbr3/SKBR3_Sniffles_variants_tra.bedpe
-    import {makeDraggable} from '../../node_modules/igv-ui/dist/igv-ui.js'
+    //https://igv-genepattern-org.s3.amazonaws.com/demo/skbr3/SKBR3_Sniffles_variants_tra.bedpe
     import igv from "../../js/index.js";
+    import makeDraggable from "../../js/ui/utils/draggable.js"
 
     // Start igv.js and create regions
     var options =
@@ -49,7 +49,7 @@
             genome: "hg19",
             tracks: [
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/reads_lr_skbr3.fa_ngmlr-0.2.3_mapped.bam.sniffles1kb_auto_l8_s5_noalt_filtered.tra.vcf", //https://s3.amazonaws.com/igv.org.demo/SKBR3/sniffles_tra.vcf",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/vcf/reads_lr_skbr3.fa_ngmlr-0.2.3_mapped.bam.sniffles1kb_auto_l8_s5_noalt_filtered.tra.vcf", //https://s3.amazonaws.com/igv.org.demo/SKBR3/sniffles_tra.vcf",
                     type: "variant",
                     format: "vcf",
                     name: "sniffles translocations",
@@ -61,7 +61,7 @@
                 },
                 {
                     id: "delly",
-                    url: "https://s3.amazonaws.com/igv.org.demo/SKBR3/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.delly_noalt_filtered.tra.vcf",
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/vcf/SKBR3_550bp_pcrFREE_S1_L001_AND_L002_R1_001.101bp.bwamem.ill.mapped.sort.bam.delly_noalt_filtered.tra.vcf",
                     type: "variant",
                     format: "vcf",
                     name: "delly translocations",
