@@ -569,6 +569,11 @@ class SegTrack extends TrackBase {
             else return d2 * -1
         })
 
+        if(NULL_GROUP !== this.groupBy) {
+            // If grouping by attribute, we need to re-group the samples
+            this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, this.groupBy, 1)
+        }
+
         this.config.sort = sort
         this.trackView.repaintViews()
     }
@@ -632,6 +637,11 @@ class SegTrack extends TrackBase {
         sortDirection = sortDirection || this.sortDirections.get(attribute) || 1
 
         this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection)
+
+        if(NULL_GROUP !== this.groupBy) {
+            // If grouping by attribute, we need to re-group the samples
+            this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, this.groupBy, 1)
+        }
 
         this.config.sort = {
             option: "ATTRIBUTE",
