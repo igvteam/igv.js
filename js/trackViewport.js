@@ -344,7 +344,6 @@ class TrackViewport extends Viewport {
             return
         }
         const pixelTop = Math.max(0, this.contentTop - Math.floor(pixelHeight / 3))
-console.log(`contentTop: ${this.contentTop}, pixelTop: ${pixelTop}, viewportHeight: ${viewportHeight}, pixelHeight: ${pixelHeight}`)
         const bpPerPixel = this.referenceFrame.bpPerPixel
         const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / bpPerPixel)
         const canvasTop =  pixelTop - (this.contentTop || 0)
