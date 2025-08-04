@@ -213,8 +213,10 @@ class TrackViewport extends Viewport {
         // Offset canvas if contentTop does not match pixelTop.  contetTop is the top of the virtual canvas
         // relative to the viewport, and is always <= 0, i.e. content top is shifted "up" when the
         // track is scrolled vertically  making the top of the virtual canvas above the top of the viewport.
-        let offset =  this.canvas._data.pixelTop - contentTop
-        this.canvas.style.top = `${offset}px`
+        if (this.canvas) {
+            let offset = this.canvas._data.pixelTop - contentTop
+            this.canvas.style.top = `${offset}px`
+        }
     }
 
     setHeight(h) {
