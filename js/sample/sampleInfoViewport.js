@@ -5,6 +5,7 @@ import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js
 import IGVGraphics from "../igv-canvas.js"
 import {defaultRulerHeight} from "../rulerTrack.js"
 import SegTrack from "../feature/segTrack.js"
+import {drawGroupDividers} from "./sampleGroup.js"
 
 const MaxSampleInfoColumnHeight = 128
 
@@ -47,7 +48,6 @@ class SampleInfoViewport {
     resizeCanvas() {
 
         const dpi = window.devicePixelRatio
-        // const dpi = 1
         const requiredWidth = this.browser.getSampleInfoViewportWidth()
 
         let requiredHeight
@@ -70,7 +70,6 @@ class SampleInfoViewport {
 
             if (null === this.viewport.previousElementSibling) {
                 IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, {fillStyle: appleCrayonRGB('snow')})
-                // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: randomRGB(150,250) })
             }
 
         }
@@ -111,7 +110,7 @@ class SampleInfoViewport {
 
         if (null === this.viewport.previousElementSibling) {
             // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, {fillStyle: randomRGB(150, 250)})
-            IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { fillStyle: appleCrayonRGB('snow') })
+            IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, {fillStyle: appleCrayonRGB('snow')})
         }
 
     }
@@ -126,7 +125,7 @@ class SampleInfoViewport {
                 this.draw({context: this.ctx, samples})
             }
         } else if (null === this.viewport.previousElementSibling) {
-            if(this.browser.rulerTrackView) {
+            if (this.browser.rulerTrackView) {
                 this.browser.rulerTrackView.setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? this.calculateSampleInfoColumnHeight() : defaultRulerHeight, true)
             }
             this.renderSampleInfoColumns(this.ctx)
@@ -156,20 +155,20 @@ class SampleInfoViewport {
             const tileHeight = samples.height
             shim = tileHeight - 2 * shim <= 1 ? 0 : 1
 
-            let y = this.contentTop + samples.yOffset
+            let y = samples.yOffset - this.contentTop
 
             let rowIndex = 0
             this.hitList = {}
-            const bucketMarginHeight = typeof this.trackView.track.getBucketMarginHeight === 'function' ? this.trackView.track.getBucketMarginHeight() : 0
-            const bucketStartRows = typeof this.trackView.track.getBucketStartRows === 'function' ? this.trackView.track.getBucketStartRows() : []
 
             for (const sampleName of samples.names) {
 
                 const attributes = this.browser.sampleInfo.getAttributes(sampleName)
                 if (attributes) {
-                    
-                    const bucketMarginCount = bucketMarginHeight > 0 && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(rowIndex, bucketStartRows) : 0;
-                    const yy = y + shim + (bucketMarginCount * bucketMarginHeight);
+
+                    let yy = y + shim
+                    if (samples.groupIndeces) {
+                        yy += samples.groupIndeces[rowIndex] * samples.groupMarginHeight
+                    }
 
                     const hh = tileHeight - (2 * shim)
 
@@ -196,6 +195,14 @@ class SampleInfoViewport {
 
             } // for (sample.names)
 
+            drawGroupDividers(context,
+                0,
+                context.canvas.width,
+                context.canvas.height,
+                samples.yOffset - this.contentTop,
+                samples.height,
+                samples.groups,
+                samples.groupMarginHeight)
         }
 
     }
@@ -260,6 +267,7 @@ class SampleInfoViewport {
 
     addMouseHandlers() {
         this.addMouseMoveHandler()
+        this.addMouseClickHandler()
     }
 
     addMouseMoveHandler() {
@@ -322,8 +330,70 @@ class SampleInfoViewport {
         }
     }
 
+    addMouseClickHandler() {
+
+        this.boundMouseClickHandler = mouseClick.bind(this)
+        this.viewport.addEventListener('click', this.boundMouseClickHandler)
+
+        function mouseClick(event) {
+            // event.stopPropagation()
+
+            if (this.hitList) {
+
+                const entries = Object.entries(this.hitList)
+
+                if (null === this.viewport.previousElementSibling) {
+
+                    const getXY = (column, viewport) => {
+                        const {marginTop} = window.getComputedStyle(viewport)
+                        const {
+                            x,
+                            y
+                        } = DOMUtils.translateMouseCoordinates(event, this.browser.columnContainer.querySelector('.igv-sample-info-column'))
+                        return {x: Math.floor(x), y: Math.floor(y - parseInt(marginTop, 10))}
+                    }
+
+                    const column = this.browser.columnContainer.querySelector('.igv-sample-info-column')
+                    const {x, y} = getXY(column, this.viewport)
+
+                    for (const [bbox, value] of entries) {
+
+                        const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                        if (x < xx || x > xx + width || y < yy || y > yy + height) {
+                            // do nothing
+                        } else {
+
+                            const tracks = this.browser.findTracks(track => 'seg' === track.type)
+                            for (const track of tracks) {
+                                track.sortByAttribute(value)
+                            }
+
+                            break
+                        }
+                    }
+
+                } else {
+
+                    const {x, y} = DOMUtils.translateMouseCoordinates(event, this.viewport)
+
+                    for (const [bbox, value] of entries) {
+                        const [xx, yy, width, height] = bbox.split('#').map(str => parseInt(str, 10))
+                        if (x < xx || x > xx + width || y < yy || y > yy + height) {
+                            // do nothing
+                        } else {
+                            const [a, b] = value.split('#')
+                            break
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
     removeMouseHandlers() {
         this.viewport.removeEventListener('mousemove', this.boundMouseMoveHandler)
+        this.viewport.removeEventListener('click', this.boundMouseClickHandler)
     }
 
     dispose() {

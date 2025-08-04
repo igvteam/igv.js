@@ -12,53 +12,52 @@ import {doSortByAttributes} from "../sample/sampleUtils.js"
 import {createElementWithString} from "../ui/utils/dom-utils.js"
 import SEGFilterDialog from "../ui/components/segFilterDialog.js"
 import FilterManagerDialog from "../ui/components/filterManagerDialog.js"
+import {drawGroupDividers} from "../sample/sampleGroup.js"
+
+const NULL_GROUP = 'None'
 
 class SegTrack extends TrackBase {
 
     static defaults =
         {
-            groupBy: undefined
-        };
+            type: 'seg',
+            groupBy: NULL_GROUP,
+            isLog: undefined,
+            displayMode: "EXPANDED",
+            height: 300,
+            maxHeight: 500,
+            squishedRowHeight: 2,
+            expandedRowHeight: 13
+        }
 
-    static BUCKET_MARGIN_HEIGHT = 16
+    static GROUP_MARGIN_HEIGHT = 16
+
 
     constructor(config, browser) {
         super(config, browser)
-        this._sampleKeys = []
-        this.buckets = new Map()
-        this.bucketedAttribute = undefined
-
+        this.groups = new Map()
         this.segFilterDialog = new SEGFilterDialog(browser.columnContainer)
         this.filterManagerDialog = new FilterManagerDialog(browser.columnContainer)
     }
 
-    #sortDirections = new Map()
 
     init(config) {
+
         super.init(config)
 
-        this.type = config.type || "seg"
         if (this.type === 'maf') this.type = 'mut'
-        this.isLog = config.isLog
-        this.displayMode = config.displayMode || "EXPANDED" // EXPANDED | SQUISHED
-        this.height = config.height || 300
-        this.maxHeight = config.maxHeight || 500
-        this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2
-        this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 13
+        this.sortDirections = new Map()
+        this.sampleKeys = []
+        this.groups = new Map()
         this.sampleHeight = this.squishedRowHeight      // Initial value, will get overwritten when rendered
 
         // Explicitly set samples -- used to select a subset of samples from a dataset
-        this.sampleKeys = []
         if (config.samples) {
-            // Explicit setting, keys == names
             for (let s of config.samples) {
-                const currentKeys = this.sampleKeys
-                currentKeys.push(s)
-                this.sampleKeys = currentKeys
+                this.sampleKeys.push(s)
             }
-            this.explicitSamples = true
+            this.explicitSamples = true  // Samples are explicitly set, do not update from features
         }
-
 
         // Color settings
         if (config.color) {
@@ -66,17 +65,12 @@ class SegTrack extends TrackBase {
         } else if (config.colorTable) {
             this.colorTable = new ColorTable(config.colorTable)
         } else {
-            switch (this.type) {
-                case "mut":
-                    this.colorTable = new ColorTable(MUT_COLORS)
-                    break
-                // case "shoebox":
-                //     if (config.colorScale) this.sbColorScale = HicColorScale.parse(config.colorScale)
-                //     break
-                default:
-                    // Color scales for "seg" (copy number) tracks.
-                    this.posColorScale = new GradientColorScale(config.posColorScale || POS_COLOR_SCALE)
-                    this.negColorScale = new GradientColorScale(config.negColorScale || NEG_COLOR_SCALE)
+            if ('mut' === this.type) {
+                this.colorTable = new ColorTable(MUT_COLORS)
+            } else {
+                // Color scales for "seg" (copy number) tracks.
+                this.posColorScale = new GradientColorScale(config.posColorScale || POS_COLOR_SCALE)
+                this.negColorScale = new GradientColorScale(config.negColorScale || NEG_COLOR_SCALE)
             }
         }
 
@@ -86,23 +80,9 @@ class SegTrack extends TrackBase {
         const configCopy = Object.assign({}, this.config)
         configCopy.maxWGCount = configCopy.maxWGCount || Number.MAX_SAFE_INTEGER
 
-        if ('shoebox' === this.type) {
-            this.featureSource = new ShoeboxSource(configCopy, this.browser.genome)
-            this.height = config.height || 500
-            this.maxHeight = config.maxHeight || 800
-            this.isLog = false
-            this.squishedRowHeight = config.squishedRowHeight || 1
-            this.displayMode = config.displayMode || "SQUISHED"
-            this.visibilityWindow = config.visibilityWindow === undefined ? 1000000 : config.visibilityWindow
-        } else {
-            this.featureSource = FeatureSource(configCopy, this.browser.genome)
-        }
+        this.featureSource = FeatureSource(configCopy, this.browser.genome)
 
         this.initialSort = config.sort
-
-        if (config.groupBy){
-            this.groupBy = config.groupBy
-        }
 
     }
 
@@ -120,37 +100,25 @@ class SegTrack extends TrackBase {
         this._initialAltColor = this.altColor || this.constructor.defaultColor
 
         // Initialize filters from track config (individual track filtering)
-        if (this.config.filters){
+        if (this.config.filters) {
             this._trackFilterObjects = await this.createFilterObjects(this.config.filters)
         }
-        // Legacy support for filterConfigurations (for backward compatibility)
-        else if (this.config.filterConfigurations){
-            this._trackFilterObjects = await this.createFilterObjects(this.config.filterConfigurations)
-        }
-    }
 
-    get sampleKeys() {
-        return [...this._sampleKeys]
-    }
-
-    set sampleKeys(keys) {
-        if (Array.isArray(keys)) {
-            this._sampleKeys = [...keys]
-        } else {
-            this._sampleKeys = []
-        }
+        this.didTrackDragEnd = undefined
+        this.browser.on('trackdragend', () => this.didTrackDragEnd = true)
     }
 
     menuItemList() {
 
         const menuItems = []
 
-        if (true === doSortByAttributes(this.browser.sampleInfo, this.filteredSampleKeys)) {
+        if (true === doSortByAttributes(this.browser.sampleInfo, this.sampleKeys)) {
             menuItems.push('<hr/>')
             menuItems.push("Sort by attribute:")
             for (const attribute of this.browser.sampleInfo.attributeNames) {
 
-                if (this.filteredSampleKeys.some(s => {
+                const sampleNames = this.sampleKeys
+                if (sampleNames.some(s => {
                     const attrs = this.browser.sampleInfo.getAttributes(s)
                     return attrs && attrs[attribute]
                 })) {
@@ -159,7 +127,7 @@ class SegTrack extends TrackBase {
                     element.innerHTML = `&nbsp;&nbsp;${attribute.split(SampleInfo.emptySpaceReplacement).join(' ')}`
 
                     function attributeSort() {
-                        this.sortByAttribute(attribute, (this.#sortDirections.get(attribute) || 1))
+                        this.sortByAttribute(attribute)
                     }
 
                     menuItems.push({element, click: attributeSort})
@@ -170,11 +138,11 @@ class SegTrack extends TrackBase {
         menuItems.push('<hr/>')
         menuItems.push("Group by attribute:")
 
-        for (const attribute of [ 'None', ...this.browser.sampleInfo.attributeNames]) {
+        for (const attribute of [NULL_GROUP, ...this.browser.sampleInfo.attributeNames]) {
 
             let initialState = false
-            if ('None' === attribute) {
-                initialState = (undefined === this.groupBy)
+            if (NULL_GROUP === attribute) {
+                initialState = (NULL_GROUP === this.groupBy)
             } else {
                 initialState = (attribute === this.groupBy)
             }
@@ -183,12 +151,8 @@ class SegTrack extends TrackBase {
             menuItems.push(
                 {
                     element,
-                    click: function groupByFunction(){
-                        this.groupBy = 'None' === attribute ? undefined : attribute;
-                        this.buckets.clear()
-                        this.bucketedAttribute = this.groupBy
-                        this.trackView.checkContentHeight()
-                        this.trackView.repaintViews()
+                    click: function groupByFunction() {
+                        this.groupByAttribute(attribute)
                     }
                 })
         }
@@ -200,32 +164,10 @@ class SegTrack extends TrackBase {
                 "FILL": "Fill"
             }
 
-        if (this.type === 'shoebox' && this.sbColorScale) {
-            menuItems.push('<hr/>')
-
-            function dialogPresentationHandler(e) {
-                this.browser.inputDialog.present({
-                    label: 'Color Scale Threshold',
-                    value: this.sbColorScale.threshold,
-                    callback: () => {
-                        const t = Number(this.browser.inputDialog.value, 10)
-                        if (t) {
-                            this.sbColorScale.setThreshold(t)
-                            this.trackView.repaintViews()
-                        }
-                    }
-                }, e)
-            }
-
-            menuItems.push({
-                element: createElementWithString('<div>Set color scale threshold</div>'),
-                dialog: dialogPresentationHandler
-            })
-        }
 
         menuItems.push('<hr/>')
         menuItems.push("DisplayMode:")
-        const displayOptions = new Set([ 'mut', 'seg', 'shoebox' ] ).has(this.type)  ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"]
+        const displayOptions = 'seg' === this.type ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"]
         for (let displayMode of displayOptions) {
 
             menuItems.push(
@@ -237,8 +179,8 @@ class SegTrack extends TrackBase {
                         this.trackView.checkContentHeight()
                         this.trackView.repaintViews()
                         this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta)
+                        this.createGroupLabels()
                     }
-
                 })
         }
 
@@ -251,10 +193,15 @@ class SegTrack extends TrackBase {
     }
 
     getSamples() {
+        const groupIndeces = NULL_GROUP !== this.groupBy ?
+            this.filteredSampleKeys.map(sample => this.getGroupIndex(sample)) : undefined
         return {
-            names: this.metadataSampleKeys,
+            names: this.filteredSampleKeys,
             height: this.sampleHeight,
-            yOffset: 0
+            yOffset: 0,
+            groups: this.groups,
+            groupIndeces,
+            groupMarginHeight: this.getGroupMarginHeight()
         }
     }
 
@@ -304,7 +251,9 @@ class SegTrack extends TrackBase {
      * @returns {Promise<Array>} - Array of filter objects with computed scores
      */
     async createFilterObjects(filterSpecs) {
-        const list = filterSpecs.map(filterSpec => { return { ...filterSpec } })
+        const list = filterSpecs.map(filterSpec => {
+            return {...filterSpec}
+        })
 
         // Compute scores for all filter objects
         const promises = list.map(filterSpec => this.computeRegionScores(filterSpec))
@@ -321,7 +270,7 @@ class SegTrack extends TrackBase {
     /**
      * Set the sample filter objects.  This is used to filter samples from the set based on values over specified
      * genomic regions.   The values compared depend on the track data type:
-     *   - "seg" and "shoebox" -- average value over the region
+     *   - "seg" -- average value over the region
      *   - "mut" and "maf" -- count of features overlapping the region
      *
      * Multiple filters work in a pipeline fashion - each filter's output becomes the input for the next filter.
@@ -393,7 +342,7 @@ class SegTrack extends TrackBase {
         if (this._trackFilterObjects && this._trackFilterObjects.length > 0) {
             // Convert filter objects to filter specs (remove computed scores)
             const filterSpecs = this._trackFilterObjects.map(filterObj => {
-                const { scores, ...filterSpec } = filterObj
+                const {scores, ...filterSpec} = filterObj
                 return filterSpec
             })
             state.filters = filterSpecs
@@ -414,19 +363,18 @@ class SegTrack extends TrackBase {
                 const sortFeatures = (sort.chr === chr && sort.start >= start && sort.end <= end) ? features : undefined
                 this.sortByValue(sort, sortFeatures)
             } else if ("ATTRIBUTE" === sort.option.toUpperCase() && sort.attribute) {
-                const direction = sort.direction === "DESC" ? 1 : -1;
-                this.sortByAttribute(sort.attribute, direction)
+                const sortDirection = "DESC" === sort.direction ? 1 : -1
+                this.sortByAttribute(sort.attribute, sortDirection)
             }
             this.initialSort = undefined  // Sample order is sorted,
         }
         return features
     }
 
-    draw(config) {
-
-        const {context, contentTop, pixelXOffset, viewport, viewportWidth, pixelWidth, pixelHeight, pixelTop, features, bpPerPixel, bpStart} = config
+    draw({context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
 
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
+
 
         if (features && features.length > 0) {
 
@@ -437,37 +385,29 @@ class SegTrack extends TrackBase {
                 this.sbColorScale = new HicColorScale({threshold, r: 0, g: 0, b: 255})
             }
 
-            this.metadataSampleKeys = undefined
-            if (this.groupBy) {
-                this.buckets.clear()
-                this.bucketedAttribute = this.groupBy
-                this.metadataSampleKeys = this.browser.sampleInfo.getGroupedSampleKeysByAttribute(this.filteredSampleKeys, this.buckets, this.bucketedAttribute)
-                if (this.config.sort && this.config.sort.doSort) {
-                    this.metadataSampleKeys = this.config.sort.doSort([ ...this.metadataSampleKeys ])
-                }
-            } else {
-                this.metadataSampleKeys = this.filteredSampleKeys
-                if (this.config.sort && this.config.sort.doSort) {
-                    this.metadataSampleKeys = this.config.sort.doSort([ ...this.metadataSampleKeys ])
-                }
-            }
-
-            const sampleIndexLUT = {}
-            this.metadataSampleKeys.forEach((key, index)  => {
-                sampleIndexLUT[key] = index
+            // Create a map for fast id -> row lookup
+            const sampleRowIndeces = {}
+            const filteredKeys = this.filteredSampleKeys
+            filteredKeys.forEach(function (sample, index) {
+                sampleRowIndeces[sample] = index
             })
 
-            const bucketMarginHeight = this.getBucketMarginHeight()
-            const bucketStartRows = this.getBucketStartRows();
+            let border
+            switch (this.displayMode) {
+                case "FILL":
+                    this.sampleHeight = pixelHeight / filteredKeys.length
+                    border = 0
+                    break
 
-            const { sampleHeight, border } = this.calculateDisplayProperties(
-                this.displayMode,
-                pixelHeight,
-                bucketStartRows,
-                bucketMarginHeight,
-                this.filteredSampleKeys.length
-            )
-            this.sampleHeight = sampleHeight
+                case "SQUISHED":
+                    this.sampleHeight = this.squishedRowHeight
+                    border = 0
+                    break
+                default:   // EXPANDED
+                    this.sampleHeight = this.expandedRowHeight
+                    border = 1
+            }
+            const rowHeight = this.sampleHeight
 
             for (let segment of features) {
                 segment.pixelRect = undefined   // !important, reset this in case segment is not drawn
@@ -475,28 +415,109 @@ class SegTrack extends TrackBase {
 
             const pixelBottom = pixelTop + pixelHeight
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
+            const xScale = bpPerPixel
 
-            for (const feature of features) {
-                if (this.isFeatureVisible(feature, bpStart, bpEnd, pixelTop, pixelBottom, this.sampleHeight, sampleIndexLUT, bucketMarginHeight, bucketStartRows, border)) {
-                    this.renderFeature(feature, bpStart, bpEnd, bpPerPixel, this.sampleHeight, border, sampleIndexLUT, bucketMarginHeight, bucketStartRows, context)
+            this.sampleYStart = undefined
+            let drawCount = 0
+            for (let f of features) {
+
+                if (f.end < bpStart || f.start > bpEnd) continue
+
+                const sampleKey = f.sampleKey || f.sample
+                f.row = sampleRowIndeces[sampleKey]
+                const y = this.getGroupIndex(sampleKey) * this.getGroupMarginHeight() + f.row * rowHeight
+
+                if (undefined === this.sampleYStart) {
+                    this.sampleYStart = y
                 }
+
+                const bottom = y + rowHeight
+
+                if (bottom < pixelTop || y > pixelBottom) {
+                    continue
+                }
+
+                const segmentStart = Math.max(f.start, bpStart)
+                // const segmentStart = segment.start;
+                let x = Math.round((segmentStart - bpStart) / xScale)
+
+                const segmentEnd = Math.min(f.end, bpEnd)
+                // const segmentEnd = segment.end;
+                const x1 = Math.round((segmentEnd - bpStart) / xScale)
+                let w = Math.max(1, x1 - x)
+
+                let color
+                if (this.color) {
+                    if (typeof this.color === "function") {
+                        color = this.color(f)
+                    } else {
+                        color = this.color
+                    }
+                } else if (this.colorTable) {
+                    color = this.colorTable.getColor(f.value.toLowerCase())
+                }
+
+                let h
+                if ("mut" === this.type) {
+                    h = rowHeight - 2 * border
+                    if (w < 3) {
+                        w = 3
+                        x -= 1
+                    }
+                } else {
+                    // Assume seg track
+                    let value = f.value
+                    if (!this.isLog) {
+                        value = IGVMath.log2(value / 2)
+                    }
+                    if (value < -0.1) {
+                        color = this.negColorScale.getColor(value)
+                    } else if (value > 0.1) {
+                        color = this.posColorScale.getColor(value)
+                    } else {
+                        color = "white"
+                    }
+
+                    let sh = rowHeight
+                    if (rowHeight < 0.25) {
+                        const f = 0.1 + 2 * Math.abs(value)
+                        sh = Math.min(1, f * rowHeight)
+                    }
+                    h = sh - 2 * border
+                }
+
+
+                f.pixelRect = {x, y, w, h}
+
+                // Use for diagnostic rendering
+                // context.fillStyle = randomRGB(180, 240)
+                context.fillStyle = color
+
+                context.fillRect(x, y, w, h)
+                drawCount++
             }
 
-            if (this.groupBy && viewport.doRenderBucketLabels) {
-                this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
-            } else {
-                const bucketLabels = viewport.viewportElement.querySelectorAll('.igv-attribute-group-label')
-                for (const label of bucketLabels) {
-                    label.remove()
-                }
-                const bucketLines = viewport.viewportElement.querySelectorAll('.igv-attribute-group-line')
-                for (const line of bucketLines) {
-                    line.remove()
-                }
+            if (NULL_GROUP !== this.groupBy) {
+                drawGroupDividers(context,
+                    pixelTop,
+                    pixelWidth,
+                    pixelHeight,
+                    0,
+                    this.sampleHeight,
+                    this.groups,
+                    SegTrack.GROUP_MARGIN_HEIGHT)
             }
-
         }
+    }
 
+
+    getGroupIndex(sampleKey) {
+        const attributeValue = this.browser.sampleInfo.getAttributeValue(sampleKey, this.groupBy) || ""
+        if (this.groups.has(attributeValue)) {
+            return this.groups.get(attributeValue).index
+        } else {
+            return this.groups.size
+        }
     }
 
     checkForLog(features) {
@@ -524,47 +545,34 @@ class SegTrack extends TrackBase {
         if (!features) return 0
         const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight
         this.updateSampleKeys(features)
-
-        if (this.buckets && this.buckets.size > 0) {
-            const aggregateBucketMarginHeight = (this.buckets.size - 1) * this.getBucketMarginHeight()
-            return aggregateBucketMarginHeight + (this.filteredSampleKeys.length * sampleHeight)
-        } else {
-            return this.filteredSampleKeys.length * sampleHeight
-        }
+        return this.filteredSampleKeys.length * sampleHeight + (this.groups.size - 1) * this.getGroupMarginHeight()
     }
 
+    /**
+     * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
+     */
     async sortByValue(sort, featureList) {
 
-        const createValueComparator = (scores, direction) => {
-            const d2 = (direction === "ASC" ? 1 : -1)
-            return (a, b) => {
-                let s1 = scores[a]
-                let s2 = scores[b]
-                if (!s1) s1 = d2 * Number.MAX_VALUE
-                if (!s2) s2 = d2 * Number.MAX_VALUE
-                if (s1 === s2) return 0
-                else if (s1 > s2) return d2
-                else return d2 * -1
-            }
-        }
-
-        let {chr, start, end, position, direction} = sort
-
-        if (position !== undefined) {
-            start = position - 1
-        }
-
-        if (end === undefined) {
-            end = start + 1
-        }
-
+        const chr = sort.chr
+        const start = sort.position !== undefined ? sort.position - 1 : sort.start
+        const end = sort.end === undefined ? start + 1 : sort.end
         const scores = await this.computeRegionScores({chr, start, end}, featureList)
+        const d2 = (sort.direction === "ASC" ? 1 : -1)
 
-        this.config.sort = { ...sort }
-        this.config.sort.doSort = sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByComparator(sampleKeys, createValueComparator(scores, direction), this.buckets)
+        this.sampleKeys.sort(function (a, b) {
+            let s1 = scores[a]
+            let s2 = scores[b]
+            if (!s1) s1 = d2 * Number.MAX_VALUE
+            if (!s2) s2 = d2 * Number.MAX_VALUE
+            if (s1 === s2) return 0
+            else if (s1 > s2) return d2
+            else return d2 * -1
+        })
 
+        this.config.sort = sort
         this.trackView.repaintViews()
     }
+
 
     async computeRegionScores(filterObject, featureList) {
 
@@ -583,7 +591,7 @@ class SegTrack extends TrackBase {
         }
         if (!featureList) return
 
-        this.updateSampleKeys(featureList)
+        //this.updateSampleKeys(featureList)
 
         const scores = {}
         const bpLength = end - start + 1
@@ -591,27 +599,27 @@ class SegTrack extends TrackBase {
         const mutationTypes = filterObject.value ? new Set(filterObject.value) : undefined
 
         for (let segment of featureList) {
-            if (segment.end >= start && segment.start <= end) {
-                const sampleKey = segment.sampleKey || segment.sample
+            if (segment.end < start) continue
+            if (segment.start > end) break
+            const sampleKey = segment.sampleKey || segment.sample
 
-                if ("mut" === this.type) {
-                    if (mutationTypes) {
-                        const mutationType = segment.getAttribute("Variant_Classification")
-                        if (mutationTypes.has(mutationType)) {
-                            // Just count features overlapping region per sample
-                            scores[sampleKey] = (scores[sampleKey] || 0) + 1
-                        }
-                    } else {
+            if ("mut" === this.type) {
+                if (mutationTypes) {
+                    const mutationType = segment.getAttribute("Variant_Classification")
+                    if (mutationTypes.has(mutationType)) {
                         // Just count features overlapping region per sample
                         scores[sampleKey] = (scores[sampleKey] || 0) + 1
                     }
                 } else {
-
-                    const min = Math.max(start, segment.start)
-                    const max = Math.min(end, segment.end)
-                    const f = (max - min) / bpLength
-                    scores[sampleKey] = (scores[sampleKey] || 0) + f * segment.value
+                    // Just count features overlapping region per sample
+                    scores[sampleKey] = (scores[sampleKey] || 0) + 1
                 }
+            } else {
+
+                const min = Math.max(start, segment.start)
+                const max = Math.min(end, segment.end)
+                const f = (max - min) / bpLength
+                scores[sampleKey] = (scores[sampleKey] || 0) + f * segment.value
             }
         }
 
@@ -621,16 +629,74 @@ class SegTrack extends TrackBase {
 
     sortByAttribute(attribute, sortDirection) {
 
-        this.config.sort =
-            {
-                doSort: sampleKeys => this.browser.sampleInfo.getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection, this.buckets),
-                option: "ATTRIBUTE",
-                attribute,
-                direction: sortDirection === 1 ? "ASC" : "DESC"
-            }
+        sortDirection = sortDirection || this.sortDirections.get(attribute) || 1
 
-        this.#sortDirections.set(attribute, sortDirection * -1)
+        this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection)
+
+        this.config.sort = {
+            option: "ATTRIBUTE",
+            attribute: attribute,
+            direction: sortDirection === 1 ? "ASC" : "DESC"
+        }
+        this.sortDirections.set(attribute, sortDirection * -1)
         this.trackView.repaintViews()
+    }
+
+    groupByAttribute(attribute) {
+
+        this.groupBy = attribute
+
+        // Group samples by the specified attribute
+        this.groups.clear()
+        if (NULL_GROUP !== attribute) {
+            this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, attribute, 1)
+
+            const sampleKeys = this.filteredSampleKeys
+            for (let sampleKey of sampleKeys) {
+                const value = this.browser.sampleInfo.getAttributeValue(sampleKey, attribute) || ""
+                if (value) {
+                    if (!this.groups.has(value)) {
+                        this.groups.set(value, {index: this.groups.size, count: 1})
+                    } else {
+                        this.groups.get(value).count += 1
+                    }
+                }
+            }
+        }
+
+        this.trackView.checkContentHeight()
+        this.trackView.repaintViews()
+        this.createGroupLabels()
+    }
+
+    createGroupLabels() {
+
+        const viewport = this.trackView.getLastViewport()
+        viewport.overlayElement.innerHTML = ''   // Clear previous labels
+
+        if (this.groups.size === 0) return
+
+        let sampleHeight
+        switch (this.displayMode) {
+            case "EXPANDED":
+                sampleHeight = this.expandedRowHeight
+                break
+            case "SQUISHED":
+                sampleHeight = this.squishedRowHeight
+                break
+            default:   // FILL mode -- hopefully sample height has been set in the draw method
+                sampleHeight = this.sampleHeight
+        }
+
+        let top = 5
+        for (const bucketKey of this.groups.keys()) {
+            const labelDiv = document.createElement('div')
+            labelDiv.className = 'igv-attribute-group-label'
+            viewport.overlayElement.appendChild(labelDiv)
+            labelDiv.innerText = bucketKey
+            labelDiv.style.top = `${top}px`
+            top += this.groups.get(bucketKey).count * sampleHeight + this.getGroupMarginHeight()
+        }
     }
 
     clickedFeatures(clickState) {
@@ -680,7 +746,7 @@ class SegTrack extends TrackBase {
 
     contextMenuItemList(clickState) {
 
-        const { genomicLocation, referenceFrame, viewport, event } = clickState
+        const {genomicLocation, referenceFrame, viewport, event} = clickState
 
         const sortHandler = (sort) => {
             const features = viewport.cachedFeatures
@@ -724,7 +790,7 @@ class SegTrack extends TrackBase {
                             const end = Math.floor(genomicLocation + bpWidth)
 
                             // Apply filter to this specific track
-                            const filterConfig = { type: "VALUE", op, value: threshold, chr, start, end }
+                            const filterConfig = {type: "VALUE", op, value: threshold, chr, start, end}
                             await this.addFilter(filterConfig)
                         }
                     }
@@ -756,6 +822,7 @@ class SegTrack extends TrackBase {
     updateSampleKeys(featureList) {
         if (this.explicitSamples) return
 
+        let newSamplesFound = false
         const sampleKeySet = new Set(this.sampleKeys)
         for (let feature of featureList) {
             const sampleKey = feature.sampleKey || feature.sample
@@ -764,261 +831,17 @@ class SegTrack extends TrackBase {
                 keys.push(sampleKey)
                 this.sampleKeys = keys
                 sampleKeySet.add(sampleKey)
+                newSamplesFound = true
             }
         }
-    }
+        if (newSamplesFound && NULL_GROUP !== this.groupBy) {
+            this.groupByAttribute(this.groupBy)
 
-    /**
-     * Calculate the position and bounds for a feature
-     * @param {Object} feature - The feature to calculate position for
-     * @param {Object} sampleIndexLUT - Lookup table for sample indices
-     * @param {number} rowHeight - Height of each row
-     * @param {number} bucketMarginHeight - Height of bucket margins
-     * @param {Array} bucketStartRows - Array of bucket start row indices
-     * @param {number} border - Border width
-     * @returns {Object} - Object containing row, y, bottom properties
-     */
-    calculateFeaturePosition(feature, sampleIndexLUT, rowHeight, bucketMarginHeight, bucketStartRows, border) {
-
-        const sampleKey = feature.sampleKey || feature.sample
-        const row = sampleIndexLUT[sampleKey]
-
-        const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(row, bucketStartRows) : 0
-
-        const y = (row * rowHeight) + (bucketMarginCount * bucketMarginHeight) + border
-        const bottom = y + rowHeight
-        return { row, y, bottom }
-    }
-
-    /**
-     * Check if a feature should be rendered based on genomic and pixel bounds
-     * @param {Object} feature - The feature to check
-     * @param {number} bpStart - Start position in base pairs
-     * @param {number} bpEnd - End position in base pairs
-     * @param {number} pixelTop - Top pixel position
-     * @param {number} pixelBottom - Bottom pixel position
-     * @param {number} rowHeight - Height of each row
-     * @param {Object} sampleIndexLUT - Lookup table for sample indices
-     * @param {number} bucketMarginHeight - Height of bucket margins
-     * @param {Array} bucketStartRows - Array of bucket start row indices
-     * @param {number} border - Border width
-     * @returns {boolean} - True if feature should be rendered
-     */
-    isFeatureVisible(feature, bpStart, bpEnd, pixelTop, pixelBottom, rowHeight, sampleIndexLUT, bucketMarginHeight, bucketStartRows, border) {
-        // Check genomic bounds
-        if (feature.end < bpStart || feature.start > bpEnd) {
-            return false
-        }
-
-        // Calculate position
-        const { bottom, y } = this.calculateFeaturePosition(feature, sampleIndexLUT, rowHeight, bucketMarginHeight, bucketStartRows, border)
-
-        // Check pixel bounds
-        if (bottom < pixelTop || y > pixelBottom) {
-            return false
-        }
-
-        return true
-    }
-
-    /**
-     * Calculate the style properties (color, height, width, x position) for a feature
-     * @param {Object} feature - The feature to style
-     * @param {number} rowHeight - Height of each row
-     * @param {number} border - Border width
-     * @param {number} w - Width of the feature
-     * @param {number} x - X position of the feature
-     * @returns {Object} - Object containing color, h, w, x properties
-     */
-    calculateFeatureStyle(feature, rowHeight, border, w, x) {
-        let color, h
-
-        if (this.color) {
-            color = typeof this.color === "function" ? this.color(feature) : this.color
-        } else if (this.colorTable) {
-            color = this.colorTable.getColor(feature.value.toLowerCase())
-        }
-
-        if ("mut" === this.type) {
-            h = rowHeight - 2 * border
-            if (w < 3) {
-                w = 3
-                x -= 1
-            }
-        } else if ("shoebox" === this.type) {
-            color = this.sbColorScale.getColor(feature.value)
-            let sh = rowHeight
-            if (rowHeight < 0.25) {
-                const f = 0.1 + 2 * Math.abs(feature.value)
-                sh = Math.min(1, f * rowHeight)
-            }
-            h = sh - 2 * border
-        } else {
-            // Assume seg track
-            let value = feature.value
-            if (!this.isLog) {
-                value = IGVMath.log2(value / 2)
-            }
-            if (value < -0.1) {
-                color = this.negColorScale.getColor(value)
-            } else if (value > 0.1) {
-                color = this.posColorScale.getColor(value)
-            } else {
-                color = "white"
-            }
-
-            let sh = rowHeight
-            if (rowHeight < 0.25) {
-                const f = 0.1 + 2 * Math.abs(value)
-                sh = Math.min(1, f * rowHeight)
-            }
-            h = sh - 2 * border
-        }
-
-        return { color, h, w, x }
-    }
-
-    /**
-     * Render a single feature
-     * @param {Object} feature - The feature to render
-     * @param {number} bpStart - Start position in base pairs
-     * @param {number} bpEnd - End position in base pairs
-     * @param {number} bpPerPixel - Scale factor for x coordinates
-     * @param {number} rowHeight - Height of each row
-     * @param {number} border - Border width
-     * @param {Object} sampleIndexLUT - Lookup table for sample indices
-     * @param {number} bucketMarginHeight - Height of bucket margins
-     * @param {Array} bucketStartRows - Array of bucket start row indices
-     * @param {CanvasRenderingContext2D} context - Canvas context for drawing
-     */
-    renderFeature(feature, bpStart, bpEnd, bpPerPixel, rowHeight, border, sampleIndexLUT, bucketMarginHeight, bucketStartRows, context) {
-
-        const { y } = this.calculateFeaturePosition(feature, sampleIndexLUT, rowHeight, bucketMarginHeight, bucketStartRows, border)
-
-        // Calculate geometry
-        const segmentStart = Math.max(feature.start, bpStart)
-        let x = Math.round((segmentStart - bpStart) / bpPerPixel)
-        const segmentEnd = Math.min(feature.end, bpEnd)
-        const x1 = Math.round((segmentEnd - bpStart) / bpPerPixel)
-        let w = Math.max(1, x1 - x)
-
-        // Determine color and height based on track type
-        const { color, h, w: finalW, x: finalX } = this.calculateFeatureStyle(feature, rowHeight, border, w, x)
-
-        // Store pixel rect and draw
-        feature.pixelRect = {x: finalX, y, w: finalW, h}
-        context.fillStyle = color
-        context.fillRect(finalX, y, finalW, h)
-    }
-
-    renderBucketLabels(viewport, rowHeight, bucketMarginHeight, bucketStartRows, top) {
-
-        // discard all pre-existing bucket labels and lines
-        const bucketLabels = viewport.viewportElement.querySelectorAll('.igv-attribute-group-label')
-        for (const label of bucketLabels) {
-            label.remove()
-        }
-        const bucketLines = viewport.viewportElement.querySelectorAll('.igv-attribute-group-line')
-        for (const line of bucketLines) {
-            line.remove()
-        }
-
-        let bucketIndex = 0
-        const bucketKeys = Array.from(this.buckets.keys())
-
-        const fudge = 4
-        const lineOffset = bucketMarginHeight/2  // Offset above the label text
-        for (const key of bucketKeys) {
-
-            const bucketStartRow = bucketStartRows[bucketIndex]
-            const bucketMarginCount = bucketMarginHeight && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(bucketStartRow, bucketStartRows) : 0
-            const y = top + (bucketStartRow * rowHeight) + (bucketMarginCount * bucketMarginHeight)
-
-            // Create horizontal line above the label (skip for first group)
-            if (bucketIndex > 0) {
-                const horizontalLine = document.createElement('div')
-                viewport.viewportElement.appendChild(horizontalLine)
-                horizontalLine.className = 'igv-attribute-group-line'
-                horizontalLine.style.top = `${y - lineOffset}px`
-                horizontalLine.style.display = 'block'
-            }
-
-            // Create the label
-            const attributeGroupLabel = document.createElement('div')
-            viewport.viewportElement.appendChild(attributeGroupLabel)
-            attributeGroupLabel.className = 'igv-attribute-group-label'
-            attributeGroupLabel.style.top = `${y + fudge}px`
-            attributeGroupLabel.textContent = key
-            attributeGroupLabel.style.display = 'block'
-
-            bucketIndex++
-        }
-
-    }
-
-    /**
-     * Calculate display properties based on display mode
-     * @param {string} displayMode - The display mode (FILL, SQUISHED, EXPANDED)
-     * @param {number} pixelHeight - Total pixel height available
-     * @param {number} bucketStartRows - Array of bucket start row indices
-     * @param {number} bucketMarginHeight - Height of bucket margins
-     * @param {number} filteredSampleKeysLength - Number of filtered sample keys
-     * @returns {Object} - Object containing sampleHeight and border properties
-     */
-    calculateDisplayProperties(displayMode, pixelHeight, bucketStartRows, bucketMarginHeight, filteredSampleKeysLength) {
-        let sampleHeight, border
-
-        switch (displayMode) {
-            case "FILL":
-                const marginPixelsTotalHeight = (bucketStartRows.length > 1 ? bucketMarginHeight * bucketStartRows.length - 1 : 0)
-                const samplePixelsTotalHeight = pixelHeight - marginPixelsTotalHeight
-                // console.log(`filteredSampleKeys: ${ filteredSampleKeysLength } pixelHeight: ${pixelHeight}, marginPixelsTotalHeight: ${marginPixelsTotalHeight}, samplePixelsTotalHeight: ${samplePixelsTotalHeight}`)
-                sampleHeight = samplePixelsTotalHeight / filteredSampleKeysLength
-                border = 0
-                break
-
-            case "SQUISHED":
-                sampleHeight = this.squishedRowHeight
-                border = 0
-                break
-            default:   // EXPANDED
-                sampleHeight = this.expandedRowHeight
-                border = 1
-        }
-
-        return { sampleHeight, border }
-    }
-
-    setTopHelper(viewport, contentTop) {
-        if (this.groupBy && viewport.doRenderBucketLabels) {
-            const bucketStartRows = this.getBucketStartRows()
-            const bucketMarginHeight = this.getBucketMarginHeight()
-            this.renderBucketLabels(viewport, this.sampleHeight, bucketMarginHeight, bucketStartRows, contentTop)
         }
     }
 
-    getBucketStartRows() {
-        let bucketStartRows = [];
-        if (this.buckets) {
-            let row = 0;
-            for (let [bucketName, samplesArr] of this.buckets) {
-                bucketStartRows.push(row);
-                row += samplesArr.length;
-            }
-        }
-        return bucketStartRows;
-    }
-
-    getBucketMarginHeight() {
-        return this.buckets && this.buckets.size > 0 ? SegTrack.BUCKET_MARGIN_HEIGHT : 0
-    }
-
-    static getBucketMarginCount(rowIndex, bucketStartRows) {
-        let count = 0;
-        for (let i = 1; i < bucketStartRows.length; i++) {
-            if (rowIndex >= bucketStartRows[i]) count++;
-        }
-        return count;
+    getGroupMarginHeight() {
+        return SegTrack.GROUP_MARGIN_HEIGHT
     }
 
 }
