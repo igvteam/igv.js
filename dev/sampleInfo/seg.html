@@ -21,13 +21,14 @@
 
     const config =
         {
-            "genome": "hg18",
-            "sampleinfo": [
+            queryParametersSupported: true,
+            genome: "hg18",
+            sampleinfo: [
                 {
                     "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-sampletable-samplemapping-colors.txt"
                 }
             ],
-            "tracks": [
+            tracks: [
                 {
                     "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/Broad.080528.subtypes.seg.gz",
                     "name": "GBM Copy Number",

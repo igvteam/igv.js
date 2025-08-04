@@ -110,6 +110,22 @@ class TrackView {
             const viewport = createViewport(this, viewportColumns[i], referenceFrameList[i], viewportWidth)
             this.viewports.push(viewport)
         }
+        if(typeof this.track.createGroupLabels === 'function') {
+            this.track.createGroupLabels()
+        }
+    }
+
+    /**
+     * Return the last (rightmost) track viewport.  Normally this is the only one, but in multilocus view there may be
+     * several
+     * @returns {undefined|*} The last viewport, or undefined if there are no viewports
+     */
+    getLastViewport() {
+        if (this.viewports && this.viewports.length > 0) {
+            return this.viewports[this.viewports.length - 1]
+        } else {
+            return undefined
+        }
     }
 
     createAxis(browser, track) {
@@ -326,7 +342,7 @@ class TrackView {
         this.innerScroll.style.top = `${top}px`;
 
         const contentHeight = this.maxViewportContentHeight()
-        const contentTop = -Math.round(top * (contentHeight / this.viewports[0].viewportElement.clientHeight))
+        const contentTop = Math.round(top * (contentHeight / this.viewports[0].viewportElement.clientHeight))
 
         for (let viewport of this.viewports) {
             viewport.setTop(contentTop)
@@ -337,12 +353,6 @@ class TrackView {
         this.sampleNameViewport.trackScrollDelta = delta
         this.sampleNameViewport.setTop(contentTop)
 
-    }
-
-    isLoading() {
-        for (let viewport of this.viewports) {
-            if (viewport.isLoading()) return true
-        }
     }
 
     /**

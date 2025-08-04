@@ -49,19 +49,9 @@ class SampleInfo {
         return this.sampleDictionary[key]
     }
 
-    export() {
-        const sampleInfoObject = {}
-        const reverseSampleMappingDictionary = Object.fromEntries(
-            Object.entries(this.sampleMappingDictionary).map(([key, value]) => [value, key])
-        )
-        for(const sampleName of Object.keys(this.sampleDictionary)) {
-            const key = reverseSampleMappingDictionary[sampleName] || sampleName
-            const attributes = this.getAttributes(sampleName)
-            if (attributes) {
-                sampleInfoObject[key] = attributes
-            }
-        }
-        console.log(JSON.stringify(sampleInfoObject, null, 2))
+    getAttributeValue(sampleName, attribute) {
+        const attributes = this.getAttributes(sampleName)
+        return attributes ? attributes[attribute] : undefined
     }
 
     async loadSampleInfo(config) {
@@ -70,12 +60,12 @@ class SampleInfo {
             await this.loadSampleInfoFile(config.url)
         } else {
 
-            const samples = { ...config }
+            const samples = {...config}
             for (const [key, record] of Object.entries(samples)) {
                 samples[key] = SampleInfo.toNumericalRepresentation(record)
             }
 
-            const [ value ] = Object.values(samples)
+            const [value] = Object.values(samples)
             const attributes = Object.keys(value)
 
             this.loadSampleInfoHelper(attributes, samples)
@@ -85,7 +75,7 @@ class SampleInfo {
         this.initialized = true
     }
 
-    loadSampleInfoHelper(attributes, samples){
+    loadSampleInfoHelper(attributes, samples) {
 
         // Establish the range of values for each attribute
         const lut = createAttributeRangeLUT(attributes, samples)
@@ -157,11 +147,7 @@ class SampleInfo {
 
     }
 
-    #sortSampleKeysWithComparator(sampleKeys, comparator) {
-        return sampleKeys.sort(comparator)
-    }
-
-    #sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
+    sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection) {
         const numbers = sampleKeys.filter(key => {
             const attributes = this.getAttributes(key)
             if (undefined === attributes) {
@@ -199,69 +185,6 @@ class SampleInfo {
         strings.sort(compare)
 
         return sortDirection === -1 ? [...numbers, ...strings] : [...strings, ...numbers]
-    }
-
-    getSortedSampleKeysByComparator(sampleKeys, comparator, buckets) {
-
-        if (buckets.size > 1) {
-            const result = []
-            for (const bucketKeys of buckets.values()) {
-                result.push(...this.#sortSampleKeysWithComparator(bucketKeys, comparator))
-            }
-            return result
-        } else {
-            return this.#sortSampleKeysWithComparator(sampleKeys, comparator)
-        }
-
-    }
-
-    getSortedSampleKeysByAttribute(sampleKeys, attribute, sortDirection, buckets) {
-        sortDirection = sortDirection || 1
-
-        if (buckets.size > 0) {
-            const result = []
-            // Sort within each bucket
-            for (const bucketKeys of buckets.values()) {
-                result.push(...this.#sortSampleKeysByAttribute(bucketKeys, attribute, sortDirection))
-            }
-            return result
-        } else {
-            return this.#sortSampleKeysByAttribute(sampleKeys, attribute, sortDirection)
-        }
-
-    }
-
-    getGroupedSampleKeysByAttribute(sampleKeys, buckets, bucketedAttribute) {
-
-        if ('None' === bucketedAttribute) {
-            return sampleKeys
-        }
-
-        // First pass: collect all unique values and initialize buckets
-        for (const key of sampleKeys) {
-            const attributes = this.getAttributes(key)
-            if (undefined === attributes) {
-                console.log(`No attributes for key: ${key}`)
-                continue
-            }
-            const value = attributes[bucketedAttribute]
-            if (!buckets.has(value)) {
-                buckets.set(value, [])
-            }
-        }
-
-        // Second pass: assign sample keys to their respective buckets
-        for (const key of sampleKeys) {
-            const attributes = this.getAttributes(key)
-            if (undefined === attributes) {
-                console.warn(`No attributes for key: ${key}`)
-                continue
-            }
-            const value = attributes[bucketedAttribute]
-            buckets.get(value).push(key)
-        }
-
-        return Array.from(buckets.values()).flat()
     }
 
     toJSON() {
@@ -484,6 +407,24 @@ class SampleInfo {
         }
 
         return `rgb(${color.join(', ')})`
+    }
+
+    /**
+     * Export the sample information as a JSON object.  This is provided for debugging purposes.
+     */
+    export() {
+        const sampleInfoObject = {}
+        const reverseSampleMappingDictionary = Object.fromEntries(
+            Object.entries(this.sampleMappingDictionary).map(([key, value]) => [value, key])
+        )
+        for (const sampleName of Object.keys(this.sampleDictionary)) {
+            const key = reverseSampleMappingDictionary[sampleName] || sampleName
+            const attributes = this.getAttributes(sampleName)
+            if (attributes) {
+                sampleInfoObject[key] = attributes
+            }
+        }
+        console.log(JSON.stringify(sampleInfoObject, null, 2))
     }
 
 }

@@ -251,9 +251,13 @@ class VariantTrack extends TrackBase {
         return {
             names: this.sampleKeys,
             yOffset,
-            height
+            height,
+            // groups: this.groups,
+            // groupIndeces,
+            // groupMarginHeight: this.getGroupMarginHeight()
         }
     }
+
 
     /**
      * The required height in pixels required for the track content.   This is not the visible track height, which
@@ -832,7 +836,7 @@ class VariantTrack extends TrackBase {
             direction: sortDirection === 1 ? "ASC" : "DESC"
         }
 
-        this.sampleKeys = this.browser.sampleInfo.getSortedSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection)
+        this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection)
         this.trackView.repaintViews()
 
     }
