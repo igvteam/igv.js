@@ -1667,7 +1667,7 @@ class Browser {
             viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-info-column'), this.referenceFrameList.length)
             this.fireEvent('didchangecolumnlayout')
 
-            // Create the viewport objects
+            // Create the viewport objects -- TODO -- this is done for every search, which is insane
             for (let trackView of this.trackViews) {
                 trackView.createViewports(this, this.columnContainer, this.referenceFrameList)
             }

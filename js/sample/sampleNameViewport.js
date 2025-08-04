@@ -101,7 +101,7 @@ class SampleNameViewport {
             const tileHeight = samples.height
             const shim = tileHeight - 2 <= 1 ? 0 : 1
 
-            let y = this.contentTop + samples.yOffset
+            let y =  samples.yOffset - this.contentTop
 
             let rowIndex = 0
             this.hitList = {}
@@ -122,7 +122,7 @@ class SampleNameViewport {
                 rowIndex++
             }
 
-            drawGroupDividers(context, 0, context.canvas.width, context.canvas.height, this.contentTop + samples.yOffset, samples.height, samples.groups, samples.groupMarginHeight)
+            drawGroupDividers(context, 0, context.canvas.width, context.canvas.height,  samples.yOffset - this.contentTop, samples.height, samples.groups, samples.groupMarginHeight)
         }
     }
 

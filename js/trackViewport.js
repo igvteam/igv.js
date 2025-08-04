@@ -196,14 +196,14 @@ class TrackViewport extends Viewport {
 
         super.setTop(contentTop)
 
-        this.overlayElement.style.top = `${contentTop}px`
+        this.overlayElement.style.top = `-${contentTop}px`
 
         if (!this.canvas) {
             this.repaint()
         } else {
             // See if currently painted canvas covers the vertical range of the viewport.  If not repaint
             const h = this.viewportElement.clientHeight
-            const vt = contentTop + this.canvas._data.pixelTop
+            const vt =  this.canvas._data.pixelTop - contentTop
             const vb = vt + this.canvas._data.pixelHeight
             if (vt > 0 || vb < h) {
                 this.repaint()
@@ -213,7 +213,7 @@ class TrackViewport extends Viewport {
         // Offset canvas if contentTop does not match pixelTop.  contetTop is the top of the virtual canvas
         // relative to the viewport, and is always <= 0, i.e. content top is shifted "up" when the
         // track is scrolled vertically  making the top of the virtual canvas above the top of the viewport.
-        let offset = contentTop + this.canvas._data.pixelTop
+        let offset =  this.canvas._data.pixelTop - contentTop
         this.canvas.style.top = `${offset}px`
     }
 
@@ -343,11 +343,11 @@ class TrackViewport extends Viewport {
             }
             return
         }
-        const pixelTop = Math.max(0, -this.contentTop - Math.floor(pixelHeight / 3))
+        const pixelTop = Math.max(0, this.contentTop - Math.floor(pixelHeight / 3))
 console.log(`contentTop: ${this.contentTop}, pixelTop: ${pixelTop}, viewportHeight: ${viewportHeight}, pixelHeight: ${pixelHeight}`)
         const bpPerPixel = this.referenceFrame.bpPerPixel
         const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / bpPerPixel)
-        const canvasTop = (this.contentTop || 0) + pixelTop
+        const canvasTop =  pixelTop - (this.contentTop || 0)
         const newCanvas = document.createElement('canvas')
         newCanvas.style.position = 'relative'
         newCanvas.style.display = 'block'
@@ -449,7 +449,7 @@ console.log(`contentTop: ${this.contentTop}, pixelTop: ${pixelTop}, viewportHeig
 
         const canvasMetadata = this.canvas._data
         const canvasTop = canvasMetadata ? canvasMetadata.pixelTop : 0
-        const y = (-this.contentTop - canvasTop) * window.devicePixelRatio
+        const y = (this.contentTop - canvasTop) * window.devicePixelRatio
 
         const ctx = this.canvas.getContext("2d")
         const imageData = ctx.getImageData(x, y, w, h)
@@ -524,8 +524,8 @@ console.log(`contentTop: ${this.contentTop}, pixelTop: ${pixelTop}, viewportHeig
             const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
 
             const x = deltaX
-            const y = deltaY + this.contentTop
-            const yClipOffset = -this.contentTop
+            const y = deltaY - this.contentTop
+            const yClipOffset = this.contentTop
 
             context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
 
@@ -1003,7 +1003,7 @@ console.log(`contentTop: ${this.contentTop}, pixelTop: ${pixelTop}, viewportHeig
             viewport: this,
             referenceFrame,
             genomicLocation,
-            y: viewportCoords.y - this.contentTop,
+            y: viewportCoords.y + this.contentTop,
             canvasX: canvasCoords.x,
             canvasY: canvasCoords.y
         }

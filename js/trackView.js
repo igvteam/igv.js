@@ -110,6 +110,9 @@ class TrackView {
             const viewport = createViewport(this, viewportColumns[i], referenceFrameList[i], viewportWidth)
             this.viewports.push(viewport)
         }
+        if(typeof this.track.createGroupLabels === 'function') {
+            this.track.createGroupLabels()
+        }
     }
 
     /**
@@ -339,7 +342,7 @@ class TrackView {
         this.innerScroll.style.top = `${top}px`;
 
         const contentHeight = this.maxViewportContentHeight()
-        const contentTop = -Math.round(top * (contentHeight / this.viewports[0].viewportElement.clientHeight))
+        const contentTop = Math.round(top * (contentHeight / this.viewports[0].viewportElement.clientHeight))
 
         for (let viewport of this.viewports) {
             viewport.setTop(contentTop)

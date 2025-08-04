@@ -13,7 +13,7 @@ class SampleGroup {
 
 function drawGroupDividers(context, pixelTop, pixelWidth, pixelHeight, offset, sampleHeight, groups, groupMarginHeight) {
 
-    if (groups.size < 2) return
+    if (!groups || groups.size < 2) return
 
     const pixelBottom = pixelTop + pixelHeight
     context.save()

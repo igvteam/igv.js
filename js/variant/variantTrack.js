@@ -251,9 +251,13 @@ class VariantTrack extends TrackBase {
         return {
             names: this.sampleKeys,
             yOffset,
-            height
+            height,
+            // groups: this.groups,
+            // groupIndeces,
+            // groupMarginHeight: this.getGroupMarginHeight()
         }
     }
+
 
     /**
      * The required height in pixels required for the track content.   This is not the visible track height, which

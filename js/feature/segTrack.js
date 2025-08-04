@@ -14,12 +14,14 @@ import SEGFilterDialog from "../ui/components/segFilterDialog.js"
 import FilterManagerDialog from "../ui/components/filterManagerDialog.js"
 import {drawGroupDividers} from "../sample/sampleGroup.js"
 
+const NULL_GROUP = 'None'
+
 class SegTrack extends TrackBase {
 
     static defaults =
         {
             type: 'seg',
-            groupBy: 'None',
+            groupBy: NULL_GROUP,
             isLog: undefined,
             displayMode: "EXPANDED",
             height: 300,
@@ -139,11 +141,11 @@ class SegTrack extends TrackBase {
         menuItems.push('<hr/>')
         menuItems.push("Group by attribute:")
 
-        for (const attribute of ['None', ...this.browser.sampleInfo.attributeNames]) {
+        for (const attribute of [NULL_GROUP, ...this.browser.sampleInfo.attributeNames]) {
 
             let initialState = false
-            if ('None' === attribute) {
-                initialState = ('None' === this.groupBy)
+            if (NULL_GROUP === attribute) {
+                initialState = (NULL_GROUP === this.groupBy)
             } else {
                 initialState = (attribute === this.groupBy)
             }
@@ -194,7 +196,7 @@ class SegTrack extends TrackBase {
     }
 
     getSamples() {
-        const groupIndeces = 'None' !== this.groupBy ?
+        const groupIndeces = NULL_GROUP !== this.groupBy ?
             this.filteredSampleKeys.map(sample => this.getGroupIndex(sample)) : undefined
         return {
             names: this.filteredSampleKeys,
@@ -498,8 +500,15 @@ class SegTrack extends TrackBase {
                 drawCount++
             }
 
-            if ('None' !== this.groupBy) {
-                drawGroupDividers(context, pixelTop, pixelWidth, pixelHeight, 0, this.sampleHeight, this.groups, SegTrack.GROUP_MARGIN_HEIGHT)
+            if (NULL_GROUP !== this.groupBy) {
+                drawGroupDividers(context,
+                    pixelTop,
+                    pixelWidth,
+                    pixelHeight,
+                    0,
+                    this.sampleHeight,
+                    this.groups,
+                    SegTrack.GROUP_MARGIN_HEIGHT)
             }
         }
     }
@@ -642,7 +651,7 @@ class SegTrack extends TrackBase {
 
         // Group samples by the specified attribute
         this.groups.clear()
-        if ('None' !== attribute) {
+        if (NULL_GROUP !== attribute) {
             this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, attribute, 1)
 
             const sampleKeys = this.filteredSampleKeys
