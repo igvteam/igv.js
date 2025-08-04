@@ -84,9 +84,6 @@ class SegTrack extends TrackBase {
 
         this.initialSort = config.sort
 
-        if (config.groupBy) {
-            this.groupBy = config.groupBy
-        }
     }
 
     async postInit() {
@@ -825,6 +822,7 @@ class SegTrack extends TrackBase {
     updateSampleKeys(featureList) {
         if (this.explicitSamples) return
 
+        let newSamplesFound = false
         const sampleKeySet = new Set(this.sampleKeys)
         for (let feature of featureList) {
             const sampleKey = feature.sampleKey || feature.sample
@@ -833,7 +831,12 @@ class SegTrack extends TrackBase {
                 keys.push(sampleKey)
                 this.sampleKeys = keys
                 sampleKeySet.add(sampleKey)
+                newSamplesFound = true
             }
+        }
+        if (newSamplesFound && NULL_GROUP !== this.groupBy) {
+            this.groupByAttribute(this.groupBy)
+
         }
     }
 
