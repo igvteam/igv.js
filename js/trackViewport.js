@@ -30,29 +30,34 @@ class TrackViewport extends Viewport {
 
     initializationHelper() {
 
-        this.spinnerElement = document.createElement('div');
-        this.spinnerElement.className = 'igv-loading-spinner-container';
-        this.viewportElement.appendChild(this.spinnerElement);
+        this.spinnerElement = document.createElement('div')
+        this.spinnerElement.className = 'igv-loading-spinner-container'
+        this.viewportElement.appendChild(this.spinnerElement)
+        this.spinnerElement.appendChild(document.createElement('div'))
 
-        const innerDiv = document.createElement('div');
-        this.spinnerElement.appendChild(innerDiv);
+        this.overlayElement = document.createElement('div')
+        //this.overlayElement.className = 'igv-track-viewport-overlay';
+        this.overlayElement.style.position = 'absolute'
+        this.overlayElement.style.width = '100%'
+        this.overlayElement.style.height = '100%'
+        this.viewportElement.appendChild(this.overlayElement)
 
-        const track = this.trackView.track;
+        const track = this.trackView.track
         if ('sequence' !== track.type) {
-            this.zoomInNoticeElement = TrackViewport.createZoomInNotice(this.viewportElement);
+            this.zoomInNoticeElement = TrackViewport.createZoomInNotice(this.viewportElement)
         }
 
         if ("sequence" !== track.id) {
-            this.trackLabelElement = document.createElement('div');
-            this.trackLabelElement.className = 'igv-track-label';
-            this.viewportElement.appendChild(this.trackLabelElement);
-            this.setTrackLabel(track.name || "");
+            this.trackLabelElement = document.createElement('div')
+            this.trackLabelElement.className = 'igv-track-label'
+            this.viewportElement.appendChild(this.trackLabelElement)
+            this.setTrackLabel(track.name || "")
             if (false === this.browser.doShowTrackLabels) {
-                this.trackLabelElement.style.display = 'none';
+                this.trackLabelElement.style.display = 'none'
             }
             // Setting track height can affect label style
             if (this.trackView.track.height) {
-                this.setHeight(this.trackView.track.height);
+                this.setHeight(this.trackView.track.height)
             }
         }
 
@@ -81,22 +86,22 @@ class TrackViewport extends Viewport {
 
     setTrackLabel(label) {
 
-        this.trackLabelElement.innerHTML = '';
-        this.trackLabelElement.innerHTML = label;
+        this.trackLabelElement.innerHTML = ''
+        this.trackLabelElement.innerHTML = label
 
-        const txt = this.trackLabelElement.textContent;
-        this.trackLabelElement.setAttribute('title', txt);
+        const txt = this.trackLabelElement.textContent
+        this.trackLabelElement.setAttribute('title', txt)
     }
 
     startSpinner() {
-        if (this.spinnerElement){
-            this.spinnerElement.style.display = 'flex';
+        if (this.spinnerElement) {
+            this.spinnerElement.style.display = 'flex'
         }
     }
 
     stopSpinner() {
         if (this.spinnerElement) {
-            this.spinnerElement.style.display = 'none';
+            this.spinnerElement.style.display = 'none'
         }
     }
 
@@ -138,7 +143,7 @@ class TrackViewport extends Viewport {
 
             // Out of visibility window
             if (this.canvas && this.canvas.parentNode) {
-                this.canvas.parentNode.removeChild(this.canvas);
+                this.canvas.parentNode.removeChild(this.canvas)
                 this.canvas = undefined
             }
             if (this.trackView.track.autoHeight) {
@@ -146,12 +151,12 @@ class TrackViewport extends Viewport {
                 this.setContentHeight(minHeight)
             }
             if (this.zoomInNoticeElement) {
-                this.zoomInNoticeElement.style.display = 'flex';
+                this.zoomInNoticeElement.style.display = 'flex'
             }
             return false
         } else {
             if (this.zoomInNoticeElement) {
-                this.zoomInNoticeElement.style.display = 'none';
+                this.zoomInNoticeElement.style.display = 'none'
             }
             return true
         }
@@ -191,6 +196,8 @@ class TrackViewport extends Viewport {
 
         super.setTop(contentTop)
 
+        this.overlayElement.style.top = `${contentTop}px`
+
         if (!this.canvas) {
             this.repaint()
         } else {
@@ -203,33 +210,24 @@ class TrackViewport extends Viewport {
             }
         }
 
-        // If data is loaded,  offset backing canvas to align with the contentTop visual offset.  If not data has
-        // been loaded canvas will be undefined
-        if(this.canvas && this.canvas._data) {
-            let offset = contentTop + this.canvas._data.pixelTop
-            this.canvas.style.top = `${offset}px`
-        }
+        // Offset canvas if contentTop does not match pixelTop.  contetTop is the top of the virtual canvas
+        // relative to the viewport, and is always <= 0, i.e. content top is shifted "up" when the
+        // track is scrolled vertically  making the top of the virtual canvas above the top of the viewport.
+        let offset = contentTop + this.canvas._data.pixelTop
+        this.canvas.style.top = `${offset}px`
     }
 
     setHeight(h) {
         super.setHeight(h)
-        const labelElement = this.viewportElement.querySelector(".igv-track-label");
-        if(labelElement) {
+        const labelElement = this.viewportElement.querySelector(".igv-track-label")
+        if (labelElement) {
             // If the track height is small center the label vertically.
             if (h < 30) {
-                //labelElement.classList.add("igv-vertical-center")
-               // .igv-vertical-center {
-               //      margin: 0 ;
-               //      top: 50% ;
-               //      -ms-transform: translateY(-50%);
-               //      transform: translateY(-50%);
-               //  }
                 labelElement.style.margin = 0
                 labelElement.style.top = "50%"
                 labelElement.style.transform = "translateY(-50%)"
                 labelElement.style["-ms-transform"] = "translateY(-50%)"
             } else {
-                //labelElement.classList.remove("igv-vertical-center")
                 labelElement.style.removeProperty("margin")
                 labelElement.style.removeProperty("top")
                 labelElement.style.removeProperty("transform")
@@ -314,7 +312,7 @@ class TrackViewport extends Viewport {
         const pixelWidth = isWGV ? this.viewportElement.clientWidth : 3 * this.viewportElement.clientWidth
         const bpPerPixel = this.referenceFrame.bpPerPixel
         const bpStart = this.referenceFrame.start - (isWGV ? 0 : this.viewportElement.clientWidth * bpPerPixel)
-        const bpEnd = isWGV ? Number.MAX_SAFE_INTEGER : this.referenceFrame.start +  2 * this.viewportElement.clientWidth * bpPerPixel + 1
+        const bpEnd = isWGV ? Number.MAX_SAFE_INTEGER : this.referenceFrame.start + 2 * this.viewportElement.clientWidth * bpPerPixel + 1
         return {
             bpStart, bpEnd, pixelWidth
         }
@@ -341,12 +339,12 @@ class TrackViewport extends Viewport {
         const pixelHeight = Math.min(maxHeight, 3 * viewportHeight)
         if (0 === pixelWidth || 0 === pixelHeight) {
             if (this.canvas && this.canvas.parentNode) {
-                this.canvas.parentNode.removeChild(this.canvas);
+                this.canvas.parentNode.removeChild(this.canvas)
             }
             return
         }
         const pixelTop = Math.max(0, -this.contentTop - Math.floor(pixelHeight / 3))
-
+console.log(`contentTop: ${this.contentTop}, pixelTop: ${pixelTop}, viewportHeight: ${viewportHeight}, pixelHeight: ${pixelHeight}`)
         const bpPerPixel = this.referenceFrame.bpPerPixel
         const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / bpPerPixel)
         const canvasTop = (this.contentTop || 0) + pixelTop
@@ -390,7 +388,7 @@ class TrackViewport extends Viewport {
         this.draw(drawConfiguration, features, roiFeatures)
 
         if (this.canvas && this.canvas.parentNode) {
-            this.canvas.parentNode.removeChild(this.canvas);
+            this.canvas.parentNode.removeChild(this.canvas)
         }
         newCanvas._data = drawConfiguration
         this.canvas = newCanvas
@@ -444,14 +442,14 @@ class TrackViewport extends Viewport {
 
         if (!this.canvas) return
 
-        const w = this.viewportElement.clientWidth * window.devicePixelRatio;
-        const h = this.viewportElement.clientHeight * window.devicePixelRatio;
+        const w = this.viewportElement.clientWidth * window.devicePixelRatio
+        const h = this.viewportElement.clientHeight * window.devicePixelRatio
 
         const x = -this.canvas.offsetLeft * window.devicePixelRatio
 
         const canvasMetadata = this.canvas._data
         const canvasTop = canvasMetadata ? canvasMetadata.pixelTop : 0
-        const y = (-this.contentTop - canvasTop) * window.devicePixelRatio;
+        const y = (-this.contentTop - canvasTop) * window.devicePixelRatio
 
         const ctx = this.canvas.getContext("2d")
         const imageData = ctx.getImageData(x, y, w, h)
@@ -462,7 +460,7 @@ class TrackViewport extends Viewport {
         exportCtx.putImageData(imageData, 0, 0)
 
         // filename = this.trackView.track.name + ".png";
-        const filename = (this.trackLabelElement && this.trackLabelElement.textContent ? this.trackLabelElement.textContent : "image") + ".png";
+        const filename = (this.trackLabelElement && this.trackLabelElement.textContent ? this.trackLabelElement.textContent : "image") + ".png"
         const data = exportCanvas.toDataURL("image/png")
         FileUtils.download(filename, data)
     }
@@ -568,7 +566,7 @@ class TrackViewport extends Viewport {
                     selection: this.selection,
                     viewport: this,
                     viewportWidth: this.viewportElement.clientWidth
-                };
+                }
 
             const features = this.featureCache ? this.featureCache.features : undefined
             const roiFeatures = this.featureCache ? this.featureCache.roiFeatures : undefined
@@ -578,13 +576,13 @@ class TrackViewport extends Viewport {
         }
 
         if (includeLabel && this.trackLabelElement && this.browser.doShowTrackLabels) {
-            const {x: x_p, y: y_p, width: width_p, height: height_p} = this.viewportElement.getBoundingClientRect();
-            const {x: x_c, y: y_c, width: width_c, height: height_c} = this.trackLabelElement.getBoundingClientRect();
-            const x = x_c - x_p;
-            const y = y_c - y_p;
-            const width = width_c;
-            const height = height_c;
-            this.renderTrackLabelSVG(context, deltaX + x, deltaY + y, width, height);
+            const {x: x_p, y: y_p, width: width_p, height: height_p} = this.viewportElement.getBoundingClientRect()
+            const {x: x_c, y: y_c, width: width_c, height: height_c} = this.trackLabelElement.getBoundingClientRect()
+            const x = x_c - x_p
+            const y = y_c - y_p
+            const width = width_c
+            const height = height_c
+            this.renderTrackLabelSVG(context, deltaX + x, deltaY + y, width, height)
         }
 
     }
@@ -597,8 +595,8 @@ class TrackViewport extends Viewport {
         const text = this.trackLabelElement.textContent
         const {width: stringWidth} = context.measureText(text)
 
-        const dx = 0.25 * (width - stringWidth);
-        const dy = 0.7 * (height - 12);
+        const dx = 0.25 * (width - stringWidth)
+        const dy = 0.7 * (height - 12)
 
         this.renderElementSVG(context, id, tx, ty, width, height, text, dx, dy)
     }
@@ -614,7 +612,7 @@ class TrackViewport extends Viewport {
         context.font = "12px Arial"
         context.fillStyle = 'rgb(68, 68, 68)'
 
-        context.fillText(text, dx, height - dy);
+        context.fillText(text, dx, height - dy)
 
         context.strokeStyle = 'rgb(68, 68, 68)'
         context.strokeRect(0, 0, width, height)
@@ -666,17 +664,17 @@ class TrackViewport extends Viewport {
 
     static createZoomInNotice(parentElement) {
 
-        const container = document.createElement('div');
-        container.className = 'igv-zoom-in-notice-container';
-        parentElement.appendChild(container);
+        const container = document.createElement('div')
+        container.className = 'igv-zoom-in-notice-container'
+        parentElement.appendChild(container)
 
-        const element = document.createElement('div');
-        container.appendChild(element);
-        element.textContent = 'Zoom in to see features';
+        const element = document.createElement('div')
+        container.appendChild(element)
+        element.textContent = 'Zoom in to see features'
 
-        container.style.display = 'none';
+        container.style.display = 'none'
 
-        return container;
+        return container
     }
 
     viewIsReady() {
@@ -766,7 +764,7 @@ class TrackViewport extends Viewport {
 
             // Add items common to all tracks
             if (menuItems.length > 0) {
-                menuItems.push({label: document.createElement('hr')});
+                menuItems.push({label: document.createElement('hr')})
             }
 
             menuItems.push({label: 'Save Image (PNG)', click: () => this.savePNG()})
@@ -897,78 +895,78 @@ class TrackViewport extends Viewport {
 
     addTrackLabelClickHandler(trackLabel) {
         trackLabel.addEventListener('click', (event) => {
-            event.stopPropagation();
+            event.stopPropagation()
 
             // Remove any existing popover
-            this.removeTrackLabelPopover();
+            this.removeTrackLabelPopover()
 
-            const { track } = this.trackView;
-            let content;
+            const {track} = this.trackView
+            let content
             if (typeof track.description === 'function') {
-                content = track.description(); // Should return a DOM node or fragment
+                content = track.description() // Should return a DOM node or fragment
             } else if (track.description) {
                 // Fallback: wrap string in a row
-                const row = document.createElement('div');
-                row.className = 'igv-track-label-popover__row';
-                row.textContent = track.description;
-                content = row;
+                const row = document.createElement('div')
+                row.className = 'igv-track-label-popover__row'
+                row.textContent = track.description
+                content = row
             }
 
             if (content) {
-                this.showTrackLabelPopover(event, content, track.name || '');
+                this.showTrackLabelPopover(event, content, track.name || '')
             }
-        });
+        })
     }
 
     showTrackLabelPopover(event, content, title) {
         // Create popover container
-        const popover = document.createElement('div');
-        popover.className = 'igv-track-label-popover';
+        const popover = document.createElement('div')
+        popover.className = 'igv-track-label-popover'
 
         // Header
-        const header = document.createElement('div');
-        header.className = 'igv-track-label-popover__header';
+        const header = document.createElement('div')
+        header.className = 'igv-track-label-popover__header'
 
-        const titleDiv = document.createElement('div');
-        titleDiv.className = 'igv-track-label-popover__title';
-        titleDiv.textContent = title;
+        const titleDiv = document.createElement('div')
+        titleDiv.className = 'igv-track-label-popover__title'
+        titleDiv.textContent = title
 
-        const closeBtn = document.createElement('div');
-        closeBtn.className = 'igv-track-label-popover__close';
-        closeBtn.setAttribute('tabindex', '0');
-        closeBtn.setAttribute('aria-label', 'Close');
-        closeBtn.appendChild(createIcon('times'));
-        closeBtn.addEventListener('click', () => this.removeTrackLabelPopover());
+        const closeBtn = document.createElement('div')
+        closeBtn.className = 'igv-track-label-popover__close'
+        closeBtn.setAttribute('tabindex', '0')
+        closeBtn.setAttribute('aria-label', 'Close')
+        closeBtn.appendChild(createIcon('times'))
+        closeBtn.addEventListener('click', () => this.removeTrackLabelPopover())
 
-        header.appendChild(titleDiv);
-        header.appendChild(closeBtn);
+        header.appendChild(titleDiv)
+        header.appendChild(closeBtn)
 
         // Body
-        const body = document.createElement('div');
-        body.className = 'igv-track-label-popover__body';
-        body.appendChild(content);
+        const body = document.createElement('div')
+        body.className = 'igv-track-label-popover__body'
+        body.appendChild(content)
 
         // Assemble popover
-        popover.appendChild(header);
-        popover.appendChild(body);
+        popover.appendChild(header)
+        popover.appendChild(body)
 
         // Position popover near the track label
-        const labelRect = this.trackLabelElement.getBoundingClientRect();
-        const containerRect = this.browser.columnContainer.getBoundingClientRect();
-        const offsetX = labelRect.left - containerRect.left;
-        const offsetY = labelRect.bottom - containerRect.top + 5;
+        const labelRect = this.trackLabelElement.getBoundingClientRect()
+        const containerRect = this.browser.columnContainer.getBoundingClientRect()
+        const offsetX = labelRect.left - containerRect.left
+        const offsetY = labelRect.bottom - containerRect.top + 5
 
-        popover.style.left = `${offsetX}px`;
-        popover.style.top = `${offsetY}px`;
-        popover.style.position = 'absolute';
+        popover.style.left = `${offsetX}px`
+        popover.style.top = `${offsetY}px`
+        popover.style.position = 'absolute'
 
         // Store reference for later removal
-        this._trackLabelPopover = popover;
+        this._trackLabelPopover = popover
 
         // Add to DOM
-        this.browser.columnContainer.appendChild(popover);
+        this.browser.columnContainer.appendChild(popover)
 
-        makeDraggable(popover, header, { minX:0, minY:0 })
+        makeDraggable(popover, header, {minX: 0, minY: 0})
 
         // Remove on outside click
         // setTimeout(() => {
@@ -982,11 +980,11 @@ class TrackViewport extends Viewport {
 
     removeTrackLabelPopover() {
         if (this._trackLabelPopover) {
-            this._trackLabelPopover.remove();
-            this._trackLabelPopover = null;
+            this._trackLabelPopover.remove()
+            this._trackLabelPopover = null
             if (this._trackLabelPopoverListener) {
-                document.removeEventListener('mousedown', this._trackLabelPopoverListener);
-                this._trackLabelPopoverListener = null;
+                document.removeEventListener('mousedown', this._trackLabelPopoverListener)
+                this._trackLabelPopoverListener = null
             }
         }
     }

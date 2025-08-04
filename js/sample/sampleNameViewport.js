@@ -3,6 +3,7 @@ import {appleCrayonRGB} from '../util/colorPalletes.js'
 import IGVGraphics from "../igv-canvas.js"
 import SegTrack from "../feature/segTrack.js"
 import SampleInfo from "./sampleInfo.js"
+import {drawGroupDividers} from "./sampleGroup.js"
 
 const maxSampleNameViewportWidth = 200
 const fudgeTextMetricWidth = 4
@@ -104,15 +105,14 @@ class SampleNameViewport {
 
             let rowIndex = 0
             this.hitList = {}
-            const bucketMarginHeight = typeof this.trackView.track.getBucketMarginHeight === 'function' ? this.trackView.track.getBucketMarginHeight() : 0
-            const bucketStartRows = typeof this.trackView.track.getBucketStartRows === 'function' ? this.trackView.track.getBucketStartRows() : []
 
             for (const sampleName of samples.names) {
 
                 const x = 0
-
-                const bucketMarginCount = bucketMarginHeight > 0 && bucketStartRows.length > 1 ? SegTrack.getBucketMarginCount(rowIndex, bucketStartRows) : 0;
-                const yy = y + shim + (bucketMarginCount * bucketMarginHeight);
+                let yy = y + shim
+                if (samples.groupIndeces) {
+                    yy += samples.groupIndeces[rowIndex] * samples.groupMarginHeight
+                }
 
                 const hh = tileHeight - (2 * shim)
 
@@ -121,6 +121,8 @@ class SampleNameViewport {
                 y += tileHeight
                 rowIndex++
             }
+
+            drawGroupDividers(context, 0, context.canvas.width, context.canvas.height, this.contentTop + samples.yOffset, samples.height, samples.groups, samples.groupMarginHeight)
         }
     }
 

@@ -112,6 +112,19 @@ class TrackView {
         }
     }
 
+    /**
+     * Return the last (rightmost) track viewport.  Normally this is the only one, but in multilocus view there may be
+     * several
+     * @returns {undefined|*} The last viewport, or undefined if there are no viewports
+     */
+    getLastViewport() {
+        if (this.viewports && this.viewports.length > 0) {
+            return this.viewports[this.viewports.length - 1]
+        } else {
+            return undefined
+        }
+    }
+
     createAxis(browser, track) {
 
         const axis = DOMUtils.div()
@@ -337,12 +350,6 @@ class TrackView {
         this.sampleNameViewport.trackScrollDelta = delta
         this.sampleNameViewport.setTop(contentTop)
 
-    }
-
-    isLoading() {
-        for (let viewport of this.viewports) {
-            if (viewport.isLoading()) return true
-        }
     }
 
     /**

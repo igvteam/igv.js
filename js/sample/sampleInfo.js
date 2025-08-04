@@ -49,18 +49,23 @@ class SampleInfo {
         return this.sampleDictionary[key]
     }
 
+    getAttributeValue(sampleName, attribute) {
+        const attributes = this.getAttributes(sampleName)
+        return attributes ? attributes[attribute] : undefined
+    }
+
     async loadSampleInfo(config) {
 
         if (config.url) {
             await this.loadSampleInfoFile(config.url)
         } else {
 
-            const samples = { ...config }
+            const samples = {...config}
             for (const [key, record] of Object.entries(samples)) {
                 samples[key] = SampleInfo.toNumericalRepresentation(record)
             }
 
-            const [ value ] = Object.values(samples)
+            const [value] = Object.values(samples)
             const attributes = Object.keys(value)
 
             this.loadSampleInfoHelper(attributes, samples)
@@ -70,7 +75,7 @@ class SampleInfo {
         this.initialized = true
     }
 
-    loadSampleInfoHelper(attributes, samples){
+    loadSampleInfoHelper(attributes, samples) {
 
         // Establish the range of values for each attribute
         const lut = createAttributeRangeLUT(attributes, samples)
@@ -412,7 +417,7 @@ class SampleInfo {
         const reverseSampleMappingDictionary = Object.fromEntries(
             Object.entries(this.sampleMappingDictionary).map(([key, value]) => [value, key])
         )
-        for(const sampleName of Object.keys(this.sampleDictionary)) {
+        for (const sampleName of Object.keys(this.sampleDictionary)) {
             const key = reverseSampleMappingDictionary[sampleName] || sampleName
             const attributes = this.getAttributes(sampleName)
             if (attributes) {

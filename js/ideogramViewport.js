@@ -212,8 +212,8 @@ class IdeogramViewport extends TrackViewport {
         const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
 
         const x = deltaX
-        const y = deltaY + this.contentTop
-        const yClipOffset = -this.contentTop
+        const y = deltaY - this.contentTop
+        const yClipOffset = this.contentTop
 
         context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
         this.trackView.track.draw({
