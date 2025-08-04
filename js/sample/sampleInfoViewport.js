@@ -382,7 +382,6 @@ class SampleInfoViewport {
                             // do nothing
                         } else {
                             const [a, b] = value.split('#')
-                            console.log(`clicked: ${a.split(SampleInfo.emptySpaceReplacement).join(' ')}: ${'-' === b ? '' : b}`)
                             break
                         }
                     }
