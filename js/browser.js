@@ -286,7 +286,7 @@ class Browser {
 
         const {x, y, width, height} = this.columnContainer.getBoundingClientRect()
 
-        const h_render = 8000      // <= DO NOT USE 'height' here
+        const h_render = Number.MAX_SAFE_INTEGER      // <= DO NOT USE 'height' here
 
         const config =
             {
