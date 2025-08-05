@@ -169,7 +169,7 @@ class SampleInfoViewport {
                     let yy = y + shim
                     if (samples.groupIndeces) {
                         yy += samples.groupIndeces[rowIndex] * GROUP_MARGIN_HEIGHT
-                        if(yy > viewportHeight) {
+                        if (yy > viewportHeight) {
                             break
                         }
                     }
