@@ -176,7 +176,7 @@ const BamUtils = {
             if (refID < 0) {
                 offset = blockEnd
                 continue   // unmapped read
-            } else if (chrIdx !== undefined && (refID > chrIdx || pos > max)) {
+            } else if (chrIdx !== undefined && (refID > chrIdx || (refID === chrIdx && pos > max))) {
                 return true    // off right edge, we're done
             } else if (chrIdx !== undefined && (refID < chrIdx)) {
                 offset = blockEnd
