@@ -203,7 +203,7 @@ class TrackViewport extends Viewport {
         } else {
             // See if currently painted canvas covers the vertical range of the viewport.  If not repaint
             const h = this.viewportElement.clientHeight
-            const vt =  this.canvas._data.pixelTop - contentTop
+            const vt = this.canvas._data.pixelTop - contentTop
             const vb = vt + this.canvas._data.pixelHeight
             if (vt > 0 || vb < h) {
                 this.repaint()
@@ -348,7 +348,7 @@ class TrackViewport extends Viewport {
         const pixelTop = Math.max(0, this.contentTop - Math.floor(pixelHeight / 3))
         const bpPerPixel = this.referenceFrame.bpPerPixel
         const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / bpPerPixel)
-        const canvasTop =  pixelTop - (this.contentTop || 0)
+        const canvasTop = pixelTop - (this.contentTop || 0)
         const newCanvas = document.createElement('canvas')
         newCanvas.style.position = 'relative'
         newCanvas.style.display = 'block'
@@ -811,7 +811,11 @@ class TrackViewport extends Viewport {
                         this.browser.search(string)
 
                     } else {
-                        this.browser.zoomWithScaleFactor(0.5, centerBP, this.referenceFrame)
+                        if (event.shiftKey) {
+                            this.browser.zoomWithScaleFactor(2, centerBP, this.referenceFrame)
+                        } else {
+                            this.browser.zoomWithScaleFactor(0.5, centerBP, this.referenceFrame)
+                        }
                     }
 
 
