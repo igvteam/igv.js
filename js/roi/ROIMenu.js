@@ -53,8 +53,8 @@ class ROIMenu {
             this.#addBlatMenuItem(items, feature)
         }
 
-        // Add sort menu items
-        this.#addSortMenuItems(items, feature)
+        // Add sort menu items  -- disabled for now, its not clear what this means for tracks in general
+        // this.#addSortMenuItems(items, feature)
 
         // REMOVED: Add filter menu items - now handled by individual tracks
         // this.#addFilterMenuItems(items, feature, event)
@@ -153,10 +153,7 @@ class ROIMenu {
         }
     }
 
-    #addFilterMenuItems(items, feature, event) {
-        // REMOVED: Filter menu items are now available in SegTrack context menu
-        // Filtering is now done on individual tracks rather than globally
-    }
+
 
     #addBlatMenuItem(items, feature) {
         items.push({

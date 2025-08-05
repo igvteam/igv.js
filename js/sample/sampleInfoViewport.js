@@ -4,7 +4,7 @@ import SampleInfo from './sampleInfo.js'
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 import IGVGraphics from "../igv-canvas.js"
 import {defaultRulerHeight} from "../rulerTrack.js"
-import {drawGroupDividers, GROUP_MARGIN_HEIGHT, NULL_GROUP} from "./sampleGroup.js"
+import {drawGroupDividers, GROUP_MARGIN_HEIGHT, NULL_GROUP} from "./sampleGroupUtils.js"
 
 const MaxSampleInfoColumnHeight = 128
 
@@ -171,11 +171,10 @@ class SampleInfoViewport {
                     let yy = y + shim
                     if (samples.groupIndeces) {
                         yy += samples.groupIndeces[rowIndex] * GROUP_MARGIN_HEIGHT
-                        if (yy > viewportHeight) {
-                            break
-                        }
                     }
-
+                    if (yy > viewportHeight) {
+                        break
+                    }
                     if (yy + tileHeight > 0) {
 
                         const hh = tileHeight - (2 * shim)
