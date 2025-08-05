@@ -142,7 +142,7 @@ class AlignmentTrack extends TrackBase {
     }
 
     dispose() {
-        this.browser.off('locuschage', this._locusChange)
+        this.browser.off('locuschange', this._locusChange)
     }
 
     /**
@@ -699,7 +699,7 @@ class AlignmentTrack extends TrackBase {
             colorByMenuItems.push({key: 'tlen', label: 'insert size (TLEN)'})
             colorByMenuItems.push({key: 'unexpectedPair', label: 'pair orientation & insert size (TLEN)'})
         }
-        if(this.colorBy && this.colorBy.startsWith("tag:")) {
+        if (this.colorBy && this.colorBy.startsWith("tag:")) {
             colorByMenuItems.push({key: this.colorBy, label: this.colorBy})
         }
         colorByMenuItems.push({key: 'tag', label: 'tag...'})
@@ -1432,7 +1432,7 @@ class AlignmentTrack extends TrackBase {
                 if (tagValue !== undefined) {
 
                     // If the tag value can be interpreted as a color, use it
-                    if(typeof tagValue.startsWith === 'function') {
+                    if (typeof tagValue.startsWith === 'function') {
                         color = IGVColor.createColorStringSafe(tagValue)
                     }
 
