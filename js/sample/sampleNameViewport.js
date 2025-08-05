@@ -119,7 +119,7 @@ class SampleNameViewport {
                 y += tileHeight
                 rowIndex++
 
-                if(y > viewportHeight) {
+                if (y > viewportHeight) {
                     break
                 }
             }
