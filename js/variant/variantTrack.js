@@ -1008,7 +1008,6 @@ class VariantTrack extends TrackBase {
             }
         }
     }
-
 }
 
 

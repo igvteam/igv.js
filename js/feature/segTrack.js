@@ -660,7 +660,6 @@ class SegTrack extends TrackBase {
         this.groups.clear()
         if (NULL_GROUP !== attribute) {
             this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, attribute, 1)
-
             const sampleKeys = this.filteredSampleKeys
             for (let sampleKey of sampleKeys) {
                 const value = this.browser.sampleInfo.getAttributeValue(sampleKey, attribute) || ""
