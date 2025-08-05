@@ -114,7 +114,7 @@ class Viewport {
             this.setContentHeight(this.viewportElement.clientHeight);
         } else if (typeof track.computePixelHeight === 'function') {
             if (features && features.length > 0) {
-                const requiredContentHeight = track.computePixelHeight(features);
+                const requiredContentHeight = track.computePixelHeight(features, this.referenceFrame.bpPerPixel);
                 if (requiredContentHeight !== this.contentHeight) {
                     this.setContentHeight(requiredContentHeight);
                 }
