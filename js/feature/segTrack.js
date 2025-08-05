@@ -7,12 +7,10 @@ import {GradientColorScale} from "../util/colorScale.js"
 import {ColorTable} from "../util/colorPalletes.js"
 import SampleInfo from "../sample/sampleInfo.js"
 import HicColorScale from "../hic/hicColorScale.js"
-import ShoeboxSource from "../hic/shoeboxSource.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
-import {createElementWithString} from "../ui/utils/dom-utils.js"
 import SEGFilterDialog from "../ui/components/segFilterDialog.js"
 import FilterManagerDialog from "../ui/components/filterManagerDialog.js"
-import {drawGroupDividers} from "../sample/sampleGroup.js"
+import {drawGroupDividers} from "../sample/sampleGroupUtils.js"
 
 const NULL_GROUP = 'None'
 
@@ -786,38 +784,38 @@ class SegTrack extends TrackBase {
         })
 
 
+        // TODO -- filtering disabled for now
         // Add filter menu items based on track type
-        if (this.type === 'seg') {
-            menuItems.push('<hr/>')
-            menuItems.push({
-                label: 'Filter by value ...',
-                click: () => {
-                    const config = {
-                        callback: async (threshold, op) => {
-                            const chr = referenceFrame.chr
-                            const start = Math.floor(genomicLocation - bpWidth)
-                            const end = Math.floor(genomicLocation + bpWidth)
-
-                            // Apply filter to this specific track
-                            const filterConfig = {type: "VALUE", op, value: threshold, chr, start, end}
-                            await this.addFilter(filterConfig)
-                        }
-                    }
-                    this.segFilterDialog.present(event, config)
-                }
-            })
-
-        }
-
-        if (this._trackFilterObjects && this._trackFilterObjects.length > 0) {
-            menuItems.push({
-                label: 'Filters...',
-                click: () => {
-                    this.filterManagerDialog.present(this, event)
-                }
-            })
-
-        }
+        // if (this.type === 'seg') {
+        //     menuItems.push('<hr/>')
+        //     menuItems.push({
+        //         label: 'Filter by value ...',
+        //         click: () => {
+        //             const config = {
+        //                 callback: async (threshold, op) => {
+        //                     const chr = referenceFrame.chr
+        //                     const start = Math.floor(genomicLocation - bpWidth)
+        //                     const end = Math.floor(genomicLocation + bpWidth)
+        //
+        //                     // Apply filter to this specific track
+        //                     const filterConfig = {type: "VALUE", op, value: threshold, chr, start, end}
+        //                     await this.addFilter(filterConfig)
+        //                 }
+        //             }
+        //             this.segFilterDialog.present(event, config)
+        //         }
+        //     })
+        // }
+        //
+        // if (this._trackFilterObjects && this._trackFilterObjects.length > 0) {
+        //     menuItems.push({
+        //         label: 'Filters...',
+        //         click: () => {
+        //             this.filterManagerDialog.present(this, event)
+        //         }
+        //     })
+        //
+        // }
 
         menuItems.push('<hr/>')
 
