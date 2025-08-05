@@ -1,8 +1,6 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import IGVGraphics from "../igv-canvas.js"
-import SegTrack from "../feature/segTrack.js"
-import SampleInfo from "./sampleInfo.js"
 import {drawGroupDividers} from "./sampleGroup.js"
 
 const maxSampleNameViewportWidth = 200
@@ -34,8 +32,6 @@ class SampleNameViewport {
 
         this.contentTop = 0
         this.hitList = undefined
-
-        this.sortDirection = 1
 
         this.setWidth(width)
 
@@ -98,6 +94,7 @@ class SampleNameViewport {
 
         if (samples && samples.names.length > 0) {
 
+            const viewportHeight = this.viewport.getBoundingClientRect().height
             const tileHeight = samples.height
             const shim = tileHeight - 2 <= 1 ? 0 : 1
 
@@ -114,15 +111,20 @@ class SampleNameViewport {
                     yy += samples.groupIndeces[rowIndex] * samples.groupMarginHeight
                 }
 
-                const hh = tileHeight - (2 * shim)
-
-                drawTextInRect(context, sampleName, x + 2, yy, context.canvas.width, hh);
+                if (yy + tileHeight > 0) {
+                    const hh = tileHeight - (2 * shim)
+                    drawTextInRect(context, sampleName, x + 2, yy, context.canvas.width, hh);
+                }
 
                 y += tileHeight
                 rowIndex++
+
+                if (y > viewportHeight) {
+                    break
+                }
             }
 
-            drawGroupDividers(context, 0, context.canvas.width, context.canvas.height,  samples.yOffset - this.contentTop, samples.height, samples.groups, samples.groupMarginHeight)
+            drawGroupDividers(context, 0, context.canvas.width, context.canvas.height,  samples.yOffset - this.contentTop, samples.height, samples.groups)
         }
     }
 
