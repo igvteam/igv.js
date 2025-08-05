@@ -116,18 +116,20 @@ class SampleInfoViewport {
 
         this.resizeCanvas()
 
-        if (typeof this.trackView.track.getSamples === 'function') {
-            const samples = this.trackView.track.getSamples()
-            if (samples.names && samples.names.length > 0) {
-                this.draw({context: this.ctx, samples})
-            }
-        } else if (this.isIdeogram) {     // TODO -- why is this happening here?
+        if (this.isIdeogram) {
+            // Resize the rulertrack to create more space for the sample info columns.  TODO -- this should not be done on every repaint.
             if (this.browser.rulerTrackView) {
                 this.browser.rulerTrackView.setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? this.calculateSampleInfoColumnHeight() : defaultRulerHeight, true)
             }
             this.renderSampleInfoColumns(this.ctx)
         }
 
+        if (typeof this.trackView.track.getSamples === 'function') {
+            const samples = this.trackView.track.getSamples()
+            if (samples.names && samples.names.length > 0) {
+                this.draw({context: this.ctx, samples})
+            }
+        }
     }
 
     calculateSampleInfoColumnHeight() {
