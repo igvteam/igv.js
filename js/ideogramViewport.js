@@ -56,7 +56,7 @@ class IdeogramViewport extends TrackViewport {
         // Add tooltip for cytoband names
         this.tooltipContent = document.createElement('div');
         this.tooltip.appendChild(this.tooltipContent);
-        
+
         // Initially hide the tooltip
         this.tooltip.style.display = 'none';
 
@@ -212,7 +212,7 @@ class IdeogramViewport extends TrackViewport {
         const id = `${str}_referenceFrame_${index}_guid_${DOMUtils.guid()}`
 
         const x = deltaX
-        const y = this.contentTop - deltaY
+        const y = this.contentTop + deltaY
         const yClipOffset = -this.contentTop
 
         context.saveWithTranslationAndClipRect(id, x, y, width, height, yClipOffset)
