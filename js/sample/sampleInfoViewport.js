@@ -1,11 +1,10 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
-import {appleCrayonRGB, randomRGB} from '../util/colorPalletes.js'
+import {appleCrayonRGB} from '../util/colorPalletes.js'
 import SampleInfo from './sampleInfo.js'
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 import IGVGraphics from "../igv-canvas.js"
 import {defaultRulerHeight} from "../rulerTrack.js"
-import SegTrack from "../feature/segTrack.js"
-import {drawGroupDividers} from "./sampleGroup.js"
+import {drawGroupDividers, GROUP_MARGIN_HEIGHT, NULL_GROUP} from "./sampleGroup.js"
 
 const MaxSampleInfoColumnHeight = 128
 
@@ -15,6 +14,7 @@ class SampleInfoViewport {
 
         this.guid = DOMUtils.guid()
         this.trackView = trackView
+        this.isIdeogram = 'ideogram' === trackView.track.type
 
         this.browser = trackView.browser
 
@@ -24,7 +24,7 @@ class SampleInfoViewport {
 
         this.viewport.style.height = `${trackView.track.height}px`
 
-        if (null === this.viewport.previousElementSibling) {
+        if (this.isIdeogram) {
             this.viewport.style.zIndex = 16
             this.viewport.style.overflow = 'visible'
         }
@@ -34,16 +34,14 @@ class SampleInfoViewport {
         this.ctx = this.canvas.getContext("2d")
         this.ctx.font = '10px verdana'
 
-
         this.contentTop = 0
         this.hitList = undefined
-
-        this.sortDirection = 1
 
         this.setWidth(width)
 
         this.addMouseHandlers()
     }
+
 
     resizeCanvas() {
 
@@ -51,7 +49,7 @@ class SampleInfoViewport {
         const requiredWidth = this.browser.getSampleInfoViewportWidth()
 
         let requiredHeight
-        if (this.browser.trackViews.length > 1 && null === this.viewport.previousElementSibling) {
+        if (this.browser.trackViews.length > 1 && this.isIdeogram) {
             const [at, bt] = [this.browser.ideogramTrackView.track, this.browser.rulerTrackView.track]
             requiredHeight = at.height + bt.height
         } else {
@@ -68,7 +66,7 @@ class SampleInfoViewport {
             this.ctx = this.canvas.getContext("2d")
             this.ctx.scale(dpi, dpi)
 
-            if (null === this.viewport.previousElementSibling) {
+            if (this.isIdeogram) {
                 IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, {fillStyle: appleCrayonRGB('snow')})
             }
 
@@ -108,14 +106,13 @@ class SampleInfoViewport {
         this.ctx = this.canvas.getContext('2d')
         this.ctx.scale(dpi, dpi)
 
-        if (null === this.viewport.previousElementSibling) {
-            // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, {fillStyle: randomRGB(150, 250)})
+        if (this.isIdeogram) {
             IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, {fillStyle: appleCrayonRGB('snow')})
         }
 
     }
 
-    async repaint() {
+    repaint() {
 
         this.resizeCanvas()
 
@@ -124,7 +121,7 @@ class SampleInfoViewport {
             if (samples.names && samples.names.length > 0) {
                 this.draw({context: this.ctx, samples})
             }
-        } else if (null === this.viewport.previousElementSibling) {
+        } else if (this.isIdeogram) {     // TODO -- why is this happening here?
             if (this.browser.rulerTrackView) {
                 this.browser.rulerTrackView.setTrackHeight(true === this.browser.sampleInfoControl.showSampleInfo ? this.calculateSampleInfoColumnHeight() : defaultRulerHeight, true)
             }
@@ -146,7 +143,11 @@ class SampleInfoViewport {
         context.fillStyle = appleCrayonRGB('snow')
         context.fillRect(0, 0, context.canvas.width, context.canvas.height)
 
+        const viewportHeight = this.viewport.getBoundingClientRect().height
+        const viewportWidth = this.viewport.getBoundingClientRect().width
+
         if (samples && samples.names.length > 0) {
+
 
             const attributeNames = this.browser.sampleInfo.attributeNames
 
@@ -167,25 +168,30 @@ class SampleInfoViewport {
 
                     let yy = y + shim
                     if (samples.groupIndeces) {
-                        yy += samples.groupIndeces[rowIndex] * samples.groupMarginHeight
+                        yy += samples.groupIndeces[rowIndex] * GROUP_MARGIN_HEIGHT
+                        if(yy > viewportHeight) {
+                            break
+                        }
                     }
 
-                    const hh = tileHeight - (2 * shim)
+                    if (yy + tileHeight > 0) {
 
-                    const attributeEntries = Object.entries(attributes)
-                    for (const attributeEntry of attributeEntries) {
+                        const hh = tileHeight - (2 * shim)
 
-                        const [attribute, value] = attributeEntry
+                        const attributeEntries = Object.entries(attributes)
+                        for (const attributeEntry of attributeEntries) {
 
-                        const index = attributeNames.indexOf(attribute)
-                        const x = sampleInfoTileXShim + index * sampleInfoTileWidth
+                            const [attribute, value] = attributeEntry
 
-                        context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
-                        context.fillRect(x, yy, sampleInfoTileWidth - 1, hh)
+                            const index = attributeNames.indexOf(attribute)
+                            const x = sampleInfoTileXShim + index * sampleInfoTileWidth
 
-                        const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
-                        this.hitList[key] = `${attribute}#${value}`
+                            context.fillStyle = this.browser.sampleInfo.getAttributeColor(attribute, value)
+                            context.fillRect(x, yy, sampleInfoTileWidth - 1, hh)
 
+                            const key = `${Math.floor(x)}#${Math.floor(yy)}#${sampleInfoTileWidth}#${Math.ceil(hh)}`
+                            this.hitList[key] = `${attribute}#${value}`
+                        }
                     } // for (attributeEntries)
 
                 } // if (attributes)
@@ -197,12 +203,11 @@ class SampleInfoViewport {
 
             drawGroupDividers(context,
                 0,
-                context.canvas.width,
-                context.canvas.height,
+                viewportWidth,
+                viewportHeight,
                 samples.yOffset - this.contentTop,
                 samples.height,
-                samples.groups,
-                samples.groupMarginHeight)
+                samples.groups)
         }
 
     }
@@ -282,7 +287,7 @@ class SampleInfoViewport {
 
                 const entries = Object.entries(this.hitList)
 
-                if (null === this.viewport.previousElementSibling) {
+                if (this.isIdeogram) {
 
                     const getXY = (column, viewport) => {
                         const {marginTop} = window.getComputedStyle(viewport)
@@ -342,7 +347,7 @@ class SampleInfoViewport {
 
                 const entries = Object.entries(this.hitList)
 
-                if (null === this.viewport.previousElementSibling) {
+                if (this.isIdeogram) {
 
                     const getXY = (column, viewport) => {
                         const {marginTop} = window.getComputedStyle(viewport)
