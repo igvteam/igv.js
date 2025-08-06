@@ -2307,8 +2307,8 @@ function handleMouseMove(e) {
 
 
         if (this.isScrolling) {
-            const delta = this.vpMouseDown.r * (this.vpMouseDown.lastMouseY - y)
-            viewport.trackView.moveScroller(delta)
+            const delta =  (this.vpMouseDown.lastMouseY - y)
+            viewport.trackView.scrollByPixels(delta)
         }
 
 

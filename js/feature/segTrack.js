@@ -176,7 +176,6 @@ class SegTrack extends TrackBase {
                         this.config.displayMode = displayMode
                         this.trackView.checkContentHeight()
                         this.trackView.repaintViews()
-                        this.trackView.moveScroller(this.trackView.sampleNameViewport.trackScrollDelta)
                         this.createGroupLabels()
                     }
                 })
