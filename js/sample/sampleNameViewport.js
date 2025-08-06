@@ -28,8 +28,6 @@ class SampleNameViewport {
         this.viewport.appendChild(this.canvas)
         this.ctx = this.canvas.getContext("2d")
 
-        this.trackScrollDelta = 0
-
         this.contentTop = 0
         this.hitList = undefined
 

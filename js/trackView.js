@@ -110,7 +110,7 @@ class TrackView {
             const viewport = createViewport(this, viewportColumns[i], referenceFrameList[i], viewportWidth)
             this.viewports.push(viewport)
         }
-        if(typeof this.track.createGroupLabels === 'function') {
+        if (typeof this.track.createGroupLabels === 'function') {
             this.track.createGroupLabels()
         }
     }
@@ -248,7 +248,7 @@ class TrackView {
                                 trackView.repaintViews()
                             }
                         },
-                    };
+                    }
             } else {
                 colorHandlers =
                     {
@@ -260,7 +260,7 @@ class TrackView {
                             this.track.altColor = hexToRGB(hex)
                             this.repaintViews()
                         }
-                    };
+                    }
             }
 
             const moreColorsPresentationColor = 'color' === colorSelection ? (this.track.color || this.track.constructor.defaultColor) : (this.track.altColor || this.track.constructor.defaultColor)
@@ -327,33 +327,54 @@ class TrackView {
             if (viewportContentHeight > viewportHeight) {
                 this.innerScroll.style.display = 'block'
                 this.innerScroll.style.height = `${innerScrollHeight}px`
+
             } else {
                 this.innerScroll.style.display = 'none'
             }
-
         }
+    }
 
+    setTop(contentTop) {
+        for (let viewport of this.viewports) {
+            viewport.setTop(contentTop)
+        }
+        this.sampleInfoViewport.setTop(contentTop)
+        this.sampleNameViewport.setTop(contentTop)
     }
 
     moveScroller(delta) {
 
         const y = this.innerScroll.offsetTop + delta
         const top = Math.min(Math.max(0, y), this.outerScroll.clientHeight - this.innerScroll.clientHeight)
-        this.innerScroll.style.top = `${top}px`;
+        this.innerScroll.style.top = `${top}px`
 
         const contentHeight = this.maxViewportContentHeight()
         const contentTop = Math.round(top * (contentHeight / this.viewports[0].viewportElement.clientHeight))
-
-        for (let viewport of this.viewports) {
-            viewport.setTop(contentTop)
-        }
-
-        this.sampleInfoViewport.setTop(contentTop)
-
-        this.sampleNameViewport.trackScrollDelta = delta
-        this.sampleNameViewport.setTop(contentTop)
-
+        this.setTop(contentTop)
     }
+
+    /**
+     * Scroll the content vertically by 'delta' pixels in track view coordinates.
+     * @param {number} delta - The number of pixels to scroll vertically.
+     */
+    scrollByPixels(delta) {
+
+
+        const currentTop = this.viewports[0].getContentTop()  // Bit of a hack, contentTop is the same for all viewports
+
+        const contentHeight = this.maxViewportContentHeight()
+        const maxContentTop = contentHeight - this.viewports[0].viewportElement.clientHeight
+        const newTop = Math.min(Math.max(0, currentTop + delta), maxContentTop)
+
+        this.setTop(newTop)
+
+        if (this.innerScroll) {
+            const viewportHeight = this.viewports[0].viewportElement.clientHeight
+            const top = Math.round(newTop * (viewportHeight / contentHeight))
+            this.innerScroll.style.top = `${top}px`
+        }
+    }
+
 
     /**
      * Repaint all viewports without loading any new data.   Use this for events that change visual aspect of data,
@@ -604,17 +625,19 @@ class TrackView {
 
         if (false === scrollbarExclusionTypes.has(this.track.type)) {
 
-            // Adjust scrollbar, if needed, to insure content is in view
+            // Adjust top, if needed, to insure content is in view
             const currentTop = this.viewports[0].getContentTop()
             const viewportHeight = this.viewports[0].viewportElement.clientHeight
             const minTop = Math.min(0, viewportHeight - contentHeight)
             if (currentTop < minTop) {
-                for (let viewport of this.viewports) {
-                    viewport.setTop(minTop)
-                }
+                this.setTop(minTop)
             }
+
             this.updateScrollbar()
+            this.moveScroller(0)
+
         }
+
     }
 
     createTrackScrollbar(browser) {
@@ -699,7 +722,7 @@ class TrackView {
 
             const {y} = DOMUtils.pageCoordinates(event)
 
-            this.innerScroll.dataset.yDown = y.toString();
+            this.innerScroll.dataset.yDown = y.toString()
 
             this.boundColumnContainerMouseMoveHandler = columnContainerMouseMoveHandler.bind(this)
             browser.columnContainer.addEventListener('mousemove', this.boundColumnContainerMouseMoveHandler)
@@ -712,7 +735,7 @@ class TrackView {
 
                 this.moveScroller(y - parseInt(this.innerScroll.dataset.yDown))
 
-                this.innerScroll.dataset.yDown = y.toString();
+                this.innerScroll.dataset.yDown = y.toString()
 
 
             }
