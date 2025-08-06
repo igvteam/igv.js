@@ -355,7 +355,7 @@ class TrackView {
 
     /**
      * Scroll the content vertically by 'delta' pixels in track view coordinates.
-     * @param delta
+     * @param {number} delta - The number of pixels to scroll vertically.
      */
     scrollByPixels(delta) {
 
