@@ -61,6 +61,22 @@ class HtsgetVariantReader extends HtsgetReader {
             await this.readHeader()
         }
 
+        if(!this.chrAliasTable.has(chr)) {
+            const aliasRecord = await this.genome.getAliasRecord(chr)
+            if (aliasRecord) {
+                const aliases = Object.keys(aliasRecord)
+                    .filter(k => k !== "start" && k !== "end")
+                    .map(k => aliasRecord[k])
+                if (aliases.length > 0) {
+                    for(let a of aliases) {
+                        this.chrAliasTable.set(chr, a)
+                    }
+                } else {
+                    this.chrAliasTable.set(chr, chr) // No alias found, use the original name to mark it as searched
+                }
+            }
+        }
+
         let queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr
 
         let data = await this.readData(queryChr, start, end)

@@ -31,6 +31,9 @@ import {BGZip} from "../../node_modules/igv-utils/src/index.js"
 
 class HtsgetBamReader extends HtsgetReader {
 
+    chrAliasTable = new Map()
+    chrNames = new Set()
+
     constructor(config, genome) {
         super(config, genome)
         BamUtils.setReaderDefaults(this, config)
@@ -43,13 +46,31 @@ class HtsgetBamReader extends HtsgetReader {
             const compressedData = await this.readHeaderData()
             const ba = BGZip.unbgzf(compressedData.buffer)
             this.header = BamUtils.decodeBamHeader(ba, this.genome)
-            this.chrAliasTable = new Map()
-            for (let name of this.header.chrNames) {
-                this.chrAliasTable.set(name, this.genome.getChromosomeName(name))
+            for(let name of this.header.chrNames) {
+                this.chrNames.add(name)
             }
         }
 
-        let queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr
+        if(!this.chrNames.has(chr)) {
+            const aliasRecord = await this.genome.getAliasRecord(chr)
+            if (aliasRecord) {
+                const aliases = Object.keys(aliasRecord)
+                    .filter(k => k !== "start" && k !== "end")
+                    .map(k => aliasRecord[k])
+                if (aliases.length > 0) {
+                   for(let a of aliases) {
+                        this.chrAliasTable.set(chr, a)
+                    }
+                }
+            }
+        }
+
+        // Query chromosome is the name in the BAM header, not the genome
+        const queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr
+        if(!this.chrNames.has(queryChr)) {
+            console.warn("Chromosome " + chr + " not found in BAM header")
+            return new AlignmentContainer(chr, start, end, this.config)  // Empty container
+        }
 
         const compressedData = await this.readData(queryChr, start, end)
 
