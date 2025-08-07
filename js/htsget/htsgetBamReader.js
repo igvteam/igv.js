@@ -54,7 +54,7 @@ class HtsgetBamReader extends HtsgetReader {
 
         // If the chromosome is not in the BAM header, check for an alias.
         let queryChr = chr
-        if(this.chrNames.size > 0 && !this.chrNames.has(chr) && this.chromAliasManager) {
+        if (this.chrNames.size > 0 && !this.chrNames.has(chr) && this.chromAliasManager) {
             queryChr = await this.chromAliasManager.getAliasName(chr)
         }
 
