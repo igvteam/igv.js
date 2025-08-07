@@ -39,7 +39,7 @@ class VcfParser {
 
         const header = {}
 
-        header.chrAliasTable = new Map()
+        header.sequenceNames = []
 
         // First line must be file format
         let line = await dataWrapper.nextLine()
@@ -98,8 +98,7 @@ class VcfParser {
                             idx2 = line.indexOf(">", idx1)
                         }
                         const chr = line.substring(idx1 + 4, idx2)
-                        const canonicalChromosome = genome.getChromosomeName(chr)
-                        header.chrAliasTable.set(canonicalChromosome, chr)
+                        header.sequenceNames.push(chr)
                     } else {
                         // ignoring other directives
                     }

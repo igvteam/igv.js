@@ -28,10 +28,10 @@ import HtsgetReader from "./htsgetReader.js"
 import AlignmentContainer from "../bam/alignmentContainer.js"
 import BamUtils from "../bam/bamUtils.js"
 import {BGZip} from "../../node_modules/igv-utils/src/index.js"
+import ChromAliasManager from "../feature/chromAliasManager.js"
 
 class HtsgetBamReader extends HtsgetReader {
 
-    chrAliasTable = new Map()
     chrNames = new Set()
 
     constructor(config, genome) {
@@ -49,24 +49,15 @@ class HtsgetBamReader extends HtsgetReader {
             for(let name of this.header.chrNames) {
                 this.chrNames.add(name)
             }
+            this.chromAliasManager = this.genome ? new ChromAliasManager(this.chrNames, this.genome) : null
         }
 
-        if(!this.chrNames.has(chr)) {
-            const aliasRecord = await this.genome.getAliasRecord(chr)
-            if (aliasRecord) {
-                const aliases = Object.keys(aliasRecord)
-                    .filter(k => k !== "start" && k !== "end")
-                    .map(k => aliasRecord[k])
-                if (aliases.length > 0) {
-                   for(let a of aliases) {
-                        this.chrAliasTable.set(chr, a)
-                    }
-                }
-            }
+        // If the chromosome is not in the BAM header, check for an alias.
+        let queryChr = chr
+        if(this.chrNames.size > 0 && !this.chrNames.has(chr) && this.chromAliasManager) {
+            queryChr = await this.chromAliasManager.getAliasName(chr)
         }
 
-        // Query chromosome is the name in the BAM header, not the genome
-        const queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr
         if(!this.chrNames.has(queryChr)) {
             console.warn("Chromosome " + chr + " not found in BAM header")
             return new AlignmentContainer(chr, start, end, this.config)  // Empty container

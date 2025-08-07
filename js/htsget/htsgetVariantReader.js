@@ -29,8 +29,12 @@ import HtsgetReader from "./htsgetReader.js"
 import getDataWrapper from "../feature/dataWrapper.js"
 import VcfParser from "../variant/vcfParser.js"
 import {isgzipped, ungzip} from "../../node_modules/igv-utils/src/bgzf.js"
+import ChromAliasManager from "../feature/chromAliasManager.js"
 
 class HtsgetVariantReader extends HtsgetReader {
+
+
+    chrNames = new Set()
 
     constructor(config, genome) {
         super(config, genome)
@@ -46,7 +50,9 @@ class HtsgetVariantReader extends HtsgetReader {
 
             const dataWrapper = getDataWrapper(data)
             this.header = await this.parser.parseHeader(dataWrapper, this.genome)
-            this.chrAliasTable = this.header.chrAliasTable
+            if(this.header.sequenceNames && this.header.sequenceNames.length > 0) {
+                this.chromAliasManager = new ChromAliasManager(this.header.sequenceNames, this.genome)
+            }
         }
         return this.header
     }
@@ -57,27 +63,12 @@ class HtsgetVariantReader extends HtsgetReader {
             throw Error(`htsget format ${this.config.format} is not supported`)
         }
 
-        if (!this.chrAliasTable) {
+        if (!this.header) {
             await this.readHeader()
         }
 
-        if(!this.chrAliasTable.has(chr)) {
-            const aliasRecord = await this.genome.getAliasRecord(chr)
-            if (aliasRecord) {
-                const aliases = Object.keys(aliasRecord)
-                    .filter(k => k !== "start" && k !== "end")
-                    .map(k => aliasRecord[k])
-                if (aliases.length > 0) {
-                    for(let a of aliases) {
-                        this.chrAliasTable.set(chr, a)
-                    }
-                } else {
-                    this.chrAliasTable.set(chr, chr) // No alias found, use the original name to mark it as searched
-                }
-            }
-        }
 
-        let queryChr = this.chrAliasTable.has(chr) ? this.chrAliasTable.get(chr) : chr
+        let queryChr = await this.chromAliasManager.getAliasName(chr)
 
         let data = await this.readData(queryChr, start, end)
         if (isgzipped(data)) {
@@ -91,27 +82,7 @@ class HtsgetVariantReader extends HtsgetReader {
         //  return dataWrapper;
 
     }
-
 }
-
-
-/*
-Example for https://htsget.ga4gh.org/variants/1000genomes.phase1.chr22?format=VCF&referenceName=22&start=0&end=100000
-
-{
-    "htsget": {
-        "format": "VCF",
-        "urls": [{
-            "url": "https://htsget.ga4gh.org/variants/data/1000genomes.phase1.chr22",
-            "headers": {"HtsgetBlockClass": "header", "HtsgetCurrentBlock": "0", "HtsgetTotalBlocks": "2"},
-            "class": "header"
-        }, {
-            "url": "https://htsget.ga4gh.org/variants/data/1000genomes.phase1.chr22?end=100000&referenceName=22&start=0",
-            "headers": {"HtsgetCurrentBlock": "1", "HtsgetTotalBlocks": "2"},
-            "class": "body"
-        }]
-    }
-*/
 
 
 export default HtsgetVariantReader
