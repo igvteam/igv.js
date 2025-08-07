@@ -124,9 +124,23 @@ suite("testTDF", function () {
             start = 24376175,
             end = 24376200,
             bpPerPixel = 1
+        const tdfSource = new TDFSource({url: url}, createGenome('ncbi'))
+        const features = await tdfSource.getFeatures({chr, start, end, bpPerPixel})
+        assert.ok(features.length > 0)
+
+    })
+
+    test("TDF - alias", async function () {
+        this.timeout(10000)
+        const url = "test/data/tdf/gstt1_sample.bam.tdf"
+
+        const chr = "chr22",
+            start = 24376175,
+            end = 24376200,
+            bpPerPixel = 1
         const tdfSource = new TDFSource({url: url}, genome)
         const features = await tdfSource.getFeatures({chr, start, end, bpPerPixel})
-        assert.ok(features)
+        assert.ok(features.length > 0)
 
     })
 })

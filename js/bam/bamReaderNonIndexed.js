@@ -69,7 +69,7 @@ class BamReaderNonIndexed {
             this.alignmentCache = this.#parseAlignments(unc)
         }
 
-        const queryChr = await this.#getQueryChr(chr)
+        const queryChr = chr // Aliasing is done in the cache -- TODO refactor this await this.#getQueryChr(chr)
         const qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd)
         const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
         for (let a of qAlignments) {
