@@ -28,7 +28,7 @@ suite("testBAM", function () {
 
     })
 
-    test("BAM alignments - CSI index", async function () {
+    test("BAM alignments - CSI index alias", async function () {
 
         const genome = createGenome("ncbi")
         const start = 155140000
@@ -66,6 +66,21 @@ suite("testBAM", function () {
         })
 
         let alignmentContainer = await bamReader.readAlignments("chr1", start, end)
+        validate(assert, alignmentContainer)
+    })
+
+    test("BAM alignments - non indexed alias", async function () {
+
+        const start = 155140000
+        const end = 155160000
+
+        const bamReader = new BamReaderNonIndexed({
+            type: 'bam',
+            url: 'test/data/bam/na12889.bam',
+            indexed: false,
+        }, createGenome('ncbi'))
+
+        let alignmentContainer = await bamReader.readAlignments("1", start, end)
         validate(assert, alignmentContainer)
     })
 
@@ -138,16 +153,16 @@ suite("testBAM", function () {
         })
 
         const alignmentContainer = await bamReader.readAlignments("1", 119930, 119940)
-        const alignment = alignmentContainer.alignments[0].firstAlignment;
+        const alignment = alignmentContainer.alignments[0].firstAlignment
 
-        const tags = alignment.tags();
+        const tags = alignment.tags()
         assert.ok(floatEqual(tags["pa"], 228.71))
         assert.equal(tags["X0"], 10)
         assert.equal(tags["RG"], "SRR360773")
         assert.equal(tags["XT"], "R")
 
     })
- })
+})
 
 function floatEqual(f1, f2) {
     const dif = Math.abs(f1 - f2) / (f1 + f2)

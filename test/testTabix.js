@@ -2,6 +2,8 @@ import "./utils/mockObjects.js"
 import {loadIndex} from "../js/bam/indexFactory.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import {assert} from 'chai'
+import {createGenome} from "./utils/MockGenome.js"
+import TextFeatureSource from "../js/feature/textFeatureSource.js"
 
 suite("testTabix", function () {
 
@@ -20,6 +22,32 @@ suite("testTabix", function () {
         assert.equal(blocks.length, 1)
         assert.equal(1640062, blocks[0].minv.block)
 
+    })
+
+    test("TBI index - aliasing", async function () {
+
+        const chr = "chr1",
+            start = 0,
+            end = 43409221
+
+        const source = new TextFeatureSource({
+                format: "gtf",
+                url: "test/data/tabix/sorted.genes.gtf.gz",
+                indexURL: "test/data/tabix/sorted.genes.gtf.gz.tbi"
+            },
+            createGenome('ucsc'))
+
+        const visibilityWindow = end - start
+        const features = await source.getFeatures({chr, start, end, visibilityWindow})
+        assert.ok(features)
+
+        // Verify features are in query range.  The features immediately before and after query range are returned by design
+        const len = features.length
+        assert.ok(len > 0)
+        for (let i = 1; i < len - 1; i++) {
+            const f = features[i]
+            assert.ok(f.chr === "1" && f.end >= start && f.start <= end)
+        }
     })
 
 
@@ -62,6 +90,32 @@ suite("testTabix", function () {
         for (let i = 1; i < len - 1; i++) {
             const f = features[i]
             assert.ok(f.chr === chr && f.end >= beg && f.start <= end)
+        }
+    })
+
+    test("CSI query - aliasing", async function () {
+
+        const chr = "1",
+            start = 1226000,
+            end = 1227000
+
+        const source = new TextFeatureSource({
+                format: "vcf",
+                url: "test/data/tabix/csi-test.vcf.gz",
+                indexURL: "test/data/tabix/csi-test.vcf.gz.csi"
+            },
+            createGenome('ncbi'))
+
+        const visibilityWindow = end - start
+        const features = await source.getFeatures({chr, start, end, visibilityWindow})
+        assert.ok(features)
+
+        // Verify features are in query range.  The features immediately before and after query range are returned by design
+        const len = features.length
+        assert.ok(len > 0)
+        for (let i = 1; i < len - 1; i++) {
+            const f = features[i]
+            assert.ok(f.chr === "chr1" && f.end >= start && f.start <= end)
         }
     })
 

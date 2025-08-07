@@ -147,6 +147,26 @@ suite("testBedpe", function () {
             genome
         )
 
+        const features = await featureSource.getFeatures({chr, start, end})
+        assert.ok(features)
+        assert.equal(features.length, 4)
+        for (let f of features) {
+            assert.ok(f.name)
+            assert.equal(f.score, 0)
+            assert.ok(f.value > 0)
+        }
+    })
+
+    test("alias", async function () {
+        const chr = "12"
+        const start = 1
+        const end = Number.MAX_SAFE_INTEGER
+        const featureSource = FeatureSource({
+                url: 'test/data/bedpe/interactExample1.txt',
+                format: 'interact'
+            },
+            createGenome('ncbi')
+        )
 
         const features = await featureSource.getFeatures({chr, start, end})
         assert.ok(features)
