@@ -47,7 +47,7 @@ class HtsgetVariantReader extends HtsgetReader {
 
             const dataWrapper = getDataWrapper(data)
             this.header = await this.parser.parseHeader(dataWrapper, this.genome)
-            if(this.header.sequenceNames && this.header.sequenceNames.length > 0) {
+            if (this.header.sequenceNames && this.header.sequenceNames.length > 0) {
                 this.chromAliasManager = new ChromAliasManager(this.header.sequenceNames, this.genome)
             }
         }
