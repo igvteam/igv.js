@@ -35,7 +35,6 @@ class HtsgetVariantReader extends HtsgetReader {
 
 
     chrNames = new Set()
-
     constructor(config, genome) {
         super(config, genome)
         this.parser = new VcfParser()
