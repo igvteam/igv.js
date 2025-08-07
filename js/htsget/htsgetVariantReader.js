@@ -33,8 +33,6 @@ import ChromAliasManager from "../feature/chromAliasManager.js"
 
 class HtsgetVariantReader extends HtsgetReader {
 
-
-    chrNames = new Set()
     constructor(config, genome) {
         super(config, genome)
         this.parser = new VcfParser()
@@ -67,7 +65,7 @@ class HtsgetVariantReader extends HtsgetReader {
         }
 
 
-        let queryChr = await this.chromAliasManager.getAliasName(chr)
+        let queryChr = this.chromAliasManager ? await this.chromAliasManager.getAliasName(chr) : chr
 
         let data = await this.readData(queryChr, start, end)
         if (isgzipped(data)) {
