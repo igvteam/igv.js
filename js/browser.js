@@ -494,7 +494,7 @@ class Browser {
             await GenomeUtils.expandReference(this.alert, genomeOrReference) :
             genomeOrReference
 
-        await this.loadReference(genomeConfig, genomeConfig.locus || session.locus)
+        const genome = await this.loadReference(genomeConfig, genomeConfig.locus || session.locus)
 
         this.centerLineList = this.createCenterLineList(this.columnContainer)
 
@@ -522,7 +522,7 @@ class Browser {
         }
         this.roiManager.clearROIs()
         if (session.roi) {
-            this.roiManager.loadROI(session.roi)
+            this.roiManager.loadROI(session.roi, genome)
         } else {
             // Reset is called by loadROI, if no ROIs are loaded we need to call it explicitly
             await this.roiManager.reset()
@@ -663,6 +663,7 @@ class Browser {
                 })
             }
         }
+        return genome
     }
 
     /**
