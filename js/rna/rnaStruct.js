@@ -29,6 +29,7 @@ import IGVGraphics from "../igv-canvas.js"
 import {FeatureCache, igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions} from "../util/igvUtils.js"
 import TextFeatureSource from "../feature/textFeatureSource.js"
+import ChromAliasManager from "../feature/chromAliasManager.js"
 
 class RnaStructTrack extends TrackBase {
 
@@ -44,11 +45,11 @@ class RnaStructTrack extends TrackBase {
         super(config, browser)
 
         // Backward compatibility hack, arcOrientation was previously a boolean, now a string
-        if(config.arcOrientation === false) {
+        if (config.arcOrientation === false) {
             this.arcOrientation = "DOWN"
-        } else if(config.arcOrientation === true) {
+        } else if (config.arcOrientation === true) {
             this.arcOrientation = "UP"
-        } else if(config.arcOrientation) {
+        } else if (config.arcOrientation) {
             this.arcOrientation = config.arcOrientation.toUpperCase()
         } else {
             this.arcOrientation = "UP"
@@ -263,16 +264,6 @@ class RNAFeatureSource {
 
             const data = await igvxhr.loadByteArray(this.config.url, options)
 
-            this.featureCache = new FeatureCache(parseBP(data), genome)
-
-            return this.featureCache.queryFeatures(chr, start, end)
-
-        } else {
-            return this.featureCache.queryFeatures(chr, start, end)
-        }
-
-        function parseBP(data) {
-
             if (!data) return null
 
             const dataWrapper = getDataWrapper(data)
@@ -282,6 +273,7 @@ class RNAFeatureSource {
             const colors = []
             const descriptors = []
             const features = []
+            const chrNames = new Set()
 
             while ((line = dataWrapper.nextLine()) !== undefined) {
 
@@ -336,12 +328,22 @@ class RNAFeatureSource {
                         feature.description = descriptors[colorIdx]
                     }
 
+                    chrNames.push(chr)
                     features.push(feature)
                 }
             }
 
-            return features
+            this.chromAliasManager = new ChromAliasManager(chrNames, genome)
+
+            this.featureCache = new FeatureCache(features)
+
         }
+
+        const queryChr = this.chromAliasManager ? await this.chromAliasManager.getAliasName(chr) : chr
+
+        return this.featureCache.queryFeatures(queryChr, start, end)
+
+
     }
 }
 

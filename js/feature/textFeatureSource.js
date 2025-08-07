@@ -152,7 +152,8 @@ class TextFeatureSource extends BaseFeatureSource {
             }
             return this.wgFeatures
         } else {
-            return this.featureCache.queryFeatures(chr, start, end)
+            const queryChr = this.chrAliasManager ?  await this.chrAliasManager.getAliasName(chr) : chr
+            return this.featureCache.queryFeatures(queryChr, start, end)
         }
     }
 
@@ -214,7 +215,7 @@ class TextFeatureSource extends BaseFeatureSource {
         }
 
         const genomicInterval = this.queryable ?
-            new GenomicInterval(chr, intervalStart, intervalEnd) :
+            new GenomicInterval(queryChr, intervalStart, intervalEnd) :
             undefined
 
         if (features) {
@@ -226,7 +227,7 @@ class TextFeatureSource extends BaseFeatureSource {
             }
 
             // Note - replacing previous cache with new one.  genomicInterval is optional (might be undefined => includes all features)
-            this.featureCache = new FeatureCache(features, this.genome, genomicInterval)
+            this.featureCache = new FeatureCache(features, undefined, genomicInterval)
 
             // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
             if (this.searchable) {

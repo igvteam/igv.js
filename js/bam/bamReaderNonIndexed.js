@@ -28,6 +28,7 @@ import AlignmentContainer from "./alignmentContainer.js"
 import BamUtils from "./bamUtils.js"
 import {BGZip, FeatureCache, igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {buildOptions, isDataURL} from "../util/igvUtils.js"
+import ChromAliasManager from "../feature/chromAliasManager.js"
 
 /**
  * Class for reading a bam file
@@ -66,10 +67,11 @@ class BamReaderNonIndexed {
                 const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config))
                 unc = BGZip.unbgzf(arrayBuffer)
             }
-            this.alignmentCache = this.#parseAlignments(unc)
+            const alignments = this.#parseAlignments(unc)
+            this.alignmentCache = new FeatureCache(alignments)
         }
 
-        const queryChr = chr // Aliasing is done in the cache -- TODO refactor this await this.#getQueryChr(chr)
+        const queryChr = this.chromAliasManager ? await this.chromAliasManager.getAliasName(chr) : chr
         const qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd)
         const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.config)
         for (let a of qAlignments) {
@@ -82,8 +84,9 @@ class BamReaderNonIndexed {
     #parseAlignments(data) {
         const alignments = []
         this.header = BamUtils.decodeBamHeader(data)
+        this.chromAliasManager = this.genome ? new ChromAliasManager(this.header.chrNames, this.genome) : null
         BamUtils.decodeBamRecords(data, this.header.size, alignments, this.header.chrNames, undefined, 0, Number.MAX_SAFE_INTEGER, this.filter)
-        return new FeatureCache(alignments, this.genome)
+        return alignments
     }
 
     async #getQueryChr(chr) {
