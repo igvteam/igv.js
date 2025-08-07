@@ -58,7 +58,7 @@ class HtsgetBamReader extends HtsgetReader {
             queryChr = await this.chromAliasManager.getAliasName(chr)
         }
 
-        if(!this.chrNames.has(queryChr)) {
+        if (!this.chrNames.has(queryChr)) {
             console.warn("Chromosome " + chr + " not found in BAM header")
             return new AlignmentContainer(chr, start, end, this.config)  // Empty container
         }
