@@ -26,7 +26,7 @@
 import IntervalTree from "./intervalTree.js";
 
 /**
- * Object for caching lists of features.  Supports effecient range queries (chr, start, end)
+ * Object for caching lists of features.  Supports efficient range queries (chr, start, end)
  *
  * @param featureList
  * @param The genomic range spanned by featureList (optional)
