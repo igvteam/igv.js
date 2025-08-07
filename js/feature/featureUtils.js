@@ -1,4 +1,5 @@
 import pack from "./featurePacker.js"
+import IntervalTree from "./intervalTree.js"
 
 const DEFAULT_MAX_WG_COUNT = 10000
 
@@ -11,19 +12,26 @@ const DEFAULT_MAX_WG_COUNT = 10000
  * @param maxWGCount - optional, maximum # of whole genome features to computer
  * @returns {*[]}
  */
-async function computeWGFeatures(allFeatures, genome, maxWGCount) {
+async function computeWGFeatures(allFeatures, genome, chromAliasManager, maxWGCount) {
+
+
+    const aliasTable = new Map()
+    const chrTable = new Map()
 
     const makeWGFeature = (f) => {
         const wg = Object.assign({}, f)
         wg.chr = "all"
 
 
-        if(f.chr2 && f.end2) {
-            wg.start = genome.getGenomeCoordinate(f.chr1, f.start1)
-            wg.end = genome.getGenomeCoordinate(f.chr2, f.end2)
+        if (f.chr2 && f.end2) {
+            const c1 = aliasTable.get(f.chr1) || f.chr1
+            const c2 = aliasTable.get(f.chr2) || f.chr2
+            wg.start = genome.getGenomeCoordinate(c1, f.start1)
+            wg.end = genome.getGenomeCoordinate(c2, f.end2)
         } else {
-            wg.start = genome.getGenomeCoordinate(f.chr, f.start)
-            wg.end = genome.getGenomeCoordinate(f.chr, f.end)
+            const c = aliasTable.get(f.chr) || f.chr
+            wg.start = genome.getGenomeCoordinate(c, f.start)
+            wg.end = genome.getGenomeCoordinate(c, f.end)
         }
         wg._f = f
         // Don't draw exons in whole genome view
@@ -32,6 +40,15 @@ async function computeWGFeatures(allFeatures, genome, maxWGCount) {
     }
 
     const wgChromosomeNames = new Set(genome.wgChromosomeNames)
+
+    if (chromAliasManager) {
+        for (let c of genome.wgChromosomeNames) {
+            const alias = await chromAliasManager.getAliasName(c)
+            aliasTable.set(c, alias)
+            chrTable.set(alias, c)  // Reverse lookup
+        }
+    }
+
     const wgFeatures = []
     let count = 0
     for (let c of genome.wgChromosomeNames) {
@@ -48,23 +65,27 @@ async function computeWGFeatures(allFeatures, genome, maxWGCount) {
             allFeatures = featureDict
         }
 
-        const features = allFeatures[c]
+        // Look up the chromosome name in the alias table.  This maps names in genome => names in dataset.
+        const queryChr = aliasTable.get(c) || c
+        const features = allFeatures[queryChr]
 
         if (features) {
             const max = maxWGCount || DEFAULT_MAX_WG_COUNT
             for (let f of features) {
-                if(f.dup) continue  // Skip duplicates, these are pseudo features for inter-chromosomal features
-                const queryChr = genome.getChromosomeName(f.chr)
-                const queryChr2 = f.chr2 ? genome.getChromosomeName(f.chr2) : queryChr
-                if (wgChromosomeNames.has(queryChr) && wgChromosomeNames.has(queryChr2)) {
+                if (f.dup) continue  // Skip duplicates, these are pseudo features for inter-chromosomal features
+
+                // Reverse lookup for chromosome names, names in dataset => names in genome
+                const chr = chrTable.get(f.chr) || f.chr
+                const chr2 = f.chr2 ? (chrTable.get(f.chr2) || f.chr2) : chr
+                if (wgChromosomeNames.has(chr) && wgChromosomeNames.has(chr2)) {
                     if (wgFeatures.length < max) {
-                        wgFeatures.push(makeWGFeature(f))
+                        wgFeatures.push(await makeWGFeature(f))
                     } else {
                         //Reservoir sampling
                         const samplingProb = max / (count + 1)
                         if (Math.random() < samplingProb) {
                             const idx = Math.floor(Math.random() * (max - 1))
-                            wgFeatures[idx] = makeWGFeature(f)
+                            wgFeatures[idx] = await makeWGFeature(f)
                         }
                     }
                 }
@@ -97,8 +118,8 @@ function packFeatures(features, maxRows, filter) {
     const chrFeatureMap = {}
     const chrs = []
     for (let feature of features) {
-        if(filter && !filter(feature)) {
-            feature.row = undefined;
+        if (filter && !filter(feature)) {
+            feature.row = undefined
         } else {
             const chr = feature.chr
             let flist = chrFeatureMap[chr]
@@ -143,7 +164,7 @@ function findFeatureAfterCenter(featureList, center, direction = true) {
     let high = sortedList.length
     while (low < high) {
         let mid = Math.floor((low + high) / 2)
-        if(direction) {
+        if (direction) {
             if (featureCenter(sortedList[mid]) <= center) {
                 low = mid + 1
             } else {
@@ -159,6 +180,82 @@ function findFeatureAfterCenter(featureList, center, direction = true) {
         }
     }
     return sortedList[low]
+}
+
+/**
+ * Find features overlapping the given interval.  It is assumed that all features share the same chromosome.
+ *
+ * @param featureList
+ * @param start
+ * @param end
+ */
+function findOverlapping(featureList, start, end) {
+
+    if (!featureList || featureList.length === 0) {
+        return []
+    } else {
+        const tree = buildIntervalTree(featureList)
+        const intervals = tree.findOverlapping(start, end)
+
+        if (intervals.length === 0) {
+            return []
+        } else {
+
+            // Trim the list of features in the intervals to those
+            // overlapping the requested range.
+            // Assumption: features are sorted by start position
+
+            const overlaps = []
+
+            intervals.forEach(function (interval) {
+                const intervalFeatures = interval.value
+                const len = intervalFeatures.length
+                for (let i = 0; i < len; i++) {
+                    const feature = intervalFeatures[i]
+                    if (feature.start > end) break
+                    else if (feature.end > start) {
+                        overlaps.push(feature)
+                    }
+                }
+            })
+
+            overlaps.sort(function (a, b) {
+                return a.start - b.start
+            })
+
+            return overlaps
+        }
+    }
+}
+
+/**
+ * Build an interval tree from the feature list for fast interval based queries.   We lump features in groups
+ * of 10, or total size / 100,   to reduce size of the tree.
+ *
+ * @param featureList
+ */
+function buildIntervalTree(featureList) {
+
+    const tree = new IntervalTree()
+    const len = featureList.length
+    const chunkSize = Math.max(10, Math.round(len / 100))
+
+    featureList.sort(function (f1, f2) {
+        return (f1.start === f2.start ? 0 : (f1.start > f2.start ? 1 : -1))
+    })
+
+    for (let i = 0; i < len; i += chunkSize) {
+        const e = Math.min(len, i + chunkSize)
+        const subArray = featureList.slice(i, e)
+        const iStart = subArray[0].start
+        let iEnd = iStart
+        subArray.forEach(function (feature) {
+            iEnd = Math.max(iEnd, feature.end)
+        })
+        tree.insert(iStart, iEnd, subArray)
+    }
+
+    return tree
 }
 
 export {computeWGFeatures, packFeatures, findFeatureAfterCenter}

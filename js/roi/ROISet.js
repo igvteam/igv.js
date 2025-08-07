@@ -156,7 +156,7 @@ class DynamicFeatureSource {
 
     async getFeatures({chr, start, end}) {
         if (chr.toLowerCase() === 'all') {
-            return computeWGFeatures(this.featureMap, this.genome)
+            return await computeWGFeatures(this.featureMap, this.genome)
         } else {
             // TODO -- this use of filter is O(N), and might not scale well for large feature lists.
             const featureList = this.featureMap[chr]

@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
+import FeatureCache from "./featureCache.js"
 import {computeWGFeatures, findFeatureAfterCenter, packFeatures} from "./featureUtils.js"
 import BaseFeatureSource from "./baseFeatureSource.js"
 import ChromAliasManager from "./chromAliasManager.js"
@@ -84,7 +84,7 @@ class StaticFeatureSource extends BaseFeatureSource {
         //   * cache is disabled
         //   * cache does not contain requested range
         if (isWholeGenome) {
-            return computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.maxWGCount)
+            return await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.chromAliasManager, this.maxWGCount)
         } else {
             return this.featureCache.queryFeatures(queryChr, start, end)
         }
