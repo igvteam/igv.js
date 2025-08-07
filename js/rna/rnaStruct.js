@@ -328,7 +328,7 @@ class RNAFeatureSource {
                         feature.description = descriptors[colorIdx]
                     }
 
-                    chrNames.push(chr)
+                    chrNames.add(chr)
                     features.push(feature)
                 }
             }
