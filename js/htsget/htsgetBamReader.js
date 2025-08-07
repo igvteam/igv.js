@@ -49,7 +49,7 @@ class HtsgetBamReader extends HtsgetReader {
             for(let name of this.header.chrNames) {
                 this.chrNames.add(name)
             }
-            this.chromAliasManager = this.genome ? new ChromAliasManager(this.chrNames, this.genome) : null
+            this.chromAliasManager = this.genome ? new ChromAliasManager(this.header.chrNames, this.genome) : null
         }
 
         // If the chromosome is not in the BAM header, check for an alias.
