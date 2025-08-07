@@ -76,6 +76,7 @@ class Browser {
 
         let shadowRoot = parentDiv.shadowRoot
         if (!shadowRoot) {
+            // Create the shadow root and attach the IGV CSS stylesheet.
             shadowRoot = parentDiv.attachShadow({mode: "open"})
             const sheet = new CSSStyleSheet()
             sheet.replaceSync(igvCss)
