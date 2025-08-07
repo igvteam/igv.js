@@ -23,6 +23,6 @@ suite("testRnaStruct", function () {
         const features = await rnaStruct.getFeatures('1', 1, 100)
         assert.ok(features)
         assert.equal(features.length, 8)
-
     })
+
 })
