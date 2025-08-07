@@ -23,7 +23,7 @@ class ChromAliasManager {
         if (!this.chrAliasTable.has(chr)) {
             const aliasRecord = await this.genome.getAliasRecord(chr)
             if (!aliasRecord) {
-                this.chrAliasTable.set(chr, undefined)  // No know alias, record to prevent searching again
+                this.chrAliasTable.set(chr, chr)  // No know alias, record to prevent searching again
             } else {
                 let alias
                 const aliases = Object.keys(aliasRecord)
@@ -31,10 +31,10 @@ class ChromAliasManager {
                     .map(k => aliasRecord[k])
                     .filter(a => this.sequenceNames.has(a))
                 if (aliases.length > 0) {
-                    alias = aliases[0]
+                    this.chrAliasTable.set(chr, aliases[0])
+                } else {
+                    this.chrAliasTable.set(chr, chr)  // No known alias, record to prevent searching again
                 }
-
-                this.chrAliasTable.set(chr, alias)  // alias may be undefined => no alias exists. Setting prevents repeated attempts
             }
         }
 

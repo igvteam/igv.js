@@ -1,7 +1,6 @@
 import FeatureSource from '../feature/featureSource.js'
 import {appleCrayonRGBA, rgbaStringTokens} from '../util/colorPalletes.js'
 import {computeWGFeatures} from "../feature/featureUtils.js"
-import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 const appleCrayonColorName = 'nickel'
@@ -156,7 +155,7 @@ class DynamicFeatureSource {
 
     async getFeatures({chr, start, end}) {
         if (chr.toLowerCase() === 'all') {
-            return computeWGFeatures(this.featureMap, this.genome)
+            return await computeWGFeatures(this.featureMap, this.genome)
         } else {
             // TODO -- this use of filter is O(N), and might not scale well for large feature lists.
             const featureList = this.featureMap[chr]

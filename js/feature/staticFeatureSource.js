@@ -23,9 +23,10 @@
  * THE SOFTWARE.
  */
 
-import {FeatureCache} from "../../node_modules/igv-utils/src/index.js"
+import FeatureCache from "./featureCache.js"
 import {computeWGFeatures, findFeatureAfterCenter, packFeatures} from "./featureUtils.js"
 import BaseFeatureSource from "./baseFeatureSource.js"
+import ChromAliasManager from "./chromAliasManager.js"
 
 /**
  * feature source for features supplied directly, as opposed to reading and parsing from a file or webservice
@@ -51,7 +52,10 @@ class StaticFeatureSource extends BaseFeatureSource {
         if (this.config.mappings) {
             mapProperties(features, this.config.mappings)
         }
-        this.featureCache = new FeatureCache(features, this.genome)
+
+        this.chromAliasManager = this.genome ? new ChromAliasManager(features.map(f => f.chr), this.genome) : null
+
+        this.featureCache = new FeatureCache(features)
 
         if (this.searchable || this.config.searchableFields) {
             this.addFeaturesToDB(features, this.config)
@@ -72,8 +76,7 @@ class StaticFeatureSource extends BaseFeatureSource {
      */
     async getFeatures({chr, start, end, bpPerPixel, visibilityWindow}) {
 
-        const genome = this.genome
-        const queryChr = genome ? genome.getChromosomeName(chr) : chr
+        const queryChr = this.chromAliasManager ? await this.chromAliasManager.getAliasName(chr) : chr
         const isWholeGenome = ("all" === queryChr.toLowerCase())
 
         // Various conditions that can require a feature load
@@ -81,7 +84,7 @@ class StaticFeatureSource extends BaseFeatureSource {
         //   * cache is disabled
         //   * cache does not contain requested range
         if (isWholeGenome) {
-            return computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.maxWGCount)
+            return await computeWGFeatures(this.featureCache.getAllFeatures(), this.genome, this.chromAliasManager, this.maxWGCount)
         } else {
             return this.featureCache.queryFeatures(queryChr, start, end)
         }
