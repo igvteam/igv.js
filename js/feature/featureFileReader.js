@@ -162,6 +162,7 @@ class FeatureFileReader {
             }
 
             this.header = await this.parser.parseHeader(dataWrapper)
+
             return this.header
 
         } else if ("service" === this.config.sourceType) {
@@ -182,6 +183,9 @@ class FeatureFileReader {
             }
 
         } else {
+
+            // Non-indexed file, or indexed file without an index
+            this.indexed = false
 
             let data
 
@@ -210,9 +214,8 @@ class FeatureFileReader {
             dataWrapper = getDataWrapper(data)
             this.features = await this.parser.parseFeatures(dataWrapper)   // cache features
 
-            // Extract chromosome names
-            this.sequenceNames = new Set()
-            for (let f of this.features) this.sequenceNames.add(f.chr)
+            // Extract chromosome names from features
+            this.sequenceNames = new Set(this.features.map(f => f.chr))
 
             return this.header
         }

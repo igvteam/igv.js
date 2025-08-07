@@ -184,7 +184,7 @@ class TextFeatureSource extends BaseFeatureSource {
 
         // chr aliasing
         let queryChr = chr
-        if (!this.chrAliasManager && this.reader && this.reader.sequenceNames) {
+        if (!this.chrAliasManager && this.reader && this.reader.sequenceNames && this.reader.sequenceNames.size > 0) {
             this.chrAliasManager = new ChromAliasManager(this.reader.sequenceNames, this.genome)
         }
         if (this.chrAliasManager) {
