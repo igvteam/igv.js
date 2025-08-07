@@ -79,13 +79,13 @@ async function computeWGFeatures(allFeatures, genome, chromAliasManager, maxWGCo
                 const chr2 = f.chr2 ? (chrTable.get(f.chr2) || f.chr2) : chr
                 if (wgChromosomeNames.has(chr) && wgChromosomeNames.has(chr2)) {
                     if (wgFeatures.length < max) {
-                        wgFeatures.push(await makeWGFeature(f))
+                        wgFeatures.push(makeWGFeature(f))
                     } else {
                         //Reservoir sampling
                         const samplingProb = max / (count + 1)
                         if (Math.random() < samplingProb) {
                             const idx = Math.floor(Math.random() * (max - 1))
-                            wgFeatures[idx] = await makeWGFeature(f)
+                            wgFeatures[idx] =  makeWGFeature(f)
                         }
                     }
                 }
