@@ -70,19 +70,19 @@
         {
             parent,
             width: 364,
-        };
+        }
 
     const colorPicker = new GenericColorPicker(colorPickerConfig)
 
     const colorHandlers =
         {
             color: rgbString => {
-                console.log(`color ${ rgbString }`)
+                console.log(`color ${rgbString}`)
             },
             altColor: rgbString => {
-                console.log(`altColor ${ rgbString }`)
+                console.log(`altColor ${rgbString}`)
             },
-        };
+        }
 
     colorPicker.configure('rgb(150,150,150)', colorHandlers['color'], 'rgb(150,150,150)')
 

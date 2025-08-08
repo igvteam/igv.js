@@ -25,7 +25,7 @@
                         name: "NA12878 - cache on",
                     },
                 ]
-        };
+        }
 
     const config_pacbio =
         {
@@ -85,7 +85,7 @@
                     "type": "annotation"
                 }
             ]
-        };
+        }
 
     const config_short_query =
         {
@@ -129,11 +129,11 @@
                     "type": "annotation"
                 }
             ]
-        };
+        }
 
     igv.createBrowser(document.getElementById('igvDiv'), config_short_query)
         .then(browser => {
-            console.log(`browser ${ browser.guid } is good to go`)
+            console.log(`browser ${browser.guid} is good to go`)
         })
 
 

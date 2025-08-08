@@ -11,14 +11,14 @@
 
 <h1>ENSEMBL gff</h1>
 
-An Ensembl gff, which has a peculiar model, but then again its gff.   There are 2 levels in the parent-child hierarchy,
+An Ensembl gff, which has a peculiar model, but then again its gff. There are 2 levels in the parent-child hierarchy,
 the parent is of type "mRNA", children of of type "exon", "five_prime_utr", "three_prime_utr",
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
@@ -40,13 +40,13 @@ the parent is of type "mRNA", children of of type "exon", "five_prime_utr", "thr
                         "assembleGFF": false
                     },
                 ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 

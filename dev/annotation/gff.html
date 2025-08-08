@@ -15,19 +15,12 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
-            //genome: "hg38",
-            reference: {
-                "id": "hg38",
-                "name": "Human (GRCh38/hg38)",
-                "fastaURL": "https://igv.org/genomes/data/hg38/hg38.fa",
-                "indexURL": "https://igv.org/genomes/data/hg38/hg38.fa.fai",
-                //"twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
-            },
-                locus: "chr8:127,736,541-127,736,692 chr1:155,186,114-155,186,153",
+            genome: "hg38",
+            locus: "chr8:127,736,541-127,736,692 chr1:155,186,114-155,186,153",
             tracks:
                 [
                     {
@@ -60,13 +53,13 @@
                         assembleGFF: false
                     }
                 ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 

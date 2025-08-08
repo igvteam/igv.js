@@ -18,6 +18,7 @@
 <script type="module">
 
     import igv from "../../js/index.js"
+
     const options =
         {
             genome: "hg19",
@@ -36,10 +37,10 @@
 
     igv.createBrowser(document.getElementById('igvDiv'), options)
         .then(browser => {
-            const track = browser.findTracks("type", "variant")[0];
+            const track = browser.findTracks("type", "variant")[0]
             document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
             document.getElementById("pytor").addEventListener("click", () => {
-               track.convertToPytor()
+                track.convertToPytor()
             })
         })
 

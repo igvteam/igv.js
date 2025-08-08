@@ -19,14 +19,11 @@
 
 <script type="module">
 
-    import igv from "../../js";
+    import igv from "../../js"
 
     var options =
         {
-            reference: {
-                fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
-                indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai"
-            },
+            genome: "hg38",
             locus: "chr22:23,767,847-23,844,164",
             tracks: [
                 {
@@ -50,16 +47,14 @@
                     "url": " https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
                     "indexURL": " https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx"
                 }
-
-
             ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 </script>

@@ -11,34 +11,34 @@
 
 <h1>ENCODE peak formats/h1>
 
-<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+    <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
-<script type="module">
+    <script type="module">
 
-    import igv from "../../js/index.js";
+        import igv from "../../js/index.js"
 
-    var options =
-        {
-            genome: "hg19",
-            tracks:
-                [
-                    {
-                        "name": "Narrow peak",
-                        "type": "annotation",
-                        "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeAwgDnaseUniform/wgEncodeAwgDnaseDukeGm12891UniPk.narrowPeak.gz"
-                    }
-                ]
-        };
+        var options =
+            {
+                genome: "hg19",
+                tracks:
+                    [
+                        {
+                            "name": "Narrow peak",
+                            "type": "annotation",
+                            "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeAwgDnaseUniform/wgEncodeAwgDnaseDukeGm12891UniPk.narrowPeak.gz"
+                        }
+                    ]
+            }
 
-    var igvDiv = document.getElementById("igvDiv");
+        var igvDiv = document.getElementById("igvDiv")
 
-    igv.createBrowser(igvDiv, options)
-        .then(function (browser) {
-            console.log("Created IGV browser");
-        })
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser")
+            })
 
 
-</script>
+    </script>
 
 </body>
 

@@ -16,7 +16,7 @@
 
 <script type="module">
 
-    import igv from "../../js";
+    import igv from "../../js"
 
     const options =
         {
@@ -29,22 +29,22 @@
                     name: "Color by function, SVTYPE",
                     visibilityWindow: -1,
                     color: function (variant) {
-                        const svtype = variant.info["SVTYPE"];
+                        const svtype = variant.info["SVTYPE"]
                         switch (svtype) {
                             case 'DEL':
-                                return "#ff2101";
+                                return "#ff2101"
                             case 'INS':
-                                return "#001888";
+                                return "#001888"
                             case 'DUP':
-                                return "#028401";
+                                return "#028401"
                             case 'INV':
-                                return "#008688";
+                                return "#008688"
                             case 'CNV':
-                                return "#8931ff";
+                                return "#8931ff"
                             case 'BND':
-                                return "#891100";
+                                return "#891100"
                             default:
-                                return "#002eff";
+                                return "#002eff"
                         }
                     }
                 },
@@ -72,9 +72,9 @@
                     visibilityWindow: -1
                 }
             ]
-        };
+        }
 
-    const igvDiv = document.getElementById("igvDiv");
+    const igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
 
@@ -83,31 +83,31 @@
 
             function download(filename, data) {
 
-                const element = document.createElement('a');
-                element.setAttribute('href', data);
-                element.setAttribute('download', filename);
-                element.style.display = 'none';
-                document.body.appendChild(element);
-                element.click();
-                document.body.removeChild(element);
+                const element = document.createElement('a')
+                element.setAttribute('href', data)
+                element.setAttribute('download', filename)
+                element.style.display = 'none'
+                document.body.appendChild(element)
+                element.click()
+                document.body.removeChild(element)
             }
 
             document.getElementById("bmBtn").addEventListener("click", () => {
-                window.history.pushState({}, "IGV", browser.sessionURL());
-            });
+                window.history.pushState({}, "IGV", browser.sessionURL())
+            })
 
             document.getElementById("sessionButton").addEventListener("click", () => {
                 try {
-                    const json = browser.toJSON();
-                    console.log(json);
-                    const jsonString = JSON.stringify(json, null, '\t');
-                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}));
-                    download("session.json", data);
+                    const json = browser.toJSON()
+                    console.log(json)
+                    const jsonString = JSON.stringify(json, null, '\t')
+                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}))
+                    download("session.json", data)
                 } catch (e) {
-                    alert(e);
+                    alert(e)
                 }
             })
-        });
+        })
 
 </script>
 

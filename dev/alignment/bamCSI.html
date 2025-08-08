@@ -13,7 +13,7 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
@@ -26,20 +26,20 @@
                     indexURL: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/csi/gstt1_sample.bam.csi",
                     name: "CSI BAM",
                     onclick: (features) => {
-                        for(let f of features) {
-                            console.log(f);
+                        for (let f of features) {
+                            console.log(f)
                         }
-                        return false;
+                        return false
                     }
                 }
             ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 

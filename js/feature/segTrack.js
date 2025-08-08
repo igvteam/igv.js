@@ -566,7 +566,7 @@ class SegTrack extends TrackBase {
             else return d2 * -1
         })
 
-        if(NULL_GROUP !== this.groupBy) {
+        if (NULL_GROUP !== this.groupBy) {
             // If grouping by attribute, we need to re-group the samples
             this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, this.groupBy, 1)
         }
@@ -593,12 +593,10 @@ class SegTrack extends TrackBase {
         }
         if (!featureList) return
 
-        //this.updateSampleKeys(featureList)
+        this.updateSampleKeys(featureList)
 
         const scores = {}
         const bpLength = end - start + 1
-
-        const mutationTypes = filterObject.value ? new Set(filterObject.value) : undefined
 
         for (let segment of featureList) {
             if (segment.end < start) continue
@@ -606,16 +604,8 @@ class SegTrack extends TrackBase {
             const sampleKey = segment.sampleKey || segment.sample
 
             if ("mut" === this.type) {
-                if (mutationTypes) {
-                    const mutationType = segment.getAttribute("Variant_Classification")
-                    if (mutationTypes.has(mutationType)) {
-                        // Just count features overlapping region per sample
-                        scores[sampleKey] = (scores[sampleKey] || 0) + 1
-                    }
-                } else {
-                    // Just count features overlapping region per sample
-                    scores[sampleKey] = (scores[sampleKey] || 0) + 1
-                }
+                // Just count features overlapping region per sample
+                scores[sampleKey] = (scores[sampleKey] || 0) + 1
             } else {
 
                 const min = Math.max(start, segment.start)
@@ -626,7 +616,6 @@ class SegTrack extends TrackBase {
         }
 
         return scores
-
     }
 
     sortByAttribute(attribute, sortDirection) {
@@ -635,7 +624,7 @@ class SegTrack extends TrackBase {
 
         this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, attribute, sortDirection)
 
-        if(NULL_GROUP !== this.groupBy) {
+        if (NULL_GROUP !== this.groupBy) {
             // If grouping by attribute, we need to re-group the samples
             this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, this.groupBy, 1)
         }

@@ -24,7 +24,7 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
@@ -41,20 +41,20 @@
                     {
                         name: "Override track name, description, and color",
                         color: "blue",
-                        description:'<a href="http://genome.ucsc.edu/goldenPath/help/clones.html" target="_blank">UCSC Clones example</a>',
+                        description: '<a href="http://genome.ucsc.edu/goldenPath/help/clones.html" target="_blank">UCSC Clones example</a>',
                         type: "annotation",
                         format: "bed",
                         url: "../../test/data/bed/track_url.bed",
                         indexed: false
                     },
                 ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 

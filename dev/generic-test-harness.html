@@ -15,29 +15,29 @@
 
 <script type="module">
 
-    import igv from "../js/index.js";
+    import igv from "../js/index.js"
 
     const config =
         {
-        queryParametersSupported: true,
-        locus: '19:49301000-49305700',
-        genome: "hg19",
-        tracks:
-            [
-            {
-                name: 'All pos bars',
-                url: '../../test/data/wig/allPositive.bedgraph',
-                // color: '#0f0',
-                indexed: false
-            },
-            {
-                name: 'All negative bars',
-                url: '../../test/data/wig/allNegativewig.bedgraph',
-                // color: '#f00',
-                indexed: false
-            },
-        ]
-    };
+            queryParametersSupported: true,
+            locus: '19:49301000-49305700',
+            genome: "hg19",
+            tracks:
+                [
+                    {
+                        name: 'All pos bars',
+                        url: '../../test/data/wig/allPositive.bedgraph',
+                        // color: '#0f0',
+                        indexed: false
+                    },
+                    {
+                        name: 'All negative bars',
+                        url: '../../test/data/wig/allNegativewig.bedgraph',
+                        // color: '#f00',
+                        indexed: false
+                    },
+                ]
+        }
 
     const config_offscreen_scroll =
         {
@@ -257,7 +257,7 @@
                     "height": 70
                 }
             ]
-        };
+        }
 
     const config_tracks_palooza =
         {
@@ -344,7 +344,7 @@
                     "height": 70
                 }
             ]
-        };
+        }
 
     const config_whole_lotta_wigs =
         {
@@ -568,11 +568,11 @@
                     "height": 70
                 }
             ]
-        };
+        }
 
     igv.createBrowser(document.getElementById("igv-container"), config_whole_lotta_wigs).then(browser => {
-        console.log(`browser ${ browser.guid } is good to go`)
-    });
+        console.log(`browser ${browser.guid} is good to go`)
+    })
 
 
 </script>

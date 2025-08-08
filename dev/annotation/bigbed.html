@@ -11,7 +11,7 @@
 
 <h1>Bigbed file</h1>
 
-Demonstration of Bigbed with custom fields. Also demonstrates use of "hoverTextFields" and custom "hoverText" function.
+Demonstration of Bigbed with custom fields.
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
@@ -32,18 +32,7 @@ Demonstration of Bigbed with custom fields. Also demonstrates use of "hoverTextF
                         type: "annotation",
                         format: "bigbed",
                         height: 300,
-                        displayMode: "EXPANDED",
-                        hoverTextFields: ["disease_title"]
-                    },
-                    {
-                        name: "GenCC",
-                        description: "Annotations from the <a href='https://thegencc.org/' target='_blank'>The Gene Curation Coalition</a> courtesy of the UCSC Genome Browser team.  See the <a href='https://genome.ucsc.edu/cgi-bin/hgTrackUi?db=hg38&g=genCC' target='_blank'>UCSC track settings page</a> for more details.",
-                        url: "https://hgdownload.soe.ucsc.edu/gbdb/hg38/bbi/genCC.bb",
-                        type: "annotation",
-                        format: "bigbed",
-                        height: 300,
-                        displayMode: "EXPANDED",
-                        hoverText: (feature) => `Disease : ${feature["disease_title"]}`
+                        displayMode: "EXPANDED"
                     }
                 ]
         }

@@ -88,7 +88,7 @@
 
             const variantDict = {}
             variantDict[chr] = await this.vcfTrack.getFeatures(chr, start, end)
-            const binSize = Math.max(100, (end - start) / (3*100))     // Requested range is ~ 3 X screen width
+            const binSize = Math.max(100, (end - start) / (3 * 100))     // Requested range is ~ 3 X screen width
             const wigFeatures = computeDepthFeatures(variantDict, binSize)
             return wigFeatures
         }

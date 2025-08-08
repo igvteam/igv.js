@@ -21,13 +21,13 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
             // Example of fully specifying a reference .  We could alternatively use  "genome: 'hg19'"
             genome: "hg18",
-           // locus: ["chr20:14,350-14,390", "chr20:1,234,560-1,234,599"],
+            // locus: ["chr20:14,350-14,390", "chr20:1,234,560-1,234,599"],
             tracks:
                 [
                     {
@@ -38,13 +38,13 @@
                         height: 500
                     }
                 ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 

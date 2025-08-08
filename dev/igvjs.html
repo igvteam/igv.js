@@ -23,16 +23,16 @@ See demos/igv-links.html
 
 <script type="module">
 
-    import igv from "../js/index.js";
+    import igv from "../js/index.js"
 
-    var div = document.getElementById("myDiv");
+    var div = document.getElementById("myDiv")
 
     igv
         .createBrowser(div, {
             queryParametersSupported: true
         })
         .then(function (browser) {
-            console.log("Browser ready");
+            console.log("Browser ready")
         })
 
 

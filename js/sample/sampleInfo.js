@@ -94,13 +94,9 @@ class SampleInfo {
     }
 
     async loadSampleInfoFile(path) {
-        try {
-            const string = await igvxhr.loadString(path)
-            this.#processSampleInfoFileAsString(string)
-            this.sampleInfoFiles.push(path)
-        } catch (e) {
-            console.error(e.message)
-        }
+        const string = await igvxhr.loadString(path)
+        this.#processSampleInfoFileAsString(string)
+        this.sampleInfoFiles.push(path)
     }
 
     discard() {

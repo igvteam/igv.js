@@ -25,9 +25,9 @@
 
 <script type="module">
 
-    import {GoogleAuth} from "../../node_modules/igv-utils/src/index.js";
-    import igv from "../../js/index.js";
-    import oauthConfig from "./oauthConfig.js";
+    import {GoogleAuth} from "../../node_modules/igv-utils/src/index.js"
+    import igv from "../../js/index.js"
+    import oauthConfig from "./oauthConfig.js"
 
     GoogleAuth.init(oauthConfig)
         .then(function (ignore) {
@@ -52,12 +52,12 @@
                         }
 
                     ]
-                };
+                }
 
-            var igvDiv = document.getElementById("igvDiv");
+            var igvDiv = document.getElementById("igvDiv")
 
-            igv.createBrowser(igvDiv, options);
-        });
+            igv.createBrowser(igvDiv, options)
+        })
 
 
 </script>

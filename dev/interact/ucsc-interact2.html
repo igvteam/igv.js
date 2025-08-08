@@ -19,7 +19,7 @@
 
 <script type="module">
 
-    import igv from "../../js";
+    import igv from "../../js"
 
     var options =
         {
@@ -27,7 +27,7 @@
             locus: "chr3:64,487,397-64,645,623",
             tracks: [
                 {
-                   url: "../../test/data/bedpe/interactExample2.txt",
+                    url: "../../test/data/bedpe/interactExample2.txt",
                     type: "interaction",
                     format: "interact",
                     name: "UCSC Example 2 - nested use score",
@@ -46,14 +46,14 @@
                     height: 250
                 }
             ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
-            window.igvBrowser = browser;
+            console.log("Created IGV browser")
+            window.igvBrowser = browser
         })
 
 

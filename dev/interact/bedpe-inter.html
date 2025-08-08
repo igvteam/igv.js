@@ -23,7 +23,7 @@
 
 <script type="module">
 
-    import igv from "../../js";
+    import igv from "../../js"
 
     var options =
         {
@@ -47,32 +47,32 @@
                     showBlocks: true,
                 }
             ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
-            window.igvBrowser = browser;
+            console.log("Created IGV browser")
+            window.igvBrowser = browser
 
             document.getElementById("svgButton").addEventListener("click", () => {
-                let svg = browser.toSVG();
-                const path = 'bedpe-inter.svg';
-                const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
-                download(path, data);
+                let svg = browser.toSVG()
+                const path = 'bedpe-inter.svg'
+                const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
+                download(path, data)
             })
         })
 
-    function download  (filename, data) {
+    function download(filename, data) {
 
-        const element = document.createElement('a');
-        element.setAttribute('href', data);
-        element.setAttribute('download', filename);
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
+        const element = document.createElement('a')
+        element.setAttribute('href', data)
+        element.setAttribute('download', filename)
+        element.style.display = 'none'
+        document.body.appendChild(element)
+        element.click()
+        document.body.removeChild(element)
     }
 
 

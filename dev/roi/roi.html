@@ -32,7 +32,7 @@
         locus: '1:67,655,272-67,684,468',
 
         genome: "hg19",
-        
+
         // Define two global "region of interest" sets, the first with a bed file, the second with an explicit array
         // of regions
         roi:
@@ -116,7 +116,6 @@
         () => window.history.pushState({}, "IGV", browser.sessionURL()))
 
     document.getElementById("log-state").addEventListener("click", () => console.log(browser.toJSON()))
-
 
 
 </script>

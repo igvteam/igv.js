@@ -23,23 +23,23 @@
  * THE SOFTWARE.
  */
 
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 
 const cBioUtils = {
 
     fetchStudies: async function (baseURL) {
 
-        baseURL = baseURL || "https://www.cbioportal.org/api";
-        let url = baseURL + "/studies?projection=DETAILED&pageSize=10000000&pageNumber=0&direction=ASC";
-        return igvxhr.loadJson(url);
+        baseURL = baseURL || "https://www.cbioportal.org/api"
+        let url = baseURL + "/studies?projection=DETAILED&pageSize=10000000&pageNumber=0&direction=ASC"
+        return igvxhr.loadJson(url)
     },
 
     fetchSamplesByStudy: async function (study, baseURL) {
 
         baseURL = baseURL || "https://www.cbioportal.org/api"
-        let url = baseURL + "/studies/" + study + "/samples";
-        const samples = await igvxhr.loadJson(url);
-        let sampleStudyList = [];
+        let url = baseURL + "/studies/" + study + "/samples"
+        const samples = await igvxhr.loadJson(url)
+        let sampleStudyList = []
         samples.forEach(function (sampleJson) {
             sampleStudyList.push(
                 {
@@ -48,7 +48,7 @@ const cBioUtils = {
                 }
             )
         })
-        return sampleStudyList;
+        return sampleStudyList
     },
 
     // Copy number
@@ -66,28 +66,28 @@ const cBioUtils = {
     // }
 
     fetchCopyNumberByStudy: async function (study, baseURL) {
-        baseURL = baseURL || "https://www.cbioportal.org/api";
-        const sampleStudyList = await this.fetchSamplesByStudy(study);
-        const url = baseURL + "/copy-number-segments/fetch?projection=SUMMARY";
-        const body = JSON.stringify(sampleStudyList);
-        const json = await igvxhr.loadJson(url, {method: "POST", sendData: body});
+        baseURL = baseURL || "https://www.cbioportal.org/api"
+        const sampleStudyList = await this.fetchSamplesByStudy(study)
+        const url = baseURL + "/copy-number-segments/fetch?projection=SUMMARY"
+        const body = JSON.stringify(sampleStudyList)
+        const json = await igvxhr.loadJson(url, {method: "POST", sendData: body})
         for (let j of json) {
-            j.chr = j["chromosome"];
-            j.value = j["segmentMean"];
-            j.sampleKey = j["uniqueSampleKey"];
-            j.sample = j["sampleId"];
+            j.chr = j["chromosome"]
+            j.value = j["segmentMean"]
+            j.sampleKey = j["uniqueSampleKey"]
+            j.sample = j["sampleId"]
         }
-        return json;
+        return json
     },
 
     fetchMutationsByStudy: async function (study, baseURL) {
-        baseURL = baseURL || "https://www.cbioportal.org/api";
-        const sampleStudyList = await this.fetchSamplesByStudy(study);
-        const url = baseURL + "/molecular-profiles/ov_tcga_pub_mutations/mutations/fetch?projection=DETAILED";
-        const sampleList = sampleStudyList.map(ss => ss.sampleId);
-        const body =  JSON.stringify({"sampleIds":["TCGA-13-1489-01"]}) ;// JSON.stringify({sampleIds: sampleList});
-        const json = await igvxhr.loadJson(url, {method: "POST", sendData: body});
-        return json;
+        baseURL = baseURL || "https://www.cbioportal.org/api"
+        const sampleStudyList = await this.fetchSamplesByStudy(study)
+        const url = baseURL + "/molecular-profiles/ov_tcga_pub_mutations/mutations/fetch?projection=DETAILED"
+        const sampleList = sampleStudyList.map(ss => ss.sampleId)
+        const body = JSON.stringify({"sampleIds": ["TCGA-13-1489-01"]})// JSON.stringify({sampleIds: sampleList});
+        const json = await igvxhr.loadJson(url, {method: "POST", sendData: body})
+        return json
     },
 
 
@@ -110,5 +110,5 @@ const cBioUtils = {
 //     "numberOfProbes": 958
 // }
 
-export default cBioUtils;
+export default cBioUtils
 

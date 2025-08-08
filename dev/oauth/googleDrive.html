@@ -17,7 +17,7 @@
 <h1>Google Drive</h1>
 
 <p>
-    BAM and CRAM files hosted on Google Drive.  An API Key, specified in oauthConfig, is required to run this demo.
+    BAM and CRAM files hosted on Google Drive. An API Key, specified in oauthConfig, is required to run this demo.
 </p>
 
 
@@ -25,9 +25,9 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
-    import {GoogleAuth} from "../../node_modules/igv-utils/src/index.js";
-    import oauthConfig from "./oauthConfig.js";
+    import igv from "../../js/index.js"
+    import {GoogleAuth} from "../../node_modules/igv-utils/src/index.js"
+    import oauthConfig from "./oauthConfig.js"
 
     var options =
         {
@@ -52,7 +52,7 @@
             ]
 
         }
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
 
     GoogleAuth.init(oauthConfig)
@@ -60,7 +60,7 @@
             return igv.createBrowser(igvDiv, options)
         })
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 

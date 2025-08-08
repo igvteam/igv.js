@@ -13,7 +13,8 @@
 
 <div style="padding-top: 10px;padding-bottom: 10px;">
 
-Example taken from <a href="https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md" target="_blank">GFF3 Spec</a>
+    Example taken from <a href="https://github.com/The-Sequence-Ontology/Specifications/blob/master/gff3.md"
+                          target="_blank">GFF3 Spec</a>
 
 </div>
 
@@ -21,16 +22,11 @@ Example taken from <a href="https://github.com/The-Sequence-Ontology/Specificati
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
-            reference: {
-                "id": "hg38",
-                "name": "Human (GRCh38/hg38)",
-                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
-                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
-            },
+            genome: "hg38",
             locus: "chr1:1-50000",
             tracks:
                 [
@@ -42,13 +38,13 @@ Example taken from <a href="https://github.com/The-Sequence-Ontology/Specificati
                         "height": 300
                     }
                 ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 

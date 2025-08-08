@@ -8,14 +8,14 @@
 
 <h1>Non-indexed BAM file</h1>
 
-In this example a non-indexed bam file is loaded.  This is only suitable for small bam files as the entire file
+In this example a non-indexed bam file is loaded. This is only suitable for small bam files as the entire file
 is loaded.
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     const options =
         {
@@ -30,13 +30,13 @@ is loaded.
                     name: "gstt1"
                 }
             ]
-        };
+        }
 
-    const igvDiv = document.getElementById("igvDiv");
+    const igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
 
         })
 

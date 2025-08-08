@@ -17,9 +17,9 @@ Verify that features are visible in whole genome view.
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
-    const div = document.getElementById("myDiv");
+    const div = document.getElementById("myDiv")
     const options = {
         genome: "hg19",
         tracks: [
@@ -28,10 +28,10 @@ Verify that features are visible in whole genome view.
                 url: '../../test/data/wig/NA12878.SLX.sample.wig'
             }
         ]
-    };
+    }
 
     igv.createBrowser(div, options).then(function (browser) {
-    });
+    })
 
 
 </script>

@@ -40,7 +40,7 @@
 
 <script type="module">
     //https://igv-genepattern-org.s3.amazonaws.com/demo/skbr3/SKBR3_Sniffles_variants_tra.bedpe
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
     import makeDraggable from "../../js/ui/utils/draggable.js"
 
     // Start igv.js and create regions
@@ -72,16 +72,16 @@
                 }
             ],
             showCircularView: true
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(async function (browser) {
 
             const circularViewContainer = document.getElementById('jbrowse_circular_genome_view')
-            browser.createCircularView(circularViewContainer, true);
-            makeDraggable(circularViewContainer, browser.circularView.toolbar);
+            browser.createCircularView(circularViewContainer, true)
+            makeDraggable(circularViewContainer, browser.circularView.toolbar)
             browser.circularView.setSize(512)
 
 

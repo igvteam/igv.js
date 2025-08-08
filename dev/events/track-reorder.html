@@ -96,7 +96,7 @@
                 ]
         }
 
-        var igv_custom_track_click = $('#igv-custom-track-click');
+        var igv_custom_track_click = $('#igv-custom-track-click')
 
         igv.createBrowser(igv_custom_track_click.get(0), options)
 
@@ -105,15 +105,15 @@
                 // Initialize list, this is not part of the public API
                 updateTrackList(browser.getTrackOrder())
 
-                browser.on('trackorderchanged', updateTrackList);
+                browser.on('trackorderchanged', updateTrackList)
 
                 function updateTrackList(trackNames) {
-                    let html = "<ul>";
-                    for(let track of trackNames) {
+                    let html = "<ul>"
+                    for (let track of trackNames) {
                         html += `<li>${track}</li>`
                     }
-                    html += "</ul>";
-                    document.getElementById("trackList").innerHTML = html;
+                    html += "</ul>"
+                    document.getElementById("trackList").innerHTML = html
                 }
             })
     })

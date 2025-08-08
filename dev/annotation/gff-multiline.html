@@ -12,24 +12,19 @@
 <h1>Multiline feature GFF</h1>
 
 <div>
-This file contains a feature spread across multiple lines, and split across chromosomes 1 and 2.  This is legal GFF,
-although relatively rare.  It can for example be used to represent a split alignment.
+    This file contains a feature spread across multiple lines, and split across chromosomes 1 and 2. This is legal GFF,
+    although relatively rare. It can for example be used to represent a split alignment.
 </div>
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
-            reference: {
-                "id": "hg38",
-                "name": "Human (GRCh38/hg38)",
-                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
-                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
-            },
+            genome: "hg38",
             locus: "chr1:505890-539429 chr2:505890-539429",
             tracks:
                 [
@@ -41,13 +36,13 @@ although relatively rare.  It can for example be used to represent a split align
                     },
 
                 ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 

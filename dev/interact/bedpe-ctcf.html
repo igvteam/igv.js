@@ -19,7 +19,7 @@
 
 <script type="module">
 
-    import igv from "../../js";
+    import igv from "../../js"
 
     var options =
         {
@@ -27,7 +27,7 @@
             locus: "chr2:65,489,209-65,795,733",
             tracks: [
                 {
-                   url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                    url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
                     type: "interact",
                     format: "bedpe",
                     name: "CTCF PET - proportional",
@@ -51,14 +51,14 @@
                     visibilityWindow: 10000000
                 }
             ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
-            window.igvBrowser = browser;
+            console.log("Created IGV browser")
+            window.igvBrowser = browser
         })
 
 

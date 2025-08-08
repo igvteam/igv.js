@@ -60,7 +60,9 @@
 
     document.getElementById("log-session").addEventListener('click', () => console.log(browser.toJSON()))
 
-    document.getElementById("export-sampleinfo").addEventListener('click', () => {browser.sampleInfo.export()})
+    document.getElementById("export-sampleinfo").addEventListener('click', () => {
+        browser.sampleInfo.export()
+    })
 
 
 </script>
