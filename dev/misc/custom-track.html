@@ -6,6 +6,8 @@
 
 <body>
 
+<h2>Example of a minimal implmentation of a custom track</h2>
+
 <button id="log-state">Log Session</button>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
@@ -18,7 +20,7 @@
 
         constructor(config, browser) {
             super(config, browser)
-            this.resolutionAware = true
+            this.resolutionAware = true    // Indicates that features are resolution dependent
         }
 
         async getFeatures(chr, start, end, bpPerPixel) {
@@ -36,14 +38,7 @@
             return features
         }
 
-        draw(options) {
-
-            const features = options.features
-            const ctx = options.context
-            const bpPerPixel = options.bpPerPixel
-            const bpStart = options.bpStart
-            const pixelWidth = options.pixelWidth
-            const pixelHeight = options.pixelHeight
+        draw({features, context: ctx, bpPerPixel, bpStart, pixelWidth, pixelHeight}) {
 
             ctx.fillStyle = this.color || 'blue'
             for (let f of features) {
@@ -57,10 +52,7 @@
 
                 ctx.fillRect(x, y, width, height)
             }
-
         }
-
-
     }
 
     igv.registerTrackClass("custom", CustomTrack)
