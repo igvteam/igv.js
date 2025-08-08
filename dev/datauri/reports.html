@@ -28,7 +28,7 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     const options =
         {
@@ -61,23 +61,23 @@
         }
 
 
-    const igvDiv = document.getElementById("igvDiv");
+    const igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
 
         .then(function (browser) {
 
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
 
             document.getElementById("sessionButton").addEventListener("click", () => {
                 try {
-                    const json = browser.toJSON();
-                    console.log(json);
-                    const jsonString = JSON.stringify(json, null, '\t');
-                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}));
-                    download("session.json", data);
+                    const json = browser.toJSON()
+                    console.log(json)
+                    const jsonString = JSON.stringify(json, null, '\t')
+                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}))
+                    download("session.json", data)
                 } catch (e) {
-                    alert(e);
+                    alert(e)
                 }
             })
 

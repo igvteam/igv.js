@@ -50,31 +50,31 @@
 <h3>Select study to load copy number</h3>
 
 <div id="trackList"></div>
-<div class='igv-loading-spinner-container' >
+<div class='igv-loading-spinner-container'>
     <div id="spinner" style="display: none"></div>   <!-- This extra div is needed, apparently -->
 </div>
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import cBioUtils from "./cbio.js";
-    import igv from "../../js/index.js";
+    import cBioUtils from "./cbio.js"
+    import igv from "../../js/index.js"
 
 
     async function initMenu(div, browser) {
 
-        const studies = await cBioUtils.fetchStudies();
+        const studies = await cBioUtils.fetchStudies()
 
         for (let study of studies) {
 
-            let sampleCount = study["cnaSampleCount"];
+            let sampleCount = study["cnaSampleCount"]
             if (sampleCount > 0) {
-                let name = study["name"] + " (" + sampleCount + ")";
-                let trackDiv = document.createElement('div');
-                trackDiv.textContent = name;
-                trackDiv.addEventListener('click', async  (event) => {
+                let name = study["name"] + " (" + sampleCount + ")"
+                let trackDiv = document.createElement('div')
+                trackDiv.textContent = name
+                trackDiv.addEventListener('click', async (event) => {
 
-                    document.getElementById("spinner").style.display = "block";
+                    document.getElementById("spinner").style.display = "block"
 
                     const features = await cBioUtils.fetchCopyNumberByStudy(study.studyId)
 
@@ -86,13 +86,13 @@
                         features: features
 
                     }
-                    browser.loadTrack(trackJson);
+                    browser.loadTrack(trackJson)
 
-                    document.getElementById("spinner").style.display = "none";
+                    document.getElementById("spinner").style.display = "none"
 
-                });
+                })
 
-                div.appendChild(trackDiv);
+                div.appendChild(trackDiv)
 
             }
 
@@ -114,7 +114,7 @@
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            initMenu(document.getElementById('trackList'), browser);
+            initMenu(document.getElementById('trackList'), browser)
         })
 
 

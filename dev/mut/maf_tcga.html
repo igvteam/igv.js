@@ -15,7 +15,7 @@
 <script type="module">
 
     //import igv from "https://cdn.jsdelivr.net/npm/igv@2.7.5/dist/igv.esm.min.js";  //"../../js/index.js";
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     (async function () {
 
@@ -26,8 +26,8 @@
                 genome: 'hg38',
                 tracks: [
                     {
-                       //format: 'maf',
-                       //type: 'mut',
+                        //format: 'maf',
+                        //type: 'mut',
                         name: 'BRCA Mutations - TCGA (mutect)',
                         url: 'https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/maf/TCGA.BRCA.mutect.somatic.maf.gz',
                         height: 700,
@@ -36,13 +36,13 @@
                 ]
             }
 
-        const igvDiv = document.getElementById("igvDiv");
+        const igvDiv = document.getElementById("igvDiv")
 
         igv.createBrowser(igvDiv, options)
             .then(function (browser) {
-                console.log("Created IGV browser");
+                console.log("Created IGV browser")
             })
-    })();
+    })()
 
 </script>
 

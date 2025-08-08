@@ -16,55 +16,55 @@
     document.addEventListener("DOMContentLoaded", async () => {
 
         const config =
-        {
-            "version": "3.2.6",
-            "showSampleNames": false,
-            "reference": {
-                "id": "hg19",
-                "name": "Human (GRCh37/hg19)",
-                "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit",
-                "wholeGenomeView": true,
-                "cytobandURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/cytoBand.txt.gz",
-                "aliasURL": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/hg19/hg19_alias.tab",
-                "chromosomeOrder": "chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY",
-                "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes",
-                "hubs": [
-                    "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/hubs/hg19/hub.txt",
-                    "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/hubs/hg19/1kg/hub.txt",
-                    "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/hubs/hg19/platinum_genomes/hub.txt",
-                    "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/hubs/hg19/tutorials/hub.txt"
+            {
+                "version": "3.2.6",
+                "showSampleNames": false,
+                "reference": {
+                    "id": "hg19",
+                    "name": "Human (GRCh37/hg19)",
+                    "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit",
+                    "wholeGenomeView": true,
+                    "cytobandURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/cytoBand.txt.gz",
+                    "aliasURL": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/hg19/hg19_alias.tab",
+                    "chromosomeOrder": "chr1,chr2,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY",
+                    "chromSizesURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes",
+                    "hubs": [
+                        "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/hubs/hg19/hub.txt",
+                        "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/hubs/hg19/1kg/hub.txt",
+                        "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/hubs/hg19/platinum_genomes/hub.txt",
+                        "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/genomes/hubs/hg19/tutorials/hub.txt"
+                    ]
+                },
+                "locus": "chr8:128,747,477-128,756,197",
+                "tracks": [
+                    {
+                        "type": "sequence",
+                        "order": -9007199254740991
+                    },
+                    {
+                        "sourceType": "gcs",
+                        "type": "alignment",
+                        "url": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam",
+                        "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam.bai",
+                        "name": "NA12890",
+                        "order": 5,
+                        "colorBy": "unexpectedPair",
+                        "groupBy": "strand"
+                    },
+                    {
+                        "id": "refseqSelect",
+                        "name": "Refseq Select",
+                        "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeqSelect.txt.gz",
+                        "format": "refgene",
+                        "html": "https://www.ncbi.nlm.nih.gov/refseq/refseq_select/",
+                        "order": 100000,
+                        "type": "annotation",
+                        "height": 70
+                    }
                 ]
-            },
-            "locus": "chr8:128,747,477-128,756,197",
-            "tracks": [
-                {
-                    "type": "sequence",
-                    "order": -9007199254740991
-                },
-                {
-                    "sourceType": "gcs",
-                    "type": "alignment",
-                    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam",
-                    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam.bai",
-                    "name": "NA12890",
-                    "order": 5,
-                    "colorBy": "unexpectedPair",
-                    "groupBy": "strand"
-                },
-                {
-                    "id": "refseqSelect",
-                    "name": "Refseq Select",
-                    "url": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeqSelect.txt.gz",
-                    "format": "refgene",
-                    "html": "https://www.ncbi.nlm.nih.gov/refseq/refseq_select/",
-                    "order": 100000,
-                    "type": "annotation",
-                    "height": 70
-                }
-            ]
-        };
+            }
 
-        const browser = await igv.createBrowser(igvDiv, config);
+        const browser = await igv.createBrowser(igvDiv, config)
 
     })
 

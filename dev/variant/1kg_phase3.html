@@ -17,7 +17,7 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     const options =
         {
@@ -40,13 +40,13 @@
                     "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
                     "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi",
                     "name": "1KG variants (chr22)",
-                   // "visibilityWindow": 1000,
+                    // "visibilityWindow": 1000,
                     "height": 500,
                     "onclick": (features) => {
-                        for(let f of features) {
-                            console.log(f);
+                        for (let f of features) {
+                            console.log(f)
                         }
-                        return false;
+                        return false
                     }
                 },
                 {
@@ -57,7 +57,7 @@
                     "colorBy": "SVTYPE"
                 }
             ]
-        };
+        }
 
     igv.createBrowser(document.getElementById('igvDiv'), options)
         .then(function (browser) {

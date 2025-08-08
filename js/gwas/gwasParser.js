@@ -142,7 +142,7 @@ class GWASFeature {
         })
     }
 
-    getAttribute(attrName) {
+    getAttributeValue(attrName) {
         const tokens = this.line.split(/\t/)
         for (let i = 0; i < this.columns.length; i++) {
             if (this.columns[i] === attrName) {

@@ -11,12 +11,12 @@
 
 <h1>Searchable GFF</h1>
 <p>
-    Illustrates searching for a feature in a GFF track from a column 9 field.  Search for
+    Illustrates searching for a feature in a GFF track from a column 9 field. Search for
 <pre>ENST00000524013</pre>
 </p>
 <p>
     Track configuration:
-    <pre>
+<pre>
     {
       name: "NCBI gff",
       url: "../../test/data/gff/NCBI_hg38_MYC.gff",
@@ -29,7 +29,7 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
@@ -42,13 +42,13 @@
                         "format": "gff3"
                     }
                 ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 

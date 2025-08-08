@@ -695,13 +695,16 @@ class TrackViewport extends Viewport {
 
         // Mouse move
         if (typeof this.trackView.track.hoverText === 'function') {
+            let lastTooltipUpdate = 0
             this.viewportElement.addEventListener('mousemove', (event => {
-                if (event.buttons === 0 && (Date.now() - lastHoverUpdateTime > 100)) {
-                    lastHoverUpdateTime = Date.now()
+                const now = Date.now()
+                if (event.buttons === 0 && (now - lastTooltipUpdate > 100)) {
+                    lastTooltipUpdate = now
                     const clickState = this.createClickState(event)
                     if (clickState) {
                         const tooltip = this.trackView.track.hoverText(clickState)
                         if (tooltip) {
+                            console.log(`Setting tooltip: ${tooltip}`)
                             this.viewportElement.setAttribute("title", tooltip)
                         } else {
                             this.viewportElement.removeAttribute("title")

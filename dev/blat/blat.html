@@ -26,9 +26,7 @@
     let igvBrowser
 
     const tableData =
-        {
-
-        }
+        {}
     tableData.headers =
         [
             "chr",
@@ -50,7 +48,7 @@
 
         try {
 
-            const results = await blat({ userSeq:sequence, db:'hg19' })
+            const results = await blat({userSeq: sequence, db: 'hg19'})
 
             tableData.rows = results.map(f => [
                 f.chr,
@@ -73,12 +71,12 @@
                     browser: igvBrowser,
                     parent: document.getElementById('igv-container'),
                     headerTitle: 'BLAT Results',
-                    description: `${ sequence }${ sequence }${ sequence }${ sequence }${ sequence }${ sequence }`,
+                    description: `${sequence}${sequence}${sequence}${sequence}${sequence}${sequence}`,
                     // description: `${ sequence }`,
                     dismissHandler: () => blatTable.dismiss(),
                     columnFormat: BlatTable.getColumnFormatConfiguration(),
                     gotoButtonHandler: BlatTable.gotoButtonHandler
-                };
+                }
 
             blatTable = new BlatTable(config)
 
@@ -92,7 +90,7 @@
         }
     })
 
-    igv.createBrowser(document.getElementById('igv-container'), { genome: 'hg19', locus: 'myc' })
+    igv.createBrowser(document.getElementById('igv-container'), {genome: 'hg19', locus: 'myc'})
         .then(browser => igvBrowser = browser)
 
 </script>

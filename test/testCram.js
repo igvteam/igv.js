@@ -34,10 +34,7 @@ suite("testCRAM", function () {
             genome)
 
         const alignmentContainer = await cramReader.readAlignments("chr1", start, end)
-        validate(assert, alignmentContainer)
-    })
 
-    function validate(assert, alignmentContainer) {
         assert.ok(alignmentContainer)
 
         // 2 alignments, 1 paired and 1 single
@@ -86,7 +83,6 @@ suite("testCRAM", function () {
         assert.equal(tags["MQ"], 29)
         assert.equal(tags["AM"], 29)
         assert.equal(tags["XT"], "M")
-    }
-
+    })
 })
 

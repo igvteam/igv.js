@@ -17,27 +17,27 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
-            const options =
+    const options =
+        {
+            genome: "hg38",
+            locus: "chr1:16,760,730-16,760,768",
+            tracks: [
                 {
-                    genome: "hg38",
-                    locus: "chr1:16,760,730-16,760,768",
-                    tracks: [
-                        {
-                            name: "VCF Indels",
-                            type: "variant",
-                            format: "vcf",
-                            indexed: false,
-                            url: "../../test/data/vcf/example-indels/example.vcf"
-                        }
-                    ]
-                };
+                    name: "VCF Indels",
+                    type: "variant",
+                    format: "vcf",
+                    indexed: false,
+                    url: "../../test/data/vcf/example-indels/example.vcf"
+                }
+            ]
+        }
 
-            igv.createBrowser(document.getElementById('igvDiv'), options)
-                .then(function (browser) {
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (browser) {
 
-                })
+        })
 
 
 </script>

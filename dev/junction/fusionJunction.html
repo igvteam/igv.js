@@ -13,7 +13,7 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options = {
         reference: {
@@ -30,11 +30,11 @@
         }
     }
 
-    var igvDiv = document.getElementById("igv-div");
+    var igvDiv = document.getElementById("igv-div")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
+            console.log("Created IGV browser")
         })
 
 </script>

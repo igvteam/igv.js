@@ -8,7 +8,7 @@
     {
       "type": "alignment",
       "format": "bam",
-      "url":      "https://www.dropbox.com/scl/fi/2se4cumu6lj6hq36d4lvh/run5_5mC_pod5_model_sort.bam?rlkey=x3rowbgt5dxl1hemwb7c9c3a3&dl=0",
+      "url": "https://www.dropbox.com/scl/fi/2se4cumu6lj6hq36d4lvh/run5_5mC_pod5_model_sort.bam?rlkey=x3rowbgt5dxl1hemwb7c9c3a3&dl=0",
       "indexURL": "https://www.dropbox.com/scl/fi/7tab2ps7m7rrgbr0eeska/run5_5mC_pod5_model_sort.bam.bai?rlkey=388pdh02ffyu9ca6rb7slwbrr&dl=0",
       "height": 700,
       "name": "Issue 1185",

@@ -18,9 +18,9 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
-    const div = document.getElementById("myDiv");
+    const div = document.getElementById("myDiv")
     const options = {
         queryParametersSupported: true,
         locus: '19:49301000-49305700',
@@ -77,7 +77,7 @@
                 indexed: false
             },
         ]
-    };
+    }
 
     igv.createBrowser(div, options).then(function (browser) {
 
@@ -90,7 +90,7 @@
             window.history.pushState({}, "IGV", url)
         })
 
-    });
+    })
 
 
 </script>

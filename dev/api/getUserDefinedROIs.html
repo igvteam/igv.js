@@ -40,8 +40,7 @@
                 genome: "hg19",
 
                 tracks:
-                    [
-                    ]
+                    []
             }
 
         const browser = await igv.createBrowser(document.getElementById('myDiv'), browser_config)
@@ -62,7 +61,7 @@
                 const list = document.createElement("ul")
                 div.appendChild(list)
 
-                for (const { chr, start, end } of rois) {
+                for (const {chr, start, end} of rois) {
                     const li = document.createElement('li')
                     li.innerText = `${chr}:${start + 1}-${end}`
                     list.appendChild(li)

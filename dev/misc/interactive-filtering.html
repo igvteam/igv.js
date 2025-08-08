@@ -38,6 +38,7 @@
         .igv-facet .facet-toggle-chevron {
             visibility: hidden;
         }
+
         .igv-facet:hover .igv-facet-header-checkbox,
         .igv-facet:hover .facet-toggle-chevron {
             visibility: visible;
@@ -668,14 +669,14 @@
             }
         }
 
-            /** Toggle icon for collapsing a list; for each filter list, and all filter lists */
+        /** Toggle icon for collapsing a list; for each filter list, and all filter lists */
         function getFacetTools(
             isCollapsed, whatToToggle,
             isLoaded,
             sortKey,
             setSortKey,
-            facet=null,
-            isRoot=false, hasNondefaultSelection, handleResetFilters
+            facet = null,
+            isRoot = false, hasNondefaultSelection, handleResetFilters
         ) {
             const collapseToggleChevron = getCollapseToggleChevron(isCollapsed, whatToToggle)
             return `
@@ -717,22 +718,22 @@
 
         /** Add or remove all checked item from list */
         function handleFacetCheckboxChange(event) {
-          const target = event.target
-          const facetName = target.getAttribute('data-igv-facet-name')
-          const isChecked = target.checked
-          const selector = `.igv-filter[data-igv-facet-name="${facetName}"]`
-          const filterCheckboxes = document.querySelectorAll(selector)
-          console.log('filterCheckboxes', filterCheckboxes)
-          filterCheckboxes.forEach(filterCheckbox => {
-            filterCheckbox.checked = isChecked
-          })
-          const changeEvent = new Event('change')
-          filterCheckboxes[0].dispatchEvent(changeEvent)
+            const target = event.target
+            const facetName = target.getAttribute('data-igv-facet-name')
+            const isChecked = target.checked
+            const selector = `.igv-filter[data-igv-facet-name="${facetName}"]`
+            const filterCheckboxes = document.querySelectorAll(selector)
+            console.log('filterCheckboxes', filterCheckboxes)
+            filterCheckboxes.forEach(filterCheckbox => {
+                filterCheckbox.checked = isChecked
+            })
+            const changeEvent = new Event('change')
+            filterCheckboxes[0].dispatchEvent(changeEvent)
         }
 
         function getCategoricalFacetHeader(facet) {
-          const friendlyName = getFriendlyFacetName(facet)
-          const header = `
+            const friendlyName = getFriendlyFacetName(facet)
+            const header = `
             <input
                 type="checkbox"
                 class="igv-facet-header-checkbox"
@@ -747,7 +748,7 @@
             >${friendlyName}</span>
             ${getFacetTools()}`
 
-          return header
+            return header
         }
 
         /**
@@ -1141,9 +1142,9 @@
                 // Original is unpolished; remove redundant field name; standardize case, spacing
                 // "Ancestral Allele. Format: AA|REF|ALT|IndelType. AA: Ancestral allele, REF:Reference Allele, ALT:Alternate Allele, IndelType:Type of Indel (REF, ALT and IndelType are only defined for indels)"
                 prose = (
-                'Format: AA | REF | ALT | IndelType <br/>' +
-                'AA: Ancestral allele, REF: Reference allele, ALT: Alternate allele, IndelType: Type of Indel. <br/>' +
-                'REF, ALT and IndelType are only defined for indels.'
+                    'Format: AA | REF | ALT | IndelType <br/>' +
+                    'AA: Ancestral allele, REF: Reference allele, ALT: Alternate allele, IndelType: Type of Indel. <br/>' +
+                    'REF, ALT and IndelType are only defined for indels.'
                 )
             }
 
@@ -1441,11 +1442,11 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     const options =
         {
-            genome:  "hg19",
+            genome: "hg19",
             locus: "19:11,199,138-11,245,496",
             tracks:
                 [

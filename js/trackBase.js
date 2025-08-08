@@ -127,14 +127,6 @@ class TrackBase {
                 this.description = () => config.description
             }
         }
-
-        // Support for mouse hover text.  This can be expensive, off by default.
-        // this.hoverText = function(clickState) => return tool tip text
-        if (config.hoverTextFields) {
-            this.hoverText = hoverText.bind(this)
-        } else if (typeof this.config.hoverText === 'function') {
-            this.hoverText = this.config.hoverText
-        }
     }
 
     async postInit() {
@@ -715,39 +707,6 @@ class TrackBase {
      */
     getFilterableAttributes() {
         return {}
-    }
-}
-
-function hoverText(clickState) {
-
-    if (!this.hoverTextFields) return
-
-    const features = this.clickedFeatures(clickState)
-
-    if (features && features.length > 0) {
-        let str = ""
-        for (let i = 0; i < features.length; i++) {
-            if (i === 10) {
-                str += "; ..."
-                break
-            }
-            if (!features[i]) continue
-
-            const f = features[i]._f || features[i]
-            if (str.length > 0) str += "\n"
-
-            str = ""
-            for (let field of this.hoverTextFields) {
-                if (str.length > 0) str += "\n"
-                if (f.hasOwnProperty(field)) {
-                    str += f[field]
-                } else if (typeof f.getAttribute === "function") {
-                    str += f.getAttribute(field)
-                }
-            }
-
-        }
-        return str
     }
 }
 

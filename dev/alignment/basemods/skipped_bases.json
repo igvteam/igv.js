@@ -5,7 +5,7 @@
     {
       "type": "alignment",
       "format": "bam",
-      "url":      "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/skipped/HG002-SRF.m84011_220902_175841_s1.GRCh38.dmode.bam",
+      "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/skipped/HG002-SRF.m84011_220902_175841_s1.GRCh38.dmode.bam",
       "indexURL": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/skipped/HG002-SRF.m84011_220902_175841_s1.GRCh38.dmode.bam.bai",
       "height": 500,
       "name": "Skipped bases '.'",
@@ -14,7 +14,7 @@
     {
       "type": "alignment",
       "format": "bam",
-      "url":      "https://www.dropbox.com/scl/fi/0efiiqpzho54qx7rl2qwv/HG002-SRF.m84011_220902_175841_s1.GRCh38.bam?rlkey=xbkl1sqbkmbzxnvn723ffeyrm&dl=0",
+      "url": "https://www.dropbox.com/scl/fi/0efiiqpzho54qx7rl2qwv/HG002-SRF.m84011_220902_175841_s1.GRCh38.bam?rlkey=xbkl1sqbkmbzxnvn723ffeyrm&dl=0",
       "indexURL": "https://www.dropbox.com/scl/fi/9bumsh2ziy413x2iolc0s/HG002-SRF.m84011_220902_175841_s1.GRCh38.bam.bai?rlkey=i8tqhquv5uxhrnj8w50zk6hi8&dl=0",
       "height": 500,
       "name": "Skipped bases '?'",

@@ -5,7 +5,7 @@
     {
       "type": "alignment",
       "format": "bam",
-      "url":      "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/pacbio/HG002_chr11_119076212_119102218.bam",
+      "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/pacbio/HG002_chr11_119076212_119102218.bam",
       "indexURL": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/pacbio/HG002_chr11_119076212_119102218.bam.bai",
       "height": 400,
       "name": "5mC and 6mA - 2 color mode",
@@ -16,7 +16,7 @@
     {
       "type": "alignment",
       "format": "bam",
-      "url":      "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/pacbio/HG002_chr11_119076212_119102218.bam",
+      "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/pacbio/HG002_chr11_119076212_119102218.bam",
       "indexURL": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/bam/basemods/pacbio/HG002_chr11_119076212_119102218.bam.bai",
       "height": 400,
       "name": "5mC and 6mA - mono color mode",

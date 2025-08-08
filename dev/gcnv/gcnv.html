@@ -16,7 +16,7 @@
 
 <script type="module">
 
-    import igv from "../../js/index.js";
+    import igv from "../../js/index.js"
 
     var options =
         {
@@ -24,8 +24,8 @@
             locus: "chr22:23,850,132-23,888,290",
             tracks: [
                 {
-                   type: 'gcnv',
-                   format: 'gcnv',
+                    type: 'gcnv',
+                    format: 'gcnv',
                     name: 'example track',
                     url: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz',
                     indexURL: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz.tbi',
@@ -40,14 +40,14 @@
                     onlyHandleClicksForHighlightedSamples: false,
                 }
             ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
-            window.igvBrowser = browser;
+            console.log("Created IGV browser")
+            window.igvBrowser = browser
         })
 
 

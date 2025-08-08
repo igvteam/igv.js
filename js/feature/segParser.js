@@ -146,7 +146,7 @@ class SegFeature {
         this.attributeValues = values
     }
 
-    getAttribute(name) {
+    getAttributeValue(name) {
         if (this.attributeNames) {
             const idx = this.attributeNames.indexOf(name)
             if (idx >= 0) {

@@ -19,7 +19,7 @@
 
 <script type="module">
 
-    import igv from "../../js";
+    import igv from "../../js"
 
     var options =
         {
@@ -37,14 +37,14 @@
                     height: 300
                 }
             ]
-        };
+        }
 
-    var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv")
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            console.log("Created IGV browser");
-            window.igvBrowser = browser;
+            console.log("Created IGV browser")
+            window.igvBrowser = browser
         })
 
 

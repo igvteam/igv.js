@@ -538,11 +538,8 @@ class Browser {
                 if (sampleInfoConfig.file) {
                     localSampleInfoFiles.push(sampleInfoConfig.file)
                 } else {
-                    // this.loadSampleInfo(sampleInfoConfig)
                     await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
-
                 }
-
             }
         }
 
