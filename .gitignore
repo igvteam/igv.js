@@ -6,8 +6,9 @@ igv.js.iml
 /npm-debug.log
 /css/.sass-cache/
 /dist/
-igv.css.map
 /deploy/
 /dev/oauth/oauthConfigPrivate.js
-/js/bigwig/bwReader_nochromtree.js
 /yarn.lock
+/js/embedCss.js
+/css/igv.css
+/css/igv.css.map

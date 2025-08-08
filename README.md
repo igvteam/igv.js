@@ -106,7 +106,13 @@ Windows users can use [Windows Subsystem for Linux](https://docs.microsoft.com/e
 
 ### Building
 
-Building igv.js and running the examples requires [node.js](https://nodejs.org/).
+Building igv.js and running the examples requires [node.js](https://nodejs.org/).  
+
+Development can be done directly from the source files  by importing igv.js from ```js/index.js```.  
+See the html files in the ```dev``` folder for examples of how to import igv.js from the source
+directory. The ```dist```files are not required for development, however you must first build at least once to compile 
+the CSS and create the required file  ```js/embedCss.js```.  
+
 
 
 ```  
