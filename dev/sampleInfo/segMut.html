@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Whole Lotta cBio</title>
+
+</head>
+
+<body>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js"
+
+    document.addEventListener("DOMContentLoaded", async (event) => {
+
+        const config =
+            {
+                "genome": "hg19",
+                "tracks": [
+                    {
+                        name: "Filtered Samples",
+                        type: "seg",
+                        format: "seg",
+                        url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/Broad.080528.subtypes.seg.gz",
+                        "height": 200,
+                        "displayMode": "FILL",
+                        "groupBy": "Subtype"
+                    },
+                    {
+                        name: "Somatic Mutations",
+                        type: "mut",
+                        format: "maf",
+                        "height": 350,
+                        "displayMode": "FILL",
+                        url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/TCGA_GBM_Level3_Somatic_Mutations_08.28.2008.maf.gz",
+                        "groupBy": "Subtype"
+                    },
+
+                ],
+                "sampleinfo": [
+                    {
+                        "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-sampletable-samplemapping-colors.txt"
+                    }
+                ]
+            }
+
+        const browser = await igv.createBrowser(document.getElementById("igv-div"), config)
+    })
+
+
+</script>
+
+</body>
+
+</html>

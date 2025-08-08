@@ -704,7 +704,6 @@ class TrackViewport extends Viewport {
                     if (clickState) {
                         const tooltip = this.trackView.track.hoverText(clickState)
                         if (tooltip) {
-                            console.log(`Setting tooltip: ${tooltip}`)
                             this.viewportElement.setAttribute("title", tooltip)
                         } else {
                             this.viewportElement.removeAttribute("title")

@@ -392,7 +392,7 @@ class SegTrack extends TrackBase {
             let border
             switch (this.displayMode) {
                 case "FILL":
-                    this.sampleHeight = pixelHeight / filteredKeys.length
+                    this.sampleHeight = (pixelHeight - (this.groups.size - 1) * this.getGroupMarginHeight()) / filteredKeys.length
                     border = 0
                     break
 
@@ -531,7 +531,7 @@ class SegTrack extends TrackBase {
 
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
-     * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
+     * has side effects (modifiying the samples hash).
      *
      * Note displayMode "FILL" is handled by the viewport
      *
@@ -680,7 +680,9 @@ class SegTrack extends TrackBase {
                 sampleHeight = this.squishedRowHeight
                 break
             default:   // FILL mode -- hopefully sample height has been set in the draw method
-                sampleHeight = this.sampleHeight
+                const pixelHeight = viewport.viewportElement.getBoundingClientRect().height
+                sampleHeight = (pixelHeight - (this.groups.size - 1) * this.getGroupMarginHeight()) / this.filteredSampleKeys.length
+
         }
 
         let top = 5
