@@ -25,14 +25,12 @@
     var div = document.getElementById("myDiv")
     var options = {
         genome: "hg19",
-        locus: "chr8:128,734,098-128,763,217",
+        locus: "chr11:5020134-5020614",
         tracks: [
             {
-                type: 'variant',
-                name: 'giab.NA12878',
                 sourceType: 'htsget',
-                format: "VCF",
-                url: 'https://htsget-rs.umccr.workers.dev/variants/vcf/spec-v4.3'
+                format: 'bam',
+                url: 'https://htsget.ga4gh-demo.org/reads/htsnexus_test_NA12878'
             },
             // {
             //    type: 'alignment',

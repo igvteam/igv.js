@@ -1473,6 +1473,7 @@
     // The current demo supports a single track only
 
     const trackToFilter = window.igvBrowser.findTracks('name', 'Phase 3 WGS variants')[0]
+    initIgvFacets(trackToFilter)
 
     // To fetch all variant tracks
     //const tracksToFilter = window.igvBrowser.findTracks('type', 'variant')
