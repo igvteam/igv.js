@@ -369,7 +369,7 @@ class SampleInfoViewport {
                             // do nothing
                         } else {
 
-                            const tracks = this.browser.findTracks(track => 'seg' === track.type)
+                            const tracks = this.browser.findTracks(track => typeof track.sortByAttribute === 'function')
                             for (const track of tracks) {
                                 track.sortByAttribute(value)
                             }
