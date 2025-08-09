@@ -4,7 +4,7 @@ import SampleInfo from './sampleInfo.js'
 import {sampleInfoTileWidth, sampleInfoTileXShim} from "./sampleInfoConstants.js"
 import IGVGraphics from "../igv-canvas.js"
 import {defaultRulerHeight} from "../rulerTrack.js"
-import {drawGroupDividers, GROUP_MARGIN_HEIGHT, NULL_GROUP} from "./sampleGroupUtils.js"
+import {drawGroupDividers, GROUP_MARGIN_HEIGHT, NULL_GROUP} from "./sampleUtils.js"
 
 const MaxSampleInfoColumnHeight = 128
 

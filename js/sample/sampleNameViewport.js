@@ -1,7 +1,7 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import IGVGraphics from "../igv-canvas.js"
-import {drawGroupDividers} from "./sampleGroupUtils.js"
+import {drawGroupDividers} from "./sampleUtils.js"
 
 const maxSampleNameViewportWidth = 200
 const fudgeTextMetricWidth = 4

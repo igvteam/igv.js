@@ -10,7 +10,7 @@ import HicColorScale from "../hic/hicColorScale.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
 import SEGFilterDialog from "../ui/components/segFilterDialog.js"
 import FilterManagerDialog from "../ui/components/filterManagerDialog.js"
-import {drawGroupDividers} from "../sample/sampleGroupUtils.js"
+import {drawGroupDividers, GROUP_MARGIN_HEIGHT} from "../sample/sampleUtils.js"
 
 const NULL_GROUP = 'None'
 
@@ -27,8 +27,6 @@ class SegTrack extends TrackBase {
             squishedRowHeight: 2,
             expandedRowHeight: 13
         }
-
-    static GROUP_MARGIN_HEIGHT = 16
 
 
     constructor(config, browser) {
@@ -198,7 +196,7 @@ class SegTrack extends TrackBase {
             yOffset: 0,
             groups: this.groups,
             groupIndeces,
-            groupMarginHeight: this.getGroupMarginHeight()
+            groupMarginHeight: GROUP_MARGIN_HEIGHT
         }
     }
 
@@ -237,95 +235,9 @@ class SegTrack extends TrackBase {
     }
 
     get filteredSampleKeys() {
-        return this.sampleKeys.filter(key => this.filter(key))
-    }
-
-    /**
-     * Create filter objects with computed scores from filter specifications.
-     * This method computes scores for each filter and returns the complete filter objects.
-     *
-     * @param filterSpecs - Array of filter specification objects
-     * @returns {Promise<Array>} - Array of filter objects with computed scores
-     */
-    async createFilterObjects(filterSpecs) {
-        const list = filterSpecs.map(filterSpec => {
-            return {...filterSpec}
-        })
-
-        // Compute scores for all filter objects
-        const promises = list.map(filterSpec => this.computeRegionScores(filterSpec))
-        const scores = await Promise.all(promises)
-
-        // Assign scores back to filter objects
-        list.forEach((filterSpec, index) => {
-            filterSpec.scores = scores[index]
-        })
-
-        return list
-    }
-
-    /**
-     * Set the sample filter objects.  This is used to filter samples from the set based on values over specified
-     * genomic regions.   The values compared depend on the track data type:
-     *   - "seg" -- average value over the region
-     *   - "mut" and "maf" -- count of features overlapping the region
-     *
-     * Multiple filters work in a pipeline fashion - each filter's output becomes the input for the next filter.
-     * The method is asynchronous because it may need to fetch data from the server to compute the scores.
-     * Computed scores are stored and used to filter the sample keys on demand.
-     *
-     * @param filterSpecs - Single filter object or array of filter objects
-     * @returns {Promise<void>}
-     */
-    async setSampleFilter(filterSpecs) {
-        if (!filterSpecs) {
-            this._trackFilterObjects = undefined
-        } else {
-            this._trackFilterObjects = await this.createFilterObjects(filterSpecs)
-            this.trackView.checkContentHeight()
-        }
-
-        this.trackView.repaintViews()
-    }
-
-    /**
-     * Add a filter to this track's filter list
-     * @param {Object} filterConfig - The filter configuration object
-     * @returns {Promise<void>}
-     */
-    async addFilter(filterConfig) {
-        const currentFilters = this._trackFilterObjects || []
-        const updatedFilters = [...currentFilters, filterConfig]
-        await this.setSampleFilter(updatedFilters)
-    }
-
-    /**
-     * Remove a specific filter from this track by index
-     * @param {number} index - Index of the filter to remove
-     * @returns {Promise<void>}
-     */
-    async removeFilter(index) {
-        const currentFilters = this._trackFilterObjects || []
-        if (index >= 0 && index < currentFilters.length) {
-            const newFilters = currentFilters.filter((_, i) => i !== index)
-            await this.setSampleFilter(newFilters.length > 0 ? newFilters : undefined)
-        }
-    }
-
-    /**
-     * Clear all filters for this track
-     * @returns {Promise<void>}
-     */
-    async clearFilters() {
-        await this.setSampleFilter(undefined)
-    }
-
-    /**
-     * Get the current filters for this track
-     * @returns {Array} - Array of filter objects
-     */
-    getFilters() {
-        return this._trackFilterObjects || []
+        return this.sampleKeys
+        // Filtering is disabled for now.
+        //return this.sampleKeys.filter(key => this.filter(key))
     }
 
     /**
@@ -392,7 +304,7 @@ class SegTrack extends TrackBase {
             let border
             switch (this.displayMode) {
                 case "FILL":
-                    this.sampleHeight = (pixelHeight - (this.groups.size - 1) * this.getGroupMarginHeight()) / filteredKeys.length
+                    this.sampleHeight = (pixelHeight - (this.groups.size - 1) * GROUP_MARGIN_HEIGHT) / filteredKeys.length
                     border = 0
                     break
 
@@ -422,7 +334,7 @@ class SegTrack extends TrackBase {
 
                 const sampleKey = f.sampleKey || f.sample
                 f.row = sampleRowIndeces[sampleKey]
-                const y = this.getGroupIndex(sampleKey) * this.getGroupMarginHeight() + f.row * rowHeight
+                const y = this.getGroupIndex(sampleKey) * GROUP_MARGIN_HEIGHT + f.row * rowHeight
 
                 if (undefined === this.sampleYStart) {
                     this.sampleYStart = y
@@ -502,7 +414,7 @@ class SegTrack extends TrackBase {
                     0,
                     this.sampleHeight,
                     this.groups,
-                    SegTrack.GROUP_MARGIN_HEIGHT)
+                    GROUP_MARGIN_HEIGHT)
             }
         }
     }
@@ -541,8 +453,7 @@ class SegTrack extends TrackBase {
     computePixelHeight(features) {
         if (!features) return 0
         const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight
-        this.updateSampleKeys(features)
-        return this.filteredSampleKeys.length * sampleHeight + (this.groups.size - 1) * this.getGroupMarginHeight()
+        return this.filteredSampleKeys.length * sampleHeight + (this.groups.size) * GROUP_MARGIN_HEIGHT
     }
 
     /**
@@ -681,7 +592,7 @@ class SegTrack extends TrackBase {
                 break
             default:   // FILL mode -- hopefully sample height has been set in the draw method
                 const pixelHeight = viewport.viewportElement.getBoundingClientRect().height
-                sampleHeight = (pixelHeight - (this.groups.size - 1) * this.getGroupMarginHeight()) / this.filteredSampleKeys.length
+                sampleHeight = (pixelHeight - (this.groups.size - 1) * GROUP_MARGIN_HEIGHT) / this.filteredSampleKeys.length
 
         }
 
@@ -692,7 +603,7 @@ class SegTrack extends TrackBase {
             viewport.overlayElement.appendChild(labelDiv)
             labelDiv.innerText = bucketKey
             labelDiv.style.top = `${top}px`
-            top += this.groups.get(bucketKey).count * sampleHeight + this.getGroupMarginHeight()
+            top += this.groups.get(bucketKey).count * sampleHeight + GROUP_MARGIN_HEIGHT
         }
     }
 
@@ -837,9 +748,95 @@ class SegTrack extends TrackBase {
         }
     }
 
-    getGroupMarginHeight() {
-        return SegTrack.GROUP_MARGIN_HEIGHT
+
+    /**
+     * Create filter objects with computed scores from filter specifications.
+     * This method computes scores for each filter and returns the complete filter objects.
+     *
+     * @param filterSpecs - Array of filter specification objects
+     * @returns {Promise<Array>} - Array of filter objects with computed scores
+     */
+    async createFilterObjects(filterSpecs) {
+        const list = filterSpecs.map(filterSpec => {
+            return {...filterSpec}
+        })
+
+        // Compute scores for all filter objects
+        const promises = list.map(filterSpec => this.computeRegionScores(filterSpec))
+        const scores = await Promise.all(promises)
+
+        // Assign scores back to filter objects
+        list.forEach((filterSpec, index) => {
+            filterSpec.scores = scores[index]
+        })
+
+        return list
     }
+
+    /**
+     * Set the sample filter objects.  This is used to filter samples from the set based on values over specified
+     * genomic regions.   The values compared depend on the track data type:
+     *   - "seg" -- average value over the region
+     *   - "mut" and "maf" -- count of features overlapping the region
+     *
+     * Multiple filters work in a pipeline fashion - each filter's output becomes the input for the next filter.
+     * The method is asynchronous because it may need to fetch data from the server to compute the scores.
+     * Computed scores are stored and used to filter the sample keys on demand.
+     *
+     * @param filterSpecs - Single filter object or array of filter objects
+     * @returns {Promise<void>}
+     */
+    async setSampleFilter(filterSpecs) {
+        if (!filterSpecs) {
+            this._trackFilterObjects = undefined
+        } else {
+            this._trackFilterObjects = await this.createFilterObjects(filterSpecs)
+            this.trackView.checkContentHeight()
+        }
+
+        this.trackView.repaintViews()
+    }
+
+    /**
+     * Add a filter to this track's filter list
+     * @param {Object} filterConfig - The filter configuration object
+     * @returns {Promise<void>}
+     */
+    async addFilter(filterConfig) {
+        const currentFilters = this._trackFilterObjects || []
+        const updatedFilters = [...currentFilters, filterConfig]
+        await this.setSampleFilter(updatedFilters)
+    }
+
+    /**
+     * Remove a specific filter from this track by index
+     * @param {number} index - Index of the filter to remove
+     * @returns {Promise<void>}
+     */
+    async removeFilter(index) {
+        const currentFilters = this._trackFilterObjects || []
+        if (index >= 0 && index < currentFilters.length) {
+            const newFilters = currentFilters.filter((_, i) => i !== index)
+            await this.setSampleFilter(newFilters.length > 0 ? newFilters : undefined)
+        }
+    }
+
+    /**
+     * Clear all filters for this track
+     * @returns {Promise<void>}
+     */
+    async clearFilters() {
+        await this.setSampleFilter(undefined)
+    }
+
+    /**
+     * Get the current filters for this track
+     * @returns {Array} - Array of filter objects
+     */
+    getFilters() {
+        return this._trackFilterObjects || []
+    }
+
 
 }
 
