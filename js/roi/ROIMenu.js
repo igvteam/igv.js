@@ -54,12 +54,8 @@ class ROIMenu {
         }
 
         // Add sort menu items  -- disabled for now, its not clear what this means for tracks in general
-        // this.#addSortMenuItems(items, feature)
+        this.#addSortMenuItems(items, feature)
 
-        // REMOVED: Add filter menu items - now handled by individual tracks
-        // this.#addFilterMenuItems(items, feature, event)
-
-        // ROI driven filter
 
         if (roiSet.isUserDefined) {
 
