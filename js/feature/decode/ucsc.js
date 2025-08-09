@@ -493,6 +493,13 @@ function decodeWig(tokens, header) {
     }
 }
 
+/**
+ * Decode a UCSC SNP record.
+ * Reference: https://genome.ucsc.edu/FAQ/FAQformat.html#format1
+ * @param tokens
+ * @param header
+ * @returns {undefined|{chr: *, start: number, end: number, name: *, score: number}}
+ */
 function decodeSNP(tokens, header) {
 
     if (tokens.length < 6) return undefined
