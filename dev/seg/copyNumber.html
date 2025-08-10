@@ -44,7 +44,15 @@
         {
             genome: "hg19",
             showSampleNames: true,
+            sampleinfo: [
+                {
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-sampletable-samplemapping-colors.txt"
+                }
+            ],
             tracks: [
+                {
+                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/Broad.080528.subtypes.seg.gz"
+                },
                 {
                     name: "Explicit Samples",
                     type: "seg",
@@ -56,18 +64,6 @@
                         "TCGA-06-0151-01A-01D-0236-01"],
                     url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz",
                     height: 100
-                },
-                {
-                    name: "Filtered Samples",
-                    type: "seg",
-                    format: "seg",
-                    url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-TP.seg.gz",
-                    filter: (sampleKey) => {
-                        return sampleKey === "TCGA-06-0168-01A-02D-0236-01" ||
-                            sampleKey === "TCGA-02-0115-01A-01D-0193-01" ||
-                            sampleKey === "TCGA-02-2485-01A-01D-0784-01" ||
-                            sampleKey === "TCGA-06-0151-01A-01D-0236-01"
-                    },
                 },
                 {
                     name: "Indexed",
