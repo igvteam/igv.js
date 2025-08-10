@@ -29,6 +29,10 @@ class HtsgetVariantReader extends HtsgetReader {
 
     async readFeatures(chr, start, end) {
 
+        if('all' === chr) {
+            return []    // This should never happen, but just in case
+        }
+
         if (this.config.format && this.config.format.toUpperCase() !== "VCF") {
             throw Error(`htsget format ${this.config.format} is not supported`)
         }

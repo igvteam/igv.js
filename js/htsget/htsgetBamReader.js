@@ -16,6 +16,10 @@ class HtsgetBamReader extends HtsgetReader {
 
     async readAlignments(chr, start, end) {
 
+        if('all' === chr) {
+            return []    // This should never happen, but just in case
+        }
+
         if (!this.header) {
             const compressedData = await this.readHeaderData()
             const ba = BGZip.unbgzf(compressedData.buffer)
