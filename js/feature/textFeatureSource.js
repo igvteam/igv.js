@@ -45,6 +45,7 @@ class TextFeatureSource extends BaseFeatureSource {
         } else if ("htsget" === config.sourceType) {
             this.reader = new HtsgetVariantReader(config, genome)
             this.queryable = true
+            this.supportsWholeGenome = () => false   // htsget sources do not support whole genome view
         } else if (config.sourceType === 'ucscservice') {
             this.reader = new UCSCServiceReader(config.source)
             this.queryable = true
