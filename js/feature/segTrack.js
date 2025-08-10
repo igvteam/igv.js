@@ -8,8 +8,6 @@ import {ColorTable} from "../util/colorPalletes.js"
 import SampleInfo from "../sample/sampleInfo.js"
 import HicColorScale from "../hic/hicColorScale.js"
 import {doSortByAttributes} from "../sample/sampleUtils.js"
-import SEGFilterDialog from "../ui/components/segFilterDialog.js"
-import FilterManagerDialog from "../ui/components/filterManagerDialog.js"
 import {drawGroupDividers, GROUP_MARGIN_HEIGHT} from "../sample/sampleUtils.js"
 
 const NULL_GROUP = 'None'
@@ -32,8 +30,6 @@ class SegTrack extends TrackBase {
     constructor(config, browser) {
         super(config, browser)
         this.groups = new Map()
-        this.segFilterDialog = new SEGFilterDialog(browser.columnContainer)
-        this.filterManagerDialog = new FilterManagerDialog(browser.columnContainer)
     }
 
 
@@ -94,11 +90,6 @@ class SegTrack extends TrackBase {
 
         this._initialColor = this.color || this.constructor.defaultColor
         this._initialAltColor = this.altColor || this.constructor.defaultColor
-
-        // Initialize filters from track config (individual track filtering)
-        if (this.config.filters) {
-            this._trackFilterObjects = await this.createFilterObjects(this.config.filters)
-        }
 
         this.didTrackDragEnd = undefined
         this.browser.on('trackdragend', () => this.didTrackDragEnd = true)
@@ -189,9 +180,9 @@ class SegTrack extends TrackBase {
 
     getSamples() {
         const groupIndeces = NULL_GROUP !== this.groupBy ?
-            this.filteredSampleKeys.map(sample => this.getGroupIndex(sample)) : undefined
+            this.sampleKeys.map(sample => this.getGroupIndex(sample)) : undefined
         return {
-            names: this.filteredSampleKeys,
+            names: this.sampleKeys,
             height: this.sampleHeight,
             yOffset: 0,
             groups: this.groups,
@@ -234,11 +225,6 @@ class SegTrack extends TrackBase {
         return true
     }
 
-    get filteredSampleKeys() {
-        return this.sampleKeys
-        // Filtering is disabled for now.
-        //return this.sampleKeys.filter(key => this.filter(key))
-    }
 
     /**
      * Return the current state of the track. Used to create sessions and bookmarks.
@@ -296,8 +282,7 @@ class SegTrack extends TrackBase {
 
             // Create a map for fast id -> row lookup
             const sampleRowIndeces = {}
-            const filteredKeys = this.filteredSampleKeys
-            filteredKeys.forEach(function (sample, index) {
+            this.sampleKeys.forEach(function (sample, index) {
                 sampleRowIndeces[sample] = index
             })
 
@@ -456,7 +441,7 @@ class SegTrack extends TrackBase {
     computePixelHeight(features) {
         if (!features) return 0
         const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight
-        return this.filteredSampleKeys.length * sampleHeight + (this.groups.size > 1 ? (this.groups.size + 1) * GROUP_MARGIN_HEIGHT : 0)
+        return this.sampleKeys.length * sampleHeight + (this.groups.size > 1 ? (this.groups.size + 1) * GROUP_MARGIN_HEIGHT : 0)
     }
 
     /**
@@ -560,7 +545,7 @@ class SegTrack extends TrackBase {
         this.groups.clear()
         if (NULL_GROUP !== attribute) {
             this.sampleKeys = this.browser.sampleInfo.sortSampleKeysByAttribute(this.sampleKeys, attribute, 1)
-            const sampleKeys = this.filteredSampleKeys
+            const sampleKeys = this.sampleKeys
             for (let sampleKey of sampleKeys) {
                 const value = this.browser.sampleInfo.getAttributeValue(sampleKey, attribute) || ""
                 if (value) {
@@ -595,7 +580,7 @@ class SegTrack extends TrackBase {
                 break
             default:   // FILL mode -- hopefully sample height has been set in the draw method
                 const pixelHeight = viewport.viewportElement.getBoundingClientRect().height
-                sampleHeight = (pixelHeight - (this.groups.size - 1) * GROUP_MARGIN_HEIGHT) / this.filteredSampleKeys.length
+                sampleHeight = (pixelHeight - (this.groups.size - 1) * GROUP_MARGIN_HEIGHT) / this.sampleKeys.length
 
         }
 
@@ -687,40 +672,6 @@ class SegTrack extends TrackBase {
             }
         })
 
-
-        // TODO -- filtering disabled for now
-        // Add filter menu items based on track type
-        // if (this.type === 'seg') {
-        //     menuItems.push('<hr/>')
-        //     menuItems.push({
-        //         label: 'Filter by value ...',
-        //         click: () => {
-        //             const config = {
-        //                 callback: async (threshold, op) => {
-        //                     const chr = referenceFrame.chr
-        //                     const start = Math.floor(genomicLocation - bpWidth)
-        //                     const end = Math.floor(genomicLocation + bpWidth)
-        //
-        //                     // Apply filter to this specific track
-        //                     const filterConfig = {type: "VALUE", op, value: threshold, chr, start, end}
-        //                     await this.addFilter(filterConfig)
-        //                 }
-        //             }
-        //             this.segFilterDialog.present(event, config)
-        //         }
-        //     })
-        // }
-        //
-        // if (this._trackFilterObjects && this._trackFilterObjects.length > 0) {
-        //     menuItems.push({
-        //         label: 'Filters...',
-        //         click: () => {
-        //             this.filterManagerDialog.present(this, event)
-        //         }
-        //     })
-        //
-        // }
-
         menuItems.push('<hr/>')
 
         return menuItems
@@ -750,96 +701,6 @@ class SegTrack extends TrackBase {
 
         }
     }
-
-
-    /**
-     * Create filter objects with computed scores from filter specifications.
-     * This method computes scores for each filter and returns the complete filter objects.
-     *
-     * @param filterSpecs - Array of filter specification objects
-     * @returns {Promise<Array>} - Array of filter objects with computed scores
-     */
-    async createFilterObjects(filterSpecs) {
-        const list = filterSpecs.map(filterSpec => {
-            return {...filterSpec}
-        })
-
-        // Compute scores for all filter objects
-        const promises = list.map(filterSpec => this.computeRegionScores(filterSpec))
-        const scores = await Promise.all(promises)
-
-        // Assign scores back to filter objects
-        list.forEach((filterSpec, index) => {
-            filterSpec.scores = scores[index]
-        })
-
-        return list
-    }
-
-    /**
-     * Set the sample filter objects.  This is used to filter samples from the set based on values over specified
-     * genomic regions.   The values compared depend on the track data type:
-     *   - "seg" -- average value over the region
-     *   - "mut" and "maf" -- count of features overlapping the region
-     *
-     * Multiple filters work in a pipeline fashion - each filter's output becomes the input for the next filter.
-     * The method is asynchronous because it may need to fetch data from the server to compute the scores.
-     * Computed scores are stored and used to filter the sample keys on demand.
-     *
-     * @param filterSpecs - Single filter object or array of filter objects
-     * @returns {Promise<void>}
-     */
-    async setSampleFilter(filterSpecs) {
-        if (!filterSpecs) {
-            this._trackFilterObjects = undefined
-        } else {
-            this._trackFilterObjects = await this.createFilterObjects(filterSpecs)
-            this.trackView.checkContentHeight()
-        }
-
-        this.trackView.repaintViews()
-    }
-
-    /**
-     * Add a filter to this track's filter list
-     * @param {Object} filterConfig - The filter configuration object
-     * @returns {Promise<void>}
-     */
-    async addFilter(filterConfig) {
-        const currentFilters = this._trackFilterObjects || []
-        const updatedFilters = [...currentFilters, filterConfig]
-        await this.setSampleFilter(updatedFilters)
-    }
-
-    /**
-     * Remove a specific filter from this track by index
-     * @param {number} index - Index of the filter to remove
-     * @returns {Promise<void>}
-     */
-    async removeFilter(index) {
-        const currentFilters = this._trackFilterObjects || []
-        if (index >= 0 && index < currentFilters.length) {
-            const newFilters = currentFilters.filter((_, i) => i !== index)
-            await this.setSampleFilter(newFilters.length > 0 ? newFilters : undefined)
-        }
-    }
-
-    /**
-     * Clear all filters for this track
-     * @returns {Promise<void>}
-     */
-    async clearFilters() {
-        await this.setSampleFilter(undefined)
-    }
-
-    /**
-     * Get the current filters for this track
-     * @returns {Array} - Array of filter objects
-     */
-    getFilters() {
-        return this._trackFilterObjects || []
-    }
-
 
 }
 
