@@ -1,7 +1,7 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import {appleCrayonRGB} from '../util/colorPalletes.js'
 import IGVGraphics from "../igv-canvas.js"
-import {drawGroupDividers} from "./sampleUtils.js"
+import {drawGroupDividers, GROUP_MARGIN_HEIGHT} from "./sampleUtils.js"
 
 const maxSampleNameViewportWidth = 200
 const fudgeTextMetricWidth = 4
@@ -105,8 +105,8 @@ class SampleNameViewport {
 
                 const x = 0
                 let yy = y + shim
-                if (samples.groupIndeces) {
-                    yy += samples.groupIndeces[rowIndex] * samples.groupMarginHeight
+                if (samples.groupIndeces && samples.groups.size > 0) {
+                    yy += (samples.groupIndeces[rowIndex] + 1) * GROUP_MARGIN_HEIGHT
                 }
 
                 if (yy + tileHeight > 0) {

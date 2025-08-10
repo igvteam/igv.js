@@ -334,7 +334,10 @@ class SegTrack extends TrackBase {
 
                 const sampleKey = f.sampleKey || f.sample
                 f.row = sampleRowIndeces[sampleKey]
-                const y = this.getGroupIndex(sampleKey) * GROUP_MARGIN_HEIGHT + f.row * rowHeight
+                let y =   f.row * rowHeight
+                if( this.groups.size > 1) {
+                   y += (this.getGroupIndex(sampleKey) + 1) * GROUP_MARGIN_HEIGHT
+                }
 
                 if (undefined === this.sampleYStart) {
                     this.sampleYStart = y
@@ -453,7 +456,7 @@ class SegTrack extends TrackBase {
     computePixelHeight(features) {
         if (!features) return 0
         const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight
-        return this.filteredSampleKeys.length * sampleHeight + (this.groups.size) * GROUP_MARGIN_HEIGHT
+        return this.filteredSampleKeys.length * sampleHeight + (this.groups.size > 1 ? (this.groups.size + 1) * GROUP_MARGIN_HEIGHT : 0)
     }
 
     /**
@@ -596,7 +599,7 @@ class SegTrack extends TrackBase {
 
         }
 
-        let top = 5
+        let top = GROUP_MARGIN_HEIGHT
         for (const bucketKey of this.groups.keys()) {
             const labelDiv = document.createElement('div')
             labelDiv.className = 'igv-attribute-group-label'

@@ -20,31 +20,30 @@
 
         const config =
             {
-                "genome": "hg19",
-                "tracks": [
+                genome: "hg19",
+                tracks: [
                     {
-                        name: "Filtered Samples",
+                        name: "Copy Number",
                         type: "seg",
                         format: "seg",
-                        url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/Broad.080528.subtypes.seg.gz",
-                        "height": 480,
-                        "displayMode": "SQUISHED",
-                        "groupBy": "Subtype"
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/Broad.080528.subtypes.seg.gz",
+                        autoHeight: true,
+                        displayMode: "SQUISHED",
+                        groupBy: "Subtype"
                     },
                     {
                         name: "Somatic Mutations",
                         type: "mut",
                         format: "maf",
-                        "height": 350,
-                        "displayMode": "SQUISHED",
+                        autoHeight: true,
+                        displayMode: "SQUISHED",
                         url: "https://igvdata.broadinstitute.org/data/hg18/tcga/gbm/gbmsubtypes/TCGA_GBM_Level3_Somatic_Mutations_08.28.2008.maf.gz",
-                        "groupBy": "Subtype"
+                        groupBy: "Subtype"
                     },
-
                 ],
-                "sampleinfo": [
+                sampleinfo: [
                     {
-                        "url": "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-sampletable-samplemapping-colors.txt"
+                        url: "https://raw.githubusercontent.com/igvteam/igv-data/refs/heads/main/data/test/gbm/GBM-sampletable-samplemapping-colors.txt"
                     }
                 ]
             }

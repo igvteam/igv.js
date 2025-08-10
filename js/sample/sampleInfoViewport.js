@@ -169,8 +169,8 @@ class SampleInfoViewport {
                 if (attributes) {
 
                     let yy = y + shim
-                    if (samples.groupIndeces) {
-                        yy += samples.groupIndeces[rowIndex] * GROUP_MARGIN_HEIGHT
+                    if (samples.groupIndeces && samples.groups.size > 0) {
+                        yy += (samples.groupIndeces[rowIndex] + 1) * GROUP_MARGIN_HEIGHT
                     }
                     if (yy > viewportHeight) {
                         break
