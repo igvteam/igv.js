@@ -285,29 +285,6 @@ class InteractionTrack extends TrackBase {
         }
     }
 
-    getColor(feature) {
-        let color
-        if (this.colorBy) {
-            const value = feature.getAttributeValue ?
-                feature.getAttributeValue(this.colorBy) :
-                feature[this.colorBy]
-            color = this.colorTable.getColor(value)
-        } else if (typeof this.color === 'function') {
-            color = this.color(feature)
-        } else {
-            color = this.color || feature.color || DEFAULT_ARC_COLOR
-        }
-        if (this.config.useScore && Number.isFinite(feature.score)) {
-            color = getAlphaColor(color, scoreShade(feature.score))
-        }
-        return color
-    }
-
-    getScaleFactor(min, max, height, logScale) {
-        const scale = logScale ? height / (Math.log10(max + 1) - (min <= 0 ? 0 : Math.log10(min + 1))) : height / (max - min)
-        return scale
-    }
-
     drawProportional(options) {
 
         const ctx = options.context
@@ -319,7 +296,6 @@ class InteractionTrack extends TrackBase {
         const refStart = options.referenceFrame.start
         const refEnd = options.referenceFrame.end
         const direction = "UP" === this.arcOrientation
-
 
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
@@ -403,7 +379,10 @@ class InteractionTrack extends TrackBase {
                     }
 
                     if (this.alpha) {
-                        ctx.fillStyle = getAlphaColor(color, this.alpha)
+                        const scoreFactor = this.config.useScore ?
+                            Math.max(0.1, Math.round(scoreShade(feature.score) * 10) / 10) :
+                            1
+                        ctx.fillStyle = getAlphaColor(color, scoreFactor * this.alpha)
                         if (true === ctx.isSVG) {
                             ctx.fillEllipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise)
                         } else {
@@ -454,6 +433,30 @@ class InteractionTrack extends TrackBase {
             }
         }
     }
+
+    getColor(feature) {
+        let color
+        if (this.colorBy) {
+            const value = feature.getAttributeValue ?
+                feature.getAttributeValue(this.colorBy) :
+                feature[this.colorBy]
+            color = this.colorTable.getColor(value)
+        } else if (typeof this.color === 'function') {
+            color = this.color(feature)
+        } else {
+            color = this.color || feature.color || DEFAULT_ARC_COLOR
+        }
+        if (this.config.useScore && Number.isFinite(feature.score)) {
+            color = getAlphaColor(color, scoreShade(feature.score))
+        }
+        return color
+    }
+
+    getScaleFactor(min, max, height, logScale) {
+        const scale = logScale ? height / (Math.log10(max + 1) - (min <= 0 ? 0 : Math.log10(min + 1))) : height / (max - min)
+        return scale
+    }
+
 
     clearAxis(ctx, pixelWidth, pixelHeight) {
         IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
@@ -808,6 +811,8 @@ function estimateTheta(x) {
 const colorAlphaCache = new Map()
 
 function getAlphaColor(color, alpha) {
+
+
     const key = `${color}_${alpha}`
     let c = colorAlphaCache.get(key)
     if (!c) {
