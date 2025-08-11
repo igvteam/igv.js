@@ -28,6 +28,34 @@
 
 <body>
 
+<p>
+    This example illustrates loading sample information by calling <b>browser.loadSampleInfo(sampleInfoObject)</b>.
+    where <b>sampleInfoObject</b> is an object who's keys are sample values and values are key-value pairs of sample attributes.
+</p>
+
+<pre>
+       browser.loadSampleInfo:
+                {
+                    "TRIBE_p_TCGAaffx_B1_2_GBM_Nsp_GenomeWideSNP_6_A01_155716": {
+                        "Subtype": "Classical",
+                        "sil_width": -0.135526414,
+                        "GENDER": "FEMALE",
+                        "KarnScore": 80,
+                        "AgeAtFirstDiagnosis": 45,
+                        "Secondary|or|Recurrent": "Rec",
+                        "Survival|(days)": 221,
+                        "VITALSTATUS": "DEAD",
+                        "Censured": 0,
+                        "MGMT_methylated": "-",
+                        "%|Tumor|Nuclei": 97.5,
+                        "%|Necrosis": 0
+                    },
+                    "TRIBE_p_TCGAaffx_B1_2_GBM_Nsp_GenomeWideSNP_6_A03_155748": {
+                        "Subtype": "Neural",
+                        "sil_width": -0.069669747,
+                  ...
+</pre>
+
 <div class="button-container">
     <button id="loadSampleInfoButton" class="load-button">Load Sample Information</button>
 </div>

@@ -9,20 +9,6 @@
             margin-bottom: 10px;
             padding: 10px;
         }
-
-        .load-button {
-            padding: 8px 16px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 14px;
-        }
-
-        .load-button:hover {
-            background-color: #45a049;
-        }
     </style>
 </head>
 
@@ -30,6 +16,9 @@
 
 <div class="button-container">
     <button id="loadSampleInfoButton" class="load-button">Load Sample Information</button>
+    <button id="bookmark">Bookmark session</button>
+    <button id="log-session">Log session</button>
+    <button id="export-sampleinfo">Export sample info</button>
 </div>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
@@ -55,6 +44,20 @@
         }
 
     const browser = await igv.createBrowser(document.getElementById('myDiv'), config)
+
+    document.getElementById('bookmark').addEventListener('click', () => {
+        const path = window.location.href.slice()
+        const idx = path.indexOf("?")
+        const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+        window.location = url
+        //window.history.pushState({}, "IGV", url)
+    })
+
+    document.getElementById("log-session").addEventListener('click', () => console.log(browser.toJSON()))
+
+    document.getElementById("export-sampleinfo").addEventListener('click', () => {
+        browser.sampleInfo.export()
+    })
 
     document.getElementById('loadSampleInfoButton').addEventListener('click', () => {
         browser.loadSampleInfo(sampleInfo)
