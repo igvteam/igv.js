@@ -351,19 +351,6 @@ class InteractionTrack extends TrackBase {
                     const xc = pixelStart + w / 2
                     feature.drawState = {xc, yc: y, radiusX, radiusY}
 
-                    // const arcKey = ((pixelStart << 16) | pixelEnd)
-                    // let arc = arcCaches.get(arcKey)
-                    // if (arc !== undefined) {
-                    //     if (arc.has(radiusY)) {
-                    //         continue
-                    //     }
-                    //     arc.add(radiusY)
-                    // } else {
-                    //     let arcHeights = new Set()
-                    //     arcHeights.add(radiusY)
-                    //     arcCaches.set(arcKey, arcHeights)
-                    // }
-
                     const counterClockwise = direction
 
                     const color = this.getColor(feature)
@@ -379,7 +366,7 @@ class InteractionTrack extends TrackBase {
                     }
 
                     if (this.alpha) {
-                        const scoreFactor = this.config.useScore ?
+                        const scoreFactor = this.config.useScore && Number.isFinite(feature.score) ?
                             Math.max(0.1, Math.round(scoreShade(feature.score) * 10) / 10) :
                             1
                         ctx.fillStyle = getAlphaColor(color, scoreFactor * this.alpha)
