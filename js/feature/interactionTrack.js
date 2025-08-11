@@ -297,7 +297,7 @@ class InteractionTrack extends TrackBase {
         } else {
             color = this.color || feature.color || DEFAULT_ARC_COLOR
         }
-        if(this.config.useScore) {
+        if (this.config.useScore) {
             color = getAlphaColor(color, scoreShade(feature.score))
         }
         return color
