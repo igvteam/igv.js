@@ -180,8 +180,9 @@ class InteractionTrack extends TrackBase {
                 // Reset transient property drawState.  An undefined value => feature has not been drawn.
                 feature.drawState = undefined
                 let color = this.getColor(feature)
-                ctx.strokeStyle = color
                 ctx.fillStyle = color
+                ctx.strokeStyle = color
+
                 ctx.lineWidth = feature.thickness || this.thickness || 1
 
                 if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
@@ -295,9 +296,9 @@ class InteractionTrack extends TrackBase {
             color = this.color(feature)
         } else {
             color = this.color || feature.color || DEFAULT_ARC_COLOR
-            if (color && this.config.useScore) {
-                color = getAlphaColor(color, scoreShade(feature.score))
-            }
+        }
+        if(this.config.useScore) {
+            color = getAlphaColor(color, scoreShade(feature.score))
         }
         return color
     }
@@ -389,11 +390,8 @@ class InteractionTrack extends TrackBase {
 
                     const counterClockwise = direction
 
-                    let color = this.getColor(feature)
-
-                    const strokeColor = this.config.useScore ? getAlphaColor(color, scoreShade(feature.score)) : color
-
-                    ctx.strokeStyle = strokeColor
+                    const color = this.getColor(feature)
+                    ctx.strokeStyle = color
                     ctx.lineWidth = feature.thickness || this.thickness || 1
 
                     if (true === ctx.isSVG) {
@@ -518,6 +516,57 @@ class InteractionTrack extends TrackBase {
                 this.trackView.repaintViews()
             }
         })
+
+        items.push("<hr/>")
+        items.push({
+            name: 'Set line thickness',
+            click: function setLineThicknessHandler(ev) {
+                const inputDialog = this.browser.inputDialog
+                inputDialog.present({
+                    label: "Enter line thickness",
+                    value: this.thickness,
+                    callback: value => {
+                        const newThickness = parseFloat(value)
+                        if (isNaN(newThickness)) {
+                            window.alert("Invalid line thickness: " + value)
+                        } else {
+                            this.thickness = newThickness
+                            this.trackView.repaintViews()
+                        }
+                    }
+                }, ev)
+            }
+        })
+
+        items.push({
+            name: 'Set alpha',
+            click: function (ev) {
+                const inputDialog = this.browser.inputDialog
+                inputDialog.present({
+                    label: "Enter alpha transparency (0-1)",
+                    value: this.alpha,
+                    callback: value => {
+                        const newAlpha = parseFloat(value)
+                        if (isNaN(newAlpha) || newAlpha < 0 || newAlpha > 1) {
+                            window.alert("Invalid alpha: " + value)
+                        } else {
+                            this.alpha = newAlpha
+                            this.trackView.repaintViews()
+                        }
+                    }
+                }, ev)
+            }
+        })
+
+        if (this.hasValue) {
+            items.push({
+                element: createCheckbox("Use score", this.config.useScore), click: () => {
+                    this.config.useScore = !this.config.useScore
+                    this.valueColumn = "score"
+                    this.trackView.repaintViews()
+                }
+            })
+        }
 
 
         if (this.arcType === "proportional" || this.arcType === "inView" || this.arcType === "partialInView") {
