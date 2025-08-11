@@ -524,7 +524,7 @@ class InteractionTrack extends TrackBase {
                 const inputDialog = this.browser.inputDialog
                 inputDialog.present({
                     label: "Enter line thickness",
-                    value: this.thickness,
+                    value: this.thickness || 1,
                     callback: value => {
                         const newThickness = parseFloat(value)
                         if (isNaN(newThickness)) {
