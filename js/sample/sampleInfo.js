@@ -181,16 +181,6 @@ class SampleInfo {
         return sortDirection === -1 ? [...numbers, ...strings] : [...strings, ...numbers]
     }
 
-    toJSON() {
-        const json = []
-        for (const url of this.sampleInfoFiles) {
-            const raw = {url}
-            const cooked = TrackBase.localFileInspection(raw)
-            json.push(cooked)
-        }
-        return json
-    }
-
     #processSampleInfoFileAsString(string) {
 
         const sectionDictionary = createSectionDictionary(string)

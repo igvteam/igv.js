@@ -289,7 +289,7 @@ class SegTrack extends TrackBase {
             let border
             switch (this.displayMode) {
                 case "FILL":
-                    this.sampleHeight = (pixelHeight - (this.groups.size - 1) * GROUP_MARGIN_HEIGHT) / filteredKeys.length
+                    this.sampleHeight = (pixelHeight - (this.groups.size - 1) * GROUP_MARGIN_HEIGHT) / this.sampleKeys.length
                     border = 0
                     break
 

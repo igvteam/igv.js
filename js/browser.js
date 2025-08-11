@@ -531,7 +531,8 @@ class Browser {
         // Sample info
         const localSampleInfoFiles = []
         if (session.sampleinfo) {
-            for (const sampleInfoConfig of session.sampleinfo) {
+            const sampleInfoArray = Array.isArray(session.sampleinfo) ? session.sampleinfo : [session.sampleinfo]
+            for (const sampleInfoConfig of sampleInfoArray) {
                 // The "file" property is recorded in the session when a local file is referenced. It can't be used
                 // on reloading, its only purpose is to present an alert to the user.  This could also be used
                 // to prompt the user to load the file manually, but we don't currently do that.
@@ -643,7 +644,7 @@ class Browser {
         const locusFound = await this.search(locus, true)
         if (!locusFound) {
             console.error(`Cannot set initial locus ${locus}`)
-            if(locus !== genome.initialLocus) {
+            if (locus !== genome.initialLocus) {
                 await this.search(genome.initialLocus)
             }
         }
@@ -1686,7 +1687,14 @@ class Browser {
 
     async loadSampleInfo(sampleInfoConfig) {
 
+
         await this.sampleInfo.loadSampleInfo(sampleInfoConfig)
+
+        if (this.config.sampleinfo) {
+            this.config.sampleinfo.push(sampleInfoConfig)
+        } else {
+            this.config.sampleinfo = [sampleInfoConfig]
+        }
 
         for (const {sampleInfoViewport} of this.trackViews) {
             sampleInfoViewport.setWidth(this.getSampleInfoColumnWidth())
@@ -1918,12 +1926,9 @@ class Browser {
 
         // Sample info
         const localSampleInfoFileDetections = []
-        if (this.sampleInfo.sampleInfoFiles.length > 0) {
+        if (this.config.sampleinfo) {
 
-            const si = this.sampleInfo.toJSON()
-            if (si.length > 0) {
-                json["sampleinfo"] = si
-            }
+            json["sampleinfo"] = this.config.sampleinfo
 
             for (const path of this.sampleInfo.sampleInfoFiles) {
                 const config = TrackBase.localFileInspection({url: path})
@@ -2306,7 +2311,7 @@ function handleMouseMove(e) {
 
 
         if (this.isScrolling) {
-            const delta =  (this.vpMouseDown.lastMouseY - y)
+            const delta = (this.vpMouseDown.lastMouseY - y)
             viewport.trackView.scrollByPixels(delta)
         }
 
