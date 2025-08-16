@@ -145,6 +145,13 @@ class ROIManager {
 
         userDefinedROISet.addFeature(feature)
 
+        this.browser.fireEvent('roiadded', [{
+            chr: feature.chr,
+            start: feature.start,
+            end: feature.end,
+            name: feature.name
+        }])
+
         this.setROITableButtonVisibility(true)
 
         await this.renderROISet({browser: this.browser, pixelTop: this.top, roiSet: userDefinedROISet})
