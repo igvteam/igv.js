@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parent Page</title>
+</head>
+<body>
+<button id="openPickerBtn">Select File</button>
+<button id="requestBytesBtn" >Request Bytes 0-100</button>
+<div>
+    <h3>File Contents:</h3>
+    <pre id="fileContents"></pre>
+</div>
+<script>
+    const channel = new BroadcastChannel('file_channel');
+    let fileReady = false;
+
+    // Ask peers if anyone has a file ready (after refresh)
+    channel.postMessage({ type: 'whoHasFile' });
+
+    document.getElementById('openPickerBtn').addEventListener('click', function() {
+        window.open('file-picker.html', 'filePicker' + Date.now(), 'width=600,height=400');
+    });
+
+    document.getElementById('requestBytesBtn').addEventListener('click', function() {
+        if (fileReady) {
+            channel.postMessage({ type: 'getBytes', start: 0, end: 100 });
+        }
+    });
+
+    channel.onmessage = function(event) {
+        const msg = event.data;
+        if (msg.type === 'fileReady') {
+            fileReady = true;
+            document.getElementById('requestBytesBtn').disabled = false;
+        } else if (msg.type === 'byteRange') {
+            const decoder = new TextDecoder();
+            const text = decoder.decode(new Uint8Array(msg.data));
+            document.getElementById('fileContents').textContent = text;
+        }
+    };
+</script>
+</body>
+</html>
