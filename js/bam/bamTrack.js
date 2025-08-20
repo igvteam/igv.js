@@ -168,7 +168,7 @@ class BAMTrack extends TrackBase {
 
         IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"})
 
-        if (true === this.showCoverage && this.coverageTrackHeight > 0) {
+        if (true === this.showCoverage && this.coverageTrackHeight > 0 && false !== this.config.showAxis) {
             this.trackView.axisCanvas.style.display = 'block'
             this.coverageTrack.draw(options)
         } else {

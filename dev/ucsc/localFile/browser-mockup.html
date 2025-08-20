@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Browser mockup</title>
+</head>
+<style>
+    td {
+        text-align: center;
+        vertical-align: middle;
+    }
+</style>
+<body>
+
+<button id="openPickerBtn">Select File</button>
+<button id="saveStateBtn">Log State</button>
+<button id="bookmark">Bookmark session</button>
+
+<table id="imgTbl">
+
+    <tbody>
+
+    <tr id="tr_dbSnp155Common">
+        <td>
+            <div style="width:13px;height:100px;background: grey"></div>
+        </td>
+        <td>
+            <div style="width: 140px;height: 100px; background: #24d6ff">UCSC label</div>
+        </td>
+        <td>
+            <div style="width:1200px;height: 100px; background: lavender  ">UCSC track data</div>
+        </td>
+    </tr>
+    <tr id="tr_igv">
+        <td style="background: grey">
+            <div style="width:13px"></div>
+        </td>
+        <td style="background: #24d6ff">
+            <div style="width: 140px;">blank</div>
+        </td>
+        <td>
+            <div id="igv_div" style="width: auto"></div>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script type="module">
+
+    import igv from "../../../js/index.js"
+    import MockFile from "../../../js/ucsc/mockFile.js"
+
+    const div = document.getElementById("igv_div")
+    let filePicker
+
+    let browser = await igv.createBrowser(div, {
+        queryParametersSupported: true,
+        reference: {
+            twoBitURL: "../../../hg19/hg19.2bit"
+        },
+        locus: "chr1:155140000-155160000",
+        showNavigation: false,
+        showIdeogram: false,
+        showRuler: false,
+        showSequence: false,
+        showAxis: false,
+        showTrackDragHandles: false
+
+    })
+
+
+    document.getElementById('openPickerBtn').addEventListener('click', async function () {
+        if (filePicker && !filePicker.closed) {
+            filePicker.focus()
+            return
+        } else {
+
+            const waitForResponse = new Promise((resolve) => {
+                const originalOnMessage = channel.onmessage
+                channel.onmessage = (event) => {
+                    if (event.data && event.data.type === "focusMeResponse") {
+                        channel.onmessage = originalOnMessage
+                        resolve(true)
+                    }
+                }
+                setTimeout(() => {
+                    channel.onmessage = originalOnMessage
+                    resolve(false)
+                }, 100)
+            })
+            channel.postMessage({type: "filePickerFocus"})
+
+            const responded = await waitForResponse
+            if (responded) {
+                alert("File picker is already open in another window. Please switch to that window.")
+            } else {
+                filePicker = window.open('file-picker2.html', 'filePicker' + Date.now(), 'width=600,height=400')
+            }
+        }
+    })
+
+    document.getElementById('saveStateBtn').addEventListener('click', function () {
+        console.log(browser.toJSON()) //browser.compressedSession())
+    })
+
+    document.getElementById('bookmark').addEventListener('click', () => {
+        const path = window.location.href.slice()
+        const idx = path.indexOf("?")
+        const url = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + browser.compressedSession()
+        //window.location = url
+        window.history.pushState({}, "IGV", url)
+    })
+
+    const channel = new BroadcastChannel('file_channel')
+
+    channel.onmessage = async function (event) {
+        const msg = event.data
+        if (msg.type === 'loadFiles') {
+            console.log(event.data)
+            let bam, index
+            for (let {id, file} of event.data.files) {
+                if (file.name.endsWith(".bam")) {
+                    bam = {id, file}
+                } else if (file.name.endsWith(".bai") || file.name.endsWith(".csi")) {
+                    index = {id, file}
+                }
+            }
+            if (bam && index) {
+                const bamFile = new MockFile(bam.id, bam.file)
+                const indexFile = new MockFile(index.id, index.file)
+                browser.loadTrack({
+                    type: 'alignment',
+                    format: 'bam',
+                    url: bamFile,
+                    indexURL: indexFile
+                })
+
+
+            } else {
+                alert("Must select a bam file and its index")
+            }
+        }
+    }
+
+
+</script>
+
+</html>
