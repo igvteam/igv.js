@@ -1,15 +1,16 @@
 To update the cram-js bundle
 
-(1)  clone the GMode cram-js repository:  https://github.com/GMOD/cram-js
-
-(2)  build dist bundle
+(1)  update the @gmod/cram package to the latest version in package.json
 
 ```bash
-yarn install
-npm run build
+
+(2)  update the @gmod/cram package by running the following command in the igv.js root directory
+
+```bash
+npm install
 ```
 
-(3) copy `<cram-js repo>/dist/cram-bundle.js`  to `<igv.js-repo>/js/cram/cram-bundle.js`
+(3) copy `node_modules/@gmod/cram/dist/cram-bundle.js`  to `js/cram/cram-bundle.js`
 
 Edit `cram-bundle.js` as follows. (The gmod distribution bundle sets a windows global, and does not provide an ES6
 export.  The modification below will convert the bundle to an ES6 module, required by igv.js)
