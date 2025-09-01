@@ -48,6 +48,7 @@ export default {
     registerTrackCreatorFunction,
     registerFileFormats,
     loadSessionFile: Browser.loadSessionFile,
-    loadHub
+    loadHub,
+    uncompressSession: Browser.uncompressSession,
 }
 
