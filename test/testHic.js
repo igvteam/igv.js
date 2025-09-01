@@ -56,18 +56,6 @@ suite('HicFile', function () {
         assert.equal(normVector.nValues, 515)
     })
 
-    test('remote file read header', async function () {
-        this.timeout(100000)
-        const hicFile = new HicFile({
-            "url": "https://www.dropbox.com/scl/fi/eqppb40khtk61262czfsn/HCT-116_Untreated.hic?rlkey=1ho9ojun138lwahi5xvs7usyx&dl=0",
-            "loadFragData": false
-        })
-
-        await hicFile.readHeaderAndFooter()
-        assert.equal(hicFile.magic, "HIC")
-
-    })
-
     const file = new NodeLocalFile({
         "path": "test/data/hic/testBp.hic",
     })
