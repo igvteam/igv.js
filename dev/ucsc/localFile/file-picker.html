@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Picker</title>
+
+    <style>
+        .section-group {
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            background: #fafafa;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+            gap: 16px;
+        }
+
+        .input-row label {
+            min-width: 100px;
+        }
+
+        .input-row input[type="url"] {
+            width: 500px;
+        }
+    </style>
+
+</head>
+<body>
+
+
+<section class="section-group">
+    <h2>Files</h2>
+    <p>Select file(s) to load. For indexed formats both data and index files must be selected.</p>
+    <input type="file" id="fileInput" multiple>
+    <p>
+    <h3>Selected Files:</h3>
+    <ul id="fileList"></ul>
+    </p>
+</section>
+
+<section class="section-group">
+    <h2>URL</h2>
+    Enter a URL to a track file to load. For indexed formats the index file is assumed to be at the same location
+    with an added extension if not specified.
+
+    <div class="input-row">
+        <label for="urlInput">URL</label>
+        <input type="url" id="urlInput">
+    </div>
+    <div class="input-row">
+        <label for="indexURLInput">Index URL</label>
+        <input type="url" id="indexURLInput">
+    </div>
+    <p><button id="urlButton">Load</button></p>
+</section>
+
+
+<script>
+    const channel = new BroadcastChannel('igv_file_channel')
+    const selectedFiles = new Map()
+
+    document.getElementById('fileInput').addEventListener('change', function (event) {
+        const files = []
+        for (let file of event.target.files) {
+            const id = `${file.name}_${file.size}`
+            selectedFiles.set(id, file)
+            files.push({id, file}) //value)
+            document.getElementById("fileList").innerHTML += `<li>${file.name} (${file.size} bytes)</li>`
+        }
+
+        channel.postMessage({type: 'loadFiles', files: files})
+    })
+
+    document.getElementById("urlButton").addEventListener('click', event => {
+        const url = document.getElementById("urlInput").value
+        if (url) {
+            let indexURL = document.getElementById("indexURLInput").value
+            if(!indexURL) {
+                if (url.endsWith(".bam")) {
+                    indexURL = url + ".bai"
+                } else if (url.endsWith(".cram")) {
+                    indexURL = url + ".crai"
+                } else if (url.endsWith(".vcf.gz")) {
+                    indexURL = url + ".tbi"
+                }
+            }
+            channel.postMessage({type: 'loadURL', config: {url, indexURL}})
+        }
+    })
+
+    // Respond to messages from the browser page
+    channel.onmessage = function (event) {
+        const {id, type} = event.data
+        if (type === 'getFile') {
+            const selectedFile = selectedFiles.get(id)
+            channel.postMessage({type: 'file', data: selectedFile})   // TODO -- what if selectedFile is undefined?  Handle here or in browser?
+        } else if (event.data.type === 'ping') {
+            window.focus()
+            channel.postMessage({type: 'pong', id: window.name})
+        }
+    }
+
+</script>
+</body>
+</html>

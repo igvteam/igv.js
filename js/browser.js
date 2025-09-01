@@ -47,7 +47,6 @@ import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
-import MockFile from "./ucsc/mockFile.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -595,8 +594,6 @@ class Browser {
             const featureSource = FeatureSource(config, this.genome)
             await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER})
         }
-
-        await MockFile.restoreConfigurations(nonLocalTrackConfigurations)
 
         await this.loadTrackList(nonLocalTrackConfigurations)
 

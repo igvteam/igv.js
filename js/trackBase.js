@@ -2,7 +2,6 @@ import {isSimpleType} from "./util/igvUtils.js"
 import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
-import MockFile from "./ucsc/mockFile.js"
 
 const fixColor = (colorString) => {
     if (StringUtils.isString(colorString)) {
@@ -632,8 +631,6 @@ class TrackBase {
             if (cooked[key] && cooked[key] instanceof File) {
                 cooked[lut[key]] = cooked[key].name
                 delete cooked[key]
-            } else if (cooked[key] && cooked[key] instanceof MockFile) {
-                cooked[key] = config[key].toJSON()
             }
         }
 
