@@ -226,7 +226,7 @@
 
                 for (let config of configs) {
 
-                    const matchingTracks = igvBrowser.findTracks(t => config.url.id === t.url.id)
+                    const matchingTracks = igvBrowser.findTracks(t => t.url && config.url.id === t.url.id)
                     if (matchingTracks.length > 0) {
                         // Just select the first matching track, there should only be one.  Restore its file reference(s).
                         matchingTracks[0].config.url.file = config.url.file
