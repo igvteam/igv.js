@@ -55,7 +55,7 @@
             } else if (requireIndex.has(extension)) {
                 throw new Error(`Unable to load track file ${filename} - you must select both ${filename} and its corresponding index file`)
             } else {
-                configurations.push({url: new MockFile(file.id, file.file)})
+                configurations.push({url: new MockFile(id, file)})
             }
 
         }
