@@ -105,10 +105,14 @@ class TrackView {
 
     createAxis(browser, track) {
 
+        const axisColumn = browser.columnContainer.querySelector('.igv-axis-column')
+        if(!axisColumn) {
+            return;   // The axis column is optional.
+        }
+
         const axis = DOMUtils.div()
         this.axis = axis
-
-        browser.columnContainer.querySelector('.igv-axis-column').appendChild(axis)
+        axisColumn.appendChild(axis)
 
         axis.dataset.tracktype = track.type
 

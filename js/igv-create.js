@@ -86,86 +86,16 @@ async function visibilityChange() {
     }
 }
 
-function setDefaults(config) {
-
-    if (undefined === config.minimumBases) {
-        config.minimumBases = 40
+function setDefaults(config, defaults) {
+    if (typeof defaults === "undefined") {
+        defaults = defaultOptions
     }
-
-    if (undefined === config.showIdeogram) {
-        config.showIdeogram = true
+    for (const key of Object.keys(defaults)) {
+        if (config[key] === undefined) {
+            config[key] = defaults[key]
+        }
     }
-
-    if (undefined == config.showCytobandNames) {
-        config.showCytobandNames = false
-    }
-
-    if (undefined === config.showCircularView) {
-        config.showCircularView = false
-    }
-
-    if (undefined === config.showCircularViewButton) {
-        config.showCircularViewButton = false
-    }
-
-    if (undefined === config.showTrackLabelButton) {
-        config.showTrackLabelButton = true
-    }
-
-    if (undefined === config.showTrackLabels) {
-        config.showTrackLabels = true
-    }
-
-    if (undefined === config.showCursorTrackingGuideButton) {
-        config.showCursorTrackingGuideButton = true
-    }
-
-    if (undefined === config.showCursorGuide) {
-        config.showCursorGuide = config.showCursorTrackingGuide || false   // showCursorTrackingGuide is a synonym
-    }
-
-    if (undefined === config.showCenterGuideButton) {
-        config.showCenterGuideButton = true
-    }
-
-    if (undefined === config.showCenterGuide) {
-        config.showCenterGuide = false
-    }
-
-    if (undefined === config.showSampleNames) {
-        config.showSampleNames = false
-    }
-
-    if (undefined === config.showSVGButton) {
-        config.showSVGButton = true
-    }
-
-    if (config.showControls === undefined) {
-        config.showControls = true
-    }
-
-    if (config.showNavigation === undefined) {
-        config.showNavigation = true
-    }
-
-    if (config.showRuler === undefined) {
-        config.showRuler = true
-    }
-
-    if (config.flanking === undefined) {
-        config.flanking = 1000
-    }
-
-    if (config.pairsSupported === undefined) {
-        config.pairsSupported = true
-    }
-
-    if (!config.tracks) {
-        config.tracks = []
-    }
-
     return config
-
 }
 
 
@@ -256,5 +186,28 @@ function extractQuery(config) {
 async function createTrack(config, browser) {
     return await Browser.prototype.createTrack.call(browser, config)
 }
+
+const defaultOptions = {
+    minimumBases: 40,
+    showIdeogram: true,
+    showCytobandNames: false,
+    showCircularView: false,
+    showCircularViewButton: false,
+    showTrackLabelButton: true,
+    showTrackLabels: true,
+    showCursorTrackingGuideButton: true,
+    showCursorGuide: false,   // showCursorTrackingGuide is a synonym
+    showCenterGuideButton: true,
+    showCenterGuide: false,
+    showSampleNames: false,
+    showSVGButton: true,
+    showControls: true,
+    showNavigation: true,
+    showRuler: true,
+    flanking: 1000,
+    pairsSupported: true,
+    tracks: []
+}
+
 
 export {createTrack, createBrowser, removeBrowser, removeAllBrowsers, getAllBrowsers, visibilityChange, setDefaults}

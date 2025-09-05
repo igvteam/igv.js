@@ -1,5 +1,5 @@
 import {isSimpleType} from "./util/igvUtils.js"
-import {FileUtils, StringUtils, FeatureUtils} from "../node_modules/igv-utils/src/index.js"
+import {FeatureUtils, FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 import {createCheckbox} from "./igv-icons.js"
 import {findFeatureAfterCenter} from "./feature/featureUtils.js"
 
@@ -447,61 +447,61 @@ class TrackBase {
     description() {
 
         const createKeyValueRow = (key, value) => {
-            const row = document.createElement('div');
-            row.className = 'igv-track-label-popover__row';
-            
-            const keySpan = document.createElement('span');
-            keySpan.className = 'igv-track-label-popover__key';
-            keySpan.textContent = key + ':';
-            
-            const valueSpan = document.createElement('span');
-            valueSpan.className = 'igv-track-label-popover__value';
-            valueSpan.textContent = value;
-            
-            row.appendChild(keySpan);
-            row.appendChild(valueSpan);
-            return row;
-        };
+            const row = document.createElement('div')
+            row.className = 'igv-track-label-popover__row'
 
-        const fragment = document.createDocumentFragment();
-        
+            const keySpan = document.createElement('span')
+            keySpan.className = 'igv-track-label-popover__key'
+            keySpan.textContent = key + ':'
+
+            const valueSpan = document.createElement('span')
+            valueSpan.className = 'igv-track-label-popover__value'
+            valueSpan.textContent = value
+
+            row.appendChild(keySpan)
+            row.appendChild(valueSpan)
+            return row
+        }
+
+        const fragment = document.createDocumentFragment()
+
         if (this.url) {
             if (FileUtils.isFile(this.url)) {
-                fragment.appendChild(createKeyValueRow('Filename', this.url.name));
+                fragment.appendChild(createKeyValueRow('Filename', this.url.name))
             } else {
-                fragment.appendChild(createKeyValueRow('URL', this.url));
+                fragment.appendChild(createKeyValueRow('URL', this.url))
             }
         } else {
             // If no URL, just return the name as a simple text node
-            const nameDiv = document.createElement('div');
-            nameDiv.className = 'igv-track-label-popover__row';
-            nameDiv.textContent = this.name;
-            fragment.appendChild(nameDiv);
-            return fragment;
+            const nameDiv = document.createElement('div')
+            nameDiv.className = 'igv-track-label-popover__row'
+            nameDiv.textContent = this.name
+            fragment.appendChild(nameDiv)
+            return fragment
         }
-        
+
         if (this.config) {
             if (this.config.metadata) {
                 for (let key of Object.keys(this.config.metadata)) {
-                    const value = this.config.metadata[key];
-                    fragment.appendChild(createKeyValueRow(key, value));
+                    const value = this.config.metadata[key]
+                    fragment.appendChild(createKeyValueRow(key, value))
                 }
             }
 
             // Add any config properties that are capitalized
             for (let key of Object.keys(this.config)) {
-                if (key.startsWith("_")) continue;   // transient property
-                let first = key.substr(0, 1);
+                if (key.startsWith("_")) continue   // transient property
+                let first = key.substr(0, 1)
                 if (first !== first.toLowerCase()) {
-                    const value = this.config[key];
+                    const value = this.config[key]
                     if (value && isSimpleType(value)) {
-                        fragment.appendChild(createKeyValueRow(key, value));
+                        fragment.appendChild(createKeyValueRow(key, value))
                     }
                 }
             }
         }
-        
-        return fragment;
+
+        return fragment
     }
 
     /**
