@@ -86,8 +86,10 @@ async function visibilityChange() {
     }
 }
 
-function setDefaults(config, defaults = defaultOptions) {
-
+function setDefaults(config, defaults) {
+    if (typeof defaults === "undefined") {
+        defaults = defaultOptions
+    }
     for (const key of Object.keys(defaults)) {
         if (config[key] === undefined) {
             config[key] = defaults[key]
