@@ -120,7 +120,7 @@
                 refreshFileList()
             } else if (type === 'restoreFiles') {
                 const failed = event.data.files
-                for (f of failed) {
+                for (const f of failed) {
                     restoreCache.set(f.id, f.name)
                 }
                 refreshFileList()
