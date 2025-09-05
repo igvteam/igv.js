@@ -15,6 +15,7 @@
 
 // Note: The UCSC browser does not use modules, so wrap code in a self-executing function to limit
 // scope of variables to this file.
+
 (function () {
 
 
@@ -193,7 +194,6 @@
                 document.getElementById("positionDisplay").innerText = locusString
             }
         )
-
         return igvBrowser
     }
 
@@ -332,7 +332,6 @@
     }
 
 
-
     // Code below is for testing only, not part of the UCSC integration, it simulates form submission from the navigation buttons
     window.addEventListener("DOMContentLoaded", () => {
         const moveButtons = [["hgt.left3", -0.95], ["hgt.left2", -0.475], ["hgt.left1", -0.1], ["hgt.right1", 0.1], ["hgt.right2", 0.475], ["hgt.right3", 0.95]]
@@ -370,6 +369,16 @@
 
             })
         })
+    })
 
+    // Button for testing -- remove igvBrowser and clear local s
+    window.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("clearTracks").addEventListener("click", function () {
+            if(igvBrowser) {
+                igvBrowser.removeAllTracks()
+                igvBrowser = null
+            }
+            localStorage.removeItem("ucscSession")
+        })
     })
 })()
