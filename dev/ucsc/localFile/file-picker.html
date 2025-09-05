@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>File Picker</title>
+
+    <style>
+        .section-group {
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            background: #fafafa;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            margin-top: 8px;
+            gap: 16px;
+        }
+
+        .input-row label {
+            min-width: 100px;
+        }
+
+        .input-row input[type="url"] {
+            width: 500px;
+        }
+    </style>
+
+</head>
+<body>
+
+<section class="section-group" style="text-align: center; margin-bottom: 32px; background: #e3f2fd;">
+    <h2 style="margin: 0; font-size: 2em; color: #1976d2;">File Manager</h2>
+    <p style="font-size: 1.1em; color: #d32f2f;">Do not close this window.</p>
+</section>
+
+<section class="section-group">
+    <div id="message" style="color: red; font-weight: bold; display: none;">
+        Please select the following files using the 'Choose Files' button.
+        <p>
+        <ul id="restoreList"></ul>
+        </p>
+    </div>
+    <h3>Files</h3>
+    <p>Select file(s) to load. For indexed formats both data and index files must be selected.</p>
+    <input type="file" id="fileInput" multiple>
+    <p>
+    <h4>Selected Files:</h4>
+    <ul id="fileList"></ul>
+    </p>
+</section>
+
+<section class="section-group">
+    <h3>URL</h3>
+    Enter a URL to a track file to load. For indexed formats the index file is assumed to be at the same location
+    with an added extension if not specified.
+
+    <div class="input-row">
+        <label for="urlInput">URL</label>
+        <input type="url" id="urlInput">
+    </div>
+    <div class="input-row">
+        <label for="indexURLInput">Index URL</label>
+        <input type="url" id="indexURLInput">
+    </div>
+    <p>
+        <button id="urlButton">Load</button>
+    </p>
+</section>
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const channel = new BroadcastChannel('igv_file_channel')
+        const fileCache = new Map()
+        const restoreCache = new Map()
+
+        document.getElementById('fileInput').addEventListener('change', function (event) {
+            const files = []
+            for (let file of event.target.files) {
+                const id = `${file.name}_${file.size}`
+                files.push({id, file}) //value)
+                fileCache.set(id, file)
+                restoreCache.delete(id)
+                refreshFileList()
+            }
+            event.target.value = ""
+
+            channel.postMessage({type: 'selectedFiles', files: files})
+        })
+
+        document.getElementById("urlButton").addEventListener('click', event => {
+            const url = document.getElementById("urlInput").value
+            if (url) {
+                let indexURL = document.getElementById("indexURLInput").value
+                if (!indexURL) {
+                    if (url.endsWith(".bam")) {
+                        indexURL = url + ".bai"
+                    } else if (url.endsWith(".cram")) {
+                        indexURL = url + ".crai"
+                    } else if (url.endsWith(".vcf.gz")) {
+                        indexURL = url + ".tbi"
+                    }
+                }
+                channel.postMessage({type: 'loadURL', config: {url, indexURL}})
+            }
+        })
+
+        // Respond to messages from the browser page
+        channel.onmessage = function (event) {
+            const {id, type} = event.data
+            if (type === 'getFile') {
+                const selectedFile = fileCache.get(id)
+                channel.postMessage({type: 'file', data: selectedFile})   // TODO -- what if selectedFile is undefined?  Handle here or in browser?
+            } else if (type === 'removeFile') {
+                fileCache.delete(id)
+                refreshFileList()
+            } else if (type === 'restoreFiles') {
+                const failed = event.data.files
+                for (const f of failed) {
+                    restoreCache.set(f.id, f.name)
+                }
+                refreshFileList()
+            } else if (type === 'removedTrack') {
+                // TODO -- might want to remove from restoreCache too
+                const config = event.data.config
+                if (config.url && config.url.id) {
+                    fileCache.delete(config.url.id)
+                    restoreCache.delete(config.url.id)
+                }
+                if (config.indexURL && config.indexURL.id) {
+                    fileCache.delete(config.indexURL.id)
+                    restoreCache.delete(config.indexURL.id)
+                }
+                refreshFileList()
+            } else if (type === 'ping') {
+                window.focus()
+                channel.postMessage({type: 'pong', id: window.name})
+            }
+        }
+
+        function refreshFileList() {
+
+            if (restoreCache.size > 0) {
+                const ul = document.getElementById("restoreList")
+                ul.innerHTML = ""
+                for (let name of restoreCache.values()) {
+                    ul.innerHTML += `<li>${name}</li>`
+                }
+                document.getElementById("message").style.display = "block"
+            } else {
+                document.getElementById("message").style.display = "none"
+            }
+
+            const ul = document.getElementById("fileList")
+            ul.innerHTML = ""
+            for (let file of fileCache.values()) {
+                ul.innerHTML += `<li>${file.name}</li>`
+            }
+        }
+    })
+</script>
+</body>
+</html>

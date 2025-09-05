@@ -389,7 +389,7 @@ class Browser {
 
         let session
         if (options.url || options.file) {
-            session = await Browser.loadSessionFile(options)
+            session = await Browser.loadSessionFile(options, this.config)
             // if (options.parentApp``) {
             //     session.parentApp = options.parentApp
             // }
@@ -406,7 +406,7 @@ class Browser {
      * @param options
      * @returns {Promise<*|XMLSession>}
      */
-    static async loadSessionFile(options) {
+    static async loadSessionFile(options, defaults) {
 
         const urlOrFile = options.url || options.file
 
@@ -437,8 +437,8 @@ class Browser {
                 throw Error("Unrecognized session file format:" + filename)
             }
         }
-        return setDefaults(config)
-
+        setDefaults(config, defaults)
+        return config
     }
 
     /**
@@ -467,7 +467,13 @@ class Browser {
         }
 
         // axis column
-        createColumn(this.columnContainer, 'igv-axis-column')
+        const axisColumn = createColumn(this.columnContainer, 'igv-axis-column')
+        if (false === this.config.showAxis) {
+            axisColumn.style.display = 'none'
+        }
+        if (this.config.axisWidth !== undefined) {
+            axisColumn.style.width = this.config.axisWidth + 'px'
+        }
 
         // sample info column
         createColumn(this.columnContainer, 'igv-sample-info-column')
@@ -479,7 +485,10 @@ class Browser {
         createColumn(this.columnContainer, 'igv-scrollbar-column')
 
         // Track drag/reorder column
-        createColumn(this.columnContainer, 'igv-track-drag-column')
+        const dragColumn = createColumn(this.columnContainer, 'igv-track-drag-column')
+        if(false === this.config.showTrackDragHandles) {
+            dragColumn.style.display = 'none'
+        }
 
         // Track gear column
         createColumn(this.columnContainer, 'igv-gear-menu-column')
@@ -550,7 +559,7 @@ class Browser {
 
         // Ensure that we always have a sequence track with no explicit URL (=> the reference genome sequence track)
         const pushSequenceTrack = trackConfigurations.filter(track => 'sequence' === track.type && !track.url && !track.fastaURL).length === 0
-        if (pushSequenceTrack /*&& false !== this.config.showSequence*/) {
+        if (pushSequenceTrack && false !== this.config.showSequence) {
             trackConfigurations.push({type: "sequence", order: defaultSequenceTrackOrder, removable: false})
         }
 
