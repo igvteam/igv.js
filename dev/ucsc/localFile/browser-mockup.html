@@ -108,24 +108,5 @@
     </tbody>
 </table>
 
-<script>
-
-    // Simple alert dialog, to be replaced with UCSC style dialog
-    $("#myAlertDialog").dialog({
-        autoOpen: false,
-        modal: true,
-        position: {my: "center", at: "center", of: $("#imgTbl")},
-        buttons: {
-            "OK": function () {
-                $(this).dialog("close")
-            }
-        }
-    })
-    function alert(message) {
-        $("#myAlertDialog").html(message)
-        $("#myAlertDialog").dialog("open")
-    }
-</script>
-
 </body>
 </html>

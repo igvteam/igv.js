@@ -171,15 +171,24 @@
         }
 
         slice(start, end) {
+            this.checkFile()
             return this.file.slice(start, end)
         }
 
         async text() {
+            this.checkFile()
             return this.file.text()
         }
 
         async arrayBuffer() {
+            this.checkFile()
             return this.file.arrayBuffer()
+        }
+
+        checkFile() {
+            if (!this.file) {
+                throw new Error(`File ${this.name} is not available.  Please re-select the file.`)
+            }
         }
     }
 

@@ -74,10 +74,12 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        const channel = new BroadcastChannel('igv_file_channel')
+
         const fileCache = new Map()
         const restoreCache = new Map()
-
+        const channel = new BroadcastChannel('igv_file_channel')
+        channel.postMessage({type: 'filePickerReady'})
+        
         document.getElementById('fileInput').addEventListener('change', function (event) {
             const files = []
             for (let file of event.target.files) {
