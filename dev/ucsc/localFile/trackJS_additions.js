@@ -27,8 +27,7 @@
 
     // Represents the current state of the UCSC browser page.  Its not clear yet how this obtained, this is just a placeholder.
     const ucscState = {
-        genomeID: "hg19",
-        locus: "chr1:155140000-155160000"
+        genomeID: "hg19", locus: "chr1:155140000-155160000"
     }
 
 
@@ -63,21 +62,24 @@
                         }
                         if (filePicker) {
                             // File picker is already open, this is not expected.
-                            alert(
-                                `The following file connections could not be restored:\n<ul>${
-                                    failed.map(f => `<li>${f}</li>`).join('')
-                                }</ul>\nTo restore the connection open the file manager by selecting 'Add IGV Tracks' followed by 'Choose Files' and select the files.`
-                            )
+                            alert(`The following file connections could not be restored:\n<ul>${failed.map(f => `<li>${f.mame}</li>`).join('')}</ul>\nTo restore the connection select the files in the file picker.`)
+                            channel.postMessage({type: "restoreFiles", files: failed})
                         } else {
-                            filePicker = window.open('file-picker.html', 'filePicker' + Date.now(), 'width=600,height=800')
-                            filePicker.onload = () => {
-                                channel.postMessage({type: "restoreFiles", files: failed})
-                                //alert(
-                                //    `The following file connections could not be restored:\n<ul>${
-                                //        failed.map(f => `<li>${f}</li>`).join('')
-                                //    }</ul>\nTo restore the connection select 'Choose Files' and select the files.`
-                                //)
-                            }
+                            // Temporarily store the files that need restoring
+                            sessionStorage.setItem('filesToRestore', JSON.stringify(failed))
+                            alert(`The following file connections could not be restored:\n<ul>${failed.map(f => `<li>${f.name}</li>`).join('')}</ul>\nTo restore the connection open the file picker and select the files.`,
+                                {
+                                    // "Cancel": function () {
+                                    //     $(this).dialog("close");
+                                    // },
+                                    "Open File Picker":
+                                        function () {
+                                            $(this).dialog("close")
+                                            // Open the file picker
+                                            filePicker = window.open('file-picker.html', 'filePicker' + Date.now(), 'width=600,height=800')
+                                        }
+
+                                })
                         }
                     }
                 }
@@ -106,6 +108,13 @@
     // it is already open in which case it brings that window to the front.  Tracks are added
     // from the filePicker page by selecting track files.
     window.addEventListener("DOMContentLoaded", () => {
+
+
+        // Simple alert dialog, to be replaced with UCSC style dialog
+        $("#myAlertDialog").dialog({
+            autoOpen: false, modal: true, position: {my: "center", at: "center", of: $("#imgTbl")}
+        })
+
 
         document.getElementById('igv_track_add').addEventListener('click', async function () {
 
@@ -161,11 +170,7 @@
 
         // Ammend the config to remove most of the IGV widgets.  We only want the track display area.
         Object.assign(config, {
-            showNavigation: false,
-            showIdeogram: false,
-            showRuler: false,
-            showSequence: false,
-            showAxis: false
+            showNavigation: false, showIdeogram: false, showRuler: false, showSequence: false, showAxis: false
             //TODO discuss if we want IGV track drag handles.  It allows users to rearrange IGV tracks within the IGV area
             //showTrackDragHandles: false
         })
@@ -188,12 +193,11 @@
         // Add event handler to track igv.js track dragging (locus change).  On the UCSC side this should be treated
         // as if the user had dragged a track image
         igvBrowser.on('locuschange', referenceFrameList => {
-                // We are currently not supporting multi-locus view, so there is a single reference frame.
-                const locusString = referenceFrameList[0].getLocusString()
-                ucscState.locus = locusString
-                document.getElementById("positionDisplay").innerText = locusString
-            }
-        )
+            // We are currently not supporting multi-locus view, so there is a single reference frame.
+            const locusString = referenceFrameList[0].getLocusString()
+            ucscState.locus = locusString
+            document.getElementById("positionDisplay").innerText = locusString
+        })
         return igvBrowser
     }
 
@@ -213,8 +217,7 @@
                 // from the UCSC browser for genome and locus.
                 if (!igvBrowser) {
                     const defaultConfig = {
-                        reference: getMinimalReference(ucscState.genomeID),
-                        locus: ucscState.locus
+                        reference: getMinimalReference(ucscState.genomeID), locus: ucscState.locus
                     }
                     await createIGVBrowser(defaultConfig)
                 }
@@ -241,11 +244,39 @@
 
                 igvBrowser.loadTrackList(newConfigs)
             }
-        }
-        if (msg.type === 'loadURL') {
+        } else if (msg.type === 'loadURL') {
             igvBrowser.loadTrack(config)
+        } else if (msg.type === 'filePickerReady') {
+            // This message is received from the newly opened file picker.
+            // Now it's safe to post the "restoreFiles" message.
+            // You need to store the 'failed' files array temporarily.
+            const filesToRestore = JSON.parse(sessionStorage.getItem('filesToRestore'))
+            if (filesToRestore) {
+                channel.postMessage({type: "restoreFiles", files: filesToRestore})
+                sessionStorage.removeItem('filesToRestore')
+            }
         }
     }
+
+
+    /**
+     * Opens a modal dialog with a message and custom buttons.
+     * @param {string} message - The HTML message to display.
+     * @param {Object} [buttons] - An object where keys are button labels and values are click handler functions.
+     */
+    function alert(message, buttons) {
+        $("#myAlertDialog").html(message)
+
+        const buttonsToShow = buttons || {
+            "OK": function () {
+                $(this).dialog("close")
+            }
+        }
+
+        $("#myAlertDialog").dialog("option", "buttons", buttonsToShow)
+        $("#myAlertDialog").dialog("open")
+    }
+
 
     /**
      * Send a "ping" message to the file picker window and wait up to 100 msec for a "pong" response.  Used to
@@ -288,23 +319,19 @@
         switch (genomeID) {
             case "hg19":
                 return {
-                    "id": "hg19",
-                    "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit",
+                    "id": "hg19", "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit",
                 }
             case "hg38":
                 return {
-                    "id": "hg38",
-                    "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
+                    "id": "hg38", "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.2bit",
                 }
             case "mm10":
                 return {
-                    "id": "mm10",
-                    "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.2bit",
+                    "id": "mm10", "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.2bit",
                 }
             case "mm39": // GRCm39
                 return {
-                    "id": "mm39",
-                    "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/mm39/bigZips/mm39.2bit",
+                    "id": "mm39", "twoBitURL": "https://hgdownload.soe.ucsc.edu/goldenPath/mm39/bigZips/mm39.2bit",
                 }
             default:
                 throw new Error(`Unsupported genomeID: ${genomeID}`)
@@ -351,8 +378,7 @@
             })
         })
 
-        const zoomButtons = [["hgt.in1", 1.5], ["hgt.in2", 3], ["hgt.in3", 10], ["hgt.inBase", "base"],
-            ["hgt.out1", 1 / 1.5], ["hgt.out2", 1 / 3], ["hgt.out3", 1 / 10], ["hgt.out4", 1 / 100]]
+        const zoomButtons = [["hgt.in1", 1.5], ["hgt.in2", 3], ["hgt.in3", 10], ["hgt.inBase", "base"], ["hgt.out1", 1 / 1.5], ["hgt.out2", 1 / 3], ["hgt.out3", 1 / 10], ["hgt.out4", 1 / 100]]
         zoomButtons.forEach(function (item) {
             document.getElementById(item[0]).addEventListener('click', function () {
                 const l = parseLocusString(ucscState.locus)
@@ -374,7 +400,7 @@
     // Button for testing -- remove igvBrowser and clear local s
     window.addEventListener("DOMContentLoaded", () => {
         document.getElementById("clearTracks").addEventListener("click", function () {
-            if(igvBrowser) {
+            if (igvBrowser) {
                 igvBrowser.removeAllTracks()
                 igvBrowser = null
             }
