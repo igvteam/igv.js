@@ -5,19 +5,29 @@
 // remains open while the UCSC browser page is in use, providing a cache of sorts for the local file blobs.  On
 // page reload this cache can be used to restore igv.js track File references.
 //
-// Currently, igv.js tracks are removed from the "igv.js" gear menu.  When all igv.js tracks are removed the igv.js
+// Currently, igv.js tracks are removed using the "igv.js" gear menu.  When all igv.js tracks are removed the igv.js
 // instance is removed from the page.  This is likely to be confusing to UCSC browser users, in a future version
 // we will add a track control widget in the control area below the browser track image table, perhaps in the
 // existing "Custom Tracks" category, or perhaps in a new category.
 
-// Assumption - assuming "igv.js" and "igvFileHelper.js" are included in the
-// page with a script tag which defines the global objects "igv" and "igvHelper".
+// Assumption - assuming "igv.js" and "igvFileHelper.js", which define the globals "igv" and "igvHelper" respectively,
+// are included in the page with a script tag.
 
 // Note: The UCSC browser does not use modules, so wrap code in a self-executing function to limit
 // scope of variables to this file.
 
 (function () {
 
+    // Use constants for message channel types
+    const MSG = {
+        SELECTED_FILES: 'selectedFiles',
+        RESTORE_FILES: 'restoreFiles',
+        REMOVED_TRACK: 'removedTrack',
+        LOAD_URL: 'loadURL',
+        FILE_PICKER_READY: 'filePickerReady',
+        PING: 'ping',
+        PONG: 'pong'
+    }
 
     let filePicker = null
     let igvBrowser = null
@@ -31,65 +41,129 @@
     }
 
 
-    // Simulate a page reload restoring the UCSC user session, including the embedded igv sessin if any.  In this mockup we are
-    // storing the session in local storage.
-    window.addEventListener("DOMContentLoaded", async (event) => {
+    window.addEventListener("DOMContentLoaded", async () => {
+        initializeDialog()
+        setupUIEventListeners()
+        await restoreSavedSession()
+        addNavigationButtons()
+    })
 
-        // We are simulating the UCSC user session (a cookie?) with local storage.
+    // Restore the browser session from local storage, if possible. This includes UCSC state (locus) and igv.js state
+    // This is a gross implification of UCSC session handling, but illustrates the basic idea of restoring igv.js state.
+    async function restoreSavedSession() {
+
         const sessionString = localStorage.getItem("ucscSession")
-        if (sessionString) {
-            const ucscSession = JSON.parse(sessionString)
-            if (ucscSession.locus) {
-                ucscState.locus = ucscSession.locus
-            }
+        if (!sessionString) return
 
-            const posEl = document.getElementById("positionDisplay")
-            if (posEl) posEl.innerText = ucscState.locus
+        let ucscSession
+        try {
+            ucscSession = JSON.parse(sessionString)
+        } catch (e) {
+            console.warn("Invalid ucscSession JSON", e)
+            return
+        }
 
-            // Restore the previously saved igv session, if any.
-            if (ucscSession.igvSession) {
-                const igvSessionString = igv.uncompressSession(`blob:${ucscSession.igvSession}`)
-                const igvSession = JSON.parse(igvSessionString)
+        if (ucscSession.locus) {
+            ucscState.locus = ucscSession.locus
+        }
 
-                // Reconnect any file-based tracks to the actual File objects.
-                if (igvSession.tracks) {
-                    const failed = await igvHelper.restoreTrackConfigurations(igvSession.tracks)
-                    if (failed.length > 0) {
-                        if (filePicker && !filePicker.closed) {
-                            channel.postMessage({type: "restoreFiles", files: failed})
-                            filePicker.focus()
-                            return
-                        }
-                        if (filePicker) {
-                            // File picker is already open, this is not expected.
-                            alert(`The following file connections could not be restored:\n<ul>${failed.map(f => `<li>${f.mame}</li>`).join('')}</ul>\nTo restore the connection select the files in the file picker.`)
-                            channel.postMessage({type: "restoreFiles", files: failed})
-                        } else {
-                            // Temporarily store the files that need restoring
-                            sessionStorage.setItem('filesToRestore', JSON.stringify(failed))
-                            alert(`The following file connections could not be restored:\n<ul>${failed.map(f => `<li>${f.name}</li>`).join('')}</ul>\nTo restore the connection open the file picker and select the files.`,
-                                {
-                                    // "Cancel": function () {
-                                    //     $(this).dialog("close");
-                                    // },
-                                    "Open File Picker":
-                                        function () {
-                                            $(this).dialog("close")
-                                            // Open the file picker
-                                            filePicker = window.open('file-picker.html', 'filePicker' + Date.now(), 'width=600,height=800')
-                                        }
+        const posEl = document.getElementById("positionDisplay")
+        if (posEl) posEl.innerText = ucscState.locus
 
-                                })
-                        }
+        if (!ucscSession.igvSession) return
+
+        let igvSession
+        try {
+            const igvSessionString = igv.uncompressSession(`blob:${ucscSession.igvSession}`)
+            igvSession = JSON.parse(igvSessionString)
+        } catch (e) {
+            console.warn("Failed to uncompress / parse IGV session", e)
+            return
+        }
+
+        if (igvSession.tracks) {
+            try {
+                const failed = await igvHelper.restoreTrackConfigurations(igvSession.tracks)
+                if (failed.length > 0) {
+
+                    const sendRestoreRequest = () => channel.postMessage({type: "restoreFiles", files: failed})
+
+                    if (filePicker && !filePicker.closed) {
+                        sendRestoreRequest()
+                        filePicker.focus()
+                        return
+                    }
+
+                    if (filePicker) {
+                        // Unexpected: reference exists but window is closed.
+                        showDialog(
+                            `The following file connections could not be restored:\n<ul>${failed.map(f => `<li>${f.name}</li>`).join("")}</ul>\nTo restore the connection select the files in the file picker.`
+                        )
+                        sendRestoreRequest()
+                    } else {
+                        sessionStorage.setItem("filesToRestore", JSON.stringify(failed))
+                        showDialog(
+                            `The following file connections could not be restored:\n<ul>${failed.map(f => `<li>${f.name}</li>`).join("")}</ul>\nTo restore the connection open the file picker and select the files.`,
+                            {
+                                "Open File Picker": function () {
+                                    $(this).dialog("close")
+                                    filePicker = window.open(
+                                        "file-picker.html",
+                                        "filePicker" + Date.now(),
+                                        "width=600,height=800"
+                                    )
+                                }
+                            }
+                        )
                     }
                 }
-
-                // Override locus  in the IGV session with the UCSC locus
-                igvSession.locus = ucscState.locus
-                await createIGVBrowser(igvSession)
+            } catch (e) {
+                console.warn("Failed restoring track configurations", e)
             }
         }
-    })
+
+        igvSession.locus = ucscState.locus
+        await createIGVBrowser(igvSession)
+    }
+
+    // Initialize a jQuery UI dialog used for user messages.
+    function initializeDialog() {
+        $("#myAlertDialog").dialog({
+            autoOpen: false,
+            modal: true,
+            position: {my: "center", at: "center", of: $("#imgTbl")}
+        })
+    }
+
+    function setupUIEventListeners() {
+
+        // The "Add IGV track" button handler.  Tracks are added from the filePicker page by selecting track files.
+        document.getElementById('igv_track_add').addEventListener('click', async function () {
+            if (filePicker && !filePicker.closed) {
+                filePicker.focus()
+                return
+            }
+            // A filePicker might be open from a previous instance of this page.  We can detect this by sending
+            // a message on the channel and waiting briefly for a response, but we cannot get a reference to the window
+            // so we ask the user to bring it to the front.
+            const responded = await pingFilePicker(channel)
+            if (responded) {
+                showDialog("File picker is already open. Please switch to that window.")
+            } else {
+                filePicker = window.open('file-picker.html', 'filePicker' + Date.now(), 'width=600,height=600')
+            }
+        })
+
+        // Button for testing -- remove igvBrowser and clear local storage
+        document.getElementById("clearTracks").addEventListener("click", function () {
+            if (igvBrowser) {
+                igvBrowser.removeAllTracks()
+                igvBrowser = null
+            }
+            localStorage.removeItem("ucscSession")
+        })
+    }
+
 
     // Detect a page refresh (visibility change to hidden) and save the session to local storage.  This is meant to
     // simulate  UCSC browser session handling.
@@ -102,41 +176,6 @@
             localStorage.setItem("ucscSession", JSON.stringify(ucscSession))
         }
     }
-
-
-    // The "Add IGV track" button handler.  The button opens the file picker window, unless
-    // it is already open in which case it brings that window to the front.  Tracks are added
-    // from the filePicker page by selecting track files.
-    window.addEventListener("DOMContentLoaded", () => {
-
-
-        // Simple alert dialog, to be replaced with UCSC style dialog
-        $("#myAlertDialog").dialog({
-            autoOpen: false, modal: true, position: {my: "center", at: "center", of: $("#imgTbl")}
-        })
-
-
-        document.getElementById('igv_track_add').addEventListener('click', async function () {
-
-            if (filePicker && !filePicker.closed) {
-                filePicker.focus()
-                return
-            } else {
-
-                // A filePicker might be open from a previous instance of this page.  We can detect this by sending
-                // a message on the channel and waiting briefly for a response, but we cannot get a reference to the window
-                // so we ask the user to bring it to the front.
-
-                const responded = await pingFilePicker(channel)
-                if (responded) {
-                    alert("File picker is already open. Please switch to that window.")
-                } else {
-                    // No filePicker found, open a new one.
-                    filePicker = window.open('file-picker.html', 'filePicker' + Date.now(), 'width=600,height=600')
-                }
-            }
-        })
-    })
 
 
     /**
@@ -201,60 +240,74 @@
         return igvBrowser
     }
 
-
     // Respond to messages from the filePicker window.
     channel.onmessage = async function (event) {
         const msg = event.data
+        if (!msg || !msg.type) return
 
-        if (msg.type === 'selectedFiles') {
+        switch (msg.type) {
 
-            // Convert file descriptor objects to igv.js track configuration objects.
-            const configs = igvHelper.getTrackConfigurations(event.data.files)
+            case MSG.SELECTED_FILES:
+                await handleSelectedFiles(msg.files)
+                break
 
-            if (configs.length > 0) {
-
-                // Create igvBrowser if needed -- i.e. this is the first track being added.  State needs to be obtained
-                // from the UCSC browser for genome and locus.
-                if (!igvBrowser) {
-                    const defaultConfig = {
-                        reference: getMinimalReference(ucscState.genomeID), locus: ucscState.locus
-                    }
-                    await createIGVBrowser(defaultConfig)
+            case MSG.LOAD_URL:
+                if (igvBrowser) {
+                    igvBrowser.loadTrack(msg.config)
                 }
+                break
 
-                // First search for existing tracks referencing the same files.  This is to handle the situation
-                // of a user closing the file picker window, thus loosing file references, then reopening the file picker
-                // to restore them.
-                const newConfigs = []
-
-                for (let config of configs) {
-
-                    const matchingTracks = igvBrowser.findTracks(t => t.url && config.url.id === t.url.id)
-                    if (matchingTracks.length > 0) {
-                        // Just select the first matching track, there should only be one.  Restore its file reference(s).
-                        matchingTracks[0].config.url.file = config.url.file
-                        if (config.indexURL) {
-                            matchingTracks[0].config.indexURL.file = config.indexURL.file
-                        }
-                    } else {
-                        // This is a new track
-                        newConfigs.push(config)
-                    }
+            case MSG.FILE_PICKER_READY: {
+                const filesToRestore = JSON.parse(sessionStorage.getItem('filesToRestore'))
+                if (filesToRestore) {
+                    channel.postMessage({type: MSG.RESTORE_FILES, files: filesToRestore})
+                    sessionStorage.removeItem('filesToRestore')
                 }
+                break
+            }
 
-                igvBrowser.loadTrackList(newConfigs)
+            // case MSG.PONG: // (optional handling)
+            //     break
+        }
+    }
+
+    async function handleSelectedFiles(files) {
+
+        // Convert file descriptor objects to igv.js track configuration objects.
+        const configs = igvHelper.getTrackConfigurations(files)
+
+        if (configs.length > 0) {
+
+            // Create igvBrowser if needed -- i.e. this is the first track being added.  State needs to be obtained
+            // from the UCSC browser for genome and locus.
+            if (!igvBrowser) {
+                const defaultConfig = {
+                    reference: getMinimalReference(ucscState.genomeID), locus: ucscState.locus
+                }
+                await createIGVBrowser(defaultConfig)
             }
-        } else if (msg.type === 'loadURL') {
-            igvBrowser.loadTrack(config)
-        } else if (msg.type === 'filePickerReady') {
-            // This message is received from the newly opened file picker.
-            // Now it's safe to post the "restoreFiles" message.
-            // You need to store the 'failed' files array temporarily.
-            const filesToRestore = JSON.parse(sessionStorage.getItem('filesToRestore'))
-            if (filesToRestore) {
-                channel.postMessage({type: "restoreFiles", files: filesToRestore})
-                sessionStorage.removeItem('filesToRestore')
+
+            // First search for existing tracks referencing the same files.  This is to handle the situation
+            // of a user closing the file picker window, thus loosing file references, then reopening the file picker
+            // to restore them.
+            const newConfigs = []
+
+            for (let config of configs) {
+
+                const matchingTracks = igvBrowser.findTracks(t => t.url && config.url.id === t.url.id)
+                if (matchingTracks.length > 0) {
+                    // Just select the first matching track, there should only be one.  Restore its file reference(s).
+                    matchingTracks[0].config.url.file = config.url.file
+                    if (config.indexURL) {
+                        matchingTracks[0].config.indexURL.file = config.indexURL.file
+                    }
+                } else {
+                    // This is a new track
+                    newConfigs.push(config)
+                }
             }
+
+            igvBrowser.loadTrackList(newConfigs)
         }
     }
 
@@ -264,17 +317,14 @@
      * @param {string} message - The HTML message to display.
      * @param {Object} [buttons] - An object where keys are button labels and values are click handler functions.
      */
-    function alert(message, buttons) {
+    function showDialog(message, buttons) {
         $("#myAlertDialog").html(message)
-
         const buttonsToShow = buttons || {
             "OK": function () {
                 $(this).dialog("close")
             }
         }
-
-        $("#myAlertDialog").dialog("option", "buttons", buttonsToShow)
-        $("#myAlertDialog").dialog("open")
+        $("#myAlertDialog").dialog("option", "buttons", buttonsToShow).dialog("open")
     }
 
 
@@ -360,7 +410,7 @@
 
 
     // Code below is for testing only, not part of the UCSC integration, it simulates form submission from the navigation buttons
-    window.addEventListener("DOMContentLoaded", () => {
+    function addNavigationButtons() {
         const moveButtons = [["hgt.left3", -0.95], ["hgt.left2", -0.475], ["hgt.left1", -0.1], ["hgt.right1", 0.1], ["hgt.right2", 0.475], ["hgt.right3", 0.95]]
         moveButtons.forEach(function (item) {
             document.getElementById(item[0]).addEventListener('click', function () {
@@ -395,16 +445,6 @@
 
             })
         })
-    })
+    }
 
-    // Button for testing -- remove igvBrowser and clear local s
-    window.addEventListener("DOMContentLoaded", () => {
-        document.getElementById("clearTracks").addEventListener("click", function () {
-            if (igvBrowser) {
-                igvBrowser.removeAllTracks()
-                igvBrowser = null
-            }
-            localStorage.removeItem("ucscSession")
-        })
-    })
 })()
