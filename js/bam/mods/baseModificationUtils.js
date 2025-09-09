@@ -19,6 +19,7 @@ const codeValues = new Map([
     ["N", "Unknown"]
 ])
 
+const EMPTY_SET = new Set()
 
 function modificationName(modification) {
     return  (codeValues.has(modification)) ? codeValues.get(modification) : "Uknown"
@@ -38,7 +39,10 @@ function modificationName(modification) {
  */
 function getBaseModificationSets(mm, ml, sequence, isNegativeStrand) {
 
-    const origSequence = sequence
+    if(!sequence) {
+        return EMPTY_SET
+    }
+
     if (isNegativeStrand) {
         sequence = reverseComplementSequence(sequence)
     }
