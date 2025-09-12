@@ -225,27 +225,39 @@ function createReferenceFrameList(loci, genome, browserFlanking, minimumBases, v
 
     return loci.map(l => {
 
-        const locus = Object.assign({}, l)  // Copy as we might mutate this object
+        let referenceFrame
+        if (l.bpPerPixel) {
+            // This is an explicit locus with bpPerPixel defined, just use it.
+            referenceFrame = new ReferenceFrame(
+                genome,
+                l.chr,
+                l.start,
+                l.start + viewportWidth * l.bpPerPixel,
+                l.bpPerPixel
+            )
+        } else {
+            const locus = Object.assign({}, l)  // Copy as we might mutate this object
 
-        // If a flanking region is defined, and the search object is a feature (has a name) type, adjust start and end
-        if (browserFlanking && locus.name) {
-            locus.start = Math.max(0, locus.start - browserFlanking)
-            locus.end += browserFlanking
+            // If a flanking region is defined, and the search object is a feature (has a name) type, adjust start and end
+            if (browserFlanking && locus.name) {
+                locus.start = Math.max(0, locus.start - browserFlanking)
+                locus.end += browserFlanking
+            }
+
+            // Validate the range.  This potentionally modifies start & end of locus.
+            if (!isSoftclipped) {
+                const chromosome = genome.getChromosome(locus.chr)
+                validateGenomicExtent(chromosome.bpLength, locus, minimumBases)
+            }
+
+            referenceFrame = new ReferenceFrame(
+                genome,
+                locus.chr,
+                locus.start,
+                locus.end,
+                (locus.end - locus.start) / viewportWidth
+            )
         }
-
-        // Validate the range.  This potentionally modifies start & end of locus.
-        if (!isSoftclipped) {
-            const chromosome = genome.getChromosome(locus.chr)
-            validateGenomicExtent(chromosome.bpLength, locus, minimumBases)
-        }
-
-        const referenceFrame = new ReferenceFrame(
-            genome,
-            locus.chr,
-            locus.start,
-            locus.end,
-            (locus.end - locus.start) / viewportWidth
-        )
 
         return referenceFrame
     })
