@@ -558,11 +558,6 @@ class FeatureTrack extends TrackBase {
  */
 function monitorTrackDrag(track) {
 
-    if (track.browser.on) {
-        track.browser.on('trackdragend', onDragEnd)
-        track.browser.on('trackremoved', unSubscribe)
-    }
-
     function onDragEnd() {
         if (track.trackView && track.displayMode !== "SQUISHED") {
             // Repaint views to adjust feature name if center is moved out of view
@@ -570,12 +565,10 @@ function monitorTrackDrag(track) {
         }
     }
 
-    function unSubscribe(removedTrack) {
-        if (track.browser.un && track === removedTrack) {
-            track.browser.un('trackdragend', onDragEnd)
-            track.browser.un('trackremoved', unSubscribe)
-        }
+    if (track.browser.on) {
+        track.browser.on('trackdragend', onDragEnd)
     }
+
 
 }
 
