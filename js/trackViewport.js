@@ -737,6 +737,7 @@ class TrackViewport extends Viewport {
             }
 
             event.preventDefault()
+            event.stopPropagation()
 
             // Track specific items
             let menuItems = []

@@ -1314,17 +1314,16 @@ class AlignmentTrack extends TrackBase {
                     }
                 }
             }
-        }
 
-        // If we get here check downsampled intervals
-        if (offsetY < minGroupY && features.downsampledIntervals) {
-            for (const interval of features.downsampledIntervals) {
-                if (interval.start <= genomicLocation && interval.end >= genomicLocation) {
-                    return interval
+            // If we get here check downsampled intervals
+            if (offsetY < minGroupY && features.downsampledIntervals) {
+                for (const interval of features.downsampledIntervals) {
+                    if (interval.start <= genomicLocation && interval.end >= genomicLocation) {
+                        return interval
+                    }
                 }
             }
         }
-
 
     }
 
