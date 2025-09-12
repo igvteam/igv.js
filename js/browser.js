@@ -486,12 +486,15 @@ class Browser {
 
         // Track drag/reorder column
         const dragColumn = createColumn(this.columnContainer, 'igv-track-drag-column')
-        if(false === this.config.showTrackDragHandles) {
+        if (false === this.config.showTrackDragHandles) {
             dragColumn.style.display = 'none'
         }
 
         // Track gear column
-        createColumn(this.columnContainer, 'igv-gear-menu-column')
+        const gearcolumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
+        if (false === this.config.showGearColumn) {
+            gearcolumn.style.display = 'none'
+        }
 
         const genomeOrReference = session.reference || session.genome
         if (!genomeOrReference) {
@@ -646,15 +649,25 @@ class Browser {
         this.navbar.updateGenome(genome)
 
         let locus = initialLocus || genome.initialLocus
-        if (Array.isArray(locus)) {
-            locus = locus.join(' ')
-        }
 
-        const locusFound = await this.search(locus, true)
-        if (!locusFound) {
-            console.error(`Cannot set initial locus ${locus}`)
-            if (locus !== genome.initialLocus) {
-                await this.search(genome.initialLocus)
+        if (typeof (locus.chr) !== "undefined" && typeof (locus.start) !== "undefined") {
+
+            // Locus explicitly an object, either {chr, start, end} or {chr, start, bpPerPixel), skip search,
+            // bug must still ensure chromosome is loaded
+            await this.genome.loadChromosome(locus.chr)
+            await this.updateLoci([locus], true)
+
+        } else {
+            if (Array.isArray(locus)) {
+                locus = locus.join(' ')
+            }
+
+            const locusFound = await this.search(locus, true)
+            if (!locusFound) {
+                console.error(`Cannot set initial locus ${locus}`)
+                if (locus !== genome.initialLocus) {
+                    await this.search(genome.initialLocus)
+                }
             }
         }
 
@@ -1402,7 +1415,13 @@ class Browser {
 
         let {width} = this.columnContainer.getBoundingClientRect()
 
-        width -= igv_axis_column_width + this.getSampleInfoViewportWidth() + this.getSampleNameViewportWidth() + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
+        width -=
+            (this.config.showAxis === false ? 0 : igv_axis_column_width) +
+            this.getSampleInfoViewportWidth() +
+            this.getSampleNameViewportWidth() +
+            igv_scrollbar_outer_width +
+            (this.config.showTrackDragHandles === false ? 0 : igv_track_manipulation_handle_width) +
+            (this.config.showGearColumn === false ? 0 : igv_track_gear_menu_column_width)
 
         width -= column_multi_locus_shim_width * (columnCount - 1)
 
