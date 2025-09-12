@@ -27,8 +27,59 @@ class InputDialog {
         this.container.appendChild(this.input_container)
 
         // input element.  DO NOT ACCESS THIS OUTSIDE OF THIS CLASS
-        this._input = document.createElement("input")
-        this.input_container.appendChild(this._input)
+        // The input element goes through some hoops to prevent event propagation when nested within a form
+        // that might define hot keys.  Basically we disable default behavior for all key events, then
+        // implement the ones we care about.
+        this._input = document.createElement("input");
+
+        this.input_container.appendChild(this._input);
+        this._input.addEventListener('mousedown', (e) => {
+            this._input.focus(); // Explicitly set focus on the input element
+        });
+
+        // Prevent key event propagation to parent form
+        this._input.addEventListener('keydown', e => {
+
+            // Prevent parent listeners from handling this event.
+            e.preventDefault();
+            e.stopPropagation();
+
+            const input = this._input;
+            const start = input.selectionStart;
+            const end = input.selectionEnd;
+
+            if (e.key.length === 1) {
+                // Handle printable characters
+                const value = input.value;
+                input.value = value.slice(0, start) + e.key + value.slice(end);
+                input.selectionStart = input.selectionEnd = start + 1;
+            } else if (e.key === 'Backspace') {
+                if (start === end && start > 0) {
+                    // No selection, delete character before cursor
+                    input.value = input.value.slice(0, start - 1) + input.value.slice(start);
+                    input.selectionStart = input.selectionEnd = start - 1;
+                } else if (start < end) {
+                    // Delete selection
+                    input.value = input.value.slice(0, start) + input.value.slice(end);
+                    input.selectionStart = input.selectionEnd = start;
+                }
+            } else if (e.key === 'Delete') {
+                if (start === end && start < input.value.length) {
+                    // No selection, delete character after cursor
+                    input.value = input.value.slice(0, start) + input.value.slice(start + 1);
+                    input.selectionStart = input.selectionEnd = start;
+                } else if (start < end) {
+                    // Delete selection
+                    input.value = input.value.slice(0, start) + input.value.slice(end);
+                    input.selectionStart = input.selectionEnd = start;
+                }
+            } else if (e.key === 'ArrowLeft') {
+                input.selectionStart = input.selectionEnd = Math.max(0, start - 1);
+            } else if (e.key === 'ArrowRight') {
+                input.selectionStart = input.selectionEnd = Math.min(input.value.length, start + 1);
+            }
+
+        }, true); // Use the capturing phase.
 
 
         // ok | cancel
@@ -36,6 +87,7 @@ class InputDialog {
         this.container.appendChild(buttons)
 
         // ok
+
         this.ok = DOMUtils.div()
         buttons.appendChild(this.ok)
         this.ok.textContent = 'OK'
@@ -91,37 +143,37 @@ class InputDialog {
         this.callback = options.callback || options.click
 
         this.container.style.display = ''
-        
+
         // Get click coordinates
         const clickX = e.clientX
         const clickY = e.clientY
-        
+
         // Get dialog dimensions
         const dialogWidth = this.container.offsetWidth
         const dialogHeight = this.container.offsetHeight
-        
+
         // Calculate available space
         const windowWidth = window.innerWidth
         const windowHeight = window.innerHeight
-        
+
         // Calculate position to keep dialog on screen
         let left = clickX
         let top = clickY
-        
+
         // Adjust horizontal position if dialog would go off screen
         if (left + dialogWidth > windowWidth) {
             left = windowWidth - dialogWidth - 10 // 10px padding from edge
         }
-        
+
         // Adjust vertical position if dialog would go off screen
         if (top + dialogHeight > windowHeight) {
             top = windowHeight - dialogHeight - 10 // 10px padding from edge
         }
-        
+
         // Ensure minimum distance from edges
         left = Math.max(10, left)
         top = Math.max(10, top)
-        
+
         // Apply positions
         this.container.style.left = `${left}px`
         this.container.style.top = `${top}px`
