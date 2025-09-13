@@ -466,6 +466,14 @@ class Browser {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
         }
 
+        // Track gear column
+        if (this.config.gearColumnPosition === 'left') {
+            const gearcolumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
+            if (false === this.config.showGearColumn) {
+                gearcolumn.style.width = '0px'  // Don't use display none, need element to attach menu
+            }
+        }
+
         // axis column
         const axisColumn = createColumn(this.columnContainer, 'igv-axis-column')
         if (false === this.config.showAxis) {
@@ -491,9 +499,11 @@ class Browser {
         }
 
         // Track gear column
-        const gearcolumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
-        if (false === this.config.showGearColumn) {
-            gearcolumn.style.display = 'none'
+        if (this.config.gearColumnPosition !== 'left') {
+            const gearcolumn = createColumn(this.columnContainer, 'igv-gear-menu-column')
+            if (false === this.config.showGearColumn) {
+                gearcolumn.style.width = '0px'
+            }
         }
 
         const genomeOrReference = session.reference || session.genome
@@ -1415,10 +1425,13 @@ class Browser {
 
         let {width} = this.columnContainer.getBoundingClientRect()
 
+        const sampleInfoViewportWidth = this.getSampleInfoViewportWidth()
+        const sampleNameViewportWidth = this.getSampleNameViewportWidth()
+
         width -=
             (this.config.showAxis === false ? 0 : igv_axis_column_width) +
-            this.getSampleInfoViewportWidth() +
-            this.getSampleNameViewportWidth() +
+            sampleInfoViewportWidth +
+            sampleNameViewportWidth +
             igv_scrollbar_outer_width +
             (this.config.showTrackDragHandles === false ? 0 : igv_track_manipulation_handle_width) +
             (this.config.showGearColumn === false ? 0 : igv_track_gear_menu_column_width)
@@ -1475,12 +1488,14 @@ class Browser {
     // Zoom in by a factor of 2, keeping the same center location
     zoomIn() {
         this.zoomWithScaleFactor(0.5)
-    };
+    }
+
 
     // Zoom out by a factor of 2, keeping the same center location if possible
     zoomOut() {
         this.zoomWithScaleFactor(2.0)
-    };
+    }
+
 
     async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
 
@@ -1790,7 +1805,8 @@ class Browser {
             this.eventHandlers[eventName] = []
         }
         this.eventHandlers[eventName].push(fn)
-    };
+    }
+
 
     /**
      * @deprecated use off()
@@ -1799,7 +1815,8 @@ class Browser {
      */
     un(eventName, fn) {
         this.off(eventName, fn)
-    };
+    }
+
 
     off(eventName, fn) {
 
@@ -2008,7 +2025,8 @@ class Browser {
             mouseDownY: coords.y,
             referenceFrame: viewport.referenceFrame
         }
-    };
+    }
+
 
     cancelTrackPan() {
 
@@ -2255,7 +2273,9 @@ class Browser {
     }
 }
 
-function getFileExtension(input) {
+function
+
+getFileExtension(input) {
     let fileName
 
     // Check if input is a File object or a URL string
@@ -2284,7 +2304,9 @@ function getFileExtension(input) {
  *
  * @returns {Promise<void>}
  */
-async function resize(event) {
+async function
+
+resize(event) {
 
     if (undefined === this.referenceFrameList || 0 === this.referenceFrameList.length) {
         return
@@ -2297,7 +2319,9 @@ async function resize(event) {
 }
 
 
-function handleMouseMove(e) {
+function
+
+handleMouseMove(e) {
 
     e.preventDefault()
 
@@ -2349,7 +2373,9 @@ function handleMouseMove(e) {
     }
 }
 
-function mouseUpOrLeave(e) {
+function
+
+mouseUpOrLeave(e) {
     this.cancelTrackPan()
     this.endTrackDrag()
 }
@@ -2358,7 +2384,9 @@ function mouseUpOrLeave(e) {
  * Handle keyup event, used for navigating feature tracks with hot keys.  This will get bound to the browser object
  * @param event
  */
-async function keyUpHandler(event) {
+async function
+
+keyUpHandler(event) {
 
     // Feature jumping disabled in multi-locus view
     if (!this.referenceFrameList || this.referenceFrameList.length > 1) return
@@ -2436,7 +2464,9 @@ async function keyUpHandler(event) {
     }
 }
 
-function toggleTrackLabels(trackViews, isVisible) {
+function
+
+toggleTrackLabels(trackViews, isVisible) {
 
     for (let {viewports} of trackViews) {
         for (let viewport of viewports) {
