@@ -30,7 +30,7 @@ class MenuPopup {
 
     }
 
-    presentMenuList(trackView, menuList) {
+    presentMenuList(trackView, menuList, config) {
 
         hideAllMenuPopups(this.parent);
 
@@ -66,7 +66,11 @@ class MenuPopup {
 
             const { width } = this.popover.getBoundingClientRect();
 
-            this.popover.style.left = `${-width}px`;
+            if('left' === config.gearColumnPosition) {
+                this.popover.style.right = `${width}px`;
+            } else {
+                this.popover.style.left = `${-width}px`;
+            }
             this.popover.style.top = `${0}px`;
 
         }

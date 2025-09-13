@@ -662,7 +662,11 @@ class TrackView {
 
             this.gear = DOMUtils.div()
             this.gearContainer.appendChild(this.gear)
-            this.gear.appendChild(createIcon('cog'))
+            const cog = createIcon('cog')
+            if(false === browser.config.showGearColumn) {
+                cog.style.color = 'white'
+            }
+            this.gear.appendChild(cog)
 
             this.trackGearPopup = new MenuPopup(this.gear)
 
@@ -679,7 +683,7 @@ class TrackView {
                         otherTrackView.trackGearPopup.popover.style.display = 'none'
                     }
 
-                    this.trackGearPopup.presentMenuList(this, browser.menuUtils.trackMenuItemList(this))
+                    this.trackGearPopup.presentMenuList(this, browser.menuUtils.trackMenuItemList(this), browser.config)
                 } else {
                     this.trackGearPopup.popover.style.display = 'none'
                 }
