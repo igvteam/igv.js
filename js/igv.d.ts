@@ -514,7 +514,7 @@ interface CreateOptExtras {
 }
 
 export namespace BrowserEvents {
-    export type EventType = "trackremoved" | "trackdrag" | "trackdragend" | "locuschange" | "trackclick" | "trackorderchanged";
+    export type EventType = "trackremoved" | "trackdrag" | "trackdragend" | "locuschange" | "trackclick" | "trackorderchanged" | "roiadded" | "roiremoved";
 
     // returns the type of the event handler based on the event type
     export type EventHandler<T extends EventType> =
@@ -531,7 +531,9 @@ export namespace BrowserEvents {
                         genomicLocation?: number
                     ) => EventReturn<T> :
                     T extends "trackorderchanged" ? (trackNames: string[]) => EventReturn<T> :
-                        (payload: any) => EventReturn<T>;
+                        T extends "roiadded" ? (roi: { chr: string; start: number; end: number; name?: string }) => EventReturn<T> :
+                            T extends "roiremoved" ? (roi: { chr: string; start: number; end: number; name?: string }) => EventReturn<T> :
+                                (payload: any) => EventReturn<T>;
 
     export type EventReturn<T extends EventType> =
         T extends "trackclick" ? string | boolean | undefined :
