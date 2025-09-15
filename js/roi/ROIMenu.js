@@ -73,6 +73,14 @@ class ROIMenu {
                 label: 'Delete',
                 click: async () => {
                     roiSet.removeFeature(feature)
+                    
+                    roiManager.browser.fireEvent('roiremoved', [{
+                        chr: feature.chr,
+                        start: feature.start,
+                        end: feature.end,
+                        name: feature.name
+                    }])
+                    
                     const userDefinedFeatures = await roiSet.getAllFeatures()
 
                     // Delete user defined ROI Set if it is empty
