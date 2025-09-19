@@ -13,6 +13,7 @@ import Browser from "./browser.js"
 import AlertDialog from "./ui/components/alertDialog.js"
 import {registerFileFormats} from "./util/fileFormats.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
+import {createIcon} from "./ui/utils/icons.js"
 
 const setApiKey = igvxhr.setApiKey
 
@@ -50,5 +51,6 @@ export default {
     loadSessionFile: Browser.loadSessionFile,
     loadHub,
     uncompressSession: Browser.uncompressSession,
+    createIcon
 }
 
