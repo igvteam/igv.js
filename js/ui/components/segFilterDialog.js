@@ -2,6 +2,7 @@ import * as UIUtils from "../utils/ui-utils.js"
 import * as DOMUtils from "../utils/dom-utils.js"
 import makeDraggable from "../utils/draggable.js"
 import DOMPurify from "../../../node_modules/dompurify/dist/purify.es.mjs"
+import InputDialog from "./inputDialog.js"
 
 class SEGFilterDialog {
 
@@ -69,52 +70,11 @@ class SEGFilterDialog {
         this.input_container.appendChild(this._input)
         this._input.placeholder="Enter filter threshold (e.g., 0.5)"
         this._input.value = ''
-        // Prevent key event propagation to parent form
-        this._input.addEventListener('keydown', e => {
 
-            // Prevent parent listeners from handling this event.
-            e.preventDefault();
-            e.stopPropagation();
-
-            const input = this._input;
-            const start = input.selectionStart;
-            const end = input.selectionEnd;
-
-            if (e.key.length === 1) {
-                // Handle printable characters
-                const value = input.value;
-                input.value = value.slice(0, start) + e.key + value.slice(end);
-                input.selectionStart = input.selectionEnd = start + 1;
-            } else if (e.key === 'Backspace') {
-                if (start === end && start > 0) {
-                    // No selection, delete character before cursor
-                    input.value = input.value.slice(0, start - 1) + input.value.slice(start);
-                    input.selectionStart = input.selectionEnd = start - 1;
-                } else if (start < end) {
-                    // Delete selection
-                    input.value = input.value.slice(0, start) + input.value.slice(end);
-                    input.selectionStart = input.selectionEnd = start;
-                }
-            } else if (e.key === 'Delete') {
-                if (start === end && start < input.value.length) {
-                    // No selection, delete character after cursor
-                    input.value = input.value.slice(0, start) + input.value.slice(start + 1);
-                    input.selectionStart = input.selectionEnd = start;
-                } else if (start < end) {
-                    // Delete selection
-                    input.value = input.value.slice(0, start) + input.value.slice(end);
-                    input.selectionStart = input.selectionEnd = start;
-                }
-            } else if (e.key === 'ArrowLeft') {
-                input.selectionStart = input.selectionEnd = Math.max(0, start - 1);
-            } else if (e.key === 'ArrowRight') {
-                input.selectionStart = input.selectionEnd = Math.min(input.value.length, start + 1);
-            }
-
-        }, true); // Use the capturing phase.
-
-
-
+        // Prevent key event propagation
+        if(InputDialog.FORM_EMBED_MODE) {
+            InputDialog.captureKeyInput(this._input)
+        }
 
         // ok | cancel
         const buttons = DOMUtils.div({class: 'igv-roi-seg-filter-dialog__ok-cancel'})
