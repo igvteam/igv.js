@@ -1,6 +1,7 @@
 import {GoogleAuth, igvxhr} from '../node_modules/igv-utils/src/index.js'
 import Browser from "./browser.js"
 import GenomeUtils from "./genome/genomeUtils.js"
+import InputDialog  from "./ui/components/inputDialog.js"
 
 let allBrowsers = []
 
@@ -37,6 +38,11 @@ async function createBrowser(parentDiv, config) {
             apiKey: config.apiKey,
             scope: 'https://www.googleapis.com/auth/userinfo.profile'
         })
+    }
+
+    // A very obscure and undocumented option unlikely to be needed by anyone but us.
+    if(config.formEmbedMode) {
+        InputDialog.FORM_EMBED_MODE = true
     }
 
     // Create browser
