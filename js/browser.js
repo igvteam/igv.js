@@ -1499,6 +1499,8 @@ class Browser {
 
     async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
 
+        if(this.config.disableZoom === true) return   // Useful when an embedding application wants to control zooming
+
         if (!this.referenceFrameList) return
 
         const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
@@ -1508,6 +1510,8 @@ class Browser {
         for (let referenceFrame of referenceFrames) {
             referenceFrame.zoomWithScaleFactor(this, scaleFactor, viewportWidth, centerBPOrUndefined)
         }
+
+        this.fireEvent("zoom", [referenceFrames])
     }
 
     /**
@@ -1846,8 +1850,8 @@ class Browser {
         }
 
         const scope = thisObj || window
-        const results = handlers.map(function (event) {
-            return event.apply(scope, args)
+        const results = handlers.map(function (handler) {
+            return handler.apply(scope, args)
         })
 
         return results[0]
@@ -2358,7 +2362,7 @@ handleMouseMove(e) {
             if (viewChanged) {
                 this.updateViews()
             }
-            this.fireEvent('trackdrag')
+            this.fireEvent('trackdrag', [e])
         }
 
 
