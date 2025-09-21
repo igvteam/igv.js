@@ -47,6 +47,7 @@ import CursorGuide from "./ui/cursorGuide.js"
 import SliderDialog from "./ui/components/sliderDialog.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
+import {EventEmitter} from "./events.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -71,8 +72,8 @@ class Browser {
         this.config = config
         this.guid = DOMUtils.guid()
         this.namespace = '.browser_' + this.guid
-
         this.parent = parentDiv
+        this.eventEmitter = new EventEmitter()
 
         let shadowRoot = parentDiv.shadowRoot
         if (!shadowRoot) {
@@ -106,14 +107,13 @@ class Browser {
             doubleClickDelay: config.doubleClickDelay || 500
         }
 
-        // Map of event name -> [ handlerFn, ... ]
-        this.eventHandlers = {}
-
         if (config.listeners) {
             for (let evt of Object.keys(config.listeners)) {
                 this.on(evt, config.listeners[evt])
             }
         }
+
+        // Events
 
         this.on('trackremoved', () => {
 
@@ -1499,7 +1499,7 @@ class Browser {
 
     async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
 
-        if(this.config.disableZoom === true) return   // Useful when an embedding application wants to control zooming
+        if (this.config.disableZoom === true) return   // Useful when an embedding application wants to control zooming
 
         if (!this.referenceFrameList) return
 
@@ -1802,15 +1802,11 @@ class Browser {
     }
 
 
-// EVENTS
+    // IGV events (not DOM events)
 
     on(eventName, fn) {
-        if (!this.eventHandlers[eventName]) {
-            this.eventHandlers[eventName] = []
-        }
-        this.eventHandlers[eventName].push(fn)
+        this.eventEmitter.on(eventName, fn)
     }
-
 
     /**
      * @deprecated use off()
@@ -1818,43 +1814,16 @@ class Browser {
      * @param fn
      */
     un(eventName, fn) {
-        this.off(eventName, fn)
+        this.eventEmitter.off(eventName, fn)
     }
 
 
     off(eventName, fn) {
-
-        if (!eventName) {
-            this.eventHandlers = {}   // Remove all event handlers
-        } else if (!fn) {
-            this.eventHandlers[eventName] = [] // Remove all eventhandlers matching name
-        } else {
-            // Remove specific event handler
-            const handlers = this.eventHandlers[eventName]
-            if (!handlers || handlers.length === 0) {
-                console.warn("No handlers to remove for event: " + eventName)
-            } else {
-                const callbackIndex = handlers.indexOf(fn)
-                if (callbackIndex !== -1) {
-                    this.eventHandlers[eventName].splice(callbackIndex, 1)
-                }
-            }
-        }
+        this.eventEmitter.off(eventName, fn)
     }
 
     fireEvent(eventName, args, thisObj) {
-
-        const handlers = this.eventHandlers[eventName]
-        if (undefined === handlers || handlers.length === 0) {
-            return undefined
-        }
-
-        const scope = thisObj || window
-        const results = handlers.map(function (handler) {
-            return handler.apply(scope, args)
-        })
-
-        return results[0]
+        return this.eventEmitter.emit(eventName, args, thisObj)
     }
 
     dispose() {
