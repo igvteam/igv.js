@@ -1,4 +1,6 @@
 class EventEmitter {
+
+
     constructor() {
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = new Map()
@@ -49,7 +51,7 @@ class EventEmitter {
             return undefined
         }
 
-        const scope = thisObj || window
+        const scope = thisObj || globalThis
         const results = handlers.map(function (handler) {
             return handler.apply(scope, args)
         })

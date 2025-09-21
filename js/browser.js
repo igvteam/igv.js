@@ -134,7 +134,7 @@ class Browser {
             }
         })
 
-        this.on('didchangecolumnlayout', () => {
+        this.on('columnlayoutchange', () => {
             if (trackViewportPopoverList.length > 0) {
                 const len = trackViewportPopoverList.length
                 for (let i = 0; i < len; i++) {
@@ -1540,7 +1540,7 @@ class Browser {
         // TODO -- this is really ugly
         const {viewportElement} = this.trackViews[0].viewports[indexLeft]
         const viewportColumn = viewportColumnManager.insertAfter(viewportElement.parentElement)
-        this.fireEvent('didchangecolumnlayout')
+        this.fireEvent('columnlayoutchange')
 
         if (indexRight === this.referenceFrameList.length) {
             this.referenceFrameList.push(newReferenceFrame)
@@ -1586,7 +1586,7 @@ class Browser {
         const {viewportElement} = this.trackViews[0].viewports[index]
 
         viewportColumnManager.removeColumnAtIndex(index, viewportElement.parentElement)
-        this.fireEvent('didchangecolumnlayout')
+        this.fireEvent('columnlayoutchange')
 
         for (let {viewports} of this.trackViews) {
             viewports[index].dispose()
@@ -1712,7 +1712,7 @@ class Browser {
 
             // Insert viewport columns preceding the sample info column
             viewportColumnManager.insertBefore(this.columnContainer.querySelector('.igv-sample-info-column'), this.referenceFrameList.length)
-            this.fireEvent('didchangecolumnlayout')
+            this.fireEvent('columnlayoutchange')
 
             // Create the viewport objects -- TODO -- this is done for every search, which is insane
             for (let trackView of this.trackViews) {
