@@ -198,7 +198,9 @@ class TrackViewport extends Viewport {
 
         this.overlayElement.style.top = `-${contentTop}px`
 
-        if (!this.canvas) {
+        if(!this.checkZoomIn()) return;
+
+        if (this.canvas) {
             this.repaint()
         } else {
             // See if currently painted canvas covers the vertical range of the viewport.  If not repaint

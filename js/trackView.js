@@ -420,7 +420,7 @@ class TrackView {
 
         if (!(this.browser && this.browser.referenceFrameList)) return
 
-        const visibleViewports = this.viewports.filter(viewport => viewport.isVisible())
+        const visibleViewports = this.viewports.filter(viewport => viewport.isVisible() && viewport.checkZoomIn())
 
         // Shift viewports left/right to current genomic state (pans canvas)
         visibleViewports.forEach(viewport => viewport.shift())
@@ -431,10 +431,10 @@ class TrackView {
         }
 
         // Filter zoomed out views.  This has the side effect or turning off or no the zoomed out notice
-        const viewportsToRepaint = visibleViewports.filter(vp => vp.needsRepaint()).filter(viewport => viewport.checkZoomIn())
+        const viewportsToRepaint = visibleViewports.filter(vp => vp.needsRepaint())
 
         // Get viewports that require a data load
-        const viewportsToReload = visibleViewports.filter(viewport => viewport.checkZoomIn()).filter(viewport => viewport.needsReload())
+        const viewportsToReload = visibleViewports.filter(viewport => viewport => viewport.needsReload())
 
         // Trigger viewport to load features needed to cover current genomic range
         // NOTE: these must be loaded synchronously, do not user Promise.all,  not all file readers are thread safe
