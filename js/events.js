@@ -1,6 +1,4 @@
 class EventEmitter {
-
-
     constructor() {
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = new Map()
