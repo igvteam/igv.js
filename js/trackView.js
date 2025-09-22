@@ -292,8 +292,6 @@ class TrackView {
         this.gearContainer.style.height = `${newHeight}px`
 
         this.browser.fireEvent("trackheightchange", this)
-
-
     }
 
     updateScrollbar() {
