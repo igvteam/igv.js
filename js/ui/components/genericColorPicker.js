@@ -10,7 +10,7 @@ class GenericColorPicker extends GenericContainer {
     constructor({parent, width}) {
         super({parent, width, border: '1px solid gray'})
 
-        this.container.classList.add('igv-ui-colorpicker-container');
+        this.container.classList.add('igv-ui-colorpicker-container')
 
         // nth-child(2) - Color Swatches
         this.colorSwatchContainer = DOMUtils.div()
@@ -89,7 +89,7 @@ class GenericColorPicker extends GenericContainer {
 
     }
 
-    updateRecentColorsSwatches(colorHandler){
+    updateRecentColorsSwatches(colorHandler) {
         this.recentColorsSwatches.innerHTML = ''
         for (const hexColorString of this.recentColors) {
             const swatch = DOMUtils.div({class: 'igv-ui-color-swatch'})
@@ -105,15 +105,15 @@ class GenericColorPicker extends GenericContainer {
         moreColorsContainer.innerHTML = ''
         moreColorsContainer.innerText = 'More Colors ...'
 
-        const colorPickerContainer = document.createElement('div');
-        colorPickerContainer.style.position = 'absolute';
-        moreColorsContainer.appendChild(colorPickerContainer);
+        const colorPickerContainer = document.createElement('div')
+        colorPickerContainer.style.position = 'absolute'
+        moreColorsContainer.appendChild(colorPickerContainer)
 
-        const { width, height } = moreColorsContainer.getBoundingClientRect()
-        colorPickerContainer.style.right = `${0}px`;
-        colorPickerContainer.style.top = `${0}px`;
-        colorPickerContainer.style.width = `${width}px`;
-        colorPickerContainer.style.height = `${height}px`;
+        const {width, height} = moreColorsContainer.getBoundingClientRect()
+        colorPickerContainer.style.right = `${0}px`
+        colorPickerContainer.style.top = `${0}px`
+        colorPickerContainer.style.width = `${width}px`
+        colorPickerContainer.style.height = `${height}px`
 
         colorPickerContainer.addEventListener('click', (event) => {
             event.stopPropagation()
@@ -144,7 +144,7 @@ class GenericColorPicker extends GenericContainer {
         picker.onDone = color => {
 
             // Remove alpha from hex color string
-            const hexColorString = color.hex.substring(0,7)
+            const hexColorString = color.hex.substring(0, 7)
 
             this.recentColors.unshift(hexColorString)
 
@@ -164,10 +164,34 @@ class GenericColorPicker extends GenericContainer {
         picker.show()
     }
 
-    present(event){
-        const { top} = event.currentTarget.parentElement.getBoundingClientRect()
-        this.container.style.top = `${ top }px`
+    present(event) {
+
+        // Make the dialog visible to measure its dimensions
         this.show()
+
+        const {clientX, clientY} = event
+        const {offsetWidth: containerWidth, offsetHeight: containerHeight} = this.container
+        const {innerHeight: windowHeight} = window
+        const windowWidth = document.documentElement.clientWidth
+
+        const padding = 10
+
+        // Calculate initial centered position
+        let left = clientX - (containerWidth / 2)
+        let top = clientY
+
+        // Clamp horizontal position to viewport
+        const minLeft = padding
+        const maxLeft = windowWidth - containerWidth - padding
+        left = Math.max(minLeft, Math.min(left, maxLeft))
+
+        // Clamp vertical position to viewport
+        const minTop = padding
+        const maxTop = windowHeight - containerHeight - padding
+        top = Math.max(minTop, Math.min(top, maxTop))
+
+        this.container.style.left = `${left}px`
+        this.container.style.top = `${top}px`
     }
 
 }
