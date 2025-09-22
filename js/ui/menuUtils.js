@@ -266,6 +266,7 @@ function trackRenameMenuItem() {
             let value = this.browser.inputDialog.value;
             value = ('' === value || undefined === value) ? 'untitled' : value.trim();
             this.name = value;
+            this.browser.fireEvent('tracknamechange', [this])
         };
 
         const config =
