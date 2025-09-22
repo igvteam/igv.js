@@ -200,7 +200,7 @@ class TrackViewport extends Viewport {
 
         if(!this.checkZoomIn()) return;
 
-        if (this.canvas) {
+        if (!this.canvas) {
             this.repaint()
         } else {
             // See if currently painted canvas covers the vertical range of the viewport.  If not repaint
