@@ -456,14 +456,14 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
         if (phase) {
             stringA = sequenceInterval.getSequence(phaseExtentStart, phaseExtentEnd)
 
-            if (undefined === stringA) {
+            if (!stringA) {
                 return undefined
             }
 
             [ss, ee] = [getEonStart(riteExon), getEonStart(riteExon) + (3 - phase)]
             stringB = sequenceInterval.getSequence(ss, ee)
 
-            if (undefined === stringB) {
+            if (!stringB) {
                 return undefined
             }
 
