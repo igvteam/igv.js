@@ -48,6 +48,7 @@ import SliderDialog from "./ui/components/sliderDialog.js"
 import {createBlatTrack} from "./blat/blatTrack.js"
 import {loadHub} from "./ucsc/hub/hubParser.js"
 import {EventEmitter} from "./events.js"
+import Locus from "./locus.js"
 
 
 // css - $igv-scrollbar-outer-width: 14px;
@@ -610,6 +611,12 @@ class Browser {
 
         await this.loadTrackList(nonLocalTrackConfigurations)
 
+        // If an initial locus is defined and represents a single basedo a "search" here.  This will force micro
+        // adjustments after width of track column(s) is known.  This can be an issue when the center gide is shown
+        // Without this adjustment the single base would be off center by a few pixels.
+        if (session.locus && Locus.isSingleBaseLocusString(session.locus)) {
+            await this.search(session.locus)
+        }
     }
 
     cleanHouseForSession() {
