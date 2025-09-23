@@ -475,7 +475,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
         if (remainder) {
             stringB = sequenceInterval.getSequence(remainder.start, remainder.end)
 
-            if (stringB) {
+            if (!stringB) {
                 return undefined
             }
 
@@ -483,7 +483,7 @@ function getAminoAcidLetterWithExonGap(strand, phase, phaseExtentStart, phaseExt
             const leftEnd = getExonEnd(leftExon)
             stringA = sequenceInterval.getSequence(leftEnd - leftPhase, leftEnd)
 
-            if (stringA) {
+            if (!stringA) {
                 return undefined
             }
 
