@@ -44,6 +44,49 @@ class Locus {
         const end = Number.parseInt(se[1].replace(/,/g, ""))
         return new Locus({chr, start, end})
     }
+
+    /**
+     * Return true if the locus string represents a single base, e.g. "chr1:12345" or "chr1:12345-12345"
+     * @param locus
+     * @returns {boolean}
+     */
+    static isSingleBaseLocusString(locus) {
+
+        if (!locus || typeof locus !== 'string') {
+            return false
+        }
+
+        const parts = locus.split(':')
+        if (parts.length <= 1) {
+            return false
+        }
+
+        const range = parts[1].replace(/,/g, '')
+        if (!range) {
+            return false
+        }
+
+        const rangeParts = range.split('-')
+        const startString = rangeParts[0]
+        const start = parseInt(startString, 10)
+
+        if (String(start) !== startString || !Number.isInteger(start)) {
+            return false
+        }
+
+        if (rangeParts.length === 1) {
+            return true
+        }
+
+        const endString = rangeParts[1]
+        const end = parseInt(endString, 10)
+
+        if (String(end) !== endString || !Number.isInteger(end)) {
+            return false
+        }
+
+        return start === end
+    }
 }
 
 export default Locus
