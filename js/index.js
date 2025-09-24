@@ -25,6 +25,10 @@ function setOauthToken(accessToken, host) {
     return igvxhr.setOauthToken(accessToken, host)
 }
 
+function setCORSProxy(proxyURL) {
+    igvxhr.corsProxy = proxyURL
+}
+
 // Backward compatibility
 const oauth = igvxhr.oauth
 
@@ -41,6 +45,7 @@ export default {
     visibilityChange,
     setGoogleOauthToken,
     setOauthToken,
+    setCORSProxy,
     oauth,
     version,
     setApiKey,
