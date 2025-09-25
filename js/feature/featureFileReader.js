@@ -202,6 +202,7 @@ class FeatureFileReader {
 
         switch (config.format) {
             case "vcf":
+            case "vcftabix":
                 return new VcfParser(config)
             case "seg" :
                 return new SegParser("seg")

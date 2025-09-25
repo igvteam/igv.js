@@ -1,5 +1,3 @@
-
-
 function inferTrackType(format) {
 
     if (format) {
@@ -11,6 +9,8 @@ function inferTrackType(format) {
             case "tdf":
                 return "wig"
             case "vcf":
+            case "vcftabix":
+            case "vcf.list":
                 return "variant"
             case "seg":
                 return "seg"
@@ -65,7 +65,7 @@ function translateDeprecatedTypes(config) {
     } else if ("bam" === config.type) {
         config.type = "alignment"
         config.format = "bam"
-    } else if ("vcf" === config.type) {
+    } else if ("vcf" === config.type || "vcftabix" === config.type) {
         config.type = "variant"
         config.format = "vcf"
     } else if ("t2d" === config.type) {

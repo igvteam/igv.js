@@ -903,6 +903,10 @@ class Browser {
             config = JSON.parse(config)
         }
 
+        if(config.format && config.format.toLowerCase() === 'sampleinfo') {
+            return this.loadSampleInfo(config)
+        }
+
         let track
         try {
             track = await this.createTrack(config)
