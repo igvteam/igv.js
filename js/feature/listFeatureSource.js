@@ -4,6 +4,11 @@ import {buildOptions} from "../util/igvUtils.js"
 import getDataWrapper from "./dataWrapper.js"
 import FeatureSource from "./featureSource.js"
 
+/**
+ * A feature source for a "list" file.  A list file is a text file with two columns, chromosome and URL.  It was
+ * created for the 1KG genotype files, which are split by chromosome, and at the moment that is the only use case.
+ */
+
 class ListFeatureSource extends BaseFeatureSource {
 
     constructor(config, genome) {
@@ -71,6 +76,10 @@ class ListFeatureSource extends BaseFeatureSource {
                 }
             }
         }
+    }
+
+    supportWholeGenome() {
+        return false
     }
 }
 

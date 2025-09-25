@@ -150,7 +150,8 @@ class VariantTrack extends TrackBase {
     }
 
     get supportsWholeGenome() {
-        return !this.config.indexURL || this.config.supportsWholeGenome === true
+        const sourceSupportsWG = typeof this.featureSource.supportsWholeGenome === 'function' && this.featureSource.supportsWholeGenome()
+        return sourceSupportsWG || this.config.supportsWholeGenome === true
     }
 
     get color() {
