@@ -182,7 +182,7 @@ class SegTrack extends TrackBase {
         const groupIndeces = NULL_GROUP !== this.groupBy ?
             this.sampleKeys.map(sample => this.getGroupIndex(sample)) : undefined
         return {
-            names: this.sampleKeys,
+            names: this.sampleKeys || [],
             height: this.sampleHeight,
             yOffset: 0,
             groups: this.groups,

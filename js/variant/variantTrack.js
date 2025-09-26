@@ -224,7 +224,7 @@ class VariantTrack extends TrackBase {
         const yOffset = TOP_MARGIN + nVariantRows * (variantHeight + vGap)
 
         return {
-            names: this.sampleKeys,
+            names: this.sampleKeys || [],
             yOffset,
             height,
             // groups: this.groups,
