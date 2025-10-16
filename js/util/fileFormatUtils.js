@@ -1,6 +1,6 @@
-import {buildOptions, getFilename} from "./igvUtils.js"
+import {buildOptions} from "./igvUtils.js"
 import BinaryParser from "../binary.js"
-import {BGZip, igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js"
+import {BGZip, igvxhr, StringUtils, FileUtils} from "../../node_modules/igv-utils/src/index.js"
 import QTLParser from "../qtl/qtlParser.js"
 import {isHiccups} from "../feature/decode/bedpe.js"
 import GWASParser from "../gwas/gwasParser.js"
@@ -81,7 +81,7 @@ async function inferFileFormat(config) {
     let format
 
     // First try determining format from file extension
-    const filename = config.filename || await getFilename(config.url)
+    const filename = config.filename || FileUtils.getFilename(config.url)
     if(filename) {
         format = await inferFileFormatFromName(filename)
     }

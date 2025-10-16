@@ -10,7 +10,7 @@ import {getTrack, knownTrackTypes} from "./trackFactory.js"
 import XMLSession from "./session/igvXmlSession.js"
 import GenomeUtils from "./genome/genomeUtils.js"
 import ReferenceFrame, {createReferenceFrameList} from "./referenceFrame.js"
-import {createColumn, doAutoscale, getFilename} from "./util/igvUtils.js"
+import {createColumn, doAutoscale} from "./util/igvUtils.js"
 import {createViewport} from "./util/viewportUtils.js"
 import {bppSequenceThreshold, defaultSequenceTrackOrder} from './sequenceTrack.js'
 import version from "./version.js"
@@ -418,7 +418,7 @@ class Browser {
         } else {
             let filename = options.filename
             if (!filename) {
-                filename = (options.url ? await getFilename(options.url) : options.file.name)
+                filename = (options.url ? FileUtils.getFilename(options.url) : options.file.name)
             }
 
             if (filename.endsWith(".xml")) {
@@ -432,10 +432,8 @@ class Browser {
                 config = {
                     reference: genomeConfig
                 }
-            } else if (filename.endsWith(".json")) {
+            } else  {
                 config = await igvxhr.loadJson(urlOrFile)
-            } else {
-                throw Error("Unrecognized session file format:" + filename)
             }
         }
         setDefaults(config, defaults)

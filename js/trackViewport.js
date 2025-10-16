@@ -198,7 +198,7 @@ class TrackViewport extends Viewport {
 
         this.overlayElement.style.top = `-${contentTop}px`
 
-        if(!this.checkZoomIn()) return;
+        if (!this.checkZoomIn()) return
 
         if (!this.canvas) {
             this.repaint()
@@ -837,7 +837,7 @@ class TrackViewport extends Viewport {
 
                         popupTimerID = setTimeout(() => {
 
-                                const content = this.getPopupContent(event)
+                                const content = this.handleTrackClick(event)
                                 if (content) {
 
                                     if (false === event.shiftKey) {
@@ -1002,7 +1002,7 @@ class TrackViewport extends Viewport {
 
     }
 
-    getPopupContent(event) {
+    handleTrackClick(event) {
 
         const clickState = this.createClickState(event)
 

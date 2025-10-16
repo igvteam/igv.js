@@ -1,5 +1,5 @@
-import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
-import {buildOptions, getFilename} from "../util/igvUtils.js"
+import {FileUtils, igvxhr} from "../../node_modules/igv-utils/src/index.js"
+import {buildOptions} from "../util/igvUtils.js"
 
 class HtsgetReader {
 
@@ -60,7 +60,7 @@ class HtsgetReader {
                 config.format = format.toLowerCase()
                 config.sourceType = "htsget"
                 if (!config.name) {
-                    config.name = await getFilename(config.url)
+                    config.name = FileUtils.getFilename(config.url)
                 }
             }
         } catch (e) {
