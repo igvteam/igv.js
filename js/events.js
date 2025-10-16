@@ -56,7 +56,8 @@ class EventEmitter {
             return handler.apply(scope, args)
         })
 
-        return results
+        // The only event that uses the return value is "trackclick", which implicitly assumes a single handler
+        return results[0]
     }
 }
 
