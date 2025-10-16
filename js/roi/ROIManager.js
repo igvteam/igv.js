@@ -1,9 +1,10 @@
 import * as DOMUtils from "../ui/utils/dom-utils.js"
 import ROISet, {screenCoordinates} from './ROISet.js'
-import {getElementVerticalDimension, getFilename} from "../util/igvUtils.js"
+import {getElementVerticalDimension} from "../util/igvUtils.js"
 import {inferFileFormat} from "../util/fileFormatUtils.js"
 import ROIMenu from "./ROIMenu.js"
 import ROITable from "./ROITable.js"
+import {FileUtils} from "../../node_modules/igv-utils/src/index.js"
 
 class ROIManager {
 
@@ -72,7 +73,7 @@ class ROIManager {
 
         for (let config of configs) {
             if (!config.name && config.url) {
-                config.name = await getFilename(config.url)
+                config.name = FileUtils.getFilename(config.url)
             }
             if (config.url && !config.format) {
                 config.format = await inferFileFormat(config)
