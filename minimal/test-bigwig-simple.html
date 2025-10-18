@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple BigWig Module Test</title>
+</head>
+<body>
+    <h1>BigWig Module Loading Test</h1>
+    <div id="output"></div>
+    
+    <script type="module">
+        const output = document.getElementById('output')
+        
+        async function testModules() {
+            try {
+                output.innerHTML += '<p>Testing BigWig module imports...</p>'
+                
+                // Test importing BigWigSource
+                const { BigWigSource } = await import('./data/bigwigSource.js')
+                output.innerHTML += '<p>✅ BigWigSource imported successfully</p>'
+                
+                // Test creating an instance
+                const config = {
+                    url: 'https://www.encodeproject.org/files/ENCFF000RQI/@@download/ENCFF000RQI.bigWig',
+                    format: 'bigwig',
+                    type: 'wig'
+                }
+                
+                const source = new BigWigSource(config)
+                output.innerHTML += '<p>✅ BigWigSource instance created</p>'
+                output.innerHTML += '<p>Source URL: ' + source.url + '</p>'
+                output.innerHTML += '<p>Reader type: ' + source.reader + '</p>'
+                
+                output.innerHTML += '<p style="color: green; font-weight: bold;">All module tests passed!</p>'
+                
+            } catch (error) {
+                output.innerHTML += '<p style="color: red;">❌ Error: ' + error.message + '</p>'
+                console.error('Full error:', error)
+            }
+        }
+        
+        testModules()
+    </script>
+</body>
+</html>
+
