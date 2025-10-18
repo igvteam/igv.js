@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        #container { border: 1px solid #ccc; padding: 10px; width: 800px; }
+    </style>
+</head>
+<body>
+    <h1>Simple IGV Minimal Test</h1>
+    <div id="container"></div>
+    
+    <script type="module">
+        import IGV from './index.js'
+        
+        async function test() {
+            try {
+                console.log('Starting test...')
+                
+                const browser = await IGV.create(
+                    document.getElementById('container'),
+                    {
+                        locus: 'chr19:49302000-49304700',
+                        tracks: [
+                            {
+                                type: 'wig',
+                                url: '../test/data/wig/allPositive.bedgraph',
+                                name: 'Test Track',
+                                color: 'blue',
+                                height: 100,
+                                graphType: 'bar'
+                            }
+                        ]
+                    }
+                )
+                
+                console.log('Browser created successfully!')
+                
+            } catch (error) {
+                console.error('Error:', error)
+            }
+        }
+        
+        test()
+    </script>
+</body>
+</html>
