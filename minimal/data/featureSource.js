@@ -9,8 +9,10 @@ export class FeatureSource {
 
     /**
      * Fetch features for a genomic region
+     * @param region - Genomic region
+     * @param bpPerPixel - Basepairs per pixel (not used for text files, but kept for API consistency)
      */
-    async fetch(region) {
+    async fetch(region, bpPerPixel) {
         try {
             const response = await fetch(this.url)
             if (!response.ok) {

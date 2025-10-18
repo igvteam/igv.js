@@ -12,12 +12,9 @@ export class WigRenderer {
         ctx.clearRect(0, 0, dimensions.width, dimensions.height)
 
         if (!dataPoints || dataPoints.length === 0) {
-            console.log('No data points to render for track:', viewModel.name)
             this.renderNoData(ctx, dimensions)
             return
         }
-
-        console.log(`Rendering ${dataPoints.length} data points for track:`, viewModel.name)
 
         // Render based on graph type
         switch (graphType) {

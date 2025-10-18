@@ -21,13 +21,21 @@
                 const browser = await IGV.create(
                     document.getElementById('container'),
                     {
-                        locus: 'chr19:49302000-49304700',
+                        locus: 'chr19:49307000-49308000',
                         tracks: [
                             {
                                 type: 'wig',
-                                url: '../test/data/wig/allPositive.bedgraph',
-                                name: 'Test Track',
-                                color: 'blue',
+                                url: '../test/data/wig/fixedStep-example.wig',
+                                name: 'Fixed Step WIG',
+                                color: 'rgb(255, 0, 0)',
+                                height: 100,
+                                graphType: 'bar'
+                            },
+                            {
+                                type: 'wig',
+                                url: '../test/data/wig/variableStep-example.wig',
+                                name: 'Variable Step WIG',
+                                color: 'rgb(0, 150, 0)',
                                 height: 100,
                                 graphType: 'bar'
                             }

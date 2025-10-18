@@ -37,15 +37,19 @@ export class MinimalBrowser {
             
             this.trackConfigs = this.config.tracks.map(t => new TrackConfig(t))
             
-            // 3. Fetch all track data in parallel
+            // 3. Calculate pixel width for bpPerPixel calculation
+            const availableWidth = this.ui.getAvailableWidth()
+            const bpPerPixel = this.region.length / availableWidth
+            console.log(`Browser: Region size = ${this.region.length} bp, Width = ${availableWidth} px, bpPerPixel = ${bpPerPixel.toFixed(2)}`)
+            
+            // 4. Fetch all track data in parallel with correct bpPerPixel
             const dataPromises = this.trackConfigs.map(config =>
-                this.dataLoader.load(config, this.region)
+                this.dataLoader.load(config, this.region, bpPerPixel)
             )
             
             const trackData = await Promise.all(dataPromises)
             
-            // 4. Build view models
-            const availableWidth = this.ui.getAvailableWidth()
+            // 6. Build view models
             this.viewModels = trackData.map((data, i) =>
                 ViewModelBuilder.build(
                     this.trackConfigs[i],
@@ -58,7 +62,7 @@ export class MinimalBrowser {
                 )
             )
             
-            // 5. Render
+            // 7. Render
             this.render()
             
         } catch (error) {
