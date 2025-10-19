@@ -1,5 +1,3 @@
 ```
-npm install
-npm run build
-cd examples
+./run-examples.sh
 ```
