@@ -16,7 +16,7 @@ export class GenomicRegion {
      * - "1:1000-2000"
      * - "chr1:1,000-2,000"
      */
-    static parse(locusString) {
+    static parse(locusString, chromosomeInfo = null) {
         if (!locusString || typeof locusString !== 'string') {
             throw new Error('Invalid locus string')
         }
@@ -38,7 +38,24 @@ export class GenomicRegion {
             throw new Error(`Invalid locus: start (${start}) must be less than end (${end})`)
         }
 
-        return new GenomicRegion(chr, start, end)
+        // Normalize chromosome name if chromosome info is available
+        let normalizedChr = chr
+        if (chromosomeInfo) {
+            normalizedChr = chromosomeInfo.normalize(chr)
+            
+            // Validate chromosome exists
+            if (!chromosomeInfo.hasChromosome(chr)) {
+                throw new Error(`Unknown chromosome: ${chr}`)
+            }
+            
+            // Validate region is within chromosome bounds
+            if (!chromosomeInfo.validateRegion(normalizedChr, start, end)) {
+                const chrSize = chromosomeInfo.getSize(normalizedChr)
+                throw new Error(`Region ${start}-${end} is outside chromosome ${normalizedChr} bounds (0-${chrSize})`)
+            }
+        }
+
+        return new GenomicRegion(normalizedChr, start, end)
     }
 
     toString() {
