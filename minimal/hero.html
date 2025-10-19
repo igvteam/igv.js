@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigWig URL Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+        }
+        #container { 
+            border: 1px solid #ccc; 
+            padding: 10px; 
+            width: 1200px; 
+            height: 400px;
+        }
+        #status {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .info {
+            color: blue;
+        }
+    </style>
+</head>
+<body>
+    <h1>BigWig URL Loading Test</h1>
+    <div id="status">
+        <div class="info">Status: Initializing...</div>
+    </div>
+    <div id="container"></div>
+    
+    <script type="module">
+        // Add cache buster to force reload
+        const cacheBuster = '?v=' + Date.now()
+        const moduleUrl = './index.js' + cacheBuster
+        import(moduleUrl).then(module => {
+            const IGV = module.default
+            
+            const statusDiv = document.getElementById('status')
+            
+            function updateStatus(message, className = 'info') {
+                statusDiv.innerHTML = `<div class="${className}">${message}</div>`
+                console.log(message)
+            }
+            
+            async function testBigWigURL() {
+                try {
+                    updateStatus('Starting BigWig URL test...', 'info')
+                    console.log('Test starting...')
+                    
+                    // Using actual ENCODE tracks from wholeLotaWIGs.html
+                    const config = {
+                        locus: 'chr10:1-120,250,001',  // Whole chromosome (same as wholeLotaWIGs.html)
+                        tracks: [
+                            {
+                                "name": "Homo sapiens HepG2 PRPF4 ",
+                                "url": "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
+                                "metadata": {
+                                    "Biosample": "Homo sapiens HepG2",
+                                    "AssayType": "ChIP-seq",
+                                    "Target": "PRPF4 ",
+                                    "BioRep": "1,2",
+                                    "TechRep": "1_1,2_1",
+                                    "OutputType": "fold change over control",
+                                    "Format": "bigWig",
+                                    "Lab": "Xiang-Dong Fu, UCSD",
+                                    "Accession": "ENCFF059CKF",
+                                    "Experiment": "ENCSR243LNQ"
+                                },
+                                "order": 0,
+                                "format": "bigwig",
+                                "type": "wig",
+                                "height": 128,
+                                "windowFunction": "mean",
+                                "color": "rgb(255, 41, 135)"
+                            },
+                            {
+                                "name": "Homo sapiens GM13977 CTCF ",
+                                "url": "https://www.encodeproject.org/files/ENCFF000RQI/@@download/ENCFF000RQI.bigWig",
+                                "metadata": {
+                                    "Biosample": "Homo sapiens GM13977",
+                                    "AssayType": "ChIP-seq",
+                                    "Target": "CTCF ",
+                                    "BioRep": "1",
+                                    "TechRep": "1_1",
+                                    "OutputType": "base overlap signal",
+                                    "Format": "bigWig",
+                                    "Lab": "Vishwanath Iyer, UTA",
+                                    "Accession": "ENCFF000RQI",
+                                    "Experiment": "ENCSR000DLB"
+                                },
+                                "order": 1,
+                                "format": "bigwig",
+                                "type": "wig",
+                                "height": 128,
+                                "windowFunction": "mean",
+                                "color": "rgb(5, 248, 2)"
+                            },
+                            {
+                                "name": "Homo sapiens GM12878 BCLAF1 ",
+                                "url": "https://www.encodeproject.org/files/ENCFF036IRJ/@@download/ENCFF036IRJ.bigWig",
+                                "metadata": {
+                                    "Biosample": "Homo sapiens GM12878",
+                                    "AssayType": "ChIP-seq",
+                                    "Target": "BCLAF1 ",
+                                    "BioRep": "2",
+                                    "TechRep": "2_1",
+                                    "OutputType": "fold change over control",
+                                    "Format": "bigWig",
+                                    "Lab": "Richard Myers, HAIB",
+                                    "Accession": "ENCFF036IRJ",
+                                    "Experiment": "ENCSR000BJZ"
+                                },
+                                "order": 2,
+                                "format": "bigwig",
+                                "type": "wig",
+                                "height": 128,
+                                "windowFunction": "mean",
+                                "color": "rgb(0, 46, 255)"
+                            }
+                        ]
+                    }
+                    
+                    updateStatus('Creating browser with BigWig track...', 'info')
+                    console.log('Config:', JSON.stringify(config, null, 2))
+                    
+                    const browser = await IGV.create(document.getElementById('container'),config)
+                    
+                    console.log('Browser created:', browser)
+                    updateStatus('Browser created successfully! BigWig data should be loading...', 'success')
+                    
+                } catch (error) {
+                    updateStatus(`Error: ${error.message}`, 'error')
+                    console.error('Full error:', error)
+                    
+                    // Show helpful message about BigWig support
+                    if (error.message.includes('BigWig')) {
+                        statusDiv.innerHTML += `
+                            <div style="margin-top: 10px; padding: 10px; background: #fff3cd; border: 1px solid #ffc107; border-radius: 4px;">
+                                <strong>Note:</strong> BigWig format is not yet supported in the minimal core.
+                                <br><br>
+                                <strong>Next step:</strong> Implement BigWig support by:
+                                <ol>
+                                    <li>Copying the BigWig reader from the main codebase (js/bigwig/)</li>
+                                    <li>Creating a BigWigSource class</li>
+                                    <li>Updating the DataLoader to detect and use BigWigSource</li>
+                                </ol>
+                                See <code>minimal/BIGWIG_SUPPORT.md</code> for detailed implementation plan.
+                            </div>
+                        `
+                    }
+                }
+            }
+            
+            // Run the test
+            testBigWigURL()
+        }).catch(error => {
+            console.error('Failed to load module:', error)
+        })
+    </script>
+</body>
+</html>
+

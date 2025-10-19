@@ -4,6 +4,9 @@ import { DataLoader } from '../data/dataLoader.js'
 import { ViewModelBuilder } from '../viewmodel/viewModelBuilder.js'
 import { UIManager } from '../ui/uiManager.js'
 import { RendererRegistry } from '../render/rendererRegistry.js'
+import { GenomeResolver } from '../genome/genomeResolver.js'
+import { ChromosomeInfo } from '../genome/chromosomeInfo.js'
+import { GenomeConfig } from '../models/genome.js'
 
 /**
  * Minimal genome browser - orchestrates data loading, view model creation, and rendering
@@ -20,6 +23,8 @@ export class MinimalBrowser {
         this.dataLoader = new DataLoader()
         this.viewModels = []
         this.trackConfigs = []
+        this.genome = null
+        this.chromosomeInfo = null
     }
 
     /**
@@ -27,22 +32,51 @@ export class MinimalBrowser {
      */
     async load() {
         try {
-            // 1. Parse locus into genomic region
-            this.region = GenomicRegion.parse(this.config.locus)
+            // 1. Resolve genome (if provided)
+            if (this.config.genome) {
+                console.log('Browser: Resolving genome:', this.config.genome)
+                const genomeData = await GenomeResolver.resolve(this.config.genome)
+                console.log('Browser: Genome data received:', genomeData)
+                this.genome = new GenomeConfig(genomeData)
+                console.log('Browser: GenomeConfig instance created:', this.genome)
+                console.log('Browser: GenomeConfig methods:', Object.getOwnPropertyNames(Object.getPrototypeOf(this.genome)))
+                this.chromosomeInfo = await ChromosomeInfo.load(this.genome.chromSizesURL)
+                console.log('Browser: Loaded genome:', this.genome.name, 'with', this.chromosomeInfo.chromosomes.length, 'chromosomes')
+                
+                // Optionally add default tracks
+                if (this.config.includeDefaultTracks) {
+                    console.log('Browser: Getting default tracks...')
+                    const defaultTracks = this.genome.getDefaultTracks()
+                    console.log('Browser: Default tracks:', defaultTracks)
+                    
+                    // Add default tracks with proper configuration
+                    const configuredDefaultTracks = defaultTracks.map(track => ({
+                        ...track,
+                        height: track.height || 50,
+                        color: track.color || '#666666'
+                    }))
+                    
+                    this.config.tracks = [...configuredDefaultTracks, ...this.config.tracks]
+                    console.log('Browser: Added', configuredDefaultTracks.length, 'default tracks')
+                }
+            }
             
-            // 2. Create track configurations
+            // 2. Parse locus into genomic region (with chromosome validation if available)
+            this.region = GenomicRegion.parse(this.config.locus, this.chromosomeInfo)
+            
+            // 3. Create track configurations
             if (!this.config.tracks || this.config.tracks.length === 0) {
                 throw new Error('No tracks configured')
             }
             
             this.trackConfigs = this.config.tracks.map(t => new TrackConfig(t))
             
-            // 3. Calculate pixel width for bpPerPixel calculation
+            // 4. Calculate pixel width for bpPerPixel calculation
             const availableWidth = this.ui.getAvailableWidth()
             const bpPerPixel = this.region.length / availableWidth
             console.log(`Browser: Region size = ${this.region.length} bp, Width = ${availableWidth} px, bpPerPixel = ${bpPerPixel.toFixed(2)}`)
             
-            // 4. Fetch all track data in parallel with correct bpPerPixel
+            // 5. Fetch all track data in parallel with correct bpPerPixel
             const dataPromises = this.trackConfigs.map(config =>
                 this.dataLoader.load(config, this.region, bpPerPixel)
             )
@@ -106,6 +140,8 @@ export class MinimalBrowser {
         this.ui.cleanup()
         this.viewModels = []
         this.trackConfigs = []
+        this.genome = null
+        this.chromosomeInfo = null
     }
 
     /**

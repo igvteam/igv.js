@@ -1,5 +1,6 @@
 import { WigViewModel } from './wigViewModel.js'
 import { GeneViewModel } from './geneViewModel.js'
+import { SequenceViewModel } from './sequenceViewModel.js'
 
 /**
  * Factory for building view models from track configuration and data
@@ -12,6 +13,9 @@ export class ViewModelBuilder {
         switch (trackConfig.type) {
             case 'wig':
                 return new WigViewModel(trackConfig, data, region, dimensions)
+            
+            case 'sequence':
+                return new SequenceViewModel(trackConfig, data, region, dimensions)
             
             case 'refseq':
             case 'gene':

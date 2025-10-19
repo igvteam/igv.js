@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Genome Configuration Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+        }
+        #container { 
+            border: 1px solid #ccc; 
+            padding: 10px; 
+            width: 1200px; 
+            height: 600px;
+        }
+        #status {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .info {
+            color: blue;
+        }
+        .controls {
+            margin-bottom: 20px;
+            padding: 10px;
+            background: #e8f4f8;
+            border-radius: 4px;
+        }
+        button {
+            margin: 5px;
+            padding: 8px 16px;
+            background: #007cba;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #005a8b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Genome Configuration Test</h1>
+    <div id="status">
+        <div class="info">Status: Initializing...</div>
+    </div>
+    
+    <div class="controls">
+        <h3>Test Different Configurations:</h3>
+        <button onclick="testWithGenomeId()">Test with Genome ID (hg19)</button>
+        <button onclick="testWithGenomeIdAndDefaults()">Test with Genome ID + Default Tracks</button>
+        <button onclick="testWithFullGenomeConfig()">Test with Full Genome Config</button>
+        <button onclick="testWithoutGenome()">Test without Genome (existing tracks only)</button>
+    </div>
+    
+    <div id="container"></div>
+    
+    <script type="module">
+        // Add aggressive cache buster to force reload
+        const cacheBuster = '?v=' + Date.now() + '&r=' + Math.random()
+        const moduleUrl = './index.js' + cacheBuster
+        import(moduleUrl).then(module => {
+            const IGV = module.default
+            
+            const statusDiv = document.getElementById('status')
+            
+            function updateStatus(message, className = 'info') {
+                statusDiv.innerHTML = `<div class="${className}">${message}</div>`
+                console.log(message)
+            }
+            
+            // Test with simple genome ID
+            window.testWithGenomeId = async function() {
+                try {
+                    updateStatus('Testing with genome ID "hg19"...', 'info')
+                    
+                    const config = {
+                        genome: "hg19",
+                        locus: "chr10:100,000,000-100,010,000",  // Small region for testing
+                        tracks: [
+                            {
+                                name: "Test WIG Track",
+                                url: "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
+                                type: "wig",
+                                format: "bigwig",
+                                height: 128,
+                                color: "rgb(255, 41, 135)"
+                            }
+                        ]
+                    }
+                    
+                    const browser = await IGV.create(document.getElementById('container'), config)
+                    updateStatus('Success! Browser created with genome ID "hg19"', 'success')
+                    
+                } catch (error) {
+                    updateStatus(`Error: ${error.message}`, 'error')
+                    console.error('Full error:', error)
+                }
+            }
+            
+            // Test with genome ID and default tracks
+            window.testWithGenomeIdAndDefaults = async function() {
+                try {
+                    updateStatus('Testing with genome ID "hg19" + default tracks...', 'info')
+                    
+                    const config = {
+                        genome: "hg19",
+                        locus: "chr1:155,000,000-155,050,000",  // Gene-rich region with multiple genes
+                        includeDefaultTracks: true,
+                        tracks: [
+                            {
+                                name: "Test WIG Track",
+                                url: "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
+                                type: "wig",
+                                format: "bigwig",
+                                height: 128,
+                                color: "rgb(255, 41, 135)"
+                            }
+                        ]
+                    }
+                    
+                    const browser = await IGV.create(document.getElementById('container'), config)
+                    updateStatus('Success! Browser created with genome ID "hg19" + default tracks', 'success')
+                    
+                } catch (error) {
+                    updateStatus(`Error: ${error.message}`, 'error')
+                    console.error('Full error:', error)
+                }
+            }
+            
+            // Test with full genome configuration object
+            window.testWithFullGenomeConfig = async function() {
+                try {
+                    updateStatus('Testing with full genome configuration object...', 'info')
+                    
+                    const config = {
+                        genome: {
+                            id: "hg19",
+                            name: "Human (GRCh37/hg19)",
+                            twoBitURL: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit",
+                            chromSizesURL: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes",
+                            cytobandURL: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/cytoBand.txt.gz",
+                            tracks: [
+                                {
+                                    type: "sequence",
+                                    name: "DNA Sequence",
+                                    order: -1000000
+                                },
+                                {
+                                    type: "refseq",
+                                    name: "RefSeq Genes",
+                                    url: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/database/ncbiRefSeq.txt.gz",
+                                    order: 100000
+                                }
+                            ]
+                        },
+                        locus: "chr10:100,000,000-100,010,000",
+                        includeDefaultTracks: true,
+                        tracks: [
+                            {
+                                name: "Test WIG Track",
+                                url: "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
+                                type: "wig",
+                                format: "bigwig",
+                                height: 128,
+                                color: "rgb(255, 41, 135)"
+                            }
+                        ]
+                    }
+                    
+                    const browser = await IGV.create(document.getElementById('container'), config)
+                    updateStatus('Success! Browser created with full genome configuration', 'success')
+                    
+                } catch (error) {
+                    updateStatus(`Error: ${error.message}`, 'error')
+                    console.error('Full error:', error)
+                }
+            }
+            
+            // Test without genome (existing functionality)
+            window.testWithoutGenome = async function() {
+                try {
+                    updateStatus('Testing without genome configuration...', 'info')
+                    
+                    const config = {
+                        locus: "chr10:100,000,000-100,010,000",
+                        tracks: [
+                            {
+                                name: "Test WIG Track",
+                                url: "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
+                                type: "wig",
+                                format: "bigwig",
+                                height: 128,
+                                color: "rgb(255, 41, 135)"
+                            }
+                        ]
+                    }
+                    
+                    const browser = await IGV.create(document.getElementById('container'), config)
+                    updateStatus('Success! Browser created without genome configuration', 'success')
+                    
+                } catch (error) {
+                    updateStatus(`Error: ${error.message}`, 'error')
+                    console.error('Full error:', error)
+                }
+            }
+            
+            // Start with the first test
+            testWithGenomeId()
+            
+        }).catch(error => {
+            console.error('Failed to load module:', error)
+        })
+    </script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 import { WigRenderer } from './wigRenderer.js'
 import { GeneRenderer } from './geneRenderer.js'
+import { SequenceRenderer } from './sequenceRenderer.js'
 
 /**
  * Registry for mapping track types to renderers
@@ -9,7 +10,8 @@ export class RendererRegistry {
         ['wig', WigRenderer],
         ['gene', GeneRenderer],
         ['refseq', GeneRenderer],
-        ['feature', GeneRenderer]
+        ['feature', GeneRenderer],
+        ['sequence', SequenceRenderer]
     ])
 
     /**
