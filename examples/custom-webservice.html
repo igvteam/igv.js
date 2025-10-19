@@ -10,39 +10,23 @@
 
 <body>
 
-<h1>Custom Web Service Examples</h1>
-<p>These examples illustrate configuring a custom web service to fetch features for a track.
-<p>(1) In the first example we configure a simple web service that fetches bed records defining cytobads. This service
-    requires no parameter manipulation or result mapping. Track configuration:
-<pre>
-         {
-            name: "Cytobands",
-            type: "annotation",
-            sourceType: "custom",
-            source: {
-                url: "https://lk85l6ycte.execute-api.us-east-1.amazonaws.com/dev/testservice/bands?chr=$CHR&start=$START&end=$END",
-                contentType: "application/json"
-            }
-        }
-</pre>
-</p>
 <div id="igvDiv1" style="padding-top: 50px;padding-bottom: 50px; height: auto; border:1px solid lightgray"></div>
-
-
 
 <script type="module">
 
-    import igv from "../dist/igv.esm.min.js"
+    import igv from "../js/index.js"
 
-    // Simple wervice requiring no query parameter or result mappings.
-    const cytobands = {
-        name: "Cytobands",
+    // gRPC-web track example with mock data
+    const grpcTrack = {
+        name: "gRPC Web Features",
         type: "annotation",
-        sourceType: "custom",
+        sourceType: "grpc-web",
         displayMode: "COLLAPSED",
         source: {
-            url: "https://lk85l6ycte.execute-api.us-east-1.amazonaws.com/dev/testservice/bands?chr=$CHR&start=$START&end=$END",
-            contentType: "application/json"
+            serviceUrl: "https://your-grpc-service.com",
+            serviceName: "FeatureService",
+            methodName: "GetFeatures",
+            // Add any gRPC-web specific configuration here
         }
     }
 
@@ -50,7 +34,7 @@
         genome: "hg38",
         locus: "chr1",
         tracks: [
-            cytobands
+            grpcTrack
         ]
     }
 

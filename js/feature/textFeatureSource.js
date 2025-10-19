@@ -2,6 +2,7 @@ import FeatureCache from "./featureCache.js"
 import FeatureFileReader from "./featureFileReader.js"
 import CustomServiceReader from "./customServiceReader.js"
 import UCSCServiceReader from "./ucscServiceReader.js"
+import GrpcWebServiceReader from "./grpcWebServiceReader.js"
 import GtexReader from "../qtl/gtexReader.js"
 import GenomicInterval from "../genome/genomicInterval.js"
 import HtsgetVariantReader from "../htsget/htsgetVariantReader.js"
@@ -32,6 +33,9 @@ class TextFeatureSource extends BaseFeatureSource {
 
         const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "biginteract", "biggenepred", "bignarrowpeak", "tdf"])
 
+        console.log("--------------------------------");
+        console.log(config)
+
         this.queryable = config.indexURL || config.queryable === true   // False by default, unless explicitly set
         if (config.reader) {
             // Explicit reader implementation
@@ -52,6 +56,9 @@ class TextFeatureSource extends BaseFeatureSource {
         } else if (config.sourceType === 'custom') {
             this.reader = new CustomServiceReader(config.source)
             this.queryable = false !== config.source.queryable
+        } else if (config.sourceType === 'grpc-web') {
+            this.reader = new GrpcWebServiceReader(config.source)
+            this.queryable = true
         } else if ('service' === config.sourceType) {
             this.reader = new FeatureFileReader(config, genome)
             this.queryable = true
