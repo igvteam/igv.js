@@ -7,6 +7,7 @@ import { RendererRegistry } from '../render/rendererRegistry.js'
 import { GenomeResolver } from '../genome/genomeResolver.js'
 import { ChromosomeInfo } from '../genome/chromosomeInfo.js'
 import { GenomeConfig } from '../models/genome.js'
+import { search } from '../genome/search.js'
 
 /**
  * Minimal genome browser - orchestrates data loading, view model creation, and rendering
@@ -61,8 +62,8 @@ export class MinimalBrowser {
                 }
             }
             
-            // 2. Parse locus into genomic region (with chromosome validation if available)
-            this.region = GenomicRegion.parse(this.config.locus, this.chromosomeInfo)
+            // 2. Parse locus into genomic region (supports both coordinates and gene names)
+            this.region = await search(this, this.config.locus)
             
             // 3. Create track configurations
             if (!this.config.tracks || this.config.tracks.length === 0) {
@@ -133,8 +134,8 @@ export class MinimalBrowser {
             // Update locus in config
             this.config.locus = locusString
             
-            // 1. Parse new locus into genomic region
-            this.region = GenomicRegion.parse(this.config.locus, this.chromosomeInfo)
+            // 1. Parse new locus into genomic region (supports both coordinates and gene names)
+            this.region = await search(this, this.config.locus)
             
             // 2. Calculate pixel width for bpPerPixel calculation
             const availableWidth = this.ui.getAvailableWidth()

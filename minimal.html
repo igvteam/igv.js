@@ -210,7 +210,7 @@
                     <input 
                         type="text" 
                         id="locus-input" 
-                        placeholder="e.g., chr1:1-100,000,000 or chr4:68,374,553-68,374,733"
+                        placeholder="e.g., EGFR or chr1:1-100,000,000"
                         value="chr1:1-100,000,000"
                     />
                 </div>
@@ -219,11 +219,11 @@
 
             <div class="example-loci">
                 <strong style="font-size: 12px; color: #6b7280; align-self: center; margin-right: 8px;">Quick examples:</strong>
-                <div class="example-locus" onclick="setLocus('chr1:1-249,250,621')">Full chr1</div>
+                <div class="example-locus" onclick="setLocus('EGFR')">EGFR gene</div>
+                <div class="example-locus" onclick="setLocus('TP53')">TP53 gene</div>
+                <div class="example-locus" onclick="setLocus('BRCA1')">BRCA1 gene</div>
                 <div class="example-locus" onclick="setLocus('chr1:1-100,000,000')">Chr1 p-arm</div>
-                <div class="example-locus" onclick="setLocus('chr1:155,000,000-155,050,000')">Gene region</div>
                 <div class="example-locus" onclick="setLocus('chr4:68,374,553-68,374,733')">Base pairs</div>
-                <div class="example-locus" onclick="setLocus('chr7:140,000,000-145,000,000')">5Mb region</div>
             </div>
         </div>
 
@@ -240,6 +240,7 @@
                 <li><strong>DNA Sequence Track</strong>: Displays nucleotide sequence at base-pair resolution</li>
                 <li><strong>RefSeq Genes</strong>: Gene annotations from NCBI RefSeq database</li>
                 <li><strong>BigWig Track</strong>: Example signal track from ENCODE project</li>
+                <li><strong>Gene Search</strong>: Enter a gene name (e.g., EGFR, TP53, BRCA1) or coordinates (chr:start-end)</li>
             </ul>
         </div>
     </div>
