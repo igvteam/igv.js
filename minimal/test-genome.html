@@ -5,14 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Genome Configuration Test</title>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            margin: 20px; 
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
         }
-        #container { 
-            border: 1px solid #ccc; 
-            padding: 10px; 
-            width: 1200px; 
+        #container {
+            border: 1px solid #ccc;
+            padding: 10px;
+            width: 1200px;
             height: 600px;
         }
         #status {
@@ -57,7 +57,7 @@
     <div id="status">
         <div class="info">Status: Initializing...</div>
     </div>
-    
+
     <div class="controls">
         <h3>Test Different Configurations:</h3>
         <button onclick="testWithGenomeId()">Test with Genome ID (hg19)</button>
@@ -66,28 +66,34 @@
         <button onclick="testSequenceTrack()">Test Sequence Track (chr4:68,374,553-68,374,733)</button>
         <button onclick="testWithoutGenome()">Test without Genome (existing tracks only)</button>
     </div>
-    
+
     <div id="container"></div>
-    
+
     <script type="module">
-        // Add aggressive cache buster to force reload
-        const cacheBuster = '?v=' + Date.now() + '&r=' + Math.random() + '&force=' + Math.random()
+        // Add aggressive cache buster to force reload - UPDATED
+        const cacheBuster = '?v=' + Date.now() + '&r=' + Math.random() + '&force=' + Math.random() + '&bust=' + Date.now()
         const moduleUrl = './index.js' + cacheBuster
+        
+        // Clear any cached modules
+        if (window.performance && window.performance.clearResourceTimings) {
+            window.performance.clearResourceTimings()
+        }
+        
         import(moduleUrl).then(module => {
             const IGV = module.default
-            
+
             const statusDiv = document.getElementById('status')
-            
+
             function updateStatus(message, className = 'info') {
                 statusDiv.innerHTML = `<div class="${className}">${message}</div>`
                 console.log(message)
             }
-            
+
             // Test with simple genome ID
             window.testWithGenomeId = async function() {
                 try {
                     updateStatus('Testing with genome ID "hg19"...', 'info')
-                    
+
                     const config = {
                         genome: "hg19",
                         locus: "chr10:100,000,000-100,010,000",  // Small region for testing
@@ -102,24 +108,25 @@
                             }
                         ]
                     }
-                    
+
                     const browser = await IGV.create(document.getElementById('container'), config)
                     updateStatus('Success! Browser created with genome ID "hg19"', 'success')
-                    
+
                 } catch (error) {
                     updateStatus(`Error: ${error.message}`, 'error')
                     console.error('Full error:', error)
                 }
             }
-            
+
             // Test with genome ID and default tracks
             window.testWithGenomeIdAndDefaults = async function() {
                 try {
                     updateStatus('Testing with genome ID "hg19" + default tracks...', 'info')
-                    
+
                     const config = {
                         genome: "hg19",
-                        locus: "chr1:155,000,000-155,050,000",  // Gene-rich region with multiple genes
+                        // locus: "chr1:155,000,000-155,050,000",  // Gene-rich region with multiple genes
+                        locus: "chr4:68,374,553-68,374,733",  // Sequence track visible
                         includeDefaultTracks: true,
                         tracks: [
                             {
@@ -132,21 +139,21 @@
                             }
                         ]
                     }
-                    
+
                     const browser = await IGV.create(document.getElementById('container'), config)
                     updateStatus('Success! Browser created with genome ID "hg19" + default tracks', 'success')
-                    
+
                 } catch (error) {
                     updateStatus(`Error: ${error.message}`, 'error')
                     console.error('Full error:', error)
                 }
             }
-            
+
             // Test with full genome configuration object
             window.testWithFullGenomeConfig = async function() {
                 try {
                     updateStatus('Testing with full genome configuration object...', 'info')
-                    
+
                     const config = {
                         genome: {
                             id: "hg19",
@@ -181,21 +188,21 @@
                             }
                         ]
                     }
-                    
+
                     const browser = await IGV.create(document.getElementById('container'), config)
                     updateStatus('Success! Browser created with full genome configuration', 'success')
-                    
+
                 } catch (error) {
                     updateStatus(`Error: ${error.message}`, 'error')
                     console.error('Full error:', error)
                 }
             }
-            
+
             // Test without genome (existing functionality)
             window.testWithoutGenome = async function() {
                 try {
                     updateStatus('Testing without genome configuration...', 'info')
-                    
+
                     const config = {
                         locus: "chr10:100,000,000-100,010,000",
                         tracks: [
@@ -209,10 +216,10 @@
                             }
                         ]
                     }
-                    
+
                     const browser = await IGV.create(document.getElementById('container'), config)
                     updateStatus('Success! Browser created without genome configuration', 'success')
-                    
+
                 } catch (error) {
                     updateStatus(`Error: ${error.message}`, 'error')
                     console.error('Full error:', error)
@@ -223,7 +230,7 @@
             window.testSequenceTrack = async function() {
                 try {
                     updateStatus('Testing sequence track rendering...', 'info')
-                    
+
                     const config = {
                         genome: "hg19",
                         locus: "chr4:68,374,553-68,374,733",  // Small region for sequence display
@@ -238,19 +245,19 @@
                             }
                         ]
                     }
-                    
+
                     const browser = await IGV.create(document.getElementById('container'), config)
                     updateStatus('Success! Browser created with sequence track', 'success')
-                    
+
                 } catch (error) {
                     updateStatus(`Error: ${error.message}`, 'error')
                     console.error('Full error:', error)
                 }
             }
-            
+
             // Start with the first test
             testWithGenomeId()
-            
+
         }).catch(error => {
             console.error('Failed to load module:', error)
         })
