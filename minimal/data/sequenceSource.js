@@ -14,6 +14,9 @@ export class SequenceSource {
      * @returns {string} Format type
      */
     detectFormat(url) {
+        if (!url) {
+            return 'unknown'
+        }
         const lowerUrl = url.toLowerCase()
         if (lowerUrl.includes('.2bit') || lowerUrl.includes('2bit')) {
             return '2bit'

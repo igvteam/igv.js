@@ -30,11 +30,40 @@ export class GenomeConfig {
     }
 
     /**
-     * Get default tracks for this genome
+     * Get default tracks for this genome, including sequence track if available
      * @returns {Array} Array of default track configurations
      */
     getDefaultTracks() {
-        return [...this.defaultTracks] // Return a copy
+        const tracks = []
+        
+        // Check if a sequence track already exists in defaultTracks
+        const existingSequenceTrack = this.defaultTracks.find(t => t.type === 'sequence')
+        
+        if (this.sequenceSource) {
+            if (existingSequenceTrack) {
+                // If sequence track exists but has no URL, add the URL to it
+                tracks.push({
+                    ...existingSequenceTrack,
+                    url: existingSequenceTrack.url || this.sequenceSource,
+                    format: existingSequenceTrack.format || (this.sequenceSource.endsWith('.2bit') ? "2bit" : "fasta"),
+                    height: existingSequenceTrack.height || 50
+                })
+            } else {
+                // No sequence track exists, create one
+                tracks.push({
+                    type: "sequence",
+                    name: "DNA Sequence",
+                    url: this.sequenceSource,
+                    format: this.sequenceSource.endsWith('.2bit') ? "2bit" : "fasta",
+                    order: -1000000,  // Render first
+                    height: 50
+                })
+            }
+        }
+        
+        // Add other default tracks from genome registry (excluding any sequence track we already handled)
+        const otherTracks = this.defaultTracks.filter(t => t.type !== 'sequence')
+        return [...tracks, ...otherTracks]
     }
 
     /**
