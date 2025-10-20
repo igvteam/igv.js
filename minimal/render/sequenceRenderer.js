@@ -9,23 +9,34 @@ export class SequenceRenderer {
      * @param {object} dimensions - Canvas dimensions
      */
     static render(ctx, viewModel, dimensions) {
-        const { sequenceBases, getRenderingOptions } = viewModel
+        const { sequenceBases } = viewModel
         const { width, height } = dimensions
+
+        console.log('SequenceRenderer: Rendering sequence track', {
+            name: viewModel.name,
+            sequenceBases: sequenceBases?.length || 0,
+            dimensions: { width, height }
+        })
 
         // Clear canvas
         ctx.clearRect(0, 0, width, height)
 
         if (!sequenceBases || sequenceBases.length === 0) {
+            console.log('SequenceRenderer: No sequence bases, rendering no data message')
             this.renderNoData(ctx, dimensions)
             return
         }
 
-        const options = getRenderingOptions()
+        const options = viewModel.getRenderingOptions()
+        console.log('SequenceRenderer: Rendering options', options)
         
         if (!options.showBases) {
+            console.log('SequenceRenderer: Not showing bases, rendering zoomed out message')
             this.renderZoomedOut(ctx, dimensions, viewModel)
             return
         }
+
+        console.log('SequenceRenderer: Rendering individual bases')
 
         // Set up text rendering
         ctx.font = `${options.fontSize}px monospace`
@@ -34,8 +45,16 @@ export class SequenceRenderer {
 
         // Render each visible base
         const visibleBases = viewModel.getVisibleBases()
+        console.log('SequenceRenderer: Visible bases count:', visibleBases.length)
+        if (visibleBases.length > 0) {
+            console.log('SequenceRenderer: First base:', visibleBases[0])
+            console.log('SequenceRenderer: Last base:', visibleBases[visibleBases.length - 1])
+        }
         
-        visibleBases.forEach(base => {
+        visibleBases.forEach((base, index) => {
+            if (index < 3) {
+                console.log(`SequenceRenderer: Drawing base ${index}:`, base, 'bpPerPixel:', options.bpPerPixel)
+            }
             this.renderBase(ctx, base, height, options)
         })
 
@@ -54,43 +73,32 @@ export class SequenceRenderer {
      */
     static renderBase(ctx, base, height, options) {
         const { base: baseChar, x, width } = base
-        const centerX = x + width / 2
-        const centerY = height / 2
+        const bpPerPixel = options.bpPerPixel || 1
+        const BP_PER_PIXEL_TEXT_THRESHOLD = 0.1  // Show text only if zoomed in beyond this
 
-        // Draw background rectangle
-        ctx.fillStyle = this.getBaseBackgroundColor(baseChar, options)
-        ctx.fillRect(x, 0, width, height)
+        // Get the fill color for this base
+        const fillColor = options.baseColors[baseChar] || options.defaultColor
 
-        // Draw base character
-        ctx.fillStyle = this.getBaseTextColor(baseChar, options)
-        ctx.fillText(baseChar, centerX, centerY)
-    }
-
-    /**
-     * Get background color for a base
-     * @param {string} base - Base character
-     * @param {object} options - Rendering options
-     * @returns {string} Background color
-     */
-    static getBaseBackgroundColor(base, options) {
-        const baseBackgrounds = {
-            'A': 'rgba(255, 200, 200, 0.3)',  // Light red
-            'T': 'rgba(200, 255, 200, 0.3)',  // Light green
-            'G': 'rgba(200, 200, 255, 0.3)',  // Light blue
-            'C': 'rgba(255, 220, 200, 0.3)'   // Light orange
+        if (bpPerPixel > BP_PER_PIXEL_TEXT_THRESHOLD) {
+            // Zoomed out: draw colored bars only
+            const FRAME_BORDER = 5
+            const barHeight = height - FRAME_BORDER
+            
+            // Debug: log first 3 bars being drawn
+            if (base.position < 68374556) {
+                console.log(`SequenceRenderer.renderBase: Drawing bar for ${baseChar} at x=${x}, y=${FRAME_BORDER}, width=${width}, height=${barHeight}, color=${fillColor}`)
+            }
+            
+            ctx.fillStyle = fillColor
+            ctx.fillRect(x, FRAME_BORDER, width, barHeight)
+        } else {
+            // Zoomed in: draw text labels
+            const centerX = x + width / 2
+            const centerY = height / 2
+            ctx.strokeStyle = fillColor
+            ctx.lineWidth = 1
+            ctx.strokeText(baseChar, centerX, centerY)
         }
-        
-        return baseBackgrounds[base] || 'rgba(240, 240, 240, 0.3)'
-    }
-
-    /**
-     * Get text color for a base
-     * @param {string} base - Base character
-     * @param {object} options - Rendering options
-     * @returns {string} Text color
-     */
-    static getBaseTextColor(base, options) {
-        return options.baseColors[base] || options.defaultColor
     }
 
     /**

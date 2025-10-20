@@ -7,6 +7,7 @@ export class SequenceViewModel {
     constructor(trackConfig, rawData, region, dimensions) {
         this.type = 'sequence'
         this.name = trackConfig.name || 'Sequence'
+        this.height = trackConfig.height || 50
         this.region = region
         this.dimensions = dimensions
         
@@ -101,12 +102,24 @@ export class SequenceViewModel {
     }
 
     /**
+     * Determine if individual bases should be shown
+     * @returns {boolean} True if bases should be shown
+     */
+    shouldShowBases() {
+        // Show bases if zoomed in enough (less than 10 bp per pixel)
+        const bpPerPixel = this.region.length / this.dimensions.width
+        return bpPerPixel < 10 && this.showBases
+    }
+
+    /**
      * Get rendering options
      * @returns {object} Rendering options
      */
     getRenderingOptions() {
+        const bpPerPixel = this.region.length / this.dimensions.width
         return {
             showBases: this.shouldShowBases(),
+            bpPerPixel: bpPerPixel,
             fontSize: this.fontSize,
             baseColors: {
                 'A': this.getBaseColor('A'),
