@@ -30,11 +30,23 @@ export class GenomeConfig {
     }
 
     /**
-     * Get default tracks for this genome, including sequence track if available
+     * Get default tracks for this genome, including ideogram, sequence track if available
+     * @param {object} config - Browser configuration object (optional)
      * @returns {Array} Array of default track configurations
      */
-    getDefaultTracks() {
+    getDefaultTracks(config = {}) {
         const tracks = []
+        
+        // Add ideogram track if cytobandURL exists and showIdeogram is true
+        if (this.cytobandURL && config.showIdeogram) {
+            tracks.push({
+                type: "ideogram",
+                name: "Ideogram",
+                url: this.cytobandURL,
+                order: -2000000,  // Render before sequence
+                height: 16
+            })
+        }
         
         // Check if a sequence track already exists in defaultTracks
         const existingSequenceTrack = this.defaultTracks.find(t => t.type === 'sequence')
@@ -55,7 +67,7 @@ export class GenomeConfig {
                     name: "DNA Sequence",
                     url: this.sequenceSource,
                     format: this.sequenceSource.endsWith('.2bit') ? "2bit" : "fasta",
-                    order: -1000000,  // Render first
+                    order: -1000000,  // Render after ideogram
                     height: 50
                 })
             }

@@ -1,12 +1,14 @@
 import { WigRenderer } from './wigRenderer.js'
 import { GeneRenderer } from './geneRenderer.js'
 import { SequenceRenderer } from './sequenceRenderer.js'
+import { IdeogramRenderer } from './ideogramRenderer.js'
 
 /**
  * Registry for mapping track types to renderers
  */
 export class RendererRegistry {
     static renderers = new Map([
+        ['ideogram', IdeogramRenderer],
         ['wig', WigRenderer],
         ['gene', GeneRenderer],
         ['refseq', GeneRenderer],

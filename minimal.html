@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IGV Minimal - Interactive Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 24px 32px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .controls {
+            padding: 20px 32px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #fafafa;
+        }
+
+        .control-row {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .control-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .control-group label {
+            font-size: 13px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .control-group input {
+            padding: 10px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            transition: border-color 0.2s;
+        }
+
+        .control-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            padding: 10px 24px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            align-self: flex-end;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status {
+            padding: 12px 32px;
+            background: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            font-size: 13px;
+            color: #1e40af;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            border-left-color: #ef4444;
+            color: #991b1b;
+        }
+
+        .status.success {
+            background: #f0fdf4;
+            border-left-color: #22c55e;
+            color: #166534;
+        }
+
+        #igv-container {
+            padding: 0;
+            min-height: 600px;
+        }
+
+        .info-panel {
+            padding: 16px 32px;
+            background: #fafafa;
+            border-top: 1px solid #e5e7eb;
+            font-size: 13px;
+            color: #6b7280;
+        }
+
+        .info-panel h3 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+
+        .info-panel ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .info-panel li {
+            padding: 4px 0;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .info-panel li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #667eea;
+        }
+
+        .example-loci {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .example-locus {
+            padding: 6px 12px;
+            background: white;
+            border: 1px solid #d1d5db;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .example-locus:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: #f0f4ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧬 IGV Minimal Browser</h1>
+            <p>Interactive genome browser with ideogram, sequence, and annotation tracks</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-row">
+                <div class="control-group">
+                    <label for="locus-input">Genomic Locus</label>
+                    <input 
+                        type="text" 
+                        id="locus-input" 
+                        placeholder="e.g., chr1:1-100,000,000 or chr4:68,374,553-68,374,733"
+                        value="chr1:1-100,000,000"
+                    />
+                </div>
+                <button id="go-button" onclick="navigateToLocus()">Go</button>
+            </div>
+
+            <div class="example-loci">
+                <strong style="font-size: 12px; color: #6b7280; align-self: center; margin-right: 8px;">Quick examples:</strong>
+                <div class="example-locus" onclick="setLocus('chr1:1-249,250,621')">Full chr1</div>
+                <div class="example-locus" onclick="setLocus('chr1:1-100,000,000')">Chr1 p-arm</div>
+                <div class="example-locus" onclick="setLocus('chr1:155,000,000-155,050,000')">Gene region</div>
+                <div class="example-locus" onclick="setLocus('chr4:68,374,553-68,374,733')">Base pairs</div>
+                <div class="example-locus" onclick="setLocus('chr7:140,000,000-145,000,000')">5Mb region</div>
+            </div>
+        </div>
+
+        <div id="status" class="status">
+            Initializing browser...
+        </div>
+
+        <div id="igv-container"></div>
+
+        <div class="info-panel">
+            <h3>About this view</h3>
+            <ul>
+                <li><strong>Ideogram Track</strong>: Shows chromosome cytobands with red viewport indicator</li>
+                <li><strong>DNA Sequence Track</strong>: Displays nucleotide sequence at base-pair resolution</li>
+                <li><strong>RefSeq Genes</strong>: Gene annotations from NCBI RefSeq database</li>
+                <li><strong>BigWig Track</strong>: Example signal track from ENCODE project</li>
+            </ul>
+        </div>
+    </div>
+
+    <script type="module">
+        let browser = null
+
+        // Aggressive cache buster for development
+        const cacheBuster = '?v=' + Date.now() + '&r=' + Math.random() + '&force=' + Math.random()
+        const moduleUrl = './minimal/index.js' + cacheBuster
+
+        // Update status message
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('status')
+            statusDiv.textContent = message
+            statusDiv.className = `status ${type}`
+            console.log(`[${type.toUpperCase()}] ${message}`)
+        }
+
+        // Initialize the browser
+        async function initializeBrowser(locus) {
+            try {
+                updateStatus('Loading genome browser...', 'info')
+
+                const IGV = await import(moduleUrl).then(m => m.default)
+
+                const config = {
+                    genome: "hg19",
+                    locus: locus || "chr1:1-100,000,000",
+                    showIdeogram: true,
+                    includeDefaultTracks: true,
+                    tracks: [
+                        {
+                            name: "ENCODE Signal",
+                            url: "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
+                            type: "wig",
+                            format: "bigwig",
+                            height: 128,
+                            color: "rgb(255, 41, 135)"
+                        }
+                    ]
+                }
+
+                browser = await IGV.create(document.getElementById('igv-container'), config)
+                updateStatus(`✓ Browser loaded successfully at ${locus || config.locus}`, 'success')
+
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`, 'error')
+                console.error('Full error:', error)
+            }
+        }
+
+        // Navigate to a new locus
+        window.navigateToLocus = async function() {
+            const locusInput = document.getElementById('locus-input')
+            const goButton = document.getElementById('go-button')
+            const locus = locusInput.value.trim()
+
+            if (!locus) {
+                updateStatus('Please enter a locus', 'error')
+                return
+            }
+
+            try {
+                goButton.disabled = true
+                updateStatus(`Navigating to ${locus}...`, 'info')
+
+                if (browser) {
+                    await browser.setLocus(locus)
+                    updateStatus(`✓ Navigated to ${locus}`, 'success')
+                } else {
+                    await initializeBrowser(locus)
+                }
+
+            } catch (error) {
+                updateStatus(`Error: ${error.message}`, 'error')
+                console.error('Navigation error:', error)
+            } finally {
+                goButton.disabled = false
+            }
+        }
+
+        // Set locus and navigate
+        window.setLocus = function(locus) {
+            document.getElementById('locus-input').value = locus
+            navigateToLocus()
+        }
+
+        // Handle Enter key in locus input
+        document.getElementById('locus-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                navigateToLocus()
+            }
+        })
+
+        // Initialize on page load
+        initializeBrowser()
+
+    </script>
+</body>
+</html>
+

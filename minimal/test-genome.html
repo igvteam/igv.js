@@ -60,11 +60,11 @@
 
     <div class="controls">
         <h3>Test Different Configurations:</h3>
-        <button onclick="testWithGenomeId()">Test with Genome ID (hg19)</button>
-        <button onclick="testWithGenomeIdAndDefaults()">Test with Genome ID + Default Tracks</button>
-        <button onclick="testWithFullGenomeConfig()">Test with Full Genome Config</button>
-        <button onclick="testSequenceTrack()">Test Sequence Track (chr4:68,374,553-68,374,733)</button>
-        <button onclick="testWithoutGenome()">Test without Genome (existing tracks only)</button>
+        <button onclick="testWithGenomeId()">Genome ID (hg19)</button>
+        <button onclick="testWithGenomeIdAndDefaults()">Genome ID + Default Tracks</button>
+        <button onclick="testWithFullGenomeConfig()">Full Genome Config</button>
+        <button onclick="testSequenceTrack()">Sequence Track</button>
+        <button onclick="testWithIdeogram()">Ideogram Track</button>
     </div>
 
     <div id="container"></div>
@@ -198,34 +198,6 @@
                 }
             }
 
-            // Test without genome (existing functionality)
-            window.testWithoutGenome = async function() {
-                try {
-                    updateStatus('Testing without genome configuration...', 'info')
-
-                    const config = {
-                        locus: "chr10:100,000,000-100,010,000",
-                        tracks: [
-                            {
-                                name: "Test WIG Track",
-                                url: "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
-                                type: "wig",
-                                format: "bigwig",
-                                height: 128,
-                                color: "rgb(255, 41, 135)"
-                            }
-                        ]
-                    }
-
-                    const browser = await IGV.create(document.getElementById('container'), config)
-                    updateStatus('Success! Browser created without genome configuration', 'success')
-
-                } catch (error) {
-                    updateStatus(`Error: ${error.message}`, 'error')
-                    console.error('Full error:', error)
-                }
-            }
-
             // Test sequence track rendering
             window.testSequenceTrack = async function() {
                 try {
@@ -248,6 +220,37 @@
 
                     const browser = await IGV.create(document.getElementById('container'), config)
                     updateStatus('Success! Browser created with sequence track', 'success')
+
+                } catch (error) {
+                    updateStatus(`Error: ${error.message}`, 'error')
+                    console.error('Full error:', error)
+                }
+            }
+
+            // Test ideogram track rendering
+            window.testWithIdeogram = async function() {
+                try {
+                    updateStatus('Testing ideogram track rendering...', 'info')
+
+                    const config = {
+                        genome: "hg19",
+                        locus: "chr1:1-100,000,000",  // Large region to show full chromosome context
+                        showIdeogram: true,
+                        includeDefaultTracks: true,
+                        tracks: [
+                            {
+                                name: "Test WIG Track",
+                                url: "https://www.encodeproject.org/files/ENCFF059CKF/@@download/ENCFF059CKF.bigWig",
+                                type: "wig",
+                                format: "bigwig",
+                                height: 128,
+                                color: "rgb(255, 41, 135)"
+                            }
+                        ]
+                    }
+
+                    const browser = await IGV.create(document.getElementById('container'), config)
+                    updateStatus('Success! Browser created with ideogram track', 'success')
 
                 } catch (error) {
                     updateStatus(`Error: ${error.message}`, 'error')

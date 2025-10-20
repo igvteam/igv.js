@@ -3,6 +3,7 @@ import { BigWigSource } from './bigwigSource.js'
 import { FeatureSource } from './featureSource.js'
 import { SequenceSource } from './sequenceSource.js'
 import { RefSeqSource } from './refseqSource.js'
+import { CytobandSource } from './cytobandSource.js'
 
 /**
  * Coordinates data fetching from various sources
@@ -60,6 +61,10 @@ export class DataLoader {
                     console.log('DataLoader: Using WigSource for', config.url)
                     return new WigSource(config)
                 }
+            
+            case 'ideogram':
+                console.log('DataLoader: Using CytobandSource for', config.url)
+                return new CytobandSource(config)
             
             case 'sequence':
                 console.log('DataLoader: Using SequenceSource for', config.url || 'genome sequence')
