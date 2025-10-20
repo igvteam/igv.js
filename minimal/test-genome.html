@@ -63,6 +63,7 @@
         <button onclick="testWithGenomeId()">Test with Genome ID (hg19)</button>
         <button onclick="testWithGenomeIdAndDefaults()">Test with Genome ID + Default Tracks</button>
         <button onclick="testWithFullGenomeConfig()">Test with Full Genome Config</button>
+        <button onclick="testSequenceTrack()">Test Sequence Track (chr4:68,374,553-68,374,733)</button>
         <button onclick="testWithoutGenome()">Test without Genome (existing tracks only)</button>
     </div>
     
@@ -70,7 +71,7 @@
     
     <script type="module">
         // Add aggressive cache buster to force reload
-        const cacheBuster = '?v=' + Date.now() + '&r=' + Math.random()
+        const cacheBuster = '?v=' + Date.now() + '&r=' + Math.random() + '&force=' + Math.random()
         const moduleUrl = './index.js' + cacheBuster
         import(moduleUrl).then(module => {
             const IGV = module.default
@@ -211,6 +212,35 @@
                     
                     const browser = await IGV.create(document.getElementById('container'), config)
                     updateStatus('Success! Browser created without genome configuration', 'success')
+                    
+                } catch (error) {
+                    updateStatus(`Error: ${error.message}`, 'error')
+                    console.error('Full error:', error)
+                }
+            }
+
+            // Test sequence track rendering
+            window.testSequenceTrack = async function() {
+                try {
+                    updateStatus('Testing sequence track rendering...', 'info')
+                    
+                    const config = {
+                        genome: "hg19",
+                        locus: "chr4:68,374,553-68,374,733",  // Small region for sequence display
+                        tracks: [
+                            {
+                                name: "DNA Sequence",
+                                url: "https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.2bit",
+                                type: "sequence",
+                                format: "2bit",
+                                height: 50,
+                                color: "rgb(0, 0, 0)"
+                            }
+                        ]
+                    }
+                    
+                    const browser = await IGV.create(document.getElementById('container'), config)
+                    updateStatus('Success! Browser created with sequence track', 'success')
                     
                 } catch (error) {
                     updateStatus(`Error: ${error.message}`, 'error')
