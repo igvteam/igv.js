@@ -46,7 +46,7 @@ export class MinimalBrowser {
                 // Optionally add default tracks
                 if (this.config.includeDefaultTracks) {
                     console.log('Browser: Getting default tracks...')
-                    const defaultTracks = this.genome.getDefaultTracks()
+                    const defaultTracks = this.genome.getDefaultTracks(this.config)
                     console.log('Browser: Default tracks:', defaultTracks)
                     
                     // Add default tracks with proper configuration
@@ -129,8 +129,45 @@ export class MinimalBrowser {
      * Change to a new locus and re-render
      */
     async setLocus(locusString) {
-        this.config.locus = locusString
-        await this.load()
+        try {
+            // Update locus in config
+            this.config.locus = locusString
+            
+            // 1. Parse new locus into genomic region
+            this.region = GenomicRegion.parse(this.config.locus, this.chromosomeInfo)
+            
+            // 2. Calculate pixel width for bpPerPixel calculation
+            const availableWidth = this.ui.getAvailableWidth()
+            const bpPerPixel = this.region.length / availableWidth
+            console.log(`Browser: New region size = ${this.region.length} bp, Width = ${availableWidth} px, bpPerPixel = ${bpPerPixel.toFixed(2)}`)
+            
+            // 3. Fetch all track data in parallel with correct bpPerPixel
+            const dataPromises = this.trackConfigs.map(config =>
+                this.dataLoader.load(config, this.region, bpPerPixel)
+            )
+            
+            const trackData = await Promise.all(dataPromises)
+            
+            // 4. Build view models
+            this.viewModels = trackData.map((data, i) =>
+                ViewModelBuilder.build(
+                    this.trackConfigs[i],
+                    data,
+                    this.region,
+                    {
+                        width: availableWidth,
+                        height: this.trackConfigs[i].height
+                    }
+                )
+            )
+            
+            // 5. Re-render
+            this.render()
+            
+        } catch (error) {
+            this.renderError(error)
+            throw error
+        }
     }
 
     /**
