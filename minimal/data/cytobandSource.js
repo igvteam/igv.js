@@ -10,7 +10,7 @@ export class CytobandSource {
         this.config = config
         this.url = config.url
         this.format = config.format || this.detectFormat(this.url)
-        
+
         // Cache cytobands by chromosome
         this.cytobandCache = new Map()
     }
@@ -39,30 +39,30 @@ export class CytobandSource {
      */
     async fetch(region, bpPerPixel) {
         try {
-            console.log('CytobandSource: Fetching cytobands for chromosome:', region.chr, 'format:', this.format)
-            
+            // console.log('CytobandSource: Fetching cytobands for chromosome:', region.chr, 'format:', this.format)
+
             // Check cache
             if (this.cytobandCache.has(region.chr)) {
                 const cached = this.cytobandCache.get(region.chr)
                 console.log('CytobandSource: Using cached cytobands:', cached.length)
                 return cached
             }
-            
+
             let cytobands
             if (this.format === 'bigbed') {
                 cytobands = await this.fetchBigBed(region)
             } else {
                 cytobands = await this.fetchText(region)
             }
-            
+
             // Cache for this chromosome
             this.cytobandCache.set(region.chr, cytobands)
-            
-            console.log('CytobandSource: Loaded', cytobands.length, 'cytobands for', region.chr)
+
+            // console.log('CytobandSource: Loaded', cytobands.length, 'cytobands for', region.chr)
             if (cytobands.length > 0) {
-                console.log('CytobandSource: Sample cytoband:', cytobands[0])
+                // console.log('CytobandSource: Sample cytoband:', cytobands[0])
             }
-            
+
             return cytobands
         } catch (error) {
             console.error('Error fetching cytoband data:', error)
@@ -79,15 +79,15 @@ export class CytobandSource {
         if (!this.bwReader) {
             this.bwReader = new BWReader({ url: this.url, ...this.config })
         }
-        
+
         // Load header if not already loaded
         if (!this.bwReader.header) {
             await this.bwReader.loadHeader()
         }
-        
+
         // Fetch features for the entire chromosome
         const features = await this.bwReader.readFeatures(region.chr, 0, Number.MAX_SAFE_INTEGER)
-        
+
         // Convert to Cytoband objects
         // BigBed cytoband features have: chr, start, end, name, gieStain
         return features.map(f => new Cytoband(f.start, f.end, f.name, f.gieStain || f.stain || 'gneg'))
@@ -104,7 +104,7 @@ export class CytobandSource {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`)
         }
-        
+
         // Handle gzipped data
         let text
         if (this.url.endsWith('.gz')) {
@@ -114,9 +114,9 @@ export class CytobandSource {
         } else {
             text = await response.text()
         }
-        
-        console.log('CytobandSource: Fetched text, length:', text.length)
-        
+
+        // console.log('CytobandSource: Fetched text, length:', text.length)
+
         // Parse the text format
         return this.parseTextCytobands(text, region.chr)
     }
@@ -150,31 +150,31 @@ export class CytobandSource {
     parseTextCytobands(text, chr) {
         const cytobands = []
         const lines = text.split('\n')
-        
+
         for (let line of lines) {
             line = line.trim()
             if (!line || line.startsWith('#')) {
                 continue
             }
-            
+
             const tokens = line.split('\t')
             if (tokens.length < 5) {
                 continue
             }
-            
+
             const chrName = tokens[0]
-            
+
             // Only include cytobands for the requested chromosome
             if (chrName === chr) {
                 const start = parseInt(tokens[1])
                 const end = parseInt(tokens[2])
                 const name = tokens[3]
                 const stain = tokens[4]
-                
+
                 cytobands.push(new Cytoband(start, end, name, stain))
             }
         }
-        
+
         return cytobands
     }
 }

@@ -14,14 +14,15 @@ export class SequenceRenderer {
 
         console.log('SequenceRenderer: Rendering sequence track', {
             name: viewModel.name,
-            sequenceBases: sequenceBases?.length || 0,
+            sequenceLength: sequenceBases?.sequence?.length || 0,
+            basesCount: sequenceBases?.bases?.length || 0,
             dimensions: { width, height }
         })
 
         // Clear canvas
         ctx.clearRect(0, 0, width, height)
 
-        if (!sequenceBases || sequenceBases.length === 0) {
+        if (!sequenceBases || !sequenceBases.bases || sequenceBases.bases.length === 0) {
             console.log('SequenceRenderer: No sequence bases, rendering no data message')
             this.renderNoData(ctx, dimensions)
             return
