@@ -1,128 +1,60 @@
 /**
- * Data source for sequence tracks - fetches DNA sequence data
+ * Data source for sequence tracks - fetches DNA sequence data from genome
  */
 export class SequenceSource {
     constructor(config) {
         this.config = config
-        this.sequenceUrl = config.fastaURL || config.twoBitURL || config.url
-        this.format = config.format || this.detectFormat(this.sequenceUrl)
+        this.sequenceLoader = null // Will be set by DataLoader
+        this.bppSequenceThreshold = 10 // Don't fetch sequence if bpPerPixel > 10
     }
 
     /**
-     * Detect sequence format from URL
-     * @param {string} url - Sequence URL
-     * @returns {string} Format type
+     * Set the sequence loader for fetching sequence
+     * @param {object} sequenceLoader - Sequence loader with getSequence method
      */
-    detectFormat(url) {
-        if (!url) {
-            return 'unknown'
-        }
-        const lowerUrl = url.toLowerCase()
-        if (lowerUrl.includes('.2bit') || lowerUrl.includes('2bit')) {
-            return '2bit'
-        } else if (lowerUrl.includes('.fa') || lowerUrl.includes('.fasta')) {
-            return 'fasta'
-        }
-        return 'fasta' // Default
+    setSequenceLoader(sequenceLoader) {
+        this.sequenceLoader = sequenceLoader
     }
 
     /**
      * Fetch sequence data for a region
      * @param {object} region - GenomicRegion object
      * @param {number} bpPerPixel - Base pairs per pixel
-     * @returns {Promise<Array>} Array of sequence data points
+     * @returns {Promise<Object|null>} Sequence data object or null if too zoomed out
      */
     async fetch(region, bpPerPixel) {
-        // Only fetch sequence data when zoomed in enough to see individual bases
-        const SEQUENCE_THRESHOLD = 1.0 // Show bases when bpPerPixel < 1.0
-        
-        if (bpPerPixel >= SEQUENCE_THRESHOLD) {
-            // Too zoomed out to show individual bases
-            return []
+        // Only fetch sequence data when zoomed in enough
+        if (bpPerPixel > this.bppSequenceThreshold) {
+            console.log('SequenceSource: Too zoomed out (bpPerPixel:', bpPerPixel, ')')
+            return null
+        }
+
+        if (!this.sequenceLoader) {
+            console.error('SequenceSource: No sequence loader set')
+            return null
         }
 
         try {
-            console.log('SequenceSource: Fetching sequence for region:', region, 'bpPerPixel:', bpPerPixel)
+            console.log('SequenceSource: Fetching sequence for', region.chr, ':', region.start, '-', region.end, 'bpPerPixel:', bpPerPixel)
             
-            // For now, return a placeholder structure
-            // In a full implementation, this would fetch actual sequence data
-            // from the FASTA or 2bit file and parse it
+            // Fetch the actual sequence string from the sequence loader
+            const sequenceString = await this.sequenceLoader.getSequence(region.chr, region.start, region.end)
             
-            const sequenceData = this.generatePlaceholderSequence(region)
-            console.log('SequenceSource: Generated', sequenceData.length, 'sequence characters')
+            if (!sequenceString) {
+                console.error('SequenceSource: No sequence returned for region')
+                return null
+            }
+
+            console.log('SequenceSource: Fetched', sequenceString.length, 'bases')
             
-            return sequenceData
+            // Return sequence data in the format expected by SequenceViewModel
+            return {
+                bpStart: region.start,
+                sequence: sequenceString
+            }
         } catch (error) {
-            console.error('Error fetching sequence data:', error)
-            throw error
+            console.error('SequenceSource: Error fetching sequence data:', error)
+            return null
         }
-    }
-
-    /**
-     * Generate placeholder sequence data for testing
-     * @param {object} region - GenomicRegion object
-     * @returns {Array} Array of sequence characters with positions
-     */
-    generatePlaceholderSequence(region) {
-        const sequence = []
-        const length = region.length
-        
-        // Generate a simple repeating pattern for testing
-        const bases = ['A', 'T', 'G', 'C']
-        
-        for (let i = 0; i < Math.min(length, 1000); i++) { // Limit to 1000 bases for performance
-            const position = region.start + i
-            const base = bases[i % 4]
-            
-            sequence.push({
-                position: position,
-                base: base,
-                chr: region.chr,
-                start: position,
-                end: position + 1
-            })
-        }
-        
-        return sequence
-    }
-
-    /**
-     * Parse FASTA sequence data (placeholder implementation)
-     * @param {string} fastaData - Raw FASTA data
-     * @param {object} region - GenomicRegion object
-     * @returns {Array} Parsed sequence data
-     */
-    parseFastaSequence(fastaData, region) {
-        // This would parse actual FASTA format
-        // For now, return placeholder data
-        return this.generatePlaceholderSequence(region)
-    }
-
-    /**
-     * Parse 2bit sequence data (placeholder implementation)
-     * @param {ArrayBuffer} twoBitData - Raw 2bit data
-     * @param {object} region - GenomicRegion object
-     * @returns {Array} Parsed sequence data
-     */
-    parseTwoBitSequence(twoBitData, region) {
-        // This would parse actual 2bit format
-        // For now, return placeholder data
-        return this.generatePlaceholderSequence(region)
-    }
-
-    /**
-     * Get the URL for this sequence source
-     * @returns {string} Sequence URL
-     */
-    getUrl() {
-        return this.sequenceUrl
-    }
-
-    /**
-     * Get the format of this sequence source
-     * @returns {string} Format type
-     */
-    getFormat() {
-        return this.format
     }
 }

@@ -207,9 +207,9 @@
             <div class="control-row">
                 <div class="control-group">
                     <label for="locus-input">Genomic Locus</label>
-                    <input 
-                        type="text" 
-                        id="locus-input" 
+                    <input
+                        type="text"
+                        id="locus-input"
                         placeholder="e.g., EGFR or chr1:1-100,000,000"
                         value="chr1:1-100,000,000"
                     />
@@ -263,7 +263,7 @@
         // Initialize the browser
         async function initializeBrowser(locus) {
             try {
-                updateStatus('Loading genome browser...', 'info')
+                // updateStatus('Loading genome browser...', 'info')
 
                 const IGV = await import(moduleUrl).then(m => m.default)
 
@@ -285,10 +285,10 @@
                 }
 
                 browser = await IGV.create(document.getElementById('igv-container'), config)
-                updateStatus(`✓ Browser loaded successfully at ${locus || config.locus}`, 'success')
+                // updateStatus(`✓ Browser loaded successfully at ${locus || config.locus}`, 'success')
 
             } catch (error) {
-                updateStatus(`Error: ${error.message}`, 'error')
+                // updateStatus(`Error: ${error.message}`, 'error')
                 console.error('Full error:', error)
             }
         }
@@ -306,17 +306,17 @@
 
             try {
                 goButton.disabled = true
-                updateStatus(`Navigating to ${locus}...`, 'info')
+                // updateStatus(`Navigating to ${locus}...`, 'info')
 
                 if (browser) {
                     await browser.setLocus(locus)
-                    updateStatus(`✓ Navigated to ${locus}`, 'success')
+                    // updateStatus(`✓ Navigated to ${locus}`, 'success')
                 } else {
                     await initializeBrowser(locus)
                 }
 
             } catch (error) {
-                updateStatus(`Error: ${error.message}`, 'error')
+                // updateStatus(`Error: ${error.message}`, 'error')
                 console.error('Navigation error:', error)
             } finally {
                 goButton.disabled = false

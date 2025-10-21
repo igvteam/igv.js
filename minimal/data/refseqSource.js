@@ -16,8 +16,8 @@ export class RefSeqSource {
      */
     async fetch(region, bpPerPixel) {
         try {
-            console.log('RefSeqSource: Fetching gene data for region:', region)
-            
+            // console.log('RefSeqSource: Fetching gene data for region:', region)
+
             const response = await fetch(this.url)
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status} ${response.statusText}`)
@@ -32,10 +32,10 @@ export class RefSeqSource {
             } else {
                 text = await response.text()
             }
-            
-            console.log('RefSeqSource: Fetched text, length:', text.length, 'first 200 chars:', text.substring(0, 200))
+
+            // console.log('RefSeqSource: Fetched text, length:', text.length, 'first 200 chars:', text.substring(0, 200))
             const features = this.parseRefGeneData(text, region)
-            
+
             console.log('RefSeqSource: Parsed', features.length, 'gene features')
             if (features.length > 0) {
                 console.log('RefSeqSource: Sample feature:', features[0])
@@ -59,15 +59,15 @@ export class RefSeqSource {
         let skippedLines = 0
         let parsedLines = 0
         let matchedLines = 0
-        
+
         console.log('RefSeqSource: Parsing', lines.length, 'lines for region', region.chr, region.start, '-', region.end)
-        
+
         lines.forEach((line, index) => {
             if (line.startsWith('#') || line.trim() === '') {
                 skippedLines++
                 return // Skip comments and empty lines
             }
-            
+
             try {
                 parsedLines++
                 const feature = this.parseRefGeneLine(line, region)
@@ -79,7 +79,7 @@ export class RefSeqSource {
                 console.warn(`Error parsing RefSeq line ${index + 1}:`, error)
             }
         })
-        
+
         console.log('RefSeqSource: Skipped', skippedLines, 'lines, parsed', parsedLines, 'lines, matched', matchedLines, 'features in region')
         return features
     }
@@ -92,11 +92,11 @@ export class RefSeqSource {
      */
     parseRefGeneLine(line, region) {
         const fields = line.split('\t')
-        
+
         if (fields.length < 12) {
             return null // Invalid line
         }
-        
+
         const [
             bin,
             name,
@@ -119,7 +119,7 @@ export class RefSeqSource {
         // Convert to 0-based coordinates (RefSeq is 0-based)
         const start = parseInt(txStart, 10)
         const end = parseInt(txEnd, 10)
-        
+
         // Check if feature overlaps with the region
         if (chrom !== region.chr || end < region.start || start > region.end) {
             return null
@@ -127,7 +127,7 @@ export class RefSeqSource {
 
         // Parse exon information
         const exons = this.parseExons(exonStarts, exonEnds, start, end, region)
-        
+
         return {
             type: 'gene',
             name: name2 || name,
@@ -158,16 +158,16 @@ export class RefSeqSource {
         if (!exonStarts || !exonEnds) {
             return []
         }
-        
+
         const starts = exonStarts.split(',').map(s => parseInt(s.trim(), 10))
         const ends = exonEnds.split(',').map(s => parseInt(s.trim(), 10))
-        
+
         const exons = []
-        
+
         for (let i = 0; i < Math.min(starts.length, ends.length); i++) {
             const start = starts[i]
             const end = ends[i]
-            
+
             if (!isNaN(start) && !isNaN(end) && end > start) {
                 // Check if exon overlaps with region
                 if (end >= region.start && start <= region.end) {
@@ -179,7 +179,7 @@ export class RefSeqSource {
                 }
             }
         }
-        
+
         return exons
     }
 

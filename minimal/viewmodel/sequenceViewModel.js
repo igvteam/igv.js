@@ -20,35 +20,37 @@ export class SequenceViewModel {
 
     /**
      * Build sequence bases for rendering
-     * @param {Array} rawData - Raw sequence data from SequenceSource
+     * @param {Object} rawData - Raw sequence data from SequenceSource { bpStart, sequence }
      * @param {object} region - GenomicRegion object
      * @param {object} dimensions - Canvas dimensions
-     * @returns {Array} Array of renderable base objects
+     * @returns {Object} Sequence data for rendering
      */
     buildSequenceBases(rawData, region, dimensions) {
-        if (!rawData || rawData.length === 0) {
-            return []
+        if (!rawData || !rawData.sequence) {
+            return { bpStart: region.start, sequence: '', bases: [] }
         }
 
         const bases = []
         const { width } = dimensions
+        const { bpStart, sequence } = rawData
         
         // Create scale for genomic position to pixel conversion
         const scale = new LinearScale(region.start, region.end, 0, width)
         
-        // Calculate pixel positions for each base
-        rawData.forEach(baseData => {
-            const pixelX = scale.toPixels(baseData.position)
+        // Calculate pixel positions for each base in the sequence string
+        for (let i = 0; i < sequence.length; i++) {
+            const position = bpStart + i
+            const pixelX = scale.toPixels(position)
             
             bases.push({
-                base: baseData.base,
-                position: baseData.position,
+                base: sequence[i],
+                position: position,
                 x: pixelX,
-                width: Math.max(1, scale.toPixels(baseData.position + 1) - pixelX)
+                width: Math.max(1, scale.toPixels(position + 1) - pixelX)
             })
-        })
+        }
         
-        return bases
+        return { bpStart, sequence, bases }
     }
 
     /**
@@ -56,7 +58,7 @@ export class SequenceViewModel {
      * @returns {Array} Array of visible bases
      */
     getVisibleBases() {
-        return this.sequenceBases.filter(base => 
+        return this.sequenceBases.bases.filter(base => 
             base.x >= 0 && base.x <= this.dimensions.width
         )
     }
@@ -75,22 +77,6 @@ export class SequenceViewModel {
         }
         
         return baseColors[base] || this.color
-    }
-
-    /**
-     * Check if bases should be displayed (based on zoom level)
-     * @returns {boolean} True if bases should be shown
-     */
-    shouldShowBases() {
-        if (!this.showBases) {
-            return false
-        }
-        
-        // Don't show bases if they would be too crowded
-        const minBaseWidth = 8 // Minimum pixels per base
-        const avgBaseWidth = this.dimensions.width / this.sequenceBases.length
-        
-        return avgBaseWidth >= minBaseWidth
     }
 
     /**
@@ -146,7 +132,7 @@ export class SequenceViewModel {
         })
         
         return {
-            totalBases: this.sequenceBases.length,
+            totalBases: this.sequenceBases.bases.length,
             visibleBases: visibleBases.length,
             baseCounts: baseCounts,
             gcContent: (baseCounts.G + baseCounts.C) / (visibleBases.length || 1) * 100

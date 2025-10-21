@@ -13,9 +13,9 @@ export class BigWigSource {
     async fetch(region, bpPerPixel) {
         try {
             console.log('BigWigSource: Fetching data for region:', region, 'bpPerPixel:', bpPerPixel)
-            
+
             // Load header if not already loaded
-            console.log('BigWigSource: Loading header...')
+            // console.log('BigWigSource: Loading header...')
             await this.reader.loadHeader()
             console.log('BigWigSource: Header loaded, type:', this.reader.type)
 
@@ -24,9 +24,9 @@ export class BigWigSource {
             // If not provided, default to 1 (full resolution - not recommended for large regions)
             const effectiveBpPerPixel = bpPerPixel || 1
             const windowFunction = this.config.windowFunction || 'mean'
-            
+
             console.log('BigWigSource: Reading features with bpPerPixel:', effectiveBpPerPixel, 'windowFunction:', windowFunction)
-            
+
             const features = await this.reader.readFeatures(
                 region.chr,
                 region.start,
@@ -48,7 +48,7 @@ export class BigWigSource {
                 end: f.end,
                 value: f.value || f.score
             }))
-            
+
             console.log('BigWigSource: Returning', converted.length, 'converted features')
             return converted
 

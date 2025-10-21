@@ -9,6 +9,10 @@ import { CytobandSource } from './cytobandSource.js'
  * Coordinates data fetching from various sources
  */
 export class DataLoader {
+    constructor(browser) {
+        this.browser = browser
+    }
+
     /**
      * Load data for a track in a given region
      * @param trackConfig - Track configuration
@@ -17,11 +21,11 @@ export class DataLoader {
      */
     async load(trackConfig, region, bpPerPixel) {
         console.log('DataLoader.load() called with bpPerPixel:', bpPerPixel)
-        console.log('DataLoader.load() trackConfig:', trackConfig)
+        // console.log('DataLoader.load() trackConfig:', trackConfig)
         const source = this.getSource(trackConfig)
-        
+
         try {
-            console.log('DataLoader: Calling source.fetch() with bpPerPixel:', bpPerPixel)
+            // console.log('DataLoader: Calling source.fetch() with bpPerPixel:', bpPerPixel)
             const data = await source.fetch(region, bpPerPixel)
             return data
         } catch (error) {
@@ -46,13 +50,13 @@ export class DataLoader {
                 type = 'feature'
             }
         }
-        
+
         switch (type) {
             case 'wig':
                 // Check if this is a BigWig file (binary format)
                 const url = config.url.toLowerCase()
                 const format = config.format ? config.format.toLowerCase() : ''
-                
+
                 if (format === 'bigwig' || url.endsWith('.bw') || url.endsWith('.bigwig')) {
                     console.log('DataLoader: Using BigWigSource for', config.url)
                     return new BigWigSource(config)
@@ -61,24 +65,29 @@ export class DataLoader {
                     console.log('DataLoader: Using WigSource for', config.url)
                     return new WigSource(config)
                 }
-            
+
             case 'ideogram':
                 console.log('DataLoader: Using CytobandSource for', config.url)
                 return new CytobandSource(config)
-            
+
             case 'sequence':
                 console.log('DataLoader: Using SequenceSource for', config.url || 'genome sequence')
-                return new SequenceSource(config)
-            
+                const sequenceSource = new SequenceSource(config)
+                // Pass the sequence loader to the sequence source
+                if (this.browser && this.browser.sequenceLoader) {
+                    sequenceSource.setSequenceLoader(this.browser.sequenceLoader)
+                }
+                return sequenceSource
+
             case 'refseq':
                 console.log('DataLoader: Using RefSeqSource for', config.url)
                 return new RefSeqSource(config)
-            
+
             case 'gene':
             case 'feature':
                 console.log('DataLoader: Using FeatureSource for', config.url)
                 return new FeatureSource(config)
-            
+
             default:
                 throw new Error(`Unknown track type: ${config.type || 'undefined'} (format: ${config.format || 'undefined'})`)
         }
